@@ -1047,6 +1047,13 @@ function route(){
   }
   if(sec==="tools"){
     if(p[3]==="mandates"){ p=hashRewrite([org,w,"agents"]); return {page:"agents",org:org,ws:w}; }
+    /* one policy version: its rules, its tests, and its changes against the version it came from */
+    if(p[3]==="policy"&&p[4]){
+      S.tab.tools="policy"; S.tab.pol=({tests:"tests",changes:"changes"})[p[5]]||"rules";
+      var pvId=decodeURIComponent(p[4]), pvRule=HQ.get("rule");
+      if(pvRule&&S.polJumpFor!==location.hash){ S.polJumpFor=location.hash; S.polJump=pvRule; }
+      return {page:"policyversion",org:org,ws:w,id:pvId,tab:S.tab.pol};
+    }
     var TOOL_TAB_ALIAS={servers:"providers",connections:"providers",registry:"tools",autoapprovals:"policy"};
     if(p[3]&&TOOL_TAB_ALIAS[p[3]]) p=hashRewrite([org,w,"tools"].concat(TOOL_TAB_ALIAS[p[3]]==="tools"?[]:[TOOL_TAB_ALIAS[p[3]]]));
     S.tab.tools=p[3]||"tools";
@@ -1105,7 +1112,7 @@ function go(hash){location.hash=hash;}
 function applyHashTab(){ route(); }
 window.addEventListener("hashchange",function(){S.side=false;fpStop();applyHashTab();render();});
 
-var PAGES={work:"Work",workitem:"Work",workorder:"Work",run:"Work",agents:"Agents",agent:"Agents",agentsource:"Agents",
+var PAGES={work:"Work",workitem:"Work",workorder:"Work",run:"Work",agents:"Agents",agent:"Agents",agentsource:"Agents",policyversion:"Tools",
   tools:"Tools",steering:"Steering",source:"Steering",runtimes:"Runtimes",repositories:"Repositories",spend:"Spend",
   organization:"Organization",billing:"Billing",audit:"Audit",scenarios:"Scenarios"};
 
@@ -1278,9 +1285,11 @@ function pAgentSource(r){
 }
 function edMount(){
   var t=el("edT"); if(!t||!S.ed) return;
+  /* edPaint() ends in edPos(), which reads the caret, so the saved selection is taken first */
+  var sel=S.ed.sel.slice();
   t.value=defSrc(S.ed.slug);
+  try{t.setSelectionRange(sel[0],sel[1]);}catch(e){}
   edPaint();
-  try{t.setSelectionRange(S.ed.sel[0],S.ed.sel[1]);}catch(e){}
   t.addEventListener("input",function(){S.defSrc[S.ed.slug]=t.value;S.ed.cur=-1;edPaint();});
   t.addEventListener("keydown",edKey);
   ["keyup","click","select"].forEach(function(ev){t.addEventListener(ev,edPos);});
@@ -1642,6 +1651,7 @@ function crumbs(r){
     if(r.page==="agent"){out.push('<a href="'+base+'/agents">Agents</a>');out.push('<b class="mono">'+h(r.id)+'</b>');}
     if(r.page==="agentsource"){out.push('<a href="'+base+'/agents">Agents</a>');out.push('<a href="'+base+'/agents/'+h(r.id)+'">'+h(r.id)+'</a>');out.push('<b class="mono">source</b>');}
     if(r.page==="tools")out.push('<b>Tools</b>');
+    if(r.page==="policyversion"){out.push('<a href="'+base+'/tools/policy">Policy</a>');out.push('<b class="mono">'+h(r.id)+'</b>');}
     if(r.page==="steering")out.push('<b>Steering</b>');
     if(r.page==="source"){out.push('<a href="'+base+'/steering">Steering</a>');out.push('<b class="mono">'+h(r.id||"")+'</b>');}
     if(r.page==="scenarios")out.push('<b>Scenarios</b>');
@@ -4904,13 +4914,13 @@ function pTools(){
      '<button class="btn sm" onclick="openDialog(\'policynew\')">Draft new version</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Version</th><th>State</th><th>Author</th><th>When</th><th class="num">Rules</th><th>Tests</th><th>What changed</th><th></th></tr></thead><tbody>'+
      POLICIES.map(function(p){
-      var sm={active:"allowed",superseded:"q"};
-      return '<tr><td class="mono">'+h(p.v)+'</td><td><span class="b b-'+(sm[p.state]||"approval")+'"><span class="d"></span>'+h(p.state)+'</span></td>'+
-       '<td>'+h(p.by)+'</td><td class="mono dim" style="font-size:11px">'+h(p.at)+'</td><td class="num">'+p.rules+'</td>'+
-       '<td><span class="b b-'+(/pass/.test(p.tests)?"allowed":"q")+'">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td>'+
-       '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'policyver\',\''+p.v+'\')">Open</button><span class="vh">, </span>'+
+      var sm={active:"allowed",superseded:"q"}, sv=polSaved(p.v), tl=polTestsLabel(p.v,sv);
+      return '<tr><td class="mono"><a href="'+polUrl(p.v)+'">'+h(p.v)+'</a></td><td><span class="b b-'+(sm[p.state]||"approval")+'"><span class="d"></span>'+h(p.state)+'</span></td>'+
+       '<td>'+h(p.by)+'</td><td class="mono dim" style="font-size:11px">'+h(p.at)+'</td><td class="num">'+polParse(sv).rules.length+'</td>'+
+       '<td><span class="b '+tl.c+'">'+h(tl.t)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td>'+
+       '<td class="rowacts"><button class="btn sm" onclick="go(\''+polUrl(p.v)+'\')">Open</button><span class="vh">, </span>'+
        (p.state==="active"?'<button class="btn sm" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft new version</button>':
-        p.state==="draft"?'<button class="btn sm" onclick="openDialog(\'policyedit\',\''+p.v+'\')">Edit</button><span class="vh">, </span>'+
+        p.state==="draft"?'<button class="btn sm" onclick="go(\''+polUrl(p.v)+'\')">Edit</button><span class="vh">, </span>'+
          '<button class="btn sm primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button><span class="vh">, </span>'+
          '<button class="btn sm danger" onclick="openDialog(\'policydiscard\',\''+p.v+'\')">Discard</button>':
         '<button class="btn sm" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')+'</td></tr>';}).join("")+
@@ -4930,9 +4940,8 @@ function pTools(){
       .map(function(c){return '<span class="b b-q" style="font-size:10.5px">'+h(c)+'</span>';}).join(SEP)+'</div>'+
      '<div class="hr"></div><p class="eyebrow q" data-help="sequence-rule">Sequence rule</p>'+
      '<p class="muted" style="margin:0 0 8px;font-size:12.5px">This rule denies a payment unless the same run already priced it.</p>'+
-     '<pre><span class="c">// a payment requires a prior quote call in the same run</span>\n'+
-     '<span class="k">forbid</span> (principal, action == Action::<span class="s">"stripe__create_payment"</span>, resource)\n'+
-     '<span class="k">unless</span> { context.run.has_prior_call(<span class="s">"stripe__list_prices"</span>) };</pre>';
+     '<pre>'+hlCode('// A payment is denied unless the same run already priced it.\n@id("rg_0044")\nforbid (principal, action == Action::"stripe__create_payment", resource)\n'+
+      'unless { context.run.prior_calls.contains("stripe__list_prices") };',"cedar")+'</pre>';
   } else if(t==="switches"){
     var cls=SWITCHES.filter(function(s){return s.cls;}), rest=SWITCHES.filter(function(s){return !s.cls;});
     body='<div class="ks-stack">'+
@@ -5296,20 +5305,281 @@ function mandateRevoke(id){
   closeDialog(); render(); act("Revoked "+id+". The reservation is released at the next boundary.");
 }
 
-DLG_EXT.policyver=function(v){
-  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
-  if(!p) return noSuch("Policy version");
-  return {t:p.v,w:false,
-   b:'<dl class="kv"><dt>State</dt><dd>'+h(p.state)+'</dd><dt>Author</dt><dd>'+h(p.by)+'</dd>'+
-    '<dt>'+(p.state==="draft"?"Drafted":"Activated")+'</dt><dd class="mono">'+h(p.at)+'</dd><dt>Rules</dt><dd>'+p.rules+'</dd>'+
-    '<dt>Tests</dt><dd>'+h(p.tests)+'</dd><dt>What changed</dt><dd>'+h(p.note)+'</dd>'+
-    '<dt>Stored in</dt><dd>oxagen</dd></dl>',
-   f:'<button class="btn" onclick="closeDialog()">Close</button>'+
-    (p.state==="active"?'<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft new version</button>':
-     p.state==="draft"?'<button class="btn" onclick="openDialog(\'policyedit\',\''+p.v+'\')">Edit</button>'+
-      '<button class="btn primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>':
-     '<button class="btn primary" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')};
-};
+/* ---------- Policy versions ----------
+   Every version holds its rule source and its tests. POLICY_RULES is one library of both: a rule or
+   a test belongs to version N when since <= N < until, so a fixture version's source is the library
+   rules it holds, in library order. A draft made here (local) carries its own source and test list,
+   copied from the version it was based on. The editor store keeps each version's text under
+   "pol:<version>": S.cedBase holds the saved copy and S.cedVal what the editor holds now. */
+var POL_RULES=FIXTURES.POLICY_RULES.rules, POL_TESTS=FIXTURES.POLICY_RULES.tests;
+S.polRun={}; S.polJump=null;
+var POL_DEC={allow:"allow",approval:"require approval",deny:"deny"};
+var POL_DEC_B={allow:"b-allowed",approval:"b-approval",deny:"b-denied"};
+function polN(v){return parseInt(String(v).replace(/\D/g,""),10)||0;}
+function polBy(v){var p=null;POLICIES.forEach(function(x){if(x.v===v)p=x;});return p;}
+function polIn(x,n){return x.since<=n&&(!x.until||n<x.until);}
+function polKey(v){return "pol:"+v;}
+function polUrl(v,tab){return "#/"+ORG.slug+"/"+S.ws+"/tools/policy/"+encodeURIComponent(v)+(tab&&tab!=="rules"?"/"+tab:"");}
+function polGo(u){if(location.hash===u)render();else go(u);}
+function polSrc(v){
+  var p=polBy(v); if(!p) return "";
+  var k=polKey(v), fresh=S.cedVal[k]==null;
+  cedSeed(k,p.src!=null?p.src:POL_RULES.filter(function(r){return polIn(r,polN(v));}).map(function(r){return r.text;}).join("\n\n")+"\n");
+  /* a fixture version's tests ran when it was saved; a draft made here has not run them */
+  if(fresh&&!p.local) polRun(v,true);
+  return S.cedVal[k];
+}
+function polSaved(v){polSrc(v);return S.cedBase[polKey(v)]||"";}
+function polTests(p){return p.testList||POL_TESTS.filter(function(t){return polIn(t,polN(p.v));});}
+function polRuleN(v){return polParse(polSaved(v)).rules.length;}
+/* The version a version is read against: the one it was drafted from, else the next older one here. */
+function polBase(p){
+  if(p.from) return polBy(p.from);
+  var n=polN(p.v),best=null;
+  POLICIES.forEach(function(x){var k=polN(x.v);if(k<n&&(!best||k>polN(best.v)))best=x;});
+  return best;
+}
+
+/* The context a rule may read, by path. `args` holds the call's own arguments, so any name may follow it. */
+var POL_CTX={tool:["name","version","risk","side_effect","egress","financial_class","consequence"],args:null,
+  taint:["tainted","sources"],time:["hour_utc","weekday"],rate:["calls_last_hour","calls_last_minute"],
+  run:["prior_calls","prior_reads"],operator:["role"],tier:[],budget:["remaining_cents","run_spent_cents"],
+  mandate:["remaining_cents","auto_approve_cents","counterparties"],approval:["granted","approvers"]};
+/* Splits the source into rules at each ; that sits outside a comment, a string, and every bracket,
+   and reads each rule's @id, @decision, effect, and the comment line above it. The problems are the
+   ones an editor can see as you type: an effect other than permit or forbid, a bracket left open or
+   closed twice, a rule with no @id or a repeated one, and a context path the schema does not hold. */
+function polParse(src){
+  var rules=[],problems=[],seen={},n=src.length,i=0,start=0,stack=[],code="";
+  var PAIR={"(":1,"[":1,"{":1},CLOSE={")":"(","]":"[","}":"{"},NL=[0];
+  for(i=0;i<n;i++)if(src.charCodeAt(i)===10)NL.push(i+1);
+  function lineOf(k){var lo=0,hi=NL.length-1;while(lo<hi){var mid=(lo+hi+1)>>1;if(NL[mid]<=k)lo=mid;else hi=mid-1;}return lo+1;}
+  function prob(k,msg){problems.push({line:lineOf(k),msg:msg});}
+  /* the same text with comments blanked and string bodies masked, so every offset still lines up */
+  i=0;
+  while(i<n){
+    var c=src.charAt(i),e;
+    if(c==="/"&&src.charAt(i+1)==="/"){e=src.indexOf("\n",i);if(e<0)e=n;code+=src.slice(i,e).replace(/[^\n]/g," ");i=e;continue;}
+    if(c==="/"&&src.charAt(i+1)==="*"){e=src.indexOf("*/",i+2);e=e<0?n:e+2;code+=src.slice(i,e).replace(/[^\n]/g," ");i=e;continue;}
+    if(c==='"'){
+      var j=i+1;while(j<n&&src.charAt(j)!=='"'&&src.charAt(j)!=="\n"){if(src.charAt(j)==="\\")j++;j++;}
+      var shut=src.charAt(j)==='"'; if(!shut)prob(i,"This string is never closed.");
+      code+='"'+src.slice(i+1,j).replace(/[^\n]/g,"x")+(shut?'"':"");i=j+(shut?1:0);continue;
+    }
+    code+=c;i++;
+  }
+  function stmt(a,b){
+    var c=code.slice(a,b),off=c.search(/\S/); if(off<0) return;
+    var body=src.slice(a,b),at=a+off,ann={},m,reA=/@(\w+)\s*\(\s*"([^"\n]*)"\s*\)/g;
+    while((m=reA.exec(body))){if(c.charAt(m.index)==="@")ann[m[1]]=m[2];}
+    var rest=c.replace(/@\w+\s*\(\s*"[^"\n]*"\s*\)/g,function(x){return x.replace(/[^\n]/g," ");});
+    var eff=(/^\s*([A-Za-z_]\w*)/.exec(rest)||[])[1]||"",effAt=a+Math.max(0,rest.search(/\S/));
+    if(eff!=="permit"&&eff!=="forbid") prob(effAt,"A rule starts with permit or forbid."+(eff?" This one starts with "+eff+".":""));
+    var id=ann.id||"";
+    if(!id) prob(at,"This rule has no @id, so no test or decision can name it.");
+    else if(seen[id]) prob(at,"Two rules use @id(\""+id+"\").");
+    seen[id]=1;
+    if(ann.decision&&(ann.decision!=="require_approval"||eff!=="forbid")) prob(at,"@decision takes one value, \"require_approval\", on a forbid rule.");
+    var reC=/\bcontext\s*\.\s*(\w+)(?:\s*\.\s*(\w+))?/g,reH=/\bcontext\s+has\s+(\w+)/g;
+    while((m=reC.exec(c))){
+      var top=m[1],sub=m[2],L=POL_CTX[top];
+      if(!POL_CTX.hasOwnProperty(top)) prob(a+m.index,"context."+top+" is not in the schema.");
+      else if(sub&&L&&L.indexOf(sub)<0&&!/^(contains|containsAll|containsAny|isEmpty)$/.test(sub)) prob(a+m.index,"context."+top+"."+sub+" is not in the schema.");
+    }
+    while((m=reH.exec(c))){if(!POL_CTX.hasOwnProperty(m[1]))prob(a+m.index,"context has "+m[1]+" names nothing in the schema.");}
+    var said=src.slice(a,at).split("\n").map(function(l){var q=/^\s*\/\/\s?(.*)$/.exec(l);return q?q[1].trim():"";}).filter(Boolean);
+    var s0=a+body.search(/\S/);
+    rules.push({id:id,effect:eff,decision:eff==="permit"?"allow":ann.decision==="require_approval"?"approval":"deny",
+      say:said.length?said[said.length-1]:"",line:lineOf(s0),text:body.trim()});
+  }
+  for(i=0;i<n;i++){
+    var ch=code.charAt(i);
+    if(PAIR[ch])stack.push({c:ch,at:i});
+    else if(CLOSE[ch]){if(!stack.length||stack[stack.length-1].c!==CLOSE[ch])prob(i,"This "+ch+" closes nothing.");else stack.pop();}
+    else if(ch===";"&&!stack.length){stmt(start,i+1);start=i+1;}
+  }
+  stack.forEach(function(s){prob(s.at,"This "+s.c+" is never closed.");});
+  var tail=code.slice(start).search(/\S/);
+  if(tail>=0) prob(start+tail,"This rule has no closing ;.");
+  problems.sort(function(x,y){return x.line-y.line;});
+  return {rules:rules,problems:problems};
+}
+
+/* Which rule decides a call. A library test names its rule, and the decision is that rule's effect,
+   or a deny when the rule is gone, because nothing else permits the call. A test added here names no
+   rule, so polMatch finds one the way the gateway orders them: a forbid that denies, then a forbid that
+   parks for approval, then a permit. It reads a rule's scope and its tests of the tool's own
+   classification, and skips a rule that also reads the call's arguments, taint, time, rate, budget or
+   mandate, because a test here states those as text. It stands in for the evaluator. */
+function polMatch(t,parsed){
+  var name=t.tool.split("@")[0],tl=null,m;
+  TOOLS.forEach(function(x){if(x.n===name&&(!tl||parseFloat(x.v)>parseFloat(tl.v)))tl=x;});
+  var cls={side_effect:tl?tl.eff:"",financial_class:tl?tl.fin:"none",risk:tl?tl.risk:""};
+  var wsOf=/^a-intel\.finops\./.test(t.agent)?"finops":"core-platform",hit={};
+  parsed.rules.forEach(function(r){
+    var x=r.text.replace(/^\s*\/\/[^\n]*$/gm,""),scope=x.split(/\bwhen\b|\bunless\b/)[0];
+    if((m=/principal\s*==\s*Agent::"([^"]+)"/.exec(scope))&&m[1]!==t.agent) return;
+    if((m=/principal\s+in\s+Workspace::"([^"]+)"/.exec(scope))&&m[1]!==wsOf) return;
+    if((m=/action\s*==\s*Action::"([^"]+)"/.exec(scope))&&m[1]!==name) return;
+    if((m=/action\s+in\s*\[([^\]]*)\]/.exec(scope))&&m[1].indexOf('"'+name+'"')<0) return;
+    if(/context\s*\.\s*(args|taint|time|rate|run|operator|tier|budget|mandate)\b|context\s+has/.test(x)) return;
+    var ok=true,re=/context\.tool\.(side_effect|financial_class|risk)\s*(==|!=)\s*"([^"]*)"/g;
+    while((m=re.exec(x))){var eq=cls[m[1]]===m[3];if((m[2]==="=="&&!eq)||(m[2]==="!="&&eq))ok=false;}
+    var u=/\bunless\s*\{([^}]*)\}/.exec(x);
+    if(u&&(m=/principal\s+in\s+Workspace::"([^"]+)"/.exec(u[1]))&&m[1]===wsOf) ok=false;
+    if(ok&&!hit[r.decision]) hit[r.decision]=r;
+  });
+  return hit.deny||hit.approval||hit.allow||null;
+}
+function polDecide(t,parsed){
+  var r=null;
+  if(t.rule) parsed.rules.forEach(function(x){if(x.id===t.rule)r=x;});
+  else r=polMatch(t,parsed);
+  return r?{got:r.decision,by:r.id}:{got:"deny",by:""};
+}
+function polRun(v,quiet){
+  var p=polBy(v); if(!p) return;
+  var src=S.cedVal[polKey(v)]||"",parsed=polParse(src),ts=polTests(p);
+  var res=ts.map(function(t){var d=polDecide(t,parsed);return {id:t.id,got:d.got,by:d.by,pass:d.got===t.expect};});
+  S.polRun[v]={src:src,n:ts.length,res:res};
+  if(quiet) return;
+  var fail=res.filter(function(x){return !x.pass;}).length;
+  render(); act(plural(res.length,"test")+" ran against "+v+". "+(res.length-fail)+" pass"+(fail?", "+fail+" fail":"")+".");
+}
+function polRunTests(v){polSrc(v);polRun(v);}
+/* the run that answers for this text, or null when the rules or the tests changed since it ran */
+function polRunOf(v,text){var r=S.polRun[v],p=polBy(v);return r&&p&&r.src===text&&r.n===polTests(p).length?r:null;}
+function polTestsLabel(v,text){
+  var r=polRunOf(v,text); if(!r) return {t:"not run yet",c:"b-q"};
+  var pass=r.res.filter(function(x){return x.pass;}).length;
+  return {t:pass+" / "+r.res.length+" pass",c:pass===r.res.length?"b-allowed":"b-failed"};
+}
+function polChanges(bp,parsed){
+  var old={},now={},out={added:[],changed:[],removed:[]};
+  bp.rules.forEach(function(r){old[r.id]=r.text;});
+  parsed.rules.forEach(function(r){now[r.id]=1;if(old[r.id]==null)out.added.push(r.id);else if(old[r.id]!==r.text)out.changed.push(r.id);});
+  bp.rules.forEach(function(r){if(!now[r.id])out.removed.push(r.id);});
+  return out;
+}
+
+/* ---- the version page ---- */
+function pPolicyVersion(r){
+  var w=ws(),home="#/"+ORG.slug+"/"+w.slug+"/tools/policy",p=polBy(r.id);
+  if(S.state==="loading") return skeleton();
+  if(S.state==="error") return errorState("This policy version","503 policy_store_unavailable");
+  if(S.state==="denied") return deniedState("this policy version","tools.read on "+w.slug);
+  if(!p) return '<div class="phead"><div class="t"><p class="eyebrow"><a href="'+home+'">Policy</a></p><h1>Policy version not found</h1></div></div>'+
+    emptyState("No version named "+r.id,"A discarded draft leaves no version behind.",'<button class="btn primary" onclick="go(\''+home+'\')">Back to Policy</button>');
+  var k=polKey(p.v),text=polSrc(p.v),draft=p.state==="draft",tb=r.tab||"rules";
+  var parsed=polParse(text),b=polBase(p),bsrc=b?polSaved(b.v):"",bp=b?polParse(bsrc):{rules:[]};
+  var ch=polChanges(bp,parsed),nChg=b?ch.added.length+ch.changed.length+ch.removed.length:0,ts=polTests(p),tl=polTestsLabel(p.v,text);
+  var sm={active:"allowed",superseded:"q"};
+  var acts=draft?
+    '<button class="btn danger" onclick="openDialog(\'policydiscard\',\''+p.v+'\')">Discard</button>'+
+    '<button class="btn" data-ced-dirty onclick="polSave(\''+p.v+'\')"'+(cedDirty(k)?'':' disabled')+'>Save the draft</button>'+
+    '<button class="btn primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>':
+   p.state==="active"?'<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft new version</button>':
+    '<button class="btn primary" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>';
+  var head='<div class="phead"><div class="t"><p class="eyebrow"><a href="'+home+'">Policy</a></p><h1 class="mono" style="font-size:20px">'+h(p.v)+'</h1>'+
+   '<div class="row" style="margin-top:8px"><span class="b b-'+(sm[p.state]||"approval")+'"><span class="d"></span>'+h(p.state)+'</span>'+
+   (b?'<a class="b b-q mono" href="'+polUrl(b.v)+'">based on '+h(b.v)+'</a>':'')+
+   '<span class="b b-q">'+h(p.by)+'</span><span class="b b-q mono">'+h(p.at)+'</span></div></div>'+
+   '<div class="acts">'+acts+'</div></div>';
+  var note=draft?
+    '<div class="field pv-note" data-help="what-changes"><label for="pv-note">What changes</label>'+
+     '<input id="pv-note" value="'+h(p.note)+'" onchange="polNote(\''+p.v+'\',this.value)"><div class="hint">One sentence.</div></div>':
+    '<dl class="kv pv-note" data-help="what-changes"><dt>What changed</dt><dd>'+h(p.note)+'</dd>'+
+     (p.reason?'<dt>Reason</dt><dd>'+h(p.reason)+'</dd>':'')+'</dl>';
+  var tabs='<div class="tabs" role="tablist">'+
+   [["rules","Rules",parsed.rules.length,plural(parsed.rules.length,"rule")],["tests","Tests",ts.length,plural(ts.length,"test")],
+    ["changes","Changes",nChg,plural(nChg,"rule changed","rules changed")]].map(function(x){
+     return '<button class="tab" role="tab" aria-selected="'+(tb===x[0])+'" onclick="go(\''+polUrl(p.v,x[0])+'\')">'+x[1]+
+      '<span id="polTab-'+x[0]+'">'+tabN(x[2],x[3])+'</span></button>';}).join("")+'</div>';
+  var body;
+  if(tb==="tests"){
+    var run=polRunOf(p.v,text);
+    body='<div class="panel"><div class="panel-h"><h3>Tests</h3><div class="sp"><span class="b '+tl.c+'">'+h(tl.t)+'</span>'+
+      (draft?'<button class="btn sm" onclick="openDialog(\'policytest\',\''+p.v+'\')">Add test</button>':'')+
+      '<button class="btn sm" onclick="polRunTests(\''+p.v+'\')">Run tests</button></div></div>'+
+     '<div class="tw"><table><thead><tr><th>Call</th><th>Agent</th><th>Facts</th><th>Expected</th><th>Result</th><th>Decided by</th></tr></thead><tbody>'+
+     ts.map(function(t,i){var rr=run?run.res[i]:null;
+      return '<tr><td class="mono" style="font-size:12px">'+h(t.tool)+'</td><td class="mono dim" style="font-size:11.5px">'+h(t.agent)+'</td>'+
+       '<td style="font-size:12px">'+(t.facts?h(t.facts):'<span class="dim">none</span>')+'</td>'+
+       '<td><span class="b '+POL_DEC_B[t.expect]+'">'+POL_DEC[t.expect]+'</span></td>'+
+       '<td>'+(!rr?'<span class="b b-q">not run</span>':rr.pass?'<span class="b b-allowed"><span class="d"></span>pass</span>':
+        '<span class="b b-failed"><span class="d"></span>fail</span> <span class="dim" style="font-size:11.5px">got '+POL_DEC[rr.got]+'</span>')+'</td>'+
+       '<td>'+(!rr?'<span class="dim">not run</span>':rr.by?'<a class="mono" href="'+polUrl(p.v)+'?rule='+rr.by+'">'+rr.by+'</a>':'<span class="dim">no rule permits it</span>')+'</td></tr>';}).join("")+
+     '</tbody></table></div></div>';
+  } else if(tb==="changes"){
+    var ids=function(a){return a.length?a.map(function(x){return '<a class="mono" href="'+polUrl(p.v)+'?rule='+x+'">'+x+'</a>';}).join(", "):'<span class="dim">none</span>';};
+    body='<div class="panel"><div class="panel-h"><h3>Changes</h3>'+(b?'<div class="sp"><span class="b b-q mono">against '+h(b.v)+'</span></div>':'')+'</div>'+
+     (!b?'<div class="panel-b"><p class="muted" style="margin:0">'+h(p.v)+' is the oldest version kept here.</p></div>':
+      '<div class="panel-b"><dl class="kv"><dt>Added</dt><dd>'+ids(ch.added)+'</dd><dt>Changed</dt><dd>'+ids(ch.changed)+'</dd>'+
+       '<dt>Removed</dt><dd>'+(ch.removed.length?ch.removed.map(function(x){return '<span class="mono">'+x+'</span>';}).join(", "):'<span class="dim">none</span>')+'</dd></dl></div>'+
+      (bsrc===text?'<div class="panel-b"><p class="muted" style="margin:0">The rules match '+h(b.v)+' line for line.</p></div>':diffSplitHtml(diffLines(bsrc,text),2,[b.v,p.v])))+'</div>';
+  } else {
+    body='<div class="pv-grid">'+
+     '<div class="panel pv-out"><div class="panel-h"><h3>Rules</h3>'+(draft?'<div class="sp"><button class="btn sm" onclick="openDialog(\'policyrule\',\''+p.v+'\')">Add rule</button></div>':'')+'</div>'+
+      '<div class="pv-list" id="polOutline">'+polOutline(p.v,parsed,bp)+'</div></div>'+
+     '<div class="pv-main"><div data-help="editor">'+cedHtml(k,p.v+".cedar","cedar",{readonly:!draft})+'</div>'+
+      '<div class="panel pv-probs"><div class="panel-h"><h3>Problems</h3></div><div class="panel-b" id="polProblems">'+polProblemsHtml(p.v,parsed)+'</div></div></div></div>';
+  }
+  return head+note+tabs+body;
+}
+function polOutline(v,parsed,bp){
+  if(!parsed.rules.length) return '<p class="muted" style="padding:12px 14px;margin:0">No rules yet.</p>';
+  var old={}; bp.rules.forEach(function(r){old[r.id]=r.text;});
+  return parsed.rules.map(function(r){
+    var st=!bp.rules.length?"":old[r.id]==null?"new":old[r.id]!==r.text?"changed":"";
+    return '<button class="pv-rule" onclick="polJump(\''+v+'\','+r.line+')"><span class="pv-rule-h"><span class="mono">'+h(r.id||"no @id")+'</span>'+
+     '<span class="b '+POL_DEC_B[r.decision]+'">'+POL_DEC[r.decision]+'</span>'+(st?'<span class="b b-approval">'+st+'</span>':'')+'</span>'+
+     '<span class="pv-rule-s">'+h(r.say||"No comment above this rule.")+'</span></button>';}).join("");
+}
+function polProblemsHtml(v,parsed){
+  if(!parsed.problems.length) return '<p class="muted" style="margin:0">No problems.</p>';
+  return parsed.problems.map(function(x){
+    return '<div class="pv-prob"><button class="btn sm mono" onclick="polJump(\''+v+'\','+x.line+')">Line '+x.line+'</button><span>'+h(x.msg)+'</span></div>';}).join("");
+}
+/* the editor's input hook: the outline, the problems and the tab counts follow the text as you type */
+function polLive(){
+  var k=S.ced&&S.ced.key; if(!k||k.indexOf("pol:")!==0) return;
+  var v=k.slice(4),p=polBy(v); if(!p) return;
+  var parsed=polParse(cedText(k)),b=polBase(p),bp=b?polParse(polSaved(b.v)):{rules:[]},ch=polChanges(bp,parsed);
+  var o=el("polOutline"); if(o) o.innerHTML=polOutline(v,parsed,bp);
+  var pr=el("polProblems"); if(pr) pr.innerHTML=polProblemsHtml(v,parsed);
+  var tr=el("polTab-rules"); if(tr) tr.innerHTML=tabN(parsed.rules.length,plural(parsed.rules.length,"rule"));
+  var n=b?ch.added.length+ch.changed.length+ch.removed.length:0, tc=el("polTab-changes"); if(tc) tc.innerHTML=tabN(n,plural(n,"rule changed","rules changed"));
+}
+function polJump(v,line){
+  if((S.tab.pol||"rules")!=="rules"){S.polJump=line;go(polUrl(v));return;}
+  var t=el("cedT"); if(!t) return;
+  var ls=t.value.split("\n"),off=0; for(var i=0;i<line-1&&i<ls.length;i++) off+=ls[i].length+1;
+  try{t.focus({preventScroll:true});}catch(e){t.focus();}
+  t.setSelectionRange(off,off); cedPos();
+  var s=el("cedS"); if(s) s.scrollTop=Math.max(0,(line-1)*20-40);
+}
+/* After render: a ?rule= address or a jump asked for from another tab lands the caret on that rule. */
+function polMount(r){
+  var j=S.polJump; if(j==null||(r.tab||"rules")!=="rules") return;
+  S.polJump=null;
+  if(typeof j==="string"){
+    var hit=null; polParse(cedText(polKey(r.id))).rules.forEach(function(x){if(x.id===j)hit=x;});
+    try{history.replaceState(null,"",polUrl(r.id));}catch(e){}
+    if(!hit) return act("No rule named "+j+" in "+r.id+".");
+    j=hit.line;
+  }
+  polJump(r.id,j);
+}
+function polNote(v,val){var p=polBy(v);if(p&&p.state==="draft"&&val.trim())p.note=val.trim();}
+function polSave(v){
+  var p=polBy(v); if(!p||p.state!=="draft") return;
+  var k=polKey(v),ne=el("pv-note"),note=ne?ne.value.trim():p.note;
+  if(!note) return act("Say what the version changes before you save it.");
+  p.note=note; cedReseed(k,cedText(k)); p.src=S.cedBase[k]; p.at="2026-09-11 09:24";
+  var np=polParse(p.src).problems.length;
+  render(); act(v+" saved."+(np?" "+plural(np,"problem")+" to fix before it can be activated.":""));
+}
+
 DLG_EXT.policynew=function(base){
   var opts=POLICIES.filter(function(x){return x.state!=="draft";});
   var from=null; POLICIES.forEach(function(x){if(x.v===base&&x.state!=="draft")from=x;});
@@ -5317,111 +5587,217 @@ DLG_EXT.policynew=function(base){
   if(!from) return noSuch("Policy version");
   return {t:"Draft a policy version",s:"A draft decides nothing until an approver activates it",w:false,
    b:'<div class="field"><label for="pn-base">Based on</label><select id="pn-base">'+
-     opts.map(function(x){return '<option value="'+h(x.v)+'"'+(x.v===from.v?" selected":"")+'>'+h(x.v)+' ('+h(x.state)+', '+plural(x.rules,"rule")+')</option>';}).join("")+
-     '</select><div class="hint">The draft opens as a copy of this version’s rules.</div></div>'+
+     opts.map(function(x){return '<option value="'+h(x.v)+'"'+(x.v===from.v?" selected":"")+'>'+h(x.v)+' ('+h(x.state)+')</option>';}).join("")+
+     '</select><div class="hint">The draft opens as a copy of this version’s rules and tests.</div></div>'+
      '<div class="field"><label for="pn-note">What changes</label><input id="pn-note" placeholder="Raises any egress call to approval">'+
      '<div class="hint">One sentence.</div></div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="policyDraft()">Create the draft</button>'};
 };
-function policyNextV(){var n=0;POLICIES.forEach(function(x){var k=parseInt(String(x.v).replace(/\D/g,""),10);if(k>n)n=k;});return "pol_v"+(n+1);}
+function policyNextV(){var n=0;POLICIES.forEach(function(x){var k=polN(x.v);if(k>n)n=k;});return "pol_v"+(n+1);}
+/* A new draft copies its base's saved rules and tests, and has run no test yet. */
+function polNewDraft(from,note){
+  var v=policyNextV();
+  POLICIES.unshift({v:v,state:"draft",by:PEOPLE.marcus.name,at:"2026-09-11 09:20",note:note,from:from.v,local:true,
+   src:polSaved(from.v),testList:polTests(from).slice()});
+  return v;
+}
 function policyDraft(){
   var base=el("pn-base")?el("pn-base").value:"";
   var note=el("pn-note")?el("pn-note").value.trim():"";
   if(!note) return act("Say what the version changes before you create it.");
-  var from=null; POLICIES.forEach(function(x){if(x.v===base)from=x;});
-  var v=policyNextV();
-  POLICIES.unshift({v:v,state:"draft",by:PEOPLE.marcus.name,at:"2026-09-11 09:20",
-   rules:from?from.rules:0,tests:"not run yet",note:note,from:base});
-  closeDialog(); render(); act("Drafted "+v+" from "+base+".","gold");
+  var from=polBy(base); if(!from) return;
+  var v=polNewDraft(from,note);
+  closeDialog(); go(polUrl(v)); act("Drafted "+v+" from "+base+".","gold");
 }
-DLG_EXT.policyedit=function(v){
-  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
-  if(!p) return noSuch("Policy version");
-  if(p.state!=="draft") return {t:h(p.v)+" cannot be edited",w:false,
-   b:'<div class="note">'+h(p.v)+' is '+h(p.state)+', so its rules are fixed. Draft a new version from it instead.</div>',
+
+/* ---- Add a rule: a builder that writes one rule into the draft, which you can then edit as text ---- */
+var POL_COND=[["","Always"],["tainted","The input is tainted"],["amount","The amount is above"],["repo","The repository is"],
+  ["path","The path starts with"],["hours","Outside weekday hours (09:00 to 17:00 UTC)"],["budget","The budget left is below"],["prior","The run has not called"]];
+var POL_COND_PH={amount:"500.00",repo:"a-intel/mobile",path:"infra/prod/",budget:"1.00",prior:"stripe__list_prices"};
+function polToolNames(){var seen={},out=[];TOOLS.forEach(function(t){if(!seen[t.n]){seen[t.n]=1;out.push(t.n);}});return out.sort();}
+function polToolVers(){
+  var top={};TOOLS.forEach(function(t){if(!top[t.n]||parseFloat(t.v)>parseFloat(top[t.n].v))top[t.n]=t;});
+  return Object.keys(top).sort().map(function(n){return n+"@"+top[n].v;});
+}
+function polNextId(v){
+  var n=0,re=/rg_(\d+)/g,m,all=cedText(polKey(v))+POL_RULES.map(function(r){return r.id;}).join(" ");
+  while((m=re.exec(all))){var k=parseInt(m[1],10);if(k>n)n=k;}
+  return "rg_"+("000"+(n+1)).slice(-4);
+}
+function polRuleVals(){
+  function g(id,d){var x=el(id);return x?x.value:d;}
+  return {say:g("pr-say",""),dec:g("pr-dec","approval"),tool:g("pr-tool","any"),agent:g("pr-agent","any"),cond:g("pr-cond",""),val:g("pr-val","")};
+}
+function polRuleSrc(id,o){
+  var q=function(s){return String(s).replace(/["\\]/g,"").trim();},cents=function(s){var x=parseFloat(String(s).replace(/[^0-9.]/g,""));return isNaN(x)?0:Math.round(x*100);};
+  var prin="principal",actn="action",when=[],val=q(o.val);
+  if(o.agent.indexOf("ws:")===0) prin='principal in Workspace::"'+o.agent.slice(3)+'"';
+  else if(o.agent!=="any") prin='principal == Agent::"'+o.agent+'"';
+  if(o.tool.indexOf("eff:")===0) when.push('context.tool.side_effect == "'+o.tool.slice(4)+'"');
+  else if(o.tool.indexOf("fin:")===0) when.push('context.tool.financial_class == "'+o.tool.slice(4)+'"');
+  else if(o.tool!=="any") actn='action == Action::"'+o.tool+'"';
+  var c=o.cond,ph=POL_COND_PH[c]||"";
+  if(c==="tainted") when.push("context.taint.tainted");
+  if(c==="amount") when.push("context.args has amount_cents && context.args.amount_cents > "+cents(val||ph));
+  if(c==="repo") when.push('context.args has repository && context.args.repository == "'+(val||ph)+'"');
+  if(c==="path") when.push('context.args has path && context.args.path like "'+(val||ph).replace(/\*+$/,"")+'*"');
+  if(c==="hours") when.push("!(context.time.weekday && context.time.hour_utc >= 9 && context.time.hour_utc < 17)");
+  if(c==="budget") when.push("context.budget.remaining_cents < "+cents(val||ph));
+  if(c==="prior") when.push('!context.run.prior_calls.contains("'+(val||ph)+'")');
+  var L=["// "+(q(o.say)||"Say what this rule does."),'@id("'+id+'")'];
+  if(o.dec==="approval") L.push('@decision("require_approval")');
+  L.push((o.dec==="allow"?"permit":"forbid")+" ("+prin+", "+actn+", resource)");
+  if(when.length) L.push("when { "+when.join(" && ")+" }");
+  if(o.dec==="approval") L.push("unless { context.approval.granted }");
+  L[L.length-1]+=";";
+  return L.join("\n");
+}
+function polRulePrev(){
+  var pv=el("pr-prev"),vi=el("pr-val"),o=polRuleVals(); if(!pv) return;
+  if(vi) vi.placeholder=POL_COND_PH[o.cond]||"No value needed";
+  pv.innerHTML=hlCode(polRuleSrc(pv.getAttribute("data-id"),o),"cedar");
+}
+function polNotDraft(p){
+  return {t:h(p.v)+" cannot be edited",w:false,
+   b:'<div class="note">'+h(p.v)+' is '+h(p.state)+', so its rules and tests are fixed. Draft a new version from it instead.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft new version</button>'};
-  return {t:"Edit "+p.v,w:true,
-   b:'<div class="field"><label for="pe-note">What changes</label><input id="pe-note" value="'+h(p.note)+'"></div>'+
-     '<div class="field"><label>Rules</label>'+
-     '<pre><span class="c">// '+h(p.note)+'</span>\n'+
-     '<span class="k">permit</span> (principal, action, resource)\n<span class="k">when</span> { context.tool.side_effect == <span class="s">"irreversible"</span> }\n'+
-     '<span class="k">advice</span> <span class="s">"require_approval"</span>;</pre>'+
-     '<div class="hint">'+p.rules+' rules in this draft.</div></div>'+
-     '<div class="field"><label>Tests that ship with it</label>'+
-     '<div class="tw"><table class="narrow"><tbody>'+
-     [["github__create_release@2 must require approval","pass"],
-      ["github__get_file_contents@2 must be allowed","pass"],
-      ["stripe__create_payment@4 with no mandate must be denied","pass"]]
-      .map(function(r){return '<tr><td style="font-size:12px">'+h(r[0])+'</td><td><span class="b b-allowed"><span class="d"></span>'+r[1]+'</span></td></tr>';}).join("")+
-     '</tbody></table></div></div>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
-     '<button class="btn danger" onclick="openDialog(\'policydiscard\',\''+p.v+'\')">Discard</button>'+
-     '<button class="btn primary" onclick="policySaveDraft(\''+p.v+'\')">Save the draft</button>'};
-};
-function policySaveDraft(v){
-  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
-  if(!p) return;
-  var note=el("pe-note")?el("pe-note").value.trim():p.note;
-  if(!note) return act("Say what the version changes before you save it.");
-  p.note=note; p.tests="44 / 44 pass";
-  closeDialog(); render(); act(v+" saved.");
 }
+DLG_EXT.policyrule=function(v){
+  var p=polBy(v); if(!p) return noSuch("Policy version");
+  if(p.state!=="draft") return polNotDraft(p);
+  polSrc(v);
+  var id=polNextId(v),o={say:"",dec:"approval",tool:"any",agent:"any",cond:"",val:""};
+  function sel(id2,label,opts,cur){return '<div class="field"><label for="'+id2+'">'+label+'</label><select id="'+id2+'" onchange="polRulePrev()">'+
+    opts.map(function(x){return x.g?'<optgroup label="'+h(x.g)+'">'+x.o.map(function(y){return '<option value="'+h(y[0])+'"'+(y[0]===cur?' selected':'')+'>'+h(y[1])+'</option>';}).join("")+'</optgroup>':
+     '<option value="'+h(x[0])+'"'+(x[0]===cur?' selected':'')+'>'+h(x[1])+'</option>';}).join("")+'</select></div>';}
+  return {t:"Add a rule to "+p.v,w:true,
+   b:'<div class="field"><label for="pr-say">What the rule does</label><input id="pr-say" placeholder="Parks a pod delete in prod-east for approval" oninput="polRulePrev()">'+
+     '<div class="hint">One sentence. It becomes the comment above the rule.</div></div>'+
+     '<div class="fields">'+
+      sel("pr-dec","Decision",[["allow","Allow"],["approval","Require approval"],["deny","Deny"]],o.dec)+
+      sel("pr-tool","Tools",[["any","Every tool"],["eff:irreversible","Every irreversible tool"],["eff:write","Every tool that writes"],["fin:moves_funds","Every tool that moves money"],
+       {g:"One tool",o:polToolNames().map(function(n){return [n,n];})}],o.tool)+
+      sel("pr-agent","Agents",[["any","Every agent"]].concat(WS.map(function(x){return ["ws:"+x.slug,"Every agent in "+x.name];}),
+       [{g:"One agent",o:AGENTS.map(function(a){return [a.key,a.key];})}]),o.agent)+
+      sel("pr-cond","Only when",POL_COND,o.cond)+
+      '<div class="field"><label for="pr-val">Value</label><input id="pr-val" placeholder="No value needed" oninput="polRulePrev()">'+
+       '<div class="hint">An amount in USD, a repository, a path, or a tool name.</div></div>'+
+     '</div>'+
+     '<div class="field"><label>Rule</label><pre id="pr-prev" data-id="'+id+'">'+hlCode(polRuleSrc(id,o),"cedar")+'</pre>'+
+      '<div class="hint">It goes at the end of the draft, where you can edit it.</div></div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+     '<button class="btn primary" onclick="polAddRule(\''+p.v+'\')">Add to the draft</button>'};
+};
+function polAddRule(v){
+  var p=polBy(v); if(!p||p.state!=="draft") return;
+  var o=polRuleVals();
+  if(!o.say.trim()) return act("Say what the rule does before you add it.");
+  if(["amount","repo","path","budget","prior"].indexOf(o.cond)>=0&&!o.val.trim()) return act("Give the value the rule tests.");
+  var k=polKey(v),id=polNextId(v);
+  S.cedVal[k]=cedText(k).replace(/\s*$/,"")+"\n\n"+polRuleSrc(id,o)+"\n";
+  S.polJump=id; closeDialog(); polGo(polUrl(v));
+  act("Added "+id+" to "+v+". Save the draft to keep it.");
+}
+
+/* ---- Add a test: a call and the decision it must get ---- */
+DLG_EXT.policytest=function(v){
+  var p=polBy(v); if(!p) return noSuch("Policy version");
+  if(p.state!=="draft") return polNotDraft(p);
+  return {t:"Add a test to "+p.v,w:false,
+   b:'<div class="field"><label for="pt-tool">Tool</label><select id="pt-tool">'+polToolVers().map(function(n){return '<option>'+h(n)+'</option>';}).join("")+'</select></div>'+
+     '<div class="field"><label for="pt-agent">Agent</label><select id="pt-agent">'+AGENTS.map(function(a){return '<option>'+h(a.key)+'</option>';}).join("")+'</select></div>'+
+     '<div class="field"><label for="pt-facts">Facts</label><input id="pt-facts" placeholder="amount $720.00">'+
+      '<div class="hint">What the call carries that a rule reads: an amount, a repository, a path, taint.</div></div>'+
+     '<div class="field"><label for="pt-exp">Expected</label><select id="pt-exp"><option value="allow">Allow</option>'+
+      '<option value="approval" selected>Require approval</option><option value="deny">Deny</option></select></div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
+     '<button class="btn primary" onclick="polAddTest(\''+p.v+'\')">Add the test</button>'};
+};
+function polAddTest(v){
+  var p=polBy(v); if(!p||p.state!=="draft") return;
+  function g(id){var x=el(id);return x?x.value.trim():"";}
+  if(!p.testList) p.testList=polTests(p).slice();
+  var n=0; POL_TESTS.concat(p.testList).forEach(function(t){var q=parseInt(t.id.replace(/\D/g,""),10);if(q>n)n=q;});
+  p.testList.push({id:"pt_"+("00"+(n+1)).slice(-3),since:polN(v),tool:g("pt-tool"),agent:g("pt-agent"),facts:g("pt-facts"),expect:g("pt-exp")||"approval",rule:""});
+  closeDialog(); polGo(polUrl(v,"tests"));
+  act("Added a test to "+v+". Run the tests to see which rule decides it.");
+}
+
 DLG_EXT.policydiscard=function(v){
-  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
-  if(!p) return noSuch("Policy version");
+  var p=polBy(v); if(!p) return noSuch("Policy version");
   if(p.state!=="draft") return {t:h(p.v)+" cannot be discarded",w:false,
    b:'<div class="note">'+h(p.v)+' is '+h(p.state)+', so it is kept. Supersede it with a new version instead.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft new version</button>'};
   return {t:"Discard "+p.v+"?",w:false,
-   b:'<div class="warn"><b>'+h(p.note)+'</b> goes with it.</div>',
+   b:'<div class="warn"><b>'+h(p.note)+'</b> goes with it, with its rules and its tests.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
      '<button class="btn danger" onclick="policyDiscard(\''+p.v+'\')">Discard</button>'};
 };
 function policyDiscard(v){
   var i=-1; POLICIES.forEach(function(x,k){if(x.v===v&&x.state==="draft")i=k;});
   if(i<0) return;
-  POLICIES.splice(i,1);
-  closeDialog(); render(); act("Discarded "+v+".");
+  POLICIES.splice(i,1); delete S.polRun[v];
+  closeDialog();
+  if(location.hash.indexOf("/tools/policy/")>=0) go("#/"+ORG.slug+"/"+S.ws+"/tools/policy"); else render();
+  act("Discarded "+v+".");
 }
 DLG_EXT.policyrestore=function(v){
-  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
-  if(!p) return noSuch("Policy version");
+  var p=polBy(v); if(!p) return noSuch("Policy version");
   var act0=POLICIES.filter(function(x){return x.state==="active";})[0];
   return {t:"Restore "+p.v+"?",w:false,
-   b:'<div class="note">This copies '+h(p.v)+'’s rules into a new draft above '+h(act0?act0.v:"the active version")+'.</div>'+
+   b:'<div class="note">This copies '+h(p.v)+'’s rules and tests into a new draft above '+h(act0?act0.v:"the active version")+'.</div>'+
     '<div class="warn"><b>'+h(p.note)+'</b> is undone by this. Read what it changed before you approve it.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn primary" onclick="policyRestore(\''+p.v+'\')">Draft the restore</button>'};
 };
 function policyRestore(v){
-  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
-  if(!p) return;
-  var n=parseInt(String(POLICIES[0].v).replace(/\D/g,""),10)+1;
-  POLICIES.unshift({v:"pol_v"+n,state:"draft",by:PEOPLE.marcus.name,at:"2026-09-11 09:20Z",rules:p.rules,
-   tests:p.tests,note:"restores "+p.v});
-  closeDialog(); render(); act("Drafted pol_v"+n+" from "+v+".","gold");
+  var p=polBy(v); if(!p) return;
+  var nv=polNewDraft(p,"restores "+v);
+  closeDialog(); go(polUrl(nv)); act("Drafted "+nv+" from "+v+".","gold");
+}
+
+/* ---- Activate: refused until the draft is saved, its rules have no problem, and every test passes ---- */
+function polGate(v){
+  var k=polKey(v),saved=polSaved(v),parsed=polParse(saved),run=polRunOf(v,saved);
+  var fail=run?run.res.filter(function(x){return !x.pass;}).length:0;
+  return [
+   {ok:!cedDirty(k),yes:"The draft is saved.",no:"The draft has changes that are not saved."},
+   {ok:!parsed.problems.length,yes:"The rules have no problems.",no:"The rules have "+plural(parsed.problems.length,"problem")+"."},
+   {ok:!!run,yes:"The tests ran against the saved rules.",no:"The tests have not run against the saved rules."},
+   {ok:!!run&&!fail,yes:run?plural(run.res.length,"test")+" pass.":"",no:run?plural(fail,"test")+" "+(fail===1?"fails":"fail")+".":"The tests have no result yet."}];
 }
 DLG_EXT.policyactivate=function(v){
-  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
-  if(!p) return noSuch("Policy version");
-  var cur=POLICIES.filter(function(x){return x.state==="active";})[0];
+  var p=polBy(v); if(!p) return noSuch("Policy version");
+  if(p.state!=="draft") return {t:h(p.v)+" cannot be activated",w:false,
+   b:'<div class="note">'+h(p.v)+' is '+h(p.state)+'. Only a draft is activated.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  var gate=polGate(v),ok=gate.every(function(c){return c.ok;}),cur=POLICIES.filter(function(x){return x.state==="active";})[0];
+  var list='<div class="pv-checks">'+gate.map(function(c){
+    return '<div class="pv-check"><span class="b '+(c.ok?'b-allowed':'b-failed')+'"><span class="d"></span>'+(c.ok?'ready':'blocked')+'</span><span>'+h(c.ok?c.yes:c.no)+'</span></div>';}).join("")+'</div>';
+  if(!ok) return {t:h(p.v)+" is not ready",w:false,
+   b:list+'<div class="note">Fix what is blocked on the version page, then activate it.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'+
+    '<button class="btn primary" onclick="closeDialog();go(\''+polUrl(p.v,gate[0].ok&&gate[1].ok?"tests":"rules")+'\')">Open '+h(p.v)+'</button>'};
+  var saved=polSaved(v);
   return {t:"Activate "+p.v+"?",w:false,
-   b:'<div class="note">'+(cur?h(cur.v)+' is superseded. ':'')+
-     'From the next tool call, every policy decision names '+h(p.v)+'.</div>'+
-    '<dl class="kv"><dt>Rules</dt><dd>'+p.rules+'</dd><dt>Tests</dt><dd>'+h(p.tests)+'</dd>'+
-    '<dt>What changes</dt><dd>'+h(p.note)+'</dd></dl>'+
+   b:'<div class="note">'+(cur?h(cur.v)+' is superseded. ':'')+'From the next tool call, every policy decision names '+h(p.v)+'.</div>'+list+
+    '<dl class="kv"><dt>Rules</dt><dd>'+polParse(saved).rules.length+'</dd><dt>What changes</dt><dd>'+h(p.note)+'</dd></dl>'+
+    '<div class="field"><label for="pa-why">Reason</label><textarea id="pa-why" rows="2" placeholder="Release calls went out unreviewed twice this week"></textarea>'+
+     '<div class="hint">Recorded with the activation.</div></div>'+
     '<div class="warn"><b>This is a governed action.</b> It records your name.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn primary" onclick="policyActivate(\''+p.v+'\')">Activate it</button>'};
 };
 function policyActivate(v){
-  var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
-  if(!p) return;
+  var p=polBy(v); if(!p||p.state!=="draft") return;
+  if(!polGate(v).every(function(c){return c.ok;})) return openDialog("policyactivate",v);
+  var why=el("pa-why")?el("pa-why").value.trim():"";
+  if(!why) return act("Say why you are activating it.");
   POLICIES.forEach(function(x){if(x.state==="active")x.state="superseded";});
-  p.state="active"; S.denyGen+=1;
+  p.state="active"; p.reason=why; p.at="2026-09-11 09:31"; S.denyGen+=1;
   closeDialog(); render(); act(v+" is active. Kill-switch generation is now "+S.denyGen+".","gold");
 }
 
@@ -11201,6 +11577,9 @@ var CED_LANG={
  toml:{label:"TOML",line:"#"},
  md:{label:"Markdown",line:null},
  json:{label:"JSON",line:null},
+ cedar:{label:"Cedar",line:"//",block:["/*","*/"],str:"\"",
+   kw:["permit","forbid","when","unless","principal","action","resource","context","in","has","like","is","if","then","else"],
+   ty:["true","false","Action","Agent","Workspace"]},
  ts:{label:"TypeScript",line:"//",block:["/*","*/"],str:"\"'`",
    kw:["import","from","export","const","let","var","function","async","await","return","if","else","for","of","in","new","class","extends","interface","type","throw","try","catch","finally","switch","case","break","default","implements","private","public","readonly","as","satisfies"],
    ty:["string","number","boolean","void","unknown","never","Promise","Record","Array","object","null","undefined","true","false"]},
@@ -11326,17 +11705,20 @@ function cedHtml(key,path,lang,opts){
     '<label class="ed-find"><input id="cedFind" placeholder="Find  ⌘F" aria-label="Find in file" value="'+h(S.ced.find||"")+'"><span id="cedFindN" class="mono dim"></span></label></div>'+
    '<div class="ed-scroll" id="cedS"><div class="ed-gut" id="cedG" aria-hidden="true"></div>'+
    '<div class="ed-wrap"><div class="ed-cl" id="cedCL"></div><pre class="ed-mk" id="cedM" aria-hidden="true"></pre><pre class="ed-hl" id="cedH" aria-hidden="true"></pre>'+
-   '<textarea id="cedT" class="ed-t" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="'+(wrap?"soft":"off")+'" aria-label="'+h(path)+'"></textarea></div></div>'+
-   '<div class="ed-status"><span id="cedPos">Ln 1, Col 1</span><span>'+h(opts.label||L.label)+'</span><span id="cedCount"></span><span>LF</span><span>UTF-8</span><span class="ed-sp"></span>'+
+   '<textarea id="cedT" class="ed-t"'+(opts.readonly?' readonly':'')+' spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="'+(wrap?"soft":"off")+'" aria-label="'+h(path)+'"></textarea></div></div>'+
+   '<div class="ed-status"><span id="cedPos">Ln 1, Col 1</span><span>'+h(opts.label||L.label)+'</span>'+(opts.readonly?'<span>read-only</span>':'')+'<span id="cedCount"></span><span>LF</span><span>UTF-8</span><span class="ed-sp"></span>'+
    '<span class="keys dim">Tab indent · ⇧Tab outdent'+(L.line?' · ⌘/ comment':'')+' · ⌘F find</span></div></div>';
 }
 
 function cedMount(){
   var t=el("cedT"); if(!t||!S.ced) return;
+  /* cedPaint() ends in cedPos(), which reads the caret. Setting the value moves the caret to the end,
+     so the saved selection is taken first, or every re-render would leave the caret at the last line. */
+  var sel=S.ced.sel.slice();
   t.value=cedText(S.ced.key);
+  try{t.setSelectionRange(sel[0],sel[1]);}catch(e){}
   cedPaint();
-  try{t.setSelectionRange(S.ced.sel[0],S.ced.sel[1]);}catch(e){}
-  t.addEventListener("input",function(){S.cedVal[S.ced.key]=t.value;S.ced.cur=-1;cedPaint();});
+  t.addEventListener("input",function(){S.cedVal[S.ced.key]=t.value;S.ced.cur=-1;cedPaint();polLive();});
   t.addEventListener("keydown",cedKey);
   ["keyup","click","select"].forEach(function(ev){t.addEventListener(ev,cedPos);});
   var f=el("cedFind");
@@ -11418,6 +11800,8 @@ function cedKey(e){
   function ins(str){t.focus();var ok=false;try{ok=document.execCommand("insertText",false,str);}catch(x){}if(!ok){t.setRangeText(str,t.selectionStart,t.selectionEnd,"end");t.dispatchEvent(new Event("input"));}}
   function bounds(){var a=v.lastIndexOf("\n",s-1)+1,b=v.indexOf("\n",en);if(b<0)b=v.length;return [a,b];}
   if(mod&&key.toLowerCase()==="f"){e.preventDefault();e.stopPropagation();var f=el("cedFind");if(f){f.focus();f.select();}return;}
+  if(t.readOnly) return;
+  if(mod&&key.toLowerCase()==="s"&&S.ced.key.indexOf("pol:")===0){e.preventDefault();e.stopPropagation();polSave(S.ced.key.slice(4));return;}
   if(mod&&key==="/"&&lc){
     e.preventDefault();
     var lb=bounds(),ls=v.slice(lb[0],lb[1]).split("\n"),re=new RegExp("^\\s*"+lc.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));
@@ -13605,6 +13989,7 @@ function render(){
   else if(r.page==="agent")page=pAgent(r);
   else if(r.page==="agentsource")page=pAgentSource(r);
   else if(r.page==="tools")page=pTools();
+  else if(r.page==="policyversion")page=pPolicyVersion(r);
   else if(r.page==="source")page=pSource(r);
   else if(r.page==="scenarios")page=pScenarios();
   else if(r.page==="steering")page=pSteering();
@@ -13626,6 +14011,7 @@ function render(){
   el("layer").innerHTML=dialog();
   if(r.page==="agentsource")edMount();
   cedMount();
+  if(r.page==="policyversion")polMount(r);
   asstMount();
   listify();
   /* every tab bar scrolls on a phone; the tab in view is scrolled to, never the page */
@@ -13665,7 +14051,7 @@ var MNAV_MORE={organization:1,billing:1,audit:1,steering:1,source:1,scenarios:1,
 function mobileNav(r){
   var w=ws(), fr=obFirstRun(w), base="#/"+ORG.slug+"/"+w.slug;
   var crit=fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length;
-  var cur=r.page==="run"||r.page==="workitem"||r.page==="workorder"?"work":r.page==="agent"||r.page==="agentsource"?"agents":r.page;
+  var cur=r.page==="run"||r.page==="workitem"||r.page==="workorder"?"work":r.page==="agent"||r.page==="agentsource"?"agents":r.page==="policyversion"?"tools":r.page;
   function b(id,label,href,count,hot,on){
     return '<button class="mn" '+(on?'aria-current="page"':'')+' onclick="'+href+'"><span class="ic">'+icon(id)+'</span><span>'+label+'</span>'+
       (count?'<span class="ct'+(hot?" hot":"")+'">'+count+'</span>':'')+'</button>';
@@ -14105,7 +14491,7 @@ document.addEventListener("click",function(e){
     "Requires approval for Kubernetes delete_pod and drain_node in prod-east.","Blocks Salesforce send_email for every agent. A person sends the email instead.","Adds the HubSpot provider. Enrolling a contact requires approval."];
   POL_NOTES.forEach(function(note,i){
     var v=39-i, d=TODAY-(18+i*11)*86400000;
-    POLICIES.push({v:"pol_v"+v,state:"superseded",by:pick(["Priya Natarajan","Marcus Bell",PEOPLE[WSX.security.owner].name]),at:dstr(d)+" "+pad(ri(8,18))+":"+pad(ri(0,59)),rules:36-i,tests:(38-i)+" / "+(38-i)+" pass",note:note});
+    POLICIES.push({v:"pol_v"+v,state:"superseded",by:pick(["Priya Natarajan","Marcus Bell",PEOPLE[WSX.security.owner].name]),at:dstr(d)+" "+pad(ri(8,18))+":"+pad(ri(0,59)),note:note});
   });
   var REC_ST={
     rule:["Every pull request description names the issue it closes and the test that proves it.","Post to a shared channel only after the run is sealed.","Prefer the workspace's own retry helper over ad-hoc loops.","Cite the receipt id when reporting money moved.","Group release notes by surface, never by author.","Ask before touching a file outside the task's directory.","Write the reproduction command into the issue before labeling it."],

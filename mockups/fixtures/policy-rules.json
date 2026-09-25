@@ -1,0 +1,613 @@
+{
+ "rules": [
+  {
+   "id": "rg_0001",
+   "since": 0,
+   "text": "// Every agent may call a read-only tool of low or medium risk.\n@id(\"rg_0001\")\npermit (principal, action, resource)\nwhen { context.tool.side_effect == \"read\" && context.tool.risk != \"high\" };"
+  },
+  {
+   "id": "rg_0004",
+   "since": 0,
+   "text": "// A high-risk read runs only when the call is routed through the gateway.\n@id(\"rg_0004\")\npermit (principal, action, resource)\nwhen {\n  context.tool.side_effect == \"read\" &&\n  context.tool.risk == \"high\" &&\n  [\"gateway\", \"contained\"].contains(context.tier)\n};"
+  },
+  {
+   "id": "rg_0007",
+   "since": 0,
+   "text": "// Every agent may write inside a repository that belongs to a-intel.\n@id(\"rg_0007\")\npermit (principal, action, resource)\nwhen {\n  context.tool.side_effect == \"write\" &&\n  context.args has repository &&\n  context.args.repository like \"a-intel/*\"\n};"
+  },
+  {
+   "id": "rg_0009",
+   "since": 0,
+   "text": "// Harness edits and shell commands are allowed on the agent's own branch.\n@id(\"rg_0009\")\npermit (\n  principal,\n  action in [Action::\"claude_code__Edit\", Action::\"claude_code__Bash\"],\n  resource\n)\nwhen { context.args has branch && context.args.branch like \"agent/*\" };"
+  },
+  {
+   "id": "rg_0011",
+   "since": 0,
+   "text": "// Every agent may call Oxagen's own tools.\n@id(\"rg_0011\")\npermit (\n  principal,\n  action in [\n    Action::\"recall_context\",\n    Action::\"search_graph\",\n    Action::\"expand_graph\",\n    Action::\"append_record\",\n    Action::\"open_context_pr\",\n    Action::\"send_message\",\n    Action::\"search_tools\",\n    Action::\"load_tools\",\n    Action::\"verify\"\n  ],\n  resource\n);"
+  },
+  {
+   "id": "rg_0012",
+   "since": 0,
+   "text": "// Every agent may comment on an issue and update a Linear issue.\n@id(\"rg_0012\")\npermit (\n  principal,\n  action in [Action::\"github__create_issue_comment\", Action::\"linear__update_issue\"],\n  resource\n);"
+  },
+  {
+   "id": "rg_0014",
+   "since": 0,
+   "text": "// Every agent may post and upload to Slack.\n@id(\"rg_0014\")\npermit (\n  principal,\n  action in [Action::\"slack__post_message\", Action::\"slack__upload_file\"],\n  resource\n);"
+  },
+  {
+   "id": "rg_0015",
+   "since": 0,
+   "text": "// A post or upload to a shared external Slack channel parks for approval.\n@id(\"rg_0015\")\n@decision(\"require_approval\")\nforbid (\n  principal,\n  action in [Action::\"slack__post_message\", Action::\"slack__upload_file\"],\n  resource\n)\nwhen { context.args has channel && context.args.channel like \"ext-*\" }\nunless { context.approval.granted };"
+  },
+  {
+   "id": "rg_0093",
+   "since": 0,
+   "text": "// A release, a branch delete, or a repository delete on GitHub parks for approval.\n@id(\"rg_0093\")\n@decision(\"require_approval\")\nforbid (\n  principal,\n  action in [\n    Action::\"github__create_release\",\n    Action::\"github__delete_branch\",\n    Action::\"github__delete_repository\"\n  ],\n  resource\n)\nunless { context.approval.granted };"
+  },
+  {
+   "id": "rg_0024",
+   "since": 0,
+   "text": "// A pull request may target only a repository that belongs to a-intel.\n@id(\"rg_0024\")\nforbid (principal, action == Action::\"github__create_pull_request\", resource)\nunless { context.args has repository && context.args.repository like \"a-intel/*\" };"
+  },
+  {
+   "id": "rg_0027",
+   "since": 0,
+   "text": "// A change to a workflow file parks for approval.\n@id(\"rg_0027\")\n@decision(\"require_approval\")\nforbid (\n  principal,\n  action in [Action::\"claude_code__Edit\", Action::\"github__create_pull_request\"],\n  resource\n)\nwhen { context.args has path && context.args.path like \".github/workflows/*\" }\nunless { context.approval.granted };"
+  },
+  {
+   "id": "rg_0029",
+   "since": 0,
+   "text": "// A change under infra/prod parks for approval.\n@id(\"rg_0029\")\n@decision(\"require_approval\")\nforbid (\n  principal,\n  action in [Action::\"claude_code__Edit\", Action::\"github__create_pull_request\"],\n  resource\n)\nwhen { context.args has path && context.args.path like \"infra/prod/*\" }\nunless { context.approval.granted };"
+  },
+  {
+   "id": "rg_0031",
+   "since": 0,
+   "text": "// A refund above $500 parks for approval.\n@id(\"rg_0031\")\n@decision(\"require_approval\")\nforbid (principal, action == Action::\"stripe__create_refund\", resource)\nwhen { context.args has amount_cents && context.args.amount_cents > 50000 }\nunless { context.approval.granted };"
+  },
+  {
+   "id": "rg_0033",
+   "since": 0,
+   "text": "// A payment goes only to a counterparty on the vendor list.\n@id(\"rg_0033\")\nforbid (principal, action == Action::\"stripe__create_payment\", resource)\nunless { context.args has counterparty && context.args.counterparty like \"vendor:*\" };"
+  },
+  {
+   "id": "rg_0044",
+   "since": 0,
+   "text": "// A payment is denied unless the same run already priced it.\n@id(\"rg_0044\")\nforbid (principal, action == Action::\"stripe__create_payment\", resource)\nunless { context.run.prior_calls.contains(\"stripe__list_prices\") };"
+  },
+  {
+   "id": "rg_0035",
+   "since": 0,
+   "text": "// Money moves only on a weekday between 09:00 and 17:00 UTC.\n@id(\"rg_0035\")\nforbid (principal, action, resource)\nwhen { context.tool.financial_class == \"moves_funds\" }\nunless {\n  context.time.weekday &&\n  context.time.hour_utc >= 9 &&\n  context.time.hour_utc < 17\n};"
+  },
+  {
+   "id": "rg_0037",
+   "since": 0,
+   "text": "// A savings plan purchase parks for approval.\n@id(\"rg_0037\")\n@decision(\"require_approval\")\nforbid (principal, action == Action::\"aws_billing__purchase_savings_plan\", resource)\nunless { context.approval.granted };"
+  },
+  {
+   "id": "rg_0038",
+   "since": 0,
+   "text": "// Only an agent in finops may call a tool that commits spend.\n@id(\"rg_0038\")\nforbid (principal, action, resource)\nwhen { context.tool.financial_class == \"commits_spend\" }\nunless { principal in Workspace::\"finops\" };"
+  },
+  {
+   "id": "rg_0052",
+   "since": 0,
+   "text": "// Content fetched from the web may not reach a shell command.\n@id(\"rg_0052\")\nforbid (principal, action == Action::\"claude_code__Bash\", resource)\nwhen { context.taint.sources.contains(\"web\") };"
+  },
+  {
+   "id": "rg_0053",
+   "since": 0,
+   "text": "// A tainted call may not send anything to a domain outside a-intel.\n@id(\"rg_0053\")\nforbid (principal, action, resource)\nwhen {\n  context.taint.tainted &&\n  context.args has recipient_domain &&\n  ![\"a-intel.com\", \"a-intel.example\"].contains(context.args.recipient_domain)\n};"
+  },
+  {
+   "id": "rg_0061",
+   "since": 0,
+   "text": "// No agent posts to Slack more than 20 times in an hour.\n@id(\"rg_0061\")\nforbid (principal, action == Action::\"slack__post_message\", resource)\nwhen { context.rate.calls_last_hour >= 20 };"
+  },
+  {
+   "id": "rg_0062",
+   "since": 0,
+   "text": "// No agent fetches from the web more than 60 times in a minute.\n@id(\"rg_0062\")\nforbid (principal, action == Action::\"claude_code__WebFetch\", resource)\nwhen { context.rate.calls_last_minute >= 60 };"
+  },
+  {
+   "id": "rg_0073",
+   "since": 0,
+   "text": "// A call against prod-east needs an operator with the sre role.\n@id(\"rg_0073\")\nforbid (principal, action, resource)\nwhen { context.args has cluster && context.args.cluster == \"prod-east\" }\nunless { context.operator.role == \"sre\" };"
+  },
+  {
+   "id": "rg_0075",
+   "since": 0,
+   "text": "// A run with less than $1 of budget left may only read.\n@id(\"rg_0075\")\nforbid (principal, action, resource)\nwhen { context.budget.remaining_cents < 100 && context.tool.side_effect != \"read\" };"
+  },
+  {
+   "id": "rg_0077",
+   "since": 0,
+   "text": "// A payment larger than what is left on its mandate is denied.\n@id(\"rg_0077\")\nforbid (principal, action, resource)\nwhen {\n  context.tool.financial_class == \"moves_funds\" &&\n  context has mandate &&\n  context.args has amount_cents &&\n  context.args.amount_cents > context.mandate.remaining_cents\n};"
+  },
+  {
+   "id": "rg_0081",
+   "since": 0,
+   "until": 40,
+   "text": "// Triage may comment on and label issues in a-intel/mobile.\n@id(\"rg_0081\")\npermit (\n  principal == Agent::\"a-intel.core.triage\",\n  action in [Action::\"github__create_issue_comment\", Action::\"linear__update_issue\"],\n  resource\n)\nwhen { context.args has repository && context.args.repository == \"a-intel/mobile\" };"
+  },
+  {
+   "id": "rg_0083",
+   "since": 0,
+   "text": "// A Snowflake query may not read the raw_pii schema.\n@id(\"rg_0083\")\nforbid (principal, action == Action::\"snowflake__run_query\", resource)\nwhen { context.args has schema && context.args.schema == \"raw_pii\" };"
+  },
+  {
+   "id": "rg_0085",
+   "since": 0,
+   "text": "// The docs writer edits files under docs/ and nowhere else.\n@id(\"rg_0085\")\nforbid (\n  principal == Agent::\"a-intel.core.docs-writer\",\n  action == Action::\"claude_code__Edit\",\n  resource\n)\nunless { context.args has path && context.args.path like \"docs/*\" };"
+  },
+  {
+   "id": "rg_0087",
+   "since": 0,
+   "text": "// A branch delete needs a read of the same branch earlier in the run.\n@id(\"rg_0087\")\nforbid (principal, action == Action::\"github__delete_branch\", resource)\nunless { context.args has branch && context.run.prior_reads.contains(context.args.branch) };"
+  },
+  {
+   "id": "rg_0089",
+   "since": 0,
+   "text": "// A release of a-intel/mobile is cut only from the release branch.\n@id(\"rg_0089\")\nforbid (principal, action == Action::\"github__create_release\", resource)\nwhen { context.args has repository && context.args.repository == \"a-intel/mobile\" }\nunless { context.args has branch && context.args.branch == \"release\" };"
+  },
+  {
+   "id": "rg_0101",
+   "since": 34,
+   "text": "// Enrolling a HubSpot contact in a sequence parks for approval.\n@id(\"rg_0101\")\n@decision(\"require_approval\")\nforbid (principal, action == Action::\"hubspot__enroll_contact\", resource)\nunless { context.approval.granted };"
+  },
+  {
+   "id": "rg_0104",
+   "since": 35,
+   "text": "// No agent sends email from Salesforce. A person sends it.\n@id(\"rg_0104\")\nforbid (principal, action == Action::\"salesforce__send_email\", resource);"
+  },
+  {
+   "id": "rg_0106",
+   "since": 36,
+   "text": "// Deleting a pod or draining a node in prod-east parks for approval.\n@id(\"rg_0106\")\n@decision(\"require_approval\")\nforbid (\n  principal,\n  action in [Action::\"kubernetes__delete_pod\", Action::\"kubernetes__drain_node\"],\n  resource\n)\nwhen { context.args has cluster && context.args.cluster == \"prod-east\" }\nunless { context.approval.granted };"
+  },
+  {
+   "id": "rg_0108",
+   "since": 37,
+   "text": "// Support tools may read customer PII fields and may not write them.\n@id(\"rg_0108\")\nforbid (\n  principal,\n  action in [\n    Action::\"zendesk__update_ticket\",\n    Action::\"salesforce__update_contact\",\n    Action::\"hubspot__update_contact\"\n  ],\n  resource\n)\nwhen {\n  context.args has fields &&\n  context.args.fields.containsAny([\"email\", \"phone\", \"address\", \"date_of_birth\"])\n};"
+  },
+  {
+   "id": "rg_0110",
+   "since": 38,
+   "text": "// A call that moves more than $1,000 needs two approvers.\n@id(\"rg_0110\")\n@decision(\"require_approval\")\nforbid (principal, action, resource)\nwhen {\n  context.tool.financial_class == \"moves_funds\" &&\n  context.args has amount_cents &&\n  context.args.amount_cents > 100000\n}\nunless { context.approval.granted && context.approval.approvers >= 2 };"
+  },
+  {
+   "id": "rg_0111",
+   "since": 39,
+   "text": "// Muting a Datadog monitor parks for approval.\n@id(\"rg_0111\")\n@decision(\"require_approval\")\nforbid (principal, action == Action::\"datadog__mute_monitor\", resource)\nunless { context.approval.granted };"
+  },
+  {
+   "id": "rg_0112",
+   "since": 40,
+   "text": "// Triage is read-only on a-intel/mobile.\n@id(\"rg_0112\")\nforbid (principal == Agent::\"a-intel.core.triage\", action, resource)\nwhen {\n  context.args has repository &&\n  context.args.repository == \"a-intel/mobile\" &&\n  context.tool.side_effect != \"read\"\n};"
+  },
+  {
+   "id": "rg_0115",
+   "since": 41,
+   "text": "// Any write made with tainted input parks for approval.\n@id(\"rg_0115\")\n@decision(\"require_approval\")\nforbid (principal, action, resource)\nwhen { context.taint.tainted && context.tool.side_effect != \"read\" }\nunless { context.approval.granted };"
+  },
+  {
+   "id": "rg_0116",
+   "since": 41,
+   "text": "// AWS Billing purchases follow the money window, like every call that moves money.\n@id(\"rg_0116\")\nforbid (principal, action == Action::\"aws_billing__purchase_savings_plan\", resource)\nunless {\n  context.time.weekday &&\n  context.time.hour_utc >= 9 &&\n  context.time.hour_utc < 17\n};"
+  },
+  {
+   "id": "rg_0131",
+   "since": 42,
+   "text": "// Every irreversible call in core-platform parks for approval.\n@id(\"rg_0131\")\n@decision(\"require_approval\")\nforbid (principal in Workspace::\"core-platform\", action, resource)\nwhen { context.tool.side_effect == \"irreversible\" }\nunless { context.approval.granted };"
+  }
+ ],
+ "tests": [
+  {
+   "id": "pt_001",
+   "since": 0,
+   "tool": "github__get_file_contents@2",
+   "agent": "a-intel.core.triage",
+   "facts": "",
+   "expect": "allow",
+   "rule": "rg_0001"
+  },
+  {
+   "id": "pt_002",
+   "since": 0,
+   "tool": "slack__list_channels@1",
+   "agent": "a-intel.core.release-manager",
+   "facts": "",
+   "expect": "allow",
+   "rule": "rg_0001"
+  },
+  {
+   "id": "pt_003",
+   "since": 0,
+   "tool": "snowflake__run_query@2",
+   "agent": "a-intel.core.stella-ci",
+   "facts": "tier gateway",
+   "expect": "allow",
+   "rule": "rg_0004"
+  },
+  {
+   "id": "pt_004",
+   "since": 0,
+   "tool": "github__create_pull_request@3",
+   "agent": "a-intel.core.stella-ci",
+   "facts": "repository a-intel/platform",
+   "expect": "allow",
+   "rule": "rg_0007"
+  },
+  {
+   "id": "pt_005",
+   "since": 0,
+   "tool": "claude_code__Edit@2.1",
+   "agent": "a-intel.core.stella-ci",
+   "facts": "branch agent/ci-fix-482",
+   "expect": "allow",
+   "rule": "rg_0009"
+  },
+  {
+   "id": "pt_006",
+   "since": 0,
+   "tool": "recall_context@2",
+   "agent": "a-intel.core.docs-writer",
+   "facts": "",
+   "expect": "allow",
+   "rule": "rg_0011"
+  },
+  {
+   "id": "pt_007",
+   "since": 0,
+   "tool": "github__create_issue_comment@2",
+   "agent": "a-intel.core.triage",
+   "facts": "repository a-intel/platform",
+   "expect": "allow",
+   "rule": "rg_0012"
+  },
+  {
+   "id": "pt_008",
+   "since": 0,
+   "tool": "slack__post_message@2",
+   "agent": "a-intel.core.release-manager",
+   "facts": "channel #releases",
+   "expect": "allow",
+   "rule": "rg_0014"
+  },
+  {
+   "id": "pt_009",
+   "since": 0,
+   "tool": "slack__post_message@2",
+   "agent": "a-intel.core.release-manager",
+   "facts": "channel ext-acme",
+   "expect": "approval",
+   "rule": "rg_0015"
+  },
+  {
+   "id": "pt_010",
+   "since": 0,
+   "tool": "github__create_release@2",
+   "agent": "a-intel.core.release-manager",
+   "facts": "repository a-intel/platform",
+   "expect": "approval",
+   "rule": "rg_0093"
+  },
+  {
+   "id": "pt_011",
+   "since": 0,
+   "tool": "github__delete_repository@1",
+   "agent": "a-intel.core.stella-ci",
+   "facts": "",
+   "expect": "approval",
+   "rule": "rg_0093"
+  },
+  {
+   "id": "pt_012",
+   "since": 0,
+   "tool": "github__create_pull_request@3",
+   "agent": "a-intel.core.stella-ci",
+   "facts": "repository octo/fork",
+   "expect": "deny",
+   "rule": "rg_0024"
+  },
+  {
+   "id": "pt_013",
+   "since": 0,
+   "tool": "claude_code__Edit@2.1",
+   "agent": "a-intel.core.stella-ci",
+   "facts": "path .github/workflows/ci.yml",
+   "expect": "approval",
+   "rule": "rg_0027"
+  },
+  {
+   "id": "pt_014",
+   "since": 0,
+   "tool": "claude_code__Edit@2.1",
+   "agent": "a-intel.core.release-manager",
+   "facts": "path infra/prod/main.tf",
+   "expect": "approval",
+   "rule": "rg_0029"
+  },
+  {
+   "id": "pt_015",
+   "since": 0,
+   "tool": "stripe__create_refund@3",
+   "agent": "a-intel.finops.invoice-bot",
+   "facts": "amount $720.00",
+   "expect": "approval",
+   "rule": "rg_0031"
+  },
+  {
+   "id": "pt_016",
+   "since": 0,
+   "tool": "stripe__create_payment@5",
+   "agent": "a-intel.finops.invoice-bot",
+   "facts": "counterparty acct:unknown",
+   "expect": "deny",
+   "rule": "rg_0033"
+  },
+  {
+   "id": "pt_017",
+   "since": 0,
+   "tool": "stripe__create_payment@5",
+   "agent": "a-intel.finops.invoice-bot",
+   "facts": "no prior stripe__list_prices",
+   "expect": "deny",
+   "rule": "rg_0044"
+  },
+  {
+   "id": "pt_018",
+   "since": 0,
+   "tool": "stripe__create_refund@3",
+   "agent": "a-intel.finops.invoice-bot",
+   "facts": "Saturday 11:00 UTC",
+   "expect": "deny",
+   "rule": "rg_0035"
+  },
+  {
+   "id": "pt_019",
+   "since": 0,
+   "tool": "aws_billing__purchase_savings_plan@2",
+   "agent": "a-intel.finops.invoice-bot",
+   "facts": "",
+   "expect": "approval",
+   "rule": "rg_0037"
+  },
+  {
+   "id": "pt_020",
+   "since": 0,
+   "tool": "aws_billing__purchase_savings_plan@2",
+   "agent": "a-intel.core.stella-ci",
+   "facts": "",
+   "expect": "deny",
+   "rule": "rg_0038"
+  },
+  {
+   "id": "pt_021",
+   "since": 0,
+   "tool": "claude_code__Bash@2.1",
+   "agent": "a-intel.core.stella-ci",
+   "facts": "taint from web",
+   "expect": "deny",
+   "rule": "rg_0052"
+  },
+  {
+   "id": "pt_022",
+   "since": 0,
+   "tool": "slack__upload_file@1",
+   "agent": "a-intel.core.triage",
+   "facts": "tainted, recipient partner.io",
+   "expect": "deny",
+   "rule": "rg_0053"
+  },
+  {
+   "id": "pt_023",
+   "since": 0,
+   "tool": "slack__post_message@2",
+   "agent": "a-intel.core.triage",
+   "facts": "20 posts in the last hour",
+   "expect": "deny",
+   "rule": "rg_0061"
+  },
+  {
+   "id": "pt_024",
+   "since": 0,
+   "tool": "claude_code__WebFetch@2.1",
+   "agent": "a-intel.core.docs-writer",
+   "facts": "60 fetches in the last minute",
+   "expect": "deny",
+   "rule": "rg_0062"
+  },
+  {
+   "id": "pt_025",
+   "since": 0,
+   "tool": "claude_code__Bash@2.1",
+   "agent": "a-intel.core.release-manager",
+   "facts": "cluster prod-east, role developer",
+   "expect": "deny",
+   "rule": "rg_0073"
+  },
+  {
+   "id": "pt_026",
+   "since": 0,
+   "tool": "linear__update_issue@3",
+   "agent": "a-intel.core.triage",
+   "facts": "budget left $0.40",
+   "expect": "deny",
+   "rule": "rg_0075"
+  },
+  {
+   "id": "pt_027",
+   "since": 0,
+   "tool": "stripe__create_payment@5",
+   "agent": "a-intel.finops.invoice-bot",
+   "facts": "amount $900.00, mandate left $250.00",
+   "expect": "deny",
+   "rule": "rg_0077"
+  },
+  {
+   "id": "pt_028",
+   "since": 0,
+   "until": 40,
+   "tool": "github__create_issue_comment@2",
+   "agent": "a-intel.core.triage",
+   "facts": "repository a-intel/mobile",
+   "expect": "allow",
+   "rule": "rg_0081"
+  },
+  {
+   "id": "pt_029",
+   "since": 0,
+   "tool": "snowflake__run_query@2",
+   "agent": "a-intel.core.stella-ci",
+   "facts": "schema raw_pii",
+   "expect": "deny",
+   "rule": "rg_0083"
+  },
+  {
+   "id": "pt_030",
+   "since": 0,
+   "tool": "claude_code__Edit@2.1",
+   "agent": "a-intel.core.docs-writer",
+   "facts": "path src/index.ts",
+   "expect": "deny",
+   "rule": "rg_0085"
+  },
+  {
+   "id": "pt_031",
+   "since": 0,
+   "tool": "github__delete_branch@1",
+   "agent": "a-intel.core.stella-ci",
+   "facts": "branch not read in this run",
+   "expect": "deny",
+   "rule": "rg_0087"
+  },
+  {
+   "id": "pt_032",
+   "since": 0,
+   "tool": "github__create_release@2",
+   "agent": "a-intel.core.release-manager",
+   "facts": "repository a-intel/mobile, branch main",
+   "expect": "deny",
+   "rule": "rg_0089"
+  },
+  {
+   "id": "pt_033",
+   "since": 34,
+   "tool": "hubspot__enroll_contact@1",
+   "agent": "a-intel.core.triage",
+   "facts": "",
+   "expect": "approval",
+   "rule": "rg_0101"
+  },
+  {
+   "id": "pt_034",
+   "since": 35,
+   "tool": "salesforce__send_email@1",
+   "agent": "a-intel.core.triage",
+   "facts": "",
+   "expect": "deny",
+   "rule": "rg_0104"
+  },
+  {
+   "id": "pt_035",
+   "since": 36,
+   "tool": "kubernetes__delete_pod@1",
+   "agent": "a-intel.core.release-manager",
+   "facts": "cluster prod-east, role sre",
+   "expect": "approval",
+   "rule": "rg_0106"
+  },
+  {
+   "id": "pt_036",
+   "since": 37,
+   "tool": "zendesk__update_ticket@1",
+   "agent": "a-intel.core.triage",
+   "facts": "fields email",
+   "expect": "deny",
+   "rule": "rg_0108"
+  },
+  {
+   "id": "pt_037",
+   "since": 38,
+   "tool": "stripe__create_payment@5",
+   "agent": "a-intel.finops.invoice-bot",
+   "facts": "amount $2,450.00, one approver",
+   "expect": "approval",
+   "rule": "rg_0110"
+  },
+  {
+   "id": "pt_038",
+   "since": 39,
+   "tool": "datadog__mute_monitor@1",
+   "agent": "a-intel.core.release-manager",
+   "facts": "",
+   "expect": "approval",
+   "rule": "rg_0111"
+  },
+  {
+   "id": "pt_039",
+   "since": 40,
+   "tool": "github__create_issue_comment@2",
+   "agent": "a-intel.core.triage",
+   "facts": "repository a-intel/mobile",
+   "expect": "deny",
+   "rule": "rg_0112"
+  },
+  {
+   "id": "pt_040",
+   "since": 40,
+   "tool": "github__get_file_contents@2",
+   "agent": "a-intel.core.triage",
+   "facts": "repository a-intel/mobile",
+   "expect": "allow",
+   "rule": "rg_0001"
+  },
+  {
+   "id": "pt_041",
+   "since": 41,
+   "tool": "linear__update_issue@3",
+   "agent": "a-intel.core.triage",
+   "facts": "taint from web",
+   "expect": "approval",
+   "rule": "rg_0115"
+  },
+  {
+   "id": "pt_042",
+   "since": 41,
+   "tool": "github__create_pull_request@3",
+   "agent": "a-intel.core.stella-ci",
+   "facts": "taint from a tool result",
+   "expect": "approval",
+   "rule": "rg_0115"
+  },
+  {
+   "id": "pt_043",
+   "since": 41,
+   "tool": "aws_billing__purchase_savings_plan@2",
+   "agent": "a-intel.finops.invoice-bot",
+   "facts": "Sunday 14:00 UTC",
+   "expect": "deny",
+   "rule": "rg_0116"
+  },
+  {
+   "id": "pt_044",
+   "since": 42,
+   "tool": "zendesk__merge_tickets@1",
+   "agent": "a-intel.core.triage",
+   "facts": "",
+   "expect": "approval",
+   "rule": "rg_0131"
+  },
+  {
+   "id": "pt_045",
+   "since": 42,
+   "tool": "kubernetes__rollout_undo@1",
+   "agent": "a-intel.core.release-manager",
+   "facts": "cluster staging",
+   "expect": "approval",
+   "rule": "rg_0131"
+  }
+ ]
+}

@@ -90,8 +90,8 @@ export default {
     ["--dim", "List and compact layouts' second line"],
   ],
   helpers: [
-    ["hxIcon(harness, size, alone)", "engine.js:14628", "The harness mark, found by key or by label. `alone` adds `role=\"img\"` and an `aria-label` when no text beside the mark names the harness."],
-    ["agentCard(a, o)", "engine.js:9804", "The one function that draws an agent identity. `o.layout` picks list, compact, or detail. 17 calls."],
+    ["hxIcon(harness, size, alone)", "engine.js:15014", "The harness mark, found by key or by label. `alone` adds `role=\"img\"` and an `aria-label` when no text beside the mark names the harness."],
+    ["agentCard(a, o)", "engine.js:10180", "The one function that draws an agent identity. `o.layout` picks list, compact, or detail. 17 calls."],
   ],
   sourceNotes: [
     "`o.sub` overrides the second line outright, so a caller can put a run's turn number or a mandate's toolbelt count there instead of the harness. Several call sites do.",

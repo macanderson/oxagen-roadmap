@@ -44,6 +44,7 @@ export const PAGES = [
   { id: "tools-toolbelts",   title: "Toolbelts",                   group: "Tools",        hash: `#/${ORG}/core-platform/tools/toolbelts`,                  states: ALL },
   { id: "tools-providers",   title: "Providers",                   group: "Tools",        hash: `#/${ORG}/core-platform/tools/providers`,                  states: ALL },
   { id: "tools-policy",      title: "Policy",                      group: "Tools",        hash: `#/${ORG}/core-platform/tools/policy`,                     states: ALL },
+  { id: "tools-policy-version", title: "Policy version",           group: "Tools",        hash: `#/${ORG}/core-platform/tools/policy/pol_v42`,             states: NO_EMPTY },
   { id: "tools-switches",    title: "Kill switches",               group: "Tools",        hash: `#/${ORG}/core-platform/tools/switches`,                   states: ALL },
   { id: "steering",          title: "Sources",                     group: "Steering",     hash: `#/${ORG}/core-platform/steering`,                         states: ["loaded"], future: true },
   { id: "steering-source",   title: "Steering record",             group: "Steering",     hash: `#/${ORG}/core-platform/steering/sources/record/ctx.release.notes-format`, states: ["loaded"], future: true },
