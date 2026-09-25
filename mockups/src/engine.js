@@ -6840,7 +6840,9 @@ function pRuntimes(r){
    '<div class="panel"><div class="panel-h"><h3>Hosts</h3>'+
    '<span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Runtime</th><th>Kind</th><th>Harness</th><th>Model surface</th><th>Tier</th>'+
-   '<th>Agents</th><th>Collector</th><th>Hooks</th><th>Health</th><th>Last checkpoint</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+   '<th>Agents</th><th>Collector</th><th>Hooks</th><th>Health</th><th>Last checkpoint</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Tier ladder</h3></div>'+
+   '<div class="panel-b">'+tierLadder(null)+'</div></div>';
 }
 
 function rtDetail(rt){
@@ -6937,6 +6939,28 @@ var DRIFT={
                   ["[[repos]] a-intel/mobile","role = linked","linked, no .oxagen/","neither"]]
 };
 var DRIFT_PR={"core-platform":"oxpr_01K6T4E5"};
+/* Every committed path under .oxagen/ on a main repository's production branch, as
+   get_repository_tree answers it. Keyed by repository; the count is the Repositories tab's file
+   count. workspace.json is gitignored, so it is never here. */
+var OX_TREE={
+ "a-intel/platform":[".oxagen/workspace.toml",".oxagen/rules/governance.toml",".oxagen/rules/promotions.jsonl",
+   ".oxagen/rules/ctx.platform.changelog-once.toml",".oxagen/agents/release-manager.toml",
+   ".oxagen/skills/customer-escalation-writeup/SKILL.md",".oxagen/skills/release-notes-from-prs/SKILL.md",
+   ".oxagen/skills/rollback-a-bad-release/SKILL.md",".oxagen/skills/safe-db-migration/SKILL.md"]
+};
+/* The paths as an indented tree: a directory once, then its files beneath it. */
+function oxTreeText(paths){
+  var out=[], seen={};
+  paths.forEach(function(p){
+    var parts=p.split("/");
+    for(var i=1;i<parts.length;i++){
+      var key=parts.slice(0,i).join("/");
+      if(!seen[key]){ seen[key]=1; out.push(new Array(i).join("  ")+parts[i-1]+"/"); }
+    }
+    out.push(new Array(parts.length).join("  ")+parts[parts.length-1]);
+  });
+  return out.join("\n");
+}
 function oxState(r){return OX_STATE[r.ox||"governed"]||OX_STATE.governed;}
 /* The repositories this workspace's own record names, main first, then linked, then whatever
    the installation can reach that nobody has bound. Role is the workspace's word, not GitHub's. */
@@ -7210,7 +7234,7 @@ function cfgTab(){
      under another workspace would report drift that workspace does not have, and send the
      operator to a reconciliation pull request that is not its own. A workspace with nothing
      recorded says so. */
-  var drift=DRIFT[w.slug]||[], reconcile=DRIFT_PR[w.slug]||null;
+  var drift=DRIFT[w.slug]||[], reconcile=DRIFT_PR[w.slug]||null, tree=OX_TREE[w.main]||null;
   return '<div class="grid g2">'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>.oxagen/workspace.toml</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">On <span class="mono">'+h(w.main)+'</span>'+
@@ -7226,8 +7250,12 @@ function cfgTab(){
       '</tbody></table></div>'
      :'<div class="panel-b"><div class="note">The reconciler last compared <span class="mono">'+h(w.main)+'</span> with the control plane and found no drift.</div></div>')+
    '</div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>.oxagen/rules/governance.toml</h3></div><div class="panel-b">'+
-   '<pre>'+h(oxGovernanceToml("team"))+'</pre></div></div>';
+   '<div class="grid g2" style="margin-top:14px">'+
+   '<div class="panel"><div class="panel-h"><h3>.oxagen/rules/governance.toml</h3></div><div class="panel-b">'+
+   '<pre>'+h(oxGovernanceToml("team"))+'</pre></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Tree</h3>'+(tree?'<span class="b b-q" style="margin-left:auto">'+plural(tree.length,"file")+'</span>':'')+'</div><div class="panel-b">'+
+   (tree?'<pre>'+h(oxTreeText(tree))+'</pre>':'<p class="muted" style="margin:0">No path under <span class="mono">.oxagen/</span> is recorded for <span class="mono">'+h(w.main)+'</span> yet.</p>')+
+   '</div></div></div>';
 }
 
 /* A Repositories tab's address: the app's path segments (working-copies, configuration). */
