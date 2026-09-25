@@ -151,7 +151,7 @@ A build shows `not recorded` for every Work field until `list_tasks` ships. On a
 The send menu lists the agents you operate and the published workflows, and picking one opens the work order dialog.
 
 ### Purpose
-You have selected ready work items and want to choose who does them. The menu lists every agent in this workspace where you are the registered operator, each with its harness, host and tier, and every published workflow made of such agents. Search narrows both lists. Picking a row opens the work order dialog with that target.
+You have selected ready work items and want to choose who does them. The menu lists every agent in this workspace where you are the registered operator, each with its harness, host and tier, and every published workflow whose stages are all agents you operate. Search narrows both lists. Picking a row opens the work order dialog with that target.
 
 ### Rationale
 Work reaches an agent only through a person who answers for it. The sender must be the agent's registered operator (`tasks-spec.md` §9.2), so the menu never lists an agent somebody else operates. The menu once carried a caption under its header, "agents where you are the registered operator". The group label "Agents you operate" already says it, so the rule lives here. Every harness shows its own mark and none is listed first by default (ADR-101). The design adds a checkbox per row and **Continue**, so one send can go to several targets as one work order per target (`work-graph-spec.md` §7). The mockup does not draw those checkboxes.
@@ -161,11 +161,11 @@ Work reaches an agent only through a person who answers for it. The sender must 
 |---|---|---|---|
 | Agents you operate | `myAgents()` over `AGENTS` (`operator`) | `list_agents` `operatorId` | live |
 | Harness mark, host, tier | `AGENTS[].harness`, `.host`, `.tier` | `list_agents` | live |
-| Published workflows | `WORKFLOWS` in state `published` | `.oxagen/workflows/*.toml` | none |
+| Published workflows you may send to | `WORKFLOWS` through `wfSendable()` | `.oxagen/workflows/*.toml` | none |
 
 ### Logic
 1. `dispatchButton()` stores the selection in `S.dspIds` and toggles the `dispatch` layer. `dispatchMenu()` draws the menu with `role=menu` and `aria-label` "Send to", headed "Send 2 work items to".
-2. `dspList()` filters `myAgents()` and published `WORKFLOWS` by `S.dsq`. `dsqIn()` repaints the list without a render, so the caret stays.
+2. `dspList()` filters `myAgents()` and the workflows `wfSendable()` accepts by `S.dsq`. `wfSendable()` keeps a workflow that is published and whose every stage agent has you as its operator, so a workflow that names somebody else's agent is never offered. `dsqIn()` repaints the list without a render, so the caret stays.
 3. `myAgents()` puts the seven seeded agents first (Bug fixer, Validator, Documenter, Architect, stella CI, Release manager, Triage), then the rest by name. The menu lists twelve, then "16 more. Type to narrow."
 4. `dspAgentItem()` shows the harness mark, avatar, name, "<harness> · <host>" and `tierBadge()`. `dspWfItem()` shows the stage marks from `hxRow()` and "4 stages then you".
 5. With no match: "No agent you operate matches." or "No published workflow matches."
@@ -188,7 +188,7 @@ A work order is the operator's brief (`tasks-spec.md` §9.3). Oxagen runs no age
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
 | Draft state | `S.wo` from `woOpen()` | `create_work_order` | none |
-| Target list | `myAgents()`, published `WORKFLOWS` | `list_agents` `operatorId`; `.oxagen/workflows/*.toml` | partial |
+| Target list | `myAgents()`, `WORKFLOWS` through `wfSendable()` | `list_agents` `operatorId`; `.oxagen/workflows/*.toml` | partial |
 | Merged definition of done | `woItemsFor()` | `tasks.dod_items`, `tasks.work_order_items` | none |
 | Drafted brief | `woDraftPrompt()` | `create_work_order`, drafted by `oxagen.assistant` | none |
 | Send | `woSend()` | `send_work_order`, a governed action | none |
@@ -249,7 +249,7 @@ The select lists only agents where you are the registered operator, and the publ
 | Workflows and stages | `WORKFLOWS`, `stageChain()` | `.oxagen/workflows/*.toml` | none |
 
 ### Logic
-1. The select's value is `agent:<key>` or `workflow:<id>`. `woSetTarget()` writes `S.wo.target`, clears the repository confirmation, and redrafts the brief unless the person edited it.
+1. The Workflows group lists the workflows `wfSendable()` accepts, the same rule as the send menu. The select's value is `agent:<key>` or `workflow:<id>`. `woSetTarget()` writes `S.wo.target`, clears the repository confirmation, and redrafts the brief unless the person edited it.
 2. For an agent the section draws its harness mark, avatar, name, "Claude Code on mbell-mbp-16", its tier badge and `operator: you`.
 3. For a workflow `stageChain()` draws each stage with its role, agent, tier and owned tags, and a last **Accept** card by You.
 4. The dialog subtitle follows the target.

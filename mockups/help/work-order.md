@@ -180,11 +180,11 @@ A stage hands off with `hand_off_work_order` and a note, and Oxagen sends the ne
 1. `pWorkOrder()` draws one line per entry in `w.runs`.
 2. Each line names the stage's role, with "sent the work back" when the run returned the work.
 3. `runLink()` links the run id when the run is in view, and prints it in mono when not.
-4. The note follows, or "Running" when the run has none yet.
+4. The note follows. A run with no note reads "Running" while it is live and "No note" once it seals, read from the run itself where the run is in view.
 5. A stage that needed two stages lists one line per upstream run, each with its own note, stage and run (`docs/work-graph-spec.md` §8.2).
 
 ### States
-A direct work order has one run and no handoff. The mockup still draws the panel there, with the run and "Running" even once the run is sealed. A build leaves the panel out of a direct work order. A queued work order has no run, so the list is empty. A build renders the notes as `not recorded` until `hand_off_work_order` ships.
+A direct work order has one run and no handoff, so `pWorkOrder()` leaves the panel out. A queued work order has no run, so the list is empty. A build renders the notes as `not recorded` until `hand_off_work_order` ships.
 
 ## Order
 
@@ -372,12 +372,12 @@ A work order is done when a person accepts every item, and accepting is the one 
 
 ### Logic
 1. **Accept all items** in the header opens `woaccept` with the work order id. The button is gold and enabled only when every item is claimed.
-2. Title "Accept all items", subtitle the work order's title.
+2. Title "Accept the work", subtitle the work order's title.
 3. The body reads "You accept 4 items the agents claimed, with the evidence each one cited."
 4. The warning reads "Accepting merges nothing." and, when the latest run has a pull request, "A person merges `<number>` on GitHub."
 5. `woClose()` reads the connection of the first work item's provider. On: "The GitHub connection closes each issue as Done." Off: "The GitHub connection has close on accept off, so each issue stays open there." A work item with no connection shows no close note.
 6. On a send, a note names each open sibling: "Accepting stops `wo_01K6TC5B`, which carries the same work items."
-7. **Accept all items** calls `woAccept()`. It stops each open sibling and records `stoppedFor`, sets the work order `accepted` with the time, marks every claim accepted by you, and sets each work item's readiness to `accepted`.
+7. **Accept every item** calls `woAccept()`. It stops each open sibling and records `stoppedFor`, sets the work order `accepted` with the time, marks every claim accepted by you, and sets each work item's readiness to `accepted`.
 8. The gold toast reads "Accepted. accept_work_order recorded." then either "oxagen closes <numbers> in GitHub as Done." or "<numbers> stays open in GitHub." The reason the work item stays open sat in the toast. It lives here now: close on accept is off for that connection.
 
 ### States

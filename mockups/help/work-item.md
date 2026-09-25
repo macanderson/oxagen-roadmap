@@ -23,12 +23,11 @@ A work item is ready only when a person certifies its definition of done (`tasks
 | Provider link | `providerUrl()` over `IP_KIND[kind].url` | the provider's own URL for the item | none |
 
 ### Logic
-1. `pTask()` draws the eyebrow from `wiLogo(t,13)` and the number. An item written in Oxagen (`kind` `oxagen`) carries the Oxagen mark.
+1. `pTask()` draws the eyebrow from `wiLogo(t,13)` and the number. An item written in Oxagen (`kind` `oxagen`) carries the Oxagen mark. An item whose provider was disconnected adds the `disconnected` badge (`tkDiscBadge()`), because its values are as last read.
 2. The subtext reads "Imported from <provider>. Updated <time>." An item written in Oxagen reads "Written in Oxagen", with "from finding `<id>`" when it came from one. A `ready` item that `tkGraphBlocked()` reports as blocked adds "Blocked by #612 and #618."
 3. **Copy prompt** calls `copyTaskPrompt()`, which copies `taskPromptText()` and toasts "Prompt copied, with 2 work orders." or "with no work order". The text says "Certified by <name> on <time>, <digest>" for a certified list, "before the description changed" for a `changed` one, and "A draft. Nobody has certified it." otherwise.
 4. **Open in <provider>** opens `providerUrl(t)` in a new tab. An item from a finding shows **Open the finding** instead, which goes to Work › Findings with `?finding=<id>` and opens the evidence.
-5. The primary follows readiness. `drafting` shows **Draft it now**, disabled while `S.tkDrafting` holds the item. `draft` and `changed` show **Certify definition of done**, disabled with no items. `ready` shows **Open the work order** when `tkQueuedWo()` finds a queued one, `dispatchButton([t.id])` when `tkSelectable()` allows it, and otherwise a plain disabled **Send to an agent…** titled with `tkWhyNot()`. An item with a work order shows **Open the work order**. `closed` shows no primary.
-6. The page spec names the `changed` primary **Certify again**. The mockup labels it **Certify definition of done**, and a build uses the spec's label.
+5. The primary follows readiness. `drafting` shows **Draft it now**, disabled while `S.tkDrafting` holds the item. `draft` shows **Certify definition of done** and `changed` shows **Certify again**, both disabled with no items. `ready` shows **Open the work order** when `tkQueuedWo()` finds a queued one, `dispatchButton([t.id])` when `tkSelectable()` allows it, and otherwise a plain disabled **Send to an agent…** titled with `tkWhyNot()`. An item with a work order shows **Open the work order**. `closed` shows no primary.
 
 ### States
 Loading shows `skeleton()`. Error shows "503 work_index_unavailable". Denied names `work.read on core-platform`. An unknown id renders "No work item has this id" with **Back to Work** inside the shell. On a phone the actions wrap and the gold one takes its own line.
@@ -160,7 +159,7 @@ The definition of done is the contract between the person who sends work and the
 3. While drafting, the body is a busy line: "Reading the description, the labels and the linked pull requests." **Draft it now** calls `tkDraftNow()`, which waits 900 ms, fills the list and the notes from `TK_DRAFTS[id]` (or one default item), sets `draft`, and toasts "oxagen.assistant drafted 4 items for PLAT-244. Read them, then certify."
 4. `dodRows(t,edit)` draws one numbered row per item. Editable rows carry a text field (`dodSet(...,'t',...)`, which marks the source `edited` unless a person wrote the item), a Tag select over `DOD_TAGS`, a Kind select (check, review) and a remove button (`dodDel()`). Read-only rows show the tag chip, the kind and the source. The source reads "from the issue" (the provider's own unit), "oxagen.assistant", "you" or "edited by you".
 5. **Add item** and Enter call `dodAdd()`, which appends a `check` item tagged `code` with source `operator`. An empty field toasts "Write the item first."
-6. For `changed`, a row under the list reads "oxagen.assistant suggests an item for the new scope:" and the item, with **Add item**, which appends it with source `assistant`. The mockup hardcodes the suggestion for #590. The page spec names the button **Add it**.
+6. For `changed`, a row under the list reads "oxagen.assistant suggests an item for the new scope:" and the item, with **Add it**, which appends it with source `assistant`. The mockup hardcodes the suggestion for #590. The page spec names the button **Add it**.
 7. The mockup's redraft replaces the whole list. A build keeps every item a person wrote or edited (`tasks-spec.md` §8.3).
 8. A build drafts at most 60 items a minute per workspace, oldest update first, and never drafts a closed item (§8.2). **Draft it now** moves an item to the front of that queue.
 
@@ -216,8 +215,8 @@ Work has an order that a flat backlog hides (`work-graph-spec.md` §1). Oxagen r
 3. Otherwise it draws **Blocked by** from `tkBlockers(t)` and **Blocks** from `tkBlocks(t)`, each list "none" when empty.
 4. A row shows the provider logo, the number as a link, the subject and `tkDepBadge()`: `accepted`, `closed as <resolution>`, `in a work order`, or `open`.
 5. An `oxagen` row adds "added here by <name> on <time>" and **Remove**, which calls `tkUnlink()` and toasts "Dependency removed. unlink_tasks recorded." A `provider` row shows "from <provider>" titled "Read from GitHub. Remove the link there."
-6. `t.outsideLinks` adds "1 link to an issue outside the scope of this connection." The mockup's sentence is singular. A build pluralizes it.
-7. The mockup deletes a removed dependency. A build keeps its row with who removed it and when, and a removed dependency never blocks again (§4.1).
+6. `t.outsideLinks` adds "1 link to an issue outside the scope of this connection.", with `plural()` for more than one.
+7. **Remove** calls `tkUnlink()`, which marks the dependency removed with who and when and keeps it on the record (§4.1). `tkBlockers()` and `tkBlocks()` skip a removed dependency, so it never blocks again and leaves the panel, and History lists "Dependency removed". Adding the same dependency again adds a new row.
 8. The demo item #640 (`tsk_01K6SG4R8T`) is blocked by #612, read from GitHub, and by #618, added here by Marcus Bell on 2026-09-11 10:02.
 
 ### States
@@ -308,13 +307,12 @@ Every step of the item is a recorded event. `tasks-spec.md` §13 names `task.imp
    - Definition of done drafted, by `oxagen.assistant`, when the item has items
    - Certified, with the certifier
    - Changed in <provider>, with "No longer ready"
-   - Dependency added, once per `oxagen` blocker
+   - Dependency added, once per `oxagen` dependency, and Dependency removed, with who removed it, once per removed one
    - Unblocked, when every blocker is done
    - Queued in a work order, or Sent in a work order, with the work order id
    - Accepted
 2. The mockup approximates two times: the draft uses the item's creation time and Unblocked uses its update time. Accepted names the work order's sender. A build reads each event's own time and actor, and names the person who accepted.
-3. The page spec lists Dependency removed. The mockup never records it, because `tkUnlink()` deletes the dependency. A build lists it.
-4. A build lists the events in the order they were recorded.
+3. A build lists the events in the order they were recorded.
 
 ### States
 An item just imported shows one event. On a phone each event's time and actor wrap under its name.
@@ -370,7 +368,7 @@ A certified list is read-only (`tasks-spec.md` §8.3), because the certification
 1. **Edit** in the Definition of done header opens `dodreopen`. It shows only while the item is `ready`.
 2. `DLG_EXT.dodreopen` reads "<number> is no longer ready and returns to draft. It is ready again when somebody certifies it."
 3. Footer **Keep it certified** and **Edit it** (gold).
-4. `dodReopen()` sets `draft`, closes the dialog and toasts "<number> needs certification again. It’s ready when somebody certifies it." The page spec's toast reads "<number> is a draft again."
+4. `dodReopen()` sets `draft`, closes the dialog and toasts "<number> is a draft again. It is ready when somebody certifies it."
 5. The mockup keeps the old certifier, time and digest on the item. A build keeps them in the history and clears them from readiness.
 6. The mockup shows **Edit** on a `ready` item that a queued work order holds. The specs do not say what reopening does to that queued work order.
 

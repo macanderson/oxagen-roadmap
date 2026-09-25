@@ -119,7 +119,7 @@ function backlogTab(){
     return '<tr '+rowClick("go('"+taskUrl(t)+"')","Open "+t.num)+(on?' aria-selected="true"':'')+'>'+
      '<td class="ck" onclick="event.stopPropagation()"><input type="checkbox" aria-label="Select '+h(t.num)+'"'+(on?' checked':'')+(ok?'':' disabled title="'+h(tkWhyNot(t))+'"')+
        ' onclick="event.stopPropagation()" onchange="tkToggle(\''+t.id+'\',this.checked)"></td>'+
-     '<td><span class="tk-t">'+wiLogo(t,14)+'<span class="mono dim" style="font-size:11.5px">'+h(t.num)+'</span></span><div class="tk-s">'+h(t.subject)+'</div></td>'+
+     '<td><span class="tk-t">'+wiLogo(t,14)+'<span class="mono dim" style="font-size:11.5px">'+h(t.num)+'</span>'+tkDiscBadge(t)+'</span><div class="tk-s">'+h(t.subject)+'</div></td>'+
      '<td>'+lblChips(t.labels)+'</td>'+
      '<td>'+tStatusBadge(t.status)+'</td>'+
      '<td'+fut("dependencies")+'>'+tkBlockedByCell(t)+'</td>'+

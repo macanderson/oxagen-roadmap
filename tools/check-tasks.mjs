@@ -190,7 +190,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   const t = await text(page);
   ok(/The description changed after certification/.test(t), "changed: says why it is no longer ready");
   ok(/Certified against/.test(t) && /Now/.test(t), "changed: shows both versions");
-  ok(/Changed since certified/.test(t) && /Certify definition of done/.test(t), "changed: offers to certify again");
+  ok(/Changed since certified/.test(t) && /Certify again/.test(t), "changed: offers to certify again");
   await done(page, errs, "changed");
 }
 
@@ -292,7 +292,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   const w = await open(H + "/orders/wo_01K6TA2M");
   ok(!(await w.page.locator(".phead button", { hasText: "Accept all items" }).isDisabled()), "accept: enabled when every item is claimed");
   await w.page.click(".phead >> text=Accept all items");
-  await footBtn(w.page, "Accept all items").click();
+  await footBtn(w.page, "Accept every item").click();
   ok(/3 \/ 3/.test(await text(w.page)) && /accepted/i.test(await text(w.page)), "accept: every item accepted");
   await done(w.page, [...errs, ...w.errs], "accept");
 }
