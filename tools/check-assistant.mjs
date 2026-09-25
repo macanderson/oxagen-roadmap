@@ -34,7 +34,7 @@ async function open(hash = "#/a-intel/core-platform", opts = {}) {
   const errs = [];
   page.on("pageerror", e => errs.push(String(e.message || e)));
   page.on("dialog", d => d.dismiss());
-  await page.goto(FILE + "?product=1&state=loaded&mobile=" + (opts.mobile ? 1 : 0) + (opts.theme ? "&theme=" + opts.theme : "") + hash);
+  await page.goto(FILE + "?product=1&island=0&state=loaded&mobile=" + (opts.mobile ? 1 : 0) + (opts.theme ? "&theme=" + opts.theme : "") + hash);
   await page.waitForTimeout(350);
   return { page, errs };
 }

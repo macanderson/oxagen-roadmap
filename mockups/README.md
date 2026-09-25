@@ -14,14 +14,27 @@ rev1 is measured against.
 - `node tools/check-mockup.mjs` runs the headless checks over every page, state, shell and scenario.
 
 The URL contract: `?debug=true`, `?state=`, `?mobile=`, `?theme=`, `?future=1` (outline every field
-no contract carries today), `?drawer=approvals|stella` and the `#/a-intel/...` routes, which take a
-query of their own (`#/a-intel/core-platform/spend?by=operator&key=marcus`). `mockups/catalog.mjs`
-lists every unique view and scenario.
+no contract carries today), `?drawer=approvals|stella`, the review island's `?phone=1`, `?help=1`
+and `?island=0`, and the `#/a-intel/...` routes, which take a query of their own
+(`#/a-intel/core-platform/spend?by=operator&key=marcus`). `mockups/catalog.mjs` lists every unique
+view and scenario.
 
-The file opens as the product. The mockup chrome — the state bar, the scenario rail, the
-scenario nav item, the onboarding demo entry points and Exit demo — appears only under
-`?debug=true`, so a reviewer's first open shows the design and nothing else. `?product=1` is
-the old spelling of the same default and still works.
+The file opens as the product, with the review island floating over it. The rest of the mockup
+chrome (the scenario rail, the scenario nav item, the onboarding demo entry points and Exit demo)
+appears only under `?debug=true`. `?product=1` is the old spelling of the same default and still
+works.
+
+## The review island
+
+A floating toolbar on every page (`mockups/src/island.js`). Drag it anywhere. Select it to see the
+route, the page title and the page description (the Job paragraph of `pages/<id>.md`), and to open
+that spec in a new tab. It switches the state, the mobile view (the 400px phone preview), the theme,
+and component help. **Hide** removes it until the page reloads.
+
+With component help on, every page part shows a blue `?` that opens its spec from `help/<id>.md`:
+purpose, rationale, data sources, logic and states. Explanations of the design live there and never
+on the page, so with help off the mockup shows what the app shows. `help/README.md` is the format,
+and `node tools/check-help.mjs` fails on a part with no spec.
 
 ## The fleet operations wedge (2026-09-24)
 

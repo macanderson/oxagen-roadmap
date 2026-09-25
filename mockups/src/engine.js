@@ -3,10 +3,11 @@
    unpinned, the viewport decides), ?theme=dark|light, ?debug=true, and the hash the file opens on
    when the URL carries none. A host page may set window.BOOT instead.
 
-   The file opens as the product. The mockup chrome — the state bar, the scenario rail, the scenario
-   nav item, the onboarding demo entry points and "Exit demo" — appears only under ?debug=true, so
-   what a reviewer sees on a first open is the design and nothing else. ?product=1 is the old
-   spelling of the same default and still works. */
+   The file opens as the product, with the review island (src/island.js) floating over it. The rest
+   of the mockup chrome (the scenario rail, the scenario nav item, the onboarding demo entry points
+   and "Exit demo") appears only under ?debug=true. ?product=1 is the old spelling of the same
+   default and still works. The island's own flags: ?phone=1 opens the 400px phone preview,
+   ?help=1 turns component help on, and ?island=0 leaves the island out. */
 var BOOT=(function(){var q=new URLSearchParams(location.search),b=window.BOOT||{};
   var d=q.get("debug"), debug=d==="true"||d==="1"||!!b.debug;
   return {state:q.get("state")||b.state||null,
@@ -16,6 +17,9 @@ var BOOT=(function(){var q=new URLSearchParams(location.search),b=window.BOOT||{
           product:!debug,
           future:q.get("future")==="1"||!!b.future,
           drawer:q.get("drawer")||b.drawer||null,
+          phone:q.get("phone")==="1"||!!b.phone,
+          island:q.get("island")==="0"?false:(b.island===false?false:true),
+          help:q.get("help")==="1"||!!b.help,
           hash:q.get("hash")||b.hash||null,
           as:q.get("as")||b.as||null};})();
 var DEBUG=BOOT.debug;
@@ -13907,11 +13911,6 @@ function render(){
   el("layer").className=vcls;
   el("toast").className=vcls;
   if(isPhone())cardTables();
-  if(el("chrome")){
-    document.querySelectorAll("#chrome [data-st]").forEach(function(b){
-      b.setAttribute("aria-pressed",b.getAttribute("data-st")===S.state?"true":"false");});
-    el("cPhone").setAttribute("aria-pressed",S.phone?"true":"false");
-  }
 }
 /* ---- mobile: the phone preview (S.phone, a 400px column) and the real thing (S.mobile, the
    whole viewport on a narrow or coarse-pointer screen) share every phone rule; only S.mobile drops
@@ -13990,14 +13989,6 @@ function toggleTheme(){
   var cur=document.documentElement.getAttribute("data-theme");
   setTheme(cur==="light"?"dark":cur==="dark"?"system":"light");
   S.layer=null;render();
-}
-if(el("chrome")){
-  document.querySelectorAll("#chrome [data-st]").forEach(function(b){
-    b.addEventListener("click",function(){S.state=b.getAttribute("data-st");render();});});
-  el("cPhone").addEventListener("click",function(){S.phone=!S.phone;render();});
-  el("cTheme").addEventListener("click",toggleTheme);
-  el("cIndex").addEventListener("click",function(){openDialog("cmd");});
-  el("cReset").addEventListener("click",function(){seedApprovals();SKS.answered=null;SKS.picked=null;S.dlg=null;S.dlgArg=null;render();toast("Approvals reset. Every parked call is pending again with a fresh clock, and the question is waiting again.","gold");});
 }
 /* a resize across the phone breakpoint re-lays the shell; BOOT.mobile pins it either way */
 (function(){var t=null;window.addEventListener("resize",function(){if(BOOT.mobile!=null)return;clearTimeout(t);t=setTimeout(function(){var m=mobileMedia();if(m!==S.mobile){S.mobile=m;S.side=false;render();}},120);});})();

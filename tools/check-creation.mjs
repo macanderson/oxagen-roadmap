@@ -31,7 +31,7 @@ async function open(hash = "#/a-intel/core-platform") {
   const errs = [];
   page.on("pageerror", e => errs.push(String(e.message || e)));
   page.on("dialog", d => d.dismiss());
-  await page.goto(FILE + "?product=1&state=loaded&mobile=0" + hash.replace("#", "#"));
+  await page.goto(FILE + "?product=1&island=0&state=loaded&mobile=0" + hash.replace("#", "#"));
   await page.waitForTimeout(300);
   return { page, errs };
 }
@@ -542,7 +542,7 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
 
   const ph = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const pe = []; ph.on("pageerror", (e) => pe.push(String(e.message || e)));
-  await ph.goto(FILE + "?product=1&state=loaded&mobile=1&theme=dark#/a-intel/core-platform/steering");
+  await ph.goto(FILE + "?product=1&island=0&state=loaded&mobile=1&theme=dark#/a-intel/core-platform/steering");
   await ph.waitForTimeout(300);
   await ph.evaluate(() => { wzOpen("import"); impSample(); impParse(); wzGo(2); });
   await ph.waitForTimeout(200);
@@ -561,7 +561,7 @@ for (const theme of ["light", "dark"]) {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const errs = [];
   page.on("pageerror", e => errs.push(String(e.message || e)));
-  await page.goto(FILE + "?product=1&state=loaded&mobile=1&theme=" + theme + "#/a-intel/core-platform");
+  await page.goto(FILE + "?product=1&island=0&state=loaded&mobile=1&theme=" + theme + "#/a-intel/core-platform");
   await page.waitForTimeout(350);
   for (const kind of ["record", "tool", "skill", "agent"]) {
     await page.evaluate(k => { wzOpen(k); if (k === "record") { S.wz.desc = "one sentence"; wzGo(2); } }, kind);
@@ -1294,7 +1294,7 @@ for (const theme of ["light", "dark"]) {
 {
   const { page, errs } = await open("#/a-intel/core-platform/steering/records");
   const rid = await page.evaluate(() => RECORDS.filter((r) => r.status === "published")[0].id);
-  await page.goto(FILE + "?product=1&state=loaded&mobile=0#/a-intel/core-platform/steering/records/" + encodeURIComponent(rid));
+  await page.goto(FILE + "?product=1&island=0&state=loaded&mobile=0#/a-intel/core-platform/steering/records/" + encodeURIComponent(rid));
   await page.waitForTimeout(400);
   const acts = await page.evaluate(() =>
     [...document.querySelectorAll(".phead .acts button")].map((b) => b.textContent.trim()));
@@ -1451,7 +1451,7 @@ for (const theme of ["light", "dark"]) {
 
   const pg = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   const e2 = []; pg.on("pageerror", e => e2.push(String(e.message || e)));
-  await pg.goto(FILE + "?product=1&state=loaded&mobile=0&as=priya" + RD1X);
+  await pg.goto(FILE + "?product=1&island=0&state=loaded&mobile=0&as=priya" + RD1X);
   await pg.waitForTimeout(300);
   const q = await pg.evaluate(() => ({ who: me().name, sg: document.querySelector("[data-sg]")?.dataset.sg,
     axes: document.querySelectorAll(".run-main .sx-rax").length,
@@ -1480,7 +1480,7 @@ for (const theme of ["light", "dark"]) {
   const as = async (who, hash) => {
     const pg = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     const errs = []; pg.on("pageerror", e => errs.push(String(e.message || e)));
-    await pg.goto(FILE + "?product=1&state=loaded&mobile=0" + (who ? "&as=" + who : "") + hash);
+    await pg.goto(FILE + "?product=1&island=0&state=loaded&mobile=0" + (who ? "&as=" + who : "") + hash);
     await pg.waitForTimeout(300);
     return { pg, errs };
   };
@@ -1587,7 +1587,7 @@ for (const theme of ["light", "dark"]) {
   const ph = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const pe = []; ph.on("pageerror", e => pe.push(String(e.message || e)));
   for (const hash of ["#/a-intel", "#/a-intel/core-platform/spend?by=cost_center&key=ENG-1001"]) {
-    await ph.goto(FILE + "?product=1&state=loaded&mobile=1&theme=dark&as=dana" + hash);
+    await ph.goto(FILE + "?product=1&island=0&state=loaded&mobile=1&theme=dark&as=dana" + hash);
     await ph.waitForTimeout(300);
     if (hash === "#/a-intel") { await ph.evaluate(() => orgTab("costcenters")); await ph.waitForTimeout(150); }
     const over = await ph.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);

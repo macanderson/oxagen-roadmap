@@ -51,7 +51,7 @@ async function open(hash) {
   const errs = [];
   page.on("pageerror", e => errs.push(String(e.message || e)));
   page.on("dialog", d => d.dismiss());
-  await page.goto(FILE + "?product=1&state=loaded&mobile=0" + hash);
+  await page.goto(FILE + "?product=1&island=0&state=loaded&mobile=0" + hash);
   await page.waitForTimeout(300);
   return { page, errs };
 }
@@ -238,7 +238,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/Sent by Marcus Bell/.test(t) && /Bug fixer/.test(t), "sent: the work order page opens");
   ok(/0 \/ 8/.test(t), "sent: nothing is claimed yet");
   ok(/Hand review questions to @a-intel\.core\.validator/.test(t), "sent: the prompt is kept as sent");
-  await page.goto(FILE + "?product=1&state=loaded&mobile=0" + H + "/items/tsk_01K6S2M4QF");
+  await page.goto(FILE + "?product=1&island=0&state=loaded&mobile=0" + H + "/items/tsk_01K6S2M4QF");
   await page.waitForTimeout(200);
   ok(/in a work order/.test(await text(page)), "sent: the work item is tagged to the work order");
   await done(page, errs, "work order");
@@ -383,7 +383,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await page.click("text=Fix, validate, document, review");
   ok(/after Validate and Document/.test(await dlgText(page)) && /needs = \["Validate", "Document"\]/.test(await dlgText(page)), "stages: wfview shows the fan-in stage and the v0.2 file");
   await page.click("#layer .dlg-f >> text=Close");
-  await page.goto(FILE + "?product=1&state=loaded&mobile=0" + H + "/orders/wo_01K6T9QX");
+  await page.goto(FILE + "?product=1&island=0&state=loaded&mobile=0" + H + "/orders/wo_01K6T9QX");
   await page.waitForTimeout(300);
   ok((await page.locator(".stage-col").count()) === 1 && (await page.locator(".stage-col .stage").count()) === 2, "stages: Validate and Document share one column on the work order");
   ok(/stages 2 and 3 of 4/.test(await text(page, ".stat")), "stages: the State tile counts both running stages");

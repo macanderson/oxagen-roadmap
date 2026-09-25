@@ -9,7 +9,8 @@
 //   node tools/check-mockup.mjs --scenarios        # scenarios only
 //   node tools/check-mockup.mjs --shots out/       # also write a screenshot per view
 //
-// Per page view: no JavaScript error; PRODUCT is true and the #chrome bar, the scenario rail,
+// Per page view: no JavaScript error; the review island is on screen with component help off;
+// PRODUCT is true and the #chrome bar, the scenario rail,
 // the Scenarios nav item and every piece of onboarding-demo copy are gone; S.state and S.mobile
 // are pinned to what the URL says; the state's own markup is on screen (the skeleton, the empty /
 // error / denied panel, or a loaded page with a heading and no state panel); a mobile shell page
@@ -62,6 +63,8 @@ async function checkView(url, { state, mobile, shellPage, drawer, future, tag })
     const t = app ? app.innerText.replace(/\s+/g, " ") : "";
     return {
       chrome: !!document.getElementById("chrome"),
+      island: !!document.getElementById("island"),
+      hq: document.querySelectorAll(".hq").length,
       product: typeof PRODUCT !== "undefined" && PRODUCT === true,
       state: typeof S !== "undefined" ? S.state : null,
       mobileFlag: typeof S !== "undefined" ? S.mobile : null,
@@ -86,6 +89,7 @@ async function checkView(url, { state, mobile, shellPage, drawer, future, tag })
   });
   ok(errors.length === 0, `${tag}: no JS errors (${errors.slice(0, 2).join(" | ")})`);
   ok(!r.chrome && r.product, `${tag}: PRODUCT view without the #chrome bar`);
+  ok(r.island && r.hq === 0, `${tag}: the review island is on screen and component help is off (${r.hq} ?)`);
   ok(!r.scen && !r.exitDemo && !r.navScenarios, `${tag}: no scenario rail, Scenarios nav item or onboarding-demo copy`);
   ok(r.len > 40, `${tag}: renders something (${r.len} chars)`);
   if (state) ok(r.state === state, `${tag}: S.state pinned to ${state} (is ${r.state})`);
@@ -124,6 +128,48 @@ if (doPages) {
     if (p.future) {
       await checkView(mockupUrl(FILE, { state: "loaded", mobile: false, hash: p.hash, future: true }), { state: "loaded", mobile: false, shellPage, future: true, tag: `${p.id}-loaded-future` });
     }
+  }
+
+  // The review island: expanded, it names the page and links its spec; it switches the state and
+  // component help; Hide removes it and help with it, and a reload brings it back.
+  if (!only || only === "tools") {
+    const page = await browser.newPage(DESKTOP);
+    const errors = [];
+    page.on("pageerror", e => errors.push(String(e.message || e)));
+    await page.goto(mockupUrl(FILE, { state: "loaded", mobile: false, hash: `#/${ORG}/core-platform/tools` }));
+    await page.waitForTimeout(350);
+    await page.click("#island .isl-pill");
+    const menu = await page.evaluate(() => {
+      const m = document.querySelector("#island .isl-menu"), a = m && m.querySelector("a.isl-spec");
+      return { shown: !!m && !m.hidden, title: (m.querySelector("h2") || {}).textContent, route: (m.querySelector(".isl-route code") || {}).textContent,
+        desc: (m.querySelector(".isl-desc") || {}).textContent || "", href: a && a.getAttribute("href"), target: a && a.getAttribute("target") };
+    });
+    ok(menu.shown && menu.title === "Tools", `island: expanded menu names the page (${menu.title})`);
+    ok(/#\/a-intel\/core-platform\/tools/.test(menu.route || ""), `island: route shown (${menu.route})`);
+    ok(menu.desc.length > 40, `island: page description from the spec's Job section`);
+    ok(/mockups\/pages\/tools\.md$/.test(menu.href || "") && menu.target === "_blank", `island: page spec opens in a new tab (${menu.href})`);
+    await page.click('#island .isl-seg button[data-v="error"]');
+    ok(await page.evaluate(() => S.state === "error" && /state=error/.test(location.search)), "island: State switches the page and the URL");
+    await page.click('#island .isl-seg button[data-v="loaded"]');
+    await page.click('#island .isl-sw[aria-label="Component help"]');
+    await page.waitForTimeout(150);
+    const hq = await page.evaluate(() => document.querySelectorAll(".hq").length);
+    ok(hq >= 4, `island: component help puts a ? on every page part (${hq})`);
+    await page.click(".hq >> nth=2");
+    await page.waitForTimeout(100);
+    ok(await page.evaluate(() => document.getElementById("islHelp").open), "island: a ? opens the spec dialog");
+    await page.keyboard.press("Escape");
+    ok(await page.evaluate(() => !document.getElementById("islHelp").open), "island: Escape closes the spec dialog");
+    await page.click('#island .isl-sw[aria-label="Mobile view"]');
+    ok(await page.evaluate(() => S.phone === true && /\bphone\b/.test(document.getElementById("viewport").className)), "island: Mobile view opens the phone preview");
+    await page.click('#island .isl-sw[aria-label="Mobile view"]');
+    await page.click("#island .isl-hide");
+    ok(await page.evaluate(() => !document.getElementById("island") && document.querySelectorAll(".hq").length === 0), "island: Hide removes the island and the ? buttons");
+    await page.reload();
+    await page.waitForTimeout(350);
+    ok(await page.evaluate(() => !!document.getElementById("island")), "island: a reload brings the island back");
+    ok(errors.length === 0, `island: no JS errors (${errors.slice(0, 2).join(" | ")})`);
+    await page.close();
   }
 
   if (!only || only === "work-backlog") {
