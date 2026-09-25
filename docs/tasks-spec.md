@@ -8,6 +8,7 @@
 | **Source** | `mockups/src/engine.js` (the Tasks section: `pTasks`, `pTask`, `pWorkOrder`, `DLG_EXT.ipwz`, `DLG_EXT.wo`, `DLG_EXT.certify`, `DLG_EXT.wfnew`), `mockups/fixtures/tasks.json`, rendered in `mockups/missioncontrol.html` |
 | **Builds on** | ADR-043 (Oxagen governs agents, it does not run them), ADR-096 (the launcher may contain the process), ADR-101 (four first-class harnesses), ADR-157 (ARP carries an operator-authored brief), ADR-053 (the assistant), ADR-052 (the governed action is the billable unit) |
 | **Related** | `creation-spec.md` (every definition is a file, and a wizard ends on a pull request), `dod-spec.md` (the run dod, a different object), `mission-control-spec.md` §1 (the operator), §7.6 (agent messages are quoted evidence), §11.2 (connectors) |
+| **Amended by** | `work-in-flight-spec.md` (CSV upload, four more task fields, agent-minute estimates, agent messages, scope claims, and the plan) |
 | **Pages** | `mockups/pages/tasks.md`, `tasks-providers.md`, `task.md`, `work-order.md`, each with its audit prompt |
 | **Check** | `node tools/check-tasks.mjs` walks every flow below in the built mockup |
 
@@ -37,7 +38,7 @@ what is out with which agent, and what came back.
 | Thirteen fixed fields per task (§6.1) | Custom fields |
 | Statuses in three categories, resolutions, and labels, each configurable with a mapping per provider | Two-way sync of subject and description |
 | Creating a status, resolution, or label in a provider when a person chooses Create (§5.6) | Renaming or deleting a provider value |
-| A colour per label | Labels that carry definition-of-done items (§6.5) |
+| A color per label | Labels that carry definition-of-done items (§6.5) |
 | Mapping provider accounts to workspace members, with any account left not mapped | Group and team mapping |
 | A definition of done drafted by `oxagen.assistant` for every open task imported | Drafting from linked pull requests and comments |
 | Certification by a person, and readiness | Certification rules per label or per repository |
@@ -55,7 +56,7 @@ open question (§18).
 
 1. **Connect.** A person with `issue_provider.connect` runs the six-step wizard (§5.1). Oxagen stores the
    token and starts reading.
-2. **Import.** Every task in scope becomes a task record with the thirteen fields (§6.1).
+2. **Import.** Every task in scope becomes a task record with the seventeen fields (§6.1).
 3. **Draft.** `oxagen.assistant` drafts a definition of done for each open task (§8.2). The task is a draft.
 4. **Certify.** A person reads the draft, edits it, and certifies it (§8.4). The task is ready.
 5. **Send.** You select ready tasks, choose an agent you operate or a workflow, and send a work order (§9).
@@ -72,10 +73,10 @@ open question (§18).
 | **Connection** | One authorized account of one provider in one workspace. A workspace may hold several, including two of the same provider. |
 | **Provider value** | A status, resolution, label, priority, type, category, or tag as a provider names it. A mapping joins each Oxagen value to provider values (§6). |
 | **Requester** | The person who asked for the work on a help desk: a ServiceNow caller, a Salesforce contact, or a Zendesk requester. Oxagen shows a requester by name and never maps one (§7). |
-| **Task** | One issue, incident, case, or ticket, read into Oxagen with the thirteen fields. Its id is `tsk_<ULID>`, minted by Oxagen and stable across reconnects. |
+| **Task** | One issue, incident, case, or ticket, read into Oxagen with the seventeen fields. Its id is `tsk_<ULID>`, minted by Oxagen and stable across reconnects. |
 | **Definition of done** | The ordered items that say what finished means for one task. Drafted by the assistant or a person, and certified by a person. |
 | **Item** | One line of a definition of done: its text, its kind (`check` or `review`), its tag (`code`, `test`, `docs`, `review`), and its source. |
-| **Resolution** | Why a closed task closed: Done, Won't do, Duplicate, Cancelled, or Other (§6.3). |
+| **Resolution** | Why a closed task closed: Done, Won't do, Duplicate, Canceled, or Other (§6.3). |
 | **Certification** | A person's statement that the items define done. It records who, when, the digest of the items, and the version of the task they were read against. |
 | **Readiness** | Oxagen's state for a task, separate from the provider's status (§8.6). A task is **ready** when it is certified and open. |
 | **Work order** | Ready tasks, their merged definition of done, a prompt, the repositories it may change, and a spend cap, sent to one agent or one workflow. |
@@ -215,8 +216,8 @@ or in a status, resolution, or label editor on the Fields tab. Oxagen creates no
   so on step 4 and edits no workflow and no process.
 - **Limits.** Oxagen creates no ServiceNow priority, because the instance derives priority from impact
   and urgency. It creates no Zendesk priority or type, because Zendesk fixes both.
-- **Colour.** A label Oxagen creates takes its Oxagen colour once, where the provider has label colours
-  (GitHub, Linear). Oxagen never changes the colour after.
+- **Color.** A label Oxagen creates takes its Oxagen color once, where the provider has label colors
+  (GitHub, Linear). Oxagen never changes the color after.
 - **The record.** Each value created is a governed action, `create_provider_value`, made with the
   connection's token and recorded in Audit beside the `connect_issue_provider` or `update_task_fields`
   that asked for it.
@@ -227,7 +228,8 @@ or in a status, resolution, or label editor on the Fields tab. Oxagen creates no
 ### 6.1 Fields
 
 Day 1 reads thirteen fields and nothing else. The Fields tab shows one column for each connected
-provider.
+provider. `work-in-flight-spec.md` §4 adds four more (provider id, source url, priority, and
+estimated agent minutes), for seventeen in all.
 
 | Field | GitHub | Linear | Jira |
 |---|---|---|---|
@@ -284,7 +286,7 @@ A closed task carries one resolution. Oxagen ships five, and a workspace may add
 | Done | `state_reason completed` | Done | Done, Fixed |
 | Won't do | `state_reason not_planned` | Canceled with label `Won't do` | Won't Do, Won't Fix |
 | Duplicate | `state_reason duplicate` | Duplicate | Duplicate |
-| Cancelled | `not_planned` with label `cancelled` | Canceled | Cancelled |
+| Canceled | `not_planned` with label `canceled` | Canceled | Canceled |
 | Other | anything else | anything else | Cannot Reproduce, Incomplete, anything else |
 
 | Resolution | ServiceNow | Salesforce Service Cloud | Zendesk |
@@ -292,10 +294,10 @@ A closed task carries one resolution. Oxagen ships five, and a workspace may add
 | Done | close code Solution provided, Workaround provided, Resolved by caller | status Closed | status Solved |
 | Won't do | close code No resolution provided | not mapped | not mapped |
 | Duplicate | close code Duplicate | not mapped | not mapped |
-| Cancelled | state Canceled | not mapped | not mapped |
+| Canceled | state Canceled | not mapped | not mapped |
 | Other | anything else | anything else | anything else |
 
-Oxagen's words are the words of done. A closed task is `Done`, `Won't do`, `Duplicate`, `Cancelled`,
+Oxagen's words are the words of done. A closed task is `Done`, `Won't do`, `Duplicate`, `Canceled`,
 or `Other`, and those words read the same to a support team, an IT desk, and an engineering team. A
 provider's own words, such as Jira's `Fixed` and Zendesk's `Solved`, stay in the mapping column and
 never become Oxagen's. Salesforce and Zendesk have one closed state out of the box, so only `Done` maps
@@ -303,10 +305,10 @@ there until a workspace maps more or creates the values (§5.6).
 
 ### 6.4 Labels
 
-A task carries any number of labels. A label has a name, a group, a colour, and a mapping to each
+A task carries any number of labels. A label has a name, a group, a color, and a mapping to each
 provider's labels, priorities, types, categories, or tags. Oxagen ships ten.
 
-| Label | Group | Colour | GitHub | Linear | Jira |
+| Label | Group | Color | GitHub | Linear | Jira |
 |---|---|---|---|---|---|
 | P0 | Priority | `#D6455E` | label `P0` | priority Urgent | priority Highest |
 | P1 | Priority | `#E0803A` | label `P1` | priority High | priority High |
@@ -332,10 +334,10 @@ provider's labels, priorities, types, categories, or tags. Oxagen ships ten.
 | Test | not mapped | not mapped | not mapped |
 | Chore | category Inquiry / Help | type Question | type Task |
 
-The colour is Oxagen's own. Oxagen sets a label's colour in a provider once, when it creates the label
+The color is Oxagen's own. Oxagen sets a label's color in a provider once, when it creates the label
 there (§5.6), and never changes it after. The label editor
 offers twelve swatches and a hex field, and previews the chip as you choose. Gold is not offered,
-because gold is the house identity colour and never encodes state. A provider label that maps to no
+because gold is the house identity color and never encodes state. A provider label that maps to no
 Oxagen label is not read.
 
 ### 6.5 Label items
@@ -353,7 +355,7 @@ from settings into steering, and it is why it waits for its own change.
 
 ### 6.6 Where settings live
 
-Statuses, resolutions, labels, colours, and their mappings are workspace settings in Postgres. Each
+Statuses, resolutions, labels, colors, and their mappings are workspace settings in Postgres. Each
 change is a governed action (`update_task_fields`) in Audit, and it applies to the next read of every
 task. They are not files, because they translate a tracker's words into Oxagen's and steer no agent.
 Connections and people mappings are rows too, because they hold a credential and personal data that
@@ -630,7 +632,7 @@ Every stage is its own run, by its own agent, on its own runtime, under its own 
 ## 11. Completing work
 
 - **Claims.** The agent calls `claim_dod_item` with the item number and its evidence: a commit, a test,
-  a check run, or a pull request. A claim is the agent's word and is labelled as one.
+  a check run, or a pull request. A claim is the agent's word and is labeled as one.
 - **Acceptance.** When every item is claimed, the work order shows `waiting on you` and **Accept the
   work** turns gold. Accepting records `accept_work_order` with your name and accepts every claimed
   item. It merges nothing: pull requests are merged by a person in the repository.
@@ -651,7 +653,7 @@ The runs a work order starts are metered like any run.
 | `update_issue_provider` | api, app, cli | Scope, filter, write-back switches, and **Create values** |
 | `sync_issue_provider` | api, app, cli | Queues a read now |
 | `disconnect_issue_provider` | api, app, cli | Revokes and deletes the token |
-| `get_task_fields`, `update_task_fields` | api, app, cli | Statuses, resolutions, labels, colours, and mappings |
+| `get_task_fields`, `update_task_fields` | api, app, cli | Statuses, resolutions, labels, colors, and mappings |
 | `create_provider_value` | api, app, cli | Creates a status, resolution, or label in a provider with the connection's token (§5.6) |
 | `list_provider_people`, `map_provider_person` | api, app, cli | |
 | `list_tasks`, `get_task` | api, mcp, app, cli, agent | |
@@ -666,7 +668,7 @@ The runs a work order starts are metered like any run.
 | `propose_workflow` | api, app, cli | Opens the pull request, as `open_context_pr` does |
 
 Existing capabilities it reuses: `suggest_connection_mappings` (field suggestions in step 4),
-`open_context_pr` (workflows), `dispatch_command` (cancelling a live run on stop), `ask_assistant`
+`open_context_pr` (workflows), `dispatch_command` (canceling a live run on stop), `ask_assistant`
 (drafting). The agent-facing tools (`get_work_order`, `claim_dod_item`, `hand_off_work_order`,
 `return_work_order`) must load in Claude Code, Codex, Cursor, and Stella (ADR-101).
 
@@ -689,7 +691,7 @@ The Postgres tables are a schema change, so the pull request that adds them carr
 |---|---|---|
 | `task.read` | See tasks, work orders, workflows, providers, fields, and people | every workspace member |
 | `issue_provider.connect` | Connect, edit, sync, and disconnect a provider, and choose **Create values** | workspace owner |
-| `task_fields.write` | Edit statuses, resolutions, labels, and colours, and create a value in a provider | workspace owner |
+| `task_fields.write` | Edit statuses, resolutions, labels, and colors, and create a value in a provider | workspace owner |
 | `identity_map.write` | Map provider accounts | workspace owner |
 | `task.edit_dod` | Edit a draft definition of done | workspace member |
 | `task.certify` | Certify a definition of done | workspace owner, and members granted it |
@@ -749,7 +751,7 @@ Each becomes an ADR before the code it governs merges.
 5. **The product words.** "Work order" and "send". ADR-113 reserves "Dispatch" as a name only the
    founder decides, so neither the UI nor a capability name uses it for this.
 6. **The mention grammar gains `context_record` and `task`.** `packages/ai/src/prompts/mentions.ts`.
-7. **The words of done.** A closed task's resolutions are `Done`, `Won't do`, `Duplicate`, `Cancelled`,
+7. **The words of done.** A closed task's resolutions are `Done`, `Won't do`, `Duplicate`, `Canceled`,
    and `Other`, in every vertical. A provider's own words stay in its mapping (§6.3).
 8. **Oxagen creates a provider value only when a person chooses Create, and never renames or deletes
    one.** §5.6.
@@ -779,9 +781,9 @@ Each becomes an ADR before the code it governs merges.
 - [ ] Each connection authenticates with the method in §5.2 and stores its token in the workspace credential store.
 - [ ] More than one provider, and more than one account of one provider, can be connected to one workspace.
 - [ ] Provider accounts map to workspace members with suggestions a person confirms, and any account can stay not mapped.
-- [ ] Tasks import with the thirteen fields of §6.1 and no others.
-- [ ] Statuses, resolutions, and labels are configurable with a mapping per provider, and every label has a colour.
-- [ ] The ten default labels, five resolutions (`Done`, `Won't do`, `Duplicate`, `Cancelled`, `Other`), and three status categories ship as specified.
+- [ ] Tasks import with the seventeen fields of §6.1 and `work-in-flight-spec.md` §4, and no others.
+- [ ] Statuses, resolutions, and labels are configurable with a mapping per provider, and every label has a color.
+- [ ] The ten default labels, five resolutions (`Done`, `Won't do`, `Duplicate`, `Canceled`, `Other`), and three status categories ship as specified.
 - [ ] With the close switch on, accepting the work closes each task as `Done` in its provider.
 - [ ] The label editor shows the definition-of-done section as `later`.
 - [ ] Every open task imported gets a draft definition of done from `oxagen.assistant`, with its notes.
