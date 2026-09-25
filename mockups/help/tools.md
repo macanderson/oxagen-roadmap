@@ -237,7 +237,7 @@ A category says what a tool acts on. It is independent of the hazard (how bad a 
 
 Category is a registry attribute and decides nothing. A rule may reference it, but only risk, side effect, financial effect and egress carry a decision by themselves (§6.9). The dialog draws the hazard and gate marks under the categories so the two axes that decide sit apart from the one that describes. On a gate mark, a dashed outline means a person still stands in the way.
 
-The intro paragraph and the footer that said this moved here.
+The shipped app has this dialog too, behind the same **What the categories mean** button, where it lists the consequence tags the chips show (`apps/app/src/features/tools/registry.tsx`). So the legend stays as app UI. The intro paragraph and the footer that explained it moved here.
 
 ### Data sources
 | Field | Mockup source | Target store | Status |
@@ -302,6 +302,8 @@ The manifest is the tool. Every chip above the editor is read out of it by `toml
 
 Every handler, in all four languages, does three things. It reads the grant off the call rather than a key out of the environment. It passes the request id as the idempotency key, so a retried call is one effect. It declares its annotations, so a provider that lies about being read-only is a diff somebody can see. The code is yours, in your repository. Oxagen governs the call that reaches it and the receipt that leaves.
 
+What you type is a draft. The file the pull request carries is prose that `oxagen.assistant` wrote from it, so step 1 does not advance until that turn has run. The assistant rewrites what you give it and does not decide what you are building. Its drafting turn is recorded with frames and a receipt and billed to Oxagen. It is not one of your runs, so it appears in neither Work nor Spend. Every line it drafts is yours to change before anybody reviews it. The same rule holds in every creation wizard that turns a description into a file.
+
 The step subtitles, the step 1 hint and note, and the notes on steps 2 to 4 moved here.
 
 ### Data sources
@@ -314,10 +316,10 @@ The step subtitles, the step 1 hint and note, and the notes on steps 2 to 4 move
 | Pull request | `wzPrStep()` | the workspace's main repository | future |
 
 ### Logic
-1. **Describe**: the description box and four example chips. **Match it** stays disabled until the wand has rewritten the text (`wzDescOk()`).
-2. **Recommendation**: `mcpMatch()` scores the description against the catalogue on whole words. The top match is recommended with its tools, hazards, publisher, transport, credential and downscope. With no match, Build it is recommended. "Also matched" lists the other providers, and picking one changes which provider the import walks.
+1. **Describe**: the description box and four example chips. Typing writes `S.wz.desc` without a re-render, so the caret stays put (`wzDescIn()`), and clears `descAI`. The wand (`wzWand()`) runs `assistProse()`, which is deterministic in the mockup: the same sentence in gives the same prose out. It refuses an empty box and a second run on text it already wrote. **Match it** stays disabled until the wand has rewritten the text (`wzDescOk()`). A chip fills the box with its sentence, which still needs the wand.
+2. **Recommendation**: a drafting card (`wzDraftNote()`) says the step was drafted by `oxagen.assistant` from what you wrote. `mcpMatch()` scores the description against the catalogue on whole words. The top match is recommended with its tools, hazards, publisher, transport, credential and downscope. With no match, Build it is recommended. "Also matched" lists the other providers, and picking one changes which provider the import walks.
 3. **Import** (the import path): the provider's URL, publisher, transport, credential and catalogue tools. A provider that moves money warns that its financial tools are denied by construction until a named human owner with a finance role holds the connection and every calling agent holds a mandate. **Open the importer** hands off to `import`.
-4. **Manifest** (the build path): the TOML in the source editor. The chips re-read on every edit, and a file that does not parse blocks the next step.
+4. **Manifest** (the build path): the same drafting card, then the TOML in the source editor. The chips re-read on every edit, and a file that does not parse blocks the next step.
 5. **Code**: a handler in TypeScript, Python, Go or Rust, and the input JSON Schema.
 6. **Pull request**: five files and five checks. **Open the pull request** closes the wizard and toasts that the version exists when the pull request merges.
 
