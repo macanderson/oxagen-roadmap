@@ -1037,7 +1037,7 @@ for (const theme of ["light", "dark"]) {
   const rv = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
   ok(/Revoke mnd_7K2ETQ4/.test(rv), "mandate: the revoke dialog names this mandate, got " + rv.slice(0, 120));
   ok(/reserved/.test(rv) && /settled/.test(rv), "mandate: the revoke dialog says what is reserved and what settled");
-  ok(/ledger is kept, never deleted/i.test(rv), "mandate: the revoke dialog keeps the ledger");
+  ok(/stays on the ledger/i.test(rv), "mandate: the revoke dialog keeps the ledger");
   ok(errs.length === 0, "mandate: no JavaScript error: " + errs.join(" | "));
   await page.close();
 }

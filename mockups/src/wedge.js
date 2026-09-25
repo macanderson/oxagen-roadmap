@@ -1307,12 +1307,12 @@ function aSteering(a,r){
   var srcRows=order.map(function(k){var x=srcs[k], href=srcHref(x.src);
     return '<tr><td>'+srcCell(x.src)+'</td><td>'+FT.filter(function(t){return x.types[t.id];}).map(function(t){return ftBadge(t.id);}).join(" ")+'</td><td class="num">'+x.n+'</td>'+
       '<td style="font-size:12px">'+h((SRC_KIND[x.src.kind]||{home:""}).home)+'</td></tr>';}).join("");
-  return (obs?'<div class="warn" style="margin-bottom:14px"><b>Assembled, not delivered.</b> This agent is on the <span class="mono">observe</span> tier. No hook is installed, so nothing below reaches it.</div>':'')+
-   '<div class="dt"><section class="dt-sec"'+fut("frame types and per-frame provenance")+'><div class="dt-h"><span class="dt-n">1</span><div style="min-width:0;flex:1"><h3>What it receives</h3>'+
+  return (obs?'<div class="warn" style="margin-bottom:14px"><b>Not delivered.</b> This agent is on the <span class="mono">observe</span> tier. No hook is installed, so nothing below reaches it.</div>':'')+
+   '<div class="dt"><section class="dt-sec" data-help="what-it-receives"'+fut("frame types and per-frame provenance")+'><div class="dt-h"><span class="dt-n">1</span><div style="min-width:0;flex:1"><h3>What it receives</h3>'+
      '<p>'+ftLead(E.sel,"ag","SteeringFrames")+' for its standing brief'+(brief?', “'+h(brief)+'”':'')+'.</p></div>'+
      '<div class="sp"><a class="btn sm" href="#/'+ORG.slug+'/'+a.ws+'/steering/compiler/'+encodeURIComponent(slug)+'">Open in the Compiler</a></div></div>'+envelopeHtml(E,"ag")+'</section>'+
-   '<section class="dt-sec"><div class="dt-h"><span class="dt-n">2</span><div style="min-width:0;flex:1"><h3>Excluded</h3><p>'+ftLead(E.cut,"ag","resolved")+' for this agent and not delivered, each with its reason.</p></div></div>'+exclusionsHtml(E,"ag")+'</section>'+
-   '<section class="dt-sec"><div class="dt-h"><span class="dt-n">3</span><div style="min-width:0;flex:1"><h3>Sources</h3><p>'+order.length+' sources reach this agent, each managed where it lives.</p></div></div>'+
+   '<section class="dt-sec" data-help="excluded"><div class="dt-h"><span class="dt-n">2</span><div style="min-width:0;flex:1"><h3>Excluded</h3><p>'+ftLead(E.cut,"ag","resolved")+' for this agent and not delivered.</p></div></div>'+exclusionsHtml(E,"ag")+'</section>'+
+   '<section class="dt-sec" data-help="sources"><div class="dt-h"><span class="dt-n">3</span><div style="min-width:0;flex:1"><h3>Sources</h3><p>'+order.length+' sources reach this agent.</p></div></div>'+
      '<div class="tw"><table><thead><tr><th>Source</th><th>Emits here</th><th class="num">Frames</th><th>Managed in</th></tr></thead><tbody>'+srcRows+'</tbody></table></div></section></div>';
 }
 
@@ -1328,8 +1328,7 @@ function permDelegation(a){
   var mine=MANDATES.filter(function(m){return m.agent===a.key;});
   if(!mine.length) return permMandates(a);
   var sel=S.delegationSel, base='#/'+ORG.slug+'/'+S.ws+'/agents/'+defSlug(a)+'/permissions';
-  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Delegation</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Authority a person delegated to this agent. Each active mandate reaches it as a delegation frame, and the gate enforces the same limits on every call.</p></div>'+
+  return '<div class="panel" data-help="delegation"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Delegation</h3></div>'+
    '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>'+mine.filter(function(m){return m.status==="active";}).length+' active</span></div>'+
    mine.map(function(m){
      var on=sel===m.id||mine.length===1, f=mandateFrame(m), P=PEOPLE, grant=m.by+(m.roleAt?' ('+m.roleAt+')':''), usedN=money(m.used), resN=money(m.reserved), cap=money(m.perPeriod);
@@ -1355,8 +1354,7 @@ function permDelegation(a){
            '<td><span class="b b-'+sb+'"><span class="d"></span>'+h(x.state==="released"&&x.why?"Released ("+x.why+")":x.state)+'</span></td><td class="mono dim" style="font-size:11px">'+h(x.ext)+'</td>'+
            '<td>'+(x.rcp?receiptLink(x.rcp):'<span class="dim">—</span>')+'</td></tr>';}).join("")+'</tbody></table></div>'
        :'<button class="lnk" style="font-size:12px;margin-top:8px" onclick="go(\''+base+'?delegation='+encodeURIComponent(m.id)+'\')">Show the ledger</button>')+
-      '</div>';}).join("")+
-   '<div class="panel-b"><div class="note">A mandate is the only thing that lets this agent move money. Every draw reserves, then settles or releases. Its tools appear on the toolbelt gated <span class="mono">mandate + approval</span>, never plain <span class="mono">allowed</span>.</div></div></div>';
+      '</div>';}).join("")+'</div>';
 }
 
 /* ---- Activity: the work orders this agent worked ---- */
@@ -1364,11 +1362,11 @@ function aActivity(a,r){ return '<div class="grid">'+actWork(a)+actAccounting(a)
 function actWork(a){
   var rr=RUNS.filter(function(x){return x.agent===a.key;});
   if(!rr.length) return '<div class="panel"><div class="panel-h"><h3>Work orders</h3></div><div class="panel-b">'+
-   '<p class="muted" style="margin:0;font-size:12.5px">No run of this agent is in view. It has '+a.runs30.toLocaleString()+' in the last 30 days, and every one is in the audit record.</p></div></div>';
+   '<p class="muted" style="margin:0;font-size:12.5px">No run of this agent is in view. It has '+a.runs30.toLocaleString()+' in the last 30 days.</p></div></div>';
   var g={}, order=[];
   rr.forEach(function(x){var w=runParent(x), k=w?w.id:"—"; if(!g[k]){g[k]={w:w,runs:[]};order.push(k);} g[k].runs.push(x);});
   return '<div class="panel"'+fut("work orders")+'><div class="panel-h"><div style="flex:1;min-width:0"><h3>Work orders</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+order.length+' work order'+(order.length===1?'':'s')+' with '+rr.length+' run'+(rr.length===1?'':'s')+' in view. A direct one holds a run started from a terminal.</p></div></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+order.length+' work order'+(order.length===1?'':'s')+' with '+rr.length+' run'+(rr.length===1?'':'s')+' in view.</p></div></div>'+
    '<div class="tw"><table><thead><tr><th>Work order</th><th>Kind</th><th>Runs</th><th>Status</th><th class="num">Cost</th><th>Started</th></tr></thead><tbody>'+
    order.map(function(k){var x=g[k], w=x.w, R=x.runs, cost=R.reduce(function(s,y){return s+(parseFloat(y.cost)||0);},0), last=R[R.length-1];
      return '<tr class="click" onclick="go(\''+(w?woUrl(w):'#/'+ORG.slug+'/'+last.ws+'/runs/'+last.id)+'\')"><td>'+(w?'<span class="mono" style="font-size:12px">'+h(w.id)+'</span><div style="font-size:12px">'+h(w.title)+'</div>':'<span class="dim">—</span>')+'</td>'+

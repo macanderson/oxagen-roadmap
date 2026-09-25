@@ -18,6 +18,8 @@ This spec owns the agent header and the tab bar, which every tab shares, and the
 
 ## What is on the page
 
+With component help off, the page carries no explainer text. Each part's specification is in `mockups/help/agent.md`, which also holds the header and the tab bar every agent tab shares.
+
 **Header.** Eyebrow “Agent”. The h1 is the agent card in its detail layout: the avatar, the agent key in mono (“a-intel.core.triage”), and the harness mark and label (“Codex CLI”). Under it one row of badges: the lifecycle status as a dot and a word (“enrolled”), the tier as recorded (“gateway”), and “operator Marcus Bell”. Then the agent's description (“Labels incoming issues, reproduces where it can, and opens a proposal when it cannot.”). Actions, in this order, none of them gold:
 
 - **Edit avatar** opens the avatar editor for the agent (“Avatar for Triage”).
@@ -42,7 +44,7 @@ Older addresses still land on the tab that absorbed them: `…/enrollment` on Ru
 - **Cache hit rate**: “83% · 89,161,305 of 107,423,259 input tokens served from cache”.
 - **Per run**: “93,217 tok · $0.30”.
 - **Per model call**: “2,586 tok in the mean request”.
-- **Basis**: “observed by the gateway proxy from the bytes that passed through it”, or on an agent whose spend is reported by the harness “self-reported by the harness · absent classes are marked, never zero”.
+- **Basis**: “observed by the gateway proxy”, or on an agent whose spend is reported by the harness “self-reported by the harness”. How each basis is counted is in the component help (`mockups/help/agent.md`, 30-day token use).
 
 **Optimization.** The badge reads “2 suggestions”, or “3 of <N> suggestions” when there are more than three. At most three items, ordered by the money at stake. Each item is a badge with its title, a signal line in mono, “$<amount> a month at stake”, and one action. On the demo record:
 
@@ -53,22 +55,22 @@ Older addresses still land on the tab that absorbed them: `…/enrollment` on Ru
 
 The other items the rules can raise are Keep the prefix stable (**Open steering**), Page the tool results (**Propose a record**), Lower the context budget (**Open the compiler**), Route classification-shaped work to a light model (**Edit the definition**) and Stop the retry storms (**Open incidents**). With none: “Nothing to change. Every share is inside the workspace norm and the cache holds.” The foot of the panel links “Optimization for this workspace →” to Spend › Optimization (`#/a-intel/core-platform/spend/optimization`). The items are the same ones Spend › Optimization lists for this agent.
 
-**Composition.** Subtext: “One principal, and a reference to every other object it uses.” The badge is the agent's health (`tamper`, `not enrolled`, `observe` or `healthy`, as on the roster). Six rows, each with a sub-line; every row but Owner has a button to the tab that owns it (**Open**, **Open toolbelt**, **Open runtime** or **Open permissions**):
+**Composition.** No subtext. The panel's explanation is in the component help (`mockups/help/agent.md`, Composition). The badge is the agent's health (`tamper`, `not enrolled`, `observe` or `healthy`, as on the roster). Six rows. Steering, Toolbelt and Runtime carry a sub-line, and every row but Owner has a button to the tab that owns it (**Open**, **Open toolbelt**, **Open runtime** or **Open permissions**):
 
 | Row | Value | Sub-line |
 |---|---|---|
-| Identity | `prn_01JQ8W3F2M6XKD7A9RZT4BVCNG` | “minted at registration and never reused” |
-| Steering | “14 items · 1,149 tok” | “assembled from the workspace's Steering Sources and delivered at SessionStart and UserPromptSubmit”. On the observe tier: “assembled, and not delivered: no hook is installed on the observe tier”. With no standing brief the value is “no preview prompt is set up”, over a two-sentence sub-line with a “never” contrast (“steering comes from the workspace's sources. This agent holds a reference, never a copy”), which is a copy defect; a build states one fact |
+| Identity | `prn_01JQ8W3F2M6XKD7A9RZT4BVCNG` | none |
+| Steering | “14 items · 1,149 tok” | “delivered at SessionStart and UserPromptSubmit”. On the observe tier: “not delivered: no hook is installed”. With no standing brief the value is “no preview prompt is set up”, with no sub-line |
 | Toolbelt | Each assigned toolbelt as a link into Tools › Toolbelts (Repository reader, Repository contributor, Release control, Context graph, Workstation, Issue tracker, Messaging, Cloud cost) | “52 tools · Searchable” |
 | Runtime | The host (`mbp-01`) and the tier badge | “workstation · Codex CLI 1.4.0 · macOS 15.5 · arm64”, or “no host is enrolled” |
-| Owner | “Marcus Bell workspace.owner · core-platform” | “accountable for every run this agent makes” |
-| Permissions | “1 role · no mandate”, or the role count with a mandate badge | “A toolbelt says what it can see. Its roles and the policy say what it may call.” |
+| Owner | “Marcus Bell workspace.owner · core-platform” | none |
+| Permissions | “1 role · no mandate”, or the role count with a mandate badge | none |
 
 The Steering row still counts the rev1 assembler's items, while the Steering tab counts SteeringFrames: 14 items here against 45 SteeringFrames there for Triage. A build shows the Steering tab's count of SteeringFrames and their tokens.
 
-**Last 30 days.** Subtext: “This agent's own rollup, the same one the Agents table reads.” **Open activity** in the header opens the Activity tab. Four stats: Runs (“1,340”, “last at 2026-09-11 14:19:02”), Spend (“$402.11” over its basis, “Observed by gateway”), Tokens (“124,910,766” over “83% cache read over input”) and Tamper incidents (“1”, in the critical colour when not zero, over the health reason). The mockup's reason reads “1 open incident” although Triage's only incident is resolved; a build counts every recorded incident and says how many are open. A note closes the panel: “Every tool on the toolbelt is sent, and paid for, on every model call, whether or not it's used.”
+**Last 30 days.** No subtext. **Open activity** in the header opens the Activity tab. Four stats: Runs (“1,340”, “last at 2026-09-11 14:19:02”), Spend (“$402.11” over its basis, “Observed by gateway”), Tokens (“124,910,766” over “83% cache read over input”) and Tamper incidents (“1”, in the critical colour when not zero, over the health reason). The mockup's reason reads “1 open incident” although Triage's only incident is resolved. A build counts every recorded incident and says how many are open. No note closes the panel. That this rollup is the one the Agents table reads, and what tool definitions cost on each call, are in the component help (`mockups/help/agent.md`, Last 30 days).
 
-**Definition.** Subtext: “The definition file in git is the source of truth. Identity and credentials are managed by oxagen.” **Open definition** in the header opens the Definition tab (the mockup goes through the old `/definition` address, which lands there). Rows: Path (`.oxagen/agents/triage.toml`), Repo (`a-intel/platform @ main`), Commit (`a4c91e2`), `definition_digest` (`sha256:73ad0e15f8c9b224`), and Generated beside it (`.claude/agents/triage.md`, with the sub-line “A pull request that edits a generated file without regenerating it fails the checks.”).
+**Definition.** No subtext. Where the source of truth lives is in the component help (`mockups/help/agent.md`, Definition). **Open definition** in the header opens the Definition tab (the mockup goes through the old `/definition` address, which lands there). Rows: Path (`.oxagen/agents/triage.toml`), Repo (`a-intel/platform @ main`), Commit (`a4c91e2`), `definition_digest` (`sha256:73ad0e15f8c9b224`), and Generated beside it (`.claude/agents/triage.md`, with no sub-line).
 
 **Dialogs this page opens.**
 
@@ -83,8 +85,8 @@ The Steering row still counts the rev1 assembler's items, while the Steering tab
   - **Remove avatar**, only when the record has one, with the hint “Use the agent’s default initials instead.” (or your, the workspace's, or the organization's). It clears the avatar at once.
   - **Refusals** show in an alert in the dialog, not a toast, and clear on the next edit: “Paste an https link to a photo first, or switch to an icon or initials.”, “Type at least one letter.”, and, for a link over 512 characters, “That avatar was refused. A photo link must be an https address under 512 characters.” The app also shows a refusal for a denied or failed write, which the mockup does not simulate.
   - **Cancel** and **Save avatar** (gold). Save closes the dialog and shows the receipt “Avatar updated on <key>. The definition change opens as a pull request.” The Register an agent dialog and the wizard open the same editor on the agent they are about to register, and Save returns to them.
-- `rotatecred`, titled “Rotate the credential on a-intel.core.triage?”. It says a new key is minted and handed to the host at its next check-in, that the old key stops working at the next call and every live run token dies with it, and warns that a run in flight ends at its next call. **Cancel** and **Rotate it** (gold).
-- `suspendagent`, titled “Suspend a-intel.core.triage?”. It says suspension is reversible and keeps the registration, the roles and the mandates, and that every run token dies at the next call because the refusal is on the server. **Cancel** and **Suspend it** (danger).
+- `rotatecred`, titled “Rotate the credential on a-intel.core.triage?”. A note: “A new key goes to the host at its next check-in. The old key stops working at the next call.” A warning: “A run in flight on this agent ends at its next call.” **Cancel** and **Rotate it** (gold). The toast reads “Credential rotated on a-intel.core.triage. The old key stops working at the next call.” What happens to live run tokens and in-flight frames is in the component help (`mockups/help/agent.md`, Rotate the credential).
+- `suspendagent`, titled “Suspend a-intel.core.triage?”. One note: “Every run token dies at the next call. You can undo a suspension.” **Cancel** and **Suspend it** (danger). The toast reads “Agent a-intel.core.triage suspended. Every run token dies at the next call.” What suspension keeps, and why it holds with the daemon down, is in the component help (`mockups/help/agent.md`, Suspend an agent).
 - `delagent`, titled “Retire agent” with the agent key: what is kept, what ends (the roles, the mandates and the host enrollment), what is in flight, the checkbox “I understand this cannot be undone”, **Cancel** and **Retire agent** (danger).
 - The Optimization actions open the Definition tab, the Toolbelt tab, Steering, the Compiler, the Steering record wizard or the Activity tab. The mockup's Edit the definition and Open incidents go through the old `/definition` and `/incidents` addresses, which land on the Definition tab and Activity; a build links the canonical paths.
 
@@ -141,8 +143,8 @@ The Overview carries no `data-future` mark, and the catalog gives `agent` no fut
 
 ## States
 
-- **loaded**: as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell, agent Triage). An agent slug that matches nothing falls back to the first agent.
-- **empty**: “This agent has never run”. “It is registered and enrolled, but no frame has arrived. Its toolbelt is computed at run start, so there is nothing yet to show for tools either.” Action: **Back to Work**. The header and the tab bar are replaced along with the body.
+- **loaded**: as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell, agent Triage). An agent slug that matches nothing draws “Agent not found” over “No agent named <slug>” and **Open Agents**.
+- **empty**: “This agent has never run”. “It is registered and enrolled, and no frame has arrived.” Action: **Back to Work**. The header and the tab bar are replaced along with the body.
 - **loading**: the shell stays; the page body is the skeleton (four tile blocks and a panel of seven rows).
 - **error**: “This agent could not be loaded”. “The control plane answered `503 iam_principals_unavailable`. Nothing was changed. Runs kept recording while this page was down.” Actions: **Try again** (gold) and **Open an incident**, over the line “trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z”.
 - **access denied**: “You cannot see this agent”. “Your roles on Anderson Intelligence Corp. do not include `agent.read on core-platform`. An organization owner can grant it.” Actions: **Request access** (gold) and **Back to Work**. Below: Signed in as (“Marcus Bell · workspace.owner · core-platform”), Needed (`agent.read on core-platform`) and Decided by (`pol_v41`).
