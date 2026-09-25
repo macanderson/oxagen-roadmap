@@ -7886,7 +7886,7 @@ function pRuntimes(r){
      '<td class="num">'+(ag.length||'<span class="dim">0</span>')+
        (ag.length?'<span class="sub mono">'+h(ag.map(function(a){return a.key;}).join(", "))+'</span>':'<span class="sub">'+(rtEnrolled(rt)?'No agent assigned':'Not enrolled')+'</span>')+'</td>'+
      (rtEnrolled(rt)?'<td class="mono" style="font-size:11.5px">oxagend '+h(rt.collector)+
-       '<span class="sub">'+(rt.gaps?h(rt.gaps+" telemetry gap"+(rt.gaps>1?"s":"")+" in 24h"):"0 gaps in 24h")+'</span></td>'
+       '<span class="sub">'+(rt.gaps?h(plural(rt.gaps,"telemetry gap")+" in 24h"):"0 gaps in 24h")+'</span></td>'
        :'<td>—<span class="sub">Not installed</span></td>')+
      '<td class="num">'+rt.hookCount+' of 5'+(!rt.hookCount?'<span class="sub">No hooks installed</span>':rt.hookCount<5?'<span class="sub">Some calls are recorded without a decision</span>':'')+'</td>'+
      '<td>'+rtHealth(rt)+'</td>'+
@@ -7928,7 +7928,7 @@ function rtDetail(rt){
    '<dt>Owner</dt><dd>'+h(rtPerson(rt.owner))+'</dd>'+
    '<dt>Harness</dt><dd>'+h(rt.harness)+' <span class="mono dim">'+h(rt.harnessV)+'</span></dd>'+
    (on?'<dt>Collector</dt><dd class="mono">oxagend '+h(rt.collector)+'<span class="sub" style="font-family:var(--font)">'+
-     (rt.gaps?h(rt.gaps+" telemetry gap"+(rt.gaps>1?"s":"")+" in the last 24h. A gap is a hole in the record, not a failed run."):"0 telemetry gaps in the last 24h")+'</span></dd>'+
+     (rt.gaps?h(plural(rt.gaps,"telemetry gap")+" in the last 24h. A gap is a hole in the record, not a failed run."):"0 telemetry gaps in the last 24h")+'</span></dd>'+
    '<dt>Hook binary</dt><dd class="mono">oxagen-hook '+h(rt.collector)+'<span class="sub" style="font-family:var(--font)">Refuses a call if it cannot reach oxagen and has no cached policy</span></dd>'
    :'<dt>Collector</dt><dd>—<span class="sub">Not installed. This host is not enrolled.</span></dd>')+
    '<dt>Hooks installed</dt><dd'+(rt.hookCount?' class="mono" style="font-size:11.5px"':'')+'>'+h(rt.hookCount?rt.hooks:"None")+
@@ -8109,7 +8109,7 @@ function repoTab(){
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Repositories</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">The main repository holds the workspace’s steering and configuration, and each linked repository can hold records for its own runs.</p></div>'+
    '<div class="sp"><button class="btn sm" onclick="wzOpen(\'init\')">Add .oxagen/</button></div></div>'+
-   '<div class="tw"><table><thead><tr><th>Repository</th><th>Role</th><th>Production branch</th><th>.oxagen/</th><th>Events</th><th class="num">Symbols</th><th></th></tr></thead>'+
+   '<div class="tw"><table><thead><tr><th>Repository</th><th>Role</th><th>Production branch</th><th><span class="id">.oxagen/</span></th><th>Events</th><th class="num">Symbols</th><th></th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Changing the main repository needs an organization owner and an approval, and Audit records it as a security event. When GitHub’s default branch changes, the GitHub App records the change, and the production branch stays put until someone confirms the move.</div></div></div>';
 }
@@ -8142,7 +8142,7 @@ function copyTab(){
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Each row is a directory where someone ran <span class="mono">oxagen init</span>, linked by one gitignored file.</p></div>'+
    '<div class="sp"><button class="btn primary" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
-   '<div class="tw"><table><thead><tr><th>Directory</th><th>Repository</th><th>Branch</th><th>.oxagen/</th><th>Symlinks</th><th>Bundle</th><th>Last seen</th></tr></thead>'+
+   '<div class="tw"><table><thead><tr><th>Directory</th><th>Repository</th><th>Branch</th><th><span class="id">.oxagen/</span></th><th>Symlinks</th><th>Bundle</th><th>Last seen</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div></div>'+
    '<div class="grid g2" style="margin-top:14px">'+
    '<div class="panel"><div class="panel-h"><h3>Files to review</h3></div><div class="panel-b">'+
@@ -8178,7 +8178,7 @@ function chgTab(){
        '<div class="dim mono" style="font-size:11px;margin-top:2px">'+h(p.branch)+'</div></td>'+
      '<td><span class="b b-q">'+h(k.l)+'</span></td>'+
      '<td class="mono" style="font-size:12px">'+h(p.pr)+'</td>'+
-     '<td>'+(p.byKind==="person"?h(p.by):'<span class="mono">'+h(p.by)+'</span>')+
+     '<td data-v="'+h(p.by)+'">'+(p.byKind==="person"?h(p.by):'<span class="mono">'+h(p.by)+'</span>')+
        '<div class="dim" style="font-size:11px">'+(p.byKind==="person"?"Person":"Automatic")+'</div></td>'+
      '<td>'+stBadge(st)+'</td>'+
      '<td>'+oxprCiLight(p)+'</td>'+

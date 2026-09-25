@@ -10116,7 +10116,7 @@ function pRuntimes(r){
      '<td class="num">'+(ag.length||'<span class="dim">0</span>')+
        (ag.length?'<span class="sub mono">'+h(ag.map(function(a){return a.key;}).join(", "))+'</span>':'<span class="sub">'+(rtEnrolled(rt)?'No agent assigned':'Not enrolled')+'</span>')+'</td>'+
      (rtEnrolled(rt)?'<td class="mono" style="font-size:11.5px">oxagend '+h(rt.collector)+
-       '<span class="sub">'+(rt.gaps?h(rt.gaps+" telemetry gap"+(rt.gaps>1?"s":"")+" in 24h"):"0 gaps in 24h")+'</span></td>'
+       '<span class="sub">'+(rt.gaps?h(plural(rt.gaps,"telemetry gap")+" in 24h"):"0 gaps in 24h")+'</span></td>'
        :'<td>—<span class="sub">Not installed</span></td>')+
      '<td class="num">'+rt.hookCount+' of 5'+(!rt.hookCount?'<span class="sub">No hooks installed</span>':rt.hookCount<5?'<span class="sub">Some calls are recorded without a decision</span>':'')+'</td>'+
      '<td>'+rtHealth(rt)+'</td>'+
@@ -10158,7 +10158,7 @@ function rtDetail(rt){
    '<dt>Owner</dt><dd>'+h(rtPerson(rt.owner))+'</dd>'+
    '<dt>Harness</dt><dd>'+h(rt.harness)+' <span class="mono dim">'+h(rt.harnessV)+'</span></dd>'+
    (on?'<dt>Collector</dt><dd class="mono">oxagend '+h(rt.collector)+'<span class="sub" style="font-family:var(--font)">'+
-     (rt.gaps?h(rt.gaps+" telemetry gap"+(rt.gaps>1?"s":"")+" in the last 24h. A gap is a hole in the record, not a failed run."):"0 telemetry gaps in the last 24h")+'</span></dd>'+
+     (rt.gaps?h(plural(rt.gaps,"telemetry gap")+" in the last 24h. A gap is a hole in the record, not a failed run."):"0 telemetry gaps in the last 24h")+'</span></dd>'+
    '<dt>Hook binary</dt><dd class="mono">oxagen-hook '+h(rt.collector)+'<span class="sub" style="font-family:var(--font)">Refuses a call if it cannot reach oxagen and has no cached policy</span></dd>'
    :'<dt>Collector</dt><dd>—<span class="sub">Not installed. This host is not enrolled.</span></dd>')+
    '<dt>Hooks installed</dt><dd'+(rt.hookCount?' class="mono" style="font-size:11.5px"':'')+'>'+h(rt.hookCount?rt.hooks:"None")+
