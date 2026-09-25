@@ -80,7 +80,7 @@
    "cache": 0.76
   },
   {
-   "m": "z-ai/glm-latest (Oxagen)",
+   "m": "z-ai/glm-latest (oxagen)",
    "calls": 1204,
    "spend": "1,082.45",
    "cache": 0.62
@@ -105,7 +105,7 @@
    "spend": 2918.4,
    "perCall": 0.23,
    "perRun": 0.86,
-   "note": "cheapest call on the belt; cache hit 94%"
+   "note": "cheapest call on the toolbelt; cache hit 94%"
   },
   {
    "t": "aws_billing__get_cost_and_usage",
@@ -224,7 +224,7 @@
    "c": "context bloat",
    "spend": "412.77",
    "runs": 97,
-   "why": "tool list or tool results larger than the turn used; the belt was recomputed mid-run"
+   "why": "tool list or tool results larger than the turn used; the toolbelt was recomputed mid-run"
   },
   {
    "c": "idle while parked",
@@ -283,7 +283,7 @@
      "approval"
     ]
    ],
-   "what": "Triage labelled the issue but the check found the label already present. Five of nine steps changed nothing."
+   "what": "Triage labeled the issue but the check found the label already present. Five of nine steps changed nothing."
   },
   {
    "run": "run_01K5RS7M2E8FJ3QW",
@@ -294,7 +294,7 @@
      "approval"
     ],
     [
-     "belt recomputed mid-run",
+     "toolbelt recomputed mid-run",
      "q"
     ],
     [
@@ -302,7 +302,7 @@
      "allowed"
     ]
    ],
-   "what": "The tool list grew at turn 5 when a deny-generation bump recomputed the belt. Every turn since pays for 1,900 tokens of definitions the run never calls."
+   "what": "The tool list grew at turn 5 when a deny-generation bump recomputed the toolbelt. Every turn since pays for 1,900 tokens of definitions the run never calls."
   },
   {
    "run": "run_01K5RE9P4Q2WSX6C",
@@ -313,7 +313,7 @@
      "approval"
     ],
     [
-     "client_attested",
+     "Reported by harness",
      "q"
     ],
     [

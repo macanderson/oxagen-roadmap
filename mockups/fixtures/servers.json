@@ -98,7 +98,7 @@
  {
   "id": "oxagen",
   "name": "oxagen",
-  "system": "Oxagen agent tools",
+  "system": "oxagen agent tools",
   "desc": "The graph, context and messaging tools that ship with the release.",
   "transport": "native",
   "wire": "in-process",

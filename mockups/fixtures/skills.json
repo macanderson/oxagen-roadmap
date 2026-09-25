@@ -58,12 +58,12 @@
   "citedAfter": 0.34
  },
  {
-  "id": "a-intel.postgres-safe-migration",
+  "id": "a-intel.safe-db-migration",
   "ver": "1.2.0",
   "kind": "constraint",
   "src": "linked",
   "srcLabel": "a-intel/billing",
-  "path": ".oxagen/skills/postgres-safe-migration/SKILL.md",
+  "path": ".oxagen/skills/safe-db-migration/SKILL.md",
   "digest": "sha256:1a7fe4b309cd8265",
   "tokens": 1320,
   "tier": "approval",
@@ -130,7 +130,7 @@
   "runs": 0,
   "owner": "dana",
   "updated": "a month ago",
-  "why": "Published with <span class=\"mono\">scope = workspace:finops</span>. <b>core-platform</b> is not in its scope, so it is not in this belt and it does not come back from a search here.",
+  "why": "Published with <span class=\"mono\">scope = workspace:finops</span>. <b>core-platform</b> is not in its scope, so it is not in this toolbelt and it does not come back from a search here.",
   "citedBefore": null,
   "citedAfter": null
  },

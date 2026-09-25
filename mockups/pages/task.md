@@ -24,14 +24,14 @@ Actions: **Copy prompt** (plain), **Open in <provider>** (plain; opens the issue
 |---|---|
 | `drafting` | **Draft it now** (gold) |
 | `draft` | **Certify definition of done** (gold; disabled with no items) |
-| `changed` | **Certify again** (gold) |
-| `ready`, open | **Create work order and send to agent** (gold; the send menu of `tasks.md` with this task) |
+| `changed` | **Certify definition of done** (gold) |
+| `ready`, open | **Send to an agent…** (gold; the send menu of `tasks.md` with this task) |
 | `ready`, blocked | the same button, disabled, with the reason |
 | `sent`, `accepted` | **Open the work order** (gold) |
 
 **Copy prompt** copies the task as plain text to paste into an agent session. It carries the number, the subject, and the issue link, the Oxagen task id and link, the description, and the definition of done. The line above the items says who certified them and when, that they were certified before the description changed, or that they are a draft nobody has certified. Then **Work orders**: every work order that carries the task, each with its id, title, when it was sent and to whom, its state, its Oxagen link, and its pull request when one exists. A task in no work order says "No work order carries this task." The toast reads "Prompt copied, with N work orders.", or "Prompt copied, with no work order." for a task in none.
 
-**Changed** (readiness `changed` only): a banner, `changed`, "The description changed after certification", who edited it and when, and "The certification from <time> no longer matches the task, so it left ready." Then two panels side by side: **Certified against** and **Now**.
+**Changed** (readiness `changed` only): a banner, **Changed since certified**, "The description changed after certification", who edited it and when, and "The certification from <time> no longer matches the task, so it’s no longer ready." Then two panels side by side: **Certified against** and **Now**.
 
 Then two columns.
 
@@ -51,7 +51,7 @@ Then two columns.
 ## Dialogs
 
 - **`certify`**: title "Certify the definition of done", subtitle the number and subject. The items as a numbered list with tag and kind. The note on what certifying records (`certify_task_dod`, your name, the digest of the N items, the provider version they were read against, and that an upstream change marks it changed). When the connection allows it, "Oxagen posts the list as a comment on <number> …". In a regulated workspace, a warning that the certifier cannot send it. **I read every item**, "These items are what done means for this task." Footer "needs `task.certify`", **Cancel**, **Certify** (gold, disabled until the box is ticked). Certifying toasts and turns the page ready.
-- **`dodreopen`**: "Edit a certified definition of done?", "<number> leaves ready and returns to draft. It is ready again when somebody certifies it.", and "Work orders already sent keep the list they were sent with." Footer **Keep it certified**, **Edit it**.
+- **`dodreopen`**: "Edit a certified definition of done?", "<number> is no longer ready and goes back to Needs certification. It’s ready again when somebody certifies it.", and "Work orders already sent keep the list they were sent with." Footer **Keep it certified**, **Edit it**.
 
 ## Data sources
 
