@@ -222,10 +222,10 @@
       <tr><td><code>effBadge(e)</code> at <code>engine.js:738</code></td><td>A side effect: irreversible or write.</td></tr>
       <tr><td><code>finBadge(f)</code> at <code>engine.js:742</code></td><td>A financial class as a critical label, or a dim none.</td></tr>
       <tr><td><code>originBadge(o)</code> at <code>engine.js:745</code></td><td>Where a tool schema came from: observed, or observed and approved.</td></tr>
-      <tr><td><code>stBadge(m)</code> at <code>engine.js:6979</code></td><td>A dot badge from a status map. 13 calls.</td></tr>
-      <tr><td><code>tStatusBadge(k)</code> at <code>engine.js:14956</code></td><td>A work item's status.</td></tr>
-      <tr><td><code>readyBadge(t)</code> at <code>engine.js:14970</code></td><td>A work item's readiness.</td></tr>
-      <tr><td><code>permChips(perms, max)</code> at <code>engine.js:10125</code></td><td>Permissions as mono neutral badges with <code>SEP</code> between them.</td></tr>
+      <tr><td><code>stBadge(m)</code> at <code>engine.js:6993</code></td><td>A dot badge from a status map. 13 calls.</td></tr>
+      <tr><td><code>tStatusBadge(k)</code> at <code>engine.js:14970</code></td><td>A work item's status.</td></tr>
+      <tr><td><code>readyBadge(t)</code> at <code>engine.js:14984</code></td><td>A work item's readiness.</td></tr>
+      <tr><td><code>permChips(perms, max)</code> at <code>engine.js:10139</code></td><td>Permissions as mono neutral badges with <code>SEP</code> between them.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -254,7 +254,7 @@
 ## Inputs
 
 1. mockups/components/badge.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 184 to 193, 59, 2056, link chips 2154 to 2156, live 376 to 378. The mockup renders it with statusBadge(st) (engine.js:706), tierBadge(t) (engine.js:724), riskBadge(r) (engine.js:734), effBadge(e) (engine.js:738), finBadge(f) (engine.js:742), originBadge(o) (engine.js:745), stBadge(m) (engine.js:6979), tStatusBadge(k) (engine.js:14956), readyBadge(t) (engine.js:14970), permChips(perms, max) (engine.js:10125).
+2. The design source: mockups/src/engine.css lines 184 to 193, 59, 2056, link chips 2154 to 2156, live 376 to 378. The mockup renders it with statusBadge(st) (engine.js:706), tierBadge(t) (engine.js:724), riskBadge(r) (engine.js:734), effBadge(e) (engine.js:738), finBadge(f) (engine.js:742), originBadge(o) (engine.js:745), stBadge(m) (engine.js:6993), tStatusBadge(k) (engine.js:14970), readyBadge(t) (engine.js:14984), permChips(perms, max) (engine.js:10139).
 3. The build's implementation: find it by its root selector (.b) or its name, and list every route that renders it.
 4. Where to see it in the design: every page, Agents, Run, Tools, Work, Spend, approvals drawer. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
