@@ -35,7 +35,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Submit (`obSignedIn`) signs in and lands on Work with the toast “Signed in as Marcus Bell. The session is recorded like any other governed action.”
+- Submit (`obSignedIn`) signs in and lands on Work with the toast “Signed in as Marcus Bell.”
 - **Use a recovery code instead** toasts “Recovery codes are single use. 8 of 10 remain.”
 - The expiry countdown shows how long the current code stays valid. Three wrong codes lock the account for 15 minutes.
 

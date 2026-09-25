@@ -20,26 +20,26 @@ Say what this workspace's month cost and where the money went. One table groups 
 
 **Shell.** The sidebar lists Work (8), Agents, Tools (29), Steering (9), Runtimes (2), Spend and Repositories (5), then Organization, Billing and Audit (3). Spend is lit and carries no count, because nothing on it waits on a person. The foot holds the Stella launcher and the connection badge. The top bar holds the breadcrumbs (Anderson Intelligence Corp. / Core platform / Spend), ⌘K search, notifications, the Approvals button with its count, and the account avatar.
 
-**Header.** Eyebrow the workspace name ("Core platform"), h1 "Spend", subtext "What the tokens bought, with the basis on every number." Actions: **Export report** (opens `spendexport`) and **Set a budget** (gold, opens `budget`, specified in `spend-budgets.md`).
+**Header.** Eyebrow the workspace name ("Core platform"), h1 "Spend", and no subtext. What the page is for is in the component help (`mockups/help/spend.md`, Header). Actions: **Export report** (opens `spendexport`) and **Set a budget** (gold, opens `budget`, specified in `spend-budgets.md`).
 
 **Tiles**, four in a row, each one number and one line beneath it:
 
 | Tile | Number | Line beneath |
 |---|---|---|
-| Spend | $439,498.34 | Observed by gateway + Reported by harness · USD |
+| Organization spend | $439,705.21 | Observed by gateway + Reported by harness · USD |
 | Tokens | 20,503,823,758 | 80% served from cache |
 | Observed by the gateway | 92% | of tokens counted by the proxy |
-| Wasted | $85,768.79, in the critical ink | 20% of spend · Optimization |
+| Unproductive spend | $85,768.79, in the critical ink | 20% of spend · Optimization |
 
-The Wasted tile opens Optimization. Its share is computed from the Wasted and Spend figures, so it cannot disagree with them.
+The Unproductive spend tile opens Optimization. Its share is computed from the unproductive and organization spend figures, so it cannot disagree with them.
 
 **Tabs**: Overview · Budgets (4) · Optimization. Each is a path segment: `/spend`, `/spend/budgets`, `/spend/optimization`. Changing the tab drops the grouping and the key.
 
-**September by day.** A panel with the caption "From the daily rollup, rebuilt from frames. Weekends run lighter." and, at its right, "$439,498.34 to date". One bar per day from 1 to 24 September, in one image (`role="img"`, labelled "Spend by day, 1 to 24 September"). Each bar's tooltip reads "Sep <day> · <amount>". The axis reads Sep 1, Sep 12 and Sep 24.
+**September by day.** A panel with no caption and, at its right, "$439,705.21 to date". Where the figures come from is in the component help (`mockups/help/spend.md`, Month by day). One bar per day from 1 to 11 September, in one image (`role="img"`, labeled "Spend by day, 1 to 11 September"). Each bar's tooltip reads "Sep <day> · <amount>". The axis reads Sep 1, Sep 6 and Sep 11.
 
 **Group by.** A segmented control (`role="group"`, labelled "Group by") with the caption "Group by" and six buttons, the current one `aria-pressed`: Work order · Operator · Agent · Model · Tool · Cost center. A button writes `?by=` and closes any open side panel.
 
-**The table.** Heading "By <grouping>" ("By work order", "By operator", "By agent", "By model", "By tool", "By cost center") and the subtext "Select a row to open it here. There is no drill page." The shell's list tools sit above the rows: the search field "Search this list", up to three filters, each on a column of two to eight short values (such as "Any kind" on By work order and "Any provider key" on By model), Rows (5, 10, 25, 50 or All, with 10 by default), sortable column headers, and a pager that counts the rows (1,169 work orders, ten to a page). Rows open ordered by spend, largest first.
+**The table.** Heading "By <grouping>" ("By work order", "By operator", "By agent", "By model", "By tool", "By cost center") and no subtext. The shell's list tools sit above the rows: the search field "Search this list", up to three filters, each on a column of two to eight short values (such as "Any kind" on By work order and "Any provider key" on By model), Rows (5, 10, 25, 50 or All, with 10 by default), sortable column headers, and a pager that counts the rows (1,169 work orders, ten to a page). Rows open ordered by spend, largest first.
 
 Columns, in order:
 
@@ -52,13 +52,13 @@ Columns, in order:
 | Tool | Tool (the name in mono over its kind, such as `harness`, `jira` or `stripe`) · Calls · Runs · Per call · Spend · Share |
 | Cost center | Cost center (the label in mono, and `~none` adds "no agent or workspace label"; a label deleted since its runs rolled up keeps its row and adds a `deleted` badge) · Agents · Workspaces · Spend · Share |
 
-Two groupings end on a note. By work order: "1,169 work orders in view, most of them direct: a run started from an operator’s own terminal. The rest of the month’s runs roll up the same way." By cost center: "A run with no label is charged to ~none, so the centers sum to the month (ADR-142)."
+No grouping ends on a note. What a direct work order is, and why the cost centers sum to the month through `~none` (ADR-142), is in the component help (`mockups/help/spend.md`, Grouped table), with the side panel's one-page rule.
 
 Selecting a row writes `&key=`, marks the row (`aria-selected`) and opens the side panel. Selecting the open row again closes it. While a panel is open, the table narrows to the name column, Spend and, on every grouping but By work order, Share. The panel takes the right column (340 px).
 
 **The side panel** is an `aside` labelled with its title, with **Close** at its top right (`aria-label="Close"`). One per grouping:
 
-- **Operator** (`?by=operator&key=marcus`): heading "Marcus Bell". Role `workspace.owner · core-platform`. Agents "24 operated, 28 in view". Runs "14,225". Spend "$49,545.43". Budget "87% of $57,000.00". Bounded tasks "4 work orders sent, 2 items accepted, $2.07 per accepted item" (future-only). Beneath, the caption "The record, not a grade. Habits and the rules they suggest are on Optimization." and **Open the habits**, which opens `/spend/optimization?part=habits`.
+- **Operator** (`?by=operator&key=marcus`): heading "Marcus Bell". Role `workspace.owner · core-platform`. Agents "24 operated, 28 in view". Runs "14,225". Spend "$49,545.43". Budget "87% of $57,000.00". Bounded tasks "7 work orders sent, 2 items accepted, $2.06 per accepted item" (future-only). Beneath, with no caption, **Open the habits**, which opens `/spend/optimization?part=habits`. Why the panel reports the record and grades no one is in the component help (`mockups/help/spend.md`, Side panel).
 - **Agent** (`?by=agent&key=a-intel.core.triage`): the compact agent card is the heading ("a-intel.core.triage", "Codex CLI · 1,340 runs 30d · $402.11"). Runs "1,340". Spend "$402.11, +9% on last month". Tokens per run "93,217". Cache hit "83%". Tool definitions "34% of every request". Cost center `ENG-1001`. Beneath: "2 recommendations for this agent on Optimization.", **Open the agent**, and **Recommendations**, which opens `/spend/optimization?part=agents`.
 - **Model** (`?by=model&key=claude-opus-5`): heading the model id. Model calls "1,201,471". Spend "$272,442.52". Cache hit "84%". Provider key `Anthropic · pk_9f21`. **Model routes** opens Organization.
 - **Tool** (`?by=tool&key=claude_code__Bash`): heading the tool name. Kind "harness". Calls "164,664 in 35,611 runs". Per call "$0.70". Per run "$3.25". Record "result bodies average 4.1k tokens; 31% of calls are re-runs of the same command". No action.
@@ -67,8 +67,8 @@ Selecting a row writes `&key=`, marks the row (`aria-selected`) and opens the si
 
 **Dialogs this page opens:** `spendexport`, `ccexport` and `budget`.
 
-- **`spendexport`**, "Export a spend report". Timeframe: This month · September 2026 (to date), Last month · August 2026, Last 30 days, Last 90 days, Quarter to date · Q3 2026, Year to date · 2026, Custom range, with From and To dates beneath. Include: four choices, the first naming everything on the page, then "By operator and agent only", "By tool only" and "Unproductive spend only". The note "Delivered as CSV and a signed PDF to marcus@a-intel.example. Every figure carries its basis; the report is built from frames, so a large range takes a few minutes." Footer: **Cancel**, **Generate report** (gold).
-- **`ccexport`**, "Export the chargeback statement", subtitle "CSV · every workspace". Month: September 2026 (to date), August 2026, July 2026. Columns, as badges: `line`, `cost_center`, `runs`, `unpriced_runs`, `cost_micros`, `cost_cents`, `currency`, `basis`, `run_ids` (`FIXTURES.COST_CENTERS.columns`). The note "One line per cost center, one for ~none (spend with no label), and the organization total they sum to. Each line lists the run ids behind it, and cost is in micros and in cents." Footer: **Cancel**, **Export CSV** (gold). Exporting writes `cost_center_statement_exported` to Audit and toasts "Exported cost-centers-<month>.csv. In the product this downloads the file. A mockup writes nothing to disk."
+- **`spendexport`**, "Export a spend report". Timeframe: This month · September 2026 (to date), Last month · August 2026, Last 30 days, Last 90 days, Quarter to date · Q3 2026, Year to date · 2026, Custom range, with From and To dates beneath. Include: four choices, the first naming everything on the page, then "By operator and agent only", "By tool only" and "Unproductive spend only". The note "Delivered as CSV and a signed PDF to marcus@a-intel.example." The basis and build time are in the component help (`mockups/help/spend.md`, Spend report export). Footer: **Cancel**, **Generate report** (gold).
+- **`ccexport`**, "Export the chargeback statement", subtitle "CSV · every workspace". Month: September 2026 (to date), August 2026, July 2026. Columns, as badges: `line`, `cost_center`, `runs`, `unpriced_runs`, `cost_micros`, `cost_cents`, `currency`, `basis`, `run_ids` (`FIXTURES.COST_CENTERS.columns`). The note "One line per cost center, one for ~none (spend with no label), and the organization total they sum to." Footer: **Cancel**, **Export CSV** (gold). Exporting writes `cost_center_statement_exported` to Audit and toasts "Exported cost-centers-<month>.csv." The line format is in the component help (`mockups/help/spend.md`, Chargeback statement export).
 - **`budget`**, "Set a budget": see `spend-budgets.md`.
 
 ## Data sources
@@ -80,7 +80,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. The mockup collection is
 | Spend tile | `SPEND.spend` plus Oxagen's own routes, through `spendMonthTotal()` | `get_spend` total for the month (`cost.daily_totals`) | `packages/oxagen/src/contracts/spend.get.ts:34-73`; the tile, `apps/app/src/features/spend/summary.tsx:36-49` | ✅ |
 | Tokens tile and its cache share | `wsTok()` | the token classes on every `get_spend` row | `packages/oxagen/src/contracts/spend.shared.ts:107-116`; `apps/app/src/features/spend/summary.tsx:26-28, 50-59` | ✅ |
 | Observed by the gateway | `wsTok().observed` | the share of tokens by basis | No read counts tokens by basis. The app prints "not recorded" (`apps/app/src/features/spend/summary.tsx:60-62`) | ❌ |
-| Wasted tile | `SPEND.wasteTotal`, `wasteShareText()` | `list_waste`: `wasted` and `share` | `packages/oxagen/src/contracts/spend.waste.ts:26-56`, with one cause, `cache_write_never_read` (line 14); `apps/app/src/features/spend/summary.tsx:63-78` | 🟡 |
+| Unproductive spend tile | `SPEND.wasteTotal`, `wasteShareText()` | `list_waste`: `wasted` and `share` | `packages/oxagen/src/contracts/spend.waste.ts:26-56`, with one cause, `cache_write_never_read` (line 14); `apps/app/src/features/spend/summary.tsx:63-78` | 🟡 |
 | September by day | `spendDays()`, seeded from the month's total | `cost.daily_totals`, one row per UTC day and group | The table keeps a row per day (`packages/database/src/schema/cost.ts:388-395`). No contract answers the workspace's month by day. `get_spend_drill` answers a daily series for one operator, agent or tool (`packages/oxagen/src/contracts/spend.drill.ts:59-117`) | 🟡 |
 | By work order | `WORKORDERS`, `woSpend()`, `woItems()` | `work_order_id` on the run record, and the work order store | Nothing stores a work order. The run's `taskRef` is free text and null for wrapped runs (wedge, Work, Shipped today). The shipped `task` level keys on the run's goal (ADR-142 §5; `apps/app/src/features/spend/tables.tsx:557-591`) | ❌ |
 | By operator | `SPEND.byOperator`, `operatorTok()` | `get_spend` at `operator` | Operator, Role, Runs, Spend, Tokens and Cache hit ship (`apps/app/src/features/spend/tables.tsx:177-268`). Agents and Budget position print "not recorded" (lines 243-245, 259-261) | 🟡 |
@@ -142,7 +142,7 @@ Loaded only. This change designs the loaded state. The build uses the shell's st
 
 The thumb bar holds Work (8), Agents, Tools, Spend and More (3), with Spend lit. More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The top bar collapses to the menu button, the page name, search, notifications, Approvals and the avatar.
 
-The header actions sit under the subtext, and the four tiles form a two by two grid. The tabs stay one row. The Group by buttons wrap. The table becomes one card per row, each cell labelled with its column, under the search field, the filter and Rows. With a key open, the side panel stacks below the table and its pager: for `?by=operator&key=marcus` it starts about 2,400 px down the page, and picking a card does not scroll to it. The selected card is shaded. Dialogs rise from the bottom edge as sheets. Nothing scrolls sideways at 390 px.
+The header actions sit under the h1, and the four tiles form a two by two grid. The tabs stay one row. The Group by buttons wrap. The table becomes one card per row, each cell labelled with its column, under the search field, the filter and Rows. With a key open, the side panel stacks below the table and its pager: for `?by=operator&key=marcus` it starts about 2,400 px down the page, and picking a card does not scroll to it. The selected card is shaded. Dialogs rise from the bottom edge as sheets. Nothing scrolls sideways at 390 px.
 
 ## Permissions
 

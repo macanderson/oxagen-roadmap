@@ -56,7 +56,7 @@ a:hover{text-decoration:underline}
 .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-text);font-weight:600;margin:0 0 10px}
 .eyebrow.q{color:var(--muted)}
 /* Identifiers keep their case inside uppercase labels: wo_01K6T9QX, a-intel/platform#590, workspace.owner. */
-.eyebrow.id,.eyebrow .id,.b .id,.stat .k .id,th .id,.k .id{text-transform:none}
+.eyebrow.id,.eyebrow .id,.b .id,.stat .k .id,th .id,.k .id,.stage .r .id{text-transform:none}
 h1,h2,h3,h4{margin:0;letter-spacing:-.015em}
 /* Space Grotesk sets the page h1 and the wordmarks, and nothing below 20px. Every other heading,
    panel title and label is Geist: the display face loses its shape at small sizes. */
@@ -132,7 +132,7 @@ p{margin:0 0 10px;color:var(--body)}
 #viewport.phone .phead .acts{margin-left:0;width:100%}
 
 /* ---------- buttons ---------- */
-.btn{border:1px solid var(--border);background:var(--panel);color:var(--fg);border-radius:9px;padding:7px 13px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:7px;transition:border-color .15s,background .15s}
+.btn{border:1px solid var(--border);background:var(--panel);color:var(--fg);border-radius:9px;padding:7px 13px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:7px;transition:border-color .15s,background .15s,color .15s}
 .btn:hover{border-color:var(--rule);background:var(--hl)}
 .btn.primary{background:var(--gold);border-color:var(--gold);color:var(--on-gold);font-weight:600}
 .btn.primary:hover{background:var(--gold-bright);border-color:var(--gold-bright)}
@@ -503,6 +503,16 @@ tbody tr.click:hover .drill-lnk{border-bottom-style:solid}
 .avx.person{border-radius:50%}
 .avx.agent{border-radius:27%}
 .avx img{width:100%;height:100%;object-fit:cover;display:block}
+/* A provider's logomark. Vendor icons are drawn for a light page, so the plate under one stays
+   white in both themes. The letter tile uses the theme's soft surface. */
+.avx.provider{border-radius:6px;background:var(--hl);color:var(--muted);border-color:var(--border)}
+.avx.provider:has(img){background:#fff}
+.avx.provider img{object-fit:contain;padding:2px;box-sizing:border-box}
+.pv{display:flex;gap:10px;align-items:flex-start}
+.pv-t{min-width:0}
+.pv-l a{margin-right:10px}
+.pv-url a{overflow-wrap:anywhere}
+#viewport.phone .pv-l a,#layer.phone .pv-url a{display:inline-flex;align-items:center;min-height:44px}
 .avx.f-sans{font-family:var(--font)}
 .avx.f-serif{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;font-weight:500}
 .avx.f-mono{font-family:var(--mono);font-weight:600}
@@ -923,6 +933,26 @@ th.sortable[aria-sort="descending"]::after{content:"↓";color:var(--gold)}
 .lt-none{padding:18px 16px;color:var(--dim);font-size:12.5px;text-align:center}
 #viewport.phone .lt .lt-q{flex-basis:100%}
 #viewport.phone .lt .lt-rows{margin-left:0}
+/* A multi-select filter: a button that shows the first pick as the table draws it, and a popover of checkboxes */
+.lt .lt-mb{display:inline-flex;align-items:center;gap:6px;max-width:220px;min-height:28px;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:3px 26px 3px 8px;font-size:12px;color:var(--fg);font-family:var(--font);position:relative;cursor:pointer;transition:border-color .12s}
+.lt .lt-mb::after{content:"";position:absolute;right:10px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:translateY(-70%) rotate(45deg)}
+.lt .lt-mb:focus-visible,.lt .lt-mb[aria-expanded="true"]{border-color:var(--gold);outline:none}
+.lt .lt-mb[data-on]{border-color:color-mix(in srgb,var(--gold) 55%,var(--border))}
+.lt .lt-mb .lt-mv{display:inline-flex;min-width:0;overflow:hidden}
+.lt .lt-mb .lt-mv .tkp{gap:5px}
+.lt .lt-mb .lt-mn{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.lt-pop{inset:auto;margin:0;position:fixed;min-width:220px;max-width:min(300px,calc(100vw - 16px));max-height:min(440px,70vh);overflow:auto;padding:6px;background:var(--panel);color:var(--fg);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow)}
+.lt-o{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12.5px}
+.lt-o:hover{background:var(--hl)}
+.lt-o input{width:15px;height:15px;margin:0;accent-color:var(--gold);flex:none}
+.lt-o .lt-ov{flex:1;min-width:0;display:flex}
+.lt-o .lt-on{font-family:var(--mono);font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+.lt-pf{display:flex;justify-content:flex-end;padding:6px 4px 2px;margin-top:4px;border-top:1px solid var(--border)}
+#viewport.phone .lt .lt-mb{min-height:44px;font-size:16px}
+#viewport.phone .lt-o{min-height:44px}
+/* Work: the scope toggle over the four stat cards */
+.wk-stats{margin-bottom:16px}
+.wk-stats>.seg{margin-bottom:10px}
 /* ---- definition form (the file is the record; the form is a view of it) ---- */
 .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--ink);border:1px solid var(--border);border-radius:9px;padding:6px 8px;min-height:38px;transition:border-color .15s}
 .chips:focus-within{border-color:var(--gold)}
@@ -2079,7 +2109,7 @@ body.asst-resizing{cursor:ew-resize;user-select:none}
 .apd.open{translate:0 0;opacity:1;visibility:visible;transition:translate .34s cubic-bezier(.32,.72,0,1),opacity .18s ease,visibility 0s 0s}
 .apd.phone{width:100%;max-width:100%}
 .apd-h{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);flex:none}
-.apd-h h3{margin:0;font-size:14px}
+.apd-h h2,.apd-h h3{margin:0;font-size:14px}
 .apd-b{padding:14px 16px;overflow-y:auto;flex:1;min-height:0}
 .apd-list{display:grid;gap:8px}
 .apd-row{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;padding:10px 11px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--fg);cursor:pointer;transition:border-color .15s}
@@ -2176,6 +2206,7 @@ a.b.lk:hover *,button.b.lk:hover *{text-decoration:none}
 .hxn>.hx{vertical-align:0;margin-top:.15em}
 .tkp{display:inline-flex;align-items:center;gap:7px;min-width:0;vertical-align:middle}
 .tk-t{display:inline-flex;align-items:center;gap:6px}
+.tk-t .mono{white-space:nowrap}
 .tk-s{font-weight:500;color:var(--fg);margin-top:2px;overflow-wrap:anywhere}
 .tk-body{margin:0;white-space:pre-wrap;font-size:13px;color:var(--body)}
 .tk-link{display:flex;flex-direction:column;gap:2px;padding:7px 0;border-top:1px solid var(--border);color:var(--body);font-size:12.5px}
@@ -2216,7 +2247,7 @@ tr[aria-selected="true"] td{background:color-mix(in srgb,var(--gold) 7%,transpar
 .stage .r{display:flex;align-items:center;gap:6px;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:600}
 .stage .r i{font-style:normal;display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;border:1px solid var(--rule);font-size:10px;letter-spacing:0}
 .stage .ag{display:flex;align-items:center;gap:6px;font-size:13px;min-width:0}
-.stage .ag b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stage .ag b{overflow-wrap:anywhere}
 .stage .sub{font-size:11.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .stage.done{border-color:color-mix(in srgb,var(--st-allowed) 40%,var(--border))}
 .stage.done .r i{background:var(--st-allowed);border-color:var(--st-allowed);color:var(--ink)}
@@ -2409,3 +2440,13 @@ tr.on>td{background:var(--panel-h)}
 tr.wo-group td{background:var(--panel-h)}
 tr.wo-child td:first-child{padding-left:28px}
 @media (max-width:640px){.stages.layered{flex-wrap:wrap}.stage-col{flex:1 1 100%}}
+
+/* ---------- copied ----------
+   A copy that landed. The button's label becomes a check and "Copied" for 1.6s, then returns: copiedState()
+   in engine.js, wireCopy() in docs-kit/docs.js. The 8% ground keeps the light theme's green text above 4.5:1.
+   The rules sit here, not with the buttons, so the line numbers the component specs cite stay put. */
+.btn.copied,.btn.copied:hover{color:var(--st-allowed);background:color-mix(in srgb,var(--st-allowed) 8%,var(--panel));border-color:color-mix(in srgb,var(--st-allowed) 40%,transparent);justify-content:center}
+.btn.copied svg{width:14px;height:14px;flex:none;animation:copied-pop .24s cubic-bezier(.3,1.5,.6,1)}
+.btn.copied svg path{stroke-dasharray:16;animation:copied-draw .3s .06s ease-out backwards}
+@keyframes copied-pop{from{transform:scale(.5);opacity:0}}
+@keyframes copied-draw{from{stroke-dashoffset:16}}

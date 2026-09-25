@@ -181,8 +181,8 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 312 to 317, 2206 to 2218, 2397 to 2403</td><td>The rules that draw it</td></tr>
-      <tr><td><code>stageChain(wf, opts)</code> at <code>engine.js:14877</code></td><td>Writes the <code>.stages</code> row from a workflow's stage list, plus a final Accept card. <code>opts.state(i)</code> returns each stage's class.</td></tr>
-      <tr><td><code>stState(i)</code> at <code>engine.js:15496</code></td><td>A work order's per-stage state function: <code>done</code> once sealed and not returned, <code>on</code> while live or next up, empty while queued.</td></tr>
+      <tr><td><code>stageChain(wf, opts)</code> at <code>engine.js:14736</code></td><td>Writes the <code>.stages</code> row from a workflow's stage list, plus a final Accept card. <code>opts.state(i)</code> returns each stage's class.</td></tr>
+      <tr><td><code>stState(i)</code> at <code>engine.js:15338</code></td><td>A work order's per-stage state function: <code>done</code> once sealed and not returned, <code>on</code> while live or next up, empty while queued.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -210,7 +210,7 @@
 ## Inputs
 
 1. mockups/components/timeline.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 312 to 317, 2206 to 2218, 2397 to 2403. The mockup renders it with stageChain(wf, opts) (engine.js:14877), stState(i) (engine.js:15496).
+2. The design source: mockups/src/engine.css lines 312 to 317, 2206 to 2218, 2397 to 2403. The mockup renders it with stageChain(wf, opts) (engine.js:14736), stState(i) (engine.js:15338).
 3. The build's implementation: find it by its root selector (.chain) or its name, and list every route that renders it.
 4. Where to see it in the design: Billing, Spend (evidence and fix dialogs), Work orders (Stages). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

@@ -236,12 +236,12 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 770 and 924 to 931 (chip and chips), 1234 to 1239 (edge), 1350 to 1357 (role chip), 1604 to 1606 and 1644 to 1648 (self-check chip and its tokens), 2169 (person), 2186 to 2189 (label), 2194 to 2195 (dod tag), 2246 to 2248 (mention)</td><td>The rules that draw it</td></tr>
-      <tr><td><code>agentRoleChips(a)</code> at <code>engine.js:10296</code></td><td>Every role an agent holds, as removable chips joined by <code>SEP</code>, with an Assign role button.</td></tr>
-      <tr><td><code>edgeChip(it)</code> at <code>engine.js:3190</code></td><td>One provenance edge, plus a <code>button.edge</code> per frame it cites.</td></tr>
-      <tr><td><code>lblChip(k)</code> at <code>engine.js:14845</code></td><td>One work-item label, colored from the tracker's own value.</td></tr>
-      <tr><td><code>lblChips(ks)</code> at <code>engine.js:14849</code></td><td>A <code>.lbls</code> row of <code>lblChip()</code>.</td></tr>
-      <tr><td><code>tagChip(t)</code> at <code>engine.js:14876</code></td><td>One DoD tag.</td></tr>
-      <tr><td><code>tkPerson(id, opts)</code> at <code>engine.js:14867</code></td><td>A provider account as a mapped teammate or a raw handle.</td></tr>
+      <tr><td><code>agentRoleChips(a)</code> at <code>engine.js:10077</code></td><td>Every role an agent holds, as removable chips joined by <code>SEP</code>, with an Assign role button.</td></tr>
+      <tr><td><code>edgeChip(it)</code> at <code>engine.js:3183</code></td><td>One provenance edge, plus a <code>button.edge</code> per frame it cites.</td></tr>
+      <tr><td><code>lblChip(k)</code> at <code>engine.js:14703</code></td><td>One work-item label, colored from the tracker's own value.</td></tr>
+      <tr><td><code>lblChips(ks)</code> at <code>engine.js:14707</code></td><td>A <code>.lbls</code> row of <code>lblChip()</code>.</td></tr>
+      <tr><td><code>tagChip(t)</code> at <code>engine.js:14735</code></td><td>One DoD tag.</td></tr>
+      <tr><td><code>tkPerson(id, opts)</code> at <code>engine.js:14725</code></td><td>A provider account as a mapped teammate or a raw handle.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -271,7 +271,7 @@
 ## Inputs
 
 1. mockups/components/chips.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 770 and 924 to 931 (chip and chips), 1234 to 1239 (edge), 1350 to 1357 (role chip), 1604 to 1606 and 1644 to 1648 (self-check chip and its tokens), 2169 (person), 2186 to 2189 (label), 2194 to 2195 (dod tag), 2246 to 2248 (mention). The mockup renders it with agentRoleChips(a) (engine.js:10296), edgeChip(it) (engine.js:3190), lblChip(k) (engine.js:14845), lblChips(ks) (engine.js:14849), tagChip(t) (engine.js:14876), tkPerson(id, opts) (engine.js:14867).
+2. The design source: mockups/src/engine.css lines 770 and 924 to 931 (chip and chips), 1234 to 1239 (edge), 1350 to 1357 (role chip), 1604 to 1606 and 1644 to 1648 (self-check chip and its tokens), 2169 (person), 2186 to 2189 (label), 2194 to 2195 (dod tag), 2246 to 2248 (mention). The mockup renders it with agentRoleChips(a) (engine.js:10077), edgeChip(it) (engine.js:3183), lblChip(k) (engine.js:14703), lblChips(ks) (engine.js:14707), tagChip(t) (engine.js:14735), tkPerson(id, opts) (engine.js:14725).
 3. The build's implementation: find it by its root selector (.rl-chip, .sx-chip, .edge, .chip, .lbl, .tg, .tkp, .mref) or its name, and list every route that renders it.
 4. Where to see it in the design: Agents, Work, Run (Decision trace, Transcript), Steering. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

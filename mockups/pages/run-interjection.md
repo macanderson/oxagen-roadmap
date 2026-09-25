@@ -18,15 +18,17 @@ The Skills console that used to host this moment is cut, and the walk W13 is ret
 
 ## What is on the page
 
+With component help on, each part carries a `?` that opens its section in `mockups/help/run-interjection.md` (Page header, Loop state, Agent view, Operator question, Frames, Skill loaded, Workspace created, and Skill and Retire a skill for the dialogs). The note carries the `data-help` key `loop-state`, and the three panes carry `agent-view`, `operator-question` and `frames`. The explanations that used to sit on this page live there.
+
 **Shell.** As `run.md`: the sidebar with Work lit, and the top bar with the Approvals button, whose count includes this question while it waits. The breadcrumb reads Anderson Intelligence Corp. / Core platform / Work orders / `run_01K6QW3D5N7TYBA2`. The held run names no work order: the mockup files it under none, where D2 files a run started from an operator's terminal under a direct work order. A build names the direct work order in the breadcrumb, as `run.md` does.
 
 **Header.** Eyebrow "Run · run_01K6QW3D5N7TYBA2", h1 "Cut the first release notes for edge-proxy", and the line "a-intel.core.release-manager · Claude Code · Marcus Bell · harness tier · github.com/a-intel/edge-proxy@e7c41a9". On the right, the status: "paused · waiting on a person" (approval colour) while waiting, and "live" once answered. No header actions. The eyebrow and the waiting status each carry a mid-dot, against the label rule below. A build keeps the words and drops the mid-dot: the eyebrow "Run" with the id in mono beside it, and the status "paused" with "waiting on a person" as its caption.
 
 **The note.**
 
-- Waiting: "**The loop is stopped.** Not failed, not queued, not continuing on a default. The harness is holding at the boundary before its first model call, the clock on this run is not running, and nothing has been charged since 09:14:02Z."
+- Waiting: "**The loop is stopped.** The harness is holding before its first model call. Nothing has been charged since 09:14:02Z."
 - Answered by link: "**Answered.** a-intel/edge-proxy is a linked repo of core-platform, the run resolved skl_v7, and one skill is loaded."
-- Answered by create: "**Answered.**" and that the workspace edge exists with `a-intel/edge-proxy` as its main repo and skills off, because that is what a new workspace ships as, and that the run carries none and the agent was told so in one line.
+- Answered by create: "**Answered.** The workspace **edge** exists, `a-intel/edge-proxy` is its main repo, and **skills are off in it**. The run carries none, and the agent was told so."
 - After either answer, "Ask again", which resets the mockup to waiting. It is not a product control.
 
 **The triptych**, three panes side by side, each with an eyebrow and a label naming whose view it is.
@@ -37,9 +39,9 @@ The Skills console that used to host this moment is cut, and the walk W13 is ret
    - Two pick cards (`aria-pressed`, a check glyph on the one picked): "Link it to core-platform", "Becomes a linked repo. Inherits skl_v7, the toolbelt, the budget and the harness tier of that workspace."; and "Create a new workspace", "Called edge, with a-intel/edge-proxy as its main repo. Ships with skills off, like every workspace does."
    - "Send this answer" (gold), disabled with "pick one" beside it until a card is picked, then "answers as Marcus Bell".
    - Answered: Marcus's reply at 09:17:38Z ("Link it to core-platform." or "Make a new workspace. Call it edge.") and the agent's turn 1 at 09:17:39Z. By link: "Linked. I have a-intel.release-notes-from-prs@2.1.0 and I am following it: group the merged pull requests, write the draft to a release branch, publish nothing." and "2 skills were withheld from my search. I am told the count and the reason class, not the names." By create: that it works in edge with no skills, from the commit history, and "I will say so in the pull request, because a reviewer should know this was done without the release-notes procedure."
-   - Under the pane, a note: the question reaches Marcus where he already is, in the agent's own surface; there is no second inbox, and the agent is not the author of the question.
+   - No note under the pane. Why the question reaches Marcus in the agent's own surface is in the component help (Agent view).
 2. **What oxagen put to a person** (label "oxagen"; the one gold-bordered pane).
-   - Waiting: the card `control.interject` with the chip "the loop is held" and 09:14:02Z; the lines `repo.unknown` (`github.com/a-intel/edge-proxy` resolves to no workspace in `a-intel`) and "skills.enabled = true and unbound_repo = ask, so oxagen put it to a person instead of resolving nothing quietly."
+   - Waiting: the card `control.interject` with the chip "the loop is held" and 09:14:02Z; the lines `repo.unknown` (`github.com/a-intel/edge-proxy` resolves to no workspace in `a-intel`) and the config line "`skills.enabled = true` · `unbound_repo = ask`"
    - Two paths side by side, each with a heading and one line under it, and consequence lines marked + (gains), − (losses) and · (unchanged):
 
 | Path | Consequences |
@@ -47,21 +49,24 @@ The Skills console that used to host this moment is cut, and the walk W13 is ret
 | **Link**, "to core-platform" | + Inherits `skl_v7`, with 7 skills in scope and 1 withheld. + "Inherits the toolbelt, the $2.00 run budget and the harness tier". + "Becomes the third linked repo · indexed into the code graph". · "Marcus already owns this workspace, so no new grant". − "Everything in edge-proxy is now in core-platform’s spend and audit" |
 | **Create**, "a workspace called edge" | − "**Skills ship off.** 0 in scope, and search_skills is not on the toolbelt". − "No toolbelt, no budget, no price book until somebody sets them". + "Its own spend, its own audit, its own owner". + "a-intel/edge-proxy becomes its main repo, branch main". · "This run continues either way, with or without a procedure" |
 
-   - A note that the second path brings up a new workspace with skills off in the middle of a run that was asking for skills, because the default holds every time a workspace is made.
-   - "If nobody answers": "At 30 minutes this times out to deny. The run continues with no skills and the agent is told why, because the safe end of an unanswered question is fewer skills, not more."
-   - Answered: "Answered" with the badge "closed" and 09:17:38Z; "Marcus Bell chose link to core-platform. Receipt rcp_01K6QW44, waited 3m 36s." (by create, "create the workspace edge" and `rcp_01K6QW45`); and "Linking a repository is a governed action, so this answer went through the same path as approving a payment: a rule, a grant, a receipt, and a name that stays on it."
+   - No note under the paths. What the create path means for a run that asked for skills is in the component help (Operator question).
+   - "If nobody answers": "At 30 minutes this times out to deny. The run continues with no skills, and the agent is told why."
+   - Answered: "Answered" with the badge "closed" and 09:17:38Z; "Marcus Bell chose link to core-platform. Receipt rcp_01K6QW44, waited 3m 36s." (by create, "create the workspace edge" and `rcp_01K6QW45`). The card carries nothing more. That the answer is a governed action with a rule, a grant, a receipt and a name is in the component help (Operator question).
 3. **What was written down** (label "frames"). One row per frame: a class dot, the kind in mono, one line, and the time.
-   - Waiting: `run.started` (09:14:02.118Z), `repo.unknown` and `control.interject` (both highlighted), then greyed: `control.answer` ("marcus answered · pending"), `skills.resolved` and `context.assembled` ("waits on the answer") and `model.request` ("the first model call of the run has not happened"). The note: "The three greyed frames have not happened. A run that is waiting is a run that has written down that it is waiting." The mockup greys four rows and gives the pending `control.answer` a time (09:17:38.902Z). A build greys only the frames that have not happened, shows no time on them, and makes the note's count match.
-   - Answered by link: `control.answer`, `repo.bound`, `skills.resolved`, `skills.searched`, `skills.loaded`, `context.assembled`, `model.request`. By create: `control.answer`, `workspace.created` (`skills.enabled = false`), `repo.bound`, `skills.resolved` (0 in scope), `context.assembled`, `model.request`. The note: "Nothing here is reconstructed. The pause, the question, the wait and the answer are frames in the same chain as the work."
+   - Waiting: `run.started` (09:14:02.118Z), `repo.unknown` and `control.interject` (both highlighted), then greyed: `control.answer` ("marcus answered · pending"), `skills.resolved` and `context.assembled` ("waits on the answer") and `model.request` ("the first model call of the run has not happened"). No note follows. What the greyed rows mean is in the component help (Frames). The mockup greys four rows and gives the pending `control.answer` a time (09:17:38.902Z). A build greys only the frames that have not happened and shows no time on them.
+   - Answered by link: `control.answer`, `repo.bound`, `skills.resolved`, `skills.searched`, `skills.loaded`, `context.assembled`, `model.request`. By create: `control.answer`, `workspace.created` (`skills.enabled = false`), `repo.bound`, `skills.resolved` (0 in scope), `context.assembled`, `model.request`. No note follows.
 
 **After the answer**, one panel under the triptych.
 
-- By link, **Skill loaded**, with "1,840 tokens · $0.0055 · priced on the Spend page as context, not as output": the skill's row (`a-intel.release-notes-from-prs @2.1.0`, its statement, source, kind, tokens, digest, "cited in 186 of 212 runs", "cited 62% → 81% of loads", "allowed", "6 days ago", "Open" and "Edit") and a note that the model call that follows cites it in the system position. "Open" opens the `skill` dialog. "Edit" opens the skill's Steering source page.
-- By create, **Workspace created**, with the badge "skills off": the file `a-intel/edge-proxy · .oxagen/workspace.toml`, "committed by oxagen, 09:17:39Z", with `slug`, `name`, `owner`, `main` and `branch` and no `[skills]` block; the note "This is the same file core-platform had on 2026-07-30. It took a pull request and a named person to change it then, and it takes one now."; and "See how core-platform did it", which opens Steering Sources filtered to skills, where the header carries the skills setting.
+- By link, **Skill loaded**, with "1,840 tokens · $0.0055": the skill's row (`a-intel.release-notes-from-prs @2.1.0`, its statement, source, kind, tokens, digest, "cited in 186 of 212 runs", "cited 62% → 81% of loads", "allowed", "6 days ago", "Open" and "Edit"), and no note. How Spend prices the load and where the next model call cites it are in the component help (Skill loaded). "Open" opens the `skill` dialog. "Edit" opens the skill's Steering source page.
+- By create, **Workspace created**, with the badge "skills off": the file `a-intel/edge-proxy · .oxagen/workspace.toml`, "committed by oxagen, 09:17:39Z", with `slug`, `name`, `owner`, `main` and `branch` and no `[skills]` block; and "See how core-platform did it", which opens Steering Sources filtered to skills, where the header carries the skills setting.
 
 **In the Approvals drawer.** While the question waits, it is the first row of the drawer on every page (`apdInterjectionRow()`): "release-manager is paused and needs a decision", "It’s working in `a-intel/edge-proxy`, which isn’t linked to any workspace, so there’s no skill configuration to apply. No cost since 09:14. If nobody answers within 30 min, the request is denied.", and "Answer" (gold), which closes the drawer and opens this page. It counts one in the Approvals button. No sidebar count and no Agents tile includes it. The row is a pointer to this page, not a second place to answer. `approvals-drawer.md` owns the drawer.
 
-**Dialogs this page opens:** `skill` (from "Open" after a link answer).
+**Dialogs this page opens:** `skill` (from "Open" after a link answer), and `skretire` from its "Retire".
+
+- `skill`: the title is the skill id and the subtitle its source and path. Version, Digest, Kind, Load cost, Decision, Owner, Cited, and Cited rate where measured, then the held reason where there is one and the file's body. No note follows the body. The footer holds "Close", "Retire" (danger), and "Edit the file" or, for an unapproved digest, "Send the digest for approval".
+- `skretire`: "Retire <id>?", the note "This opens a pull request that removes `<path>` on <repo>." (or, for an installed skill, "This opens a pull request that removes its install line from `.oxagen/workspace.toml`."), the warning "<n> of <m> runs cited it. Each keeps the digest it recorded." or "No run has ever cited it.", and "Keep it" and "Open the pull request". The toast reads "Opened <pr> to retire <id>." A skill already retiring shows that its pull request is waiting on its checks.
 
 ## Data sources
 
@@ -92,8 +97,8 @@ The view carries no future-only mark, and the catalog gives it no future story. 
 
 - **loaded**, waiting (the default), then answered by link or by create after "Send this answer".
 - **loading**: the shell stays and the body is the skeleton: four tile blocks and a panel of seven rows.
-- **error**: "This run could not be loaded". "The control plane answered `502 frame_store_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen." Actions "Try again" and "Open an incident", then the line "trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z".
-- **access denied**: "You cannot see this run". "Your roles on Anderson Intelligence Corp. do not include `runs.read on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it." Actions "Request access" and "Back to Work". Below: Signed in as (Marcus Bell · `workspace.owner` · core-platform), Needed (`runs.read on core-platform`), Decided by (`pol_v41` · deny wins over every allow).
+- **error**: "This run could not be loaded". "The control plane answered `502 frame_store_unreachable`. Nothing was changed. Runs kept recording while this page was down." Actions "Try again" and "Open an incident", then the line "trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z".
+- **access denied**: "You cannot see this run". "Your roles on Anderson Intelligence Corp. do not include `runs.read on core-platform`. An organization owner can grant it." Actions "Request access" and "Back to Work". Below: Signed in as (Marcus Bell · `workspace.owner` · core-platform), Needed (`runs.read on core-platform`), Decided by (`pol_v41`).
 
 ## Mobile
 

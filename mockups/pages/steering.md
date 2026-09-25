@@ -26,10 +26,10 @@ This spec also owns the parts every Steering tab shares: the header with its gov
 
 - Eyebrow: the workspace name, "Core platform" (set in capitals by the style).
 - h1: "Steering".
-- Subtext: "Every source that can steer an agent here, and the frames it emits."
+- No subtext. What the page is for is in its component help (`mockups/help/steering.md`, Header).
 - Actions, left to right:
-  - The governance chip, "Governance: team (code-owner review)", with the mode in mono. It opens `govmode`. It is never gold.
-  - The skills chip, "Skills: skl_v7", with the configuration version in mono and the title "How skills resolve in this workspace". It renders only in a workspace with skills on, and it opens `skcfg`. It is never gold.
+  - The governance chip, "Governance: team": the mode's name and no review claim, because no shipped gate runs a code-owner review. It opens `govmode`. It is never gold.
+  - The skills chip, "Skills settings", with the title "How skills resolve in this workspace, settings version skl_v7". It renders only in a workspace with skills on, and it opens `skcfg`. It is never gold.
   - **Import Markdown**, plain on every tab. It opens the Markdown import below.
   - **New source**. Gold on Sources, Assignments, Compiler and Proposals. Plain on the Pull requests view, where Merge pull request holds the gold. It opens `newsrc`.
 
@@ -47,7 +47,7 @@ Picking a chip writes `?kind=<kind>` into the address, and All clears it. A kind
 **Sources panel.**
 
 - Heading: "All sources", or the picked kind's label ("Steering records", "Documents", "Skills", "Agent definitions", "Instructions", "Glossary", "Memory", "Policy", "Mandates" or "Toolbelts").
-- Caption: "186 sources, 22 emitting nothing. Agents counts the agents in Core platform each source can reach by its scope." The count is singular for one source ("1 source."), and the emitting-nothing clause appears only when a listed source emits nothing.
+- Caption: "186 sources, 22 emitting nothing." The count is singular for one source ("1 source."), and the emitting-nothing clause appears only when a listed source emits nothing. How the Agents column counts is in the component help (`mockups/help/steering.md`, Source list).
 - The type strip, right of the heading: one frame-type badge per type the listed sources emit, with the total beside it. On All in Core platform: `goal` 1, `invariant` 1, `constraint` 47, `procedure` 81, `context` 34 and `capability` 19. Each badge carries the type's description as its title.
 - The shared list controls: "Search this list", up to three filters for columns whose values are a short list (on All sources: Scope, Managed in and Emits; on Steering records: Status, Scope and Emits), Rows (5, 10, 25, 50, All; 10 by default), a pager ("1–10 of 186") and sortable column headers.
 
@@ -88,37 +88,37 @@ The Core platform fixtures, by kind: 78 Steering records (62 published, 16 archi
 
 **`govmode`**, opened by the governance chip.
 
-- Title "Governance mode · Core platform", subtitle ".oxagen/rules/governance.toml on a-intel/platform".
-- Three cards in one column. `solo`: "The author may merge their own. One person, or a repository nobody else reviews." `team`: "A code-owner review is required. What a missing governance.toml means, and what most repositories want." `regulated`: "A named approver from a role must approve, and the promotion ledger is hash-chained. Separation of duties: the author of a record may never be its approver." The mode in force carries "· now" after its name, and the picked card is highlighted.
+- Title "Governance mode for Core platform", subtitle ".oxagen/rules/governance.toml on a-intel/platform".
+- Three cards in one column, each saying what the merge gate enforces (`context.steering.policy.ts`). `solo`: "Any workspace member merges, the author included." `team`: "An org Owner or Admin, or a workspace Owner, other than the author merges." `regulated`: "An org Owner or Admin other than the author merges, recorded as the accountable approver." The mode in force carries "· now" after its name, and the picked card is highlighted. Who each mode suits, and separation of duties under `regulated`, are in the dialog's component help.
 - Under the cards, the file the pick would write: two comment lines saying the file is read on the production branch when a pull request is opened and again when it is merged, and that a missing file means team; then `mode = "<mode>"` and `separation_of_duties = true` for `regulated`, `false` otherwise. A build writes the comment `draftGovernanceToml` writes (`packages/oxagen/src/contracts/context.steering.shared.ts:96`). The mockup's first comment line joins the path and the sentence with a colon.
-- A note: "The mode is read off the file when a pull request is opened and again when it is merged, so raising it takes effect on everything already in flight. Lowering it is an org-owner action with approval, recorded as a security event."
-- Footer: Cancel and **Open the pull request** (gold). Confirming reports "Pull request opened on a-intel/platform: .oxagen/rules/governance.toml sets mode = <mode>. It takes effect on merge for everything already in flight; nothing else in Oxagen writes that file." Picking the mode in force reports "Governance mode is already team; nothing to change."
+- No note. When the mode is read, and what a lowering needs, are in the dialog's component help (`mockups/help/steering.md`, Governance mode).
+- Footer: Cancel and **Open the pull request** (gold). Confirming reports "Pull request opened on a-intel/platform: .oxagen/rules/governance.toml sets mode = <mode>." Picking the mode in force reports "Governance mode is already team. Nothing to change."
 
 **`skcfg`**, opened by the skills chip.
 
 - Title ".oxagen/skills.toml", subtitle "Version skl_v7, merged as a-intel/platform#523 by Marcus Bell on 2026-09-10 11:42:07Z".
-- The file, headed ".oxagen/skills.toml" and "skl_v7 · merged 2026-09-10 11:42:07Z": `enabled`, `[sources]`, `[search]`, `[unbound_repo]` with `policy = "ask"`, and `[reflection]`. The mockup's comment on `use = "research"` says "See the Reflection tab.", a tab the wedge cut with skill reflection; the build shows the file and links to no such tab.
-- The sources and what each contributes: a-intel/platform (3 skills), a-intel/billing (1), a-intel/mobile ("not a source"), the a-intel org registry (3) and the Oxagen marketplace (1), each with its one-line note.
-- Footer: "changing this is a pull request, not a save button" and Close. The dialog changes nothing.
+- The file, headed ".oxagen/skills.toml" and "skl_v7 · merged 2026-09-10 11:42:07Z": `enabled`, `[sources]`, `[search]`, `[unbound_repo]` with `policy = "ask"`, and `[reflection]`. The comment on `use = "research"` reads "the only accepted value" and links to no tab.
+- **Sources**: a-intel/platform (3 skills, "The workspace's main repository."), a-intel/billing (1, "A linked repository."), a-intel/mobile ("not a source", "Linked. Not a skill source."), the a-intel org registry (3, "Published across the organization.") and the Oxagen marketplace (1, "Third-party. Every version waits for a person to approve its digest.").
+- Footer: Close. The dialog changes nothing. That a change is a pull request is in its component help.
 
 **`newsrc`**, opened by New source.
 
 - Title "New source", subtitle "Every source changes by a pull request against a-intel/platform".
 - Four cards, each with its action word:
-  - Steering record, "A rule, constraint, procedure, fact or preference in .oxagen/rules/. It publishes when its pull request merges." **Write one** opens the record wizard ("New Steering record").
+  - Steering record, "A rule, constraint, procedure, fact or preference in .oxagen/rules/." **Write one** opens the record wizard ("New Steering record").
   - Document, "Name a document, such as docs/VISION.md or an ADR, in .oxagen/sources.toml, and say which sections emit which frame types." **Register one** opens `srcreg`.
-  - Skill, "A folder under .oxagen/skills/ with skill.toml, SKILL.md, references and optional entrypoints. oxagen describes an entrypoint and never runs it." **Add one** opens the skill wizard ("Add a skill").
+  - Skill, "A folder under .oxagen/skills/ with skill.toml, SKILL.md, references and optional entrypoints." **Add one** opens the skill wizard ("Add a skill").
   - Glossary term, "One term the way this workspace uses it, in .oxagen/ontology/." **Define one** opens `ontnew` ("Define a glossary term").
-- A note: "An agent appends memory, and Import Markdown writes it from a file. A memory becomes a Steering record only through a proposal. Policy, mandates and toolbelts are managed in Tools and on the agent’s Permissions tab."
+- No note. Why memory, policy, mandates and toolbelts have no card is in the dialog's component help (`mockups/help/steering.md`, New source).
 - Footer: Cancel. Each wizard ends on a pull request against the main repository. `docs/creation-spec.md` specifies the wizards.
 
 **`srcreg`**, opened by Register one.
 
 - Title "Register a document", subtitle ".oxagen/sources.toml on a-intel/platform".
-- Lead: "A document emits frames only from the sections this file names. oxagen reads the declared structure and never asks a model what a document means."
+- No lead. How a registration decides what a document emits is in the dialog's component help.
 - The registration as TOML: a `[[source]]` with `id = "ADR-034"`, `kind = "adr"` and its path, and two `[[source.section]]` tables: Decision emits `procedure` at `should`, and Invariants emits `invariant` with `enforced_by = "gate.never-merge"`.
-- A note: "Last changed by a-intel/platform#431, merged 2026-09-02. An invariant needs a section the ADR declares as its invariants, and a superseded ADR emits nothing."
-- Footer: Cancel and **Open the pull request** (gold), which reports "Pull request opened on a-intel/platform to register ADR-034. It emits nothing until that merges."
+- A note: "Last changed by a-intel/platform#431, merged 2026-09-02."
+- Footer: Cancel and **Open the pull request** (gold), which reports "Pull request opened on a-intel/platform to register ADR-034."
 
 ### Markdown import
 
@@ -132,25 +132,25 @@ The Markdown import reads an existing CLAUDE.md, AGENTS.md, or any other Markdow
   - The field **Found in <root>** ("Found" when no root is known) is a table with the columns Include (a checkbox with no header text), File, Lines, KB, Tokens and Import as (`records` or `memories`). An excluded row dims. Under the table, **Import every file as** sets every row at once.
   - Caps. A directory named `node_modules` or `vendor` is skipped as "a dependency directory", `.git` as "version control", and `dist` or `build` as "build output". A skipped directory is named once, by its own path, and never opened. A file that does not end in `.md` or `.markdown` is "not Markdown". A file over 200 KB is "over the 200 KB limit". A file the browser cannot read is "could not be read".
   - The field **Skipped** groups the skipped paths by reason. It shows three paths per reason, then "and N more", and it gives an oversized file's size in KB.
-  - With files included, a note reads "stella reads N files, about T tokens. That costs about $X in usage credits, billed to <organization>. Nothing is sent until you choose Parse with stella." ("file" for one). KB is the file's characters divided by 1024, to one decimal and at least 0.1. Tokens are the characters divided by 3.6. The cost is $0.012 per thousand tokens, rounded up to the cent and never below $0.01.
+  - With files included, a note reads "stella reads N files, about T tokens. That costs about $X in usage credits, billed to <organization>." ("file" for one). The organization's trailing period is dropped, so the sentence ends once. KB is the file's characters divided by 1024, to one decimal and at least 0.1. Tokens are the characters divided by 3.6. The cost is $0.012 per thousand tokens, rounded up to the cent and never below $0.01.
   - Gold **Parse with stella**, disabled while no file is included or a file is still being read.
 - **Step 2, Review.** Title "Review candidates", subtitle "Accept or reject each line, or a whole file at once."
   - Four tiles: **Files** ("parsed by stella"), **Candidates** ("N as records, M as memories"), **Duplicates** ("start rejected") and **Parse cost** ("usage credits").
   - A bar holds **Accept all**, **Reject all**, the select **Import everything as** (each file’s choice, records, or memories), and the count "N accepted, N rejected, N undecided" (`data-imp-counts`). When any line is a duplicate, a hint reads "Accept all leaves the N duplicates rejected. Accept one on its row to import it anyway."
   - Candidates are grouped by file. Each group header holds the path, "N candidates" ("candidate" for one), **Accept file** and **Reject file**.
   - Each candidate row holds the kind badge and its source, `<file>:L<line>` (`L<line>-<end>` for a block), then the text with the matched word marked, then the reason stella gives, with "You set it to <kind>." added when the operator changed the kind. Then the row's notes, then its controls: **Import as** (Record or Memory), Kind, Force (a select for a record, a badge for a memory), Constraint effect (forbid or require, on a record constraint only), **Accept** and **Reject**. The row carries `data-imp-id`, `data-imp-st` and `data-imp-as`.
-  - The notes a row can carry: "Already published as <record> (N% word overlap).", "Repeats <file>:L<line> (N% word overlap).", "Joins <memory> as a saying (N% word overlap). An imported saying never counts as a run." on a memory, "Close to memory <memory> (N% word overlap). As a record it stands alone." on a record, and "A memory caps at may. Keep it a record to hold it at <force>."
-  - A closing note reads "An undecided line is left out. The Markdown files themselves stay as they are." Gold **Review what publishes**, enabled once one line is accepted.
+  - The notes a row can carry: "Already published as <record> (N% word overlap).", "Repeats <file>:L<line> (N% word overlap).", "Joins <memory> as a saying (N% word overlap)." on a memory, "Close to memory <memory> (N% word overlap)." on a record, and "A memory caps at may. Keep it a record to hold it at <force>."
+  - A closing note reads "An undecided line is left out." Gold **Review what publishes**, enabled once one line is accepted.
 - **Step 3, Publish.** Title "Publish", subtitle "Records open one pull request per source file, and memories are written now."
-  - With records, a line reads "Each pull request runs the same six checks as a record you write by hand. A record steers nothing until its pull request merges." Then one block per source file (`data-imp-pr`): `<main> ← context/import-<file slug>`, and one `add .oxagen/rules/<lineage>.toml` per accepted line beside its `<file>:L<line>`.
-  - With memories, the field **Memories** lists `mod <memory id>` ("a saying from <file>:L<line>") for a line that joins a memory, and `add mem.import.<words>` ("<class> at <force> from <file>:L<line>") for a new one. The hint reads "Written when you publish, with no pull request. A memory becomes a record only through a proposal that runs earn, and an imported saying never counts as a run."
+  - With records, one block per source file (`data-imp-pr`): `<main> ← context/import-<file slug>`, and one `add .oxagen/rules/<lineage>.toml` per accepted line beside its `<file>:L<line>`.
+  - With memories, the field **Memories** lists `mod <memory id>` ("a saying from <file>:L<line>") for a line that joins a memory, and `add mem.import.<words>` ("<class> at <force> from <file>:L<line>") for a new one. The hint reads "Written when you publish, with no pull request."
   - The gold button reads "Open N pull requests and write M memories", "Open N pull requests" or "Write M memories", singular for one.
 - **What each target writes.**
   - A record goes into one pull request per source file, opened at once, like a record you write by hand: branch `context/import-<file slug>`, scope workspace, and lineage `ctx.<first segment of the workspace slug>.<first four words>`, with the words cut at 48 characters. Where a published record, an open pull request, or an earlier line already holds a lineage, the import adds `-2`, `-3` and so on. The pull request's description reads "Imported from <file>". `steering-prs.md` specifies how it reads.
   - A memory is written at once, with no pull request, at `may` or `info`. A new one takes the lineage `mem.import.<words>` and provenance "<file>:L<line> · import by <person>". A line that joins a memory adds a saying to it, which counts toward the sayings and never toward the runs. `steering-source.md` specifies the memory's page, and `run-memories.md` specifies folding.
   - The Markdown files are never changed.
   - Audit records `steering_imported`: "<R> records in <P> pull requests, <M> new memories and <S> sayings from <F> Markdown files", each noun singular at a count of one.
-  - A gold toast joins the parts that apply: "Opened N pull requests for R records.", "Wrote N memories.", "Added N sayings to existing memories.", and "The records steer nothing until their pull requests merge."
+  - A gold toast joins the parts that apply: "Opened N pull requests for R records.", "Wrote N memories." and "Added N sayings to existing memories."
   - With a pull request opened, the page goes to the Pull requests view, `/steering/proposals/prs`, with the first one selected. With none, it goes to Sources at `?kind=memory`.
 - **Empty and refused.** With no file found, step 1 shows the drop zone and the note "oxagen skips dependency and build directories, version control, anything that is not Markdown, and any file over 200 KB.", and **Parse with stella** is disabled. A parse that finds no candidate shows 0 on every tile and the closing note, and **Review what publishes** stays disabled with no line that says why. The wizard has no refused state: `wzOpen()` checks no permission, and the footer only names what the import needs.
 
@@ -248,7 +248,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, and More is the lit slo
 - Every enforcement claim states the tier. "Enforced" only for calls routed through Oxagen. A policy source is a notice; the gate behind it is edited on Tools, and removing a notice never removes its gate.
 - Headers are rollups of the rows beneath them: the Sources tab count, the chip counts, the caption and the type strip all read the one list.
 - No person is scored or ranked.
-- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing. The caption under "All sources" runs to two sentences in the mockup, which is a design defect to fix there, not a pattern to copy.
+- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing. The caption under "All sources" is one sentence.
 - Exactly one gold action per screen: New source here. The governance and skills chips and Import Markdown are never gold. Inside the import wizard, each step's own action is the gold.
 - A future-only field is marked in the design and renders as not recorded in a build until its contract ships.
 - Nothing on this page writes a row. Every change ends on a pull request, or on a governed write the source's own page names. The Markdown import's memories are that governed write, and it never changes a Markdown file.

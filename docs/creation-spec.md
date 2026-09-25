@@ -29,7 +29,9 @@ repository, under your review. What Oxagen governs is the call, not the source.
 **The drafting turn belongs to `oxagen.assistant`.** It is recorded with frames and a receipt like
 any turn, and it is billed to Oxagen, never to the tenant: it is not one of your runs and it never
 appears in Work or in Spend. Every line it drafts is the operator's to change before anybody
-reviews it, and the wizard says so on every drafting step.
+reviews it. The drafting card on screen names the drafter ("Drafted by oxagen.assistant from what
+you wrote"). The rest of this paragraph is in the wizards' component help
+(`mockups/help/steering.md`, Steering record wizard).
 
 **The Markdown import is the one exception.** It reads CLAUDE.md, AGENTS.md, and any Markdown file
 into records and memories. The records it accepts take the same road, one pull request per source
@@ -43,7 +45,7 @@ specified under Markdown import in `mockups/pages/steering.md`.
 
 | Page | Action | Opens |
 |---|---|---|
-| Agents | **New agent** | `wzOpen("agent")` |
+| Agents | **Write a new agent…** | `wzOpen("agent")` |
 | Tools | **New tool** | `wzOpen("tool")` |
 | Steering › Sources | **New source**, then **Write one** on the Steering record card | `DLG_EXT.newsrc`, then `wzOpen("record")` |
 | Steering › Sources | **New source**, then **Add one** on the Skill card | `DLG_EXT.newsrc`, then `wzOpen("skill")` |
@@ -53,9 +55,10 @@ Skills are a kind of Steering Source, not a page of their own. Sources lists eve
 with a kind filter (`mockups/pages/steering.md`). The New source chooser also registers a document
 and defines a glossary term, which are dialogs of their own and not wizards of this spec.
 
-**New agent** is not **Register an agent**. Register wraps an agent that already runs on a machine
-or in CI; New agent writes one that does not exist yet. Both end on a pull request; they start from
-opposite ends.
+**Write a new agent…** is not **Register agent**. Register wraps an agent that already runs on a
+machine or in CI; Write a new agent… writes one that does not exist yet. Both end on a pull request;
+they start from opposite ends. The wizard's first step points the other way in one line: “To wrap an
+agent that already runs, register it instead.”, where register links to the Register agent gate.
 
 ## 2. The wizard shell
 
@@ -74,7 +77,7 @@ did. Oxagen gives the first one where it can, because an imported tool arrives w
 publisher and a credential story, and a tool you write arrives with none of those until you write
 them too.
 
-1. **Describe** — the capability, not the implementation.
+1. **Describe** — the capability, not the implementation. The step's subtitle reads "Describe what the tool does."
 2. **Recommendation** — `mcpMatch()` scores the description against `MCP_CATALOG` on **whole words,
    never substrings**: "admin" contains "dm", and a matcher that does not know that will offer to
    import Slack for a feature-flag tool, which is worse than offering nothing because the operator
@@ -84,12 +87,14 @@ them too.
 3. **Import** — hands off to the existing importer with the server chosen. A server that moves money
    carries the warning that its financial tools are denied by construction until a named human owner
    with a finance role holds the connection and every agent that may call them holds a mandate.
-   Import grants nothing.
+   Import grants nothing. The step no longer says so on screen: the wizard's component help
+   (`mockups/help/tools.md`, Tool creation wizard) carries it.
 4. **Manifest** (the build path) — `.oxagen/tools/<name>.toml`, drafted from the description, in the
    source editor. The classification chips above it are **read out of the file** by `tomlParse`, not
    out of a form: break the file and the chips say so and the step will not advance. Declare the
    worst case, not the common case — the gate a call gets is computed from category, risk, side
-   effects, egress and financial class and nothing else.
+   effects, egress and financial class and nothing else. That advice is component help, and the
+   step shows only the file and its chips.
 5. **Code** — a handler in TypeScript, Python, Go or Rust, plus the input JSON Schema. All four do
    the same three things: read the grant off the call rather than a key out of the environment, pass
    the request id as the idempotency key so a retried call is one effect and not two, and declare
@@ -124,7 +129,7 @@ the skill's row on Steering › Sources and from the skill dialog, ending on the
 patch version bumped.
 
 **Where it ends.** The pull request is listed on Repositories · Changes with kind `skill`. After the
-merge the skill is in the catalog on Steering · Skills, and **sync** materializes its files into
+merge the skill is on Steering › Sources at `?kind=skill`, and **sync** materializes its files into
 each enrolled checkout. The Delivered by sync panel shows each repository’s state. The harness loads
 the file by its own progressive disclosure. Only the description line competes in the assembler, and
 Steering › Compiler shows it competing.
@@ -133,19 +138,21 @@ Steering › Compiler shows it competing.
 
 The kind is not a label. It decides how the statement is delivered, what the checks assert about it,
 and how a run is allowed to use it — so the wizard makes you pick one before it will let you write
-the sentence, and it shows what each kind can never do.
+the sentence. What each kind can never do is in the wizard's component help
+(`mockups/help/steering.md`, Steering record wizard), not on the cards.
 
 1. **Describe** — the concern. Say the thing itself, not the reason for it: the reason belongs in the
    rationale on the pull request, where a reviewer reads it once, not in the bundle, where every
    agent pays for it on every turn.
-2. **Kind** — six cards, each with what it is for, what it can never do, and how it reaches a run.
+2. **Kind** — six cards, each with the kind's description and what it is for.
 3. **Statement** — the source editor over the statement, plus force, scope and, for the two
    constraining kinds, the constraint effect. Force is filtered by kind: a preference cannot be
    `must`, and a fact or a memory is `info`. A live preview shows the record card as it will read,
    and the step prices the bundle recompile.
 4. **Checks** — the six, spelled out for this record. The fifth one earns the others: two people can
    each write a sensible record, six weeks apart, that together say a call must happen and must not,
-   and the only place that is catchable is on the pull request, before either reaches a run.
+   and the only place that is catchable is on the pull request, before either reaches a run. The step
+   lists the checks; this reasoning is in its component help.
 5. **Pull request** — merge is the publication, and the record is in force from the merge commit, not
    from when it was written.
 
@@ -154,9 +161,9 @@ and the statement in the same editor.
 
 **Where it ends.** The wizard closes on Steering › Proposals, on the Pull requests view
 (`#/:org/:ws/steering/proposals/prs`), with the new pull request selected. After the merge the record
-is on Steering · Records with its force, scope, token cost, and compilation chip: “compiles to text”,
-or “compiles to text and a gate” when it carries an enforcement grant. A record written in the wizard
-carries no grant. Steering › Compiler shows where the record lands for an agent and a prompt: the
+is on Steering › Sources at `?kind=record`, and its page shows its force, scope and token cost. A
+constraint's panel says whether it carries an enforcement grant, which compiles it to a gate as well
+as to text. A record written in the wizard carries no grant. Steering › Compiler shows where the record lands for an agent and a prompt: the
 stable prefix for `must` and `should`, the volatile selection for `may` and `info`.
 
 ## 6. What this feature must never do

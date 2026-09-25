@@ -24,10 +24,10 @@ The page never shows a frame as its source. Its "Frames it emits" panel lists th
 
 - Eyebrow: "Steering · <kind label>", where Steering links back to Sources filtered to this kind (`?kind=record`, `doc`, `memory`, `glossary` or `instruction`).
 - h1: the source's title. A title over 90 characters sets a smaller h1.
-- A row of badges under the h1, then one lead paragraph, then the actions at the right.
+- A row of badges under the h1, then the actions at the right. A lead paragraph appears only for a state: "Archived in <commit>." on an archived record and "Superseded by <id>." on a superseded ADR.
 - Two columns. The left column holds the source; the right column holds the kind panel (a record only), **Frames it emits** and **Agents it reaches**.
 
-**Frames it emits.** Heading "Frames it emits". Caption "<n> at this version. The same source at the same version always emits these frames, with these hashes." A source that emits nothing reads "None." followed by its reason: "It emits nothing at this version." for an archived record, "superseded by ADR-014" for ADR-008. Each frame is one item:
+**Frames it emits.** Heading "Frames it emits". Caption "<n> at this version." Why the frames and hashes are stable is in the component help (`mockups/help/steering-source.md`, Frames it emits). A source that emits nothing reads "None." followed by its reason: "It emits nothing at this version." for an archived record, "superseded by ADR-014" for ADR-008. Each frame is one item:
 
 - the frame-type badge, the force badge, and the injection point in dim text ("Session start", "Prompt submit");
 - the token cost at the right ("214 tok");
@@ -43,26 +43,26 @@ The route `…/sources/record/ctx.release.notes-format` renders a rule at `shoul
 
 - Eyebrow "Steering · Steering record". The kind's glyph in a tinted tile beside the h1, and the h1 is the statement, never the lineage.
 - Badges: the kind badge (its icon and the kind in capitals, "RULE"), the force ("should"), the constraint effect where the record carries one ("require" or "forbid"), the scope ("workspace"), and the status ("published" with a dot, or "archived"). While a change to the record is open, its branch shows as a further badge ("context/ctx.release.notes-format.amend").
-- Lead: the kind's description, then "It is in force because <commit> merged, and it stops being in force the same way." The descriptions: rule "A directive that steers behavior", constraint "A hard boundary: require or forbid", procedure "Steps, in order", fact "A checkable claim about the world", memory "A durable recollection", preference "Soft and often unfalsifiable".
+- No lead on a published record. The kind's description and what puts a record in force are in the component help (`mockups/help/steering-source.md`, Header).
 - Actions: **Discard edits** (disabled until the statement changes, and it returns the editor to the words in force), **Archive** (red outline; opens `crecarchive`; absent on an archived record) and **Propose a change** (gold; opens `srcpr`).
-- An archived record (`ctx.sec.prefer-the-workspaces-own`) reads "archived", has no Archive action, and its Frames it emits reads "None. It emits nothing at this version." The mockup keeps the lead's "It is in force because…" sentence on it, which contradicts the badge; a build never says an archived record is in force.
+- An archived record (`ctx.platform.retry-budget`) reads "archived", has the lead "Archived in <commit>.", has no Archive action, and its Frames it emits reads "None. It emits nothing at this version."
 
 Left column:
 
-- **The statement editor.** The shared source editor over the statement and nothing else. Its path label reads ".oxagen/rules/ctx.release.notes-format.toml · statement", its change state "unchanged", and its bar "214 tok in the bundle" (or "not compiled"). It has a line-number gutter, markdown highlighting, the current-line band, **Find ⌘F** with a match count, and a status line: "Ln 1, Col 91", "Statement", "1 line · 90 chars", "LF", "UTF-8", and the key hints.
-- A note under it: "This is the statement and nothing else. The lineage, the force, the scope and the effect are the rest of the file, and each one is changed the same way: a pull request against a-intel/platform." The mockup and the build both join the last clause with a colon.
-- **Lineage** panel, with the caption "Git decides which version is in force". Rows: Lineage (`ctx.release.notes-format`), File (".oxagen/rules/ctx.release.notes-format.toml on a-intel/platform"), Published by ("a4c91e2 on 2026-09-04"), Effect ("rendered 212 · cited 188 · violated 3", or "never rendered") and Schema (`steering-record/v0.1`).
+- **The statement editor.** The shared source editor over the statement and nothing else. Its path label reads ".oxagen/rules/ctx.release.notes-format.toml · statement", its change state "unchanged", and its bar "214 tok in the bundle" (or "in the stable prefix"). It has a line-number gutter, markdown highlighting, the current-line band, **Find ⌘F** with a match count, and a status line: "Ln 1, Col 91", "Statement", "1 line · 90 chars", "LF", "UTF-8", and the key hints.
+- No note under it. That the editor holds the statement only is in its component help (`mockups/help/steering-source.md`, Statement).
+- **Lineage** panel, with no caption. Rows: Lineage (`ctx.release.notes-format`), File (".oxagen/rules/ctx.release.notes-format.toml on a-intel/platform"), Published by ("a4c91e2 on 2026-09-04"), Effect ("rendered 212 · cited 188 · violated 3", or "never rendered") and Schema (`steering-record/v0.1`).
 
-Right column, first **the kind panel**. It is headed with the kind's name and its badge, opens with the eyebrow "How it reaches a run" and one note, and ends with "Limits." and one sentence. Each of the six kinds has its own panel:
+Right column, first **the kind panel**. It is headed with the kind's name and its badge, and shows only the record's own data. How each kind reaches a run and what it can never do are in the component help (`mockups/help/steering-source.md`, Kind panel). Each of the six kinds has its own panel:
 
-| Kind | How it reaches a run | What the panel shows | What it can never do |
-|---|---|---|---|
-| `rule` | "Compiled into the steering block of the policy bundle. must and should sit in the stable prefix every turn; may and info are selected by relevance." | "Where it sits": Force ("should", with "in the stable prefix, every turn in scope"; `may` and `info` read "selected by relevance"), Effect (its badge, where the record has one) and Bundle ("v41 · 214 of 1,340 tokens", or "Not in the compiled bundle"). Three meters: "Runs it was rendered into" (212 of 212), "Runs that cited it" (188 of 212) and "Runs that went against it" (3 of 212) | "Can’t grant permission or allow a blocked call." |
-| `constraint` | "Compiled into the stable prefix at whatever force it carries, and asserted by the checks against every other published record on the same subject." | A boundary block with the effect in capitals. `forbid` with an enforcement grant: "This record carries an enforcement grant, so it compiles to text and to a gate. A call routed through oxagen that crosses this boundary is denied before it is dispatched, with this record cited as the reason." The mockup's third sentence, "The gate and its notice are on Steering, under Policy.", names a tab the wedge moved; the build names Tools › Policy. `forbid` without a grant: "This record carries no enforcement grant, so it compiles to text. The agent reads the boundary in its stable prefix. Nothing refuses a call because of it until a grant compiles a gate." `require`: "A run that has not done this cannot proceed past the point that needs it. The check is on the run, not on the call." Then "Conflicts": "Every merge re-runs the conflict check across all 59 published records. A forbid that contradicts an active require on the same subject fails the check, so the two can never both be in force." Meters: rendered, cited and "Runs that crossed it" | "Can narrow what is allowed but can’t widen it. A `require` doesn’t create the permission it requires." |
-| `procedure` | "Compiled like a rule, and rendered as an ordered list so a model cannot silently reorder it." | "The steps, in order": the statement as a numbered list, one step per line. A note: "The order is the record. A run that did these in a different order did not follow this procedure, even if every step happened." | "A step grants nothing. Naming a governed action in step 4 doesn’t put it on a toolbelt." |
-| `fact` | "Delivered as a fact context frame with provenance to this record and its commit, valid_from set to the merge time." | "The claim, and how it is checked": Falsifiable by, valid_from ("2026-05-30, the merge time of a4c91e2"), Last confirmed ("96 runs read it and none contradicted it") and Steers ("nothing by itself"). A note: "A fact that needs to change behavior is a rule that cites it. Keeping the two apart is what lets a fact go stale without silently turning off a rule." | "Steers nothing by itself. To change behavior, write a rule that cites it." |
-| `memory` | "Delivered as a memory context frame, selected by relevance, never pinned into the prefix." | "When it happened": Recorded, Explains, Selection ("By relevance. 12 of 40 runs that carried it used it.") and Decay ("none automatic. A memory that stops being true is archived by a pull request, like everything else.") | "Forbids nothing and proves nothing on its own. It can explain why a retry isn’t a regression." |
-| `preference` | "Delivered at may or info, selected by relevance and dropped first when the window is tight." | "Soft, and recorded as soft": a note that nothing blocks a call, that "Violated" on a preference reads as not followed, and that a run that did not follow it is not a failing run, which is why its third counter is grey. Meters: rendered, cited and "Runs that departed from it" in grey | "Can’t block a call. A run that ignored it hasn’t failed." |
+| Kind | What the panel shows |
+|---|---|
+| `rule` | "Where it sits": Force ("should", with "in the stable prefix, every turn in scope"; `may` and `info` read "selected by relevance"), Effect (its badge, where the record has one) and Bundle ("v41 · 214 of 1,340 tokens", or "Not in the compiled bundle"). Three meters: "Runs it was rendered into" (212 of 212), "Runs that cited it" (188 of 212) and "Runs that went against it" (3 of 212) |
+| `constraint` | A boundary block with the effect in capitals and one line: "Enforcement grant. Its gate is on Tools › Policy." for a record with a grant, "No enforcement grant." otherwise. Meters: rendered, cited and "Runs that crossed it" |
+| `procedure` | "Steps": the statement as a numbered list, one step per line |
+| `fact` | "Claim": Falsifiable by, valid_from ("2026-05-30, the merge time of a4c91e2") and Last confirmed ("96 runs read it and none contradicted it") |
+| `memory` | "When it happened": Recorded, Explains, Selection ("By relevance. 12 of 40 runs that carried it used it.") and Decay ("none automatic") |
+| `preference` | Three meters: rendered, cited and "Runs that departed from it" in grey |
 
 The meters are the record's attribution, read from the effect line: rendered is the total, and the other two are shares of it. They are never a score.
 
@@ -74,9 +74,9 @@ The routes `…/sources/adr/ADR-021`, `…/sources/adr/ADR-008` and `…/sources
 
 - Eyebrow "Steering · ADR" or "Steering · Product vision". The h1 is the document's title: "No agent merges to main", "Release notes are written by hand", "Product vision".
 - Badges: the status (accepted, superseded or registered), the id in mono, "@<commit>", and "repository a-intel/platform".
-- Lead. An accepted ADR: "An accepted ADR emits frames only from the sections the registration names." The vision: the same sentence for "a registered document" (the mockup renders "An registered document", a typo the build does not copy). A superseded ADR: "Superseded by ADR-014, so it emits nothing. Runs that received its frames before still name them."
-- Action: **Open the file**, plain. It opens the document on its repository and reports "Opened <path> on <repository>. A change is a pull request."
-- **Sections** panel. Caption: "What .oxagen/sources.toml says each section emits. A section it does not name emits nothing." Columns: Section, Emits, Force and Text. Emits is the frame-type badge, with "enforced by <gate>" under it where the registration names a gate, or "nothing". Force is the force badge, or a dash for an unregistered section. Every section of a superseded ADR reads "nothing".
+- Lead. None on an accepted ADR or the vision. A superseded ADR: "Superseded by ADR-014."
+- Action: **Open the file**, plain. It opens the document on its repository and reports "Opened <path> on <repository>."
+- **Sections** panel, with no caption. Columns: Section, Emits, Force and Text. Emits is the frame-type badge, with "enforced by <gate>" under it where the registration names a gate, or "nothing". Force is the force badge, or a dash for an unregistered section. Every section of a superseded ADR reads "nothing".
 
 | Document | Sections |
 |---|---|
@@ -93,10 +93,10 @@ The route `…/sources/memory/mem_01K5QX7C`.
 
 - Eyebrow "Steering · Memory". The h1 is the memory's body: "On 4.10.1 a green release pull request was merged by the agent to save time, and nobody objected."
 - Badges: the status ("yields"), the force ("may"), the scope ("workspace"), the version (the date it was recorded, "2026-08-14") and the hash ("sha256:c81f7720").
-- Lead: "Appended by an agent’s run. It competes as context at force may and never above may. It becomes a Steering record only through a proposal." A memory the Markdown importer wrote opens "Imported from a Markdown file." in place of the first sentence.
+- No lead. Where the memory came from is its Where row. How it competes and how it becomes a record are in the component help (`mockups/help/steering-source.md`, Header).
 - Actions: **Forget** (plain; opens `memforget`) and **Propose as a Steering record** (gold; opens the record wizard with the memory's words in its description). A memory the fold already proposed offers **Open the proposal** (gold) instead, which lands on Proposals with that proposal selected (`…/sources/memory/mem_01K5R0N2` opens `prp_01K5RX1N`), so nobody argues the same record twice.
 - **Record** panel: Kind ("Memory"), Where (the run that left it: "run_01K5R52Q3X9YAB9E · frame 88 · reflection"), Recalled ("212 times in 30 days, last 2026-09-11 09:14") and, for a memory that yields, Yields to (a link to `ctx.release.never-merge`, then "a published must, and is excluded as overridden_by_must").
-- **Sayings** panel, under Record, with a count badge, when the memory holds any. The same list the memory dialog shows (`run-memories.md`): each saying in quotes with who said it, then its run and frame as a link to that run's Memories tab, or, for an imported saying, `<file>:L<line>` and "imported". Under the list, the fold line. `mem_01K5QX7C` has one saying ("It becomes a proposal at 3 sayings from 2 runs. It has 1 from 1 run."). `mem_01K5R0N2` has three and reads "Proposed as prp_01K5RX1N when it reached 3 sayings from 2 runs. The proposal cites every saying above." An import adds its saying here, and the fold line then says "An imported saying counts toward the sayings and never toward the runs, so an import alone never makes a proposal."
+- **Sayings** panel, under Record, with a count badge, when the memory holds any. The same list the memory dialog shows (`run-memories.md`): each saying in quotes with who said it, then its run and frame as a link to that run's Memories tab, or, for an imported saying, `<file>:L<line>` and "imported". Under the list, the fold line. `mem_01K5QX7C` has one saying ("It becomes a proposal at 3 sayings from 2 runs. It has 1 from 1 run."). `mem_01K5R0N2` has three and reads "Proposed as prp_01K5RX1N when it reached 3 sayings from 2 runs." An import adds its saying here. How an imported saying counts toward the fold is in the component help (`mockups/help/steering-source.md`, Sayings).
 - An imported memory's Where reads its file, line and importer ("apps/api/CLAUDE.md:L3 · import by Marcus Bell").
 - Right column: **Frames it emits** (one `context` frame at `may`, Prompt submit, 29 tok) and **Agents it reaches**. A memory that yields still emits its frame; the Compiler and the Decision trace list it as excluded with `overridden_by_must`.
 
@@ -106,7 +106,7 @@ The route `…/sources/glossary/ont.release-train`.
 
 - Eyebrow "Steering · Glossary term". The h1 is "term: definition": "release train: The release train is the weekly cut of a-intel/platform from main to a release/x.y branch. A change that misses the freeze rides the next train."
 - Badges: published, `info`, workspace, the commit ("d17e40b") and the hash ("sha256:2f90b1c4").
-- Lead: "A term the way this workspace uses it. It changes by a pull request against a-intel/platform."
+- No lead.
 - Action: **Propose a change** (gold; opens `ontedit`).
 - **Record** panel: Kind ("Glossary term") and Where (".oxagen/ontology/release-train.toml").
 - Right column: **Frames it emits** (one `context` frame at `info`, Prompt submit, 34 tok) and **Agents it reaches**.
@@ -117,7 +117,7 @@ The route `#/a-intel/finops/steering/sources/instruction/ins.finops.additional`.
 
 - Eyebrow "Steering · Workspace instructions". The h1 is the instruction text: "Quote every amount with its currency and its purchase order. Never round."
 - Badges: "in force", `should`, workspace, the date ("2026-08-30") and the hash ("sha256:f19a60c7").
-- Lead: "Workspace settings. It reaches every agent in FinOps as a procedure at force should."
+- No lead. Its badges carry the force, and Agents it reaches carries its reach.
 - No action. The instructions are a workspace setting, not a file.
 - **Record** panel: Kind ("Workspace instructions") and Where ("workspace settings").
 - Right column: **Frames it emits** (one `procedure` frame at `should`, Session start, 19 tok) and **Agents it reaches** (21 in FinOps).
@@ -130,28 +130,28 @@ A policy source, a mandate, a toolbelt and an agent definition are managed on To
 
 **`srcpr`**, "Propose a change to this record", subtitle ".oxagen/rules/<lineage>.toml".
 
-- Lead: "A published record is changed the way it was published: a branch, a pull request, the same six checks, and a merge. Nothing here edits what is in force."
+- No lead. The primary action names what it does.
 - The change: the main repository and the branch ("a-intel/platform ← context/ctx.release.notes-format.amend"), the added and removed line counts, and the line diff of the statement, or "Nothing changed yet."
-- "What the checks will assert": Schema ("steering-record/v0.1 still valid after the edit"), Lineage (the record keeps its lineage, because an amended record is the same record and not a new one), record_hash recomputation ("recomputed over the new bytes · the old hash stays on every run that carried it"), Secret and PII scan ("the new statement is scanned"), Conflict against active records ("re-run in full, because the words changed") and constraint_effect ("unchanged · require").
-- Footer: Cancel and **Open the pull request** (gold; disabled while nothing changed). Opening reports "a-intel/platform#528 opened. ctx.release.notes-format changes when it merges; until then every run still gets the words that are in force now." The header gains the branch badge and the Sources row gains "pull request open". The record in force does not change until the merge.
+- "What the checks will assert": Schema ("steering-record/v0.1 still valid after the edit"), Lineage ("ctx.release.notes-format keeps its lineage"), record_hash recomputation ("recomputed over the new bytes · the old hash stays on every run that carried it"), Secret and PII scan ("the new statement is scanned"), Conflict against active records ("re-run in full") and constraint_effect ("unchanged · require").
+- Footer: Cancel and **Open the pull request** (gold; disabled while nothing changed). Opening reports "a-intel/platform#528 opened. ctx.release.notes-format changes when it merges." The header gains the branch badge and the Sources row gains "pull request open". The record in force does not change until the merge.
 
 **`crecarchive`**, "Archive <lineage>?".
 
-- "Archiving is a pull request that sets status = "archived" on .oxagen/rules/<lineage>.toml. The file stays, the lineage stays, and the record stops compiling into the bundle when it merges. It is in force until then."
-- For a record that carries a constraint effect, a warning: "This record carries <effect>, so it compiles to a gate as well as to text. The gate goes with it, and what it refused today is allowed once this merges." Only a record with an enforcement grant compiles a gate, as the constraint panel and the Sources policy rows say, so a build shows this warning for a granted record alone.
-- "Nothing is deleted. Every run this record steered keeps naming its hash, and a later record may supersede it instead."
-- Footer: **Keep it in force** and **Open the pull request** (red). Opening reports "Opened <pull request> to archive <lineage>. It is in force until that merges." A record with a change already open says "<lineage> already has a pull request open" and offers Close; an archived record says "<lineage> is already archived".
+- "Archiving opens a pull request that sets status = "archived" on .oxagen/rules/<lineage>.toml."
+- For a record with an enforcement grant, a warning: "This record compiles to a gate. What the gate refuses today is allowed once this merges." A record with a constraint effect and no grant gets no warning, because only a grant compiles a gate.
+- What stays (the file, the lineage, every run's hash) is in the dialog's component help.
+- Footer: **Keep it in force** and **Open the pull request** (red). Opening reports "Opened <pull request> to archive <lineage>." A record with a change already open says "<lineage> already has a pull request open", "Branch <branch> is waiting on its checks. Land or close that one first." and offers Close; an archived record says "<lineage> is already archived" and "It is out of force."
 
 **`memforget`**, "Forget this memory?".
 
-- "The assembler stops selecting it, and every agent in scope stops being told it. The runs it was folded from are untouched: every frame stays, and every run that carried it keeps naming the hash it carried."
-- A warning with its recall count: "It was recalled 212 times in the last 30 days. Whatever those runs did with it, they did because of this."
-- "Promote is the other answer. If the memory is right, a record makes it binding instead of leaving it to compete."
-- Footer: **Keep it** and **Forget it** (red), which reports "Forgot <id>. The assembler stops selecting it; every run that carried it is untouched."
+- "The assembler stops selecting it, and every agent in scope stops being told it."
+- A warning with its recall count: "It was recalled 212 times in the last 30 days."
+- What forgetting leaves untouched, and promotion as the other answer, are in the dialog's component help.
+- Footer: **Keep it** and **Forget it** (red), which reports "Forgot <id>."
 
-**`ontedit`**, "Edit release train": Term, Kind (term, entity, alias or boundary, with the hint on each), Definition (with the wand, "Press the wand. oxagen.assistant rewrites what you wrote into the prose the file carries. Read it before anybody reviews it.") and About. A note: "Saving opens a pull request against .oxagen/ontology/release-train.toml. The definition in force does not change until it merges." Footer: Cancel, **Retire** (red; opens `ontretire`) and **Open the pull request** (gold).
+**`ontedit`**, "Edit release train": Term, Kind (term, entity, alias or boundary, with the hint on each), Definition (with the wand, "Press the wand to have oxagen.assistant write the definition’s prose.") and About. A note: "Saving opens a pull request against .oxagen/ontology/release-train.toml." Footer: Cancel, **Retire** (red; opens `ontretire`) and **Open the pull request** (gold). Opening reports "Opened <pull request> for release train."
 
-**`ontretire`**, "Retire release train?": retiring is a pull request that removes the file, and the term keeps informing the model until that merges. Footer: **Keep it** and **Open the pull request** (red).
+**`ontretire`**, "Retire release train?": "Retiring it opens a pull request that removes .oxagen/ontology/release-train.toml.", then the warning "Once the removal merges, no agent is told that release train means what this note says it means." Footer: **Keep it** and **Open the pull request** (red), which reports "Opened <pull request> to remove release train."
 
 The record wizard that Propose as a Steering record opens is specified in `docs/creation-spec.md` §5; it ends on a pull request.
 
@@ -240,11 +240,11 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 - A Steering Source and a SteeringFrame are never shown as each other. This page lists the SteeringFrames a source emits, each with its own id, and a frame row elsewhere links here at the version it names.
 - A frame (a recorded event) and a SteeringFrame (a resolved input) never share a name on screen.
 - A record's statement is the headline. A build that leads with the lineage, the id or the status has inverted the record.
-- Each of the six record kinds gets its own panel, and each says what its kind can never do. A record never grants authority.
+- Each of the six record kinds gets its own panel of the record's own data. What each kind can never do is in the kind panel's component help. A record never grants authority.
 - The meters are attribution read from the record, never a score. No person is scored or ranked.
 - Every enforcement claim states the tier. "Enforced" only for calls routed through Oxagen. A gate named on this page is edited on Tools › Policy.
 - Headers are rollups of the rows beneath them: the Frames it emits count is the rows beneath it, and the reach count is the agents listed plus those on Assignments.
-- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing. The mockup's kind-panel eyebrows carry commas and its captions under Frames it emits and Sections run to two sentences; those are design defects, not patterns to copy.
+- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing. The kind-panel eyebrows are plain nouns (Where it sits, Steps, Claim, When it happened), and the Frames it emits caption is one sentence.
 - Exactly one gold action per screen: Propose a change, or, on a memory, Propose as a Steering record or Open the proposal.
 - A future-only field is marked in the design and renders as not recorded in a build until its contract ships.
 - Nothing on this page writes a row. A file changes by a pull request, and a memory by its own governed write.
