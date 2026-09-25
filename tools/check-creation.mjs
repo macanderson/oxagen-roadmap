@@ -1244,7 +1244,9 @@ for (const theme of ["light", "dark"]) {
   await page.evaluate(() => { closeDialog(); openDialog("repounlink", "a-intel/billing"); });
   await page.waitForTimeout(220);
   const ut = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
-  ok(/nothing is deleted/i.test(ut), "repositories: the confirm says the repository is untouched, got " + ut.slice(0, 160));
+  // What stays untouched (no delete, no branch moves, .oxagen/ stays) is in the Repository unlink help.
+  ok(/stop reaching this workspace/i.test(ut), "repositories: the confirm says what stops, got " + ut.slice(0, 160));
+  ok(!/nothing is deleted/i.test(ut), "repositories: the confirm leaves the explanation to the component help");
   const trip = await page.evaluate(() => {
     closeDialog(); repoUnlink("a-intel/billing");
     const off = { linked: ws().linked.indexOf("a-intel/billing") >= 0, role: repoByName("a-intel/billing").role };
@@ -1273,9 +1275,9 @@ for (const theme of ["light", "dark"]) {
   await page.evaluate((i) => { closeDialog(); openDialog("copyoff", i); }, cid);
   await page.waitForTimeout(220);
   const ct = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
-  ok(/workspace\.json/.test(ct), "copies: the confirm names the gitignored link file, got " + ct.slice(0, 160));
-  ok(/nothing on disk is deleted/i.test(ct), "copies: the confirm says the directory is left alone");
-  ok(/oxagen init/.test(ct), "copies: the confirm says how to link it back");
+  // The gitignored link file and how to link the directory back are in the Working copy disconnection help.
+  ok(/nothing on disk is deleted/i.test(ct), "copies: the confirm says the directory is left alone, got " + ct.slice(0, 160));
+  ok(!/oxagen init/.test(ct), "copies: the confirm leaves how to link it back to the component help");
   ok(!/pull request/i.test(ct), "copies: disconnecting is not a pull request, got " + ct.slice(0, 200));
   const n = await page.evaluate((i) => {
     const before = WORKCOPIES.length; closeDialog(); copyDisconnect(i);

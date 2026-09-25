@@ -30,19 +30,19 @@ It runs the same resolver that builds an agent's Steering tab and a run's Decisi
 
 - Caption: "44 SteeringFrames for release-manager in a-intel/platform."
 - Two meters, each a bar with `role=img` and a percent label:
-  - "Session-start prefix", "1,102 of 4,096 tok", with "16 KiB in the signed bundle, header included" under it. The figure is the compile header (38 tok) plus the Session start frames.
-  - "Per-prompt selection", "419 of 430 tok", with "picked for this brief under the workspace budget" under it. The figure is the Prompt submit frames.
+  - "Session-start prefix", "1,102 of 4,096 tok", with no caption. The figure is the compile header (38 tok) plus the Session start frames.
+  - "Per-prompt selection", "419 of 430 tok", with no caption. The figure is the Prompt submit frames.
 - The type strip: a button per frame type present, each the type badge and its count, with `aria-pressed`: `goal` 1, `invariant` 1, `constraint` 9, `procedure` 10, `context` 9 and `capability` 14. Pressing one filters both sections to that type, and "Show every type" clears it.
-- One block per injection point that carries frames, in this order, each with its name, its description in dim text, and "<n> frames · <tok> tok" at the right:
+- One block per injection point that carries frames, in this order, each with its name and "<n> frames · <tok> tok" at the right. The Envelope help (`mockups/help/steering-compiler.md`) says what each point is:
 
-| Injection point | Description | Release manager, "Cut the 4.11.0 release notes" |
-|---|---|---|
-| Session start | "the stable prefix, delivered in the signed bundle" | 14 frames, 1,064 tok |
-| Prompt | "the brief the run started with" | No block: the Compiler sends no brief |
-| Prompt submit | "the per-prompt selection, picked for this prompt" | 8 frames, 419 tok |
-| Model request | "added at the gateway, between turns" | No block: no steer |
-| Checkout files | "synced into the checkout, loaded by the harness" | 9 frames, 9,140 tok |
-| Tool list | "the tool definitions the toolbelt shows the model" | 13 frames, 977 tok |
+| Injection point | Release manager, "Cut the 4.11.0 release notes" |
+|---|---|
+| Session start | 14 frames, 1,064 tok |
+| Prompt | No block: the Compiler sends no brief |
+| Prompt submit | 8 frames, 419 tok |
+| Model request | No block: no steer |
+| Checkout files | 9 frames, 9,140 tok |
+| Tool list | 13 frames, 977 tok |
 
 - Each block is a table. Columns, in order: Type, SteeringFrame, Source, Force and Tokens.
   - **Type**: the frame-type badge, with the type's description as its title.

@@ -256,7 +256,18 @@ A Steering Source and a SteeringFrame are two objects and never collapse (D4). E
 2. The heading line is `ftLead()`: "53 SteeringFrames reached this run", or "N <type> of 53 SteeringFrames" under a filter.
 3. Two meters: Session-start prefix is the Session start rows plus the bundle's 38-token compile header, against a cap of 16 KiB at the bytes-per-token rate. Per-prompt selection is the Prompt submit rows against the workspace's volatile budget.
 4. `typeStrip()` draws one button per type present, in type order, with `aria-pressed`. `dtType()` filters the Envelope and the Exclusions together, adds "Show every type", and a second press clears it.
-5. Points appear in the order Session start, Prompt, Prompt submit, Model request, Checkout files and Tool list, each with its caption and a tally of frames and tokens. A point with no frame is not drawn.
+5. Points appear in the order Session start, Prompt, Prompt submit, Model request, Checkout files and Tool list, each with its name and a tally of frames and tokens. A point with no frame is not drawn. The page shows no caption under a point. What each one is:
+
+   | Point | What reaches the model there |
+   |---|---|
+   | Session start | The stable prefix, delivered in the signed bundle. |
+   | Prompt | The brief the run started with. |
+   | Prompt submit | The per-prompt selection, picked for this prompt. |
+   | Model request | Frames the gateway adds between turns, such as a steer. |
+   | Checkout files | Files synced into the checkout and loaded by the harness, such as skill bundles. |
+   | Tool list | The tool definitions the toolbelt shows the model. |
+
+   The meters carry no caption either. The session-start prefix fits 16 KiB in the signed bundle, header included. The per-prompt selection is picked for this brief under the workspace budget.
 6. Each point is a table Type · SteeringFrame · Source · Force · Tokens. A gate-backed frame carries "enforced by <gate>". `srcCell()` names the source kind, links the source id with `srcHref()`, and shows the version and the frame hash.
 7. Rows sort by type, then force, then id (`frameOrder()`). A point shows 4 rows and "Show all N" (`dtAll()`). Under a filter every row shows.
 

@@ -72,8 +72,8 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
 - **empty**: "Nothing billable yet". You pay per governed action: a call Oxagen decided, delivered and recorded. The free tier has every governance feature on, an included monthly allowance, thirty days of evidence and three seats. Action: **Back to Work**. Below the empty panel, **Buy governed actions** stays so an organization can buy its first block.
 - **loading**: the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
-- **error**: "Billing could not be loaded". The control plane answered `502 stripe_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
-- **access denied**: "You cannot see billing". Your roles on the organization do not include `org.billing`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it. Actions: **Request access** (opens `request-access`), **Back to Work**. Below: *Signed in as* (name, role), *Needed* (the permission), *Decided by* (`pol_v41`, deny wins over every allow).
+- **error**: "Billing could not be loaded". The control plane answered `502 stripe_unreachable`. Nothing was changed. Runs kept recording while this page was down. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
+- **access denied**: "You cannot see billing". Your roles on the organization do not include `org.billing`. An organization owner can grant it. Actions: **Request access** (opens `request-access`), **Back to Work**. Below: *Signed in as* (name, role), *Needed* (the permission), *Decided by* (`pol_v41`).
 
 ## Mobile
 

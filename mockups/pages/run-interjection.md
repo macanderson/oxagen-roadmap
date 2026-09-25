@@ -97,8 +97,8 @@ The view carries no future-only mark, and the catalog gives it no future story. 
 
 - **loaded**, waiting (the default), then answered by link or by create after "Send this answer".
 - **loading**: the shell stays and the body is the skeleton: four tile blocks and a panel of seven rows.
-- **error**: "This run could not be loaded". "The control plane answered `502 frame_store_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen." Actions "Try again" and "Open an incident", then the line "trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z".
-- **access denied**: "You cannot see this run". "Your roles on Anderson Intelligence Corp. do not include `runs.read on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it." Actions "Request access" and "Back to Work". Below: Signed in as (Marcus Bell · `workspace.owner` · core-platform), Needed (`runs.read on core-platform`), Decided by (`pol_v41` · deny wins over every allow).
+- **error**: "This run could not be loaded". "The control plane answered `502 frame_store_unreachable`. Nothing was changed. Runs kept recording while this page was down." Actions "Try again" and "Open an incident", then the line "trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z".
+- **access denied**: "You cannot see this run". "Your roles on Anderson Intelligence Corp. do not include `runs.read on core-platform`. An organization owner can grant it." Actions "Request access" and "Back to Work". Below: Signed in as (Marcus Bell · `workspace.owner` · core-platform), Needed (`runs.read on core-platform`), Decided by (`pol_v41`).
 
 ## Mobile
 

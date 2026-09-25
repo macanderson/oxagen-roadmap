@@ -26,16 +26,16 @@ The agent header and the tab bar are as `agent.md` specifies, with Steering sele
 
 **1 · What it receives.** The sentence: “44 SteeringFrames for its standing brief, “Cut the 4.11.0 release notes”.” **Open in the Compiler** on the right opens `#/a-intel/core-platform/steering/compiler/release-manager`. The standing brief is the agent's preview prompt, or its description when no prompt is set up. On pr-reviewer the description ends in a full stop inside the quotation marks and the sentence adds its own after them, a copy defect a build avoids.
 
-- Two meters. **Session-start prefix**: “1,102 of 4,096 tok”, captioned “16 KiB in the signed bundle, header included”. **Per-prompt selection**: “419 of 430 tok”, captioned “picked for this brief under the workspace budget”.
+- Two meters, with no caption. **Session-start prefix**: “1,102 of 4,096 tok”. **Per-prompt selection**: “419 of 430 tok”.
 - The type strip: one button per frame type present, in type order, each the type badge and its count, with `aria-pressed`. The demo reads goal 1, invariant 1, constraint 9, procedure 10, context 9, capability 14. Pressing one filters the frames and the exclusions to that type and adds **Show every type**.
-- The injection points that carry frames, in this order, each with its name, its caption and a tally:
+- The injection points that carry frames, in this order, each with its name and a tally. The Envelope help (`mockups/help/run.md`) says what each point is:
 
-| Injection point | Caption | Demo tally |
-|---|---|---|
-| Session start | “the stable prefix, delivered in the signed bundle” | “14 frames · 1,064 tok” |
-| Prompt submit | “the per-prompt selection, picked for this prompt” | “8 frames · 419 tok” |
-| Checkout files | “synced into the checkout, loaded by the harness” | “9 frames · 9,140 tok” |
-| Tool list | “the tool definitions the toolbelt shows the model” | “13 frames · 977 tok” |
+| Injection point | Demo tally |
+|---|---|
+| Session start | “14 frames · 1,064 tok” |
+| Prompt submit | “8 frames · 419 tok” |
+| Checkout files | “9 frames · 9,140 tok” |
+| Tool list | “13 frames · 977 tok” |
 
   Prompt and Model request do not appear: the standing brief is not a work order's send and carries no steer.
 - Each injection point is a table, Type · SteeringFrame · Source · Force · Tokens. Type is the type badge. SteeringFrame is the body, with “enforced by <gate>” under a gate-backed frame that is not a capability (“enforced by gate.never-merge”). Source is the source kind (“Product vision”, “ADR”, “Steering record”, “Policy”, “Skill”, “Memory”, “Glossary term”, “Agent definition”, “Toolbelt”), the source id as a link to where it is managed, and the source version with the frame's hash (“a4c91e2 · #bdec8418”). A toolbelt's version is the date it last changed (`tb_context_graph`, “updated 2026-08-30”). Force is `must`, `should`, `may` or `info`. Tokens is the frame's cost, or a dash for a descriptor that costs nothing (a skill entrypoint). Rows sort by type, then force, then id. A table shows four rows and **Show all N**, which turns into **Show the first 4**.
