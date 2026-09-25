@@ -632,6 +632,8 @@ var KEY_LABEL={gateway_observed:"Observed by gateway",client_attested:"Reported 
   unknown_tool:"Unknown tool",initiating_principal:"Person who started the run","policy.decision":"Policy decision",
   per_run_micros:"Per-run budget",cache_write_5m:"Cache write (5 min)",input_uncached:"Uncached input",
   content_exact:"Exact content match",deny_tools:"Denied tools",above_micros:"Auto-approve limit","approval.above_micros":"Auto-approve limit"};
+// A separator between chips: read aloud and copied as ", ", invisible on screen.
+var SEP='<span class="vh">, </span>';
 function keyText(k){return KEY_LABEL[k]||String(k);}
 function keyLabel(k){return KEY_LABEL[k]?'<span title="'+h(k)+'">'+h(KEY_LABEL[k])+'</span>':h(k);}
 // The spend basis chip: "Observed by gateway" or "Reported by harness".
@@ -1117,7 +1119,7 @@ function defForm(a){
   var rows=dirty?diffLines(defBase(slug),defSrc(slug)):null, st=rows?diffStat(rows):null;
   function fld(label,html,hint){return '<div class="field"><label>'+label+'</label>'+html+(hint?'<div class="hint">'+hint+'</div>':'')+'</div>';}
   function txt(section,key,val,ro){return '<input '+(ro?'readonly ':'')+'value="'+h(val==null?"":val)+'" aria-label="'+h(key)+'"'+(ro?' class="mono"':' onchange="defField(\''+slug+'\','+(section?"'"+section+"'":"null")+',\''+key+'\',this.value)"')+'>';}
-  function chips(key,arr){arr=Array.isArray(arr)?arr:[];return '<div class="chips">'+arr.map(function(v,i){return '<span class="chip mono"><span>'+h(v)+'</span><button type="button" aria-label="Remove '+h(v)+'" onclick="defChip(\''+slug+'\',\''+key+'\','+i+',null)">×</button></span>';}).join("")+
+  function chips(key,arr){arr=Array.isArray(arr)?arr:[];return '<div class="chips">'+arr.map(function(v,i){return '<span class="chip mono"><span>'+h(v)+'</span><button type="button" aria-label="Remove '+h(v)+'" onclick="defChip(\''+slug+'\',\''+key+'\','+i+',null)">×</button></span>';}).join(SEP)+
     '<input class="mono" placeholder="add a tool pattern, Enter to keep" aria-label="Add to '+key+'" onkeydown="if(event.key===\'Enter\'&&this.value.trim()){defChip(\''+slug+'\',\''+key+'\',-1,this.value.trim());event.preventDefault();}"></div>';}
   var fx=Array.isArray(d.side_effects)?d.side_effects:[];
   function check(v,label,desc,locked){var on=fx.indexOf(v)>=0;return '<label class="check'+(locked?' off':'')+'"><input type="checkbox"'+(on?' checked':'')+(locked?' disabled':'')+' onchange="defFx(\''+slug+'\',\''+v+'\',this.checked)"><span class="grow"><span class="n">'+label+'</span><div class="d">'+desc+'</div></span></label>';}
@@ -1430,7 +1432,7 @@ function commitBody(){
      :'<div class="field"><label>Branch head</label><div class="hint" style="margin-top:9px">'+(ex?h(String(ex.ahead))+' commit'+(ex.ahead===1?'':'s')+' ahead of '+h(w.branch)+' · '+h(PEOPLE[ex.by]?PEOPLE[ex.by].name:ex.by)+' · '+h(ex.when)+(ex.pr?'<br><span class="mono">'+h(ex.pr)+'</span> is open for it; this commit joins that pull request.':'<br>No pull request yet.'):'Your open change for this agent.')+'</div></div>')+
    '</div>'+
    '<div class="field"><label>Summary</label><input value="'+h(c.title)+'" aria-label="Summary" oninput="cmSet(\'title\',this.value)">'+
-    '<div class="cm-draft"><span class="b b-q">'+h(d.kind)+'</span>'+d.areas.map(function(x){return '<span class="b b-q">'+h(x)+'</span>';}).join("")+
+    '<div class="cm-draft"><span class="b b-q">'+h(d.kind)+'</span>'+d.areas.map(function(x){return '<span class="b b-q">'+h(x)+'</span>';}).join(SEP)+
     '<span>Drafted by <span class="mono">'+h(d.model)+'</span> · light tier · '+d.tokens+' tokens · $'+d.cost+' · '+d.ms+' ms</span>'+
     '<button class="btn sm ghost" type="button" onclick="cmRedraft()">Redraft</button></div></div>'+
    '<div class="field"><label>Description</label><textarea rows="4" aria-label="Description" oninput="cmSet(\'body\',this.value)">'+h(c.body)+'</textarea>'+
@@ -2532,7 +2534,7 @@ function runWhere(R){
   var k=runWork(R);
   var prs=k.prs.length
     ? k.prs.map(function(p){return '<a class="b b-q lk" href="'+h(p.url)+'" target="_blank" rel="noopener" title="'+h(p.title)+'">'+
-        avSvg("git-pull-request")+h(p.ref)+'</a>';}).join("")
+        avSvg("git-pull-request")+h(p.ref)+'</a>';}).join(SEP)
     : '<span class="b b-q dim">no pull request</span>';
   return '<div class="row where" style="margin-top:6px">'+
    '<a class="b b-q lk" href="'+h(ghRepoUrl(k.repo))+'" target="_blank" rel="noopener">'+h(k.repo)+'</a>'+
@@ -4616,8 +4618,8 @@ function pAgents(){
 
   var list=AGENTS.filter(function(a){return a.ws===w.slug;}), view=agentViewSet();
   var acts=function(a){
-    return '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">Edit</button>'+
-     '<button class="btn sm" onclick="openDialog(\'assignrole\',\''+a.key+'\')">Roles</button>'+
+    return '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">Edit</button><span class="vh">, </span>'+
+     '<button class="btn sm" onclick="openDialog(\'assignrole\',\''+a.key+'\')">Roles</button><span class="vh">, </span>'+
      '<button class="btn sm danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Retire</button></td>';
   };
   var head, rows;
@@ -4807,7 +4809,7 @@ function beltGateCell(b){
   var g=beltGates(b), tone={allow:"allowed",require_approval:"approval",mandate:"proven",killed:"critical"};
   var lab={allow:"allowed",require_approval:"approval",mandate:"mandate",killed:"killed"};
   var out=["allow","require_approval","mandate","killed"].filter(function(k){return g[k];})
-    .map(function(k){return '<span class="b b-'+tone[k]+'" style="font-size:10.5px"><span class="d"></span>'+g[k]+' '+lab[k]+'</span>';}).join("");
+    .map(function(k){return '<span class="b b-'+tone[k]+'" style="font-size:10.5px"><span class="d"></span>'+g[k]+' '+lab[k]+'</span>';}).join(SEP);
   return out||'<span class="dim">—</span>';
 }
 function beltAvailability(b){
@@ -5697,7 +5699,7 @@ function pTools(){
        '<td><span class="b b-q">'+h(x.eg)+'</span></td><td>'+finBadge(x.fin)+'</td>'+
        '<td>'+originBadge(toolOrigin(x))+'</td>'+
        '<td class="mono dim" style="font-size:11px">'+h(toolDigest(x))+'</td>'+
-       '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(""):'<span class="dim">—</span>')+'</td>'+
+       '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(SEP):'<span class="dim">—</span>')+'</td>'+
        '<td class="num">'+agentsWithTool(x.n+"@"+x.v).length+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("");
     body='<div class="grid">'+
      (props.length?'<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>'+props.length+' awaiting approval</span>'+
@@ -5734,8 +5736,8 @@ function pTools(){
        '<td><b>'+h(b.name)+'</b><span class="sub">'+h(b.desc)+'</span></td>'+
        '<td class="mono" style="font-size:11.5px">'+h(b.owner)+'<span class="sub">'+h(b.by)+'</span></td>'+
        '<td class="num">'+b.tools.length+'</td>'+
-       '<td>'+provs.map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join("")+'</td>'+
-       '<td>'+(keys.length?keys.map(function(k){return '<span class="b b-q" style="font-size:10.5px">'+h(k.split(".").pop())+'</span>';}).join("")
+       '<td>'+provs.map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join(SEP)+'</td>'+
+       '<td>'+(keys.length?keys.map(function(k){return '<span class="b b-q" style="font-size:10.5px">'+h(k.split(".").pop())+'</span>';}).join(SEP)
                           :'<span class="dim">unassigned</span>')+'</td>'+
        '<td>'+beltGateCell(b)+'</td>'+
        '<td>'+(avail.blocked?'<span class="b b-critical"><span class="d"></span>'+avail.blocked+' unavailable</span>'
@@ -5754,9 +5756,9 @@ function pTools(){
       bs.forEach(function(b){beltProviders(b).forEach(function(s){if(!seen[s]){seen[s]=1;pv.push(s);}});});
       return '<tr '+(a?rowClick("go('#/"+ORG.slug+"/"+S.ws+"/agents/"+defSlug(a)+"/toolbelt')","Open "+k):"")+'>'+
        '<td><b class="mono" style="font-size:11.5px">'+h(k)+'</b>'+(a?'<span class="sub">'+h(a.desc||a.harnessLabel)+'</span>':'')+'</td>'+
-       '<td>'+bs.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join("")+'</td>'+
+       '<td>'+bs.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(SEP)+'</td>'+
        '<td class="num">'+(a?beltTotal(a):(AGENT_BELTS[k]||[]).length)+'</td>'+
-       '<td>'+pv.map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join("")+'</td>'+
+       '<td>'+pv.map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join(SEP)+'</td>'+
        '<td>'+(a?tierBadge(a.tier):'<span class="dim">—</span>')+'</td></tr>';}).join("")+
      '</tbody></table></div></div></div>';
   } else if(t==="providers"){
@@ -5771,7 +5773,7 @@ function pTools(){
        '<td><b>'+h(sv.system)+'</b><span class="sub">'+h(sv.desc)+'</span></td>'+
        '<td><span class="b b-q">'+h(sv.transport)+'</span><span class="sub mono" style="font-size:10.5px">'+h(sv.wire)+' · '+h(sv.url)+'</span></td>'+
        '<td class="num">'+sv.tools+'<span class="sub">'+plural(sv.versions,"version")+'</span></td>'+
-       '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(""):'<span class="dim">—</span>')+'</td>'+
+       '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(SEP):'<span class="dim">—</span>')+'</td>'+
        '<td class="num">'+(ag.length||'<span class="dim">—</span>')+'</td>'+
        '<td>'+(sv.health==="ok"?'<span class="b b-allowed"><span class="d"></span>ok</span>':'<span class="b b-approval"><span class="d"></span>degraded</span>')+'</td>'+
        '<td style="font-size:12px" class="rowacts" onclick="event.stopPropagation()">'+(c
@@ -5804,8 +5806,8 @@ function pTools(){
        '<td><span class="b b-'+(/pass/.test(p.tests)?"allowed":"q")+'">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td>'+
        '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'policyver\',\''+p.v+'\')">Open</button>'+
        (p.state==="active"?'<button class="btn sm" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft a change</button>':
-        p.state==="draft"?'<button class="btn sm" onclick="openDialog(\'policyedit\',\''+p.v+'\')">Edit</button>'+
-         '<button class="btn sm primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>'+
+        p.state==="draft"?'<button class="btn sm" onclick="openDialog(\'policyedit\',\''+p.v+'\')">Edit</button><span class="vh">, </span>'+
+         '<button class="btn sm primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button><span class="vh">, </span>'+
          '<button class="btn sm danger" onclick="openDialog(\'policydiscard\',\''+p.v+'\')">Discard</button>':
         '<button class="btn sm" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')+'</td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><div class="note">A version is activated by a governed action with approval, and in regulated mode it is a Context PR instead. A draft is the only version you can edit or discard: once a version has decided anything it is kept, because every decision cites the version that made it.</div></div></div>'+
@@ -5821,7 +5823,7 @@ function pTools(){
      '<div class="hr"></div>'+
      '<p class="eyebrow q">Conditions a rule may test</p>'+
      '<div class="row">'+["tool version","risk","side effect","egress","financial class","amount by path","counterparty","repository","path prefix","recipient domain","taint and its sources","time window","rate","sequence","operator role","enforcement tier","budget position","mandate position"]
-      .map(function(c){return '<span class="b b-q" style="font-size:10.5px">'+h(c)+'</span>';}).join("")+'</div>'+
+      .map(function(c){return '<span class="b b-q" style="font-size:10.5px">'+h(c)+'</span>';}).join(SEP)+'</div>'+
      '<div class="hr"></div><p class="eyebrow q">Sequence rule</p>'+
      '<p class="muted" style="margin:0 0 8px;font-size:12.5px">A rule names the call it governs, then the condition that lets it through. This one denies a payment unless the same run already priced it.</p>'+
      '<pre><span class="c">// a payment requires a prior quote call in the same run</span>\n'+
@@ -5995,9 +5997,9 @@ DLG_EXT.server=function(id){
     '<dt>Registry name</dt><dd class="mono">'+h(sv.name)+'</dd>'+
     '<dt>Schemas</dt><dd>'+h(sv.schemas)+'</dd>'+
     '<dt>Tool versions</dt><dd>'+sv.versions+' across '+plural(sv.tools,"tool")+'</dd>'+
-    '<dt>Toolbelts</dt><dd>'+(pbelt.length?pbelt.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join("")
+    '<dt>Toolbelts</dt><dd>'+(pbelt.length?pbelt.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(SEP)
       :'<span class="dim">on no toolbelt in this workspace</span>')+'</dd>'+
-    '<dt>Agents reached</dt><dd>'+(pag.length?pag.map(function(k){return '<span class="b b-q" style="font-size:10.5px">'+h(k.split(".").pop())+'</span>';}).join("")
+    '<dt>Agents reached</dt><dd>'+(pag.length?pag.map(function(k){return '<span class="b b-q" style="font-size:10.5px">'+h(k.split(".").pop())+'</span>';}).join(SEP)
       :'<span class="dim">none</span>')+'</dd>'+
     '<dt>Last import</dt><dd class="mono">'+h(sv.imported)+'</dd></dl>'+
     '<p class="eyebrow" style="margin:18px 0 8px">Authorization</p>'+conn+
@@ -6025,7 +6027,7 @@ DLG_EXT.belt=function(id){
       h(av.why)+'. The agents carrying it are still shown them, and the call is refused at dispatch.</div>':'')+
     (b.note?'<div class="note" style="margin-bottom:14px">'+h(b.note)+'</div>':'')+
     '<dl class="kv"><dt>Owner</dt><dd>'+h(b.owner)+'<span class="sub">last changed '+h(b.updated)+' by '+h(b.by)+'</span></dd>'+
-    '<dt>Providers</dt><dd>'+beltProviders(b).map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join("")+'</dd>'+
+    '<dt>Providers</dt><dd>'+beltProviders(b).map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join(SEP)+'</dd>'+
     '<dt>Agents assigned</dt><dd>'+(keys.length
       ?keys.map(function(k){var a=agentByKey(k);
         return a?'<button class="btn sm ghost" onclick="closeDialog();go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+defSlug(a)+'/toolbelt\')">'+h(defSlug(a))+'</button>'
@@ -7380,7 +7382,7 @@ function stgOntologyTab(w){
      '<td>'+(o.retiring?'<span class="b b-approval"><span class="d"></span>retiring</span>':forceBadge(o.force))+'</td>'+
      '<td class="mono" style="font-size:11.5px">'+o.entities.map(h).join("<br>")+'</td>'+
      '<td class="num">'+tokn(o.token_cost)+' tok</td><td class="mono" style="font-size:11px">'+h(o.provenance)+'</td>'+
-     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'ontedit\',\''+h(o.id)+'\')">Edit</button>'+
+     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'ontedit\',\''+h(o.id)+'\')">Edit</button><span class="vh">, </span>'+
      '<button class="btn sm danger" onclick="openDialog(\'ontretire\',\''+h(o.id)+'\')">Retire</button></td></tr>';}).join("");
   return '<div class="note" style="margin-bottom:14px">An ontology note defines one entity or one term the way this workspace uses it. It compiles to text like any other item, enters the volatile selection as <span class="mono">info</span>, and grants nothing. A note is a file somebody wrote and somebody merged, under <span class="mono">.oxagen/ontology/</span> on '+h(w.main)+', so writing, changing and retiring one each open a pull request.</div>'+
    '<div class="panel"><div class="panel-h"><h3>Definitions</h3><div class="sp"><span class="b b-q">'+L.length+'</span>'+
@@ -8905,7 +8907,7 @@ function spendWaste(){
    '<div class="panel-b" style="display:grid;gap:12px">'+
    SPEND.wasteRunsList.map(function(x){var r=byRun[x.run]; if(!r) return '';
     var href="#/"+ORG.slug+"/"+r.ws+"/runs/"+r.id;
-    var badges=x.badges.map(function(b){return '<span class="b b-'+b[1]+'"><span class="d"></span>'+h(b[0])+'</span>';}).join("");
+    var badges=x.badges.map(function(b){return '<span class="b b-'+b[1]+'"><span class="d"></span>'+h(b[0])+'</span>';}).join(SEP);
     var frac=Math.min(1,parseFloat(x.wasted)/parseFloat(r.cost));
     return '<div class="act-card" style="margin:0"><div class="t" style="flex-wrap:wrap"><a class="mono" href="'+href+'" style="font-size:12px">'+h(r.id)+'</a>'+
      '<span class="dim" style="font-size:12px">'+h(r.agent)+' · '+h(PEOPLE[r.op].name)+' · '+h(r.started)+'</span>'+
@@ -9000,7 +9002,7 @@ function pOrganization(){
        '<td>'+h(m.ws)+'</td><td>'+h(m.mfa)+'</td>'+
        '<td class="mono dim" style="font-size:11px">'+h(m.last)+'</td>'+
        '<td><span class="b '+(m.status==="active"?"b-allowed":"b-q")+'"><span class="d"></span>'+h(m.status)+'</span></td>'+
-       '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'member\',\''+m.p+'\')">Open</button><button class="btn sm" onclick="openDialog(\'role\',\''+m.p+'\')">Change role</button><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
+       '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'member\',\''+m.p+'\')">Open</button><span class="vh">, </span><button class="btn sm" onclick="openDialog(\'role\',\''+m.p+'\')">Change role</button><span class="vh">, </span><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing a role is a governed action. It passes IAM, writes an audit record, and bills as one action.</div></div></div>';
   } else if(t==="roles"){
@@ -9011,7 +9013,7 @@ function pOrganization(){
      '<thead><tr><th>Email</th><th>Role offered</th><th>Invited by</th><th>Sent</th><th>Expires</th><th></th></tr></thead><tbody>'+
      INVITES.map(function(i){return '<tr><td class="mono" style="font-size:12px">'+h(i.email)+'</td>'+
       '<td class="mono" style="font-size:11.5px">'+h(i.role)+'</td><td>'+h(i.by)+'</td><td>'+h(i.sent)+'</td><td>'+h(i.expires)+'</td>'+
-      '<td class="rowacts"><button class="btn sm" onclick="inviteResend(\''+h(i.email)+'\')">Resend</button>'+
+      '<td class="rowacts"><button class="btn sm" onclick="inviteResend(\''+h(i.email)+'\')">Resend</button><span class="vh">, </span>'+
       '<button class="btn sm danger" onclick="openDialog(\'invrevoke\',\''+h(i.email)+'\')">Revoke</button></td></tr>';}).join("")+
      '</tbody></table></div></div>';
   } else if(t==="workspaces"){
@@ -9023,7 +9025,7 @@ function pOrganization(){
       '<td class="mono dim" style="font-size:11.5px">'+(w.linked.length?h(w.linked.join(", ")):"—")+'</td>'+
       '<td class="num">'+w.agents+'</td><td>'+h(w.owner)+'</td>'+
       '<td><span class="b b-q">'+h(wsGov(w))+'</span><div class="dim mono" style="font-size:11px">'+h(w.retention)+' · ns '+h(w.ns)+'</div></td>'+
-      '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
+      '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><span class="vh">, </span><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><span class="vh">, </span><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
   } else if(t==="funding"){
@@ -9040,7 +9042,7 @@ function pOrganization(){
      APIKEYS.map(function(k,i){var st=KST[k.st];
       return '<tr><td><b>'+h(k.name)+'</b><div class="dim mono" style="font-size:11px">'+h(k.key)+'</div></td>'+
        '<td class="mono" style="font-size:11.5px">'+h(k.principal)+'</td>'+
-       '<td style="max-width:26ch">'+k.grants.map(function(g){return '<span class="b b-q" style="margin:0 3px 3px 0;font-family:var(--mono);font-weight:500">'+h(g)+'</span>';}).join("")+'</td>'+
+       '<td style="max-width:26ch">'+k.grants.map(function(g){return '<span class="b b-q" style="margin:0 3px 3px 0;font-family:var(--mono);font-weight:500">'+h(g)+'</span>';}).join(SEP)+'</td>'+
        '<td>'+h(k.by)+'</td><td class="mono dim" style="font-size:11px">'+h(k.last)+'</td>'+
        '<td class="num">'+k.n30.toLocaleString()+'</td>'+
        '<td><span class="b '+st[0]+'"><span class="d"></span>'+h(st[1])+'</span><div class="dim mono" style="font-size:11px">'+h(k.expires)+'</div></td>'+
@@ -9534,7 +9536,7 @@ function auditExports(){
    '<div class="note" style="margin-top:12px">The verifier runs offline and needs no oxagen service. It recomputes every Merkle root and checks every seal signature against the published key, so an auditor never has to trust oxagen’s word for the chain.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Outbound events</h3><span class="b b-q" style="margin-left:auto">Series A</span></div><div class="panel-b">'+
    '<p class="muted" style="font-size:12.5px;margin-top:0">Subscriptions name the event kinds; only those are emitted and everything else never leaves. Payloads carry ids and a link to the run and frame, never raw prompt or tool bodies.</p>'+
-   '<div class="row">'+kinds.map(function(e){return '<span class="b b-q mono" style="font-size:10.5px">'+h(e)+'</span>';}).join("")+'</div>'+
+   '<div class="row">'+kinds.map(function(e){return '<span class="b b-q mono" style="font-size:10.5px">'+h(e)+'</span>';}).join(SEP)+'</div>'+
    '<div class="hr"></div><dl class="kv"><dt>Dead-letter view</dt><dd>0 undelivered</dd><dt>Delivery</dt><dd>signed webhook, HMAC with a rotating secret, ordered per run, at-least-once with backoff</dd></dl></div></div></div>';
 }
 
@@ -11843,7 +11845,7 @@ function roleAssignees(id){
 }
 function permChips(perms,max){
   var shown=perms.slice(0,max||4);
-  return shown.map(function(p){return '<span class="b b-q" style="margin:0 3px 3px 0;font-family:var(--mono);font-weight:500">'+h(p)+'</span>';}).join("")+
+  return shown.map(function(p){return '<span class="b b-q" style="margin:0 3px 3px 0;font-family:var(--mono);font-weight:500">'+h(p)+'</span>';}).join(SEP)+
    (perms.length>shown.length?'<span class="dim" style="font-size:11px">+'+(perms.length-shown.length)+' more</span>':'');
 }
 /* Role kinds (human, agent, service), not record kinds. Named apart from kindBadge, which this used to
@@ -11858,8 +11860,8 @@ function rolesBody(){
      '<td style="max-width:30ch">'+permChips(r.perms)+'</td>'+
      '<td style="font-size:12px;white-space:nowrap">'+(n.total?[n.people?plural(n.people,"person","people") :'',n.agents?n.agents+' agent'+(n.agents>1?'s':''):'',n.svc?n.svc+' key'+(n.svc>1?'s':''):''].filter(Boolean).join(' · '):'<span class="dim">nobody</span>')+'</td>'+
      '<td style="font-size:11.5px">'+(locked?'<span class="b b-q">built-in</span>':'<span class="dim">'+h(r.by)+' · '+h(r.at)+'</span>')+'</td>'+
-     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="roleOpen(\''+r.id+'\')">'+(locked?'View':'Edit')+'</button>'+
-      '<button class="btn sm" onclick="roleDup(\''+r.id+'\')">Duplicate</button>'+
+     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="roleOpen(\''+r.id+'\')">'+(locked?'View':'Edit')+'</button><span class="vh">, </span>'+
+      '<button class="btn sm" onclick="roleDup(\''+r.id+'\')">Duplicate</button><span class="vh">, </span>'+
       '<button class="btn sm danger"'+(locked?' disabled title="Built-in roles cannot be deleted"':busy?' disabled title="Reassign the '+n.total+' holder'+(n.total>1?'s':'')+' first"':'')+' onclick="openDialog(\'roledel\',\''+r.id+'\')">Delete</button></td></tr>';
   }).join("");
   return '<div class="panel"><div class="panel-h"><h3>Roles</h3>'+
@@ -12018,7 +12020,7 @@ function budgetDel(i){
 /* ---- identities and role assignment on an agent ---- */
 function agentRoleChips(a){
   var list=agentRolesOf(a.key);
-  return (list.length?list.map(function(r){return '<span class="rl-chip"><span>'+h(r)+'</span><button type="button" aria-label="Remove '+h(r)+'" title="Remove role" onclick="roleUnassign(\''+h(a.key)+'\',\''+h(r)+'\')">×</button></span>';}).join(""):'<span class="dim">none — it can call nothing</span>')+
+  return (list.length?list.map(function(r){return '<span class="rl-chip"><span>'+h(r)+'</span><button type="button" aria-label="Remove '+h(r)+'" title="Remove role" onclick="roleUnassign(\''+h(a.key)+'\',\''+h(r)+'\')">×</button></span>';}).join(SEP):'<span class="dim">none — it can call nothing</span>')+
    '<div><button class="btn sm" style="margin-top:6px" onclick="openDialog(\'assignrole\',\''+h(a.key)+'\')">Assign role</button></div>';
 }
 function roleUnassign(key,r){var l=agentRolesOf(key);var i=l.indexOf(r);if(i>=0)l.splice(i,1);render();act("Removed "+r+" from "+key+". Its toolbelt is recomputed at the next run start.");}
@@ -14910,12 +14912,12 @@ function ltPager(st,total,onPage){
   var per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per));
   if(st.page>pages)st.page=pages; if(st.page<1)st.page=1;
   var from=total?((st.page-1)*per+1):0, to=Math.min(total,st.page*per);
-  var html='<div class="lp"><span class="lp-n">'+(total?from+'–'+to+' of '+total:'0 of 0')+'</span><span class="lp-pg">'+
+  var html='<div class="lp"><span class="lp-n">'+(total?from+'–'+to+' of '+total.toLocaleString("en-US")+(pages>1?' (page '+st.page+' of '+pages+')':''):'None')+'</span><span class="lp-pg">'+
    '<button class="btn sm" data-p="prev" aria-label="Previous page"'+(st.page<=1?' disabled':'')+'>‹</button>';
   var nums=[]; if(pages<=7){for(var i=1;i<=pages;i++)nums.push(i);} else {
     nums=[1]; var lo=Math.max(2,st.page-1), hi=Math.min(pages-1,st.page+1);
     if(lo>2)nums.push("…"); for(var j=lo;j<=hi;j++)nums.push(j); if(hi<pages-1)nums.push("…"); nums.push(pages);}
-  nums.forEach(function(p){html+= p==="…"?'<span class="el">…</span>':'<button class="btn sm" data-p="'+p+'"'+(p===st.page?' aria-current="page"':'')+'>'+p+'</button>';});
+  nums.forEach(function(p){html+= p==="…"?'<span class="el">…</span>':'<button class="btn sm" data-p="'+p+'" aria-label="Page '+p+' of '+pages+'"'+(p===st.page?' aria-current="page"':'')+'>'+p+'</button>';});
   html+='<button class="btn sm" data-p="next" aria-label="Next page"'+(st.page>=pages?' disabled':'')+'>›</button></span></div>';
   var lp=ltEl(html);
   lp.addEventListener("click",function(e){var b=e.target.closest("button[data-p]"); if(!b||b.disabled)return; var p=b.getAttribute("data-p");
@@ -14950,6 +14952,19 @@ function ltFacets(cols,vals,rows){
   return c.slice(0,3).map(function(col){return {key:String(col.i),label:col.name,values:col.values};});
 }
 
+/* A cell's text as it reads on screen. textContent runs adjacent elements together ("platformmbell",
+   "11 items1,161 tok"), so each element starts a new word, a hidden chip separator keeps its comma, and
+   avatar initials (aria-hidden) are skipped. */
+function ltCellText(el){
+  var out="";
+  (function walk(n){
+    if(n.nodeType===3){out+=n.nodeValue;return;}
+    if(n.nodeType!==1||n.getAttribute("aria-hidden")==="true")return;
+    if(out&&!/\s$/.test(out))out+=" ";
+    for(var c=n.firstChild;c;c=c.nextSibling)walk(c);
+  })(el);
+  return out.replace(/\s+/g," ").replace(/ ,/g,",").trim();
+}
 function ltTable(table,prefix){
   if(!table.tHead||!table.tBodies[0]||!table.tHead.rows[0]||table.getAttribute("data-lt"))return;
   table.setAttribute("data-lt","1");
@@ -14961,7 +14976,7 @@ function ltTable(table,prefix){
   var st=ltState(prefix,sig);
   /* A cell may name its own value in data-v, for sorting and filtering, where its text carries a
      second word: a kind badge with a skill's shelf under it still filters as its kind. */
-  var vals=rows.map(function(r){return cols.map(function(c){var cell=r.cells[c.i]; var t=cell?(cell.getAttribute("data-v")||cell.textContent).replace(/\s+/g," ").trim():""; return {t:t,n:ltNum(t)};});});
+  var vals=rows.map(function(r){return cols.map(function(c){var cell=r.cells[c.i]; var t=cell?(cell.getAttribute("data-v")||ltCellText(cell)).replace(/\s+/g," ").trim():""; return {t:t,n:ltNum(t)};});});
   cols.forEach(function(c){ if(c.num)return; var k=0,tot=0; vals.forEach(function(v){if(v[c.i].t){tot++; if(v[c.i].n!=null)k++;}}); if(tot&&k/tot>=.6)c.num=true; });
   var texts=rows.map(function(r){return r.textContent.replace(/\s+/g," ").toLowerCase();});
   var facets=ltFacets(cols,vals,rows.length);
@@ -16213,8 +16228,8 @@ function tkProvTab(){
       wbLine(p.writeback.status,"Move the status when a work order starts")+
       wbLine(p.writeback.close,"Close the "+k.unit+" as Done when you accept the work")+'</ul></div></div>'+
       '<div class="panel-b rowacts" style="border-top:1px solid var(--border)">'+
-      '<button class="btn sm" onclick="act(\''+h(k.l)+' sync queued. sync_issue_provider recorded as a governed action.\')">Sync now</button>'+
-      '<button class="btn sm" onclick="ipzOpen(\''+p.kind+'\',\''+p.id+'\')">Edit scope and fields</button>'+
+      '<button class="btn sm" onclick="act(\''+h(k.l)+' sync queued. sync_issue_provider recorded as a governed action.\')">Sync now</button><span class="vh">, </span>'+
+      '<button class="btn sm" onclick="ipzOpen(\''+p.kind+'\',\''+p.id+'\')">Edit scope and fields</button><span class="vh">, </span>'+
       '<button class="btn sm danger" style="margin-left:auto" onclick="openDialog(\'ipoff\',\''+p.id+'\')">Disconnect</button></div></div>';
   });
   var have={}; wsProviders().forEach(function(p){have[p.kind]=1;});
@@ -16726,7 +16741,7 @@ DLG_EXT.wo=function(){
   var nrep=woRepoList().length;
   var b=
    '<section class="wo-sec"><h4>Tasks</h4><div class="wo-tasks">'+z.tasks.map(function(id){var t=taskById(id);
-     return '<span class="chip">'+ipLogo(t.kind,12)+'<span class="mono">'+h(t.num)+'</span><span>'+h(t.subject)+'</span>'+(z.tasks.length>1?'<button aria-label="Remove '+h(t.num)+'" onclick="woDropTask(\''+t.id+'\')">×</button>':'')+'</span>';}).join("")+'</div>'+
+     return '<span class="chip">'+ipLogo(t.kind,12)+'<span class="mono">'+h(t.num)+'</span><span>'+h(t.subject)+'</span>'+(z.tasks.length>1?'<button aria-label="Remove '+h(t.num)+'" onclick="woDropTask(\''+t.id+'\')">×</button>':'')+'</span>';}).join(SEP)+'</div>'+
      '<div class="hint">Each task is tagged to this work order, and each shows it on its own page.</div></section>'+
    '<section class="wo-sec"><h4>Sent to</h4><div class="field" style="margin-bottom:10px"><select aria-label="Sent to" onchange="woSetTarget(this.value)">'+opts+'</select>'+
      '<div class="hint">Agents where you are the registered operator, and the published workflows made of them.</div></div>'+who+'</section>'+
