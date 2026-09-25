@@ -125,8 +125,8 @@ export default {
     ["--st-approval, --st-failed, --st-allowed", "Value tone, with the state named beside it"],
   ],
   helpers: [
-    ["tile(k, v, s, col)", "engine.js:2548", "Writes one stat box. `col` sets the value's tone. About 15 calls."],
-    ["runStatRow(R)", "engine.js:2545", "The Run page's row of six, with a local tile of its own."],
+    ["tile(k, v, s, col)", "engine.js:2562", "Writes one stat box. `col` sets the value's tone. About 15 calls."],
+    ["runStatRow(R)", "engine.js:2559", "The Run page's row of six, with a local tile of its own."],
     ["basisChip(k)", "engine.js:695", "The spend basis chip in the subline."],
   ],
   sourceNotes: [

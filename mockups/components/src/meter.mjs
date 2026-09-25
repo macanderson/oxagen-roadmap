@@ -99,10 +99,10 @@ export default {
     ["--fg, --muted, --dim", "Figure, legend text, and sub line"],
   ],
   helpers: [
-    ["stgMeter(label, used, max, unit, sub)", "engine.js:6447", "Single-value meter with `role=\"img\"` and an aria-label stating the percent. Holds at 90%."],
+    ["stgMeter(label, used, max, unit, sub)", "engine.js:6461", "Single-value meter with `role=\"img\"` and an aria-label stating the percent. Holds at 90%."],
     ["tokBars(t, opts)", "engine.js:191", "One composition meter per prompt part, plus output and reasoning, each in its own hue."],
-    ["stack3(parts, total)", "engine.js:2647", "One `.stk` segment per part, sized by flex, each with a tooltip."],
-    ["stackLeg(parts)", "engine.js:2650", "The `.leg` row naming each part `stack3()` drew."],
+    ["stack3(parts, total)", "engine.js:2661", "One `.stk` segment per part, sized by flex, each with a tooltip."],
+    ["stackLeg(parts)", "engine.js:2664", "The `.leg` row naming each part `stack3()` drew."],
     ["mandateBar(m, showReserve)", "engine.js:1798", "The `.mbar` budget bar plus its own `.mlegend`, for a mandate card and the mandate page."],
   ],
   sourceNotes: [

@@ -42,7 +42,7 @@
   <p class="dx-lead">A button runs an action on the page it sits on: save, deny, open a dialog, close a pull request. The default button is neutral. One button per screen may be the gold primary, and it marks the action the screen exists for. Destructive actions are red, and icon buttons carry a label a screen reader can speak.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.btn</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673, copied 2413 to 2421</span>
     <span><b>Used on</b> every page, every dialog, the approvals drawer</span>
   </div>
 </div>
@@ -78,6 +78,16 @@
 <button class="btn primary" disabled>Retire agent</button>
 <button class="btn danger" disabled>Retire agent</button>
 <span class="muted" style="font-size:12px">Tick the check to confirm.</span>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-copied">
+    <figcaption class="dx-story-h"><b>Copied</b><span>A copy that lands turns the label into a check and &quot;Copied&quot; for 1.6s.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="copied" data-name="Copied">
+<button class="btn">Copy prompt</button>
+<button class="btn copied"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5"/></svg>Copied</button>
+<button class="btn primary sm">Copy prompt</button>
+<button class="btn primary sm copied"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5"/></svg>Copied</button>
     </template>
   </figure>
   <figure class="dx-story" id="story-dialog-footer">
@@ -133,6 +143,7 @@
       <tr><td>Ghost</td><td><code>.btn.ghost</code></td><td>No ground. For a secondary action that should recede, such as Details.</td></tr>
       <tr><td>Selected</td><td><code>.btn.sel</code></td><td><code>--hl</code> ground, <code>--rule</code> border, <code>--fg</code> 600. Used by filter rows.</td></tr>
       <tr><td>Disabled</td><td><code>.btn:disabled</code></td><td>45% opacity and a not-allowed cursor.</td></tr>
+      <tr><td>Copied</td><td><code>.btn.copied</code></td><td><code>--st-allowed</code> text on an 8% ground of it, with a border at 40%. A 14px check pops in and draws its stroke in 0.3s. The label returns after 1.6s, and the button keeps its width.</td></tr>
       <tr><td>Icon button</td><td><code>.iconbtn</code></td><td>32px square, an 8px radius, <code>--muted</code> icon. Pressed is gold. <code>.dot</code> is a 6px <code>--st-approval</code> marker and <code>.cnt</code> a count pill.</td></tr>
       <tr><td>Assist</td><td><code>.btn.wand</code></td><td>A 30px square filled with <code>--fg</code> and a 16px wand icon in <code>--ink</code>.</td></tr>
       <tr><td>Link button</td><td><code>.lnk</code></td><td>No box. <code>--accent-text</code>, underlined, in the surrounding type.</td></tr>
@@ -159,6 +170,7 @@
     <li><b>Destructive.</b> A reversible removal is <code>.danger</code>. An irreversible one asks for confirmation, names what ends and what is kept, and uses <code>.danger.solid</code> or a disabled <code>.danger</code> until the person ticks a check.</li>
     <li><b>Assist.</b> The wand is the one assist action in a field. It is never gold, because gold is already spent on the step's primary action.</li>
     <li><b>Loading.</b> A button that waits on the control plane keeps its label and is disabled until the answer arrives. The result arrives as a <a href="toast.html">toast</a>.</li>
+    <li><b>Copy.</b> A copy button confirms on itself with <code>.copied</code> once the clipboard accepts the text, and a toast or status line says what went. A refused copy leaves the button as it was and says so in the toast.</li>
   </ul>
 </section>
 
@@ -205,6 +217,7 @@
       <tr><td><code>--hl, --rule</code></td><td>Hover and selected</td></tr>
       <tr><td><code>--gold, --gold-bright, --on-gold</code></td><td>The one primary</td></tr>
       <tr><td><code>--st-failed</code></td><td>Danger text, border, and solid fill</td></tr>
+      <tr><td><code>--st-allowed</code></td><td>Copied text, ground, border, and check</td></tr>
       <tr><td><code>--muted</code></td><td>Icon button icon</td></tr>
       <tr><td><code>--st-approval</code></td><td>Icon button dot and count</td></tr>
       <tr><td><code>--accent-text</code></td><td>Link button (see Findings)</td></tr>
@@ -218,9 +231,10 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673</td><td>The rules that draw it</td></tr>
-      <tr><td><code>dialog()</code> at <code>engine.js:9569</code></td><td>Writes a dialog's footer buttons from <code>d.f</code>.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673, copied 2413 to 2421</td><td>The rules that draw it</td></tr>
+      <tr><td><code>dialog()</code> at <code>engine.js:9583</code></td><td>Writes a dialog's footer buttons from <code>d.f</code>.</td></tr>
       <tr><td><code>act(msg, tone)</code> at <code>engine.js:2036</code></td><td>What most buttons call when they finish: a toast in the button's tone.</td></tr>
+      <tr><td><code>copiedState(btn)</code> at <code>engine.js:2470</code></td><td>Swaps a button to the copied state for 1.6s. <code>copyText()</code> calls it once the clipboard accepts.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -248,7 +262,7 @@
 ## Inputs
 
 1. mockups/components/button.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673. The mockup renders it with dialog() (engine.js:9569), act(msg, tone) (engine.js:2036).
+2. The design source: mockups/src/engine.css lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673, copied 2413 to 2421. The mockup renders it with dialog() (engine.js:9583), act(msg, tone) (engine.js:2036), copiedState(btn) (engine.js:2470).
 3. The build's implementation: find it by its root selector (.btn) or its name, and list every route that renders it.
 4. Where to see it in the design: every page, every dialog, the approvals drawer. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

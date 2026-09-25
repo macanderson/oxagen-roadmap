@@ -189,7 +189,7 @@
       <tr><td><code>mockups/src/engine.css</code> lines 558 to 568, 596 to 615</td><td>The rules that draw it</td></tr>
       <tr><td><code>notifsBody()</code> at <code>engine.js:1743</code></td><td>Writes the notification list, one <code>.li</code> per entry, unread ones as buttons via <code>notifRead()</code>.</td></tr>
       <tr><td><code>notifIcon(tone)</code> at <code>engine.js:1736</code></td><td>The tone's icon: a check for allowed, a clock for approval, a confetti mark for gold, a triangle for anything else, including failed and critical.</td></tr>
-      <tr><td><code>accountBody()</code> at <code>engine.js:9893</code></td><td>The Security tab's two <code>.lst</code> lists, with an inline-styled <code>.ic</code> instead of a tone class.</td></tr>
+      <tr><td><code>accountBody()</code> at <code>engine.js:9907</code></td><td>The Security tab's two <code>.lst</code> lists, with an inline-styled <code>.ic</code> instead of a tone class.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -217,7 +217,7 @@
 ## Inputs
 
 1. mockups/components/list-item.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 558 to 568, 596 to 615. The mockup renders it with notifsBody() (engine.js:1743), notifIcon(tone) (engine.js:1736), accountBody() (engine.js:9893).
+2. The design source: mockups/src/engine.css lines 558 to 568, 596 to 615. The mockup renders it with notifsBody() (engine.js:1743), notifIcon(tone) (engine.js:1736), accountBody() (engine.js:9907).
 3. The build's implementation: find it by its root selector (.lst) or its name, and list every route that renders it.
 4. Where to see it in the design: Notifications, Account (Security tab). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
