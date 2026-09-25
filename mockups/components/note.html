@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Note</title>
+<meta name="description" content="The small print that explains a rule, a caution, or a fact beside its field.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Note</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Feedback</p>
+  <h1>Note</h1>
+  <p class="dx-lead">A note is one or two sentences that explain how the page works, set beside the field or the section it describes. Oxagen writes four weights of it: a quiet note for a rule worth knowing, a warn box for a caution, a banner for a fact that spans the width of a panel, and a callout for a fact that deserves more room. None of the four is an error state. That is a <a href="state-surfaces.html">state surface</a>.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.note</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 323 to 325, 332 to 334, 754, 762</span>
+    <span><b>Used on</b> most pages</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-note">
+    <figcaption class="dx-story-h"><b>Note</b><span>A gold left rule and quiet, muted text. The default weight, used about 270 times.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="note" data-name="Note">
+<div class="note">oxagen never executes steering as an instruction. It enters as evidence at the steering position with operator authority.</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-deny">
+    <figcaption class="dx-story-h"><b>Denial note</b><span><code>.note.deny</code> swaps the left rule to <code>--st-denied</code>, for a note that explains a refusal.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="deny" data-name="Denial note">
+<div class="note deny"><b>This is a class switch.</b> It names no provider or agent. It matches each tool version by the class it declares. A tool imported tomorrow that declares the same class is blocked as soon as it enters the registry.</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-warn">
+    <figcaption class="dx-story-h"><b>Warn</b><span>A tinted box with a bold lead, for a caution. Used about 46 times, most of them not about a critical event.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="warn" data-name="Warn">
+<div class="warn"><b>Compacted.</b> This transcript is read from the archive. Its frames were moved out of the live record, and nothing was recomputed.</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-banner">
+    <figcaption class="dx-story-h"><b>Banner</b><span>A full-width fact, with an optional lead in <code>b</code> and <code>.grow</code> to let a control sit beside it.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="banner" data-name="Banner">
+<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>2 awaiting approval</span><span class="grow">Two proposed changes to <span class="mono">.oxagen/steering/</span> are waiting on a reviewer before they compile into any agent's context.</span></div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-callout">
+    <figcaption class="dx-story-h"><b>Callout</b><span>A gold left rule on a tinted ground, for a fact that deserves more room than a note.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="callout" data-name="Callout">
+<div class="callout">An export is a verifiable bundle: archive segments, attestations, key ids, and a verifier script. The segment was written once, at seal time, and holds the same bytes the graph indexed. A customer's auditor checks it offline, without trusting oxagen or the worker's harness.</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Note</td><td><code>.note</code></td><td>A 2px <code>--gold</code> left rule, 2px by 12px padding (left only), 12.5px <code>--muted</code> text.</td></tr>
+      <tr><td>Note, deny</td><td><code>.note.deny</code></td><td>The same box with the left rule in <code>--st-denied</code>, for a note that explains a refusal.</td></tr>
+      <tr><td>Warn</td><td><code>.warn</code></td><td>A box border and background tinted from <code>--st-critical</code> (45% border, 9% fill), 11px by 14px padding, 10px radius, 12.5px <code>--body</code> text. <code>.warn b</code> sets the lead in <code>--st-critical</code>.</td></tr>
+      <tr><td>Banner</td><td><code>.banner</code></td><td>A <code>--hl</code> box with a 1px <code>--border</code>, 10px radius, 12px by 15px padding, flex row with an 11px gap. <code>.banner b</code> is a bold <code>--fg</code> lead line. <code>.banner .grow</code> is the flexible fact, at least 24 characters wide.</td></tr>
+      <tr><td>Callout</td><td><code>.callout</code></td><td>A <code>--hl</code> box with a 1px <code>--border</code> plus a 2px <code>--gold</code> left rule, 10px radius, 11px by 13px padding, 12.5px <code>--body</code> text at 1.5 line height.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li><b>Note</b>: a rule worth knowing beside the field or section it governs, such as how steering is applied or what an export contains.</li><li><b>Warn</b>: any caution a person should read before acting, whether or not the underlying event is severe.</li><li><b>Banner</b>: a fact that spans a panel's width, often paired with a count badge or a control.</li><li><b>Callout</b>: a fact substantial enough to want its own paragraph, such as what a governed action actually does.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>An error, an empty result, or a denied view: use a <a href="state-surfaces.html">state surface</a>.</li><li>The result of an action that already ran: use a <a href="toast.html">toast</a>.</li><li>A single field's inline hint: keep it as <code>.hint</code> under the field.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="note" style="border-left-color:var(--gold)">Every field on this page autosaves. Changes are versioned and export includes cost, spend and every audit event across the organization for the last ninety days.</div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Three facts in one note and a gold rule doing decoration, not marking one action. Split it, and let the panel's own border carry the box.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="note">Every field on this page autosaves. Changes are versioned.</div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>One idea, stated once, in the quiet weight a rule deserves.</p></div>
+  </div>
+  <ul>
+    <li>One fact per note. A second fact is a second note, not a mid-dot list.</li>
+    <li>A warn box states the caution first, in the bold lead, then the one sentence that explains it.</li>
+    <li>A callout is prose, not a list. A list of facts belongs in a <a href="key-value-list.html">key-value list</a> instead.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Note</b>: starts mid-thought is fine (&quot;oxagen never executes...&quot;), since it reads as a footnote to the field above it.</li>
+    <li><b>Warn lead</b>: a short bold phrase naming the state (&quot;Compacted.&quot;, &quot;Provisional.&quot;), then the sentence that explains what it means for what the person is looking at.</li>
+    <li><b>Banner</b>: a badge for the count when there is one, then the fact in a full sentence.</li>
+    <li><b>Callout</b>: two to four sentences, the same length a lead paragraph would take, no bullet points.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>None of the four is announced as an alert. A caution that must interrupt reading belongs in a dialog, not a warn box.</li>
+    <li>Color never carries the caution alone: the warn box's bold lead states the word, and the tint reinforces it.</li>
+    <li>A note beside a field is in reading order right after the field it explains, so a screen reader hears them together.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>All four keep their padding and font size on phone. None is hidden or truncated.</li>
+    <li>A banner's <code>.grow</code> wraps under a leading badge rather than truncating, since <code>min-width:24ch</code> stops it from collapsing to nothing.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--gold</code></td><td>Note and callout left rule (see Findings)</td></tr>
+      <tr><td><code>--muted</code></td><td>Note text</td></tr>
+      <tr><td><code>--st-denied</code></td><td>Note, deny variant</td></tr>
+      <tr><td><code>--st-critical</code></td><td>Warn border, fill, and lead</td></tr>
+      <tr><td><code>--body</code></td><td>Warn and callout text</td></tr>
+      <tr><td><code>--hl</code></td><td>Banner and callout ground</td></tr>
+      <tr><td><code>--border</code></td><td>Banner and callout border</td></tr>
+      <tr><td><code>--fg</code></td><td>Banner lead</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 323 to 325, 332 to 334, 754, 762</td><td>The rules that draw it</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li><code>.note</code> appears about 270 times, <code>.warn</code> about 45, <code>.banner</code> about 10, and <code>.callout</code> 7. <code>.note.deny</code> has one caller, the tool class-switch explanation (engine.js 8413).</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold beyond identity and one action</h4><p><code>.note</code> and <code>.callout</code> both draw a 2px <code>--gold</code> left rule on every instance, about 275 notes and 7 callouts on a typical page load. Gold is identity plus at most one action per screen. A rule on every note spends it as decoration instead. A neutral <code>--border</code> or <code>--rule</code> would mark the same shape without the cost.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Warn is not only for critical events</h4><p><code>.warn</code> is styled from <code>--st-critical</code> at every one of its roughly 46 sites, but its actual uses range from a compacted-transcript notice to a provisional-workspace caution, most of which are not critical severity. The box's color says &quot;critical&quot; for every caution, regardless of how serious the one it wraps actually is.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's note against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Note audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the note component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/note.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 323 to 325, 332 to 334, 754, 762.
+3. The build's implementation: find it by its root selector (.note) or its name, and list every route that renders it.
+4. Where to see it in the design: most pages. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Anatomy. Each of the four renders the border, background, padding, and radius this page lists, in both themes.
+2. One fact. A note, warn, banner, or callout with more than one idea, or a mid-dot list of facts, is a FAIL.
+3. Gold. Count `.note` and `.callout` instances on a routed page. Every one with a gold left rule counts toward the page's gold total. More than one gold element total on the screen is a FAIL under the one-action rule.
+4. Warn severity. Sample five warn boxes across the build. If none is actually critical, the component is being used correctly as a general caution. If the copy claims &quot;critical&quot; language it does not mean, that is a content FAIL, not a component one.
+5. Placement. A note sits directly after the field or section it explains, in DOM order, not floated elsewhere on the page.
+6. No actions inside. None of the four carries a button or a link that performs a write. A fact that needs an action beside it puts the control next to the note, not inside it, or the action belongs in a [dialog](dialog.html).
+7. Contrast. Warn and callout text meets 4.5:1 against their tinted grounds in both themes.
+8. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+9. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+10. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+11. Phone. At 390 by 844 with a touch pointer: All four keep their padding and font size on phone. None is hidden or truncated. A banner's `.grow` wraps under a leading badge rather than truncating, since `min-width:24ch` stops it from collapsing to nothing.
+12. Accessibility. None of the four is announced as an alert. A caution that must interrupt reading belongs in a dialog, not a warn box. Color never carries the caution alone: the warn box's bold lead states the word, and the tint reinforces it. A note beside a field is in reading order right after the field it explains, so a screen reader hears them together.
+13. One implementation. The build draws the note from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Note: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="state-surfaces.html"><span>Previous</span>State surfaces</a><span></span></nav>
+</main>
+</div>
+</body>
+</html>

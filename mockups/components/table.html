@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Table</title>
+<meta name="description" content="Rows of records with one column per field, inside a panel.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Table</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Data display</p>
+  <h1>Table</h1>
+  <p class="dx-lead">A table lists records of one kind: agents, runs, tools, work items, budgets. Each row is one record and each column one field. Tables sit inside a panel and scroll sideways inside it, never the page. A row that opens its record is a keyboard button, and a missing value is a dash.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>table</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 234 to 245, 1334, 2174 to 2177, 2350, phone 696 to 708</span>
+    <span><b>Used on</b> Work, Agents, Tools, Spend, Repositories, Organization, Audit</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-default">
+    <figcaption class="dx-story-h"><b>Records in a panel</b><span>Clickable rows, a <code>.sub</code> second line, right-aligned figures, and an empty cell.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="default" data-name="Records in a panel">
+<div class="panel">
+  <div class="panel-h"><h3>Agents</h3></div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Agent</th><th>Runtime</th><th>Owner</th><th class="num">Runs</th><th class="num">Spend</th></tr></thead>
+      <tbody>
+        <tr class="click" tabindex="0" role="button" aria-label="Open a-intel.core.release-manager">
+          <td><span class="tkey">a-intel.core.release-manager</span><span class="sub">Prepares release notes and cuts the tag</span></td>
+          <td class="mono">mbell-mbp-16</td>
+          <td>Marcus Bell</td>
+          <td class="num">412</td>
+          <td class="num">$186.40</td>
+        </tr>
+        <tr class="click" tabindex="0" role="button" aria-label="Open a-intel.core.triage">
+          <td><span class="tkey">a-intel.core.triage</span><span class="sub">Labels and routes new issues</span></td>
+          <td class="mono">ci-runner-04</td>
+          <td>Priya Natarajan</td>
+          <td class="num">1,340</td>
+          <td class="num">$402.11</td>
+        </tr>
+        <tr class="click" tabindex="0" role="button" aria-label="Open a-intel.finops.invoice-bot">
+          <td><span class="tkey">a-intel.finops.invoice-bot</span><span class="sub">Reconciles supplier invoices</span></td>
+          <td class="mono">ci-runner-08</td>
+          <td>Amara Lindqvist</td>
+          <td class="num">88</td>
+          <td class="num"><span class="dim">—</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-narrow">
+    <figcaption class="dx-story-h"><b>Narrow table</b><span><code>table.narrow</code> drops the 560px minimum for a side column or a dialog.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="narrow" data-name="Narrow table">
+<div class="panel" style="max-width:340px">
+  <div class="panel-h"><h3>Tool calls by tool</h3></div>
+  <div class="tw">
+    <table class="narrow">
+      <thead><tr><th>Tool</th><th class="num">Calls</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">github__create_pull_request</td><td class="num">41</td></tr>
+        <tr><td class="mono">github__list_commits</td><td class="num">1,206</td></tr>
+        <tr><td class="mono">fs__read_file</td><td class="num">318</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-selection">
+    <figcaption class="dx-story-h"><b>Selectable rows</b><span>A checkbox column, a selected row tinted gold, and a row that cannot be selected says why.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="selection" data-name="Selectable rows">
+<div class="panel">
+  <div class="panel-h"><h3>Backlog</h3><div class="sp"><span class="b b-q">1 selected</span><button class="btn sm">Clear</button></div></div>
+  <div class="tw">
+    <table>
+      <thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th>Status</th><th>Updated</th></tr></thead>
+      <tbody>
+        <tr class="click" tabindex="0" role="button" aria-label="Open PLAT-1893" aria-selected="true">
+          <td class="ck"><input type="checkbox" aria-label="Select PLAT-1893" checked></td>
+          <td><span class="mono dim" style="font-size:11.5px">PLAT-1893</span><div>Cut 4.11.0 release notes</div></td>
+          <td><span class="b b-allowed"><span class="d"></span>Ready</span></td>
+          <td class="mono dim" style="font-size:11.5px">2026-09-24 14:02</td>
+        </tr>
+        <tr class="click" tabindex="0" role="button" aria-label="Open PLAT-1901">
+          <td class="ck"><input type="checkbox" aria-label="Select PLAT-1901" disabled title="Not ready: its definition of done is not certified"></td>
+          <td><span class="mono dim" style="font-size:11.5px">PLAT-1901</span><div>Retry flaky checkout test</div></td>
+          <td><span class="b b-approval"><span class="d"></span>Needs certification</span></td>
+          <td class="mono dim" style="font-size:11.5px">2026-09-24 09:41</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-groups">
+    <figcaption class="dx-story-h"><b>Grouped rows</b><span>A <code>tr.tgrp</code> heads each group, and a critical or high-risk row carries a left rule.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="groups" data-name="Grouped rows">
+<div class="panel">
+  <div class="tw">
+    <table>
+      <thead><tr><th>Tool</th><th>Decision</th><th class="num">Calls</th></tr></thead>
+      <tbody>
+        <tr class="tgrp t-vcs"><td colspan="2"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6a9 9 0 0 0-9 9V3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/></svg></span><b>Source control</b><span class="muted">Changes code history: branches, pull requests, merges, releases, repositories.</span></td><td class="dim" style="font-size:11px;white-space:nowrap">2 tools</td></tr>
+        <tr class="hz-row-high click" tabindex="0" role="button" aria-label="Open github__merge_pull_request"><td class="mono">github__merge_pull_request</td><td><span class="b b-approval"><span class="d"></span>Needs approval</span></td><td class="num">12</td></tr>
+        <tr class="click" tabindex="0" role="button" aria-label="Open github__create_pull_request"><td class="mono">github__create_pull_request</td><td><span class="b b-allowed"><span class="d"></span>Allowed</span></td><td class="num">41</td></tr>
+        <tr class="tgrp t-finance"><td colspan="2"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span><b>Financial control</b><span class="muted">Moves funds or commits spend.</span></td><td class="dim" style="font-size:11px;white-space:nowrap">1 tool</td></tr>
+        <tr class="hz-row-critical click" tabindex="0" role="button" aria-label="Open stripe__create_payment"><td class="mono">stripe__create_payment</td><td><span class="b b-approval"><span class="d"></span>Needs approval</span></td><td class="num">3</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-current">
+    <figcaption class="dx-story-h"><b>Current row</b><span><code>tr.on</code> marks the row whose detail the side panel shows, on <code>--panel-h</code>.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="current" data-name="Current row">
+<div class="panel" style="max-width:560px">
+  <div class="tw">
+    <table class="narrow">
+      <thead><tr><th>Operator</th><th class="num">Runs</th><th class="num">Spend</th></tr></thead>
+      <tbody>
+        <tr class="click on" aria-selected="true"><td>Priya Natarajan</td><td class="num">612</td><td class="num">$1,284.60</td></tr>
+        <tr class="click" aria-selected="false"><td>Marcus Bell</td><td class="num">431</td><td class="num">$904.12</td></tr>
+        <tr class="click" aria-selected="false"><td>Amara Lindqvist</td><td class="num">97</td><td class="num">$212.08</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Scroller</td><td><code>.tw</code></td><td>Holds the table and scrolls sideways inside the panel, with touch momentum.</td></tr>
+      <tr><td>Table</td><td><code>table</code></td><td>Full width, 13px, collapsed borders, and a 560px minimum so columns never crush.</td></tr>
+      <tr><td>Narrow table</td><td><code>table.narrow</code></td><td>Drops the minimum width for a side column, a card, or a dialog.</td></tr>
+      <tr><td>Header cell</td><td><code>th</code></td><td>10.5px Geist 600 in capitals at 0.09em, <code>--dim</code>, sticky to the top of the scroller, on <code>--panel</code>.</td></tr>
+      <tr><td>Body cell</td><td><code>td</code></td><td>9px by 12px padding, a 1px <code>--border</code> rule below, vertically centered. The last row has no rule.</td></tr>
+      <tr><td>Figure column</td><td><code>th.num</code>, <code>td.num</code></td><td>Right-aligned with tabular figures, so amounts line up.</td></tr>
+      <tr><td>Second line</td><td><code>.sub</code></td><td>A 11px <code>--dim</code> line under the cell's main value.</td></tr>
+      <tr><td>Record key</td><td><code>.tkey</code></td><td>An agent key or event name in 12px Monaspace Neon, <code>--fg</code>.</td></tr>
+      <tr><td>Clickable row</td><td><code>tr.click</code></td><td>Pointer cursor and a <code>--hl</code> hover. <code>rowClick()</code> adds the keyboard role and label.</td></tr>
+      <tr><td>Selection</td><td><code>th.ck</code>, <code>td.ck</code>, <code>tr[aria-selected=&quot;true&quot;]</code></td><td>A 34px checkbox column, and a 7% gold tint on a selected row.</td></tr>
+      <tr><td>Current row</td><td><code>tr.on</code></td><td>The row the side panel describes, on <code>--panel-h</code>.</td></tr>
+      <tr><td>Group row</td><td><code>tr.tgrp</code></td><td>A band on <code>--hl</code> with an icon tile, a bold name, and a muted description.</td></tr>
+      <tr><td>Risk rule</td><td><code>tr.hz-row-critical</code>, <code>tr.hz-row-high</code></td><td>A 3px left rule in the critical or denied hue on the first cell.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Records of one kind that a person scans, compares, sorts, or opens.</li><li>Figures that line up in columns: runs, calls, spend, tokens.</li><li>A list long enough to need search and paging. The engine adds those, see <a href="list-table.html">List table</a>.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>One record's fields: use a <a href="key-value-list.html">key-value list</a>.</li><li>Two or three figures a person checks at a glance: use <a href="stat-box.html">stat boxes</a>.</li><li>Records with long prose, such as findings or steering records: use a card list.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex"><div class="panel"><div class="tw"><table class="narrow"><thead><tr><th>Agent</th><th>Spend</th></tr></thead><tbody><tr onclick=""><td>Release manager</td><td>186.4</td></tr><tr><td>Invoice bot</td><td></td></tr></tbody></table></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A row that only answers a mouse click, a left-aligned amount with no format, and a blank cell.</p></div>
+    <div class="dx-do"><div class="dx-ex"><div class="panel"><div class="tw"><table class="narrow"><thead><tr><th>Agent</th><th class="num">Spend</th></tr></thead><tbody><tr class="click" tabindex="0" role="button" aria-label="Open release manager"><td>Release manager</td><td class="num">$186.40</td></tr><tr><td>Invoice bot</td><td class="num"><span class="dim">—</span></td></tr></tbody></table></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>A keyboard row with a label, a formatted amount in a <code>.num</code> column, and a dash for the missing value.</p></div>
+  </div>
+  <ul>
+    <li>A table sits in a <a href="panel.html">panel</a>. The panel header names what the rows are.</li>
+    <li>The first column names the record. An id or key is set in mono (<code>.tkey</code>, <code>.mono</code>), and a person or an agent can lead with an <a href="avatar.html">avatar</a>.</li>
+    <li>Every row that opens something uses <code>rowClick()</code>. A bare <code>class=&quot;click&quot;</code> is not reachable by keyboard.</li>
+    <li>Put figures in <code>.num</code> columns and format them with <code>usd()</code>, <code>plural()</code>, and thousands separators.</li>
+    <li>A row of a different weight (a group, a total) spans the columns and uses its own class, never an inline style.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Headers</b>: plain nouns in sentence case in the source (&quot;Agent&quot;, &quot;Spend&quot;). CSS sets the capitals. An id in a header keeps its case with <code>.id</code>.</li>
+    <li><b>Cells</b>: one value each. A second fact goes on a <code>.sub</code> line, never after a mid-dot.</li>
+    <li><b>Empty cell</b>: <code>—</code> in <code>--dim</code>. The engine treats a dash as empty, so a column of counts with a few dashes still sorts as numbers.</li>
+    <li><b>Figures</b>: money through <code>usd()</code>, counts with thousands separators, a true minus sign for a negative value.</li>
+    <li><b>Stored keys</b>: shown by their label (&quot;Observed by gateway&quot;), with the key in a tooltip, through <code>keyLabel()</code>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>A clickable row has <code>tabindex=&quot;0&quot;</code>, <code>role=&quot;button&quot;</code>, an <code>aria-label</code> that names the record (&quot;Open PLAT-1893&quot;), and opens on Enter and Space. <code>rowClick()</code> writes all four.</li>
+    <li>A checkbox column has a visually hidden header (<code>&lt;span class=&quot;vh&quot;&gt;Select&lt;/span&gt;</code>), and each checkbox has its own <code>aria-label</code>. A disabled checkbox says why in its <code>title</code>.</li>
+    <li>A link or a checkbox inside a clickable row stops the click from reaching the row, so one press does one thing.</li>
+    <li>Header text is <code>--dim</code>, which is 3.67:1 on <code>--panel</code> in dark and 2.56:1 in light. Headers are words a person reads, so they need 4.5:1. See Findings.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li><code>cardTables()</code> (engine.js 13812) marks every table with a single header row as <code>.cards</code>, and gives each cell a <code>data-l</code> label from its column.</li>
+    <li>In the phone shell each row becomes a card on <code>--ink</code> with a 12px radius. The first cell is the card's title, and each other cell shows its column label on the left in 10.5px capitals.</li>
+    <li>Nothing scrolls sideways. A tool cell drops its 220px minimum.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--panel</code></td><td>Header cell ground</td></tr>
+      <tr><td><code>--border</code></td><td>Row rules</td></tr>
+      <tr><td><code>--dim</code></td><td>Header text, <code>.sub</code> lines, empty cells</td></tr>
+      <tr><td><code>--fg</code></td><td>Cell text and <code>.tkey</code></td></tr>
+      <tr><td><code>--hl</code></td><td>Hover on a clickable row, group row ground</td></tr>
+      <tr><td><code>--panel-h</code></td><td>Current row</td></tr>
+      <tr><td><code>--gold</code></td><td>Selected row tint (7%) and the checkbox accent</td></tr>
+      <tr><td><code>--st-critical, --st-denied</code></td><td>Risk rule on critical and high rows</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 234 to 245, 1334, 2174 to 2177, 2350, phone 696 to 708</td><td>The rules that draw it</td></tr>
+      <tr><td><code>rowClick(on, label)</code> at <code>engine.js:6916</code></td><td>Makes a row a keyboard button. 17 calls.</td></tr>
+      <tr><td><code>cardTables()</code> at <code>engine.js:13859</code></td><td>Turns every single-header table into labelled cards on a phone.</td></tr>
+      <tr><td><code>keyLabel(k)</code> at <code>engine.js:635</code></td><td>Shows a stored key as its label with the key in a tooltip.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>Pages write tables as HTML strings, and <code>listify()</code> adds the list controls to every one at render. See <a href="list-table.html">List table</a>.</li>
+    <li><code>table{color:inherit}</code> at line 1334 exists because a page with no doctype gave tables a color of their own in Chrome.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Header contrast</h4><p><code>th</code> is <code>--dim</code>: 3.67:1 on <code>--panel</code> in dark and 2.56:1 in light. Column headers are words a person reads, so they belong on <code>--muted</code>. See <a href="../colors.html#findings">Colors</a>.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Rows a keyboard cannot reach</h4><p>15 rows use a bare <code>class=&quot;click&quot;</code> with an <code>onclick</code> and no <code>tabindex</code>, role, or label, such as the toolbelt rows at engine.js 4484 and 4826. <code>rowClick()</code> exists to replace them.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Selection state on a button</h4><p>A selected Backlog row carries <code>aria-selected=&quot;true&quot;</code> on a <code>role=&quot;button&quot;</code> row. Buttons do not support that state, so a screen reader does not announce the selection. The checkbox does.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Gold on a row</h4><p>A selected row takes a 7% gold tint (line 2177). The brand rule keeps gold off rows. <code>--hl</code> or <code>--panel-h</code> would mark it without spending gold.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Dead rule</h4><p><code>.tid</code> (line 244) has no emitter in engine.js or wedge.js.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's table against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Table audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the table component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/table.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 234 to 245, 1334, 2174 to 2177, 2350, phone 696 to 708. The mockup renders it with rowClick(on, label) (engine.js:6916), cardTables() (engine.js:13859), keyLabel(k) (engine.js:635).
+3. The build's implementation: find it by its root selector (table) or its name, and list every route that renders it.
+4. Where to see it in the design: Work, Agents, Tools, Spend, Repositories, Organization, Audit. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Container. Every table sits in a panel inside a horizontal scroller, and the page itself never scrolls sideways. A table on the page ground with no panel is a FAIL unless the build draws the free list bar around it.
+2. Header cells. 10.5px Geist 600 at 0.09em, capitals by `text-transform`, sticky to the top, sentence case in the source. Report the header color and its ratio on the header ground. Below 4.5:1 is a FAIL.
+3. Body cells. 13px, 9px by 12px padding, a 1px `--border` rule below each row and none below the last, vertically centered.
+4. Figures. Every column of amounts or counts is right-aligned with tabular figures, and money matches `usd()`. A left-aligned figure column is a FAIL.
+5. Empty cells. A missing value renders a dash in `--dim`. A blank cell, `undefined`, `null`, `NaN`, or a zero the record did not give is a FAIL.
+6. Clickable rows. Every row that opens a record is reachable by Tab, has a button role and a label naming the record, and opens on Enter and Space. A row that responds only to the mouse is a FAIL. List each one.
+7. Selection. A selectable table has a checkbox column with a hidden header label and a label per checkbox, and a disabled checkbox names its reason. Selecting a row does not open it.
+8. Second lines and keys. A second fact sits on its own `.sub` line, and ids and keys are set in Monaspace Neon. A mid-dot joining two facts in a cell is a FAIL.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: `cardTables()` (engine.js 13812) marks every table with a single header row as `.cards`, and gives each cell a `data-l` label from its column. In the phone shell each row becomes a card on `--ink` with a 12px radius. The first cell is the card's title, and each other cell shows its column label on the left in 10.5px capitals. Nothing scrolls sideways. A tool cell drops its 220px minimum.
+13. Accessibility. A clickable row has `tabindex=&quot;0&quot;`, `role=&quot;button&quot;`, an `aria-label` that names the record (&quot;Open PLAT-1893&quot;), and opens on Enter and Space. `rowClick()` writes all four. A checkbox column has a visually hidden header (`&lt;span class=&quot;vh&quot;&gt;Select&lt;/span&gt;`), and each checkbox has its own `aria-label`. A disabled checkbox says why in its `title`. A link or a checkbox inside a clickable row stops the click from reaching the row, so one press does one thing. Header text is `--dim`, which is 3.67:1 on `--panel` in dark and 2.56:1 in light. Headers are words a person reads, so they need 4.5:1. See Findings.
+14. One implementation. The build draws the table from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Table: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="stat-box.html"><span>Previous</span>Stat box</a><a class="nx" href="list-table.html"><span>Next</span>List table</a></nav>
+</main>
+</div>
+</body>
+</html>

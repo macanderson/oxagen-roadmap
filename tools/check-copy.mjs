@@ -102,6 +102,9 @@ const OVERLAYS = [
   ["assistant", "asstToggle(true)"],
   ...["create", "newws", "mintkey", "import", "funding", "switch", "budget", "role", "notifs", "plan", "steerfleet", "more"]
     .map((k) => [`dialog ${k}`, `openDialog('${k}')`]),
+  // Dialogs that need a record to open. The retire dialog said Deregister until 2026-09-25 because
+  // no route or overlay here ever opened it.
+  ["dialog delagent", "openDialog('delagent','a-intel.core.triage')"],
 ].filter(([name]) => !only || name.includes(only));
 
 const browser = await launchChromium(root);

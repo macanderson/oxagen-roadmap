@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Form field</title>
+<meta name="description" content="A label, a control, and a one-sentence hint, with the checkbox card and the small select.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Form field</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Actions and input</p>
+  <h1>Form field</h1>
+  <p class="dx-lead">A form field is a label above a control with an optional hint below it. The control is a text input, a select, or a textarea on the page ground. Two fields can sit side by side, a read-only field shows a value you cannot change here, and a checkbox card holds a choice with its consequence written out. Most fields live in dialogs.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.field</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 479 to 483, 562 to 569, check card 570 to 575, 1359 to 1361, 2242, 2259, small select 766 to 767, read-only 924, phone 670 to 672</span>
+    <span><b>Used on</b> every dialog, Set a budget, Invite a person, Retire agent, the connection wizard, Account</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-text">
+    <figcaption class="dx-story-h"><b>Text inputs</b><span>A label tied to its control, and a hint that says what a valid value looks like.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="text" data-name="Text inputs">
+<div style="max-width:480px">
+  <div class="field"><label for="f-email">Email</label><input id="f-email" type="email" value="rowan@a-intel.example"><div class="hint">The invitation goes to this address and expires in seven days.</div></div>
+  <div class="field"><label for="f-role">Role</label><select id="f-role"><option>Workspace member</option><option>Workspace admin</option><option>Billing</option></select></div>
+  <div class="field"><label for="f-why">Reason</label><textarea id="f-why" rows="3">The push to main skips review. Push to a branch and open a pull request.</textarea><div class="hint">The agent reads this as the reason for the denial.</div></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-two-up">
+    <figcaption class="dx-story-h"><b>Two fields in a row</b><span><code>.fields</code> puts two fields side by side and stacks them under 560px.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="two-up" data-name="Two fields in a row">
+<div class="fields" style="max-width:520px">
+  <div class="field"><label for="f-limit">Monthly limit</label><input id="f-limit" value="$2,000.00"><div class="hint">In US dollars.</div></div>
+  <div class="field"><label for="f-mode">Mode</label><select id="f-mode"><option>Enforced</option><option>Recorded only</option></select></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-readonly">
+    <figcaption class="dx-story-h"><b>Read-only</b><span>A value set elsewhere, on <code>--hl</code> in <code>--muted</code>, with a hint that says where to change it.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="readonly" data-name="Read-only">
+<div style="max-width:480px">
+  <div class="field"><label for="f-mail">Email</label><input id="f-mail" readonly value="marcus@a-intel.example"><div class="hint">Your identity provider sets this.</div></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-check">
+    <figcaption class="dx-story-h"><b>Checkbox card</b><span>A choice with its consequence. The title is mono by default, for a permission or a key.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="check" data-name="Checkbox card">
+<div style="max-width:480px">
+  <label class="check"><input type="checkbox" checked><span class="grow"><span class="n">spend.read</span><span class="d">See spend, budgets, and the findings on this workspace.</span></span></label>
+  <label class="check"><input type="checkbox"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Registering again creates a new principal.</span></span></label>
+  <label class="check off"><input type="checkbox" disabled><span class="grow"><span class="n">billing.write</span><span class="d">Only an org owner can grant this.</span></span></label>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-small-select">
+    <figcaption class="dx-story-h"><b>Small select</b><span><code>.sel-sm</code> sits inside a table row or a list item.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="small-select" data-name="Small select">
+<span class="muted" style="font-size:12px">Tag</span>
+<select class="sel-sm" aria-label="Tag of item 1"><option>code</option><option selected>test</option><option>docs</option><option>review</option></select>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Field</td><td><code>.field</code></td><td>A block with 14px below it.</td></tr>
+      <tr><td>Label</td><td><code>.field label</code></td><td>12px Geist 600 in <code>--muted</code>, 5px above the control.</td></tr>
+      <tr><td>Control</td><td><code>.field input</code>, <code>select</code>, <code>textarea</code></td><td>Full width on <code>--ink</code>, a 1px <code>--border</code>, a 9px radius, 8px by 11px padding, 13px text. Focus turns the border gold.</td></tr>
+      <tr><td>Hint</td><td><code>.field .hint</code></td><td>11.5px in <code>--dim</code>, 5px below. Inside a dialog it is <code>--muted</code> at line height 1.5.</td></tr>
+      <tr><td>Read-only</td><td><code>.field input[readonly]</code></td><td><code>--muted</code> text on <code>--hl</code>, default cursor.</td></tr>
+      <tr><td>Two up</td><td><code>.fields</code></td><td>Two equal columns, 12px apart. One column under 560px and in the phone dialog layer.</td></tr>
+      <tr><td>Checkbox card</td><td><code>.check</code></td><td>A bordered row on <code>--ink</code>: a gold-accent checkbox, a title (<code>.n</code>, 12.5px Monaspace Neon 500), and a line (<code>.d</code>, 12px <code>--muted</code>).</td></tr>
+      <tr><td>Disabled card</td><td><code>.check.off</code></td><td>55% opacity and a not-allowed cursor.</td></tr>
+      <tr><td>Small select</td><td><code>.sel-sm</code></td><td>12px on <code>--ink</code>, a 7px radius, 4px by 8px padding.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  <p class="dx-sub">Label above, control, hint below. Nothing else in a field.</p>
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Any value a person types or picks in a dialog or a wizard.</li><li>A consequence a person must accept before a destructive action: the checkbox card.</li><li>A per-row choice in a table: the small select.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Searching or filtering a list: the <a href="list-table.html">list table</a> adds its own search and filters.</li><li>An on or off setting that applies at once: use a <a href="switch.html">switch</a>.</li><li>Two to five choices that change a view: use a <a href="segmented-control.html">segmented control</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex"><div class="field" style="width:100%"><input placeholder="Email"></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A placeholder as the only label. It disappears as you type, and a screen reader may not read it.</p></div>
+    <div class="dx-do"><div class="dx-ex"><div class="field" style="width:100%"><label for="dd-email">Email</label><input id="dd-email" placeholder="name@a-intel.example"></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>A label tied to the input, and a placeholder that shows the format.</p></div>
+  </div>
+  <ul>
+    <li>The label is tied to its control with <code>for</code> and <code>id</code>, or the control sits inside the label.</li>
+    <li>A hint is one sentence. It says what a valid value looks like or what happens when you save.</li>
+    <li>Validation says what is wrong and what to write, under the field, when you leave it or save. See Findings.</li>
+    <li>A money field shows dollars. The store keeps micros, and the field never shows them.</li>
+    <li>A destructive dialog keeps its action disabled until the checkbox card is ticked.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Label</b>: a noun in sentence case, no colon: &quot;Monthly limit&quot;, &quot;Reason&quot;.</li>
+    <li><b>Placeholder</b>: an example of the format, never the label: <code>name@a-intel.example</code>.</li>
+    <li><b>Hint</b>: one sentence, present tense: &quot;In US dollars.&quot; &quot;Your identity provider sets this.&quot;</li>
+    <li><b>Error</b>: what is wrong, then what to write: &quot;The limit is below this month's spend of $2,450.00. Set it at $2,450.00 or more.&quot;</li>
+    <li><b>Checkbox title</b>: a permission or key in mono (<code>spend.read</code>), or a plain statement in Geist when it is a sentence the person agrees to.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>Every control has a programmatic label. 112 fields in the mockup put a bare <code>label</code> beside an input and name the input with <code>aria-label</code> instead. See Findings.</li>
+    <li>The hint is tied to its control with <code>aria-describedby</code>, so it is read after the label.</li>
+    <li>An invalid field sets <code>aria-invalid=&quot;true&quot;</code> and ties its message with <code>aria-describedby</code>.</li>
+    <li>The focus border is gold and the global focus ring also shows. Both clear 3:1 on <code>--ink</code>.</li>
+    <li>The hint in <code>--dim</code> outside a dialog is 3.67:1 on <code>--panel</code> in dark. A hint a person needs to act belongs on <code>--muted</code>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>Inputs, selects, and textareas are 16px so iOS does not zoom on focus, and inputs and selects are at least 44px tall.</li>
+    <li><code>.fields</code> stacks to one column.</li>
+    <li>The small select is at least 36px tall.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--ink</code></td><td>Control and checkbox card ground</td></tr>
+      <tr><td><code>--border</code></td><td>Control and card border</td></tr>
+      <tr><td><code>--gold</code></td><td>Focus border and checkbox accent</td></tr>
+      <tr><td><code>--muted</code></td><td>Label, read-only text, card line, dialog hint</td></tr>
+      <tr><td><code>--dim</code></td><td>Hint outside a dialog</td></tr>
+      <tr><td><code>--hl</code></td><td>Read-only ground</td></tr>
+      <tr><td><code>--rule</code></td><td>Card hover border</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 479 to 483, 562 to 569, check card 570 to 575, 1359 to 1361, 2242, 2259, small select 766 to 767, read-only 924, phone 670 to 672</td><td>The rules that draw it</td></tr>
+      <tr><td><code>dialog()</code> at <code>engine.js:9514</code></td><td>Renders the fields a dialog body holds.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>Fields are written inline, about 258 of them, mostly in dialogs. There are 11 checkbox cards.</li>
+    <li>The onboarding screens have their own invalid state, <code>.field input.ob-bad</code> (engine.css 1469). Nothing else in the engine draws an invalid field.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Half the labels are not tied to their controls</h4><p>112 fields write <code>&lt;label&gt;Name&lt;/label&gt;&lt;input aria-label=&quot;Name&quot;&gt;</code> and 109 use <code>for</code>. Clicking the bare label does not focus the input. Every label should use <code>for</code>.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>No shared invalid state</h4><p>Only onboarding draws an invalid field, and <code>aria-invalid</code> appears once in the engine. A build needs one error style and message slot for every field.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Mono checkbox titles by default</h4><p><code>.check .n</code> is Monaspace Neon. A title that is a sentence must override it inline, as the retire dialog does. A modifier class would be clearer.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Hint color changes with its container</h4><p>A hint is <code>--dim</code> on a page and <code>--muted</code> in a dialog. One rule, <code>--muted</code>, would read the same everywhere.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's form field against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Form field audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the form field component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/form-field.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 479 to 483, 562 to 569, check card 570 to 575, 1359 to 1361, 2242, 2259, small select 766 to 767, read-only 924, phone 670 to 672. The mockup renders it with dialog() (engine.js:9514).
+3. The build's implementation: find it by its root selector (.field) or its name, and list every route that renders it.
+4. Where to see it in the design: every dialog, Set a budget, Invite a person, Retire agent, the connection wizard, Account. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Labels. Every input, select, and textarea has a visible label tied to it with for and id, or wrapped by it. aria-label alone beside a visible label is a FAIL.
+2. Look. Labels are 12px Geist 600 in --muted. Controls are full width on --ink with a 1px --border, a 9px radius, 8px by 11px padding, and 13px text. Focus shows a gold border and the focus ring.
+3. Hints. Each hint is one sentence tied with aria-describedby.
+4. Validation. Submit each form empty and with a bad value. Each invalid field shows its message beside it, sets aria-invalid, and the message says what is wrong and what to write. A message only in a toast is a FAIL.
+5. Money. A money field shows and accepts dollars with separators, and stores micros. Micros in a field are a FAIL.
+6. Read-only. A read-only value is visibly read-only and its hint says where it is changed.
+7. Checkbox cards. The title and line are one label for the checkbox, a disabled card says why, and a destructive action stays disabled until its card is ticked.
+8. Phone. Controls are 16px and at least 44px tall, and two-up fields stack.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: Inputs, selects, and textareas are 16px so iOS does not zoom on focus, and inputs and selects are at least 44px tall. `.fields` stacks to one column. The small select is at least 36px tall.
+13. Accessibility. Every control has a programmatic label. 112 fields in the mockup put a bare `label` beside an input and name the input with `aria-label` instead. See Findings. The hint is tied to its control with `aria-describedby`, so it is read after the label. An invalid field sets `aria-invalid=&quot;true&quot;` and ties its message with `aria-describedby`. The focus border is gold and the global focus ring also shows. Both clear 3:1 on `--ink`. The hint in `--dim` outside a dialog is 3.67:1 on `--panel` in dark. A hint a person needs to act belongs on `--muted`.
+14. One implementation. The build draws the form field from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Form field: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="button.html"><span>Previous</span>Button</a><a class="nx" href="switch.html"><span>Next</span>Switch</a></nav>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Timeline</title>
+<meta name="description" content="A short sequence of steps, read top to bottom or left to right.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Timeline</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Data display</p>
+  <h1>Timeline</h1>
+  <p class="dx-lead">A timeline lays out the steps of a fixed sequence: how a figure was priced, the stages of a workflow, how to apply a fix. The vertical <code>.chain</code> reads top to bottom with a rule and a dot per step. The horizontal <code>.stages</code> variant, written by <code>stageChain()</code>, reads left to right and carries a live state per stage: waiting, on, or done.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.chain</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 312 to 317, 2199 to 2211, 2390 to 2396</span>
+    <span><b>Used on</b> Billing, Spend (evidence and fix dialogs), Work orders (Stages)</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-vertical">
+    <figcaption class="dx-story-h"><b>Vertical chain</b><span>From the Billing page's Billable units panel. Every item here renders <code>li.on</code>, so the gold dot marks each row alike.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="vertical" data-name="Vertical chain">
+<ul class="chain">
+  <li class="on"><span class="h">Priced</span><div>A governed action: a call oxagen decided, delivered and recorded, with its receipt in the chain.</div></li>
+  <li class="on"><span class="h">Reported</span><div>Sealed runs, tokens by class and retained evidence. Reported, never priced.</div></li>
+  <li class="on"><span class="h">Free</span><div>Denials, runs oxagen halted before a model call, and runs of the in-app agent.</div></li>
+</ul>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-steps">
+    <figcaption class="dx-story-h"><b>Plain steps</b><span>From the fix dialog's &quot;How to apply it&quot; list. No <code>.h</code> label, just the step text.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="steps" data-name="Plain steps">
+<ul class="chain">
+  <li class="on"><div style="font-size:12.5px;color:var(--body)">Add <span class="mono">page_size</span> to the billing call.</div></li>
+  <li class="on"><div style="font-size:12.5px;color:var(--body)">Cache the first page for the rest of the run.</div></li>
+  <li class="on"><div style="font-size:12.5px;color:var(--body)">Open a pull request. The Spend page confirms the drop on the next sealed run.</div></li>
+</ul>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-stages">
+    <figcaption class="dx-story-h"><b>Stage chain</b><span>The horizontal variant, written by <code>stageChain()</code>, for a work order's Stages panel. State per stage: waiting (plain), <code>on</code> (current, gold), <code>done</code> (<code>--st-allowed</code>).</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="stages" data-name="Stage chain">
+<div class="stages">
+  <div class="stage done"><span class="r"><i>1</i>Draft</span><span class="ag"><span class="avx agent tn-solid f-mono" style="width:18px;height:18px;font-size:8px">CI</span><b>stella CI</b></span><span class="sub">owns tests, lint</span></div>
+  <span class="stage-arrow" aria-hidden="true">→</span>
+  <div class="stage on"><span class="r"><i>2</i>Review</span><span class="ag"><span class="avx agent tn-solid" style="width:18px;height:18px;font-size:8px">RM</span><b>Release manager</b></span><span class="sub">owns changelog, release notes</span></div>
+  <span class="stage-arrow" aria-hidden="true">→</span>
+  <div class="stage you"><span class="r"><i>3</i>Accept</span><span class="ag"><span class="avx person tn-soft f-serif" style="width:18px;height:18px;font-size:8px">MB</span><b>You</b></span><span class="sub">a person accepts every item</span></div>
+</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Vertical list</td><td><code>.chain</code></td><td>A <code>ul</code> with no default list marker, laid out as a single-column grid with no row gap.</td></tr>
+      <tr><td>Step</td><td><code>.chain li</code></td><td>A 22px left rule in <code>--rule</code>, 14px padding below, a 5px left margin so the dot sits on the rule.</td></tr>
+      <tr><td>Step dot</td><td><code>.chain li::before</code></td><td>A 9px <code>--panel</code> circle with a 2px <code>--rule</code> border, positioned on the rule.</td></tr>
+      <tr><td>Current step dot</td><td><code>.chain li.on::before</code></td><td>The dot and its border turn <code>--gold</code> (see Findings).</td></tr>
+      <tr><td>Step label</td><td><code>.chain .h</code></td><td>10.5px Geist 600 at 0.1em, capitals by CSS, <code>--dim</code>.</td></tr>
+      <tr><td>Stage row</td><td><code>.stages</code></td><td>A wrapping flex row with an 8px gap, for <code>stageChain()</code>'s horizontal variant.</td></tr>
+      <tr><td>Stage card</td><td><code>.stage</code></td><td>A <code>--ink</code> box with a 1px <code>--border</code>, a 10px radius, holding the role, the agent, and the sub line.</td></tr>
+      <tr><td>Stage arrow</td><td><code>.stage-arrow</code></td><td>A <code>--dim</code> arrow between stage cards, hidden on a phone.</td></tr>
+      <tr><td>Current stage</td><td><code>.stage.on</code></td><td>A <code>--gold</code>-tinted border and glow (see Findings).</td></tr>
+      <tr><td>Done stage</td><td><code>.stage.done</code></td><td>A <code>--st-allowed</code>-tinted border and a filled numbered circle.</td></tr>
+      <tr><td>Your stage</td><td><code>.stage.you</code></td><td>A dashed border, for the person-accepts step at the end of every workflow.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A fixed sequence a person reads once: how a number was priced, the steps to apply a fix.</li><li>A workflow's stages and which one is current, in the horizontal <code>.stages</code> layout.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A record's changing state with timestamps: use the run's own transcript or frame list.</li><li>A single current status with no history: use a <a href="badge.html">badge</a>.</li><li>Many parallel branches: the layered <code>.stages.layered</code> variant handles that, but a graph belongs in its own view.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><ul class="chain" style="width:100%"><li class="on"><span class="h">Step 1</span><div>Priced.</div></li><li class="on"><span class="h">Step 2</span><div>Reported.</div></li><li class="on"><span class="h">Step 3</span><div>Free.</div></li></ul></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Every step marked &quot;on&quot; in gold. Nothing is current, so the gold dot means nothing.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><ul class="chain" style="width:100%"><li class="on"><span class="h">Priced</span><div>A governed action, billed at the rate on record.</div></li><li><span class="h">Reported</span><div>Sealed runs and retained evidence. Reported, never priced.</div></li></ul></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>Gold marks the one step that is current or true right now, and a later step waits in the plain rule color.</p></div>
+  </div>
+  <ul>
+    <li>A vertical chain lists a fixed set of facts or steps, not a live progress state, unless one step is genuinely current.</li>
+    <li>A horizontal stage chain's <code>on</code> state is the stage a work order is at right now. Every other stage is <code>done</code>, waiting, or <code>you</code>.</li>
+    <li>The step label, when there is one, is a plain noun or a short phrase, not a numbered instruction (&quot;Step 1&quot;).</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Step label</b>: a plain noun in sentence case (&quot;Priced&quot;, &quot;Reported&quot;). CSS sets the capitals.</li>
+    <li><b>Step body</b>: one or two sentences, present tense, stating a fact or an instruction.</li>
+    <li><b>Stage role</b>: a plain noun for the job the stage does (&quot;Draft&quot;, &quot;Review&quot;, &quot;Accept&quot;), never a comma tail.</li>
+    <li><b>Stage sub line</b>: what the stage owns, or its current run state (&quot;Running&quot;, &quot;Sent back&quot;, &quot;Done&quot;), never a design rationale.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li><code>.chain</code> is a real <code>ul</code>/<code>li</code> list, so a screen reader announces the step count and reads each step in order.</li>
+    <li>The step dot is CSS-generated content (<code>::before</code>), so it carries no text of its own. The color it turns is decoration, not the only signal: a stage's state also changes its border color and, in <code>.stages</code>, its numbered circle.</li>
+    <li>A stage's state word (&quot;Running&quot;, &quot;Sent back&quot;, &quot;Done&quot;) is visible text beside the stage, not color alone.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li><code>.stages</code> wraps to one column and <code>.stage-arrow</code> is hidden, so stages stack without a dangling arrow.</li>
+    <li><code>.chain</code> needs no phone rule: it is already a single column with no fixed width.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--rule</code></td><td>Chain rule and step dot border at rest</td></tr>
+      <tr><td><code>--panel</code></td><td>Step dot fill at rest</td></tr>
+      <tr><td><code>--gold</code></td><td>Current chain dot, current stage border (see Findings)</td></tr>
+      <tr><td><code>--dim</code></td><td>Step label, stage role, stage arrow</td></tr>
+      <tr><td><code>--ink</code></td><td>Stage card ground</td></tr>
+      <tr><td><code>--border</code></td><td>Stage card border at rest</td></tr>
+      <tr><td><code>--st-allowed</code></td><td>Done stage border and numbered circle</td></tr>
+      <tr><td><code>--st-approval</code></td><td><code>.stage.again</code>, a stage sent back for another pass</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 312 to 317, 2199 to 2211, 2390 to 2396</td><td>The rules that draw it</td></tr>
+      <tr><td><code>stageChain(wf, opts)</code> at <code>engine.js:14884</code></td><td>Writes the <code>.stages</code> row from a workflow's stage list, plus a final Accept card. <code>opts.state(i)</code> returns each stage's class.</td></tr>
+      <tr><td><code>stState(i)</code> at <code>engine.js:15503</code></td><td>A work order's per-stage state function: <code>done</code> once sealed and not returned, <code>on</code> while live or next up, empty while queued.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>The vertical <code>.chain</code> is written inline in three places: <code>pBilling()</code> (engine.js 7923), the evidence dialog's &quot;How we know&quot; list (9451), and the fix dialog's &quot;How to apply it&quot; list (9495). None goes through a shared helper.</li>
+    <li>In all three inline sites every <code>&lt;li&gt;</code> carries <code>.on</code>. <code>stageChain()</code> is the only caller that varies the state per item.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold marks every row, not a state</h4><p>The three inline <code>.chain</code> lists (Billing, the evidence dialog, the fix dialog) mark every <code>&lt;li&gt;</code> with <code>.on</code>, so <code>li.on::before</code> (engine.css 316) turns every dot gold. Gold is identity plus one action, never decoration, and a dot that is gold on every row carries no information at all.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold marks the current stage</h4><p><code>.stage.on</code> (engine.css 2208) tints the current stage's border and glow with <code>--gold</code>, while <code>.stage.done</code> (2206) correctly uses the <code>--st-allowed</code> state token. The same component marks one state with a state token and another with the identity color, so the rule is inconsistent inside a single call to <code>stageChain()</code>.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>No shared vertical helper</h4><p>The three inline <code>.chain</code> lists and <code>stageChain()</code>'s Accept card are hand-written HTML strings in four places. A <code>chainList(steps)</code> helper would draw the vertical variant once.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's timeline against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Timeline audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the timeline component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/timeline.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 312 to 317, 2199 to 2211, 2390 to 2396. The mockup renders it with stageChain(wf, opts) (engine.js:14884), stState(i) (engine.js:15503).
+3. The build's implementation: find it by its root selector (.chain) or its name, and list every route that renders it.
+4. Where to see it in the design: Billing, Spend (evidence and fix dialogs), Work orders (Stages). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Structure. The vertical variant is a `ul` of `li`, each with a rule to its left and a dot on the rule. A `div`-based imitation with no list semantics is a FAIL.
+2. Current state. Gold marks at most one step or stage as current on a chain. Every step gold, or none, when the source data has a real current step, is a FAIL.
+3. Stage states. A stage chain's `done` stages use a state token (`--st-allowed`), never gold. Report any stage state colored gold outside the current stage.
+4. Labels. A step label, when present, is a plain noun in sentence case with capitals set by CSS, not typed in capitals in the source.
+5. Stage card. Role, agent (with its avatar), and a sub line naming what the stage owns or its run state, inside a bordered `--ink` card.
+6. Arrow. `.stage-arrow` sits between stage cards on desktop and is hidden on a phone width, where stages stack in one column.
+7. Content. A step or stage state word is visible text beside the color, never color alone.
+8. One implementation. List every place the build draws a vertical or horizontal timeline by hand, with its file and line.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: `.stages` wraps to one column and `.stage-arrow` is hidden, so stages stack without a dangling arrow. `.chain` needs no phone rule: it is already a single column with no fixed width.
+13. Accessibility. `.chain` is a real `ul`/`li` list, so a screen reader announces the step count and reads each step in order. The step dot is CSS-generated content (`::before`), so it carries no text of its own. The color it turns is decoration, not the only signal: a stage's state also changes its border color and, in `.stages`, its numbered circle. A stage's state word (&quot;Running&quot;, &quot;Sent back&quot;, &quot;Done&quot;) is visible text beside the stage, not color alone.
+14. One implementation. The build draws the timeline from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Timeline: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="agent-card.html"><span>Previous</span>Agent card</a><a class="nx" href="record-card.html"><span>Next</span>Record card</a></nav>
+</main>
+</div>
+</body>
+</html>

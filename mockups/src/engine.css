@@ -58,7 +58,9 @@ a:hover{text-decoration:underline}
 /* Identifiers keep their case inside uppercase labels: wo_01K6T9QX, a-intel/platform#590, workspace.owner. */
 .eyebrow.id,.eyebrow .id,.b .id,.stat .k .id,th .id,.k .id,.stage .r .id{text-transform:none}
 h1,h2,h3,h4{margin:0;letter-spacing:-.015em}
-h1,h2,h3{font-family:var(--font-display)}
+/* Space Grotesk sets the page h1 and the wordmarks, and nothing below 20px. Every other heading,
+   panel title and label is Geist: the display face loses its shape at small sizes. */
+h1{font-family:var(--font-display)}
 h4{font-weight:600}
 h1{font-size:24px;font-weight:700}
 h2{font-size:18px;font-weight:600}
@@ -1917,7 +1919,7 @@ button.wz-opt:hover{border-color:var(--rule)}
 /* Page content is under #viewport; a dialog is under #layer, and render() puts the phone class on
    both. Every rule below that dresses a dialog has to name #layer or it never fires. */
 #viewport.phone .crec-grid{grid-template-columns:1fr}
-#viewport.phone .crec-h h1{font-size:18px}
+#viewport.phone .crec-h h1{font-size:20px}
 #layer.phone .wz-pick,#layer.phone .wz-kinds,#layer.phone .wz-opt-kv,
 #viewport.phone .wz-pick,#viewport.phone .wz-kinds,#viewport.phone .wz-opt-kv{grid-template-columns:1fr}
 #layer.phone .wz-rail,#viewport.phone .wz-rail{gap:4px}

@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Meter</title>
+<meta name="description" content="A figure shown as a fraction of a ceiling, or a total shown as its named parts, in a thin bar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Meter</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Data display</p>
+  <h1>Meter</h1>
+  <p class="dx-lead">A meter answers one question: how much of what's allowed is used. A budget, a token cap, a cache rate. A stacked meter answers a related one: what is a total made of. Both draw a thin bar and both name their figures in words beside it, so the bar is never the only place the number lives.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.bar, .meter, .stk</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 318 to 322 (bar and meter), 765 (bar hold), 1395 to 1398 (stacked ratio), 1376 to 1379 (legend), 2057 to 2060 (meter, defined a second time)</span>
+    <span><b>Used on</b> Run (Decision trace, Tokens, Instruments), Spend, Agents (30-day token use, mandates), Steering (record page)</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-budget">
+    <figcaption class="dx-story-h"><b>Single-value meter</b><span>The label and figure come first, then the bar, then a one-line reason. At 90% or more the fill takes <code>.hold</code> and turns from allowed-green to approval-blue.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="budget" data-name="Single-value meter">
+<div class="meter"><div class="lab"><span>Session-start prefix</span><b>1,161 of 4,096 tok</b></div><div class="bar" role="img" aria-label="Session-start prefix: 28 percent used"><i style="width:28%"></i></div><div class="dim" style="font-size:11.5px">16 KiB in the signed bundle, header included</div></div>
+<div class="meter" style="margin-top:14px"><div class="lab"><span>Volatile selection</span><b>3,844 of 4,096 tok</b></div><div class="bar" role="img" aria-label="Volatile selection: 94 percent used"><i class="hold" style="width:94%"></i></div><div class="dim" style="font-size:11.5px">picked for this brief under the workspace budget</div></div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-composition">
+    <figcaption class="dx-story-h"><b>Composition meter</b><span>One meter per prompt part, each in its own hue, tallest first. <code>tokBars()</code> sets no <code>role</code> or <code>aria-label</code> on these. See Findings.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="composition" data-name="Composition meter">
+<div style="display:grid;gap:9px">
+  <div class="meter"><div class="lab">Conversation<b>18,204 <span class="dim" style="font-weight:500">· 41%</span></b></div><div class="bar"><i style="width:100%;background:var(--st-allowed)"></i></div></div>
+  <div class="meter"><div class="lab">Tool definitions<b>9,880 <span class="dim" style="font-weight:500">· 22%</span></b></div><div class="bar"><i style="width:54%;background:var(--st-approval)"></i></div></div>
+  <div class="meter"><div class="lab">Context frames<b>7,412 <span class="dim" style="font-weight:500">· 17%</span></b></div><div class="bar"><i style="width:41%;background:var(--st-proven)"></i></div></div>
+  <div class="meter"><div class="lab">Tool results<b>5,006 <span class="dim" style="font-weight:500">· 11%</span></b></div><div class="bar"><i style="width:27%;background:var(--muted)"></i></div></div>
+  <div class="meter"><div class="lab">Output<b>2,890 <span class="dim" style="font-weight:500">· 6%</span></b></div><div class="bar"><i style="width:16%;background:var(--fg)"></i></div></div>
+  <div class="meter"><div class="lab">Reasoning<b>1,240 <span class="dim" style="font-weight:500">· 3%</span></b></div><div class="bar"><i style="width:7%;background:var(--muted)"></i></div></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-stacked">
+    <figcaption class="dx-story-h"><b>Stacked ratio</b><span>One bar, several named segments. <code>stackLeg()</code> is the legend below it, each swatch matching a segment's hue.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="stacked" data-name="Stacked ratio">
+<div>
+  <div class="stk"><i class="fk-model" style="flex:41" title="model · 41%"></i><i class="fk-tool" style="flex:33" title="tool · 33%"></i><i class="fk-gov" style="flex:20" title="waiting on a person · 20%"></i><i class="neu" style="flex:6" title="harness · 6%"></i></div>
+  <div class="leg" style="margin-top:8px"><span><i class="fk-model"></i>model <b>2m 04s</b></span><span><i class="fk-tool"></i>tool <b>1m 40s</b></span><span><i class="fk-gov"></i>waiting on a person <b>1m 01s</b></span><span><i class="neu"></i>harness <b>18s</b></span></div>
+</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Bar</td><td><code>.bar</code></td><td>The track: 7px tall, <code>--hl</code> ground with a 1px <code>--border</code>, corners rounded and clipped.</td></tr>
+      <tr><td>Fill</td><td><code>.bar i</code></td><td>The filled portion, <code>--st-allowed</code> by default, its width set by an inline percent.</td></tr>
+      <tr><td>Hold fill</td><td><code>.bar i.hold</code></td><td>The fill in <code>--st-approval</code>, applied once the value reaches 90% used.</td></tr>
+      <tr><td>Meter</td><td><code>.meter</code></td><td>The label-and-bar unit, a grid with a 5px gap. Defined twice (engine.css 321 and 2057). The later definition wins.</td></tr>
+      <tr><td>Meter label</td><td><code>.meter .lab</code></td><td>The name and the figure on one line, the figure pushed to the far side.</td></tr>
+      <tr><td>Meter's own bar</td><td><code>.meter .bar</code></td><td>A 6px track from the second <code>.meter .bar</code> rule, thinner than a bare <code>.bar</code>.</td></tr>
+      <tr><td>Stacked ratio</td><td><code>.stk</code></td><td>Several fills in one 8px track, 2px gaps, the first and last corners rounded, with an optional reference tick (<code>.stk .ref</code>).</td></tr>
+      <tr><td>Legend</td><td><code>.leg</code></td><td>A row naming each stacked segment: a small swatch, the part's name in <code>--muted</code>, and its figure in <code>--fg</code>.</td></tr>
+      <tr><td>Budget bar</td><td><code>.mbar</code> (page-bound)</td><td>A 12px pill track with a settled segment and, for a call in flight, a diagonally hatched reserved segment, with its own <code>.mlegend</code> below. Mandate cards and the mandate page.</td></tr>
+      <tr><td>Family bar</td><td><code>.fb</code> (page-bound)</td><td>A bare 7px bar with no border, always the <code>--fk-model</code> hue, beside a count. Run's tool-family and concurrency rows.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A figure with a ceiling worth showing as a fraction: a token budget, a spend cap, a cache rate.</li><li>A total made of named parts, shown as one bar: wall clock by phase, tokens by prompt part.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A figure with no ceiling: use a <a href="stat-box.html">stat box</a>.</li><li>A history over time: a run's per-turn cost is a column chart, not a meter.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="bar" style="max-width:220px"><i style="width:92%;background:var(--gold)"></i></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>No label names what is 92% of what, and the fill is gold, which is reserved for identity and the one action on a screen.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="meter" style="max-width:220px"><div class="lab"><span>Monthly budget</span><b>$1,840 of $2,000</b></div><div class="bar" role="img" aria-label="Monthly budget: 92 percent used"><i class="hold" style="width:92%"></i></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>The figure states both numbers before the bar draws them, and the bar itself carries the percent to a screen reader.</p></div>
+  </div>
+  <ul>
+    <li>A meter's fill is a state hue (<code>--st-allowed</code>, holding to <code>--st-approval</code>) or a fixed categorical hue (<code>--fk-*</code>). Never gold.</li>
+    <li>A single-value meter states its percent to assistive technology through <code>role=&quot;img&quot;</code> and an <code>aria-label</code>, not through the bar's width alone.</li>
+    <li>At 90% or more, a single-value meter's fill switches to <code>.hold</code>, a state change a person should notice before the ceiling, not only a color.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Label</b>: the figure's name, sentence case (&quot;Session-start prefix&quot;, &quot;Monthly budget&quot;).</li>
+    <li><b>Figure</b>: &quot;{used} of {max} {unit}&quot;, formatted with <code>tokn()</code> or <code>usd()</code> so thousands separators and currency match the rest of the page.</li>
+    <li><b>Sub line</b>: one fact in <code>--dim</code> under the bar, such as &quot;16 KiB in the signed bundle, header included&quot;.</li>
+    <li><b>Legend entry</b>: the part's name in <code>--muted</code> and its formatted figure in <code>&lt;b&gt;</code>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li><code>stgMeter()</code>'s <code>.bar</code> carries <code>role=&quot;img&quot;</code> and an <code>aria-label</code> stating the label and the percent in words. <code>tokBars()</code>'s composition meters carry neither. See Findings.</li>
+    <li>Getting close to a ceiling is never color alone. The hold state also changes the fill's hue, and the label states the raw numbers beside it.</li>
+    <li>A stacked bar's segments carry a <code>title</code> naming the part and its share, so a pointer or a screen reader gets the same fact the legend gives a sighted reader.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>The label and the bar keep their sizes at 390px. <code>.lab</code> is a flex row with no <code>nowrap</code>, so a long figure wraps under the name rather than truncating.</li>
+    <li>A stacked bar's segments keep a 2px minimum width so a small share stays visible and tappable for its tooltip.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--hl, --border</code></td><td>Bar track ground and border</td></tr>
+      <tr><td><code>--st-allowed</code></td><td>Default single-value fill</td></tr>
+      <tr><td><code>--st-approval</code></td><td>Hold fill at 90% or more, and the budget bar's reserved segment</td></tr>
+      <tr><td><code>--fk-model, --fk-tool, --fk-gov</code></td><td>Stacked-ratio and composition-meter hues</td></tr>
+      <tr><td><code>--rule</code></td><td>The <code>.neu</code> segment (&quot;harness&quot;, &quot;other&quot;)</td></tr>
+      <tr><td><code>--fg, --muted, --dim</code></td><td>Figure, legend text, and sub line</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 318 to 322 (bar and meter), 765 (bar hold), 1395 to 1398 (stacked ratio), 1376 to 1379 (legend), 2057 to 2060 (meter, defined a second time)</td><td>The rules that draw it</td></tr>
+      <tr><td><code>stgMeter(label, used, max, unit, sub)</code> at <code>engine.js:6393</code></td><td>Single-value meter with <code>role=&quot;img&quot;</code> and an aria-label stating the percent. Holds at 90%.</td></tr>
+      <tr><td><code>tokBars(t, opts)</code> at <code>engine.js:193</code></td><td>One composition meter per prompt part, plus output and reasoning, each in its own hue.</td></tr>
+      <tr><td><code>stack3(parts, total)</code> at <code>engine.js:2592</code></td><td>One <code>.stk</code> segment per part, sized by flex, each with a tooltip.</td></tr>
+      <tr><td><code>stackLeg(parts)</code> at <code>engine.js:2595</code></td><td>The <code>.leg</code> row naming each part <code>stack3()</code> drew.</td></tr>
+      <tr><td><code>mandateBar(m, showReserve)</code> at <code>engine.js:1741</code></td><td>The <code>.mbar</code> budget bar plus its own <code>.mlegend</code>, for a mandate card and the mandate page.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>A third local meter, <code>crecMeter()</code> (engine.js:13304), draws a Steering record's rendered, cited, and violated counts with the same <code>.meter</code>, <code>.lab</code>, and <code>.bar</code> markup as <code>stgMeter()</code>, but takes its own arguments and sets no <code>role</code> or <code>aria-label</code>.</li>
+    <li><code>.fb</code> and <code>.pr-bar</code> are declared beside <code>.mbar</code> in the CSS (engine.css 1548 to 1559) as page-bound variants. <code>.fb</code> is live on Run. <code>.pr-bar</code> renders nowhere. See Findings.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Composition meters carry no ARIA percent</h4><p><code>tokBars()</code>'s <code>.bar</code> has neither <code>role=&quot;img&quot;</code> nor an <code>aria-label</code>, unlike <code>stgMeter()</code>'s. A screen reader gets the part's name and figure but never the percent the fill visually conveys.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>`.pr-bar` has no emitter</h4><p>Declared at engine.css 1555 to 1559 with its own label, track, and value columns. Nothing in engine.js or wedge.js renders one.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>A third meter shadows `stgMeter()`</h4><p><code>crecMeter()</code> (engine.js 13304) draws the same <code>.meter</code> markup with its own signature and no ARIA attributes, for the Steering record page alone.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>`.meter .lab` is defined twice</h4><p>Once at engine.css 321 (<code>margin-left:auto</code> pushes the figure right) and again at 2057 (<code>justify-content:space-between</code>). The two render alike, but a component with two rules for the same part should have one.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's meter against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Meter audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the meter component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/meter.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 318 to 322 (bar and meter), 765 (bar hold), 1395 to 1398 (stacked ratio), 1376 to 1379 (legend), 2057 to 2060 (meter, defined a second time). The mockup renders it with stgMeter(label, used, max, unit, sub) (engine.js:6393), tokBars(t, opts) (engine.js:193), stack3(parts, total) (engine.js:2592), stackLeg(parts) (engine.js:2595), mandateBar(m, showReserve) (engine.js:1741).
+3. The build's implementation: find it by its root selector (.bar, .meter, .stk) or its name, and list every route that renders it.
+4. Where to see it in the design: Run (Decision trace, Tokens, Instruments), Spend, Agents (30-day token use, mandates), Steering (record page). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Bar and fill. `.bar` is a 7px `--hl` track with a 1px `--border`. `.bar i` fills it in `--st-allowed`, switching to `--st-approval` under `.hold` at 90% or more used. A gold fill at any percent is a FAIL.
+2. Meter shell. `.meter` pairs a `.lab` (name and figure) with a `.bar`, label first, so a screen reader reads the name and the figure before the bar. A meter with the bar before its label is a FAIL.
+3. ARIA percent. A single-value meter's `.bar` carries `role=&quot;img&quot;` and an `aria-label` stating the label and the percent in words. Report every meter on the sampled route that lacks it; the composition meter's gap is a known finding, not a new one.
+4. Stacked ratio. `.stk` draws each part as a flex segment in its own categorical hue with a 2px gap and no border between segments, and `.leg` names every part with its own swatch and figure. A stacked bar with no legend is a FAIL.
+5. Hold threshold. A single-value meter reaches `.hold` at 90% used, not before and not after. Report the exact percent your build switches at.
+6. Figure format. Every meter's figure uses the engine's number helpers (`tokn()`, `usd()`, `pct()`), so separators and currency match the rest of the page.
+7. Budget bar. `.mbar`, where present, shows a settled segment and, for a call in flight, a diagonally hatched reserved segment, both named in `.mlegend` below it. Omitting the reserved segment for a call in flight is a FAIL.
+8. No dead meters. `.pr-bar` renders nowhere in the reference. If a build's mockup renders it, treat it as a new pattern for the index audit, not as this page's subject.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: The label and the bar keep their sizes at 390px. `.lab` is a flex row with no `nowrap`, so a long figure wraps under the name rather than truncating. A stacked bar's segments keep a 2px minimum width so a small share stays visible and tappable for its tooltip.
+13. Accessibility. `stgMeter()`'s `.bar` carries `role=&quot;img&quot;` and an `aria-label` stating the label and the percent in words. `tokBars()`'s composition meters carry neither. See Findings. Getting close to a ceiling is never color alone. The hold state also changes the fill's hue, and the label states the raw numbers beside it. A stacked bar's segments carry a `title` naming the part and its share, so a pointer or a screen reader gets the same fact the legend gives a sighted reader.
+14. One implementation. The build draws the meter from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Meter: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="chips.html"><span>Previous</span>Chips</a><a class="nx" href="ci-light.html"><span>Next</span>CI light</a></nav>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Toast</title>
+<meta name="description" content="One fact, stated in past tense, after an action finishes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Toast</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Overlays</p>
+  <h1>Toast</h1>
+  <p class="dx-lead">A toast reports what an action did: what was written, what changed, what a decision meant. It appears at the bottom of the screen, states one fact in past tense, and removes itself after 4.2 seconds. Toasts stack, newest at the bottom, so more than one event in quick succession is never lost.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>#toast</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 881 to 885, phone 636</span>
+    <span><b>Used on</b> every page</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-tones">
+    <figcaption class="dx-story-h"><b>Tones</b><span>The dot carries the tone. Allowed is the default, and each other tone matches the decision vocabulary the rest of the mockup uses.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="tones" data-name="Tones">
+<div id="toast" role="status" aria-live="polite" style="position:relative;left:auto;bottom:auto;transform:none;display:grid;gap:8px;justify-items:start">
+  <div class="toast"><span class="d" style="background:var(--st-allowed)"></span><span>Committed +12 &minus;3 to feature/rotate-key on core-platform.</span></div>
+  <div class="toast"><span class="d" style="background:var(--st-approval)"></span><span>Already approved by Priya Natarajan. A decision is written once.</span></div>
+  <div class="toast"><span class="d" style="background:var(--st-denied)"></span><span>A denial needs a reason. The agent is told it.</span></div>
+  <div class="toast"><span class="d" style="background:var(--st-failed)"></span><span>Approval expired after 10 minutes. stripe__create_payment was not sent, and the agent was told the request timed out.</span></div>
+  <div class="toast"><span class="d" style="background:var(--st-critical)"></span><span>Pause queued for run_01K5RS7M2E8FJ3QW. It takes effect at the next boundary.</span></div>
+  <div class="toast"><span class="d" style="background:var(--gold)"></span><span>oxagen/roadmap#523 opened for feature/rotate-key &middot; Rotate the Stripe restricted key.</span></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-stack">
+    <figcaption class="dx-story-h"><b>Stack</b><span>One row per event, newest at the bottom, each on its own timer.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="stack" data-name="Stack">
+<div id="toast" role="status" aria-live="polite" style="position:relative;left:auto;bottom:auto;transform:none;display:grid;gap:8px;justify-items:start">
+  <div class="toast"><span class="d" style="background:var(--st-allowed)"></span><span>Avatar updated on a-intel.core.triage. The definition change opens as a pull request. The badge shows here now.</span></div>
+  <div class="toast"><span class="d" style="background:var(--st-allowed)"></span><span>All notifications marked read. Audit records who read each one.</span></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-long">
+    <figcaption class="dx-story-h"><b>Long message</b><span>A toast wraps to <code>min(560px, 92vw)</code>. It states one fact, however many clauses that fact needs.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="long" data-name="Long message">
+<div id="toast" role="status" aria-live="polite" style="position:relative;left:auto;bottom:auto;transform:none;display:grid;gap:8px;justify-items:start">
+  <div class="toast"><span class="d" style="background:var(--st-allowed)"></span><span>Token apt_1bc4f9a07b02 minted. It is single-use and bound to the call digest, this agent, this run, and a 60-second expiry. Credential brokered, stripe__create_payment dispatched.</span></div>
+</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Stack</td><td><code>#toast</code></td><td>Fixed at the bottom center, <code>z-index:300</code>, a <code>justify-items:center</code> grid that grows upward as rows are appended. <code>pointer-events:none</code> on the stack. Rows below need none either.</td></tr>
+      <tr><td>Row</td><td><code>.toast</code></td><td>A <code>--panel</code> pill, 1px <code>--rule</code> border, 11px radius, <code>--shadow</code>, 11px by 16px padding, at most <code>min(560px, 92vw)</code> wide, 12.5px <code>--fg</code> text.</td></tr>
+      <tr><td>Tone dot</td><td><code>.toast .d</code></td><td>A 7px circle, colored inline per call from the tone map. It carries the tone. The words carry the fact.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>The result of an action that already ran: a commit, a decision, a reset, a copy.</li><li>A quick validation refusal before an action runs, such as a missing field.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A task or a decision still open: use a <a href="dialog.html">dialog</a>.</li><li>Something parked for a person to act on later: use the <a href="drawer.html">drawer</a>.</li><li>A caution that belongs on the page itself, not a moment in time: use a <a href="note.html">note</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="toast"><span class="d" style="background:var(--st-allowed)"></span><span>Saving...</span></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Present tense and no fact. A toast fires after the action finishes, so it reports what happened, not what is happening.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="toast"><span class="d" style="background:var(--st-allowed)"></span><span>Removed the switch on payment-gateway.</span></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>Past tense, one fact, the record it acted on.</p></div>
+  </div>
+  <ul>
+    <li>One toast per event. Two facts from one action are two toasts, not one joined by a mid-dot.</li>
+    <li>A toast never carries an action button. If the result needs a next step, that step lives on the page or in the record it just changed.</li>
+    <li>The tone matches the outcome's own vocabulary: approval, denied, failed, or critical, the same words the badges and the drawer use.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Tense</b>: past tense always. &quot;Committed&quot;, &quot;Removed&quot;, &quot;Approval expired&quot;, never &quot;Committing&quot; or &quot;Removing&quot;.</li>
+    <li><b>One fact per toast</b>: what happened, to what record, and the one consequence that matters (&quot;...released back to the mandate&quot;).</li>
+    <li><b>Record ids and tool names</b>: in the sentence as written elsewhere, not reformatted: <code>stripe__create_payment</code>, <code>run_01K5RS7M2E8FJ3QW</code>.</li>
+    <li><b>No design language</b>: a toast never explains itself (&quot;in the mockup's decision vocabulary&quot;) or names its own tone.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The stack is <code>role=&quot;status&quot;</code> with <code>aria-live=&quot;polite&quot;</code>, so an assistive technology announces each row as it is appended, in the page shell (<code>mockups/missioncontrol.html</code>), not in a template <code>toast()</code> writes.</li>
+    <li>Color is not the only signal: the tone dot pairs with the sentence's own words (&quot;Denied&quot;, &quot;expired&quot;, &quot;approved&quot;), so the tone never carries the outcome alone.</li>
+    <li>A toast never receives focus and never traps it. It reports. It does not ask.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>The stack caps each row at 368px wide instead of <code>min(560px, 92vw)</code>.</li>
+    <li>When the phone thumb bar is showing, the stack's bottom offset increases so a toast never sits under it (engine.css 636).</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--panel</code></td><td>Row ground</td></tr>
+      <tr><td><code>--rule</code></td><td>Row border</td></tr>
+      <tr><td><code>--shadow</code></td><td>Row shadow</td></tr>
+      <tr><td><code>--fg</code></td><td>Row text</td></tr>
+      <tr><td><code>--st-allowed</code></td><td>Allowed tone (default)</td></tr>
+      <tr><td><code>--st-approval</code></td><td>Approval tone</td></tr>
+      <tr><td><code>--st-denied</code></td><td>Denied tone</td></tr>
+      <tr><td><code>--st-failed</code></td><td>Failed tone</td></tr>
+      <tr><td><code>--st-critical</code></td><td>Critical tone</td></tr>
+      <tr><td><code>--gold</code></td><td>Gold tone (see Findings)</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 881 to 885, phone 636</td><td>The rules that draw it</td></tr>
+      <tr><td><code>toast(msg, tone)</code> at <code>engine.js:1982</code></td><td>Appends one row to <code>#toast</code> and removes it after 4.2 seconds. 17 calls.</td></tr>
+      <tr><td><code>act(msg, tone)</code> at <code>engine.js:1981</code></td><td>Records the message on state and calls <code>toast()</code>. Over 200 calls. The usual way a change reports itself.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>The stack container itself, <code>&lt;div id=&quot;toast&quot; role=&quot;status&quot; aria-live=&quot;polite&quot;&gt;</code>, is written once in the page shell rather than by any function in <code>engine.js</code>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold used as a state, not the one action</h4><p><code>toast()</code>'s tone map sends <code>&quot;gold&quot;</code> to <code>var(--gold)</code> (engine.js 1977), used for a pull request opening or a reset. Gold is identity plus at most one action per screen. A toast is neither. <code>--st-allowed</code> or <code>--fg</code> would say &quot;this happened&quot; without spending gold on a report.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Two idioms for the same message</h4><p>Most call sites call <code>toast()</code> directly. <code>act(msg, tone)</code> (engine.js 1974) does the same thing after also recording the message on <code>S.toast</code>. Both idioms are live and neither is documented as the default.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's toast against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Toast audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the toast component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/toast.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 881 to 885, phone 636. The mockup renders it with toast(msg, tone) (engine.js:1982), act(msg, tone) (engine.js:1981).
+3. The build's implementation: find it by its root selector (#toast) or its name, and list every route that renders it.
+4. Where to see it in the design: every page. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Live region. `#toast` (or its equivalent) is `role=&quot;status&quot;` with `aria-live=&quot;polite&quot;`, present once in the page shell, not recreated per toast.
+2. Timing. A row is removed automatically after about 4.2 seconds, and an event that fires again re-adds its own row rather than resetting an existing one.
+3. Stacking. Two events close together render as two rows, newest last, each on its own timer. No row is dropped.
+4. Tense and content. Every message is past tense and states one fact. A message with no verb, or in the present or future tense, is a FAIL.
+5. Tone. The dot's color matches one of allowed, approval, denied, failed, critical, or gold, and never carries the outcome alone. The words repeat it.
+6. Gold. Count toasts using the gold tone on a routed page. Gold spent on a report rather than the screen's one action is a FAIL.
+7. No actions. A toast carries no button, link, or dismiss control beyond its automatic timeout.
+8. Position. The stack sits centered at the bottom of the viewport, above the phone thumb bar when one is showing, and never covers a dialog or the drawer.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: The stack caps each row at 368px wide instead of `min(560px, 92vw)`. When the phone thumb bar is showing, the stack's bottom offset increases so a toast never sits under it (engine.css 636).
+13. Accessibility. The stack is `role=&quot;status&quot;` with `aria-live=&quot;polite&quot;`, so an assistive technology announces each row as it is appended, in the page shell (`mockups/missioncontrol.html`), not in a template `toast()` writes. Color is not the only signal: the tone dot pairs with the sentence's own words (&quot;Denied&quot;, &quot;expired&quot;, &quot;approved&quot;), so the tone never carries the outcome alone. A toast never receives focus and never traps it. It reports. It does not ask.
+14. One implementation. The build draws the toast from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Toast: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="drawer.html"><span>Previous</span>Drawer</a><a class="nx" href="tooltip.html"><span>Next</span>Tooltip</a></nav>
+</main>
+</div>
+</body>
+</html>

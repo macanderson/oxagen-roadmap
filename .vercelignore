@@ -3,7 +3,6 @@ node_modules
 .storybook
 storybook-static
 mockups/stories
-mockups/src
 mockups/fixtures
 .claude
 .github

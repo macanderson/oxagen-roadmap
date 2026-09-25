@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>List item</title>
+<meta name="description" content="One row in a bordered list: an icon, two lines of text, and a timestamp.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>List item</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Data display</p>
+  <h1>List item</h1>
+  <p class="dx-lead">A list item is a compact record inside a <code>.lst</code>: a notification, a security method, an active session. It leads with a tone icon, carries a title and one line of detail, and ends in a timestamp or an action. An unread item is a button that marks itself read. A read item is plain text.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.lst</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 551 to 561, 589 to 608</span>
+    <span><b>Used on</b> Notifications, Account (Security tab)</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-notifications">
+    <figcaption class="dx-story-h"><b>Notification list</b><span>From <code>notifsBody()</code>. The unread rows are buttons, and the read rows are plain <code>div</code>s. Every <code>.ic</code> tone the CSS defines appears once.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="notifications" data-name="Notification list">
+<div class="lst">
+  <div class="li unread" role="button" tabindex="0" aria-label="Mark read: Approval waiting · github__merge_pull_request@3"><span class="ic t-approval"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+    <div class="bd2"><div class="t1">Approval waiting · github__merge_pull_request@3</div><div class="t2">a-intel.core.release-manager on run_01K5ZB4T8P wants to merge a-intel/platform#1893 into main. Rule merge.requires_approval. Expires 15:54.</div>
+    <div class="mono dim" style="font-size:11px;margin-top:3px">approval.requested</div></div>
+    <time>15:44</time></div>
+  <div class="li unread" role="button" tabindex="0" aria-label="Mark read: Hard budget reached · a-intel.core.docs-writer"><span class="ic t-failed"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.5"/></svg></span>
+    <div class="bd2"><div class="t1">Hard budget reached · a-intel.core.docs-writer</div><div class="t2">$0.80 per run reached at turn 3 of run_01K5ZA0J2M. The run was paused at the next checkpoint.</div>
+    <div class="mono dim" style="font-size:11px;margin-top:3px">budget.breached</div></div>
+    <time>15:21</time></div>
+  <div class="li"><span class="ic t-gold"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.5"/><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 7.5v9M18 10.5c0 4-12 2-12 6"/></svg></span>
+    <div class="bd2"><div class="t1">Context PR opened · a-intel/platform#519</div><div class="t2">The promoter proposed a rule on lineage ctx.release.no-reread-changelog. Supported by 682 duplicate tool calls across 212 runs.</div>
+    <div class="mono dim" style="font-size:11px;margin-top:3px">context_pr.opened</div></div>
+    <time>13:02</time></div>
+  <div class="li"><span class="ic t-allowed"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
+    <div class="bd2"><div class="t1">Run sealed · run_01K5YX2D6R</div><div class="t2">a-intel.core.stella-ci sealed a-intel/platform#1887: 212 frames, 38,400 tokens, $2.41 observed by gateway.</div>
+    <div class="mono dim" style="font-size:11px;margin-top:3px">run.sealed</div></div>
+    <time>15:09</time></div>
+  <div class="li"><span class="ic t-critical"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.5"/></svg></span>
+    <div class="bd2"><div class="t1">Kill switch flipped · tool version</div><div class="t2">Priya Natarajan disabled slack__post_message@7 across a-intel after a schema regression.</div>
+    <div class="mono dim" style="font-size:11px;margin-top:3px">kill_switch.flipped</div></div>
+    <time>2026-09-09</time></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-security">
+    <figcaption class="dx-story-h"><b>Security list</b><span>From the account dialog's Security tab. Every row is plain text, and the icon tone is a hand-written inline <code>style</code>, not a <code>.ic.t-*</code> class (see Findings).</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="security" data-name="Security list">
+<div class="lst">
+  <div class="li"><div class="ic" style="background:color-mix(in srgb,var(--st-allowed) 14%,transparent);color:var(--st-allowed)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+    <div class="bd2"><div class="t1">Authenticator app</div><div class="t2">TOTP, added 2026-08-22. 8 of 10 recovery codes unused.</div></div>
+    <button class="btn sm">Regenerate codes</button></div>
+  <div class="li"><div class="bd2"><div class="t1">MacBook Pro · Chrome 141<span class="b b-allowed"><span class="d"></span>this device</span></div><div class="t2">San Francisco · 73.15.240.8</div></div><time>now, this session</time></div>
+  <div class="li"><div class="bd2"><div class="t1">iPhone 17 · Safari</div><div class="t2">San Francisco · 73.15.240.8</div></div><time>2026-09-11 08:12Z</time><button class="btn sm">Revoke</button></div>
+</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>List</td><td><code>.lst</code></td><td>A bordered, radius-10px column. Its children each carry a 1px bottom border, and the last one drops it.</td></tr>
+      <tr><td>Row</td><td><code>.li</code></td><td>10px by 12px padding on <code>--ink</code>, a flex row with a 10px gap, aligned to the top. Hovers to <code>--hl</code> when it is a button.</td></tr>
+      <tr><td>Icon</td><td><code>.li .ic</code></td><td>A 22px tile with a 6px radius, holding a 12px icon.</td></tr>
+      <tr><td>Icon tone</td><td><code>.li .ic.t-approval</code> / <code>.t-failed</code> / <code>.t-critical</code> / <code>.t-allowed</code> / <code>.t-gold</code></td><td>A 14% tint of the matching state token, or 13% gold, behind the icon.</td></tr>
+      <tr><td>Body</td><td><code>.li .bd2</code></td><td>A column with a 2px gap, holding the title and the detail line.</td></tr>
+      <tr><td>Title</td><td><code>.li .t1</code></td><td>12.5px Geist 500, <code>--fg</code>.</td></tr>
+      <tr><td>Detail</td><td><code>.li .t2</code></td><td>11.5px <code>--muted</code> at a 1.45 line height.</td></tr>
+      <tr><td>Timestamp</td><td><code>.li time</code></td><td>10px Monaspace Neon, <code>--dim</code>, never wraps.</td></tr>
+      <tr><td>Unread marker</td><td><code>.li.unread</code></td><td>A 5% gold tint on the row and a 5px gold dot before the title (see Findings).</td></tr>
+      <tr><td>Keyboard row</td><td><code>.li[role=button]</code></td><td>A pointer cursor and an inset focus ring. The row itself takes Enter and Space.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A short list of similar-shaped records where each row is mostly text: notifications, security methods, active sessions.</li><li>A row that a person marks done or read by activating it, as an unread notification does.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Records with several columns of figures: use a <a href="table.html">table</a>.</li><li>One record's fields: use a <a href="key-value-list.html">key-value list</a>.</li><li>A row that opens a full record page: use a <a href="table.html">table</a> row or a <a href="record-card.html">record card</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="lst" style="width:100%"><div class="li"><div class="ic" style="background:#3a2f0f;color:#e6b800"><svg width="12" height="12" viewBox="0 0 24 24"></svg></div><div class="bd2"><div class="t1">Approval waiting</div></div></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A raw hex background and color, and no detail line or timestamp. The tone carries no state class an audit can find.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="lst" style="width:100%"><div class="li"><span class="ic t-approval"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg></span><div class="bd2"><div class="t1">Approval waiting</div><div class="t2">Expires in 10 minutes.</div></div><time>15:44</time></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>A named tone class, a detail line, and a timestamp: the full anatomy.</p></div>
+  </div>
+  <ul>
+    <li>An icon's tone is one of the five <code>.ic.t-*</code> classes, never an inline <code>style</code> (see Findings).</li>
+    <li>An unread item is a real button with an <code>aria-label</code> naming what activating it does. A read item is plain text with no click handler.</li>
+    <li>A row's detail line states one fact. A second fact goes on the mono line under it, not after a mid-dot.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Title</b>: the event or the record, in sentence case, with an id in mono where one is load-bearing (&quot;Approval waiting · github__merge_pull_request@3&quot;).</li>
+    <li><b>Detail</b>: one or two sentences of what happened and what it means, in the present or past tense.</li>
+    <li><b>Kind line</b>: the machine event name in mono and <code>--dim</code>, for a person who needs to match it to a log (&quot;approval.requested&quot;).</li>
+    <li><b>Timestamp</b>: a time for today, a date for anything older, never a relative phrase like &quot;3 minutes ago&quot; that goes stale on screen.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>An unread row is <code>role=&quot;button&quot;</code>, <code>tabindex=&quot;0&quot;</code>, and carries an <code>aria-label</code> that names the action (&quot;Mark read: …&quot;). It answers Enter and Space.</li>
+    <li>A read row is plain text with no role and no handler, so a screen reader does not announce it as interactive when there is nothing to activate.</li>
+    <li>The unread dot (<code>.li.unread .t1::before</code>) is CSS-generated content with no text, so the row's own label is the only way a screen reader knows it is unread. The <code>aria-label</code> carries that. The dot alone would not.</li>
+    <li><code>.li[role=button]:focus-visible</code> draws an inset ring rather than the standard offset gold ring used elsewhere. Confirm it stays visible against <code>--hl</code>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>The row keeps its horizontal layout and 10px by 12px padding. Nothing about <code>.li</code> changes at 390px.</li>
+    <li>A row with both a detail line and a trailing button can crowd at narrow widths since neither wraps to its own line. Confirm the button stays reachable.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--ink</code></td><td>Row ground</td></tr>
+      <tr><td><code>--hl</code></td><td>Row hover, and the security list's icon fallback ground</td></tr>
+      <tr><td><code>--border</code></td><td>List and row dividers</td></tr>
+      <tr><td><code>--fg</code></td><td>Title</td></tr>
+      <tr><td><code>--muted</code></td><td>Detail line</td></tr>
+      <tr><td><code>--dim</code></td><td>Kind line, timestamp</td></tr>
+      <tr><td><code>--gold</code></td><td>Unread tint, unread dot, <code>.ic.t-gold</code></td></tr>
+      <tr><td><code>--st-approval, --st-failed, --st-critical, --st-allowed</code></td><td>Icon tones</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 551 to 561, 589 to 608</td><td>The rules that draw it</td></tr>
+      <tr><td><code>notifsBody()</code> at <code>engine.js:1686</code></td><td>Writes the notification list, one <code>.li</code> per entry, unread ones as buttons via <code>notifRead()</code>.</td></tr>
+      <tr><td><code>notifIcon(tone)</code> at <code>engine.js:1679</code></td><td>The tone's icon: a check for allowed, a clock for approval, a confetti mark for gold, a triangle for anything else, including failed and critical.</td></tr>
+      <tr><td><code>accountBody()</code> at <code>engine.js:9838</code></td><td>The Security tab's two <code>.lst</code> lists, with an inline-styled <code>.ic</code> instead of a tone class.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li><code>.lst</code> and <code>.li</code> are defined twice in engine.css: once at lines 551 to 561, and again at 589 to 608. The second definition wins the cascade and is the one that actually renders, since it adds <code>:hover</code>, the five <code>.ic.t-*</code> tones, <code>.unread</code>, and <code>[role=button]</code>. The first definition draws nothing a person can see that the second does not already draw.</li>
+    <li>notifIcon()'s default branch (the triangle) fires for both <code>failed</code> and <code>critical</code> tones, so the two states share one icon shape and differ only by their tint color.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Rules defined twice</h4><p><code>.lst</code> and <code>.li</code> (engine.css 551 to 561 and again 589 to 608) are two full definitions of the same classes. The second wins by cascade order, which is also called out on the components index. A build should carry one definition, not rely on source order to pick the right one.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold as an unread marker</h4><p><code>.li.unread</code> (engine.css 605) tints the row and its dot with <code>--gold</code>. Unread is a state, not an identity or the one action on the screen, and a busy notification list can carry several unread rows at once, which is more than one gold mark on a screen.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>A second icon-tone idiom</h4><p><code>accountBody()</code>'s Security tab (engine.js 9850 to 9853) sets each icon's background and color with an inline <code>style=&quot;background:…;color:…&quot;</code> instead of one of the five <code>.ic.t-*</code> classes the second <code>.li</code> definition already provides. An audit that greps for <code>.ic.t-</code> misses these rows entirely.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's list item against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>List item audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the list item component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/list-item.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 551 to 561, 589 to 608. The mockup renders it with notifsBody() (engine.js:1686), notifIcon(tone) (engine.js:1679), accountBody() (engine.js:9838).
+3. The build's implementation: find it by its root selector (.lst) or its name, and list every route that renders it.
+4. Where to see it in the design: Notifications, Account (Security tab). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Anatomy. Every list item renders an icon tile, a title, a detail line, and either a timestamp or an action, inside a `.lst` with a 1px border between rows.
+2. Icon tone. Every icon tone is one of the five named classes (`t-approval`, `t-failed`, `t-critical`, `t-allowed`, `t-gold`) and resolves to a 14% tint of its matching state token, or 13% gold. A raw hex or an inline `style` in place of a tone class is a FAIL.
+3. Unread state. An unread row is a real button with `tabindex=&quot;0&quot;`, `role=&quot;button&quot;`, and an `aria-label` naming the action. It answers Enter and Space and marks itself read on activation. A read row has no button role and no click handler.
+4. One definition. `.lst` and `.li` are defined once in the build's stylesheet. A second, shadowed definition of either is a FAIL.
+5. Content. The title states the event with any load-bearing id in mono. The detail line is one or two sentences. A kind or event name, where shown, is in mono and `--dim`.
+6. Gold. Report every row with a gold-tinted marker and what state it marks. More than one such row visible on screen at once is a FAIL against the one-gold-action rule.
+7. Timestamp. An absolute time or date, never a relative phrase that goes stale without a re-render.
+8. One implementation. List every place the build draws a list item by hand outside a shared component, with its file and line.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: The row keeps its horizontal layout and 10px by 12px padding. Nothing about `.li` changes at 390px. A row with both a detail line and a trailing button can crowd at narrow widths since neither wraps to its own line. Confirm the button stays reachable.
+13. Accessibility. An unread row is `role=&quot;button&quot;`, `tabindex=&quot;0&quot;`, and carries an `aria-label` that names the action (&quot;Mark read: …&quot;). It answers Enter and Space. A read row is plain text with no role and no handler, so a screen reader does not announce it as interactive when there is nothing to activate. The unread dot (`.li.unread .t1::before`) is CSS-generated content with no text, so the row's own label is the only way a screen reader knows it is unread. The `aria-label` carries that. The dot alone would not. `.li[role=button]:focus-visible` draws an inset ring rather than the standard offset gold ring used elsewhere. Confirm it stays visible against `--hl`.
+14. One implementation. The build draws the list item from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# List item: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="record-card.html"><span>Previous</span>Record card</a><a class="nx" href="code-block.html"><span>Next</span>Code block</a></nav>
+</main>
+</div>
+</body>
+</html>
