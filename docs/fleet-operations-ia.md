@@ -183,9 +183,9 @@ Every unique view has a page spec in `mockups/pages/` and a loaded story in Stor
 | `spend-budgets` | Spend, Budgets | `#/a-intel/core-platform/spend/budgets` | `spend-budgets.md` |
 | `spend-optimization` | Spend, Optimization | `#/a-intel/core-platform/spend/optimization` | `spend-optimization.md` |
 | `repositories` | Repositories | `#/a-intel/core-platform/repositories` | `repositories.md` |
-| `repositories-copies` | Repositories, Working copies | `#/a-intel/core-platform/repositories/copies` | `repositories-copies.md` |
+| `repositories-copies` | Repositories, Working copies | `#/a-intel/core-platform/repositories/working-copies` | `repositories-copies.md` |
 | `repositories-changes` | Repositories, Changes | `#/a-intel/core-platform/repositories/changes` | `repositories-changes.md` |
-| `repositories-config` | Repositories, Configuration | `#/a-intel/core-platform/repositories/config` | `repositories-config.md` |
+| `repositories-config` | Repositories, Configuration | `#/a-intel/core-platform/repositories/configuration` | `repositories-config.md` |
 | `approvals-drawer` | Approvals drawer | `#/a-intel/core-platform/work`, drawer open | `approvals-drawer.md` |
 | `stella-drawer` | Stella drawer | `#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW`, drawer open | `stella-drawer.md` |
 

@@ -1121,7 +1121,7 @@ for (const theme of ["light", "dark"]) {
 // A working copy could be connected and never disconnected. The link is one gitignored file on a
 // laptop, so this is not a pull request and the confirm has to say so.
 {
-  const { page, errs } = await open("#/a-intel/core-platform/repositories/copies");
+  const { page, errs } = await open("#/a-intel/core-platform/repositories/working-copies");
   const cid = await page.evaluate(() => wsCopies()[0].id);
   await page.evaluate((i) => { closeDialog(); openDialog("workcopy", i); }, cid);
   await page.waitForTimeout(220);

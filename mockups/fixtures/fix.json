@@ -5,11 +5,11 @@
   "why": "A tool result is context. Every token the tool returns is paid for on the call that receives it and again on every later turn of the run, because the window carries it forward. aws_billing__get_cost_and_usage returns 41,200 tokens of daily line items and the model sums them to service totals in its head on 86 of 88 runs. The provider can do that sum for free before the result ever leaves AWS.",
   "before": {
    "lang": "python",
-   "code": "<span class=\"c\"># agents/cost_reporter/query.py — as it stands</span>\nres = ce.get_cost_and_usage(\n    TimePeriod={<span class=\"s\">\"Start\"</span>: start, <span class=\"s\">\"End\"</span>: end},\n    Granularity=<span class=\"s\">\"DAILY\"</span>,\n    GroupBy=[{<span class=\"s\">\"Type\"</span>: <span class=\"s\">\"DIMENSION\"</span>, <span class=\"s\">\"Key\"</span>: <span class=\"s\">\"LINKED_ACCOUNT\"</span>},\n             {<span class=\"s\">\"Type\"</span>: <span class=\"s\">\"DIMENSION\"</span>, <span class=\"s\">\"Key\"</span>: <span class=\"s\">\"USAGE_TYPE\"</span>}],\n    Metrics=[<span class=\"s\">\"UnblendedCost\"</span>])\n<span class=\"k\">return</span> res[<span class=\"s\">\"ResultsByTime\"</span>]   <span class=\"c\"># ~41k tokens, unpaged</span>"
+   "code": "<span class=\"c\"># agents/cost_reporter/query.py: as it stands</span>\nres = ce.get_cost_and_usage(\n    TimePeriod={<span class=\"s\">\"Start\"</span>: start, <span class=\"s\">\"End\"</span>: end},\n    Granularity=<span class=\"s\">\"DAILY\"</span>,\n    GroupBy=[{<span class=\"s\">\"Type\"</span>: <span class=\"s\">\"DIMENSION\"</span>, <span class=\"s\">\"Key\"</span>: <span class=\"s\">\"LINKED_ACCOUNT\"</span>},\n             {<span class=\"s\">\"Type\"</span>: <span class=\"s\">\"DIMENSION\"</span>, <span class=\"s\">\"Key\"</span>: <span class=\"s\">\"USAGE_TYPE\"</span>}],\n    Metrics=[<span class=\"s\">\"UnblendedCost\"</span>])\n<span class=\"k\">return</span> res[<span class=\"s\">\"ResultsByTime\"</span>]   <span class=\"c\"># ~41k tokens, unpaged</span>"
   },
   "after": {
    "lang": "python",
-   "code": "<span class=\"c\"># agents/cost_reporter/query.py — totals first, rows on demand</span>\nres = ce.get_cost_and_usage(\n    TimePeriod={<span class=\"s\">\"Start\"</span>: start, <span class=\"s\">\"End\"</span>: end},\n    Granularity=<span class=\"s\">\"MONTHLY\"</span>,\n    GroupBy=[{<span class=\"s\">\"Type\"</span>: <span class=\"s\">\"DIMENSION\"</span>, <span class=\"s\">\"Key\"</span>: <span class=\"s\">\"SERVICE\"</span>}],\n    Metrics=[<span class=\"s\">\"UnblendedCost\"</span>])\n<span class=\"k\">return</span> totals(res)                <span class=\"c\"># ~1.9k tokens</span>\n\n<span class=\"c\"># exposed as a second tool: aws_billing__get_line_items(service, page)</span>"
+   "code": "<span class=\"c\"># agents/cost_reporter/query.py: totals first, rows on demand</span>\nres = ce.get_cost_and_usage(\n    TimePeriod={<span class=\"s\">\"Start\"</span>: start, <span class=\"s\">\"End\"</span>: end},\n    Granularity=<span class=\"s\">\"MONTHLY\"</span>,\n    GroupBy=[{<span class=\"s\">\"Type\"</span>: <span class=\"s\">\"DIMENSION\"</span>, <span class=\"s\">\"Key\"</span>: <span class=\"s\">\"SERVICE\"</span>}],\n    Metrics=[<span class=\"s\">\"UnblendedCost\"</span>])\n<span class=\"k\">return</span> totals(res)                <span class=\"c\"># ~1.9k tokens</span>\n\n<span class=\"c\"># exposed as a second tool: aws_billing__get_line_items(service, page)</span>"
   },
   "steps": [
    "Split the tool in two: grouped totals for the report, paged line items for a drill-down. The model reaches for the second only when a turn needs a row.",
@@ -25,11 +25,11 @@
   "why": "A model in a shell re-runs git status, ls and cargo tree to reassure itself, and the harness obliges. Each re-run costs the call, the result body re-entering the window, and the turn the model spent deciding to look again. On claude_code__Bash 31% of calls were repeats of a command whose result was already in the window, unchanged.",
   "before": {
    "lang": "yaml",
-   "code": "<span class=\"c\"># agents/stella-ci/harness.yaml — as it stands</span>\n<span class=\"k\">tools</span>:\n  <span class=\"k\">claude_code__Bash</span>:\n    <span class=\"k\">result_cache</span>: <span class=\"s\">off</span>      <span class=\"c\"># every call executes</span>"
+   "code": "<span class=\"c\"># agents/stella-ci/harness.yaml: as it stands</span>\n<span class=\"k\">tools</span>:\n  <span class=\"k\">claude_code__Bash</span>:\n    <span class=\"k\">result_cache</span>: <span class=\"s\">off</span>      <span class=\"c\"># every call executes</span>"
   },
   "after": {
    "lang": "yaml",
-   "code": "<span class=\"c\"># agents/stella-ci/harness.yaml — serve identical commands from the turn window</span>\n<span class=\"k\">tools</span>:\n  <span class=\"k\">claude_code__Bash</span>:\n    <span class=\"k\">result_cache</span>:\n      <span class=\"k\">scope</span>: <span class=\"s\">turn_window</span>\n      <span class=\"k\">invalidate_on</span>: [<span class=\"s\">write</span>, <span class=\"s\">network</span>]\n      <span class=\"k\">exempt</span>: [<span class=\"s\">date</span>, <span class=\"s\">curl</span>, <span class=\"s\">ps</span>]"
+   "code": "<span class=\"c\"># agents/stella-ci/harness.yaml: serve identical commands from the turn window</span>\n<span class=\"k\">tools</span>:\n  <span class=\"k\">claude_code__Bash</span>:\n    <span class=\"k\">result_cache</span>:\n      <span class=\"k\">scope</span>: <span class=\"s\">turn_window</span>\n      <span class=\"k\">invalidate_on</span>: [<span class=\"s\">write</span>, <span class=\"s\">network</span>]\n      <span class=\"k\">exempt</span>: [<span class=\"s\">date</span>, <span class=\"s\">curl</span>, <span class=\"s\">ps</span>]"
   },
   "steps": [
    "The cache keys on the command's input digest and lives for the turn window, so a repeat after a file write or a network call still executes.",
@@ -45,11 +45,11 @@
   "why": "The agent's brief says to resolve a channel by name before posting, so it lists the channels first, every run. The list changed twice this month. 341 fetches put 3,400 tokens of channel metadata into 341 contexts, and every later turn on each run carried it forward.",
   "before": {
    "lang": "python",
-   "code": "<span class=\"c\"># agents/release_manager/post.py — as it stands</span>\nchannels = slack.list_channels()          <span class=\"c\"># every run</span>\ntarget = next(c <span class=\"k\">for</span> c <span class=\"k\">in</span> channels <span class=\"k\">if</span> c.name == name)\nslack.post_message(target.id, body)"
+   "code": "<span class=\"c\"># agents/release_manager/post.py: as it stands</span>\nchannels = slack.list_channels()          <span class=\"c\"># every run</span>\ntarget = next(c <span class=\"k\">for</span> c <span class=\"k\">in</span> channels <span class=\"k\">if</span> c.name == name)\nslack.post_message(target.id, body)"
   },
   "after": {
    "lang": "python",
-   "code": "<span class=\"c\"># agents/release_manager/post.py — workspace cache, 24-hour TTL</span>\nchannels = ctx.cache.get(<span class=\"s\">\"slack.channels\"</span>, ttl=<span class=\"s\">\"24h\"</span>,\n                         fetch=slack.list_channels)\ntarget = next(c <span class=\"k\">for</span> c <span class=\"k\">in</span> channels <span class=\"k\">if</span> c.name == name)\nslack.post_message(target.id, body)"
+   "code": "<span class=\"c\"># agents/release_manager/post.py: workspace cache, 24-hour TTL</span>\nchannels = ctx.cache.get(<span class=\"s\">\"slack.channels\"</span>, ttl=<span class=\"s\">\"24h\"</span>,\n                         fetch=slack.list_channels)\ntarget = next(c <span class=\"k\">for</span> c <span class=\"k\">in</span> channels <span class=\"k\">if</span> c.name == name)\nslack.post_message(target.id, body)"
   },
   "steps": [
    "Cache at the workspace, not the run: every agent that posts to Slack shares one fetch a day.",
@@ -74,11 +74,11 @@
   "why": "Every model call on a run starts with the same system block: the compiled steering bundle, then the tool definitions. Providers cache that prefix by content hash. Publish a steering record and the bundle hash changes, so every live conversation pays full input price on its next call and again on every call until the new prefix is warm. The runs that were live when Priya merged paid that twice: once for the miss, once because their old prefix was still in the cache and never read again.",
   "before": {
    "lang": "toml",
-   "code": "<span class=\"c\"># .oxagen/workspace.toml — as it stands</span>\n[<span class=\"k\">context</span>]\n<span class=\"k\">publish</span> = <span class=\"s\">\"on_merge\"</span>        <span class=\"c\"># bundle bumps the moment the PR merges</span>"
+   "code": "<span class=\"c\"># .oxagen/workspace.toml: as it stands</span>\n[<span class=\"k\">context</span>]\n<span class=\"k\">publish</span> = <span class=\"s\">\"on_merge\"</span>        <span class=\"c\"># bundle bumps the moment the PR merges</span>"
   },
   "after": {
    "lang": "toml",
-   "code": "<span class=\"c\"># .oxagen/workspace.toml — batch publications to a window</span>\n[<span class=\"k\">context</span>]\n<span class=\"k\">publish</span> = <span class=\"s\">\"windowed\"</span>\n<span class=\"k\">publish_windows</span> = [<span class=\"s\">\"00:00Z\"</span>, <span class=\"s\">\"12:00Z\"</span>]\n<span class=\"k\">drain_live_runs</span> = <span class=\"s\">true</span>      <span class=\"c\"># live runs finish on the old bundle</span>"
+   "code": "<span class=\"c\"># .oxagen/workspace.toml: batch publications to a window</span>\n[<span class=\"k\">context</span>]\n<span class=\"k\">publish</span> = <span class=\"s\">\"windowed\"</span>\n<span class=\"k\">publish_windows</span> = [<span class=\"s\">\"00:00Z\"</span>, <span class=\"s\">\"12:00Z\"</span>]\n<span class=\"k\">drain_live_runs</span> = <span class=\"s\">true</span>      <span class=\"c\"># live runs finish on the old bundle</span>"
   },
   "steps": [
    "Merged records queue until the next window instead of bumping the bundle at once.",
@@ -94,11 +94,11 @@
   "why": "Tool definitions are not free context. Every model call carries the JSON schema of every tool on the belt, and the model reads all of it before it reads the task. On a-intel.core.triage that block is 9,140 tokens, and 34 of the 52 tools were never called in 1,340 runs. The agent was wrapped with each provider's full export, which is the default when a wrap grants a provider instead of a tool.",
   "before": {
    "lang": "yaml",
-   "code": "<span class=\"c\"># agents/triage/wrap.yaml — as it stands</span>\n<span class=\"k\">grants</span>:\n  - <span class=\"k\">server</span>: <span class=\"s\">github</span>      <span class=\"c\"># 41 tools · 12 called</span>\n  - <span class=\"k\">server</span>: <span class=\"s\">linear</span>      <span class=\"c\"># 18 tools · 4 called</span>\n  - <span class=\"k\">server</span>: <span class=\"s\">slack</span>       <span class=\"c\"># 14 tools · 2 called</span>"
+   "code": "<span class=\"c\"># agents/triage/wrap.yaml: as it stands</span>\n<span class=\"k\">grants</span>:\n  - <span class=\"k\">server</span>: <span class=\"s\">github</span>      <span class=\"c\"># 41 tools · 12 called</span>\n  - <span class=\"k\">server</span>: <span class=\"s\">linear</span>      <span class=\"c\"># 18 tools · 4 called</span>\n  - <span class=\"k\">server</span>: <span class=\"s\">slack</span>       <span class=\"c\"># 14 tools · 2 called</span>"
   },
   "after": {
    "lang": "yaml",
-   "code": "<span class=\"c\"># agents/triage/wrap.yaml — grant the 18 tools the runs call</span>\n<span class=\"k\">grants</span>:\n  - <span class=\"k\">server</span>: <span class=\"s\">github</span>\n    <span class=\"k\">tools</span>: [<span class=\"s\">get_issue</span>, <span class=\"s\">list_commits</span>, <span class=\"s\">add_labels</span>, <span class=\"s\">search__code</span>, <span class=\"s\">get_file_contents</span>, …]\n  - <span class=\"k\">server</span>: <span class=\"s\">linear</span>\n    <span class=\"k\">tools</span>: [<span class=\"s\">get_issue</span>, <span class=\"s\">update_issue</span>, <span class=\"s\">list_labels</span>, <span class=\"s\">create_comment</span>]\n  - <span class=\"k\">server</span>: <span class=\"s\">slack</span>\n    <span class=\"k\">tools</span>: [<span class=\"s\">post_message</span>, <span class=\"s\">get_thread</span>]"
+   "code": "<span class=\"c\"># agents/triage/wrap.yaml: grant the 18 tools the runs call</span>\n<span class=\"k\">grants</span>:\n  - <span class=\"k\">server</span>: <span class=\"s\">github</span>\n    <span class=\"k\">tools</span>: [<span class=\"s\">get_issue</span>, <span class=\"s\">list_commits</span>, <span class=\"s\">add_labels</span>, <span class=\"s\">search__code</span>, <span class=\"s\">get_file_contents</span>, …]\n  - <span class=\"k\">server</span>: <span class=\"s\">linear</span>\n    <span class=\"k\">tools</span>: [<span class=\"s\">get_issue</span>, <span class=\"s\">update_issue</span>, <span class=\"s\">list_labels</span>, <span class=\"s\">create_comment</span>]\n  - <span class=\"k\">server</span>: <span class=\"s\">slack</span>\n    <span class=\"k\">tools</span>: [<span class=\"s\">post_message</span>, <span class=\"s\">get_thread</span>]"
   },
   "steps": [
    "Grant tools, not servers. The belt is compiled from the grants, so the definition block shrinks to what is listed.",
@@ -114,11 +114,11 @@
   "why": "The harness routes each step by tier: light for classification-shaped work, complex for reasoning. When a light-tier call fails or times out, the retry takes the fallback route, and this agent's fallback is the workspace default, which is the complex tier. So every transient timeout on a 300-token label call is retried on claude-opus-5 at 15× the price, and 188 of 191 such retries produced the same label the light tier had already given on the same input.",
   "before": {
    "lang": "yaml",
-   "code": "<span class=\"c\"># agents/triage/agent.yaml — as it stands</span>\n<span class=\"k\">model</span>:\n  <span class=\"k\">route</span>: <span class=\"s\">light</span>\n  <span class=\"c\"># fallback: inherited — workspace default is \"complex\"</span>"
+   "code": "<span class=\"c\"># agents/triage/agent.yaml: as it stands</span>\n<span class=\"k\">model</span>:\n  <span class=\"k\">route</span>: <span class=\"s\">light</span>\n  <span class=\"c\"># fallback: inherited, workspace default is \"complex\"</span>"
   },
   "after": {
    "lang": "yaml",
-   "code": "<span class=\"c\"># agents/triage/agent.yaml — pin the fallback</span>\n<span class=\"k\">model</span>:\n  <span class=\"k\">route</span>: <span class=\"s\">light</span>\n  <span class=\"k\">fallback</span>: <span class=\"s\">light</span>          <span class=\"c\"># retry on the same tier</span>\n  <span class=\"k\">retry</span>:\n    <span class=\"k\">max</span>: <span class=\"s\">2</span>\n    <span class=\"k\">backoff_ms</span>: <span class=\"s\">400</span>"
+   "code": "<span class=\"c\"># agents/triage/agent.yaml: pin the fallback</span>\n<span class=\"k\">model</span>:\n  <span class=\"k\">route</span>: <span class=\"s\">light</span>\n  <span class=\"k\">fallback</span>: <span class=\"s\">light</span>          <span class=\"c\"># retry on the same tier</span>\n  <span class=\"k\">retry</span>:\n    <span class=\"k\">max</span>: <span class=\"s\">2</span>\n    <span class=\"k\">backoff_ms</span>: <span class=\"s\">400</span>"
   },
   "steps": [
    "Pin fallback to the same tier for classification agents. Escalation is for reasoning steps that ran out of capability, not for timeouts.",
@@ -134,11 +134,11 @@
   "why": "A custom agent loop that runs until the model says it is finished will, on most models, re-read what it just wrote, list the directory again, and ask itself whether it is done, several times over. None of that produces a side effect the run keeps. On a-intel.core.docs-writer those tail steps average 2.1 model calls each, and on 41 of 64 runs there were six or more of them after the last kept write.",
   "before": {
    "lang": "python",
-   "code": "<span class=\"c\"># agents/docs_writer/loop.py — as it stands</span>\n<span class=\"k\">while</span> <span class=\"k\">not</span> done:\n    step = agent.next_step(ctx)\n    ctx.apply(step)\n    done = step.kind == <span class=\"s\">\"final\"</span>     <span class=\"c\"># the model decides when to stop</span>"
+   "code": "<span class=\"c\"># agents/docs_writer/loop.py: as it stands</span>\n<span class=\"k\">while</span> <span class=\"k\">not</span> done:\n    step = agent.next_step(ctx)\n    ctx.apply(step)\n    done = step.kind == <span class=\"s\">\"final\"</span>     <span class=\"c\"># the model decides when to stop</span>"
   },
   "after": {
    "lang": "python",
-   "code": "<span class=\"c\"># agents/docs_writer/loop.py — stop after two unproductive steps</span>\nidle = 0\n<span class=\"k\">while</span> <span class=\"k\">not</span> done:\n    step = agent.next_step(ctx)\n    effect = ctx.apply(step)\n    idle = 0 <span class=\"k\">if</span> effect.kept <span class=\"k\">else</span> idle + 1\n    done = step.kind == <span class=\"s\">\"final\"</span> <span class=\"k\">or</span> idle >= 2\n<span class=\"c\"># effect.kept comes from the gateway: did the side effect survive to the sealed run?</span>"
+   "code": "<span class=\"c\"># agents/docs_writer/loop.py: stop after two unproductive steps</span>\nidle = 0\n<span class=\"k\">while</span> <span class=\"k\">not</span> done:\n    step = agent.next_step(ctx)\n    effect = ctx.apply(step)\n    idle = 0 <span class=\"k\">if</span> effect.kept <span class=\"k\">else</span> idle + 1\n    done = step.kind == <span class=\"s\">\"final\"</span> <span class=\"k\">or</span> idle >= 2\n<span class=\"c\"># effect.kept comes from the gateway: did the side effect survive to the sealed run?</span>"
   },
   "steps": [
    "Count unproductive steps from the gateway's own signal: a step is productive when its side effect is kept in the sealed run.",
@@ -154,11 +154,11 @@
   "why": "A cache write costs 1.25× the input price and pays back only if a later call reads the prefix inside the TTL. Priya's invoice runs are one turn each, scheduled forty minutes apart, and the agent's request builder marks the system block cacheable on every call. So each run writes an 18,400-token prefix that expires unread. The premium was the whole cost of the write.",
   "before": {
    "lang": "python",
-   "code": "<span class=\"c\"># agents/invoice_bot/request.py — as it stands</span>\nsystem = [{<span class=\"s\">\"type\"</span>: <span class=\"s\">\"text\"</span>, <span class=\"s\">\"text\"</span>: SYSTEM,\n           <span class=\"s\">\"cache_control\"</span>: {<span class=\"s\">\"type\"</span>: <span class=\"s\">\"ephemeral\"</span>}}]   <span class=\"c\"># on every call</span>"
+   "code": "<span class=\"c\"># agents/invoice_bot/request.py: as it stands</span>\nsystem = [{<span class=\"s\">\"type\"</span>: <span class=\"s\">\"text\"</span>, <span class=\"s\">\"text\"</span>: SYSTEM,\n           <span class=\"s\">\"cache_control\"</span>: {<span class=\"s\">\"type\"</span>: <span class=\"s\">\"ephemeral\"</span>}}]   <span class=\"c\"># on every call</span>"
   },
   "after": {
    "lang": "python",
-   "code": "<span class=\"c\"># agents/invoice_bot/request.py — write the cache only when a read will follow</span>\ncacheable = run.expected_turns > 1 <span class=\"k\">or</span> schedule.next_within(minutes=5)\nsystem = [{<span class=\"s\">\"type\"</span>: <span class=\"s\">\"text\"</span>, <span class=\"s\">\"text\"</span>: SYSTEM,\n           **({<span class=\"s\">\"cache_control\"</span>: {<span class=\"s\">\"type\"</span>: <span class=\"s\">\"ephemeral\"</span>}} <span class=\"k\">if</span> cacheable <span class=\"k\">else</span> {})}]"
+   "code": "<span class=\"c\"># agents/invoice_bot/request.py: write the cache only when a read will follow</span>\ncacheable = run.expected_turns > 1 <span class=\"k\">or</span> schedule.next_within(minutes=5)\nsystem = [{<span class=\"s\">\"type\"</span>: <span class=\"s\">\"text\"</span>, <span class=\"s\">\"text\"</span>: SYSTEM,\n           **({<span class=\"s\">\"cache_control\"</span>: {<span class=\"s\">\"type\"</span>: <span class=\"s\">\"ephemeral\"</span>}} <span class=\"k\">if</span> cacheable <span class=\"k\">else</span> {})}]"
   },
   "steps": [
    "Write the cache when a read is likely: multi-turn runs, or a schedule that fires again inside the TTL.",

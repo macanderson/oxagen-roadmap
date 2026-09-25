@@ -56,9 +56,9 @@ export const PAGES = [
   { id: "spend-budgets",     title: "Budgets",                     group: "Spend",        hash: `#/${ORG}/core-platform/spend/budgets`,                    states: ["loaded"] },
   { id: "spend-optimization",title: "Optimization",                group: "Spend",        hash: `#/${ORG}/core-platform/spend/optimization`,               states: ["loaded"] },
   { id: "repositories",      title: "Repositories",                group: "Repositories", hash: `#/${ORG}/core-platform/repositories`,                     states: ALL },
-  { id: "repositories-copies", title: "Working copies",            group: "Repositories", hash: `#/${ORG}/core-platform/repositories/copies`,              states: ALL },
+  { id: "repositories-copies", title: "Working copies",            group: "Repositories", hash: `#/${ORG}/core-platform/repositories/working-copies`,      states: ALL },
   { id: "repositories-changes", title: "Changes",                  group: "Repositories", hash: `#/${ORG}/core-platform/repositories/changes`,             states: ALL },
-  { id: "repositories-config", title: "Configuration",             group: "Repositories", hash: `#/${ORG}/core-platform/repositories/config`,              states: ALL },
+  { id: "repositories-config", title: "Configuration",             group: "Repositories", hash: `#/${ORG}/core-platform/repositories/configuration`,       states: ALL },
   { id: "approvals-drawer",  title: "Approvals",                   group: "Drawers",      hash: `#/${ORG}/core-platform/work`, drawer: "approvals",        states: ["loaded"] },
   { id: "stella-drawer",     title: "Stella",                      group: "Drawers",      hash: `#/${ORG}/core-platform/runs/run_01K5RS7M2E8FJ3QW`, drawer: "stella", states: ["loaded"] },
   // organization scope (pages 8–10)

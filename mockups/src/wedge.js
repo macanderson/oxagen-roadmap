@@ -243,6 +243,8 @@ var POINTS=[
  ["files","Checkout files","synced into the checkout, loaded by the harness"],
  ["tools","Tool list","the tool definitions the belt shows the model"]];
 var POINT_LABEL={}; POINTS.forEach(function(p){POINT_LABEL[p[0]]=p[1];});
+/* A harness's own tools (Bash in Claude Code, a shell in Codex CLI) are not frames: Oxagen did not put them there. */
+var HARNESS_TOOL_RE=/^(claude_code|codex_cli|codex|cursor|stella)__/;
 var SOURCES=FIXTURES.SOURCES;
 function srcHash(s){return "sha256:"+frHex(String(s),16);}
 /* One frame. src is {kind,id,version,path}; the hash is over the canonical body, so the same source at the
@@ -257,6 +259,9 @@ function frameOf(type,src,body,o){
 function srcOfItem(it){
   var p=String(it.provenance||""), at=p.indexOf(" @ ");
   var kind=it.kind==="record"?"record":it.kind==="ontology"?"glossary":it.kind;
+  /* the assembler keys a skill's description line as skill:<id>; the source is the skill at its version */
+  if(kind==="skill"){ var sid=String(it.id).replace(/^skill:/,""), sk=skillOf(sid);
+    return {kind:"skill",id:sid,version:sk?sk.ver:(it.valid_from||""),path:sk?sk.path:p}; }
   return {kind:kind,id:it.id,version:at>0?p.slice(at+3):(it.valid_from||""),path:at>0?p.slice(0,at):p};
 }
 function itemFrame(it,point,extra){
@@ -336,13 +341,17 @@ function resolveEnvelope(slug,brief,opt){
     sel.push(frameOf("procedure",src,"SKILL.md: "+s.st,{force:"info",point:"files",tok:B?B.instructions.tok:s.tokens,hash:s.digest}));
     if(B){ B.references.forEach(function(r){sel.push(frameOf("context",src,r.path+": "+r.body,{force:"info",point:"files",tok:r.tok}));});
       B.entrypoints.forEach(function(e){sel.push(frameOf("capability",src,e.name+" "+e.args+" → "+e.returns+". "+e.desc,{force:"info",point:"files",tok:0,hash:e.digest,enforced:"descriptor"}));}); }});
-  (SOURCES.withheld||[]).forEach(function(x){
+  (SOURCES.withheld||[]).filter(function(x){return SK_ON[wslug]&&(x.ws||"core-platform")===wslug;}).forEach(function(x){
     cut.push(frameOf("procedure",{kind:"skill",id:x.id,version:x.ver,path:".oxagen/skills/"+x.id.split(".").pop()+"/SKILL.md"},"Withheld before ranking. The agent is told the count and the reason, never the name.",
       {force:"info",point:"files",reason:x.reason,why:x.why,tok:0}));});
   /* the toolbelt: one capability frame per tool Oxagen shows the model; a harness's own tools are not frames */
+  var belts=TOOLBELT_ASSIGN[a.key]||[];
   beltOf(a).forEach(function(m){
-    if(/^(claude_code|codex|cursor|stella)__/.test(m.id)) return;
-    var src={kind:"toolbelt",id:m.id,version:m.dig||m.v||"",path:m.rule||""};
+    if(HARNESS_TOOL_RE.test(m.id)) return;
+    /* the source is the named belt that puts the tool on this agent; the searchable belt's meta-tools come from the definition */
+    var bid=belts.filter(function(id){var b=beltCatalogById(id);return b&&b.tools.indexOf(m.id)>=0;})[0], b=bid?beltCatalogById(bid):null;
+    var src=b?{kind:"toolbelt",id:b.id,version:"updated "+String(b.updated).slice(0,10),path:b.name}
+      :{kind:"agent",id:".oxagen/agents/"+defSlug(a)+".toml",version:a.commit||"main",path:"the searchable belt's meta-tools"};
     var f=frameOf("capability",src,m.id+": "+m.d,{force:"info",point:"tools",tok:Math.max(60,Math.round(String(m.d).length*1.6)),enforced:m.dec});
     if(m.dec==="deny"){ f.reason="overridden_by_gate"; f.why=m.rule; cut.push(f); } else sel.push(f);});
   /* the work order the run belongs to, and the steers it received */
@@ -357,13 +366,23 @@ function resolveEnvelope(slug,brief,opt){
 }
 var FORCE_ORDER={must:0,should:1,may:2,info:3};
 function frameOrder(x,y){return (FT_ORDER[x.type]-FT_ORDER[y.type])||((FORCE_ORDER[x.force]||0)-(FORCE_ORDER[y.force]||0))||(x.id<y.id?-1:x.id>y.id?1:0);}
+function mandateHref(id){var m=MANDATES.filter(function(x){return x.id===id;})[0], ag=m?agent(m.agent):null;
+  return ag?agentUrl(ag)+"/permissions?delegation="+encodeURIComponent(id):null;}
 function srcHref(src){
   if(src.kind==="record") return wsBase()+"/steering/sources/record/"+encodeURIComponent(src.id);
   if(src.kind==="skill") return wsBase()+"/steering/sources/skill/"+encodeURIComponent(src.id);
   if(src.kind==="adr"||src.kind==="vision") return wsBase()+"/steering/sources/"+src.kind+"/"+encodeURIComponent(src.id);
   if(src.kind==="memory"||src.kind==="glossary"||src.kind==="instruction") return wsBase()+"/steering/sources/"+src.kind+"/"+encodeURIComponent(src.id);
-  if(src.kind==="policy"||src.kind==="toolbelt") return wsBase()+"/tools/"+(src.kind==="policy"?"policy":"toolbelts");
-  if(src.kind==="mandate") return wsBase()+"/agents";
+  if(src.kind==="toolbelt") return wsBase()+"/tools/toolbelts?belt="+encodeURIComponent(src.id);
+  if(src.kind==="policy"){
+    /* a gate is edited where it lives: a kill switch on Kill switches, a record's grant on the record, a mandate on its agent */
+    var g=GATES.filter(function(x){return x.id===src.id;})[0], gs=g?String(g.source||""):"";
+    if(g&&g.gate==="kill switch") return wsBase()+"/tools/switches";
+    if(g&&/enforcement grant/.test(gs)) return wsBase()+"/steering/sources/record/"+encodeURIComponent(gs.split(" · ")[0]);
+    if(g&&g.gate==="mandate"&&/^mnd_/.test(gs)) return mandateHref(gs)||wsBase()+"/agents";
+    return wsBase()+"/tools/policy";
+  }
+  if(src.kind==="mandate") return mandateHref(src.id)||wsBase()+"/agents";
   if(src.kind==="agent") return wsBase()+"/agents/"+src.id.replace(/^.*\/|\.toml$/g,"")+"/source";
   if(src.kind==="work_order") return woUrl({id:src.id});
   return null;
@@ -392,22 +411,27 @@ function frameTable(L,o){
   o=o||{};
   if(!L.length) return '<div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">'+h(o.empty||"None.")+'</p></div>';
   var cap=o.cap||0, open=!cap||(S.dtAll||{})[o.key]||L.length<=cap+1, rows=open?L:L.slice(0,cap);
-  return '<div class="tw"><table class="fr-t" data-lt="'+(o.lt||"off")+'"><thead><tr><th>Type</th><th>Frame</th><th>Source</th>'+
+  return '<div class="tw"><table class="fr-t" data-lt="'+(o.lt||"off")+'"><thead><tr><th>Type</th><th>SteeringFrame</th><th>Source</th>'+
     (o.reason?'<th>Reason</th>':'<th>Force</th>')+'<th class="num">Tokens</th></tr></thead><tbody>'+
     rows.map(function(f){return frameRow(f,o);}).join("")+'</tbody></table></div>'+
     (cap&&L.length>cap+1?'<button class="lnk fr-more" onclick="dtAll(\''+h(o.key)+'\')">'+(open?'Show the first '+cap:'Show all '+L.length)+'</button>':'');
 }
 function dtAll(k){S.dtAll=S.dtAll||{}; S.dtAll[k]=!S.dtAll[k]; render();}
-function dtType(t){S.dtType=S.dtType===t?null:t; render();}
-/* Counts by type, as a strip of badges. With a handler, each badge filters the frames by its type. */
-function typeStrip(L,pick){
-  var c={}; L.forEach(function(f){c[f.type]=(c[f.type]||0)+1;});
+/* The type filter belongs to the view it was set on: a run's trace, the Compiler, or an agent's Steering tab. */
+function ftOn(ctx){return (S.ftype||{})[ctx]||null;}
+function dtType(t,ctx){ctx=ctx||"run"; S.ftype=S.ftype||{}; S.ftype[ctx]=S.ftype[ctx]===t?null:t; render();}
+/* A count that follows the filter: "9 procedure of 53 SteeringFrames" with one on, "53 SteeringFrames" without. */
+function ftLead(L,ctx,noun){var t=ftOn(ctx); if(!t) return L.length+" "+noun;
+  return L.filter(function(f){return f.type===t;}).length+' <span class="mono">'+h(t)+'</span> of '+L.length+" "+noun;}
+/* Counts by type, as a strip of badges. With a view, each badge filters that view's frames by its type. */
+function typeStrip(L,ctx){
+  var c={}, on=ctx?ftOn(ctx):null; L.forEach(function(f){c[f.type]=(c[f.type]||0)+1;});
   return '<div class="ft-strip">'+FT.map(function(x){
     if(!c[x.id]) return '';
     var inner=ftBadge(x.id)+'<b>'+c[x.id]+'</b>';
-    return pick?'<button class="ft-n ft-pick'+(S.dtType===x.id?' on':'')+'" aria-pressed="'+(S.dtType===x.id)+'" onclick="'+pick+'(\''+x.id+'\')">'+inner+'</button>'
+    return ctx?'<button class="ft-n ft-pick'+(on===x.id?' on':'')+'" aria-pressed="'+(on===x.id)+'" onclick="dtType(\''+x.id+'\',\''+ctx+'\')">'+inner+'</button>'
       :'<span class="ft-n">'+inner+'</span>';}).join("")+
-    (pick&&S.dtType?'<button class="lnk" style="font-size:12px" onclick="'+pick+'(S.dtType)">Show every type</button>':'')+'</div>';
+    (ctx&&on?'<button class="lnk" style="font-size:12px" onclick="dtType(\''+on+'\',\''+ctx+'\')">Show every type</button>':'')+'</div>';
 }
 
 /* ---- the work order's own panels ---- */
@@ -547,9 +571,9 @@ function decisionTrace(R){
     '<div class="dim">Oxagen has no access to the model’s hidden reasoning. Thinking a provider returns is in the Transcript, labelled as the provider’s text.</div></div>';
 
   /* 1. Envelope, by injection point, and 2. what was excluded: the Compiler's own renderers */
-  var s1=dtSection(1,"Envelope",E.sel.length+" SteeringFrames reached this run, grouped by where they entered. Select a type to filter.",
+  var s1=dtSection(1,"Envelope",ftLead(E.sel,"run","SteeringFrames")+" reached this run, by where they entered.",
     envelopeHtml(E,"run"),null,"frame types and per-frame provenance");
-  var s2=dtSection(2,"Exclusions",E.cut.length+" resolved and not delivered. The same sources, run and budget give the same exclusions.",
+  var s2=dtSection(2,"Exclusions",ftLead(E.cut,"run","resolved")+" and not delivered, each with its reason.",
     exclusionsHtml(E,"run"),null,null);
 
   /* 3. Choices */
@@ -698,7 +722,7 @@ function steeringSources(wslug){
         status:s.retiring?"retiring":ok?"approved":s.state==="scope"?"out of scope":"unapproved",why:ok?"":s.state==="scope"?"scoped to another workspace":"no person approved its digest",
         pend:!!s.retiring,
         href:srcUrl("skill",s.id,wslug),home:"Steering"});});
-    (SOURCES.withheld||[]).forEach(function(x){
+    (SOURCES.withheld||[]).filter(function(x){return (x.ws||"core-platform")===wslug;}).forEach(function(x){
       add({g:"skill",kind:"skill",id:x.id,title:x.why,path:".oxagen/skills/"+x.id.split(".").pop()+"/",emits:{},scope:"workspace",version:x.ver,hash:"",
         status:"withheld",why:"withheld as "+x.reason,href:srcUrl("skill",x.id,wslug),home:"Steering"});});
   }
@@ -730,8 +754,9 @@ function steeringSources(wslug){
   TOOLBELTS.forEach(function(b){
     var who=Object.keys(TOOLBELT_ASSIGN).filter(function(k){var a=agent(k);return a&&a.ws===wslug&&TOOLBELT_ASSIGN[k].indexOf(b.id)>=0;});
     if(!who.length) return;
-    add({g:"toolbelt",kind:"toolbelt",id:b.id,title:b.name+". "+b.desc,path:b.tools.length+" tools",emits:{capability:b.tools.length},scope:"assigned",
-      agentsList:who,version:"updated "+String(b.updated).slice(0,10),hash:"",status:"in force",href:"#/"+ORG.slug+"/"+wslug+"/tools/toolbelts",home:"Tools › Toolbelts"});});
+    var shown=b.tools.filter(function(t){return !HARNESS_TOOL_RE.test(t);}).length;
+    add({g:"toolbelt",kind:"toolbelt",id:b.id,title:b.name+". "+b.desc,path:b.tools.length+" tools",emits:shown?{capability:shown}:{},scope:"assigned",
+      agentsList:who,version:"updated "+String(b.updated).slice(0,10),hash:"",status:"in force",href:"#/"+ORG.slug+"/"+wslug+"/tools/toolbelts?belt="+encodeURIComponent(b.id),home:"Tools › Toolbelts"});});
   return out;
 }
 /* A gate notice is managed where its gate is edited: the policy, a kill switch, the record whose grant
@@ -818,20 +843,20 @@ function stgAssignmentsTab(w){
 
 /* ---- the envelope, shared by the Compiler and the Decision trace ---- */
 function envelopeHtml(E,keyPre){
-  var pickT=function(F){return S.dtType?F.filter(function(f){return f.type===S.dtType;}):F;};
+  var ft=ftOn(keyPre), pickT=function(F){return ft?F.filter(function(f){return f.type===ft;}):F;};
   var env=POINTS.map(function(p){
     var F=pickT(E.byPoint[p[0]]); if(!F.length) return "";
     var tk=F.reduce(function(s,f){return s+(f.tok||0);},0);
     return '<div class="dt-point"><div class="dt-point-h"><b>'+h(p[1])+'</b><span class="dim">'+h(p[2])+'</span>'+
       '<span class="sp mono dim" style="font-size:11px">'+F.length+' frame'+(F.length===1?'':'s')+(tk?' · '+tokn(tk)+' tok':'')+'</span></div>'+
-      frameTable(F,{cap:S.dtType?0:4,key:keyPre+"."+p[0]})+'</div>';}).join("");
+      frameTable(F,{cap:ft?0:4,key:keyPre+"."+p[0]})+'</div>';}).join("");
   var meters='<div class="dt-meters">'+stgMeter("Session-start prefix",E.prefixTok,E.prefixCap,"tok","16 KiB in the signed bundle, header included")+
     stgMeter("Volatile selection",E.volatileTok,E.volatileCap,"tok","picked for this brief under the workspace budget")+'</div>';
-  return meters+typeStrip(E.sel,"dtType")+env;
+  return meters+typeStrip(E.sel,keyPre)+env;
 }
 function exclusionsHtml(E,keyPre){
-  var L=S.dtType?E.cut.filter(function(f){return f.type===S.dtType;}):E.cut;
-  return frameTable(L,{reason:true,point:true,cap:S.dtType?0:6,key:keyPre+".cut",empty:"Nothing was excluded."});
+  var ft=ftOn(keyPre), L=ft?E.cut.filter(function(f){return f.type===ft;}):E.cut;
+  return frameTable(L,{reason:true,point:true,cap:ft?0:6,key:keyPre+".cut",empty:ft?"Nothing of this type was excluded.":"Nothing was excluded."});
 }
 
 /* ---- Compiler: resolve one agent and one brief, send nothing ---- */
@@ -841,24 +866,24 @@ function pvInput(v){ S.pv.text=v; var o=el("pvOut"); if(o){ o.innerHTML=compiler
 function compilerOut(){
   var E=resolveEnvelope(S.pv.agent,pvPrompt(),{});
   return '<div class="dt"><section class="dt-sec"'+fut("frame types and per-frame provenance")+'><div class="dt-h"><span class="dt-n">1</span><div style="min-width:0;flex:1"><h3>Envelope</h3>'+
-     '<p>'+E.sel.length+' SteeringFrames for <span class="mono">'+h(E.slug)+'</span> in <span class="mono">'+h(E.repo)+'</span>. Select a type to filter.</p></div></div>'+envelopeHtml(E,"cmp")+'</section>'+
-   '<section class="dt-sec"><div class="dt-h"><span class="dt-n">2</span><div style="min-width:0;flex:1"><h3>Exclusions</h3>'+
-     '<p>'+E.cut.length+' resolved and not delivered. The same sources, agent and brief give the same exclusions.</p></div></div>'+exclusionsHtml(E,"cmp")+'</section></div>';
+     '<p>'+ftLead(E.sel,"cmp","SteeringFrames")+' for <span class="mono">'+h(E.slug)+'</span> in <span class="mono">'+h(E.repo)+'</span>.</p></div></div>'+envelopeHtml(E,"cmp")+'</section>'+
+   '<section class="dt-sec"'+fut("a capability that resolves without delivering (#3879)")+'><div class="dt-h"><span class="dt-n">2</span><div style="min-width:0;flex:1"><h3>Exclusions</h3>'+
+     '<p>'+ftLead(E.cut,"cmp","resolved")+' and not delivered, each with its reason.</p></div></div>'+exclusionsHtml(E,"cmp")+'</section></div>';
 }
 function stgCompilerTab(w){
-  var L=stgAgents().filter(function(x){return x.a.ws===w.slug;});
-  if(!L.length) return '<div class="panel pad"><p class="muted" style="margin:0">No agent in this workspace has a standing brief to resolve.</p></div>';
-  if(!agentBySlug(S.pv.agent)||agentBySlug(S.pv.agent).ws!==w.slug){ S.pv.agent=L[0].slug; if(S.pv.text==null) S.pv.preset=L[0].prompt; }
-  if(!L.some(function(x){return x.slug===S.pv.agent;})) L=L.concat([stgAgent(S.pv.agent)]);
-  var A=stgAgent(S.pv.agent);
+  var L=AGENTS.filter(function(a){return a.ws===w.slug;}).map(function(a){return stgAgent(defSlug(a));}).filter(Boolean);
+  if(!L.length) return '<div class="panel pad"><p class="muted" style="margin:0">No agent is registered in this workspace.</p></div>';
+  var cur=agentBySlug(S.pv.agent);
+  if(!cur||cur.ws!==w.slug){ S.pv.agent=L[0].slug; S.pv.text=null; S.pv.preset=L[0].prompt||null; }
+  var A=stgAgent(S.pv.agent), chips=STG_PREVIEW.prompts.filter(function(p){return (p.ws||"core-platform")===w.slug;});
   return '<div class="panel pad" style="margin-bottom:14px"><div class="stg-pv">'+
    '<div class="field" style="margin:0"><label for="pvSel">Agent</label><select id="pvSel" onchange="pvAgent(this.value)">'+L.map(function(x){
      return '<option value="'+h(x.slug)+'"'+(x.slug===S.pv.agent?' selected':'')+'>'+h(x.a.name)+' · '+h(x.a.harnessLabel)+'</option>';}).join("")+'</select>'+
     '<div class="hint">'+tierBadge(A.a.tier)+' works in <span class="mono">'+h(A.repo)+'</span></div></div>'+
    '<div class="field" style="margin:0"><label for="pvText">Brief</label><textarea id="pvText" rows="2" oninput="pvInput(this.value)" placeholder="What a work order would send">'+h(pvPrompt())+'</textarea>'+
     '<div class="hint">Sends nothing. Nothing here reaches an agent.</div></div></div>'+
-   '<div class="kf" role="group" aria-label="Pick a brief" style="padding:10px 0 0;border:0">'+STG_PREVIEW.prompts.map(function(p){
-     return '<button class="btn sm" aria-pressed="'+(S.pv.text==null&&S.pv.preset===p.id)+'" onclick="pvPreset(\''+p.id+'\')">'+h(p.text)+'</button>';}).join("")+'</div></div>'+
+   (chips.length?'<div class="kf" role="group" aria-label="Pick a brief" style="padding:10px 0 0;border:0">'+chips.map(function(p){
+     return '<button class="btn sm" aria-pressed="'+(S.pv.text==null&&S.pv.preset===p.id)+'" onclick="pvPreset(\''+p.id+'\')">'+h(p.text)+'</button>';}).join("")+'</div>':'')+'</div>'+
    '<div id="pvOut">'+compilerOut()+'</div>';
 }
 
@@ -884,6 +909,8 @@ function stgProposalsTab(w,t){
 
 /* ---- the Steering page ---- */
 function stgOpenPrCount(){ return stgOpenCount(); }
+/* The Steering nav count: what waits on a person there, the same figure the Proposals tab shows. */
+function stgNavCount(wslug){ return PROPOSALS.length+recprOpenCount(); }
 function newSourceBtn(primary){ return '<button class="btn'+(primary?' primary':'')+'" onclick="openDialog(\'newsrc\')">New source</button>'; }
 function pSteering(){
   var w=ws(), t=tab("steering","sources");
@@ -945,6 +972,7 @@ function srcFramesOf(o){
       return frameOf(x.emits,docSrc(d),x.body,{force:x.force,point:vol?"prompt_submit":"session_start",enforced:x.enforcedBy||null});}); }
   if(o.g==="skill"){ var s=skillOf(o.id), B=(SOURCES.bundles||{})[o.id], src={kind:"skill",id:o.id,version:o.version,path:o.path}; if(!s) return [];
     var out=[frameOf("procedure",src,"SKILL.md: "+s.st,{force:"info",point:"files",tok:B?B.instructions.tok:s.tokens,hash:s.digest})];
+    var desc=stgItemById(wslug,"skill:"+o.id); if(desc) out.unshift(itemFrame(desc,"prompt_submit"));
     if(B){ B.references.forEach(function(r){out.push(frameOf("context",src,r.path+": "+r.body,{force:"info",point:"files",tok:r.tok}));});
       B.entrypoints.forEach(function(e){out.push(frameOf("capability",src,e.name+" "+e.args+" → "+e.returns+". "+e.desc,{force:"info",point:"files",tok:0,hash:e.digest,enforced:"descriptor"}));}); }
     return out; }
@@ -1267,7 +1295,7 @@ function agentsTiles(w,list){
 function agentBrief(slug){
   var A=stgAgent(slug), P=STG_PREVIEW.prompts;
   for(var i=0;i<P.length;i++){ if(P[i].id===A.prompt) return P[i].text; }
-  return "";
+  return A&&A.a?String(A.a.desc||""):"";
 }
 function aSteering(a,r){
   var slug=defSlug(a), brief=agentBrief(slug), E=resolveEnvelope(slug,brief,{});
@@ -1279,10 +1307,10 @@ function aSteering(a,r){
       '<td style="font-size:12px">'+h((SRC_KIND[x.src.kind]||{home:""}).home)+'</td></tr>';}).join("");
   return (obs?'<div class="warn" style="margin-bottom:14px"><b>Assembled, not delivered.</b> This agent is on the <span class="mono">observe</span> tier. No hook is installed, so nothing below reaches it.</div>':'')+
    '<div class="dt"><section class="dt-sec"'+fut("frame types and per-frame provenance")+'><div class="dt-h"><span class="dt-n">1</span><div style="min-width:0;flex:1"><h3>What it receives</h3>'+
-     '<p>'+E.sel.length+' SteeringFrames for its standing brief'+(brief?', “'+h(brief)+'”':'')+'. A work order’s brief changes the volatile selection.</p></div>'+
+     '<p>'+ftLead(E.sel,"ag","SteeringFrames")+' for its standing brief'+(brief?', “'+h(brief)+'”':'')+'.</p></div>'+
      '<div class="sp"><a class="btn sm" href="#/'+ORG.slug+'/'+a.ws+'/steering/compiler/'+encodeURIComponent(slug)+'">Open in the Compiler</a></div></div>'+envelopeHtml(E,"ag")+'</section>'+
-   '<section class="dt-sec"><div class="dt-h"><span class="dt-n">2</span><div style="min-width:0;flex:1"><h3>Excluded</h3><p>'+E.cut.length+' resolved for this agent and not delivered, with the reason.</p></div></div>'+exclusionsHtml(E,"ag")+'</section>'+
-   '<section class="dt-sec"><div class="dt-h"><span class="dt-n">3</span><div style="min-width:0;flex:1"><h3>Sources</h3><p>'+order.length+' sources reach this agent. Each is managed where it lives.</p></div></div>'+
+   '<section class="dt-sec"><div class="dt-h"><span class="dt-n">2</span><div style="min-width:0;flex:1"><h3>Excluded</h3><p>'+ftLead(E.cut,"ag","resolved")+' for this agent and not delivered, each with its reason.</p></div></div>'+exclusionsHtml(E,"ag")+'</section>'+
+   '<section class="dt-sec"><div class="dt-h"><span class="dt-n">3</span><div style="min-width:0;flex:1"><h3>Sources</h3><p>'+order.length+' sources reach this agent, each managed where it lives.</p></div></div>'+
      '<div class="tw"><table><thead><tr><th>Source</th><th>Emits here</th><th class="num">Frames</th><th>Managed in</th></tr></thead><tbody>'+srcRows+'</tbody></table></div></section></div>';
 }
 
@@ -1318,7 +1346,7 @@ function permDelegation(a){
       '<dl class="kv"><dt>Tools</dt><dd class="mono" style="font-size:12px">'+h(m.tools)+'</dd>'+
        '<dt>Counterparties</dt><dd>allow <span class="mono">'+h(m.allow)+'</span>, deny <span class="mono">'+h(m.deny)+'</span></dd>'+
        '<dt>Approval</dt><dd>above '+usd(m.approvalAbove)+', always for <span class="mono">'+h(m.alwaysFor)+'</span>, by <span class="mono">'+h(m.approvers)+'</span></dd>'+
-       '<dt>Frame</dt><dd'+fut("delegation frames")+'>'+ftBadge("delegation")+' <span class="mono dim" style="font-size:11px">'+h(f.id)+'</span><div style="font-size:12.5px;margin-top:4px">'+h(f.body)+'</div></dd></dl></div>'+
+       '<dt>SteeringFrame</dt><dd'+fut("delegation frames")+'>'+ftBadge("delegation")+' <span class="mono dim" style="font-size:11px">'+h(f.id)+'</span><div style="font-size:12.5px;margin-top:4px">'+h(f.body)+'</div></dd></dl></div>'+
       (on?'<div class="tw" style="margin-top:10px"><table data-lt="off"><thead><tr><th>When</th><th>Call</th><th class="num">Amount</th><th>State</th><th>External</th><th>Receipt</th></tr></thead><tbody>'+
         (m.ledger||[]).map(function(x){var sb={settled:"allowed",reserved:"approval",released:"denied"}[x.state]||"q";
           return '<tr><td class="mono" style="font-size:11.5px">'+h(x.when)+'</td><td class="mono" style="font-size:11.5px">'+h(x.call)+'</td><td class="num">'+usd(x.amount)+'</td>'+

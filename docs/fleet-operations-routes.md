@@ -133,7 +133,14 @@ The mockup drew Tasks at `#/:org/:ws/tasks…`. The app never built it, so these
 
 ### Runtimes and Repositories
 
-Unchanged. `/{org}/{ws}/runtimes[/{runtime}]` and `/{org}/{ws}/repositories[/{tab}[/{change}]]` keep every path.
+The app's paths are unchanged: `/{org}/{ws}/runtimes[/{runtime}]` and `/{org}/{ws}/repositories[/{tab}[/{change}]]`, where the Repositories tabs are `working-copies`, `changes` and `configuration`. The app addresses a runtime by its enrollment id (`tch_…`). The mockup addresses a host by its hostname, and it drew two tab segments of its own, which it now rewrites in place:
+
+| Old path (mockup) | Canonical path | Kind | Note |
+|---|---|---|---|
+| `#/:org/:ws/repositories/copies` | `#/:org/:ws/repositories/working-copies` | in place | The segment the app ships |
+| `#/:org/:ws/repositories/config` | `#/:org/:ws/repositories/configuration` | in place | The segment the app ships |
+| `#/:org/:ws/repositories/changes/{id}` | same | same | Opens that pull request in the Changes tab |
+| `#/:org/:ws/tools/toolbelts?belt={id}` | same | new | Opens that belt, so a `capability` frame's source links to it |
 
 ## Organization and sign-in
 

@@ -111,8 +111,8 @@
     }
   },
   "withheld": [
-    { "id": "a-intel.changelog-bot", "ver": "1.4.0", "reason": "unapproved_digest", "why": "Its digest changed on 2026-09-09 after Priya Natarajan approved 1.3.2. Nobody has approved the new one." },
-    { "id": "a-intel.mobile-release-notes", "ver": "2.0.1", "reason": "out_of_scope", "why": "Scoped to a-intel/mobile. This run works in a-intel/platform." }
+    { "id": "a-intel.changelog-bot", "ver": "1.4.0", "ws": "core-platform", "reason": "unapproved_digest", "why": "Its digest changed on 2026-09-09 after Priya Natarajan approved 1.3.2. Nobody has approved the new one." },
+    { "id": "a-intel.mobile-release-notes", "ver": "2.0.1", "ws": "core-platform", "reason": "out_of_scope", "why": "Scoped to a-intel/mobile. This run works in a-intel/platform." }
   ],
   "resolutions": {
     "run_01K5RS7M2E8FJ3QW": {

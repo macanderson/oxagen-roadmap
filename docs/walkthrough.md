@@ -342,7 +342,7 @@ Repositories lists the repositories the workspace governs, its main repo first, 
 
 Working copies are the checkouts on operators' machines linked to the workspace. The link is a gitignored file, so it is never reviewed or merged.
 
-**Sources** · Prompt: [repositories-copies.audit-prompt.md](../mockups/pages/repositories-copies.audit-prompt.md) · Spec: [§10.2 On-disk layout](mission-control-spec.md#102-on-disk-layout-oxagen) · Plan: [data mapping](implementation-plan.md#31-workspace-pages) · Page: [Repositories · Working copies](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/repositories/copies) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/repositories/copies)), [repositories-copies.md](../mockups/pages/repositories-copies.md)
+**Sources** · Prompt: [repositories-copies.audit-prompt.md](../mockups/pages/repositories-copies.audit-prompt.md) · Spec: [§10.2 On-disk layout](mission-control-spec.md#102-on-disk-layout-oxagen) · Plan: [data mapping](implementation-plan.md#31-workspace-pages) · Page: [Repositories · Working copies](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/repositories/working-copies) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/repositories/working-copies)), [repositories-copies.md](../mockups/pages/repositories-copies.md)
 
 #### Changes
 
@@ -354,7 +354,7 @@ Changes lists the pull requests Oxagen opened, Steering record pull requests amo
 
 Configuration shows `.oxagen/workspace.toml` and the governance file. A change to either is a pull request.
 
-**Sources** · Prompt: [repositories-config.audit-prompt.md](../mockups/pages/repositories-config.audit-prompt.md) · Spec: [§10.2 On-disk layout](mission-control-spec.md#102-on-disk-layout-oxagen) · Plan: [data mapping](implementation-plan.md#31-workspace-pages) · Page: [Repositories · Configuration](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/repositories/config) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/repositories/config)), [repositories-config.md](../mockups/pages/repositories-config.md)
+**Sources** · Prompt: [repositories-config.audit-prompt.md](../mockups/pages/repositories-config.audit-prompt.md) · Spec: [§10.2 On-disk layout](mission-control-spec.md#102-on-disk-layout-oxagen) · Plan: [data mapping](implementation-plan.md#31-workspace-pages) · Page: [Repositories · Configuration](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/repositories/configuration) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/repositories/configuration)), [repositories-config.md](../mockups/pages/repositories-config.md)
 
 ### 23. Organization
 
