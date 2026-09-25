@@ -25,7 +25,7 @@ A provider is named by the system it is: GitHub, Stripe, the harness on a host. 
 - **List controls** (`ltTable()`): "Search this list", the filters "Any health", "Any transport" and "Any authorization", **Rows** (10 by default) and the pager (`1–10 of 19`).
 - **Table**, columns in order: Provider · Transport · Tools · Toolbelts · Agents · Health · Connection · Authorization · Last import, then an unlabelled actions column.
   - *Provider*: the logomark (24 px) beside the system in bold over what it is ("GitHub" over "Source control and pull requests."), then the links the registry entry holds: the website's host ("github.com"), **Docs** and **Source**.
-    - The logomark is the registry entry's icon, loaded with no referrer on a white plate. A provider with no icon, or one whose icon does not load, shows the first letter of its system on a soft tile ("A" for AWS Billing). No favicon service fills the gap.
+    - The logomark is the registry entry's icon, loaded with no referrer on a white plate. A provider with no icon, or one whose icon does not load, shows the first letter of its system on a soft tile ("A" for AWS Billing). While #3917 leaves the build without a system name, the letter is the registry name's. No favicon service fills the gap.
     - Every link is https and opens in a new tab. Clicking a link, or pressing Enter on it, follows the link and does not open the row.
     - Docs is left out when it is the same URL as the website or the source. The registry has no docs field, so for most entries Oxagen's docs link is one of the other two (see Registry fields below).
     - A provider with no registry entry (AWS Billing, Oxagen agent tools, Harness-native tools) shows no links.

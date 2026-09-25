@@ -512,6 +512,7 @@ tbody tr.click:hover .drill-lnk{border-bottom-style:solid}
 .pv-t{min-width:0}
 .pv-l a{margin-right:10px}
 .pv-url a{overflow-wrap:anywhere}
+#viewport.phone .pv-l a,#layer.phone .pv-url a{display:inline-flex;align-items:center;min-height:44px}
 .avx.f-sans{font-family:var(--font)}
 .avx.f-serif{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;font-weight:500}
 .avx.f-mono{font-family:var(--mono);font-weight:600}
