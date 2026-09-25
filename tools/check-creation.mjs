@@ -360,16 +360,18 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
   await page.close();
 }
 {
-  const { page, errs } = await open("#/a-intel/core-platform/steering/skills/a-intel.release-notes-from-prs/source");
+  const { page, errs } = await open("#/a-intel/core-platform/steering/sources/skill/a-intel.release-notes-from-prs");
   const r = await page.evaluate(() => ({
     h1: document.querySelector("#pg h1")?.textContent || "",
+    bar: document.querySelector("#pg .ced")?.innerText || document.getElementById("pg").innerText,
     tab: document.querySelector('#pg .tabs .tab[aria-selected="true"]')?.textContent || "",
     ced: !!document.getElementById("cedT"),
     gutter: (g => g ? (g.children.length || g.textContent.split("\n").filter(Boolean).length) : 0)(document.getElementById("cedG")),
     hl: document.querySelectorAll("#cedH span").length,
     txt: document.getElementById("cedT")?.value || "",
   }));
-  ok(/SKILL\.md/.test(r.h1), "skill source: the path is the heading, got " + r.h1);
+  ok(/a-intel\.release-notes-from-prs/.test(r.h1), "skill source: the skill's id is the heading, got " + r.h1);
+  ok(/\.oxagen\/skills\/release-notes-from-prs\/SKILL\.md/.test(r.bar), "skill source: the editor names the SKILL.md path");
   ok(r.ced && r.gutter > 8, "skill source: editor with a gutter, " + r.gutter + " lines");
   ok(r.hl > 5, "skill source: markdown highlighted, " + r.hl + " spans");
   ok(!/<span/.test(r.txt), "skill source: the editor holds text, not markup");
@@ -391,8 +393,8 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
   const cases = [
     ["#/a-intel/core-platform/tools", "New tool"],
     ["#/a-intel/core-platform/agents", "New agent"],
-    ["#/a-intel/core-platform/steering/skills", "Add a skill"],
-    ["#/a-intel/core-platform/steering", "Write a context record"],
+    ["#/a-intel/core-platform/steering?kind=skill", "New source"],
+    ["#/a-intel/core-platform/steering", "New source"],
   ];
   for (const [hash, label] of cases) {
     await page.evaluate(hh => { location.hash = hh; }, hash);
@@ -400,7 +402,11 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
     const found = await page.evaluate(l => [...document.querySelectorAll("#pg .acts .btn")].some(b => b.textContent.trim() === l), label);
     ok(found, "entry point: " + label + " on " + hash);
   }
-  await page.evaluate(() => openDialog("create"));
+  await page.evaluate(() => openDialog("newsrc"));
+  await page.waitForTimeout(150);
+  const kinds = await page.evaluate(() => [...document.querySelectorAll("#layer .wz-card b")].map(b => b.textContent).join("|"));
+  ok(/Steering record/.test(kinds) && /Skill/.test(kinds) && /Document/.test(kinds) && /Glossary term/.test(kinds), "new source: a card per authored kind, got " + kinds);
+  await page.evaluate(() => { closeDialog(); openDialog("create"); });
   await page.waitForTimeout(150);
   const cards = await page.evaluate(() => document.querySelectorAll("#layer .wz-card").length);
   ok(cards === 5, "create chooser: five cards, got " + cards);
@@ -569,16 +575,20 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
-// An ontology note is a file on the workspace repository, so writing, changing and retiring one
-// each open a pull request and nothing on the page claims a merge it has not seen.
+// A glossary term (an ontology note until the fleet operations wedge) is a file on the workspace
+// repository, so writing, changing and retiring one each open a pull request and nothing on the page
+// claims a merge it has not seen. Terms are a source kind on Steering › Sources.
 {
-  const { page, errs } = await open("#/a-intel/core-platform/steering/ontology");
+  const { page, errs } = await open("#/a-intel/core-platform/steering?kind=glossary");
   const dtxt = () => page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
-  const terms = () => page.evaluate(() => [...document.querySelectorAll("table tbody tr td:first-child b")].map((x) => x.textContent).join("|"));
+  const terms = () => page.evaluate(() => [...document.querySelectorAll("table tbody tr .src-t")].map((x) => x.textContent).join("|"));
   const prs = () => page.evaluate(() => OXPRS.filter((x) => x.kind === "ontology").map((x) => x.files[0][0] + ":" + x.files[0][1]).join("|"));
 
   ok(/release train/.test(await terms()), "ontology: the shipped definitions are listed");
-  ok(await page.evaluate(() => !!document.querySelector("[onclick*=\"ontnew\"]")), "ontology: the panel writes a new definition");
+  await page.evaluate(() => openDialog("newsrc"));
+  await page.waitForTimeout(150);
+  ok(await page.evaluate(() => !!document.querySelector("#layer [onclick*=\"ontnew\"]")), "ontology: New source writes a new definition");
+  await page.evaluate(() => closeDialog());
   ok(!(await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"))).includes("Index"), "ontology: the Index roadmap panel is gone");
 
   // Opening a row reads the note; it offers both writes.
@@ -590,7 +600,7 @@ for (const theme of ["light", "dark"]) {
   // Writing one.
   await page.evaluate(() => openDialog("ontnew"));
   await page.waitForTimeout(150);
-  ok(/Write an ontology note/.test(await dtxt()), "ontology: the create dialog opens");
+  ok(/Define a glossary term/.test(await dtxt()), "ontology: the create dialog opens");
   const kinds = await page.evaluate(() => [...document.querySelectorAll("#on-kind option")].map((o) => o.value).join("|"));
   ok(/term/.test(kinds) && /entity/.test(kinds) && /alias/.test(kinds) && /boundary/.test(kinds), "ontology: the four note kinds are offered, got " + kinds);
 
@@ -835,7 +845,7 @@ for (const theme of ["light", "dark"]) {
   for (const row of ["Store", "In regulated mode", "Compiled from", "Who reads it", "What it writes"]) {
     ok(new RegExp(row).test(where), "policy: the storage panel states " + row);
   }
-  ok(/not a context record/.test(where), "policy: a version is distinguished from a context record");
+  ok(/not a Steering record/.test(where), "policy: a version is distinguished from a Steering record");
   ok(/\.oxagen\/policy\//.test(where), "policy: regulated mode names the file");
   ok(/policy\.decision/.test(where), "policy: the frame it writes is named");
 
@@ -858,11 +868,13 @@ for (const theme of ["light", "dark"]) {
 }
 
 // The mandate page wired Change limits to the grant wizard, so editing opened a form that creates
-// a second mandate, and Revoke was a toast that reported a write it never made.
+// a second mandate, and Revoke was a toast that reported a write it never made. The mandate page is
+// now Delegation on the agent's Permissions tab, and its old address lands there.
 {
   const { page, errs } = await open("#/a-intel/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4");
+  ok(/permissions\?delegation=mnd_7K2ETQ4/.test(await page.evaluate(() => location.hash)), "mandate: the old address lands on Delegation");
   const acts = await page.evaluate(() =>
-    [...document.querySelectorAll(".phead .acts button")].map((b) => b.getAttribute("onclick") + "|" + b.textContent.trim()));
+    [...document.querySelectorAll(".dlg-m .dlg-m-h button")].map((b) => b.getAttribute("onclick") + "|" + b.textContent.trim()));
   ok(acts.some((a) => /openDialog\('mandateedit','mnd_7K2ETQ4'\)\|Change limits/.test(a)),
     "mandate: Change limits opens the edit dialog on this mandate, got " + acts.join(" ~ "));
   ok(acts.some((a) => /openDialog\('mandaterevoke','mnd_7K2ETQ4'\)\|Revoke/.test(a)),
@@ -997,17 +1009,17 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
-// Two gate buttons carried the mid-dot the plain-noun rule bans, and one pointed at a Mandates
-// ledger tab that no longer exists.
+// Steering › Gates is gone: a gate notice is a policy source on Sources, and each row links to where
+// its gate is edited. No link carries a mid-dot or points at the cut Mandates ledger.
 {
-  const { page, errs } = await open("#/a-intel/core-platform/steering/policy");
-  const opens = await page.evaluate(() =>
-    [...document.querySelectorAll("button")].map((b) => b.textContent.trim()).filter((t) => /^Open /.test(t)));
-  ok(opens.length > 0, "gates: an Edited on button opens its editor");
-  ok(!opens.some((l) => /·/.test(l)), "gates: no Open button carries a mid-dot, got " + opens.join(" ~ "));
-  ok(!opens.some((l) => /Mandates/.test(l)), "gates: no Open button points at the cut Mandates ledger, got " + opens.join(" ~ "));
-  for (const label of ["Open the policy tab", "Open the kill switches tab", "Open the record"]) {
-    ok(opens.includes(label), "gates: " + label + " is present, got " + opens.join(" ~ "));
+  const { page, errs } = await open("#/a-intel/core-platform/steering?kind=policy");
+  const homes = await page.evaluate(() =>
+    [...document.querySelectorAll("table tbody tr td:last-child a")].map((a) => a.textContent.trim() + "|" + a.getAttribute("href")));
+  ok(homes.length > 0, "gates: each gate notice links to where its gate is edited");
+  ok(!homes.some((l) => /·/.test(l.split("|")[0])), "gates: no link carries a mid-dot, got " + homes.join(" ~ "));
+  ok(!homes.some((l) => /Mandates/.test(l)), "gates: no link points at the cut Mandates ledger, got " + homes.join(" ~ "));
+  for (const [label, href] of [["Tools › Policy", /tools\/policy$/], ["Tools › Kill switches", /tools\/switches$/], ["Steering record", /sources\/record\//]]) {
+    ok(homes.some((l) => l.startsWith(label + "|") && href.test(l.split("|")[1])), "gates: " + label + " is linked, got " + homes.join(" ~ "));
   }
   ok(errs.length === 0, "gates: no JavaScript error: " + errs.join(" | "));
   await page.close();
@@ -1017,7 +1029,7 @@ for (const theme of ["light", "dark"]) {
 // A skill could be written and edited and never retired. One written here is a file; one installed
 // is a line in workspace.toml. Both are a pull request, and the drill-down offers it either way.
 {
-  const { page, errs } = await open("#/a-intel/core-platform/steering/skills");
+  const { page, errs } = await open("#/a-intel/core-platform/steering?kind=skill");
   const foot = async (kind, arg) => {
     await page.evaluate(([k, a]) => { closeDialog(); openDialog(k, a); }, [kind, arg]);
     await page.waitForTimeout(220);
@@ -1190,7 +1202,7 @@ for (const theme of ["light", "dark"]) {
 // The memory tab told you to promote a memory and no row offered it, and nothing forgot one:
 // a fact an agent got wrong kept being recalled with no way to stop it.
 {
-  const { page, errs } = await open("#/a-intel/core-platform/steering/memory");
+  const { page, errs } = await open("#/a-intel/core-platform/steering?kind=memory");
   const clickable = await page.evaluate(() => document.querySelectorAll("table tbody tr.click").length);
   const total = await page.evaluate(() => stgMemory("core-platform").length);
   ok(clickable === total, "memory: every row opens its item, got " + clickable + " of " + total);
@@ -1226,7 +1238,7 @@ for (const theme of ["light", "dark"]) {
   await page.evaluate((i) => { closeDialog(); memPromote(i); }, mid2);
   await page.waitForTimeout(350);
   const title = await page.evaluate(() => document.querySelector(".dlg-h h2").textContent);
-  ok(/context record/i.test(title), "memory: promoting opens the record wizard, got " + title);
+  ok(/Steering record/i.test(title), "memory: promoting opens the record wizard, got " + title);
   const wz = await page.evaluate(() => S.wz && { kind: S.wz.kind, from: S.wz.fromMemory, desc: S.wz.desc });
   ok(wz && wz.kind === "record" && wz.from === mid2,
     "memory: the wizard knows which memory it came from, got " + JSON.stringify(wz && { k: wz.kind, f: wz.from }));

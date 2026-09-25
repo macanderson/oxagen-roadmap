@@ -1,26 +1,27 @@
 #!/usr/bin/env node
-// Walks the Tasks surface of mockups/missioncontrol.html in headless Chromium, in the order an operator
-// meets it, and asserts what each step must show. The spec is docs/tasks-spec.md; the pages are
-// mockups/pages/tasks.md, tasks-providers.md, task.md and work-order.md. check-mockup.mjs opens every
-// page in every state; the wizard, the definition of done and the work order are interactions it never
+// Walks the Work surface of mockups/missioncontrol.html in headless Chromium, in the order an operator
+// meets it, and asserts what each step must show. The specs are docs/tasks-spec.md and
+// docs/fleet-operations-wedge.md; the pages are mockups/pages/work-backlog.md, work-intake.md,
+// work-item.md, work-orders.md, work-order.md and work-workflows.md. check-mockup.mjs opens every page
+// in every state; the wizard, the definition of done and the work order are interactions it never
 // reaches.
 //
 //   node tools/check-tasks.mjs            # every flow
 //   node tools/check-tasks.mjs --shots    # also write a screenshot per step to .claude/shots/tasks/
 //
 // The flows, in order:
-//   1. connect Jira through the six-step wizard, create one value in Jira, leave one account not mapped,
-//      and see it on Providers
-//  1b. connect ServiceNow with creation off, and see its column on Fields
+//   1. connect Jira through the six-step wizard from Intake, create one value in Jira, leave one account
+//      not mapped, and see it under Providers
+//  1b. connect ServiceNow with creation off, and see its column under Fields
 //   2. draft a definition of done with the assistant, edit it, and certify it
-//   3. a certified task that changes upstream leaves ready
-//   4. only ready tasks can be selected; the send menu lists only agents you operate, with harness marks
+//   3. a certified work item that changes upstream leaves ready
+//   4. only ready work items can be selected; the send menu lists only agents you operate, with harness marks
 //   5. the work order merges every definition of done, drafts a prompt, resolves @ mentions, and will not
-//      send until the repositories are confirmed; sending tags the tasks and opens the work order
+//      send until the repositories are confirmed; sending tags the work items and opens the work order
 //   6. a workflow chains stages and ends with a person; the builder drafts stages from a sentence
 //   7. labels carry a colour and a mapping, a resolution can be created in a provider, and a claimed work
 //      order can be accepted
-//   8. the task and the work order each copy a prompt that names the other
+//   8. the work item and the work order each copy a prompt that names the other
 // Every assertion names a string the surface is supposed to render, never a value read back out of
 // the control under test.
 import { mkdirSync } from "node:fs";
@@ -32,7 +33,8 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const FILE = "file://" + path.join(root, "mockups/missioncontrol.html");
 const shots = process.argv.includes("--shots") ? path.join(root, ".claude/shots/tasks") : null;
 if (shots) mkdirSync(shots, { recursive: true });
-const H = "#/a-intel/core-platform/tasks";
+const H = "#/a-intel/core-platform/work";
+const INTAKE = H + "?intake=";
 
 const browser = await launchChromium(root);
 let fails = 0, passes = 0;
@@ -55,12 +57,12 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
 
 /* 1. connecting Jira */
 {
-  const { page, errs } = await open(H + "/providers");
-  let t = await text(page);
+  const { page, errs } = await open(INTAKE + "providers");
+  let t = await dlgText(page);
   ok(/GitHub/.test(t) && /Linear/.test(t), "providers: GitHub and Linear are connected");
   ok(/Jira/.test(t) && /Connect/.test(t), "providers: Jira is offered");
   ok((await page.locator(".ipl svg").count()) >= 3, "providers: every provider shows its logo as an SVG");
-  await page.click("text=Connect an issue provider");
+  await page.click("#layer .dlg-f >> text=Connect an issue provider");
   let d = await dlgText(page);
   ok(/Provider Authorize Scope Fields People Review/.test(d.replace(/[0-9]/g, "").replace(/\s+/g, " ")) || (await page.locator(".wz-st").count()) === 6, "wizard: six steps");
   ok((await page.locator(".ipz-card").count()) === 6, "wizard: six providers to choose from");
@@ -106,20 +108,20 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/1 to create in Jira/.test(d) && /create_provider_value/.test(d), "wizard: review names the value it creates");
   await footBtn(page, "Connect Jira").click();
   await page.waitForTimeout(200);
-  t = await text(page);
-  ok(/a-intel\.atlassian\.net/.test(t) && /Jira Cloud site/.test(t), "providers: Jira is connected after the wizard");
-  await page.click("text=People");
-  await page.fill(".lt-q", "Jira");
+  t = await dlgText(page);
+  ok(/a-intel\.atlassian\.net/.test(t) && /Jira Cloud site/.test(t), "providers: Jira is connected after the wizard, back in Intake");
+  await page.click("#layer .stg-seg >> text=People");
+  await page.fill("#layer .lt-q", "Jira");
   await page.waitForTimeout(100);
-  t = await text(page);
+  t = await dlgText(page);
   ok(/Automation for Jira/.test(t) && /not mapped/.test(t), "people: the new accounts are listed, one not mapped");
   await done(page, errs, "connect");
 }
 
 /* 1b. connecting a help desk */
 {
-  const { page, errs } = await open(H + "/providers");
-  await page.click("text=Connect an issue provider");
+  const { page, errs } = await open(INTAKE + "providers");
+  await page.click("#layer .dlg-f >> text=Connect an issue provider");
   await page.click(".ipz-card >> text=ServiceNow");
   await footBtn(page, "Next").click();
   let d = await dlgText(page);
@@ -142,23 +144,23 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await footBtn(page, "Next").click();
   await footBtn(page, "Connect ServiceNow").click();
   await page.waitForTimeout(200);
-  ok(/a-intel\.service-now\.com/.test(await text(page)) && /ServiceNow instance/.test(await text(page)), "providers: ServiceNow is connected after the wizard");
-  await page.click("text=Fields");
+  ok(/a-intel\.service-now\.com/.test(await dlgText(page)) && /ServiceNow instance/.test(await dlgText(page)), "providers: ServiceNow is connected after the wizard");
+  await page.click("#layer .stg-seg >> text=Fields");
   await page.waitForTimeout(100);
-  ok(/close code Solution provided/.test(await text(page)), "fields: a connected help desk gets its own column");
+  ok(/close code Solution provided/.test(await dlgText(page)), "fields: a connected help desk gets its own column");
   await done(page, errs, "help desk");
 }
 
 /* 2. drafting and certifying a definition of done */
 {
-  const { page, errs } = await open(H + "/tsk_01K6SA3G9Z");
+  const { page, errs } = await open(H + "/items/tsk_01K6SA3G9Z");
   let t = await text(page);
-  ok(/oxagen\.assistant is reading the task/.test(t), "draft: a new task is being drafted");
+  ok(/oxagen\.assistant is reading the work item/.test(t), "draft: a new work item is being drafted");
   await page.click("text=Draft it now");
   await page.waitForTimeout(1200);
   t = await text(page);
-  ok(/A draft\. Certify it to make this task ready/.test(t), "draft: the draft lands");
-  ok(/one row per agent/.test((await page.locator(".dod-in").evaluateAll(xs => xs.map(x => x.value).join(" ")))), "draft: items from the task are drafted");
+  ok(/A draft\. Certify it to make this work item ready/.test(t), "draft: the draft lands");
+  ok(/one row per agent/.test((await page.locator(".dod-in").evaluateAll(xs => xs.map(x => x.value).join(" ")))), "draft: items from the work item are drafted");
   await page.fill("#dodNew", "The export runs as a governed action");
   await page.click("text=Add item");
   ok((await page.locator(".dod-in").count()) >= 6, "draft: a person adds an item");
@@ -170,15 +172,15 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await page.check("#certOk");
   await footBtn(page, "Certify").click();
   t = await text(page);
-  ok(/Certified by Marcus Bell/.test(t), "certify: the task is certified");
-  ok(/ready/.test(await text(page, ".phead")) || /Create work order and send to agent/.test(t), "certify: the task can be sent");
+  ok(/Certified by Marcus Bell/.test(t), "certify: the work item is certified");
+  ok(/ready/.test(await text(page, ".phead")) || /Create work order and send to agent/.test(t), "certify: the work item can be sent");
   await shot(page, "03-certified");
   await done(page, errs, "certify");
 }
 
 /* 3. changed since certification */
 {
-  const { page, errs } = await open(H + "/tsk_01K6SC1Y5M");
+  const { page, errs } = await open(H + "/items/tsk_01K6SC1Y5M");
   const t = await text(page);
   ok(/The description changed after certification/.test(t), "changed: says why it left ready");
   ok(/Certified against/.test(t) && /Now/.test(t), "changed: shows both versions");
@@ -195,7 +197,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await page.click('input[aria-label="Select PLAT-231"]');
   await page.click("#dspBtn");
   const menu = await text(page, ".dsp-menu");
-  ok(/Send 2 tasks to/.test(menu), "send: the menu counts the selection");
+  ok(/Send 2 work items to/.test(menu), "send: the menu counts the selection");
   ok(/Bug fixer/.test(menu) && /Claude Code/.test(menu) && /Documenter/.test(menu) && /Cursor/.test(menu), "send: agents with their harness");
   ok(!/Docs writer/.test(menu), "send: an agent somebody else operates is not offered");
   ok((await page.locator(".dsp-menu .hx svg").count()) >= 4, "send: each agent carries its harness mark");
@@ -203,12 +205,12 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await shot(page, "04-menu");
   await page.click(".dsp-i >> nth=0");
   let d = await dlgText(page);
-  ok(/2 tasks to Bug fixer/.test(await text(page, "#layer .dlg-h")), "work order: names the tasks and the agent");
-  ok(/8 items from 2 tasks/.test(d), "work order: merges both definitions of done");
-  ok(/#612/.test(d) && /PLAT-231/.test(d), "work order: tags each item with its task");
+  ok(/2 work items to Bug fixer/.test(await text(page, "#layer .dlg-h")), "work order: names the work items and the agent");
+  ok(/8 items from 2 work items/.test(d), "work order: merges both definitions of done");
+  ok(/#612/.test(d) && /PLAT-231/.test(d), "work order: tags each item with its work item");
   const prompt = await page.inputValue("#woPrompt");
   ok(/Definition of done/.test(prompt) && /claim_dod_item/.test(prompt), "work order: drafts a prompt with the items and the claim tool");
-  ok(/ctx\.release\.never-merge/.test(await text(page, "#woRefs")), "work order: the drafted mention resolves to a context record");
+  ok(/ctx\.release\.never-merge/.test(await text(page, "#woRefs")), "work order: the drafted mention resolves to a Steering record");
   await page.click("#woPrompt");
   await page.keyboard.press("Control+End");
   await page.keyboard.type("\nHand review questions to @valid");
@@ -218,7 +220,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/Validator/.test(await text(page, "#woRefs")), "mention: the profile appears in References");
   await page.keyboard.type("and follow @ctx.platform.retry");
   await page.keyboard.press("Enter");
-  ok(/ctx\.platform\.retry-budget/.test(await text(page, "#woRefs")), "mention: context records are mentionable too");
+  ok(/ctx\.platform\.retry-budget/.test(await text(page, "#woRefs")), "mention: Steering records are mentionable too");
   ok(/outside Bug fixer/.test(await dlgText(page)), "repositories: one outside the agent's toolbelt is refused");
   ok(await page.locator("#woSend").isDisabled(), "send: waits for the repositories to be confirmed");
   await page.check("#woOk");
@@ -230,9 +232,9 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/Sent by Marcus Bell/.test(t) && /Bug fixer/.test(t), "sent: the work order page opens");
   ok(/0 \/ 8/.test(t), "sent: nothing is claimed yet");
   ok(/Hand review questions to @a-intel\.core\.validator/.test(t), "sent: the prompt is kept as sent");
-  await page.goto(FILE + "?product=1&state=loaded&mobile=0" + H + "/tsk_01K6S2M4QF");
+  await page.goto(FILE + "?product=1&state=loaded&mobile=0" + H + "/items/tsk_01K6S2M4QF");
   await page.waitForTimeout(200);
-  ok(/in a work order/.test(await text(page)), "sent: the task is tagged to the work order");
+  ok(/in a work order/.test(await text(page)), "sent: the work item is tagged to the work order");
   await done(page, errs, "work order");
 }
 
@@ -261,27 +263,27 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
 
 /* 7. labels and acceptance */
 {
-  const { page, errs } = await open(H + "/fields");
-  const t = await text(page);
+  const { page, errs } = await open(INTAKE + "fields");
+  const t = await dlgText(page);
   ok(/P0/.test(t) && /P3/.test(t) && /New Feature/.test(t) && /Documentation/.test(t) && /Chore/.test(t), "fields: the default labels ship");
   ok((await page.locator("td b", { hasText: /^Done$/ }).count()) >= 1 && /Won't do/.test(t) && /Duplicate/.test(t) && /Cancelled/.test(t) && /Other/.test(t), "fields: the default resolutions ship");
   ok(!/Won't fix|\bFixed\b/.test(t.replace(/Done, Fixed|Won't Do, Won't Fix/g, "")), "fields: no resolution is named Fixed or Won't fix");
   ok(/Open/.test(t) && /Blocked/.test(t) && /Closed/.test(t), "fields: the three status categories");
-  await page.click("text=New Feature >> nth=0");
+  await page.click("#layer .dlg >> text=New Feature >> nth=0");
   const d = await dlgText(page);
   ok(/A label will carry definition-of-done items/.test(d), "label: says labels will carry definition-of-done items");
   await page.click('button[aria-label="Colour #9D8BE3"]');
   await footBtn(page, "Save label").click();
-  ok(/#9D8BE3/.test(await text(page)), "label: the colour is saved");
-  await page.locator("td b", { hasText: /^Won't do$/ }).click();
+  ok(/#9D8BE3/.test(await dlgText(page)), "label: the colour is saved, back in Intake");
+  await page.locator("#layer td b", { hasText: /^Won't do$/ }).click();
   let r = await dlgText(page);
   ok(/Creating one needs write/.test(r), "resolution: Linear without the write scope says what creating needs");
   await page.click("#layer .dlg >> text=Create in GitHub");
   await footBtn(page, "Save resolution").click();
   ok(/create_provider_value for GitHub/.test(await text(page, "#toast")), "resolution: saving creates the value in GitHub");
-  ok(/label Won't do/.test(await text(page)), "resolution: the GitHub mapping names the label Oxagen creates");
+  ok(/label Won't do/.test(await dlgText(page)), "resolution: the GitHub mapping names the label Oxagen creates");
   await page.close();
-  const w = await open(H + "/work-orders/wo_01K6TA2M");
+  const w = await open(H + "/orders/wo_01K6TA2M");
   ok(!(await w.page.locator(".phead button", { hasText: "Accept the work" }).isDisabled()), "accept: enabled when every item is claimed");
   await w.page.click(".phead >> text=Accept the work");
   await footBtn(w.page, "Accept every item").click();
@@ -297,33 +299,33 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: t => { window.__copied = t; return Promise.resolve(); } } });
   });
   const copied = page => page.evaluate(() => window.__copied || "");
-  const w = await open(H + "/work-orders/wo_01K6T9QX");
+  const w = await open(H + "/orders/wo_01K6T9QX");
   await grab(w.page);
-  await w.page.click(".phead >> text=Copy prompt");
+  await w.page.click(".phead >> text=Copy brief");
   await w.page.waitForTimeout(100);
   let c = await copied(w.page);
-  ok(/You have a work order from Marcus Bell/.test(c) && /claim_dod_item/.test(c), "copy: the work order copies the prompt as sent");
+  ok(/You have a work order from Marcus Bell/.test(c) && /claim_dod_item/.test(c), "copy: the work order copies the brief as sent");
   ok(/Work order wo_01K6T9QX: Same-minute migration stamps/.test(c) && /sha256:ab41c7e09f3d2865/.test(c), "copy: the work order names itself and its digest");
-  ok(/Task a-intel\/platform#587/.test(c) && /tsk_01K6SF2W6Q: https:\/\/app\.oxagen\.sh\/a-intel\/core-platform\/tasks\/tsk_01K6SF2W6Q/.test(c), "copy: the work order links its task");
-  ok(/Prompt copied, with 1 task\./.test(await text(w.page, "#toast")), "copy: the work order toast counts the tasks");
+  ok(/Work item a-intel\/platform#587/.test(c) && /tsk_01K6SF2W6Q: https:\/\/app\.oxagen\.sh\/a-intel\/core-platform\/work\/items\/tsk_01K6SF2W6Q/.test(c), "copy: the work order links its work item");
+  ok(/Brief copied, with 1 work item\./.test(await text(w.page, "#toast")), "copy: the work order toast counts the work items");
   await done(w.page, w.errs, "copy work order");
-  const t = await open(H + "/tsk_01K6SF2W6Q");
+  const t = await open(H + "/items/tsk_01K6SF2W6Q");
   await grab(t.page);
   await t.page.click(".phead >> text=Copy prompt");
   await t.page.waitForTimeout(100);
   c = await copied(t.page);
-  ok(/Task a-intel\/platform#587/.test(c) && /https:\/\/github\.com\/a-intel\/platform\/issues\/587/.test(c), "copy: the task names its issue");
-  ok(/Certified by Marcus Bell/.test(c) && /\[test\] A test covers a same-minute pair/.test(c), "copy: the task carries its certified definition of done");
-  ok(/wo_01K6T9QX: Same-minute migration stamps/.test(c) && /tasks\/work-orders\/wo_01K6T9QX/.test(c), "copy: the task links its work order");
-  ok(/Prompt copied, with 1 work order\./.test(await text(t.page, "#toast")), "copy: the task toast counts the work orders");
+  ok(/Work item a-intel\/platform#587/.test(c) && /https:\/\/github\.com\/a-intel\/platform\/issues\/587/.test(c), "copy: the work item names its issue");
+  ok(/Certified by Marcus Bell/.test(c) && /\[test\] A test covers a same-minute pair/.test(c), "copy: the work item carries its certified definition of done");
+  ok(/wo_01K6T9QX: Same-minute migration stamps/.test(c) && /work\/orders\/wo_01K6T9QX/.test(c), "copy: the work item links its work order");
+  ok(/Prompt copied, with 1 work order\./.test(await text(t.page, "#toast")), "copy: the work item toast counts the work orders");
   await t.page.close();
-  const d = await open(H + "/tsk_01K6S7C5PA");
+  const d = await open(H + "/items/tsk_01K6S7C5PA");
   await grab(d.page);
   await d.page.click(".phead >> text=Copy prompt");
   await d.page.waitForTimeout(100);
   c = await copied(d.page);
   ok(/A draft\. Nobody has certified it\./.test(c) && !/Certified by/.test(c), "copy: a draft is not called certified");
-  ok(/No work order carries this task/.test(c), "copy: a task in no work order says so");
+  ok(/No work order carries this work item/.test(c), "copy: a work item in no work order says so");
   await done(d.page, [...t.errs, ...d.errs], "copy task");
 }
 

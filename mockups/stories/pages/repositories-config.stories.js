@@ -4,10 +4,10 @@ import { view, argTypes } from "../_view.js";
 const spec = "";
 
 export default {
-  title: "Oxagen/Workspace/Tasks · Work orders",
+  title: "Oxagen/Repositories/Configuration",
   tags: ["autodocs"],
   argTypes,
-  args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/tasks/work-orders" },
+  args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/repositories/config" },
   parameters: { docs: { description: { component: spec } } },
   render: view,
 };

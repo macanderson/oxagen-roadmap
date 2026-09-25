@@ -82,7 +82,7 @@ function pWork(r){
   var sel=Object.keys(S.tsel).filter(function(k){return S.tsel[k];});
   var acts=t==="backlog"?'<button class="btn" onclick="openDialog(\'intake\',\'providers\')">Intake</button>'+dispatchButton(sel)
     :t==="workflows"?'<button class="btn primary" onclick="wfzOpen()">New workflow</button>':'';
-  var body=t==="orders"?workOrdersTab(fr):t==="workflows"?tkWfTab():t==="findings"?findingsTab():backlogTab();
+  var body=t==="orders"?workOrdersTab(fr):t==="workflows"?'<div'+fut("workflows")+'>'+tkWfTab()+'</div>':t==="findings"?findingsTab():backlogTab();
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Work</h1>'+
    '<p>What the agents work on, and what waits on you.</p></div><div class="acts">'+acts+'</div></div>'+
    obFirstBanners(w,fr)+(fr?obOfferCard(fr):'')+tabs+body;
@@ -666,7 +666,8 @@ function steeringSources(wslug){
   function add(o){ o.emitN=Object.keys(o.emits).reduce(function(s,k){return s+o.emits[k];},0); o.reach=reachOf(o); out.push(o); }
   if(wslug==="core-platform"){
     var seen={};
-    RECORDS.forEach(function(r){
+    /* newest publication first, so a record merged a moment ago leads the list */
+    RECORDS.slice().sort(function(x,y){return String(y.pub||"")<String(x.pub||"")?-1:String(y.pub||"")>String(x.pub||"")?1:0;}).forEach(function(r){
       seen[r.id]=1; var on=r.status==="published";
       add({g:"record",kind:"record",id:r.id,title:r.st,path:".oxagen/rules/"+r.id+".toml",emits:on?one(recType(r.kind,r.force)):{},force:r.force,
         scope:stgScope(r),repo:r.repo||(stgScope(r)==="repository"?main:null),agent:r.agent,version:r.commit||"",hash:r.hash||"",status:on?"published":"archived",pend:!!S.recPending[r.id],
@@ -686,7 +687,8 @@ function steeringSources(wslug){
       var B=(SOURCES.bundles||{})[s.id], em={procedure:1}, ok=s.state==="ok";
       if(B){ if(B.references.length) em.context=B.references.length; if(B.entrypoints.length) em.capability=B.entrypoints.length; }
       add({g:"skill",kind:"skill",id:s.id,title:s.st,path:s.path.replace(/SKILL\.md$/,""),emits:ok?em:{},scope:"workspace",version:s.ver,hash:s.digest,
-        status:ok?"approved":s.state==="scope"?"out of scope":"unapproved",why:ok?"":s.state==="scope"?"scoped to another workspace":"no person approved its digest",
+        status:s.retiring?"retiring":ok?"approved":s.state==="scope"?"out of scope":"unapproved",why:ok?"":s.state==="scope"?"scoped to another workspace":"no person approved its digest",
+        pend:!!s.retiring,
         href:srcUrl("skill",s.id,wslug),home:"Steering"});});
     (SOURCES.withheld||[]).forEach(function(x){
       add({g:"skill",kind:"skill",id:x.id,title:x.why,path:".oxagen/skills/"+x.id.split(".").pop()+"/",emits:{},scope:"workspace",version:x.ver,hash:"",
@@ -702,15 +704,16 @@ function steeringSources(wslug){
   stgOntology(wslug).forEach(function(x){
     var at=String(x.provenance||"").split(" @ ");
     add({g:"glossary",kind:"glossary",id:x.id,title:(x.term?x.term+": ":"")+x.body,path:at[0],emits:{context:1},force:x.force,scope:stgScope(x),
-      version:at[1]||x.valid_from||"",hash:x.hash||"",status:"published",href:srcUrl("glossary",x.id,wslug),home:"Steering"});});
+      version:at[1]||x.valid_from||"",hash:x.hash||"",status:x.retiring?"retiring":x.valid_from==="pending the merge"?"pending merge":"published",
+      href:srcUrl("glossary",x.id,wslug),home:"Steering"});});
   stgMemory(wslug).forEach(function(x){
     add({g:"memory",kind:"memory",id:x.id,title:x.body,path:x.provenance,emits:{context:1},force:x.force,scope:stgScope(x),agent:x.agent,
       version:x.valid_from||"",hash:x.hash||"",status:x.yieldsTo?"yields":"recorded",why:x.yieldsTo?"yields to "+x.yieldsTo:"",
       href:srcUrl("memory",x.id,wslug),home:"Steering"});});
   stgGates(wslug).forEach(function(x){
+    var ed=gateHome(x,wslug);
     add({g:"policy",kind:"policy",id:x.id,title:x.body,path:x.source||"",emits:{constraint:1},force:x.force,scope:stgScope(x),repo:x.repo,agent:x.agent,
-      agentsList:x.agents||null,version:String(x.source||"").split(" · ")[0],hash:x.hash||"",status:"in force",
-      href:"#/"+ORG.slug+"/"+wslug+"/tools/policy",home:"Tools › Policy"});});
+      agentsList:x.agents||null,version:String(x.source||"").split(" · ")[0],hash:x.hash||"",status:"in force",href:ed[1],home:ed[0]});});
   MANDATES.filter(function(m){var a=agent(m.agent);return a&&a.ws===wslug;}).forEach(function(m){
     var a=agent(m.agent), slug=defSlug(a), on=m.status==="active";
     add({g:"mandate",kind:"mandate",id:m.id,title:m.purpose,path:"granted by "+m.by,emits:on?{delegation:1}:{},scope:"agent",agent:slug,
@@ -723,12 +726,23 @@ function steeringSources(wslug){
       agentsList:who,version:"updated "+String(b.updated).slice(0,10),hash:"",status:"in force",href:"#/"+ORG.slug+"/"+wslug+"/tools/toolbelts",home:"Tools › Toolbelts"});});
   return out;
 }
+/* A gate notice is managed where its gate is edited: the policy, a kill switch, the record whose grant
+   compiled it, or the agent's Permissions for a mandate. */
+function gateHome(x,wslug){
+  var b="#/"+ORG.slug+"/"+wslug;
+  if(x.edit==="tools/switches") return ["Tools › Kill switches",b+"/tools/switches"];
+  if(x.edit==="record"){ var id=String(x.source||"").split(" · ")[0]; return ["Steering record",srcUrl("record",id,wslug)]; }
+  if(x.edit==="mandate"){ var m=MANDATES.filter(function(y){return y.id===x.source;})[0], a=m&&agent(m.agent);
+    return ["Agent › Permissions",a?"#/"+ORG.slug+"/"+a.ws+"/agents/"+defSlug(a)+"/permissions?delegation="+encodeURIComponent(m.id):b+"/agents"]; }
+  if(x.edit==="agents") return ["Agents",b+"/agents"];
+  return ["Tools › Policy",b+"/tools/policy"];
+}
 function emitsCell(o){
   if(!o.emitN) return '<span class="dim">nothing</span>'+(o.why?'<div class="dim" style="font-size:11px">'+h(o.why)+'</div>':'');
   return '<div class="ft-strip" style="margin:0;gap:5px">'+FT.map(function(x){var n=o.emits[x.id];
     return n?'<span class="ft-n">'+ftBadge(x.id)+(n>1?'<b>'+n+'</b>':'')+'</span>':'';}).join("")+'</div>';
 }
-var SRC_ST={published:"b-allowed",approved:"b-allowed","in force":"b-allowed",accepted:"b-allowed",registered:"b-allowed",active:"b-allowed",
+var SRC_ST={published:"b-allowed",approved:"b-allowed","in force":"b-allowed",retiring:"b-approval","pending merge":"b-approval",accepted:"b-allowed",registered:"b-allowed",active:"b-allowed",
   recorded:"b-q",yields:"b-q",archived:"b-q",superseded:"b-q",withheld:"b-denied",unapproved:"b-denied","out of scope":"b-q",expired:"b-q",revoked:"b-q"};
 function srcStatus(o){ return '<span class="b '+(SRC_ST[o.status]||"b-q")+'"><span class="d"></span>'+h(o.status)+'</span>'+(o.pend?' <span class="b b-approval">pull request open</span>':''); }
 function scopeCell(o){
@@ -747,7 +761,7 @@ function stgSourcesTab(w){
     return '<tr class="click" onclick="go(\''+o.href+'\')"'+(o.future?fut(o.future):'')+'>'+
      '<td data-v="'+h(o.id)+'" style="max-width:46ch"><span class="dim" style="font-size:11px">'+h((SRC_KIND[o.kind]||{l:o.kind}).l)+'</span>'+
        '<div class="src-t">'+h(o.title)+'</div><a class="mono sub" href="'+o.href+'" onclick="event.stopPropagation()">'+h(o.id)+'</a></td>'+
-     '<td>'+emitsCell(o)+'</td>'+
+     '<td'+fut("frame types")+'>'+emitsCell(o)+'</td>'+
      '<td data-v="'+h(o.scope)+'">'+scopeCell(o)+'</td>'+
      '<td class="mono" style="font-size:11px;white-space:nowrap">'+h(shortHash(o.version))+(o.hash?'<div class="dim">#'+h(String(o.hash).replace(/^sha256:/,"").slice(0,8))+'</div>':'')+'</td>'+
      '<td data-v="'+h(o.status)+'">'+srcStatus(o)+'</td>'+
@@ -756,8 +770,8 @@ function stgSourcesTab(w){
   return chips+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+h(k?SRC_FILTERS.filter(function(x){return x[0]===k;})[0][1]:"All sources")+'</h3>'+
      '<p class="muted" style="margin:2px 0 0;font-size:12px">'+L.length+' source'+(L.length===1?'':'s')+(silent?', '+silent+' emitting nothing':'')+
-     '. Agents counts the agents in '+h(w.name)+' each source can reach by its scope.</p></div>'+strip+'</div>'+
-   '<div class="tw"><table><thead><tr><th>Source</th><th>Emits</th><th>Scope</th><th>Version</th><th>Status</th><th class="num">Agents</th><th>Managed in</th></tr></thead><tbody>'+
+     '. Agents counts the agents in '+h(w.name)+' each source can reach by its scope.</p></div><div'+fut("frame types")+'>'+strip+'</div></div>'+
+   '<div class="tw"><table><thead><tr><th>Source</th><th'+fut("frame types")+'>Emits</th><th>Scope</th><th>Version</th><th>Status</th><th class="num">Agents</th><th>Managed in</th></tr></thead><tbody>'+
    rows+'</tbody></table></div></div>';
 }
 
@@ -780,11 +794,11 @@ function stgAssignmentsTab(w){
     var label=key==="org"?"Organization":key==="workspace"?"Workspace "+h(w.name):/^repo:/.test(key)?'Repository <span class="mono">'+h(o.repo)+'</span>'
       :key==="agent"?'One agent each<div class="dim" style="font-size:11.5px">agent definitions, agent-scoped records and memory, mandates</div>'
       :'Named agents<div class="dim" style="font-size:11.5px">toolbelt assignments and kill switches that name agents</div>';
-    return '<tr><td>'+label+'</td><td class="num">'+g.L.length+'</td><td>'+typeCountStrip(typeCounts(g.L))+'</td><td class="num">'+n.toLocaleString()+'</td></tr>';}).join("");
+    return '<tr><td>'+label+'</td><td class="num">'+g.L.length+'</td><td'+fut("frame types")+'>'+typeCountStrip(typeCounts(g.L))+'</td><td class="num">'+n.toLocaleString()+'</td></tr>';}).join("");
   var agRows=A.map(function(a){
     var mine=all.filter(function(o){return o.reach(a);}), slug=defSlug(a), obs=a.tier==="observe";
     return '<tr><td>'+agentCard(a,{layout:"list",sub:"",sz:22})+'</td><td>'+tierBadge(a.tier)+(obs?'<div class="dim" style="font-size:11px">assembled, not delivered</div>':'')+'</td>'+
-     '<td class="num">'+mine.length+'</td><td>'+typeCountStrip(typeCounts(mine))+'</td>'+
+     '<td class="num">'+mine.length+'</td><td'+fut("frame types")+'>'+typeCountStrip(typeCounts(mine))+'</td>'+
      '<td><a href="#/'+ORG.slug+'/'+w.slug+'/steering/compiler/'+encodeURIComponent(slug)+'">Compiler</a></td></tr>';}).join("");
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>By scope</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">Frames each scope can emit, and the agents in '+h(w.name)+' it reaches. A narrower scope narrows a wider one and never widens it.</p></div></div>'+
@@ -1000,7 +1014,7 @@ function pItemSource(o){
     :o.g==="glossary"?'A term the way this workspace uses it. It changes by a pull request against '+h(w.main)+'.'
     :'Workspace settings. It reaches every agent in '+h(w.name)+' as a procedure at force <span class="mono">should</span>.';
   var acts=o.g==="memory"?'<button class="btn" onclick="openDialog(\'memforget\',\''+h(o.id)+'\')">Forget</button>'+
-      '<button class="btn primary" onclick="act(\'Proposal opened from '+h(o.id)+'. It steers nothing until its pull request merges.\',\'gold\');go(stgHash(\'proposals\'))">Propose as a Steering record</button>'
+      '<button class="btn primary" onclick="memPromote(\''+h(o.id)+'\')">Propose as a Steering record</button>'
     :o.g==="glossary"?'<button class="btn primary" onclick="openDialog(\'ontedit\',\''+h(o.id)+'\')">Propose a change</button>':'';
   var rec='<div class="panel"><div class="panel-h"><h3>Record</h3></div><div class="panel-b"><dl class="kv">'+
    '<dt>Kind</dt><dd>'+h(lab)+'</dd><dt>Where</dt><dd><span class="mono" style="font-size:12px">'+h(o.path)+'</span></dd>'+
@@ -1133,7 +1147,6 @@ function spendSide(by,key){
     '<button class="btn sm" onclick="spendKey(null)" aria-label="Close">Close</button></div>'+
     '<div class="panel-b"><dl class="kv">'+kv+'</dl>'+(foot?'<div style="margin-top:12px">'+foot+'</div>':'')+'</div></aside>';
 }
-function woById(id){ for(var i=0;i<WORKORDERS.length;i++){ if(WORKORDERS[i].id===id) return WORKORDERS[i]; } return null; }
 function spendOverview(){
   var by=S.spendBy||"work", key=S.spendKey, total=spendMonthTotal();
   var seg='<div class="kf stg-seg" role="group" aria-label="Group by"><span class="dim" style="font-size:12px;align-self:center;margin-right:4px">Group by</span>'+
@@ -1339,5 +1352,5 @@ DLG_EXT.intake=function(){
     return '<button class="btn sm" aria-pressed="'+(part===x[0])+'" onclick="intakePart(\''+x[0]+'\')">'+h(x[1])+'</button>';}).join("")+'</div>';
   return {t:"Intake",s:n+" issue provider"+(n===1?"":"s")+" connected to "+ws().name+". Each imported issue becomes a work item.",w:true,
    b:seg+(part==="fields"?tkFieldsTab():part==="people"?tkPeopleTab():tkProvTab()),
-   f:'<button class="btn primary" onclick="closeDialog()">Done</button>'};
+   f:'<button class="btn" onclick="ipzOpen()">Connect an issue provider</button><button class="btn primary" onclick="closeDialog()">Done</button>'};
 };

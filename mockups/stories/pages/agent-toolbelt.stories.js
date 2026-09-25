@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 const spec = "";
 
 export default {
-  title: "Oxagen/Workspace/Agent · Toolbelt",
+  title: "Oxagen/Agents/Toolbelt",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/agents/triage/toolbelt" },

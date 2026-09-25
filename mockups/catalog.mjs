@@ -14,59 +14,60 @@ export const ALL = ["loaded", "empty", "loading", "error", "denied"];
 const NO_EMPTY = ["loaded", "loading", "error", "denied"];
 
 export const PAGES = [
-  // workspace scope (spec Appendix F, pages 1–7)
-  { id: "fleet",             title: "Fleet",                       group: "Workspace",    hash: `#/${ORG}/core-platform`,                                  states: ALL },
-  { id: "run",               title: "Run",                         group: "Workspace",    hash: `#/${ORG}/core-platform/runs/run_01K5RS7M2E8FJ3QW`,         states: ALL },
-  // Tasks: work from the issue trackers, a definition of done per task, and the work orders that send it
-  { id: "tasks",             title: "Tasks",                       group: "Workspace",    hash: `#/${ORG}/core-platform/tasks`,                            states: ALL },
-  { id: "tasks-work-orders", title: "Tasks · Work orders",         group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/work-orders`,                states: ALL },
-  { id: "tasks-workflows",   title: "Tasks · Workflows",           group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/workflows`,                  states: ALL },
-  { id: "tasks-providers",   title: "Tasks · Providers",           group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/providers`,                  states: ALL },
-  { id: "tasks-fields",      title: "Tasks · Fields",              group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/fields`,                     states: ALL },
-  { id: "tasks-people",      title: "Tasks · People",              group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/people`,                     states: ALL },
-  { id: "task",              title: "Task",                        group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/tsk_01K6S7C5PA`,             states: NO_EMPTY },
-  { id: "work-order",        title: "Work order",                  group: "Workspace",    hash: `#/${ORG}/core-platform/tasks/work-orders/wo_01K6T9QX`,    states: NO_EMPTY },
-  { id: "agents",            title: "Agents",                      group: "Workspace",    hash: `#/${ORG}/core-platform/agents`,                           states: ALL },
-  { id: "agent",             title: "Agent",                       group: "Workspace",    hash: `#/${ORG}/core-platform/agents/triage`,                    states: ALL },
-  { id: "agent-toolbelt",    title: "Agent · Toolbelt",            group: "Workspace",    hash: `#/${ORG}/core-platform/agents/triage/toolbelt`,           states: NO_EMPTY },
-  { id: "agent-steering",    title: "Agent · Steering",            group: "Workspace",    hash: `#/${ORG}/core-platform/agents/triage/steering`,           states: NO_EMPTY },
-  { id: "agent-runtime",     title: "Agent · Runtime",             group: "Workspace",    hash: `#/${ORG}/core-platform/agents/triage/runtime`,            states: NO_EMPTY },
-  { id: "agent-permissions", title: "Agent · Permissions",         group: "Workspace",    hash: `#/${ORG}/core-platform/agents/triage/permissions`,        states: NO_EMPTY },
-  { id: "agent-activity",    title: "Agent · Activity",            group: "Workspace",    hash: `#/${ORG}/core-platform/agents/triage/activity`,           states: NO_EMPTY },
-  { id: "agent-source",      title: "Agent source",                group: "Workspace",    hash: `#/${ORG}/core-platform/agents/release-manager/source`,    states: NO_EMPTY },
-  { id: "mandate",           title: "Mandate",                     group: "Workspace",    hash: `#/${ORG}/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4`, states: ALL },
-  { id: "tools",             title: "Tools",                       group: "Workspace",    hash: `#/${ORG}/core-platform/tools`,                            states: ALL },
-  { id: "toolbelts",         title: "Tools · Toolbelts",           group: "Workspace",    hash: `#/${ORG}/core-platform/tools/toolbelts`,                  states: ALL },
-  { id: "providers",         title: "Tools · Providers",           group: "Workspace",    hash: `#/${ORG}/core-platform/tools/providers`,                  states: ALL },
-  // Steering is the hub: five tabs, each a URL segment (#/:org/:ws/steering/<tab>). The Library
-  // holds four shelves and each shelf keeps the URL it had, so every old link still lands. Skills
-  // is a shelf with its own page and its own three page ids.
-  { id: "steering",          title: "Steering · Library",          group: "Workspace",    hash: `#/${ORG}/core-platform/steering/library`,                 states: ALL },
-  { id: "steering-records",  title: "Steering · Library · Records",group: "Workspace",    hash: `#/${ORG}/core-platform/steering/records`,                 states: ALL },
-  { id: "steering-memory",   title: "Steering · Library · Memory", group: "Workspace",    hash: `#/${ORG}/core-platform/steering/memory`,                  states: ALL },
-  { id: "steering-ontology", title: "Steering · Library · Ontology",group: "Workspace",   hash: `#/${ORG}/core-platform/steering/ontology`,                states: ALL },
-  { id: "steering-assignments", title: "Steering · Assignments",   group: "Workspace",    hash: `#/${ORG}/core-platform/steering/assignments`,             states: ALL },
-  { id: "steering-gates",    title: "Steering · Gates",            group: "Workspace",    hash: `#/${ORG}/core-platform/steering/gates`,                   states: ALL },
-  { id: "steering-proposals",title: "Steering · Proposals",        group: "Workspace",    hash: `#/${ORG}/core-platform/steering/proposals`,               states: ALL },
-  { id: "steering-compiler", title: "Steering · Compiler",         group: "Workspace",    hash: `#/${ORG}/core-platform/steering/compiler/release-manager`,states: ALL },
-  { id: "runtimes",          title: "Runtimes",                    group: "Workspace",    hash: `#/${ORG}/core-platform/runtimes`,                         states: ALL },
-  { id: "runtime",           title: "Runtime",                     group: "Workspace",    hash: `#/${ORG}/core-platform/runtimes/mbell-mbp-16`,            states: NO_EMPTY },
-  { id: "repositories",      title: "Repositories",                group: "Workspace",    hash: `#/${ORG}/core-platform/repositories`,                     states: ALL },
-  { id: "record",            title: "Context record",              group: "Workspace",    hash: `#/${ORG}/core-platform/steering/records/ctx.release.never-merge`, states: NO_EMPTY },
-  { id: "spend",             title: "Spend",                       group: "Workspace",    hash: `#/${ORG}/core-platform/spend`,                            states: ALL },
-  // skills (W13), now the Skills tab of Steering: sync, resolution, the seat in the loop, reflection;
-  // the off-by-default gate; the interjected run. The old #/:org/:ws/skills… routes still resolve.
-  { id: "skills",            title: "Steering · Library · Skills", group: "Workspace",    hash: `#/${ORG}/core-platform/steering/skills`,                  states: ALL },
-  { id: "skills-off",        title: "Steering · Library · Skills · off (the default)", group: "Workspace", hash: `#/${ORG}/finops/steering/skills`,        states: ["loaded"] },
-  { id: "skill-source",      title: "Skill source",                group: "Workspace",    hash: `#/${ORG}/core-platform/steering/skills/a-intel.release-notes-from-prs/source`, states: NO_EMPTY },
-  { id: "run-interjection",  title: "Run · interjection",          group: "Workspace",    hash: `#/${ORG}/core-platform/runs/run_01K6QW3D5N7TYBA2`,        states: NO_EMPTY },
+  // The unique views of the fleet operations wedge (docs/fleet-operations-ia.md, Unique views). A view
+  // this change added or redesigned is designed loaded only; `future` marks a view with future-only
+  // fields, which gets a second story with ?future=1 outlining them. `drawer` opens a global drawer.
+  { id: "work-backlog",      title: "Backlog",                     group: "Work",         hash: `#/${ORG}/core-platform/work`,                             states: ["loaded"], future: true },
+  { id: "work-intake",       title: "Intake",                      group: "Work",         hash: `#/${ORG}/core-platform/work?intake=providers`,            states: ["loaded"] },
+  { id: "work-item",         title: "Work item",                   group: "Work",         hash: `#/${ORG}/core-platform/work/items/tsk_01K5RS482Q`,        states: ["loaded"], future: true },
+  { id: "work-orders",       title: "Work orders",                 group: "Work",         hash: `#/${ORG}/core-platform/work/orders`,                      states: ["loaded"], future: true },
+  { id: "work-order",        title: "Work order",                  group: "Work",         hash: `#/${ORG}/core-platform/work/orders/wo_01K5RS7M4N`,        states: ["loaded"], future: true },
+  { id: "work-workflows",    title: "Workflows",                   group: "Work",         hash: `#/${ORG}/core-platform/work/workflows`,                   states: ["loaded"], future: true },
+  { id: "work-findings",     title: "Findings",                    group: "Work",         hash: `#/${ORG}/core-platform/work/findings`,                    states: ["loaded"], future: true },
+  { id: "run",               title: "Decision trace",              group: "Runs",         hash: `#/${ORG}/core-platform/runs/run_01K5RS7M2E8FJ3QW`,         states: ["loaded"], future: true },
+  { id: "run-transcript",    title: "Transcript",                  group: "Runs",         hash: `#/${ORG}/core-platform/runs/run_01K5RS7M2E8FJ3QW/transcript`, states: ["loaded"] },
+  { id: "run-cost",          title: "Cost",                        group: "Runs",         hash: `#/${ORG}/core-platform/runs/run_01K5RS7M2E8FJ3QW/cost`,    states: ["loaded"] },
+  { id: "run-evidence",      title: "Evidence",                    group: "Runs",         hash: `#/${ORG}/core-platform/runs/run_01K5RS7M2E8FJ3QW/evidence`, states: ["loaded"], future: true },
+  { id: "run-interjection",  title: "Held for an answer",          group: "Runs",         hash: `#/${ORG}/core-platform/runs/run_01K6QW3D5N7TYBA2`,        states: NO_EMPTY },
+  { id: "agents",            title: "Agents",                      group: "Agents",       hash: `#/${ORG}/core-platform/agents`,                           states: ["loaded"] },
+  { id: "agent",             title: "Overview",                    group: "Agents",       hash: `#/${ORG}/core-platform/agents/triage`,                    states: ALL },
+  { id: "agent-identity",    title: "Identity",                    group: "Agents",       hash: `#/${ORG}/core-platform/agents/triage/identity`,           states: NO_EMPTY },
+  { id: "agent-steering",    title: "Steering",                    group: "Agents",       hash: `#/${ORG}/core-platform/agents/release-manager/steering`,  states: ["loaded"], future: true },
+  { id: "agent-toolbelt",    title: "Toolbelt",                    group: "Agents",       hash: `#/${ORG}/core-platform/agents/triage/toolbelt`,           states: NO_EMPTY },
+  { id: "agent-runtime",     title: "Runtime",                     group: "Agents",       hash: `#/${ORG}/core-platform/agents/triage/runtime`,            states: NO_EMPTY },
+  { id: "agent-permissions", title: "Permissions",                 group: "Agents",       hash: `#/${ORG}/finops/agents/invoice-bot/permissions`,          states: ["loaded"], future: true },
+  { id: "agent-activity",    title: "Activity",                    group: "Agents",       hash: `#/${ORG}/core-platform/agents/triage/activity`,           states: ["loaded"], future: true },
+  { id: "agent-source",      title: "Source",                      group: "Agents",       hash: `#/${ORG}/core-platform/agents/release-manager/source`,    states: ["loaded"] },
+  { id: "tools",             title: "Tools",                       group: "Tools",        hash: `#/${ORG}/core-platform/tools`,                            states: ALL },
+  { id: "tools-toolbelts",   title: "Toolbelts",                   group: "Tools",        hash: `#/${ORG}/core-platform/tools/toolbelts`,                  states: ALL },
+  { id: "tools-providers",   title: "Providers",                   group: "Tools",        hash: `#/${ORG}/core-platform/tools/providers`,                  states: ALL },
+  { id: "tools-policy",      title: "Policy",                      group: "Tools",        hash: `#/${ORG}/core-platform/tools/policy`,                     states: ALL },
+  { id: "tools-switches",    title: "Kill switches",               group: "Tools",        hash: `#/${ORG}/core-platform/tools/switches`,                   states: ALL },
+  { id: "steering",          title: "Sources",                     group: "Steering",     hash: `#/${ORG}/core-platform/steering`,                         states: ["loaded"], future: true },
+  { id: "steering-source",   title: "Steering record",             group: "Steering",     hash: `#/${ORG}/core-platform/steering/sources/record/ctx.release.notes-format`, states: ["loaded"], future: true },
+  { id: "steering-source-skill", title: "Skill",                   group: "Steering",     hash: `#/${ORG}/core-platform/steering/sources/skill/a-intel.release-notes-from-prs`, states: ["loaded"], future: true },
+  { id: "steering-assignments", title: "Assignments",              group: "Steering",     hash: `#/${ORG}/core-platform/steering/assignments`,             states: ["loaded"], future: true },
+  { id: "steering-compiler", title: "Compiler",                    group: "Steering",     hash: `#/${ORG}/core-platform/steering/compiler/release-manager`,states: ["loaded"], future: true },
+  { id: "steering-proposals",title: "Proposals",                   group: "Steering",     hash: `#/${ORG}/core-platform/steering/proposals`,               states: ["loaded"] },
+  { id: "steering-prs",      title: "Pull requests",               group: "Steering",     hash: `#/${ORG}/core-platform/steering/proposals/prs`,           states: ["loaded"] },
+  { id: "runtimes",          title: "Runtimes",                    group: "Runtimes",     hash: `#/${ORG}/core-platform/runtimes`,                         states: ALL },
+  { id: "runtime",           title: "Runtime",                     group: "Runtimes",     hash: `#/${ORG}/core-platform/runtimes/mbell-mbp-16`,            states: NO_EMPTY },
+  { id: "spend",             title: "Overview",                    group: "Spend",        hash: `#/${ORG}/core-platform/spend`,                            states: ["loaded"], future: true },
+  { id: "spend-budgets",     title: "Budgets",                     group: "Spend",        hash: `#/${ORG}/core-platform/spend/budgets`,                    states: ["loaded"] },
+  { id: "spend-optimization",title: "Optimization",                group: "Spend",        hash: `#/${ORG}/core-platform/spend/optimization`,               states: ["loaded"] },
+  { id: "repositories",      title: "Repositories",                group: "Repositories", hash: `#/${ORG}/core-platform/repositories`,                     states: ALL },
+  { id: "repositories-copies", title: "Working copies",            group: "Repositories", hash: `#/${ORG}/core-platform/repositories/copies`,              states: ALL },
+  { id: "repositories-changes", title: "Changes",                  group: "Repositories", hash: `#/${ORG}/core-platform/repositories/changes`,             states: ALL },
+  { id: "repositories-config", title: "Configuration",             group: "Repositories", hash: `#/${ORG}/core-platform/repositories/config`,              states: ALL },
+  { id: "approvals-drawer",  title: "Approvals",                   group: "Drawers",      hash: `#/${ORG}/core-platform/work`, drawer: "approvals",        states: ["loaded"] },
+  { id: "stella-drawer",     title: "Stella",                      group: "Drawers",      hash: `#/${ORG}/core-platform/runs/run_01K5RS7M2E8FJ3QW`, drawer: "stella", states: ["loaded"] },
   // organization scope (pages 8–10)
   { id: "organization",      title: "Organization",                group: "Organization", hash: `#/${ORG}`,                                                states: ALL },
   { id: "organization-api-keys", title: "Organization · API keys", group: "Organization", hash: `#/${ORG}/api-keys`,                                       states: ALL },
   { id: "organization-roles",    title: "Organization · Roles",    group: "Organization", hash: `#/${ORG}/roles`,                                          states: ALL },
   { id: "billing",           title: "Billing",                     group: "Organization", hash: `#/${ORG}/billing`,                                        states: ALL },
   { id: "audit",             title: "Audit",                       group: "Organization", hash: `#/${ORG}/audit`,                                          states: ALL },
-  // register an agent (the gate Fleet opens; three steps)
+  // register an agent (the gate Register agent opens on Agents; three steps)
   { id: "register-name",     title: "Register agent · Name",       group: "Register",     hash: `#/${ORG}/core-platform/register/name`,                    states: ["loaded", "loading", "denied"] },
   { id: "register-wrap",     title: "Register agent · Wrap",       group: "Register",     hash: `#/${ORG}/core-platform/register/wrap`,                    states: ["loaded", "loading", "denied"] },
   { id: "register-run",      title: "Register agent · First run",  group: "Register",     hash: `#/${ORG}/core-platform/register/run`,                     states: ["loaded", "loading", "error", "denied"] },
@@ -100,15 +101,18 @@ export const SCENARIOS = [
 export const STATE_WORD = { loaded: "loaded", empty: "empty", loading: "loading", error: "error", denied: "access denied" };
 
 // The URL of one view of the master file. `file` is the path or URL of missioncontrol.html.
+// `future` outlines every future-only field; `drawer` opens the Approvals or the Stella drawer.
 // The file opens as the product; `debug: true` adds ?debug=true, which brings back the mockup
 // chrome — the state bar, the scenario rail and the scenario nav item.
-export function mockupUrl(file, { product = true, debug = false, state = null, mobile = null, theme = null, hash = HOME } = {}) {
+export function mockupUrl(file, { product = true, debug = false, state = null, mobile = null, theme = null, future = false, drawer = null, hash = HOME } = {}) {
   const q = new URLSearchParams();
   if (debug) q.set("debug", "true");
   else if (product) q.set("product", "1");
   if (state) q.set("state", state);
   if (mobile != null) q.set("mobile", mobile ? "1" : "0");
   if (theme) q.set("theme", theme);
+  if (future) q.set("future", "1");
+  if (drawer) q.set("drawer", drawer);
   const qs = q.toString();
   return file + (qs ? "?" + qs : "") + (hash || "");
 }

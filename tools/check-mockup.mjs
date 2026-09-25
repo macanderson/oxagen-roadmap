@@ -4,7 +4,7 @@
 // from the mockup chrome, which only ?debug=true brings back; then walks every guided scenario step by step.
 //
 //   node tools/check-mockup.mjs                    # every page × state × shell, then every scenario
-//   node tools/check-mockup.mjs --only fleet       # one page id, or one scenario id
+//   node tools/check-mockup.mjs --only work-backlog # one page id, or one scenario id
 //   node tools/check-mockup.mjs --pages            # pages only
 //   node tools/check-mockup.mjs --scenarios        # scenarios only
 //   node tools/check-mockup.mjs --shots out/       # also write a screenshot per view
@@ -13,7 +13,7 @@
 // the Scenarios nav item and every piece of onboarding-demo copy are gone; S.state and S.mobile
 // are pinned to what the URL says; the state's own markup is on screen (the skeleton, the empty /
 // error / denied panel, or a loaded page with a heading and no state panel); a mobile shell page
-// has the thumb bar and never scrolls sideways. Then, on the loaded mobile fleet, the mobile
+// has the thumb bar and never scrolls sideways. Then, on the loaded mobile workspace root (Work), the mobile
 // shell's own guarantees: five thumb-bar slots at least 44 px tall in the bottom quarter, More
 // opening as a full-width bottom sheet with the rest of the app in it, the drawer over a scrim
 // that closes it, list tables as cards, every input 16 px or larger.
@@ -49,7 +49,7 @@ const MOBILE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, is
 const AUTH = /^(signup|verify-email|login|two-factor|forgot-password|reset-password|accept-invitation|installer)$/;
 const GATE = /^(onboarding-|register-)/;
 
-async function checkView(url, { state, mobile, shellPage, tag }) {
+async function checkView(url, { state, mobile, shellPage, drawer, future, tag }) {
   const page = await browser.newPage(mobile ? MOBILE : DESKTOP);
   const errors = [];
   page.on("pageerror", e => errors.push(String(e.message || e)));
@@ -72,6 +72,10 @@ async function checkView(url, { state, mobile, shellPage, tag }) {
       regErr: !!document.querySelector(".reg-err,.ob-err,.ob-state.deny"),
       spin: !!document.querySelector(".ob-spin,[aria-disabled='true'].primary"),
       h1: !!app && !!app.querySelector("h1,h2"),
+      apd: !!document.querySelector("#apdrawer.open"),
+      asst: !!document.querySelector("#asst.open"),
+      future: document.documentElement.classList.contains("show-future"),
+      futureN: document.querySelectorAll("#app [data-future]").length,
       text: t,
       scrollW: document.documentElement.scrollWidth, innerW: window.innerWidth,
       scen: !!document.querySelector(".scn"),
@@ -96,6 +100,9 @@ async function checkView(url, { state, mobile, shellPage, tag }) {
   if (state === "error") ok((r.stateWrap && /could not be loaded/.test(r.text)) || r.regErr, `${tag}: error panel`);
   if (state === "denied") ok((r.stateWrap && /You cannot see/.test(r.text)) || r.regErr, `${tag}: denied panel`);
   if (state === "loaded") ok(r.h1 && !r.stateWrap && !r.skeleton, `${tag}: loaded page with a heading and no state panel`);
+  if (drawer === "approvals") ok(r.apd, `${tag}: the Approvals drawer is open`);
+  if (drawer === "stella") ok(r.asst, `${tag}: the Stella drawer is open`);
+  if (future) ok(r.future && r.futureN > 0, `${tag}: future-only fields outlined (${r.futureN} marked)`);
   if (shots) await page.screenshot({ path: path.join(shots, tag.replace(/[^a-z0-9-]+/gi, "_") + ".png"), fullPage: false });
   await page.close();
 }
@@ -110,12 +117,16 @@ if (doPages) {
     if (only && only !== p.id) continue;
     const shellPage = !AUTH.test(p.id) && !GATE.test(p.id);
     for (const st of p.states) {
-      await checkView(mockupUrl(FILE, { state: st, mobile: false, hash: p.hash }), { state: st, mobile: false, shellPage, tag: `${p.id}-${st}` });
-      await checkView(mockupUrl(FILE, { state: st, mobile: true, hash: p.hash }), { state: st, mobile: true, shellPage, tag: `${p.id}-${st}-mobile` });
+      await checkView(mockupUrl(FILE, { state: st, mobile: false, hash: p.hash, drawer: p.drawer }), { state: st, mobile: false, shellPage, drawer: p.drawer, tag: `${p.id}-${st}` });
+      await checkView(mockupUrl(FILE, { state: st, mobile: true, hash: p.hash, drawer: p.drawer }), { state: st, mobile: true, shellPage, drawer: p.drawer, tag: `${p.id}-${st}-mobile` });
+    }
+    /* the future-only story: the same loaded view with every future-only field outlined and tagged */
+    if (p.future) {
+      await checkView(mockupUrl(FILE, { state: "loaded", mobile: false, hash: p.hash, future: true }), { state: "loaded", mobile: false, shellPage, future: true, tag: `${p.id}-loaded-future` });
     }
   }
 
-  if (!only || only === "fleet") {
+  if (!only || only === "work-backlog") {
     const page = await browser.newPage(MOBILE);
     const errors = [];
     page.on("pageerror", e => errors.push(String(e.message || e)));

@@ -4,19 +4,14 @@ import { view, argTypes } from "../_view.js";
 const spec = "";
 
 export default {
-  title: "Oxagen/Workspace/Agent · Steering",
+  title: "Oxagen/Agents/Steering",
   tags: ["autodocs"],
   argTypes,
-  args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/agents/triage/steering" },
+  args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/agents/release-manager/steering" },
   parameters: { docs: { description: { component: spec } } },
   render: view,
 };
 
 export const Loaded = { name: "Loaded", args: { state: "loaded" } };
-export const Loading = { name: "Loading", args: { state: "loading" } };
-export const Error = { name: "Error", args: { state: "error" } };
-export const AccessDenied = { name: "Access denied", args: { state: "denied" } };
 export const LoadedMobile = { name: "Loaded · mobile", args: { state: "loaded", shell: "mobile" } };
-export const LoadingMobile = { name: "Loading · mobile", args: { state: "loading", shell: "mobile" } };
-export const ErrorMobile = { name: "Error · mobile", args: { state: "error", shell: "mobile" } };
-export const AccessDeniedMobile = { name: "Access denied · mobile", args: { state: "denied", shell: "mobile" } };
+export const LoadedFuture = { name: "Loaded · future-only fields marked", args: { state: "loaded", future: true } };

@@ -32,7 +32,7 @@ for (const p of PAGES) {
     `  title: ${JSON.stringify(`${TITLE}/${p.group}/${p.title}`)},`,
     `  tags: ["autodocs"],`,
     `  argTypes,`,
-    `  args: { shell: "desktop", theme: "system", product: true, hash: ${JSON.stringify(p.hash)} },`,
+    `  args: { shell: "desktop", theme: "system", product: true, hash: ${JSON.stringify(p.hash)}${p.drawer ? `, drawer: ${JSON.stringify(p.drawer)}` : ""} },`,
     `  parameters: { docs: { description: { component: spec } } },`,
     `  render: view,`,
     `};`,
@@ -40,6 +40,8 @@ for (const p of PAGES) {
   const label = st => STATE_WORD[st][0].toUpperCase() + STATE_WORD[st].slice(1);
   for (const st of p.states) lines.push(`export const ${exportName(st)} = { name: ${JSON.stringify(label(st))}, args: { state: ${JSON.stringify(st)} } };`);
   for (const st of p.states) lines.push(`export const ${exportName(st)}Mobile = { name: ${JSON.stringify(label(st) + " · mobile")}, args: { state: ${JSON.stringify(st)}, shell: "mobile" } };`);
+  // A view with future-only fields gets one more story: loaded, with ?future=1 outlining each of them.
+  if (p.future) lines.push(`export const LoadedFuture = { name: "Loaded · future-only fields marked", args: { state: "loaded", future: true } };`);
   outs.set(`pages/${p.id}.stories.js`, lines.join("\n") + "\n");
 }
 

@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 const spec = "";
 
 export default {
-  title: "Oxagen/Workspace/Agent · Runtime",
+  title: "Oxagen/Agents/Runtime",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/agents/triage/runtime" },
