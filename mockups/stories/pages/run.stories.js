@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/run.md?raw";
 
 export default {
-  title: "Oxagen/Workspace/Run",
+  title: "Oxagen/Runs/Decision trace",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW" },
@@ -13,12 +13,5 @@ export default {
 };
 
 export const Loaded = { name: "Loaded", args: { state: "loaded" } };
-export const Empty = { name: "Empty", args: { state: "empty" } };
-export const Loading = { name: "Loading", args: { state: "loading" } };
-export const Error = { name: "Error", args: { state: "error" } };
-export const AccessDenied = { name: "Access denied", args: { state: "denied" } };
 export const LoadedMobile = { name: "Loaded · mobile", args: { state: "loaded", shell: "mobile" } };
-export const EmptyMobile = { name: "Empty · mobile", args: { state: "empty", shell: "mobile" } };
-export const LoadingMobile = { name: "Loading · mobile", args: { state: "loading", shell: "mobile" } };
-export const ErrorMobile = { name: "Error · mobile", args: { state: "error", shell: "mobile" } };
-export const AccessDeniedMobile = { name: "Access denied · mobile", args: { state: "denied", shell: "mobile" } };
+export const LoadedFuture = { name: "Loaded · future-only fields marked", args: { state: "loaded", future: true } };

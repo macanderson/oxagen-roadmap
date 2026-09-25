@@ -1,56 +1,55 @@
-# Audit prompt: Steering · Compiler
+# Audit prompt: Steering › Compiler
 
 Copy everything below the line into a fresh agent session. Fill the two placeholders. The agent
-audits the built page against this design and reports a verdict per check. It does not fix anything
+audits the built view against its design and reports a verdict per check. It does not fix anything
 unless told to in a second turn.
 
 ---
 
-You are auditing the **Steering · Compiler** tab of Oxagen (`#/a-intel/core-platform/steering/compiler[/<agent>]`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see. Compare it.
+You are auditing the **Steering › Compiler** view of Oxagen (`/{org}/{ws}/steering/compiler/{agent}`) for conformance to its design. Be exact and adversarial: the design is the spec, and "close enough" is a fail. Do not summarise what you see. Compare it.
 
 ## Inputs
 
-1. The page spec: `mockups/pages/steering-compiler.md`, and the hub it belongs to, `mockups/pages/steering.md` (read both first, in full).
-2. The design, rendered: the `steering-compiler` stories in Storybook (`npm run storybook`), one per state, desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>`. The checker is `node tools/check-mockup.mjs`.
-3. The decisions this tab renders: the story sheet of 2026-09-18, decisions 1, 5, 6, 8, 9, and 11; the product spec §12.6.
+1. The page spec: `mockups/pages/steering-compiler.md`. Read it first, in full. `steering.md` specifies the header, the tabs and the shell; `steering-source.md` and `steering-source-skill.md` the pages each frame's source links to.
+2. The design, rendered: the stories `Oxagen / Steering / Compiler` in Storybook (`npm run storybook`): Loaded, Loaded · mobile, and Loaded · future-only fields marked. Or `mockups/missioncontrol.html?product=1&state=loaded&mobile=<0|1>#/a-intel/core-platform/steering/compiler/release-manager`, with `&future=1` to outline the future-only fields. Try each brief chip and each agent, and `#/a-intel/finops/steering/compiler/invoice-bot` for a `delegation` frame.
+3. The design authority: `docs/fleet-operations-wedge.md` (D4, D5, D6, D11, D12; the Steering sections Frame types, Emissions, Provenance, Exclusion reasons and Shipped today, which says the Compiler is future-only until #3879), `docs/fleet-operations-ia.md` (Steering, Compiler) and ADR-093 §4 in `macanderson/oxagen`.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`.
 
 ## Procedure
 
-Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
+Work through every check. For each, record PASS, FAIL or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
 
-1. **Route and shell.** The build serves the route with and without the agent segment, and the old route `#/:org/:ws/steering/preview[/<agent>]` resolves to the same tab and agent. The workspace nav reads Fleet, Agents, Tools, Steering, Runtimes, Repositories, Spend, with Steering lit and no Skills entry (Skills is a shelf of the Library tab). The breadcrumb ends on Steering. The top bar has the Approvals button left of the avatar with the organization-wide waiting count; it opens the drawer `#apdrawer`, a selected row shows the approval card with Approve and Deny, and Escape closes it. No assistant button in the top bar.
-2. **Hub header, chip, and tabs.** Eyebrow is the workspace name, h1 “Steering”, the one-sentence subtext, the governance chip “Governance: <mode>”. Five tabs in this order: Library, Assignments, Gates, Proposals, Compiler, with counts and none on Compiler. This tab, Compiler, is selected. Each tab is a URL segment, and reloading the URL lands on the same tab and agent.
-3. **One gold action.** Write a context record in the hub header is the one gold action. The chip is not gold; no prompt chip is gold.
-4. **Sections and tables.** The build has each item below with the same headings and every column named, in that order.
-   - Controls: Agent select with “name · harness · tier” options and the tier line under it, Prompt textarea, six prompt chips with the copy the spec quotes.
-   - The delivery warning where the spec says it renders, verbatim.
-   - Two meters: stable prefix bytes of 16,384 with the split line, volatile tokens of the budget with the fit and cut counts.
-   - Three parts, each naming its injection point in its tally: SessionStart additional context capped at 16 KiB, UserPromptSubmit additional context with the budget, files in the checkout with the repository and sync state.
-   - Every row in the three parts and every cut carries the kind badge the Library table uses, never a grey “record · constraint” chip. The Kind filter lists the word on the badge.
-   - Manifest cuts with its badge: Item · Kind · Force · Token cost · Cut because · Why, with the four reasons and no others, and the Why copy per reason.
-   - The closing note, verbatim.
-5. **Token figures reconcile.** The prefix meter's tokens equal the compile header plus the gate notice rows plus the must and should rows. The volatile meter's tokens equal the sum of the volatile rows. The cut count in the meter, the badge, and the table are the same number. Bytes equal tokens times the bundle's bytes per token.
-6. **Actions.** Changing the agent changes the URL and the selection. Typing changes the selection without losing the caret. The same inputs give the same selection every time. Every item id links to where it is authored; a skill path opens the `skill` dialog.
-7. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows are wired to the named store; 🟡 rows are wired for the fields that exist and render `NotBacked` for the rest; ❌ rows render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
-8. **States.** Force each state and compare copy and controls with the design:
-   - **empty** (`state=empty`): the hub header, chip, and tabs stay; the body is “Nothing to compile yet” with its sentences and Write a context record.
-   - **loading** (`state=loading`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
-   - **error** (`state=error`): “Steering could not be loaded”, `503 record_index_unavailable`, Try again, Open an incident, and the trace line.
-   - **access denied** (`state=denied`): “You cannot see this workspace’s steering”, naming `steering.read on core-platform`, with Request access and Back to Fleet.
-9. **Trust language.** An agent with no hook shows that nothing is delivered, and the warning names the tier the agent is on. The model request is named as written at the proxy on the `gateway` and `contained` tiers, with the run's Context tab showing what it carried. No copy says an item is enforced. A gate notice is never among the cuts for budget. No verdict, proof, or witness vocabulary.
-10. **Plain nouns.** No heading on the built tab carries a comma, a mid-dot, or a not/never contrast; subtext is one sentence. Part eyebrows are “1 · Stable prefix”, “2 · Volatile selection”, “3 · Skills”.
-11. **Mobile.** At 390 × 844 with a touch pointer: the five tabs are one scrolling strip and the selected tab is in view; the controls and meters stack; the cut table renders as labelled cards; the page never scrolls sideways; tap targets are ≥ 44 px; inputs are 16 px; More is the lit thumb-bar slot, and its sheet lists Steering with its shelves inside, Runtimes, Repositories, Organization, Billing, and Audit.
-12. **Accessibility.** Tabs use `role=tablist/tab` with `aria-selected`; prompt chips use `aria-pressed`; meters carry `role=img` with a percent label; the select and textarea have labels; state is never colour alone; focus is visible; the tab is operable by keyboard end to end.
-13. **Permissions.** Read requires `steering.read`, checked server-side. There are no writes on this tab.
-14. **Nothing extra.** List anything on the built tab that is not in the spec. Each is a finding.
+1. **Route and shell.** The build serves `/steering/compiler/{agent}` and `/steering/compiler`, and `/steering/preview/{agent}` resolves to the Compiler for that agent. Compiler is selected; the header, the tabs and the shell match `steering.md`; the kind filter does not render.
+2. **Until #3879 ships.** If the build has no capability that runs the assembler without delivering, the Envelope and Exclusions render "not recorded" and name the gap. A build that fills them from fixtures, or from one run's manifest presented as a resolution, is a FAIL. Mark the checks that need the envelope N/A with this reason, and still run checks 1, 3, 12 to 17.
+3. **Controls.** The Agent select, labelled, with "<name> · <harness>" options, and the tier badge and repository under it; changing it writes `/steering/compiler/<slug>`. An agent the address names that has no standing brief still resolves, in every workspace. The Brief text area, labelled, with its placeholder and the line "Sends nothing. Nothing here reaches an agent." The six brief chips in a group, with `aria-pressed` on the one in use.
+4. **Sends nothing.** Typing, choosing a chip and changing the agent write no run, no frame, no record and no audit event. Check the network log: every request is a read.
+5. **Envelope.** The caption states the SteeringFrame count, the agent and the repository. The two meters read "<used> of <cap> tok" with their sub-lines. The type strip sums the frames by type. One block per injection point that carries frames, in the order Session start, Prompt, Prompt submit, Model request, Checkout files, Tool list, each with its description and "<n> frames · <tok> tok". Columns: Type, Frame, Source, Force and Tokens, in that order.
+6. **Rollups.** The caption's count equals the frames across the blocks. Each block's figures equal its rows. The session-start meter equals the compile header plus the Session start frames, and its cap is the budget the manifest records (2,000 tokens today, not a fixed 4,096). The volatile meter equals the Prompt submit frames. The exclusions' count equals its rows. A figure that disagrees with its rows is a FAIL; name both values.
+7. **Provenance on every frame.** Every Source cell names the kind, the id as a link, and the version with the frame's hash. Each link lands on the source at the version it names: a record, document, memory, glossary term or the instructions on its page, a skill on its skill page (never "No skill here"), an agent definition on the agent's Source tab, a gate notice where its gate is edited, a mandate on the agent's Delegation, a toolbelt on Tools › Toolbelts. Every frame the envelope attributes to a source appears on that source's page with the same id.
+8. **Exclusions.** The caption, the table (Type, Frame with the injection point under it, Source, Reason and Tokens), and every reason from the wedge spec's closed vocabulary with the numbers that decided it: the rank, relevance, cost and remainder for `over_budget`, the scope for `out_of_scope`, the rule for `overridden_by_gate`, the record for `overridden_by_must`, the newer version for `superseded`. A reason outside the vocabulary, or one without its numbers, is a FAIL.
+9. **Determinism.** Resolve the same agent and brief three times: the frames, their order, their ids and the exclusions are identical. Resolve "CI is green, merge the release pull request" for the release manager and confirm the memory `mem_01K5QX7C` is excluded as `overridden_by_must` by `ctx.release.never-merge`.
+10. **Type filter.** Pressing a type filters both sections to it, and "Show every type" clears it. Each button carries `aria-pressed`. Note whether the captions say the list is filtered.
+11. **Frame types, not kinds.** Every frame carries one of the eight types (`goal`, `invariant`, `constraint`, `delegation`, `procedure`, `context`, `invocation`, `capability`). A delegation frame appears for an agent with an active mandate. A harness's own tools are not frames. A tool the belt denies is excluded, not listed.
+12. **Data sources.** For each row of the spec's data-source table, find the adapter or query that feeds it. ✅ rows are wired to `list_agents` and its `enforcementTier`. 🟡 rows show what a run's manifest records and nothing more. ❌ rows render "not recorded" or are absent. A fixture reaching production is a FAIL.
+13. **Future-only fields.** With the design's `?future=1`, the Envelope section, each frame's hash and every reason badge beyond `tier`, `over_budget` and `superseded` are outlined. In the build each renders as the spec's "What a build shows today" says, and so does the unmarked Exclusions section, the briefs, the repository line and the volatile meter.
+14. **States.** Loaded only. Force `state=loading`, `error`, `empty` and `denied` and confirm the shell's standard panels replace the page body and keep the shell, with no zeros and no stale rows.
+15. **Mobile.** At 390 × 844 with a touch pointer: the thumb bar holds Work, Agents, Tools, Spend and More, with More lit; the tabs scroll sideways with Compiler in view; the controls and meters stack; the chips wrap; every frame table renders as labelled cards; the page never scrolls sideways; tap targets are at least 44 px; the Brief text area is 16 px and does not zoom.
+16. **Rules.**
+    - No model and no score take part in the resolution, and nothing on the view says one did.
+    - No heading carries a comma, a mid-dot, or a not/never contrast, and subtext under a heading is one sentence. Note where the design breaks this.
+    - Exactly one gold action: the header's New source. No chip, meter or type button is gold.
+    - Every enforcement claim names the tier and "routed through Oxagen".
+    - No person is scored or ranked.
+17. **Accessibility.** The select and text area have labels; the meters carry `role=img` with a percent label; the chip group and type buttons use `aria-pressed`; state is never colour alone; focus is visible; the view is operable by keyboard end to end, and typing keeps the caret.
+18. **Permissions.** The read is refused server-side without the Steering read. There are no writes on this view.
+19. **Nothing extra.** List anything on the built view that is not in the spec: a Run button, a send action, a delivery warning, a Preview label. Each is a finding.
 
 ## Output
 
 Return a single markdown report:
 
 ```
-# Steering · Compiler: audit {{DATE}}
+# Steering › Compiler: audit {{DATE}}
 Verdict: PASS | FAIL (n fails, m notes)
 
 | # | Check | Result | Evidence | Fix |
@@ -62,6 +61,9 @@ Verdict: PASS | FAIL (n fails, m notes)
 
 ## Not in the spec
 - …
+
+## Data sources not backed (expected not recorded, and whether the build renders it honestly)
+- …
 ```
 
-Rules: never mark PASS on an assumption. Open the file or the DOM. Quote the design’s copy verbatim when a label differs. If the build cannot be started or the route is missing, stop and report that as the single FAIL.
+Rules: never mark PASS on an assumption. Open the file or the DOM. Quote the design's copy verbatim when a label differs. If the build cannot be started or the route is missing, stop and report that as the single FAIL.

@@ -1,55 +1,53 @@
-# Audit prompt: Steering · Proposals
+# Audit prompt: Steering › Proposals
 
 Copy everything below the line into a fresh agent session. Fill the two placeholders. The agent
-audits the built page against this design and reports a verdict per check. It does not fix anything
+audits the built view against its design and reports a verdict per check. It does not fix anything
 unless told to in a second turn.
 
 ---
 
-You are auditing the **Steering · Proposals** tab of Oxagen (`#/a-intel/core-platform/steering/proposals[/prs]`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see. Compare it.
+You are auditing the **Steering › Proposals** view of Oxagen (`/{org}/{ws}/steering/proposals`) for conformance to its design: the list of proposals, one proposal's review, and the dialog that opens its pull request. Be exact and adversarial: the design is the spec, and "close enough" is a fail. Do not summarise what you see. Compare it.
 
 ## Inputs
 
-1. The page spec: `mockups/pages/steering-proposals.md`, and the hub it belongs to, `mockups/pages/steering.md` (read both first, in full).
-2. The design, rendered: the `steering-proposals` stories in Storybook (`npm run storybook`), one per state, desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>`. The checker is `node tools/check-mockup.mjs`; `tools/check-record-e2e.mjs` walks the pull request lifecycle.
-3. The decisions this tab renders: the story sheet of 2026-09-18, decisions 8, 9, and 13; the product spec §12.8.
+1. The page spec: `mockups/pages/steering-proposals.md`. Read it first, in full. `steering.md` specifies the header, the tabs and the shell; `steering-prs.md` the Pull requests view.
+2. The design, rendered: the stories `Oxagen / Steering / Proposals` in Storybook (`npm run storybook`): Loaded and Loaded · mobile. Or `mockups/missioncontrol.html?product=1&state=loaded&mobile=<0|1>#/a-intel/core-platform/steering/proposals`; press Review on each proposal. The scenario `#/a-intel/core-platform/scenarios/learned-approved-changed/2` shows the promoter's proposal before its pull request opens. Open `mem_01K5R0N2` from Sources (`?kind=memory`) or from a run's Memories tab and press Open the proposal to reach `prp_01K5RX1N`.
+3. The design authority: `docs/fleet-operations-wedge.md` (D7, D13; the vocabulary row Proposal; Shipped today), `docs/fleet-operations-ia.md` (Steering, Proposals) and ADR-061 in `macanderson/oxagen`.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`.
 
 ## Procedure
 
-Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
+Work through every check. For each, record PASS, FAIL or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
 
-1. **Route and shell.** The build serves the route and `/steering/prs` resolves to the Context PRs view. Steering is lit in the sidebar. There is no Skills nav entry. The breadcrumb ends on Steering. The top bar has the Approvals button left of the avatar with the organization-wide waiting count; it opens the drawer `#apdrawer`, a selected row shows the approval card with Approve and Deny, and Escape closes it. No assistant button in the top bar.
-2. **Hub header, chip, and tabs.** Eyebrow is the workspace name, h1 “Steering”, the one-sentence subtext, the governance chip “Governance: <mode>”. Five tabs in this order: Library, Assignments, Gates, Proposals, Compiler, with counts; Proposals counts candidates plus open pull requests. This tab is selected. Each tab is a URL segment, and reloading the URL lands on the same tab.
-3. **One gold action.** Exactly one gold action at a time: the header's, or Open a Context PR, or Merge pull request once every check passed. The chip is not gold. Import Markdown, in the hub header and in the Proposals panel header, is plain.
-4. **Sections and tables.** The build has each item below with the same headings and every column named, in that order.
-   - The Candidates and Context PRs control, with counts, each a URL, and the line under it.
-   - Candidates: the panel heading verbatim; record cards with kind, force, state badge, checks badge, Review, statement, source, support line, id, scope, lineage.
-   - A reviewed proposal: All proposals, the three tiles, Proposed record, Promoter evidence, Supporting runs with Run · Frame · Outcome · Record, Context PR with its four rows and action, If it publishes with its five rows.
-   - Context PRs: Context PRs with Pull request · Branch · Opened by · State (the CI status light with done / total beside the state badge: blinking blue while running, a red ✕ on the first failure, static green when all passed, static grey when queued); the selected pull request with its file, body, the six named checks with per-check result text, the merge bar, Merge pull request, Close pull request on an operator's, Merge effects or promotion_event.
-5. **Outcome, not verdict.** Every Supporting runs row carries one of kept, reverted, no change, halted as a dot and a word. The rows of `prp_01K5RX1N` read passed or failed instead: record that as a FAIL against this vocabulary until the spec or the build changes. No column, badge, or tile is labelled verdict, proven, or proof. The three tiles equal what the rows beneath them give: the row count, the distinct agents, and the promoter's confidence or “apply”.
-6. **Actions.** Review opens the proposal. Open a Context PR opens `ctxpr` with Concern, Kind, Scope, Constraint effect, and Supporting evidence. Merge is blocked until every check reports, re-runs every predicate, and publishes exactly once. Close pull request leaves nothing behind. A merged pull request cannot be closed. Write a context record ends on this tab with the new pull request selected. A Markdown import that opens pull requests ends here too, with the first one selected.
-7. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows are wired to the named store; 🟡 rows are wired for the fields that exist and render `NotBacked` for the rest; ❌ rows render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
-8. **States.** Force each state and compare copy and controls with the design:
-   - **empty** (`state=empty`): the hub header, chip, and tabs stay; the body is “No proposals yet” with its sentences and Write a context record.
-   - **loading** (`state=loading`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
-   - **error** (`state=error`): “Steering could not be loaded”, `503 record_index_unavailable`, Try again, Open an incident, and the trace line.
-   - **access denied** (`state=denied`): “You cannot see this workspace’s steering”, naming `steering.read on core-platform`, with Request access and Back to Fleet.
-9. **Trust language.** While a pull request is open the record steers nothing, and no count moves: not in Records, not in the bundle, not in the audit log, bundle version unchanged. A failed check is shown as failed, with the reason. The steering tokens a turn before and after a merge reconcile to the bundle total.
-10. **Plain nouns.** No heading on the built tab carries a comma, a mid-dot, or a not/never contrast; subtext is one sentence.
-11. **Mobile.** At 390 × 844 with a touch pointer: the five tabs are one scrolling strip and the selected tab is in view; the two-column views stack; every list table renders as labelled cards; the page never scrolls sideways; tap targets are ≥ 44 px; inputs are 16 px; More is the lit thumb-bar slot.
-12. **Accessibility.** Tabs use `role=tablist/tab` with `aria-selected`; the two-way control uses `aria-pressed`; the selected pull request row carries `aria-current`; state is never colour alone; focus is visible; the tab is operable by keyboard end to end.
-13. **Permissions.** Read requires `steering.read`, checked server-side. Each write (`context.propose`, `context.review`, `context.retire`) is gated server-side.
-14. **Memory-born proposal.** Open `prp_01K5RX1N` from its card and from Open the proposal in the `memory` dialog of `mem_01K5R0N2`. The card reads “from memory fold · mem_01K5R0N2” and the support line “<sayings> sayings from <distinct runs> runs”. Supporting runs holds one row per saying of the memory, each with its run, agent, “seq <frame>”, and `mem_01K5R0N2` with “memory · saying”. Promoter evidence quotes each saying verbatim with its run and frame, and its last sentence names the fold setting's numbers; change the setting on the Memory shelf and confirm the sentence follows. Confidence reads 0.71. Open a Context PR is disabled; note that no reason is given.
-15. **Import pull requests.** Run a Markdown import that accepts records from two files. Two pull requests open, one per file, on `context/import-<file slug>`. Each row reads “<N> records from <file>” when it carries more than one record. The eyebrow ends “one source file per PR”, the file panel shows one TOML block per record, and the body is the import body the spec quotes, line for line. After a merge with more than one record, the merge bar offers one gold See them in Records.
-16. **Nothing extra.** List anything on the built tab that is not in the spec. Each is a finding.
+1. **Route and shell.** The build serves `/{org}/{ws}/steering/proposals` with Proposals selected and its count equal to the proposals plus the open pull requests. The header, the tabs and the shell match `steering.md`. The kind filter does not render.
+2. **The two views.** A group with Proposals and Pull requests, each with its count and `aria-pressed`, and the line beside them. Proposals is `/steering/proposals` and Pull requests `/steering/proposals/prs`. The Pull requests count equals the open pull requests in the table there.
+3. **The list.** The panel "Proposals" with its caption and the card list controls (Sort, Rows, pager). Each card: the kind badge, the force, the state badge, the checks badge where a pull request is open, Review, the statement as the headline, and the meta line (from, support, id, scope, lineage). Only this workspace's proposals are listed.
+4. **States and checks.** Each state badge maps a contract status (proposed, pr_open, checks_running, checks_passed, checks_failed, merged, rejected) to the design's words. A checks badge counts out of six for every Steering record pull request. "Context PR" appears nowhere in the view's copy.
+5. **Review.** Review shows one proposal and All proposals returns to the list. The three tiles (Supporting runs, Distinct agents, and Confidence or, for a person's proposal, Checks) with their sub-lines. Proposed record with "steers nothing yet". Promoter evidence. Supporting runs with Run, Frame, Outcome and Record, in that order. The Pull request panel with Target, Branch, File, Governance and the one action the spec gives for the proposal's state. If it publishes with Reaches, As, Costs, Baseline and Read back as.
+6. **Rollups.** Supporting runs equals the rows beneath it; Distinct agents equals the distinct agents in the rows. Any tile that disagrees with its rows is a FAIL; name both values.
+7. **Outcome, not verdict.** Every supporting run carries one of `kept`, `reverted`, `no change` or `halted`, as a dot and a word, or "not recorded". No column, badge or tile is labelled verdict, proven, proof, grade or score. No threshold decides a proposal.
+8. **Open a pull request.** Offered only while the proposal has none, and gold then. `ctxpr` shows the callout when one is open, the fields, the note naming the six checks, and Open the pull request (or Go to the open one). Opening calls `open_context_pr`, pushes `context/<lineage>` with one record file, queues the six checks and lands on Pull requests with it selected. The Kind and Scope options carry no dash-joined labels. A constraint effect is offered for a constraint only.
+9. **Steers nothing.** While a proposal has no merged pull request, its record is absent from Sources, from every envelope and from the compiled bundle, and the steering version has not moved.
+10. **Data sources.** For each row of the spec's data-source table, find the adapter or query that feeds it. ✅ rows are wired to the named contract (`list_proposals`, `get_context_pr`, `open_context_pr`). 🟡 rows show the counts that derive from the support and render "not recorded" for the measure. ❌ rows render "not recorded" or are absent. A fixture reaching production is a FAIL.
+11. **Future-only fields.** The spec lists the fields that are future-only though the design marks none: the support measure, Confidence, the supporting runs' agent, date, frame, outcome and record kind, Costs, Baseline, proposals the promoter, a findings job or the reflector would raise, and the proposal a memory fold raised. Each renders "not recorded" or is absent. Any rendered as data is a FAIL.
+12. **States.** Loaded only. Force `state=loading`, `error`, `empty` and `denied` and confirm the shell's standard panels replace the page body and keep the shell, with no zeros and no stale cards.
+13. **Mobile.** At 390 × 844 with a touch pointer: the thumb bar holds Work, Agents, Tools, Spend and More, with More lit; the tabs scroll sideways with Proposals in view; the cards stack their badges and wrap their meta lines; in a review the tiles wrap, the columns stack and the Supporting runs table renders as labelled cards; the dialog is a bottom sheet; the page never scrolls sideways; tap targets are at least 44 px and inputs 16 px.
+14. **The proposal a memory made.** Open `prp_01K5RX1N` from its card, and from Open the proposal in the dialog of `mem_01K5R0N2` on another page and on this one. The card reads "from memory fold · mem_01K5R0N2" and "3 sayings from 3 runs". Supporting runs holds one row per saying of the memory, each with its run, its agent, "seq <frame>", and `mem_01K5R0N2` with "memory · saying". Promoter evidence quotes each saying verbatim with its run and frame, and names the fold setting, 3 sayings from 2 runs. The rows' `passed` and `failed` are outside the four outcomes: a build that copies them is a FAIL under check 7. A build renders the rows and the tiles as not recorded until a saying per run and the fold ship.
+15. **Rules.**
+    - No heading carries a comma, a mid-dot, or a not/never contrast, and subtext under a heading is one sentence. Note where the design breaks this.
+    - Exactly one gold action on every screen, the review of a proposal with no pull request included.
+    - No person is scored or ranked; "from <name>" weighs nothing.
+    - Every enforcement claim names its tier and "routed through Oxagen".
+16. **Accessibility.** Tabs use `role=tablist` and `role=tab` with `aria-selected`; the two view buttons use `aria-pressed`; the dialog is `role=dialog`, `aria-modal`, with labelled fields and a labelled close; state is a dot and a word; focus is visible; the view is operable by keyboard end to end.
+17. **Permissions.** The read is refused server-side without the Steering read. `open_context_pr`, `propose_record` and `dismiss_proposal` are gated server-side, not only hidden. Verify with a role that lacks them.
+18. **Nothing extra.** List anything on the built view that is not in the spec. A Dismiss control is a finding for the reviewer: the capability ships and the design has none.
 
 ## Output
 
 Return a single markdown report:
 
 ```
-# Steering · Proposals: audit {{DATE}}
+# Steering › Proposals: audit {{DATE}}
 Verdict: PASS | FAIL (n fails, m notes)
 
 | # | Check | Result | Evidence | Fix |
@@ -61,6 +59,9 @@ Verdict: PASS | FAIL (n fails, m notes)
 
 ## Not in the spec
 - …
+
+## Data sources not backed (expected not recorded, and whether the build renders it honestly)
+- …
 ```
 
-Rules: never mark PASS on an assumption. Open the file or the DOM. Quote the design’s copy verbatim when a label differs. If the build cannot be started or the route is missing, stop and report that as the single FAIL.
+Rules: never mark PASS on an assumption. Open the file or the DOM. Quote the design's copy verbatim when a label differs. If the build cannot be started or the route is missing, stop and report that as the single FAIL.

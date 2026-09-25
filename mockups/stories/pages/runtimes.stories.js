@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/runtimes.md?raw";
 
 export default {
-  title: "Oxagen/Workspace/Runtimes",
+  title: "Oxagen/Runtimes/Runtimes",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/runtimes" },

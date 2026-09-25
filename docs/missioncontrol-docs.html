@@ -134,12 +134,2434 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <body>
 <div class="site">
 <nav class="docs" aria-label="Documents">
-  <a class="wordmark" href="#spec">o<span class="x">x</span>agen</a>
-  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and context records</a></li><li><a href="#tasks" data-doc="tasks">Tasks and work orders</a></li><li><a href="#agent-capability" data-doc="agent-capability">In-app agent capability expansion</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
+  <a class="wordmark" href="#wedge">o<span class="x">x</span>agen</a>
+  <p>Fleet operations</p><ol><li><a href="#wedge" data-doc="wedge">Fleet operations wedge</a></li><li><a href="#ia" data-doc="ia">Fleet operations information architecture</a></li><li><a href="#routes" data-doc="routes">Fleet operations routes</a></li><li><a href="#collapse" data-doc="collapse">Fleet operations deletion list</a></li></ol><p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and Steering records</a></li><li><a href="#tasks" data-doc="tasks">Tasks and work orders</a></li><li><a href="#agent-capability" data-doc="agent-capability">In-app agent capability expansion</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
   <div class="foot">One file, every document. The markdown in <code>docs/</code> is the source; <code>tools/build-docs.py</code> writes this page.</div>
 </nav>
 <div>
-<article id="spec" class="doc" hidden>
+<article id="wedge" class="doc" hidden>
+<header class="mast">
+  <p class="eyebrow">Oxagen · Specification</p>
+  <h1>Fleet operations wedge</h1>
+  <dl class="facts"><dt>Status</dt><dd>Draft for review</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Replaces</dt><dd>The workspace navigation of <code>agent-ontology-ia.md</code> (Fleet first, Tasks as a page, the Steering Library shelves) and the page specs <code>fleet-operations-collapse.md</code> lists</dd><dt>Related</dt><dd>ADR-043, ADR-090, ADR-091, ADR-093 and ADR-113 in <code>macanderson/oxagen</code>; <code>mission-control-spec.md</code> §8 and §10; <code>tasks-spec.md</code>; <code>fleet-operations-ia.md</code>; <code>fleet-operations-routes.md</code>; <code>fleet-operations-collapse.md</code></dd><dt>Checked against</dt><dd><code>macanderson/oxagen</code> <code>main</code> at <code>1ba160dbc</code>, 2026-09-24</dd></dl>
+</header>
+<div class="grid">
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#wedge/the-situation">The situation</a></li><li><a href="#wedge/decisions">Decisions</a></li><li><a href="#wedge/vocabulary">Vocabulary</a></li><li><a href="#wedge/work-1">Work</a></li><li><a href="#wedge/steering-1">Steering</a></li><li><a href="#wedge/decision-trace">Decision trace</a></li><li><a href="#wedge/navigation">Navigation</a></li><li><a href="#wedge/cuts">Cuts</a></li><li><a href="#wedge/unchanged">Unchanged</a></li><li><a href="#wedge/open-decisions">Open decisions</a></li></ol></nav>
+<main>
+<h2 id="wedge/the-situation">The situation</h2>
+<p>An operator's day starts from the work. A release needs notes, a bug report needs a fix, a finding says a cache write is never read. The rev1 design opens on a run log instead. Work sits on a Tasks page, steering sits on five shelves and four tabs, and the question an operator asks after every run, why it did that, has five partial answers: the Context, Policy and Governed actions tabs of the run, the Compiler, and the agent's Steering tab.</p>
+<p>The wedge puts the work first and gives each run one explanation. The operator picks work, sends it to an agent under a mandate, follows the runs it produces, and reads why each run did what it did. Oxagen still does not run the agent (ADR-043). It hands the agent its brief and its steering, answers its governed calls, and keeps the record.</p>
+<p>This spec is the design authority for the change. <code>fleet-operations-ia.md</code> lays out every view, <code>fleet-operations-routes.md</code> maps every old route, and <code>fleet-operations-collapse.md</code> lists what is deleted or merged. The page specs in <code>mockups/pages/</code> describe each view field by field.</p>
+<h2 id="wedge/decisions">Decisions</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Decision</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td>Work is the primary surface. The workspace opens on Work, whose tabs are Backlog, Work orders, Workflows and Findings.</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>A run is a child record of exactly one work order. A run an operator starts outside Oxagen is filed under a direct work order that Oxagen opens for it.</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>The Fleet page retires. Its population view moves to Agents. Its runs table becomes the runs of each work order and each agent's Activity tab. Its waiting count is the Approvals drawer's count, shown on every page.</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>A Steering Source and a SteeringFrame are two objects and never collapse into one. A source is durable material a person or an agent wrote. A SteeringFrame is what Oxagen resolved from a source for one run at one injection point.</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>Every piece of runtime input an agent receives through Oxagen is a SteeringFrame of one of eight types: goal, invariant, constraint, delegation, procedure, context, invocation and capability.</td>
+</tr>
+<tr>
+<td>D6</td>
+<td>Every frame carries its source, the source version and a hash. A frame whose hash no longer matches its source version is excluded as <code>steering_drift</code>.</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>Context record is renamed Steering record in product language. Files, schemas and tables keep <code>context</code> in their names.</td>
+</tr>
+<tr>
+<td>D8</td>
+<td>The Decision trace is the one explanation of a run. It reads the record and adds nothing to it.</td>
+</tr>
+<tr>
+<td>D9</td>
+<td>Findings are work. They move from Spend to Work, and a finding becomes a work item when a person picks it up.</td>
+</tr>
+<tr>
+<td>D10</td>
+<td>Spend has three views: Overview, Budgets and Optimization. It has no drill pages.</td>
+</tr>
+<tr>
+<td>D11</td>
+<td>A mandate is a Steering Source that emits delegation frames. It is managed on the agent's Permissions tab. There is no mandate page.</td>
+</tr>
+<tr>
+<td>D12</td>
+<td>A skill is a Steering Source: a bundle of instructions, references and optional entrypoints. An entrypoint becomes a capability descriptor, and Oxagen never runs it. There is no Skills console.</td>
+</tr>
+<tr>
+<td>D13</td>
+<td>Memory and glossary terms are source kinds in one Sources list. A memory becomes a Steering record only through a proposal. There are no Memory or Ontology tabs.</td>
+</tr>
+<tr>
+<td>D14</td>
+<td>Replay and bisect leave the interface: no Fork replay, no Bisect, no playback transport and no replay grade. The chain and the seal stay, under Evidence.</td>
+</tr>
+<tr>
+<td>D15</td>
+<td>No person is scored or ranked. Spend reports operator habits as rules the operator can adopt, as the operator review requires (VISION; ADR-113 decision 5).</td>
+</tr>
+<tr>
+<td>D16</td>
+<td>Approvals and Stella are drawers that open from every page.</td>
+</tr>
+<tr>
+<td>D17</td>
+<td>Every field in every page spec is marked shipped, partial or future-only against <code>macanderson/oxagen</code> <code>main</code>. The mockup outlines future-only fields when its URL carries <code>?future=1</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="wedge/vocabulary">Vocabulary</h2>
+<p>Terms are written the way the product writes them. A term in <code>mono</code> is a value in a contract or a file, not prose.</p>
+<h3 id="wedge/work">Work</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Replaces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Work</td>
+<td>The area where an operator decides what the agents do next</td>
+<td>Tasks</td>
+</tr>
+<tr>
+<td>Work item</td>
+<td>One unit of work: an issue, incident, case or ticket from a connected provider, a finding a person picked up, or an item written in Oxagen</td>
+<td>task</td>
+</tr>
+<tr>
+<td>Backlog</td>
+<td>Every open work item in the workspace, with its definition of done and its readiness</td>
+<td>the Tasks tab</td>
+</tr>
+<tr>
+<td>Definition of done</td>
+<td>The checks a person certifies for one work item before it can be sent. Optional, for bounded work only</td>
+<td>unchanged</td>
+</tr>
+<tr>
+<td>Work order</td>
+<td>One or more work items sent to an agent or a workflow, with the brief, the definition of done and the repositories it may change</td>
+<td>unchanged</td>
+</tr>
+<tr>
+<td>Dispatched work order</td>
+<td>A work order a person sent from Oxagen</td>
+<td>new</td>
+</tr>
+<tr>
+<td>Direct work order</td>
+<td>The work order Oxagen opens for a run an operator started outside Oxagen, titled from the run's task reference or its first prompt</td>
+<td>new</td>
+</tr>
+<tr>
+<td>Workflow</td>
+<td>A file in <code>.oxagen/workflows/</code> that names stages in order, each with an agent, and ends with a person</td>
+<td>unchanged</td>
+</tr>
+<tr>
+<td>Stage</td>
+<td>One step of a workflow. Each attempt at a stage is one run</td>
+<td>unchanged</td>
+</tr>
+<tr>
+<td>Finding</td>
+<td>A recorded problem with money or time behind it, and the evidence for it: a cache write never read, a repeated call, an unpaged result</td>
+<td>a Spend tab</td>
+</tr>
+<tr>
+<td>Intake</td>
+<td>The connection to an issue provider: what it imports, and how its fields and people map</td>
+<td>the Providers, Fields and People tabs</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="wedge/runs">Runs</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Replaces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Run</td>
+<td>One session of one agent under one operator, on one work order. A child record of that work order</td>
+<td>a row in the Fleet log</td>
+</tr>
+<tr>
+<td>Frame</td>
+<td>One recorded event in a run, hash-chained. The request for this change calls these execution frames. The product calls them frames</td>
+<td>execution frame</td>
+</tr>
+<tr>
+<td>Decision trace</td>
+<td>The first tab of a run: the SteeringFrames it received, what was excluded and why, the calls it chose, the frames it recorded and the evidence</td>
+<td>the Context, Policy and Governed actions tabs</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td>What supports the run's outcome: outputs, issues, claims, approvals, and the chain and seal</td>
+<td>the Issues and Chain and seal tabs</td>
+</tr>
+<tr>
+<td>Plan change</td>
+<td>A new version of a plan the harness recorded: a <code>TodoWrite</code> call, an <code>oxagen:task</code> frame, or a Stella plan event</td>
+<td>new</td>
+</tr>
+<tr>
+<td>Self-reported uncertainty</td>
+<td>A doubt the agent reported in a structured field. Quoted, never estimated</td>
+<td>new</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="wedge/steering">Steering</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+<th>Replaces</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Steering Source</td>
+<td>Durable material that can steer an agent: a Steering record, a skill, an ADR, the product vision, an agent definition, the workspace instructions, a glossary term, a memory, a policy, a mandate or a toolbelt. Versioned, and changed only by a pull request or by its own governed write</td>
+<td>Library item, artifact</td>
+</tr>
+<tr>
+<td>Steering record</td>
+<td>A published rule, constraint, procedure, fact, preference or memory in <code>.oxagen/rules/</code></td>
+<td>Context record</td>
+</tr>
+<tr>
+<td>SteeringFrame</td>
+<td>One resolved piece of runtime input for one run at one injection point: its type, its body or descriptor, its force, its token cost and its provenance. Fixed once recorded</td>
+<td>SteeringItem (ADR-093), context frame</td>
+</tr>
+<tr>
+<td>Frame type</td>
+<td>One of eight: <code>goal</code>, <code>invariant</code>, <code>constraint</code>, <code>delegation</code>, <code>procedure</code>, <code>context</code>, <code>invocation</code>, <code>capability</code></td>
+<td>kind, for this purpose</td>
+</tr>
+<tr>
+<td>Envelope</td>
+<td>Every SteeringFrame one run received, grouped by injection point</td>
+<td>the compiled bundle, the window</td>
+</tr>
+<tr>
+<td>Injection point</td>
+<td>Where a SteeringFrame enters: session start, the prompt (the brief that starts the run), prompt submit, MCP tool results, checkout files, the tool list (the belt's tools, as <code>capability</code> frames) or the model request. ADR-093 §4 names five of them, and the wedge adds the prompt and the tool list</td>
+<td>ADR-093's five, plus two</td>
+</tr>
+<tr>
+<td>Provenance</td>
+<td>A frame's source kind and id, the source version (a commit, a ledger version, a grant version or a work order digest) and the frame's hash</td>
+<td>unchanged</td>
+</tr>
+<tr>
+<td>Assignment</td>
+<td>Which sources apply to which agents, repositories and workspaces</td>
+<td>unchanged</td>
+</tr>
+<tr>
+<td>Compiler</td>
+<td>The Steering view that resolves the envelope for one agent and one brief, and sends nothing</td>
+<td>Preview</td>
+</tr>
+<tr>
+<td>Proposal</td>
+<td>A candidate change to a Steering Source, from an agent's memory, a finding, an operator's steer or a person</td>
+<td>suggestion, candidate</td>
+</tr>
+<tr>
+<td>Exclusion</td>
+<td>A frame the assembler resolved and did not deliver, with a reason from a closed vocabulary</td>
+<td>cut</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="wedge/brand-words">Brand words</h3>
+<p><code>frame</code> keeps its brand meaning: one recorded event in a run. SteeringFrame is one word, so the two never read as the same thing. The brand word list keeps invocation, execution and trace out of customer prose (<code>oxagen-branding</code>, <code>references/words.md</code>). This spec follows it, with two exceptions the wedge fixes by name: Decision trace, which names a view and never a run, and <code>invocation</code>, which is a frame type value shown in mono. Prose says brief: &quot;the brief the work order sent&quot;.</p>
+<h2 id="wedge/work-1">Work</h2>
+<h3 id="wedge/objects">Objects</h3>
+<pre><code>Provider issue ─┐
+Finding ────────┼─▶ Work item ──sent in──▶ Work order ──starts──▶ Run ──records──▶ Frame
+Written here ───┘                           │
+                                  Workflow ─┴─ Stage (one run per attempt)
+</code></pre>
+<ul>
+<li>A work item arrives from a connected provider (GitHub, Linear, Jira, ServiceNow, Salesforce Service Cloud or Zendesk), from a finding a person picked up, or from a person writing it in Oxagen.</li>
+<li>A work item is ready when a person certifies its definition of done (<code>tasks-spec.md</code> §8).</li>
+<li>A work order sends one or more ready items to an agent the sender operates, or to a published workflow. It carries the brief, the merged definition of done, the repositories it may change and a cap.</li>
+<li><code>oxagen work start &lt;wo&gt;</code> starts the harness with the brief as its first prompt (<code>tasks-spec.md</code> §9.6). A workflow stage starts one run per attempt.</li>
+<li>A run started outside Oxagen, from an operator's own terminal, is filed under a direct work order. Oxagen opens it at the run's first frame, titles it from the run's task reference or first prompt, and names the operator as its sender. The operator can attach it to a backlog item later.</li>
+<li>A work order is done when a person accepts every item. Accepting merges nothing.</li>
+</ul>
+<h3 id="wedge/rules">Rules</h3>
+<ol>
+<li>No run exists without a parent work order. A direct work order is opened, never skipped.</li>
+<li>The Run page names its parent work order in its header and in its breadcrumb: Work, the work order, then the run.</li>
+<li>The run route stays flat: <code>/{org}/{ws}/runs/{run}</code>. A run's public id identifies it without its parent, the same reasoning <code>routes.mandate</code> in <code>safe-path.ts</code> records for a flat route.</li>
+<li>Spend attributes a run to its work order. The run's task reference records the work order id (<code>tasks-spec.md</code> §9.6).</li>
+</ol>
+<h3 id="wedge/shipped-today">Shipped today</h3>
+<p>Nothing in <code>macanderson/oxagen</code> stores a work item, a work order, a workflow or an intake connection. The run record's only link to work is <code>taskRef</code>, a free-text goal that is null for wrapped runs (<code>packages/oxagen/src/contracts/run.list.ts:285-291</code>, <code>packages/handlers/src/run.list.ts:1277</code>). <code>dispatch_command</code> controls a run (pause, resume, cancel, steer and message). It does not send work. Every Work view is future-only, and its page spec says so field by field.</p>
+<h2 id="wedge/steering-1">Steering</h2>
+<h3 id="wedge/two-objects">Two objects</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th></th>
+<th>Steering Source</th>
+<th>SteeringFrame</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What it is</td>
+<td>Durable material that can steer an agent</td>
+<td>One resolved piece of input for one run at one injection point</td>
+</tr>
+<tr>
+<td>Lifetime</td>
+<td>Until a pull request or its own governed write retires it</td>
+<td>Fixed when recorded</td>
+</tr>
+<tr>
+<td>Written by</td>
+<td>A person, or an agent for a memory</td>
+<td>The assembler, from a source at a version</td>
+</tr>
+<tr>
+<td>Identity</td>
+<td>Its path or id: <code>ctx.release.never-merge</code>, <code>a-intel.release-notes-from-prs</code>, <code>ADR-021</code></td>
+<td><code>&lt;type&gt;:&lt;source id&gt;@&lt;first 12 hex of hash&gt;</code></td>
+</tr>
+<tr>
+<td>Versioned by</td>
+<td>Git commits, the promotion ledger or a grant version</td>
+<td>The source version it names</td>
+</tr>
+<tr>
+<td>Where a person sees it</td>
+<td>Steering › Sources, and the source's own page</td>
+<td>Steering › Compiler, the agent's Steering tab and the run's Decision trace</td>
+</tr>
+</tbody>
+</table></div>
+<p>A page never shows a frame as its source, or a source as a frame. A Sources row links to the frames it emits. A frame row links to the source version it came from.</p>
+<h3 id="wedge/frame-types">Frame types</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Tells the agent</th>
+<th>Delivered</th>
+<th>Budget</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>goal</code></td>
+<td>The outcome the work serves</td>
+<td>The prefix, or the prompt when a work order carries it</td>
+<td>Never cut for budget. A prefix that cannot hold it fails the publication check</td>
+</tr>
+<tr>
+<td><code>invariant</code></td>
+<td>A constraint that holds for every run in its scope and that no narrower source, work order or steer can relax</td>
+<td>The prefix, first</td>
+<td>Never cut</td>
+</tr>
+<tr>
+<td><code>constraint</code></td>
+<td>A requirement or prohibition for this scope</td>
+<td>The prefix when <code>must</code> or <code>should</code>, the volatile selection when <code>may</code></td>
+<td>Cut only in the volatile selection</td>
+</tr>
+<tr>
+<td><code>delegation</code></td>
+<td>Authority a person delegated: what, how much and until when</td>
+<td>The prefix</td>
+<td>Never cut. The gate plane also enforces it</td>
+</tr>
+<tr>
+<td><code>procedure</code></td>
+<td>How to do something</td>
+<td>The prefix or the volatile selection, by force</td>
+<td>Can be cut</td>
+</tr>
+<tr>
+<td><code>context</code></td>
+<td>A fact the agent needs</td>
+<td>The volatile selection, or files in the checkout</td>
+<td>Can be cut</td>
+</tr>
+<tr>
+<td><code>invocation</code></td>
+<td>What the agent was asked to do, and by whom</td>
+<td>The prompt</td>
+<td>Never cut. It is the prompt</td>
+</tr>
+<tr>
+<td><code>capability</code></td>
+<td>A callable the agent may use, described: a tool on its belt or a skill entrypoint</td>
+<td>The tool list, or files in the checkout</td>
+<td>Excluded when a gate denies it</td>
+</tr>
+</tbody>
+</table></div>
+<p>Force keeps ADR-093's meaning (<code>must</code>, <code>should</code>, <code>may</code>, <code>info</code>) and decides between the prefix and the volatile selection. Type says what the frame is for. They are separate fields, the same way ADR-093 §2 keeps a record's six-way kind apart from the item kind.</p>
+<h3 id="wedge/emissions">Emissions</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Source kind</th>
+<th>Lives in</th>
+<th>Emits</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Product vision</td>
+<td>A document named in <code>.oxagen/sources.toml</code>, such as <code>docs/VISION.md</code></td>
+<td><code>goal</code>, <code>constraint</code>, <code>context</code></td>
+<td>Only from the sections the registration names</td>
+</tr>
+<tr>
+<td>ADR</td>
+<td><code>docs/adr/*.md</code>, named the same way</td>
+<td><code>context</code>, <code>constraint</code>, <code>procedure</code>, <code>invariant</code></td>
+<td>Only an accepted ADR emits. An invariant comes only from a section the ADR declares as its invariants. A superseded ADR emits nothing</td>
+</tr>
+<tr>
+<td>Steering record</td>
+<td><code>.oxagen/rules/ctx.*.toml</code></td>
+<td>rule and constraint as <code>constraint</code>, procedure as <code>procedure</code>, fact, preference and memory as <code>context</code></td>
+<td>The record's six kinds are unchanged</td>
+</tr>
+<tr>
+<td>Skill</td>
+<td><code>.oxagen/skills/&lt;id&gt;/</code></td>
+<td><code>procedure</code> from SKILL.md, <code>context</code> from each reference file, <code>capability</code> from each declared entrypoint</td>
+<td>Oxagen never runs an entrypoint. A withheld skill emits nothing (ADR-090)</td>
+</tr>
+<tr>
+<td>Agent definition</td>
+<td><code>.oxagen/agents/&lt;slug&gt;.toml</code></td>
+<td><code>procedure</code> from its instructions</td>
+<td>Its purpose is identity, not steering</td>
+</tr>
+<tr>
+<td>Workspace instructions</td>
+<td>Workspace settings</td>
+<td><code>procedure</code></td>
+<td>Force <code>should</code> (ADR-093 §3)</td>
+</tr>
+<tr>
+<td>Glossary term</td>
+<td><code>.oxagen/ontology/*.toml</code></td>
+<td><code>context</code></td>
+<td>Was an ontology note</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>Records an agent appends</td>
+<td><code>context</code></td>
+<td>Force never above <code>may</code>. It becomes a Steering record only through a proposal</td>
+</tr>
+<tr>
+<td>Policy</td>
+<td>Tools › Policy and the kill switches</td>
+<td><code>constraint</code>, one gate notice per gate</td>
+<td>The notice names the gate that enforces it. Removing a notice never removes its gate</td>
+</tr>
+<tr>
+<td>Mandate</td>
+<td>The agent's Permissions tab</td>
+<td><code>delegation</code>, one per active mandate</td>
+<td>Carries the person who granted it, the measures, the limits and the window</td>
+</tr>
+<tr>
+<td>Toolbelt</td>
+<td>Tools › Toolbelts</td>
+<td><code>capability</code>, one per tool the belt shows the model</td>
+<td>A harness's own tools, such as Bash in Claude Code, are not frames. Oxagen did not put them there</td>
+</tr>
+</tbody>
+</table></div>
+<p>Three runtime inputs emit frames without being sources. Each frame carries provenance to its record.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Input</th>
+<th>Emits</th>
+<th>Provenance</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A work order, when sent</td>
+<td><code>invocation</code> (the brief), <code>goal</code> (each item's outcome) and <code>constraint</code> (each definition-of-done item, the repositories and the cap)</td>
+<td>The work order id and its prompt digest</td>
+</tr>
+<tr>
+<td>A workflow stage</td>
+<td><code>invocation</code> (the stage brief), <code>constraint</code> (the items the stage owns) and <code>context</code> (the previous stage's handoff note, quoted and never an instruction)</td>
+<td>The work order id, the stage and the prior run id</td>
+</tr>
+<tr>
+<td>An operator's steer</td>
+<td><code>invocation</code></td>
+<td>The control command id and the digest of the steer text</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="wedge/reading-a-source">Reading a source</h3>
+<p>Oxagen reads frames out of a source by its declared structure. It never asks a model what a document means. A Steering record declares its kind and force in the file. A skill declares its entrypoints in its manifest. A document such as the vision or an ADR becomes a source when <code>.oxagen/sources.toml</code> names it and says which of its sections emit which types. That file changes by pull request, like every other source. The same source at the same version always emits the same frames.</p>
+<h3 id="wedge/provenance">Provenance</h3>
+<p>Every SteeringFrame carries these fields.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>type</code></td>
+<td>One of the eight frame types</td>
+</tr>
+<tr>
+<td><code>source.kind</code></td>
+<td>One of the source kinds above, or <code>work_order</code>, <code>stage</code> or <code>steer</code></td>
+</tr>
+<tr>
+<td><code>source.id</code></td>
+<td>The source's id or path</td>
+</tr>
+<tr>
+<td><code>source.version</code></td>
+<td>A commit for a file, a ledger version for a record, a grant version for a mandate, a digest for a work order</td>
+</tr>
+<tr>
+<td><code>hash</code></td>
+<td>SHA-256 over the canonical frame body</td>
+</tr>
+<tr>
+<td><code>injection_point</code></td>
+<td>Where it entered</td>
+</tr>
+<tr>
+<td><code>force</code></td>
+<td><code>must</code>, <code>should</code>, <code>may</code> or <code>info</code></td>
+</tr>
+<tr>
+<td><code>token_cost</code></td>
+<td>Estimated tokens, computed once by the adapter</td>
+</tr>
+</tbody>
+</table></div>
+<p>The assembler checks each frame's hash against its source version before it delivers the frame. A mismatch excludes the frame as <code>steering_drift</code> and raises the incident of spec §10.2.</p>
+<h3 id="wedge/exclusion-reasons">Exclusion reasons</h3>
+<p>The closed vocabulary of spec §10.5, with <code>tier</code> from today's manifest, <code>unapproved_digest</code> from skill resolution and <code>overridden_by_must</code> from the assembler's precedence rule.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Reason</th>
+<th>Meaning</th>
+<th>Recorded today</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tier</code></td>
+<td>A <code>may</code> or <code>info</code> frame that the session-start delivery does not carry</td>
+<td>Yes, in <code>steering.manifest</code></td>
+</tr>
+<tr>
+<td><code>over_budget</code></td>
+<td>It did not fit the token budget</td>
+<td>Yes, recorded as <code>budget</code></td>
+</tr>
+<tr>
+<td><code>superseded</code></td>
+<td>A newer version of the same lineage won</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>below_relevance_floor</code></td>
+<td>It scored under the floor for this prompt</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>out_of_scope</code></td>
+<td>Its scope does not match the run</td>
+<td>Only for skills, in <code>preview_skill_search</code></td>
+</tr>
+<tr>
+<td><code>widens_workspace_scope</code></td>
+<td>A repository source tried to widen a workspace source</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>overridden_by_gate</code></td>
+<td>A gate disagrees, and the gate's notice is delivered instead</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>steering_drift</code></td>
+<td>Its hash does not match its source version</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>prefix_overflow</code></td>
+<td>The session-start prefix is full</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>duplicate</code></td>
+<td>Another frame carries the same body</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>source_unavailable</code></td>
+<td>Its source did not answer in time</td>
+<td>No</td>
+</tr>
+<tr>
+<td><code>overridden_by_must</code></td>
+<td>A published <code>must</code> outranks recalled memory on the same concern</td>
+<td>No. Today's manifest has no reason for it</td>
+</tr>
+<tr>
+<td><code>unapproved_digest</code></td>
+<td>A skill whose digest changed after a person approved it</td>
+<td>Yes, in <code>preview_skill_search</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Each exclusion names the numbers that decided it: the budget, what was already spent, the frame's cost, its score, or the newer version. The same sources, run and budget give the same exclusions.</p>
+<h3 id="wedge/shipped-today-1">Shipped today</h3>
+<ul>
+<li><code>steering.manifest</code> is a recorded frame kind. Its items carry id, kind, force, tokens, outcome (<code>included</code> or <code>cut</code>) and reason (<code>tier</code>, <code>budget</code> or <code>superseded</code>). They carry no scope, hash, provenance or body (<code>packages/tacho/src/wire.ts:626-697</code>).</li>
+<li>The assembler (<code>packages/steering-assembler/src/assemble.ts</code>) ranks candidates of kind <code>record</code>, <code>steer</code>, <code>skill</code>, <code>memory</code>, <code>ontology</code>, <code>policy</code> and <code>instruction</code>, but only <code>record</code> and <code>steer</code> are produced. Its budget is 2,000 tokens.</li>
+<li>A Steering record's source fields ship through <code>list_records</code> and <code>get_record</code>: lineage, kind, force, constraint effect, sharing scope, statement, status, version, checksum, commit, path, published time, versions and the pull request.</li>
+<li>Proposals and Context PRs ship through <code>list_proposals</code>, <code>get_context_pr</code>, <code>open_context_pr</code> and <code>merge_context_pr</code>.</li>
+<li>No capability runs the assembler without delivering (#3879), so the Compiler is future-only.</li>
+<li>Frame types, provenance per frame, the vision and ADR source kinds, <code>.oxagen/sources.toml</code>, delegation frames, capability frames and work order frames are future-only.</li>
+</ul>
+<h2 id="wedge/decision-trace">Decision trace</h2>
+<p>The first tab of every run. It answers why the run did what it did, from the record alone.</p>
+<h3 id="wedge/sections">Sections</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Section</th>
+<th>Shows</th>
+<th>Reads</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Envelope</td>
+<td>The SteeringFrames the run received, by injection point and then by type, each with its source, version, hash, force and tokens</td>
+<td><code>steering.manifest</code> frames, and the sources at the versions they name</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Exclusions</td>
+<td>Each frame resolved and not delivered, its reason and the numbers that decided it</td>
+<td>The same manifests</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Choices</td>
+<td>Each call the agent chose: what its belt offered, what it called, and the rule's answer (allowed, denied or routed to a person) with the rule and the policy version. For skills: what was searched, found, withheld and loaded</td>
+<td><code>tool_requested</code>, <code>policy_decision</code>, <code>harness_permission</code> and approval frames; skill resolution frames</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Frames</td>
+<td>The run's recorded frames by turn and by class, each linking into the Transcript</td>
+<td><code>get_run</code>, <code>get_run_turns</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Plan changes</td>
+<td>Each version of the plan the harness recorded, what changed, and the frame that changed it</td>
+<td><code>TodoWrite</code> calls, <code>oxagen:task</code> frames, Stella plan events</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Self-reported uncertainty</td>
+<td>Each doubt the agent reported, quoted, with its frame</td>
+<td>A structured report: the agent's call to Oxagen's <code>report_status</code> tool, or the uncertainty field of a Stella or ARP report</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Evidence</td>
+<td>The outputs, the definition-of-done claims and who accepted them, the approvals decided, and the chain's state</td>
+<td><code>get_run_work</code>, the work order's claims, approval frames, <code>get_run_chain</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>Sections 5 and 6 appear only when the record holds them. A run with neither shows one line: the harness recorded no plan, and the agent reported no uncertainty.</p>
+<h3 id="wedge/honesty-rules">Honesty rules</h3>
+<ol>
+<li>The trace reads the record. It adds no inference, no score and no model-written account of why.</li>
+<li>Oxagen has no access to a model's hidden reasoning. When a provider returns thinking text, the Transcript shows it as returned and says the provider may summarize or redact it. The trace never presents it as how the model decided, and never claims it is complete.</li>
+<li>An exclusion is deterministic. It names a reason from the closed vocabulary and the numbers that decided it.</li>
+<li>A plan change appears only when the harness recorded a plan. Oxagen does not rebuild a plan from the agent's prose.</li>
+<li>Uncertainty appears only when the agent reported it in a structured field. Oxagen does not estimate confidence and does not read doubt out of prose.</li>
+<li>Every enforcement claim states the run's tier. An <code>observe</code> run was recorded, not enforced.</li>
+</ol>
+<h3 id="wedge/shipped-today-2">Shipped today</h3>
+<ul>
+<li>Frames, turns, the chain and a run's checkouts, diffs and pull requests ship (<code>get_run</code>, <code>get_run_turns</code>, <code>get_run_chain</code>, <code>get_run_work</code>).</li>
+<li><code>policy_decision</code> ships with the decision, its source, the rule, a reason code and the risk grade (<code>packages/tacho/src/envelope.ts:67-74</code>). Approval frames ship.</li>
+<li>Plan changes are partial. <code>TodoWrite</code>, <code>TodoRead</code> and <code>ExitPlanMode</code> are recorded as ordinary tool calls, and <code>oxagen:task</code> frames record Claude Code's own task list. No frame marks a plan version.</li>
+<li>Skill resolution frames (<code>skills.searched</code>, <code>skills.resolved</code>, <code>skills.loaded</code>) are not produced. Nothing records self-reported uncertainty, and <code>report_status</code> does not exist.</li>
+<li>The provider's thinking text is recorded in the transcript as <code>kind: &quot;thinking&quot;</code> (<code>packages/oxagen/src/contracts/run.transcript.get.ts:147-151</code>). Redaction removes credentials only.</li>
+</ul>
+<h2 id="wedge/navigation">Navigation</h2>
+<p>Workspace: Work, Agents, Tools, Steering, Runtimes, Spend and Repositories. Organization: Organization, Billing and Audit, unchanged. Drawers: Approvals and Stella, from every page. <code>fleet-operations-ia.md</code> has every view, its tabs, its primary action and its story.</p>
+<h2 id="wedge/cuts">Cuts</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Cut</th>
+<th>Where it went</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The Skills console (Catalog, Search, In the loop, Reflection, Versions)</td>
+<td>Skills are Steering Sources. Search is the Compiler. The interjection stays in the Approvals drawer. <code>.oxagen/skills.toml</code> is a setting on Sources</td>
+</tr>
+<tr>
+<td>Skill reflection</td>
+<td>Deleted. ADR-090 decision 7 kept it research-only, and nothing reads it</td>
+</tr>
+<tr>
+<td>The Mandate page</td>
+<td>The Delegation section of the agent's Permissions tab, and delegation frames</td>
+</tr>
+<tr>
+<td>Replay and bisect: Fork replay, Bisect, both playback transports and replay grades</td>
+<td>Deleted from the interface. The chain and the seal stay under Evidence</td>
+</tr>
+<tr>
+<td>The Steering shelves: Records, Instructions, Skills, Memory, Ontology</td>
+<td>One Sources list with a kind filter</td>
+</tr>
+<tr>
+<td>Memory and Ontology management</td>
+<td>Memory and glossary terms are source kinds. A memory reaches a Steering record through a proposal</td>
+</tr>
+<tr>
+<td>The Spend drill pages and seven of its nine tabs</td>
+<td>Overview groups by work order, operator, agent, model or tool, with a side panel for one key</td>
+</tr>
+<tr>
+<td>Operator scores and severity ranking</td>
+<td>Operator habits as rules to adopt, in alphabetical order, with no rank and no verdict</td>
+</tr>
+<tr>
+<td>The Fleet page</td>
+<td>Work (what waits on you, what is live), Agents (the population), and each work order's runs</td>
+</tr>
+<tr>
+<td>Steering › Gates</td>
+<td>Tools › Policy owns gates. Gate notices are constraint frames on Sources</td>
+</tr>
+<tr>
+<td>The agent's Definition in git tab</td>
+<td>The agent's source page</td>
+</tr>
+<tr>
+<td>The Providers, Fields and People tabs of Tasks</td>
+<td>The Intake dialog on Backlog</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="wedge/unchanged">Unchanged</h2>
+<p>Organization, Billing, Audit, the sign-in and onboarding flows, Register agent, Runtimes, Repositories, the five Tools tabs, the approvals card and the Stella drawer keep their design. Their page specs change only where a word changed or a link moved.</p>
+<h2 id="wedge/open-decisions">Open decisions</h2>
+<ol>
+<li>ADR-113 decision 7 keeps Fleet as a page name. Retiring the page needs an amendment in <code>macanderson/oxagen</code> before the app changes. Fleet stays the operator's word for the enrolled agents.</li>
+<li>The brand word list keeps invocation out of prose. This spec uses <code>invocation</code> only as a frame type value. The message registry in <code>oxagenai/oxagen-brand</code> decides the label a person reads.</li>
+<li><code>.oxagen/sources.toml</code> is a new file in the workspace layout (spec §10.2). It needs an ADR beside ADR-093.</li>
+<li><code>report_status</code>, the Oxagen MCP tool an agent calls to report its status and its doubts, is a new capability and needs a contract.</li>
+<li>Direct work orders change what a run's parent means for Spend and Audit. The run record needs a <code>work_order_id</code> beside <code>taskRef</code>.</li>
+</ol>
+
+<footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/fleet-operations-wedge.md</code></span></footer>
+</main>
+</div>
+</article><article id="ia" class="doc" hidden>
+<header class="mast">
+  <p class="eyebrow">Oxagen · Information architecture</p>
+  <h1>Fleet operations information architecture</h1>
+  <dl class="facts"><dt>Status</dt><dd>Draft for review</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Design authority</dt><dd><code>fleet-operations-wedge.md</code></dd><dt>Related</dt><dd><code>fleet-operations-routes.md</code>, <code>fleet-operations-collapse.md</code>, <code>mockups/pages/README.md</code>, <code>mockups/catalog.mjs</code></dd></dl>
+</header>
+<div class="grid">
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#ia/the-shape">The shape</a></li><li><a href="#ia/workspace-navigation">Workspace navigation</a></li><li><a href="#ia/drawers">Drawers</a></li><li><a href="#ia/work">Work</a></li><li><a href="#ia/run">Run</a></li><li><a href="#ia/agents">Agents</a></li><li><a href="#ia/tools">Tools</a></li><li><a href="#ia/steering">Steering</a></li><li><a href="#ia/spend">Spend</a></li><li><a href="#ia/runtimes-and-repositories">Runtimes and Repositories</a></li><li><a href="#ia/organization">Organization</a></li><li><a href="#ia/links-between-objects">Links between objects</a></li><li><a href="#ia/unique-views">Unique views</a></li></ol></nav>
+<main>
+<h2 id="ia/the-shape">The shape</h2>
+<p>An operator comes to Oxagen with one of four questions, and each has one home.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Question</th>
+<th>Home</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>What should the agents work on, and what are they working on now?</td>
+<td>Work</td>
+</tr>
+<tr>
+<td>Who are the agents, and what are they allowed to do?</td>
+<td>Agents, Tools</td>
+</tr>
+<tr>
+<td>What do they know, and what are they told?</td>
+<td>Steering</td>
+</tr>
+<tr>
+<td>What did it cost, and where does the money go?</td>
+<td>Spend</td>
+</tr>
+</tbody>
+</table></div>
+<p>Runtimes and Repositories are where the agents run and where their files live. Approvals and Stella are drawers, so a decision or a question never needs a page of its own.</p>
+<h2 id="ia/workspace-navigation">Workspace navigation</h2>
+<p>The sidebar lists the workspace areas in this order. A count appears only where something waits on a person.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Item</th>
+<th>Route</th>
+<th>Count</th>
+<th>Opens on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Work</td>
+<td><code>/{org}/{ws}/work</code></td>
+<td>Definitions of done waiting for certification, plus work orders waiting on you</td>
+<td>Backlog</td>
+</tr>
+<tr>
+<td>Agents</td>
+<td><code>/{org}/{ws}/agents</code></td>
+<td>none</td>
+<td>The roster</td>
+</tr>
+<tr>
+<td>Tools</td>
+<td><code>/{org}/{ws}/tools</code></td>
+<td>Observed schemas waiting for approval</td>
+<td>Tools</td>
+</tr>
+<tr>
+<td>Steering</td>
+<td><code>/{org}/{ws}/steering</code></td>
+<td>Open proposals and Steering record pull requests</td>
+<td>Sources</td>
+</tr>
+<tr>
+<td>Runtimes</td>
+<td><code>/{org}/{ws}/runtimes</code></td>
+<td>Runtimes whose health is not ok</td>
+<td>The runtime list</td>
+</tr>
+<tr>
+<td>Spend</td>
+<td><code>/{org}/{ws}/spend</code></td>
+<td>none</td>
+<td>Overview</td>
+</tr>
+<tr>
+<td>Repositories</td>
+<td><code>/{org}/{ws}/repositories</code></td>
+<td>Open pull requests Oxagen opened</td>
+<td>Repositories</td>
+</tr>
+</tbody>
+</table></div>
+<p>The organization group follows, unchanged: Organization, Billing and Audit. The workspace root <code>/{org}/{ws}</code> opens Work. The foot of the sidebar keeps the Stella launcher and the connection badge.</p>
+<p><strong>Phone.</strong> The thumb bar holds Work, Agents, Tools, Spend and More. More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers.</p>
+<p><strong>Command menu.</strong> ⌘1 to ⌘5 open Work, Agents, Tools, Steering and Spend. Its groups are Go, Stella, Create, Work orders, Runs, Agents, Approvals, Actions and Tools.</p>
+<h2 id="ia/drawers">Drawers</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Drawer</th>
+<th>Opens from</th>
+<th>Holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Approvals</td>
+<td>The shield button in the top bar, on every page, with the count of everything waiting on you</td>
+<td>Every call parked for a person across the organization, and every open interjection. Picking one shows the full approval card, the same one the run shows. Each row names the run's work order</td>
+</tr>
+<tr>
+<td>Stella</td>
+<td>The launcher at the foot of the sidebar, More on a phone, and ⌘K</td>
+<td>The in-app agent. It reads the page it was opened from (<code>ask_assistant</code> <code>pageContext</code>), so on a run it can answer from that run's Decision trace. Its changes go through the same governed actions a person uses</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="ia/work">Work</h2>
+<p>The primary surface. Every run is a child of one work order, so everything live in the workspace is reachable from here.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Tab</th>
+<th>Route</th>
+<th>Holds</th>
+<th>Primary action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Backlog</td>
+<td><code>/{org}/{ws}/work</code></td>
+<td>Every open work item: its provider and number, subject, labels, status, owner, readiness, and the work order it is in. Tiles: ready, drafts waiting on you, in work orders, live now</td>
+<td>Create work order and send to agent</td>
+</tr>
+<tr>
+<td>Work orders</td>
+<td><code>/{org}/{ws}/work/orders</code></td>
+<td>Every work order, dispatched and direct: target, stage, runs, items claimed, state and spend</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Workflows</td>
+<td><code>/{org}/{ws}/work/workflows</code></td>
+<td>The published workflow files and their stages</td>
+<td>New workflow</td>
+</tr>
+<tr>
+<td>Findings</td>
+<td><code>/{org}/{ws}/work/findings</code></td>
+<td>Each finding with the money behind it and its evidence. A finding becomes a work item</td>
+<td>Create a work item from a finding</td>
+</tr>
+</tbody>
+</table></div>
+<p>Detail views:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>View</th>
+<th>Route</th>
+<th>Holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Work item</td>
+<td><code>/{org}/{ws}/work/items/{item}</code></td>
+<td>The item as the provider holds it, its definition of done and who certified it, the work orders it was sent in, and their runs</td>
+</tr>
+<tr>
+<td>Work order</td>
+<td><code>/{org}/{ws}/work/orders/{order}</code></td>
+<td>The stage chain, the definition of done with claims and evidence, the brief as sent, the SteeringFrames the send emitted, and the runs it started</td>
+</tr>
+</tbody>
+</table></div>
+<p>The Intake dialog opens from the Backlog header. It holds the provider connections, the field mapping and the people mapping that were the Providers, Fields and People tabs.</p>
+<h2 id="ia/run">Run</h2>
+<p>A run is a child record. Its route stays flat, <code>/{org}/{ws}/runs/{run}</code>, and its header and breadcrumb name its work order.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Tab</th>
+<th>Route</th>
+<th>Holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Decision trace</td>
+<td><code>/{org}/{ws}/runs/{run}</code></td>
+<td>Envelope, exclusions, choices, frames, plan changes when recorded, self-reported uncertainty when reported, and evidence</td>
+</tr>
+<tr>
+<td>Transcript</td>
+<td><code>/{org}/{ws}/runs/{run}/transcript</code></td>
+<td>The recorded conversation and calls, with search and kind filters. Returned thinking is labelled as the provider's text</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td><code>/{org}/{ws}/runs/{run}/cost</code></td>
+<td>Tokens by class, spend by area, the per-turn waterfall and the model fit</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td><code>/{org}/{ws}/runs/{run}/evidence</code></td>
+<td>The definition-of-done claims, the run's approvals, the issues it touched, linked work, and the chain and seal. The outputs stay in the right column on every tab</td>
+</tr>
+</tbody>
+</table></div>
+<p>The header keeps Pause, Resume, Steer, Cancel and Export by the run's state. Fork replay and Bisect are gone. The right column keeps the repository panel and the outputs.</p>
+<h2 id="ia/agents">Agents</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>View</th>
+<th>Route</th>
+<th>Holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Agents</td>
+<td><code>/{org}/{ws}/agents</code></td>
+<td>The fleet as one population: tiles for live runs, what waits on you, spend against budget and delegations held; the roster with its Composition and Operations column sets; Steer and Register agent</td>
+</tr>
+<tr>
+<td>Agent</td>
+<td><code>/{org}/{ws}/agents/{agent}</code></td>
+<td>Overview: composition, current work, tokens and recommendations</td>
+</tr>
+<tr>
+<td>Identity</td>
+<td><code>/{org}/{ws}/agents/{agent}/identity</code></td>
+<td>Principal, credentials and the run credential</td>
+</tr>
+<tr>
+<td>Steering</td>
+<td><code>/{org}/{ws}/agents/{agent}/steering</code></td>
+<td>The SteeringFrames this agent receives by type, and the sources they come from</td>
+</tr>
+<tr>
+<td>Toolbelt</td>
+<td><code>/{org}/{ws}/agents/{agent}/toolbelt</code></td>
+<td>The computed belt, each tool's decision, and what is off the belt</td>
+</tr>
+<tr>
+<td>Runtime</td>
+<td><code>/{org}/{ws}/agents/{agent}/runtime</code></td>
+<td>Host, harness, hooks, proxy and the tier earned</td>
+</tr>
+<tr>
+<td>Permissions</td>
+<td><code>/{org}/{ws}/agents/{agent}/permissions</code></td>
+<td>Roles, budgets, and Delegation: every mandate the agent holds, as the delegation frames it emits</td>
+</tr>
+<tr>
+<td>Activity</td>
+<td><code>/{org}/{ws}/agents/{agent}/activity</code></td>
+<td>The work orders this agent worked, their runs, tamper incidents and the accounting</td>
+</tr>
+<tr>
+<td>Source</td>
+<td><code>/{org}/{ws}/agents/{agent}/source</code></td>
+<td>The agent definition file in the editor. Saving opens a pull request</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="ia/tools">Tools</h2>
+<p>Unchanged: Tools, Toolbelts, Providers, Policy and Kill switches, each a path segment under <code>/{org}/{ws}/tools</code>. Policy now owns every gate. Each gate's notice appears on Steering as a constraint frame from a policy source.</p>
+<h2 id="ia/steering">Steering</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>View</th>
+<th>Route</th>
+<th>Holds</th>
+<th>Primary action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Sources</td>
+<td><code>/{org}/{ws}/steering</code></td>
+<td>Every Steering Source in one list: kind, what it emits, scope, version, hash, status, where it is managed, and the agents it reaches. A kind filter replaces the shelves. The header carries the governance mode and the skills setting</td>
+<td>New source</td>
+</tr>
+<tr>
+<td>Source</td>
+<td><code>/{org}/{ws}/steering/sources/{kind}/{id}</code></td>
+<td>One source: its file or record, its versions, the frames it emits with their types and hashes, its assignments, the runs that received its frames, and its pull requests. A skill shows its bundle: instructions, references and entrypoints as capability descriptors</td>
+<td>Edit, which opens a pull request</td>
+</tr>
+<tr>
+<td>Assignments</td>
+<td><code>/{org}/{ws}/steering/assignments</code></td>
+<td>Which sources reach which agents, by scope, with frame counts by type</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Compiler</td>
+<td><code>/{org}/{ws}/steering/compiler/{agent}</code></td>
+<td>Pick an agent and a brief, and see the envelope: selected frames by injection point and type, exclusions with reasons, and the budget. Sends nothing</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Proposals</td>
+<td><code>/{org}/{ws}/steering/proposals</code></td>
+<td>Candidates from memory, findings, steers and people, with their support</td>
+<td>none</td>
+</tr>
+<tr>
+<td>Pull requests</td>
+<td><code>/{org}/{ws}/steering/proposals/prs</code></td>
+<td>Open Steering record pull requests with their six checks</td>
+<td>Merge, when every check passed</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="ia/spend">Spend</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>View</th>
+<th>Route</th>
+<th>Holds</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Overview</td>
+<td><code>/{org}/{ws}/spend</code></td>
+<td>Tiles, the month by day, and one table grouped by work order, operator, agent, model or tool. Picking a row opens its side panel. No drill page</td>
+</tr>
+<tr>
+<td>Budgets</td>
+<td><code>/{org}/{ws}/spend/budgets</code></td>
+<td>Budgets by scope, period and mode, with each position</td>
+</tr>
+<tr>
+<td>Optimization</td>
+<td><code>/{org}/{ws}/spend/optimization</code></td>
+<td>Wasted spend by cause, token composition and cache, recommendations for agents, and operator habits written as rules to adopt. Findings live in Work</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="ia/runtimes-and-repositories">Runtimes and Repositories</h2>
+<p>Unchanged. Runtimes lists the hosts and opens one host. Repositories keeps Repositories, Working copies, Changes and Configuration. Changes lists Steering record pull requests under that name.</p>
+<h2 id="ia/organization">Organization</h2>
+<p>Unchanged: Organization (People, Roles, Invitations, Workspaces, Model funding and routes, Data plane, API keys), Billing and Audit.</p>
+<h2 id="ia/links-between-objects">Links between objects</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>From</th>
+<th>To</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Work item</td>
+<td>Its work orders, and each one's runs</td>
+</tr>
+<tr>
+<td>Work order</td>
+<td>Its work items, its runs, its workflow, the SteeringFrames its send emitted, and its spend</td>
+</tr>
+<tr>
+<td>Run</td>
+<td>Its work order, its agent, its runtime, its Decision trace, and each frame's source</td>
+</tr>
+<tr>
+<td>SteeringFrame</td>
+<td>Its source at the version it names, and the runs that received it</td>
+</tr>
+<tr>
+<td>Steering Source</td>
+<td>The frames it emits, the agents it reaches, and its pull requests</td>
+</tr>
+<tr>
+<td>Finding</td>
+<td>Its evidence runs, and the work item it became</td>
+</tr>
+<tr>
+<td>Agent</td>
+<td>Its current work order, its runs, its sources, its toolbelt and its delegations</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="ia/unique-views">Unique views</h2>
+<p>Every unique view has a page spec in <code>mockups/pages/</code> and a loaded story in Storybook. The catalog is <code>mockups/catalog.mjs</code>. The story for a view is <code>Oxagen / &lt;group&gt; / &lt;title&gt;</code>.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Id</th>
+<th>View</th>
+<th>Mockup route</th>
+<th>Spec</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>work-backlog</code></td>
+<td>Work, Backlog</td>
+<td><code>#/a-intel/core-platform/work</code></td>
+<td><code>work-backlog.md</code></td>
+</tr>
+<tr>
+<td><code>work-intake</code></td>
+<td>Work, Intake dialog</td>
+<td><code>#/a-intel/core-platform/work?intake=providers</code></td>
+<td><code>work-intake.md</code></td>
+</tr>
+<tr>
+<td><code>work-item</code></td>
+<td>Work item</td>
+<td><code>#/a-intel/core-platform/work/items/tsk_01K5RS482Q</code></td>
+<td><code>work-item.md</code></td>
+</tr>
+<tr>
+<td><code>work-orders</code></td>
+<td>Work, Work orders</td>
+<td><code>#/a-intel/core-platform/work/orders</code></td>
+<td><code>work-orders.md</code></td>
+</tr>
+<tr>
+<td><code>work-order</code></td>
+<td>Work order</td>
+<td><code>#/a-intel/core-platform/work/orders/wo_01K5RS7M4N</code></td>
+<td><code>work-order.md</code></td>
+</tr>
+<tr>
+<td><code>work-workflows</code></td>
+<td>Work, Workflows</td>
+<td><code>#/a-intel/core-platform/work/workflows</code></td>
+<td><code>work-workflows.md</code></td>
+</tr>
+<tr>
+<td><code>work-findings</code></td>
+<td>Work, Findings</td>
+<td><code>#/a-intel/core-platform/work/findings</code></td>
+<td><code>work-findings.md</code></td>
+</tr>
+<tr>
+<td><code>run</code></td>
+<td>Run, Decision trace</td>
+<td><code>#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW</code></td>
+<td><code>run.md</code></td>
+</tr>
+<tr>
+<td><code>run-transcript</code></td>
+<td>Run, Transcript</td>
+<td><code>#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW/transcript</code></td>
+<td><code>run-transcript.md</code></td>
+</tr>
+<tr>
+<td><code>run-cost</code></td>
+<td>Run, Cost</td>
+<td><code>#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW/cost</code></td>
+<td><code>run-cost.md</code></td>
+</tr>
+<tr>
+<td><code>run-evidence</code></td>
+<td>Run, Evidence</td>
+<td><code>#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW/evidence</code></td>
+<td><code>run-evidence.md</code></td>
+</tr>
+<tr>
+<td><code>run-interjection</code></td>
+<td>Run held for an answer</td>
+<td><code>#/a-intel/core-platform/runs/run_01K6QW3D5N7TYBA2</code></td>
+<td><code>run-interjection.md</code></td>
+</tr>
+<tr>
+<td><code>agents</code></td>
+<td>Agents</td>
+<td><code>#/a-intel/core-platform/agents</code></td>
+<td><code>agents.md</code></td>
+</tr>
+<tr>
+<td><code>agent</code></td>
+<td>Agent, Overview</td>
+<td><code>#/a-intel/core-platform/agents/triage</code></td>
+<td><code>agent.md</code></td>
+</tr>
+<tr>
+<td><code>agent-identity</code></td>
+<td>Agent, Identity</td>
+<td><code>#/a-intel/core-platform/agents/triage/identity</code></td>
+<td><code>agent-identity.md</code></td>
+</tr>
+<tr>
+<td><code>agent-steering</code></td>
+<td>Agent, Steering</td>
+<td><code>#/a-intel/core-platform/agents/release-manager/steering</code></td>
+<td><code>agent-steering.md</code></td>
+</tr>
+<tr>
+<td><code>agent-toolbelt</code></td>
+<td>Agent, Toolbelt</td>
+<td><code>#/a-intel/core-platform/agents/triage/toolbelt</code></td>
+<td><code>agent-toolbelt.md</code></td>
+</tr>
+<tr>
+<td><code>agent-runtime</code></td>
+<td>Agent, Runtime</td>
+<td><code>#/a-intel/core-platform/agents/triage/runtime</code></td>
+<td><code>agent-runtime.md</code></td>
+</tr>
+<tr>
+<td><code>agent-permissions</code></td>
+<td>Agent, Permissions</td>
+<td><code>#/a-intel/finops/agents/invoice-bot/permissions</code></td>
+<td><code>agent-permissions.md</code></td>
+</tr>
+<tr>
+<td><code>agent-activity</code></td>
+<td>Agent, Activity</td>
+<td><code>#/a-intel/core-platform/agents/triage/activity</code></td>
+<td><code>agent-activity.md</code></td>
+</tr>
+<tr>
+<td><code>agent-source</code></td>
+<td>Agent source</td>
+<td><code>#/a-intel/core-platform/agents/release-manager/source</code></td>
+<td><code>agent-source.md</code></td>
+</tr>
+<tr>
+<td><code>tools</code></td>
+<td>Tools</td>
+<td><code>#/a-intel/core-platform/tools</code></td>
+<td><code>tools.md</code></td>
+</tr>
+<tr>
+<td><code>tools-toolbelts</code></td>
+<td>Tools, Toolbelts</td>
+<td><code>#/a-intel/core-platform/tools/toolbelts</code></td>
+<td><code>tools-toolbelts.md</code></td>
+</tr>
+<tr>
+<td><code>tools-providers</code></td>
+<td>Tools, Providers</td>
+<td><code>#/a-intel/core-platform/tools/providers</code></td>
+<td><code>tools-providers.md</code></td>
+</tr>
+<tr>
+<td><code>tools-policy</code></td>
+<td>Tools, Policy</td>
+<td><code>#/a-intel/core-platform/tools/policy</code></td>
+<td><code>tools-policy.md</code></td>
+</tr>
+<tr>
+<td><code>tools-switches</code></td>
+<td>Tools, Kill switches</td>
+<td><code>#/a-intel/core-platform/tools/switches</code></td>
+<td><code>tools-switches.md</code></td>
+</tr>
+<tr>
+<td><code>steering</code></td>
+<td>Steering, Sources</td>
+<td><code>#/a-intel/core-platform/steering</code></td>
+<td><code>steering.md</code></td>
+</tr>
+<tr>
+<td><code>steering-source</code></td>
+<td>Steering source</td>
+<td><code>#/a-intel/core-platform/steering/sources/record/ctx.release.notes-format</code></td>
+<td><code>steering-source.md</code></td>
+</tr>
+<tr>
+<td><code>steering-source-skill</code></td>
+<td>Steering source, a skill</td>
+<td><code>#/a-intel/core-platform/steering/sources/skill/a-intel.release-notes-from-prs</code></td>
+<td><code>steering-source-skill.md</code></td>
+</tr>
+<tr>
+<td><code>steering-assignments</code></td>
+<td>Steering, Assignments</td>
+<td><code>#/a-intel/core-platform/steering/assignments</code></td>
+<td><code>steering-assignments.md</code></td>
+</tr>
+<tr>
+<td><code>steering-compiler</code></td>
+<td>Steering, Compiler</td>
+<td><code>#/a-intel/core-platform/steering/compiler/release-manager</code></td>
+<td><code>steering-compiler.md</code></td>
+</tr>
+<tr>
+<td><code>steering-proposals</code></td>
+<td>Steering, Proposals</td>
+<td><code>#/a-intel/core-platform/steering/proposals</code></td>
+<td><code>steering-proposals.md</code></td>
+</tr>
+<tr>
+<td><code>steering-prs</code></td>
+<td>Steering, Pull requests</td>
+<td><code>#/a-intel/core-platform/steering/proposals/prs</code></td>
+<td><code>steering-prs.md</code></td>
+</tr>
+<tr>
+<td><code>runtimes</code></td>
+<td>Runtimes</td>
+<td><code>#/a-intel/core-platform/runtimes</code></td>
+<td><code>runtimes.md</code></td>
+</tr>
+<tr>
+<td><code>runtime</code></td>
+<td>Runtime</td>
+<td><code>#/a-intel/core-platform/runtimes/mbell-mbp-16</code></td>
+<td><code>runtime.md</code></td>
+</tr>
+<tr>
+<td><code>spend</code></td>
+<td>Spend, Overview</td>
+<td><code>#/a-intel/core-platform/spend</code></td>
+<td><code>spend.md</code></td>
+</tr>
+<tr>
+<td><code>spend-budgets</code></td>
+<td>Spend, Budgets</td>
+<td><code>#/a-intel/core-platform/spend/budgets</code></td>
+<td><code>spend-budgets.md</code></td>
+</tr>
+<tr>
+<td><code>spend-optimization</code></td>
+<td>Spend, Optimization</td>
+<td><code>#/a-intel/core-platform/spend/optimization</code></td>
+<td><code>spend-optimization.md</code></td>
+</tr>
+<tr>
+<td><code>repositories</code></td>
+<td>Repositories</td>
+<td><code>#/a-intel/core-platform/repositories</code></td>
+<td><code>repositories.md</code></td>
+</tr>
+<tr>
+<td><code>repositories-copies</code></td>
+<td>Repositories, Working copies</td>
+<td><code>#/a-intel/core-platform/repositories/working-copies</code></td>
+<td><code>repositories-copies.md</code></td>
+</tr>
+<tr>
+<td><code>repositories-changes</code></td>
+<td>Repositories, Changes</td>
+<td><code>#/a-intel/core-platform/repositories/changes</code></td>
+<td><code>repositories-changes.md</code></td>
+</tr>
+<tr>
+<td><code>repositories-config</code></td>
+<td>Repositories, Configuration</td>
+<td><code>#/a-intel/core-platform/repositories/configuration</code></td>
+<td><code>repositories-config.md</code></td>
+</tr>
+<tr>
+<td><code>approvals-drawer</code></td>
+<td>Approvals drawer</td>
+<td><code>#/a-intel/core-platform/work</code>, drawer open</td>
+<td><code>approvals-drawer.md</code></td>
+</tr>
+<tr>
+<td><code>stella-drawer</code></td>
+<td>Stella drawer</td>
+<td><code>#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW</code>, drawer open</td>
+<td><code>stella-drawer.md</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The organization pages, Register agent, the sign-in flows and onboarding keep their ids, routes and specs.</p>
+
+<footer class="colophon"><span>Oxagen · Information architecture</span><span>Source: <code>docs/fleet-operations-ia.md</code></span></footer>
+</main>
+</div>
+</article><article id="routes" class="doc" hidden>
+<header class="mast">
+  <p class="eyebrow">Oxagen · Route map</p>
+  <h1>Fleet operations routes</h1>
+  <dl class="facts"><dt>Status</dt><dd>Draft for review</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Design authority</dt><dd><code>fleet-operations-wedge.md</code></dd><dt>Checked against</dt><dd><code>apps/app/src/shared/safe-path.ts</code> and <code>apps/app/src/shared/legacy-routes.ts</code> in <code>macanderson/oxagen</code> <code>main</code> at <code>1ba160dbc</code>; <code>route()</code> in <code>mockups/src/engine.js</code></dd></dl>
+</header>
+<div class="grid">
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#routes/rules">Rules</a></li><li><a href="#routes/workspace">Workspace</a></li><li><a href="#routes/organization-and-sign-in">Organization and sign-in</a></li><li><a href="#routes/appendix-f">Appendix F</a></li><li><a href="#routes/route-builders">Route builders</a></li></ol></nav>
+<main>
+<h2 id="routes/rules">Rules</h2>
+<ol>
+<li>Every view has one canonical path. An old path lands on it, and nothing else points at the old one.</li>
+<li>A tab or a filter is a path segment only where the view already had one. A kind filter, a grouping and a key are query values, as <code>ARCHITECTURE.md</code> §1.2 sets for filters.</li>
+<li>A path that named a page this change deletes lands on the view that absorbed it. None of them becomes a 404.</li>
+<li>The app answers an old path with a 308 through <code>responseRedirect</code> (<code>proxy.ts</code>, INV-13), or in place where the page already resolves aliases without a redirect (<code>AGENT_SECTION_ALIASES</code>, <code>STEERING_SEGMENTS</code>). The workspace root is a landing, so it answers 307.</li>
+<li>The mockup rewrites an old hash in place with <code>history.replaceState</code>, the way it already moves <code>#/:org/:ws/skills</code> under Steering, so every scenario, doc and bookmark keeps working.</li>
+</ol>
+<p>How each row lands:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Kind</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>same</td>
+<td>The path is unchanged. Its content may change</td>
+</tr>
+<tr>
+<td>308</td>
+<td>Permanent redirect to the canonical path</td>
+</tr>
+<tr>
+<td>307</td>
+<td>Temporary redirect. Used for the workspace landing only</td>
+</tr>
+<tr>
+<td>in place</td>
+<td>The page resolves the alias without a redirect, as tab aliases do today</td>
+</tr>
+<tr>
+<td>lookup 308</td>
+<td>The server reads one record to build the target, then answers 308</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="routes/workspace">Workspace</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Old path</th>
+<th>Canonical path</th>
+<th>Kind</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/{org}/{ws}</code> (Fleet)</td>
+<td><code>/{org}/{ws}/work</code></td>
+<td>307</td>
+<td>The workspace opens on Work. <code>routes.fleet</code> becomes <code>routes.work</code>, and <code>landing.ts</code> sends a new session to it</td>
+</tr>
+<tr>
+<td><code>/{org}/{ws}?cursor=…</code> (Fleet runs, a later page)</td>
+<td><code>/{org}/{ws}/work/orders</code></td>
+<td>308</td>
+<td>Runs are listed under their work orders. The cursor is dropped</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="routes/work">Work</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Old path</th>
+<th>Canonical path</th>
+<th>Kind</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>none</td>
+<td><code>/{org}/{ws}/work</code></td>
+<td>new</td>
+<td>Backlog</td>
+</tr>
+<tr>
+<td>none</td>
+<td><code>/{org}/{ws}/work/items/{item}</code></td>
+<td>new</td>
+<td>One work item</td>
+</tr>
+<tr>
+<td>none</td>
+<td><code>/{org}/{ws}/work/orders</code></td>
+<td>new</td>
+<td>Work orders</td>
+</tr>
+<tr>
+<td>none</td>
+<td><code>/{org}/{ws}/work/orders/{order}</code></td>
+<td>new</td>
+<td>One work order</td>
+</tr>
+<tr>
+<td>none</td>
+<td><code>/{org}/{ws}/work/workflows</code></td>
+<td>new</td>
+<td>Workflows. A workflow opens as a dialog over this tab, <code>?workflow={id}</code></td>
+</tr>
+<tr>
+<td>none</td>
+<td><code>/{org}/{ws}/work/findings</code></td>
+<td>new</td>
+<td>Findings. A finding's evidence opens as a dialog, <code>?finding={fnd}</code></td>
+</tr>
+<tr>
+<td><code>/{org}/{ws}/spend/findings</code></td>
+<td><code>/{org}/{ws}/work/findings</code></td>
+<td>308</td>
+<td>Findings are work</td>
+</tr>
+<tr>
+<td><code>/{org}/{ws}/spend?finding={fnd}</code></td>
+<td><code>/{org}/{ws}/work/findings?finding={fnd}</code></td>
+<td>308</td>
+<td>The evidence dialog keeps its query value</td>
+</tr>
+</tbody>
+</table></div>
+<p>The mockup drew Tasks at <code>#/:org/:ws/tasks…</code>. The app never built it, so these rows exist in the mockup alone.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Old mockup hash</th>
+<th>Canonical hash</th>
+<th>Kind</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#/:org/:ws/tasks</code></td>
+<td><code>#/:org/:ws/work</code></td>
+<td>in place</td>
+</tr>
+<tr>
+<td><code>#/:org/:ws/tasks/{task}</code></td>
+<td><code>#/:org/:ws/work/items/{task}</code></td>
+<td>in place</td>
+</tr>
+<tr>
+<td><code>#/:org/:ws/tasks/work-orders</code></td>
+<td><code>#/:org/:ws/work/orders</code></td>
+<td>in place</td>
+</tr>
+<tr>
+<td><code>#/:org/:ws/tasks/work-orders/{wo}</code></td>
+<td><code>#/:org/:ws/work/orders/{wo}</code></td>
+<td>in place</td>
+</tr>
+<tr>
+<td><code>#/:org/:ws/tasks/workflows</code></td>
+<td><code>#/:org/:ws/work/workflows</code></td>
+<td>in place</td>
+</tr>
+<tr>
+<td><code>#/:org/:ws/tasks/providers</code>, <code>…/fields</code>, <code>…/people</code></td>
+<td><code>#/:org/:ws/work</code>, with the Intake dialog open on that section</td>
+<td>in place</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="routes/runs">Runs</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Old path</th>
+<th>Canonical path</th>
+<th>Kind</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/{org}/{ws}/runs/{run}</code></td>
+<td>same</td>
+<td>same</td>
+<td>Opens the Decision trace. The header and breadcrumb name the work order</td>
+</tr>
+<tr>
+<td><code>?tab=transcript</code></td>
+<td><code>/{org}/{ws}/runs/{run}/transcript</code></td>
+<td>308</td>
+<td>In the app a run's tab was a query value. It becomes a segment, as in the mockup</td>
+</tr>
+<tr>
+<td><code>?tab=cost</code></td>
+<td><code>/{org}/{ws}/runs/{run}/cost</code></td>
+<td>308</td>
+<td></td>
+</tr>
+<tr>
+<td><code>?tab=context</code>, <code>policy</code>, <code>frames</code>, <code>player</code>, <code>approvals</code></td>
+<td><code>/{org}/{ws}/runs/{run}</code></td>
+<td>308</td>
+<td>The Decision trace absorbed the context, policy and governed actions tabs</td>
+</tr>
+<tr>
+<td><code>?tab=issues</code>, <code>chain</code>, <code>proof</code>, <code>dod</code>, <code>ladder</code></td>
+<td><code>/{org}/{ws}/runs/{run}/evidence</code></td>
+<td>308</td>
+<td>Evidence absorbed the issues and chain and seal tabs</td>
+</tr>
+<tr>
+<td><code>?kinds=</code>, <code>?frames=</code>, <code>?body=</code></td>
+<td>the same query values on <code>/transcript</code></td>
+<td>308</td>
+<td>Transcript filters keep their names</td>
+</tr>
+<tr>
+<td><code>?reads=</code>, <code>?spine=</code></td>
+<td>the same query values on any run tab</td>
+<td>same</td>
+<td>The outputs spine stays in the right column of every tab</td>
+</tr>
+</tbody>
+</table></div>
+<p><code>routes.run</code> gains a <code>tab</code> of <code>trace</code>, <code>transcript</code>, <code>cost</code> or <code>evidence</code>, and <code>trace</code> is the bare path.</p>
+<h3 id="routes/agents">Agents</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Old path</th>
+<th>Canonical path</th>
+<th>Kind</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/{org}/{ws}/agents</code></td>
+<td>same</td>
+<td>same</td>
+<td>Gains the fleet tiles</td>
+</tr>
+<tr>
+<td><code>/{org}/{ws}/agents/{agent}/{tab}</code></td>
+<td>same</td>
+<td>same</td>
+<td>Tabs: overview, identity, steering, toolbelt, runtime, permissions, activity</td>
+</tr>
+<tr>
+<td><code>…/enrollment</code>, <code>…/budgets</code>, <code>…/mandates</code>, <code>…/incidents</code>, <code>…/runs</code></td>
+<td>runtime, permissions, permissions, activity, activity</td>
+<td>in place</td>
+<td>Unchanged, <code>AGENT_SECTION_ALIASES</code></td>
+</tr>
+<tr>
+<td><code>/{org}/{ws}/agents/{agent}/definition</code></td>
+<td><code>/{org}/{ws}/agents/{agent}/source</code></td>
+<td>308</td>
+<td>One editor for one file</td>
+</tr>
+<tr>
+<td><code>/{org}/{ws}/agents/{agent}/source</code></td>
+<td>same</td>
+<td>same</td>
+<td></td>
+</tr>
+<tr>
+<td><code>/{org}/{ws}/mandates/{mandate}</code></td>
+<td><code>/{org}/{ws}/agents/{agent}/permissions?delegation={mandate}</code></td>
+<td>lookup 308</td>
+<td>The server reads the mandate for its agent. The Delegation section opens on that mandate. <code>routes.mandate</code> retires</td>
+</tr>
+<tr>
+<td><code>#/:org/:ws/agents/{agent}/mandates/{mandate}</code> (mockup)</td>
+<td><code>#/:org/:ws/agents/{agent}/permissions</code></td>
+<td>in place</td>
+<td>The delegation is highlighted</td>
+</tr>
+<tr>
+<td><code>/{org}/{ws}/register/{step}</code></td>
+<td>same</td>
+<td>same</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="routes/tools">Tools</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Old path</th>
+<th>Canonical path</th>
+<th>Kind</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/{org}/{ws}/tools[/{tab}]</code></td>
+<td>same</td>
+<td>same</td>
+<td>Tabs: tools, toolbelts, providers, policy, switches</td>
+</tr>
+<tr>
+<td><code>…/servers</code>, <code>…/connections</code>, <code>…/registry</code>, <code>…/autoapprovals</code></td>
+<td>providers, providers, tools, policy</td>
+<td>in place</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td><code>/{org}/{ws}/tools/mandates</code></td>
+<td><code>/{org}/{ws}/agents</code></td>
+<td>308</td>
+<td>The mandates ledger the app drew on Policy moves to each agent's Delegation section. The roster's Delegation column lists who holds one</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="routes/steering">Steering</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Old path</th>
+<th>Canonical path</th>
+<th>Kind</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/{org}/{ws}/steering</code></td>
+<td>same</td>
+<td>same</td>
+<td>Sources replaces the Library's All shelf</td>
+</tr>
+<tr>
+<td><code>/steering/library</code></td>
+<td><code>/steering</code></td>
+<td>308</td>
+<td></td>
+</tr>
+<tr>
+<td><code>/steering/records</code></td>
+<td><code>/steering?kind=record</code></td>
+<td>308</td>
+<td>The shelf becomes a kind filter</td>
+</tr>
+<tr>
+<td><code>/steering/instructions</code></td>
+<td><code>/steering?kind=instruction</code></td>
+<td>308</td>
+<td></td>
+</tr>
+<tr>
+<td><code>/steering/skills</code></td>
+<td><code>/steering?kind=skill</code></td>
+<td>308</td>
+<td></td>
+</tr>
+<tr>
+<td><code>/steering/memory</code></td>
+<td><code>/steering?kind=memory</code></td>
+<td>308</td>
+<td></td>
+</tr>
+<tr>
+<td><code>/steering/ontology</code></td>
+<td><code>/steering?kind=glossary</code></td>
+<td>308</td>
+<td>An ontology note is a glossary term</td>
+</tr>
+<tr>
+<td><code>/steering/records/{lineage}</code></td>
+<td><code>/steering/sources/record/{lineage}</code></td>
+<td>308</td>
+<td><code>routes.steeringRecord</code> becomes <code>routes.steeringSource(kind, id)</code></td>
+</tr>
+<tr>
+<td><code>/steering/skills/{skill}/source</code></td>
+<td><code>/steering/sources/skill/{skill}</code></td>
+<td>308</td>
+<td>The skill's bundle and editor live on its source page</td>
+</tr>
+<tr>
+<td><code>/steering/gates</code>, <code>/policy</code>, <code>/settings</code>, <code>/freshness</code></td>
+<td><code>/{org}/{ws}/tools/policy</code></td>
+<td>308</td>
+<td>Tools › Policy owns every gate, the freshness gates included</td>
+</tr>
+<tr>
+<td><code>/steering/assignments</code>, <code>/deliveries</code></td>
+<td><code>/steering/assignments</code></td>
+<td>same, in place</td>
+<td></td>
+</tr>
+<tr>
+<td><code>/steering/compiler[/{agent}]</code></td>
+<td>same</td>
+<td>same</td>
+<td></td>
+</tr>
+<tr>
+<td><code>/steering/preview/{agent}</code></td>
+<td><code>/steering/compiler/{agent}</code></td>
+<td>in place</td>
+<td>Unchanged</td>
+</tr>
+<tr>
+<td><code>/steering/proposals</code></td>
+<td>same</td>
+<td>same</td>
+<td></td>
+</tr>
+<tr>
+<td><code>/steering/proposals/prs</code>, <code>/steering/prs</code></td>
+<td><code>/steering/proposals/prs</code></td>
+<td>same, in place</td>
+<td></td>
+</tr>
+<tr>
+<td><code>/steering?tab={id}</code></td>
+<td>the path its id names in this table</td>
+<td>308</td>
+<td>Unchanged rule, new targets</td>
+</tr>
+<tr>
+<td><code>/{org}/{ws}/skills</code>, <code>/skills/{…}</code></td>
+<td><code>/steering?kind=skill</code></td>
+<td>308</td>
+<td>The target moves from <code>/steering/skills</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>STEERING_SEGMENTS</code> in <code>safe-path.ts</code> keeps <code>sources</code>, <code>assignments</code>, <code>compiler</code> and <code>proposals</code>, and maps every older id to the rows above.</p>
+<h3 id="routes/spend">Spend</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Old path</th>
+<th>Canonical path</th>
+<th>Kind</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/{org}/{ws}/spend</code></td>
+<td>same</td>
+<td>same</td>
+<td>Opens Overview, not Findings</td>
+</tr>
+<tr>
+<td><code>/spend/tokens</code>, <code>/spend/coaching</code>, <code>/spend/waste</code></td>
+<td><code>/spend/optimization</code></td>
+<td>308</td>
+<td></td>
+</tr>
+<tr>
+<td><code>/spend/operator</code>, <code>/agent</code>, <code>/model</code>, <code>/tool</code></td>
+<td><code>/spend?by=operator</code>, <code>agent</code>, <code>model</code>, <code>tool</code></td>
+<td>308</td>
+<td>A grouping is a query value</td>
+</tr>
+<tr>
+<td><code>/spend/task</code></td>
+<td><code>/spend?by=work</code></td>
+<td>308</td>
+<td>Spend by work order replaces spend by task reference</td>
+</tr>
+<tr>
+<td><code>/spend/cost_center</code></td>
+<td><code>/spend?by=cost_center</code></td>
+<td>308</td>
+<td>ADR-142 stays</td>
+</tr>
+<tr>
+<td><code>/spend/pricing</code></td>
+<td><code>/spend?by=model</code></td>
+<td>308</td>
+<td>Each model row names its price and the models the book cannot price</td>
+</tr>
+<tr>
+<td><code>/spend/{operator,agent,tool}/{key}</code></td>
+<td><code>/spend?by={kind}&amp;key={key}</code></td>
+<td>308</td>
+<td>The key opens the side panel. There are no drill pages</td>
+</tr>
+<tr>
+<td><code>/spend/budgets</code></td>
+<td>same</td>
+<td>same</td>
+<td></td>
+</tr>
+</tbody>
+</table></div>
+<p><code>routes.spend</code> takes <code>{ view: &quot;overview&quot; | &quot;budgets&quot; | &quot;optimization&quot;, by?, key? }</code>.</p>
+<h3 id="routes/runtimes-and-repositories">Runtimes and Repositories</h3>
+<p>The app's paths are unchanged: <code>/{org}/{ws}/runtimes[/{runtime}]</code> and <code>/{org}/{ws}/repositories[/{tab}[/{change}]]</code>, where the Repositories tabs are <code>working-copies</code>, <code>changes</code> and <code>configuration</code>. The app addresses a runtime by its enrollment id (<code>tch_…</code>). The mockup addresses a host by its hostname, and it drew two tab segments of its own, which it now rewrites in place:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Old path (mockup)</th>
+<th>Canonical path</th>
+<th>Kind</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>#/:org/:ws/repositories/copies</code></td>
+<td><code>#/:org/:ws/repositories/working-copies</code></td>
+<td>in place</td>
+<td>The segment the app ships</td>
+</tr>
+<tr>
+<td><code>#/:org/:ws/repositories/config</code></td>
+<td><code>#/:org/:ws/repositories/configuration</code></td>
+<td>in place</td>
+<td>The segment the app ships</td>
+</tr>
+<tr>
+<td><code>#/:org/:ws/repositories/changes/{id}</code></td>
+<td>same</td>
+<td>same</td>
+<td>Opens that pull request in the Changes tab</td>
+</tr>
+<tr>
+<td><code>#/:org/:ws/tools/toolbelts?belt={id}</code></td>
+<td>same</td>
+<td>new</td>
+<td>Opens that belt, so a <code>capability</code> frame's source links to it</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="routes/organization-and-sign-in">Organization and sign-in</h2>
+<p>Unchanged: <code>/{org}</code>, <code>/{org}/roles</code>, <code>/{org}/api-keys</code>, <code>/{org}/model-funding</code>, <code>/{org}/sso</code>, <code>/{org}/billing</code>, <code>/{org}/audit[/{tab}]</code>, the sign-in routes, <code>/invite/{token}</code>, <code>/new-organization</code>, <code>/welcome/…</code> and <code>/cli/…</code>.</p>
+<h2 id="routes/appendix-f">Appendix F</h2>
+<p><code>legacy-routes.ts</code> answers the Appendix F table with 308s. Three of its targets move.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Old target</th>
+<th>New target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fleet, for the knowledge and workbench pages</td>
+<td><code>/{org}/{ws}/work</code></td>
+</tr>
+<tr>
+<td><code>/steering?tab=skills</code>, for the skills pages</td>
+<td><code>/steering?kind=skill</code></td>
+</tr>
+<tr>
+<td><code>/steering</code>, for <code>knowledge/memory</code></td>
+<td><code>/steering?kind=memory</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="routes/route-builders">Route builders</h2>
+<p>A design note for the lane that builds this. Nothing here is implemented.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th><code>routes</code> today</th>
+<th>After</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>fleet(org, ws, { cursor })</code></td>
+<td><code>work(org, ws, { tab?: &quot;orders&quot; | &quot;workflows&quot; | &quot;findings&quot;, intake?, finding?, workflow? })</code></td>
+</tr>
+<tr>
+<td>none</td>
+<td><code>workItem(org, ws, item)</code>, <code>workOrder(org, ws, order)</code></td>
+</tr>
+<tr>
+<td><code>run(org, ws, run, { tab, kinds, frames, body, reads, spine })</code></td>
+<td><code>run(org, ws, run, { tab?: &quot;transcript&quot; | &quot;cost&quot; | &quot;evidence&quot;, kinds, frames, body, reads, spine })</code>, with the tab as a segment</td>
+</tr>
+<tr>
+<td><code>agent(org, ws, agent, { tab })</code></td>
+<td>Unchanged, with <code>definition</code> aliased to the source page</td>
+</tr>
+<tr>
+<td><code>mandate(org, ws, mandate, …)</code></td>
+<td>Retired. <code>agent(org, ws, agent, { tab: &quot;permissions&quot;, delegation })</code></td>
+</tr>
+<tr>
+<td><code>skills(org, ws, { cursor })</code></td>
+<td><code>steering(org, ws, { kind: &quot;skill&quot; })</code></td>
+</tr>
+<tr>
+<td><code>steeringRecord(org, ws, lineage)</code></td>
+<td><code>steeringSource(org, ws, kind, id)</code></td>
+</tr>
+<tr>
+<td><code>steering(org, ws, { tab, agent, skill, kind, … })</code></td>
+<td><code>steering(org, ws, { tab?: &quot;assignments&quot; | &quot;compiler&quot; | &quot;proposals&quot; | &quot;prs&quot;, agent, kind, … })</code></td>
+</tr>
+<tr>
+<td><code>spend(org, ws, { tab, drill, finding })</code></td>
+<td><code>spend(org, ws, { view?: &quot;budgets&quot; | &quot;optimization&quot;, by?, key? })</code></td>
+</tr>
+</tbody>
+</table></div>
+
+<footer class="colophon"><span>Oxagen · Route map</span><span>Source: <code>docs/fleet-operations-routes.md</code></span></footer>
+</main>
+</div>
+</article><article id="collapse" class="doc" hidden>
+<header class="mast">
+  <p class="eyebrow">Oxagen · Deletion list</p>
+  <h1>Fleet operations deletion list</h1>
+  <dl class="facts"><dt>Status</dt><dd>Proposed with the mockup change</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Design authority</dt><dd><code>fleet-operations-wedge.md</code></dd></dl>
+</header>
+<div class="grid">
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#collapse/surfaces">Surfaces</a></li><li><a href="#collapse/page-specs-stories-and-scenarios">Page specs, stories and scenarios</a></li><li><a href="#collapse/in-the-app">In the app</a></li></ol></nav>
+<main>
+<p>This list has two halves. The first is what this change deletes or merges in this repository: surfaces in the mockup, page specs, stories, fixtures and scenarios. The second is what the app build deletes or merges in <code>macanderson/oxagen</code> when a lane builds the wedge. Check <code>DEREGISTERED.md</code> in that repository before deleting a feature's files there.</p>
+<h2 id="collapse/surfaces">Surfaces</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Surface</th>
+<th>Action</th>
+<th>Into</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fleet page</td>
+<td>Delete</td>
+<td>Work (the waiting count, live work), Agents (the population, Steer, Register agent), each work order's runs</td>
+</tr>
+<tr>
+<td>Tasks page</td>
+<td>Rename</td>
+<td>Work</td>
+</tr>
+<tr>
+<td>Tasks tabs Providers, Fields, People</td>
+<td>Merge</td>
+<td>The Intake dialog on Backlog</td>
+</tr>
+<tr>
+<td>Spend › Findings</td>
+<td>Move</td>
+<td>Work › Findings</td>
+</tr>
+<tr>
+<td>Skills console: Catalog, Search, In the loop, Reflection, Versions</td>
+<td>Delete</td>
+<td>Skills are Steering Sources. Search is the Compiler. The interjection stays in the Approvals drawer</td>
+</tr>
+<tr>
+<td>Skill reflection</td>
+<td>Delete</td>
+<td>Nothing</td>
+</tr>
+<tr>
+<td>Skill source page</td>
+<td>Merge</td>
+<td>The skill's Steering source page</td>
+</tr>
+<tr>
+<td>Mandate page</td>
+<td>Delete</td>
+<td>Agent › Permissions › Delegation</td>
+</tr>
+<tr>
+<td>Fork replay, Bisect, the frame player transport, the transcript playback, replay grades</td>
+<td>Delete</td>
+<td>Nothing. The chain and seal stay under Evidence</td>
+</tr>
+<tr>
+<td>Run tabs Issues, Governed actions, Policy, Context, Chain and seal</td>
+<td>Merge</td>
+<td>Decision trace and Evidence</td>
+</tr>
+<tr>
+<td>Steering Library and its shelves</td>
+<td>Merge</td>
+<td>Sources, with a kind filter</td>
+</tr>
+<tr>
+<td>Steering › Memory and Steering › Ontology</td>
+<td>Merge</td>
+<td>Source kinds <code>memory</code> and <code>glossary</code> on Sources. Promotion is a proposal</td>
+</tr>
+<tr>
+<td>Steering › Gates</td>
+<td>Move</td>
+<td>Tools › Policy, and constraint frames on Sources</td>
+</tr>
+<tr>
+<td>Context record page</td>
+<td>Rename</td>
+<td>Steering source page, kind <code>record</code></td>
+</tr>
+<tr>
+<td>Spend tabs Tokens, Coaching, By operator, By agent, By model, By tool, Wasted spend</td>
+<td>Merge</td>
+<td>Overview (grouping) and Optimization</td>
+</tr>
+<tr>
+<td>Spend drill pages</td>
+<td>Delete</td>
+<td>The Overview side panel</td>
+</tr>
+<tr>
+<td>Operator coaching severity and ranking</td>
+<td>Delete</td>
+<td>Operator habits as rules to adopt, with no rank</td>
+</tr>
+<tr>
+<td>Agent › Definition in git</td>
+<td>Merge</td>
+<td>The agent source page</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="collapse/page-specs-stories-and-scenarios">Page specs, stories and scenarios</h2>
+<h3 id="collapse/page-specs">Page specs</h3>
+<p>Each deleted spec's content that still holds moved into the spec that replaces it. The audit prompt
+beside each deleted spec is deleted with it.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Deleted spec</th>
+<th>Replaced by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mockups/pages/fleet.md</code></td>
+<td><code>work-backlog.md</code>, <code>work-orders.md</code> (first run) and <code>agents.md</code> (tiles, Steer, Register agent)</td>
+</tr>
+<tr>
+<td><code>mockups/pages/tasks.md</code></td>
+<td><code>work-backlog.md</code>, <code>work-orders.md</code>, <code>work-workflows.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/tasks-providers.md</code></td>
+<td><code>work-intake.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/task.md</code></td>
+<td><code>work-item.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/mandate.md</code></td>
+<td><code>agent-permissions.md</code> (Delegation)</td>
+</tr>
+<tr>
+<td><code>mockups/pages/skills.md</code>, <code>skills-off.md</code></td>
+<td><code>steering.md</code> (Sources, kind skill), <code>steering-compiler.md</code>, <code>run-interjection.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/skill-source.md</code></td>
+<td><code>steering-source-skill.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/record.md</code></td>
+<td><code>steering-source.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/steering-records.md</code>, <code>steering-memory.md</code>, <code>steering-ontology.md</code></td>
+<td><code>steering.md</code> (Sources) and <code>steering-source.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/steering-gates.md</code></td>
+<td><code>tools-policy.md</code>, and policy sources on <code>steering.md</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>New specs, one per unique view (<code>fleet-operations-ia.md</code>, Unique views): <code>work-backlog</code>, <code>work-intake</code>,
+<code>work-item</code>, <code>work-orders</code>, <code>work-workflows</code>, <code>work-findings</code>, <code>run-transcript</code>, <code>run-cost</code>,
+<code>run-evidence</code>, <code>approvals-drawer</code>, <code>stella-drawer</code>, <code>agent-identity</code>, <code>agent-steering</code>,
+<code>agent-toolbelt</code>, <code>agent-runtime</code>, <code>agent-permissions</code>, <code>agent-activity</code>, <code>tools-toolbelts</code>,
+<code>tools-providers</code>, <code>tools-policy</code>, <code>tools-switches</code>, <code>steering-source</code>, <code>steering-source-skill</code>,
+<code>steering-prs</code>, <code>runtime</code>, <code>spend-budgets</code>, <code>spend-optimization</code>, <code>repositories-copies</code>,
+<code>repositories-changes</code> and <code>repositories-config</code>. Rewritten: <code>run</code>, <code>run-interjection</code>, <code>agents</code>,
+<code>agent</code>, <code>agent-source</code>, <code>work-order</code>, <code>tools</code>, <code>steering</code>, <code>steering-assignments</code>,
+<code>steering-compiler</code>, <code>steering-proposals</code>, <code>runtimes</code>, <code>spend</code> and <code>repositories</code>.</p>
+<h3 id="collapse/stories">Stories</h3>
+<p><code>node tools/build-stories.mjs</code> removed the stories of every deleted page (<code>fleet</code>, <code>tasks</code>,
+<code>tasks-work-orders</code>, <code>tasks-workflows</code>, <code>tasks-providers</code>, <code>tasks-fields</code>, <code>tasks-people</code>, <code>task</code>,
+<code>mandate</code>, <code>toolbelts</code>, <code>providers</code>, <code>record</code>, <code>skills</code>, <code>skills-off</code>, <code>skill-source</code>,
+<code>steering-records</code>, <code>steering-memory</code>, <code>steering-ontology</code> and <code>steering-gates</code>) and of the two retired
+scenarios. It writes one story file per unique view. A redesigned view has a loaded story in each
+shell, and a view with future-only fields has a third story that outlines them.
+<code>mockups/stories/_view.js</code>, which every story imports and which was missing on <code>main</code>, is restored with
+<code>future</code> and <code>drawer</code> controls.</p>
+<h3 id="collapse/scenarios">Scenarios</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W4 The flight recorder</td>
+<td>Retired. It walked the frame player, the Context tab, fork replay and bisect, all cut</td>
+</tr>
+<tr>
+<td>W13 In the loop</td>
+<td>Retired. It walked the skills console. The interjection it ended on stays in the Approvals drawer</td>
+</tr>
+<tr>
+<td>W1 Sixty seconds to governed</td>
+<td>Step 6 lands on Work, on the smoke run's direct work order</td>
+</tr>
+<tr>
+<td>W2 Stop it, steer it</td>
+<td>Opens on the work order, reads the steer as an <code>invocation</code> frame in the Decision trace, and steers the fleet from Agents</td>
+</tr>
+<tr>
+<td>W3 Money asked, a human answered</td>
+<td>Answers from the Approvals drawer, reads the mandate as Delegation and as a <code>delegation</code> frame</td>
+</tr>
+<tr>
+<td>W6 Learned, approved, changed</td>
+<td>Walks Sources, the pull request, the Compiler and the Decision trace</td>
+</tr>
+<tr>
+<td>W8 Every dollar, every operator</td>
+<td>Groups spend by work order, operator and agent, reads operator habits, and picks up a finding in Work</td>
+</tr>
+<tr>
+<td>W11 Whose account it is</td>
+<td>Opens from Work</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="collapse/fixtures-and-code">Fixtures and code</h3>
+<ul>
+<li>Deleted fixtures: <code>sk-created.json</code>, <code>sk-hist.json</code>, <code>sk-queries.json</code> and <code>sk-reflect.json</code>, read only
+by the skills console.</li>
+<li>Added fixtures: <code>sources.json</code> (the registration, documents, skill bundles, withheld skills and a run's
+skill resolution). <code>tasks.json</code> gained a dispatched work order, its work item and a work item opened
+from a finding. <code>transcripts.json</code> gained the live release run's <code>TodoWrite</code> plan versions and an
+<code>oxagen__report_status</code> call.</li>
+<li><code>mockups/src/wedge.js</code> holds the new views and <code>mockups/src/boot.js</code> the first render.
+<code>tools/build-mockup.mjs</code> appends both to <code>engine.js</code>.</li>
+<li>119 functions and 17 variables left <code>mockups/src/engine.js</code> once nothing reached them: the Fleet
+page, the Tasks list, the mandate page, the skills console and reflection, the Library shelves and
+the Memory, Ontology and Gates tabs, the old Compiler, the spend drill pages and coaching severity,
+the frame player, fork replay, bisect and the transcript playback.</li>
+</ul>
+<h2 id="collapse/in-the-app">In the app</h2>
+<p>What a lane that builds the wedge in <code>macanderson/oxagen</code> deletes, merges or adds. Read <code>DEREGISTERED.md</code>
+first: a feature taken off the surfaces whose code stays is registered there, and its files are not
+deleted without an ADR. Every route change keeps the old address working (<code>fleet-operations-routes.md</code>).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Lane or path</th>
+<th>Action</th>
+<th>Into</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>apps/app/src/app/[org]/[ws]/(fleet)</code> and <code>apps/app/src/features/fleet/</code></td>
+<td>Merge</td>
+<td>Work becomes the workspace root. <code>stat-strip</code> tiles and <code>steer-fleet</code> move to Agents. The runs table becomes each work order's Runs panel. <code>approval-decision</code> stays with the Approvals drawer</td>
+</tr>
+<tr>
+<td><code>apps/app/src/features/spend/fleet-tiles.tsx</code></td>
+<td>Move</td>
+<td>The Agents tiles</td>
+</tr>
+<tr>
+<td><code>apps/app/src/app/[org]/[ws]/mandates/[mandate]</code> and <code>apps/app/src/features/mandate/</code></td>
+<td>Merge</td>
+<td>Agent › Permissions › Delegation. The route redirects to <code>agents/{agent}/permissions?delegation={mandate}</code></td>
+</tr>
+<tr>
+<td><code>apps/app/src/app/[org]/[ws]/skills</code> and <code>apps/app/src/features/skills/</code> (console, search, versions)</td>
+<td>Merge</td>
+<td>Sources, kind skill, and the skill's source page. The interjection stays</td>
+</tr>
+<tr>
+<td><code>apps/app/src/features/steering/</code> (shelves, library, memory shelf, records shelf, deliveries, freshness)</td>
+<td>Merge</td>
+<td>Sources, Assignments, Compiler and Proposals. Freshness and the gate settings move to Tools › Policy</td>
+</tr>
+<tr>
+<td><code>apps/app/src/features/record/</code></td>
+<td>Rename</td>
+<td>The Steering source page, kind <code>record</code></td>
+</tr>
+<tr>
+<td><code>apps/app/src/features/run/</code> (<code>frame-player.tsx</code>, <code>player-bar.tsx</code>, <code>player-model.ts</code>, <code>player-hues.ts</code>, <code>replay-actions.tsx</code>, <code>timeline.tsx</code>, <code>policy-tab.tsx</code>, <code>context-tab.tsx</code>, <code>issues-tab.tsx</code>)</td>
+<td>Merge or delete</td>
+<td>The Decision trace and Evidence. The player, replay and bisect are cut</td>
+</tr>
+<tr>
+<td><code>apps/app/src/features/spend/</code> (<code>drill.tsx</code>, <code>coaching.tsx</code>, <code>findings*.tsx</code>)</td>
+<td>Merge or move</td>
+<td>The Overview side panel and Optimization. Findings move to Work</td>
+</tr>
+<tr>
+<td><code>apps/app/src/shared/safe-path.ts</code></td>
+<td>Change</td>
+<td>The route builders in <code>fleet-operations-routes.md</code></td>
+</tr>
+<tr>
+<td><code>apps/app/e2e/routes.ts</code></td>
+<td>Change</td>
+<td>The page-load route table follows the new routes. The suite keeps exactly <code>login</code>, <code>pay</code> and <code>page-load</code></td>
+</tr>
+<tr>
+<td><code>apps/app/capability-ui-map.json</code></td>
+<td>Change</td>
+<td>Bindings for the moved controls, checked by <code>pnpm check:ui-parity</code></td>
+</tr>
+<tr>
+<td><code>apps/app/messages/</code> and <code>src/i18n/messages.d.ts</code></td>
+<td>Change</td>
+<td>The new strings, regenerated with <code>pnpm --filter @oxagen/app gen:messages</code></td>
+</tr>
+<tr>
+<td>New: work items, work orders, workflows and intake</td>
+<td>Add</td>
+<td>Contracts, handlers and stores. Every Work view is future-only until they ship</td>
+</tr>
+<tr>
+<td>New: frame types and per-frame provenance on <code>steering.manifest</code>, and a Compiler capability</td>
+<td>Add</td>
+<td>The Decision trace envelope and the Compiler (#3879)</td>
+</tr>
+<tr>
+<td>New: <code>report_status</code></td>
+<td>Add</td>
+<td>Self-reported uncertainty in the Decision trace</td>
+</tr>
+</tbody>
+</table></div>
+
+<footer class="colophon"><span>Oxagen · Deletion list</span><span>Source: <code>docs/fleet-operations-collapse.md</code></span></footer>
+</main>
+</div>
+</article><article id="spec" class="doc" hidden>
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
   <h1>Oxagen Mission Control: Product and Technical Specification</h1>
@@ -8765,11 +11187,11 @@ pnpm --filter @oxagen/desktop dev          # tauri dev over Vite on :1420
 </article><article id="creation" class="doc" hidden>
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
-  <h1>Creating things in Oxagen: agents, tools, skills and context records</h1>
-  <dl class="facts"><dt>Status</dt><dd>Spec v1, for build — rev 1 scope</dd><dt>Date</dt><dd>2026-09-15</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/engine.js</code> → <code>DLG_EXT.create</code>, <code>DLG_EXT.wz</code>, <code>wzTool</code>, <code>wzSkill</code>, <code>wzAgent</code>, <code>wzRecord</code>, <code>pRecord</code>, <code>pSkillSource</code>; rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs, it does not run); <code>mission-control-spec.md</code> §10 (context and steering), §14 (Mission Control); <code>w13-in-the-loop-scenario.md</code></dd><dt>Related</dt><dd><code>pages/record.md</code>, <code>pages/skill-source.md</code>, <code>pages/tools.md</code>, <code>pages/agents.md</code>, <code>pages/skills.md</code>, <code>pages/steering.md</code></dd></dl>
+  <h1>Creating things in Oxagen: agents, tools, skills and Steering records</h1>
+  <dl class="facts"><dt>Status</dt><dd>Spec v1, for build, rev 1 scope. Amended 2026-09-24 by the fleet operations wedge (<code>fleet-operations-wedge.md</code>): a context record is a Steering record, skills are a kind on Steering › Sources, and the editing pages are the Steering source pages</dd><dt>Date</dt><dd>2026-09-15</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/engine.js</code> → <code>DLG_EXT.create</code>, <code>DLG_EXT.wz</code>, <code>wzTool</code>, <code>wzSkill</code>, <code>wzAgent</code>, <code>wzRecord</code>, <code>pRecord</code>, <code>pSkillSource</code>; rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs, it does not run); <code>mission-control-spec.md</code> §10 (context and steering), §14 (Mission Control); <code>w13-in-the-loop-scenario.md</code></dd><dt>Related</dt><dd><code>pages/steering-source.md</code>, <code>pages/steering-source-skill.md</code>, <code>pages/tools.md</code>, <code>pages/agents.md</code>, <code>pages/steering.md</code>, <code>pages/steering-prs.md</code>, <code>pages/repositories-changes.md</code></dd></dl>
 </header>
 <div class="grid">
-<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#creation/1-one-shape-four-things">1. One shape, four things</a></li><li><a href="#creation/2-the-wizard-shell">2. The wizard shell</a></li><li><a href="#creation/3-a-tool">3. A tool</a></li><li><a href="#creation/4-a-skill">4. A skill</a></li><li><a href="#creation/5-a-context-record">5. A context record</a></li><li><a href="#creation/6-what-this-feature-must-never-do">6. What this feature must never do</a></li></ol></nav>
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#creation/1-one-shape-four-things">1. One shape, four things</a></li><li><a href="#creation/2-the-wizard-shell">2. The wizard shell</a></li><li><a href="#creation/3-a-tool">3. A tool</a></li><li><a href="#creation/4-a-skill">4. A skill</a></li><li><a href="#creation/5-a-steering-record">5. A Steering record</a></li><li><a href="#creation/6-what-this-feature-must-never-do">6. What this feature must never do</a></li></ol></nav>
 <main>
 <h2 id="creation/1-one-shape-four-things">1. One shape, four things</h2>
 <p>There are four things an operator creates in Oxagen — an agent, a tool, a skill and a context
@@ -8787,7 +11209,7 @@ reviewed. It is also what lets the tool wizard offer to generate Rust: the code 
 repository, under your review. What Oxagen governs is the call, not the source.</p>
 <p><strong>The drafting turn belongs to <code>oxagen.assistant</code>.</strong> It is recorded with frames and a receipt like
 any turn, and it is billed to Oxagen, never to the tenant: it is not one of your runs and it never
-appears in Fleet or in Spend. Every line it drafts is the operator's to change before anybody
+appears in Work or in Spend. Every line it drafts is the operator's to change before anybody
 reviews it, and the wizard says so on every drafting step.</p>
 <h3 id="creation/entry-points">Entry points</h3>
 <p><code>Create</code> in ⌘K opens the chooser (<code>DLG_EXT.create</code>), and each page carries its own:</p>
@@ -8811,19 +11233,20 @@ reviews it, and the wizard says so on every drafting step.</p>
 <td><code>wzOpen(&quot;tool&quot;)</code></td>
 </tr>
 <tr>
-<td>Steering · Skills</td>
-<td><strong>Add a skill</strong></td>
-<td><code>wzOpen(&quot;skill&quot;)</code></td>
+<td>Steering › Sources</td>
+<td><strong>New source</strong>, then <strong>Write one</strong> on the Steering record card</td>
+<td><code>DLG_EXT.newsrc</code>, then <code>wzOpen(&quot;record&quot;)</code></td>
 </tr>
 <tr>
-<td>Steering (every other tab)</td>
-<td><strong>Write a context record</strong></td>
-<td><code>wzOpen(&quot;record&quot;)</code></td>
+<td>Steering › Sources</td>
+<td><strong>New source</strong>, then <strong>Add one</strong> on the Skill card</td>
+<td><code>DLG_EXT.newsrc</code>, then <code>wzOpen(&quot;skill&quot;)</code></td>
 </tr>
 </tbody>
 </table></div>
-<p>Skills is a tab of Steering, not a page of its own. Steering is the hub for everything that steers
-an agent: Records, Skills, Memory, Ontology, Policy, Proposals, Preview (<code>mockups/pages/steering.md</code>).</p>
+<p>Skills are a kind of Steering Source, not a page of their own. Sources lists every kind in one list
+with a kind filter (<code>mockups/pages/steering.md</code>). The New source chooser also registers a document
+and defines a glossary term, which are dialogs of their own and not wizards of this spec.</p>
 <p><strong>New agent</strong> is not <strong>Register an agent</strong>. Register wraps an agent that already runs on a machine
 or in CI; New agent writes one that does not exist yet. Both end on a pull request; they start from
 opposite ends.</p>
@@ -8883,15 +11306,15 @@ paid for on every turn it is loaded into, by every agent that loads it.</li>
 recomputed at merge, grants (a skill cannot raise a tier or add a tool), secret scan, and the load
 cost against the workspace's search budget.</li>
 </ol>
-<p><strong>Changing a skill</strong> is <code>pages/skill-source.md</code>: the same editor over <code>SKILL.md</code>, reached from the
-catalog row's <strong>Edit</strong> and from the skill dialog, ending on the same kind of pull request with the
+<p><strong>Changing a skill</strong> is <code>pages/steering-source-skill.md</code>: the same editor over <code>SKILL.md</code>, reached from
+the skill's row on Steering › Sources and from the skill dialog, ending on the same kind of pull request with the
 patch version bumped.</p>
 <p><strong>Where it ends.</strong> The pull request is listed on Repositories · Changes with kind <code>skill</code>. After the
 merge the skill is in the catalog on Steering · Skills, and <strong>sync</strong> materializes its files into
 each enrolled checkout. The Delivered by sync panel shows each repository’s state. The harness loads
 the file by its own progressive disclosure. Only the description line competes in the assembler, and
-Steering · Preview shows it competing.</p>
-<h2 id="creation/5-a-context-record">5. A context record</h2>
+Steering › Compiler shows it competing.</p>
+<h2 id="creation/5-a-steering-record">5. A Steering record</h2>
 <p>The kind is not a label. It decides how the statement is delivered, what the checks assert about it,
 and how a run is allowed to use it — so the wizard makes you pick one before it will let you write
 the sentence, and it shows what each kind can never do.</p>
@@ -8910,13 +11333,13 @@ and the only place that is catchable is on the pull request, before either reach
 <li><strong>Pull request</strong> — merge is the publication, and the record is in force from the merge commit, not
 from when it was written.</li>
 </ol>
-<p><strong>Reading and changing one</strong> is <code>pages/record.md</code>: the statement as the headline, a per-kind panel,
+<p><strong>Reading and changing one</strong> is <code>pages/steering-source.md</code>: the statement as the headline, a per-kind panel,
 and the statement in the same editor.</p>
-<p><strong>Where it ends.</strong> The wizard closes on Steering · Proposals, on the Context PRs view
+<p><strong>Where it ends.</strong> The wizard closes on Steering › Proposals, on the Pull requests view
 (<code>#/:org/:ws/steering/proposals/prs</code>), with the new pull request selected. After the merge the record
 is on Steering · Records with its force, scope, token cost, and compilation chip: “compiles to text”,
 or “compiles to text and a gate” when it carries an enforcement grant. A record written in the wizard
-carries no grant. Steering · Preview shows where the record lands for an agent and a prompt: the
+carries no grant. Steering › Compiler shows where the record lands for an agent and a prompt: the
 stable prefix for <code>must</code> and <code>should</code>, the volatile selection for <code>may</code> and <code>info</code>.</p>
 <h2 id="creation/6-what-this-feature-must-never-do">6. What this feature must never do</h2>
 <ul>
@@ -8935,7 +11358,7 @@ version lands in the registry callable by nobody until a role grant puts it on a
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
   <h1>Tasks and work orders</h1>
-  <dl class="facts"><dt>Status</dt><dd>Spec v1, for design review. No code is written against it yet.</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/engine.js</code> (the Tasks section: <code>pTasks</code>, <code>pTask</code>, <code>pWorkOrder</code>, <code>DLG_EXT.ipwz</code>, <code>DLG_EXT.wo</code>, <code>DLG_EXT.certify</code>, <code>DLG_EXT.wfnew</code>), <code>mockups/fixtures/tasks.json</code>, rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs agents, it does not run them), ADR-096 (the launcher may contain the process), ADR-101 (four first-class harnesses), ADR-157 (ARP carries an operator-authored brief), ADR-053 (the assistant), ADR-052 (the governed action is the billable unit)</dd><dt>Related</dt><dd><code>creation-spec.md</code> (every definition is a file, and a wizard ends on a pull request), <code>dod-spec.md</code> (the run dod, a different object), <code>mission-control-spec.md</code> §1 (the operator), §7.6 (agent messages are quoted evidence), §11.2 (connectors)</dd><dt>Pages</dt><dd><code>mockups/pages/tasks.md</code>, <code>tasks-providers.md</code>, <code>task.md</code>, <code>work-order.md</code>, each with its audit prompt</dd><dt>Check</dt><dd><code>node tools/check-tasks.mjs</code> walks every flow below in the built mockup</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Spec v1, for design review. No code is written against it yet. The fleet operations wedge renamed Tasks to Work and moved Providers, Fields and People into the Intake dialog (<code>fleet-operations-wedge.md</code>). This spec keeps the words it was written in: a task is a work item, and the Tasks page is Work.</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/wedge.js</code> (<code>pWork</code>, <code>backlogTab</code>, <code>findingsTab</code>, <code>DLG_EXT.intake</code>) and <code>mockups/src/engine.js</code> (<code>pTask</code>, <code>pWorkOrder</code>, <code>DLG_EXT.ipwz</code>, <code>DLG_EXT.wo</code>, <code>DLG_EXT.certify</code>, <code>DLG_EXT.wfnew</code>), <code>mockups/fixtures/tasks.json</code>, rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs agents, it does not run them), ADR-096 (the launcher may contain the process), ADR-101 (four first-class harnesses), ADR-157 (ARP carries an operator-authored brief), ADR-053 (the assistant), ADR-052 (the governed action is the billable unit)</dd><dt>Related</dt><dd><code>creation-spec.md</code> (every definition is a file, and a wizard ends on a pull request), <code>dod-spec.md</code> (the run dod, a different object), <code>mission-control-spec.md</code> §1 (the operator), §7.6 (agent messages are quoted evidence), §11.2 (connectors)</dd><dt>Pages</dt><dd><code>mockups/pages/work-backlog.md</code>, <code>work-intake.md</code>, <code>work-item.md</code>, <code>work-orders.md</code>, <code>work-order.md</code>, <code>work-workflows.md</code>, <code>work-findings.md</code>, each with its audit prompt</dd><dt>Check</dt><dd><code>node tools/check-tasks.mjs</code> walks every flow below in the built mockup</dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#tasks/1-the-situation">1. The situation</a></li><li><a href="#tasks/2-scope">2. Scope</a></li><li><a href="#tasks/3-the-flow">3. The flow</a></li><li><a href="#tasks/4-vocabulary">4. Vocabulary</a></li><li><a href="#tasks/5-connecting-a-provider">5. Connecting a provider</a></li><li><a href="#tasks/6-the-task-record">6. The task record</a></li><li><a href="#tasks/7-people">7. People</a></li><li><a href="#tasks/8-the-definition-of-done">8. The definition of done</a></li><li><a href="#tasks/9-sending-work">9. Sending work</a></li><li><a href="#tasks/10-workflows">10. Workflows</a></li><li><a href="#tasks/11-completing-work">11. Completing work</a></li><li><a href="#tasks/12-capabilities">12. Capabilities</a></li><li><a href="#tasks/13-storage">13. Storage</a></li><li><a href="#tasks/14-permissions">14. Permissions</a></li><li><a href="#tasks/15-pages-and-audits">15. Pages and audits</a></li><li><a href="#tasks/16-what-exists-today">16. What exists today</a></li><li><a href="#tasks/17-decisions-this-needs">17. Decisions this needs</a></li><li><a href="#tasks/18-open-questions">18. Open questions</a></li><li><a href="#tasks/19-definition-of-done-for-the-build">19. Definition of done for the build</a></li></ol></nav>
@@ -15148,7 +17571,7 @@ renders first and when it is empty make sure it does not consume alot of vspace.
 <header class="mast">
   <p class="eyebrow">Oxagen · Scenario</p>
   <h1>W13: in the loop</h1>
-  <dl class="facts"><dt>Status</dt><dd>In the master. In the spec since 2026-09-18: <code>mission-control-spec.md</code> §10.6 (skills are steering, and they are files) and §10.7 (the Steering hub)</dd><dt>Amended 2026-09-18</dt><dd>Skills now lives under Steering. It is the second of the hub's seven tabs (Records, Skills, Memory, Ontology, Policy, Proposals, Preview) and has no top-level navigation entry of its own. Every route below moved from <code>…/skills…</code> to <code>…/steering/skills…</code>, and an old link is rewritten in place. The five views (Catalog, Search, In the loop, Reflection, Versions) are views inside the Skills tab. Approved by the maintainer on 2026-09-18 with the steering, graph and gateway review (<code>reviews/2026-09-18-steering-graph-gateway-review.md</code>)</dd><dt>Mockup</dt><dd><code>mockups/missioncontrol.html#/a-intel/core-platform/scenarios/in-the-loop/1</code>, and the W13 story in Storybook</dd><dt>Owner</dt><dd>Mac Anderson</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>In the master. In the spec since 2026-09-18: <code>mission-control-spec.md</code> §10.6 (skills are steering, and they are files) and §10.7 (the Steering hub)</dd><dt>Amended 2026-09-18</dt><dd>Skills now lives under Steering. It is the second of the hub's seven tabs (Records, Skills, Memory, Ontology, Policy, Proposals, Preview) and has no top-level navigation entry of its own. Every route below moved from <code>…/skills…</code> to <code>…/steering/skills…</code>, and an old link is rewritten in place. The five views (Catalog, Search, In the loop, Reflection, Versions) are views inside the Skills tab. Approved by the maintainer on 2026-09-18 with the steering, graph and gateway review (<code>reviews/2026-09-18-steering-graph-gateway-review.md</code>)</dd><dt>Retired</dt><dd>2026-09-24, by the fleet operations wedge (<code>fleet-operations-collapse.md</code>). The skills console this scenario walked is cut: skills are a kind on Steering › Sources and the search is the Compiler. The interjection it ended on stays, on the run (<code>mockups/pages/run-interjection.md</code>) and in the Approvals drawer. What follows is the record of the scenario as it was</dd><dt>Mockup</dt><dd>The scenario is gone from the master. The interjection is <code>mockups/missioncontrol.html#/a-intel/core-platform/runs/run_01K6QW3D5N7TYBA2</code></dd><dt>Owner</dt><dd>Mac Anderson</dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#w13/the-three-things-this-scenario-proves">The three things this scenario proves</a></li><li><a href="#w13/where-this-sits-against-the-spec">Where this sits against the spec</a></li><li><a href="#w13/the-walk-six-beats">The walk — six beats</a></li><li><a href="#w13/cut-downs">Cut-downs</a></li><li><a href="#w13/what-is-mocked">What is mocked</a></li><li><a href="#w13/in-the-master">In the master</a></li><li><a href="#w13/known-gaps">Known gaps</a></li></ol></nav>
@@ -15426,8 +17849,8 @@ need a decision before W13 is written into the spec.</li>
 </div>
 <script>
 (function(){
-  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and context records', 'tasks': 'Tasks and work orders', 'agent-capability': 'In-app agent capability expansion', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
-  var first='spec';
+  var TITLES={'wedge': 'Fleet operations wedge', 'ia': 'Fleet operations information architecture', 'routes': 'Fleet operations routes', 'collapse': 'Fleet operations deletion list', 'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and Steering records', 'tasks': 'Tasks and work orders', 'agent-capability': 'In-app agent capability expansion', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
+  var first='wedge';
   function show(){
     var h=location.hash.replace(/^#/,""), id=h.split("/")[0];
     if(!TITLES[id]) id=first;

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// The context record, all the way: the wizard writes it, a Context PR carries it, six checks run,
+// The Steering record, all the way: the wizard writes it, a pull request carries it, six checks run,
 // a person merges, and only then does it steer anything. This walks that path in one browser
 // session and asserts the things that make it a governed publication rather than a save button.
 //
@@ -7,9 +7,9 @@
 //   node tools/check-record-e2e.mjs --shots   # a screenshot at each stage
 //
 // What it is really guarding, and why each is here rather than assumed:
-//   * the record does NOT exist in Records, in the bundle or on its own page while the PR is open
+//   * the record does NOT exist in Sources, in the bundle or on its own page while the PR is open
 //   * merge is blocked until every check reports — the button is disabled, and clicking does nothing
-//   * merge publishes exactly once: Records gains one row, the bundle gains one rule and one version
+//   * merge publishes exactly once: Sources gains one row, the bundle gains one rule and one version
 //   * the promoter's pull request is untouched by any of it
 //   * closing without merging leaves nothing behind
 //   * a lineage that is already published FAILS its check, and nothing merges (PR #36 review, P1)
@@ -118,16 +118,16 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   await page.waitForTimeout(400);
 
   const opened = await world(page);
-  ok(opened.hasRecpr, "a Context PR exists");
+  ok(opened.hasRecpr, "a pull request exists");
   ok(!(await page.evaluate(() => !!document.querySelector("#layer .dlg"))), "the wizard closed");
   ok(await page.evaluate(() => location.hash.endsWith("/steering/proposals/prs")), "it landed on Steering, on the pull requests view of Proposals, got " + await page.evaluate(() => location.hash));
-  ok(await page.evaluate(() => S.tab.steering) === "prs", "on the Context PRs view");
+  ok(await page.evaluate(() => S.tab.steering) === "prs", "on the Pull requests view");
   ok(/^a-intel\/platform#\d+$/.test(opened.prNumber), "the PR has a number on the main repo, got " + opened.prNumber);
   ok(opened.prNumber !== "a-intel/platform#519", "and it is not the promoter's number");
   ok(/^ctx\./.test(opened.lineage), "the lineage is derived, got " + opened.lineage);
 
   // THE point: an open PR steers nothing.
-  ok(opened.records === before.records, "Records is unchanged while the PR is open");
+  ok(opened.records === before.records, "the published records are unchanged while the PR is open");
   ok(opened.bundleV === before.bundleV, "the bundle version is unchanged while the PR is open");
   ok(opened.bundleRules === before.bundleRules, "the bundle has no new rule while the PR is open");
   ok(opened.audit === before.audit, "nothing was audited as published while the PR is open");
@@ -198,7 +198,7 @@ const clickPg = async (page, re) => await page.evaluate(src => {
   // and it is in the list it belongs to
   await page.evaluate(() => { S.prSel = null; go("#/a-intel/core-platform/steering/records"); });
   await page.waitForTimeout(400);
-  ok((await pgText(page)).includes("hand-edit a generated migration"), "it appears in Published records");
+  ok((await pgText(page)).includes("hand-edit a generated migration"), "it appears in Sources, newest first");
   ok(errs.length === 0, "no page errors across the whole path: " + errs.join(" | "));
   await page.close();
 }

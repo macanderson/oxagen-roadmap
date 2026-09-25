@@ -24,6 +24,12 @@ CSS = ('@font-face{font-family:"Monaspace Neon";font-style:normal;font-weight:20
 
 # The documents, in the order the rail lists them. id is the hash; kind is the eyebrow.
 CATALOG = [
+    ("Fleet operations", [
+        ("wedge", "fleet-operations-wedge.md", "Specification"),
+        ("ia", "fleet-operations-ia.md", "Information architecture"),
+        ("routes", "fleet-operations-routes.md", "Route map"),
+        ("collapse", "fleet-operations-collapse.md", "Deletion list"),
+    ]),
     ("Specifications", [
         ("spec", "mission-control-spec.md", "Specification"),
         ("dod", "dod-spec.md", "Specification"),

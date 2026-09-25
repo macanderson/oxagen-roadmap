@@ -12,7 +12,7 @@ You are auditing the **Two-factor** page of Oxagen (`#/welcome/two-factor`) for 
 
 1. The page spec: `pages/two-factor.md` (read it first, in full).
 2. The design, rendered: the `two-factor` stories in Storybook (`npm run storybook`), one per state (loaded, loading, error), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright. `node tools/check-mockup.mjs` confirms the design renders in every state.
-3. The product spec for context: `docs/mission-control-spec.md` §14 (Mission Control), Appendix F (the pages that survive), Appendix A (target tables); the data mapping in `docs/implementation-plan.md` §3.
+3. The product spec for context: `docs/mission-control-spec.md` §14, Appendix F (the pages that survive), Appendix A (target tables); the data mapping in `docs/implementation-plan.md` §3.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/welcome/two-factor`.
 
 ## Procedure
@@ -23,7 +23,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 2. **Header.** Eyebrow “Step 2 of 2”, h1 “Two-factor authentication”, lead as quoted in the spec with the address. Actions present with the same label: Verify. Exactly one gold (primary) action on the screen, full width.
 3. **Summary tiles.** None on this page; fail if the build added decorative ones.
 4. **Form and links.** The label “Authentication code”, six one-character numeric inputs that auto-advance and back up on Backspace, then Use a recovery code instead with the expiry countdown at the right, then the footer Back to log in. Missing or renamed items are FAILs.
-5. **Actions and dialogs.** Submit signs in and lands on Fleet with the spec’s toast. Use a recovery code instead says recovery codes are single use and how many remain. Back to log in returns to Log in. Each write is a governed action: it passes IAM, produces an audit event, and shows a receipt or reference. A stub must say what the product would do; a control that silently does nothing is a FAIL.
+5. **Actions and dialogs.** Submit signs in and lands on Work with the spec’s toast. Use a recovery code instead says recovery codes are single use and how many remain. Back to log in returns to Log in. Each write is a governed action: it passes IAM, produces an audit event, and shows a receipt or reference. A stub must say what the product would do; a control that silently does nothing is a FAIL.
 6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows must be wired to the named store. A fixture reaching production is a FAIL.
 7. **States.** Force each state and compare copy and controls with the design:
    - **loading** (`state=loading`): the primary button shows a spinner and “Verifying…” and is `aria-disabled`; the inputs stay.

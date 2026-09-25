@@ -12,7 +12,7 @@ You are auditing the **Accept invitation** page of Oxagen (`#/welcome/invite`) f
 
 1. The page spec: `pages/accept-invitation.md` (read it first, in full).
 2. The design, rendered: the `accept-invitation` stories in Storybook (`npm run storybook`), one per state (loaded, loading, error, access denied), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright. `node tools/check-mockup.mjs` confirms the design renders in every state.
-3. The product spec for context: `docs/mission-control-spec.md` §14 (Mission Control), Appendix F (the pages that survive), Appendix A (target tables); the data mapping in `docs/implementation-plan.md` §3.
+3. The product spec for context: `docs/mission-control-spec.md` §14, Appendix F (the pages that survive), Appendix A (target tables); the data mapping in `docs/implementation-plan.md` §3.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/welcome/invite`.
 
 ## Procedure
@@ -23,7 +23,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 2. **Header.** Eyebrow “Invitation”, h1 “Join <organization> on Oxagen” with the organization’s name, no lead. Actions present, in order, with the same labels: Accept invitation · Decline. Exactly one gold (primary) action on the screen: Accept invitation.
 3. **Summary tiles.** None on this page; fail if the build added decorative ones.
 4. **Card.** The inviter row (avatar, name, “organization owner · invited you on <date>”), the rule, the five facts in order (Organization with the slug, Organization role, Workspace with the main repo, Workspace role, Invitation expires), the sentence on what the workspace role lets you do and not do, and the footer “Signed in as <email> · Not you?”. Missing or renamed items are FAILs.
-5. **Actions and dialogs.** Accept signs in and lands on Fleet with the spec’s toast. Decline tells the inviter and changes nothing else. Not you? goes to Log in. Each write is a governed action: it passes IAM, produces an audit event, and shows a receipt or reference. A stub must say what the product would do; a control that silently does nothing is a FAIL.
+5. **Actions and dialogs.** Accept signs in and lands on Work with the spec’s toast. Decline tells the inviter and changes nothing else. Not you? goes to Log in. Each write is a governed action: it passes IAM, produces an audit event, and shows a receipt or reference. A stub must say what the product would do; a control that silently does nothing is a FAIL.
 6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows must be wired to the named store. A fixture reaching production is a FAIL.
 7. **States.** Force each state and compare copy and controls with the design:
    - **loading** (`state=loading`): the Accept button shows a spinner and “Accepting…”; the card stays.

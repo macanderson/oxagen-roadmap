@@ -45,6 +45,47 @@
    "fr": 3
   },
   {
+   "t": 7.75,
+   "kind": "tool",
+   "title": "TodoWrite",
+   "cls": "inspect",
+   "arg": "6 items · plan version 1",
+   "raw": "{\"todos\": [{\"content\": \"List the pull requests merged since v4.10.3\", \"status\": \"pending\"}, {\"content\": \"Read CHANGELOG.md once for the format\", \"status\": \"pending\"}, {\"content\": \"Draft release/4.11.0-notes.md\", \"status\": \"pending\"}, {\"content\": \"Lint the draft\", \"status\": \"pending\"}, {\"content\": \"Commit on a release branch\", \"status\": \"pending\"}, {\"content\": \"Create v4.11.0 as a draft release\", \"status\": \"pending\"}]}",
+   "res": {
+    "ms": 2,
+    "body": "Todos updated"
+   },
+   "plan": {
+    "v": 1,
+    "items": [
+     [
+      "List the pull requests merged since v4.10.3",
+      "pending"
+     ],
+     [
+      "Read CHANGELOG.md once for the format",
+      "pending"
+     ],
+     [
+      "Draft release/4.11.0-notes.md",
+      "pending"
+     ],
+     [
+      "Lint the draft",
+      "pending"
+     ],
+     [
+      "Commit on a release branch",
+      "pending"
+     ],
+     [
+      "Create v4.11.0 as a draft release",
+      "pending"
+     ]
+    ]
+   }
+  },
+  {
    "t": 7.8,
    "kind": "tool",
    "title": "github__list_pull_requests",
@@ -137,6 +178,51 @@
    "fr": 12
   },
   {
+   "t": 49.35,
+   "kind": "tool",
+   "title": "TodoWrite",
+   "cls": "inspect",
+   "arg": "7 items · plan version 2",
+   "raw": "{\"todos\": [{\"content\": \"List the pull requests merged since v4.10.3\", \"status\": \"completed\"}, {\"content\": \"Read CHANGELOG.md once for the format\", \"status\": \"completed\"}, {\"content\": \"Drop the four a-intel/mobile pull requests\", \"status\": \"completed\"}, {\"content\": \"Draft release/4.11.0-notes.md\", \"status\": \"in_progress\"}, {\"content\": \"Lint the draft\", \"status\": \"pending\"}, {\"content\": \"Commit on a release branch\", \"status\": \"pending\"}, {\"content\": \"Create v4.11.0 as a draft release\", \"status\": \"pending\"}]}",
+   "res": {
+    "ms": 2,
+    "body": "Todos updated"
+   },
+   "plan": {
+    "v": 2,
+    "items": [
+     [
+      "List the pull requests merged since v4.10.3",
+      "completed"
+     ],
+     [
+      "Read CHANGELOG.md once for the format",
+      "completed"
+     ],
+     [
+      "Drop the four a-intel/mobile pull requests",
+      "completed"
+     ],
+     [
+      "Draft release/4.11.0-notes.md",
+      "in_progress"
+     ],
+     [
+      "Lint the draft",
+      "pending"
+     ],
+     [
+      "Commit on a release branch",
+      "pending"
+     ],
+     [
+      "Create v4.11.0 as a draft release",
+      "pending"
+     ]
+    ]
+   }
+  },
+  {
    "t": 49.4,
    "kind": "tool",
    "title": "write_file",
@@ -186,6 +272,55 @@
     "tout": 734,
     "cost": 0.622,
     "req": "req_01JQ7F8R"
+   }
+  },
+  {
+   "t": 70.05,
+   "kind": "tool",
+   "title": "TodoWrite",
+   "cls": "inspect",
+   "arg": "8 items · plan version 3",
+   "raw": "{\"todos\": [{\"content\": \"List the pull requests merged since v4.10.3\", \"status\": \"completed\"}, {\"content\": \"Read CHANGELOG.md once for the format\", \"status\": \"completed\"}, {\"content\": \"Drop the four a-intel/mobile pull requests\", \"status\": \"completed\"}, {\"content\": \"Draft release/4.11.0-notes.md\", \"status\": \"completed\"}, {\"content\": \"Move Breaking above Fixes\", \"status\": \"in_progress\"}, {\"content\": \"Lint the draft\", \"status\": \"pending\"}, {\"content\": \"Commit on a release branch\", \"status\": \"pending\"}, {\"content\": \"Create v4.11.0 as a draft release\", \"status\": \"pending\"}]}",
+   "res": {
+    "ms": 2,
+    "body": "Todos updated"
+   },
+   "plan": {
+    "v": 3,
+    "items": [
+     [
+      "List the pull requests merged since v4.10.3",
+      "completed"
+     ],
+     [
+      "Read CHANGELOG.md once for the format",
+      "completed"
+     ],
+     [
+      "Drop the four a-intel/mobile pull requests",
+      "completed"
+     ],
+     [
+      "Draft release/4.11.0-notes.md",
+      "completed"
+     ],
+     [
+      "Move Breaking above Fixes",
+      "in_progress"
+     ],
+     [
+      "Lint the draft",
+      "pending"
+     ],
+     [
+      "Commit on a release branch",
+      "pending"
+     ],
+     [
+      "Create v4.11.0 as a draft release",
+      "pending"
+     ]
+    ]
    }
   },
   {
@@ -322,6 +457,23 @@
     "tout": 912,
     "cost": 0.8615,
     "req": "req_01JQ7FEX"
+   }
+  },
+  {
+   "t": 97.0,
+   "kind": "tool",
+   "title": "oxagen__report_status",
+   "cls": "verify",
+   "arg": "ready for approval · 1 doubt",
+   "raw": "{\"status\": \"ready_for_approval\", \"uncertain\": [\"#481 changes the default decision for unmatched untainted calls to approve. I listed it under Breaking, but I could not confirm whether any existing rule depends on the old default.\"]}",
+   "gov": {
+    "o": "allow",
+    "rule": "agent tool default",
+    "fr": 5
+   },
+   "res": {
+    "ms": 41,
+    "body": "recorded · rep_01K5RS9Q"
    }
   },
   {

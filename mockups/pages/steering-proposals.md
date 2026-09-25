@@ -1,100 +1,162 @@
-# Steering · Proposals
+# Steering › Proposals
 
 | | |
 |---|---|
-| Route | `#/a-intel/core-platform/steering/proposals[/prs]` |
+| Route | `#/a-intel/core-platform/steering/proposals`. A proposal's review opens in place on the same address. The Pull requests view, `/steering/proposals/prs`, has its own spec, `steering-prs.md` |
 | Scope | workspace |
-| Spec | the steering and gateway plan, Phase 2 (story sheet decisions 8, 9, and 13); §12.8 findings; `steering.md` is the hub this tab belongs to |
-| Design | `mockups/src/engine.js` → `pSteering()` (the proposals branch), `prpDetail()`, `prpBadge()`, `prTable()`, `ctxprTab()`, `recprDetail()`, `recprBody()`, `PRP_SUPPORT`, `PRP_META`, `wzImpPublish()`, inside `pSteering()` and `stgHub()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
-| States | loaded · empty · loading · error · access denied |
-| Storybook | `Oxagen / … / steering-proposals`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Spec | `docs/fleet-operations-wedge.md`: D4, D7 (Steering record), D13 (a memory becomes a Steering record only through a proposal); the vocabulary row Proposal; the Steering section Shipped today (proposals and their pull requests ship through `list_proposals`, `get_context_pr`, `open_context_pr` and `merge_context_pr`). `docs/fleet-operations-ia.md` (Steering, Proposals). ADR-061 in `macanderson/oxagen` |
+| Design | `mockups/src/wedge.js`: `stgProposalsTab`, inside `pSteering`; `mockups/src/engine.js`: `recordCard`, `prpBadge`, `prpDetail`, `prpStats`, `PRP_SUPPORT`, `PRP_META`, `DLG_EXT.ctxpr`, `ctxprOpen`, `memOpenProposal`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs`. Fixtures: `mockups/fixtures/proposals.json`, and `mockups/fixtures/memory.json` for the memory behind `prp_01K5RX1N` |
+| States | loaded |
+| Storybook | `Oxagen / Steering / Proposals`: Loaded, and Loaded · mobile |
 | Audit | `steering-proposals.audit-prompt.md` |
 
 ## Job
 
-The way in: a record becomes a proposal, a proposal becomes a pull request, a merge publishes it. Context PRs is a view inside this tab instead of a tab of its own. A proposal argues from runs; the outcome of each supporting run is reported as recorded, and a person decides whether the support is enough. There is no threshold and no verdict.
+The way into steering. A proposal is a candidate change to a Steering Source, raised from an agent's memory, a finding, an operator's steer or a person. It steers nothing. It becomes a pull request, and the merge publishes it. This view lists the proposals with the support each one cites, and a review of one proposal shows its record, its evidence, the runs that support it and what publishing it would do.
+
+A proposal argues from runs, and a person decides whether that is enough. There is no threshold and no verdict. Each supporting run carries the outcome the record shows for it, never a grade.
 
 ## What is on the page
 
-**Hub header.** Eyebrow: the workspace name, h1 “Steering”, subtext “Everything that can steer an agent in this workspace competes in one assembler.” Actions: the governance chip **Governance: team**, **Import Markdown** (plain; opens the Markdown import specified in `steering.md`), and **Write a context record** (gold; opens the record wizard). The header gives up the gold when the view below holds the one primary action (Open a Context PR on a proposal that has none, Merge pull request on a pull request that passed). The chip and its `govmode` dialog are specified in `steering.md`.
+**Header, tabs and shell.** As `steering.md`, with Proposals selected (16: the proposals plus the open pull requests). The kind filter does not render on this tab. New source keeps the gold in the header.
 
-**The five tabs, in this order:** Library (75) · Assignments (4) · Gates (6) · Proposals (15) · Compiler. The Proposals count is candidates plus open pull requests. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. Proposals is selected.
+**The two views.** Under the tabs, a group labelled "Proposals or pull requests" with two buttons carrying `aria-pressed`: **Proposals** 10 and **Pull requests** 6. Beside them: "A proposal becomes a pull request. A merge publishes it." Proposals is `/steering/proposals`; Pull requests is `/steering/proposals/prs` (`steering-prs.md`).
 
-- A two-way control under the tabs (`aria-pressed`): **Candidates (9)** and **Context PRs (6)**, with the line “a record becomes a proposal, a proposal becomes a pull request, a merge publishes it”. Candidates is `/steering/proposals`; Context PRs is `/steering/proposals/prs` (`/steering/prs` still resolves).
-- **Candidates**: the panel “Proposals” with a small **Import Markdown** and a small **Write a context record** in its header, both plain, then Sort, Rows, and a pager. Each proposal is a record card: the kind badge, force, its state badge (`candidate`, `open Context PR`, `merged`, or for the promoter's live proposal `ready for a Context PR`, `open Context PR` with the check state, or `published`), its checks badge (“6 / 6 checks pass”, “5 / 6 · conflict check running”), **Review**; the statement; then “from <source>” (findings job with its finding id, reflector with a run id, a person, or “memory fold · mem_01K5R0N2” for a memory's fold), the support line computed from the supporting runs (“682 duplicate tool calls across 212 runs”, “14 unsatisfied runs in 30 days”, “3 data-layer drift findings”, “3 sayings from 3 runs”), the proposal id, scope, and lineage.
-- **Review** opens the proposal (`prpDetail`): a row with **All proposals**, the lineage, and the state badges; three tiles, **Supporting runs** (“sealed runs, from the rows below” or “proposed by a person”), **Distinct agents** (“from the rows below”), and **Confidence** (“the promoter's own estimate; a person decides”) or, for a person's proposal, **Checks** “apply” (“the same six as any record”); then two columns. Left: **Proposed record** (the card, badge “steers nothing yet”, “from <source>”), **Promoter evidence** (the rationale in prose), **Supporting runs** (badge: the support line; columns Run (with agent and date) · Frame (“seq 31”) · Outcome · Record (the record or finding id, and the record kind with a repeat count)). Right: **Context PR** (Target `a-intel/platform`, Branch `context/<lineage>`, File `.oxagen/rules/<lineage>.toml`, Governance “team · a code-owner review is required”) with the action: **Open a Context PR** (gold when none is open), **Open <pr>** or **Merged in <pr>** once one exists, or the pull request and its checks in mono; **If it publishes** (Reaches, As, Costs, Baseline, Read back as).
-- **Outcome** is what the record shows for that run: `kept`, `reverted`, `no change`, or `halted`, as a dot and a word. It is never a verdict. The tiles derive from the rows beneath them.
-- **A proposal from a memory fold.** `prp_01K5RX1N` is the one proposal a memory made. Its card reads “from **memory fold · mem_01K5R0N2**” and its support line reads “<sayings> sayings from <distinct runs> runs”. **Open the proposal** in the `memory` dialog of `mem_01K5R0N2` opens it here (`memOpenProposal()`). Its detail cites the memory's sayings as follows.
-  - **Supporting runs** holds one row per saying (`PRP_SUPPORT`, built from the memory's `sayings`). Run is the run that said it, with the agent and the date. Frame is the frame it was said in (“seq 23”). Record is `mem_01K5R0N2` with the kind “memory · saying”.
-  - Outcome on these rows reads `failed` when the run's summary contains “never passed” or “nothing merged”, and `passed` otherwise. Those two words fall outside the four outcomes above. The date is fixed at 2026-09-11 for every row.
-  - The tiles: **Supporting runs** counts the rows, so it counts sayings. **Distinct agents** counts the agents behind them. **Confidence** is 0.71.
-  - **Promoter evidence** opens “Three runs said the same thing in their own words, and the fold kept them as one memory, mem_01K5R0N2.” It quotes each saying as “<agent> wrote “<saying>” in <run> at frame <n>.”, where the agent is the last segment of its slug (`stella-ci`). It closes “The third saying reached the workspace setting of <sayings> sayings from <runs> runs. As a memory it competes at may. As a record it reaches every run in core-platform at should.” The two numbers read `S.memFold`, so changing the fold setting on the Memory shelf changes the sentence.
-  - **Context PR** names Branch `context/ctx.platform.node-20` and File `.oxagen/rules/ctx.platform.node-20.toml`. Its action is **Open a Context PR**, disabled, with no reason given. **If it publishes** costs 24 steering tokens a turn, and Baseline reads “<sayings> sayings from <agents> agents in one day”.
-- **Context PRs**: the panel **Context PRs** (badge “Governance: <mode>”, the workspace's mode from `wsGov`), columns Pull request (with the statement under it) · Branch · Opened by · State. A row is selectable (`aria-current`); the selected pull request is shown below it. Three things open one, and the table says which: **the promoter**, out of runs it aggregated into a proposal, and **a person** (named), out of the record wizard or out of the Markdown import. Several operator pull requests may be open at once. Each keeps its own state, its own file, and its own checks.
-  - Before the promoter's proposal has a pull request: “prp_01K5RU4A is ready and has no Context PR yet. It steers nothing until one merges.”, **Open a Context PR** (gold; opens `ctxpr`), and a note that writing one yourself opens the same kind of pull request, argued from you rather than from runs.
-  - The selected pull request: **Context PR · <pr>** with its state badge and the line “Branch <branch> · base main · <sha> · one concern per PR”, the file it carries as TOML; **Pull request body** ( or “written by <name>”); **Checks** (badge “the same rules as stella context validate”): Schema, Lineage uniqueness, record_hash recomputation, Secret and PII scan, Conflict against active records, constraint_effect ∈ {require, forbid}, each with its own result text once it reports, and pass, running, queued, or fail.
-  - The merge bar: “Checks are running. Merge is blocked until all 6 report.”, then “6 checks passed. Governance team: <name> owns .oxagen/rules/.”; on a failure “A check failed. Nothing merges and nothing is published. Change the file and open it again.” **Merge pull request** is gold only once every check passed, disabled otherwise, and a no-op if called anyway. An operator's pull request also offers **Close pull request** (red; opens `closepr`, which previews the comment Oxagen posts on GitHub: “Closed by <first name> <last name> <email>”, a horizontal rule, then “Added via Oxagen” and the full URL of this Context PR page in Oxagen as the link text; confirming closes the pull request, posts the comment, and records a governed action).
-  - **Merge effects**, five numbered rows: write a promotion_event, re-index from the merged commit, bump the bundle vN → vN+1 and re-sign it with the tokens a turn before and after, emit steering_published, deliver on the next model call of every run in the workspace. Once merged, **promotion_event** replaces it (record_id, lineage_id, from → to, author and approver, pr_url, commit_sha, merged_at, re-indexed, bundle, tokens per turn, audit, ledger) with **Audit log**, and for the promoter's **See it in run_01K5RS7M2E8FJ3QW**; the merge bar reads “Merged by <name>” with **Open the record** and **See it in Records** on an operator's.
-  - **A pull request from the Markdown import** carries every record accepted from one source file. Its branch is `context/import-<file slug>`. Its table row reads “<N> records from <file>” under the number, or the statement when it carries one record. Its eyebrow ends “one source file per PR” in place of “one concern per PR”. The file panel holds one TOML block per record. Its body reads, line by line: “## Import <N> records from <file>”, “stella parsed `<file>` on <date>. <name> accepted these in the Markdown importer.”, “One pull request per source file, so a reviewer reads a file’s rules together.”, then “### Records” with one line per record (“- `<lineage>` · <kind> · <force> · from `<file>:L<line>`”, a constraint's effect after the force, and the statement on the next line), “### What it costs”, “Adds <N> steering tokens a turn to every turn in scope.”, a `---` line, and “Opened by <name> · workspace `<ws>` · governance `team`”. Once merged with more than one record, the merge bar offers one gold **See them in Records**, the promotion_event lineage_id reads “<N> lineages · <ids>”, and the `steering_published` audit line opens “<N> records from <file>”.
-  - **Every check with a predicate is re-run at merge.** The lineage check counts published records and competing open pull requests; the pull request opened first keeps the claim. A check that stopped passing blocks the merge and says so.
-  - **While a pull request is open the record steers nothing.** It is not in Records, not in the compiled bundle, not in the audit log, and the bundle version has not moved. `tools/check-record-e2e.mjs` asserts each of those separately.
-- Skills use the same flow: a skill is authored through a pull request of kind `skill`, listed on Repositories · Changes beside the record pull requests.
+**Proposals** panel.
 
-**Dialogs this tab opens:** `govmode`, `wz (record wizard)`, `wz (Markdown import)`, `ctxpr` (Open a Context PR: Concern, Kind, Scope, Constraint effect, Supporting evidence, and the note that merge is the publication).
+- Heading "Proposals". Caption: "Candidates from memory, findings, steers and people. A proposal steers nothing until its pull request merges."
+- The shared list controls for a card list: Sort (Shown order, Statement A–Z, Statement Z–A), Rows and a pager ("1–10 of 10").
+- Each proposal is a record card:
+  - Top line: the kind badge (its icon and the kind in capitals), the force, the state badge with a dot, the checks badge where a pull request is open, and **Review**.
+  - The statement, as the card's headline.
+  - The meta line: "from <source>" (a findings job with its finding id, the reflector with a run id, a person, or "memory fold · mem_01K5R0N2" for the proposal a memory made), the support line, the proposal id, the scope and the lineage.
+- State badges: "candidate" (no pull request), "ready for a pull request" (the promoter's proposal before its pull request opens), "open pull request", "published" or "merged". The checks badge reads "6 / 6 checks pass", or the count so far while checks run ("5 / 6 · conflict check running").
+- The ten proposals at load:
 
-**Shell.** As `steering.md`: sidebar with Steering lit and Runtimes between Steering and Repositories, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button (count of everything waiting on you across the organization) that opens the drawer `#apdrawer`, and the account avatar. No assistant button in the top bar. Skills has no nav entry of its own.
+| Kind and force | State | Statement | From | Support | Lineage |
+|---|---|---|---|---|---|
+| RULE, should | open pull request, 6 / 6 checks pass | "Do not re-read CHANGELOG.md more than once in a run; cache the first read." | findings job · fnd_01K5RT6C | "682 duplicate tool calls across 212 runs" | `ctx.release.no-reread-changelog` |
+| RULE, should | candidate | "Reproduce before labelling; if you cannot reproduce in two steps, open a proposal instead." | reflector · run_01K5RH3G8K5PAS7D | "14 unsatisfied runs in 30 days" | `ctx.triage.reproduce-first` |
+| CONSTRAINT, must | open pull request, 5 / 6 · conflict check running | "Migrations run in filename order; never renumber a merged migration." | Marcus Bell | "3 data-layer drift findings" | `ctx.platform.migration-order` |
+| RULE, should | candidate | "Build and test on Node 20. Do not move to a newer Node release until main passes on it." | memory fold · mem_01K5R0N2 | "3 sayings from 3 runs" | `ctx.platform.node-20` |
+| RULE, should | open pull request, 6 / 6 pass | "Draft the first reply in the language the ticket was written in." | findings job · fnd_01K5RU9Q | "212 tickets re-routed for language in 30 days" | `ctx.support.reply-in-customers-language` |
+| PROCEDURE, must | candidate | "Post the plan and wait for a review comment before any apply call." | reflector · run_01K5RD0D4ADEV8K7 | "3 halted runs, 1 incident" | `ctx.infra.plan-before-apply` |
+| PROCEDURE, should | open pull request, 5 / 5 pass | "Backfill in day-sized partitions and verify row counts after each." | Amara Lindqvist | "2 quality-gate failures traced to whole-table backfills" | `ctx.data.backfill-partitions` |
+| CONSTRAINT, must | merged, 7 / 7 pass | "No agent may rotate a credential it holds." | Ines Haddad | "policy review 2026-09" | `ctx.sec.never-rotate-own-credential` |
+| PREFERENCE, may | candidate | "Campaign briefs are a table of channel, audience, budget and owner." | reflector · 14 runs | "9 briefs rewritten by hand" | `ctx.growth.brief-as-table` |
+| FACT, info | open pull request, 4 / 4 pass | "The production branch of a-intel/mobile is release, not main." | reflector · run_01K5RMYJ6V9CRJM9 | "4 runs targeted main" | `ctx.mobile.release-branch` |
+
+The mockup's third proposal reads "open Context PR" in its state badge; the product word is "open pull request". Every Steering record pull request runs the same six checks, so a checks badge counts out of six; the fixture's "5 / 5", "7 / 7" and "4 / 4" are not a design.
+
+**A proposal's review.** Review replaces the list with one proposal (`prp_01K5RU4A` below). **All proposals** returns to the list.
+
+- A row: **All proposals**, the lineage in mono, and the state badges at the right.
+- Three tiles:
+  - **Supporting runs**: 212, "sealed runs, from the rows below". A person's proposal reads "proposed by a person".
+  - **Distinct agents**: 1, "from the rows below".
+  - **Confidence**: 0.97, "the promoter's own estimate; a person decides". A person's proposal shows **Checks** instead, "apply", "the same six as any record".
+- Left column:
+  - **Proposed record**, with the proposal id as a badge: the record card with "steers nothing yet" and "from findings job · fnd_01K5RT6C".
+  - **Promoter evidence**: the rationale in prose. For `prp_01K5RU4A` it says the release manager read CHANGELOG.md with an identical input digest 682 times beyond the first read across 212 sealed runs, that every repeat returned the first read's response digest, and that a rule to cache the first read changes the behaviour without editing the brief.
+  - **Supporting runs**, with the support line as its badge ("682 duplicate tool calls across 212 runs"). The shared list controls, with an Outcome filter. Columns, in order: Run (the run id, with the agent and the date under it), Frame ("seq 31"), Outcome (a dot and a word) and Record (the record id, with its kind and repeat count under it: "observation · repeat read ×3").
+- Right column:
+  - **Pull request**: Target ("a-intel/platform"), Branch ("context/ctx.release.no-reread-changelog"), File (".oxagen/rules/ctx.release.no-reread-changelog.toml") and Governance ("team · a code-owner review is required"). Under them the action:
+    - **Open a pull request** (gold) while the proposal has none, which opens `ctxpr`;
+    - **Open a-intel/platform#519** (plain) once it is open, or **Merged in a-intel/platform#519** once merged, which opens the Pull requests view;
+    - for another proposal with a pull request, its number and checks in mono ("a-intel/platform#520 · 5 / 6 · conflict check running");
+    - a disabled **Open a pull request** for a candidate the design gives no path yet.
+  - **If it publishes**: Reaches ("every run in core-platform on a-intel/platform, from its next model call"), As ("compiled steering in bundle v42, should in the stable prefix"), Costs ("46 steering tokens a turn · 1,340 → 1,386"), Baseline ("3.2 repeat reads a run · 1,977,800 tokens re-entered the window over these 212 runs · side effects kept on 67% of runs") and Read back as ("every run that renders it cites the record in its context frame, so the Run page shows where it landed").
+
+**A proposal from a memory fold.** `prp_01K5RX1N` is the one proposal a memory made. Its memory, `mem_01K5R0N2`, reached the fold setting of 3 sayings from 2 runs, and the proposal cites every saying. **Open the proposal** in that memory's dialog (`run-memories.md`, `steering-source.md`) opens this review, from any page.
+
+- **Supporting runs** holds one row per saying, built from the memory's `sayings`. Run is the run that said it, with the agent and the date. Frame is the frame it was said in ("seq 23"). Record is `mem_01K5R0N2`, with "memory · saying" under it. Its badge is the support line, "3 sayings from 3 runs".
+- The tiles: **Supporting runs** 3, which counts the sayings, **Distinct agents** 2, and **Confidence** 0.71.
+- **Promoter evidence** opens "Three runs said the same thing in their own words, and the fold kept them as one memory, mem_01K5R0N2." It quotes each saying as "<agent> wrote “<saying>” in <run> at frame <n>.", naming the agent by the last part of its key (`stella-ci`). It closes "The third saying reached the workspace setting of 3 sayings from 2 runs. As a memory it competes at may. As a record it reaches every run in core-platform at should."
+- **Pull request** names Branch `context/ctx.platform.node-20` and File `.oxagen/rules/ctx.platform.node-20.toml`. Its action is a disabled **Open a pull request**, the candidate case above.
+- **If it publishes** reads Costs "24 steering tokens a turn · 1,340 → 1,364" and Baseline "3 sayings from 2 agents in one day".
+- The mockup's Outcome on these rows reads `passed` or `failed`, from words in each run's summary, and dates every row 2026-09-11. Neither word is one of the four below. A build shows the recorded outcome of each run and its own date.
+
+**Outcome** is what the record shows for that run: `kept`, `reverted`, `no change` or `halted`, as a dot and a word. It is never a verdict. The mockup's third supporting run reads "failing", which is not one of the four; a build shows the recorded outcome in the four words.
+
+### Dialog
+
+**`ctxpr`**, "Open a pull request", subtitle "<lineage> · <proposal id>".
+
+- While a pull request is already open for the proposal, a callout first: "a-intel/platform#519 is already open for this concern. One concern, one pull request."
+- Fields: Concern (the statement, with the hint "One concern per pull request."), Kind (the promoter's kind first, then the six kinds, each with a short description), Scope (workspace, which opens on a-intel/platform, or repository, which opens on the linked repository; the hint "The promoter picks the scope from where the evidence came."), Constraint effect (forbid or require; the hint "A record can never grant authority. These are the only two values.") and Supporting evidence (the support line and the finding id).
+- A note: "Merge is the publication. The 6 checks run the same rules as stella context validate: Schema, Lineage uniqueness, record_hash recomputation, Secret and PII scan, Conflict against active records, constraint_effect ∈ {require, forbid}."
+- Footer: Cancel and **Open the pull request** (gold), or **Go to a-intel/platform#519** when one is open. Opening pushes the branch, opens the pull request, queues the six checks, and moves to the Pull requests view with it selected: "Branch context/ctx.release.no-reread-changelog pushed and a-intel/platform#519 opened. 6 checks queued."
+- The mockup's Kind and Scope options join each value to its description with a dash; the build writes them as "rule: a directive that steers behaviour". The Constraint effect field applies to a constraint only (the contract refuses an effect on any other kind).
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). The *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js`.
+Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidence that anything ships.
 
-| Element | Mockup collection | Target store | Backing today (repo) | Status |
+| Element | Mockup collection | Target store or contract | Backing today in `macanderson/oxagen` | Status |
 |---|---|---|---|---|
-| Proposals | `PROPOSALS`, `PRP_SUPPORT` (rows with `run`, `date`, `frame`, `outcome`, `dups`, `rec`), `PRP_META` | `PROPOSES`, `PROMOTED_BY` | `agent.context_promotions`; `agent.memory_promotion.*` | 🟡 |
-| Memory-born proposal | `PROPOSALS` (`prp_01K5RX1N`), `FIXTURES.MEMORY[].proposedAs` and `sayings`, `PRP_META` | the memory index, one edge per saying, and `PROPOSES` | none | ❌ |
-| Import pull requests | `RECPRS[]` with `src`, written by `wzImpPublish()` | GitHub pull requests on the main repo | none | ❌ |
-| Supporting-run outcomes | `PRP_SUPPORT[].outcome` | the run's terminal status and the frame that cited the record (§12.8) | `agent_stop` frames and `context_cited` | 🟡 |
-| Context PRs | `CTXPR`, `RECPRS`, `S.recprs`, `S.ctxpr` | GitHub pull requests on the main repo | the promotions ledger; Context PR state from GitHub is a gap | 🟡 |
-| Steering tokens a turn | `PRP_META[].tok`, `stgBundle().tok` | `cost.run_totals` `steering_tokens` | 🟡 ClickHouse `token_usage` | 🟡 |
+| The proposals | `PROPOSALS` (`fixtures/proposals.json` and six more added in `engine.js`) | `agent.context_proposals` | `list_proposals` returns id, lineage, kind, force, constraint effect, scope, statement, rationale, source, support, status, pull request and checks (`packages/oxagen/src/contracts/context.proposal.list.ts:12`, `context.steering.shared.ts:207-246`) | ✅ |
+| State badge | `PROPOSALS[].state`, `prpBadge()` | The proposal's status | `status`: proposed, pr_open, checks_running, checks_passed, checks_failed, merged or rejected (`context.steering.shared.ts:57-65`) | ✅ |
+| Checks badge | `PROPOSALS[].checks`, `S.ctxpr` | Passed of six | `checks` `{ passed, total }` (`context.steering.shared.ts:239-241`) | ✅ |
+| "from <source>" | `PROPOSALS[].from` | Who raised it | `source` (`context.proposal.create.ts:41`) | ✅ |
+| Support line ("682 duplicate tool calls across 212 runs") | `PRP_META[].support` over `PRP_SUPPORT` | A measure over the supporting runs | `support` carries run ids, agent keys, record ids and evidence links (`context.steering.shared.ts:193-204`); the counts derive from them, the measure does not (#3881) | 🟡 |
+| Tiles: Supporting runs and Distinct agents | `prpStats()` | Counts of the support | `support.runs` and `support.agents` | ✅ |
+| Tile: Confidence | `PRP_META[].confidence` | The promoter's estimate | None. ADR-061 records that the promoter and the reflector are not built (#3881) | ❌ |
+| Promoter evidence | `PRP_META[].rationale` | The proposal's rationale | `rationale` | ✅ |
+| Supporting runs: Run | `PRP_SUPPORT[].run` | The runs the proposal cites | `support.runs` | ✅ |
+| Supporting runs: agent, date, Frame, Outcome and Record kind | `PRP_SUPPORT[]` | Each cited run's terminal status, citing frame and record | None. Evidence links may carry `frame:<run>/<seq>` refs, but no read joins a run's outcome (#3881) | ❌ |
+| Pull request panel: Target, Branch, File, Governance | `CTXPR`, `wsGov()` | The pull request the proposal opens | `get_context_pr` returns the repository, branch, path, governance mode and who may merge (`context.pr.get.ts:9`, `context.pr.open.ts:27-94`) | ✅ |
+| Open a pull request | `DLG_EXT.ctxpr`, `ctxprOpen()` | Push `context/<lineage>`, open the pull request, run the six checks | `open_context_pr` (`context.pr.open.ts:96`). It takes the proposal id only (`:113-117`); the dialog's fields restate the proposal and change nothing in it | ✅ |
+| If it publishes: Reaches and As | `PRP_META`, `stgBundle()` | Scope, force and the next steering version | The scope and force ship with the proposal; `get_context_pr` `onMerge.bundleVersion` gives the version after the merge (`context.pr.open.ts:68-80`) | ✅ |
+| If it publishes: Costs and Baseline | `PRP_META[].tok`, `measure()` | Tokens a turn, before and after, and the baseline measure | None | ❌ |
+| The proposal a memory made (`prp_01K5RX1N`): one row per saying, the fold that raised it | `PROPOSALS`, `MEMORY[].sayings` and `proposedAs`, `PRP_META` | A saying per run on the memory, and the fold that raises a proposal at the setting | None. `list_memory_promotions` (`packages/oxagen/src/contracts/agent.memory_promotion.list.ts:11`) lists promotions and does not name the sayings behind one | ❌ |
+| The authors "the promoter", "findings job" and "reflector" | `PROPOSALS[].from` | Jobs that raise proposals from runs and findings | None of the jobs is built (ADR-061). A proposal today comes from `propose_record` (`context.proposal.create.ts:12`) or an agent's `record_proposal` append (`append_record`, `context.records.append.ts:28`) | ❌ |
+
+## Future-only fields
+
+The mockup marks no field on this view with `data-future`, and the catalog gives it no future-only story. These fields are future-only in `macanderson/oxagen` all the same, and a build renders each as not recorded until its contract ships: the support measure in each support line, the Confidence tile, the supporting runs' agent, date, frame, outcome and record kind, the Costs and Baseline rows, every proposal the promoter, a findings job or the reflector would raise, and the proposal a memory fold raised.
 
 ## Functionality
 
-- The tab count is candidates plus open pull requests, and the Context PRs count is the same open number.
-- Merging is done on GitHub through the Context PR. The page shows what merge will do and the check results.
-- A pull request opened from the record wizard lands here, on the Context PRs view, with its row selected. The Markdown import lands here too when it opens at least one pull request, with the first one selected, and each import pull request starts its checks at once.
-- Closing an unmerged pull request throws the branch away; a merged one cannot be closed, because taking a record back out of force is its own pull request.
+- The list is the workspace's proposals, newest first. A build lists this workspace's proposals only; the mockup's list is organization-wide and shows proposals whose pull requests target other workspaces' repositories (`a-intel/support-console#188`, `a-intel/data-platform#341`, `a-intel/security-tools#77`, `a-intel/mobile#96`).
+- A proposal steers nothing. It is not in Sources, not in any envelope, and not in the compiled bundle until its pull request merges.
+- Review opens the proposal in place; All proposals returns to the list.
+- The tiles derive from the rows beneath them: Supporting runs is the row count, and Distinct agents is the distinct agents in the rows.
+- Open a pull request is offered only while the proposal has none, because one concern has one pull request. Opening it pushes `context/<lineage>` with the one record file, opens the pull request, and queues the six checks. The view then shows the pull request on Pull requests.
+- A memory reaches a Steering record only through a proposal (D13). Propose as a Steering record on a memory's page ends here. A memory that reached the fold setting of 3 sayings from 2 runs is proposed on the promoter's next pass, and **Open the proposal** in its dialog opens that proposal's review.
+- A person's proposal and the promoter's go through the same six checks and the same merge.
 
 ## States
 
-- **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: the hub header, the chip, and the five tabs stay; the header holds no gold. The body is “No proposals yet”: “Nothing has been proposed from this workspace’s runs, and no pull request is open against `.oxagen/rules/`. A proposal steers nothing until a person opens a pull request from it and someone merges that.” Action: **Write a context record** (gold).
-- **loading**: the shell stays; the page body, hub header included, is replaced by the skeleton (four tile blocks and a panel of seven rows).
-- **error**: “Steering could not be loaded”. “The control plane answered `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the trace line.
-- **access denied**: “You cannot see this workspace’s steering”, naming `steering.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).
+Loaded only. This change designs the loaded state. The build uses the shell's standard loading, error, empty and denied panels until they are designed.
 
 ## Mobile
 
-The five tabs are one scrolling strip with scroll snap, and the tab in view is scrolled to on render; the page itself never scrolls sideways. The two columns of a proposal and of a pull request stack. Top bar collapses to hamburger · current crumb · search glyph · notifications · approvals · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet**, **Agents**, **Tools**, **Spend**, **More**. **More** is a bottom sheet listing Steering (with its shelves inside), Runtimes, Repositories, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace, and it is the lit slot on every Steering tab. Every dialog rises from the bottom edge as a sheet; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px.
+The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The four tabs are one strip that scrolls sideways with Proposals in view. The two view buttons and their line wrap. Each record card stacks its badges over the statement and wraps its meta line. In a review, the three tiles wrap, the two columns stack with the proposed record first, and the Supporting runs table becomes labelled cards. The dialog rises from the bottom edge as a sheet with full-width footer buttons. Nothing scrolls sideways; touch targets are at least 44 px and inputs are 16 px.
 
 ## Permissions
 
-- Read: `steering.read`
-- Writes (each a governed action recorded in Audit): `context.propose (open a Context PR)`, `context.review (merge one)`, `context.retire`
+- Read: the Steering read, `steering.read on core-platform` in the mockup's denied panel. `list_proposals` and `get_context_pr` allow an organization Owner or Admin and a workspace Owner, Member or Viewer.
+- Writes, each a governed action recorded in Audit:
+  - Open a pull request: `open_context_pr`, an organization Owner or Admin, or a workspace Owner or Member. An agent that calls it waits for approval.
+  - Raise a proposal: `propose_record`, the same roles.
+  - Dismiss a proposal: `dismiss_proposal`, an organization Owner or Admin, or a workspace Owner. It ships, and this view has no control for it.
 
 ## Backend gaps this page depends on
 
-- Context PR state from GitHub
-- The fold that turns a memory's sayings into a proposal, and the outcome of each saying's run from its terminal status (the mockup reads the summary's words and fixes the date)
-- The import parse and one pull request per source file (`steering.md`)
-- The outcome per supporting run, joined from the run's terminal status and the citing frame
+- The support measure, each cited run's outcome, citing frame and record, and the promoter's confidence (#3881).
+- The promoter, the findings job and the reflector that raise proposals from runs (ADR-061).
+- The fold that turns a memory's sayings into a proposal, and each saying's run outcome from its terminal status.
+- The steering tokens a turn before and after a merge, and the baseline measure.
 
 ## Rules every build of this page must keep
 
-- Status vocabulary. Hook tier: delivered, recorded, client-attested, fail-open. Never "enforced". A control claim carries its scope: "for actions routed through Oxagen".
-- Every badge that describes trust (tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger. A supporting run carries an outcome, never a verdict.
-- Headers are rollups of the rows beneath them, never typed twice.
-- Every explanation is a chain of links to items, frames, records and commits, not a summary.
-- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
-- Exactly one gold action per screen. Gold is identity; it never encodes state. State reads as a dot and a word, or a dashed outline, so it survives greyscale.
-- A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do; nothing silently does nothing.
-- A count in navigation appears only where something waits on a person.
+- A proposal steers nothing until its pull request merges, and nothing on the view says otherwise.
+- A supporting run carries an outcome, never a verdict, a proof or a grade. There is no threshold.
+- No person is scored or ranked. "from Marcus Bell" names who raised a proposal and weighs nothing.
+- A Steering Source and a SteeringFrame are never shown as each other, and a frame (a recorded event) and a SteeringFrame (a resolved input) never share a name on screen.
+- Every enforcement claim states the tier. "Enforced" only for calls routed through Oxagen.
+- Headers are rollups of the rows beneath them: the Proposals count is the cards, the Pull requests count is the open pull requests, and the tiles are the supporting runs.
+- The vocabulary holds: Steering record and pull request. No "context record" and no "Context PR" in the view's copy.
+- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing; the mockup's two-sentence caption under Proposals is a design defect, not a pattern to copy.
+- Exactly one gold action per screen. New source holds it in the header; while the promoter's proposal has no pull request, its review offers Open a pull request as gold too, and a build gives that screen one gold only.
+- A future-only field renders as not recorded in a build until its contract ships.
