@@ -12,7 +12,7 @@ You are auditing the **Tasks** page of Oxagen (`#/a-intel/core-platform/tasks`, 
 
 1. The page spec: `mockups/pages/tasks.md` (read it first, in full).
 2. The design, rendered: the `tasks`, `tasks-work-orders` and `tasks-workflows` stories in Storybook (`npm run storybook`), one per state, desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#/a-intel/core-platform/tasks[/<tab>]`. The flow check is `node tools/check-tasks.mjs`.
-3. The product spec: `docs/tasks-spec.md` §3, §8.6, §9, §10, §12, §14.
+3. The product spec: `docs/tasks-spec.md` §3, §8.6, §9, §10, §12, §14, and `docs/work-graph-spec.md` §5 to §8, §10, §11.1.
 4. The build under audit: `{{APP_ROOT}}`, served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/tasks[/<tab>]`.
 
 ## Procedure
@@ -45,7 +45,12 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 16. **Mobile.** At 390 × 844: Tasks is in the More sheet with its count; the tab strip scrolls within itself and the page never scrolls sideways; tables are labelled cards; the send menu sits above the thumb bar; dialogs are bottom sheets; the stage chain stacks without arrows; tap targets ≥ 44 px; inputs 16 px.
 17. **Accessibility.** Tabs use `role=tablist/tab` with `aria-selected`; rows are keyboard-operable with `role=button`, `tabindex=0` and an `aria-label`; each checkbox has an `aria-label` naming the task; the send menu is `role=menu` with `role=menuitem` rows; the mention list is `role=listbox` with `role=option`; harness and provider marks have a text alternative; dialogs are `role=dialog aria-modal`.
 18. **Permissions.** `task.read` to see the page; `work_order.send` and `context.propose` gated server-side. Verify with a role that lacks each.
-19. **Nothing extra.** List anything on the built page that is not in the spec.
+19. **Blocked by and the graph.** The Tasks table carries a Blocked by column after Status, listing each blocker's number as a link with its state dot, "none" with no blocker, and "closed as Won't do" beside a blocker that closed without done. A `ready` task with an open blocker reads "blocked by #N" under its readiness badge and its checkbox is **enabled**; a task whose provider status category is `blocked` is disabled with "Blocked upstream". Verify the two are never one column or one word. The **List** and **Graph** switch draws the open tasks by layer, unblocked tasks in layer 0, edges from blocker to blocked in the rule colour and never gold, no node labelled a frame, and on a phone a list by layer with "Layer N" headings. Unblocked means every upstream task is accepted in Oxagen or closed as Done in the provider; verify a prerequisite closed as Won't do still blocks.
+20. **Queued sends.** Selecting a blocked task and sending shows the blocked chip, the "N of M tasks are blocked" line, **Expires** (default 14 days, at most 90), and the footer **Queue until unblocked**. Queueing records `send_work_order` with `when: unblocked` and the expiry, lands on the work order page in state `queued`, and Oxagen releases it in the transaction that unblocks its last task. Verify in the DOM and on the server that a queued work order reaches no runtime before release.
+21. **Several targets.** Ticking two agents and pressing **Continue** opens the dialog titled "Work order, 2 targets" with one cap per work order, and sending makes one work order per target under one send. The Work orders tab shows one row, "2 work orders", `partial` while their states differ, opening to its children. No rank, score or winner appears between siblings.
+22. **Work orders states.** State includes `queued` with "waits on #N" under it, `expired`, and `partial` on a send row, and the Stage column reads "N of M <role> and <role>" when two stages run beside each other.
+23. **Stages that run beside each other.** The Workflows tab joins parallel stages with ∥. `wfview` cards read "after <role> and <role>". The builder's **After** checkboxes exist on every stage after the first, default to the previous stage, refuse an empty set inline, and "return to" lists only upstream stages. The committed TOML is `oxagen-workflow/v0.2` with `needs` on each stage that names one, and a v0.1 file with no `needs` renders the same chain as before. The second wand sentence in the spec yields Document after Fix and Review after Validate and Document.
+24. **Nothing extra.** List anything on the built page that is not in the spec.
 
 ## Output
 

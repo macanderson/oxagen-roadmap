@@ -27,13 +27,14 @@ Record PASS, FAIL, or N/A (with why) for every check, with evidence.
 6. **The assistant cannot certify.** Search the build for any path where `oxagen.assistant`, an agent, or an API key without a person certifies. One is a FAIL.
 7. **Certified.** The list is read-only with the digest shown; **Edit** opens `dodreopen`, which says the task returns to draft and that sent work orders keep their list. Confirming sets `draft`.
 8. **Changed.** An upstream edit to the subject, description or labels of a certified task sets `changed`, shows the banner and the **Certified against** and **Now** panels, keeps the list editable, offers the assistant's suggested item, and offers **Certify again**. A comment, an assignee change, or a status change within one category does not. Verify each against the sync code.
-9. **History.** Imported, Definition of done drafted, Certified, Changed upstream, Sent in a work order, Accepted, each with time and actor, and only those that happened.
+9. **History.** Imported, Definition of done drafted, Certified, Changed upstream, Dependency added, Dependency removed, Unblocked, Queued in a work order, Sent in a work order, Accepted, each with time and actor, and only those that happened.
 10. **Not found.** An unknown id renders "No task has this id" with **Back to Tasks**, inside the shell.
 11. **States.** loading (skeleton), error ("This task could not be loaded", `503 issue_index_unavailable`), denied ("You cannot see this task", `task.read on core-platform`).
 12. **Trust language.** Items are `open`, `claimed` or `accepted` elsewhere, never `held`, `proven` or `verified`. The source of every item is visible.
 13. **Plain nouns, mobile, accessibility.** Headings plain; the columns stack on a phone; every item input and select has a label naming its number; dialogs are `role=dialog aria-modal`.
-14. **Permissions.** `task.edit_dod` and `task.certify` gated server-side. Verify with a role that lacks each.
-15. **Nothing extra.** List anything not in the spec.
+14. **Permissions.** `task.edit_dod`, `task.certify` and `task.link` gated server-side. Verify with a role that lacks each.
+15. **Dependencies.** The panel sits above Fields with **Blocked by** and **Blocks**. Each row shows the number as a link, the subject, the state as a dot and a word (`open`, `in a work order`, `accepted`, `closed as Done`, `closed as Won't do`) and its source: a provider logo with "from <provider>", or "added here by <name> on <time>". A `provider` row has no **Remove** and its title says where to remove it; an `oxagen` row's **Remove** records `unlink_tasks`. `tklink` searches open tasks, previews the sentence, refuses a cycle with the path ("Refused. #A already blocks #B through …"), writes nothing on a refusal, and records `link_tasks` on Add. The header reads "Blocked by #N." while an upstream task is open, and the send button stays **enabled** for a `ready` open task the graph blocks, while a provider `blocked` status still disables it. History carries Dependency added, Dependency removed, Unblocked and Queued in a work order.
+16. **Nothing extra.** List anything not in the spec.
 
 ## Output
 
