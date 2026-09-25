@@ -552,10 +552,10 @@ function avRecord(t){
   return {s:"agent",name:"perf-watch",sub:"a-intel.core.perf-watch",cur:S.newAv||null,base:newAgentAv()};
 }
 var AV_SUBJECT={
-  user:{title:function(){return "Your avatar";},note:'Saved with <span class="mono">update_profile</span>, like any change to your account.',remove:"Use your default initials instead."},
-  agent:{note:"Part of the agent’s definition, so a change rides a pull request.",remove:"Use the agent’s default initials instead."},
-  workspace:{note:'Saved with <span class="mono">update_workspace_settings</span> on the workspace’s record.',remove:"Use the workspace’s default initials instead."},
-  organization:{note:'Saved with <span class="mono">update_org_settings</span> on the organization’s record.',remove:"Use the organization’s default initials instead."}
+  user:{title:function(){return "Your avatar";},remove:"Use your default initials instead."},
+  agent:{note:"Saved as a pull request on the agent’s definition.",remove:"Use the agent’s default initials instead."},
+  workspace:{remove:"Use the workspace’s default initials instead."},
+  organization:{remove:"Use the organization’s default initials instead."}
 };
 function avTitle(r){var s=AV_SUBJECT[r.s];return s.title?s.title():"Avatar for "+r.name;}
 var AV_REFUSAL={
@@ -614,8 +614,7 @@ function avatarBody(){
   var out='<div class="avb"><div class="avb-prev" id="av-prev">'+avPrevInner()+'</div><div>';
   out+='<div class="field"><label>Kind</label>'+avSeg([["icon","Icon"],["initials","Initials"],["photo","Photo"]],d.kind,"kind","Kind")+'</div>';
   if(d.kind==="icon"){
-    out+='<div class="field"><label>Icon</label><div class="av-ico" role="group" aria-label="Icon">'+AV_ICON_ORDER.map(function(n){return '<button type="button" aria-pressed="'+(d.icon===n)+'" aria-label="'+n+'" title="'+n+'" onclick="avSet(\'icon\',\''+n+'\')">'+avSvg(n)+'</button>';}).join("")+'</div>'+
-     '<div class="hint">Lucide glyphs, the set the product ships. One line weight, drawn in the tone’s ink.</div></div>';
+    out+='<div class="field"><label>Icon</label><div class="av-ico" role="group" aria-label="Icon">'+AV_ICON_ORDER.map(function(n){return '<button type="button" aria-pressed="'+(d.icon===n)+'" aria-label="'+n+'" title="'+n+'" onclick="avSet(\'icon\',\''+n+'\')">'+avSvg(n)+'</button>';}).join("")+'</div></div>';
   } else if(d.kind==="initials"){
     out+='<div class="fields"><div class="field"><label for="av-txt">Letters</label><input id="av-txt" class="short f-'+h(d.font)+'" maxlength="'+AV_MAX+'" autocapitalize="characters" value="'+h(d.text)+'" oninput="avType(\'text\',this.value.slice(0,'+AV_MAX+'))"><div class="hint">Up to '+AV_MAX+'.</div></div>'+
      '<div class="field"><label>Typeface</label>'+avSeg([["sans","Sans","f-sans"],["serif","Serif","f-serif"],["mono","Mono","f-mono"]],d.font,"font","Typeface")+'</div></div>';
@@ -624,11 +623,10 @@ function avatarBody(){
      '<div class="hint">An https link to a hosted image: PNG, JPEG, WebP, or SVG.</div></div>';
   }
   if(d.kind!=="photo"){
-    out+='<div class="field"><label>Tone</label>'+avToneRow(d,shape,l)+
-     '<div class="hint">Solid, soft, and line follow the theme. Gold and dark gold are the brand gold in two shades. Each tone fixes its own glyph colour, so there is no combination that fails.</div></div>';
+    out+='<div class="field"><label>Tone</label>'+avToneRow(d,shape,l)+'</div>';
   }
   out+='</div></div>';
-  out+='<div class="note av-note">'+AV_SUBJECT[r.s].note+'</div>';
+  if(AV_SUBJECT[r.s].note) out+='<div class="note av-note">'+AV_SUBJECT[r.s].note+'</div>';
   if(r.cur) out+='<div class="av-remove"><button type="button" class="btn sm" onclick="avRemove()">Remove avatar</button><div class="hint">'+h(AV_SUBJECT[r.s].remove)+'</div></div>';
   if(S.avErr) out+='<div class="av-alert" id="av-alert" role="alert"><span class="gl" aria-hidden="true">⚠</span><span>'+h(AV_REFUSAL[S.avErr])+'</span></div>';
   return out;
@@ -1577,7 +1575,6 @@ function recordCard(r,x){
    '<span class="mono">'+h(r.id)+'</span>'+(r.commit?'<span class="mono">'+h(r.commit)+'</span>':'')+(r.pub?'<span>'+h(r.pub)+'</span>':'')+
    '</div></div></div>';
 }
-function pendingCount(w){var c=0;for(var i=0;i<APPROVALS.length;i++){if(APPROVALS[i].ws===w&&apState(APPROVALS[i].id).status==="pending")c++;}return c;}
 
 /* The sidebar, the phone bar and the More sheet read their counts here, so a badge equals the count
    its page shows and its title says what it counts. Each entry is [count, title]. A zero draws nothing.
@@ -1590,7 +1587,6 @@ function sidebar(r){
   var w=ws(), cur=PAGES[r.page]||"";
   /* On first-run Work the organization is the one smoke run, so the counts here read off it too. */
   var fr=obFirstRun(w);
-  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug)+skWaiting(w);
   var orgAgents=fr?1:WS.reduce(function(n,x){return n+(x.agents||0);},0);
   function item(id,label,href,c,hot){
     return '<button class="navitem" '+(cur===label?'aria-current="page"':'')+' onclick="go(\''+href+'\')">'+
@@ -1710,7 +1706,7 @@ function apdRow(a){
 }
 function apdInterjectionRow(x){
   var w=x.ws;
-  return '<div class="apd-row inter" style="cursor:default"><span class="g">'+icon("assistant")+'</span>'+
+  return '<div class="apd-row inter" data-help="approvals-drawer/question-row" style="cursor:default"><span class="g">'+icon("assistant")+'</span>'+
    '<span class="tt"><b>'+hxIcon(SKRUN.harness,13,true)+' '+h(SKRUN.agent.split(".").pop())+' is paused and needs a decision</b><span>It’s working in <span class="mono">'+h(SKRUN.repo)+'</span>, which isn’t linked to any workspace, so there’s no skill configuration to apply. No cost since 09:14. If nobody answers within 30 min, the request is denied.</span></span>'+
    '<button class="btn sm primary" style="flex:none" onclick="apdToggle(false);go(\'#/'+ORG.slug+'/'+w.slug+'/runs/'+SKRUN.id+'\')">Answer</button></div>';
 }
@@ -1724,15 +1720,15 @@ function apdBody(){
   return '<div class="apd-b">'+
    (inter.length||pend.length
      ?'<p class="eyebrow q" style="margin:0 0 8px">'+(pend.length+inter.length)+' waiting on you</p><div class="apd-list">'+inter.map(apdInterjectionRow).join("")+pend.map(apdRow).join("")+'</div>'
-     :'<div style="text-align:center;padding:26px 6px"><p class="muted" style="font-size:12.5px;margin:0">Nothing is waiting on you.</p><p class="dim" style="font-size:11.5px;margin:8px 0 0">A call parks here when policy returns <span class="mono">approve</span>. A denied call never parks. It ends at once and costs nothing.</p></div>')+
+     :'<div style="text-align:center;padding:26px 6px"><p class="muted" style="font-size:12.5px;margin:0">Nothing is waiting on you.</p></div>')+
    (done.length?'<p class="eyebrow q" style="margin:18px 0 8px">'+done.length+' resolved today</p><div class="apd-list">'+done.map(apdRow).join("")+'</div>':'')+
-   '<div class="note" style="margin-top:14px;font-size:11.5px">Approving allows this exact call once. When the approval expires, the call ends and the agent is told why.</div></div>';
+   '</div>';
 }
 function apdHtml(){
   var n=apdCount();
   return '<div class="apd-scrim'+(S.apd.open?' open':'')+'" onclick="apdToggle(false)"></div>'+
    '<aside id="apdrawer" class="apd'+(S.apd.open?' open':'')+(isPhone()?' phone':'')+'" role="complementary" aria-label="Approvals"'+(S.apd.open?'':' inert aria-hidden="true"')+'>'+
-   '<div class="apd-h"><h3>Approvals</h3><span class="b '+(n?'b-approval':'b-q')+'"><span class="d"></span>'+n+' waiting on you in all workspaces</span>'+
+   '<div class="apd-h"><h2>Approvals</h2><span class="b '+(n?'b-approval':'b-q')+'"><span class="d"></span>'+n+' waiting on you in all workspaces</span>'+
     '<button class="iconbtn" style="margin-left:auto" onclick="apdToggle(false)" aria-label="Close approvals">'+
     '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>'+
    apdBody()+'</aside>';
@@ -1774,7 +1770,7 @@ function markAllRead(){
   closeDialog();act('All notifications marked read. Audit records who read each one.');
 }
 function userMenu(){
-  return '<div class="menu"><div class="menu-hd"><b>Marcus Bell</b><span>marcus@a-intel.example</span></div>'+
+  return '<div class="menu" data-help="shell/account-menu"><div class="menu-hd"><b>Marcus Bell</b><span>marcus@a-intel.example</span></div>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'profile\')">Account</button>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'preferences\')">Preferences</button>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'security\')">Security and sessions</button>'+
@@ -1844,8 +1840,7 @@ function rulesList(a){
 }
 function taintBlock(a){
   if(!a.tainted||!a.taint) return '';
-  return '<div class="taint"><div class="row" style="margin-bottom:8px"><span class="b b-critical"><span class="d"></span>tainted · '+a.taint.length+' source'+(a.taint.length===1?'':'s')+'</span>'+
-   '<span class="muted" style="font-size:12px">Arguments that derive from untrusted tool output. Taint on a write raises the decision to approval.</span></div>'+
+  return '<div class="taint"><div class="row" style="margin-bottom:8px"><span class="b b-critical"><span class="d"></span>tainted · '+a.taint.length+' source'+(a.taint.length===1?'':'s')+'</span></div>'+
    a.taint.map(function(t){return '<div class="srcrow"><a class="mono" href="#/'+ORG.slug+'/'+a.ws+'/runs/'+a.run+'" style="flex:none">frame #'+t.frame+'</a>'+
     '<span class="mono" style="color:var(--fg);flex:none">'+h(t.path)+'</span><span class="muted" style="min-width:0">'+h(t.tool)+': '+h(t.note)+'</span></div>';}).join("")+'</div>';
 }
@@ -1865,8 +1860,7 @@ function decisionFoot(a){
    '<span class="muted" style="font-size:12.5px">the run halted before anyone answered · '+rel+'nothing sent</span>'+open+'</div>';
   if(st.status==="expired") return '<div class="apfoot"><span class="b b-denied"><span class="d"></span>expired</span>'+
    '<span class="muted" style="font-size:12.5px">nobody answered within '+h(tmin(a.timeout))+' · the agent was told the request timed out · '+rel+'nothing sent</span>'+open+'</div>';
-  return '<div class="apfoot"><span class="muted" style="font-size:11.5px;flex:1;min-width:220px">Approving allows this exact call once. Denying '+(m?'releases '+usd(m.reserved)+' back to the mandate and ':'')+'ends the call, and the agent is told your reason.</span>'+
-   '<span class="r"><button class="btn ghost sm" onclick="go(\''+runHref+'\')">Open run</button>'+
+  return '<div class="apfoot"><span class="r"><button class="btn ghost sm" onclick="go(\''+runHref+'\')">Open run</button>'+
    '<button class="btn danger" onclick="openDialog(\'deny\',\''+a.id+'\')">Deny'+(a.amount?' payment':'')+'</button>'+
    '<button class="btn primary" onclick="openDialog(\'approve\',\''+a.id+'\')">Approve'+(a.amount?' '+usd(a.amount)+' '+h(a.currency):'')+'</button></span></div>';
 }
@@ -1908,7 +1902,7 @@ function approvalCard(a){
   var crit=a.risk==="critical"||a.side==="irreversible"||a.tainted;
   var pol=null;for(var i=0;i<POLICIES.length;i++){if(POLICIES[i].v===a.policy)pol=POLICIES[i];}
   var slug=a.agent.split(".").pop();
-  return '<div class="apcard'+(crit?' crit':'')+(done?' done':'')+'" id="ap-'+a.id+'">'+
+  return '<div class="apcard'+(crit?' crit':'')+(done?' done':'')+'" id="ap-'+a.id+'" data-help="approvals-drawer/approval-card">'+
    '<div class="aphead"><div style="min-width:0">'+
     '<p class="eyebrow" style="margin-bottom:6px">'+(done?'Approval '+h(st.status):'Approval required')+'</p>'+
     (a.amount?'<div class="amt">'+usd(a.amount)+' <span class="cur">'+h(a.currency)+'</span></div>':'<div class="amt" style="font-size:17px">'+h(a.tool)+'</div>')+
@@ -1920,8 +1914,7 @@ function approvalCard(a){
      (a.tainted?'<span class="b b-critical"><span class="d"></span>tainted</span>':'')+
      '<span class="b b-q mono">egress '+h(keyText(a.egress).toLowerCase())+'</span>'+tierBadge(a.tier)+'</div></div>'+
     '<div class="r"><span class="eyebrow q" style="font-size:10px;margin:0">'+(done?'resolved':'times out in')+'</span>'+clk+
-     '<span class="dim mono" style="font-size:10.5px">parked '+h(a.parkedAt||"")+' · timeout '+h(a.timeout)+'</span>'+
-     (done?'':'<span class="dim" style="font-size:11px;max-width:22ch;text-align:right">When it expires, the call ends and the agent is told why.</span>')+'</div></div>'+
+     '<span class="dim mono" style="font-size:10.5px">parked '+h(a.parkedAt||"")+' · timeout '+h(a.timeout)+'</span></div></div>'+
    fourHop(a)+
    '<div class="apbody">'+
     (m?mandateBar(m,st.status==="pending"||st.status==="approved"):'')+
@@ -1936,7 +1929,7 @@ function approvalCard(a){
        '<dt>Operator</dt><dd>'+h((PEOPLE[a.op]||{name:a.op}).name)+'</dd>'+
        '<dt>Policy</dt><dd><span class="mono">'+h(a.policy)+'</span>'+(pol?' <span class="dim">activated '+h(pol.at)+' by '+h(pol.by)+'</span>':'')+'</dd>'+
        '<dt>Rule</dt><dd>'+h(a.rule)+'</dd>'+
-       '<dt>Tier</dt><dd>'+h(a.tier)+((TIER_RANK[a.tier]||0)>=2?' <span class="dim">· routed through the gateway, so oxagen decided before the call left the host</span>':a.tier==="harness"?' <span class="dim">· the call was routed through oxagen, so oxagen made the decision. The agent’s native tools are reported by the harness and fail open</span>':' <span class="dim">· recorded only</span>')+'</dd></dl></div>')+
+       '<dt>Tier</dt><dd>'+h(a.tier)+'</dd></dl></div>')+
      '<div><p class="eyebrow q" style="margin-bottom:7px">The call</p><dl class="kv">'+
       '<dt>Tool version</dt><dd class="mono">'+h(a.tool)+'</dd>'+
       '<dt>Input digest</dt><dd class="mono">'+h(a.digest)+'</dd>'+
@@ -1961,8 +1954,8 @@ function resolveApproval(id,status){
   approvalSettle(a,status,"Marcus Bell",reason);
   closeDialog();
   if(status==="approved"){
-    toast("Token apt_"+a.digest.slice(7,15)+" minted. It is single-use and bound to the call digest, this agent, this run, and a 60-second expiry. Credential brokered, "+a.tool+" dispatched.","allowed");
-    setTimeout(function(){toast("Receipt "+st.rcp+" written, signed and chained at frame "+st.rcpSeq+" on "+a.run+". "+(m?"Mandate settled: "+usd(m.remaining)+" left this period.":"The token was consumed on dispatch; the agent never held it."),"allowed");},1300);
+    toast("Token apt_"+a.digest.slice(7,15)+" minted. Credential brokered, "+a.tool+" dispatched.","allowed");
+    setTimeout(function(){toast("Receipt "+st.rcp+" written, signed and chained at frame "+st.rcpSeq+" on "+a.run+"."+(m?" Mandate settled: "+usd(m.remaining)+" left this period.":""),"allowed");},1300);
   } else {
     toast("Denied. Nothing dispatched, no credential minted"+(st.released?", "+usd(fmt2(st.released))+" released back to the mandate":"")+". The agent is told your reason.","denied");
   }
@@ -9505,13 +9498,12 @@ function dialog(){
        '<button class="btn" onclick="markAllRead()"'+(notifUnread()?'':' disabled')+'>Mark all read</button>'},
    approve:{t:"Approve this action",w:false,b:approveBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="resolveApproval(S.dlgArg,\'approved\')">Approve this call</button>'},
    deny:{t:"Deny this action",w:false,b:denyBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="resolveApproval(S.dlgArg,\'denied\')">Deny with this reason</button>'},
-   account:{t:"Account",w:false,tabs:accountTabs(),b:accountBody(),f:S.dlgArg==="onboarding"?'<span class="grow">Demo only. Nothing on these screens writes anything.</span><button class="btn" onclick="closeDialog()">Close</button>':'<span class="grow">Changes here run as <span class="mono">set_preferences</span>, a governed action that is audited like any other.</span>'+
-     '<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Saved. set_preferences recorded as a frame.\')">Save</button>'},
+   account:{t:"Account",w:false,tabs:accountTabs(),b:accountBody(),f:S.dlgArg==="onboarding"?'<button class="btn" onclick="closeDialog()">Close</button>':
+     '<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Saved.\')">Save</button>'},
    "org-switch":{t:"Switch organization",w:false,b:
      '<div class="field"><input placeholder="Search organizations" aria-label="Search organizations"></div>'+
      '<button class="cmd-i on" onclick="closeDialog()"><span class="av">A</span>'+
-     '<span style="flex:1;min-width:0"><b>Anderson Intelligence Corp.</b><br><span class="dim mono" style="font-size:11px">a-intel · Team · '+plural(ic0(ORG.agents),"agent")+'</span></span><span class="r">current</span></button>'+
-     '<div class="note" style="margin-top:14px">An organization owns a key-encryption key, a database partition, a billing account, and optionally a dedicated data plane. You belong to one here.</div>',
+     '<span style="flex:1;min-width:0"><b>Anderson Intelligence Corp.</b><br><span class="dim mono" style="font-size:11px">a-intel · Team · '+plural(ic0(ORG.agents),"agent")+'</span></span><span class="r">current</span></button>',
      f:'<button class="btn" onclick="closeDialog()">Close</button>'},
    "ws-switch":{t:"Switch workspace",w:false,b:
      WS.map(function(w){return '<button class="cmd-i'+(w.slug===S.ws?" on":"")+'" onclick="S.ws=\''+w.slug+'\';closeDialog();go(\'#/'+ORG.slug+'/'+w.slug+'\')">'+
@@ -9562,8 +9554,7 @@ function dialog(){
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'a-intel/platform#522 opened. The agent exists when it merges.\')">Open the pull request</button>'},
    "request-access":{t:"Request access",w:false,b:
      '<div class="field"><label>Role requested</label><input value="workspace.read on core-platform" aria-label="Role"></div>'+
-     '<div class="field"><label>Why</label><textarea rows="3" aria-label="Reason">Closing the September books; I need to see the runs behind the finance lines.</textarea></div>'+
-     '<div class="note">Granting a role is a governed action. It will appear in the audit record with the granter’s name, your name, and this reason.</div>',
+     '<div class="field"><label>Why</label><textarea rows="3" aria-label="Reason">Closing the September books; I need to see the runs behind the finance lines.</textarea></div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Request sent to Priya Natarajan.\')">Send the request</button>'},
    incident:{t:"Open an incident",w:false,b:
      '<div class="field"><label for="in-title">Subject</label><input id="in-title" value="Stripe charge ch_3Qa8 has no receipt"></div>'+
@@ -9781,7 +9772,7 @@ function approveBody(){
    (m?'<p class="eyebrow q">Mandate position after this call</p>'+
     '<dl class="kv" style="margin-bottom:14px"><dt>Auto-approve limit</dt><dd>'+usd(m.perCall)+' per call. <b style="color:var(--st-denied)">This call is above it</b>, so it needs approval.</dd>'+
     '<dt>Remaining this period</dt><dd>'+usd(m.remaining)+' of '+usd(m.perPeriod)+'</dd>'+
-    '<dt>Reserved for this call</dt><dd>'+usd(m.reserved)+'. Each call reserves its amount before it is sent, so two calls cannot overspend the remaining balance.</dd>'+
+    '<dt>Reserved for this call</dt><dd>'+usd(m.reserved)+'</dd>'+
     '<dt>Counterparty</dt><dd><span class="mono">'+h(a.counterparty)+'</span> · on the allow list</dd></dl>':'')+
    '<div class="field"><label>Reason (the agent is told it)</label>'+
    '<textarea rows="2" aria-label="Reason">PO-4471 line 3, checked against the quote.</textarea></div>'+
@@ -9790,7 +9781,7 @@ function approveBody(){
 function denyBody(){
   return '<div class="field"><label>Reason for the agent</label>'+
    '<textarea rows="3" aria-label="Reason">Not this cycle. Open the release PR and leave the tag to a person.</textarea></div>'+
-   '<div class="note">Deny, approve, and expiry are all frames. A denial ends the call at no charge.</div>';
+   '<div class="note">A denial ends the call at no charge.</div>';
 }
 function mandateBody(){
   return '<div class="field"><label>Agent</label><select aria-label="Agent"><option>a-intel.finops.invoice-bot</option></select></div>'+
@@ -9825,10 +9816,10 @@ function accountBody(){
     return '<div class="row2">'+
      '<div class="field"><label for="ac-loc">Locale</label><select id="ac-loc">'+
      '<option>English (United States)</option><option disabled>Deutsch (planned)</option><option disabled>日本語 (planned)</option></select>'+
-     '<div class="hint">Dates, numbers and currencies format to this. Model-written prose, such as findings and explanations, is generated in this locale and recorded on the frame. Machine-readable fields in records, receipts and exports are never translated.</div></div>'+
+     '<div class="hint">Dates, numbers and currencies format to this.</div></div>'+
      '<div class="field"><label for="ac-cur">Display currency</label><select id="ac-cur">'+
      '<option>USD (US dollar)</option><option disabled>EUR (planned)</option></select>'+
-     '<div class="hint">Display only. The value of record stays the provider’s billing currency, and every converted number carries its rate and source.</div></div></div>'+
+     '<div class="hint">Display only.</div></div></div>'+
      '<div class="row2">'+
      '<div class="field"><label for="ac-tz">Time zone</label><select id="ac-tz">'+
      '<option>UTC</option><option>America/Los_Angeles</option></select></div>'+
@@ -9847,22 +9838,21 @@ function accountBody(){
      '<div class="bd2"><div class="t1">Authenticator app</div><div class="t2">TOTP, added 2026-08-22. 8 of 10 recovery codes unused.</div></div>'+
      '<button class="btn sm" onclick="act(\'Ten new recovery codes issued. The old set is void.\')">Regenerate codes</button></div>'+
      '<div class="li"><div class="ic" style="background:var(--hl);color:var(--dim)">'+icon("user")+'</div>'+
-     '<div class="bd2"><div class="t1">Passkey</div><div class="t2">Not set up. A passkey replaces the password, not the second factor.</div></div>'+
+     '<div class="bd2"><div class="t1">Passkey</div><div class="t2">Not set up.</div></div>'+
      '<button class="btn sm" onclick="act(\'Passkey enrolment starts in the browser prompt.\')">Add</button></div></div></div>'+
      '<div class="field"><label>Active sessions</label><div class="lst">'+sessions.map(function(x){
        return '<div class="li"><div class="bd2"><div class="t1">'+h(x[0])+(x[3]?'<span class="b b-allowed"><span class="d"></span>this device</span>':'')+'</div>'+
         '<div class="t2">'+h(x[1])+'</div></div><time>'+h(x[2])+'</time>'+
         (x[3]?'':'<button class="btn sm" onclick="act(\'Session revoked. It ends at its next request.\')">Revoke</button>')+'</div>';}).join("")+'</div>'+
-     '<div class="hint">Revoking a session ends it at the next request. It does not touch an agent credential or a run token. Revoke those on the Agents page to stop an agent.</div></div>';
+     '<div class="hint">Revoking a session ends it at the next request.</div></div>';
   }
   if(tab==="privacy"){
     return '<div class="field"><label>Export</label>'+
-     '<div class="hint">A signed bundle: archive segments, attestations, key ids and a verifier script, so an auditor can check the chain offline without trusting oxagen. Runs as <span class="mono">export_data</span>, a governed action with third-party egress.</div>'+
      '<div class="row" style="margin-top:4px"><button class="btn" onclick="act(\'Export queued. You will get a signed bundle and a verifier script.\')">Export my activity</button>'+
      '<button class="btn" onclick="act(\'An organization export needs an org owner. Priya Natarajan has been asked.\')">Export the organization</button></div></div>'+
      '<div class="field"><label>Erasure</label>'+
-     '<div class="hint">Frame bodies are written once and kept for seven years; personal data is redacted before write. Erasure of a data subject is handled as a support request against that policy, not as a button.</div></div>'+
-     '<div class="field"><label>What is kept, and for how long</label>'+kvl([
+     '<div class="hint">Erasure of a data subject is a support request.</div></div>'+
+     '<div class="field"><label>Retention</label>'+kvl([
        ["frame bodies","7 years from the seal · write-once · per-organization key"],
        ["run ledger","forever: run, attempt, seal, attestation, frame digests, and costs"],
        ["retention mode","content_exact: bodies retained"],
@@ -9880,7 +9870,7 @@ function accountBody(){
      ["a-intel","org.member"],
      ["core-platform","workspace.owner"],
      ["principal","prn_01K3F8QB7R · kind human"]],"code")+
-   '<div class="hint" style="margin-top:10px">A role is changed on the Organization page by someone who holds <span class="mono">set_member_role</span>, never here. This is where you see what you hold.</div></div>';
+   '<div class="hint" style="margin-top:10px">Roles are changed on the Organization page.</div></div>';
 }
 
 /* ============================== command menu ============================== */
@@ -9944,9 +9934,8 @@ function cmdMenu(){
   var belt=cmdBeltHits().map(function(x){
     return item('closeDialog();openDialog(\'tool\',\''+h(x.id)+'\')','<span class="tcw">'+toolCell(x.id,{sz:"sm"})+'</span><span class="ds">'+h(x.d)+'</span><span class="r">'+hazard(x.risk,x.eff)+gate(x.dec)+'</span>',"belt");});
   var body=nav+
-   grp("Tools on the toolbelt","risk and side effect, the same trailer the model sees",belt,"belt");
-  if(!n) body='<div class="cmd-empty"><b>Nothing on your toolbelt matches “'+h(S.cmdq)+'”.</b>'+
-   '<p>A search never returns a tool outside the toolbelt. What you cannot call, you cannot find, which is also what stops a prompt injection from naming one.</p></div>';
+   grp("Tools on the toolbelt","",belt,"belt");
+  if(!n) body='<div class="cmd-empty"><b>Nothing on your toolbelt matches “'+h(S.cmdq)+'”.</b></div>';
   if(S.cmdSel>=n) S.cmdSel=0;
   setTimeout(cmdFocus,0);
   return '<div class="scrim" onclick="if(event.target===this){S.cmdq=\'\';closeDialog();}">'+
@@ -9955,8 +9944,7 @@ function cmdMenu(){
    '<input id="cmdq" value="'+h(S.cmdq)+'" placeholder="Search runs, agents, tools and records, or run an action" aria-label="Command menu" autocomplete="off" oninput="cmdInput(this)" onkeydown="cmdKey(event)"></div>'+
    '<div class="cmd-l">'+body+'</div>'+
    '<div class="cmd-in cmd-foot">'+
-   '<span class="mono">⇅</span> move <span class="mono">↩</span> open <span class="mono">esc</span> close'+
-   '<span style="margin-left:auto"><span class="mono">search_tools</span> · this search is itself a governed call, recorded as a frame</span></div></div></div>';
+   '<span class="mono">⇅</span> move <span class="mono">↩</span> open <span class="mono">esc</span> close</div></div></div>';
 }
 
 
@@ -11259,7 +11247,7 @@ function oxName(){ return '<span class="ox-name">o<span class="x">x</span>agen</
    the mark and a third line, so the launcher never reads ready when it is not. */
 function asstLaunch(){
   var bad=S.asstEngine==="down"?"engine down":orgKeyState()==="none"?"no model key":"";
-  return '<button class="asst-launch" onclick="asstToggle()" aria-controls="asst" aria-expanded="'+(S.asst?"true":"false")+'">'+
+  return '<button class="asst-launch" data-help="stella-drawer/launcher" onclick="asstToggle()" aria-controls="asst" aria-expanded="'+(S.asst?"true":"false")+'">'+
    '<span class="asst-g'+(bad?" bad":"")+'">'+stellaMark()+'</span>'+
    '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b>'+
    '<span class="sub">'+oxName()+'’s in-app AI assistant</span>'+
@@ -11320,15 +11308,14 @@ function asstSheet(){
      answer. Same for a missing key: the turn is not free, so it cannot run without one. */
   if(S.asstEngine==="down") return asstHead('<span class="b b-failed" style="margin-left:auto"><span class="d"></span>engine down</span>')+
    asstStateBlock("The stella engine is not answering",
-    '<span class="mono">'+h(ASST_ENGINE_URL)+'</span> returned <code>503</code>. The engine is a required service; nothing falls back to an in-process loop, so the assistant says so by name rather than answering from somewhere else.',
+    '<span class="mono">'+h(ASST_ENGINE_URL)+'</span> returned <code>503</code>.',
     '<button class="btn sm" onclick="S.asstEngine=\'up\';render()">Retry</button>',
     "engine "+ASST_ENGINE_VER+" · last healthy 09:02:11Z")+
    '<div class="asst-f"><div class="box"><textarea placeholder="Unavailable while the engine is down" disabled aria-label="Message"></textarea></div></div>';
 
   if(orgKeyState()==="none") return asstHead('<span class="b b-approval" style="margin-left:auto"><span class="d"></span>no model key</span>')+
    asstStateBlock("This organization has no model key",
-    'The assistant’s turns are metered in usage credits against a model key held for '+h(ORG.name)+
-    '. There is no key to spend against, so there is nothing to run and nothing has been charged. An owner mints one under <span class="mono">Organization → Model funding and routes</span>.',
+    'Nothing has run and nothing has been charged. An owner mints a key under <span class="mono">Organization → Model funding and routes</span>.',
     '<button class="btn sm primary" onclick="asstToggle(false);S.tab.organization=\'funding\';go(\'#/'+ORG.slug+'\')">Open funding</button>',
     "needs org.admin")+
    '<div class="asst-f"><div class="box"><textarea placeholder="Unavailable until a model key is minted" disabled aria-label="Message"></textarea></div></div>';
@@ -11339,13 +11326,13 @@ function asstSheet(){
    '<div class="msg"><div class="who">'+stellaName()+' <span class="b b-q" style="font-size:9.5px"><span class="id">run_01K5RT9X4M2</span> · oxagen’s run</span></div><div class="bub">'+
    '<p style="margin:0 0 10px">I read the finding and the toolbelt. 34 of the 52 tools on <span class="mono">a-intel.core.triage</span> were never called in 1,340 runs. '+
    'Narrowing the toolbelt is a change to the agent definition, so it is a pull request, not a database write. I opened one.</p>'+
-   '<div class="act-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_context_pr</code></div>'+
+   '<div class="act-card" data-help="stella-drawer/action-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_context_pr</code></div>'+
    '<dl class="kv" style="font-size:11.5px"><dt>Pull request</dt><dd><a href="#">a-intel/platform#521</a></dd>'+
    '<dt>File</dt><dd class="mono" style="font-size:11px">.oxagen/agents/triage.toml</dd>'+
    '<dt>Change</dt><dd>tools narrowed 52 → 18</dd>'+
    '<dt>Decision</dt><dd>allow · <span class="mono">pol_v41</span> · rule <span class="mono">rg_0041</span></dd>'+
    '<dt>Receipt</dt><dd><a class="mono" href="#/'+ORG.slug+'/audit/receipts" onclick="openDialog(\'receipt\',\'rcp_01K5RTB4Q\')">rcp_01K5RTB4Q</a></dd>'+
-   '<dt>Recorded as</dt><dd>one governed action, in the ledger and not billed. <span class="mono">resolve_approval</span> is the only billable one</dd></dl></div>'+
+   '<dt>Recorded as</dt><dd>one governed action, in the ledger and not billed</dd></dl></div>'+
    '<p style="margin:10px 0 0">Estimated saving from the frames it cites: <b>$188.40</b> USD over 30 days. '+
    'A code-owner review is required in <span class="mono">team</span> mode, so it is yours to merge.</p></div></div>'+
     '<div class="msg op"><div class="who">'+h(me().name)+'</div><div class="bub">Why did run_01K5RG6H1L4OIU9Y cost $5.08?</div></div>'+
@@ -11354,10 +11341,10 @@ function asstSheet(){
     '<p style="margin:0">The Cost tab pins both findings to the turns they landed in, and Optimization names the record that stops the re-read. '+
     '<a href="#/'+ORG.slug+'/core-platform/runs/run_01K5RG6H1L4OIU9Y/cost">Open the waterfall →</a></p></div></div>'+
    '</div>'+
-   '<div class="asst-f"><div class="box">'+
+   '<div class="asst-f" data-help="stella-drawer/composer"><div class="box">'+
    '<textarea placeholder="Ask about a run, or change something" aria-label="Message the assistant"></textarea>'+
-   '<button class="btn primary sm" onclick="act(\'Turn posted. It opens a run of the in-app agent: recorded with frames and a receipt, metered in usage credits, and never counted among your runs.\')">Send</button></div>'+
-   '<p class="dim" style="font-size:11px;margin:8px 0 0">It acts through the same governed actions these screens use. It holds no authority and no credentials, and its model calls are billed to this organization’s credit balance. It runs <span class="mono">'+h(ASST_MODEL)+'</span> on <span class="mono">'+h(ASST_ENGINE_URL)+'</span>.</p></div>';
+   '<button class="btn primary sm" onclick="act(\'Turn posted. Recorded as a run of the in-app agent.\')">Send</button></div>'+
+   '<p class="dim" style="font-size:11px;margin:8px 0 0">Runs <span class="mono">'+h(ASST_MODEL)+'</span> on <span class="mono">'+h(ASST_ENGINE_URL)+'</span>.</p></div>';
 }
 
 /* ============================== Creating things ==============================
@@ -11664,15 +11651,12 @@ var CREATE={
 
 DLG_EXT.create=function(){
  var w=ws();
- return {t:"Create", s:"You describe it, oxagen drafts the file, you read it, and a pull request publishes it.", w:true,
+ return {t:"Create", w:true,
   b:'<div class="wz-pick">'+Object.keys(CREATE).map(function(k){var c=CREATE[k];
      return '<button class="wz-card" onclick="wzOpen(\''+k+'\')">'+
       '<span class="ic">'+icon(c.i)+'</span>'+
       '<span class="tx"><b>'+h(c.l)+'</b><span class="d">'+h(c.d)+'</span>'+
-      '<span class="fp mono">'+c.file+'</span></span></button>';}).join("")+'</div>'+
-    '<div class="note" style="margin-top:14px">Each one ends on a pull request against '+h(w.main)+
-    '. The thing exists once someone merges it, and a reviewer can stop it there. '+
-    'A memory from the Markdown import is the exception: it is written when you publish the import, and it steers at may or below.</div>',
+      '<span class="fp mono">'+c.file+'</span></span></button>';}).join("")+'</div>',
   f:'<span class="grow mono dim" style="font-size:11px">'+h(w.name)+' · '+h(w.main)+'</span><button class="btn" onclick="closeDialog()">Close</button>'};
 };
 
@@ -13845,7 +13829,6 @@ function cardTables(){
 var MNAV_MORE={organization:1,billing:1,audit:1,steering:1,source:1,scenarios:1,repositories:1,runtimes:1};
 function mobileNav(r){
   var w=ws(), fr=obFirstRun(w), base="#/"+ORG.slug+"/"+w.slug;
-  var waiting=fr?APPROVALS.filter(function(a){return a.run===fr.id&&apState(a.id).status==="pending";}).length:pendingCount(w.slug)+skWaiting(w);
   var crit=fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length;
   var cur=r.page==="run"||r.page==="workitem"||r.page==="workorder"?"work":r.page==="agent"||r.page==="agentsource"?"agents":r.page;
   function b(id,label,href,count,hot,on){
