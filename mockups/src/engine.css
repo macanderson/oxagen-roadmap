@@ -600,6 +600,8 @@ a.inv-i:hover *{text-decoration:none}
 .li time{font-family:var(--mono);font-size:10px;color:var(--dim);flex:0 0 auto;white-space:nowrap}
 .li.unread{background:color-mix(in srgb,var(--gold) 5%,var(--ink))}
 .li.unread .t1::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--gold);margin-right:6px;vertical-align:middle}
+.li[role=button]{cursor:pointer}
+.li[role=button]:focus-visible{outline-offset:-2px;border-radius:0}
 .menu{position:absolute;top:42px;right:0;width:250px;background:var(--panel);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);z-index:70;padding:6px;overflow:hidden}
 .menu-i{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;border:0;background:none;border-radius:8px;color:var(--body);font-size:13px;text-align:left}
 .menu-i:hover{background:var(--hl);color:var(--fg)}
@@ -636,7 +638,7 @@ html.has-mnav #toast.phone{bottom:calc(88px + env(safe-area-inset-bottom))}
 .mtile .ic{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;background:var(--panel);border:1px solid var(--border);color:var(--muted);flex:none}
 .mtile .tx{min-width:0;display:flex;flex-direction:column}
 .mtile .tx b{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mtile .tx span{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mtile .tx>span{font-size:11px;color:var(--dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mtile .ct{margin-left:auto;font-family:var(--mono);font-size:10.5px;color:var(--dim);background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:0 5px;flex:none}
 .mtile .ct.hot{color:var(--st-approval);border-color:color-mix(in srgb,var(--st-approval) 40%,transparent)}
 /* drawer: a scrim behind the sidebar, and the drawer itself is the full height with big rows */
@@ -1706,6 +1708,23 @@ tr.dod-fail td{background:color-mix(in srgb,var(--st-failed) 6%,transparent)}
 .sx-rax .rfill.obs{background:var(--st-proven)}
 .sx-rax .rn{font-family:var(--mono);font-size:11px;color:var(--body);min-width:30px;text-align:right}
 .sx-rax .rsay{font-size:12px;color:var(--muted);margin-top:5px;border-left:2px solid var(--rule);padding-left:8px}
+/* the Run page's self-grade, refused: what was captured shows, what it says does not */
+.sg-lock{display:flex;gap:11px;align-items:flex-start;border:1px dashed color-mix(in srgb,var(--sk-res) 45%,transparent);border-radius:10px;background:color-mix(in srgb,var(--sk-res) 6%,transparent);padding:11px 12px}
+.sg-lock .ic{color:var(--sk-res);flex:none;margin-top:1px}
+.sg-lock .ic svg{width:16px;height:16px}
+.sg-lock .t{font-size:13px;font-weight:600;color:var(--fg)}
+.sg-lock .s{font-size:12.3px;color:var(--muted);margin-top:3px}
+/* the fold: the setting on the Memory tab, and a memory's sayings in its dialog */
+.mem-fold{display:flex;flex-wrap:wrap;align-items:center;gap:7px;font-size:12.5px;color:var(--body)}
+.mem-fold label{font-size:12.5px;color:var(--body);margin:0}
+.mem-fold select{font:inherit;font-family:var(--mono);background:var(--ink);color:var(--fg);border:1px solid var(--border);border-radius:6px;padding:2px 6px}
+.mem-fold .dim{margin-left:4px}
+.mem-says{display:grid;gap:0}
+.mem-say{padding:8px 0;border-top:1px solid var(--border)}
+.mem-say:first-child{border-top:0;padding-top:2px}
+.mem-say .q{font-size:12.8px;color:var(--body);border-left:2px solid var(--rule);padding-left:8px}
+.mem-say .by{display:flex;flex-wrap:wrap;gap:8px;font-size:11px;color:var(--dim);margin-top:4px;padding-left:10px}
+.mem-say .by a{font-size:11px}
 .sx-rax.gap{border-color:color-mix(in srgb,var(--st-failed) 45%,transparent)}
 
 /* the quarantine box — the promise that research data stays research data */
@@ -1886,7 +1905,8 @@ button.wz-opt:hover{border-color:var(--rule)}
    the screen must not move underneath them. The host (#asst, beside #layer) is permanent and
    render() only rewrites its contents when what it renders changes — that is what lets the
    transition survive a re-render, and what keeps a half-typed message alive. */
-.asst{position:fixed;top:0;bottom:0;left:var(--side-w);width:min(430px,calc(100vw - var(--side-w) - 56px));
+/* --asst-w is the width the operator dragged to; 430px is the floor and 56px of page always shows */
+.asst{position:fixed;top:0;bottom:0;left:var(--side-w);width:min(max(430px,var(--asst-w,430px)),calc(100vw - var(--side-w) - 56px));
   background:var(--panel);border-right:1px solid var(--border);z-index:50;display:flex;flex-direction:column;
   box-shadow:18px 0 44px rgba(0,0,0,.44);padding-bottom:env(safe-area-inset-bottom);
   translate:-100% 0;opacity:0;visibility:hidden;
@@ -1897,6 +1917,14 @@ button.wz-opt:hover{border-color:var(--rule)}
    translate composes with the centring transform rather than fighting it */
 .asst.phone{left:50%;width:100%;max-width:400px;transform:translateX(-50%);
   border-left:1px solid var(--rule);border-right:1px solid var(--rule);box-shadow:var(--shadow)}
+/* the right edge is the resize handle: an 8px strip that shows a rule and the ew-resize cursor on hover */
+.asst-grip{position:absolute;top:0;bottom:0;right:-5px;width:9px;cursor:ew-resize;z-index:2;touch-action:none}
+.asst-grip::after{content:"";position:absolute;top:0;bottom:0;left:4px;width:1px;background:transparent;transition:background .15s}
+.asst-grip:hover::after,.asst-grip:focus-visible::after,.asst.resizing .asst-grip::after{background:var(--muted);width:2px;left:3px}
+.asst-grip:focus-visible{outline:none}
+.asst.resizing{transition:none}
+body.asst-resizing{cursor:ew-resize;user-select:none}
+.asst.phone .asst-grip{display:none}
 @media(prefers-reduced-motion:reduce){
   .asst{translate:0 0;transition:opacity .12s ease,visibility 0s .12s}
   .asst.open{translate:0 0;transition:opacity .12s ease,visibility 0s 0s}
@@ -1908,18 +1936,29 @@ button.wz-opt:hover{border-color:var(--rule)}
 .asst-launch:hover{border-color:var(--rule);color:var(--fg)}
 .asst-launch[aria-expanded="true"]{border-color:var(--gold)}
 .asst-launch .tx{min-width:0;flex:1}
-.asst-launch .tx b{display:block;font-size:12.5px;font-weight:600;color:var(--fg)}
-.asst-launch .tx span{display:block;font-size:10.5px;color:var(--dim);font-family:var(--mono);
+.asst-launch .tx b{display:block;font-size:13.5px;font-weight:600;color:var(--fg)}
+.asst-launch .tx>span{display:block;font-size:11px;color:var(--dim);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.asst-launch .tx span.down{color:var(--st-failed)}
+.asst-launch .tx>span.down{color:var(--st-failed);font-family:var(--mono);font-size:10.5px}
+/* a red dot on the mark when the engine is down or no key is set */
+.asst-g{position:relative}
+.asst-g.bad::after{content:"";position:absolute;top:-3px;right:-3px;width:8px;height:8px;border-radius:50%;
+  background:var(--st-failed);border:2px solid var(--panel)}
+/* "oxagen" in the wordmark's face, x in gold, as on line 2 of the launcher */
+.ox-name{font-family:var(--font-display);font-weight:600;color:var(--muted);letter-spacing:0}
+.ox-name .x{color:var(--gold)}
 .asst-launch .cv{flex:none;color:var(--dim);display:grid;place-items:center;
   transition:transform .3s cubic-bezier(.32,.72,0,1)}
 .asst-launch[aria-expanded="true"] .cv{transform:rotate(180deg);color:var(--gold)}
 @media(prefers-reduced-motion:reduce){.asst-launch .cv{transition:none}}
-.asst-g{width:28px;height:28px;border-radius:9px;flex:none;display:grid;place-items:center;background:var(--gold);color:var(--on-gold)}
-.asst-g svg{width:15px;height:15px}
+.asst-g{width:28px;height:28px;border-radius:9px;flex:none;display:grid;place-items:center;background:var(--ink);border:1px solid var(--border)}
+.asst-g svg{width:14px;height:14px}
 .asst-launch .asst-g{width:24px;height:24px;border-radius:7px}
 .asst-h{padding:12px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex:none}
+.asst-h .stl-wm{height:18px;width:auto;display:block;flex:none;color:var(--fg)}
+/* The close button sits at the right edge. A state badge, when there is one, takes the space before it. */
+.asst-h>.iconbtn{margin-left:auto}
+.asst-h>.b+.iconbtn{margin-left:0}
 .asst-b{flex:1;min-height:0;overflow-y:auto;padding:15px}
 .asst-f{border-top:1px solid var(--border);padding:11px 13px;flex:none}
 .asst-f .box{background:var(--ink);border:1px solid var(--border);border-radius:10px;padding:9px 11px;display:flex;gap:9px;align-items:flex-end}
@@ -1931,6 +1970,15 @@ button.wz-opt:hover{border-color:var(--rule)}
 .act-card{background:var(--ink);border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin:9px 0;font-size:12.5px}
 .act-card .t{display:flex;align-items:center;gap:8px;margin-bottom:7px}
 .act-card .t code{font-size:11.5px}
+/* Stella's marks: the icon on the launcher, the wordmark in the header, and the name in the
+   wordmark's face wherever the agent is named. The asterisk is gold in both themes. */
+.stl-wm .ast,.stl-mk .ast{fill:var(--gold)}
+.stl-name{font-family:var(--font-display);font-weight:600;text-transform:none;letter-spacing:0;color:var(--fg)}
+.stl-name .ast{color:var(--gold)}
+/* "Ask stella*" sets the whole label in the wordmark's face, on the launcher and the phone tile */
+.stl-ask{font-family:var(--font-display)}
+.msg .who .stl-name{font-size:12.5px}
+.mtile .ic .stl-mk{width:15px;height:15px}
 
 /* ---- Steering hub: seven tabs, the assembler's preview, the manifest on a run ---- */
 .stg-seg{padding:0 0 12px;border-bottom:0}
@@ -2174,3 +2222,4 @@ tr[aria-selected="true"] td{background:color-mix(in srgb,var(--gold) 7%,transpar
 .wf-lab{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px}
 .wf-st .dod-in{width:auto;flex:0 1 180px}
 .wf-st select.sel-sm{max-width:260px}
+#viewport.phone .mem-fold select,#layer.phone .mem-fold select{font-size:16px;min-height:44px}

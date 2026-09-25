@@ -10,7 +10,10 @@
    "text": "PN",
    "font": "serif",
    "tone": "solid"
-  }
+  },
+  "grants": [
+   "research.read"
+  ]
  },
  "marcus": {
   "name": "Marcus Bell",

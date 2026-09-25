@@ -34,5 +34,17 @@
   "state": "open Context PR",
   "pr": "a-intel/platform#520",
   "checks": "5 / 6 · conflict check running"
+ },
+ {
+  "id": "prp_01K5RX1N",
+  "lineage": "ctx.platform.node-20",
+  "kind": "rule",
+  "force": "should",
+  "from": "memory fold · mem_01K5R0N2",
+  "st": "Build and test on Node 20. Do not move to a newer Node release until main passes on it.",
+  "support": "3 sayings across 3 runs",
+  "state": "candidate",
+  "pr": "—",
+  "checks": "—"
  }
 ]
