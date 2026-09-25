@@ -309,6 +309,8 @@ pre.obj{background:var(--code-bg); border:1px solid var(--border); border-radius
 .rec[hidden]{display:none}
 .band[hidden]{display:none}
 .tdone td{color:var(--muted)}
+/* Space Grotesk sets the page h1 and nothing else (2026-09-25). */
+h2,h3,h4,.mark,.fact dd,.steps li>b,.dg-title,.fm-launch b,.fm-head{font-family:"Geist",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
 </style>
 </head>
 <body>
@@ -385,11 +387,11 @@ pre.obj{background:var(--code-bg); border:1px solid var(--border); border-radius
   <div class="tscroll"><table>
     <thead><tr><th>Area</th><th>Shipped</th><th>PR</th></tr></thead>
     <tbody>
-      <tr><td>Governance</td><td>A run cannot approve its own parked write; secret writes need approval; a parked call records as parked; every agent-surface contract declares <code>mutates</code>; a kill switch keeps a tool off the belt</td><td class="nw">#4198, #4185, #4196, #4199, #4189</td></tr>
-      <tr><td>Tools and prompt</td><td>Pins are <code>list_runs</code>, <code>get_run</code>, <code>get_run_cost</code>, <code>get_spend</code>, <code>list_approvals</code>, <code>list_agents</code>, <code>search_graph</code>; the prompt describes the current product; the page label reaches the turn</td><td class="nw">#4187, #4188, #4190</td></tr>
-      <tr><td>Context</td><td>Steering goes through the one assembler and records what it kept and cut; dropped history is summarised and recorded</td><td class="nw">#4197, #4195</td></tr>
+      <tr><td>Governance</td><td>A run cannot approve its own parked write. Secret writes need approval. A parked call records as parked. Every agent-surface contract declares <code>mutates</code>. A kill switch keeps a tool off the belt.</td><td class="nw">#4198, #4185, #4196, #4199, #4189</td></tr>
+      <tr><td>Tools and prompt</td><td>Pins are <code>list_runs</code>, <code>get_run</code>, <code>get_run_cost</code>, <code>get_spend</code>, <code>list_approvals</code>, <code>list_agents</code>, <code>search_graph</code>. The prompt describes the current product. The page label reaches the turn.</td><td class="nw">#4187, #4188, #4190</td></tr>
+      <tr><td>Context</td><td>Steering goes through the one assembler and records what it kept and cut. Dropped history is summarised and recorded.</td><td class="nw">#4197, #4195</td></tr>
       <tr><td>Flyout</td><td>Streamed replies, Stop, tool calls under each reply, cost per reply, reply feedback, approvals in the thread, threads kept across reloads, Enter to send, suggested questions, engine state before the first question</td><td class="nw">#4204, #4258, #4256, #4210, #4206, #4213, #4207, #4193, #4186, #4191</td></tr>
-      <tr><td>Engine and record</td><td>Goal-shaped turns judged on another tier (ADR-177); abandoned runs sealed; a 15-turn replay set; one source for the engine version</td><td class="nw">#4208, #4192, #4247, #4183</td></tr>
+      <tr><td>Engine and record</td><td>Goal-shaped turns judged on another tier (ADR-177). Abandoned runs sealed. A 15-turn replay set. One source for the engine version.</td><td class="nw">#4208, #4192, #4247, #4183</td></tr>
     </tbody>
   </table></div>
   <p>Open defects that bear on new power. S04 fixes them in one PR before any write-capable family lands.</p>
@@ -398,11 +400,11 @@ pre.obj{background:var(--code-bg); border:1px solid var(--border); border-radius
     <tbody>
       <tr><td class="nw">#4245 P1</td><td>stella treats permission, credit, and budget refusals as failures, not denials</td></tr>
       <tr><td class="nw">#3973</td><td>The flyout says stella could not be reached for every kind of failure</td></tr>
-      <tr><td class="nw">#4218, #4219</td><td>Kill switches stop stella differently in its tool list, calls, and approvals; the run records a permission limit its calls are never held to</td></tr>
+      <tr><td class="nw">#4218, #4219</td><td>Kill switches stop stella differently in its tool list, calls, and approvals. The run records a permission limit its calls are never held to.</td></tr>
       <tr><td class="nw">#4226</td><td>A call fails instead of waiting when a rule requires approval</td></tr>
-      <tr><td class="nw">#4227, #4228</td><td>A late-finishing turn leaves its run abandoned; the turn budget misses the cost of summarising history</td></tr>
-      <tr><td class="nw">#4222, #4223, #4229</td><td>A 20-second stall pulling run events; older workspaces show outdated tools; Steering Delivery omits stella's turns</td></tr>
-      <tr><td class="nw">#3303, #3314</td><td>Workspace instructions reach the turn unchecked; a direct provider key ignores reasoning effort and tool limits</td></tr>
+      <tr><td class="nw">#4227, #4228</td><td>A late-finishing turn leaves its run abandoned. The turn budget misses the cost of summarising history.</td></tr>
+      <tr><td class="nw">#4222, #4223, #4229</td><td>A 20-second stall pulling run events. Older workspaces show outdated tools. Steering Delivery omits stella's turns.</td></tr>
+      <tr><td class="nw">#3303, #3314</td><td>Workspace instructions reach the turn unchecked. A direct provider key ignores reasoning effort and tool limits.</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -412,7 +414,7 @@ pre.obj{background:var(--code-bg); border:1px solid var(--border); border-radius
   <h2>Parity</h2>
   <p class="sub">Each capability of stella in the terminal, where it stands in the app, and the spec that brings it.</p>
   <p>Stella's catalog has 22 tools (<code>docs/tools/README.md</code> in the stella repository). stella-serve already runs judged goal rounds, read-only sub-agents, sessions, compaction, steering, pause, and checkpoints. Oxagen sends none of those fields today (<code>packages/agent/src</code> sets <code>maxSteps</code> and nothing else).</p>
-  <p class="legend"><span><span class="st eng">engine</span> stella-serve has it; Oxagen sets a field</span> <span><span class="st host">host</span> Oxagen adds a contract</span> <span><span class="st box">sandbox</span> runs in a contained session</span></p>
+  <p class="legend"><span><span class="st eng">engine</span> stella-serve has it. Oxagen sets a field</span> <span><span class="st host">host</span> Oxagen adds a contract</span> <span><span class="st box">sandbox</span> runs in a contained session</span></p>
   <div class="tscroll"><table>
     <thead><tr><th>Terminal capability</th><th>In the app today</th><th>Path</th><th>How it arrives</th><th>Spec</th></tr></thead>
     <tbody>
@@ -420,12 +422,12 @@ pre.obj{background:var(--code-bg); border:1px solid var(--border); border-radius
       <tr><td class="k">Compaction</td><td>Host summary of dropped turns (#4195)</td><td><span class="st eng">engine</span></td><td><code>compaction_budget_tokens</code> and <code>summarize_keep_recent</code> on each turn</td><td class="nw">S03</td></tr>
       <tr><td class="k">Crash resume</td><td>A crashed turn is sealed abandoned</td><td><span class="st eng">engine</span></td><td><code>GET /v1/sessions/{id}/checkpoint</code>, once the binary can store one</td><td class="nw">S03</td></tr>
       <tr><td class="k">Judged goal rounds</td><td>Rule drafting only (ADR-177)</td><td><span class="st eng">engine</span></td><td>Goals on task turns, verdicts on the run</td><td class="nw">S27</td></tr>
-      <tr><td class="k"><code>delegate</code></td><td>Off</td><td><span class="st eng">engine</span></td><td><code>sub_agents</code> block within caps; child calls return to the gates</td><td class="nw">D2, S27</td></tr>
+      <tr><td class="k"><code>delegate</code></td><td>Off</td><td><span class="st eng">engine</span></td><td><code>sub_agents</code> block within caps. Child calls return to the gates.</td><td class="nw">D2, S27</td></tr>
       <tr><td class="k">Steer and pause</td><td>Stop only (#4258)</td><td><span class="st eng">engine</span></td><td><code>/steer</code>, <code>/pause</code>, <code>/resume</code> from the flyout</td><td class="nw">S27</td></tr>
       <tr><td class="k"><code>read_file</code>, <code>write_file</code>, <code>edit_file</code>, <code>delete_file</code></td><td>None</td><td><span class="st box">sandbox</span></td><td>Stella's schemas and code, run by the tool host</td><td class="nw">S20, S21, S22</td></tr>
       <tr><td class="k"><code>bash</code></td><td>None</td><td><span class="st box">sandbox</span></td><td>Same, with no network inside the session</td><td class="nw">S22</td></tr>
       <tr><td class="k"><code>search</code>, <code>get_environment</code></td><td><code>search_graph</code> over the workspace graph</td><td><span class="st box">sandbox</span></td><td>Code search over a checked-out repository</td><td class="nw">S22, S23</td></tr>
-      <tr><td class="k"><code>save_state</code>, <code>get_state</code>, <code>list_state</code>, <code>delete_state</code></td><td>None</td><td><span class="st host">host</span></td><td>Per-thread scratch; needs no sandbox</td><td class="nw">S14</td></tr>
+      <tr><td class="k"><code>save_state</code>, <code>get_state</code>, <code>list_state</code>, <code>delete_state</code></td><td>None</td><td><span class="st host">host</span></td><td>Per-thread scratch. Needs no sandbox.</td><td class="nw">S14</td></tr>
       <tr><td class="k"><code>issue</code>, <code>pull_request</code>, <code>watch_ci</code></td><td>Read-only <code>repo.*</code> views</td><td><span class="st host">host</span></td><td>Host-side GitHub writes (ADR-151), merge with a named reason (#4178)</td><td class="nw">S23</td></tr>
       <tr><td class="k"><code>ask_question</code></td><td>None</td><td><span class="st host">host</span></td><td>A question card in the thread that the turn waits on</td><td class="nw">S41</td></tr>
       <tr><td class="k"><code>task_create</code>, <code>task_assign</code>, <code>task_start</code>, <code>task_complete</code>, <code>task_cancel</code>, <code>task_list</code></td><td>None</td><td><span class="st host">host</span></td><td>Work items and governed workflow steps</td><td class="nw">S42, S43</td></tr>
@@ -457,8 +459,8 @@ pre.obj{background:var(--code-bg); border:1px solid var(--border); border-radius
       <tr><td class="k">Runs</td><td>Claude Code or Codex in a customer's CI</td><td>Stella's tool host, one per thread</td></tr>
       <tr><td class="k">Boundary</td><td>Docker container, host kernel shared</td><td>A microVM per session with its own kernel: an ECS task on Fargate, or Firecracker on metal hosts (D1)</td></tr>
       <tr><td class="k">Why the boundary differs</td><td>One customer's runner, their own code</td><td>Model-written code for many tenants on Oxagen's hosts, where prompt injection is the attacker</td></tr>
-      <tr><td class="k">Network</td><td><code>--network none</code> plus a four-route bridge</td><td>None; one socket to the host</td></tr>
-      <tr><td class="k">Starts</td><td>When CI launches the run</td><td>On the first code tool of a thread; a thread with no code tool starts none</td></tr>
+      <tr><td class="k">Network</td><td><code>--network none</code> plus a four-route bridge</td><td>None. One socket to the host.</td></tr>
+      <tr><td class="k">Starts</td><td>When CI launches the run</td><td>On the first code tool of a thread. A thread with no code tool starts none.</td></tr>
       <tr><td class="k">Ends</td><td>With the run</td><td>Idle limit (10 minutes proposed), thread cap (2 hours proposed), or the workspace kill switch</td></tr>
       <tr><td class="k">Tier</td><td>Computed at ingest from receipt plus chain</td><td>Computed from the receipt plus the turn's tool frames, by a rule D1 adds to ADR-095, since a stella session has no gateway traffic to count</td></tr>
     </tbody>
@@ -568,8 +570,8 @@ pre.obj{background:var(--code-bg); border:1px solid var(--border); border-radius
     <thead><tr><th>Class</th><th>Examples</th><th>What stella does</th><th>Contract fields</th></tr></thead>
     <tbody>
       <tr><td class="k nw">C0 read</td><td>Search, inspect, calculate, render a chart</td><td>Runs within existing read grants and cites its scope</td><td><code>mutates: false</code></td></tr>
-      <tr><td class="k nw">C1 draft</td><td>A private artifact, an action plan, any change inside the contained session</td><td>Runs and saves as a draft; changes nothing outside Oxagen or the session</td><td><code>mutates: true</code>, no approval</td></tr>
-      <tr><td class="k nw">C2 reversible</td><td>Edit a work item, link records, update a context record</td><td>Shows the exact diff; waits for approval unless a pre-authorization rule matches</td><td><code>requiresApproval: true</code> unless pre-authorized</td></tr>
+      <tr><td class="k nw">C1 draft</td><td>A private artifact, an action plan, any change inside the contained session</td><td>Runs and saves as a draft. Changes nothing outside Oxagen or the session.</td><td><code>mutates: true</code>, no approval</td></tr>
+      <tr><td class="k nw">C2 reversible</td><td>Edit a work item, link records, update a context record</td><td>Shows the exact diff. Waits for approval unless a pre-authorization rule matches.</td><td><code>requiresApproval: true</code> unless pre-authorized</td></tr>
       <tr><td class="k nw">C3 consequential</td><td>Assign work, change status, open or merge a pull request, start a workflow, publish</td><td>Named approval, destination, and receipt</td><td><code>requiresApproval: true</code></td></tr>
       <tr><td class="k nw">C4 high impact</td><td>Access, secrets, deletion, production, broad external distribution</td><td>Confirmation immediately before execution, with the rollback path</td><td><code>requiresApproval: true</code> and a second confirmation</td></tr>
     </tbody>
@@ -617,9 +619,9 @@ launchReceipt = { profile, sessionId, imageDigest, toolHostDigest, configDigest,
     <tbody>
       <tr><td>1. First adapters</td><td>GitHub first for reads and writes, since <code>repo.*</code> and <code>repository.*</code> exist. Then the issue providers <code>run.issue.providers.get</code> already knows.</td><td class="nw">S13, S42</td></tr>
       <tr><td>3. Presentation target</td><td>A native HTML deck artifact first, PPTX export second</td><td class="nw">S51</td></tr>
-      <tr><td>4. Artifact store and retention</td><td><code>content.generated_assets</code> on an S3 driver; retention follows the run's retention (ADR-058)</td><td class="nw">S30</td></tr>
-      <tr><td>5. Pre-authorized C2</td><td>A per-workspace rule that names contracts and resource scopes, recorded on every use; none by default</td><td class="nw">S40</td></tr>
-      <tr><td>7. First templates</td><td>Staff update, leadership brief, and incident review; the workspace owner owns their content</td><td class="nw">S33</td></tr>
+      <tr><td>4. Artifact store and retention</td><td><code>content.generated_assets</code> on an S3 driver. Retention follows the run's retention (ADR-058).</td><td class="nw">S30</td></tr>
+      <tr><td>5. Pre-authorized C2</td><td>A per-workspace rule that names contracts and resource scopes, recorded on every use. None by default.</td><td class="nw">S40</td></tr>
+      <tr><td>7. First templates</td><td>Staff update, leadership brief, and incident review. The workspace owner owns their content.</td><td class="nw">S33</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -629,12 +631,12 @@ launchReceipt = { profile, sessionId, imageDigest, toolHostDigest, configDigest,
   <h2>Phases</h2>
   <p class="sub">The capability roadmap's six phases, with the parity work placed where its dependencies land.</p>
   <div class="phases">
-    <div class="phase"><span class="pid">Phase 0<small>Foundation</small></span><div><h3>Contract and foundation</h3><p>The decisions, the annotation schema, the shared objects, the engine on sessions, the residue fixes, and the bench that measures parity.</p><p class="exit">Exit: every new tool declares plane and consent class; a denied call gives a coded reason and a sentence; draft artifacts and plans have stable ids and digests; the bench runs in CI.</p><div class="chips"><a class="dec" href="#rec-D1">D1</a><a class="dec" href="#rec-D2">D2</a><a class="dec" href="#rec-D3">D3</a><a href="#rec-S01">S01</a><a href="#rec-S02">S02</a><a href="#rec-S03">S03</a><a href="#rec-S04">S04</a><a href="#rec-S05">S05</a></div></div></div>
-    <div class="phase"><span class="pid">Phase 1<small>Read parity</small></span><div><h3>Read parity and workspace understanding</h3><p>Every app action on the agent surface, Workspace Context, search with source spans, work views, scratch state, and a belt that fits the page.</p><p class="exit">Exit: five management questions answered from current evidence; every claim links to a record or says it is an inference; answers stay correct when a source is stale or filtered; no one needs the word ontology.</p><div class="chips"><a href="#rec-S10">S10</a><a href="#rec-S11">S11</a><a href="#rec-S12">S12</a><a href="#rec-S13">S13</a><a href="#rec-S14">S14</a><a href="#rec-S15">S15</a></div></div></div>
-    <div class="phase"><span class="pid">Phase 2<small>Intelligence</small></span><div><h3>Analysis and contained sessions</h3><p>The contained session and the terminal's tools, repositories in the session, snapshots, metrics, charts, sub-agents, and explainability.</p><p class="exit">Exit: throughput, aging, cycle time, and dependency risk are inspectable; a chart re-renders byte for byte; a code task runs in a session whose run shows <code>contained</code>; the bench meets the parity target on code tasks.</p><div class="chips"><a class="dec" href="#rec-D4">D4</a><a href="#rec-S20">S20</a><a href="#rec-S21">S21</a><a href="#rec-S22">S22</a><a href="#rec-S23">S23</a><a href="#rec-S24">S24</a><a href="#rec-S25">S25</a><a href="#rec-S26">S26</a><a href="#rec-S27">S27</a><a href="#rec-S28">S28</a></div></div></div>
-    <div class="phase"><span class="pid">Phase 3<small>Make</small></span><div><h3>Artifact studio</h3><p>The artifact service, the viewer and workbench, exports, templates, and the delivery health brief.</p><p class="exit">Exit: a leadership brief is generated, reviewed section by section, and regenerated with its citations; it opens outside the app as one HTML file; no artifact is distributable while a check fails.</p><div class="chips"><a href="#rec-S30">S30</a><a href="#rec-S31">S31</a><a href="#rec-S32">S32</a><a href="#rec-S33">S33</a><a href="#rec-S34">S34</a></div></div></div>
-    <div class="phase"><span class="pid">Phase 4<small>Act</small></span><div><h3>Governed actions</h3><p>Action plans, plan review in the thread, mutation adapters, governed workflows, and the backlog and decision-record slices.</p><p class="exit">Exit: a multi-object backlog update is staged with nothing changed; approval applies exactly the reviewed digest; each change names its agent, person, grant, snapshot, and request id; a partial failure leaves a recoverable state.</p><div class="chips"><a href="#rec-S40">S40</a><a href="#rec-S41">S41</a><a href="#rec-S42">S42</a><a href="#rec-S43">S43</a><a href="#rec-S44">S44</a></div></div></div>
-    <div class="phase"><span class="pid">Phase 5<small>Distribute</small></span><div><h3>Distribution and operating loops</h3><p>Destinations with receipts, decks, recurring reports, and the board packet.</p><p class="exit">Exit: a board packet is generated, approved, distributed, and traced; a recurring report shows what changed; a failed delivery never reads as sent.</p><div class="chips"><a href="#rec-S50">S50</a><a href="#rec-S51">S51</a><a href="#rec-S52">S52</a><a href="#rec-S53">S53</a></div></div></div>
+    <div class="phase"><span class="pid">Phase 0<small>Foundation</small></span><div><h3>Contract and foundation</h3><p>The decisions, the annotation schema, the shared objects, the engine on sessions, the residue fixes, and the bench that measures parity.</p><p class="exit">Exit: every new tool declares plane and consent class. A denied call gives a coded reason and a sentence. Draft artifacts and plans have stable ids and digests. The bench runs in CI.</p><div class="chips"><a class="dec" href="#rec-D1">D1</a><a class="dec" href="#rec-D2">D2</a><a class="dec" href="#rec-D3">D3</a><a href="#rec-S01">S01</a><a href="#rec-S02">S02</a><a href="#rec-S03">S03</a><a href="#rec-S04">S04</a><a href="#rec-S05">S05</a></div></div></div>
+    <div class="phase"><span class="pid">Phase 1<small>Read parity</small></span><div><h3>Read parity and workspace understanding</h3><p>Every app action on the agent surface, Workspace Context, search with source spans, work views, scratch state, and a belt that fits the page.</p><p class="exit">Exit: five management questions answered from current evidence. Every claim links to a record or says it is an inference. Answers stay correct when a source is stale or filtered. No one needs the word ontology.</p><div class="chips"><a href="#rec-S10">S10</a><a href="#rec-S11">S11</a><a href="#rec-S12">S12</a><a href="#rec-S13">S13</a><a href="#rec-S14">S14</a><a href="#rec-S15">S15</a></div></div></div>
+    <div class="phase"><span class="pid">Phase 2<small>Intelligence</small></span><div><h3>Analysis and contained sessions</h3><p>The contained session and the terminal's tools, repositories in the session, snapshots, metrics, charts, sub-agents, and explainability.</p><p class="exit">Exit: throughput, aging, cycle time, and dependency risk are inspectable. A chart re-renders byte for byte. A code task runs in a session whose run shows <code>contained</code>. The bench meets the parity target on code tasks.</p><div class="chips"><a class="dec" href="#rec-D4">D4</a><a href="#rec-S20">S20</a><a href="#rec-S21">S21</a><a href="#rec-S22">S22</a><a href="#rec-S23">S23</a><a href="#rec-S24">S24</a><a href="#rec-S25">S25</a><a href="#rec-S26">S26</a><a href="#rec-S27">S27</a><a href="#rec-S28">S28</a></div></div></div>
+    <div class="phase"><span class="pid">Phase 3<small>Make</small></span><div><h3>Artifact studio</h3><p>The artifact service, the viewer and workbench, exports, templates, and the delivery health brief.</p><p class="exit">Exit: a leadership brief is generated, reviewed section by section, and regenerated with its citations. It opens outside the app as one HTML file. No artifact is distributable while a check fails.</p><div class="chips"><a href="#rec-S30">S30</a><a href="#rec-S31">S31</a><a href="#rec-S32">S32</a><a href="#rec-S33">S33</a><a href="#rec-S34">S34</a></div></div></div>
+    <div class="phase"><span class="pid">Phase 4<small>Act</small></span><div><h3>Governed actions</h3><p>Action plans, plan review in the thread, mutation adapters, governed workflows, and the backlog and decision-record slices.</p><p class="exit">Exit: a multi-object backlog update is staged with nothing changed. Approval applies exactly the reviewed digest. Each change names its agent, person, grant, snapshot, and request id. A partial failure leaves a recoverable state.</p><div class="chips"><a href="#rec-S40">S40</a><a href="#rec-S41">S41</a><a href="#rec-S42">S42</a><a href="#rec-S43">S43</a><a href="#rec-S44">S44</a></div></div></div>
+    <div class="phase"><span class="pid">Phase 5<small>Distribute</small></span><div><h3>Distribution and operating loops</h3><p>Destinations with receipts, decks, recurring reports, and the board packet.</p><p class="exit">Exit: a board packet is generated, approved, distributed, and traced. A recurring report shows what changed. A failed delivery never reads as sent.</p><div class="chips"><a href="#rec-S50">S50</a><a href="#rec-S51">S51</a><a href="#rec-S52">S52</a><a href="#rec-S53">S53</a></div></div></div>
   </div>
 </section>
 
@@ -780,7 +782,7 @@ function ctx(s) {
     `Repository ${s.repo}, branch ${s.branch}, worktree ${s.worktree}.`,
     `Goal: ${s.goal}`,
     `Issues: ${s.issues.length ? s.issues.join(', ') : 'none yet'}.`,
-    `Depends on: ${s.deps.length ? s.deps.join('; ') : 'nothing'}.`,
+    `Depends on: ${s.deps.length ? s.deps.join(', ') : 'nothing'}.`,
     `Done when:\n- ${s.done.join('\n- ')}`,
   ].join('\n')
 }
@@ -905,7 +907,7 @@ return results.map((r, i) => {
       id: "D2", phase: 0, kind: "decision", repo: "oxagen", slug: "subagents-long-turns-adr",
       title: "Sub-agents and long turns", planes: ["compute", "govern"],
       why: "stella in the terminal delegates research and works for hours. stella-serve already runs read-only children through a sub_agents block and holds sessions with checkpoints, and Oxagen sends neither. ADR-043 retired Oxagen's own fan-out (ADR-010), so this needs an ADR even though no Oxagen runtime returns.",
-      refs: "ADR-043, ADR-053, ADR-056, ADR-092, ADR-177; in ~/Projects/stella, docs/spec/serve-surface.md (sub-agents, sessions, durability)",
+      refs: "ADR-043, ADR-053, ADR-056, ADR-092, ADR-177, and in ~/Projects/stella, docs/spec/serve-surface.md (sub-agents, sessions, durability)",
       issues: [], deps: [],
       goal: "An ADR that lets an in-app turn carry a sub_agents block and run on an engine session, with numeric caps, the model tier children use, how child calls bill and record, and how a turn keeps working after the flyout closes.",
       readers: [
@@ -913,7 +915,7 @@ return results.map((r, i) => {
         "In ~/Projects/stella, what does docs/spec/serve-surface.md say about sub_agents (the operator caps in ServeConfig::sub_agents), /v1/sessions, steer, pause, and checkpoints, and can the stella-serve binary store a checkpoint?"
       ],
       units: [
-        "Write the ADR as Proposed: caps for children per turn, steps per child, steps per turn kind, and wall time; child model routing by role; how child calls are billed and recorded on the parent run; the ADR-056 change for steer, pause, and resume on arun_ runs",
+        "Write the ADR as Proposed. It sets caps for children per turn, steps per child, steps per turn kind, and wall time. It routes child model calls by role, states how child calls are billed and recorded on the parent run, and names the ADR-056 change for steer, pause, and resume on arun_ runs",
         "State how a turn that outlives the flyout notifies the person, under ADR-092"
       ],
       done: [
@@ -927,7 +929,7 @@ return results.map((r, i) => {
       id: "D3", phase: 0, kind: "decision", repo: "oxagen", slug: "workspace-context-names-adr",
       title: "Workspace Context names", planes: ["observe", "query"],
       why: "The capability spec retires ontology as the product term and proposes query_context and get_context_entity. Oxagen's context.* family already means steering records, and ADR-137 calls standing decisions workspace context records. The proposed names would collide.",
-      refs: "ADR-137; packages/oxagen/src/contracts/context.*, graph.*, ontology.*; section 4 of docs/in-app-agent-capability-expansion-spec.md in macanderson/oxagen-roadmap",
+      refs: "ADR-137, packages/oxagen/src/contracts/context.*, graph.*, and ontology.*, and section 4 of docs/in-app-agent-capability-expansion-spec.md in macanderson/oxagen-roadmap",
       issues: [], deps: [],
       goal: "An ADR that names the Workspace Context tool family without colliding with context.*, keeps search_graph and the ontology tools as aliases for one migration cycle, and settles open decision 6 of the capability spec.",
       readers: [
@@ -1013,7 +1015,7 @@ return results.map((r, i) => {
       id: "S03", phase: 0, kind: "build", repo: "oxagen", slug: "engine-sessions",
       title: "Engine sessions on the current engine", planes: ["compute"],
       why: "Oxagen resends up to 50 prior turns on every call to stateless POST /v1/turns at engine 0.9.414, and Stella main is 0.9.437. Engine sessions keep history, compact inside the engine, and write checkpoints. Long work needs all three.",
-      refs: "packages/stella-engine-client/src/version.ts, packages/agent/src/runtime/assistant-turn.ts, governed-turn.ts, tools/scripts/package-for-node.sh; in ~/Projects/stella, crates/stella-serve/src/routes/sessions.rs and docs/spec/serve-surface.md",
+      refs: "packages/stella-engine-client/src/version.ts, packages/agent/src/runtime/assistant-turn.ts, governed-turn.ts, tools/scripts/package-for-node.sh, and in ~/Projects/stella, crates/stella-serve/src/routes/sessions.rs and docs/spec/serve-surface.md",
       issues: ["Refs #4228", "Refs #4227"], deps: ["D2"],
       goal: "Run each thread on an engine session at the latest engine release, send only new input, set compaction per turn, and resume a turn from its checkpoint after an engine restart.",
       readers: [
@@ -1023,7 +1025,7 @@ return results.map((r, i) => {
       units: [
         "Bump STELLA_SERVE_PINNED_VERSION to the latest release and fix what the wire change breaks",
         "Open one engine session per thread, send only new input, and set compaction_budget_tokens and summarize_keep_recent per turn",
-        "Resume a turn from GET /v1/sessions/{id}/checkpoint after an engine restart, and seal the run resumed or abandoned; a checkpoint store in stella-serve is a separate stella PR if the binary lacks one"
+        "Resume a turn from GET /v1/sessions/{id}/checkpoint after an engine restart, and seal the run resumed or abandoned. A checkpoint store in stella-serve is a separate stella PR if the binary lacks one"
       ],
       done: [
         "The pin is the latest release, and the image follows it from the one source (#4183)",
@@ -1065,7 +1067,7 @@ return results.map((r, i) => {
       id: "S05", phase: 0, kind: "build", repo: "oxagen", slug: "parity-bench",
       title: "Parity bench against the terminal", planes: ["govern"],
       why: "Matching stella in the terminal needs a number. Pass rate alone saturates on small task sets, while steps, cost, and the times a person had to steer keep separating two agents.",
-      refs: "the replay set from #4247 under packages/agent/src/runtime/, packages/stella-engine-client/src/fake-engine.ts; headless mode in ~/Projects/stella",
+      refs: "the replay set from #4247 under packages/agent/src/runtime/, packages/stella-engine-client/src/fake-engine.ts, and headless mode in ~/Projects/stella",
       issues: [], deps: [],
       goal: "A 30-task bench that runs each task through stella in the terminal and through the in-app turn on the same model, and reports verdict, steps, cost, and interventions per task. It is the exit test of every phase.",
       readers: [
@@ -1176,7 +1178,7 @@ return results.map((r, i) => {
       id: "S14", phase: 1, kind: "build", repo: "oxagen", slug: "scratch-state-attachments",
       title: "Scratch state and attachments", planes: ["create"],
       why: "stella in the terminal keeps notes with save_state and reads files it was handed. Neither needs a sandbox. conversation.attachment.add and conversation.files.list already exist.",
-      refs: "in ~/Projects/stella, docs/tools/save_state.toml, get_state.toml, list_state.toml, delete_state.toml, read_file.toml; packages/oxagen/src/contracts/conversation.attachment.add.ts, conversation.files.list.ts",
+      refs: "in ~/Projects/stella, docs/tools/save_state.toml, get_state.toml, list_state.toml, delete_state.toml, read_file.toml, and packages/oxagen/src/contracts/conversation.attachment.add.ts, conversation.files.list.ts",
       issues: ["Closes #4179"], deps: ["S01"],
       goal: "Per-thread save_state, get_state, list_state, and delete_state with Stella's schemas, read_file over a thread's attachments, and Markdown attachments turned into memories or context records after the person confirms.",
       readers: [
@@ -1314,7 +1316,7 @@ return results.map((r, i) => {
       id: "S24", phase: 2, kind: "build", repo: "oxagen", slug: "snapshots-analysis",
       title: "Snapshots and analysis", planes: ["analyze"],
       why: "stella can retrieve records but cannot calculate. The capability spec wants bounded compute over cited datasets with stated assumptions.",
-      refs: "run.*, spend.*, cost.*, repo.* contracts; D4's ADR",
+      refs: "run.*, spend.*, cost.*, repo.* contracts, and D4's ADR",
       issues: [], deps: ["D4", "S20", "S12"],
       goal: "snapshot_records writes a governed read's rows into the session as Parquet with provenance, run_analysis runs Python or DuckDB over snapshots only, and aggregate_records, compare_periods, detect_trends, and find_outliers are named analyses with fixed code.",
       readers: [
@@ -1425,7 +1427,7 @@ return results.map((r, i) => {
       why: "Useful analysis disappears into the thread. content.generated_assets and persistGeneratedAsset already store a generated file, and nothing on the agent surface creates one.",
       refs: "packages/database/src/schema/content.ts, packages/handlers/src/generated-asset.persist.ts, packages/storage/",
       issues: ["Refs #4177"], deps: ["S02"],
-      goal: "Versions, digests, lifecycle states, source references, and a render recipe on generated assets; create_artifact, update_artifact, append_artifact_section, get_artifact, diff_artifact, and validate_artifact on the agent, api, and mcp surfaces; production storage on S3.",
+      goal: "Add versions, digests, lifecycle states, source references, and a render recipe to generated assets. Add create_artifact, update_artifact, append_artifact_section, get_artifact, diff_artifact, and validate_artifact on the agent, api, and mcp surfaces. Move production storage to S3.",
       readers: [
         "What do content.generated_assets and persistGeneratedAsset store today, and which storage driver does production use?",
         "What does section 8 of the capability spec require of lifecycle, versions, and the quality bar?"
@@ -1555,7 +1557,7 @@ return results.map((r, i) => {
       why: "A plan needs a place to be read and approved without leaving the conversation, and the engine's ask_question needs a way to reach the person.",
       refs: "apps/app/src/features/shell/, the #4213 approval cards, S40 contracts",
       issues: [], deps: ["S40"],
-      goal: "A plan card in the thread with the diff per resource, approve all or part, and apply; and a question card for the engine's ask_question that the turn waits on.",
+      goal: "A plan card in the thread with the diff per resource, approve all or part, and apply. Add a question card for the engine's ask_question that the turn waits on.",
       readers: [
         "How do the approval cards from #4213 render and resolve?",
         "How does the engine's ask_question tool reach the host, and how long may a turn wait on it?"
@@ -1812,7 +1814,7 @@ return results.map((r, i) => {
     L.push("Kind: " + (s.kind === "decision" ? "decision. The PR stays a draft, and the maintainer decides." : "build."));
     L.push("Repository: " + REPO[s.repo].dir + ". Branch: " + branchOf(s) + ".");
     if (s.issues.length) L.push("Issues: " + s.issues.join(", ") + ".");
-    if (s.deps.length) L.push("Depends on: " + s.deps.map(depLabel).join("; ") + ". The Confirm stage stops this spec if a dependency has not merged.");
+    if (s.deps.length) L.push("Depends on: " + s.deps.map(depLabel).join(", ") + ". The Confirm stage stops this spec if a dependency has not merged.");
     L.push("Start at: " + s.refs + ".");
     L.push("", "Done when:");
     s.done.forEach(function (d) { L.push("- [ ] " + d); });
