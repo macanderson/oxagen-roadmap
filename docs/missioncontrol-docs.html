@@ -136,7 +136,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <div class="site">
 <nav class="docs" aria-label="Documents">
   <a class="wordmark" href="#wedge">o<span class="x">x</span>agen</a>
-  <p>Fleet operations</p><ol><li><a href="#wedge" data-doc="wedge">Fleet operations wedge</a></li><li><a href="#ia" data-doc="ia">Fleet operations information architecture</a></li><li><a href="#routes" data-doc="routes">Fleet operations routes</a></li><li><a href="#collapse" data-doc="collapse">Fleet operations deletion list</a></li></ol><p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and Steering records</a></li><li><a href="#tasks" data-doc="tasks">Tasks and work orders</a></li><li><a href="#work-in-flight" data-doc="work-in-flight">Work in flight</a></li><li><a href="#agent-capability" data-doc="agent-capability">In-app agent capability expansion</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
+  <p>Fleet operations</p><ol><li><a href="#wedge" data-doc="wedge">Fleet operations wedge</a></li><li><a href="#ia" data-doc="ia">Fleet operations information architecture</a></li><li><a href="#routes" data-doc="routes">Fleet operations routes</a></li><li><a href="#collapse" data-doc="collapse">Fleet operations deletion list</a></li></ol><p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#tiers" data-doc="tiers">The enforcement tier ladder</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and Steering records</a></li><li><a href="#tasks" data-doc="tasks">Tasks and work orders</a></li><li><a href="#work-in-flight" data-doc="work-in-flight">Work in flight</a></li><li><a href="#agent-capability" data-doc="agent-capability">In-app agent capability expansion</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
   <div class="foot">One file, every document. The markdown in <code>docs/</code> is the source; <code>tools/build-docs.py</code> writes this page.</div>
 </nav>
 <div>
@@ -10439,6 +10439,653 @@ Begin with Phase 1. Write the fixtures before the code.
 <footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/dod-spec.md</code></span></footer>
 </main>
 </div>
+</article><article id="tiers" class="doc" hidden>
+<header class="mast">
+  <p class="eyebrow">Oxagen · Specification</p>
+  <h1>The enforcement tier ladder</h1>
+  <dl class="facts"><dt>Status</dt><dd>Spec v1, for review. It describes the four tiers as decided and as built, and it lists where the page copy, the ADRs, and the code disagree.</dd><dt>Date</dt><dd>2026-09-25</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>macanderson/oxagen</code> at <code>main</code> <code>4a21610ef</code> (2026-09-25): <code>packages/tacho</code> (the daemon <code>tachod</code>, the hook binary <code>tacho-hook</code>, the model proxy, and the contained launcher), <code>packages/handlers/src/tacho.events.ingest.ts</code> (where the tier is computed), <code>packages/handlers/src/tacho.command.dispatch.ts</code> (steering delivery), and <code>packages/handlers/src/lib/tacho-host.ts</code> (the signed bundle)</dd><dt>Builds on</dt><dd>ADR-095 (the ladder), ADR-096 (the contained tier), ADR-152 (the contained launcher), ADR-094 (the gateway), ADR-143 (credential custody), ADR-056 (delivery modes), ADR-078 (wrapped and connected), ADR-163 (commands reach every tier), ADR-067 (every claim states its scope)</dd><dt>Related</dt><dd><code>mission-control-spec.md</code> §7.1 and §7.2 (the first statement of the ladder, written before Phase 4 and Phase 5 merged; where the two disagree on status, this spec is current), <code>dod-spec.md</code> &quot;What the tier ladder means for a dod&quot;, <code>fleet-operations-ia.md</code> Vocabulary</dd><dt>Copy</dt><dd><code>mockups/src/engine.js:713-721</code> (<code>TIERS</code>), quoted in <code>mockups/pages/runtimes.md</code> and <code>mockups/pages/agent-runtime.md</code></dd></dl>
+</header>
+<div class="grid">
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#tiers/the-ladder">The ladder</a></li><li><a href="#tiers/terms">Terms</a></li><li><a href="#tiers/how-a-tier-is-computed">How a tier is computed</a></li><li><a href="#tiers/observe">observe</a></li><li><a href="#tiers/harness">harness</a></li><li><a href="#tiers/gateway">gateway</a></li><li><a href="#tiers/contained">contained</a></li><li><a href="#tiers/delivery-modes-by-tier">Delivery modes by tier</a></li><li><a href="#tiers/copy-rules">Copy rules</a></li><li><a href="#tiers/surfaces">Surfaces</a></li><li><a href="#tiers/data-model">Data model</a></li><li><a href="#tiers/status">Status</a></li><li><a href="#tiers/conflicts">Conflicts</a></li><li><a href="#tiers/rules-every-build-keeps">Rules every build keeps</a></li></ol></nav>
+<main>
+<h2 id="tiers/the-ladder">The ladder</h2>
+<p>Every agent run you open carries one of four words: <code>observe</code>, <code>harness</code>, <code>gateway</code>, or <code>contained</code>. The word tells you how much of the run passed through Oxagen, and so how much of it Oxagen could record, steer, meter, or refuse. The control plane computes the word from the run's own record after the traffic arrives. Nobody assigns it, and no host can set it for itself.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Page copy</th>
+<th>What passes through Oxagen</th>
+<th>Who can undo it</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>observe</code></td>
+<td>Recorded only. No hook is installed and nothing is delivered.</td>
+<td>Events the harness exports, or hook events from a host in observe mode</td>
+<td>Anyone. Nothing is refused on a rule</td>
+</tr>
+<tr>
+<td><code>harness</code></td>
+<td>Hooks installed. Steering is delivered and four hook events can refuse a call. The harness reports spend, and a call goes ahead if its hook fails.</td>
+<td>Harness lifecycle events, through five command hooks</td>
+<td>The person at the keyboard: delete the hook entry, disable hooks, or run another build</td>
+</tr>
+<tr>
+<td><code>gateway</code></td>
+<td>Model and MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it.</td>
+<td>Model requests and responses through the loopback proxy, and MCP calls through the gateway</td>
+<td>The person who owns the machine: unset the base URL, or decrypt the custody file</td>
+</tr>
+<tr>
+<td><code>contained</code></td>
+<td>The agent runs in an OS sandbox whose only network exit is the gateway.</td>
+<td>Every network request from every process in the sandbox</td>
+<td>The host's administrator only. The agent and its child processes cannot</td>
+</tr>
+</tbody>
+</table></div>
+<p>Each rung adds one route to the ones below it, for a wrapped harness. The ladder is cumulative there. For a connected app it is not: Claude Desktop reaches <code>gateway</code> through its Oxagen MCP calls and has no <code>harness</code> rung under it (ADR-078 §2, kept by ADR-095).</p>
+<p>The claims each tier may make, from ADR-095:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>It may say</th>
+<th>It may never say</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>observe</code></td>
+<td>&quot;recorded&quot;</td>
+<td>Anything about refusal or delivery</td>
+</tr>
+<tr>
+<td><code>harness</code></td>
+<td>&quot;delivered&quot;, &quot;recorded&quot;, &quot;client-attested&quot;, &quot;fail-open&quot;</td>
+<td>&quot;enforced&quot;</td>
+</tr>
+<tr>
+<td><code>gateway</code></td>
+<td>&quot;observed&quot; metering, &quot;enforced&quot; budgets on routed traffic</td>
+<td>&quot;enforced&quot; against the machine's operator, or anything about traffic that did not route</td>
+</tr>
+<tr>
+<td><code>contained</code></td>
+<td>&quot;enforced&quot; for routed traffic and the filesystem boundary</td>
+<td>Anything about a run the launcher did not start, or whose receipt lacks one of the three controls</td>
+</tr>
+</tbody>
+</table></div>
+<p>Every control claim carries its scope: &quot;for actions routed through Oxagen&quot; (ADR-067).</p>
+<h2 id="tiers/terms">Terms</h2>
+<ul>
+<li><strong>Tier.</strong> One of the four words above. It belongs to a run. A host or agent page shows the tier its runs earned.</li>
+<li><strong>Harness.</strong> Two meanings share this word. The <code>harness</code> tier is a rung of the ladder. A harness product is the agent program itself: Claude Code, Codex, Cursor, or Stella. The harness marks on agent and run rows (<code>hxIcon()</code>) name the product, not the tier. Write &quot;the <code>harness</code> tier&quot; when you mean the rung.</li>
+<li><strong>Routed.</strong> A request passed through a process Oxagen runs and the record shows it. A base URL written into a config file is intent. A request the proxy sealed is routing.</li>
+<li><strong>Recorded.</strong> The event is on the run's hash-chained record.</li>
+<li><strong>Delivered.</strong> Oxagen handed steering text to the harness through a hook.</li>
+<li><strong>Client-attested.</strong> The evidence comes from a process on the customer's machine that the person at the keyboard can change.</li>
+<li><strong>Observed.</strong> The gateway saw the bytes and metered them itself (<code>oxagen.metering: observed</code>, <code>source: collector</code>, <code>fidelity: proxy</code>).</li>
+<li><strong>Enforced.</strong> A request that breaks the rule does not reach its destination, and the party named in the claim cannot route around the check.</li>
+<li><strong>Fail-open.</strong> Two senses, and this spec always says which. The hook process fails closed against its cached bundle. The <code>harness</code> tier as a whole fails open against the person at the keyboard, because that person can remove the hook.</li>
+<li><strong>Operator, owner, administrator.</strong> The operator is the person or system that runs the agent. On a laptop the operator is also the machine's owner. On a CI runner or a managed device, the host administrator is someone else.</li>
+<li><strong>Mode.</strong> A host's signed bundle is in <code>observe</code> or <code>enforce</code> mode (<code>wire.ts:519</code>). Mode is a host setting. Tier is a run's result. An <code>enforce</code>-mode host produces <code>harness</code> runs at least, and an <code>observe</code>-mode host produces <code>observe</code> runs unless traffic routes through the gateway.</li>
+</ul>
+<h2 id="tiers/how-a-tier-is-computed">How a tier is computed</h2>
+<p>The control plane computes the tier when it ingests a batch of events (<code>enforcementTierOf</code>, <code>tacho.events.ingest.ts:762-843</code>, then <code>containedTierOf</code> and <code>promotedTier</code>, <code>lib/tacho-containment.ts:43-69</code>). It reads the chain, the host row, and the launch receipts. It never reads the <code>oxagen.enforcement_tier</code> attribute the daemon writes on each event (<code>ingest:753-760</code>). That attribute is true of one event and says nothing the control plane can check about the session.</p>
+<ol>
+<li><strong>Start from the host's mode.</strong> An <code>enforce</code>-mode host gives <code>harness</code>. An <code>observe</code>-mode host gives <code>observe</code> (<code>ingest:842</code>).</li>
+<li><strong>Promote to <code>gateway</code> on model traffic.</strong> The chain verifies and holds a model call the loopback proxy sealed (<code>ingest:810</code>). The call must carry <code>source: collector</code> and <code>fidelity: proxy</code>, which a record posted through the local OTLP endpoint cannot carry.</li>
+<li><strong>Promote to <code>gateway</code> on MCP traffic.</strong> The control plane served a gateway call for this chain, the chain's genesis hash matches the session's, and the chain verifies (<code>ingest:812-841</code>).</li>
+<li><strong>Promote to <code>contained</code>.</strong> The run is already <code>gateway</code>, and a registered contained launch carries the same genesis hash (<code>containedTierOf</code>).</li>
+<li><strong>Keep the highest word.</strong> A live session's tier only rises. A sealed session's tier is final (<code>promotedTier</code>). ADR-159 lets a tier still rise after an idle close, before the seal.</li>
+</ol>
+<p>One observed model call is enough for <code>gateway</code>. The tier then covers the traffic that routed, and every claim names that scope.</p>
+<p><strong>What the tier is not.</strong></p>
+<ul>
+<li>It is not a score, a percentage, or &quot;fully governed&quot; (ADR-078 §2).</li>
+<li>It is not what the adapter supports on paper. A host with the base URL written, whose run went around the proxy, stays on its mode's word.</li>
+<li>It is not the harness name. <code>wire.ts:317-324</code> and <code>:475-480</code> still map harness names to ADR-078's two words for display only.</li>
+</ul>
+<h2 id="tiers/observe">observe</h2>
+<p><code>observe</code> means Oxagen recorded the run and nothing more. It is the floor of the ladder and the default mode of a new bundle (<code>docs/specs/tacho/plan.md:45</code> in <code>oxagen</code>).</p>
+<p><strong>How a run lands here.</strong></p>
+<ul>
+<li>The host is enrolled in <code>observe</code> mode, and no model or MCP traffic routed.</li>
+<li>The run arrived without hooks: a CLI that exports telemetry Oxagen ingests, such as Gemini CLI, or a run backfilled from a transcript (ADR-161).</li>
+</ul>
+<p><strong>What is recorded.</strong> The events the harness exported, or the hook events an <code>observe</code>-mode host sent. For an <code>observe</code>-mode host, each rule result is recorded with the answer the rule would have given, and the hook answers allow (<code>bundle.ts:724-727</code>).</p>
+<p><strong>What refuses.</strong> No rule refuses anything. Operator state still applies in both modes: a suspended, revoked, or paused host, or a paused or cancelled session, is refused at the hooks (<code>bundle.ts:724-727</code>). A <code>[containment] required</code> clause is recorded and refuses nothing (ADR-152).</p>
+<p><strong>What is delivered.</strong> The page copy says nothing is. For a run with no hooks that holds. For an <code>observe</code>-mode host with hooks it does not hold: steering reaches the run through <code>UserPromptSubmit</code> and the step hooks, because ADR-163 lets commands reach a run at every tier and dispatch treats <code>observe</code> like <code>harness</code> (<code>tacho.command.dispatch.ts:127-146</code>). See &quot;Conflicts&quot;.</p>
+<p><strong>Spend.</strong> Whatever the harness reported, labelled &quot;Reported by harness&quot;. Codex and Stella export none, so an <code>observe</code> Codex run has no spend.</p>
+<p><strong>What the page says.</strong> &quot;recorded&quot;. A backfilled run reads &quot;Nothing was enforced&quot; (ADR-161). The Decision trace opens with &quot;Tier observe: recorded, not enforced.&quot; (<code>wedge.js:584-585</code>). Steering assignments under an <code>observe</code> badge read &quot;assembled, not delivered&quot; (<code>wedge.js:848</code>).</p>
+<h2 id="tiers/harness">harness</h2>
+<p><code>harness</code> means the host has Oxagen's hooks installed in the harness's settings, in <code>enforce</code> mode. The hooks deliver steering and can refuse at four points in the harness's lifecycle. Everything the tier does runs on the customer's machine, inside a file the person at the keyboard can edit.</p>
+<h3 id="tiers/hooks">Hooks</h3>
+<p>Enrollment writes five command hooks that run <code>tacho-hook</code> (<code>host/settings-writer.ts:11-18</code>). Four can refuse. <code>Stop</code> cannot.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Event</th>
+<th>Harness timeout</th>
+<th>Daemon answer budget</th>
+<th>Can refuse</th>
+<th>How it refuses</th>
+<th>What it refuses on</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>SessionStart</code></td>
+<td>10 s</td>
+<td>5 s</td>
+<td>Yes</td>
+<td><code>continue: false</code> (<code>hook-handler.ts:856-875</code>)</td>
+<td>Operator state: host suspended, revoked, or paused; session paused or cancelled; containment required and unmet</td>
+</tr>
+<tr>
+<td><code>UserPromptSubmit</code></td>
+<td>10 s</td>
+<td>5 s</td>
+<td>Yes</td>
+<td><code>decision: &quot;block&quot;</code> (<code>:932-938</code>)</td>
+<td>Operator state, as above</td>
+</tr>
+<tr>
+<td><code>PreToolUse</code></td>
+<td>15 s</td>
+<td>10 s</td>
+<td>Yes</td>
+<td>Deny (<code>:1084-1091</code>)</td>
+<td>Operator state, the bundle's rules, and a steer sent as an interrupt (<code>steer_interrupt</code>, <code>:1004-1038</code>)</td>
+</tr>
+<tr>
+<td><code>PermissionRequest</code></td>
+<td>600 s</td>
+<td>595 s</td>
+<td>Yes</td>
+<td><code>behavior: &quot;deny&quot;</code> (<code>:1230-1241</code>)</td>
+<td>Operator state. Offline, the bundle's rules (<code>hook-client.ts:534-560</code>). Otherwise it falls through to the harness's own prompt</td>
+</tr>
+<tr>
+<td><code>Stop</code></td>
+<td>10 s</td>
+<td>5 s</td>
+<td>No</td>
+<td>None. <code>decision: &quot;block&quot;</code> here only delivers a queued steer (<code>:1268-1294</code>)</td>
+<td>Nothing</td>
+</tr>
+</tbody>
+</table></div>
+<p>The harness timeouts are <code>COMMAND_HOOK_TIMEOUTS_S</code> (<code>settings-writer.ts:108-117</code>). The daemon answer budgets are in <code>hook-client.ts:287-307</code>, with a 50 ms budget to connect to the daemon. Only <code>PreToolUse</code> evaluates the bundle's rules while the daemon is up. Control-plane elevation at <code>PermissionRequest</code> (Biscuit tokens, <code>docs/specs/tacho/spec.md:371</code>) is not built (<code>hook-handler.ts:1242-1244</code>).</p>
+<p>Claude Code also posts 26 events to the daemon as HTTP hooks (<code>settings-writer.ts:20-48</code>). Those record and never refuse. A failure there becomes a <code>telemetry_gap</code> frame on the chain.</p>
+<p><strong>Harness differences.</strong></p>
+<ul>
+<li><strong>Codex</strong> runs the same five events, all as command hooks. It turns a hook's <code>ask</code> into a deny (<code>hook-client.ts:615-642</code>).</li>
+<li><strong>Cursor</strong> also refuses at <code>SubagentStart</code> (<code>hook-client.ts:572-609</code>). It is the one harness with a <code>failClosed</code> setting that catches a crashed hook (<code>:829-836</code>).</li>
+<li><strong>Stella</strong> is wrapped through the same hooks until it speaks the control contract natively, and its hook evidence is client-attested like the others (ADR-080).</li>
+</ul>
+<h3 id="tiers/steering-delivery">Steering delivery</h3>
+<p>Dispatch picks the strongest delivery mode the host can carry at or below the one requested (<code>resolveDeliveryMode</code>, <code>tacho.command.dispatch.ts:127-146</code>).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Requested</th>
+<th>At <code>harness</code></th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>turn_boundary</code></td>
+<td>Delivered at the next <code>UserPromptSubmit</code></td>
+<td>Every host carries it</td>
+</tr>
+<tr>
+<td><code>next_step</code></td>
+<td>Delivered at the next <code>PostToolUse</code> or <code>Stop</code> on Claude Code and Codex. Elsewhere it waits for the next prompt (<code>no_step_carrier</code>)</td>
+<td>Needs the <code>steer_next_step</code> bundle feature and a step-carrier runtime</td>
+</tr>
+<tr>
+<td><code>interrupt</code></td>
+<td>Degrades to <code>next_step</code> (<code>harness_tier</code>)</td>
+<td>Nothing on the run's path can cut a model call in flight</td>
+</tr>
+</tbody>
+</table></div>
+<p>The closest the <code>harness</code> tier comes to an interrupt is refusing the next tool call with the steer as the reason (<code>steer_interrupt</code>). The applied frame carries <code>command.interrupted: 0</code>.</p>
+<h3 id="tiers/spend">Spend</h3>
+<p>The harness reports its own spend. A self-reported <code>llm_call</code> comes from Claude Code's OTel export (<code>otel_log</code>), the transcript, or a hook, and the first sighting counts (<code>ingest:359-372</code>). Codex and Stella export no spend, so their <code>harness</code> runs have none. Pages label it &quot;Reported by harness&quot; (<code>fleet-operations-ia.md:160-161</code>). A budget at this tier is counted from those numbers and refuses nothing.</p>
+<h3 id="tiers/failure-behavior">Failure behavior</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>What fails</th>
+<th>What happens</th>
+<th>Where</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>The hook binary crashes, or prints nothing</td>
+<td>The harness reads no output as allow. Cursor with <code>failClosed</code> is the exception</td>
+<td><code>hook-client.ts:993-998</code>, <code>:829-836</code></td>
+</tr>
+<tr>
+<td>The bundle is unverified (bad signature, or signed for another host)</td>
+<td>Read-only tools are allowed. Mutating tools are denied, in either mode</td>
+<td><code>bundle.ts:26-32</code>, <code>:800-821</code></td>
+</tr>
+<tr>
+<td>The bundle is stale (its 24-hour signed window has passed since the last confirmation, or the deny generation was bumped)</td>
+<td>With the daemon up, the hook refreshes synchronously, then denies a mutating tool if still stale. With the control plane unreachable, a mutating tool is denied in <code>enforce</code> mode and allowed in <code>observe</code> mode</td>
+<td><code>bundle.ts:594-632</code>, <code>:841-848</code>; <code>hook-handler.ts:972-993</code></td>
+</tr>
+<tr>
+<td>The daemon is down</td>
+<td>The hook decides from the cached bundle. <code>ask</code> and <code>no_rule</code> outcomes fall to the harness's own prompt (<code>hook_fail_open</code>, signed into the bundle). A deny from the bundle still holds</td>
+<td><code>hook-client.ts:340-370</code></td>
+</tr>
+<tr>
+<td><code>host.json</code> is unreadable and the daemon is down</td>
+<td><code>PreToolUse</code> and <code>PermissionRequest</code> deny</td>
+<td><code>hook-client.ts:916-940</code></td>
+</tr>
+<tr>
+<td><code>host.json</code> is missing</td>
+<td>Allow. The host was never enrolled, or was unenrolled</td>
+<td><code>hook-client.ts:942-948</code></td>
+</tr>
+<tr>
+<td>A telemetry hook fails</td>
+<td>A <code>telemetry_gap</code> frame. Never a block</td>
+<td><code>settings-writer.ts:20-48</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>So the hook fails closed against its bundle. The tier fails open against the person at the keyboard: delete the hook entry, set <code>disableAllHooks</code>, kill the daemon, add another MCP server, or run a build of the harness without the hooks, and the call goes ahead (ADR-094:51-53). Oxagen detects tampering after the fact, from the gap it leaves in the record.</p>
+<h3 id="tiers/what-the-page-says">What the page says</h3>
+<p>&quot;delivered&quot;, &quot;recorded&quot;, &quot;client-attested&quot;, &quot;fail-open&quot;. Never &quot;enforced&quot;. On rendered pages <code>tools/check-copy.mjs</code> bans the literal &quot;client-attested&quot;, so pages say &quot;Reported by harness&quot; for spend and state the fail-open property in the tier's tooltip.</p>
+<h2 id="tiers/gateway">gateway</h2>
+<p><code>gateway</code> means the run's model traffic, its MCP traffic, or both went through a process Oxagen runs: the loopback model proxy inside <code>tachod</code> (ADR-094), or the Oxagen MCP gateway. The gateway saw the bytes. It meters them itself and can refuse a call before the vendor receives it.</p>
+<h3 id="tiers/routes">Routes</h3>
+<p>Enrollment points the harness at the loopback proxy by rewriting its base URL (<code>wire.ts:388-410</code>). The proxy listens on the port after the collector's.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Harness</th>
+<th>Setting written</th>
+<th>Proxy prefix</th>
+<th>Credential brokered (ADR-143)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Claude Code</td>
+<td><code>env.ANTHROPIC_BASE_URL</code></td>
+<td><code>/anthropic</code></td>
+<td>Yes. An <code>apiKeyHelper</code> hands the harness a run token</td>
+</tr>
+<tr>
+<td>Codex</td>
+<td><code>openai_base_url</code></td>
+<td><code>/backend-api/codex</code></td>
+<td>Yes, with a static run token. A ChatGPT login stays <code>harness_held</code></td>
+</tr>
+<tr>
+<td>Stella</td>
+<td><code>providers.anthropic.base_url</code></td>
+<td><code>/stella/anthropic</code></td>
+<td>No (<code>brokerable: false</code>)</td>
+</tr>
+<tr>
+<td>Cursor</td>
+<td>None. Hooks only</td>
+<td>None</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Claude Desktop</td>
+<td>The Oxagen MCP gateway in its config (<code>CONNECTED_HARNESSES</code>, <code>wire.ts:343</code>)</td>
+<td>None. No model traffic routes</td>
+<td>No</td>
+</tr>
+</tbody>
+</table></div>
+<p>The proxy speaks Anthropic Messages, OpenAI Responses, and OpenAI Chat Completions, streamed or not. A websocket upgrade gets <code>426</code>, and Codex falls back to HTTP. The proxy ties each call to a session by, in order: the <code>x-oxagen-session</code> header (read and removed), the harness's own session header, the session id inside Anthropic <code>metadata.user_id</code>, a Responses <code>prompt_cache_key</code> that names a known session, and the one live session of that harness. A call that matches none is sealed on the daemon's own chain and marked <code>unattributed</code> (<code>model-proxy.ts:73-83</code>).</p>
+<p>The MCP aggregator that re-serves a wrapped harness's MCP servers through loopback (ADR-094 part 3) is not on <code>main</code> (<code>oxagen</code> #3299, open). Today a wrapped harness reaches <code>gateway</code> through model traffic only, and Claude Desktop through its Oxagen MCP calls only.</p>
+<h3 id="tiers/metering">Metering</h3>
+<p>The proxy seals one <code>llm_call</code> frame per call with <code>fidelity: proxy</code> and <code>oxagen.metering: observed</code>. The frame carries request and response digests, usage, latency, status, <code>oxagen.credential_basis</code>, and <code>oxagen.run_token_id</code> when the call was brokered (<code>model-proxy.ts:29-44</code>, <code>wire.ts:123-132</code>). Once a session has one observed call, the control plane drops the harness's self-reported calls from its counts (<code>ingest:280-296</code>), and the session's <code>cost_basis</code> is written <code>observed</code> (<code>ingest:1849-1851</code>). Pages label it &quot;Observed by gateway&quot;.</p>
+<h3 id="tiers/budgets">Budgets</h3>
+<p>A budget is enforced only when the agent's published definition declares one. The bundle's <code>budget.mode</code> stays <code>observed</code> when the host names no agent, the agent has no published version, or its active definition has no budget table (<code>tacho-host.ts:464-477</code>, <code>deriveBundleBudget</code>). With <code>budget.mode: enforced</code>:</p>
+<ol>
+<li>The proxy checks the budget when it admits a call. A session whose observed spend reached <code>budget.session_limit_usd</code>, or an agent whose observed spend for the UTC day reached <code>budget.daily_limit_usd</code> (ADR-160), has its next call refused.</li>
+<li>The refusal is a <code>403</code> in the vendor's error shape, with <code>x-oxagen-refusal: session_budget_exceeded</code> or <code>daily_budget_exceeded</code> and <code>x-should-retry: false</code>. It is sealed as a <code>policy_decision</code>.</li>
+<li>A call in flight holds its ceiling (its request bytes as input and its output cap) against the session limit until it settles, so parallel calls cannot all pass on the same settled figure.</li>
+<li>A call already streaming is never cut for budget. The check runs at admission only.</li>
+</ol>
+<p>Prices arrive in the signed bundle as <code>model_prices</code>. An unpriced model costs the budget nothing and its frame says <code>observed_unpriced</code>.</p>
+<p>The workspace can also turn on a model allowlist (<code>update_tacho_session_policy</code>). A model outside <code>models.allow</code>, or inside <code>models.deny</code>, is refused with <code>model_not_permitted</code>.</p>
+<h3 id="tiers/interrupt">Interrupt</h3>
+<p>At <code>gateway</code>, <code>interrupt</code> is real. Pause, cancel, kill, and a steer sent as <code>interrupt</code> abort the session's in-flight model calls (<code>packages/tacho/README.md:295-297</code>). A call cut by a steer gets a <code>503</code> with <code>steered_by_operator</code>, which the harness retries (<code>model-proxy.ts:1257-1268</code>). A paused session's new calls are refused until <code>resume</code>. The applied frame carries <code>command.interrupted: 1</code> only when a call was cut.</p>
+<h3 id="tiers/credential-custody">Credential custody</h3>
+<p><code>tacho enroll</code> seals the vendor key in <code>credentials.json</code> (AES-256-GCM, mode 0600) (ADR-143:58-67). A brokered harness holds an <code>oxrt_</code> run token that lasts at most 15 minutes. The proxy verifies the token and swaps in the custody key. An expired token gets a <code>401</code>. A vendor key the harness brings from its shell environment is refused as <code>foreign_credential</code>. The key stays on the machine. Oxagen's servers never hold it.</p>
+<h3 id="tiers/failure-behavior-1">Failure behavior</h3>
+<ul>
+<li><strong>A fault of Oxagen's never stops a call.</strong> An unpriced model, an unreachable control plane, an unreadable response, and a <code>beforeForward</code> that throws or takes over 250 ms all let the call through (<code>model-proxy.ts:46-64</code>).</li>
+<li><strong>An operator decision always stops one.</strong> A budget at its limit, a paused or cancelled session, and a suspended or revoked host all refuse.</li>
+<li><strong>The daemon is down.</strong> The harness gets a refused connection. It does not fall through to the vendor, because its base URL points at loopback.</li>
+<li><strong>The control plane is down.</strong> The proxy keeps deciding from the cached bundle (ADR-094:83-84).</li>
+</ul>
+<h3 id="tiers/routing-around-it">Routing around it</h3>
+<p>The machine's owner can still leave the gateway:</p>
+<ul>
+<li>Unset the base URL. The host's health report shows it as <code>model_base_urls.ours: false</code> (<code>wire.ts:1006-1019</code>).</li>
+<li>For a brokered harness, decrypt <code>credentials.json</code> and call the vendor directly.</li>
+<li>Add an MCP server that does not go through the gateway.</li>
+<li>Use the harness's built-in tools (Bash, Edit, Write). They never touch the gateway, so they stay at the <code>harness</code> tier's strength even on a <code>gateway</code> run.</li>
+</ul>
+<h3 id="tiers/what-the-page-says-1">What the page says</h3>
+<p>&quot;Observed&quot; for metering. &quot;Enforced&quot; for budgets on routed traffic, with the scope stated. Never &quot;enforced&quot; against the machine's operator, and nothing about traffic that did not route.</p>
+<h2 id="tiers/contained">contained</h2>
+<p><code>contained</code> means Oxagen's launcher started the agent inside an OS sandbox, attested three controls, and the run's traffic reached the gateway. It is the only tier that earns &quot;enforced&quot; against the machine's operator. It targets CI runners, headless runs, cloud runners, and managed devices. It is never mandatory on a developer's own laptop, where nothing is enforceable against the owner (ADR-096).</p>
+<h3 id="tiers/three-controls">Three controls</h3>
+<p>A sandbox alone does not earn the tier. The launcher attests all three, and a run whose receipt lacks any one earns <code>gateway</code> at most (ADR-096).</p>
+<ol>
+<li><strong>Gateway-only egress.</strong> Every model and MCP request from every process in the sandbox goes through the gateway or fails. This turns model and MCP traffic from attested to enforced.</li>
+<li><strong>A filesystem policy.</strong> The writable set is the workspace the launcher was given. The harness's settings file, its hook entries, and the <code>tacho-hook</code> binary are read-only inside the sandbox.</li>
+<li><strong>Hook integrity at launch.</strong> The launcher starts the binary it chose with the hook entries it wrote, records a digest of that configuration, and the sandbox denies writes to it for the life of the run.</li>
+</ol>
+<p>Egress alone leaves the hooks client-attested, because a process inside the sandbox could edit the settings file, set <code>disableAllHooks</code>, or start a second copy of the harness. The second and third controls close that.</p>
+<h3 id="tiers/the-profile">The profile</h3>
+<p>The first profile is <code>oxagen-linux-docker-v1</code> (ADR-152): a Docker container on Linux, created by an unprivileged user in the <code>docker</code> group. GitHub's hosted runners provide exactly that.</p>
+<pre><code class="language-sh">tacho run --contained -- claude [args]
+oxagen run -- codex [args]   # delegates to tacho run --contained
+</code></pre>
+<p><code>oxagen run export &lt;run-id&gt;</code> still parses as a subcommand.</p>
+<p>The launcher creates the container with:</p>
+<ul>
+<li><code>--network none</code>. Loopback only.</li>
+<li><code>--read-only</code>, <code>--cap-drop ALL</code>, <code>--security-opt no-new-privileges</code>, and private IPC and cgroup namespaces.</li>
+<li>Limits of 512 processes, 4 GB of memory, and 2 CPUs.</li>
+<li><code>--user</code> set to the launching user's uid and gid. Never root.</li>
+<li>Two mounts: the repository root, read-write, at <code>/workspace</code>, and a per-run session directory, read-only, at <code>/opt/oxagen/session</code>.</li>
+</ul>
+<h3 id="tiers/the-one-exit">The one exit</h3>
+<p>The only way out of the container is a Unix socket in the session directory. Inside, <code>entry.mjs</code> relays <code>127.0.0.1:43801</code> to that socket. Outside, the bridge (<code>contained/bridge.ts</code>) serves four routes. It refuses every other path and records a <code>contained_gateway_route</code> denial.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Route</th>
+<th>Destination</th>
+<th>Credential</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>/model/v1/...</code></td>
+<td>The loopback model proxy, for one harness's paths only</td>
+<td>A 15-minute run token from the daemon's custody, set by the bridge</td>
+</tr>
+<tr>
+<td><code>/hook</code></td>
+<td>The daemon's hook handler, with <code>session_id</code> and <code>cwd</code> pinned to the launched session</td>
+<td>None</td>
+</tr>
+<tr>
+<td><code>/mcp</code></td>
+<td>The local MCP gateway, then the Oxagen API</td>
+<td>The host's gateway credential, held by the daemon</td>
+</tr>
+<tr>
+<td><code>/github/...</code></td>
+<td><code>github.com</code> smart-HTTP git and <code>api.github.com/repos/&lt;owner&gt;/&lt;repo&gt;</code>, for one repository, only when the operator supplied a token</td>
+<td>The run's installation token, set by the bridge. Each request is a <code>contained_github_route</code> decision</td>
+</tr>
+</tbody>
+</table></div>
+<p>No credential enters the container. The harness inside holds a placeholder key, and the bridge replaces every inbound credential header. The operator's GitHub token must reach exactly the one named repository, or the launcher refuses it. The launcher revokes it when the run ends or when any check refuses the launch.</p>
+<h3 id="tiers/the-launch">The launch</h3>
+<p>Before any agent process runs, the launcher:</p>
+<ol>
+<li>Refuses a workspace that is not the repository root, or that holds a nested mount, a symbolic link leaving the checkout, a hard-linked file, a socket or device, or a credential file (<code>.env</code>, <code>.env.local</code>, <code>.aws</code>, <code>.ssh</code>, <code>.netrc</code>, <code>.npmrc</code>, and similar). Committed templates (<code>.env.example</code>, <code>.env.sample</code>, <code>.env.template</code>) pass.</li>
+<li>Refuses harness arguments outside a short allowlist, so no flag can point the harness at another settings file or endpoint.</li>
+<li>Writes the hook configuration into the session directory, mode 0400. The image links Claude Code's managed settings and Codex's <code>requirements.toml</code> to those files, and both set managed hooks only.</li>
+<li>Runs <code>docker create</code>, then <code>docker inspect</code>, and checks every setting against what Docker reports. A mismatch stops the launch.</li>
+<li>Computes the measurement: the profile name, the container id, the image digest, a digest over the sorted configuration files, and three flags (<code>gatewayOnlyEgress</code>, <code>workspaceOnlyWrites</code>, <code>readOnlyHooks</code>).</li>
+<li>Posts the measurement with the session's chain genesis hash to <code>POST /v1/tacho/contained-launch</code>, authenticated by the host's gateway credential. The API requires the enrolling operator to hold Owner or Admin.</li>
+<li>Runs <code>docker start</code> only after the API accepts the receipt.</li>
+</ol>
+<p>The launcher refuses to start when the environment cannot provide the profile: not Linux, running as root, no Docker, a Docker daemon that is not Linux, a missing image, an inspect mismatch, or a refused registration. It never falls back to an uncontained run.</p>
+<h3 id="tiers/who-decides-the-tier">Who decides the tier</h3>
+<p>The launcher never labels a run <code>contained</code>, and neither does the daemon. The daemon reports <code>gateway</code> or lower, as it does for any wrapped session. The control plane computes <code>contained</code> at ingest from three things it holds: a verified chain, gateway traffic in that chain, and a receipt whose genesis hash matches the chain's (<code>register_contained_launch</code>, <code>tacho.contained_launches</code>). A run started outside the launcher on the same machine has no receipt, so it earns <code>gateway</code> at most.</p>
+<h3 id="tiers/required-containment">Required containment</h3>
+<p>An agent definition can require the tier:</p>
+<pre><code class="language-toml">[containment]
+required = true
+</code></pre>
+<p>The control plane signs <code>containment: { required: true }</code> into the bundle of a host that advertises the <code>containment</code> bundle feature. It suspends a host that does not advertise it, because that host's strict bundle schema would drop the clause and run the agent uncontained (<code>tacho-host.ts:590-603</code>). In <code>enforce</code> mode, the hook refuses the start, every prompt, and every tool call of a session the launcher did not start, with <code>containment_required</code> (<code>bundle.ts:823-832</code>). In <code>observe</code> mode the requirement is recorded and refuses nothing.</p>
+<h3 id="tiers/trust-boundary">Trust boundary</h3>
+<p><code>contained</code> holds against the agent and every process it starts. It does not hold against whoever administers the host, because membership in the <code>docker</code> group is root on that machine. That person can:</p>
+<ul>
+<li>Run a modified <code>tachod</code> that registers a measurement for a process it never confined. The receipt is the launcher's attestation. No hardware or remote attestation signs it.</li>
+<li>Change the container after it was measured, with <code>docker network connect</code>, <code>docker exec</code>, or a new mount.</li>
+<li>Read the vendor key from custody, and the GitHub token while the run is live.</li>
+<li>Build a different image. Its digest lands in the receipt, and nothing compares it with a known-good list.</li>
+<li>Stop the daemon or drop events before they ship. The record shows silence, not a violation.</li>
+</ul>
+<p>Two gaps remain against the agent itself:</p>
+<ul>
+<li>The agent can write anything under <code>/workspace</code>, including <code>.git/hooks</code>. A git command the host later runs in that checkout runs those hooks outside the container. The CI example discards the checkout after the run.</li>
+<li>The model and MCP routes are open for the run's life. The gateway governs and meters what the agent sends through them. The container refuses none of it.</li>
+</ul>
+<h3 id="tiers/stella-in-app-runs">Stella in-app runs</h3>
+<p>A Stella in-app run (<code>arun_</code>) sends no gateway traffic, because the engine runs outside the sandbox. The Stella in-app roadmap proposes rule D1 for those runs: <code>contained</code> needs a receipt naming all three controls, plus a frame for every tool call showing it entered through the host (<code>stella-in-app-agent-roadmap.html:443-468</code>). D1 is a proposal and is not built.</p>
+<h3 id="tiers/what-the-page-says-2">What the page says</h3>
+<p>&quot;Enforced&quot;, for routed traffic and the filesystem boundary, against the agent and every process it starts. Never &quot;enforced&quot; against the host administrator, and nothing about a run the launcher did not start.</p>
+<h2 id="tiers/delivery-modes-by-tier">Delivery modes by tier</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Mode</th>
+<th><code>observe</code></th>
+<th><code>harness</code></th>
+<th><code>gateway</code></th>
+<th><code>contained</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>turn_boundary</code></td>
+<td>Delivered at the next prompt if hooks are installed. Recorded as assembled otherwise</td>
+<td>Delivered at the next prompt</td>
+<td>Delivered at the next prompt</td>
+<td>Delivered at the next prompt</td>
+</tr>
+<tr>
+<td><code>next_step</code></td>
+<td>As <code>harness</code>, if hooks are installed</td>
+<td>Delivered at the next step on Claude Code and Codex</td>
+<td>Delivered at the next step</td>
+<td>Delivered at the next step</td>
+</tr>
+<tr>
+<td><code>interrupt</code></td>
+<td>Degrades to <code>next_step</code></td>
+<td>Degrades to <code>next_step</code> (<code>harness_tier</code>)</td>
+<td>Cuts the model call in flight</td>
+<td>Cuts the model call in flight</td>
+</tr>
+</tbody>
+</table></div>
+<p>A command that cannot reach a run is refused for a reason about the run, never about its tier: <code>run_sealed</code>, <code>no_host</code>, <code>host_revoked</code>, or <code>host_offline</code> (ADR-163). A Stella steer is refused with <code>no_prompt_carrier</code>.</p>
+<h2 id="tiers/copy-rules">Copy rules</h2>
+<ul>
+<li><strong>A tier word is shown as a word.</strong> It is never a score, a percentage, a progress bar, or &quot;fully governed&quot; or &quot;partially governed&quot; (ADR-078:88-91).</li>
+<li><strong>No surface shows a stronger word than the run's tier.</strong> This covers the UI, exports, attestation reports, and docs (<code>docs/oxagen/specs/tacho/plan.md:19</code>).</li>
+<li><strong>&quot;Enforced&quot; appears in two places only.</strong> Budgets on <code>gateway</code> traffic, and <code>contained</code> runs. Each carries its scope.</li>
+<li><strong>&quot;Enforced on every call&quot; and &quot;enforced on every run&quot; are banned</strong> without a scope. The replacement is &quot;checked on governed calls, for actions routed through Oxagen&quot; (<code>oxagen</code> <code>.claude/skills/oxagen-branding/references/words.md:81</code>, <code>:104</code>).</li>
+<li><strong>Page vocabulary.</strong> Pages say &quot;tier&quot;, never &quot;seam&quot; or &quot;client tier&quot; (<code>fleet-operations-ia.md:151</code>). Spend sources read &quot;Observed by gateway&quot; and &quot;Reported by harness&quot; (<code>:160-161</code>). <code>tools/check-copy.mjs</code> bans &quot;seams&quot;, &quot;client-attested&quot;, &quot;earns the word&quot;, and &quot;stronger word than&quot; on rendered pages. Specs in <code>docs/</code> may use them.</li>
+<li><strong>A tier that is not built yet</strong> shows a dashed badge and a hatched rung, and claims nothing as present (<code>engine.js:725</code>, <code>engine.css:2057-2059</code>). <code>TIER_NA</code> is empty today because every rung has code on <code>main</code>.</li>
+</ul>
+<h2 id="tiers/surfaces">Surfaces</h2>
+<p><strong>Badge.</strong> <code>tierBadge(t)</code> (<code>engine.js:723-728</code>) draws a lowercase badge in 10.5 px Monaspace Neon (<code>.b-tier</code>, <code>engine.css:193</code>) whose tooltip is the rung's page copy.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Badge tone</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>observe</code></td>
+<td><code>b-q</code> (neutral)</td>
+</tr>
+<tr>
+<td><code>harness</code></td>
+<td><code>b-approval</code></td>
+</tr>
+<tr>
+<td><code>gateway</code></td>
+<td><code>b-allowed</code></td>
+</tr>
+<tr>
+<td><code>contained</code></td>
+<td><code>b-proven</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Ladder.</strong> <code>tierLadder(cur)</code> (<code>engine.js:729-732</code>) draws the four rungs as an ordered list labelled &quot;The tier ladder&quot;, four columns wide and two on a phone (<code>engine.css:2052-2063</code>). It highlights the current rung and badges it &quot;this agent&quot;.</p>
+<p><strong>Where a tier appears.</strong></p>
+<ul>
+<li>The run header (<code>engine.js:2066</code>) and the Decision trace intro (<code>wedge.js:584-585</code>).</li>
+<li>The <code>agent_start</code> frame (<code>engine.js:3608</code>) and the evidence seal, which signs <code>enforcement_tier</code> (<code>engine.js:3921-3922</code>).</li>
+<li>The Agent runtime tab: the ladder and the &quot;Tier earned&quot; row (<code>engine.js:4493</code>, <code>:4538</code>).</li>
+<li>The Runtimes page: the table cell, the ladder, and the tier row (<code>engine.js:6808</code>, <code>:6838</code>, <code>:6861</code>).</li>
+<li>Agent lists and cards, and steering assignments.</li>
+</ul>
+<h2 id="tiers/data-model">Data model</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Object</th>
+<th>Where</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Wire enum <code>ENFORCEMENT_TIERS</code></td>
+<td><code>packages/tacho/src/envelope.ts:64</code></td>
+<td><code>gateway</code>, <code>harness</code>, <code>observe</code>. <code>contained</code> is missing. See &quot;Conflicts&quot;</td>
+</tr>
+<tr>
+<td>Database enum <code>TACHO_ENFORCEMENT_TIERS</code></td>
+<td><code>packages/database/src/schema/tacho.ts</code></td>
+<td>All four</td>
+</tr>
+<tr>
+<td>Session column</td>
+<td><code>tacho.sessions.enforcement_tier</code></td>
+<td>All four. Default <code>observe</code></td>
+</tr>
+<tr>
+<td>Event column</td>
+<td>ClickHouse <code>tacho_events.enforcement_tier</code> (<code>packages/telemetry/src/migrations/0027_tacho_events.sql:25</code>)</td>
+<td>Generated from the wire enum</td>
+</tr>
+<tr>
+<td>Seal and cost columns</td>
+<td><code>agent.agent_run_attempt_seals</code>, <code>cost.run_totals</code></td>
+<td>All four, by CHECK constraint</td>
+</tr>
+<tr>
+<td>Replay grade</td>
+<td><code>GRADE_ENFORCEMENT_TIERS</code> (<code>packages/tacho/src/evidence/replay-grade.ts</code>)</td>
+<td>All four</td>
+</tr>
+<tr>
+<td>Launch receipts</td>
+<td><code>tacho.contained_launches</code>, unique on <code>(host_id, session_uuid)</code>, with row-level security</td>
+<td>Migration <code>20260923230000_tacho_contained_launches.sql</code></td>
+</tr>
+<tr>
+<td>Receipt route</td>
+<td><code>POST /v1/tacho/contained-launch</code> (<code>apps/api/src/routes/v1/tacho.contained_launch.register.ts:30</code>), capability <code>register_contained_launch</code></td>
+<td>Refuses with <code>containment_not_ready</code> before the migration and <code>contained_launch_mismatch</code> on a conflicting registration</td>
+</tr>
+<tr>
+<td>Refusal codes</td>
+<td>Proxy and hooks</td>
+<td><code>session_budget_exceeded</code>, <code>daily_budget_exceeded</code>, <code>model_not_permitted</code>, <code>model_ambiguous</code>, <code>foreign_credential</code>, <code>containment_required</code>, <code>steer_interrupt</code>, <code>steered_by_operator</code></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="tiers/status">Status</h2>
+<p>Checked at <code>oxagen</code> <code>main</code> <code>4a21610ef</code> on 2026-09-25.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>Built</th>
+<th>Running in production</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>observe</code></td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>harness</code></td>
+<td>Yes. Claude Code, Codex, Cursor, and Stella through hooks</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td><code>gateway</code></td>
+<td>Model proxy, credential custody, budgets, allowlist, and interrupt are on <code>main</code>. The MCP aggregator for wrapped harnesses is not (#3299 open). Claude Desktop's MCP gateway is on <code>main</code></td>
+<td>Model traffic for enrolled Claude Code, Codex, and Stella hosts. MCP for Claude Desktop only</td>
+</tr>
+<tr>
+<td><code>contained</code></td>
+<td>Receipt route and tier binding (#3772) and the launcher (#3813) merged 2026-09-23. Phase 5 (#3300) is open with <code>needs:rig</code>. Contained runs pushing through the Git proxy (#3815) are open</td>
+<td>No. The <code>contained-run</code> CI job waits on the repository variable <code>OXAGEN_CONTAINED_ENABLED</code>, and <code>docs/VISION.md:107-110</code> says no production run has reached the tier</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="tiers/conflicts">Conflicts</h2>
+<p>These are places where the page copy, the ADRs, and the code disagree today. Each needs one side changed.</p>
+<ol>
+<li><strong>The <code>observe</code> copy says &quot;No hook is installed and nothing is delivered.&quot;</strong> An <code>observe</code>-mode host has hooks installed. It delivers steering, refuses on operator state, and records every rule result. The copy holds only for runs with no hooks. Proposed copy: &quot;Recorded only. Rules are checked and recorded, and none refuses a call.&quot; The same line lives in <code>oxagen</code> <code>apps/app/messages/runtimes.json</code> and <code>agents.json</code>.</li>
+<li><strong>The <code>gateway</code> copy says &quot;Model and MCP traffic goes through the gateway.&quot;</strong> Today a wrapped harness routes model traffic only, and Claude Desktop routes MCP only. One call of either kind earns the tier. Proposed copy: &quot;Model or MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it.&quot;</li>
+<li><strong>The <code>gateway</code> copy says the gateway &quot;enforces budgets&quot;.</strong> It enforces a budget only when the agent's definition declares one. Otherwise <code>budget.mode</code> is <code>observed</code> and the budget refuses nothing. The run page should say which.</li>
+<li><strong>The <code>contained</code> copy names one control.</strong> A sandbox whose only exit is the gateway earns <code>gateway</code> at most unless the receipt also attests the filesystem policy and hook integrity. Proposed copy: &quot;The agent runs in an OS sandbox the launcher set up. Its only network exit is the gateway, and its hooks cannot be changed.&quot;</li>
+<li><strong>The wire enum lacks <code>contained</code>.</strong> <code>ENFORCEMENT_TIERS</code> in <code>envelope.ts:64</code> has three values while every database list has four. ClickHouse <code>tacho_events.enforcement_tier</code> is generated from the wire enum, so a <code>contained</code> event value has no slot there. #3300 work item 4 is half done.</li>
+<li><strong>The hook crash case contradicts the fail-closed framing.</strong> ADR-095 says the hook fails closed against its bundle, and it does for rule decisions. A hook process that crashes or prints nothing is read as allow by every harness except Cursor with <code>failClosed</code> (<code>hook-client.ts:993-998</code>).</li>
+<li><strong>The Tacho spec lags the code.</strong> <code>docs/specs/tacho/spec.md</code> in <code>oxagen</code> defines <code>gateway</code> as &quot;every tool routed&quot; (<code>:278</code>), has no <code>contained</code> in §6.3, still refuses commands to <code>observe</code> runs with <code>observe_tier</code> (<code>:391</code>, reversed by ADR-163), and says <code>per_day_micros</code> is not signed (<code>:405</code>). The spec's status is still <code>Proposed</code>.</li>
+<li><strong>Phase status reads three ways.</strong> <code>docs/VISION.md:106</code> and <code>packages/tacho/README.md:395</code> say Phase 4 is in build. <code>README.md:415-416</code> says the proxy is on <code>main</code>. <code>README.md:375-376</code> says there is no sandbox. <code>README.md:239-240</code> and ADR-143:154 say Stella does not route, and <code>wire.ts:403-409</code> routes it.</li>
+<li><strong>The default retention mode disagrees.</strong> With no retention policy, a workspace defaults to <code>content_exact</code> (<code>tacho-host.ts:256-268</code>), and the proxy ships request and response bodies under it. ADR-094:71-75 and #3299's definition of done say no prompt body reaches Oxagen's servers. <code>packages/tacho/README.md:167</code> says <code>digest_only</code> is the default. This does not change a tier, and it changes what a <code>gateway</code> run's record holds.</li>
+<li><strong><code>mission-control-spec.md</code> §7.1 and §7.2 are out of date</strong> on status: they show <code>gateway</code> for a wrapped harness and <code>contained</code> as not built. This spec supersedes them for tier facts. <code>README.md:132-134</code> in this repo describes the mockup's fixtures, where most agents run <code>gateway</code> and Stella CI runs <code>contained</code>, which production has not reached.</li>
+</ol>
+<h2 id="tiers/rules-every-build-keeps">Rules every build keeps</h2>
+<ol>
+<li>The control plane computes the tier from the run's record. No launcher, daemon, adapter, or enrollment setting assigns it.</li>
+<li>A live tier only rises. A sealed tier never changes.</li>
+<li>No surface shows a word stronger than the run's tier, and every control claim states its scope.</li>
+<li><code>contained</code> needs a receipt naming all three controls, a verified chain, and gateway traffic in that chain.</li>
+<li>A launcher that cannot provide its profile refuses to start. It never runs the agent uncontained.</li>
+<li>No vendor or GitHub credential enters a contained sandbox.</li>
+<li>A tier word is never rendered as a score.</li>
+</ol>
+
+<footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/tier-ladder-spec.md</code></span></footer>
+</main>
+</div>
 </article><article id="witness" class="doc" hidden>
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
@@ -18934,7 +19581,7 @@ need a decision before W13 is written into the spec.</li>
 </div>
 <script>
 (function(){
-  var TITLES={'wedge': 'Fleet operations wedge', 'ia': 'Fleet operations information architecture', 'routes': 'Fleet operations routes', 'collapse': 'Fleet operations deletion list', 'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and Steering records', 'tasks': 'Tasks and work orders', 'work-in-flight': 'Work in flight', 'agent-capability': 'In-app agent capability expansion', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
+  var TITLES={'wedge': 'Fleet operations wedge', 'ia': 'Fleet operations information architecture', 'routes': 'Fleet operations routes', 'collapse': 'Fleet operations deletion list', 'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'tiers': 'The enforcement tier ladder', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and Steering records', 'tasks': 'Tasks and work orders', 'work-in-flight': 'Work in flight', 'agent-capability': 'In-app agent capability expansion', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
   var first='wedge';
   function show(){
     var h=location.hash.replace(/^#/,""), id=h.split("/")[0];

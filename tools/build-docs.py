@@ -33,6 +33,7 @@ CATALOG = [
     ("Specifications", [
         ("spec", "mission-control-spec.md", "Specification"),
         ("dod", "dod-spec.md", "Specification"),
+        ("tiers", "tier-ladder-spec.md", "Specification"),
         ("witness", "witness-spec.md", "Specification"),
         ("desktop", "desktop-spec.md", "Specification"),
         ("creation", "creation-spec.md", "Specification"),
