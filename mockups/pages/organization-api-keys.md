@@ -16,13 +16,13 @@ The organization page opened on its API keys tab: keys minted for service princi
 
 ## What is on the page
 
-**Header**: eyebrow "Organization", h1 "<organization name>", subtext "People, roles, invitations, workspaces, cost centers, model funding and routes, and API keys." Breadcrumb: <organization> / Organization / **API keys**.
+**Header**: eyebrow "Organization", h1 "<organization name>", and no subtext. Breadcrumb: <organization> / Organization / **API keys**.
 Actions: **Invite** (opens `invite`), **Create a workspace** (gold; opens `newws`).
 
 **Tabs**: the eight Organization tabs, with **API keys** selected.
 
-- **API keys**: panel "API keys" with the caption "Each key is a service principal with its own grants" and **Create key** (opens `apikey`); Rows; columns Name (with the masked key beneath), Principal, Grants (one chip each), Created by, Last used, Actions 30d, Expires (a state badge Active, "Expires in N days" counted from the mock's current date, or "Never used", with the date beneath); per row **Rotate** (opens `rotatekey`), **Revoke** (opens `revokekey`); a note that a key is shown once, carries grants not roles, and revoking ends the principal's access at the next call.
-- **Surfaces this reaches**: one paragraph saying the API, MCP, the CLI and these screens share one set of actions, so a key can do the same everywhere; four example `oxagen` CLI lines.
+- **API keys**: panel "API keys" with no caption and **Create key** (opens `apikey`); Rows; columns Name (with the masked key beneath), Principal, Grants (one chip each), Created by, Last used, Actions 30d, Expires (a state badge Active, "Expires in N days" counted from the mock's current date, or "Never used", with the date beneath); per row **Rotate** (opens `rotatekey`), **Revoke** (opens `revokekey`). The panel has no note: that a key is shown once, carries grants rather than roles, and loses access at its next call once revoked is in the component help (API keys).
+- **Surfaces this reaches**: four example `oxagen` CLI lines. That the API, MCP, the CLI and these screens share one set of actions is in the component help (`mockups/help/organization-api-keys.md`, Surfaces this reaches).
 
 **Dialogs this page opens:** `apikey` (Name, Grants, Expires; the secret is shown once), `rotatekey` (a new secret, the old one valid for 24 hours), `revokekey`, plus `invite` and `newws` from the header.
 

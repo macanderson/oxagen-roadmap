@@ -1091,13 +1091,11 @@ for (const theme of ["light", "dark"]) {
   ok(tabs.includes("Cost centers"), "organization: the Cost centers tab is present, got " + tabs.join(" ~ "));
   ok(tabs.length === 8, "organization: eight tabs, got " + tabs.length + ": " + tabs.join(" ~ "));
 
-  const sub = await page.evaluate(() => {
-    const ps = [...document.querySelectorAll(".phead .t p")];
-    return ps.length ? ps[ps.length - 1].textContent.trim() : "";
-  });
-  for (const word of ["People", "roles", "invitations", "workspaces", "API keys"]) {
-    ok(sub.includes(word), "organization: the subtext names " + word + ", got " + sub);
-  }
+  // The header is the eyebrow and the name. What the tabs hold is in the header's component help
+  // (mockups/help/organization.md, Page header), so no subtext sits under the h1.
+  const head = await page.evaluate(() =>
+    [...document.querySelectorAll(".phead .t > *")].map((x) => x.tagName + (x.classList.contains("eyebrow") ? ".eyebrow" : "")));
+  ok(head.join() === "P.eyebrow,H1", "organization: the header is the eyebrow and the h1 with no subtext, got " + head.join());
 
   // Task #24 cut the Model key and In-firewall routes panels and moved the key facts into
   // Funding source. The spec described the old shape for four commits.

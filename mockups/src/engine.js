@@ -979,7 +979,7 @@ function route(){
   if(!p.length) return {page:"work",org:ORG.slug,ws:S.ws,tab:"backlog"};
   if(p[0]==="welcome") return {page:"welcome",step:p[1]||"signup"};
   var org=p[0];
-  if(p.length===1) return {page:"organization",org:org};
+  if(p.length===1){if(S.tab.organization==="keys"||S.tab.organization==="roles")S.tab.organization="people";return {page:"organization",org:org};}
   if(p[1]==="api-keys"){S.tab.organization="keys";return {page:"organization",org:org,tab:"keys"};}
   if(p[1]==="roles"){S.tab.organization="roles";return {page:"organization",org:org,tab:"roles"};}
   if(p[1]==="billing") return {page:"billing",org:org};
@@ -7392,8 +7392,7 @@ function pOrganization(){
        '<td class="mono dim" style="font-size:11px">'+h(m.last)+'</td>'+
        '<td><span class="b '+(m.status==="active"?"b-allowed":"b-q")+'"><span class="d"></span>'+h(m.status.charAt(0).toUpperCase()+m.status.slice(1))+'</span></td>'+
        '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'member\',\''+m.p+'\')">Open</button><span class="vh">, </span><button class="btn sm" onclick="openDialog(\'role\',\''+m.p+'\')">Change role</button><span class="vh">, </span><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b">'+
-     '<div class="note">Role changes are recorded in Audit and count as one governed action.</div></div></div>';
+     '</tbody></table></div></div>';
   } else if(t==="roles"){
     body=rolesBody();
   } else if(t==="invitations"){
@@ -7415,8 +7414,7 @@ function pOrganization(){
       '<td class="num">'+w.agents+'</td><td>'+h(w.owner)+'</td>'+
       '<td><span class="b b-q">'+h(wsGov(w))+'</span><div class="dim mono" style="font-size:11px">'+h(w.retention)+' · ns '+h(w.ns)+'</div></td>'+
       '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><span class="vh">, </span><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><span class="vh">, </span><button class="btn sm" onclick="openAvatar(\'workspace:'+w.slug+'\')">Edit avatar</button><span class="vh">, </span><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b">'+
-     '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
+     '</tbody></table></div></div>';
   } else if(t==="costcenters"){
     body=orgCostCenters();
   } else if(t==="funding"){
@@ -7426,7 +7424,6 @@ function pOrganization(){
   } else {
     var KST={ok:["b-allowed","Active"],expiring:["b-approval",""],unused:["b-q","Never used"]};
     body='<div class="panel"><div class="panel-h"><h3>API keys</h3>'+
-     '<span class="dim" style="font-size:12px">Each key is a service principal with its own grants</span>'+
      '<div class="sp">'+
      '<button class="btn sm" onclick="openDialog(\'apikey\')">Create key</button></div></div><div class="tw"><table>'+
      '<thead><tr><th>Name</th><th>Principal</th><th>Grants</th><th>Created by</th><th>Last used</th><th class="num">Actions 30d</th><th>Expires</th><th></th></tr></thead><tbody>'+
@@ -7439,15 +7436,12 @@ function pOrganization(){
        '<td><span class="b '+st[0]+'"><span class="d"></span>'+h(lbl)+'</span><div class="dim mono" style="font-size:11px">'+h(k.expires)+'</div></td>'+
        '<td style="white-space:nowrap"><button class="btn sm" onclick="openDialog(\'rotatekey\','+i+')">Rotate</button><span class="vh">, </span> '+
        '<button class="btn sm danger" onclick="openDialog(\'revokekey\','+i+')">Revoke</button></td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b">'+
-     '<div class="note">A key is shown once, at creation, and never again. Keys carry grants, not roles, so an auditor’s key can read receipts and nothing else. Revoking a key ends its service principal’s access at the next call.</div></div></div>'+
+     '</tbody></table></div></div>'+
      '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Surfaces this reaches</h3>'+
      '</div><div class="panel-b">'+
-     '<p class="muted" style="font-size:12.5px;margin:0 0 10px">The API, MCP, the CLI and these screens share one set of actions, so a key that can do something here can do exactly that much everywhere else.</p>'+
      '<pre>$ oxagen login --org a-intel\n$ oxagen run list --workspace core-platform --since 24h\n$ oxagen run export run_01K5RS7M2E8FJ3QW --with-bodies --out ./run_01K5RS7M2E8FJ3QW.bundle\n$ oxagen agent status a-intel.finops.invoice-bot</pre></div></div>';
   }
-  return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>'+h(ORG.name)+'</h1>'+
-   '<p>People, roles, invitations, workspaces, cost centers, model funding and routes, and API keys.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>'+h(ORG.name)+'</h1></div>'+
    '<div class="acts"><button class="btn" onclick="openAvatar(\'org\')">Edit avatar</button>'+
    '<button class="btn" onclick="openDialog(\'invite\')">Invite</button>'+
    '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button></div></div>'+tabs+body;
@@ -7497,8 +7491,7 @@ function ccOptions(cur,none){
 
 function orgCostCenters(){
   var edit=ccCanEdit();
-  var lead='<p class="muted" style="margin:0 0 10px;font-size:12.5px">Spend is charged to the agent’s cost center, or to its workspace’s when the agent names none. Spend with neither is shown on Spend as its own row.</p>'+
-   (edit?'':'<div class="note" data-cc-readonly style="margin:0 0 10px">You can read this list. Changing it takes an organization Owner, Admin or Billing role, which '+h(ccHoldersText())+(ccHolders().length>1?' hold':' holds')+'.</div>');
+  var lead=edit?'':'<div class="panel-b" style="padding-bottom:0"><div class="note" data-cc-readonly style="margin:0 0 10px">You can read this list. Changing it takes an organization Owner, Admin or Billing role, which '+h(ccHoldersText())+(ccHolders().length>1?' hold':' holds')+'.</div></div>';
   var labels=CC.centers.length?'<div class="tw"><table data-cc-labels>'+
     '<thead><tr><th>Label</th><th>Description</th><th class="num">Agents</th><th class="num">Workspaces</th><th>Added</th><th></th></tr></thead><tbody>'+
     CC.centers.map(function(c){
@@ -7519,9 +7512,8 @@ function orgCostCenters(){
    '</tbody></table></div>';
   return '<div class="panel" data-cc-panel><div class="panel-h"><h3>Cost centers</h3>'+
     '<div class="sp"><button class="btn sm" onclick="'+(edit?'openDialog(\'ccadd\')':'ccDenied()')+'">Add a cost center</button></div></div>'+
-    '<div class="panel-b" style="padding-bottom:0">'+lead+'</div>'+labels+'</div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Workspace cost centers</h3></div>'+wsTable+
-    '<div class="panel-b"><div class="note">An agent charged to its own label keeps it whatever its workspace names. Charge an agent from its Identity tab.</div></div></div>';
+    lead+labels+'</div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Workspace cost centers</h3></div>'+wsTable+'</div>';
 }
 
 DLG_EXT.ccadd=function(){
@@ -7529,8 +7521,7 @@ DLG_EXT.ccadd=function(){
    b:'<div class="field"><label for="cc-label">Label</label><input id="cc-label" placeholder="ENG-1001" maxlength="64" autocomplete="off">'+
      '<div class="hint">Up to 64 letters, digits, dots, underscores or hyphens, such as ENG-1001.</div></div>'+
     '<div class="field"><label for="cc-desc">Description</label><input id="cc-desc" maxlength="280" placeholder="Optional"></div>'+
-    '<div class="hint" id="cc-err" role="alert" style="color:var(--st-failed)" hidden></div>'+
-    '<div class="note">A label you deleted earlier comes back with its description. Nothing is charged to it until you charge a workspace or an agent.</div>',
+    '<div class="hint" id="cc-err" role="alert" style="color:var(--st-failed)" hidden></div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ccAdd()">Add</button>'};
 };
 function ccAdd(){
@@ -7554,7 +7545,7 @@ DLG_EXT.ccdel=function(label){
   var c=ccFind(label); if(!c) return noSuch("Cost center");
   var na=ccAgents(label), nw=ccWorkspaces(label);
   return {t:"Delete "+label,w:false,
-   b:'<p style="font-size:13px;margin:0 0 10px">Runs already rolled up keep this label. New runs from an agent or workspace that names it fall back to the workspace’s cost center, or to none.</p>'+
+   b:'<p style="font-size:13px;margin:0 0 10px">New runs from an agent or workspace that names it fall back to the workspace’s cost center, or to none.</p>'+
     '<div class="'+(na||nw?'warn':'note')+'" data-cc-del-count>'+(na||nw?
       na+(na===1?' agent':' agents')+' and '+nw+(nw===1?' workspace name':' workspaces name')+' '+h(label)+' today.'
       :'No agent or workspace names '+h(label)+', so no run changes where it rolls up.')+'</div>',
@@ -7690,8 +7681,7 @@ function spendModelRows(){return SPEND.byModel.concat(orgRoutesOffSpend());}
 
 function orgRoutesPanel(){
   var total=orgRoutesTotal();
-  return '<div class="panel"><div class="panel-h"><h3>Model routes</h3>'+
-   '<div class="sp"><span class="b b-q">customer agents call their providers with their own keys, and oxagen records what each harness reports</span></div></div><div class="tw"><table data-lt="off">'+
+  return '<div class="panel"><div class="panel-h"><h3>Model routes</h3></div><div class="tw"><table data-lt="off">'+
    '<thead><tr><th>Tier</th><th>Provider</th><th>Route</th><th>Fallback</th><th class="num">Use</th><th class="num">Cost</th><th></th></tr></thead><tbody>'+
    ORG_ROUTES.map(function(r,i){var u=orgRouteUse(r);
     return '<tr data-route="'+h(r.tier)+'" data-cost="'+u.cost.toFixed(2)+'"><td><span class="mono">'+h(r.tier)+'</span><div class="dim" style="font-size:11px;max-width:34ch">'+h(r.use)+'</div></td>'+
@@ -7701,8 +7691,7 @@ function orgRoutesPanel(){
      '<td class="num">'+orgUseCount(u)+'</td><td class="num">'+usd(fmt2(u.cost))+'</td>'+
      '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'editroute\','+i+')">Edit</button></td></tr>';}).join("")+
    '<tr><td colspan="5"><b>Total</b> <span class="dim" style="font-size:11.5px">· reported by harness · '+h(ORG.currency)+'</span></td><td class="num" id="orgRoutesTotal"><b>'+usd(fmt2(total))+'</b></td><td></td></tr>'+
-   '</tbody></table></div><div class="panel-b">'+
-   '<div class="note">Tiers point at rolling aliases so “latest” stays current without a deploy. Every <span class="mono">model.response</span> frame records the concrete model id the provider returned, and the cost record prices <i>that</i> id, so the record names the exact model and a price is never looked up by alias. The complex row is the Oxagenant line on Spend.</div></div></div>';
+   '</tbody></table></div></div>';
 }
 DLG_EXT.editroute=function(arg){
   var i=parseInt(arg,10), r=ORG_ROUTES[i];
@@ -7712,8 +7701,7 @@ DLG_EXT.editroute=function(arg){
    b:'<div class="field"><label for="rtProv">Provider</label><select id="rtProv">'+opts+'</select>'+
      '<div class="hint">OpenRouter, or a vendor directly.</div></div>'+
      '<div class="field"><label for="rtRoute">Route</label><input id="rtRoute" value="'+h(r.route)+'"></div>'+
-     '<div class="field"><label for="rtFb">Fallback on a provider error</label><input id="rtFb" value="'+h(r.fallback)+'" placeholder="none"></div>'+
-     '<div class="note">Configure the alias, record the concrete model. Every fallback is a frame, so a run shows exactly which model answered and why.</div>',
+     '<div class="field"><label for="rtFb">Fallback on a provider error</label><input id="rtFb" value="'+h(r.fallback)+'" placeholder="none"></div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="orgRouteSave('+i+')">Save route</button>'};
 };
 function orgRouteSave(i){
@@ -7727,10 +7715,7 @@ function orgRouteSave(i){
 
 /* Data plane: one binding, three deployment modes. The org is on ORG.dataPlane; the other two render as previews. */
 S.planeView=null;
-var PLANE_MODES=[
- ["shared","Shared","Tenant data in oxagen’s shared infrastructure, isolated by row-level security with no bypass setting."],
- ["dedicated","Dedicated","Your own database cluster and object-storage bucket. Identity, IAM, billing and the price book stay in shared infrastructure."],
- ["firewall","Behind the firewall","The same containers, as a signed bundle you run. Outbound only, and optional. Fully air-gapped is supported, not degraded."]];
+var PLANE_MODES=[["shared","Shared"],["dedicated","Dedicated"],["firewall","Behind the firewall"]];
 var FW_OUTBOUND=[
  ["GitHub Enterprise Server · github.a-intel.internal","repository link, pull requests, checks, code graph","in use","allowed"],
  ["Model providers","none, every tier resolves inside the network","not used","q"],
@@ -7743,66 +7728,61 @@ function planeDetail(v){
    '<dt>Database</dt><dd>partitioned by <span class="mono">org_id</span> · row-level policies enforced</dd>'+
    '<dt>Object storage</dt><dd>object lock, compliance mode · per-organization key-encryption key</dd>'+
    '<dt>Key-encryption key</dt><dd class="mono">kek_aintel_2026Q3 · rotated 2026-09-10</dd>'+
-    '<dt>Attester key</dt><dd class="mono">'+h(ORG.attester)+' · published so a customer can verify an export offline</dd>'+
-    '<dt>Gateway</dt><dd>oxagen-hosted · the loopback proxy on every host reports to it, so metering is observed, never self-reported</dd></dl>';
+    '<dt>Attester key</dt><dd class="mono">'+h(ORG.attester)+' · published</dd>'+
+    '<dt>Gateway</dt><dd>oxagen-hosted</dd></dl>';
   if(v==="dedicated") return '<dl class="kv">'+
-   '<dt>Tenant data</dt><dd>a dedicated cluster in your region, the same schema and the same row-level policies</dd>'+
-   '<dt>Identity and billing</dt><dd>stay in shared infrastructure by design</dd>'+
+   '<dt>Tenant data</dt><dd>a dedicated cluster in your region · row-level policies enforced</dd>'+
+   '<dt>Identity and billing</dt><dd>shared infrastructure</dd>'+
    '<dt>Object storage</dt><dd>your own bucket · object lock in compliance mode · write-once</dd>'+
-   '<dt>Key-encryption key</dt><dd>in your KMS, referenced by ARN; oxagen never holds the key material</dd>'+
-    '<dt>Gateway</dt><dd>inside your plane</dd>'+
-    '<dt>Resolver</dt><dd>the only place a connection string is read. A call path that bypasses it is a defect, and CI fails on it.</dd></dl>';
+   '<dt>Key-encryption key</dt><dd>in your KMS, referenced by ARN</dd>'+
+    '<dt>Gateway</dt><dd>inside your plane</dd></dl>';
   return '<dl class="kv">'+
    '<dt>Deployment</dt><dd>Kubernetes, customer-operated · Helm chart</dd>'+
    '<dt>Bundle version</dt><dd class="mono">oxagen/1.4.2</dd>'+
-   '<dt>Bundle signature</dt><dd><span class="mono">cosign · sha256:7f31c0…9b42</span> · verified against oxagen release key <span class="mono">rel-2026-03</span>, the key an evidence bundle is checked against</dd>'+
+   '<dt>Bundle signature</dt><dd><span class="mono">cosign · sha256:7f31c0…9b42</span> · verified against oxagen release key <span class="mono">rel-2026-03</span></dd>'+
    '<dt>Containers</dt><dd>gateway · services · operator console · stella engine · database · S3-compatible object storage with object lock</dd>'+
    '<dt>Air-gapped mode</dt><dd><span class="b b-approval"><span class="d"></span>on</span>. Model routes resolve inside the network.</dd>'+
-   '<dt>Licence</dt><dd>per organization, annual, invoiced. Stripe is not involved behind a firewall.</dd>'+
-   '<dt>Next bundle</dt><dd><span class="mono">oxagen/1.4.3</span> available · applied on your schedule, never pushed</dd></dl>'+
+   '<dt>Licence</dt><dd>per organization, annual, invoiced</dd>'+
+   '<dt>Next bundle</dt><dd><span class="mono">oxagen/1.4.3</span> available</dd></dl>'+
    '<p class="eyebrow" style="margin:16px 0 8px">Outbound connections in use</p>'+
    '<div class="tw"><table data-lt="off"><thead><tr><th>Destination</th><th>Why</th><th>State</th></tr></thead><tbody>'+
    FW_OUTBOUND.map(function(o){return '<tr><td style="font-size:12.5px"><b>'+h(o[0])+'</b></td><td class="dim" style="font-size:12px">'+h(o[1])+'</td>'+
-    '<td><span class="b b-'+o[3]+'"><span class="d"></span>'+h(o[2])+'</span></td></tr>';}).join("")+'</tbody></table></div>'+
-   '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Everything the cloud enforces, the appliance enforces, including the gateway, whose sealed cost records you hand to your auditor.</p>';
+    '<td><span class="b b-'+o[3]+'"><span class="d"></span>'+h(o[2])+'</span></td></tr>';}).join("")+'</tbody></table></div>';
 }
 function orgPlaneBody(){
-  var v=S.planeView||ORG.dataPlane, cur=v===ORG.dataPlane, mode=PLANE_MODES.filter(function(x){return x[0]===v;})[0]||PLANE_MODES[0];
+  var v=S.planeView||ORG.dataPlane, cur=v===ORG.dataPlane;
   return '<div class="split"><div class="panel"><div class="panel-h"><h3>Data plane</h3>'+
    '<div class="sp"><span class="b b-allowed"><span class="d"></span>'+h(ORG.name)+' is on '+h(ORG.dataPlane)+'</span></div></div><div class="panel-b">'+
-   '<div class="seg" role="group" aria-label="Deployment mode">'+PLANE_MODES.map(function(x){
+   '<div class="seg" role="group" aria-label="Deployment mode" style="margin-bottom:12px">'+PLANE_MODES.map(function(x){
      return '<button class="btn sm" aria-pressed="'+(x[0]===v)+'" onclick="S.planeView=\''+x[0]+'\';render()">'+h(x[1])+(x[0]===ORG.dataPlane?' · current':'')+'</button>';}).join("")+'</div>'+
-   '<p class="muted" style="font-size:12.5px;margin:12px 0">'+h(mode[2])+'</p>'+
-   (cur?'':'<div class="note" style="margin-bottom:12px" data-plane-preview="'+h(v)+'"><b>Preview.</b> This is what the page shows on a '+h(mode[1].toLowerCase())+' deployment. Modes, not forks: every store is resolved per organization, so moving is a deployment change, never a different product. Nothing below is in effect for '+h(ORG.name)+'.</div>')+
+   (cur?'':'<div class="note" style="margin-bottom:12px" data-plane-preview="'+h(v)+'"><b>Preview.</b> Nothing below is in effect for '+h(ORG.name.replace(/\.$/,""))+'.</div>')+
    planeDetail(v)+
    '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'plane\')">Request a change of plane</button>'+
-   '<button class="btn" onclick="act(\'Key rotation scheduled. A rotation is a governed action and a security event.\')">Rotate keys</button></div></div></div>'+
+   '<button class="btn" onclick="openDialog(\'rotatekek\')">Rotate keys</button></div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Retention</h3></div><div class="panel-b"><dl class="kv">'+
    '<dt>Frame bodies</dt><dd>7 years from the seal · encrypted, content-addressed</dd>'+
    '<dt>Run ledger</dt><dd>forever</dd>'+
    '<dt>Frame rows</dt><dd>13-month hot window, then compacted into the segment</dd>'+
    '<dt>Control-plane audit</dt><dd>7 years</dd>'+
    '<dt><span class="mono">digest_only</span> mode</dt><dd>'+orgDigestOnly()+'</dd>'+
-   '</dl>'+
-   '<div class="note" style="margin-top:12px">Without bodies, the transcript and the Decision trace show digests where the text was. Keeping bodies is the default.</div></div></div></div>'+
+   '</dl></div></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Tenant isolation</h3><div class="sp"><span class="b b-q">postgres · '+h(ORG.slug)+'</span></div></div><div class="panel-b"><dl class="kv">'+
-   '<dt>Rows</dt><dd>every tenant table carries <span class="mono">org_id</span> and row-level security is on with no bypass; the tenant boundary is the policy, and the policy is tested</dd>'+
-   '<dt>Workspace scoping</dt><dd>every run, frame and record carries <span class="mono">ws</span> ('+WS.map(function(w){return '<span class="mono">'+h(w.slug)+'</span>';}).join(", ")+'), set by oxagen, the only writer</dd>'+
-   '<dt>Cross-tenant reads</dt><dd>refused by the database itself, not by application code</dd>'+
-   '<dt>Platform catalogs</dt><dd>price books, tool schemas and connector definitions are platform tables, never tenant rows</dd>'+
-   '<dt>Startup guard</dt><dd>the app role may not be a superuser, may not hold <span class="mono">BYPASSRLS</span>, and row-level security may not be off, or the plane refuses to boot</dd></dl></div></div>';
+   '<dt>Rows</dt><dd><span class="mono">org_id</span> on every tenant table · row-level security on · no bypass</dd>'+
+   '<dt>Workspace scoping</dt><dd><span class="mono">ws</span> on every run, frame and record ('+WS.map(function(w){return '<span class="mono">'+h(w.slug)+'</span>';}).join(", ")+')</dd>'+
+   '<dt>Cross-tenant reads</dt><dd>refused by the database</dd>'+
+   '<dt>Platform catalogs</dt><dd>price books, tool schemas and connector definitions</dd>'+
+   '<dt>Startup guard</dt><dd>on · no superuser · no <span class="mono">BYPASSRLS</span> · row-level security enforced</dd></dl></div></div>';
 }
 function orgDigestOnly(){
   var off=WS.filter(function(w){return w.retention==="digest_only";});
   return off.length?'<b>on</b> in '+off.map(function(w){return h(w.slug);}).join(", ")+'. Every run there records a completeness gap'
-   :'<b>off</b> in every workspace. Turning it off is recorded as a completeness gap';
+   :'<b>off</b> in every workspace';
 }
 
 DLG_EXT.plane=function(){
   var v=S.planeView&&S.planeView!=="shared"?S.planeView:"dedicated";
   return {t:"Request a change of data plane",s:ORG.name+" is on "+ORG.dataPlane,w:false,
-   b:'<div class="note" style="margin-bottom:14px">Per-organization data planes make every store switchable. A dedicated plane, and a behind-the-firewall deployment, is a deployment mode rather than a fork.</div>'+
-    '<div class="field"><label for="planeMode">Mode</label><select id="planeMode">'+
+   b:'<div class="field"><label for="planeMode">Mode</label><select id="planeMode">'+
      [["dedicated","dedicated · oxagen cloud"],["firewall","behind your firewall · signed Helm bundle"],["airgap","air-gapped · in-firewall models"]].map(function(x){return '<option'+(x[0]===v?' selected':'')+'>'+h(x[1])+'</option>';}).join("")+'</select></div>'+
     '<div class="field"><label for="planeRegion">Region</label><select id="planeRegion">'+["us-east-1","eu-west-1","ap-southeast-2"].map(function(r){return '<option'+(r===ORG.region?' selected':'')+'>'+r+'</option>';}).join("")+'</select></div>'+
     '<dl class="kv"><dt>Included</dt><dd>the gateway inside your plane, a dedicated database cluster and object store, and your own release key</dd>'+
@@ -7816,8 +7796,7 @@ DLG_EXT.role=function(p){
   return {t:"Change role",s:pp.email,w:false,
    b:'<div class="field"><label>Person</label><input value="'+h(pp.name)+'" disabled aria-label="Person"></div>'+
     '<div class="field"><label for="roleSel">Role</label><select id="roleSel">'+ROLES.filter(function(r){return r.kind==="human";}).map(function(r){return '<option'+(r.id===cur?' selected':'')+'>'+h(r.id)+'</option>';}).join("")+'</select>'+
-    '</div>'+
-    '<div class="note">Role changes are recorded in Audit and count as one governed action. A new role does not widen what this person’s agents may do. An agent can only use the permissions it shares with its operator.</div>',
+    '</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Role changed and recorded in Audit with your name.\')">Change role</button>'};
 };
 DLG_EXT.member=function(p){
@@ -7857,8 +7836,7 @@ function pBilling(){
     "You pay per governed action: a call Oxagen decided, delivered and recorded. The free tier has every governance feature on, an included monthly allowance, thirty days of evidence and three seats.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/work\')">Back to Work</button>');
 
-  return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>Billing</h1>'+
-   '<p>What Anderson Intelligence Corp. pays oxagen.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>Billing</h1></div>'+
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'plan\')">Change plan</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Plan</span><span class="v" style="font-size:19px">'+h(BILLING.plan)+'</span><span class="s">monthly, cancel any time</span></div>'+
@@ -7879,12 +7857,12 @@ function pBilling(){
     '<thead><tr><th>Meter</th><th class="num">This period</th><th>Note</th></tr></thead><tbody>'+
     BILLING.meters.map(function(m){return '<tr><td>'+h(m.m)+'</td><td class="num">'+h(m.v)+'</td>'+
      '<td class="dim" style="font-size:11.5px">'+h(m.note)+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><div class="note">Only governed actions are priced. A governed action is a call oxagen decided, delivered and recorded. Runs, tokens and retained evidence are reported and not priced.</div></div></div>'+
+    '</tbody></table></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Invoices</h3></div><div class="tw"><table>'+
     '<thead><tr><th>Invoice</th><th>Period</th><th class="num">Governed actions</th><th class="num">Amount</th><th>Status</th><th>Paid</th><th></th></tr></thead><tbody>'+
     BILLING.invoices.map(function(i){return '<tr><td class="mono">'+h(i.n)+'</td><td>'+h(i.p)+'</td>'+
      '<td class="num">'+i.runs.toLocaleString()+'</td><td class="num">'+usd(i.amt)+'</td>'+
-     '<td><span class="b b-allowed"><span class="d"></span>'+h(i.st.charAt(0).toUpperCase()+i.st.slice(1))+'</span></td><td>'+(i.st==="open"?'<span class="dim">Not paid</span>':h(i.d))+'</td>'+
+     '<td><span class="b '+(i.st==="open"?'b-approval':'b-allowed')+'"><span class="d"></span>'+h(i.st.charAt(0).toUpperCase()+i.st.slice(1))+'</span></td><td>'+(i.st==="open"?'<span class="dim">Not paid</span>':h(i.d))+'</td>'+
      '<td><a href="#">Open in Stripe ↗</a></td></tr>';}).join("")+
     '</tbody></table></div></div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Price list</h3></div><div class="tw"><table class="narrow"><tbody>'+
@@ -7892,11 +7870,11 @@ function pBilling(){
      ["Invoice billing","Never capped. Overage is invoiced at the contracted rate at period end."],["Evidence retention","13 months included on paid plans, then $0.10 per GB-month"],
      ["Tokens oxagen buys for you","At cost, no markup, capped"],["Enterprise, annual","From $60,000 per year"]]
     .map(function(p){return '<tr><td style="font-size:12.5px">'+h(p[0])+'</td><td class="num mono" style="font-size:11.5px">'+h(p[1])+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">Every plan has every governance feature. Plans differ in evidence retention, seats and the included monthly allowance.</p></div></div>'+
+    '</tbody></table></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Billable units</h3></div><div class="panel-b">'+
-    '<ul class="chain"><li class="on"><span class="h">Priced</span><div>A governed action: a call oxagen decided, delivered and recorded, with its receipt in the chain.</div></li>'+
-    '<li class="on"><span class="h">Reported</span><div>Sealed runs, tokens by class and retained evidence. Reported, never priced.</div></li>'+
-    '<li class="on"><span class="h">Free</span><div>Denials, runs oxagen halted before a model call, and runs of the in-app agent.</div></li></ul></div></div></div></div>';
+    '<ul class="chain"><li class="on"><span class="h">Priced</span><div>Governed actions</div></li>'+
+    '<li class="on"><span class="h">Reported</span><div>Sealed runs, tokens by class, retained evidence</div></li>'+
+    '<li class="on"><span class="h">Free</span><div>Denials, runs oxagen halted before a model call, runs of the in-app agent</div></li></ul></div></div></div></div>';
 }
 
 /* ============================== Audit ============================== */
@@ -8008,8 +7986,8 @@ function auditActorKind(who){
   return "human";
 }
 function auditResult(e){return e.res||(e.ev==="tool_call.denied"?"denied":"allowed");}
-function auditStats(tiles){
-  return '<div class="grid g4" style="margin-bottom:14px">'+tiles.map(function(t){
+function auditStats(tiles,help){
+  return '<div class="grid g4" style="margin-bottom:14px"'+(help?' data-help="'+help+'"':'')+'>'+tiles.map(function(t){
     return '<div class="stat"><span class="k">'+h(t[0])+'</span><span class="v"'+(t[3]?' style="color:var(--st-'+t[3]+')"':'')+'>'+t[1]+'</span><span class="s">'+h(t[2])+'</span></div>';}).join("")+'</div>';
 }
 function auditFacts(rows){
@@ -8025,15 +8003,30 @@ function auditEvent(ev,who,what,sev,ref){AUDIT.unshift({t:auditNow(),ev:ev,who:w
 function auditGo(t){S.tab.audit=t;var hsh="#/"+ORG.slug+"/audit/"+t;if(location.hash!==hsh)location.hash=hsh;render();}
 function auditTabs(t){
   var open=INCIDENTS.filter(function(i){return i.status==="open";}).length;
-  var defs=[["events","Events",AUDIT.length,plural(AUDIT.length,"event")],["incidents","Incidents",open+" open",plural(open,"open incident")+" of "+INCIDENTS.length],
+  var nEv=auditRecent().length;
+  var defs=[["events","Events",nEv,plural(nEv,"event")+" in 30 days"],["incidents","Incidents",open+" open",plural(open,"open incident")+" of "+INCIDENTS.length],
    ["receipts","Receipts",RECEIPTS.length,plural(RECEIPTS.length,"receipt")],["exports","Exports",EXPORTS.length,plural(EXPORTS.length,"export")],["keys","Keys"],
    ["retention","Retention"]];
   return '<div class="tabs" role="tablist">'+defs.map(function(x){
     return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="auditGo(\''+x[0]+'\')">'+x[1]+tabN(x[2]!==undefined?h(x[2]):"",x[3])+'</button>';}).join("")+'</div>';
 }
 
+/* How long ago an event happened, before the mock's now (2026-09-11 09:14 UTC): whole calendar days,
+   and hours. Today's events carry a bare time; older ones carry the date. */
+function auditAge(t){
+  var now=9+14/60, m=/^(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d)/.exec(t), days=0, at=0;
+  if(m){days=Math.round((Date.UTC(2026,8,11)-Date.UTC(+m[1],+m[2]-1,+m[3]))/864e5);at=+m[4]+m[5]/60;}
+  else{m=/^(\d\d):(\d\d)/.exec(t);at=m?+m[1]+m[2]/60:now;}
+  return {days:days,hours:Math.max(0,days*24+now-at)};
+}
+/* calendar days for the two longer ranges, so "Last 30 days" holds every event the 30-day tile counts */
+var AUDIT_RANGES=[["30d","Last 30 days",function(a){return a.days<=30;}],["7d","Last 7 days",function(a){return a.days<=7;}],["48h","Last 48 hours",function(a){return a.hours<=48;}]];
+/* the last 30 days of the record: what the Events tab counts, its tiles count and the CSV export carries */
+function auditRecent(){return AUDIT.filter(function(e){return auditAge(e.t).days<=30;});}
 function auditEvents(){
-  var rows=AUDIT.map(function(e){
+  var actor=S.auditActor||"all", range=S.auditRange||"30d", within=(AUDIT_RANGES.filter(function(r){return r[0]===range;})[0]||AUDIT_RANGES[0])[2];
+  var shown=AUDIT.filter(function(e){return (actor==="all"||auditActorKind(e.who)===actor)&&within(auditAge(e.t));});
+  var rows=shown.map(function(e){
     var res=auditResult(e), kind=auditActorKind(e.who);
     return '<tr><td class="mono dim" style="font-size:11.5px;white-space:nowrap">'+h(e.t)+'</td>'+
      '<td class="tkey">'+h(e.ev)+'</td>'+
@@ -8044,25 +8037,30 @@ function auditEvents(){
      '<td class="mono dim" style="font-size:11px">'+h(e.ref)+'</td></tr>';}).join("");
   /* Every tile counts the rows in the table beneath it, through the same actor classifier
      the table uses, so the strip and the list can never tell different stories. */
-  var svc=AUDIT.filter(function(e){return auditActorKind(e.who)==="service";}).length;
-  var den=AUDIT.filter(function(e){return auditResult(e)==="denied";}).length;
-  return auditStats([["Events · 30 days",AUDIT.length.toLocaleString(),"every IAM decision is recorded, allowed or not"],
-    ["Denied",String(den),"denials are recorded and cost nothing"],
-    ["By a service principal",String(svc),"Terraform, CI, exports, and the audit archive"],
-    ["By an agent",String(AUDIT.filter(function(e){return auditActorKind(e.who)==="agent";}).length),"each one a governed action with a receipt"]])+
-   '<div class="panel"><div class="panel-h"><h3>Control-plane events</h3><span class="muted" style="font-size:12.5px">admin actions, IAM changes, repository links, plane changes, key rotations</span>'+
+  var recent=auditRecent();
+  var svc=recent.filter(function(e){return auditActorKind(e.who)==="service";}).length;
+  var den=recent.filter(function(e){return auditResult(e)==="denied";}).length;
+  var of="of "+plural(recent.length.toLocaleString(),"event");
+  return auditStats([["Events · 30 days",recent.length.toLocaleString(),"allowed and denied"],
+    ["Denied",String(den),of],
+    ["By a service principal",String(svc),of],
+    ["By an agent",String(recent.filter(function(e){return auditActorKind(e.who)==="agent";}).length),of]],"event-tiles")+
+   '<div class="panel"><div class="panel-h"><h3>Control-plane events</h3>'+
    '<div class="sp">'+
-   '<select class="sel-sm" aria-label="Actor" onchange="act(\'Filtering is a mockup here. The API takes actor_kind.\')"><option>All actors</option><option>Humans</option><option>Agents</option><option>Services</option></select>'+
-   '<select class="sel-sm" aria-label="Range" onchange="act(\'Range is a mockup here. The API takes since and until.\')"><option>Last 48 hours</option><option>Last 7 days</option><option>Last 30 days</option></select>'+
+   '<select class="sel-sm" aria-label="Actor" onchange="S.auditActor=this.value;render()">'+[["all","All actors"],["human","Humans"],["agent","Agents"],["service","Services"]].map(function(o){return '<option value="'+o[0]+'"'+(o[0]===actor?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select>'+
+   '<select class="sel-sm" aria-label="Range" onchange="S.auditRange=this.value;render()">'+AUDIT_RANGES.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===range?' selected':'')+'>'+o[1]+'</option>';}).join("")+'</select>'+
    '<button class="btn sm" onclick="openDialog(\'exportevents\')">Export CSV</button></div></div>'+
    '<div class="panel-b" style="border-bottom:1px solid var(--border)"><div class="field" style="margin:0"><input placeholder="Search events, receipts, actors, external ids" aria-label="Search the audit record"></div></div>'+
-   '<div class="tw"><table><thead><tr><th>When</th><th>Event</th><th>Actor</th><th>What</th><th>Result</th><th>Severity</th><th>Reference</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">oxagen writes the record. An agent cannot. A call the harness reported is labeled as such and can never be shown as decided by oxagen.</div></div></div>';
+   (shown.length?'<div class="tw"><table><thead><tr><th>When</th><th>Event</th><th>Actor</th><th>What</th><th>Result</th><th>Severity</th><th>Reference</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+    :'<div class="panel-b"><p class="muted" style="margin:0">No event matches this actor and range.</p></div>')+'</div>';
 }
 
+function incidentStamp(t){var m=/^(\d{4})-(\d\d)-(\d\d) (\d\d):(\d\d)/.exec(t||"");return m?Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5]):0;}
+function incidentSpan(min){min=Math.round(min);var d=Math.floor(min/1440),hr=Math.floor(min%1440/60),mi=min%60;return d?d+"d "+hr+"h":hr?hr+"h "+mi+"m":mi+"m";}
 function auditIncidents(){
   var open=INCIDENTS.filter(function(i){return i.status==="open";});
-  var crit=open.filter(function(i){return i.sev==="critical";})[0];
+  /* the money exception gets the banner; the tiles count every open critical */
+  var crit=open.filter(function(i){return i.kind==="mandate.exception";})[0];
   var rows=INCIDENTS.map(function(i){
     return '<tr class="click" tabindex="0" onclick="openDialog(\'incidentview\',\''+i.id+'\')" onkeydown="if(event.key===\'Enter\')this.click()">'+
      '<td>'+auditBadge(AUD_SEV[i.sev],i.sev)+'</td>'+
@@ -8070,17 +8068,21 @@ function auditIncidents(){
      '<td class="mono dim" style="font-size:11.5px;white-space:nowrap">'+h(i.at)+'</td><td style="font-size:12.5px">'+h(i.by)+'</td>'+
      '<td>'+(i.status==="open"?auditBadge("approval","open"):auditBadge("allowed","resolved"))+(i.closedAt?'<div class="t-sub mono" style="font-size:11px">'+h(i.closedAt)+'</div>':'')+'</td>'+
      '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'incidentview\',\''+i.id+'\')">Open</button>'+
-     (i.status==="open"?'<button class="btn sm primary" onclick="openDialog(\'incidentclose\',\''+i.id+'\')">Resolve</button>':'')+'</td></tr>';}).join("");
-  return auditStats([["Open",String(open.length),crit?"one critical · money moved without a receipt":"none critical",crit?"critical":"approval"],
-    ["Critical open","1","since 08:40 today"],
-    ["Median time to resolve","2h 38m","across 5 resolved incidents"],
-    ["Money moved without a receipt","$18.00 <small>USD</small>","one charge, 2026-09-11, open"]])+
+     (i.status==="open"?'<button class="btn sm" onclick="openDialog(\'incidentclose\',\''+i.id+'\')">Resolve</button>':'')+'</td></tr>';}).join("");
+  var critOpen=open.filter(function(i){return i.sev==="critical";});
+  var resolved=INCIDENTS.filter(function(i){return i.status==="resolved"&&i.closedAt;});
+  var mins=resolved.map(function(i){return (incidentStamp(i.closedAt)-incidentStamp(i.at))/6e4;}).filter(function(n){return n>=0;}).sort(function(a,b){return a-b;});
+  var med=mins.length?(mins.length%2?mins[(mins.length-1)/2]:(mins[mins.length/2-1]+mins[mins.length/2])/2):null;
+  var firstCrit=critOpen.slice().sort(function(a,b){return incidentStamp(a.at)-incidentStamp(b.at);})[0];
+  return auditStats([["Open",String(open.length),critOpen.length?plural(critOpen.length,"critical","critical"):"none critical",critOpen.length?"critical":"approval"],
+    ["Critical open",String(critOpen.length),firstCrit?"since "+firstCrit.at:"none open"],
+    ["Median time to resolve",med==null?"—":incidentSpan(med),"across "+plural(mins.length,"resolved incident")],
+    ["Money moved without a receipt",crit?"$18.00 <small>USD</small>":"$0.00 <small>USD</small>",crit?"one charge, 2026-09-11, open":"none open"]],"incident-tiles")+
    (crit?'<div class="warn" style="margin-bottom:14px"><b>Critical · '+h(crit.id)+' · open.</b> Stripe charge <span class="mono">ch_3Qa8</span>, $18.00 USD, attributable to <span class="mono">con_01K2A9</span>, has no receipt. Money moved that oxagen did not govern. '+
     '<a href="#" onclick="event.preventDefault();openDialog(\'incidentview\',\''+crit.id+'\')">Open the incident</a></div>':'')+
-   '<div class="panel"><div class="panel-h"><h3>Incidents</h3><span class="muted" style="font-size:12.5px">raised by the policy engine, the gateway and the verifier</span>'+
+   '<div class="panel"><div class="panel-h"><h3>Incidents</h3>'+
    '<div class="sp"><button class="btn sm" onclick="openDialog(\'incident\')">Open an incident</button></div></div>'+
-   '<div class="tw"><table><thead><tr><th>Severity</th><th>What happened</th><th>Opened</th><th>Detected by</th><th>State</th><th class="num"></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">Any external transaction attributable to a governed connection with no receipt is an exception at severity critical: money moved that oxagen did not govern. That is the only way this number becomes non-zero.</div></div></div>';
+   '<div class="tw"><table><thead><tr><th>Severity</th><th>What happened</th><th>Opened</th><th>Detected by</th><th>State</th><th class="num"></th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 
 function auditReceipts(){
@@ -8093,35 +8095,32 @@ function auditReceipts(){
      '<td>'+toolCell(r.tool,{sz:"sm"})+'</td><td>'+auditBadge(AUD_DEC[r.decision]||"q",AUD_DEC_LABEL[r.decision]||r.decision)+'</td>'+
      '<td class="num mono" style="font-size:12px">'+h(r.amount)+'</td><td class="mono" style="font-size:11.5px">'+h(r.effect)+'</td><td>'+tierBadge(r.tier)+'</td></tr>';}).join("");
   var chips=["stripe","harness","observe","deny","a-intel.finops.invoice-bot","pi_3QaL8f2Xk"];
-  return '<div class="panel"><div class="panel-h"><h3>Receipt search</h3><span class="muted" style="font-size:12.5px">One signed record per tool call</span>'+
-   '<div class="sp">'+auditStore("frames in the database, bodies in object storage")+'</div></div>'+
+  return '<div class="panel"><div class="panel-h"><h3>Receipt search</h3></div>'+
    '<div class="panel-b" style="border-bottom:1px solid var(--border)"><div class="row"><div class="field" style="margin:0;flex:1;min-width:200px">'+
    '<input id="rq" value="'+h(S.rq||"")+'" placeholder="agent key, tool, external effect id, call digest, receipt id" aria-label="Search receipts" onkeydown="if(event.key===\'Enter\'){S.rq=this.value;render();}"></div>'+
    '<button class="btn" onclick="S.rq=el(\'rq\').value;render()">Search</button></div>'+
    '<div class="chips">'+chips.map(function(c){return '<button class="btn sm'+((S.rq||"")===c?' sel':'')+'" onclick="S.rq=\''+c+'\';render()">'+h(c)+'</button>';}).join("")+
    (q?'<button class="btn sm ghost" onclick="S.rq=\'\';render()">clear</button>':'')+'</div></div>'+
    (hits.length?'<div class="tw"><table><thead><tr><th>Receipt</th><th>When</th><th>Agent and operator</th><th>Tool version</th><th>Decision</th><th class="num">Amount</th><th>External effect</th><th>Tier</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
-    :emptyState("No receipt matches “"+(S.rq||"")+"”","Receipts are searchable by agent key, tool version, external effect id, call digest and approver. A denied call has a receipt too. It records the denial, and nothing was dispatched.",'<button class="btn" onclick="S.rq=\'\';render()">Clear the search</button>'))+
-   '<div class="panel-b"><div class="note">'+hits.length+' of '+plural(RECEIPTS.length,"receipt")+' shown. Receipts for harness-reported calls say <b>Recorded</b>. Calls routed through oxagen say <b>Decided by oxagen</b>.</div></div></div>';
+    :emptyState("No receipt matches “"+(S.rq||"")+"”","Search by agent key, tool version, external effect id, call digest or approver.",'<button class="btn" onclick="S.rq=\'\';render()">Clear the search</button>'))+
+   '<div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">'+hits.length+' of '+plural(RECEIPTS.length,"receipt")+' shown</p></div></div>';
 }
 
 function auditExports(){
   S.verified=S.verified||{};
   var cards=EXPORTS.map(function(x){
     var ready=x.st==="ready";
-    return '<div class="panel"><div class="panel-h"><h3 style="font-size:13px">'+h(x.what)+'</h3>'+(ready?auditBadge("allowed","Ready"):auditBadge("approval","Building…"))+
+    return '<div class="panel" data-help="export"><div class="panel-h"><h3 style="font-size:13px">'+h(x.what)+'</h3>'+(ready?auditBadge("allowed","Ready"):x.st==="expired"?auditBadge("q","Expired"):auditBadge("approval","Building…"))+
      '<div class="sp"><button class="btn sm" '+(ready?'onclick="S.verified[\''+x.id+'\']=true;render()"':'disabled')+'>Verify bundle</button>'+
-     '<button class="btn sm ghost" '+(ready?'onclick="act(\'In the product this downloads '+x.id+' as a signed archive with its verifier. A mockup writes nothing to disk.\')"':'disabled')+'>Download</button></div></div>'+
+     '<button class="btn sm ghost" '+(ready?'onclick="act(\'Downloading '+x.id+' with its verifier.\')"':'disabled')+'>Download</button></div></div>'+
      '<div class="panel-b">'+auditFacts([["Export id",x.id,1],["Range",x.range],["Contents",x.runs],["Size",x.size],["Created",x.at+" by "+x.by],["Signature",x.sig==="pending"?"Signature pending":x.sig,x.sig!=="pending"],["Key ids",x.keys,1]])+
      (S.verified[x.id]?'<pre style="margin-top:12px">$ ./oxagen-verify --bundle '+h(x.id)+' --release-key rel-2026-03\n  merkle roots        recomputed and matched\n  seal attestations   signatures verified\n  chain continuity    no gaps, no reordering\n  <span class="s">OK</span>  internally consistent and signed</pre>':'')+'</div></div>';}).join("");
   var kinds=["run.sealed","approval.requested","tool_call.denied","kill_switch.flipped","mandate.exception"];
-  return '<div class="callout" style="margin-bottom:14px">An export is a verifiable bundle: archive segments, attestations, key ids, and a verifier script. The segment was written once, at seal time, and holds the same bytes the graph indexed. A customer’s auditor checks it offline, without trusting oxagen or the worker’s harness.</div>'+
-   '<div class="grid g2">'+cards+'</div>'+
-   '<div class="grid g2" style="margin-top:14px"><div class="panel"><div class="panel-h"><h3>Verifier</h3><span style="margin-left:auto">'+auditStore("ships inside every bundle")+'</span></div><div class="panel-b">'+
+  return '<div class="grid g2">'+cards+'</div>'+
+   '<div class="grid g2" style="margin-top:14px"><div class="panel"><div class="panel-h"><h3>Verifier</h3></div><div class="panel-b">'+
    '<pre>$ tar xf exp_01K4Q7M1.tar.zst &amp;&amp; cd exp_01K4Q7M1\n$ ./oxagen-verify --bundle . --release-key rel-2026-03\n\n  manifest            31 segments, 188,440 frame envelopes (NDJSON)\n  merkle roots        31 / 31 recomputed and matched\n  seal attestations   962 / 962 signatures verified ('+h(ORG.attester)+', key_ox_aintel_2026Q1)\n  chain continuity    no gaps, no reordering\n  key ids present     kek_aintel_2026Q2, kek_aintel_2026Q3\n  tiers               harness 953 · observe 9\n\n  <span class="s">OK</span>  the bundle is internally consistent and signed by oxagen release key rel-2026-03</pre>'+
-   '<div class="note" style="margin-top:12px">The verifier runs offline and needs no oxagen service. It recomputes every Merkle root and checks every seal signature against the published key, so an auditor never has to trust oxagen’s word for the chain.</div></div></div>'+
+   '</div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Outbound events</h3><span class="b b-q" style="margin-left:auto">Webhook: security-feed</span></div><div class="panel-b">'+
-   '<p class="muted" style="font-size:12.5px;margin-top:0">Subscriptions name the event kinds; only those are emitted and everything else never leaves. Payloads carry ids and a link to the run and frame, never raw prompt or tool bodies.</p>'+
    '<div class="row">'+kinds.map(function(e){return '<span class="b b-q mono" style="font-size:10.5px">'+h(e)+'</span>';}).join(SEP)+'</div>'+
    '<div class="hr"></div><dl class="kv"><dt>Dead-letter view</dt><dd>0 undelivered</dd><dt>Delivery</dt><dd>signed webhook, HMAC with a rotating secret, ordered per run, at-least-once with backoff</dd></dl></div></div></div>';
 }
@@ -8135,28 +8134,26 @@ function auditKeys(){
      '<td class="mono dim" style="font-size:11.5px;white-space:nowrap">'+h(k.from)+'</td><td class="mono dim" style="font-size:11.5px;white-space:nowrap">'+h(k.to)+'</td>'+
      '<td>'+auditBadge(st[k.st][0],st[k.st][1])+'</td><td style="font-size:12px;max-width:28ch">'+h(k.covers)+'</td>'+
      '<td class="num">'+(k===kek?'<button class="btn sm" onclick="openDialog(\'rotatekek\')">Rotate</button>':'')+'</td></tr>';}).join("");
-  return '<div class="panel"><div class="panel-h"><h3>Keys</h3><span class="muted" style="font-size:12.5px">one key-encryption key per organization; data-encryption keys per object and per subject</span>'+
+  return '<div class="panel"><div class="panel-h"><h3>Keys</h3>'+
    '<div class="sp"><button class="btn sm" onclick="openDialog(\'rotatekek\')">Rotate KEK</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Key</th><th>Algorithm</th><th class="num">Gen</th><th>Valid from</th><th>Valid to</th><th>State</th><th>What it covers</th><th class="num"></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note" style="margin-bottom:12px">Rotation does not rewrite history. A retiring generation stays valid for decryption until every object it wrapped has been re-wrapped; a receipt keeps citing the signing generation it was signed under, so a four-month-old receipt still verifies after a rotation. Key ids and validity windows are published per organization, so a customer can verify an export offline years later.</div>'+
-   '<div style="max-width:440px"><div class="row" style="justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px"><span>Re-wrap kek_aintel_2026Q2 → '+h(kek?kek.id:"kek_aintel_2026Q3")+'</span><span class="mono">61% · 866k of 1.42M objects</span></div><div class="bar"><i class="hold" style="width:61%"></i></div></div></div></div>';
+   '<div class="panel-b"><div style="max-width:440px"><div class="row" style="justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px"><span>Re-wrap kek_aintel_2026Q2 → '+h(kek?kek.id:"kek_aintel_2026Q3")+'</span><span class="mono">61% · 866k of 1.42M objects</span></div><div class="bar"><i class="hold" style="width:61%"></i></div></div></div></div>';
 }
 
 function auditRetention(){
   var tiers=RETENTION_TIERS.map(function(t){
     return '<tr><td class="t-main" style="font-size:12.5px">'+h(t[0])+'</td><td class="mono" style="font-size:11.5px">'+h(t[1])+'</td>'+
      '<td style="font-size:12px;max-width:38ch">'+h(t[2])+'</td><td class="mono" style="font-size:11.5px">'+h(t[3])+'</td><td class="num mono">'+h(t[4])+'</td></tr>';}).join("");
-  return '<div class="panel"><div class="panel-h"><h3>Retention</h3><span class="muted" style="font-size:12.5px">Retention policy for this organization</span>'+
+  return '<div class="panel"><div class="panel-h"><h3>Retention</h3>'+
    '<div class="sp">'+auditStore("organization policy")+'<button class="btn sm" onclick="openDialog(\'retention\')">Edit policy</button></div></div>'+
-   '<div class="panel-b">'+auditFacts([     ["Body retention","7 years from the seal. Organizations may set a longer period."],
-     ["Hot window","13 months, then frame rows are compacted into the segment. Bodies are never moved."],
-     ["A compacted run","reads from the segment, not the hot table. Same bytes."],
+   '<div class="panel-b">'+auditFacts([["Body retention","7 years from the seal"],
+     ["Hot window","13 months, then frame rows are compacted into the segment"],
      ["Per-workspace override",(function(){var m=WS.map(function(w){return w.retention||"content_exact";});return m.every(function(x){return x===m[0];})?keyText(m[0])+" (all workspaces)":WS.map(function(w,i){return w.name+": "+keyText(m[i]);}).join(" · ");})()],
      ["Storage price",retainedGbText()+". Included for 13 months, then $0.10 per GB-month (about "+usd((Number(BILLING.retainedGb)||0)*0.1)+" a month)."]])+'</div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Archive tiers</h3><span style="margin-left:auto">'+auditStore("three stores, one policy")+'</span></div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Archive tiers</h3></div>'+
    '<div class="tw"><table><thead><tr><th>Tier</th><th>Where</th><th>What it holds</th><th>Retention</th><th class="num">Held today</th></tr></thead><tbody>'+tiers+'</tbody></table></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Redaction</h3><span class="muted" style="font-size:12.5px">Runs before each write</span></div>'+
-   '<div class="panel-b"><div class="note">Redaction detectors run before a body is written, so personal data does not enter the archive in the first place. What is written once stays written: the archive has no edit path, which is what makes an export verifiable.</div></div></div>';
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Redaction</h3></div>'+
+   '<div class="panel-b">'+auditFacts([["Detectors","run before each body is written"],["Archive edit path","none"]])+'</div></div>';
 }
 
 function pAudit(){
@@ -8170,7 +8167,6 @@ function pAudit(){
   var tabs={events:auditEvents,incidents:auditIncidents,receipts:auditReceipts,exports:auditExports,keys:auditKeys,retention:auditRetention};
   var body=(tabs[t]||auditEvents)();
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>Audit</h1>'+
-   '<p>What happened, who allowed it, under what authority, and what it cost.</p>'+
    '<p class="mono dim" style="font-size:11.5px;margin-top:6px">Retention: control-plane events 7 years · run ledger forever · bodies 7 years (default)</p></div>'+
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'newexport\')">Export evidence bundle</button></div></div>'+auditTabs(t)+body;
 }
@@ -8181,7 +8177,7 @@ function receiptDlgSub(){var r=S.dlg==="receipt"?receiptById(S.dlgArg):null;retu
 function receiptDlgBody(){
   if(S.dlg!=="receipt") return '';
   var r=receiptById(S.dlgArg); if(!r) return '<div class="note">No receipt selected.</div>';
-  var tier=r.tier==="observe"?'<span class="b b-q"><span class="d"></span>observe · recorded only</span>':auditBadge("allowed","harness · routed through oxagen");
+  var tier=tierBadge(r.tier);
   function g(t,rows){return '<div class="rg"><h4>'+t+'</h4><div class="rb">'+auditFacts(rows)+'</div></div>';}
   return '<div class="row" style="margin-bottom:14px">'+auditBadge(AUD_DEC[r.decision]||"q",AUD_DEC_LABEL[r.decision]||r.decision)+tier+
    (r.amount!=="—"?'<span class="b b-approval mono">'+h(r.amount)+'</span>':'')+auditStore(r.tool)+auditStore("workspace "+r.ws)+'</div>'+
@@ -8190,9 +8186,8 @@ function receiptDlgBody(){
 function receiptDlgFoot(){
   var r=S.dlg==="receipt"?receiptById(S.dlgArg):null;
   var open=r&&run(r.runId)?'<button class="btn primary" onclick="closeDialog();go(\'#/'+ORG.slug+'/'+r.ws+'/runs/'+r.runId+'\')">Open the run</button>':'';
-  return '<span class="grow">Signed by the gateway. The frame hash is the receipt’s identity; the export carries the same bytes.</span>'+
-   '<button class="btn" onclick="closeDialog()">Close</button>'+
-   '<button class="btn" onclick="closeDialog();act(\'In the product this exports the receipt as signed JSON. A mockup writes nothing to disk.\')">Export receipt</button>'+open;
+  return '<button class="btn" onclick="closeDialog()">Close</button>'+
+   '<button class="btn" onclick="closeDialog();act(\'Downloading '+(r?h(r.id):'the receipt')+' as signed JSON.\')">Export receipt</button>'+open;
 }
 function incidentDlgTitle(){var i=S.dlg==="incidentview"?incidentById(S.dlgArg):null;return i?i.title:"Incident";}
 function incidentDlgSub(){var i=S.dlg==="incidentview"?incidentById(S.dlgArg):null;return i?i.id+" · "+i.kind+" · opened "+i.at:"";}
@@ -8208,7 +8203,7 @@ function incidentDlgBody(){
 function incidentDlgFoot(){
   var i=S.dlg==="incidentview"?incidentById(S.dlgArg):null;
   return '<button class="btn" onclick="closeDialog()">Close</button>'+
-   '<button class="btn" onclick="closeDialog();act(\'In the product this exports the incident with its frames. A mockup writes nothing to disk.\')">Export incident</button>'+
+   '<button class="btn" onclick="closeDialog();act(\'Downloading '+(i?h(i.id):'the incident')+' with its frames.\')">Export incident</button>'+
    (i&&i.status==="open"?'<button class="btn"'+(i.owner===me().name?' disabled title="Already yours"':'')+' onclick="incidentAssign(\''+h(i.id)+'\')">Assign to me</button>'+
      '<button class="btn primary" onclick="openDialog(\'incidentclose\',\''+h(i.id)+'\')">Resolve</button>':'');
 }
@@ -8216,17 +8211,19 @@ function queueExport(){
   var scope=el("ex-scope")?el("ex-scope").value:"core-platform · all runs";
   var id=auditUlid("exp");
   EXPORTS.unshift({id:id,what:"Evidence bundle: "+scope,range:(el("ex-from")?el("ex-from").value:"2026-08-01")+" → "+(el("ex-to")?el("ex-to").value:"2026-08-31"),
-    runs:"counting segments…",size:"—",at:"2026-09-11 "+auditNow().slice(0,5),by:"Priya Natarajan",st:"building",sig:"pending",keys:"kek_aintel_2026Q3"});
-  auditEvent("export.created","Priya Natarajan",id+" · "+scope,"info",id);
-  closeDialog(); auditGo("exports"); act("Export queued as "+id+". The bundle is signed when it finishes and includes the verifier script.");
+    runs:"counting segments…",size:"—",at:"2026-09-11 "+auditNow().slice(0,5),by:me().name,st:"building",sig:"pending",keys:"kek_aintel_2026Q3"});
+  auditEvent("export.created",me().name,id+" · "+scope,"info",id);
+  closeDialog(); auditGo("exports"); act("Export queued as "+id+".");
 }
 function rotateKek(){
   var cur=null; for(var i=0;i<KEYS.length;i++){if(KEYS[i].st==="active"&&/^kek_/.test(KEYS[i].id))cur=KEYS[i];}
   if(cur){cur.st="retiring";cur.to="2026-09-11 "+auditNow().slice(0,5);cur.covers="decrypt only (re-wrap 0% done)";}
   var gen=cur?String(Number(cur.gen)+1):"4";
-  KEYS.unshift({name:"KEK · organization",id:"kek_aintel_2026Q4",alg:"AES-256-GCM (KMS)",gen:gen,from:"2026-09-11 "+auditNow().slice(0,5),to:"2027-03-31",st:"active",covers:"all new bodies, segments, subject keys"});
-  auditEvent("key.rotated","Priya Natarajan","organization key-encryption key · kek_aintel_2026Q4 · gen "+gen,"info","kek_aintel_2026Q4");
-  closeDialog(); auditGo("keys"); act("Rotated. gen "+gen+" is active for new writes; the old generation decrypts until re-wrap completes. Recorded as key.rotated.");
+  /* the next quarter after the active generation's, so a second rotation never repeats an id */
+  var q=/(\d{4})Q(\d)$/.exec(cur?cur.id:"kek_aintel_2026Q3"), y=+q[1]+(q[2]==="4"?1:0), nid="kek_aintel_"+y+"Q"+(q[2]==="4"?1:+q[2]+1);
+  KEYS.unshift({name:"KEK · organization",id:nid,alg:"AES-256-GCM (KMS)",gen:gen,from:"2026-09-11 "+auditNow().slice(0,5),to:"2027-03-31",st:"active",covers:"all new bodies, segments, subject keys"});
+  auditEvent("key.rotated",me().name,"organization key-encryption key · "+nid+" · gen "+gen,"info",nid);
+  closeDialog(); auditGo("keys"); act("Rotated. Generation "+gen+" is active for new writes. Recorded as key.rotated.");
 }
 /* ============================== dialogs ============================== */
 /* "wrap" was a dialog; it is now the Register Agent gate, so every caller lands on the same screens. */
@@ -9540,18 +9537,17 @@ function dialog(){
    invite:{t:"Invite a person",w:false,b:
      '<div class="field"><label for="iv-email">Email</label><input id="iv-email" value="rowan@a-intel.example"></div>'+
      '<div class="field"><label for="iv-role">Role</label><select id="iv-role"><option>workspace.member · core-platform</option><option>workspace.owner · core-platform</option><option>org.auditor</option><option>org.billing</option><option>org.owner</option></select></div>'+
-     '<div class="note">An invitation is the only way into the organization. It expires in seven days, and accepting it requires a verified email and two-factor.</div>',
+     '<div class="note">It expires in seven days. Accepting it takes a verified email and two-factor.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="inviteSend()">Send the invitation</button>'},
    newws:{t:"Create a workspace",w:false,b:
      '<div class="field"><label for="nw-name">Name</label><input id="nw-name" value="Warehouse ops"></div>'+
      '<div class="field"><label for="nw-ns">Namespace</label><input id="nw-ns" value="wh" maxlength="6"><div class="hint">2–6 characters, immutable, and part of every agent key in the workspace: <span class="mono">'+h(ORG.slug)+'.data.&lt;agent&gt;</span>.</div></div>'+
      '<div class="field"><label for="nw-main">Main repository</label><select id="nw-main"><option>a-intel/warehouse</option><option>a-intel/data-platform</option></select>'+
-     '<div class="hint">Required at creation. A workspace without a main repo cannot exist.</div></div>'+
-     '<div class="field"><label for="nw-branch">Production branch</label><select id="nw-branch"><option value="main">main (GitHub’s default, suggested)</option><option value="release">release</option><option value="production">production</option></select>'+
-     '<div class="hint">The only branch whose commits update the code graph. If GitHub’s default changes later you are prompted; the setting never moves on its own.</div></div>'+
+     '<div class="hint">Required at creation.</div></div>'+
+     '<div class="field"><label for="nw-branch">Production branch</label><select id="nw-branch"><option value="main">main (GitHub’s default, suggested)</option><option value="release">release</option><option value="production">production</option></select></div>'+
      '<div class="field"><label for="nw-gov">Governance mode</label><select id="nw-gov"><option value="team">team: a code-owner review is required</option><option value="solo">solo: the author may merge</option><option value="regulated">regulated: a named approver and a ledger entry</option></select></div>'+
      '<div class="field"><label for="nw-ret">Retention mode</label><select id="nw-ret"><option value="content_exact">Exact content: keep prompts and tool bodies in full</option><option value="digest_only">Digest only: recorded as a completeness gap</option></select></div>'+
-     '<div class="note">Until the GitHub App links the main repo the workspace is provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</div>',
+     '',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsCreate()">Create</button>'},
    schema:schemaDlg(),
    toolcats:{t:"Tool categories",w:true,b:toolCatsBody(),f:'<span class="grow"></span><button class="btn" onclick="closeDialog()">Close</button>'},
@@ -9576,53 +9572,47 @@ function dialog(){
         (ORG_KEY.source===x[0]?'<span class="b b-allowed">current</span>':'')+
         (x[0]==="platform_minted"?'<span class="b b-proven">reconciles per organization</span>':'')+
         '</span><span class="d"><b>'+h(x[1])+'.</b> '+h(x[2])+'</span></div>';}).join("")+'</div>'+
-     '<div class="note">Pick a source on the panel behind this dialog; it carries the key field and the lifecycle. Every key is stored enveloped, tested before save, never returned, and every read is audited. On a customer key your tokens are reported and billed at zero; on the other two they are billed to this organization.</div>',
+     '',
      f:'<button class="btn" onclick="closeDialog()">Close</button>'},
    apikey:{t:"Create an API key",w:false,b:
-     '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Shown once, at creation, and never again.</p>'+
+     '<p class="muted" style="font-size:12.5px;margin:0 0 12px">The secret is shown once, at creation.</p>'+
      '<div class="field"><label for="ak-name">Name</label><input id="ak-name" value="Warehouse nightly export"></div>'+
-     '<div class="field"><label for="ak-grants">Grants</label><select id="ak-grants"><option>audit.read, receipt.read, export.read</option><option>cost.read, run.read</option><option>workspace.write, agent.write, grant.write</option></select>'+
-     '<div class="hint">A key can reach exactly what a person with those grants can, in the API, MCP, the CLI and these screens.</div></div>'+
-     '<div class="field"><label for="ak-exp">Expires</label><select id="ak-exp"><option value="2026-12-10">90 days</option><option value="2027-03-10">180 days</option><option value="2027-09-11">1 year</option></select></div>'+
-     '<div class="note">A key carries grants, not roles. It becomes a service principal and every call it makes is audited against it.</div>',
+     '<div class="field"><label for="ak-grants">Grants</label><select id="ak-grants"><option>audit.read, receipt.read, export.read</option><option>cost.read, run.read</option><option>workspace.write, agent.write, grant.write</option></select></div>'+
+     '<div class="field"><label for="ak-exp">Expires</label><select id="ak-exp"><option value="2026-12-10">90 days</option><option value="2027-03-10">180 days</option><option value="2027-09-11">1 year</option></select></div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="apikeyCreate()">Create key</button>'},
    rotatekey:{t:"Rotate this key",w:false,b:
      '<p style="margin:0 0 10px"><b>'+h(kk.name)+'</b> <span class="mono dim" style="font-size:11.5px">'+h(kk.key)+' · '+h(kk.principal)+'</span></p>'+
-     '<div class="note">Rotation issues a new secret and keeps the old one valid for 24 hours so callers can move. Both are audited.</div>',
+     '<div class="note">Rotation issues a new secret and keeps the old one valid for 24 hours.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="apikeyRotate('+kki+')">Rotate</button>'},
    revokekey:{t:"Revoke this key",w:false,b:
      '<p style="margin:0 0 10px"><b>'+h(kk.name)+'</b> <span class="mono dim" style="font-size:11.5px">'+h(kk.key)+' · '+h(kk.principal)+'</span></p>'+
-     '<div class="warn">Revocation ends the service principal’s access at the next call. Runs it started keep their records.</div>',
+     '<div class="warn">Revocation ends the service principal’s access at its next call.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="apikeyRevoke('+kki+')">Revoke</button>'},
    plan:{t:"Change plan",w:false,b:
-     '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team (usage-based, monthly, cancel any time)</option><option>Enterprise (annual, committed use at 20–30% off, from $60,000)</option></select></div>'+
-     '<div class="note">The free tier is in every plan: an included monthly allowance of governed actions and every governance feature on. Enterprise adds a dedicated data plane or behind-the-firewall deployment, and support with an SLA.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Plan change staged in Stripe. Stripe holds the plan and the invoices; oxagen counts the governed actions.\')">Change plan</button>'},
+     '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team (usage-based, monthly, cancel any time)</option><option>Enterprise (annual, committed use at 20–30% off, from $60,000)</option></select></div>',
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Plan change staged in Stripe.\')">Change plan</button>'},
    /* ---- audit dialogs (W10 port) — bodies are built by guarded functions in the Audit section ---- */
    receipt:{t:receiptDlgTitle(),s:receiptDlgSub(),w:true,b:receiptDlgBody(),f:receiptDlgFoot()},
    incidentview:{t:incidentDlgTitle(),s:incidentDlgSub(),w:true,b:incidentDlgBody(),f:incidentDlgFoot()},
-   exportevents:{t:"Export events",s:"CSV · the same rows the API and MCP return",w:false,b:
-     '<div class="note">'+plural(AUDIT.length.toLocaleString(),"event")+' in the last 30 days, with actor, actor kind, action, target, result, severity and event id. Nothing in a control-plane event is a prompt or tool body, so this export carries no redaction step.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'In the product this downloads events.csv. A mockup writes nothing to disk.\')">Download CSV</button>'},
-   newexport:{t:"Export an evidence bundle",s:"segments, attestations, key ids, and the verifier",w:false,b:
+   exportevents:{t:"Export events",s:"CSV",w:false,b:
+     '<div class="note">'+plural(auditRecent().length.toLocaleString(),"event")+' in the last 30 days, with actor, actor kind, action, target, result, severity and event id.</div>',
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Downloading events.csv.\')">Download CSV</button>'},
+   newexport:{t:"Export an evidence bundle",w:false,b:
      '<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>core-platform · all runs</option><option>finops · all runs</option><option>financial tool calls only · all workspaces</option><option>agent a-intel.finops.invoice-bot · all runs</option></select></div>'+
      '<div class="grid g2" style="gap:12px"><div class="field"><label>From</label><input id="ex-from" value="2026-08-01" aria-label="From"></div><div class="field"><label>To</label><input id="ex-to" value="2026-08-31" aria-label="To"></div></div>'+
-     '<div class="field"><label>Format</label><select aria-label="Format"><option>Signed bundle (segments + verifier)</option><option>Receipts as CSV</option><option>Receipts as JSON</option></select></div>'+
-     '<div class="callout">Runs as <span class="mono">export_data</span>, a governed action with third-party egress. The bundle carries the verifier, so whoever receives it can check it without oxagen.</div>',
+     '<div class="field"><label>Format</label><select aria-label="Format"><option>Signed bundle (segments + verifier)</option><option>Receipts as CSV</option><option>Receipts as JSON</option></select></div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="queueExport()">Build bundle</button>'},
-   rotatekek:{t:"Rotate the key-encryption key",s:"a new generation, nothing rewritten",w:false,b:
+   rotatekek:{t:"Rotate the key-encryption key",w:false,b:
      '<dl class="kv"><dt>New generation</dt><dd>kek_aintel_2026Q4 in <span class="mono">arn:aws:kms:us-east-1:4471…:key/9c2f</span></dd>'+
      '<dt>Takes effect</dt><dd>immediately for new bodies, segments and subject keys</dd>'+
      '<dt>Old generation</dt><dd>kek_aintel_2026Q3 becomes <span class="b b-approval">retiring</span> and stays valid for decryption until re-wrap completes</dd>'+
      '<dt>Re-wrap</dt><dd>runs in the background, roughly 6 days at current volume</dd>'+
-     '<dt>Receipts</dt><dd>keep citing the signing generation they were signed under, so an old receipt still verifies</dd>'+
      '<dt>Recorded as</dt><dd><span class="mono">key.rotated</span> with who, when and the generation</dd></dl>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="rotateKek()">Rotate</button>'},
    retention:{t:"Retention policy",s:"organization-wide",w:false,b:
      '<div class="field"><label>Body retention</label><select aria-label="Body retention"><option>7 years (default)</option><option>10 years</option><option>indefinite</option></select></div>'+
-     '<div class="field"><label>Frame hot window</label><select aria-label="Frame hot window"><option>13 months (default)</option><option>6 months</option><option>24 months</option></select></div>'+
-     '<div class="callout">Shortening the hot window compacts frame rows sooner and saves database cost. It does not touch bodies, and a compacted run reads from the segment, byte for byte.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Policy saved. Recorded as retention.policy_changed; it applies to new seals from now.\')">Save policy</button>'},
+     '<div class="field"><label>Frame hot window</label><select aria-label="Frame hot window"><option>13 months (default)</option><option>6 months</option><option>24 months</option></select></div>',
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="auditEvent(\'retention.policy_changed\',me().name,\'organization retention policy\',\'info\',\'retention\');closeDialog();act(\'Policy saved. Recorded as retention.policy_changed. It applies to new seals from now.\')">Save policy</button>'},
    evidence:evidenceDlg(),
    fix:fixDlg(),
   };
@@ -10012,9 +10002,8 @@ function rolesBody(){
       (locked?'':'<span class="vh">, </span><button class="btn sm danger"'+(busy?' disabled title="Reassign '+plural(n.total,"holder")+' first"':'')+' onclick="openDialog(\'roledel\',\''+r.id+'\')">Delete</button>')+'</td></tr>';
   }).join("");
   return '<div class="panel"><div class="panel-h"><h3>Roles</h3>'+
-   '<div class="sp"><button class="btn sm primary" onclick="roleNew()">Create role</button></div></div>'+
-   '<div class="tw"><table><thead><tr><th>Role</th><th>Kind</th><th>Scope</th><th>Permissions</th><th>Held by</th><th>Origin</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">An agent can only do what its roles, its operator’s permissions, the policy and the kill switches all allow.</div></div></div>';
+   '<div class="sp"><button class="btn sm" onclick="roleNew()">Create role</button></div></div>'+
+   '<div class="tw"><table><thead><tr><th>Role</th><th>Kind</th><th>Scope</th><th>Permissions</th><th>Held by</th><th>Origin</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 function roleNew(){S.roleEdit={id:"",kind:"agent",scope:"workspace",desc:"",perms:{},isNew:true};openDialog("roleedit");}
 function roleOpen(id){var r=roleById(id);if(!r)return;var p={};r.perms.forEach(function(x){p[x]=true;});S.roleEdit={id:r.id,orig:r.id,kind:r.kind,scope:r.scope,desc:r.desc,perms:p,builtin:r.builtin,isNew:false};openDialog("roleedit");}
@@ -10029,14 +10018,15 @@ function roleSave(){
   if(!id){act("A role needs a name.");return;}
   if(!perms.length){act("A role with no permissions grants nothing. Pick at least one.");return;}
   if(d.isNew){ if(roleById(id)){act("A role named "+id+" already exists.");return;}
-    ROLES.push({id:id,kind:kind,scope:scope,desc:desc,perms:perms,builtin:false,by:PEOPLE.marcus.name,at:"2026-09-11"});
+    ROLES.push({id:id,kind:kind,scope:scope,desc:desc,perms:perms,builtin:false,by:me().name,at:"2026-09-11"});
+    auditEvent("role.created",me().name,id+" · "+perms.join(", "),"info",id);
     closeDialog(); act("Role "+id+" created and recorded in Audit with your name.","gold");
-  } else { var r=roleById(d.orig); if(r){r.desc=desc;r.kind=kind;r.scope=scope;r.perms=perms;}
+  } else { var r=roleById(d.orig); if(r){r.desc=desc;r.kind=kind;r.scope=scope;r.perms=perms;auditEvent("role.updated",me().name,d.orig+" · "+perms.join(", "),"info",d.orig);}
     closeDialog(); act("Role "+d.orig+" updated. Each holder gets the new permissions at its next call."); }
 }
 function roleDeleteConfirm(id){
   var i=-1;ROLES.forEach(function(r,ix){if(r.id===id)i=ix;});
-  if(i<0)return; ROLES.splice(i,1); closeDialog(); act("Role "+id+" deleted. The audit record keeps its definition and every grant it ever carried.");
+  if(i<0)return; ROLES.splice(i,1); auditEvent("role.deleted",me().name,id,"info",id); closeDialog(); act("Role "+id+" deleted. The audit record keeps its definition and every grant it ever carried.");
 }
 function roleEditDlg(){
   var d=S.roleEdit; if(!d) return {t:"Role",w:true,b:"",f:""};
@@ -10052,8 +10042,7 @@ function roleEditDlg(){
    '<div class="row" style="justify-content:space-between;margin-bottom:4px"><label style="font-size:12px;font-weight:600;color:var(--muted)">Permissions · <span id="rolePermN">'+n+'</span> selected</label>'+(ro?'<span class="b b-q">built-in · read-only</span>':'')+'</div>'+
    '<div class="perm-grid">'+PERMS.map(function(g){return '<div class="pg"><div class="h">'+h(g[0])+'</div>'+g[1].map(function(p){
      return '<label class="check"><input type="checkbox"'+(d.perms[p]?' checked':'')+(ro?' disabled':'')+' onchange="rolePerm(\''+p+'\',this.checked)"><span class="n mono">'+h(p)+'</span></label>';}).join("")+'</div>';}).join("")+'</div>'+
-   (holders&&holders.total?'<div class="banner" style="margin-bottom:12px"><span>Held by '+holders.total+' principal'+(holders.total>1?'s':'')+'. Saving changes their effective permission at the next call. Nothing in flight is cut.</span></div>':'')+
-   '<div class="note">Saving is a governed action: it passes IAM, writes an audit record, and bills as one action. <span class="mono">org.*</span> is the only wildcard and only <span class="mono">org.owner</span> carries it.</div>';
+   (holders&&holders.total?'<div class="banner" style="margin-bottom:12px"><span>Held by '+holders.total+' principal'+(holders.total>1?'s':'')+'. Saving changes their effective permission at the next call.</span></div>':'');
   var f='<button class="btn" onclick="closeDialog()">'+(ro?'Close':'Cancel')+'</button>'+
    (ro?'<button class="btn primary" onclick="roleDup(\''+h(d.orig)+'\')">Duplicate as custom</button>':'<button class="btn primary" onclick="roleSave()">'+(d.isNew?'Create role':'Save changes')+'</button>');
   return {t:d.isNew?"Create a role":(ro?"Built-in role":"Edit role"),s:d.isNew?"":d.orig,w:true,b:b,f:f};
@@ -10062,8 +10051,8 @@ function roleDelDlg(){
   var r=S.dlg==="roledel"?roleById(S.dlgArg):null; if(!r) return {t:"Delete role",w:false,b:"",f:""};
   var n=roleAssignees(r.id);
   return {t:"Delete role",s:r.id,w:false,b:
-   '<p style="font-size:13px">This removes <span class="mono">'+h(r.id)+'</span> from IAM. Its definition and every grant it carried stay in the audit record.</p>'+
-   (n.total?'<div class="warn">Held by '+n.total+' principal'+(n.total>1?'s':'')+'. Reassign them first. A role cannot be deleted out from under a holder.</div>':'<div class="note">Nobody holds it. Deleting is a governed action and is recorded.</div>'),
+   '<p style="font-size:13px">This removes <span class="mono">'+h(r.id)+'</span> from IAM.</p>'+
+   (n.total?'<div class="warn">Held by '+n.total+' principal'+(n.total>1?'s':'')+'. Reassign them first.</div>':'<div class="note">Nobody holds it.</div>'),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n.total?' disabled':'')+' onclick="roleDeleteConfirm(\''+h(r.id)+'\')">Delete role</button>'};
 }
 
@@ -10227,16 +10216,16 @@ function agentDelDlg(){
    '<label class="check" style="margin-top:12px"><input type="checkbox" id="delAgentOk" onchange="el(\'delAgentBtn\').disabled=!this.checked"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Re-registering creates a new principal.</span></span></label>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button id="delAgentBtn" class="btn danger" disabled onclick="agentDelete(\''+h(a.key)+'\')">Retire agent</button>'};
 }
-function memberRemove(p){var i=-1;MEMBERS.forEach(function(m,ix){if(m.p===p)i=ix;});if(i<0)return;MEMBERS.splice(i,1);closeDialog();act(PEOPLE[p].name+" removed. Grants ended; runs stay attributed to them.");}
+function memberRemove(p){var i=-1;MEMBERS.forEach(function(m,ix){if(m.p===p)i=ix;});if(i<0)return;MEMBERS.splice(i,1);auditEvent("member.removed",me().name,PEOPLE[p].name+" · "+PEOPLE[p].role,"info",p);closeDialog();act(PEOPLE[p].name+" removed. Grants ended; runs stay attributed to them.");}
 function memberDelDlg(){
   var p=S.dlg==="removemember"?PEOPLE[S.dlgArg]:null; if(!p) return {t:"Remove person",w:false,b:"",f:""};
   var owns=AGENTS.filter(function(a){return a.operator===S.dlgArg;}).length;
   return {t:"Remove from the organization",s:p.name,w:false,b:'<p style="font-size:13px">'+h(p.name)+' loses <span class="mono">'+h(p.role)+'</span> and every workspace grant. Their sessions end now.</p>'+
-   (owns?'<div class="warn">'+owns+' agent'+(owns>1?'s act':' acts')+' on their behalf. Each one’s delegation ceiling collapses to nothing until a new parent user accepts. Reassign them first from the agent’s Identity panel.</div>':'<div class="note">No agent acts on their behalf. Removing is a governed action and is recorded.</div>'),
+   (owns?'<div class="warn">'+owns+' agent'+(owns>1?'s act':' acts')+' on their behalf. Reassign them first from the agent’s Identity panel.</div>':'<div class="note">No agent acts on their behalf.</div>'),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(owns?' disabled':'')+' onclick="memberRemove(\''+h(S.dlgArg)+'\')">Remove</button>'};
 }
 function wsById(slug){for(var i=0;i<WS.length;i++){if(WS[i].slug===slug)return WS[i];}return null;}
-function wsSave(){var w=wsById(S.dlgArg);if(!w)return;var n=el("wsName"),b=el("wsBranch"),r=el("wsRet"),g=el("wsGov");if(n&&n.value.trim())w.name=n.value.trim();if(b)w.branch=b.value;if(r)w.retention=r.value;if(g&&g.value!==wsGov(w)){w.governance=g.value;act("Pull request opened on "+w.main+": governance.toml sets mode = "+g.value+".","gold");}closeDialog();act("Workspace "+w.name+" updated. Recorded as a security event"+(w.retention==="digest_only"?"; digest_only is recorded as a completeness gap on every run.":"."));}
+function wsSave(){var w=wsById(S.dlgArg);if(!w)return;var n=el("wsName"),b=el("wsBranch"),r=el("wsRet"),g=el("wsGov");if(n&&n.value.trim())w.name=n.value.trim();if(b)w.branch=b.value;if(r)w.retention=r.value;if(g&&g.value!==wsGov(w)){w.governance=g.value;act("Pull request opened on "+w.main+": governance.toml sets mode = "+g.value+".","gold");}auditEvent("workspace.updated",me().name,w.slug+" · branch "+w.branch+" · "+w.retention,w.retention==="digest_only"?"warning":"info",w.slug);closeDialog();act("Workspace "+w.name+" updated. Recorded as a security event"+(w.retention==="digest_only"?"; digest_only is recorded as a completeness gap on every run.":"."));}
 function wsEditDlg(){
   var w=S.dlg==="editws"?wsById(S.dlgArg):null; if(!w) return {t:"Edit workspace",w:false,b:"",f:""};
   return {t:"Edit workspace",s:w.slug,w:false,b:'<div class="field"><label>Name</label><input id="wsName" value="'+h(w.name)+'" aria-label="Name"></div>'+
@@ -10246,9 +10235,9 @@ function wsEditDlg(){
     '<div class="hint">Written to <span class="mono">.oxagen/rules/governance.toml</span> through a pull request; it takes effect on merge.</div></div>'+
    '<div class="field"><label>Namespace</label><input value="'+h(w.ns||w.slug.split("-")[0])+'" disabled aria-label="Namespace"><div class="hint">Immutable. It is in every agent key here: <span class="mono">'+h(ORG.slug+"."+(w.ns||w.slug.split("-")[0]))+'.&lt;agent&gt;</span>.</div></div>'+
    '<div class="field"><label for="wsRet">Retention mode</label><select id="wsRet">'+[["content_exact","Full content (keeps prompts and tool bodies)"],["digest_only","Digests only (recorded as a completeness gap)"]].map(function(x){return '<option value="'+x[0]+'"'+((w.retention||"content_exact")===x[0]?' selected':'')+'>'+x[1]+'</option>';}).join("")+'</select>'+
-   '<div class="hint"><span class="mono">digest_only</span> is recorded as a completeness gap on every run. The transcript shows digests where the bodies were.</div></div>'+
+   '</div>'+
    '<dl class="kv"><dt>Toolbelt limit</dt><dd>'+plural(FULL_BELT_LIMIT,"tool")+', then the toolbelt is sent searchable</dd>'+
-   '<dt>Default budget</dt><dd>'+usd(w.budgetDay||"20.00")+' per day per agent · hard · a new agent starts here</dd>'+
+   '<dt>Default budget</dt><dd>'+usd(w.budgetDay||"20.00")+' per day per agent · hard</dd>'+
    '<dt>Agents</dt><dd>'+AGENTS.filter(function(a){return a.ws===w.slug;}).length+' registered · '+AGENTS.filter(function(a){return a.ws===w.slug&&(a.mandates||[]).length;}).length+' hold a mandate</dd></dl>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsSave()">Save</button>'};
 }
@@ -10256,8 +10245,8 @@ function wsArchive(slug){var i=-1;WS.forEach(function(w,ix){if(w.slug===slug)i=i
 function wsArchiveDlg(){
   var w=S.dlg==="archivews"?wsById(S.dlgArg):null; if(!w) return {t:"Archive workspace",w:false,b:"",f:""};
   var n=AGENTS.filter(function(a){return a.ws===w.slug;}).length;
-  return {t:"Archive workspace",s:w.name,w:false,b:'<p style="font-size:13px">Archiving freezes <b>'+h(w.name)+'</b>: runs, frames, records and spend stay readable forever; agents cannot start, tools cannot be granted, and the main repo link is released.</p>'+
-   (n?'<div class="warn">'+n+' agent'+(n>1?'s are':' is')+' registered here. Retire or move them first.</div>':'<div class="note">No agents here. Archiving is an org-owner action, recorded as a security event.</div>'),
+  return {t:"Archive workspace",s:w.name,w:false,b:'<p style="font-size:13px">Archiving freezes <b>'+h(w.name)+'</b>. Nothing new can start there, and the main repo link is released.</p>'+
+   (n?'<div class="warn">'+n+' agent'+(n>1?'s are':' is')+' registered here. Retire or move them first.</div>':'<div class="note">No agents here.</div>'),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n?' disabled':'')+' onclick="wsArchive(\''+h(w.slug)+'\')">Archive</button>'};
 }
 
@@ -10285,6 +10274,7 @@ function inviteSend(){
   if(inviteFind(email)>-1){act(email+" already has an invitation open.","gold");return;}
   INVITES.push({email:email,role:el("iv-role")?el("iv-role").value:"workspace.member · core-platform",
     by:me().name,sent:"2026-09-11",expires:"2026-09-18"});
+  auditEvent("invitation.sent",me().name,email+" · "+INVITES[INVITES.length-1].role+" · expires 2026-09-18","info",email);
   closeDialog(); render();
   act("Invitation sent to "+email+". It expires 2026-09-18 and needs a verified email and two-factor.");
 }
@@ -10298,13 +10288,12 @@ function inviteRevokeDlg(){
   if(i<0) return {t:"Revoke invitation",w:false,b:'<div class="note">That invitation is no longer here.</div>',
     f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   return {t:"Revoke invitation",s:email,w:false,
-   b:'<p style="font-size:13px">The link stops working the moment this is revoked, and <b>'+h(email)+'</b> gets no notice. Nothing is created for them, so nothing is left behind.</p>'+
-     '<div class="note">Who invited them, when, and who revoked it stay in the audit record. Inviting them again issues a new link.</div>',
+   b:'<p style="font-size:13px">The link stops working at once, and <b>'+h(email)+'</b> gets no notice.</p>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="inviteRevoke(\''+h(email)+'\')">Revoke</button>'};
 }
 function inviteRevoke(email){
   var i=inviteFind(email); if(i<0) return;
-  INVITES.splice(i,1); closeDialog(); render();
+  INVITES.splice(i,1); auditEvent("invitation.revoked",me().name,email,"info",email); closeDialog(); render();
   act("Revoked. The link "+email+" holds no longer works.");
 }
 function apikeyCreate(){
@@ -10314,18 +10303,21 @@ function apikeyCreate(){
     principal:"svc_"+name.toLowerCase().replace(/[^a-z0-9]+/g,"_").slice(0,20),
     grants:grants,by:me().name,last:"Never used",n30:0,
     expires:el("ak-exp")?el("ak-exp").value:"2026-12-10",st:"unused"});
+  var k=APIKEYS[APIKEYS.length-1];
+  auditEvent("api_key.created",me().name,k.principal+" · grants "+grants.join(", ")+" · expires "+k.expires,"info",k.principal);
   closeDialog(); render();
-  act("Created. The secret is shown once and stored hashed; api_key.create is in the audit record.");
+  act("Created "+name+". The secret is shown once, and api_key.created is in the audit record.");
 }
 function apikeyRotate(i){
   var k=APIKEYS[i]; if(!k) return;
   k.key="ox_live_"+rid(4)+"…"+rid(3); k.st="ok";
+  auditEvent("api_key.rotated",me().name,k.principal+" · the old secret stays valid for 24 hours","info",k.principal);
   closeDialog(); render();
   act("Rotated. "+k.name+" has a new secret, shown once; the old one stays valid for 24 hours.");
 }
 function apikeyRevoke(i){
   var k=APIKEYS[i]; if(!k) return;
-  APIKEYS.splice(i,1); closeDialog(); render();
+  APIKEYS.splice(i,1); auditEvent("api_key.revoked",me().name,k.principal+" · "+k.name,"info",k.principal); closeDialog(); render();
   act(k.name+" is revoked. "+k.principal+" loses access at its next call; runs it started keep their records.");
 }
 function incidentRaise(){
@@ -10336,28 +10328,30 @@ function incidentRaise(){
     detail:"Raised by "+me().name+" from the audit record, with the connection, the mandate and the exception attached.",
     resolution:"Open. Nobody is assigned yet.",
     status:"open",owner:"",due:"2026-09-12",closedAt:"",closedBy:"",runs:0});
+  auditEvent("incident.opened",me().name,title,sev,id);
   closeDialog(); render();
-  act(id+" is open. It is a security event with who, why, and what it stopped.","gold");
+  act(id+" is open.","gold");
 }
 function incidentAssign(id){
   var i=incidentById(id); if(!i) return;
   i.owner=me().name; i.resolution="Open. "+me().name+" is tracing it.";
+  auditEvent("incident.assigned",me().name,i.id+" · "+i.title,"info",i.id);
   render(); act(i.id+" is yours. The assignment is in the audit record.");
 }
 function incidentResolve(id){
   var i=incidentById(id); if(!i||i.status==="resolved") return;
   i.status="resolved"; i.closedAt="2026-09-11 09:20"; i.closedBy=me().name;
+  auditEvent("incident.resolved",me().name,i.id+" · "+i.title,"info",i.id);
   closeDialog(); render();
-  act(i.id+" is resolved. The detail and the chain stay exactly as they were.");
+  act(i.id+" is resolved.");
 }
 function incidentResolveDlg(){
   var i=S.dlg==="incidentclose"?incidentById(S.dlgArg):null;
   if(!i) return {t:"Resolve incident",w:false,b:'<div class="note">That incident is no longer here.</div>',
     f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   return {t:"Resolve incident",s:i.id+" · "+i.sev,w:false,
-   b:'<p style="font-size:13px">Resolving <b>'+h(i.title)+'</b> records who closed it and when. It changes nothing about what happened: the detail, the scope and the chain stay as they are.</p>'+
-     (i.sev==="critical"?'<div class="warn">This one is critical. While it is open the mandate ledger for '+h(i.scope.split(" · ")[0])+' carries an exception, and closing it clears that exception. Close it only once the money is accounted for.</div>'
-      :'<div class="note">A resolved incident stays in the list and in every export that covers its date.</div>'),
+   b:'<p style="font-size:13px">Resolving <b>'+h(i.title)+'</b> records who closed it and when.</p>'+
+     (i.kind==="mandate.exception"?'<div class="warn">Resolving clears the exception on the mandate ledger for '+h(i.scope.split(" · ")[0])+'. Resolve it only once the money is accounted for.</div>':''),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="incidentResolve(\''+h(i.id)+'\')">Resolve</button>'};
 }
 
@@ -11003,11 +10997,10 @@ var ORG_KEY_SOURCES=[
  ["platform_minted","one key minted for this organization on oxagen’s OpenRouter account",
   "oxagen owns, pays, rotates and revokes it. Its tokens are billed. The provider reports it on its own line, so the bill and the ledger can be compared."],
  ["platform","oxagen’s shared account",
-  "One key for every customer. Billed at vendor cost with no markup. The provider returns one total for every customer, so oxagen’s meter is the only per-customer count."],
+  "One key for every customer. Billed at vendor cost plus a published markup. The provider returns one total for every customer, so oxagen’s meter is the only per-customer count."],
  ["customer_key","your own OpenRouter or vendor key",
   "You own and pay for it. Stored enveloped, tested before save, never returned, every read audited. Your tokens are reported and billed at zero."]
 ];
-function orgKeySource(){ for(var i=0;i<ORG_KEY_SOURCES.length;i++){ if(ORG_KEY_SOURCES[i][0]===ORG_KEY.source) return ORG_KEY_SOURCES[i]; } return ORG_KEY_SOURCES[0]; }
 function orgKeyDrift(){ return Math.round((n$(ORG_KEY.providerUsd)-n$(ORG_KEY.ledgerUsd))*100)/100; }
 
 function orgKeyHeld(){ return ORG_KEY.source==="customer_key"?!!ORG_KEY.customerPrefix:!!ORG_KEY.provisionedId; }
@@ -11037,31 +11030,30 @@ function orgKeyClear(){
 }
 
 function orgKeyPanel(){
-  var src=orgKeySource(), none=orgKeyState()==="none", byok=ORG_KEY.source==="customer_key",
+  var none=orgKeyState()==="none", byok=ORG_KEY.source==="customer_key",
       held=orgKeyHeld(), drift=orgKeyDrift(), minted=ORG_KEY.source==="platform_minted";
   var rows="";
   if(byok){
     rows='<dl class="kv">'+
      '<dt>Key</dt><dd>'+(held
-       ?'<span class="mono">'+h(ORG_KEY.customerPrefix)+'…</span> <span class="dim">encrypted and never returned. Screens show only this prefix.</span>'
+       ?'<span class="mono">'+h(ORG_KEY.customerPrefix)+'…</span>'
        :'<span class="dim">none saved yet</span>')+'</dd>'+
-     '<dt>Billing</dt><dd>your tokens are reported and billed at zero; governed actions are billed as usual</dd>'+
-     '<dt>Key storage</dt><dd>enveloped, tested before save, never returned, every read audited</dd>'+
+     '<dt>Billing</dt><dd>tokens billed at zero</dd>'+
+     '<dt>Key storage</dt><dd>enveloped</dd>'+
      '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
      '</dl>'+
      '<div class="field" style="margin-top:14px"><label for="byokKey">Your OpenRouter or vendor key</label>'+
-     '<input id="byokKey" type="password" autocomplete="off" placeholder="sk-or-v1-…" aria-label="Your key">'+
-     '<div class="hint">oxagen calls '+h(ASST_MODEL)+' with it once to check it works, then envelopes it. It is never returned to a screen and never read from the environment.</div></div>';
+     '<input id="byokKey" type="password" autocomplete="off" placeholder="sk-or-v1-…" aria-label="Your key"></div>';
   } else if(none){
-    rows='<div class="note">No key is held for '+h(ORG.name)+'. The in-app agent cannot run, and nothing has been charged. Minting one is a governed action and puts your name on it.</div>';
+    rows='<div class="note">No key is held for '+h(ORG.name.replace(/\.$/,""))+'. The in-app agent cannot run, and nothing has been charged.</div>';
   } else {
     rows='<dl class="kv">'+
-     '<dt>Secret</dt><dd><span class="mono">'+h(ORG_KEY.prefix)+'…</span> <span class="dim">encrypted and never returned. Screens show only this prefix.</span></dd>'+
-     '<dt>Provisioned id</dt><dd><span class="mono">'+h(ORG_KEY.provisionedId)+'</span> <span class="dim">the provider’s own id; reconciliation joins on it</span></dd>'+
+     '<dt>Secret</dt><dd><span class="mono">'+h(ORG_KEY.prefix)+'…</span></dd>'+
+     '<dt>Provisioned id</dt><dd><span class="mono">'+h(ORG_KEY.provisionedId)+'</span></dd>'+
      '<dt>Name on the account</dt><dd><span class="mono">'+h(ORG_KEY.label)+'</span></dd>'+
      '<dt>Minted</dt><dd>'+h(ORG_KEY.minted)+' by '+h(PEOPLE[ORG_KEY.mintedBy].name)+(ORG_KEY.rotated?' · rotated '+h(ORG_KEY.rotated):' · never rotated')+'</dd>'+
-     '<dt>Monthly cap</dt><dd>'+usd(fmt2(ORG_KEY.capUsd))+' USD, set on the key at the provider · <span id="orgCapUsed">'+usd(fmt2(orgRoutesTotal()))+'</span> used in '+h(SPEND.month)+', the total of the routes below</dd>'+
-     '<dt>Reads</dt><dd>'+ORG_KEY.reads30+' in 30 days, each one an audit event</dd>'+
+     '<dt>Monthly cap</dt><dd>'+usd(fmt2(ORG_KEY.capUsd))+' USD, set on the key at the provider · <span id="orgCapUsed">'+usd(fmt2(orgRoutesTotal()))+'</span> used in '+h(SPEND.month)+'</dd>'+
+     '<dt>Reads</dt><dd>'+ORG_KEY.reads30+' in 30 days</dd>'+
      '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
      '</dl>';
   }
@@ -11080,12 +11072,11 @@ function orgKeyPanel(){
    '<div class="field"><label for="orgFundSrc">Source</label>'+
    '<select id="orgFundSrc" onchange="orgKeySourceSet(this.value)" aria-label="Funding source">'+
     ORG_KEY_SOURCES.map(function(x){return '<option value="'+h(x[0])+'"'+(ORG_KEY.source===x[0]?' selected':'')+'>'+h(x[1].charAt(0).toUpperCase()+x[1].slice(1))+'</option>';}).join("")+
-   '</select><div class="hint">'+h(src[2])+'</div></div>'+
+   '</select></div>'+
    rows+
    '<div class="row" style="margin-top:13px">'+acts+'</div>'+
-   '<div class="note" style="margin-top:13px">No call reads the environment. Keys and routes come from the model layer’s resolver, and a path that bypasses it is a defect.</div>'+
    '</div>'+
-   (minted&&held?'<div class="panel-b" style="border-top:1px solid var(--border)">'+
+   (minted&&held?'<div class="panel-b" style="border-top:1px solid var(--border)" data-help="reconciliation">'+
     '<p class="eyebrow q" style="margin:0 0 8px">Reconciliation</p>'+
     '<dl class="kv">'+
     '<dt>OpenRouter reports</dt><dd><span class="mono">'+usd(ORG_KEY.providerUsd)+'</span> on <span class="mono">'+h(ORG_KEY.provisionedId)+'</span></dd>'+
@@ -11094,36 +11085,31 @@ function orgKeyPanel(){
       ?'<span class="b b-allowed"><span class="d"></span>none</span>'
       :'<span class="b b-critical"><span class="d"></span>'+usd(fmt2(Math.abs(drift)))+' '+(drift>0?'unbilled':'over-billed')+'</span>')+'</dd>'+
     '</dl>'+
-    '<div class="note" style="margin-top:10px">Two independent numbers, not one derived from the other: the first is read off the provider’s usage report for this key, the second is summed from our own ledger. A shared key cannot produce this row at all, which is the whole reason this organization has a key of its own.</div>'+
    '</div>':'')+
    '</div>';
 }
 
 DLG_EXT.mintkey=function(){
-  return {t:"Mint a model key for "+ORG.name, s:"oxagen calls OpenRouter’s provisioning API and holds what comes back. The secret is never returned to this screen.", w:false,
-   b:'<div class="field"><label>Name on the account</label><input value="oxagen/'+h(ORG.slug)+'" aria-label="Name"><div class="hint">What the key is called on oxagen’s OpenRouter account. It is how a person reading the provider’s bill finds this organization.</div></div>'+
-     '<div class="field"><label>Monthly cap</label><input value="2000.00" aria-label="Monthly cap"><div class="hint">Set on the key at the provider, so a metering bug in oxagen cannot spend past it.</div></div>'+
+  return {t:"Mint a model key for "+ORG.name, w:false,
+   b:'<div class="field"><label>Name on the account</label><input value="oxagen/'+h(ORG.slug)+'" aria-label="Name"><div class="hint">The key’s name on oxagen’s OpenRouter account.</div></div>'+
+     '<div class="field"><label>Monthly cap</label><input value="2000.00" aria-label="Monthly cap"><div class="hint">USD a month, set on the key at the provider.</div></div>'+
      '<div class="field"><label>What this writes</label>'+
       '<div class="sx-cfg"><div class="sx-cfg-h">POST https://openrouter.ai/api/v1/keys</div><pre>'+
       '<span class="k">name</span>  = <span class="s">"oxagen/'+h(ORG.slug)+'"</span>\n'+
-      '<span class="k">limit</span> = <span class="n">2000.00</span>            <span class="c"># USD a month, enforced by the provider</span>\n'+
-      '<span class="c"># the response is stored enveloped under the organization key; what is kept in the</span>\n'+
-      '<span class="c"># clear is the prefix, the provisioned id and a hash. Nothing returns the secret.</span></pre></div></div>'+
-     '<div class="note">Minting is a governed action. It appears in the audit record with your name, and every later read of the key is its own audit event.</div>',
+      '<span class="k">limit</span> = <span class="n">2000.00</span>            <span class="c"># USD a month</span></pre></div></div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
-     '<button class="btn primary" onclick="closeDialog();act(\'Key minted on oxagen\\u2019s OpenRouter account as oxagen/'+h(ORG.slug)+', capped at $2,000.00 a month. The secret was enveloped and never returned; org.model_key.mint is in the audit record.\',\'gold\')">Mint the key</button>'};
+     '<button class="btn primary" onclick="auditEvent(\'org.model_key.mint\',me().name,\'oxagen/'+h(ORG.slug)+' · cap $2,000.00 a month\',\'info\',\'oxagen/'+h(ORG.slug)+'\');closeDialog();act(\'Key minted on oxagen\\u2019s OpenRouter account as oxagen/'+h(ORG.slug)+', capped at $2,000.00 a month. org.model_key.mint is in the audit record.\',\'gold\')">Mint the key</button>'};
 };
 DLG_EXT.rotateorgkey=function(){
   return {t:"Rotate this key", s:ORG_KEY.provisionedId+" · "+ORG_KEY.label, w:false,
-   b:'<div class="note">Rotation provisions a new key at the provider and envelopes it, then revokes the old one once the engine has picked the new one up. Turns in flight finish on the key they started with.</div>'+
-     '<dl class="kv" style="margin-top:12px"><dt>This month on the old key</dt><dd><span class="mono">'+usd(ORG_KEY.providerUsd)+'</span>. It stays on the provider’s report under <span class="mono">'+h(ORG_KEY.provisionedId)+'</span>, so the month still reconciles across both</dd></dl>',
+   b:'<p style="font-size:13px;margin:0">Rotation provisions a new key at the provider, then revokes the old one once the engine picks up the new one.</p>'+
+     '<dl class="kv" style="margin-top:12px"><dt>This month on the old key</dt><dd><span class="mono">'+usd(ORG_KEY.providerUsd)+'</span> on the provider’s report under <span class="mono">'+h(ORG_KEY.provisionedId)+'</span></dd></dl>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="closeDialog();act(\'Rotated. The new key is enveloped and in force; the old one is revoked and keeps its line on this month\\u2019s provider report.\')">Rotate</button>'};
 };
 DLG_EXT.revokeorgkey=function(){
   return {t:"Revoke this key", s:ORG_KEY.provisionedId+" · "+ORG_KEY.label, w:false,
-   b:'<div class="warn"><b>The in-app agent stops for everyone in '+h(ORG.name)+'.</b> Revocation ends the key at the provider at the next call. Nothing else changes: no run, no receipt and no record depends on it, and the month’s spend stays on the provider’s report.</div>'+
-     '<div class="note" style="margin-top:12px">oxagen’s own work (promotion rationale, pull request bodies, and run names) routes on the tiers above and is unaffected.</div>',
+   b:'<div class="warn"><b>The in-app agent stops for everyone in '+h(ORG.name.replace(/\.$/,""))+'.</b> Revocation ends the key at the provider at the next call.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn danger" onclick="ORG_KEY.source=\'none\';ORG_KEY.provisionedId=null;closeDialog();act(\'Revoked at the provider. The in-app agent is unavailable in '+h(ORG.name)+' until a key is minted.\')">Revoke</button>'};
 };
