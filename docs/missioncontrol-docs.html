@@ -11285,8 +11285,8 @@ required = true
 </ul>
 <p>Delivery follows the recipient's route:</p>
 <ul>
-<li><strong>Through the gateway.</strong> The gateway adds the message to the recipient's next model request, right after the steering block. This works for any runtime whose model traffic the gateway carries: Claude Code, Codex, and Stella.</li>
-<li><strong>Through the hook.</strong> For a runtime whose model calls skip the gateway, Cursor today, the hook delivers the message at the next boundary it has.</li>
+<li><strong>Through the gateway.</strong> The gateway adds the message to the recipient's next model request, right after the steering block. This works for any agent whose model traffic the gateway carries, which covers agents on the Claude Code, Codex, and Stella harnesses.</li>
+<li><strong>Through the hook.</strong> For an agent whose model calls skip the gateway, which today means an agent on the Cursor harness, the hook delivers the message at the next boundary it has.</li>
 </ul>
 <p>The existing rules hold. A message from an agent enters as quoted evidence with the sender named, never as an instruction, and a tool call built from it is marked as built from untrusted input. Each send is a governed action. Per-run inbound budgets, a rate limit per sender, duplicate suppression, expiry, and an operator mute bound it. Every status change is a frame on both runs, so &quot;did the agent see it&quot; points at the model request that carried it.</p>
 <h3 id="gateway/triggers">Triggers</h3>
@@ -11295,7 +11295,7 @@ required = true
 <li><strong><code>start_agent_run</code></strong> takes the target agent, a brief (ARP carries an operator-authored brief, ADR-157), the parent run, and an optional budget.</li>
 <li><strong>The work order is the record.</strong> A trigger creates a work order, the dispatch record <code>work-in-flight-spec.md</code> §9 defines, linked to the parent run. The child's spend rolls up to the parent and its lineage shows both.</li>
 <li><strong>The child runs under its own mandate.</strong> A trigger passes a brief, never the parent's authority. Starting another agent needs a grant naming the sender and the target. No agent holds it by default.</li>
-<li><strong>Oxagen routes the start and runs no turn.</strong> The work order goes to a runtime that can start the target agent: an enrolled host whose <code>tachod</code> advertises it can launch that agent headless, the contained launcher on a CI runner, or a customer-hosted runner. ADR-043 stands: Oxagen starts a process the customer chose, as the contained launcher does, and runs no turn itself.</li>
+<li><strong>Oxagen routes the start and runs no turn.</strong> An agent has one runtime, so the work order goes to the target agent's own runtime, and that runtime starts it: <code>tachod</code> on the enrolled host the agent runs on, the contained launcher on the agent's CI runner, or the agent's customer-hosted runner. ADR-043 stands: Oxagen starts a process the customer chose, as the contained launcher does, and runs no turn itself.</li>
 <li><strong>The answer comes back as a message.</strong> When the child seals, Oxagen sends its outcome to the parent as an <code>answer</code>, with the child's run linked.</li>
 </ul>
 <h2 id="gateway/the-tier-ladder">The tier ladder</h2>
@@ -11320,7 +11320,7 @@ required = true
 <li><strong>The MCP gateway.</strong> The toolbelt endpoint per server, OAuth and credential custody, per-tool rules, approval, metering, and billing. Enrollment imports the harness's servers and writes the gateway's entries.</li>
 <li><strong>Pinning</strong> for Claude Code, Codex, and Cursor. Stella follows once #6564 lands.</li>
 <li><strong>Delivery for the rest:</strong> skills sync, the agent-file generator, per-prompt steering, and memory import and recall.</li>
-<li><strong>Agent messages and triggers.</strong> <code>send_agent_message</code>, <code>list_agent_messages</code>, and <code>start_agent_run</code> on the gateway, delivery through the model request or the hook, and work orders routed to a runtime that can start the target agent.</li>
+<li><strong>Agent messages and triggers.</strong> <code>send_agent_message</code>, <code>list_agent_messages</code>, and <code>start_agent_run</code> on the gateway, delivery through the model request or the hook, and work orders routed to the target agent's own runtime.</li>
 <li><strong>The customer-hosted gateway.</strong> Packaging, the outbound control channel, and the customer's KMS.</li>
 <li><strong>The laptop relay</strong> for stdio servers that must stay on the machine.</li>
 </ol>

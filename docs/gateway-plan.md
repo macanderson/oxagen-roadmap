@@ -161,8 +161,8 @@ An agent on one runtime can message an agent on another, or start one, through O
 
 Delivery follows the recipient's route:
 
-- **Through the gateway.** The gateway adds the message to the recipient's next model request, right after the steering block. This works for any runtime whose model traffic the gateway carries: Claude Code, Codex, and Stella.
-- **Through the hook.** For a runtime whose model calls skip the gateway, Cursor today, the hook delivers the message at the next boundary it has.
+- **Through the gateway.** The gateway adds the message to the recipient's next model request, right after the steering block. This works for any agent whose model traffic the gateway carries, which covers agents on the Claude Code, Codex, and Stella harnesses.
+- **Through the hook.** For an agent whose model calls skip the gateway, which today means an agent on the Cursor harness, the hook delivers the message at the next boundary it has.
 
 The existing rules hold. A message from an agent enters as quoted evidence with the sender named, never as an instruction, and a tool call built from it is marked as built from untrusted input. Each send is a governed action. Per-run inbound budgets, a rate limit per sender, duplicate suppression, expiry, and an operator mute bound it. Every status change is a frame on both runs, so "did the agent see it" points at the model request that carried it.
 
@@ -173,7 +173,7 @@ An agent can start a run of another agent on another runtime:
 - **`start_agent_run`** takes the target agent, a brief (ARP carries an operator-authored brief, ADR-157), the parent run, and an optional budget.
 - **The work order is the record.** A trigger creates a work order, the dispatch record `work-in-flight-spec.md` §9 defines, linked to the parent run. The child's spend rolls up to the parent and its lineage shows both.
 - **The child runs under its own mandate.** A trigger passes a brief, never the parent's authority. Starting another agent needs a grant naming the sender and the target. No agent holds it by default.
-- **Oxagen routes the start and runs no turn.** The work order goes to a runtime that can start the target agent: an enrolled host whose `tachod` advertises it can launch that agent headless, the contained launcher on a CI runner, or a customer-hosted runner. ADR-043 stands: Oxagen starts a process the customer chose, as the contained launcher does, and runs no turn itself.
+- **Oxagen routes the start and runs no turn.** An agent has one runtime, so the work order goes to the target agent's own runtime, and that runtime starts it: `tachod` on the enrolled host the agent runs on, the contained launcher on the agent's CI runner, or the agent's customer-hosted runner. ADR-043 stands: Oxagen starts a process the customer chose, as the contained launcher does, and runs no turn itself.
 - **The answer comes back as a message.** When the child seals, Oxagen sends its outcome to the parent as an `answer`, with the child's run linked.
 
 ## The tier ladder
@@ -201,7 +201,7 @@ It keeps ADR-078 §4. There is still one tool builder, and it is the server's.
 4. **The MCP gateway.** The toolbelt endpoint per server, OAuth and credential custody, per-tool rules, approval, metering, and billing. Enrollment imports the harness's servers and writes the gateway's entries.
 5. **Pinning** for Claude Code, Codex, and Cursor. Stella follows once #6564 lands.
 6. **Delivery for the rest:** skills sync, the agent-file generator, per-prompt steering, and memory import and recall.
-7. **Agent messages and triggers.** `send_agent_message`, `list_agent_messages`, and `start_agent_run` on the gateway, delivery through the model request or the hook, and work orders routed to a runtime that can start the target agent.
+7. **Agent messages and triggers.** `send_agent_message`, `list_agent_messages`, and `start_agent_run` on the gateway, delivery through the model request or the hook, and work orders routed to the target agent's own runtime.
 8. **The customer-hosted gateway.** Packaging, the outbound control channel, and the customer's KMS.
 9. **The laptop relay** for stdio servers that must stay on the machine.
 
