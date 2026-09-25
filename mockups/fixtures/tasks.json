@@ -1,510 +1,1761 @@
 {
-  "providers": [
+ "providers": [
+  {
+   "id": "ipc_01K5Z3GH",
+   "kind": "github",
+   "ws": "core-platform",
+   "account": "a-intel",
+   "accountLabel": "GitHub organization",
+   "auth": "GitHub App installation 41829377",
+   "authKind": "app",
+   "by": "marcus",
+   "connected": "2026-09-02",
+   "scope": [
+    "a-intel/platform",
+    "a-intel/billing",
+    "a-intel/mobile"
+   ],
+   "scopeLabel": "repositories",
+   "filter": "open issues, and issues closed in the last 30 days",
+   "synced": "2 min ago",
+   "tasks": 142,
+   "events": "ok · 3,412 deliveries / 30d · 0 gaps",
+   "health": "ok",
+   "create": true,
+   "writeback": {
+    "certify": true,
+    "send": true,
+    "status": false,
+    "close": false
+   }
+  },
+  {
+   "id": "ipc_01K61LNR",
+   "kind": "linear",
+   "ws": "core-platform",
+   "account": "Anderson Intelligence",
+   "accountLabel": "Linear workspace",
+   "auth": "OAuth 2.0 as an app actor",
+   "authKind": "oauth",
+   "by": "marcus",
+   "connected": "2026-09-05",
+   "scope": [
+    "PLAT · Platform",
+    "INFRA · Infrastructure"
+   ],
+   "scopeLabel": "teams",
+   "filter": "open issues, and issues completed in the last 30 days",
+   "synced": "4 min ago",
+   "tasks": 88,
+   "events": "ok · 1,207 deliveries / 30d · 1 gap recovered",
+   "health": "ok",
+   "create": false,
+   "writeback": {
+    "certify": true,
+    "send": true,
+    "status": false,
+    "close": false
+   }
+  }
+ ],
+ "statuses": [
+  {
+   "key": "open",
+   "name": "Open",
+   "cat": "open",
+   "builtin": true,
+   "map": {
+    "github": "state open",
+    "linear": "Backlog, Todo, In Progress",
+    "jira": "category To Do, In Progress",
+    "servicenow": "state New, In Progress",
+    "salesforce": "status New, Working, Escalated",
+    "zendesk": "status New, Open"
+   }
+  },
+  {
+   "key": "in-review",
+   "name": "In review",
+   "cat": "open",
+   "builtin": false,
+   "map": {
+    "github": "open with a linked pull request",
+    "linear": "In Review",
+    "jira": "In Review"
+   }
+  },
+  {
+   "key": "blocked",
+   "name": "Blocked",
+   "cat": "blocked",
+   "builtin": true,
+   "map": {
+    "github": "label blocked",
+    "linear": "label Blocked, or an open blocked-by relation",
+    "jira": "flagged, or status Blocked",
+    "servicenow": "state On Hold",
+    "zendesk": "status On-hold, Pending"
+   }
+  },
+  {
+   "key": "closed",
+   "name": "Closed",
+   "cat": "closed",
+   "builtin": true,
+   "map": {
+    "github": "state closed",
+    "linear": "Done, Canceled, Duplicate",
+    "jira": "category Done",
+    "servicenow": "state Resolved, Closed, Canceled",
+    "salesforce": "status Closed",
+    "zendesk": "status Solved, Closed"
+   }
+  }
+ ],
+ "resolutions": [
+  {
+   "key": "done",
+   "name": "Done",
+   "builtin": true,
+   "map": {
+    "github": "state_reason completed",
+    "linear": "Done",
+    "jira": "Done, Fixed",
+    "servicenow": "close code Solution provided, Workaround provided, Resolved by caller",
+    "salesforce": "status Closed",
+    "zendesk": "status Solved"
+   }
+  },
+  {
+   "key": "wont-do",
+   "name": "Won't do",
+   "builtin": true,
+   "map": {
+    "github": "state_reason not_planned without label canceled",
+    "linear": "Canceled with label Won't do",
+    "jira": "Won't Do, Won't Fix",
+    "servicenow": "close code No resolution provided"
+   }
+  },
+  {
+   "key": "duplicate",
+   "name": "Duplicate",
+   "builtin": true,
+   "map": {
+    "github": "state_reason duplicate",
+    "linear": "Duplicate",
+    "jira": "Duplicate",
+    "servicenow": "close code Duplicate"
+   }
+  },
+  {
+   "key": "cancelled",
+   "name": "Canceled",
+   "builtin": true,
+   "map": {
+    "github": "state_reason not_planned with label canceled",
+    "linear": "Canceled",
+    "jira": "Canceled",
+    "servicenow": "state Canceled"
+   }
+  },
+  {
+   "key": "other",
+   "name": "Other",
+   "builtin": true,
+   "map": {
+    "github": "anything else",
+    "linear": "anything else",
+    "jira": "Cannot Reproduce, Incomplete, anything else",
+    "servicenow": "anything else",
+    "salesforce": "anything else",
+    "zendesk": "anything else"
+   }
+  }
+ ],
+ "labels": [
+  {
+   "key": "p0",
+   "name": "P0",
+   "group": "Priority",
+   "color": "#D6455E",
+   "map": {
+    "github": "label P0",
+    "linear": "priority Urgent",
+    "jira": "priority Highest",
+    "servicenow": "priority 1 - Critical",
+    "salesforce": "priority High",
+    "zendesk": "priority Urgent"
+   }
+  },
+  {
+   "key": "p1",
+   "name": "P1",
+   "group": "Priority",
+   "color": "#E0803A",
+   "map": {
+    "github": "label P1",
+    "linear": "priority High",
+    "jira": "priority High",
+    "servicenow": "priority 2 - High",
+    "zendesk": "priority High"
+   }
+  },
+  {
+   "key": "p2",
+   "name": "P2",
+   "group": "Priority",
+   "color": "#3B82F6",
+   "map": {
+    "github": "label P2",
+    "linear": "priority Medium",
+    "jira": "priority Medium",
+    "servicenow": "priority 3 - Moderate",
+    "salesforce": "priority Medium",
+    "zendesk": "priority Normal"
+   }
+  },
+  {
+   "key": "p3",
+   "name": "P3",
+   "group": "Priority",
+   "color": "#71717A",
+   "map": {
+    "github": "label P3",
+    "linear": "priority Low",
+    "jira": "priority Low, Lowest",
+    "servicenow": "priority 4 - Low, 5 - Planning",
+    "salesforce": "priority Low",
+    "zendesk": "priority Low"
+   }
+  },
+  {
+   "key": "bug",
+   "name": "Bug",
+   "group": "Type",
+   "color": "#C0453C",
+   "map": {
+    "github": "label bug, or issue type Bug",
+    "linear": "label Bug",
+    "jira": "issue type Bug",
+    "servicenow": "category Software",
+    "salesforce": "type Problem",
+    "zendesk": "type Problem"
+   }
+  },
+  {
+   "key": "new-feature",
+   "name": "New Feature",
+   "group": "Type",
+   "color": "#57A97C",
+   "map": {
+    "github": "label enhancement, or issue type Feature",
+    "linear": "label Feature",
+    "jira": "issue type New Feature, Story",
+    "salesforce": "type Feature Request"
+   }
+  },
+  {
+   "key": "improvement",
+   "name": "Improvement",
+   "group": "Type",
+   "color": "#3FA2A2",
+   "map": {
+    "github": "label improvement",
+    "linear": "label Improvement",
+    "jira": "issue type Improvement"
+   }
+  },
+  {
+   "key": "documentation",
+   "name": "Documentation",
+   "group": "Type",
+   "color": "#9D8BE3",
+   "map": {
+    "github": "label documentation",
+    "linear": "label Docs",
+    "jira": "label documentation",
+    "zendesk": "tag documentation"
+   }
+  },
+  {
+   "key": "test",
+   "name": "Test",
+   "group": "Type",
+   "color": "#5B93D6",
+   "map": {
+    "github": "label test",
+    "linear": "label Test",
+    "jira": "label test"
+   }
+  },
+  {
+   "key": "chore",
+   "name": "Chore",
+   "group": "Type",
+   "color": "#A1A1AA",
+   "map": {
+    "github": "label chore",
+    "linear": "label Chore",
+    "jira": "issue type Task",
+    "servicenow": "category Inquiry / Help",
+    "salesforce": "type Question",
+    "zendesk": "type Task"
+   }
+  }
+ ],
+ "people": [
+  {
+   "id": "gh:mbell-ai",
+   "kind": "github",
+   "handle": "mbell-ai",
+   "name": "Marcus Bell",
+   "email": "marcus@a-intel.example",
+   "to": "marcus",
+   "match": "verified email",
+   "state": "mapped"
+  },
+  {
+   "id": "gh:priya-n",
+   "kind": "github",
+   "handle": "priya-n",
+   "name": "Priya Natarajan",
+   "email": "priya@a-intel.example",
+   "to": "priya",
+   "match": "verified email",
+   "state": "mapped"
+  },
+  {
+   "id": "gh:amara-l",
+   "kind": "github",
+   "handle": "amara-l",
+   "name": "Amara",
+   "email": null,
+   "to": "amara",
+   "match": "by hand",
+   "state": "mapped"
+  },
+  {
+   "id": "gh:jonas-okoro",
+   "kind": "github",
+   "handle": "jonas-okoro",
+   "name": "Jonas Okoro",
+   "email": "jonas.okoro@a-intel.example",
+   "to": "jonas",
+   "match": "verified email",
+   "state": "suggested"
+  },
+  {
+   "id": "gh:vk-dev",
+   "kind": "github",
+   "handle": "vk-dev",
+   "name": "V. Kaur",
+   "email": null,
+   "to": null,
+   "match": null,
+   "state": "unmapped"
+  },
+  {
+   "id": "gh:dependabot",
+   "kind": "github",
+   "handle": "dependabot[bot]",
+   "name": "Dependabot",
+   "email": null,
+   "to": null,
+   "match": null,
+   "state": "bot"
+  },
+  {
+   "id": "lin:marcus",
+   "kind": "linear",
+   "handle": "marcus",
+   "name": "Marcus Bell",
+   "email": "marcus@a-intel.example",
+   "to": "marcus",
+   "match": "verified email",
+   "state": "mapped"
+  },
+  {
+   "id": "lin:priya",
+   "kind": "linear",
+   "handle": "priya",
+   "name": "Priya Natarajan",
+   "email": "priya@a-intel.example",
+   "to": "priya",
+   "match": "verified email",
+   "state": "mapped"
+  },
+  {
+   "id": "lin:ines",
+   "kind": "linear",
+   "handle": "ines.h",
+   "name": "Ines Haddad",
+   "email": "ines.haddad@a-intel.example",
+   "to": "ines",
+   "match": "verified email",
+   "state": "suggested"
+  },
+  {
+   "id": "lin:support-rota",
+   "kind": "linear",
+   "handle": "support-rota",
+   "name": "Support rota",
+   "email": "support@a-intel.example",
+   "to": null,
+   "match": null,
+   "state": "unmapped"
+  }
+ ],
+ "tasks": [
+  {
+   "id": "tsk_01K5RS482Q",
+   "kind": "github",
+   "num": "a-intel/platform#482",
+   "repo": "a-intel/platform",
+   "subject": "Cut 4.11.0 release notes",
+   "body": "The 4.11 milestone closed on 2026-09-09. Draft the 4.11.0 notes from the pull requests merged since v4.10.3 and put a draft release up for review. A person publishes the release.",
+   "labels": [
+    "p1",
+    "documentation"
+   ],
+   "owner": "gh:mbell-ai",
+   "createdBy": "gh:mbell-ai",
+   "createdAt": "2026-09-10 16:40",
+   "updatedBy": "gh:mbell-ai",
+   "updatedAt": "2026-09-11 09:12",
+   "closedAt": null,
+   "status": "in-review",
+   "resolution": null,
+   "ready": "sent",
+   "certifiedBy": "marcus",
+   "certifiedAt": "2026-09-11 09:12",
+   "digest": "sha256:c3a17e05b9d24f81",
+   "wo": "wo_01K5RS7M4N",
+   "dod": [
     {
-      "id": "ipc_01K5Z3GH",
-      "kind": "github",
-      "ws": "core-platform",
-      "account": "a-intel",
-      "accountLabel": "GitHub organization",
-      "auth": "GitHub App installation 41829377",
-      "authKind": "app",
-      "by": "marcus",
-      "connected": "2026-09-02",
-      "scope": ["a-intel/platform", "a-intel/billing", "a-intel/mobile"],
-      "scopeLabel": "repositories",
-      "filter": "open issues, and issues closed in the last 30 days",
-      "synced": "2 min ago",
-      "tasks": 142,
-      "events": "ok · 3,412 deliveries / 30d · 0 gaps",
-      "health": "ok",
-      "create": true,
-      "writeback": { "certify": true, "send": true, "status": false, "close": false }
+     "t": "Every pull request merged into a-intel/platform since v4.10.3 appears once, linked",
+     "k": "check",
+     "tag": "docs",
+     "src": "issue"
     },
     {
-      "id": "ipc_01K61LNR",
-      "kind": "linear",
-      "ws": "core-platform",
-      "account": "Anderson Intelligence",
-      "accountLabel": "Linear workspace",
-      "auth": "OAuth 2.0 as an app actor",
-      "authKind": "oauth",
-      "by": "marcus",
-      "connected": "2026-09-05",
-      "scope": ["PLAT · Platform", "INFRA · Infrastructure"],
-      "scopeLabel": "teams",
-      "filter": "open issues, and issues completed in the last 30 days",
-      "synced": "4 min ago",
-      "tasks": 88,
-      "events": "ok · 1,207 deliveries / 30d · 1 gap recovered",
-      "health": "ok",
-      "create": false,
-      "writeback": { "certify": true, "send": true, "status": false, "close": false }
+     "t": "Breaking changes come before Fixes, each with its migration note",
+     "k": "check",
+     "tag": "docs",
+     "src": "assistant"
+    },
+    {
+     "t": "The draft is on a release branch and main is untouched",
+     "k": "check",
+     "tag": "code",
+     "src": "operator"
+    },
+    {
+     "t": "The GitHub release is a draft, and a person publishes it",
+     "k": "review",
+     "tag": "review",
+     "src": "operator"
     }
-  ],
-  "statuses": [
-    { "key": "open", "name": "Open", "cat": "open", "builtin": true,
-      "map": { "github": "state open", "linear": "Backlog, Todo, In Progress", "jira": "category To Do, In Progress",
-               "servicenow": "state New, In Progress", "salesforce": "status New, Working, Escalated", "zendesk": "status New, Open" } },
-    { "key": "in-review", "name": "In review", "cat": "open", "builtin": false,
-      "map": { "github": "open with a linked pull request", "linear": "In Review", "jira": "In Review" } },
-    { "key": "blocked", "name": "Blocked", "cat": "blocked", "builtin": true,
-      "map": { "github": "label blocked", "linear": "label Blocked, or an open blocked-by relation", "jira": "flagged, or status Blocked",
-               "servicenow": "state On Hold", "zendesk": "status On-hold, Pending" } },
-    { "key": "closed", "name": "Closed", "cat": "closed", "builtin": true,
-      "map": { "github": "state closed", "linear": "Done, Canceled, Duplicate", "jira": "category Done",
-               "servicenow": "state Resolved, Closed, Canceled", "salesforce": "status Closed", "zendesk": "status Solved, Closed" } }
-  ],
-  "resolutions": [
-    { "key": "done", "name": "Done", "builtin": true,
-      "map": { "github": "state_reason completed", "linear": "Done", "jira": "Done, Fixed",
-               "servicenow": "close code Solution provided, Workaround provided, Resolved by caller", "salesforce": "status Closed", "zendesk": "status Solved" } },
-    { "key": "wont-do", "name": "Won't do", "builtin": true,
-      "map": { "github": "state_reason not_planned without label canceled", "linear": "Canceled with label Won't do", "jira": "Won't Do, Won't Fix",
-               "servicenow": "close code No resolution provided" } },
-    { "key": "duplicate", "name": "Duplicate", "builtin": true,
-      "map": { "github": "state_reason duplicate", "linear": "Duplicate", "jira": "Duplicate", "servicenow": "close code Duplicate" } },
-    { "key": "cancelled", "name": "Canceled", "builtin": true,
-      "map": { "github": "state_reason not_planned with label canceled", "linear": "Canceled", "jira": "Canceled",
-               "servicenow": "state Canceled" } },
-    { "key": "other", "name": "Other", "builtin": true,
-      "map": { "github": "anything else", "linear": "anything else", "jira": "Cannot Reproduce, Incomplete, anything else",
-               "servicenow": "anything else", "salesforce": "anything else", "zendesk": "anything else" } }
-  ],
-  "labels": [
-    { "key": "p0", "name": "P0", "group": "Priority", "color": "#D6455E",
-      "map": { "github": "label P0", "linear": "priority Urgent", "jira": "priority Highest",
-               "servicenow": "priority 1 - Critical", "salesforce": "priority High", "zendesk": "priority Urgent" } },
-    { "key": "p1", "name": "P1", "group": "Priority", "color": "#E0803A",
-      "map": { "github": "label P1", "linear": "priority High", "jira": "priority High",
-               "servicenow": "priority 2 - High", "zendesk": "priority High" } },
-    { "key": "p2", "name": "P2", "group": "Priority", "color": "#3B82F6",
-      "map": { "github": "label P2", "linear": "priority Medium", "jira": "priority Medium",
-               "servicenow": "priority 3 - Moderate", "salesforce": "priority Medium", "zendesk": "priority Normal" } },
-    { "key": "p3", "name": "P3", "group": "Priority", "color": "#71717A",
-      "map": { "github": "label P3", "linear": "priority Low", "jira": "priority Low, Lowest",
-               "servicenow": "priority 4 - Low, 5 - Planning", "salesforce": "priority Low", "zendesk": "priority Low" } },
-    { "key": "bug", "name": "Bug", "group": "Type", "color": "#C0453C",
-      "map": { "github": "label bug, or issue type Bug", "linear": "label Bug", "jira": "issue type Bug",
-               "servicenow": "category Software", "salesforce": "type Problem", "zendesk": "type Problem" } },
-    { "key": "new-feature", "name": "New Feature", "group": "Type", "color": "#57A97C",
-      "map": { "github": "label enhancement, or issue type Feature", "linear": "label Feature", "jira": "issue type New Feature, Story",
-               "salesforce": "type Feature Request" } },
-    { "key": "improvement", "name": "Improvement", "group": "Type", "color": "#3FA2A2",
-      "map": { "github": "label improvement", "linear": "label Improvement", "jira": "issue type Improvement" } },
-    { "key": "documentation", "name": "Documentation", "group": "Type", "color": "#9D8BE3",
-      "map": { "github": "label documentation", "linear": "label Docs", "jira": "label documentation",
-               "zendesk": "tag documentation" } },
-    { "key": "test", "name": "Test", "group": "Type", "color": "#5B93D6",
-      "map": { "github": "label test", "linear": "label Test", "jira": "label test" } },
-    { "key": "chore", "name": "Chore", "group": "Type", "color": "#A1A1AA",
-      "map": { "github": "label chore", "linear": "label Chore", "jira": "issue type Task",
-               "servicenow": "category Inquiry / Help", "salesforce": "type Question", "zendesk": "type Task" } }
-  ],
-  "people": [
-    { "id": "gh:mbell-ai", "kind": "github", "handle": "mbell-ai", "name": "Marcus Bell", "email": "marcus@a-intel.example", "to": "marcus", "match": "verified email", "state": "mapped" },
-    { "id": "gh:priya-n", "kind": "github", "handle": "priya-n", "name": "Priya Natarajan", "email": "priya@a-intel.example", "to": "priya", "match": "verified email", "state": "mapped" },
-    { "id": "gh:amara-l", "kind": "github", "handle": "amara-l", "name": "Amara", "email": null, "to": "amara", "match": "by hand", "state": "mapped" },
-    { "id": "gh:jonas-okoro", "kind": "github", "handle": "jonas-okoro", "name": "Jonas Okoro", "email": "jonas.okoro@a-intel.example", "to": "jonas", "match": "verified email", "state": "suggested" },
-    { "id": "gh:vk-dev", "kind": "github", "handle": "vk-dev", "name": "V. Kaur", "email": null, "to": null, "match": null, "state": "unmapped" },
-    { "id": "gh:dependabot", "kind": "github", "handle": "dependabot[bot]", "name": "Dependabot", "email": null, "to": null, "match": null, "state": "bot" },
-    { "id": "lin:marcus", "kind": "linear", "handle": "marcus", "name": "Marcus Bell", "email": "marcus@a-intel.example", "to": "marcus", "match": "verified email", "state": "mapped" },
-    { "id": "lin:priya", "kind": "linear", "handle": "priya", "name": "Priya Natarajan", "email": "priya@a-intel.example", "to": "priya", "match": "verified email", "state": "mapped" },
-    { "id": "lin:ines", "kind": "linear", "handle": "ines.h", "name": "Ines Haddad", "email": "ines.haddad@a-intel.example", "to": "ines", "match": "verified email", "state": "suggested" },
-    { "id": "lin:support-rota", "kind": "linear", "handle": "support-rota", "name": "Support rota", "email": "support@a-intel.example", "to": null, "match": null, "state": "unmapped" }
-  ],
-  "tasks": [
+   ],
+   "notes": [
+    "The issue names the range and the output. The house format is ctx.release.notes-format."
+   ]
+  },
+  {
+   "id": "tsk_01K6SH7C2F",
+   "kind": "oxagen",
+   "num": "WI-14",
+   "repo": "a-intel/platform",
+   "subject": "Narrow triage's toolbelt to the 18 tools it calls",
+   "body": "Picked up from finding fnd_01K5RT2A. triage's belt carries 52 tools, and 34 of them were not called once in 1,340 runs. Its tool definitions average 9,140 tokens per model call, 3.9 times the workspace median.",
+   "labels": [
+    "p2",
+    "improvement"
+   ],
+   "owner": "lin:marcus",
+   "createdBy": "lin:marcus",
+   "createdAt": "2026-09-11 08:52",
+   "updatedBy": "lin:marcus",
+   "updatedAt": "2026-09-11 08:52",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "draft",
+   "finding": "fnd_01K5RT2A",
+   "dod": [
     {
-      "id": "tsk_01K5RS482Q",
-      "kind": "github",
-      "num": "a-intel/platform#482",
-      "repo": "a-intel/platform",
-      "subject": "Cut 4.11.0 release notes",
-      "body": "The 4.11 milestone closed on 2026-09-09. Draft the 4.11.0 notes from the pull requests merged since v4.10.3 and put a draft release up for review. A person publishes the release.",
-      "labels": ["p1", "documentation"],
-      "owner": "gh:mbell-ai",
-      "createdBy": "gh:mbell-ai",
-      "createdAt": "2026-09-10 16:40",
-      "updatedBy": "gh:mbell-ai",
-      "updatedAt": "2026-09-11 09:12",
-      "closedAt": null,
-      "status": "in-review",
-      "resolution": null,
-      "ready": "sent",
-      "certifiedBy": "marcus",
-      "certifiedAt": "2026-09-11 09:12",
-      "digest": "sha256:c3a17e05b9d24f81",
-      "wo": "wo_01K5RS7M4N",
-      "dod": [
-        {
-          "t": "Every pull request merged into a-intel/platform since v4.10.3 appears once, linked",
-          "k": "check",
-          "tag": "docs",
-          "src": "issue"
-        },
-        {
-          "t": "Breaking changes come before Fixes, each with its migration note",
-          "k": "check",
-          "tag": "docs",
-          "src": "assistant"
-        },
-        {
-          "t": "The draft is on a release branch and main is untouched",
-          "k": "check",
-          "tag": "code",
-          "src": "operator"
-        },
-        {
-          "t": "The GitHub release is a draft, and a person publishes it",
-          "k": "review",
-          "tag": "review",
-          "src": "operator"
-        }
-      ],
-      "notes": ["The issue names the range and the output. The house format is ctx.release.notes-format."]
+     "t": "triage's belt lists the 18 tools it called in the last 30 days, and nothing else",
+     "k": "check",
+     "tag": "code",
+     "src": "assistant"
     },
     {
-      "id": "tsk_01K6SH7C2F",
-      "kind": "oxagen",
-      "num": "WI-14",
-      "repo": "a-intel/platform",
-      "subject": "Narrow triage's toolbelt to the 18 tools it calls",
-      "body": "Picked up from finding fnd_01K5RT2A. triage's belt carries 52 tools, and 34 of them were not called once in 1,340 runs. Its tool definitions average 9,140 tokens per model call, 3.9 times the workspace median.",
-      "labels": ["p2", "improvement"],
-      "owner": "lin:marcus",
-      "createdBy": "lin:marcus",
-      "createdAt": "2026-09-11 08:52",
-      "updatedBy": "lin:marcus",
-      "updatedAt": "2026-09-11 08:52",
-      "closedAt": null,
-      "status": "open",
-      "resolution": null,
-      "ready": "draft",
-      "finding": "fnd_01K5RT2A",
-      "dod": [
-        {
-          "t": "triage's belt lists the 18 tools it called in the last 30 days, and nothing else",
-          "k": "check",
-          "tag": "code",
-          "src": "assistant"
-        },
-        {
-          "t": "Over the next 7 days, triage's tool definitions average under 3,000 tokens per model call",
-          "k": "check",
-          "tag": "test",
-          "src": "assistant"
-        }
-      ],
-      "notes": ["Written in Oxagen from a finding. There is no provider issue to close."]
-    },
-    {
-      "id": "tsk_01K6S2M4QF", "kind": "github", "num": "a-intel/platform#612", "repo": "a-intel/platform",
-      "subject": "Rate limiter returns 500 instead of 429 when the key bucket is empty",
-      "body": "POST /v1/keys returns 500 once a key's bucket is empty. The limiter throws RateLimitExhausted and nothing maps it, so the client sees an internal error and retries at once.\n\nSteps: create a key with a 5 per minute limit, send 6 requests in 10 seconds. The sixth returns 500.\n\nExpected: 429 with Retry-After.",
-      "labels": ["p1", "bug"], "owner": "gh:mbell-ai", "createdBy": "gh:vk-dev", "createdAt": "2026-09-08 10:14", "updatedBy": "gh:mbell-ai", "updatedAt": "2026-09-10 16:02", "closedAt": null,
-      "status": "open", "resolution": null, "ready": "ready", "certifiedBy": "marcus", "certifiedAt": "2026-09-10 16:05", "digest": "sha256:61c0a9e24d7f18b3",
-      "dod": [
-        { "t": "POST /v1/keys returns 429 with a Retry-After header when the bucket is empty", "k": "check", "tag": "code", "src": "issue" },
-        { "t": "A unit test sends six requests against a five-per-minute key and asserts the sixth is 429", "k": "check", "tag": "test", "src": "assistant" },
-        { "t": "No other route that uses the limiter returns 500 for an exhausted bucket", "k": "check", "tag": "code", "src": "assistant" },
-        { "t": "The API reference for rate limits names the 429 response and its header", "k": "check", "tag": "docs", "src": "operator" },
-        { "t": "A reviewer confirms the error mapping lives in the central onError handler", "k": "review", "tag": "review", "src": "assistant" }
-      ],
-      "notes": ["The issue gives a reproduction and an expected result. Nothing is missing."]
-    },
-    {
-      "id": "tsk_01K6S4B8XN", "kind": "linear", "num": "PLAT-231", "repo": "a-intel/platform",
-      "subject": "Session cookie is not refreshed after the two-factor step-up",
-      "body": "After a step-up with TOTP the session keeps the old expiry. A person who steps up 55 minutes into a session is signed out 5 minutes later, in the middle of an approval.",
-      "labels": ["p1", "bug"], "owner": "lin:marcus", "createdBy": "lin:support-rota", "createdAt": "2026-09-06 09:40", "updatedBy": "lin:priya", "updatedAt": "2026-09-09 11:18", "closedAt": null,
-      "status": "open", "resolution": null, "ready": "ready", "certifiedBy": "marcus", "certifiedAt": "2026-09-09 14:30", "digest": "sha256:0b44e19c3a8d72f5",
-      "dod": [
-        { "t": "A successful step-up issues a new session cookie with a fresh expiry", "k": "check", "tag": "code", "src": "assistant" },
-        { "t": "A test steps up at minute 55 and asserts the session outlives minute 60", "k": "check", "tag": "test", "src": "assistant" },
-        { "t": "Rate limiting on the step-up route is unchanged", "k": "check", "tag": "test", "src": "operator" }
-      ],
-      "notes": ["The report names TOTP only. The assistant assumed passkey step-up behaves the same and says so in item 1."]
-    },
-    {
-      "id": "tsk_01K6S5R2HD", "kind": "github", "num": "a-intel/platform#618", "repo": "a-intel/platform",
-      "subject": "Webhook retries double-count delivery gaps on the Repositories tab",
-      "body": "When GitHub redelivers a webhook, the Events column counts the gap twice. core-platform showed 2 gaps for one missed delivery on 2026-09-07.",
-      "labels": ["p2", "bug"], "owner": "gh:amara-l", "createdBy": "gh:mbell-ai", "createdAt": "2026-09-07 17:55", "updatedBy": "gh:amara-l", "updatedAt": "2026-09-09 08:12", "closedAt": null,
-      "status": "open", "resolution": null, "ready": "ready", "certifiedBy": "marcus", "certifiedAt": "2026-09-09 09:00", "digest": "sha256:7ae2d05b91c6f340",
-      "dod": [
-        { "t": "A redelivered event with the same delivery id is counted once", "k": "check", "tag": "code", "src": "assistant" },
-        { "t": "A test replays one delivery twice and asserts one gap closes", "k": "check", "tag": "test", "src": "assistant" },
-        { "t": "The Events column help text says how redeliveries are counted", "k": "check", "tag": "docs", "src": "assistant" }
-      ],
-      "notes": []
-    },
-    {
-      "id": "tsk_01K6S7C5PA", "kind": "github", "num": "a-intel/platform#633", "repo": "a-intel/platform",
-      "subject": "Budget breach pauses the wrong run when two runs share a host",
-      "body": "Two runs of release-manager on mbell-mbp-16. The budget breach on run A paused run B. The pause targets the host session, not the run.",
-      "labels": ["p0", "bug"], "owner": "gh:mbell-ai", "createdBy": "gh:priya-n", "createdAt": "2026-09-11 07:48", "updatedBy": "gh:priya-n", "updatedAt": "2026-09-11 07:48", "closedAt": null,
-      "status": "open", "resolution": null, "ready": "draft",
-      "dod": [
-        { "t": "A budget breach pauses the run that breached and no other run on the host", "k": "check", "tag": "code", "src": "assistant" },
-        { "t": "A test starts two runs on one host, breaches one budget, and asserts the other keeps running", "k": "check", "tag": "test", "src": "assistant" },
-        { "t": "The control.pause frame names the run id it targeted", "k": "check", "tag": "code", "src": "assistant" },
-        { "t": "An incident note records every run paused by mistake since the oxagend 1.6 release", "k": "review", "tag": "review", "src": "assistant" }
-      ],
-      "notes": ["The issue does not say which oxagend version. The assistant assumed 1.6.2, the collector on the named host.", "Item 4 is a person's review. An agent can gather the list, and a person accepts it."]
-    },
-    {
-      "id": "tsk_01K6S8N1VE", "kind": "linear", "num": "PLAT-240", "repo": "a-intel/platform",
-      "subject": "Add a retry budget to the GitHub App token exchange",
-      "body": "Token exchange retries forever on a 502 from GitHub. Cap it at 3 attempts with jittered backoff and surface the failure on the Repositories page.",
-      "labels": ["p2", "improvement"], "owner": "lin:priya", "createdBy": "lin:priya", "createdAt": "2026-09-09 13:02", "updatedBy": "lin:priya", "updatedAt": "2026-09-10 10:40", "closedAt": null,
-      "status": "open", "resolution": null, "ready": "draft",
-      "dod": [
-        { "t": "Token exchange stops after 3 attempts with jittered backoff", "k": "check", "tag": "code", "src": "issue" },
-        { "t": "The Repositories page shows the exchange failure with its GitHub status", "k": "check", "tag": "code", "src": "issue" },
-        { "t": "A test stubs three 502 responses and asserts the third failure is surfaced", "k": "check", "tag": "test", "src": "assistant" }
-      ],
-      "notes": []
-    },
-    {
-      "id": "tsk_01K6S9D7KW", "kind": "github", "num": "a-intel/platform#621", "repo": "a-intel/platform",
-      "subject": "Flaky test: the approvals drawer closes on Escape twice",
-      "body": "apd.test.tsx fails about 1 run in 40. The drawer's keydown listener is attached twice after a hot reload.",
-      "labels": ["p2", "test"], "owner": "gh:jonas-okoro", "createdBy": "gh:jonas-okoro", "createdAt": "2026-09-08 15:30", "updatedBy": "gh:jonas-okoro", "updatedAt": "2026-09-08 15:30", "closedAt": null,
-      "status": "open", "resolution": null, "ready": "draft",
-      "dod": [
-        { "t": "The keydown listener is attached once per mount and removed on unmount", "k": "check", "tag": "code", "src": "assistant" },
-        { "t": "apd.test.tsx passes 200 consecutive runs", "k": "check", "tag": "test", "src": "assistant" }
-      ],
-      "notes": ["The owner, jonas-okoro, is not yet mapped to a workspace member. The task can still be certified and sent."]
-    },
-    {
-      "id": "tsk_01K6SA3G9Z", "kind": "linear", "num": "PLAT-244", "repo": "a-intel/platform",
-      "subject": "Export a spend report as CSV",
-      "body": "Finance wants the Spend page's month as a CSV with one row per agent.",
-      "labels": ["p3", "new-feature"], "owner": "lin:priya", "createdBy": "lin:priya", "createdAt": "2026-09-11 08:55", "updatedBy": "lin:priya", "updatedAt": "2026-09-11 08:55", "closedAt": null,
-      "status": "open", "resolution": null, "ready": "drafting",
-      "dod": [],
-      "notes": []
-    },
-    {
-      "id": "tsk_01K6SB6T2C", "kind": "github", "num": "a-intel/platform#604", "repo": "a-intel/platform",
-      "subject": "Document the steering bundle cache rules",
-      "body": "Nobody outside the steering team knows when the bundle digest changes and why a mid-day publish drops cache reads.",
-      "labels": ["p3", "documentation"], "owner": "gh:priya-n", "createdBy": "gh:priya-n", "createdAt": "2026-09-04 12:20", "updatedBy": "gh:priya-n", "updatedAt": "2026-09-05 09:03", "closedAt": null,
-      "status": "open", "resolution": null, "ready": "draft",
-      "dod": [
-        { "t": "A docs page says which changes alter the bundle digest", "k": "check", "tag": "docs", "src": "assistant" },
-        { "t": "The page shows the cache-read drop after a mid-day publish with a real number from Spend", "k": "check", "tag": "docs", "src": "assistant" },
-        { "t": "A reviewer from the steering team confirms the page is correct", "k": "review", "tag": "review", "src": "assistant" }
-      ],
-      "notes": []
-    },
-    {
-      "id": "tsk_01K6SC1Y5M", "kind": "github", "num": "a-intel/platform#590", "repo": "a-intel/platform",
-      "subject": "Audit export omits incident notes",
-      "body": "The audit export bundle carries incidents without their notes. Auditors asked for them.\n\nUpdate 2026-09-10: notes added after an incident closes must be exported too.",
-      "labels": ["p2", "bug"], "owner": "gh:mbell-ai", "createdBy": "gh:priya-n", "createdAt": "2026-09-02 10:10", "updatedBy": "gh:priya-n", "updatedAt": "2026-09-10 17:44", "closedAt": null,
-      "status": "open", "resolution": null, "ready": "changed", "certifiedBy": "marcus", "certifiedAt": "2026-09-03 09:15", "digest": "sha256:c3f81d09a2e6b7d4",
-      "was": "The audit export bundle carries incidents without their notes. Auditors asked for them.",
-      "dod": [
-        { "t": "Each incident in the export carries its notes in order", "k": "check", "tag": "code", "src": "assistant" },
-        { "t": "A test exports one incident with two notes and asserts both are present", "k": "check", "tag": "test", "src": "assistant" }
-      ],
-      "notes": ["The description changed after certification. Notes added after close are now in scope, and no item covers them."]
-    },
-    {
-      "id": "tsk_01K6SD8R3B", "kind": "linear", "num": "PLAT-219", "repo": "a-intel/platform",
-      "subject": "Rotate the Linear OAuth app secret",
-      "body": "The secret is 13 months old. Blocked until security issues the new one.",
-      "labels": ["p2", "chore"], "owner": "lin:ines", "createdBy": "lin:marcus", "createdAt": "2026-08-28 11:30", "updatedBy": "lin:ines", "updatedAt": "2026-09-04 14:00", "closedAt": null,
-      "status": "blocked", "resolution": null, "ready": "draft",
-      "dod": [
-        { "t": "The Linear connection uses the new secret and the old one is revoked", "k": "check", "tag": "code", "src": "assistant" },
-        { "t": "A sync runs green after the rotation", "k": "check", "tag": "test", "src": "assistant" }
-      ],
-      "notes": ["Blocked upstream. A blocked task can be certified and cannot be sent until it is open again."]
-    },
-    {
-      "id": "tsk_01K6SE4P7J", "kind": "github", "num": "a-intel/platform#599", "repo": "a-intel/platform",
-      "subject": "Bump pnpm to 10.18 across the workspace",
-      "body": "10.18 fixes the lockfile churn on optional dependencies.",
-      "labels": ["p3", "chore"], "owner": "gh:dependabot", "createdBy": "gh:dependabot", "createdAt": "2026-09-03 06:00", "updatedBy": "gh:mbell-ai", "updatedAt": "2026-09-10 12:00", "closedAt": null,
-      "status": "open", "resolution": null, "ready": "sent", "certifiedBy": "marcus", "certifiedAt": "2026-09-10 11:50", "digest": "sha256:5d2e7f1a0c94b863", "wo": "wo_01K6TA2M",
-      "dod": [
-        { "t": "packageManager in package.json reads pnpm@10.18.0", "k": "check", "tag": "code", "src": "assistant" },
-        { "t": "The lockfile regenerates with no churn on optional dependencies", "k": "check", "tag": "test", "src": "issue" },
-        { "t": "CI is green on the pull request", "k": "check", "tag": "test", "src": "assistant" }
-      ],
-      "notes": []
-    },
-    {
-      "id": "tsk_01K6SF2W6Q", "kind": "github", "num": "a-intel/platform#587", "repo": "a-intel/platform",
-      "subject": "Migration stamp check rejects two migrations stamped in the same minute",
-      "body": "db:lint-migrations rejects 20260910143000_a.sql and 20260910143000_b.sql. Two stamps in one minute are legal if their names sort.",
-      "labels": ["p1", "bug"], "owner": "gh:mbell-ai", "createdBy": "gh:amara-l", "createdAt": "2026-09-09 14:40", "updatedBy": "gh:mbell-ai", "updatedAt": "2026-09-10 18:20", "closedAt": null,
-      "status": "in-review", "resolution": null, "ready": "sent", "certifiedBy": "marcus", "certifiedAt": "2026-09-10 17:10", "digest": "sha256:9e03b6c1d4a8f257", "wo": "wo_01K6T9QX",
-      "dod": [
-        { "t": "Two migrations stamped in the same minute pass when their names sort", "k": "check", "tag": "code", "src": "issue" },
-        { "t": "A test covers a same-minute pair and a pair that sorts backwards", "k": "check", "tag": "test", "src": "assistant" },
-        { "t": "CLAUDE.md's migration section states the same-minute rule", "k": "check", "tag": "docs", "src": "assistant" },
-        { "t": "An architect confirms the check still refuses a stamp older than main", "k": "review", "tag": "review", "src": "assistant" }
-      ],
-      "notes": []
-    },
-    {
-      "id": "tsk_01K6RW9A2L", "kind": "github", "num": "a-intel/platform#571", "repo": "a-intel/platform",
-      "subject": "The approvals count includes expired approvals",
-      "body": "The topbar count still shows 3 after an approval expires.",
-      "labels": ["p1", "bug"], "owner": "gh:mbell-ai", "createdBy": "gh:priya-n", "createdAt": "2026-09-01 09:00", "updatedBy": "gh:mbell-ai", "updatedAt": "2026-09-08 16:40", "closedAt": "2026-09-08 16:40",
-      "status": "closed", "resolution": "done", "ready": "accepted", "certifiedBy": "marcus", "certifiedAt": "2026-09-02 10:00", "digest": "sha256:2f6a8e0d1b7c3945", "wo": "wo_01K6RZ41",
-      "dod": [
-        { "t": "The count drops when an approval expires", "k": "check", "tag": "code", "src": "assistant" },
-        { "t": "A test expires one approval and asserts the count", "k": "check", "tag": "test", "src": "assistant" }
-      ],
-      "notes": []
-    },
-    {
-      "id": "tsk_01K6RX4C8T", "kind": "linear", "num": "PLAT-201", "repo": "a-intel/platform",
-      "subject": "Approvals badge shows a stale number",
-      "body": "Same as a-intel/platform#571.",
-      "labels": ["p2", "bug"], "owner": "lin:marcus", "createdBy": "lin:support-rota", "createdAt": "2026-09-01 11:20", "updatedBy": "lin:marcus", "updatedAt": "2026-09-02 09:30", "closedAt": "2026-09-02 09:30",
-      "status": "closed", "resolution": "duplicate", "ready": "closed",
-      "dod": [],
-      "notes": []
+     "t": "Over the next 7 days, triage's tool definitions average under 3,000 tokens per model call",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
     }
-  ],
-  "workOrders": [
+   ],
+   "notes": [
+    "Written in Oxagen from a finding. There is no provider issue to close."
+   ]
+  },
+  {
+   "id": "tsk_01K6S2M4QF",
+   "kind": "github",
+   "num": "a-intel/platform#612",
+   "repo": "a-intel/platform",
+   "subject": "Rate limiter returns 500 instead of 429 when the key bucket is empty",
+   "body": "POST /v1/keys returns 500 once a key's bucket is empty. The limiter throws RateLimitExhausted and nothing maps it, so the client sees an internal error and retries at once.\n\nSteps: create a key with a 5 per minute limit, send 6 requests in 10 seconds. The sixth returns 500.\n\nExpected: 429 with Retry-After.",
+   "labels": [
+    "p1",
+    "bug"
+   ],
+   "owner": "gh:mbell-ai",
+   "createdBy": "gh:vk-dev",
+   "createdAt": "2026-09-08 10:14",
+   "updatedBy": "gh:mbell-ai",
+   "updatedAt": "2026-09-10 16:02",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "ready",
+   "certifiedBy": "marcus",
+   "certifiedAt": "2026-09-10 16:05",
+   "digest": "sha256:61c0a9e24d7f18b3",
+   "dod": [
     {
-      "id": "wo_01K5RS7M4N",
-      "ws": "core-platform",
-      "kind": "dispatched",
-      "title": "Cut 4.11.0 release notes",
-      "tasks": ["tsk_01K5RS482Q"],
-      "target": {
-        "kind": "agent",
-        "id": "a-intel.core.release-manager"
-      },
-      "by": "marcus",
-      "sent": "2026-09-11 09:13",
-      "status": "in progress",
-      "stage": 1,
-      "returns": 0,
-      "repos": ["a-intel/platform"],
-      "cap": "10.00",
-      "digest": "sha256:5d0e81c27a4b9f36",
-      "prompt": "Cut the 4.11.0 release notes for a-intel/platform.\n\nDraft from every pull request merged since the v4.10.3 tag, group them under Features, Fixes and Breaking, and write the draft to release/4.11.0-notes.md on a release branch. Then create the GitHub release v4.11.0 as a draft so nothing publishes until it is approved. Follow ctx.release.notes-format. Do not touch main.",
-      "runs": [
-        {
-          "stage": 1,
-          "run": "run_01K5RS7M2E8FJ3QW",
-          "state": "live",
-          "pr": "",
-          "note": ""
-        }
-      ],
-      "claims": [
-        {
-          "by": "a-intel.core.release-manager",
-          "run": "run_01K5RS7M2E8FJ3QW",
-          "ev": "release/4.11.0-notes.md lists 27 entries; compare v4.10.3...main counts 27"
-        },
-        {
-          "by": "a-intel.core.release-manager",
-          "run": "run_01K5RS7M2E8FJ3QW",
-          "ev": "release:lint ok, 3 sections, Breaking before Fixes"
-        },
-        {
-          "by": "a-intel.core.release-manager",
-          "run": "run_01K5RS7M2E8FJ3QW",
-          "ev": "commit 3f2a9c1 on release/4.11.0-notes, main untouched"
-        },
-        null
-      ]
+     "t": "POST /v1/keys returns 429 with a Retry-After header when the bucket is empty",
+     "k": "check",
+     "tag": "code",
+     "src": "issue"
     },
     {
-      "id": "wo_01K6T9QX", "ws": "core-platform", "title": "Same-minute migration stamps",
-      "tasks": ["tsk_01K6SF2W6Q"], "target": { "kind": "workflow", "id": "fix-validate-document-review" },
-      "by": "marcus", "sent": "2026-09-10 17:14", "status": "in progress", "stage": 2, "returns": 1,
-      "repos": ["a-intel/platform"], "digest": "sha256:ab41c7e09f3d2865",
-      "runs": [
-        { "stage": 1, "run": "run_01K6TB1Q8D", "state": "sealed", "pr": "a-intel/platform#524", "note": "Sorted same-minute stamps by name. Added two tests. Handed to the validator." },
-        { "stage": 2, "run": "run_01K6TC4E2M", "state": "sealed", "pr": "a-intel/platform#524", "note": "Sent back: the backwards pair still passes. Item 2 is not met.", "returned": true },
-        { "stage": 1, "run": "run_01K6TD7H5R", "state": "sealed", "pr": "a-intel/platform#524", "note": "Refuse a pair whose names sort backwards. Handed to the validator again." },
-        { "stage": 2, "run": "run_01K6TE2W9K", "state": "live", "pr": "a-intel/platform#524", "note": "" }
-      ],
-      "claims": [
-        { "by": "a-intel.core.bug-fixer", "run": "run_01K6TD7H5R", "ev": "commit 4e1b9a0 · test lint-migrations.test.ts" },
-        { "by": "a-intel.core.bug-fixer", "run": "run_01K6TD7H5R", "ev": "test lint-migrations.test.ts, cases same-minute and backwards" },
-        null,
-        null
-      ]
+     "t": "A unit test sends six requests against a five-per-minute key and asserts the sixth is 429",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
     },
     {
-      "id": "wo_01K6TA2M", "ws": "core-platform", "title": "pnpm 10.18",
-      "tasks": ["tsk_01K6SE4P7J"], "target": { "kind": "agent", "id": "a-intel.core.stella-ci" },
-      "by": "marcus", "sent": "2026-09-10 12:02", "status": "waiting on you", "stage": 1, "returns": 0,
-      "repos": ["a-intel/platform"], "digest": "sha256:73d0e5a1c9b24f68",
-      "runs": [
-        { "stage": 1, "run": "run_01K6TA9F3N", "state": "sealed", "pr": "a-intel/platform#523", "note": "Bumped packageManager, regenerated the lockfile, CI green." }
-      ],
-      "claims": [
-        { "by": "a-intel.core.stella-ci", "run": "run_01K6TA9F3N", "ev": "commit 8c20d4f · package.json" },
-        { "by": "a-intel.core.stella-ci", "run": "run_01K6TA9F3N", "ev": "lockfile diff 0 optional-dependency lines" },
-        { "by": "a-intel.core.stella-ci", "run": "run_01K6TA9F3N", "ev": "checks 6 / 6 on a-intel/platform#523" }
-      ]
+     "t": "No other route that uses the limiter returns 500 for an exhausted bucket",
+     "k": "check",
+     "tag": "code",
+     "src": "assistant"
     },
     {
-      "id": "wo_01K6RZ41", "ws": "core-platform", "title": "Expired approvals in the count",
-      "tasks": ["tsk_01K6RW9A2L"], "target": { "kind": "agent", "id": "a-intel.core.bug-fixer" },
-      "by": "marcus", "sent": "2026-09-02 10:04", "status": "accepted", "stage": 1, "returns": 0, "accepted": "2026-09-08 16:40",
-      "repos": ["a-intel/platform"], "digest": "sha256:e8c14b2d07f93a56",
-      "runs": [
-        { "stage": 1, "run": "run_01K6S0M2QA", "state": "sealed", "pr": "a-intel/platform#519", "note": "Filtered expired approvals from the count. One test." }
-      ],
-      "claims": [
-        { "by": "a-intel.core.bug-fixer", "run": "run_01K6S0M2QA", "ev": "commit d1f07a3", "ok": "marcus" },
-        { "by": "a-intel.core.bug-fixer", "run": "run_01K6S0M2QA", "ev": "test apd-count.test.ts", "ok": "marcus" }
-      ]
+     "t": "The API reference for rate limits names the 429 response and its header",
+     "k": "check",
+     "tag": "docs",
+     "src": "operator"
+    },
+    {
+     "t": "A reviewer confirms the error mapping lives in the central onError handler",
+     "k": "review",
+     "tag": "review",
+     "src": "assistant"
     }
-  ],
-  "workflows": [
+   ],
+   "notes": [
+    "The issue gives a reproduction and an expected result. Nothing is missing."
+   ]
+  },
+  {
+   "id": "tsk_01K6S4B8XN",
+   "kind": "linear",
+   "num": "PLAT-231",
+   "repo": "a-intel/platform",
+   "subject": "Session cookie is not refreshed after the two-factor step-up",
+   "body": "After a step-up with TOTP the session keeps the old expiry. A person who steps up 55 minutes into a session is signed out 5 minutes later, in the middle of an approval.",
+   "labels": [
+    "p1",
+    "bug"
+   ],
+   "owner": "lin:marcus",
+   "createdBy": "lin:support-rota",
+   "createdAt": "2026-09-06 09:40",
+   "updatedBy": "lin:priya",
+   "updatedAt": "2026-09-09 11:18",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "ready",
+   "certifiedBy": "marcus",
+   "certifiedAt": "2026-09-09 14:30",
+   "digest": "sha256:0b44e19c3a8d72f5",
+   "dod": [
     {
-      "id": "fix-validate-document-review", "name": "Fix, validate, document, review",
-      "file": ".oxagen/workflows/fix-validate-document-review.toml", "state": "published", "commit": "a4c91e2", "used": 1,
-      "desc": "A bug fix passes through a validator, a documenter and an architect before you accept it.",
-      "stages": [
-        { "role": "Fix", "agent": "a-intel.core.bug-fixer", "owns": ["code"], "onFail": "stop" },
-        { "role": "Validate", "agent": "a-intel.core.validator", "owns": ["test"], "onFail": "return:1", "maxReturns": 2 },
-        { "role": "Document", "agent": "a-intel.core.documenter", "owns": ["docs"], "onFail": "stop" },
-        { "role": "Review", "agent": "a-intel.core.architect", "owns": ["review"], "onFail": "return:1", "maxReturns": 1 }
-      ]
+     "t": "A successful step-up issues a new session cookie with a fresh expiry",
+     "k": "check",
+     "tag": "code",
+     "src": "assistant"
     },
     {
-      "id": "fix-and-review", "name": "Fix and review",
-      "file": ".oxagen/workflows/fix-and-review.toml", "state": "published", "commit": "a4c91e2", "used": 0,
-      "desc": "One agent fixes and an architect reviews.",
-      "stages": [
-        { "role": "Fix", "agent": "a-intel.core.bug-fixer", "owns": ["code", "test", "docs"], "onFail": "stop" },
-        { "role": "Review", "agent": "a-intel.core.architect", "owns": ["review"], "onFail": "return:1", "maxReturns": 2 }
-      ]
+     "t": "A test steps up at minute 55 and asserts the session outlives minute 60",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
     },
     {
-      "id": "docs-pass", "name": "Docs pass",
-      "file": ".oxagen/workflows/docs-pass.toml", "state": "pull request open", "pr": "a-intel/platform#526", "used": 0,
-      "desc": "A documenter writes and an architect checks it against the code.",
-      "stages": [
-        { "role": "Document", "agent": "a-intel.core.documenter", "owns": ["docs"], "onFail": "stop" },
-        { "role": "Review", "agent": "a-intel.core.architect", "owns": ["review"], "onFail": "return:1", "maxReturns": 1 }
-      ]
+     "t": "Rate limiting on the step-up route is unchanged",
+     "k": "check",
+     "tag": "test",
+     "src": "operator"
     }
-  ],
-  "agents": [
-    { "key": "a-intel.core.bug-fixer", "name": "Bug fixer", "harness": "claude-code", "harnessLabel": "Claude Code", "icon": "bug", "tone": "solid",
-      "desc": "Fixes one defect per work order on a branch and opens a pull request. Never merges.", "runs30": 46, "spend30": "88.40", "tier": "gateway", "host": "mbell-mbp-16" },
-    { "key": "a-intel.core.validator", "name": "Validator", "harness": "codex-cli", "harnessLabel": "Codex CLI", "icon": "flask-conical", "tone": "soft",
-      "desc": "Runs the tests a definition of done names and returns the work when one fails. Writes tests only.", "runs30": 39, "spend30": "41.12", "tier": "gateway", "host": "ci-runner-07" },
-    { "key": "a-intel.core.documenter", "name": "Documenter", "harness": "cursor", "harnessLabel": "Cursor", "icon": "pencil-line", "tone": "line",
-      "desc": "Writes the docs a definition of done names, in the pull request it was handed.", "runs30": 22, "spend30": "19.75", "tier": "harness", "host": "mbell-mbp-16" },
-    { "key": "a-intel.core.architect", "name": "Architect", "harness": "stella", "harnessLabel": "stella", "icon": "compass", "tone": "solid",
-      "desc": "Reviews a pull request against the architecture rules and the review items. Comments; never approves on its own.", "runs30": 31, "spend30": "57.60", "tier": "contained", "host": "stella-ci" }
-  ]
+   ],
+   "notes": [
+    "The report names TOTP only. The assistant assumed passkey step-up behaves the same and says so in item 1."
+   ]
+  },
+  {
+   "id": "tsk_01K6SJ7N2W",
+   "kind": "github",
+   "num": "a-intel/platform#647",
+   "repo": "a-intel/platform",
+   "subject": "Session cookie refresh after two-factor on the API",
+   "body": "The API's own session cookie is not refreshed after a two-factor step, the same defect PLAT-231 reports for the app. Refresh it on the step's success and cover it with a test.",
+   "labels": [
+    "p1",
+    "bug"
+   ],
+   "owner": "gh:mbell-ai",
+   "createdBy": "gh:vk-dev",
+   "createdAt": "2026-09-10 15:20",
+   "updatedBy": "gh:mbell-ai",
+   "updatedAt": "2026-09-11 11:10",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "sent",
+   "certifiedBy": "marcus",
+   "certifiedAt": "2026-09-11 11:10",
+   "digest": "sha256:3f8a1c6e0d2b7495",
+   "wo": "wo_01K6TC5A",
+   "dod": [
+    {
+     "t": "The API session cookie is reissued on a successful two-factor step",
+     "k": "check",
+     "tag": "code",
+     "src": "issue"
+    },
+    {
+     "t": "A test signs in, passes two-factor, and asserts a new cookie with a later expiry",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
+    },
+    {
+     "t": "A reviewer confirms the refresh does not extend a session past the workspace's limit",
+     "k": "review",
+     "tag": "review",
+     "src": "assistant"
+    }
+   ],
+   "notes": [
+    "PLAT-231 covers the app. The assistant assumed the API path is a separate fix, as the issue says."
+   ]
+  },
+  {
+   "id": "tsk_01K6S5R2HD",
+   "kind": "github",
+   "num": "a-intel/platform#618",
+   "repo": "a-intel/platform",
+   "subject": "Webhook retries double-count delivery gaps on the Repositories tab",
+   "body": "When GitHub redelivers a webhook, the Events column counts the gap twice. core-platform showed 2 gaps for one missed delivery on 2026-09-07.",
+   "labels": [
+    "p2",
+    "bug"
+   ],
+   "owner": "gh:amara-l",
+   "createdBy": "gh:mbell-ai",
+   "createdAt": "2026-09-07 17:55",
+   "updatedBy": "gh:amara-l",
+   "updatedAt": "2026-09-09 08:12",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "ready",
+   "certifiedBy": "marcus",
+   "certifiedAt": "2026-09-09 09:00",
+   "digest": "sha256:7ae2d05b91c6f340",
+   "dod": [
+    {
+     "t": "A redelivered event with the same delivery id is counted once",
+     "k": "check",
+     "tag": "code",
+     "src": "assistant"
+    },
+    {
+     "t": "A test replays one delivery twice and asserts one gap closes",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
+    },
+    {
+     "t": "The Events column help text says how redeliveries are counted",
+     "k": "check",
+     "tag": "docs",
+     "src": "assistant"
+    }
+   ],
+   "notes": []
+  },
+  {
+   "id": "tsk_01K6SG4R8T",
+   "kind": "github",
+   "num": "a-intel/platform#640",
+   "repo": "a-intel/platform",
+   "subject": "Return 429 with Retry-After from the rate limiter",
+   "body": "Once #612 lands, the limiter answers 429. Add the Retry-After header from the bucket's refill time, and cover the webhook retry path from #618 so a retried delivery is not counted twice against the limit.",
+   "labels": [
+    "p2",
+    "improvement"
+   ],
+   "owner": "gh:mbell-ai",
+   "createdBy": "gh:vk-dev",
+   "createdAt": "2026-09-10 15:20",
+   "updatedBy": "gh:mbell-ai",
+   "updatedAt": "2026-09-11 10:40",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "ready",
+   "certifiedBy": "marcus",
+   "certifiedAt": "2026-09-11 10:40",
+   "digest": "sha256:7d2e91c4a5b06f18",
+   "wo": null,
+   "dod": [
+    {
+     "t": "A 429 from the limiter carries Retry-After with the bucket's refill time in seconds",
+     "k": "check",
+     "tag": "code",
+     "src": "issue"
+    },
+    {
+     "t": "A test covers a retried webhook delivery under the limit and asserts one count",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
+    },
+    {
+     "t": "The rate limits page in the docs names the header",
+     "k": "check",
+     "tag": "docs",
+     "src": "assistant"
+    }
+   ],
+   "notes": [
+    "The issue does not say whether Retry-After is seconds or an HTTP date. The assistant assumed seconds, as the limiter's clients parse."
+   ],
+   "blockedBy": [
+    {
+     "id": "tsk_01K6S2M4QF",
+     "src": "provider"
+    },
+    {
+     "id": "tsk_01K6S5R2HD",
+     "src": "oxagen",
+     "by": "marcus",
+     "at": "2026-09-11 10:02"
+    }
+   ],
+   "outsideLinks": 1
+  },
+  {
+   "id": "tsk_01K6S7C5PA",
+   "kind": "github",
+   "num": "a-intel/platform#633",
+   "repo": "a-intel/platform",
+   "subject": "Budget breach pauses the wrong run when two runs share a host",
+   "body": "Two runs of release-manager on mbell-mbp-16. The budget breach on run A paused run B. The pause targets the host session, not the run.",
+   "labels": [
+    "p0",
+    "bug"
+   ],
+   "owner": "gh:mbell-ai",
+   "createdBy": "gh:priya-n",
+   "createdAt": "2026-09-11 07:48",
+   "updatedBy": "gh:priya-n",
+   "updatedAt": "2026-09-11 07:48",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "draft",
+   "dod": [
+    {
+     "t": "A budget breach pauses the run that breached and no other run on the host",
+     "k": "check",
+     "tag": "code",
+     "src": "assistant"
+    },
+    {
+     "t": "A test starts two runs on one host, breaches one budget, and asserts the other keeps running",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
+    },
+    {
+     "t": "The control.pause frame names the run id it targeted",
+     "k": "check",
+     "tag": "code",
+     "src": "assistant"
+    },
+    {
+     "t": "An incident note records every run paused by mistake since the oxagend 1.6 release",
+     "k": "review",
+     "tag": "review",
+     "src": "assistant"
+    }
+   ],
+   "notes": [
+    "The issue does not say which oxagend version. The assistant assumed 1.6.2, the collector on the named host.",
+    "Item 4 is a person's review. An agent can gather the list, and a person accepts it."
+   ]
+  },
+  {
+   "id": "tsk_01K6SH1M3V",
+   "kind": "github",
+   "num": "a-intel/platform#644",
+   "repo": "a-intel/platform",
+   "subject": "Note the budget pause fix in the 4.11 release notes",
+   "body": "When #633 lands, add it to the 4.11.0 notes under Fixes with its migration note. Nothing to write until it does.",
+   "labels": [
+    "p3",
+    "documentation"
+   ],
+   "owner": "gh:mbell-ai",
+   "createdBy": "gh:vk-dev",
+   "createdAt": "2026-09-10 15:20",
+   "updatedBy": "gh:mbell-ai",
+   "updatedAt": "2026-09-11 10:40",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "ready",
+   "certifiedBy": "marcus",
+   "certifiedAt": "2026-09-11 10:40",
+   "digest": "sha256:b19f4e0c27d8a635",
+   "wo": "wo_01K6TB2X",
+   "dod": [
+    {
+     "t": "The 4.11.0 notes name the budget pause fix under Fixes with a link to #633",
+     "k": "check",
+     "tag": "docs",
+     "src": "issue"
+    },
+    {
+     "t": "The notes say which runs the fix pauses and which it leaves running",
+     "k": "review",
+     "tag": "review",
+     "src": "assistant"
+    }
+   ],
+   "notes": [],
+   "queued": "wo_01K6TB2X",
+   "blockedBy": [
+    {
+     "id": "tsk_01K6S7C5PA",
+     "src": "provider"
+    }
+   ]
+  },
+  {
+   "id": "tsk_01K6S8N1VE",
+   "kind": "linear",
+   "num": "PLAT-240",
+   "repo": "a-intel/platform",
+   "subject": "Add a retry budget to the GitHub App token exchange",
+   "body": "Token exchange retries forever on a 502 from GitHub. Cap it at 3 attempts with jittered backoff and surface the failure on the Repositories page.",
+   "labels": [
+    "p2",
+    "improvement"
+   ],
+   "owner": "lin:priya",
+   "createdBy": "lin:priya",
+   "createdAt": "2026-09-09 13:02",
+   "updatedBy": "lin:priya",
+   "updatedAt": "2026-09-10 10:40",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "draft",
+   "dod": [
+    {
+     "t": "Token exchange stops after 3 attempts with jittered backoff",
+     "k": "check",
+     "tag": "code",
+     "src": "issue"
+    },
+    {
+     "t": "The Repositories page shows the exchange failure with its GitHub status",
+     "k": "check",
+     "tag": "code",
+     "src": "issue"
+    },
+    {
+     "t": "A test stubs three 502 responses and asserts the third failure is surfaced",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
+    }
+   ],
+   "notes": []
+  },
+  {
+   "id": "tsk_01K6S9D7KW",
+   "kind": "github",
+   "num": "a-intel/platform#621",
+   "repo": "a-intel/platform",
+   "subject": "Flaky test: the approvals drawer closes on Escape twice",
+   "body": "apd.test.tsx fails about 1 run in 40. The drawer's keydown listener is attached twice after a hot reload.",
+   "labels": [
+    "p2",
+    "test"
+   ],
+   "owner": "gh:jonas-okoro",
+   "createdBy": "gh:jonas-okoro",
+   "createdAt": "2026-09-08 15:30",
+   "updatedBy": "gh:jonas-okoro",
+   "updatedAt": "2026-09-08 15:30",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "draft",
+   "dod": [
+    {
+     "t": "The keydown listener is attached once per mount and removed on unmount",
+     "k": "check",
+     "tag": "code",
+     "src": "assistant"
+    },
+    {
+     "t": "apd.test.tsx passes 200 consecutive runs",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
+    }
+   ],
+   "notes": [
+    "The owner, jonas-okoro, is not yet mapped to a workspace member. The task can still be certified and sent."
+   ],
+   "blockedBy": [
+    {
+     "id": "tsk_01K6RX4C8T",
+     "src": "provider"
+    }
+   ]
+  },
+  {
+   "id": "tsk_01K6SA3G9Z",
+   "kind": "linear",
+   "num": "PLAT-244",
+   "repo": "a-intel/platform",
+   "subject": "Export a spend report as CSV",
+   "body": "Finance wants the Spend page's month as a CSV with one row per agent.",
+   "labels": [
+    "p3",
+    "new-feature"
+   ],
+   "owner": "lin:priya",
+   "createdBy": "lin:priya",
+   "createdAt": "2026-09-11 08:55",
+   "updatedBy": "lin:priya",
+   "updatedAt": "2026-09-11 08:55",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "drafting",
+   "dod": [],
+   "notes": []
+  },
+  {
+   "id": "tsk_01K6SB6T2C",
+   "kind": "github",
+   "num": "a-intel/platform#604",
+   "repo": "a-intel/platform",
+   "subject": "Document the steering bundle cache rules",
+   "body": "Nobody outside the steering team knows when the bundle digest changes and why a mid-day publish drops cache reads.",
+   "labels": [
+    "p3",
+    "documentation"
+   ],
+   "owner": "gh:priya-n",
+   "createdBy": "gh:priya-n",
+   "createdAt": "2026-09-04 12:20",
+   "updatedBy": "gh:priya-n",
+   "updatedAt": "2026-09-05 09:03",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "draft",
+   "dod": [
+    {
+     "t": "A docs page says which changes alter the bundle digest",
+     "k": "check",
+     "tag": "docs",
+     "src": "assistant"
+    },
+    {
+     "t": "The page shows the cache-read drop after a mid-day publish with a real number from Spend",
+     "k": "check",
+     "tag": "docs",
+     "src": "assistant"
+    },
+    {
+     "t": "A reviewer from the steering team confirms the page is correct",
+     "k": "review",
+     "tag": "review",
+     "src": "assistant"
+    }
+   ],
+   "notes": []
+  },
+  {
+   "id": "tsk_01K6SC1Y5M",
+   "kind": "github",
+   "num": "a-intel/platform#590",
+   "repo": "a-intel/platform",
+   "subject": "Audit export omits incident notes",
+   "body": "The audit export bundle carries incidents without their notes. Auditors asked for them.\n\nUpdate 2026-09-10: notes added after an incident closes must be exported too.",
+   "labels": [
+    "p2",
+    "bug"
+   ],
+   "owner": "gh:mbell-ai",
+   "createdBy": "gh:priya-n",
+   "createdAt": "2026-09-02 10:10",
+   "updatedBy": "gh:priya-n",
+   "updatedAt": "2026-09-10 17:44",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "changed",
+   "certifiedBy": "marcus",
+   "certifiedAt": "2026-09-03 09:15",
+   "digest": "sha256:c3f81d09a2e6b7d4",
+   "was": "The audit export bundle carries incidents without their notes. Auditors asked for them.",
+   "dod": [
+    {
+     "t": "Each incident in the export carries its notes in order",
+     "k": "check",
+     "tag": "code",
+     "src": "assistant"
+    },
+    {
+     "t": "A test exports one incident with two notes and asserts both are present",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
+    }
+   ],
+   "notes": [
+    "The description changed after certification. Notes added after close are now in scope, and no item covers them."
+   ]
+  },
+  {
+   "id": "tsk_01K6SD8R3B",
+   "kind": "linear",
+   "num": "PLAT-219",
+   "repo": "a-intel/platform",
+   "subject": "Rotate the Linear OAuth app secret",
+   "body": "The secret is 13 months old. Blocked until security issues the new one.",
+   "labels": [
+    "p2",
+    "chore"
+   ],
+   "owner": "lin:ines",
+   "createdBy": "lin:marcus",
+   "createdAt": "2026-08-28 11:30",
+   "updatedBy": "lin:ines",
+   "updatedAt": "2026-09-04 14:00",
+   "closedAt": null,
+   "status": "blocked",
+   "resolution": null,
+   "ready": "draft",
+   "dod": [
+    {
+     "t": "The Linear connection uses the new secret and the old one is revoked",
+     "k": "check",
+     "tag": "code",
+     "src": "assistant"
+    },
+    {
+     "t": "A sync runs green after the rotation",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
+    }
+   ],
+   "notes": [
+    "Blocked upstream. A blocked task can be certified and cannot be sent until it is open again."
+   ]
+  },
+  {
+   "id": "tsk_01K6SE4P7J",
+   "kind": "github",
+   "num": "a-intel/platform#599",
+   "repo": "a-intel/platform",
+   "subject": "Bump pnpm to 10.18 across the workspace",
+   "body": "10.18 fixes the lockfile churn on optional dependencies.",
+   "labels": [
+    "p3",
+    "chore"
+   ],
+   "owner": "gh:dependabot",
+   "createdBy": "gh:dependabot",
+   "createdAt": "2026-09-03 06:00",
+   "updatedBy": "gh:mbell-ai",
+   "updatedAt": "2026-09-10 12:00",
+   "closedAt": null,
+   "status": "open",
+   "resolution": null,
+   "ready": "sent",
+   "certifiedBy": "marcus",
+   "certifiedAt": "2026-09-10 11:50",
+   "digest": "sha256:5d2e7f1a0c94b863",
+   "wo": "wo_01K6TA2M",
+   "dod": [
+    {
+     "t": "packageManager in package.json reads pnpm@10.18.0",
+     "k": "check",
+     "tag": "code",
+     "src": "assistant"
+    },
+    {
+     "t": "The lockfile regenerates with no churn on optional dependencies",
+     "k": "check",
+     "tag": "test",
+     "src": "issue"
+    },
+    {
+     "t": "CI is green on the pull request",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
+    }
+   ],
+   "notes": []
+  },
+  {
+   "id": "tsk_01K6SF2W6Q",
+   "kind": "github",
+   "num": "a-intel/platform#587",
+   "repo": "a-intel/platform",
+   "subject": "Migration stamp check rejects two migrations stamped in the same minute",
+   "body": "db:lint-migrations rejects 20260910143000_a.sql and 20260910143000_b.sql. Two stamps in one minute are legal if their names sort.",
+   "labels": [
+    "p1",
+    "bug"
+   ],
+   "owner": "gh:mbell-ai",
+   "createdBy": "gh:amara-l",
+   "createdAt": "2026-09-09 14:40",
+   "updatedBy": "gh:mbell-ai",
+   "updatedAt": "2026-09-10 18:20",
+   "closedAt": null,
+   "status": "in-review",
+   "resolution": null,
+   "ready": "sent",
+   "certifiedBy": "marcus",
+   "certifiedAt": "2026-09-10 17:10",
+   "digest": "sha256:9e03b6c1d4a8f257",
+   "wo": "wo_01K6T9QX",
+   "dod": [
+    {
+     "t": "Two migrations stamped in the same minute pass when their names sort",
+     "k": "check",
+     "tag": "code",
+     "src": "issue"
+    },
+    {
+     "t": "A test covers a same-minute pair and a pair that sorts backwards",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
+    },
+    {
+     "t": "CLAUDE.md's migration section states the same-minute rule",
+     "k": "check",
+     "tag": "docs",
+     "src": "assistant"
+    },
+    {
+     "t": "An architect confirms the check still refuses a stamp older than main",
+     "k": "review",
+     "tag": "review",
+     "src": "assistant"
+    }
+   ],
+   "notes": []
+  },
+  {
+   "id": "tsk_01K6RW9A2L",
+   "kind": "github",
+   "num": "a-intel/platform#571",
+   "repo": "a-intel/platform",
+   "subject": "The approvals count includes expired approvals",
+   "body": "The topbar count still shows 3 after an approval expires.",
+   "labels": [
+    "p1",
+    "bug"
+   ],
+   "owner": "gh:mbell-ai",
+   "createdBy": "gh:priya-n",
+   "createdAt": "2026-09-01 09:00",
+   "updatedBy": "gh:mbell-ai",
+   "updatedAt": "2026-09-08 16:40",
+   "closedAt": "2026-09-08 16:40",
+   "status": "closed",
+   "resolution": "done",
+   "ready": "accepted",
+   "certifiedBy": "marcus",
+   "certifiedAt": "2026-09-02 10:00",
+   "digest": "sha256:2f6a8e0d1b7c3945",
+   "wo": "wo_01K6RZ41",
+   "dod": [
+    {
+     "t": "The count drops when an approval expires",
+     "k": "check",
+     "tag": "code",
+     "src": "assistant"
+    },
+    {
+     "t": "A test expires one approval and asserts the count",
+     "k": "check",
+     "tag": "test",
+     "src": "assistant"
+    }
+   ],
+   "notes": []
+  },
+  {
+   "id": "tsk_01K6RX4C8T",
+   "kind": "linear",
+   "num": "PLAT-201",
+   "repo": "a-intel/platform",
+   "subject": "Approvals badge shows a stale number",
+   "body": "Same as a-intel/platform#571.",
+   "labels": [
+    "p2",
+    "bug"
+   ],
+   "owner": "lin:marcus",
+   "createdBy": "lin:support-rota",
+   "createdAt": "2026-09-01 11:20",
+   "updatedBy": "lin:marcus",
+   "updatedAt": "2026-09-02 09:30",
+   "closedAt": "2026-09-02 09:30",
+   "status": "closed",
+   "resolution": "duplicate",
+   "ready": "closed",
+   "dod": [],
+   "notes": []
+  }
+ ],
+ "workOrders": [
+  {
+   "id": "wo_01K5RS7M4N",
+   "ws": "core-platform",
+   "kind": "dispatched",
+   "title": "Cut 4.11.0 release notes",
+   "tasks": [
+    "tsk_01K5RS482Q"
+   ],
+   "target": {
+    "kind": "agent",
+    "id": "a-intel.core.release-manager"
+   },
+   "by": "marcus",
+   "sent": "2026-09-11 09:13",
+   "status": "in progress",
+   "stage": 1,
+   "returns": 0,
+   "repos": [
+    "a-intel/platform"
+   ],
+   "cap": "10.00",
+   "digest": "sha256:5d0e81c27a4b9f36",
+   "prompt": "Cut the 4.11.0 release notes for a-intel/platform.\n\nDraft from every pull request merged since the v4.10.3 tag, group them under Features, Fixes and Breaking, and write the draft to release/4.11.0-notes.md on a release branch. Then create the GitHub release v4.11.0 as a draft so nothing publishes until it is approved. Follow ctx.release.notes-format. Do not touch main.",
+   "runs": [
+    {
+     "stage": 1,
+     "run": "run_01K5RS7M2E8FJ3QW",
+     "state": "live",
+     "pr": "",
+     "note": ""
+    }
+   ],
+   "claims": [
+    {
+     "by": "a-intel.core.release-manager",
+     "run": "run_01K5RS7M2E8FJ3QW",
+     "ev": "release/4.11.0-notes.md lists 27 entries; compare v4.10.3...main counts 27"
+    },
+    {
+     "by": "a-intel.core.release-manager",
+     "run": "run_01K5RS7M2E8FJ3QW",
+     "ev": "release:lint ok, 3 sections, Breaking before Fixes"
+    },
+    {
+     "by": "a-intel.core.release-manager",
+     "run": "run_01K5RS7M2E8FJ3QW",
+     "ev": "commit 3f2a9c1 on release/4.11.0-notes, main untouched"
+    },
+    null
+   ]
+  },
+  {
+   "id": "wo_01K6T9QX",
+   "ws": "core-platform",
+   "title": "Same-minute migration stamps",
+   "tasks": [
+    "tsk_01K6SF2W6Q"
+   ],
+   "target": {
+    "kind": "workflow",
+    "id": "fix-validate-document-review"
+   },
+   "by": "marcus",
+   "sent": "2026-09-10 17:14",
+   "status": "in progress",
+   "stage": 2,
+   "returns": 1,
+   "repos": [
+    "a-intel/platform"
+   ],
+   "digest": "sha256:ab41c7e09f3d2865",
+   "runs": [
+    {
+     "stage": 1,
+     "run": "run_01K6TB1Q8D",
+     "state": "sealed",
+     "pr": "a-intel/platform#524",
+     "note": "Sorted same-minute stamps by name. Added two tests. Handed to the validator."
+    },
+    {
+     "stage": 2,
+     "run": "run_01K6TC4E2M",
+     "state": "sealed",
+     "pr": "a-intel/platform#524",
+     "note": "Sent back: the backwards pair still passes. Item 2 is not met.",
+     "returned": true
+    },
+    {
+     "stage": 1,
+     "run": "run_01K6TD7H5R",
+     "state": "sealed",
+     "pr": "a-intel/platform#524",
+     "note": "Refuse a pair whose names sort backwards. Handed to the validator again."
+    },
+    {
+     "stage": 2,
+     "run": "run_01K6TE2W9K",
+     "state": "live",
+     "pr": "a-intel/platform#524",
+     "note": ""
+    },
+    {
+     "stage": 3,
+     "run": "run_01K6TE3X1D",
+     "state": "live",
+     "pr": "a-intel/platform#524",
+     "note": ""
+    }
+   ],
+   "claims": [
+    {
+     "by": "a-intel.core.bug-fixer",
+     "run": "run_01K6TD7H5R",
+     "ev": "commit 4e1b9a0 · test lint-migrations.test.ts"
+    },
+    {
+     "by": "a-intel.core.bug-fixer",
+     "run": "run_01K6TD7H5R",
+     "ev": "test lint-migrations.test.ts, cases same-minute and backwards"
+    },
+    null,
+    null
+   ],
+   "started": "2026-09-10 17:31"
+  },
+  {
+   "id": "wo_01K6TA2M",
+   "ws": "core-platform",
+   "title": "pnpm 10.18",
+   "tasks": [
+    "tsk_01K6SE4P7J"
+   ],
+   "target": {
+    "kind": "agent",
+    "id": "a-intel.core.stella-ci"
+   },
+   "by": "marcus",
+   "sent": "2026-09-10 12:02",
+   "status": "waiting on you",
+   "stage": 1,
+   "returns": 0,
+   "repos": [
+    "a-intel/platform"
+   ],
+   "digest": "sha256:73d0e5a1c9b24f68",
+   "runs": [
+    {
+     "stage": 1,
+     "run": "run_01K6TA9F3N",
+     "state": "sealed",
+     "pr": "a-intel/platform#523",
+     "note": "Bumped packageManager, regenerated the lockfile, CI green."
+    }
+   ],
+   "claims": [
+    {
+     "by": "a-intel.core.stella-ci",
+     "run": "run_01K6TA9F3N",
+     "ev": "commit 8c20d4f · package.json"
+    },
+    {
+     "by": "a-intel.core.stella-ci",
+     "run": "run_01K6TA9F3N",
+     "ev": "lockfile diff 0 optional-dependency lines"
+    },
+    {
+     "by": "a-intel.core.stella-ci",
+     "run": "run_01K6TA9F3N",
+     "ev": "checks 6 / 6 on a-intel/platform#523"
+    }
+   ],
+   "started": "2026-09-10 09:12"
+  },
+  {
+   "id": "wo_01K6RZ41",
+   "ws": "core-platform",
+   "title": "Expired approvals in the count",
+   "tasks": [
+    "tsk_01K6RW9A2L"
+   ],
+   "target": {
+    "kind": "agent",
+    "id": "a-intel.core.bug-fixer"
+   },
+   "by": "marcus",
+   "sent": "2026-09-02 10:04",
+   "status": "accepted",
+   "stage": 1,
+   "returns": 0,
+   "accepted": "2026-09-08 16:40",
+   "repos": [
+    "a-intel/platform"
+   ],
+   "digest": "sha256:e8c14b2d07f93a56",
+   "runs": [
+    {
+     "stage": 1,
+     "run": "run_01K6S0M2QA",
+     "state": "sealed",
+     "pr": "a-intel/platform#519",
+     "note": "Filtered expired approvals from the count. One test."
+    }
+   ],
+   "claims": [
+    {
+     "by": "a-intel.core.bug-fixer",
+     "run": "run_01K6S0M2QA",
+     "ev": "commit d1f07a3",
+     "ok": "marcus"
+    },
+    {
+     "by": "a-intel.core.bug-fixer",
+     "run": "run_01K6S0M2QA",
+     "ev": "test apd-count.test.ts",
+     "ok": "marcus"
+    }
+   ],
+   "started": "2026-09-08 11:05"
+  },
+  {
+   "id": "wo_01K6TB2X",
+   "ws": "core-platform",
+   "kind": "dispatched",
+   "title": "Budget pause fix in the 4.11 notes",
+   "tasks": [
+    "tsk_01K6SH1M3V"
+   ],
+   "target": {
+    "kind": "agent",
+    "id": "a-intel.core.release-manager"
+   },
+   "by": "marcus",
+   "sent": "2026-09-11 11:05",
+   "status": "queued",
+   "stage": 1,
+   "returns": 0,
+   "repos": [
+    "a-intel/platform"
+   ],
+   "digest": "sha256:e4a7c10d9b3f2681",
+   "runs": [],
+   "claims": [
+    null,
+    null
+   ],
+   "cap": "10.00",
+   "expires": "2026-09-25"
+  },
+  {
+   "id": "wo_01K6TC5A",
+   "ws": "core-platform",
+   "kind": "dispatched",
+   "title": "Session cookie refresh on the API",
+   "tasks": [
+    "tsk_01K6SJ7N2W"
+   ],
+   "target": {
+    "kind": "agent",
+    "id": "a-intel.core.bug-fixer"
+   },
+   "by": "marcus",
+   "sent": "2026-09-11 11:20",
+   "status": "in progress",
+   "stage": 1,
+   "returns": 0,
+   "repos": [
+    "a-intel/platform"
+   ],
+   "digest": "sha256:0c5d8e2f7a1b9346",
+   "runs": [
+    {
+     "stage": 1,
+     "run": "run_01K6TC6A1P",
+     "state": "live",
+     "pr": null,
+     "note": ""
+    }
+   ],
+   "claims": [
+    null,
+    null,
+    null
+   ],
+   "cap": "12.00",
+   "send": "snd_01K6TC59",
+   "started": "2026-09-11 11:22"
+  },
+  {
+   "id": "wo_01K6TC5B",
+   "ws": "core-platform",
+   "kind": "dispatched",
+   "title": "Session cookie refresh on the API",
+   "tasks": [
+    "tsk_01K6SJ7N2W"
+   ],
+   "target": {
+    "kind": "agent",
+    "id": "a-intel.core.validator"
+   },
+   "by": "marcus",
+   "sent": "2026-09-11 11:20",
+   "status": "sent",
+   "stage": 1,
+   "returns": 0,
+   "repos": [
+    "a-intel/platform"
+   ],
+   "digest": "sha256:0c5d8e2f7a1b9346",
+   "runs": [],
+   "claims": [
+    null,
+    null,
+    null
+   ],
+   "cap": "12.00",
+   "send": "snd_01K6TC59"
+  }
+ ],
+ "workflows": [
+  {
+   "id": "fix-validate-document-review",
+   "name": "Fix, validate, document, review",
+   "file": ".oxagen/workflows/fix-validate-document-review.toml",
+   "state": "published",
+   "commit": "a4c91e2",
+   "used": 1,
+   "desc": "A bug fix goes to a validator and a documenter at the same time, and an architect reviews both before you accept it.",
+   "stages": [
+    {
+     "role": "Fix",
+     "agent": "a-intel.core.bug-fixer",
+     "owns": [
+      "code"
+     ],
+     "onFail": "stop",
+     "needs": []
+    },
+    {
+     "role": "Validate",
+     "agent": "a-intel.core.validator",
+     "owns": [
+      "test"
+     ],
+     "onFail": "return:1",
+     "maxReturns": 2,
+     "needs": [
+      "Fix"
+     ],
+     "returnTo": "Fix"
+    },
+    {
+     "role": "Document",
+     "agent": "a-intel.core.documenter",
+     "owns": [
+      "docs"
+     ],
+     "onFail": "stop",
+     "needs": [
+      "Fix"
+     ]
+    },
+    {
+     "role": "Review",
+     "agent": "a-intel.core.architect",
+     "owns": [
+      "review"
+     ],
+     "onFail": "return:1",
+     "maxReturns": 1,
+     "needs": [
+      "Validate",
+      "Document"
+     ],
+     "returnTo": "Fix"
+    }
+   ],
+   "schema": "oxagen-workflow/v0.2"
+  },
+  {
+   "id": "fix-and-review",
+   "name": "Fix and review",
+   "file": ".oxagen/workflows/fix-and-review.toml",
+   "state": "published",
+   "commit": "a4c91e2",
+   "used": 0,
+   "desc": "One agent fixes and an architect reviews.",
+   "stages": [
+    {
+     "role": "Fix",
+     "agent": "a-intel.core.bug-fixer",
+     "owns": [
+      "code",
+      "test",
+      "docs"
+     ],
+     "onFail": "stop"
+    },
+    {
+     "role": "Review",
+     "agent": "a-intel.core.architect",
+     "owns": [
+      "review"
+     ],
+     "onFail": "return:1",
+     "maxReturns": 2
+    }
+   ]
+  },
+  {
+   "id": "docs-pass",
+   "name": "Docs pass",
+   "file": ".oxagen/workflows/docs-pass.toml",
+   "state": "pull request open",
+   "pr": "a-intel/platform#526",
+   "used": 0,
+   "desc": "A documenter writes and an architect checks it against the code.",
+   "stages": [
+    {
+     "role": "Document",
+     "agent": "a-intel.core.documenter",
+     "owns": [
+      "docs"
+     ],
+     "onFail": "stop"
+    },
+    {
+     "role": "Review",
+     "agent": "a-intel.core.architect",
+     "owns": [
+      "review"
+     ],
+     "onFail": "return:1",
+     "maxReturns": 1
+    }
+   ]
+  }
+ ],
+ "agents": [
+  {
+   "key": "a-intel.core.bug-fixer",
+   "name": "Bug fixer",
+   "harness": "claude-code",
+   "harnessLabel": "Claude Code",
+   "icon": "bug",
+   "tone": "solid",
+   "desc": "Fixes one defect per work order on a branch and opens a pull request. Never merges.",
+   "runs30": 46,
+   "spend30": "88.40",
+   "tier": "gateway",
+   "host": "mbell-mbp-16"
+  },
+  {
+   "key": "a-intel.core.validator",
+   "name": "Validator",
+   "harness": "codex-cli",
+   "harnessLabel": "Codex CLI",
+   "icon": "flask-conical",
+   "tone": "soft",
+   "desc": "Runs the tests a definition of done names and returns the work when one fails. Writes tests only.",
+   "runs30": 39,
+   "spend30": "41.12",
+   "tier": "gateway",
+   "host": "ci-runner-07"
+  },
+  {
+   "key": "a-intel.core.documenter",
+   "name": "Documenter",
+   "harness": "cursor",
+   "harnessLabel": "Cursor",
+   "icon": "pencil-line",
+   "tone": "line",
+   "desc": "Writes the docs a definition of done names, in the pull request it was handed.",
+   "runs30": 22,
+   "spend30": "19.75",
+   "tier": "harness",
+   "host": "mbell-mbp-16"
+  },
+  {
+   "key": "a-intel.core.architect",
+   "name": "Architect",
+   "harness": "stella",
+   "harnessLabel": "stella",
+   "icon": "compass",
+   "tone": "solid",
+   "desc": "Reviews a pull request against the architecture rules and the review items. Comments; never approves on its own.",
+   "runs30": 31,
+   "spend30": "57.60",
+   "tier": "contained",
+   "host": "stella-ci"
+  }
+ ],
+ "sends": [
+  {
+   "id": "snd_01K6TC59",
+   "ws": "core-platform",
+   "by": "marcus",
+   "sent": "2026-09-11 11:20",
+   "tasks": [
+    "tsk_01K6SJ7N2W"
+   ],
+   "orders": [
+    "wo_01K6TC5A",
+    "wo_01K6TC5B"
+   ]
+  }
+ ]
 }

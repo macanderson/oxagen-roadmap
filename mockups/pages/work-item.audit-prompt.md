@@ -15,6 +15,8 @@ You are auditing the **Work item** page of Oxagen (`/a-intel/core-platform/work/
 3. The product specs: `docs/fleet-operations-wedge.md` (Work), `docs/tasks-spec.md` §6, §7, §8, §9.1, §14.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`.
 
+5. The work graph: `docs/work-graph-spec.md` §4, §5, §11.2, §12.2.
+
 ## Procedure
 
 Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
@@ -38,7 +40,8 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 17. **Rules.** One gold action. No heading or caption carries a comma, a mid-dot, or a not/never contrast. Item states elsewhere are `open`, `claimed` or `accepted`, never `held`, `proven` or `verified`. The source of every item is visible. The object is a work item, never a task, in every string a person reads.
 18. **Accessibility.** Every item input and select is labelled with its number. Dialogs are `role=dialog aria-modal` with a labelled close. State is never colour alone.
 19. **Permissions.** `task.edit_dod`, `task.certify` and `work_order.send` are gated on the server. Verify with a role that lacks each.
-20. **Nothing extra.** List anything on the built page that is not in the spec. Each is a finding, and the reviewer decides whether it stays.
+20. **Dependencies.** The panel sits above Fields with **Blocked by** and **Blocks**. Each row shows the number as a link, the subject, the state as a dot and a word (`open`, `in a work order`, `accepted`, `closed as Done`, `closed as Won’t do`) and its source: a provider logo with “from <provider>”, or “added here by <name> on <time>”. A `provider` row has no **Remove** and its title says where to remove it; an `oxagen` row’s **Remove** records `unlink_tasks`. `tklink` searches open items, previews the sentence, refuses a cycle with the path (“Refused. #A already blocks #B …”), writes nothing on a refusal, and records `link_tasks` on Add. The header reads “Blocked by #N.” while an upstream item is open, the send button stays **enabled** for a `ready` open item the graph blocks, and an item a queued work order holds shows **Open the work order**. History carries Dependency added, Dependency removed, Unblocked and Queued in a work order.
+21. **Nothing extra.** List anything on the built page that is not in the spec. Each is a finding, and the reviewer decides whether it stays.
 
 ## Output
 

@@ -4,8 +4,8 @@
 |---|---|
 | Route | `#/a-intel/core-platform/work/workflows` (app `/{org}/{ws}/work/workflows`). One workflow opens as a dialog over the tab: `?workflow=<id>`, for example `?workflow=fix-validate-document-review`. Old route that lands here: the mockup’s `#/:org/:ws/tasks/workflows`, rewritten in place |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: Vocabulary › Work (Workflow, Stage), Work › Objects (a workflow stage starts one run per attempt) and Shipped today, Steering › Emissions (a workflow stage emits an `invocation`, the `constraint` items it owns, and the previous stage’s handoff as quoted `context`), D17. `docs/fleet-operations-ia.md` › Work. `docs/fleet-operations-routes.md` › Work. `docs/tasks-spec.md` §10 (the file, building one, running one, the rules), §12 (`propose_workflow`), §14, §17.2. `docs/creation-spec.md` (a definition is a file, and a wizard ends on a pull request) |
-| Design | `mockups/src/wedge.js` → `pWork()`; `mockups/src/engine.js` → `tkWfTab()`, `wzChecks()`, `stageChain()`, `DLG_EXT.wfview`, `wfzOpen()`, `wfWand()`, `wfSet()`, `wfAddStage()`, `wfDelStage()`, `wfMove()`, `wfToml()`, `DLG_EXT.wfnew`, `wfOpenPr()`, `myAgents()`; data `mockups/fixtures/tasks.json` (`workflows`, `agents`). Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| Spec | `docs/work-graph-spec.md` §8 (stages that run beside each other); `docs/fleet-operations-wedge.md`: Vocabulary › Work (Workflow, Stage), Work › Objects (a workflow stage starts one run per attempt) and Shipped today, Steering › Emissions (a workflow stage emits an `invocation`, the `constraint` items it owns, and the previous stage’s handoff as quoted `context`), D17. `docs/fleet-operations-ia.md` › Work. `docs/fleet-operations-routes.md` › Work. `docs/tasks-spec.md` §10 (the file, building one, running one, the rules), §12 (`propose_workflow`), §14, §17.2. `docs/creation-spec.md` (a definition is a file, and a wizard ends on a pull request) |
+| Design | `mockups/src/engine.js` → `wfLayerText()`, `wfDepths()`, `stageNeeds()`; `mockups/src/wedge.js` → `pWork()`; `mockups/src/engine.js` → `tkWfTab()`, `wzChecks()`, `stageChain()`, `DLG_EXT.wfview`, `wfzOpen()`, `wfWand()`, `wfSet()`, `wfAddStage()`, `wfDelStage()`, `wfMove()`, `wfToml()`, `DLG_EXT.wfnew`, `wfOpenPr()`, `myAgents()`; data `mockups/fixtures/tasks.json` (`workflows`, `agents`). Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
 | Storybook | `Oxagen / Work / Workflows`: Loaded, Loaded · mobile, Loaded · future-only fields marked |
 | Audit | `work-workflows.audit-prompt.md` |
@@ -27,7 +27,7 @@ The tab body is two panels side by side, the first two thirds wide. The mockup o
 | Column | Content |
 |---|---|
 | Workflow | The name in bold and the file path in mono |
-| Stages | Each stage’s harness mark and role, joined by arrows, ending in “You” |
+| Stages | Each stage’s harness mark and role, joined by arrows between the layers and by ∥ between stages that run beside each other (“Fix → Validate ∥ Document → Review → You”), ending in “You” |
 | State | `published` with its commit in mono, or `pull request open` with its number, as a dot and a word |
 | Work orders | How many work orders were sent to it |
 
@@ -76,7 +76,7 @@ Title “New workflow”, or “Change a workflow” from **Change it**. Subtitl
 
 - **In your own words**: a two-line text area with the placeholder “A bug fixer passes a fix to a validator, which passes it to a documenter, which passes it to an architect for final review.”, and the wand (`aria-label` “Have the assistant draft the stages”).
 - **Name**: a text field.
-- **Stages**: one block per stage. Its number; a role field (`aria-label` “Role of stage 1”); an agent select (“Agent of stage 1”) that lists only agents you operate, each “Name (Harness)”; the agent’s harness mark; **↑**, **↓** and **×** (“Move stage 1 up”, “Move stage 1 down”, “Remove stage 1”, the last absent on the only stage); **Owns** checkboxes for code, test, docs and review; **On failure**, a select of “stop and ask you” and “return to stage N” for each earlier stage; and with a return, “at most 1”, “at most 2” or “at most 3”. Arrows join the blocks.
+- **Stages**: one block per stage. Its number; a role field (`aria-label` “Role of stage 1”); an agent select (“Agent of stage 1”) that lists only agents you operate, each “Name (Harness)”; the agent’s harness mark; **↑**, **↓** and **×** (“Move stage 1 up”, “Move stage 1 down”, “Remove stage 1”, the last absent on the only stage); **Owns** checkboxes for code, test, docs and review; **On failure**, a select of “stop and ask you” and “return to stage N” for each earlier stage; and with a return, “at most 1”, “at most 2” or “at most 3”. Arrows join the blocks. Every stage after the first carries **After**: checkboxes over the earlier stages (`aria-label` “Stage N runs after <role>”), the previous stage ticked by default. Ticking two makes the stage wait for both. Unticking every box is refused inline: “A stage runs after at least one other stage.” The file shows `schema = \"oxagen-workflow/v0.2\"` and `needs = [...]` on each stage that names one; a workflow with no After change stays `v0.1`. `return_to` names a role.
 - The fixed last stage: its number, **Accept**, your avatar, and “You accept every item. This stage cannot be removed.”
 - **Add a stage**.
 - The file as it will be committed, under its path (`.oxagen/workflows/<slug>.toml`, or `workflow.toml` before the workflow has a name).
@@ -92,6 +92,10 @@ A new builder starts with one stage: Fix, Bug fixer, owning code and test, stopp
 
 **Shell.** The sidebar with Work lit and its count. Breadcrumbs “Anderson Intelligence Corp. / Core platform / Work”. ⌘K, notifications, the Approvals button with the organization’s count, and the avatar.
 
+### Stages that run beside each other
+
+A stage may name the stages it needs (`docs/work-graph-spec.md` §8). The demo’s Fix, validate, document, review file is `oxagen-workflow/v0.2`: Validate and Document need Fix, and Review needs both. `wfview` draws the chain by layer, with Validate and Document in one column and “after Validate and Document” on Review’s card, and its file carries `needs`. A v0.1 file with no `needs` draws the same chain as before.
+
 ## Data sources
 
 Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macanderson/oxagen` `origin/main` at `1ba160dbc`. Nothing in the repository stores or runs a workflow (wedge spec, Work › Shipped today). ADR-043 removed the old `workflow.*` capabilities, which ran agent turns on Oxagen’s workers; this workflow is a different object, a file that orders work orders, and no capability in `packages/oxagen/src/contracts` names one today.
@@ -106,6 +110,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | The wand: stages drafted from a sentence | `wfWand()` | `oxagen.assistant` drafting the file | `ask_assistant` exists (`packages/oxagen/src/contracts/assistant.ask.ts:61`) and drafts no workflow | ❌ |
 | Open pull request | `wfOpenPr()` | `propose_workflow` (`tasks-spec.md` §12) | none. `open_context_pr` opens a pull request for one Steering record under `.oxagen/rules/` only (`packages/oxagen/src/contracts/context.pr.open.ts:96`) | ❌ |
 | How a workflow runs (handoffs, returns, the park) | static copy | `hand_off_work_order`, `return_work_order`, the park in Approvals | none | ❌ |
+| `needs` on a stage, the layers, and **After** | `WORKFLOWS[].stages[].needs`, `wfDepths()` | `.oxagen/workflows/*.toml` at `oxagen-workflow/v0.2` (`work-graph-spec.md` §8.1) | none | ❌ |
 
 ## Future-only fields
 
@@ -127,6 +132,9 @@ The `wfview` dialog and the builder carry no mark of their own, and every field 
 - The builder’s file preview follows every change to the stages: role, agent, owned tags, on failure and the return bound.
 - The wand drafts stages from the sentence and decides nothing else: a person reads them, changes them, and opens the pull request.
 - `node tools/check-tasks.mjs` walks flow 6 (a workflow as a send target, and the builder drafting four stages from the sentence) on this tab.
+
+- A stage runs when every stage it needs has handed off. Stages ready together run together as separate runs under the work order’s one cap. `return_to` must be upstream of its stage, and a return is the only backward edge (`docs/work-graph-spec.md` §8.1).
+- `node tools/check-tasks.mjs` walks flow 12 (a fan-in workflow in the table and in `wfview`) on this tab.
 
 ## States
 
@@ -167,3 +175,4 @@ The design names these. Neither exists in `packages/iam` for a workflow today.
 - Every agent in a workflow is one you operate.
 - A handoff note is quoted evidence, never an instruction.
 - Every harness shows its own mark, and none is the default.
+- The chain is drawn from `needs`. Two stages in one column ran, or will run, beside each other, and the page never orders them.

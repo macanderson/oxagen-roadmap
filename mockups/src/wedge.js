@@ -100,7 +100,7 @@ function pWork(r){
 function woOf(t){return t.wo?woById(t.wo):null;}
 function backlogTab(){
   var rows=wsTasks();
-  var ready=rows.filter(function(t){return t.ready==="ready";}).length,
+  var ready=rows.filter(function(t){return t.ready==="ready"&&!tkGraphBlocked(t);}).length,
       drafts=rows.filter(function(t){return t.ready==="draft"||t.ready==="changed";}).length,
       inwo=rows.filter(function(t){return t.ready==="sent";}).length;
   var orders=wsWorkOrders(), live=orders.filter(woLive), toAccept=woWaiting();
@@ -119,12 +119,13 @@ function backlogTab(){
      '<td><span class="tk-t">'+wiLogo(t,14)+'<span class="mono dim" style="font-size:11.5px">'+h(t.num)+'</span></span><div class="tk-s">'+h(t.subject)+'</div></td>'+
      '<td>'+lblChips(t.labels)+'</td>'+
      '<td>'+tStatusBadge(t.status)+'</td>'+
+     '<td'+fut("dependencies")+'>'+tkBlockedByCell(t)+'</td>'+
      '<td>'+tkPerson(t.owner)+'</td>'+
-     '<td>'+readyBadge(t)+'</td>'+
+     '<td>'+readyBadge(t)+tkReadySub(t)+'</td>'+
      '<td'+fut("work orders")+'>'+(wo?'<a class="mono" style="font-size:11.5px" href="'+woUrl(wo)+'" onclick="event.stopPropagation()">'+h(wo.id)+'</a>'+(woLive(wo)?' <span class="b b-allowed"><span class="d"></span>live</span>':''):'<span class="dim">\u2014</span>')+'</td>'+
      '<td class="mono dim" style="font-size:11.5px">'+h(t.updatedAt)+'</td></tr>';}).join("");
   return '<div class="grid g4" style="margin-bottom:16px"'+fut("work items and work orders")+'>'+
-     tile("Ready to send",ready,"certified and open")+
+     tile("Ready to send",ready,"certified and unblocked")+
      tile("Waiting on you",drafts+toAccept,drafts+" to certify \u00b7 "+toAccept+" to accept",(drafts+toAccept)?"var(--st-approval)":null)+
      tile("In work orders",inwo,"sent to an agent or a workflow")+
      '<button class="stat click" onclick="go(\''+workHash("orders")+'\')" aria-label="Open the work orders with a live run"><span class="k">Live now</span><span class="v">'+live.length+'</span>'+
@@ -132,8 +133,9 @@ function backlogTab(){
    banner+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Backlog</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Only a ready work item can be selected and sent.</p></div>'+
-   '<div class="sp">'+(nsel?'<span class="b b-q">'+nsel+' selected</span><button class="btn sm" onclick="S.tsel={};render()">Clear</button>':'')+'</div></div>'+
-   '<div class="tw"><table><thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th>Labels</th><th>Status</th><th>Owner</th><th>Readiness</th><th>Work order</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
+   '<div class="sp">'+(nsel?'<span class="b b-q">'+nsel+' selected</span><button class="btn sm" onclick="S.tsel={};render()">Clear</button>':'')+
+     '<span class="chips" role="group" aria-label="View"'+fut("dependencies")+'><button class="btn sm'+(S.tkView!=="graph"?' sel':'')+'" aria-pressed="'+(S.tkView!=="graph")+'" onclick="tkView(\'list\')">List</button><button class="btn sm'+(S.tkView==="graph"?' sel':'')+'" aria-pressed="'+(S.tkView==="graph")+'" onclick="tkView(\'graph\')">Graph</button></span></div></div>'+
+   (S.tkView==="graph"?tkGraph(rows):'<div class="tw"><table><thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th>Labels</th><th>Status</th><th>Blocked by</th><th>Owner</th><th>Readiness</th><th>Work order</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>')+
    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">oxagen.assistant drafts a definition of done for every work item a provider imports or a finding opens. A person certifies it, and the item is ready from that moment. A ready item goes to an agent only inside a work order, and only to an agent you operate.</div></div></div>';
 }
 /* A work item written in Oxagen, or opened from a finding, carries the Oxagen mark where a provider item carries its provider's. */
@@ -149,17 +151,30 @@ function workOrdersTab(fr){
   var f=S.woFilter||"all";
   var rows=all.filter(function(w){return f==="all"||(f==="live"?woLive(w):w.kind===f);});
   var n={all:all.length,dispatched:all.filter(function(w){return w.kind==="dispatched";}).length,direct:all.filter(function(w){return w.kind==="direct";}).length,live:all.filter(woLive).length};
-  var trs=rows.map(function(w){
+  var seenSend={}, out=[];
+  rows.forEach(function(w){
+    if(!w.send){out.push(w);return;}
+    if(seenSend[w.send])return; seenSend[w.send]=true;
+    var sibs=woSiblings(w), sd=woSend_(w);
+    out.push({group:true,id:sd.id,title:w.title,tasks:w.tasks,orders:sibs,by:sd.by,sent:sd.sent,status:woSendState(sibs)});
+    sibs.forEach(function(x){out.push(x);});
+  });
+  var trs=out.map(function(w){
+    if(w.group) return '<tr class="wo-group"'+fut("sends")+'><td><b>'+h(w.title)+'</b><div class="dim" style="font-size:11px"><span class="mono">'+h(w.id)+'</span> · '+w.orders.length+' work orders</div></td>'+
+     '<td>'+w.tasks.map(function(id){var t=taskById(id);return t?'<span class="tk-t">'+wiLogo(t,12)+'<span class="mono" style="font-size:11.5px">'+h(t.num)+'</span></span>':"";}).join("<br>")+'</td>'+
+     '<td>'+w.orders.map(function(x){var a=agent(x.target.id);return a?hxIcon(a.harness,14):"";}).join(" ")+' <span class="dim">'+w.orders.length+' targets</span></td><td><span class="dim">one per target</span></td><td class="num"><span class="dim">\u2014</span></td>'+
+     '<td>'+stBadge(WO_ST[w.status]||WO_ST.partial)+'</td><td class="num"><span class="dim">\u2014</span></td>'+
+     '<td><span class="tkp">'+personAv(w.by,20)+'<span>'+h((PEOPLE[w.by]||{}).name||w.by)+'</span></span><div class="dim mono" style="font-size:11px">'+h(w.sent)+'</div></td></tr>';
     var items=woItems(w).length, rs=woRuns(w), lastR=rs.length?rs[rs.length-1]:null, sp=woSpend(w);
-    return '<tr '+rowClick("go('"+woUrl(w)+"')","Open "+w.id)+'>'+
-     '<td><b>'+h(w.title)+'</b><div class="row" style="gap:6px;margin-top:3px"><span class="dim mono" style="font-size:11px">'+h(w.id)+'</span>'+woKindBadge(w)+'</div></td>'+
+    return '<tr '+rowClick("go('"+woUrl(w)+"')","Open "+w.id)+(w.send?' class="click wo-child"':'')+'>'+
+     '<td><b>'+h(w.title)+'</b><div class="row" style="gap:6px;margin-top:3px"><span class="dim mono" style="font-size:11px">'+h(w.id)+'</span>'+woKindBadge(w)+'</div>'+(w.send?'<div class="dim" style="font-size:11px">'+woSendIndex(w)+' in this send</div>':'')+'</td>'+
      '<td>'+(w.tasks.length?w.tasks.map(function(id){var t=taskById(id);return t?'<span class="tk-t">'+wiLogo(t,12)+'<span class="mono" style="font-size:11.5px">'+h(t.num)+'</span></span>':"";}).join("<br>")
         :'<span class="dim mono" style="font-size:11px">'+h(w.ref||"none")+'</span>')+'</td>'+
      '<td>'+woTargetCell(w)+'</td>'+
      '<td>'+(lastR?'<span class="mono" style="font-size:11.5px">'+(lastR.R?'<a href="'+wsBase(w.ws)+'/runs/'+h(lastR.x.run)+'" onclick="event.stopPropagation()">'+h(lastR.x.run)+'</a>':h(lastR.x.run))+'</span>'+
         (lastR.x.state==="live"?' <span class="b b-allowed"><span class="d"></span>live</span>':'')+(rs.length>1?'<div class="dim" style="font-size:11px">'+rs.length+' runs</div>':''):'<span class="dim">none yet</span>')+'</td>'+
      '<td class="num">'+(items?woClaimed(w)+' / '+items:'<span class="dim">\u2014</span>')+'</td>'+
-     '<td>'+woBadge(w)+'</td>'+
+     '<td>'+woBadge(w)+(w.status==="queued"?'<div class="dim" style="font-size:11px;margin-top:3px">waits on '+woWaitsOnHtml(w)+'</div>':'')+'</td>'+
      '<td class="num">'+(sp?usd(sp.toFixed(2)):'<span class="dim">\u2014</span>')+'</td>'+
      '<td><span class="tkp">'+personAv(w.by,20)+'<span>'+h((PEOPLE[w.by]||{}).name||w.by)+'</span></span><div class="dim mono" style="font-size:11px">'+h(w.sent)+'</div></td></tr>';}).join("");
   var chips=[["all","All"],["dispatched","Dispatched"],["direct","Direct"],["live","Live"]].map(function(x){

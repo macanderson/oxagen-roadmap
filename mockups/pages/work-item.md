@@ -4,8 +4,8 @@
 |---|---|
 | Route | `#/a-intel/core-platform/work/items/<item>`, for example `tsk_01K5RS482Q` (app `/{org}/{ws}/work/items/{item}`). Old route that lands here: the mockup’s `#/:org/:ws/tasks/<item>`, rewritten in place |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: Vocabulary › Work (Work item, Definition of done), Work › Objects and Shipped today, D9 (a finding becomes a work item when a person picks it up), D17. `docs/fleet-operations-ia.md` › Work, detail views. `docs/tasks-spec.md` §6 (the work item record), §7 (people), §8 (the definition of done: drafting, editing, certification, a certified item that changes, readiness), §9.1 (selecting) |
-| Design | `mockups/src/engine.js` → `pTask()`, `dodRows()`, `tkDraftNow()`, `dodCertify()`, `dodReopen()`, `taskPromptText()`, `copyTaskPrompt()`, `DLG_EXT.certify`, `DLG_EXT.dodreopen`, and `dispatchButton()` for a ready item; `mockups/src/wedge.js` → `wiOrdersPanel()`, `wiLogo()`; data `mockups/fixtures/tasks.json`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| Spec | `docs/work-graph-spec.md` §4 (dependencies), §5 (readiness on the graph), §11.2, §12.2; `docs/fleet-operations-wedge.md`: Vocabulary › Work (Work item, Definition of done), Work › Objects and Shipped today, D9 (a finding becomes a work item when a person picks it up), D17. `docs/fleet-operations-ia.md` › Work, detail views. `docs/tasks-spec.md` §6 (the work item record), §7 (people), §8 (the definition of done: drafting, editing, certification, a certified item that changes, readiness), §9.1 (selecting) |
+| Design | `mockups/src/engine.js` → `pTask()`, `tkDepsPanel()`, `tkPathUp()`, `tkLinkAdd()`, `tkUnlink()`, `DLG_EXT.tklink`, `dodRows()`, `tkDraftNow()`, `dodCertify()`, `dodReopen()`, `taskPromptText()`, `copyTaskPrompt()`, `DLG_EXT.certify`, `DLG_EXT.dodreopen`, and `dispatchButton()` for a ready item; `mockups/src/wedge.js` → `wiOrdersPanel()`, `wiLogo()`; data `mockups/fixtures/tasks.json`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
 | Storybook | `Oxagen / Work / Work item`: Loaded, Loaded · mobile, Loaded · future-only fields marked |
 | Audit | `work-item.audit-prompt.md` |
@@ -16,7 +16,7 @@ One work item: what the provider says, what done means for it, who said so, whet
 
 ## What is on the page
 
-**Header.** Eyebrow: the provider’s logo and the number in mono (“a-intel/platform#482”, “PLAT-231”), or the Oxagen mark and “WI-14” for an item written in Oxagen. h1: the subject (“Cut 4.11.0 release notes”). Subtext: “Imported from GitHub. Updated 2026-09-11 09:12.”, or for an item written in Oxagen “Written in Oxagen from finding `fnd_01K5RT2A`. Updated 2026-09-11 08:52.”
+**Header.** Eyebrow: the provider’s logo and the number in mono (“a-intel/platform#482”, “PLAT-231”), or the Oxagen mark and “WI-14” for an item written in Oxagen. h1: the subject (“Cut 4.11.0 release notes”). Subtext: “Imported from GitHub. Updated 2026-09-11 09:12.”, or for an item written in Oxagen “Written in Oxagen from finding `fnd_01K5RT2A`. Updated 2026-09-11 08:52.” A `ready` item with an open blocker adds “Blocked by #612 and #618.”
 
 Actions: **Copy prompt** (plain; title “Copy the work item and its work orders as text”), **Open in GitHub** (plain; opens the provider’s page in a new tab), or **Open the finding** for an item written from a finding (opens Work › Findings on that finding’s evidence), then one primary that follows readiness:
 
@@ -25,7 +25,9 @@ Actions: **Copy prompt** (plain; title “Copy the work item and its work orders
 | `drafting` | **Draft it now** (gold; disabled while the draft runs) |
 | `draft` | **Certify definition of done** (gold; disabled with no items) |
 | `changed` | **Certify again** (gold) |
-| `ready`, open | **Create work order and send to agent** (gold; the send menu of `work-backlog.md` with this one item) |
+| `ready`, open, unblocked | **Create work order and send to agent** (gold; the send menu of `work-backlog.md` with this one item) |
+| `ready`, open, blocked by the graph | the same button, enabled. The work order dialog queues (`work-backlog.md`) |
+| `ready`, in a queued work order | **Open the work order** (gold) |
 | `ready`, blocked | **Create work order and send to agent**, plain and disabled, titled “Blocked upstream. It can be sent when it is open again.” |
 | `in a work order`, `accepted` | **Open the work order** (gold) |
 | `closed` | none |
@@ -47,15 +49,17 @@ Then two columns, the main column two thirds wide.
 
 **Side column**
 
+- **Dependencies**, with **Add a dependency** (plain) in its header. Two lists, **Blocked by** and **Blocks**. Each row: the provider logo, the number in mono as a link to that item, the subject, the state as a dot and a word (`open`, `in a work order`, `accepted`, `closed as Done`, `closed as Won’t do`), and the source: the provider’s logo with “from GitHub”, or “added here by Marcus Bell on 2026-09-11 10:02”. An `oxagen` row has **Remove**; a `provider` row’s title reads “Read from GitHub. Remove the link there.” Under the lists, when any: “1 link to an issue outside the scope of this connection.” With no dependency: “None. This task waits on nothing, and nothing waits on it.” The demo item #640 (`tsk_01K6SG4R8T`) is blocked by #612 from GitHub and by #618 added here. Outlined as future-only.
 - **Fields**, with the readiness badge in the header (`in a work order`). A key-value list, in order: Work item id (mono), Number (a link to the provider’s page, or plain mono for an item written in Oxagen), Status, Resolution (a dash while open), Labels (colour chips), Owner, Created by, Created at, Updated by, Updated at, Closed at. A person is the mapped member with avatar and, beside it, the provider handle with its logo (“Marcus Bell mbell-ai”). An account that is not mapped is its handle with `not mapped`, and a bot its handle with `bot`.
 - **Work orders**: every work order that carries the item, each with its id as a link, its state badge, its title, and its runs (“run”, the run id as a link, `live` while live). With none: “Not sent yet. A certified item goes to an agent inside a work order.” The mockup outlines this panel as future-only. On the demo record #482 lists `wo_01K5RS7M4N` (in progress, its run live) and the direct `wo_01K5RQ4B9C7XTN2P` (closed).
-- **History**: Imported (or Written), Definition of done drafted, Certified, Changed upstream, Sent in a work order, Accepted, each with its time and who (“from GitHub”, “from finding fnd_01K5RT2A”, “oxagen.assistant”, “Marcus Bell”, “left ready”, the work order’s id). Only what happened is listed.
+- **History**: Imported (or Written), Definition of done drafted, Certified, Changed upstream, Dependency added, Dependency removed, Unblocked, Queued in a work order, Sent in a work order, Accepted, each with its time and who (“from GitHub”, “from finding fnd_01K5RT2A”, “oxagen.assistant”, “Marcus Bell”, “left ready”, the work order’s id). Only what happened is listed.
 
 **Copy prompt** copies the work item as plain text to paste into an agent session: “Work item a-intel/platform#482: Cut 4.11.0 release notes”, the provider link, “Oxagen work item tsk_01K5RS482Q: https://app.oxagen.sh/a-intel/core-platform/work/items/tsk_01K5RS482Q”, the description, the definition of done (“Definition of done. Certified by Marcus Bell on 2026-09-11 09:12, sha256:c3a17e05b9d24f81.”, “Definition of done. A draft. Nobody has certified it.”, or the line for a changed, drafting or closed item) with each item as “1. [docs] <text>”, and **Work orders**: each one’s id, title, when it was sent and to whom, its state, and its link, or “No work order carries this work item.” The toast reads “Prompt copied, with 2 work orders.” or “Prompt copied, with no work order.”
 
 ### Dialogs
 
 - **`certify`**: title “Certify the definition of done”, subtitle the number and subject. The items as a numbered list with tag and kind. Note: “Certifying records `certify_task_dod` with your name, the digest of these 4 items, and the version of the work item in GitHub they were read against. If the work item changes upstream, the certification is marked changed and the work item leaves ready.” When the connection writes back: “Oxagen posts the list as a comment on a-intel/platform#633, because the GitHub connection allows it.” In a regulated workspace, a warning: “Regulated workspace. The person who certifies cannot send this work item in a work order.” The checkbox **I read every item**, “These items are what done means for this work item.” Footer “needs `task.certify` on core-platform”, **Cancel**, **Certify** (gold; disabled until the box is ticked). Certifying makes the item ready and toasts in gold “Certified. certify_task_dod recorded with the digest of 4 items, and the list posted as a comment on a-intel/platform#633.”
+- **`tklink`**: title “Add a dependency”, subtitle the number and subject. A direction select (`aria-label` “Direction”), “#612 is blocked by” or “#612 blocks”. A search field (“Search open tasks”) over the workspace’s open items, each result (`role=option`) with its logo, number, subject and readiness badge. Picking one shows “#612 is blocked by #618. #612 can be sent when #618 is accepted, or closed as Done.” A pick that would close a cycle shows “Refused. #612 already blocks #640.” (with “through …” naming the path when it is longer) and disables the footer. Footer “needs `task.link`”, **Cancel**, **Add** (gold). Adding toasts “Dependency added. link_tasks recorded.” and the row appears with “added here by you”.
 - **`dodreopen`**: “Edit a certified definition of done?”, “a-intel/platform#612 leaves ready and returns to draft. It is ready again when somebody certifies it.”, and the note “Work orders already sent keep the list they were sent with. The certification on 2026-09-10 16:05 stays in the work item’s history.” Footer **Keep it certified**, **Edit it** (gold). Editing toasts “a-intel/platform#612 is a draft again. It is ready when somebody certifies it.”
 - From a ready item, the send menu and the work order dialog (`wo`) of `work-backlog.md`, with this item alone.
 
@@ -83,6 +87,8 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | Runs in the Work orders panel | `WORKORDERS[].runs` | the runs of each work order | Runs ship (`list_runs`, `packages/oxagen/src/contracts/run.list.ts:477`), and no run names a work order (`taskRef`, `run.list.ts:285-291`) | ❌ |
 | History | derived from the item and its work orders | `task.imported`, `dod.drafted`, `dod.certified`, `task.changed`, `work_order.sent`, `work_order.accepted` events (`tasks-spec.md` §13) | none | ❌ |
 | Copy prompt | `taskPromptText()` | `get_task` and `list_work_orders` | none | ❌ |
+| Dependencies, their source, and the blocked reason | `TASKS[].blockedBy`, `tkBlocks()` | `tasks.task_dependencies`; `link_tasks`, `unlink_tasks`; `list_tasks` `blockedBy` (`work-graph-spec.md` §9, §10) | none. No connector reads a link between records | ❌ |
+| Links outside the connection’s scope | `TASKS[].outsideLinks` | the count on the item read (§4.2) | none | ❌ |
 
 ## Future-only fields
 
@@ -105,6 +111,11 @@ The mockup marks nothing else, but every field on the page is future-only (wedge
 - The copied prompt says whether the definition of done is certified. A draft never reads as certified.
 - `node tools/check-tasks.mjs` walks flows 2 (draft, edit and certify), 3 (a certified item that changes) and 8 (the copied prompt names its work orders) on this page.
 
+- A provider’s dependency cannot be removed here, and the row says where to remove it. An `oxagen` dependency records `link_tasks` and `unlink_tasks`.
+- Oxagen refuses a cycle and names the path. Nothing is written on a refusal.
+- The graph’s blocked reason names the items. It never replaces the provider’s status word, and it never disables the send button.
+- `node tools/check-tasks.mjs` walks flow 13 (a cycle is refused) on this page.
+
 ## States
 
 Loaded only. This change designs the loaded state. The build uses the shell’s standard loading, error, empty and denied panels until they are designed.
@@ -120,7 +131,7 @@ The thumb bar holds Work (lit, with its count), Agents, Tools, Spend and More. M
 The design names these, from `tasks-spec.md` §14. None exists in `packages/iam` today.
 
 - Read: `work.read`
-- Writes, each a governed action recorded in Audit: `task.edit_dod` (edit a draft), `task.certify` (certify), `work_order.send` (send)
+- Writes, each a governed action recorded in Audit: `task.edit_dod` (edit a draft), `task.certify` (certify), `work_order.send` (send or queue), `task.link` (add or remove a dependency)
 
 ## Backend gaps this page depends on
 
@@ -144,3 +155,4 @@ The design names these, from `tasks-spec.md` §14. None exists in `packages/iam`
 - A certified list is read-only until a person chooses to edit it, and editing returns the item to draft.
 - An item’s source is always shown. An item a person edited says so.
 - An account that is not mapped is shown as itself.
+- A dependency’s source is always shown. Read from a provider and added here are never shown as each other.
