@@ -24,7 +24,7 @@ This spec is the design authority for the change. `fleet-operations-ia.md` lays 
 | D1 | Work is the primary surface. The workspace opens on Work, whose tabs are Backlog, Work orders, Workflows and Findings. |
 | D2 | A run is a child record of exactly one work order. A run an operator starts outside Oxagen is filed under a direct work order that Oxagen opens for it. |
 | D3 | The Fleet page retires. Its population view moves to Agents. Its runs table becomes the runs of each work order and each agent's Activity tab. Its waiting count is the Approvals drawer's count, shown on every page. |
-| D4 | A Steering Source and a SteeringFrame are two objects and never collapse into one. A source is durable material a person or an agent wrote. A frame is what Oxagen resolved from a source for one run at one injection point. |
+| D4 | A Steering Source and a SteeringFrame are two objects and never collapse into one. A source is durable material a person or an agent wrote. A SteeringFrame is what Oxagen resolved from a source for one run at one injection point. |
 | D5 | Every piece of runtime input an agent receives through Oxagen is a SteeringFrame of one of eight types: goal, invariant, constraint, delegation, procedure, context, invocation and capability. |
 | D6 | Every frame carries its source, the source version and a hash. A frame whose hash no longer matches its source version is excluded as `steering_drift`. |
 | D7 | Context record is renamed Steering record in product language. Files, schemas and tables keep `context` in their names. |
@@ -79,7 +79,7 @@ Terms are written the way the product writes them. A term in `mono` is a value i
 | SteeringFrame | One resolved piece of runtime input for one run at one injection point: its type, its body or descriptor, its force, its token cost and its provenance. Fixed once recorded | SteeringItem (ADR-093), context frame |
 | Frame type | One of eight: `goal`, `invariant`, `constraint`, `delegation`, `procedure`, `context`, `invocation`, `capability` | kind, for this purpose |
 | Envelope | Every SteeringFrame one run received, grouped by injection point | the compiled bundle, the window |
-| Injection point | Where a frame enters: session start, the prompt, prompt submit, tool results, checkout files or the model request (ADR-093 §4) | unchanged |
+| Injection point | Where a SteeringFrame enters: session start, the prompt (the brief that starts the run), prompt submit, MCP tool results, checkout files, the tool list (the belt's tools, as `capability` frames) or the model request. ADR-093 §4 names five of them, and the wedge adds the prompt and the tool list | ADR-093's five, plus two |
 | Provenance | A frame's source kind and id, the source version (a commit, a ledger version, a grant version or a work order digest) and the frame's hash | unchanged |
 | Assignment | Which sources apply to which agents, repositories and workspaces | unchanged |
 | Compiler | The Steering view that resolves the envelope for one agent and one brief, and sends nothing | Preview |
