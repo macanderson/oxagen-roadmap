@@ -59,12 +59,12 @@
       "map": { "github": "state_reason completed", "linear": "Done", "jira": "Done, Fixed",
                "servicenow": "close code Solution provided, Workaround provided, Resolved by caller", "salesforce": "status Closed", "zendesk": "status Solved" } },
     { "key": "wont-do", "name": "Won't do", "builtin": true,
-      "map": { "github": "state_reason not_planned", "linear": "Canceled with label Won't do", "jira": "Won't Do, Won't Fix",
+      "map": { "github": "state_reason not_planned without label canceled", "linear": "Canceled with label Won't do", "jira": "Won't Do, Won't Fix",
                "servicenow": "close code No resolution provided" } },
     { "key": "duplicate", "name": "Duplicate", "builtin": true,
       "map": { "github": "state_reason duplicate", "linear": "Duplicate", "jira": "Duplicate", "servicenow": "close code Duplicate" } },
-    { "key": "cancelled", "name": "Cancelled", "builtin": true,
-      "map": { "github": "state_reason not_planned with label cancelled", "linear": "Canceled", "jira": "Cancelled",
+    { "key": "cancelled", "name": "Canceled", "builtin": true,
+      "map": { "github": "state_reason not_planned with label canceled", "linear": "Canceled", "jira": "Canceled",
                "servicenow": "state Canceled" } },
     { "key": "other", "name": "Other", "builtin": true,
       "map": { "github": "anything else", "linear": "anything else", "jira": "Cannot Reproduce, Incomplete, anything else",
@@ -164,9 +164,9 @@
         { "t": "A budget breach pauses the run that breached and no other run on the host", "k": "check", "tag": "code", "src": "assistant" },
         { "t": "A test starts two runs on one host, breaches one budget, and asserts the other keeps running", "k": "check", "tag": "test", "src": "assistant" },
         { "t": "The control.pause frame names the run id it targeted", "k": "check", "tag": "code", "src": "assistant" },
-        { "t": "An incident note records every run paused by mistake since the tacho 1.6 release", "k": "review", "tag": "review", "src": "assistant" }
+        { "t": "An incident note records every run paused by mistake since the oxagend 1.6 release", "k": "review", "tag": "review", "src": "assistant" }
       ],
-      "notes": ["The issue does not say which tacho version. The assistant assumed 1.6.2, the collector on the named host.", "Item 4 is a person's review. An agent can gather the list, and a person accepts it."]
+      "notes": ["The issue does not say which oxagend version. The assistant assumed 1.6.2, the collector on the named host.", "Item 4 is a person's review. An agent can gather the list, and a person accepts it."]
     },
     {
       "id": "tsk_01K6S8N1VE", "kind": "linear", "num": "PLAT-240", "repo": "a-intel/platform",
@@ -297,7 +297,7 @@
       "repos": ["a-intel/platform"], "digest": "sha256:ab41c7e09f3d2865",
       "runs": [
         { "stage": 1, "run": "run_01K6TB1Q8D", "state": "sealed", "pr": "a-intel/platform#524", "note": "Sorted same-minute stamps by name. Added two tests. Handed to the validator." },
-        { "stage": 2, "run": "run_01K6TC4E2M", "state": "sealed", "pr": "a-intel/platform#524", "note": "Returned: the backwards pair still passes. Item 2 is not met.", "returned": true },
+        { "stage": 2, "run": "run_01K6TC4E2M", "state": "sealed", "pr": "a-intel/platform#524", "note": "Sent back: the backwards pair still passes. Item 2 is not met.", "returned": true },
         { "stage": 1, "run": "run_01K6TD7H5R", "state": "sealed", "pr": "a-intel/platform#524", "note": "Refuse a pair whose names sort backwards. Handed to the validator again." },
         { "stage": 2, "run": "run_01K6TE2W9K", "state": "live", "pr": "a-intel/platform#524", "note": "" }
       ],
@@ -339,7 +339,7 @@
   "workflows": [
     {
       "id": "fix-validate-document-review", "name": "Fix, validate, document, review",
-      "file": ".oxagen/workflows/fix-validate-document-review.toml", "state": "published", "commit": "a4c91e2", "used": 4,
+      "file": ".oxagen/workflows/fix-validate-document-review.toml", "state": "published", "commit": "a4c91e2", "used": 1,
       "desc": "A bug fix passes through a validator, a documenter and an architect before you accept it.",
       "stages": [
         { "role": "Fix", "agent": "a-intel.core.bug-fixer", "owns": ["code"], "onFail": "stop" },
@@ -350,7 +350,7 @@
     },
     {
       "id": "fix-and-review", "name": "Fix and review",
-      "file": ".oxagen/workflows/fix-and-review.toml", "state": "published", "commit": "a4c91e2", "used": 9,
+      "file": ".oxagen/workflows/fix-and-review.toml", "state": "published", "commit": "a4c91e2", "used": 0,
       "desc": "One agent fixes and an architect reviews.",
       "stages": [
         { "role": "Fix", "agent": "a-intel.core.bug-fixer", "owns": ["code", "test", "docs"], "onFail": "stop" },
@@ -374,7 +374,7 @@
       "desc": "Runs the tests a definition of done names and returns the work when one fails. Writes tests only.", "runs30": 39, "spend30": "41.12", "tier": "gateway", "host": "ci-runner-07" },
     { "key": "a-intel.core.documenter", "name": "Documenter", "harness": "cursor", "harnessLabel": "Cursor", "icon": "pencil-line", "tone": "line",
       "desc": "Writes the docs a definition of done names, in the pull request it was handed.", "runs30": 22, "spend30": "19.75", "tier": "harness", "host": "mbell-mbp-16" },
-    { "key": "a-intel.core.architect", "name": "Architect", "harness": "stella", "harnessLabel": "Stella", "icon": "compass", "tone": "solid",
+    { "key": "a-intel.core.architect", "name": "Architect", "harness": "stella", "harnessLabel": "stella", "icon": "compass", "tone": "solid",
       "desc": "Reviews a pull request against the architecture rules and the review items. Comments; never approves on its own.", "runs30": 31, "spend30": "57.60", "tier": "contained", "host": "stella-ci" }
   ]
 }

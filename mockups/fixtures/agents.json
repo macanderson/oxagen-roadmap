@@ -44,9 +44,9 @@
  },
  {
   "key": "a-intel.core.stella-ci",
-  "name": "Stella CI",
+  "name": "stella CI",
   "harness": "stella",
-  "harnessLabel": "Stella",
+  "harnessLabel": "stella",
   "ws": "core-platform",
   "operator": "marcus",
   "status": "enrolled",

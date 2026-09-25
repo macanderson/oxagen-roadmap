@@ -2,7 +2,7 @@
  {
   "id": "oxpr_01K6T4A2",
   "kind": "bootstrap",
-  "title": "Add Oxagen to a-intel/mobile",
+  "title": "Add .oxagen/ to a-intel/mobile",
   "repo": "a-intel/mobile",
   "base": "release",
   "branch": "oxagen/init",
@@ -16,7 +16,7 @@
    [
     "add",
     ".oxagen/workspace.toml",
-    "the linked-repo declaration, servers and budgets"
+    "the linked-repo declaration, providers and budgets"
    ],
    [
     "add",
@@ -186,7 +186,7 @@
  {
   "id": "oxpr_01K6T4D9",
   "kind": "agent",
-  "title": "release-manager · budget and belt",
+  "title": "release-manager · budget and toolbelt",
   "repo": "a-intel/platform",
   "base": "main",
   "branch": "agents/release-manager",
@@ -210,7 +210,7 @@
     "agent-definition/v0.1; slug matches the file stem."
    ],
    [
-    "belt",
+    "toolbelt",
     "pass",
     "Every tool named resolves in the registry at a pinned version."
    ],
@@ -243,7 +243,7 @@
    [
     "mod",
     ".oxagen/workspace.toml",
-    "[servers.linear] added; budget.monthly_usd 400 → 600"
+    "[providers.linear] added; budget.monthly_usd 400 → 600"
    ]
   ],
   "checks": [
@@ -260,12 +260,12 @@
    [
     "no_authority",
     "pass",
-    "Declaring a provider grants nobody a tool; a belt still does that."
+    "Declaring a provider grants nobody a tool; a toolbelt still does that."
    ],
    [
     "secret_pii_scan",
     "pass",
-    "The server is named; its credential is not in the file."
+    "The provider is named; its credential is not in the file."
    ]
   ]
  },

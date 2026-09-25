@@ -24,7 +24,7 @@
  {
   "id": "ks_cls_funds",
   "lvl": "Class",
-  "target": "every moves_funds tool",
+  "target": "Every tool that moves funds",
   "on": false,
   "scope": "Organization-wide, in one action",
   "by": null,
@@ -37,7 +37,7 @@
  {
   "id": "ks_cls_irrev",
   "lvl": "Class",
-  "target": "every irreversible tool",
+  "target": "Every irreversible tool",
   "on": false,
   "scope": "Organization-wide, in one action",
   "by": null,
@@ -49,7 +49,7 @@
  {
   "id": "ks_cls_egress",
   "lvl": "Class",
-  "target": "every tool with egress: third_party",
+  "target": "Every tool with third-party egress",
   "on": false,
   "scope": "Organization-wide, in one action",
   "by": null,
@@ -66,7 +66,7 @@
   "scope": "Every tool from this provider",
   "by": "Marcus Bell",
   "at": "2026-09-10 23:12 UTC",
-  "why": "Server shipped 1.9.0 with an output schema change we had not approved.",
+  "why": "The provider shipped 1.9.0 with an output schema change nobody had approved.",
   "stops": "17 tool versions · 8 agents · 0 runs in flight"
  },
  {
@@ -77,7 +77,7 @@
   "scope": "This version only",
   "by": "Priya Natarajan",
   "at": "2026-07-02 08:30 UTC",
-  "why": "Never to be callable by an agent in this organization.",
+  "why": "No agent in this organization may call it.",
   "stops": "1 tool version · 0 agents"
  },
  {

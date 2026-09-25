@@ -112,7 +112,7 @@
   "force": "info",
   "scope": "agent",
   "agent": "triage",
-  "body": "Issues labelled before a reproduction were relabelled by a person 14 times in August.",
+  "body": "Issues labeled before a reproduction were relabeled by a person 14 times in August.",
   "token_cost": 23,
   "about": [
    "triage",

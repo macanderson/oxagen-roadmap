@@ -44,7 +44,7 @@
  "migrate the billing schema": {
   "hits": [
    [
-    "a-intel.postgres-safe-migration",
+    "a-intel.safe-db-migration",
     0.89
    ],
    [

@@ -74,9 +74,9 @@
    {
     "kind": "gate",
     "name": "github__create_release",
-    "where": "Oxagen \u00b7 rule rg_0093",
+    "where": "oxagen \u00b7 rule rg_0093",
     "state": "awaiting",
-    "note": "parked at Oxagen, on a call routed through it; the model sees a wait with a reason, not a failure",
+    "note": "parked at oxagen, on a call routed through it; the model sees a wait with a reason, not a failure",
     "at": "09:24:16",
     "fr": 41
    },
@@ -325,7 +325,7 @@
    {
     "kind": "gate",
     "name": "stripe__create_payment",
-    "where": "Oxagen \u00b7 mandate mnd_7K2ETQ4",
+    "where": "oxagen \u00b7 mandate mnd_7K2ETQ4",
     "state": "awaiting",
     "note": "parked on approval; no money has moved",
     "fr": 19
@@ -365,7 +365,7 @@
   "grade": "full",
   "task": "a-intel/platform#498",
   "taskTitle": "Operator guide: kill switches",
-  "summary": "Rewrote the kill-switches section of the operator guide, adding the deny-generation explanation and two worked examples (+84 / \u221212 lines in docs/operator/kill-switches.md), and opened pull request #498. The verdict is waived: prose carries no test test.",
+  "summary": "Rewrote the kill-switches section of the operator guide, adding the deny-generation explanation and two worked examples (+84 / \u221212 lines in docs/operator/kill-switches.md), and opened pull request #498. The verdict is waived: a prose change has no test to run.",
   "touched": [
    "a-intel/platform#498",
    "docs/operator/kill-switches.md"
@@ -563,7 +563,7 @@
    {
     "kind": "halt",
     "name": "kill switch \u00b7 hooks_removed",
-    "where": "Oxagen",
+    "where": "oxagen",
     "state": "blocked",
     "note": "the run token was revoked before a label or a comment was written",
     "fr": 3
@@ -822,7 +822,7 @@
   "grade": "digest",
   "task": "\u2014",
   "taskTitle": "Style pass on CLI reference",
-  "summary": "Made 41 wording and heading-case edits across docs/cli/reference.md and opened pull request #503. Observed at client tier, so only digests were recorded and the change is unverified: this summary is drawn from what the harness reported, not from what Oxagen saw.",
+  "summary": "Made 41 wording and heading-case edits across docs/cli/reference.md and opened pull request #503. Observed at client tier, so only digests were recorded and the change is unverified: this summary is drawn from what the harness reported, not from what oxagen saw.",
   "touched": [
    "a-intel/platform#503",
    "docs/cli/reference.md"
@@ -861,7 +861,7 @@
     "name": "sealed",
     "where": "chain",
     "state": "sealed",
-    "note": "client tier; drawn from what the harness reported, not what Oxagen saw"
+    "note": "client tier; drawn from what the harness reported, not what oxagen saw"
    }
   ],
   "gen": {
