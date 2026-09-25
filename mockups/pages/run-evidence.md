@@ -20,11 +20,11 @@ Fork replay, bisect and replay grades are gone (D14). The chain and the seal sta
 
 **Shared.** The run header, the Summary, the stat row, the tab bar with "Evidence" selected ("live", or "sealed" once sealed), and the side column with Changes and Outputs, as `run.md` specifies them.
 
-The tab's panels, in this order. A panel with nothing to show is absent.
+The tab's panels, in this order. A panel with nothing to show is absent. With component help on, each part carries a `?` that opens its section in `mockups/help/run-evidence.md` (Definition of done, Approvals, Issues, Linked work, Repositories, Pull requests and artifacts, Files changed, Hash chain, Seal and attestation, Checkpoints). The Linked work legend carries the `data-help` key `linked-work`.
 
-**Compacted note**, on a compacted run whose segment is not rendered: "**Compacted.** Frame nodes for this run left the graph after the thirteen-month hot window. The archive segment holds the same bytes, written once at seal."
+**Compacted note**, on a compacted run whose segment is not rendered: "**Compacted.** This run is read from its archive segment." The hot window and the archive are explained in the Hash chain section of the component help.
 
-**Definition of done**, when the run's work order carries items. Marked future-only. Heading "Definition of done" and one sentence: "From `wo_01K5RS7M4N`. A claim is the agent’s word. An acceptance is a person’s." (the work order id is a link). A table Item · State · Evidence:
+**Definition of done**, when the run's work order carries items. Marked future-only. Heading "Definition of done" and the line "From `wo_01K5RS7M4N`" (the work order id is a link). What a claim and an acceptance mean is in the component help (Definition of done). A table Item · State · Evidence:
 
 - State is a dot and a word: "accepted", "claimed" or "open".
 - Evidence is what the agent cited for its claim, or a dash.
@@ -49,9 +49,9 @@ A direct work order has no items, and the panel is absent.
 - Edge: "stated", "observed", or "inferred" with its confidence ("inferred · 70%"), and one chip per frame it cites ("frame 9", "frame 12"), each opening that frame.
 - "View ↗", the tracker's own page for the issue, or "no link".
 
-The demo run lists `a-intel/platform#482` (task, stated), `#480` (referenced, closed, observed), `#471` and `#465` (inferred). With none: "No issue is linked to this session." Under the table: "A session can touch more than one issue: the task it was started for, and any it read, referenced or closed on the way. The relation says which, the edge says how Oxagen knows, and the status is read from the tracker when the page loads."
+The demo run lists `a-intel/platform#482` (task, stated), `#480` (referenced, closed, observed), `#471` and `#465` (inferred). With none: "No issue is linked to this session." The panel has no note under the table. Why a session touches more than one issue, and what relation, edge and status each say, is in the component help (Issues).
 
-**Linked work.** Eyebrow "Linked work" and a legend: "observed" (written by oxagen from a tool call routed through it), "stated" (carried by the task), and "inferred" (a light model read the frames and proposed it, scored and cited), with the count of inferred items against the total ("2 of 5"). Two panels, each with a count:
+**Linked work.** Eyebrow "Linked work" and a legend of three edge chips, each with its count: "observed 3", "stated 0" and "inferred 2" on the demo run. Each chip's tooltip carries its meaning ("Written by Oxagen from a tool call routed through it", "Carried by the task", "Proposed by a light model that read the frames"). The full account is in the component help (Linked work). Two panels, each with a count:
 
 - Repositories: one row per repository, a link to the forge, with its ref and note and its edge chip (`a-intel/platform`, "a4c91e2 · main · read; branch release/4.11.0-notes pushed · main untouched", observed, frame 5, frame 7). Empty: "No repository was touched."
 - Pull requests and artifacts: one row per branch, release, pull request or file, each reference a link to the forge where it has one, with its state and edge chip. Empty: "Nothing produced yet."
@@ -60,9 +60,9 @@ Then **Files changed**: "+20 −0 · 1 file · as the harness reported them", an
 
 **Chain and seal**, three panels:
 
-- **Hash chain**, with the badge "no gaps": Frames ("186 · dense seq 0 … 185", then "· the seal is envelope <N>" once sealed), Rule ("hash = SHA256(prev_hash ‖ canonical(envelope))"), `telemetry_gap` frames (a count, and that a gap is recorded and never repaired), Checkpoints ("9 · every 20 frames · signed by the host device key, countersigned by oxagen at ingest") and Completeness gaps ("none, every body recorded"). The note says frames from a wrapped agent are reported by harness: producer-signed and countersigned at ingest, so Oxagen attests receipt and chain integrity, not the truth of the content, and frames Oxagen writes itself are Oxagen-attested.
-- **Seal and attestation**. Live: "The seal is computed at run end, for every terminal outcome. Until then the chain is verifiable frame by frame but there is no Merkle root and no attestation." Sealed: the badge "sealed", Merkle root, Over, Archive segment, Signature ("ed25519 · <attester key>"), Signs over ("run_id, attempt_id, frame_count, merkle_root, archive_segment_digest, enforcement_tier, completeness_gaps"), Enforcement tier (the tier badge and "computed from what was routed, not from what the adapter supports"), and Verify offline with "Export the bundle", which opens `runexport`.
-- **Checkpoints**, with "<in view> of <total>": a table Frame · Covers · Chain head · Signature ("countersigned"), each frame a link to it. With none in view: "No checkpoint frame is shown. The recorder writes one every 20 frames."
+- **Hash chain**, with the badge "no gaps": Frames ("186 · dense seq 0 … 185", then "· the seal is envelope <N>" once sealed), Rule ("hash = SHA256(prev_hash ‖ canonical(envelope))"), Telemetry gap frames ("0"), Checkpoints ("9 · every 20 frames") and Completeness gaps ("none, every body recorded"). The panel has no note. How a gap is kept, who signs a checkpoint, and what Oxagen attests for a frame reported by harness are in the component help (Hash chain).
+- **Seal and attestation**. Live: "Not sealed yet. The run is still recording." Sealed: the badge "sealed", Merkle root, Over, Archive segment, Signature ("ed25519 · <attester key>"), Signs over ("run_id, attempt_id, frame_count, merkle_root, archive_segment_digest, enforcement_tier, completeness_gaps"), Enforcement tier (the tier badge alone), and Verify offline with "Export the bundle", which opens `runexport`.
+- **Checkpoints**, with "<in view> of <total>": a table Frame · Covers · Chain head · Signature ("countersigned"), each frame a link to it. With none in view: "No checkpoint frame is shown." When the seal is computed and how often the recorder writes a checkpoint are in the component help (Seal and attestation, Checkpoints).
 
 There is no replay grade, no replay ladder, no Fork replay and no Bisect on this tab.
 
@@ -136,7 +136,7 @@ Loaded only. This change designs the loaded state. The build uses the shell's st
 - A frame (a recorded event) and a SteeringFrame (a resolved input) never share a name on screen.
 - The tab reads the record. No inference is shown as a record: an inferred edge is labelled inferred with its confidence and the frames it leaned on. No score and no model-written account of why.
 - No person is scored or ranked. The definition of done says who claimed and who accepted, and nothing more.
-- Every enforcement claim states the tier. The seal's enforcement tier is the one computed from what was routed. Frames a wrapped agent produced are reported by harness, and the page says so.
+- Every enforcement claim states the tier. The seal's enforcement tier is the one computed from what was routed. Frames a wrapped agent produced are reported by harness, and the component help says so (Hash chain).
 - No replay grade, no Fork replay and no Bisect.
 - Headers are rollups of the rows beneath them: "<N> in this session" counts the issue rows, each Linked work panel counts its rows, and the Checkpoints count is its rows against the recorder's total.
 - Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.

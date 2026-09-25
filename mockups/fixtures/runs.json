@@ -76,7 +76,7 @@
     "name": "github__create_release",
     "where": "oxagen \u00b7 rule rg_0093",
     "state": "awaiting",
-    "note": "parked at oxagen, on a call routed through it; the model sees a wait with a reason, not a failure",
+    "note": "parked at oxagen, on a call routed through it",
     "at": "09:24:16",
     "fr": 41
    },
@@ -160,7 +160,7 @@
     "name": "contract test",
     "where": "pull request checks",
     "state": "passed",
-    "note": "fail \u00b7 fail \u00b7 pass \u2014 the contract test on the pull request head",
+    "note": "fail \u00b7 fail \u00b7 pass \u00b7 the contract test on the pull request head",
     "fr": 58
    },
    {
@@ -861,7 +861,7 @@
     "name": "sealed",
     "where": "chain",
     "state": "sealed",
-    "note": "harness tier; drawn from what the harness reported, not what oxagen saw"
+    "note": "harness tier · reported by the harness"
    }
   ],
   "gen": {

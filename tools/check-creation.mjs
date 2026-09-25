@@ -829,7 +829,7 @@ for (const theme of ["light", "dark"]) {
   await page.evaluate(() => { S.tab.run = "cost"; render(); });
   await page.waitForTimeout(200);
   ok(/Generated estimate/.test(await panel()), "run fit: the panel says the reading is generated");
-  ok(/Read from this run only/.test(await panel()), "run fit: the panel cites what it read");
+  ok(/\d+ prompts? · \d+ turns? · /.test(await panel()), "run fit: the panel cites what it read");
   ok(/Move this agent to/.test(await panel()), "run fit: the model card offers the change");
   ok(/Set effort to/.test(await panel()), "run fit: the effort card offers the change");
 
@@ -839,7 +839,7 @@ for (const theme of ["light", "dark"]) {
   await page.waitForTimeout(150);
   const fd = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
   ok(/\.oxagen\/agents\//.test(fd), "run fit: the change is a pull request against the agent file, got " + fd.slice(0, 120));
-  ok(/sealed/.test(fd) || /this run/.test(fd), "run fit: the dialog says the sealed run keeps the model it ran on");
+  ok(/first run after this pull request merges/.test(fd), "run fit: the dialog says the change reaches the next run");
   await page.evaluate(() => fitPr("run_01K5RN8F3J2GHY6T:model"));
   await page.waitForTimeout(150);
   ok((await page.evaluate(() => OXPRS.length)) === before + 1, "run fit: the change opens exactly one pull request");
@@ -878,7 +878,7 @@ for (const theme of ["light", "dark"]) {
     return h ? h.closest(".panel").innerText : "";
   });
   ok(/did not capture the effort setting/.test(txt), "run fit: the panel says why the effort setting was not captured");
-  ok(/gateway and contained tiers/.test(txt), "run fit: the panel names the tiers where effort is captured");
+  ok(await page.evaluate(() => /gateway[\s\S]*contained/.test((REVIEW.help["run-cost/model-fit"] || {}).h || "")), "run fit: the component help names the tiers where effort is captured");
   ok(errs.length === 0, "run fit: no JavaScript error on a harness-tier run: " + errs.join(" | "));
   await page.close();
 }
@@ -1360,7 +1360,7 @@ for (const theme of ["light", "dark"]) {
   ok(/Where it came from/.test(mt), "memory: the drill-down names the run that left it, got " + mt.slice(0, 160));
   ok(/times in 30 days/.test(mt), "memory: it says how often the memory is recalled");
   ok(/tokens every time it is selected/.test(mt), "memory: it says what a recall costs");
-  ok(/published record/i.test(mt), "memory: it says where the memory sits against a published record");
+  ok(/Competes in the per-prompt selection|Yields to|Superseded by/.test(mt), "memory: it says where the memory sits in the selection");
 
   await page.evaluate((i) => { closeDialog(); openDialog("memforget", i); }, mid);
   await page.waitForTimeout(250);
@@ -1458,7 +1458,7 @@ for (const theme of ["light", "dark"]) {
     promote: [...document.querySelectorAll(".run-main button")].filter(b => /promote/i.test(b.textContent)).length }));
   ok(q.who === "Priya Natarajan" && q.sg === "read" && q.axes === 4, "run memories: ?as=priya reads the four axes, got " + JSON.stringify(q));
   ok(q.promote === 0, "run memories: nothing on the tab promotes a self-grade");
-  for (const [id, re, what] of [["run_01K5RS7M2E8FJ3QW", /Nothing is written until the seal[\s\S]*Captured after the seal/, "a live run writes nothing yet"],
+  for (const [id, re, what] of [["run_01K5RS7M2E8FJ3QW", /No memories yet[\s\S]*Not captured yet/, "a live run writes nothing yet"],
                                 ["run_01K4QJ9E4T6YUI1O", /Deleted on 2025-12-29/, "a self-grade past retention is deleted"],
                                 ["run_01K5RQ4B9C7XTN2P", /joined/, "a saying link lands on the run that said it"]]) {
     await pg.evaluate((h) => { location.hash = h; }, "#/a-intel/core-platform/runs/" + id + "/memory");

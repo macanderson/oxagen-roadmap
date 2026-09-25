@@ -18,6 +18,8 @@ Read the run as it happened: the prompt the operator wrote, what the model said 
 
 **Shared.** The run header, the Summary, the stat row, the tab bar with "Transcript" selected, and the side column, as `run.md` specifies them.
 
+**Component help.** With component help on, the tools row (`data-help="transcript-filters"`) and the feed with its run bar (`data-help="transcript"`) each carry a `?` that opens its section in `mockups/help/run-transcript.md`. The explanations this tab used to print live there.
+
 **The tools row.**
 
 - A search field: placeholder "Search the transcript…", aria-label "search the transcript". While a query is typed, a mono count reads "<shown> of <all> entries" ("7 of 38 entries" for "mobile").
@@ -47,13 +49,13 @@ There is no playback transport: no play, no pause, no step, no speed and no posi
 
 A `TodoWrite` call is a tool row ("6 items · plan version 1", output "Todos updated"). The Decision trace reads the same calls as plan versions.
 
-A parked call carries a line under it saying the call is held at the gateway for up to ten minutes and the model sees a wait with a reason, not a failure. The mockup's line ends "Approve or deny it from the card under Governed actions."; that tab no longer exists, and a build names the Approvals drawer and the frame. The recall row's second chip reads "open the Context tab" in the mockup and opens the Decision trace; a build labels it by where it goes.
+A parked call carries the line "Held at the gateway for up to 10 minutes." under it. What the model sees while it waits, and where the approval is answered, is in the component help (`mockups/help/run-transcript.md`, Transcript). The recall row's second chip reads "open the Context tab" in the mockup and opens the Decision trace; a build labels it by where it goes.
 
-**Under the feed**, the note: "The transcript is what the agent showed its operator. Select ⚖ to see what the gateway recorded."
+**Under the feed**, nothing. The line on what the transcript is and how it relates to the gateway's frames moved to the component help (`mockups/help/run-transcript.md`, Transcript).
 
 **Empty results.** "No failed calls in this run." under the errors filter, "Nothing matches this search." under a query, and "Nothing to show with these filters." when the chips hide every row.
 
-**A compacted run** shows, above the tools row: "**Compacted.** This transcript is read from the archive. Its frames were moved out of the live record, and nothing was recomputed."
+**A compacted run** shows, above the tools row: "**Compacted.** This transcript is read from the archive." What compaction moved, and that nothing was recomputed, is in the component help (`mockups/help/run-transcript.md`, Transcript).
 
 **Dialogs this tab opens:** `frame` (every "fr N" chip and every ⚖ chip), and the run dialogs from the header (`run.md`).
 
@@ -82,7 +84,7 @@ This tab's own content carries no future-only mark, and the catalog gives it no 
 
 - The transcript is read, never played. Every row is on the page at once, the feed does not scroll itself, and nothing reveals rows over time (D14).
 - The chips filter the entries on their kinds. The errors filter shows only failed tool calls and marks the run bar "errors only". Search matches the entry text, the tool name and arguments, the output, the diff and the model id, and reports "<shown> of <all> entries".
-- Returned thinking is folded by default. It is labelled as the provider's text everywhere it appears, and the tab says Oxagen has no access to hidden reasoning. The Decision trace never presents it as how the model decided.
+- Returned thinking is folded by default. It is labelled as the provider's text everywhere it appears, and the fold's title says it is not the model's hidden reasoning. The Decision trace never presents it as how the model decided.
 - A tool row leads with the tool's name and its arguments on one line. The raw call folds under "⋯".
 - Each "fr N" chip and each ⚖ chip opens that frame in the frame dialog (`run.md`). The Decision trace's "Open the transcript" and the side column's "Open the diff in the transcript" open this tab.
 - The burn figure is the sum of the cost of the usage rows in view, against the run's total. The cost chips on each usage row sum to the run's recorded cost.

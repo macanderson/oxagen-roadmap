@@ -576,23 +576,22 @@ function planDiff(prev,cur){
   return cur.map(function(x){var p=was[x[0]];return {text:x[0],st:x[1],change:p==null?"added":p!==x[1]?"now "+x[1].replace("_"," "):""};});
 }
 var ANSWER={allowed:["b-allowed","allowed"],routed:["b-approval","routed to a person"],denied:["b-denied","denied"]};
+/* the section's help key is the slug of its title (dt-sec is not a .panel, so the island needs it named) */
 function dtSection(n,title,sub,inner,right,futWhy){
-  return '<section class="dt-sec"'+(futWhy?fut(futWhy):'')+'><div class="dt-h"><span class="dt-n">'+n+'</span><div style="min-width:0;flex:1"><h3>'+h(title)+'</h3>'+
+  return '<section class="dt-sec" data-help="'+h(String(title).toLowerCase().replace(/[^a-z0-9]+/g,"-"))+'"'+(futWhy?fut(futWhy):'')+'><div class="dt-h"><span class="dt-n">'+n+'</span><div style="min-width:0;flex:1"><h3>'+h(title)+'</h3>'+
     (sub?'<p>'+sub+'</p>':'')+'</div>'+(right?'<div class="sp">'+right+'</div>':'')+'</div>'+inner+'</section>';
 }
 function decisionTrace(R){
   var E=runEnvelope(R), wo=runParent(R), ch=runChoices(R), plan=runPlan(R), doubts=runDoubts(R);
   var res=(SOURCES.resolutions||{})[R.id]||null, L=runFrames(R), a=agent(R.agent);
   var manifests=L.filter(function(f){return f.kind==="steering.manifest"||f.kind==="context.assembled";}).length||1;
-  var intro='<div class="dt-read"><div><b>Read from the record.</b> '+tokn(R.frames)+' frames, '+manifests+' steering manifest'+(manifests===1?'':'s')+
-    (wo&&wo.kind==="dispatched"?', and the send of <a class="mono" href="'+woUrl(wo)+'">'+h(wo.id)+'</a>':'')+'. Tier '+tierBadge(R.tier)+': '+
-    (R.tier==="observe"?'recorded, not enforced.':'calls routed through oxagen were checked and recorded.')+'</div>'+
-    '<div class="dim">oxagen has no access to the model’s hidden reasoning. Thinking a provider returns is in the Transcript, labeled as the provider’s text.</div></div>';
+  var intro='<div class="dt-read" data-help="trace-record"><div>'+tokn(R.frames)+' frames, '+manifests+' steering manifest'+(manifests===1?'':'s')+
+    (wo&&wo.kind==="dispatched"?', and the send of <a class="mono" href="'+woUrl(wo)+'">'+h(wo.id)+'</a>':'')+'. Tier '+tierBadge(R.tier)+'.</div></div>';
 
   /* 1. Envelope, by injection point, and 2. what was excluded: the Compiler's own renderers */
-  var s1=dtSection(1,"Envelope",ftLead(E.sel,"run","SteeringFrames")+" reached this run, by where they entered.",
+  var s1=dtSection(1,"Envelope",ftLead(E.sel,"run","SteeringFrames")+" reached this run.",
     envelopeHtml(E,"run"),null,"frame types and per-frame provenance");
-  var s2=dtSection(2,"Exclusions",ftLead(E.cut,"run","resolved")+" and not delivered, each with its reason.",
+  var s2=dtSection(2,"Exclusions",ftLead(E.cut,"run","SteeringFrames")+" excluded.",
     exclusionsHtml(E,"run"),null,null);
 
   /* 3. Choices */
@@ -606,19 +605,19 @@ function decisionTrace(R){
        (c.parked?'<div class="dim mono" style="font-size:11px;margin-top:3px">'+h(c.parked.ap)+' · waiting</div>':'')+'</td>'+
      '<td class="mono" style="font-size:11.5px">'+h(c.by)+'</td>'+
      '<td>'+(c.fr!=null?'<button class="lnk mono" style="font-size:11.5px" onclick="openFrame('+c.fr+')">frame '+c.fr+'</button>':'<span class="dim">—</span>')+'</td></tr>';}).join("");
-  var skill=res?'<div class="dt-skill"'+fut("skill resolution frames")+'><div class="dt-point-h"><b>Skills</b><span class="dim">'+h(res.config)+'</span></div>'+
+  var skill=res?'<div class="dt-skill" data-help="skills"'+fut("skill resolution frames")+'><div class="dt-point-h"><b>Skills</b><span class="dim">'+h(res.config)+'</span></div>'+
      '<ul class="fr-list">'+
       res.synced.map(function(x){return '<li><span class="b b-q">synced</span><span class="mono">'+h(x)+'</span><span class="dim">in the checkout</span></li>';}).join("")+
-      (SOURCES.withheld||[]).map(function(x){return '<li><span class="b b-denied">withheld</span><span class="mono">'+h(x.id+"@"+x.ver)+'</span><span class="dim">'+h(x.reason)+'. The agent was told the count and the reason, never the name.</span></li>';}).join("")+
+      (SOURCES.withheld||[]).map(function(x){return '<li><span class="b b-denied">withheld</span><span class="mono">'+h(x.id+"@"+x.ver)+'</span><span class="dim">'+h(x.reason)+'</span></li>';}).join("")+
       res.loaded.map(function(x){return '<li><span class="b b-allowed">loaded</span><span class="mono">'+h(x.id+"@"+x.ver)+'</span><span class="dim">'+h(runClock(R,x.t))+' · '+h(x.how)+'</span></li>';}).join("")+
      '</ul></div>':'';
-  var s3=dtSection(3,"Choices","The toolbelt offered "+capN+" tool"+(capN===1?"":"s")+" from oxagen, and the harness adds its own. Each call below with the rule's answer.",
+  var s3=dtSection(3,"Choices",plural(capN,"tool")+" on the toolbelt, "+plural(ch.length,"call")+".",
     (rows?'<div class="tw"><table data-lt="off"><thead><tr><th>At</th><th>Call</th><th>Answer</th><th>Decided by</th><th>Frame</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
       :'<p class="muted" style="margin:0;font-size:12.5px">No call is in view for this run. Its frames are in the Transcript.</p>')+skill,null,null);
 
   /* 4. Frames */
   var c=fkCounts(L);
-  var s4=dtSection(4,"Frames",tokn(R.frames)+" recorded, "+L.length+" in view. Each opens the frame it names.",
+  var s4=dtSection(4,"Frames",tokn(R.frames)+" recorded, "+L.length+" in view.",
     runTimeline(R)+'<div class="dt-fk">'+FK_ORDER.map(function(k){return c[k]?'<span class="dt-fkc fk-'+k+'"><i></i>'+h(FK_LABEL[k])+' <b>'+c[k]+'</b></span>':'';}).join("")+
     '<button class="btn sm" style="margin-left:auto" onclick="runTab(\'transcript\')">Open the transcript</button></div>',null,null);
 
@@ -634,7 +633,7 @@ function decisionTrace(R){
   /* 6. Self-reported uncertainty, only when the agent reported it in a structured field */
   var s6="";
   if(doubts.length){
-    s6=dtSection(6,"Self-reported uncertainty","Quoted from the agent’s own report. oxagen does not estimate confidence.",
+    s6=dtSection(6,"Self-reported uncertainty",null,
       doubts.map(function(d){return '<blockquote class="dt-quote"><p>'+h(d.q)+'</p><footer><span class="mono">oxagen__report_status</span> · '+h(d.at)+' · <span class="mono">'+h(d.ref)+'</span></footer></blockquote>';}).join(""),
       null,"report_status");
   }
@@ -644,7 +643,7 @@ function decisionTrace(R){
   var items=wo?woItems(wo):[], claimed=wo?woClaimed(wo):0;
   var pend=APPROVALS.filter(function(x){return x.run===R.id&&apState(x.id).status==="pending";});
   var outs=(R.outputs||[]).filter(roDurable);
-  var s7=dtSection(7,"Evidence","What supports the outcome so far.",
+  var s7=dtSection(7,"Evidence",null,
     '<dl class="kv dt-ev">'+
      '<dt>Outputs</dt><dd>'+(outs.length?outs.map(function(o){return '<span class="mono" style="font-size:12px">'+h(o.name)+'</span> <span class="dim">'+h(o.state)+'</span>';}).join('<br>'):'<span class="dim">none recorded</span>')+'</dd>'+
      '<dt>Definition of done</dt><dd'+fut("work orders")+'>'+(items.length?claimed+' of '+items.length+' claimed by the agent · '+(wo.claims||[]).filter(function(c){return c&&c.ok;}).length+' accepted by a person':'<span class="dim">none: a direct work order</span>')+'</dd>'+
@@ -660,12 +659,12 @@ function runEvidence(R,compacted){
   var wo=runParent(R), items=wo?woItems(wo):[];
   var done=APPROVALS.filter(function(x){return x.run===R.id;});
   var dod=items.length?'<div class="panel" style="margin-bottom:14px"'+fut("work orders")+'><div class="panel-h"><div style="flex:1;min-width:0"><h3>Definition of done</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">From <a class="mono" href="'+woUrl(wo)+'">'+h(wo.id)+'</a>. A claim is the agent’s word. An acceptance is a person’s.</p></div></div>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">From <a class="mono" href="'+woUrl(wo)+'">'+h(wo.id)+'</a></p></div></div>'+
      '<div class="tw"><table data-lt="off"><thead><tr><th>Item</th><th>State</th><th>Evidence</th></tr></thead><tbody>'+items.map(function(it,i){var c=(wo.claims||[])[i];
        return '<tr><td>'+h(it.t)+'</td><td>'+(c&&c.ok?'<span class="b b-allowed"><span class="d"></span>accepted</span>':c?'<span class="b b-approval"><span class="d"></span>claimed</span>':'<span class="b b-q"><span class="d"></span>open</span>')+'</td>'+
          '<td style="font-size:12px">'+(c?h(c.ev):'<span class="dim">—</span>')+'</td></tr>';}).join("")+'</tbody></table></div></div>':'';
   var ap=done.length?'<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Approvals</h3></div><div class="panel-b">'+done.map(approvalCardSm).join("")+'</div></div>':'';
-  var seg=compacted&&!S.seg[R.id]?'<div class="warn" style="margin-bottom:14px"><b>Compacted.</b> Frame nodes for this run left the graph after the thirteen-month hot window. The archive segment holds the same bytes, written once at seal.</div>':'';
+  var seg=compacted&&!S.seg[R.id]?'<div class="warn" style="margin-bottom:14px"><b>Compacted.</b> This run is read from its archive segment.</div>':'';
   return seg+dod+ap+issuesTab(R)+linkedWork(R)+chainTab(R);
 }
 
