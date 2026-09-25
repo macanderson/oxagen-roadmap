@@ -2125,17 +2125,17 @@ function pRun(r){
 
   var bodyHtml="";
   if(compacted&&t==="player"&&!S.seg[R.id]){
-    bodyHtml='<div class="warn" style="margin-bottom:14px"><b>Compacted.</b> Frame nodes for this run left the graph after the thirteen-month hot window. '+
-     'Render replay reads the archive segment, which is the same bytes the graph indexed, written once at seal. Nothing was moved and nothing was recomputed.</div>'+
+    bodyHtml='<div class="warn" style="margin-bottom:14px"><b>Compacted.</b> This run\'s frames left the live record after 13 months. '+
+     'Replay reads the archive segment, which holds the same bytes, written once at seal. Nothing was recomputed.</div>'+
      '<div class="panel"><div class="panel-h"><h3>Archive segment</h3></div>'+
      '<div class="panel-b"><dl class="kv">'+
      '<dt>Segment</dt><dd class="mono">seg_01K4QJ9E4T6YUI1O.ndjson.zst · 118 frame envelopes · 0.7 MB</dd>'+
      '<dt>Merkle root</dt><dd class="mono">sha256:b41e07c9a2f5308d6e14bb90c7f2a331</dd>'+
      '<dt>Attestation</dt><dd class="mono">ed25519 · '+h(ORG.attester)+' · valid 2025-01-01 → 2026-12-31</dd>'+
      '<dt>Retained until</dt><dd>2032-07-02 · object lock, compliance mode</dd>'+
-     '<dt>What remains in the graph</dt><dd>the run node, frame_count 118, merkle_root, segment_ref, and the rollups</dd>'+
+     '<dt>What remains in the graph</dt><dd>The run, its frame count (118), the Merkle root, the segment reference and the rollups</dd>'+
      '</dl><div class="row" style="margin-top:14px"><button class="btn primary" onclick="S.seg[\''+R.id+'\']=true;render();act(\'Segment fetched. Rendering '+plural(R.frames,"frame")+' from the archive.\')">Render from the segment</button>'+
-     '<button class="btn" onclick="act(\'Verifier script and key ids downloaded.\')">Verify offline</button></div></div></div>';
+     '<button class="btn" onclick="act(\'Verifier script and key IDs downloaded.\')">Verify offline</button></div></div></div>';
   } else if(t==="transcript"){
     bodyHtml=transcriptTab(R,compacted);
   } else if(t==="player"){
@@ -2146,7 +2146,7 @@ function pRun(r){
        '<span class="mono dim" style="width:22px;flex:none;text-align:right">'+f.seq+'</span>'+
        (mk?'<span class="fp-dot" style="background:'+mk+'"></span>':'<span class="fp-dot" style="background:transparent"></span>')+
        '<span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(f.kind)+'</span>'+
-       (f.cost?'<span class="ct">$'+f.cost+'</span>':'')+'</button>';
+       (f.cost?'<span class="ct">'+usd(f.cost)+'</span>':'')+'</button>';
     }).join("");
     setTimeout(fpAfterRender,0);
     bodyHtml=runTimeline(R)+fpBar(R)+'<div class="split"><div class="panel"><div class="panel-h"><h3>Frame '+fr.seq+' · <span class="mono">'+h(fr.kind)+'</span></h3>'+
@@ -2156,7 +2156,7 @@ function pRun(r){
       '<div class="row" style="margin-top:16px;border-top:1px solid var(--border);padding-top:13px">'+
        '<button class="btn sm" onclick="fpStep(-1)" title="← previous frame">◀ Previous</button>'+
        '<button class="btn sm" onclick="fpStep(1)" title="→ next frame">Next ▶</button>'+
-       '<span class="dim mono" style="font-size:11px;margin-left:auto">frame '+(S.frame+1)+' of '+FRAMES.length+' shown · '+R.frames+' in the run</span></div>'+
+       '<span class="dim mono" style="font-size:11px;margin-left:auto">frame '+(S.frame+1)+' of '+FRAMES.length+(FRAMES.length<R.frames?' shown · '+plural(R.frames,"frame")+' in the run':'')+'</span></div>'+
      '</div></div>'+
      '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Timeline</h3><span class="dim" style="margin-left:auto;font-size:11px">'+(rs==="live"?'live':rs==="paused"?'paused':'sealed')+'</span></div>'+
      '<div class="panel-b" id="fptl" style="padding:7px;max-height:420px;overflow-y:auto">'+timeline+'</div></div>'+
@@ -2171,7 +2171,7 @@ function pRun(r){
      '<thead><tr><th>Frame</th><th>Call</th><th>Outcome</th><th>Rules that fired</th><th>Taint</th><th>Latency</th></tr></thead><tbody>'+
      '<tr><td class="mono">5</td><td class="mono">github__list_pull_requests@3</td><td><span class="b b-allowed"><span class="d"></span>allow</span></td><td class="mono" style="font-size:11.5px">rg_0088</td><td class="dim">none</td><td class="num">6 ms</td></tr>'+
      '<tr><td class="mono">14</td><td class="mono">github__create_release@2</td><td><span class="b b-approval"><span class="d"></span>approve</span></td><td class="mono" style="font-size:11.5px">rg_0093</td><td class="dim">none</td><td class="num">7 ms</td></tr>'+
-     '</tbody></table></div><div class="panel-b"><div class="note">Same call, same policy version, same answer. The decision cites <span class="mono">pol_v41</span>; a change to the policy produces a new version, never a different answer from the same one.</div></div></div>';
+     '</tbody></table></div><div class="panel-b"><div class="note">The same call under the same policy version always gets the same answer. These decisions cite policy version <span class="mono">pol_v41</span>. A policy change creates a new version.</div></div></div>';
   } else if(t==="context"){
     bodyHtml=promptRow(R)+contextTab(R);
   } else if(t==="memory"){
@@ -2398,7 +2398,7 @@ var EFFORT_LADDER=["low","medium","high"];
    reports usage afterwards, so the setting is never seen. Saying "medium" there would be a guess. */
 function runEffort(R){
   if(TIER_RANK[R.tier]>=2&&R.effort) return {v:R.effort,seen:true};
-  if(TIER_RANK[R.tier]>=2) return {v:null,seen:false,why:"this agent sent no effort setting, so the model used its own default"};
+  if(TIER_RANK[R.tier]>=2) return {v:null,seen:false,gw:true,why:"this agent sent no effort setting, so the model used its own default"};
   return {v:null,seen:false,why:"the model call did not go through oxagen, so the request body was never read"};
 }
 
@@ -2409,52 +2409,57 @@ function runFit(R){
   var prompts=w.prompts, rung=modelRung(R.model);
   var reasonShare=m.tokOut?m.reasoning/m.tokOut:0;
   var redone=prompts>1||(m.errs||0)>0;
-  var fit={read:prompts+" prompt"+(prompts===1?"":"s")+" · "+R.turn+" turn"+(R.turn===1?"":"s")+" · "+
+  var fit={read:plural(prompts,"prompt")+" · "+plural(R.turn,"turn")+" · "+
     tokn(m.tokOut)+" output tokens, "+per(reasonShare)+" of them reasoning · "+
-    ((m.errs||0)?m.errs+" tool call"+(m.errs===1?"":"s")+" failed":"no tool call failed")};
+    ((m.errs||0)?plural(m.errs,"tool call")+" failed":"no tool call failed")};
 
   /* The model. Down a rung when a small job landed first time on a big model; up a rung when the
      run had to be corrected on a small one. Reasoning share is a fixed fraction of output per model
      family, so it reads the shape of the work instead: prompts, failed calls, turns, and steps. */
+  /* A move is suggested only where the record shows a saving (down a rung) or measured rework, meaning
+     follow-up prompts that cost money (up a rung). Anything else fits, and the page says so. */
   var small=R.turn<=3||m.steps<=12;
-  if(!redone&&small&&rung.rank>0){
-    var lower=MODEL_LADDER[rung.rank-1];
-    var save=Math.max(0,(parseFloat(R.cost)||0)-(m.tokIn*PRICE.inEff+m.tokOut*lower.out));
-    fit.model={verdict:"over",title:"Wrong model tier",
-     say:"This run landed in "+R.turn+" turn"+(R.turn===1?"":"s")+" and "+plural(m.steps,"step")+", first try, with no tool call failing. "+
-      lower.lab+" answers this shape of work, and this run would have cost about "+usd(save.toFixed(2))+" less.",
+  var lower=rung.rank>0?MODEL_LADDER[rung.rank-1]:null, upper=rung.rank<MODEL_LADDER.length-1?MODEL_LADDER[rung.rank+1]:null;
+  var save=lower?Math.max(0,(parseFloat(R.cost)||0)-(m.tokIn*PRICE.inEff+m.tokOut*lower.out)):0;
+  if(!redone&&small&&lower&&save>=0.005){
+    fit.model={verdict:"over",title:"Heavier model than needed",
+     say:"This run finished in "+plural(R.turn,"turn")+" and "+plural(R.steps,"step")+", first try, with no failed tool call. "+
+      lower.lab+" can do this kind of work, and this run would have cost about "+usd(save.toFixed(2))+" less.",
      suggest:lower.m,suggestLab:lower.lab,delta:-save};
-  } else if(redone&&rung.rank<MODEL_LADDER.length-1){
-    var upper=MODEL_LADDER[rung.rank+1];
-    var more=Math.max(0,(m.tokIn*PRICE.inEff+m.tokOut*upper.out)-(parseFloat(R.cost)||0))+w.usd;
-    fit.model={verdict:"under",title:"Wrong model tier",
-     say:"This run took "+plural(prompts,"prompt")+" to land and wasted "+usd(fmt2(w.usd))+" getting there. "+
-      upper.lab+" costs about "+usd(more.toFixed(2))+" more on this shape of work, and the correction is what you are paying for now.",
-     suggest:upper.m,suggestLab:upper.lab,delta:more};
+  } else if(prompts>1&&w.usd>0&&upper){
+    /* The heavier model is priced on the same tokens, less the rework it would likely have avoided. */
+    var net=(m.tokIn*PRICE.inEff+m.tokOut*upper.out)-(parseFloat(R.cost)||0)-w.usd;
+    fit.model={verdict:"under",title:"Lighter model than needed",
+     say:"This run needed "+plural(prompts-1,"extra prompt")+" ("+usd(fmt2(w.usd))+" of rework). "+
+      upper.lab+" would likely cost "+usd(Math.abs(net).toFixed(2))+" "+(net<0?"less":"more")+" for this kind of work.",
+     suggest:upper.m,suggestLab:upper.lab,delta:net};
   } else {
-    fit.model={verdict:"fit",title:"Model fit",
-     say:modelRung(R.model).lab+" matches"+" this shape of work. Nothing in the record argues for moving it either way."};
+    fit.model={verdict:"fit",title:"Model fits this work",
+     say:rung.lab+" fits this work. No change suggested."};
   }
 
   /* The effort setting, only where Oxagen saw it. */
-  if(!eff.seen){
-    fit.effort={verdict:"unseen",title:"Effort setting",
-     say:"oxagen did not capture the effort setting for this run, because "+eff.why+". It is captured at the gateway and contained tiers."};
+  if(!eff.seen&&eff.gw){
+    fit.effort={verdict:"unseen",title:"No effort setting",
+     say:"This agent sent no effort setting, so the model used its own default."};
+  } else if(!eff.seen){
+    fit.effort={verdict:"unseen",title:"Effort not captured",
+     say:"oxagen did not capture the effort setting for this run: "+eff.why+". It is captured at the gateway and contained tiers."};
   } else {
     var er=EFFORT_LADDER.indexOf(eff.v);
     if(!redone&&er>0&&m.reasoning>0.2*m.tokOut){
-      fit.effort={verdict:"over",title:"Wrong effort setting",
-       say:"This run landed first try and still spent "+tokn(m.reasoning)+" tokens thinking, "+per(reasonShare)+
-        " of everything it wrote. At "+EFFORT_LADDER[er-1]+" the model thinks less and the output bill falls.",
+      fit.effort={verdict:"over",title:"More effort than needed",
+       say:"This run finished first try and still spent "+tokn(m.reasoning)+" tokens reasoning, "+per(reasonShare)+
+        " of its output. At effort "+EFFORT_LADDER[er-1]+" the model reasons less and output costs less.",
        suggest:EFFORT_LADDER[er-1],delta:-(m.reasoning*0.45*rung.out)};
     } else if(redone&&er<EFFORT_LADDER.length-1){
-      fit.effort={verdict:"under",title:"Wrong effort setting",
-       say:"This run "+(prompts>1?"took "+plural(prompts,"prompt")+" to land":"had "+m.errs+" tool call"+(m.errs===1?"":"s")+" fail")+
-        " on effort "+eff.v+". At "+EFFORT_LADDER[er+1]+" the model thinks before it acts, which is cheaper than being told again.",
+      fit.effort={verdict:"under",title:"Less effort than needed",
+       say:"This run "+(prompts>1?"needed "+plural(prompts-1,"extra prompt"):"had "+plural(m.errs,"failed tool call"))+
+        " at effort "+eff.v+". At effort "+EFFORT_LADDER[er+1]+" the model reasons before it acts, which costs less than a correction.",
        suggest:EFFORT_LADDER[er+1],delta:m.reasoning*0.6*rung.out};
     } else {
-      fit.effort={verdict:"fit",title:"Effort setting",
-       say:"Effort "+eff.v+" matches"+" this run. "+per(reasonShare)+" of the output was reasoning and nothing had to be done twice."};
+      fit.effort={verdict:"fit",title:"Effort fits this run",
+       say:"Effort "+eff.v+" fits this run. "+(redone?"It is already the highest setting.":per(reasonShare)+" of the output was reasoning and nothing had to be redone.")};
     }
   }
   fit.eff=eff;
@@ -2569,7 +2574,7 @@ function runRig(R){
   return '<div class="row rig" style="margin-top:8px">'+
    '<span class="b b-q">'+(a?h(a.harnessLabel):"harness")+(a&&a.harnessV?' <span class="mono dim">'+h(a.harnessV)+'</span>':'')+'</span>'+
    '<span class="b b-q mono">'+h(R.model)+'</span>'+
-   '<span class="b b-q">effort '+(eff.seen?h(eff.v):'<span class="dim">not captured</span>')+'</span>'+
+   '<span class="b b-q">effort '+(eff.seen?h(eff.v):eff.gw?'<span class="dim">model default</span>':'<span class="dim">not captured</span>')+'</span>'+
    fitBadge(f.model)+fitBadge(f.effort)+'</div>';
 }
 /* The argument in full, with the change it asks for. The model is set in the agent definition, so
@@ -2585,11 +2590,11 @@ function runFitPanel(R){
      (kind==="model"?'Move this agent to '+h(x.suggestLab):'Set effort to '+h(x.suggest))+'</button></div></div>';
   }
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Model fit</h3>'+
-   '<span class="b b-q" style="margin-left:auto;font-size:10.5px">generated · not the record</span></div>'+
+   '<span class="b b-q" style="margin-left:auto;font-size:10.5px">Generated estimate</span></div>'+
    card(f.model,"model")+card(f.effort,"effort")+
    '<div class="panel-b"><div class="note">Read from this run only: '+h(f.read)+
-   '. A reading is an argument, not a verdict, and it changes nothing until somebody merges the change to '+
-   (a?'<span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>':'the agent definition')+'.</div></div></div>';
+   '. Nothing changes until the change to '+
+   (a?'<span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>':'the agent definition')+' merges.</div></div></div>';
 }
 DLG_EXT.fitchange=function(arg){
   var parts=String(arg||"").split(":"), R=run(parts[0]); if(!R)return noSuch("Run");
@@ -2599,10 +2604,10 @@ DLG_EXT.fitchange=function(arg){
    b:'<div class="note">'+h(x.say)+'</div>'+
     '<dl class="kv" style="margin-top:14px"><dt>Agent</dt><dd>'+(a?h(a.name):h(R.agent))+'</dd>'+
     '<dt>File</dt><dd class="mono" style="font-size:11.5px">'+h(file)+'</dd>'+
-    '<dt>Today</dt><dd class="mono">'+(parts[1]==="effort"?h(f.eff.v||"not captured"):h(R.model))+'</dd>'+
+    '<dt>Today</dt><dd class="mono">'+(parts[1]==="effort"?h(f.eff.v||(f.eff.gw?"model default":"not captured")):h(R.model))+'</dd>'+
     '<dt>Proposed</dt><dd class="mono">'+h(x.suggest)+'</dd>'+
-    '<dt>Effect on this shape of run</dt><dd>'+(x.delta<0?usd(Math.abs(x.delta).toFixed(2))+' less':usd(Math.abs(x.delta).toFixed(2))+' more')+' a run</dd></dl>'+
-    '<div class="note" style="margin-top:14px">Every run the agent has already sealed keeps the model it ran on. This changes the next one.</div>',
+    '<dt>Effect per run</dt><dd>'+(x.delta<0?usd(Math.abs(x.delta).toFixed(2))+' less':usd(Math.abs(x.delta).toFixed(2))+' more')+'</dd></dl>'+
+    '<div class="note" style="margin-top:14px">Runs the agent has already sealed keep the settings they ran with. This changes the next run.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn primary" onclick="fitPr(\''+h(R.id)+':'+h(parts[1])+'\')">Open the pull request</button>'};
 };
@@ -2614,14 +2619,14 @@ function fitPr(arg){
    repo:ws().main,base:ws().branch,branch:"agents/"+slug+"-"+parts[1],
    pr:ws().main+"#"+(524+OXPRS.length),by:PEOPLE.marcus.name,byKind:"person",
    opened:"just now",state:"checks_running",
-   trigger:"A model fit reading of "+R.id+" argued the "+(parts[1]==="effort"?"effort setting":"model tier")+" was the wrong size.",
+   trigger:"A model fit reading of "+R.id+" found the "+(parts[1]==="effort"?"effort setting":"model class")+" was the wrong size.",
    files:[["mod",".oxagen/agents/"+slug+".toml",(parts[1]==="effort"?"effort = ":"model = ")+x.suggest]],
    checks:[["schema","pass","agent-definition/v0.3; "+(parts[1]==="effort"?"effort":"model")+" is a value the harness accepts."],
-    ["belt_unchanged","pass","The toolbelt and its tier are untouched, so nothing this agent may do changes."],
+    ["belt_unchanged","pass","The toolbelt is unchanged, so nothing this agent may do changes."],
     ["budget_fit","pass","The agent's daily budget covers the new price at its 30-day run count."]]};
   OXPRS.unshift(p);
   closeDialog(); render();
-  act("Opened "+p.pr+". The next run uses it; every sealed run keeps the model it ran on.","gold");
+  act("Opened "+p.pr+". The first run after it merges uses the change. Sealed runs keep the settings they ran with.","gold");
 }
 function runStatRow(R){
   var m=runMetrics(R), w=runWaste(R), p=w.prompts, s=m.series;
@@ -2629,11 +2634,11 @@ function runStatRow(R){
   var tile=function(k,v,sub,color){return '<div class="stat"><span class="k">'+k+'</span><span class="v"'+(color?' style="color:'+color+'"':'')+'>'+v+'</span><span class="s">'+sub+'</span></div>';};
   return '<div class="rstats">'+
    tile("Tokens",tokn(m.tokTotal),tokn(m.tokIn)+' in, '+tokn(m.tokOut)+' out')+
-   tile("Prompts",p,p===1?'one-shot session':(p-1)+' corrective',p>2?"var(--st-approval)":null)+
-   tile("Cost",usd(R.cost),'<span class="basis">'+h(R.basis)+'</span>')+
-   tile("Wasted",fmt$(w.usd),w.corrective?(p-1)+' corrective prompt'+(p===2?'':'s'):w.listed?h(w.listed.badges[0][0]):'nothing bought nothing',w.usd>0?"var(--st-critical)":null)+
+   tile("Prompts",p,p===1?'No follow-up prompts':plural(p-1,"follow-up prompt"),p>2?"var(--st-approval)":null)+
+   tile("Cost",usd(R.cost),basisChip(R.basis))+
+   tile("Unproductive",fmt$(w.usd),w.corrective?plural(p-1,"follow-up prompt"):w.listed?h(w.listed.badges[0][0]):'None',w.usd>0?"var(--st-critical)":null)+
    tile("Wall clock",msDur(m.wall),(wp[0]==="waiting on a person"?'mostly waiting on a person':wp[0]==="model"?'mostly in the model':'mostly in '+wp[0]+" calls"))+
-   tile("Cache hit",per(R.cache),'saved about $'+s.saved.toFixed(2))+'</div>';
+   tile("Cache hit",per(R.cache),'saved about '+usd(s.saved.toFixed(2)))+'</div>';
 }
 /* Every issue a session touched: the task it was started for, and any it read, referenced or closed.
    A session is not one issue; the tab says which is which and links to each. */
@@ -2675,9 +2680,9 @@ function runAreas(R){
   var results=Math.max(0,m.tokIn-first-follow-ctx-defs-sys);
   var inCost=total/3, per=function(t){return inCost*tokShare(t,m.tokIn);};
   var areas=[["Initial prompt",first,per(first),"the first prompt, carried in every request"],
-    ["Follow-up prompts",follow,per(follow),p>1?(p-1)+" corrective prompt"+(p===2?"":"s")+", each re-sent with the window":"none"],
+    ["Follow-up prompts",follow,per(follow),p>1?plural(p-1,"follow-up prompt")+", each re-sent with the window":"none"],
     ["Context retrievals",ctx,per(ctx),"context frames and steering oxagen injected"],
-    ["Tool definitions",defs,per(defs),"the toolbelt as the model is shown it"],
+    ["Tool definitions",defs,per(defs),"the toolbelt as the model sees it"],
     ["Tool calls",results,per(results),plural(m.calls.length,"call")+", result bodies in the window"],
     ["System prompt",sys,per(sys),"the harness's own prompt"],
     ["Model output",m.tokOut,total*2/3,tokn(m.reasoning)+" of it reasoning"]];
@@ -2688,12 +2693,12 @@ function runAreas(R){
 }
 function runSpendByArea(R){
   var A=runAreas(R), mx=Math.max.apply(null,A.areas.map(function(a){return a[2];}))||1;
-  var bars=A.areas.map(function(a){return '<div class="meter"'+tipAttr(a[3])+'><div class="lab">'+a[0]+'<b>'+(a[2]>0&&a[2]<0.005?'$'+a[2].toFixed(3):fmt$(a[2]))+' <span class="dim" style="font-weight:500">· '+tokn(a[1])+' tok</span></b></div><div class="bar"><i style="width:'+Math.max(1,Math.round(a[2]/mx*100))+'%;background:var(--st-approval)"></i></div></div>';}).join("");
-  var top=A.tools.slice(0,8).map(function(t){return '<div class="rs-file"><span class="mono" title="'+h(t.id)+'">'+h(toolParts(t.id).n)+'</span><span class="mono dim">'+t.calls+' call'+(t.calls===1?'':'s')+' · <b style="color:var(--fg)">'+fmt$(t.usd)+'</b></span></div>';}).join("");
-  return '<div class="panel"><div class="panel-h"><h3>Spend by area</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+usd(R.cost)+' · '+h(R.basis)+'</span></div>'+
+  var bars=A.areas.map(function(a){return '<div class="meter"'+tipAttr(a[3])+'><div class="lab">'+a[0]+'<b>'+(a[2]>0&&a[2]<0.005?usd(a[2].toFixed(3)):fmt$(a[2]))+' <span class="dim" style="font-weight:500">· '+tokn(a[1])+' tok</span></b></div><div class="bar"><i style="width:'+Math.max(1,Math.round(a[2]/mx*100))+'%;background:var(--st-approval)"></i></div></div>';}).join("");
+  var top=A.tools.slice(0,8).map(function(t){return '<div class="rs-file"><span class="mono" title="'+h(t.id)+'">'+h(toolParts(t.id).n)+'</span><span class="mono dim">'+plural(t.calls,"call")+' · <b style="color:var(--fg)">'+fmt$(t.usd)+'</b></span></div>';}).join("");
+  return '<div class="panel"><div class="panel-h"><h3>Spend by area</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+usd(R.cost)+' · '+basisChip(R.basis)+'</span></div>'+
    '<div class="panel-b" style="display:grid;gap:9px">'+bars+'</div>'+
-   (A.tools.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="eyebrow q" style="margin:0 0 4px">Dearest tools</p><div class="rs-files" style="margin:0;border:0">'+top+'</div>'+'</div>':'')+
-   ('<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Input is a third of the money, split by the tokens each area put into the window; output is the rest. Tool calls split again by the wall clock each tool held, so the dearest tool is visible. A follow-up prompt re-sends the window, which is why it costs more than its own words.</div></div>')+'</div>';
+   (A.tools.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="eyebrow q" style="margin:0 0 4px">Most expensive tools</p><div class="rs-files" style="margin:0;border:0">'+top+'</div>'+'</div>':'')+
+   ('<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Input is about a third of the cost, split by the tokens each area added to the context window. Output is the rest. Tool calls are split again by how long each tool ran. A follow-up prompt re-sends the whole window, so it costs more than its own words.</div></div>')+'</div>';
 }
 function runSide(R){
   var g=runGraphOf(R), m=runMetrics(R), outs=R.outputs||[];
@@ -2738,12 +2743,12 @@ function runInstruments(R){
 
   /* 1 · cost, per turn */
   var costCols=s.cost.map(function(c,i){
-    return '<button type="button" class="c fk-model'+(i===s.n-1&&R.status==="live"?" cur":"")+'"'+tipAttr("Turn "+(i+1)+" · $"+c.toFixed(2)+" · cache "+per(s.cache[i])+(i===s.peak?" · dearest turn":""))+' aria-label="turn '+(i+1)+' $'+c.toFixed(2)+'" onclick="S.tab.run=\'cost\';render()">'+
-      (i===s.peak?'<span class="lab">$'+c.toFixed(2)+'</span>':'')+'<i style="height:'+Math.max(4,Math.round(c/mx*100))+'%"></i></button>';}).join("");
-  var t1=instTile("Cost so far",h(R.basis),usd(R.cost)+' <small>USD</small>',
-    '<b>$'+s.perTurn.toFixed(2)+'</b> per turn · turn '+(s.peak+1)+' was the dearest'+(medRun!=null?' · '+deltaHtml(total,medRun,function(d){return "$"+d.toFixed(2);},false)+' vs this agent’s median run $'+medRun.toFixed(2):''),
+    return '<button type="button" class="c fk-model'+(i===s.n-1&&R.status==="live"?" cur":"")+'"'+tipAttr("Turn "+(i+1)+" · "+usd(c.toFixed(2))+" · cache "+per(s.cache[i])+(i===s.peak?" · most expensive turn":""))+' aria-label="turn '+(i+1)+' '+usd(c.toFixed(2))+'" onclick="S.tab.run=\'cost\';render()">'+
+      (i===s.peak?'<span class="lab">'+usd(c.toFixed(2))+'</span>':'')+'<i style="height:'+Math.max(4,Math.round(c/mx*100))+'%"></i></button>';}).join("");
+  var t1=instTile(R.status==="live"?"Cost so far":"Cost",keyLabel(R.basis),usd(R.cost)+' <small>USD</small>',
+    '<b>'+usd(s.perTurn.toFixed(2))+'</b> per turn · turn '+(s.peak+1)+' cost the most'+(medRun!=null?' · '+deltaHtml(total,medRun,function(d){return usd(d.toFixed(2));},false)+' vs this agent’s median run of '+usd(medRun.toFixed(2)):''),
     '<div class="cols">'+costCols+'<span class="base"></span></div><div class="ax"><span>turn 1</span><span>turn '+s.n+(R.status==="live"?" · live":"")+'</span></div>',
-    'cache hit <b>'+per(R.cache)+'</b> · saved ≈ <b>$'+s.saved.toFixed(2)+'</b> against an uncached prompt');
+    'Cache hit <b>'+per(R.cache)+'</b> · saved about <b>'+usd(s.saved.toFixed(2))+'</b> compared with no cache');
 
   /* 2 · wall clock — model, tool, waiting on a person, harness */
   var wp=[["model",m.modelMs,"fk-model",msDur(m.modelMs)],["tool",m.toolMs,"fk-tool",msDur(m.toolMs)],
@@ -2751,9 +2756,9 @@ function runInstruments(R){
   var lead=wp.slice().sort(function(x,y){return y[1]-x[1];})[0];
   var t2=instTile("Wall clock",R.status==="live"?"so far":"start to seal",msDur(m.wall)+' <small>elapsed</small>',
     '<b>'+pct(lead[1],m.wall)+'</b> of it '+(lead[0]==="waiting on a person"?'waiting on a person':lead[0]==="model"?'in the model':'in '+lead[0]+" calls")+
-    (m.parked?' · '+m.parked+' call'+(m.parked===1?'':'s')+' parked for approval':''),
+    (m.parked?' · '+plural(m.parked,"call")+' waited for approval':''),
     stack3(wp,m.wall)+stackLeg(wp),
-    'Running '+m.batches.length+' batch'+(m.batches.length===1?'':'es')+' together cost <b>'+msDur(m.toolMs)+'</b> of wall clock against <b>'+msDur(m.serialMs)+'</b> one at a time.');
+    m.serialMs>m.toolMs?'Running '+plural(m.batches.length,"batch","batches")+' in parallel took <b>'+msDur(m.toolMs)+'</b> instead of <b>'+msDur(m.serialMs)+'</b> one at a time.':'');
 
   /* 3 · tokens */
   var tp=[["cache read",m.cacheRead,"fk-model",tokn(m.cacheRead)],["fresh input",m.fresh,"fk-tool",tokn(m.fresh)],["output",m.tokOut,"fk-gov",tokn(m.tokOut)]];
@@ -2767,9 +2772,9 @@ function runInstruments(R){
   var stepCols=s.steps.map(function(n,i){var mh=s.model[i]/stepMx*100,th=s.tool[i]/stepMx*100;
     return '<button type="button" class="c" style="height:100%"'+tipAttr("Turn "+(i+1)+" · "+plural(n,"step")+" · "+s.model[i]+" model · "+s.tool[i]+" tool")+' aria-label="turn '+(i+1)+' '+plural(n,"step")+'" onclick="S.tab.run=\'player\';render()">'+
       (n===stepMx?'<span class="lab">'+n+'</span>':'')+'<i class="fk-tool" style="height:'+Math.max(2,Math.round(th))+'%"></i><i class="fk-model" style="height:'+Math.max(2,Math.round(mh))+'%"></i></button>';}).join("");
-  var t4=instTile("Shape of the run",plural(FRAMES.length,"frame")+' in view',
+  var t4=instTile("Turns and steps",(FRAMES.length<R.frames?FRAMES.length+' of '+plural(R.frames,"frame"):plural(R.frames,"frame"))+' shown',
     R.turn+' <small>'+(R.turn===1?"turn":"turns")+'</small><span class="sep"> · </span>'+R.steps+' <small>'+(R.steps===1?"step":"steps")+'</small><span class="sep"> · </span>'+R.frames+' <small>'+(R.frames===1?"frame":"frames")+'</small>',
-    'A step is one model call or one tool call; a frame is one recorded event.',
+    'A step is one model call or one tool call. A frame is one recorded event.',
     '<div class="cols">'+stepCols+'<span class="base"></span></div><div class="ax"><span>turn 1</span><span>turn '+s.n+'</span></div>'+
     stackLeg([["model calls",m.modelN,"fk-model",m.modelN],["tool calls",m.calls.length,"fk-tool",m.calls.length]]),
     '<b>'+m.fan.toFixed(1)+'</b> tools per batch · <b>'+(m.calls.length/Math.max(1,m.modelN)).toFixed(2)+'</b> tool calls per model call');
@@ -2777,14 +2782,14 @@ function runInstruments(R){
   /* 5 · tool calls by family — magnitude in one hue, identity in the icon and the label */
   var fmx=m.families.length?m.families[0].n:1;
   var famRows=m.families.slice(0,4).map(function(f){
-    return '<button type="button" class="frow t-'+f.cat+'"'+tipAttr(TCAT[f.cat].l+" · "+plural(f.n,"call")+" · "+f.tools+" distinct tools · "+msDur(f.ms)+(f.err?" · "+f.err+" failed":""))+' onclick="S.tab.run=\'cost\';render()">'+
+    return '<button type="button" class="frow t-'+f.cat+'"'+tipAttr(TCAT[f.cat].l+" · "+plural(f.n,"call")+" · "+plural(f.tools,"distinct tool")+" · "+msDur(f.ms)+(f.err?" · "+f.err+" failed":""))+' onclick="S.tab.run=\'cost\';render()">'+
      '<span class="ti">'+catSvg(f.cat)+'</span><span class="fl">'+h(TCAT[f.cat].l)+'</span>'+
      '<span class="fb"><i style="width:'+Math.round(f.n/fmx*100)+'%"></i></span><span class="fn">'+f.n+'</span></button>';}).join("");
   var rest=m.families.slice(4).reduce(function(a,f){return a+f.n;},0);
-  var t5=instTile("Tool calls",m.families.length+' famil'+(m.families.length===1?'y':'ies'),
+  var t5=instTile("Tool calls",plural(m.families.length,"family","families"),
     m.calls.length+' <small>'+(m.calls.length===1?"call":"calls")+'</small>'+(m.errs?'<small>'+deltaHtml(m.errs,0,function(d){return d+" failed";},false)+'</small>':''),
-    '', '<div class="fams">'+famRows+(rest?'<div class="frow rest"><span class="ti"></span><span class="fl">other</span><span class="fb"><i style="width:'+Math.round(rest/fmx*100)+'%"></i></span><span class="fn">'+rest+'</span></div>':'')+'</div>',
-    '<b>'+m.par+'</b> of '+m.batches.length+' batches ran in parallel · up to <b>'+m.maxPar+'</b> at once');
+    '', '<div class="fams">'+famRows+(rest?'<div class="frow rest"><span class="ti"></span><span class="fl">Other</span><span class="fb"><i style="width:'+Math.round(rest/fmx*100)+'%"></i></span><span class="fn">'+rest+'</span></div>':'')+'</div>',
+    '<b>'+m.par+'</b> of '+plural(m.batches.length,"batch","batches")+' ran in parallel · up to <b>'+m.maxPar+'</b> at once');
 
   /* 6 · productive ratio */
   var ref=a?a.ratio:null;
@@ -2794,7 +2799,7 @@ function runInstruments(R){
     '<div class="stk"><i class="fk-model" style="flex:'+s.adv+'"'+tipAttr(plural(s.adv,"step")+" advanced the task")+'></i><i style="flex:'+s.idle+';background:var(--rule)"'+tipAttr(plural(s.idle,"step")+" did not: retries, re-reads and waits")+'></i>'+
     (ref!=null?'<span class="ref" style="left:'+Math.round(ref*100)+'%"'+tipAttr("this agent’s 30-day productive ratio · "+per(ref))+'></span>':'')+'</div>'+
     stackLeg([["advanced",s.adv,"fk-model",s.adv],["did not",s.idle,"neu",s.idle]]),
-    s.idle?'<b>'+s.idle+'</b> steps did not move the task: '+plural(Math.ceil(s.idle*0.55),"retry","retries")+', '+plural(Math.floor(s.idle*0.3),"re-read")+', '+plural(Math.max(0,s.idle-Math.ceil(s.idle*0.55)-Math.floor(s.idle*0.3)),"wait")+'.':'Every step advanced the task.');
+    s.idle?'<b>'+plural(s.idle,"step")+'</b> did not advance the task: '+plural(Math.ceil(s.idle*0.55),"retry","retries")+', '+plural(Math.floor(s.idle*0.3),"re-read")+', '+plural(Math.max(0,s.idle-Math.ceil(s.idle*0.55)-Math.floor(s.idle*0.3)),"wait")+'.':'Every step advanced the task.');
 
   return '<div class="inst-grid">'+t1+t2+t3+t4+t5+t6+'</div>';
 }
@@ -2804,10 +2809,10 @@ function promptRow(R){
   /* the window is runContext's: the same request, total and blocks the Context tab accounts for */
   var m=runMetrics(R),op=PEOPLE[R.op],W=runContext(R);
   var head='<div class="panel pr-row"><div class="panel-h"><h3>Prompt</h3>';
-  var said='<div class="pr-text"><p class="eyebrow q">Written by '+h(op?op.name:R.op)+'</p><p class="q">“'+h(R.taskTitle)+(R.task?'. Task '+h(R.task)+'.':'')+'”</p></div>';
+  var said='<div class="pr-text"><p class="eyebrow q">Written by '+h(op?op.name:R.op)+'</p><p class="q">“'+h(R.taskTitle)+(R.task&&R.task!=="—"?'. Task '+h(R.task)+'.':'')+'”'+(R.task&&R.task!=="—"?'':' <span class="dim">No linked task.</span>')+'</p></div>';
   if(W.none) return head+'<span class="mono dim" style="font-size:11px">'+tokn(m.promptTok)+' tok written</span></div>'+
    '<div class="panel-b pr-b">'+said+'<div class="pr-exp"><p class="eyebrow q">What reached the model on the first call</p>'+
-   '<p class="muted" style="font-size:11.5px;margin:0">'+(W.none==="no model.request"?'No model.request frame is in view for this run, so the window is not shown.':'The first model.request has no response reporting its input, so the window is not shown.')+'</p></div></div></div>';
+   '<p class="muted" style="font-size:11.5px;margin:0">'+(W.none==="no model.request"?'No model request is recorded for this run, so the context window can\'t be shown.':'The first model request has no response that reports its input, so the context window can\'t be shown.')+'</p></div></div></div>';
   var win=W.total,ts=W.tools+W.steering,words=Math.min(m.promptTok,Math.max(0,win-ts));
   var parts=[["operator’s words",words],["tools and steering",ts],["system, context, brief",win-words-ts]];
   return head+
@@ -2816,7 +2821,7 @@ function promptRow(R){
    '<div class="panel-b pr-b">'+said+
     '<div class="pr-exp" data-pr-win="'+win+'" data-pr-ts="'+ts+'"><p class="eyebrow q">First request</p>'+
      '<div class="pr-bars">'+parts.map(function(p,i){return '<div class="pr-bar"'+tipAttr(p[0]+" · "+tokn(p[1])+" tok · "+pct(p[1],win))+'><span class="l">'+p[0]+'</span><span class="t"><i style="width:'+Math.round(p[1]/Math.max(1,win)*100)+'%;opacity:'+(1-i*0.28)+'"></i></span><span class="v">'+tokn(p[1])+'</span></div>';}).join("")+'</div>'+
-     '<p class="muted" style="font-size:11.5px;margin:8px 0 0">One sentence expanded to '+tokn(win)+' tokens; '+pct(W.cached,win)+' of it came from cache, so it was paid for once.</p></div>'+
+     '<p class="muted" style="font-size:11.5px;margin:8px 0 0">One sentence became '+tokn(win)+' tokens. '+pct(W.cached,win)+' of it came from cache, so it was paid for once.</p></div>'+
    '</div></div>';
 }
 
@@ -2824,34 +2829,33 @@ function promptRow(R){
 function callsPanel(R){
   var m=runMetrics(R),fmx=m.families.length?m.families[0].n:1;
   var rows=m.families.map(function(f){
-    return '<tr><td><span class="fcell t-'+f.cat+'"><span class="ti">'+catSvg(f.cat)+'</span><span class="fx"><b>'+h(TCAT[f.cat].l)+'</b><span>'+f.tools+' distinct tool'+(f.tools===1?'':'s')+'</span></span></span></td>'+
+    return '<tr><td><span class="fcell t-'+f.cat+'"><span class="ti">'+catSvg(f.cat)+'</span><span class="fx"><b>'+h(TCAT[f.cat].l)+'</b><span>'+plural(f.tools,"distinct tool")+'</span></span></span></td>'+
      '<td class="num">'+f.n+'</td><td class="fbc"><span class="fb"'+tipAttr(TCAT[f.cat].l+" · "+pct(f.n,m.calls.length)+" of calls")+'><i style="width:'+Math.round(f.n/fmx*100)+'%"></i></span></td>'+
      '<td class="num">'+pct(f.n,m.calls.length)+'</td><td class="num">'+msDur(f.ms)+'</td>'+
      '<td class="num">'+(f.err?'<span class="b b-denied"><span class="d"></span>'+f.err+'</span>':'<span class="dim">0</span>')+'</td></tr>';}).join("");
   var hmx=Math.max.apply(null,Object.keys(m.hist).map(function(k){return m.hist[k];}));
   var hrows=Object.keys(m.hist).sort().map(function(k){
-    return '<div class="hrow"><span class="hk">'+k+' tool'+(k==="1"?"":"s")+'</span><span class="fb"'+tipAttr(m.hist[k]+" batches asked for "+k+" tool"+(k==="1"?"":"s")+" at once")+'><i style="width:'+Math.round(m.hist[k]/hmx*100)+'%"></i></span><span class="hv">'+m.hist[k]+'</span></div>';}).join("");
+    return '<div class="hrow"><span class="hk">'+k+' tool'+(k==="1"?"":"s")+'</span><span class="fb"'+tipAttr(plural(m.hist[k],"batch","batches")+" ran "+plural(+k,"tool")+" at once")+'><i style="width:'+Math.round(m.hist[k]/hmx*100)+'%"></i></span><span class="hv">'+m.hist[k]+'</span></div>';}).join("");
   return '<div class="panel" style="margin-bottom:16px"><div class="panel-h"><h3>Tool calls</h3>'+
-   '<span class="mono dim" style="font-size:11px;margin-left:auto">'+plural(m.calls.length,"call")+' · '+m.batches.length+' batches · '+m.families.length+' families</span></div>'+
+   '<span class="mono dim" style="font-size:11px;margin-left:auto">'+plural(m.calls.length,"call")+' · '+plural(m.batches.length,"batch","batches")+' · '+plural(m.families.length,"family","families")+'</span></div>'+
    '<div class="cc">'+
     '<div class="cc-c wide"><p class="eyebrow q">Calls by family</p>'+
      '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Family</th><th class="num">Calls</th><th></th><th class="num">Share</th><th class="num">Wall clock</th><th class="num">Failed</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-     '<p class="muted" style="font-size:11.5px;margin:9px 0 0">A family says what a tool <b>acts on</b>. It is orthogonal to the hazard and to what the toolbelt decided.</p></div>'+
+     '<p class="muted" style="font-size:11.5px;margin:9px 0 0">A family groups tools by what they act on. It says nothing about risk or policy.</p></div>'+
     '<div class="cc-c"><p class="eyebrow q">Tools per batch</p>'+
      '<div class="hist">'+hrows+'</div>'+
      '<dl class="kv" style="margin-top:12px"><dt>Batches</dt><dd>'+m.batches.length+' · <b>'+m.par+'</b> ran more than one tool</dd>'+
      '<dt>Widest batch</dt><dd>'+plural(m.maxPar,"tool")+' at once</dd>'+
-     '<dt>Mean fan-out</dt><dd>'+plural(m.fan.toFixed(2),"tool")+' per batch</dd>'+
-     '<dt>Wall clock won</dt><dd><b>'+msDur(m.serialMs-m.toolMs)+'</b> · '+msDur(m.toolMs)+' together against '+msDur(m.serialMs)+' in turn</dd></dl></div>'+
+     '<dt>Time saved by batching</dt><dd><b>'+msDur(Math.max(0,m.serialMs-m.toolMs))+'</b> · '+msDur(m.toolMs)+' in parallel instead of '+msDur(m.serialMs)+' one at a time</dd></dl></div>'+
     '<div class="cc-c"><p class="eyebrow q">Speculative prefetch</p>'+
      '<div class="spec"><div class="sv">'+m.used+'<small> of '+m.started+' used</small></div>'+
       '<div class="stk"><i class="fk-model" style="flex:'+m.used+'"'+tipAttr(m.used+" prefetched reads the model went on to ask for")+'></i><i style="flex:'+Math.max(0,m.discarded)+';background:var(--rule)"'+tipAttr(m.discarded+" discarded unread")+'></i></div>'+
       stackLeg([["used",m.used,"fk-model",m.used],["discarded",m.discarded,"neu",m.discarded]])+'</div>'+
-     '<dl class="kv" style="margin-top:12px"><dt>Eligible</dt><dd>'+m.eligible+' read-only calls · a write is never speculated</dd>'+
+     '<dl class="kv" style="margin-top:12px"><dt>Eligible</dt><dd>'+plural(m.eligible,"read-only call")+' · writes are never prefetched</dd>'+
      '<dt>Hit rate</dt><dd>'+pct(m.used,Math.max(1,m.started))+'</dd>'+
-     '<dt>Wall clock saved</dt><dd><b>'+msDur(m.savedMs)+'</b></dd>'+
-     '<dt>Billed</dt><dd>discarded reads are recorded and billed; nothing is hidden</dd></dl>'+
-     '<div class="note" style="margin-top:11px">The harness starts a read it expects the model to ask for before the step is final. Only read-only families are eligible: a discarded write would be an effect nobody asked for, and policy runs on the speculated call exactly as it would on a real one.</div></div>'+
+     '<dt>Time saved by prefetch</dt><dd><b>'+msDur(m.savedMs)+'</b></dd>'+
+     '<dt>Billed</dt><dd>Discarded reads are recorded and billed.</dd></dl>'+
+     '<div class="note" style="margin-top:11px">The harness starts reads it expects the model to ask for before the step is final. Only read-only tools are prefetched, and policy checks a prefetched call the same way as any other.</div></div>'+
    '</div></div>';
 }
 
@@ -2868,15 +2872,15 @@ function runTimeline(R){
   var marks="",parkedAt=-2,ticks=fr.map(function(f,i){
     var k=fkOf(f.kind),tall=k==="op"||f.kind==="approval_request"||(f.kind==="policy_decision"&&/approve/.test(f.sum)),on=i===S.frame&&S.tab.run==="player";
     if(f.kind==="control.steer")marks+='<span class="rt-mark" style="left:'+xs[i].toFixed(2)+'%">steer</span>';
-    if(f.kind==="approval_request"||(f.kind==="policy_decision"&&/approve/.test(f.sum))){if(i-parkedAt>1)marks+='<span class="rt-mark right" style="left:'+xs[i].toFixed(2)+'%">parked · approval</span>';parkedAt=i;}
+    if(f.kind==="approval_request"||(f.kind==="policy_decision"&&/approve/.test(f.sum))){if(i-parkedAt>1)marks+='<span class="rt-mark right" style="left:'+xs[i].toFixed(2)+'%">parked for approval</span>';parkedAt=i;}
     return '<button type="button" class="rt-tick fk-'+k+(tall?" tall":f.cost&&+f.cost?" cost":"")+(on?" on":"")+'" style="left:'+xs[i].toFixed(2)+'%"'+
-      tipAttr("frame "+f.seq+" · "+f.kind+"\n"+f.t+(f.cost&&+f.cost?" · $"+f.cost:"")+"\n"+f.sum)+' aria-label="frame '+f.seq+' '+h(f.kind)+'" onclick="S.tab.run=\'player\';S.frame='+i+';render()"></button>';}).join("");
+      tipAttr("frame "+f.seq+" · "+f.kind+"\n"+f.t+(f.cost&&+f.cost?" · "+usd(f.cost):"")+"\n"+f.sum)+' aria-label="frame '+f.seq+' '+h(f.kind)+'" onclick="S.tab.run=\'player\';S.frame='+i+';render()"></button>';}).join("");
   var c=fkCounts(fr),leg=FK_ORDER.filter(function(k){return c[k];}).map(function(k){return '<span class="fk-'+k+'"><i></i>'+FK_LABEL[k]+' <b>'+c[k]+'</b></span>';}).join("");
   var el=Math.round(t1-t0),elapsed=el>=60?Math.floor(el/60)+"m "+(el%60)+"s":el+" s";
-  return '<div class="panel rt"><div class="panel-h"><h3>Timeline</h3><span class="mono dim" style="font-size:11px">'+plural(fr.length,"frame")+' shown · '+R.frames+' in the run</span><div class="rt-leg">'+leg+'</div></div>'+
+  return '<div class="panel rt"><div class="panel-h"><h3>Timeline</h3><span class="mono dim" style="font-size:11px">'+(fr.length<R.frames?fr.length+' of '+plural(R.frames,"frame"):plural(R.frames,"frame"))+' shown</span><div class="rt-leg">'+leg+'</div></div>'+
    '<div class="panel-b"><div class="rt-turns">'+turns+'</div><div class="rt-track">'+bands+ticks+'<div class="rt-axis"><span>'+h(fr[0].t.slice(0,8))+'</span><span>+'+elapsed+' · '+h(fr[fr.length-1].t.slice(0,8))+(R.status==="live"?' · live':'')+'</span></div></div><div class="rt-marks">'+marks+'</div>'+
-   '<div class="rt-foot"><span class="grow">Every tick is a frame; the taller ones need a person. Click one to open it in the Player; hover for the record.</span>'+
-   '<span>'+bounds.length+' turn'+(bounds.length===1?'':'s')+' in view</span></div></div></div>';
+   '<div class="rt-foot"><span class="grow">Each tick is a frame. Taller ticks needed a person. Select one to open it in the Player.</span>'+
+   '<span>'+plural(bounds.length,"turn")+' shown</span></div></div></div>';
 }
 /* The Run page's tab for this run. Tabs that no longer exist land on Cost. */
 function runTabKey(R){
@@ -3038,7 +3042,7 @@ function txDiffBlock(d,open){
    projection from what the run record carries, and say so in the runbar */
 function txEntries(R){
   if(TRANSCRIPTS[R.id])return TRANSCRIPTS[R.id];
-  var e=[{t:0,kind:"prompt",body:R.taskTitle+(R.task?"\n\nTask "+R.task+".":""),meta:{task:R.task,by:PEOPLE[R.op]?PEOPLE[R.op].name:""}}];
+  var e=[{t:0,kind:"prompt",body:R.taskTitle+(R.task&&R.task!=="—"?"\n\nTask "+R.task+".":""),meta:{task:R.task,by:PEOPLE[R.op]?PEOPLE[R.op].name:""}}];
   var t=2;
   if(R.summary){t+=4;e.push({t:t,kind:"text",body:R.summary});}
   t+=0.2;e.push({t:t,kind:"usage",meta:{model:R.model,tin:null,cache:null,tout:null,cost:parseFloat(R.cost)||0,req:"rollup · "+plural(R.frames,"frame")+""}});
@@ -3062,17 +3066,17 @@ function txAnswerIdx(rows,R){
 }
 function txGovChip(g){
   if(!g)return "";
-  return '<button class="tx-chip gov'+(g.o==="approve"?" appr":"")+'" title="policy decision · frame '+g.fr+'" onclick="S.tab.run=\'player\';S.frame='+g.fr+';render()">⚖ '+h(g.o)+' · '+h(g.rule)+' · fr '+g.fr+'</button>';
+  return '<button class="tx-chip gov'+(g.o==="approve"?" appr":"")+'" title="policy decision · frame '+g.fr+'" onclick="S.tab.run=\'player\';S.frame='+g.fr+';render()">⚖ '+h(g.o)+' · '+h(g.rule)+' · frame '+g.fr+'</button>';
 }
 function txRow(R,e,i,cum,rows,answerIdx){
   var q=S.tx.q.trim(),open=!!S.tx.open[i],inner="",dot="",body=e.body||"";
   if(e.kind==="prompt"){
     inner='<div class="tx-role you"><div class="tx-rolegut"><span class="tx-roletag">YOU</span></div><div><div class="tx-prose">'+txHi(body,q)+'</div>'+
-     '<div class="tx-sub">'+(e.meta&&e.meta.by?'<span>'+h(e.meta.by)+' · operator</span>':'')+(e.meta&&e.meta.task?'<span class="mono">task '+h(e.meta.task)+'</span>':'')+'<span>first prompt</span></div></div></div>';
+     '<div class="tx-sub">'+(e.meta&&e.meta.by?'<span>'+h(e.meta.by)+' · operator</span>':'')+(e.meta&&e.meta.task&&e.meta.task!=="—"?'<span class="mono">task '+h(e.meta.task)+'</span>':'<span>No linked task</span>')+'<span>first prompt</span></div></div></div>';
   } else if(e.kind==="steer"){
     inner='<div class="tx-role steer"><div class="tx-rolegut"><span class="tx-roletag">STEER</span></div><div><div class="tx-prose">“'+txHi(body,q)+'”</div>'+
-     '<div class="tx-sub"><span>'+h(e.meta.by)+' · '+h(e.meta.role)+'</span><span>delivered at the next boundary · '+e.meta.tok+' tok</span>'+
-     (e.fr!=null?'<button class="tx-chip gov appr" onclick="S.tab.run=\'player\';S.frame='+e.fr+';render()">control.steer · fr '+e.fr+'</button>':'')+'</div></div></div>';
+     '<div class="tx-sub"><span>'+h(e.meta.by)+' · '+h(e.meta.role)+'</span><span>delivered at the next checkpoint · '+e.meta.tok+' tok</span>'+
+     (e.fr!=null?'<button class="tx-chip gov appr" onclick="S.tab.run=\'player\';S.frame='+e.fr+';render()">control.steer · frame '+e.fr+'</button>':'')+'</div></div></div>';
   } else if(e.kind==="text"){
     var isAns=i===answerIdx,f=txFold(body),folded=!isAns&&!open&&f.rest.length>0;
     inner='<div class="tx-role agent"><div class="tx-rolegut"><span class="tx-roletag">'+(isAns?"ANSWER":"AGENT")+'</span></div><div class="tx-prose'+(isAns?' tx-answer':'')+'">'+
@@ -3080,20 +3084,20 @@ function txRow(R,e,i,cum,rows,answerIdx){
      txHi(folded?f.head:body,q)+(folded?' <span class="dim">…</span>':'')+'</div></div>';
   } else if(e.kind==="reasoning"){
     var lines=body.split("\n"),tf=txFold(body),show=S.tx.think||open,fd=!show&&tf.rest.length>0;
-    inner='<div><button class="tx-fold" onclick="txOpen('+i+')">'+(show?"⏶":"⏵")+' thinking · '+lines.length+' line'+(lines.length===1?'':'s')+'</button>'+
+    inner='<div><button class="tx-fold" onclick="txOpen('+i+')">'+(show?"⏶":"⏵")+' thinking · '+plural(lines.length,"line")+'</button>'+
      '<div class="tx-think">'+txHi(fd?tf.head:body,q)+(fd?' …':'')+'</div></div>';
   } else if(e.kind==="usage"){
     var m=e.meta||{};
-    inner='<div class="tx-usage"><span class="u">usage — '+h(m.model||"")+(m.tin!=null?' · in '+tokn(m.tin)+' · cache '+tokn(m.cache||0)+' · out '+tokn(m.tout||0):'')+(m.req?' · '+h(m.req):'')+'</span>'+
+    inner='<div class="tx-usage"><span class="u">usage · '+h(m.model||"")+(m.tin!=null?' · in '+tokn(m.tin)+' · cache '+tokn(m.cache||0)+' · out '+tokn(m.tout||0):'')+(m.req?' · '+h(m.req):'')+'</span>'+
      '<span class="tx-chips"><span class="tx-chip cost">'+txMoney(m.cost||0)+'</span><span class="tx-chip burn">Σ '+txMoney(cum)+'</span>'+
-     (e.fr!=null?'<button class="tx-chip gov" onclick="S.tab.run=\'player\';S.frame='+e.fr+';render()">model.response · fr '+e.fr+'</button>':'')+'</span></div>';
+     (e.fr!=null?'<button class="tx-chip gov" onclick="S.tab.run=\'player\';S.frame='+e.fr+';render()">model.response · frame '+e.fr+'</button>':'')+'</span></div>';
   } else if(e.kind==="context_recall"){
     var m2=e.meta||{},list=open?CTXF:CTXF.slice(0,3),hid=CTXF.length-list.length,hidTok=0;
     CTXF.slice(list.length).forEach(function(f){hidTok+=f.tok;});
     inner='<div><button class="tx-fold" style="color:var(--st-proven);font-weight:600;font-size:12.5px" onclick="txOpen('+i+')">◉ recall · '+plural(m2.frames,"frame")+' · '+tokn(m2.tok)+' tok · '+m2.scored+' scored · '+m2.ms+' ms</button>'+
      '<div class="tx-recall">'+list.map(function(f){return '<span class="k">'+h(f.kind)+'</span><span class="l">'+txHi(f.label,q)+(open?' <span class="dim">· '+h(f.node)+' · score '+f.score+'</span>':'')+'</span><span class="n">'+tokn(f.tok)+' tok</span>';}).join("")+'</div>'+
      (hid>0?'<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⋯ '+hid+' more · '+tokn(hidTok)+' tok · provenance</button>':'')+
-     (e.fr!=null?'<div class="tx-sub" style="margin-left:20px"><button class="tx-chip gov" onclick="S.tab.run=\'player\';S.frame='+e.fr+';render()">context.assembled · fr '+e.fr+'</button><button class="tx-chip" style="cursor:pointer" onclick="S.tab.run=\'context\';render()">open the Context tab</button></div>':'')+'</div>';
+     (e.fr!=null?'<div class="tx-sub" style="margin-left:20px"><button class="tx-chip gov" onclick="S.tab.run=\'player\';S.frame='+e.fr+';render()">context.assembled · frame '+e.fr+'</button><button class="tx-chip" style="cursor:pointer" onclick="S.tab.run=\'context\';render()">Open the Context tab</button></div>':'')+'</div>';
   } else if(e.kind==="tool"){
     var r=e.res,failed=!!(r&&r.err),pending=!r,cls=e.cls||"execute";
     dot='<span class="tx-dot'+(cls==="mutate"?' solid':'')+'" style="color:var(--'+(failed?'st-failed':'tx-'+cls)+')"></span>';
@@ -3101,7 +3105,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
     if(e.diff){var st=diffStat(txDiffRows(e.diff.before,e.diff.after));chips+='<span class="tx-chip"><span style="color:var(--st-allowed)">+'+st.add+'</span> <span style="color:var(--st-denied)">−'+st.del+'</span></span>';}
     if(r&&r.ms!=null)chips+='<span class="tx-chip'+(failed?' err':'')+'">'+(r.ms>=1000?(r.ms/1000).toFixed(1)+' s':r.ms+' ms')+'</span>';
     if(r&&r.body&&!e.diff){var ln=r.body.split("\n").length;if(ln>1)chips+='<span class="tx-chip'+(failed?' err':'')+'">'+plural(ln,"line")+'</span>';}
-    if(e.parked)chips+='<button class="tx-chip gov appr" onclick="S.tab.run=\'player\';S.frame='+e.parked.fr+';render()">⏸ parked · '+h(e.parked.ap)+' · fr '+e.parked.fr+'</button>';
+    if(e.parked)chips+='<button class="tx-chip gov appr" onclick="S.tab.run=\'player\';S.frame='+e.parked.fr+';render()">⏸ parked · '+h(e.parked.ap)+' · frame '+e.parked.fr+'</button>';
     else if(pending)chips+='<span class="tx-chip">running…</span>';
     chips+=txGovChip(e.gov);
     if(e.raw)chips+='<button class="tx-fold" onclick="txOpen('+i+')" aria-label="'+(open?"hide":"show")+' arguments">'+(open?"⏶":"⋯")+'</button>';
@@ -3112,10 +3116,10 @@ function txRow(R,e,i,cum,rows,answerIdx){
     if(r&&r.body&&!e.diff){
       var L=r.body.split("\n"),budget=6,anchor=Math.min(txSalient(L),Math.max(0,L.length-budget)),shown=open?L:L.slice(anchor,anchor+budget),hidden=open?0:L.length-shown.length;
       inner+='<pre class="tx-out'+(failed?' err':'')+'">'+txHi(shown.join("\n"),q)+'</pre>';
-      if(hidden>0)inner+='<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⋯ '+hidden+' more line'+(hidden===1?'':'s')+'</button>';
+      if(hidden>0)inner+='<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⋯ '+plural(hidden,"more line","more lines")+'</button>';
       else if(open&&L.length>budget)inner+='<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⏶ collapse</button>';
     }
-    if(e.parked)inner+='<div class="tx-sub" style="margin-left:20px">held at the gateway for up to ten minutes; the model sees a wait with a reason, not a failure. Approve or deny from the card under Governed actions.</div>';
+    if(e.parked)inner+='<div class="tx-sub" style="margin-left:20px">Held at the gateway for up to 10 minutes. The model sees a wait with a reason. Approve or deny it from the card under Governed actions.</div>';
     inner+='</div>';
   } else if(e.kind==="complete"){
     inner='<div><span style="color:var(--st-allowed);font-weight:600">'+txHi(e.title,q)+'</span>'+(body?' <span class="dim">'+txHi(body,q)+'</span>':'')+'</div>';
@@ -3145,16 +3149,16 @@ function transcriptTab(R,compacted){
      '<button class="btn sm" title="step forward" onclick="txStep(1)">▶</button>'+
      '<button class="btn sm" title="to the end" onclick="txSeek(1e9)">⏭</button>'+
      '<span class="seg" style="margin-left:4px">'+TX_SPEEDS.map(function(s){return '<button class="btn sm" aria-pressed="'+(S.tx.speed===s)+'" onclick="txSpeed('+s+')">'+s+'×</button>';}).join("")+'</span>'+
-     '<span class="cnt" id="txcnt"></span>':'<span class="cnt">search shows every match · unpaced</span>')+
+     '<span class="cnt" id="txcnt"></span>':'<span class="cnt">Showing every match</span>')+
    '</div></div>';
-  var runbar='<div class="tx-runbar"><span class="name">'+h(R.task||R.id)+'</span><span class="meta">'+h(R.agent)+' · '+h(R.model)+' · '+plural(R.turn,"turn")+' · '+plural(R.steps,"step")+(synth?' · projected from the run record':' · '+plural(all.length,"entry","entries"))+'</span>'+
+  var runbar='<div class="tx-runbar"><span class="name">'+h(R.task&&R.task!=="—"?R.task:R.id)+'</span><span class="meta">'+h(R.agent)+' · '+h(R.model)+' · '+plural(R.turn,"turn")+' · '+plural(R.steps,"step")+(synth?' · projected from the run record':' · '+plural(all.length,"entry","entries"))+'</span>'+
    '<span class="tx-chips" style="margin-left:0">'+(S.tx.errs?'<span class="tx-chip err">errors only</span>':'')+(runStatus(R)==="paused"?'<span class="tx-chip warn">⏸ paused</span>':R.status==="live"?'<span class="tx-chip ok">● live</span>':R.status==="parked"?'<span class="tx-chip warn">⏸ parked</span>':'')+'</span>'+
    '<span class="tx-burn"><span>burn</span><span class="bar"><i id="txbar"></i></span><b id="txburn">'+txMoney2(0)+'</b><span>of '+txMoney2(total)+'</span></span></div>';
-  var feed='<div class="tx-feed" id="txfeed" data-n="'+rows.length+'" data-paced="'+paced+'">'+(rows.length?html:'<div class="tx-empty">'+(S.tx.errs?'no failed calls in this run.':S.tx.q?'nothing matches this search.':'nothing to show with these filters.')+'</div>')+'</div>';
+  var feed='<div class="tx-feed" id="txfeed" data-n="'+rows.length+'" data-paced="'+paced+'">'+(rows.length?html:'<div class="tx-empty">'+(S.tx.errs?'No failed calls in this run.':S.tx.q?'Nothing matches this search.':'Nothing to show with these filters.')+'</div>')+'</div>';
   setTimeout(txStart,0);
-  return (compacted?'<div class="warn" style="margin-bottom:12px"><b>Compacted.</b> This transcript is rendered from the archive segment; the frames left the graph after the hot window and nothing was recomputed.</div>':'')+
+  return (compacted?'<div class="warn" style="margin-bottom:12px"><b>Compacted.</b> This transcript is read from the archive. Its frames were moved out of the live record, and nothing was recomputed.</div>':'')+
    '<div class="txs">'+tools+'<div class="tx-frame">'+runbar+feed+'</div>'+
-   '<p class="note" style="margin-top:12px">The transcript is what the agent showed its operator. The gateway\u2019s own frames sit behind the \u2696 chips.</p><p hidden> each tool call with the output it read, and what every model step cost. The gateway\'s own frames sit behind the ⚖ chips; the transcript never replaces them.</p></div>';
+   '<p class="note" style="margin-top:12px">The transcript is what the agent showed its operator. Select \u2696 to see what the gateway recorded.</p><p hidden> each tool call with the output it read, and what every model step cost. The gateway\'s own frames sit behind the ⚖ chips; the transcript never replaces them.</p></div>';
 }
 /* ---- playback ---- */
 function txStart(){
@@ -3248,8 +3252,8 @@ function pauseBanner(R){
   var c=S.runCtl[R.id]; if(!c||c.status==="resuming")return "";
   var paused=c.status==="paused";
   return '<div class="pause-banner" role="status"><span class="g">❙❙</span><div class="grow"><b>'+(paused?'Paused':'Pausing')+'</b> at turn '+c.turn+' · step '+c.step+
-   (paused?' · by '+h(c.by)+' at '+h(c.at):' · takes effect at the next boundary')+(c.reason?' · <span class="q">“'+h(c.reason)+'”</span>':'')+
-   '<div class="dim" style="font-size:11.5px;margin-top:2px">run token held · budget reservation held · pending approvals keep their clocks · nothing new dispatches</div></div>'+
+   (paused?' · by '+h(c.by)+' at '+h(c.at):' · takes effect at the next checkpoint')+(c.reason?' · <span class="q">“'+h(c.reason)+'”</span>':'')+
+   '<div class="dim" style="font-size:11.5px;margin-top:2px">The run token and budget reservation are held. Pending approvals keep counting down. Nothing new starts.</div></div>'+
    (paused?'<button class="btn sm" onclick="resumeRun(\''+R.id+'\')">▶ Resume run</button>':'')+
    '<button class="btn sm ghost" onclick="S.tab.run=\'player\';fpSeek(FRAMES.length-1)">Open the pause frame</button></div>';
 }
@@ -3275,7 +3279,7 @@ function fpBar(R){
    '<div class="fp-scrub"><input class="fp-range" type="range" min="0" max="'+(n-1)+'" value="'+i+'" aria-label="Frame" oninput="fpSeek(+this.value,true)">'+
     '<div class="fp-ticks">'+ticks+'</div></div>'+
    '<span class="fp-cnt"><b>'+(i+1)+'</b> / '+n+' · seq '+f.seq+' · '+h(f.t)+'</span>'+
-   '<span class="fp-cnt fp-spent"'+tipAttr("model spend recorded on frames 0–"+f.seq+" of this run")+'><b>$'+FRAMES.slice(0,i+1).reduce(function(a,x){return a+(parseFloat(x.cost)||0);},0).toFixed(2)+'</b> of '+usd(R.cost)+' by here</span>'+
+   '<span class="fp-cnt fp-spent"'+tipAttr("model spend recorded on frames 0–"+f.seq+" of this run")+'><b>'+usd(FRAMES.slice(0,i+1).reduce(function(a,x){return a+(parseFloat(x.cost)||0);},0).toFixed(2))+'</b> of '+usd(R.cost)+' so far</span>'+
    '<span class="seg" style="margin-left:4px">'+FP_SPEEDS.map(function(s){return '<button class="btn sm" aria-pressed="'+(S.fp.speed===s)+'" onclick="fpSpeed('+s+')">'+s+'×</button>';}).join("")+'</span>'+
    '<span class="fp-keys"><kbd>←</kbd><kbd>→</kbd> step <kbd>space</kbd> play <kbd>home</kbd><kbd>end</kbd></span></div>';
 }
@@ -3331,7 +3335,7 @@ function runGraphOf(R){
 }
 function edgeChip(it){
   var lab=it.edge==="observed"?"observed":it.edge==="stated"?"stated":"inferred"+(it.conf!=null?" · "+Math.round(it.conf*100)+"%":"");
-  var frs=(it.fr||[]).map(function(f){return '<button class="edge" onclick="S.tab.run=\'player\';S.frame='+f+';render()">fr '+f+'</button>';}).join("");
+  var frs=(it.fr||[]).map(function(f){return '<button class="edge" onclick="S.tab.run=\'player\';S.frame='+f+';render()">frame '+f+'</button>';}).join("");
   return '<span class="ev"><span class="edge '+h(it.edge)+'">'+lab+'</span>'+frs+'</span>';
 }
 /* Where an artifact lives on the forge. A reference with no address stays plain text. */
@@ -3358,14 +3362,14 @@ function linkedWork(R){
   var repos=g.repos.map(function(r){return lwItem("⌂",r.name,(r.ref?r.ref+" · ":"")+(r.note||""),r,ghRepoUrl(r.name));});
   var k=runWork(R);
   var arts=g.artifacts.map(function(a){return '<div class="lw-item"><span class="ic">'+(artIc[a.kind]||"·")+'</span><div class="t"><b>'+artRef(a,k)+(a.state?' <span class="b '+(artState[a.state]||"b-q")+'" style="font-size:10px;vertical-align:1px">'+h(a.state)+'</span>':'')+'</b><span class="sub">'+h(a.title)+'</span>'+edgeChip(a)+'</div></div>';});
-  var files=g.files.length?'<div class="panel lw-files" style="margin-bottom:16px"><div class="panel-h"><h3>Files changed</h3><span class="dsum"><b class="a" style="color:var(--st-allowed)">+'+dm.add+'</b> <b class="d" style="color:var(--st-denied)">\u2212'+dm.del+'</b><span class="dbar" aria-hidden="true"><i class="a" style="flex:'+dm.add+'"></i><i class="d" style="flex:'+dm.del+'"></i></span>\u00b7 '+g.files.length+' file'+(g.files.length===1?'':'s')+' \u00b7 as the harness reported them</span></div><div class="panel-b" style="padding-top:2px">'+
+  var files=g.files.length?'<div class="panel lw-files" style="margin-bottom:16px"><div class="panel-h"><h3>Files changed</h3><span class="dsum"><b class="a" style="color:var(--st-allowed)">+'+dm.add+'</b> <b class="d" style="color:var(--st-denied)">\u2212'+dm.del+'</b><span class="dbar" aria-hidden="true"><i class="a" style="flex:'+dm.add+'"></i><i class="d" style="flex:'+dm.del+'"></i></span>\u00b7 '+plural(g.files.length,"file")+' \u00b7 as the harness reported them</span></div><div class="panel-b" style="padding-top:2px">'+
    g.files.map(function(f){var rows=txDiffRows(f.before,f.after),st=diffStat(rows);return '<details><summary><span class="p">'+h(f.path)+'</span>'+(f.note?'<span class="dim" style="font-size:11px;flex:none">'+h(f.note)+'</span>':'')+'<span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span></summary>'+diffHtml(rows,3)+'</details>';}).join("")+'</div></div>':'';
   return '<section aria-label="Linked work">'+
    '<div class="lw-note"><p class="eyebrow q" style="margin:0">Linked work</p>'+
     '<span><span class="edge observed">observed</span> written by oxagen from a tool call routed through it</span>'+
     '<span><span class="edge stated">stated</span> carried by the task</span>'+
-    '<span><span class="edge inferred">inferred</span> a light-tier model read the frames and proposed it, scored and cited. '+inf+' of '+(g.repos.length+g.artifacts.length)+'</span></div>'+
-   '<div class="lw">'+panel("Repositories",repos,"no repository was touched")+panel("Pull requests and artifacts",arts,"nothing was produced yet")+'</div>'+files+'</section>';
+    '<span><span class="edge inferred">inferred</span> a light model read the frames and proposed it, scored and cited. '+inf+' of '+(g.repos.length+g.artifacts.length)+'</span></div>'+
+   '<div class="lw">'+panel("Repositories",repos,"No repository was touched.")+panel("Pull requests and artifacts",arts,"Nothing produced yet.")+'</div>'+files+'</section>';
 }
 
 /* ===================== Frames of a run, synthesized from its record =====================
@@ -3596,7 +3600,7 @@ function fdContext(f,R){
   var c=f.ctx||{budget:CTXW.budget,used:CTXW.used,rows:CTXF.map(function(x){return {kind:x.kind,label:x.label,tok:x.tok,node:x.node,dig:"",cited:x.cited};})};
   var sum=c.rows.reduce(function(a,x){return a+x.tok;},0);
   return frKv([["Budget",tokn(c.budget)+" tokens"],["Used",tokn(c.used)+" tokens · "+pct(c.used,c.budget)+" of budget · "+tokn(c.budget-c.used)+" headroom"],
-    ["Context frames",c.rows.length+" · counted as context_frame_tokens"],["Assembled by","assembleSteering · "+h(R.tier)+" tier"]])+
+    ["Context frames",c.rows.length+' · counted as <span class="mono">context_frame_tokens</span>'],["Assembled by","the steering assembler · "+h(R.tier)+" tier"]])+
    frSec("Context frames served",'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Frame</th><th>Kind</th><th>Evidence</th><th class="num">Tokens</th><th>Use</th></tr></thead><tbody>'+
     c.rows.map(function(x){return '<tr><td class="mono" style="font-size:11px">'+h(x.node)+'</td><td class="mono">'+h(x.kind)+'</td><td>'+h(x.label)+(x.dig?'<div class="dim mono" style="font-size:10.5px">'+h(x.dig)+'</div>':'')+'</td>'+
      '<td class="num">'+tokn(x.tok)+'</td><td>'+(x.cited!=null?frameBtn(x.cited,"cited at frame "+x.cited):x.cited===null?'<span class="b b-q">never cited</span>':'<span class="dim">served</span>')+'</td></tr>';}).join("")+
@@ -3620,9 +3624,9 @@ function fdRequest(f,R){
     '<div class="row" style="gap:8px;font-size:11px"><b class="mono" style="color:var(--fg)">'+role+'</b><span class="mono dim" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+label+'</span><span class="mono dim" style="margin-left:auto">'+tokn(tok)+' tok</span></div>'+
     '<div style="font-size:12.5px;margin-top:4px;white-space:pre-wrap">'+text+'</div></div>';};
   return frKv([["Provider · model",frProvider(R.model)+' · <b style="color:var(--fg)">'+h(R.model)+'</b>'],
-    ["Parameters","max_tokens 8192 · temperature 1.0 · stream true"],
-    ["Tools offered","14 tools · "+tokn(cp.tools)+" tool_definition_tokens"],
-    ["Context frames",rq.ctxN+" · "+tokn(cp.ctx)+" context_frame_tokens"],
+    ["Parameters",'<span class="mono">max_tokens 8192 · temperature 1.0 · stream true</span>'],
+    ["Tools offered","14 tools · "+tokn(cp.tools)+' <span class="mono">tool_definition_tokens</span>'],
+    ["Context frames",rq.ctxN+" · "+tokn(cp.ctx)+' <span class="mono">context_frame_tokens</span>'],
     ["Prompt tokens",tokn(rq.tok)+(nextR?" · answered at "+frameBtn(nextR.seq,"frame "+nextR.seq):"")],
     steer?["Carries",'<span class="b b-proven"><span class="d"></span>control.steer</span> from '+frameBtn(steer.seq,"frame "+steer.seq)]:null])+
    frSec("Prompt composition",frBar([["system",cp.system,"var(--dim)"],["steering",cp.steering,"var(--k-rule)"],["tool definitions",cp.tools,"var(--st-approval)"],["context frames",cp.ctx,"var(--st-proven)"],["conversation",cp.conv,"var(--st-allowed)"]],rq.tok),tokn(rq.tok)+" tokens measured by oxagen")+
@@ -3630,7 +3634,7 @@ function fdRequest(f,R){
     msg("system","agent definition · .oxagen/agents/"+h(String(R.agent).split(".").pop())+".yaml",cp.system,"You are "+h(R.agent)+(a?", operated by "+h(PEOPLE[a.operator]?PEOPLE[a.operator].name:a.operator):"")+". Work only inside the grants on your toolbelt.")+
     msg("steering","steering.compiled · "+(f.bundle!=null?"bundle v"+f.bundle+" · ":"")+"pol_v41",cp.steering,"The workspace’s published steering records, compiled once and served from cache.")+
     (steer?msg("steering","control.steer · frame "+steer.seq+" · operator authority",+((/(\d+) tok/.exec(steer.sum)||[0,0])[1]),h(quote||steer.sum),true):"")+
-    msg("context",rq.ctxN+" context frames",cp.ctx,"Delivered at UserPromptSubmit, cited by content digest.")+
+    msg("context",rq.ctxN+" context frames",cp.ctx,"Delivered when the prompt was submitted, cited by content digest.")+
     msg("conversation","turn "+(f.turn||1)+" so far",cp.conv,"Prior turns and tool results, served from the recording."),
     steer?"the operator’s steer is highlighted":"no operator steer since the last request");
 }
@@ -3645,7 +3649,7 @@ function fdResponse(f,R){
     var parts=rows.map(function(r){return r[1]*r[2];}),acc=0;parts.forEach(function(p,k){if(k<parts.length-1)acc+=p;});parts[parts.length-1]=Math.max(0,c-acc);
     body='<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">USD / M</th><th class="num">Cost USD</th></tr></thead><tbody>'+
      rows.map(function(r,k){return '<tr><td class="mono">'+r[0]+'</td><td class="num">'+tokn(r[1])+'</td><td class="num dim">'+(r[2]*1e6).toFixed(2)+'</td><td class="num">'+(r[1]?parts[k].toFixed(4):'—')+'</td></tr>';}).join("")+
-     '<tr><td><b>total</b></td><td class="num"><b>'+tokn(tin+u.out+u.rsn)+'</b></td><td></td><td class="num"><b>$'+f.cost+'</b></td></tr></tbody></table></div>';
+     '<tr><td><b>total</b></td><td class="num"><b>'+tokn(tin+u.out+u.rsn)+'</b></td><td></td><td class="num"><b>'+usd(f.cost)+'</b></td></tr></tbody></table></div>';
   } else {
     var W=runContext(R);
     body='<div class="tw"><table class="narrow" data-lt="off"><tbody>'+[["input_uncached",u.inU],["cache_read",u.cr],["cache_write_5m",0],["output",u.out],["reasoning",0],W.none?null:["tool_definition_tokens",W.tools],W.none?null:["steering_tokens",W.steering]]
@@ -3657,7 +3661,7 @@ function fdResponse(f,R){
    frSec("Usage by token class",body,f.u?"input at the published effective price, split by class; output at list":"as the provider reported it")+
    frSec("Cost record",frPre({usage:{input:u.inU,cache_read:u.cr,cache_write_5m:u.cw,output:u.out,reasoning:u.rsn},cost_micros:Math.round(c*1e6),currency:"USD",cost_basis:R.basis,provider_request_id:req}))+
    frSec("Derived",frKv([["Cache hit rate",'<b style="color:var(--fg)">'+per(hit)+'</b> · '+tokn(u.cr)+' of '+tokn(tin)+' input tokens'],
-    ["Effective input price",tin?"$"+(c/3/tin*1e6).toFixed(2)+" per million across input classes":"—"],
+    ["Effective input price",tin?usd((c/3/tin*1e6).toFixed(2))+" per million input tokens, all classes":"—"],
     ["Cache write cost share","0% · nothing written"],
     f.turn?["Turn",'turn '+f.turn+' · this call is '+pct(c,runSeries(R).cost[f.turn-1]||c)+' of the turn’s spend']:null]));
 }
@@ -3672,7 +3676,7 @@ function fdToolReq(f,R){
     ["Taint sources",A&&A.tainted?'<span style="color:var(--st-denied)">'+h((A.taint||[]).map(function(x){return x.path+" from frame "+x.frame;}).join(", "))+'</span>':"none · no argument was copied from a prior tool output"],
     A?["Hazard",riskBadge(A.risk)+' '+effBadge(A.side)+' <span class="dim">egress '+h(A.egress)+'</span>']:null])+
    frSec("Validated input",readout("canonical input","exactly what the gateway will dispatch",frPre(input)))+
-   '<div class="note" style="margin-top:12px">Nothing has been dispatched yet. The next frame'+(nx?' ('+frameBtn(nx.seq,"frame "+nx.seq)+')':'')+' is the policy decision that says whether it ever is: same call, same policy version, same answer, no model in the path.</div>';
+   '<div class="note" style="margin-top:12px">Nothing has been dispatched yet. The next frame'+(nx?' ('+frameBtn(nx.seq,"frame "+nx.seq)+')':'')+' is the policy decision on whether it runs. The same call under the same policy version always gets the same answer, and no model is involved.</div>';
 }
 function fdToolCall(f,R){
   var c=frCallOf(f,R),io=frIO(f,R); if(!c)return null;
@@ -3698,7 +3702,7 @@ function fdPolicy(f,R){
    frSec("Conditions evaluated",'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Condition</th><th>Value</th><th>Result</th></tr></thead><tbody>'+
     conds.map(function(x){var v=x[2],cls=/^(pass|held|allow)$/.test(v)?"b-allowed":v==="approve"?"b-approval":v==="constrain"?"b-q":"b-denied";
      return '<tr><td class="mono" style="font-size:11.5px">'+h(x[0])+'</td><td style="font-size:12px">'+h(x[1])+'</td><td><span class="b '+cls+'"><span class="d"></span>'+h(v)+'</span></td></tr>';}).join("")+
-    '</tbody></table></div>',"derived from the call and the record, none from prose")+
+    '</tbody></table></div>',"derived from the call and the record only")+
    frSec("Decision",frPre({outcome:approve?"approve":"allow",policy_version:A?A.policy:"pol_v41",rules_fired:[rule],delegation_ceiling:"held: the narrower of agent and operator",
      taint:{marked:!!(A&&A.tainted),sources:A&&A.taint?A.taint.map(function(x){return x.path;}):[]},kill_switches:"none armed for this tool",enforcement_tier:R.tier}));
 }
@@ -3708,8 +3712,8 @@ function fdApproval(f,R){
   var ap=apState(id);
   var facts=frKv([["Approval",'<span class="mono">'+h(A.id)+'</span>'],["Call",'<span class="mono">'+h(A.tool)+'</span> · '+riskBadge(A.risk)],
     ["Rule",h(A.rule)],A.amount?["Amount",usd(A.amount)+" "+h(A.currency)+" · "+h(A.counterparty)]:null,["Approvers",h(A.approvers)],["Waited",h(A.waited)+" of "+h(A.timeout)]]);
-  if(A.waited==="expired")return '<div class="warn"><b>Expired.</b> Nobody answered inside '+h(A.timeout)+'. The call ended and the reason reached the model as the permission decision; nothing dispatched.</div>'+facts;
-  if(ap.status!=="pending")return '<div class="note">Resolved — <b>'+h(ap.status)+'</b>'+(ap.by&&ap.by!=="—"?' by '+h(ap.by):'')+'. The decision is a frame of its own.</div>'+facts;
+  if(A.waited==="expired")return '<div class="warn"><b>Expired.</b> Nobody answered inside '+h(A.timeout)+'. The call ended, the reason reached the model as the permission decision, and nothing was dispatched.</div>'+facts;
+  if(ap.status!=="pending")return '<div class="note">Resolved: <b>'+h(ap.status)+'</b>'+(ap.by&&ap.by!=="—"?' by '+h(ap.by):'')+'. The decision is a frame of its own.</div>'+facts;
   return '<div class="warn"><b>Parked.</b> The call is held for up to '+h(A.timeout)+'. The model is shown a wait with a reason, not a failure. '+
    'On resolution the gateway mints a single-use approval token bound to this exact call digest.</div>'+facts+
    '<div class="row" style="margin-top:13px"><button class="btn" onclick="openDialog(\'approve\',\''+A.id+'\')">Approve</button>'+
@@ -3720,7 +3724,7 @@ function fdRecord(f,R){
   return frKv([["Record id",'<b class="mono" style="color:var(--fg)">'+h(r.id)+'</b>'],["Lineage",'<span class="mono">lin_'+frHex(R.agent,6)+'</span> · a correction is a new record on this lineage'],
     ["Kind","note"],["Record hash",'<span class="mono">'+frDig(r.id)+'</span>'],["Sharing scope","workspace · "+h(R.ws)],["Retention","7 years from the seal"]])+
    frSec("Body",'<div class="callout">'+h(r.text)+'</div>')+
-   frSec("Provenance",r.sources.length?'<div class="row" style="gap:8px">'+r.sources.map(function(s){return frameBtn(s,"frame "+s+" · tool_call");}).join("")+'</div>':'<span class="dim">no tool result cited</span>',"every learned thing walks back to the frame that taught it");
+   frSec("Provenance",r.sources.length?'<div class="row" style="gap:8px">'+r.sources.map(function(s){return frameBtn(s,"frame "+s+" · tool_call");}).join("")+'</div>':'<span class="dim">no tool result cited</span>',"each record links to the frame it came from");
 }
 function fdCheckpoint(f,R){
   /* Walk by position, not seq: an authored list can carry sparse seqs, so L[seq] is not this frame. */
@@ -3729,35 +3733,35 @@ function fdCheckpoint(f,R){
   return frKv([["Covers","frames "+from+"–"+f.seq+" · every 20 frames or 60 seconds, whichever comes first"],["Producer","host device key · ed25519"],
     ["Producer signature",'<span class="mono">ed25519:'+frHex(R.id+"cp"+f.seq,14)+'…</span>'],["Countersigned by oxagen",'<span style="color:var(--st-allowed)">yes, at ingest</span>'],
     ["Chain head",'<span class="mono">'+h(f.head||frDig(R.id+f.seq+"head"))+'</span>']])+
-   '<div class="note" style="margin-top:12px">A checkpoint pins the chain mid-run so a crash or a network drop cannot cost the frames already recorded. oxagen attests receipt and chain integrity here, not the truth of a client-attested body.</div>';
+   '<div class="note" style="margin-top:12px">A checkpoint pins the chain mid-run so a crash or a network drop cannot cost the frames already recorded. Here oxagen attests that it received the frames and that the chain is intact. It does not attest that a body reported by the harness is true.</div>';
 }
 function fdError(f,R){
   var e=f.err||{code:"error",source:"gateway",outcome:R.status};
   return '<div class="row" style="gap:10px;margin-bottom:12px"><span class="b b-failed"><span class="d"></span>'+h(e.code)+'</span><span class="dim" style="font-size:12.5px">'+h(e.outcome)+'</span></div>'+
-   frKv([["Source",h(e.source)],["Cause",R.status==="halted"?"kill switch hooks_removed revoked the run token":"—"],["Billed",'<span style="color:var(--st-allowed)">no</span>'],
-    ["After this frame","nothing dispatched; the remaining frames close the run"]]);
+   frKv([["Source",h(e.source)],["Cause",R.status==="halted"?"oxagen detected that the agent\'s hooks were removed and revoked the run token":"—"],["Billed",'<span style="color:var(--st-allowed)">no</span>'],
+    ["After this frame","Nothing was dispatched. The remaining frames close the run."]]);
 }
 function fdTurn(f,R){
   var s=runSeries(R),t=f.turn||1,L=frList(R),fs=L.filter(function(x){return x.turn===t;}),start=f.kind==="turn_start";
   return frKv([["Turn",t+" of "+s.n],["Frames",fs.length?fs.length+" · seq "+fs[0].seq+"–"+fs[fs.length-1].seq:"—"],["Steps",s.steps[t-1]+" · "+s.model[t-1]+" model calls, "+s.tool[t-1]+" tool calls"],
-    ["Turn spend",usd(s.cost[t-1].toFixed(2))+" USD"],["Cache hit rate",per(s.cache[t-1])]])+
-   '<div class="note" style="margin-top:12px">'+(start?'One prompt, a schedule or a resumed context, through to the agent stopping. ':'')+'Turns are derived from these frames and materialized in the rollups; the Cost tab draws them.</div>';
+    ["Turn spend",usd(s.cost[t-1].toFixed(2))],["Cache hit rate",per(s.cache[t-1])]])+
+   '<div class="note" style="margin-top:12px">'+(start?'A turn runs from one prompt, schedule or resumed context until the agent stops. ':'')+'Turns are derived from these frames and stored in the rollups. The Cost tab charts them.</div>';
 }
 function fdAgent(f,R){
   var a=agent(R.agent);
   if(f.kind==="agent_start")return frKv([["Run",'<b class="mono" style="color:var(--fg)">'+h(R.id)+'</b>'],["Agent",'<span class="mono">'+h(R.agent)+'</span>'+(a?' · '+h(a.harnessLabel):'')],
-    ["Operator",h(PEOPLE[R.op]?PEOPLE[R.op].name:R.op)+" · initiating principal"],["Workspace",h(R.ws)],["Task",h(R.task)+" · "+h(R.taskTitle)],
+    ["Operator",h(PEOPLE[R.op]?PEOPLE[R.op].name:R.op)+" · initiating principal"],["Workspace",h(R.ws)],["Task",R.task&&R.task!=="—"?h(R.task)+" · "+h(R.taskTitle):h(R.taskTitle)+' <span class="dim">· no linked task</span>'],
     ["Policy version","pol_v41"],["Enforcement tier",tierBadge(R.tier)]])+
    '<div class="note" style="margin-top:12px">Everything above is built by oxagen, never by the agent. It cannot name its own operator or choose its own tier.</div>';
   return frKv([["Outcome",'<b style="color:var(--fg)">'+h(R.status)+'</b>'],["Turns",R.turn],["Steps",R.steps],["Frames",R.frames+" · seq 0–"+(R.frames-1)],
-    ["Total spend",usd(R.cost)+" USD · "+h(R.basis)],["Sealed",R.sealed?h(R.sealed)+" · the seal envelope follows as seq "+R.frames:"not sealed"]])+
+    ["Total spend",usd(R.cost)+" · "+keyLabel(R.basis)],["Sealed",R.sealed?h(R.sealed)+" · the seal envelope follows as seq "+R.frames:"not sealed"]])+
    '<div class="row" style="margin-top:12px"><button class="btn sm" onclick="S.tab.run=\'chain\';render()">Chain and seal</button></div>';
 }
 function fdToken(f,R){
   var c=frCallOf(f,R),vendor=c?toolParts(c.id).n.split("__")[0]:"github";
   return frKv([["Credential grant",'<span class="mono">'+h(f.grant||"cg_01K5RS8")+'</span>'],["Connection",h(vendor)+" · brokered by the gateway"],
     ["Minted",c?'a token scoped to <span class="mono">'+h(c.id)+'</span> and this call id':'installation token limited to <span class="mono">a-intel/platform</span>'],
-    ["TTL","5 minutes, bound to call id"],["Seen by the agent",'<b style="color:var(--st-allowed)">never</b> — the agent holds one run token, good for talking to oxagen and nothing else']]);
+    ["TTL","5 minutes, bound to call id"],["Seen by the agent",'<b style="color:var(--st-allowed)">never</b>. The agent holds one run token, which works only for calls to oxagen.']]);
 }
 var FD_KIND={"context.assembled":fdContext,"model.request":fdRequest,"model.response":fdResponse,tool_requested:fdToolReq,tool_call:fdToolCall,
   policy_decision:fdPolicy,approval_request:fdApproval,"record.appended":fdRecord,checkpoint:fdCheckpoint,error:fdError,
@@ -3768,10 +3772,10 @@ function frameDetail(f){
   if(f.kind==="control.pause"||f.kind==="control.resume"){
     var paused=f.kind==="control.pause";
     return '<div class="panel" style="background:var(--ink)"><div class="panel-b">'+
-     '<p class="eyebrow q">'+(paused?'Took effect at the boundary after seq '+(f.seq-1)+' · attributed to the operator':'Delivered at the next boundary · the reason reached the model as a control frame')+'</p>'+
+     '<p class="eyebrow q">'+(paused?'Took effect at the checkpoint after frame '+(f.seq-1)+' · attributed to the operator':'Delivered at the next checkpoint · the reason reached the model as a control frame')+'</p>'+
      '<p style="margin:0;color:var(--fg)">'+h(f.reason||"—")+'</p>'+
      '<div class="kv" style="margin-top:12px"><dt>Issuer</dt><dd>'+h(f.by||"Marcus Bell")+' · <span class="mono">'+(paused?'run.pause':'run.resume')+'</span></dd>'+
-     '<dt>While paused</dt><dd>'+(paused?'run token held · budget reservation held · pending approvals keep their clocks · no new dispatch':'the pause frame and this one are both in the chain; the gap is visible in the receipts')+'</dd>'+
+     '<dt>While paused</dt><dd>'+(paused?'The run token and budget reservation are held. Pending approvals keep counting down. Nothing new starts.':'The pause frame and this one are both in the chain, so the gap shows in the receipts.')+'</dd>'+
      '<dt>Digest</dt><dd class="mono">'+h(f.dig||"sha256:pending")+'</dd></div></div></div>';
   }
   if(f.kind==="control.steer"){
@@ -3783,15 +3787,15 @@ function frameDetail(f){
      '<div class="kv" style="margin-top:12px"><dt>Issuer</dt><dd>'+h(String(f.sum).split(" · ")[0])+' · operator authority</dd>'+
      '<dt>Injected into</dt><dd>'+(carried?frameBtn(carried.seq,"model.request · frame "+carried.seq)+', immediately after the cached system block':'the next model request')+'</dd>'+
      '<dt>Digest</dt><dd class="mono">'+h(f.dig||frDig(R.id+f.seq+"steer"))+'</dd></div>'+
-     '<div class="note" style="margin-top:12px">Steering is evidence, quoted and cited. oxagen never executes it as an instruction; whether the harness treats it as one is the harness’s contract.</div></div></div>';
+     '<div class="note" style="margin-top:12px">Steering is evidence, quoted and cited. oxagen never runs it as an instruction. Whether the harness treats it as one is up to the harness.</div></div></div>';
   }
   var body=FD_KIND[f.kind]?FD_KIND[f.kind](f,R):null;
-  var digestOnly=R.grade==="digest"?'<div class="note" style="margin-bottom:12px">Client-attested at '+h(R.tier)+' tier with replay grade <b>digest</b>: the producer sent digests, not bodies. What follows is the envelope oxagen countersigned; the content is as the harness reported it.</div>':'';
+  var digestOnly=R.grade==="digest"?'<div class="note" style="margin-bottom:12px">Reported by harness at the '+h(R.tier)+' tier, with replay grade <b>digest</b>: the producer sent digests, not bodies. What follows is the envelope oxagen countersigned. The content is as the harness reported it.</div>':'';
   return digestOnly+(body!=null?body:
    '<dl class="kv"><dt>Frame hash</dt><dd class="mono">sha256:'+(7331+f.seq*977).toString(16)+'e9c4a1b07f2d</dd>'+
-   '<dt>prev_hash</dt><dd class="mono">sha256:'+(7331+(f.seq-1)*977).toString(16)+'e9c4a1b07f2d</dd>'+
+   '<dt>Previous hash</dt><dd class="mono">sha256:'+(7331+(f.seq-1)*977).toString(16)+'e9c4a1b07f2d</dd>'+
    '<dt>Body</dt><dd>content-addressed, encrypted, retained 7 years</dd>'+
-   '<dt>Attested by</dt><dd>'+(f.tier?"the producer (client-attested), countersigned by oxagen at ingest":"oxagen, on its own runner")+'</dd></dl>');
+   '<dt>Attested by</dt><dd>'+(f.tier?"the producer (reported by harness), countersigned by oxagen at ingest":"oxagen, on its own runner")+'</dd></dl>');
 }
 
 /* ===================== the context window shown to the agent ===================== */
@@ -3954,7 +3958,7 @@ function contextTab(R){
      '<p>'+(W.none==="no model.request"
        ? 'The frames in view for <span class="mono">'+h(R.id)+'</span> carry no <span class="mono">model.request</span>, so there is no request to account for block by block.'
        : 'The first <span class="mono">model.request</span> on <span class="mono">'+h(R.id)+'</span> is not followed by a response that reports its input, so its window has no total to split.')+'</p>'+
-     (W.steers.length?'<p class="muted">'+W.steers.length+' control.steer frame'+(W.steers.length===1?'':'s')+' on this run, '+tokn(W.steerTok)+' tok.</p>':'')+'</div>';
+     (W.steers.length?'<p class="muted">'+plural(W.steers.length,"operator steer")+' on this run, '+tokn(W.steerTok)+' tokens.</p>':'')+'</div>';
   }
   var own = W.authored, sel = ctxSelOf(W);
   var blocks = W.blocks.filter(function(b){return b.tok>0;});
@@ -3967,7 +3971,7 @@ function contextTab(R){
   }).join("");
 
   var legend = W.blocks.map(function(b){
-    return '<span><i style="background:'+b.col+'"></i>'+h(b.name.split(".").pop())+' <b>'+tokn(b.tok)+'</b></span>';
+    return '<span><i style="background:'+b.col+'"></i>'+h({identity:"System",steering:"Steering",tools:"Tool definitions",frames:"Context frames",task:b.name==="task.brief"?"Task brief":"Conversation"}[b.id]||b.name)+' <b>'+tokn(b.tok)+'</b></span>';
   }).join("");
 
   var top = '<div class="panel" style="margin-bottom:14px">'+
@@ -3976,10 +3980,10 @@ function contextTab(R){
     '<span class="b b-q" data-ctx-total="'+W.total+'">'+tokn(W.total)+' tok in</span></div></div>'+
    '<div class="panel-b"><div class="compbar">'+bar+'</div><div class="legend">'+legend+'</div>'+
    '<div class="note" style="margin-top:13px">'+(own?'This is the whole of what the model received. ':'This run’s first model request, read from its frames. ')+
-   'Five blocks, in this order, and nothing else — no ambient file, no hidden preamble, no tool it was not handed. '+
+   'The model received these five blocks in this order and nothing else: no ambient file, no hidden preamble and no tool it was not given. '+
    tokn(W.cached)+' tokens came from cache and '+tokn(W.fresh)+' were new. '+
-   (W.derived?'The response records the total; where no frame states a block, the split follows the assembler’s composition rule. ':'')+
-   'Click a band, or walk the window on the right.</div></div></div>';
+   (W.derived?'The response records the total. Where no frame states a block\'s size, the split follows the assembler’s composition rule. ':'')+
+   'Select a band, or a block on the right.</div></div></div>';
 
   /* -------- the window, as a two-level tree -------- */
   var stack = "";
@@ -4003,12 +4007,12 @@ function contextTab(R){
        var id = 'steer@'+W.list.indexOf(f);
        return '<button class="ctxi" data-ctx-steer="'+f.seq+'" aria-current="'+(sel===id?'true':'false')+'" onclick="S.ctxSel=\''+id+'\';render()">'+
         '<span class="sw" style="background:var(--st-approval)"></span>'+
-        '<span class="nm">control.steer · seq '+f.seq+'</span><span class="tk">'+tokn(ctxSteerTok(f))+'</span></button>';
+        '<span class="nm">Operator steer · frame '+f.seq+'</span><span class="tk">'+tokn(ctxSteerTok(f))+'</span></button>';
      }).join("");
   }
 
   if(own){
-    stack += '<div class="ctxg">Retrieved, kept out<span class="n">'+CTXX.length+'</span></div>'+
+    stack += '<div class="ctxg">Retrieved and excluded<span class="n">'+CTXX.length+'</span></div>'+
      CTXX.map(function(x){
        return '<button class="ctxi off" aria-current="'+(sel===x.id?'true':'false')+'" onclick="S.ctxSel=\''+x.id+'\';render()">'+
         '<span class="sw" style="background:var(--border)"></span>'+
@@ -4017,7 +4021,7 @@ function contextTab(R){
   }
 
   var stackPanel = '<div class="panel" style="margin-bottom:14px">'+
-   '<div class="panel-h"><h3>Walk the window</h3>'+
+   '<div class="panel-h"><h3>Window blocks</h3>'+
    '</div>'+
    '<div class="stack">'+stack+'</div></div>';
 
@@ -4034,18 +4038,18 @@ function contextTab(R){
      '<dt>Below the floor</dt><dd class="num">'+CTXW.floor+' · score &lt; 0.60</dd>'+
      '<dt>Headroom left</dt><dd class="num">'+tokn(CTXW.headroom)+' tok</dd>'+
      '<dt>Composition digest</dt><dd class="mono">'+h(CTXW.digest)+'</dd></dl>'+
-     '<div class="note" style="margin-top:12px">The budget was not what bound this turn — '+tokn(CTXW.headroom)+
-     ' tokens went unused. The score floor and the one-chunk-per-document cap did the cutting. '+
-     'The assembler does not fill headroom for its own sake.</div></div></div>';
+     '<div class="note" style="margin-top:12px">The budget did not limit this turn: '+tokn(CTXW.headroom)+
+     ' tokens went unused. The score floor and the one-chunk-per-document cap decided what was cut. '+
+     'The assembler does not fill unused room.</div></div></div>';
   } else {
     var used = W.ctx, bpct = Math.min(100,Math.round(used/Math.max(1,W.budget)*100)), dig = W.ca?(/sha256:\S+/.exec(W.ca.sum)||[])[0]:null;
     budgetPanel = '<div class="panel"><div class="panel-h"><h3>Retrieval stats</h3></div><div class="panel-b">'+
      '<div class="meter"><div class="lab">Frame budget used<b>'+tokn(used)+' / '+tokn(W.budget)+'</b></div>'+
      '<div class="bar"><i style="width:'+bpct+'%;background:var(--st-proven)"></i></div></div>'+
      '<dl class="kv" style="margin-top:13px">'+
-     '<dt>Admitted</dt><dd class="num">'+(W.rows?W.rows.length+' · '+tokn(used)+' tok':'not itemised in the frames')+'</dd>'+
+     '<dt>Admitted</dt><dd class="num">'+(W.rows?W.rows.length+' · '+tokn(used)+' tok':'not itemized in the frames')+'</dd>'+
      '<dt>Headroom left</dt><dd class="num">'+tokn(Math.max(0,W.budget-used))+' tok</dd>'+
-     '<dt>Assembled at</dt><dd>'+(W.ca?'<span class="mono">context.assembled · seq '+W.ca.seq+'</span>':'no context.assembled frame precedes this request')+'</dd>'+
+     '<dt>Assembled at</dt><dd>'+(W.ca?'<span class="mono">context.assembled · seq '+W.ca.seq+'</span>':'No assembly frame precedes this request.')+'</dd>'+
      (dig?'<dt>Composition digest</dt><dd class="mono">'+h(dig)+'</dd>':'')+'</dl></div></div>';
   }
 
@@ -4072,16 +4076,16 @@ function ctxSteerDetail(R,W,sel){
   return ctxHd('Appended · <span class="mono">control.steer</span> · seq '+f.seq, tokBadge(tok)+cacheBadge("new"))+
    ctxBody(
     '<p>Sent by the operator at '+h(f.t)+(sane?', '+Math.round(into)+' seconds into the run,':'')+' and '+
-     (carrier?'delivered at the next boundary, as frame '+carrier.seq+'.':f.status==="expired"?'expired before any model call boundary.':'queued for the next model call boundary.')+'</p>'+
-    readout("appended after the cached prefix",carrier?"seq "+carrier.seq+" · "+h(carrier.t):h(f.status||"queued"),
+     (carrier?'delivered at the next checkpoint, as frame '+carrier.seq+'.':f.status==="expired"?'expired before the next checkpoint.':'queued for the next checkpoint.')+'</p>'+
+    readout("appended after the cached prefix",carrier?"frame "+carrier.seq+" · "+h(carrier.t):h(f.status||"queued"),
      '<div class="rb">“'+h(quote)+'”</div>')+
     '<dl class="kv"><dt>Issuer</dt><dd>'+h(by)+' · operator authority</dd>'+
     '<dt>Placed</dt><dd>immediately after the cached system block, before the task brief</dd>'+
     '<dt>Digest</dt><dd class="mono">'+h(f.dig||"sha256:pending")+'</dd>'+
     '<dt>Cost of delivering it</dt><dd class="num">'+tokn(tok)+' tok</dd></dl>'+
-    '<div class="note" style="margin-top:12px">Appended, never merged into an earlier block. Rewriting a block that is already '+
-    'cached would throw away the whole '+tokn(W.cached)+'-token prefix; appending costs '+tokn(tok)+' tokens. That is why steering arrives at a boundary '+
-    'rather than mid-turn.</div>'+
+    '<div class="note" style="margin-top:12px">A steer is appended, never merged into an earlier block. Rewriting a block that is already '+
+    'cached would throw away the whole '+tokn(W.cached)+'-token prefix. Appending costs '+tokn(tok)+' tokens. That is why steering arrives at a checkpoint '+
+    'and not mid-turn.</div>'+
     (repeats?'<div class="warn" style="margin-top:13px"><b>Already governed.</b> This steer restates '+
     '<span class="mono">ctx.release.platform-only</span>, a <span class="mono">never</span> rule the agent has held since block 2. '+
     'The operator could not see that from the run page, so they spent a turn saying it again. Surfacing the active rules where '+
@@ -4094,9 +4098,9 @@ function ctxDetailRun(R,W,sel){
   if(/^steer@/.test(sel)) return ctxSteerDetail(R,W,sel);
   var b=W.blocks.filter(function(x){return x.id===sel;})[0]||W.blocks[3];
   var src=W.derived?'split by the composition rule · total from '+(W.resp?'model.response · seq '+W.resp.seq:'the request'):'recorded on model.request · seq '+W.req.seq;
-  var what={identity:'Who the agent is acting as, and how far that reaches. oxagen writes this block; the agent author cannot.',
+  var what={identity:'Who the agent is acting as, and how far that reaches. oxagen writes this block. The agent author cannot.',
     steering:'The workspace’s published steering records, compiled into one block and served from cache. The model sees the result of the merge, never the merge itself.',
-    tools:'The tool definitions on the toolbelt. This is the only tool list the model is shown, and every one of them costs window.',
+    tools:'The tool definitions on the toolbelt. This is the only tool list the model is shown, and each definition takes room in the window.',
     frames:'What the assembler delivered from the workspace record for this request.',
     task:W.blocks[4].name==="task.brief"?'The task as the operator wrote it, with the brief the harness wraps around it.':'Prior turns and tool results, served from the recording.'}[b.id];
   var inner='<p>'+what+'</p>'+
@@ -4104,10 +4108,10 @@ function ctxDetailRun(R,W,sel){
    '<dt>Cache</dt><dd>'+{read:'inside the cached prefix of '+tokn(W.cached)+' tokens',mixed:'the cache breakpoint at token '+tokn(W.cached)+' falls inside this block','new':'after the cached prefix · billed as fresh input'}[b.cache]+'</dd>'+
    '<dt>Source</dt><dd class="mono">'+h(src)+'</dd></dl>';
   if(b.id==="frames"){
-    inner+=W.rows&&W.rows.length?'<div class="tw" style="margin-top:12px"><table class="narrow"><thead><tr><th>Kind</th><th>Frame</th><th class="num">Tok</th></tr></thead><tbody>'+
+    inner+=W.rows&&W.rows.length?'<div class="tw" style="margin-top:12px"><table class="narrow"><thead><tr><th>Kind</th><th>Frame</th><th class="num">Tokens</th></tr></thead><tbody>'+
       W.rows.map(function(f){return '<tr><td><span class="b b-q" style="color:'+ctxKindCol(f.kind)+'">'+h(f.kind)+'</span></td><td class="mono" style="font-size:11.5px">'+h(f.label)+'</td><td class="num">'+tokn(f.tok)+'</td></tr>';}).join("")+
       '<tr><td colspan="2"><b>total</b></td><td class="num"><b>'+tokn(W.rows.reduce(function(a,f){return a+f.tok;},0))+'</b></td></tr></tbody></table></div>'
-     :'<div class="note" style="margin-top:12px">'+(W.ca?'<span class="mono">context.assembled · seq '+W.ca.seq+'</span> does not itemise the frames it served.':'No context.assembled frame precedes this request.')+'</div>';
+     :'<div class="note" style="margin-top:12px">'+(W.ca?'The assembly frame (<span class="mono">context.assembled · seq '+W.ca.seq+'</span>) does not itemize the frames it served.':'No context.assembled frame precedes this request.')+'</div>';
   }
   return ctxHd('Block '+b.ix+' · <span class="mono">'+h(b.name)+'</span>', tokBadge(b.tok)+cacheBadge(b.cache))+ctxBody(inner);
 }
@@ -4130,7 +4134,7 @@ function ctxDetail(R,W,sel){
   if(sel==="identity"){
     return ctxHd('Block 1 · <span class="mono">system.identity</span>', tokBadge(210)+cacheBadge("read"))+
      ctxBody(
-      '<p>Who the agent is acting as, and how far that reaches. oxagen writes this block; the agent author cannot.</p>'+
+      '<p>Who the agent is acting as, and how far that reaches. oxagen writes this block. The agent author cannot.</p>'+
       readout("verbatim, as the model read it","",'<pre>'+
        'agent       a-intel.core.release-manager\n'+
        'run         run_01K5RS7M2E8FJ3QW\n'+
@@ -4142,7 +4146,7 @@ function ctxDetail(R,W,sel){
        '<span class="c"># no provider key, no customer credential, no vault handle</span>'+
        '</pre>')+
       '<div class="note">The things absent from this block matter more than the things in it. The provider key, the GitHub '+
-      'installation token and the customer vault never enter the window at any point in the run. The agent asks for an action; '+
+      'installation token and the customer vault never enter the window at any point in the run. The agent asks for an action, and '+
       'the gateway holds the credential.</div>');
   }
 
@@ -4163,23 +4167,23 @@ function ctxDetail(R,W,sel){
       (nw.length?'<div class="callout" style="margin:11px 0" data-next-bundle="'+live.v+'" data-next-delta="'+nwTok+'">'+nw.map(function(r){
          return '<span class="mono" data-new-rule="'+h(r.id)+'">'+h(r.id)+'</span> <span class="b b-proven">new</span> · published in bundle v'+live.v+' · reaches this run at its next model call';}).join("<br>")+
         '<div style="margin-top:6px">'+h(CTXPR.pr)+' merged'+(S.ctxpr.mergedAt?' at '+h(S.ctxpr.mergedAt):'')+', after this request was sent. The window below is what the model read and does not change. '+
-        'The next call’s steering block is '+tokn(sb.tok)+' → '+tokn(live.tok)+' tokens, <b>+'+tokn(nwTok)+'</b>; the prefix before the new rule stays cached, so those tokens are billed as fresh input.</div></div>':'')+
+        'The next call’s steering block grows from '+tokn(sb.tok)+' to '+tokn(live.tok)+' tokens, <b>+'+tokn(nwTok)+'</b>. The prefix before the new rule stays cached, and the added tokens are billed as fresh input.</div></div>':'')+
       '<div data-bundle-readout="'+sb.v+'">'+readout("bundle v"+sb.v+" · verbatim",plural(sb.rules.length,"rule"),'<pre>'+pre+'</pre>')+'</div>'+
       '<dl class="kv"><dt>Sources merged</dt><dd>3 · org, workspace core-platform, agent</dd>'+
       '<dt>Tokens per turn</dt><dd class="num">'+tokn(sb.tok)+(nw.length?' · <b>'+tokn(live.tok)+'</b> from the next call · +'+nwTok+' from the new record':'')+'</dd>'+
-      '<dt>Shadowed at compile</dt><dd class="mono">ctx.release.notes-format-legacy (org) — lost to the workspace rule</dd>'+
+      '<dt>Overridden at compile</dt><dd><span class="mono">ctx.release.notes-format-legacy</span> (org), overridden by the workspace rule</dd>'+
       '<dt>Digest</dt><dd class="mono">'+h(sb.digest)+'</dd>'+
       '<dt>Chained into</dt><dd class="mono">run.start · seq 0</dd></dl>'+
       '<div class="note" style="margin-top:12px">Conflicts resolve when the bundle compiles, not when the model reads. '+
-      'The model is never shown two rules that disagree and left to pick. One rule was shadowed here; the losing rule is '+
+      'The model is never shown two rules that disagree and left to pick. One rule was overridden here. It is '+
       'recorded in the bundle and is not in the window.</div>');
   }
 
   if(sel==="tools"){
     return ctxHd('Block 3 · <span class="mono">tools.definitions</span>', tokBadge(2118)+cacheBadge("read"))+
      ctxBody(
-      '<p>Fourteen tools. This is the only tool list the model is ever shown, and every one of them costs window.</p>'+
-      '<div class="tw"><table class="narrow"><thead><tr><th>Tool</th><th>Side</th><th class="num">Tok</th></tr></thead><tbody>'+
+      '<p>Fourteen tools. This is the only tool list the model is ever shown, and each definition takes room in the window.</p>'+
+      '<div class="tw"><table class="narrow"><thead><tr><th>Tool</th><th>Effect</th><th class="num">Tokens</th></tr></thead><tbody>'+
       '<tr><td class="mono" style="font-size:11.5px">github__list_pull_requests@3</td><td><span class="b b-q">read</span></td><td class="num">148</td></tr>'+
       '<tr><td class="mono" style="font-size:11.5px">github__get_pull_request@3</td><td><span class="b b-q">read</span></td><td class="num">132</td></tr>'+
       '<tr><td class="mono" style="font-size:11.5px">github__compare_refs@1</td><td><span class="b b-q">read</span></td><td class="num">119</td></tr>'+
@@ -4207,8 +4211,8 @@ function ctxDetail(R,W,sel){
        '<span class="c"># the schema to what this run is scoped to, before the model sees it.</span>'+
        '</pre>')+
       '<div class="note">A tool the toolbelt does not carry cannot be named. A name the model invents is refused at the gateway '+
-      'before it becomes a call, and the refusal is a frame. Narrowing the schema — the single-value <span class="mono">repo</span> '+
-      'enum above — is cheaper than catching a wrong repo at policy time, and the model never spends a turn on an option it does not have.</div>');
+      'before it becomes a call, and the refusal is a frame. Narrowing the schema, as with the single-value <span class="mono">repo</span> '+
+      'enum above, is cheaper than catching a wrong repo at policy time, and the model never spends a turn on an option it does not have.</div>');
   }
 
   if(sel==="frames"){
@@ -4224,20 +4228,20 @@ function ctxDetail(R,W,sel){
     CTXF.forEach(function(f,k){if(brk==null&&run0+f.tok>into)brk={ix:k+1,at:into-run0};run0+=f.tok;});
     return ctxHd('Block 4 · <span class="mono">context.frames</span>', tokBadge(W.ctx)+cacheBadge("mixed"))+
      ctxBody(
-      '<p>Six frames pulled from the workspace record for this turn — three quarters of the window. '+
-      'Pick a row to read what the model actually got, and why it was there.</p>'+
-      '<div class="tw"><table class="narrow"><thead><tr><th>Kind</th><th>Frame</th><th class="num">Tok</th><th class="num">Score</th><th>Cited</th></tr></thead><tbody>'+
+      '<p>Six frames pulled from the workspace record for this turn, three quarters of the window. '+
+      'Select a row to read what the model got and why it was there.</p>'+
+      '<div class="tw"><table class="narrow"><thead><tr><th>Kind</th><th>Frame</th><th class="num">Tokens</th><th class="num">Score</th><th>Cited</th></tr></thead><tbody>'+
       rows+'</tbody></table></div>'+
       '<div class="hr"></div>'+
       '<p class="eyebrow q">Where the cache stops</p>'+
       '<p>The cached prefix is '+tokn(W.cached)+' tokens: blocks 1 to 3 ('+tokn(above)+') and then '+tokn(into)+' tokens into this one. '+
-      'Caching is prefix-based, so it stops at a token, not at a frame edge'+(brk?' — the breakpoint for this request sits '+
+      'Caching is prefix-based, so it stops at a token, not at a frame edge'+(brk?'. For this request the breakpoint sits '+
       '<b>'+tokn(brk.at)+' tokens inside frame '+brk.ix+'</b>':'')+'.</p>'+
-      '<div class="note">Frame order is a cost decision. Stable frames first pushes the boundary further down the window; '+
-      'a volatile frame near the top invalidates everything under it. This run reorders by volatility, not by score.</div>'+
+      '<div class="note">Frame order is a cost decision. Putting stable frames first pushes the cache breakpoint further down the window, '+
+      'and a volatile frame near the top invalidates everything under it. This run orders frames by volatility, not by score.</div>'+
       '<div class="hr"></div>'+
       '<div class="warn"><b>Two frames were rendered and never cited.</b> The episode at frame 4 and the memory at frame 6 '+
-      'cost 3,410 tokens a turn and earned nothing. Both have a named cause and a named fix — open them.</div>');
+      'cost 3,410 tokens a turn and were never used. Each has a named cause and a named fix. Open them to see.</div>');
   }
 
   var f = ctxFrame(sel);
@@ -4249,7 +4253,7 @@ function ctxDetail(R,W,sel){
       return '<p class="eyebrow q" style="margin-top:16px">Why it was in the window</p>'+
         '<dl class="kv">'+rows+
         '<dt>Score · rank</dt><dd class="num">'+f.score.toFixed(2)+' · '+extra+' of '+CTXW.scored+' scored</dd>'+
-        '<dt>Grain</dt><dd class="mono">'+f.grain+' — rendered in full</dd>'+
+        '<dt>Grain</dt><dd><span class="mono">'+f.grain+'</span>, rendered in full</dd>'+
         '<dt>Graph node</dt><dd class="mono">'+h(f.node)+'</dd></dl>';
     };
 
@@ -4271,8 +4275,8 @@ function ctxDetail(R,W,sel){
         '<dt>Path</dt><dd class="mono">Task #482 → concerns → Repository</dd>'+
         '<dt>Read from</dt><dd>GitHub connector <span class="mono">con_01K2A7</span> at 09:14:01</dd>'+
         '<dt>Age at assembly</dt><dd>1.2 seconds</dd>', 1)+
-       '<div class="note" style="margin-top:12px">One hop, one second old, and it decided the shape of everything after it — '+
-       'the branch to compare against and who has to approve the result.</div>');
+       '<div class="note" style="margin-top:12px">One hop away and one second old, this frame set the branch to compare against '+
+       'and who has to approve the result.</div>');
     }
     if(sel==="f2"){
       return hd+ctxBody(
@@ -4290,9 +4294,9 @@ function ctxDetail(R,W,sel){
        why('<dt>Query</dt><dd class="mono">changelog format · unreleased entries</dd>'+
         '<dt>Index</dt><dd class="mono">idx_docs_v3 · 9 chunks scored</dd>'+
         '<dt>Version</dt><dd class="mono">CHANGELOG.md @ a4c91e2</dd>'+
-        '<dt>Chunk cap</dt><dd>one chunk per document per turn — this one scored highest</dd>', 2)+
+        '<dt>Chunk cap</dt><dd>one chunk per document per turn. This one scored highest.</dd>', 2)+
        '<div class="note" style="margin-top:12px">Chunks 1 and 2 scored 0.88 and 0.85 and did not get in. They are under '+
-       '<b>Retrieved, kept out</b>. If the release notes come back missing an older entry, that cap is the first thing to loosen.</div>');
+       '<b>Retrieved and excluded</b>. If the release notes come back missing an older entry, loosen that cap first.</div>');
     }
     if(sel==="f3"){
       return hd+ctxBody(
@@ -4311,7 +4315,7 @@ function ctxDetail(R,W,sel){
         '<dt>Index</dt><dd class="mono">idx_sym_v2 · symbol graph</dd>'+
         '<dt>Version</dt><dd class="mono">scripts/release.ts @ a4c91e2</dd>', 4)+
        '<div class="note" style="margin-top:12px">The steering rule in block 2 has an edge to the function that implements it, '+
-       'so the model is told the rule and shown the code that enforces it. Nobody wrote that pairing by hand — the edge is in the graph.</div>');
+       'so the model is told the rule and shown the code that enforces it. Nobody wrote that pairing by hand. The edge is in the graph.</div>');
     }
     if(sel==="f4"){
       return hd+ctxBody(
@@ -4325,11 +4329,11 @@ function ctxDetail(R,W,sel){
        why('<dt>Query</dt><dd class="mono">prior runs · same agent · same task shape</dd>'+
         '<dt>Index</dt><dd class="mono">idx_epi_v1 · floor 0.60</dd>'+
         '<dt>Margin over floor</dt><dd class="num">0.02</dd>'+
-        '<dt>Cited</dt><dd><b style="color:var(--st-failed)">never</b> — rendered in full, used in nothing</dd>', 22)+
+        '<dt>Cited</dt><dd><b style="color:var(--st-failed)">never</b>. Rendered in full and not used.</dd>', 22)+
        '<div class="warn" style="margin-top:13px"><b>This is the context-bloat finding.</b> The last three runs of this agent '+
-       'each pulled an episode that scored just over the floor, and cited none of them — 4,900 tokens, $0.31, nothing bought. '+
+       'each pulled an episode that scored just over the floor and cited none of them: 4,900 tokens and $0.31, all unused. '+
        'Raising this agent’s episodic floor from 0.60 to 0.70 drops all three and keeps every episode that was ever cited.</div>'+
-       '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="act(\'Proposed: episodic floor 0.60 → 0.70 for a-intel.core.release-manager. Replayed over 30 days of context frames — 41 runs affected, 0 cited episodes lost.\')">Try the floor change</button>'+
+       '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="act(\'Proposed: episodic floor 0.60 → 0.70 for a-intel.core.release-manager. Replayed over 30 days of context frames: 41 runs affected, no cited episode lost.\')">Try the floor change</button>'+
        '<button class="btn sm" onclick="S.tab.run=\'cost\';render()">See it on Cost</button></div>');
     }
     if(sel==="f5"){
@@ -4345,7 +4349,7 @@ function ctxDetail(R,W,sel){
         '</pre>')+
        why('<dt>Query</dt><dd class="mono">recent merged PRs touching CHANGELOG.md</dd>'+
         '<dt>Path</dt><dd class="mono">Task #482 → repository → merged PR (14 days)</dd>'+
-        '<dt>Cache</dt><dd>the prefix boundary falls <b>706 tokens inside this frame</b></dd>', 3)+
+        '<dt>Cache</dt><dd>the cache breakpoint falls <b>706 tokens inside this frame</b></dd>', 3)+
        '<div class="note" style="margin-top:12px">The frame carries its own bad news: the contract test on that backport is '+
        '<span class="mono">failing</span>. The model is shown the check, not asked to trust the merge.</div>');
     }
@@ -4366,8 +4370,8 @@ function ctxDetail(R,W,sel){
        'into block 2 as the <span class="mono">info</span> rule <span class="mono">ctx.platform.changelog-once</span>. '+
        'The assembler de-duplicates inside the memory index but not across the steering bundle, so every request in every run '+
        'of this agent carries 1,770 tokens of a rule the model has already read.</div>'+
-       '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="S.ctxSel=\'steering\';render()">Show me the duplicate in block 2</button>'+
-       '<button class="btn sm" onclick="act(\'Finding filed: assembler does not de-duplicate memory frames against the compiled steering bundle. Scope — every agent with a memory index. Estimated 1,770 tok per request on this agent alone.\')">File the finding</button></div>');
+       '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="S.ctxSel=\'steering\';render()">Show the duplicate in block 2</button>'+
+       '<button class="btn sm" onclick="act(\'Finding filed: assembler does not de-duplicate memory frames against the compiled steering bundle. Scope: every agent with a memory index. About 1,770 tokens per request on this agent alone.\')">File the finding</button></div>');
     }
   }
 
@@ -4384,9 +4388,9 @@ function ctxDetail(R,W,sel){
        'Acceptance: the release-notes contract test passes on the PR head.'+
        '</pre>')+
       '<dl class="kv"><dt>Digest</dt><dd class="mono">sha256:9f22be40c7a1d835</dd>'+
-      '<dt>Cache</dt><dd>new on this request — the brief sits after the cached prefix, so editing it costs 496 tokens, not 12,000</dd></dl>'+
+      '<dt>Cache</dt><dd>new on this request. The brief sits after the cached prefix, so editing it costs 496 tokens, not 12,000.</dd></dl>'+
       '<div class="note" style="margin-top:12px">Quoted as evidence, not executed. If the brief asked for something the steering '+
-      'in block 2 forbids, the steering still wins and the call is refused at the gateway — the brief cannot raise the operator’s '+
+      'in block 2 forbids, the steering still wins and the gateway refuses the call. The brief cannot raise the operator’s '+
       'own authority, and an operator cannot write themselves a wider one.</div>');
   }
 
@@ -4394,20 +4398,20 @@ function ctxDetail(R,W,sel){
   if(x){
     var reason = {cap:["b-q","held by a cap"], grain:["b-approval","withheld · grain"],
                   permission:["b-denied","withheld · permission"]}[x.why];
-    var hdx = ctxHd('Kept out · <span class="b b-q" style="color:'+ctxKindCol(x.kind)+'">'+x.kind+'</span>',
+    var hdx = ctxHd('Excluded · <span class="b b-q" style="color:'+ctxKindCol(x.kind)+'">'+x.kind+'</span>',
       '<span class="b b-q mono">'+tokn(x.tok)+' tok not spent</span><span class="b '+reason[0]+'"><span class="d"></span>'+reason[1]+'</span>');
 
     if(x.why==="cap"){
       return hdx+ctxBody(
        '<p class="mono" style="color:var(--fg)">'+h(x.label)+'</p>'+
-       '<dl class="kv"><dt>Score</dt><dd class="num">'+x.score.toFixed(2)+' — above the 0.60 floor</dd>'+
+       '<dl class="kv"><dt>Score</dt><dd class="num">'+x.score.toFixed(2)+', above the 0.60 floor</dd>'+
        '<dt>Reason</dt><dd>one chunk per document per turn. Chunk 3 scored 0.91 and took the slot.</dd>'+
-       '<dt>Budget at the time</dt><dd class="num">6,796 tok free — the budget would have taken it</dd></dl>'+
+       '<dt>Budget at the time</dt><dd class="num">6,796 tokens free, enough to fit it</dd></dl>'+
        '<div class="note" style="margin-top:12px">The cap is there so one long document cannot crowd out every other kind of '+
        'evidence: without it, five changelog chunks would have filled the window and the repository state, the symbol and the '+
        'prior pull request would all have been squeezed out. It cost 7,550 tokens of changelog this turn, and there was room for it. '+
        'This is a real trade, and it is tuned per index, not guessed per run.</div>'+
-       '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="act(\'Replayed over 30 days of context frames: doc chunk cap 1 → 3 for idx_docs_v3. Window grows 7,550 tok; 30-day cost +$0.18 per run; 0 frames evicted.\')">Try cap 1 → 3</button></div>');
+       '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="act(\'Replayed over 30 days of context frames: doc chunk cap 1 → 3 for idx_docs_v3. The window grows 7,550 tokens, cost rises $0.18 per run over 30 days, and no frame is evicted.\')">Try cap 1 → 3</button></div>');
     }
     if(x.why==="grain"){
       return hdx+ctxBody(
@@ -4422,7 +4426,7 @@ function ctxDetail(R,W,sel){
         '  to read it raise the agent’s grain, or ask an operator who holds L1'+
         '</pre>')+
        '<dl class="kv"><dt>Decided by</dt><dd class="mono">pol_v41 · rule rg_0101 · at assembly, before the model call</dd>'+
-       '<dt>Rendered into the window</dt><dd><b style="color:var(--st-allowed)">nothing</b> — the stub above is returned only if the agent asks for it</dd>'+
+       '<dt>Rendered into the window</dt><dd><b style="color:var(--st-allowed)">nothing</b>. The stub above is returned only if the agent asks for it.</dd>'+
        '<dt>Recorded as</dt><dd class="mono">context.withheld · seq 1 · in the hash chain</dd></dl>'+
        '<div class="note" style="margin-top:12px">The agent is allowed to know this node exists. That is a deliberate choice: an '+
        'agent that hits a wall it can name will say so, and an operator can widen the grain. Compare it with the permission case below, '+
@@ -4431,18 +4435,18 @@ function ctxDetail(R,W,sel){
     return hdx+ctxBody(
      '<p class="mono" style="color:var(--fg)">'+h(x.label)+'</p>'+
      '<p>The index matched it. It was removed before scoring was reported, and nothing about it reached the window.</p>'+
-     '<dl class="kv"><dt>Owner</dt><dd>workspace <span class="mono">finops</span> — core-platform agents have no read path</dd>'+
+     '<dl class="kv"><dt>Owner</dt><dd>workspace <span class="mono">finops</span>. Agents in core-platform have no read path to it.</dd>'+
      '<dt>Decided by</dt><dd class="mono">pol_v41 · workspace isolation · at assembly</dd>'+
-     '<dt>The agent was told</dt><dd><b style="color:var(--st-failed)">nothing at all</b> — not the title, not that it exists</dd>'+
+     '<dt>The agent was told</dt><dd><b style="color:var(--st-failed)">nothing</b>, neither the title nor that it exists</dd>'+
      '<dt>Recorded as</dt><dd class="mono">context.withheld · seq 1 · visible to an auditor, not to the agent</dd></dl>'+
-     '<div class="warn" style="margin-top:13px"><b>Told, versus not told.</b> Grain withholds a body and admits the node exists. '+
+     '<div class="warn" style="margin-top:13px"><b>Grain and permission differ.</b> Grain withholds a body and admits the node exists. '+
      'Permission withholds the existence. An agent that learns it cannot read <span class="mono">incident-2026-08-30</span> has '+
-     'learned that there was an incident on 30 August — so across a workspace boundary, oxagen does not say it. '+
+     'learned that there was an incident on August 30, so across a workspace boundary oxagen does not say it. '+
      'The withholding is still in the hash chain, and an auditor with both workspaces can see it.</div>'+
      '<div class="row" style="margin-top:13px"><button class="btn sm" onclick="S.ctxSel=\'x3\';render()">Compare with the grain case</button></div>');
   }
 
-  return ctxBody('<p class="dim">Pick a block.</p>');
+  return ctxBody('<p class="dim">Select a block.</p>');
 }
 
 /* ---- Cost tab: the run waterfall. Every figure is runSeries(R)/runMetrics(R) or a count over the run's frames. ---- */
@@ -4471,7 +4475,7 @@ function wfFindings(R,s){
     if(/cache/i.test(fd.kind)){turn=lowCache;why="the turn with the lowest cache hit rate";}
     else if(/tail/i.test(fd.kind)){turn=s.n-1;why="the last turn";}
     else if(fd.level==="tool"||/tool call/i.test(fd.kind)){turn=mostTool;why="the turn with the most tool calls";}
-    else {turn=s.peak;why="the dearest turn";}
+    else {turn=s.peak;why="the most expensive turn";}
     out.push({fd:fd,turn:turn,why:why});
   });
   return out;
@@ -4482,13 +4486,13 @@ function wfChart(R,s,tf,finds){
   var X=function(k){return pl+gap*k+gap/2;},Yb=function(v){return pt+ih-v/mx*ih;},Yc=function(v){return pt+ih-(total?v/total:0)*ih;};
   var g="",bars="",labs="",pts=[pl+","+Yc(0).toFixed(1)],cum=0,marks="";
   for(i=0;i<=4;i++){var v=mx*i/4,y=Yb(v);g+='<line x1="'+pl+'" y1="'+y.toFixed(1)+'" x2="'+(W-pr)+'" y2="'+y.toFixed(1)+'" stroke="var(--border)" stroke-width="1"/>'+
-    '<text x="'+(pl-8)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="end" fill="var(--dim)" font-size="10.5">$'+v.toFixed(2)+'</text>';}
+    '<text x="'+(pl-8)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="end" fill="var(--dim)" font-size="10.5">'+usd(v.toFixed(2))+'</text>';}
   for(i=0;i<n;i++){
     var c=s.cost[i],x=X(i)-bw/2,y2=Yb(c),bh=Math.max(2,pt+ih-y2),fnd=finds.filter(function(x){return x.turn===i;});
     var fill=fnd.length?"var(--st-denied)":"var(--st-approval)";
     bars+='<rect class="wf-bar" data-turn="'+(i+1)+'" data-c="'+c+'" x="'+x.toFixed(1)+'" y="'+y2.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="3" fill="'+fill+'" opacity="'+(fnd.length?".95":".8")+'">'+
-      '<title>Turn '+(i+1)+' · $'+c.toFixed(2)+' · cache '+per(s.cache[i])+' · '+plural(s.steps[i],"step")+' · '+plural(tf.n[i],"frame")+'</title></rect>';
-    labs+='<text x="'+X(i).toFixed(1)+'" y="'+(y2-6).toFixed(1)+'" text-anchor="middle" fill="var(--fg)" font-size="10.5">$'+c.toFixed(2)+'</text>'+
+      '<title>Turn '+(i+1)+' · '+usd(c.toFixed(2))+' · cache '+per(s.cache[i])+' · '+plural(s.steps[i],"step")+' · '+plural(tf.n[i],"frame")+'</title></rect>';
+    labs+='<text x="'+X(i).toFixed(1)+'" y="'+(y2-6).toFixed(1)+'" text-anchor="middle" fill="var(--fg)" font-size="10.5">'+usd(c.toFixed(2))+'</text>'+
       '<text x="'+X(i).toFixed(1)+'" y="'+(pt+ih+16)+'" text-anchor="middle" fill="var(--muted)" font-size="11">T'+(i+1)+'</text>'+
       '<text x="'+X(i).toFixed(1)+'" y="'+(pt+ih+30)+'" text-anchor="middle" fill="var(--dim)" font-size="10">'+per(s.cache[i])+' cache</text>';
     cum+=c;pts.push((X(i)+bw/2).toFixed(1)+","+Yc(cum).toFixed(1));
@@ -4508,15 +4512,15 @@ function costTab(R){
   var light=/haiku|flash|light/i.test(R.model||""),op=light?PRICE.outLight:PRICE.out,cum=0;
   var rows=s.cost.map(function(c,i){var from=cum;cum+=c;var fnd=finds.filter(function(x){return x.turn===i;});
     return '<tr'+(fnd.length?' style="background:var(--hl)"':'')+'><td class="mono">T'+(i+1)+'</td><td class="num">'+s.steps[i]+'</td><td class="num">'+tf.n[i]+'</td><td class="num">'+per(s.cache[i])+'</td>'+
-     '<td class="num wf-cost">$'+c.toFixed(2)+'</td><td class="num dim">$'+from.toFixed(2)+' → $'+cum.toFixed(2)+'</td><td>'+
+     '<td class="num wf-cost">'+usd(c.toFixed(2))+'</td><td class="num dim">'+usd(from.toFixed(2))+' → '+usd(cum.toFixed(2))+'</td><td>'+
      (fnd.length?fnd.map(function(x){return '<button class="b b-denied" style="cursor:pointer" onclick="openDialog(\'evidence\',\''+h(x.fd.id)+'\')"'+tipAttr("pinned to "+x.why)+'><span class="d"></span>'+h(x.fd.kind)+'</button>';}).join(" "):'<span class="dim">—</span>')+'</td></tr>';}).join("");
   var stepSum=s.steps.reduce(function(a,b){return a+b;},0),frameSum=tf.n.reduce(function(a,b){return a+b;},0);
-  var foot='<tr class="wf-total"><td><b>total</b></td><td class="num"><b>'+stepSum+'</b></td><td class="num"><b>'+frameSum+'</b></td><td class="num">'+per(s.cacheAvg)+'</td><td class="num"><b class="wf-sum">$'+cum.toFixed(2)+'</b></td><td class="num dim">of '+usd(R.cost)+' recorded</td><td></td></tr>';
+  var foot='<tr class="wf-total"><td><b>total</b></td><td class="num"><b>'+stepSum+'</b></td><td class="num"><b>'+frameSum+'</b></td><td class="num">'+per(s.cacheAvg)+'</td><td class="num"><b class="wf-sum">'+usd(cum.toFixed(2))+'</b></td><td class="num dim">of '+usd(R.cost)+' recorded</td><td></td></tr>';
   /* spend by token class: input at the effective price split by class, output at list */
   var inCost=total/3,pu=inCost/Math.max(1,m.fresh+0.1*m.cacheRead),outVis=m.tokOut-m.reasoning;
   var cls=[["input_uncached",m.fresh,m.fresh*pu],["cache_read",m.cacheRead,m.cacheRead*pu*0.1],["cache_write_5m",m.cacheWrite,0],["output",outVis,outVis*op]];
   var sofar=cls.reduce(function(a,x){return a+x[2];},0);cls.push(["reasoning",m.reasoning,Math.max(0,total-sofar)]);
-  var clsRows=cls.map(function(x){return '<tr><td class="mono">'+x[0]+'</td><td class="num">'+tokn(x[1])+'</td><td class="num">'+(x[1]?'$'+x[2].toFixed(4):'—')+'</td><td class="num dim">'+(total?(x[2]/total*100).toFixed(1):'0.0')+'%</td></tr>';}).join("")+
+  var clsRows=cls.map(function(x){return '<tr><td class="mono">'+x[0]+'</td><td class="num">'+tokn(x[1])+'</td><td class="num">'+(x[1]?usd(x[2].toFixed(4)):'—')+'</td><td class="num dim">'+(total?(x[2]/total*100).toFixed(1):'0.0')+'%</td></tr>';}).join("")+
     '<tr><td><b>total</b></td><td class="num"><b>'+tokn(m.tokTotal)+'</b></td><td class="num"><b>'+usd(R.cost)+'</b></td><td class="num dim">100.0%</td></tr>';
   /* the mean request carries the run's window's system, steering and tool blocks; the rest splits by the composition rule */
   var CW=runContext(R),mc=frReqComp(m.perCall,CW.none?{}:{system:CW.system,steering:CW.steering,tools:CW.tools});
@@ -4526,29 +4530,29 @@ function costTab(R){
     '<span><i style="display:inline-block;width:14px;border-top:2px dashed var(--fg);margin-right:5px;vertical-align:middle"></i>cost so far</span></div>';
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Waterfall</h3>'+
     '<div class="sp" style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+
-     (finds.length?'<span class="b b-denied"><span class="d"></span>'+finds.length+' finding'+(finds.length===1?'':'s')+'</span>':'')+
-     '<span class="b b-q">'+s.n+' turn'+(s.n===1?'':'s')+' · '+usd(R.cost)+' '+h(R.basis)+'</span></div></div>'+
+     (finds.length?'<span class="b b-denied"><span class="d"></span>'+plural(finds.length,"finding")+'</span>':'')+
+     '<span class="b b-q">'+plural(s.n,"turn")+' · '+usd(R.cost)+' · '+keyLabel(R.basis)+'</span></div></div>'+
     '<div class="panel-b"><div style="overflow-x:auto">'+wfChart(R,s,tf,finds)+'</div>'+legend+
-    '<p class="muted" style="font-size:11.5px;margin:10px 0 0">Bar height is the turn’s cost on the left scale; the dashed line is cost accumulating to '+usd(R.cost)+'. '+
-     (finds.length?'Diamonds are Spend findings that name this run, pinned to the turn their pattern points at. ':'')+'Each mark opens.</p></div>'+
+    '<p class="muted" style="font-size:11.5px;margin:10px 0 0">Bar height is the turn’s cost on the left scale. The dashed line is the running total, which reaches '+usd(R.cost)+'. '+
+     (finds.length?'Diamonds are Spend findings that name this run, pinned to the turn their pattern points at. ':'')+'Select a mark to open it.</p></div>'+
     '<div class="tw"><table class="wf-table" data-lt="off"><thead><tr><th>Turn</th><th class="num">Steps</th><th class="num">Frames</th><th class="num">Cache hit</th><th class="num">Cost</th><th class="num">Running total</th><th>Pinned</th></tr></thead>'+
      '<tbody>'+rows+foot+'</tbody></table></div>'+
-    (tf.counted?'':'<div class="panel-b" style="font-size:11.5px"><span class="dim">Frames per turn are apportioned by steps: this run’s frames in view do not carry their turn.</span></div>')+'</div>'+
+    (tf.counted?'':'<div class="panel-b" style="font-size:11.5px"><span class="dim">This run’s frames do not record their turn, so frames per turn are estimated from steps.</span></div>')+'</div>'+
    '<div class="grid g2"><div class="panel"><div class="panel-h"><h3>Spend by token class</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.tokTotal)+' tokens</span></div>'+
     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">Cost</th><th class="num">Share</th></tr></thead><tbody>'+clsRows+'</tbody></table></div>'+
-    '<div class="panel-b"><div class="note">Input is a third of the money and priced at the effective rate across its classes, a cache read at a tenth of an uncached token; output and reasoning are priced at '+(light?'the light-tier':'the flagship')+' list rate.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Prompt composition</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.perCall)+' tok</span></div><div class="panel-b" style="display:grid;gap:11px">'+
+    '<div class="panel-b"><div class="note">Input is about a third of the cost. It is priced at the effective rate across its classes, and a cache read costs a tenth of an uncached token. Output and reasoning are priced at the list rate for the '+(light?'light':'complex')+' model class.</div></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Prompt composition</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.perCall)+' tokens per request, on average</span></div><div class="panel-b" style="display:grid;gap:11px">'+
     comp.map(function(x){return '<div class="meter"><div class="lab">'+x[0]+'<b>'+tokn(x[1])+' tok</b></div><div class="bar"><i style="width:'+Math.round(x[1]/Math.max(1,m.perCall)*100)+'%;background:'+x[2]+'"></i></div></div>';}).join("")+
     '<div class="hr"></div><dl class="kv">'+
-    '<dt>Effective input price</dt><dd>$1.88 per million across all input classes</dd>'+
-    '<dt>Cache write cost share</dt><dd>'+(m.cacheWrite?pct(m.cacheWrite,m.tokIn):'0.0% — nothing written this run')+'</dd>'+
-    '<dt>Basis</dt><dd>'+basisChip(R.basis)+(R.basis==="gateway_observed"?' · counted by the proxy from the bytes that passed through it':' · the harness\u2019s own telemetry; absent classes are marked, never zero')+'</dd>'+
+    '<dt>Effective input price</dt><dd>$1.88 per million input tokens, all classes</dd>'+
+    '<dt>Cache write cost share</dt><dd>'+(m.cacheWrite?pct(m.cacheWrite,m.tokIn):'0.0%. Nothing was written to cache this run.')+'</dd>'+
+    '<dt>Basis</dt><dd>'+basisChip(R.basis)+(R.basis==="gateway_observed"?' · counted by the gateway from the bytes that passed through it':' · from the harness\u2019s own telemetry. A class it did not report is marked missing, not shown as zero.')+'</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(R.ratio)+' · '+s.adv+' of '+plural(R.steps,"step")+' advanced the task</dd></dl></div></div></div>';
 }
 
 /* ---- Chain and seal: dense seq, checkpoints off the frames, the replay-grade ladder ---- */
-var GRADE_LADDER=[["full","every body recorded","render, fork replay, bisect, export"],["partial","some bodies missing, recorded as gaps","render with the gaps shown; no fork past a gap"],
-  ["digest","digests only, producer-signed","verify the chain and the seal; no render of content"],["ledger","frames archived to the segment","render from the archive segment, then as full"]];
+var GRADE_LADDER=[["full","every body recorded","render, fork replay, bisect, export"],["partial","some bodies missing, recorded as gaps","render with the gaps shown, but no fork past a gap"],
+  ["digest","digests only, producer-signed","verify the chain and the seal only"],["ledger","frames archived to the segment","render from the archive segment, then as full"]];
 function chainTab(R){
   var sealed=R.status!=="live"&&R.status!=="parked",L=runFrames(R),cps=L.filter(function(f){return f.kind==="checkpoint";});
   var cpN=L.length>=R.frames?cps.length:Math.floor((R.frames||0)/20),root=R.id==="run_01K4QJ9E4T6YUI1O"?"sha256:b41e07c9a2f5308d6e14bb90c7f2a331":"sha256:"+frHex(R.id+"merkle",32);
@@ -4560,10 +4564,10 @@ function chainTab(R){
     '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>no gaps</span></div><div class="panel-b">'+
     '<dl class="kv"><dt>Frames</dt><dd class="num">'+R.frames+' · dense seq 0 … '+(R.frames-1)+(sealed?' · the seal is envelope '+R.frames:'')+'</dd>'+
     '<dt>Rule</dt><dd class="mono" style="font-size:11.5px">hash = SHA256(prev_hash ‖ canonical(envelope))</dd>'+
-    '<dt>telemetry_gap frames</dt><dd>0 — a gap is recorded, never repaired</dd>'+
+    '<dt>Telemetry gap frames</dt><dd>0. A gap is recorded, never repaired.</dd>'+
     '<dt>Checkpoints</dt><dd>'+cpN+' · every 20 frames · signed by the host device key, countersigned by oxagen at ingest</dd>'+
-    '<dt>Completeness gaps</dt><dd>'+(R.grade==="full"?"none — replay grade is full":R.grade==="partial"?"bodies missing on some frames — replay grade lowered":R.grade==="digest"?"bodies not sent — digests only":"none — frames are in the archive segment")+'</dd></dl>'+
-    '<div class="note" style="margin-top:13px">Frames from a wrapped agent are client-attested: producer-signed and countersigned at ingest, so oxagen attests receipt and chain integrity, not the truth of the content. Frames oxagen writes itself, a decision on a routed call or a witness result, are oxagen-attested.</div></div></div>'+
+    '<dt>Completeness gaps</dt><dd>'+(R.grade==="full"?"None. The replay grade is full.":R.grade==="partial"?"Some frames are missing bodies, so the replay grade is lowered.":R.grade==="digest"?"Bodies were not sent, only digests.":"None. Frames are in the archive segment.")+'</dd></dl>'+
+    '<div class="note" style="margin-top:13px">Frames from a wrapped agent are reported by harness: signed by the producer and countersigned at ingest. oxagen attests that it received them and that the chain is intact. It does not attest that their content is true. Frames oxagen writes itself, such as a decision on a routed call or a witness result, are attested by oxagen.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Seal and attestation</h3>'+(sealed?'<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>sealed</span>':'')+'</div>'+
     '<div class="panel-b">'+(sealed?'<dl class="kv">'+
     '<dt>Merkle root</dt><dd class="mono" style="word-break:break-all">'+root+'</dd>'+
@@ -4571,17 +4575,17 @@ function chainTab(R){
     '<dt>Archive segment</dt><dd class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</dd>'+
     '<dt>Signature</dt><dd class="mono">ed25519 · '+h(ORG.attester)+'</dd>'+
     '<dt>Signs over</dt><dd class="mono" style="font-size:11.5px">run_id, attempt_id, frame_count, merkle_root, archive_segment_digest, enforcement_tier, completeness_gaps</dd>'+
-    '<dt>Enforcement tier</dt><dd>'+tierBadge(R.tier)+' · computed from what was actually routed, not from what the adapter could do on paper</dd>'+
+    '<dt>Enforcement tier</dt><dd>'+tierBadge(R.tier)+' · computed from what was routed, not from what the adapter supports</dd>'+
     '<dt>Verify offline</dt><dd><button class="btn sm" onclick="openDialog(\'runexport\')">Export the bundle</button></dd></dl>':
     '<p class="muted">The seal is computed at run end, for every terminal outcome. Until then the chain is verifiable frame by frame but there is no Merkle root and no attestation.</p>')+
     '</div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Replay grade</h3><span class="b b-q" style="margin-left:auto">'+h(R.grade)+'</span></div>'+
     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Grade</th><th>What was recorded</th><th>What it allows</th></tr></thead><tbody>'+ladder+'</tbody></table></div>'+
-    '<div class="panel-b"><div class="note">The grade is computed at seal from what the chain holds, never raised afterwards. Bisect and fork replay read the same frames the player shows.</div>'+
+    '<div class="panel-b"><div class="note">The grade is computed at seal from what the chain holds and is never raised afterward. Bisect and fork replay read the same frames the player shows.</div>'+
     '<div class="row" style="margin-top:12px">'+(sealed?'<button class="btn sm" onclick="S.bis=null;openDialog(\'bisect\')">Bisect against another run</button>':'')+'<button class="btn sm" onclick="openDialog(\'forkreplay\')">Fork replay from frame '+Math.min(S.frame||0,L.length-1)+'</button></div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Checkpoints</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+cps.length+' of '+cpN+'</span></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Checkpoints</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+cps.length+' of '+cpN+' shown</span></div>'+
     (cps.length?'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Frame</th><th class="num">Covers</th><th>Chain head</th><th>Signature</th></tr></thead><tbody>'+cpRows+'</tbody></table></div>':
-     '<div class="panel-b muted" style="font-size:12.5px">No checkpoint frame is in view; the recorder writes one every 20 frames.</div>')+'</div>'+
+     '<div class="panel-b muted" style="font-size:12.5px">No checkpoint frame is shown. The recorder writes one every 20 frames.</div>')+'</div>'+
    '</div>';
 }
 
@@ -4595,19 +4599,19 @@ DLG_EXT.forkreplay=function(){
   var row=function(tg,tx){return '<div class="row" style="gap:12px;align-items:flex-start;flex-wrap:nowrap;margin-bottom:10px">'+tg+'<div style="font-size:12.5px;min-width:0">'+tx+'</div></div>';};
   var blocked=R.grade==="digest"||R.grade==="partial"||(R.status==="compacted"&&!S.seg[R.id]);
   return {t:"Fork replay from frame "+f.seq,s:"A new attempt on the same run, linked to this one. It never overwrites what is sealed.",w:true,
-   b:(blocked?'<div class="warn" style="margin-bottom:14px"><b>Not from this grade.</b> '+(R.status==="compacted"?'Render the archive segment first; a fork reads the same bytes.':'Replay grade '+h(R.grade)+' has no bodies to replay from. Only a full-grade run forks.')+'</div>':'')+
+   b:(blocked?'<div class="warn" style="margin-bottom:14px"><b>This grade cannot fork.</b> '+(R.status==="compacted"?'Render the archive segment first. A fork reads the same bytes.':'Replay grade '+h(R.grade)+' has no bodies to replay from. Only a full-grade run can fork.')+'</div>':'')+
     frSec("Where it forks",frKv([["Fork point","frame "+f.seq+" · <span class=\"mono\">"+h(f.kind)+"</span> · "+h(f.t)],["New attempt",'<span class="mono">att_'+frHex(R.id+f.seq,8).toUpperCase()+'</span> linked to '+h(R.id)],
      ["Recorded context","the exact context frames and steering frame "+f.seq+" saw, by content digest"],["Policy version","pol_v41 · the version the recording ran under"]]))+
-    frSec("What is replayed, what runs live",
+    frSec("Replayed and live calls",
      row(tag("b-q","from the recording"),'<b>Frames 0–'+f.seq+'</b> replay exactly as recorded. No model is called and no tool is dispatched for any of them.')+
-     row(tag("b-allowed","runs live"),'<b>The next model call</b>'+(first?' (recorded at '+frameBtn(first.seq,"frame "+first.seq)+')':'')+' is made for real against <span class="mono">'+h(R.model)+'</span> with the recorded prompt. It costs money and the answer may differ — that is the point of a fork.')+
-     row(tag("b-proven","from the cassette"),'<b>'+toolsAfter+' tool call'+(toolsAfter===1?'':'s')+' after this frame</b> are served from the recording when the canonical input digest matches, byte for byte. Nothing reaches a real provider.')+
+     row(tag("b-allowed","runs live"),'<b>The next model call</b>'+(first?' (recorded at '+frameBtn(first.seq,"frame "+first.seq)+')':'')+' is made for real against <span class="mono">'+h(R.model)+'</span> with the recorded prompt. It costs money, and the answer may differ. That is what a fork is for.')+
+     row(tag("b-proven","from the cassette"),'<b>'+plural(toolsAfter,"tool call")+' after this frame</b> are served from the recording when the canonical input digest matches, byte for byte. Nothing reaches a real provider.')+
      row(tag("b-denied","denied"),'<b>A tool call whose input digest differs</b> has no cassette entry. It is denied, not dispatched: a fork cannot open a pull request, move money, or write to a repository.'))+
     frSec("Cost and record",frKv([["Spent by this frame",usd(spent.toFixed(2))+" of "+usd(R.cost)+" · not spent again"],
-     ["Estimated spend",first?"about $"+(parseFloat(first.cost)||0).toFixed(2)+" for the first live call; $"+est.toFixed(2)+" if the fork runs to the end":"no model call follows this frame in view"],
-     unseen?["Not in view",unseen+" recorded frames after the last one shown; the estimate covers only frames in view"]:null,
+     ["Estimated spend",first?"about "+usd((parseFloat(first.cost)||0).toFixed(2))+" for the first live call, and "+usd(est.toFixed(2))+" if the fork runs to the end":"no model call follows this frame among the frames shown"],
+     unseen?["Not shown",plural(unseen,"recorded frame")+" after the last one shown. The estimate covers only the frames shown."]:null,
      ["Billed as","a run, on the same operator and agent"],["Recorded as","its own frames, its own chain, its own seal"],
-     ["This run",'<span style="color:var(--st-allowed)">unchanged — sealed runs are immutable</span>']])),
+     ["This run",'<span style="color:var(--st-allowed)">unchanged. Sealed runs are immutable.</span>']])),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><span class="grow"></span>'+
     '<button class="btn primary"'+(blocked?' disabled':'')+' onclick="closeDialog();act(\'Fork replay started from frame '+f.seq+' as a new attempt linked to '+R.id+'. Tool results after it are served from the cassette.\')">Start fork replay</button>'};
 };
@@ -4628,12 +4632,12 @@ function bisRun(){var a=el("bis-a"),b=el("bis-b");S.bis={a:a?a.value:S.frameRun,
 DLG_EXT.bisect=function(){
   var cur=S.frameRun||RUNS[0].id,st=S.bis||{},aId=st.a||cur,opts=bisOpts(cur),bDef=(opts.filter(function(r){return r.id!==aId;})[0]||{}).id,bId=st.b||bDef;
   var A=run(aId),B=run(bId);
-  var label=function(r){return r.id+" · "+r.agent.split(".").pop()+" · "+r.status+" · $"+r.cost+(r.task===run(cur).task?" · same task":"");};
+  var label=function(r){return r.id+" · "+r.agent.split(".").pop()+" · "+r.status+" · "+usd(r.cost)+(r.task===run(cur).task?" · same task":"");};
   var sel=function(id,val){return '<select id="'+id+'" aria-label="'+(id==="bis-a"?"Run A":"Run B")+'">'+opts.map(function(r){return '<option value="'+r.id+'"'+(r.id===val?' selected':'')+'>'+h(label(r))+'</option>';}).join("")+'</select>';};
   if(!st.done||!A||!B){
     return {t:"Bisect between two runs",s:"Aligns two runs frame by frame and finds the first frame where they did something different.",w:false,
      b:'<div class="field"><label>Run A</label>'+sel("bis-a",aId)+'</div><div class="field"><label>Run B</label>'+sel("bis-b",bId)+'</div>'+
-      '<div class="note">Runs of the same task are listed first, then runs of the same agent. Frames are compared on what they did — the kind, the tool and version, the model, the policy outcome — not on times or digests, which always differ.</div>',
+      '<div class="note">Runs of the same task are listed first, then runs of the same agent. Frames are compared on what they did (the kind, the tool and version, the model and the policy outcome), not on times or digests, which always differ.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="bisRun()">Bisect</button>'};
   }
   var LA=runFrames(A),LB=runFrames(B),n=Math.max(LA.length,LB.length),d=-1,i;
@@ -4643,27 +4647,27 @@ DLG_EXT.bisect=function(){
     rows+='<div class="bis-row" style="display:flex;gap:10px;align-items:baseline;padding:5px 9px;border-left:2px solid '+(on?'var(--st-denied)':'transparent')+';background:'+(on?'var(--hl)':'transparent')+';font-size:12px;'+(after?'color:var(--muted)':'')+'"'+(on?' data-diff="1"':'')+'>'+
       '<span class="mono dim" style="width:26px;text-align:right;flex:none">'+k+'</span><span class="mono" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(bisWhat(f,R))+'</span></div>';}
     return rows;};
-  var head=function(r,L,tagL){return '<div style="padding:8px 9px;border-bottom:1px solid var(--border)"><b>'+tagL+' · <span class="mono">'+h(r.id)+'</span></b><div class="dim" style="font-size:11.5px">'+h(r.agent)+' · '+(L.length<r.frames?L.length+' of '+plural(r.frames,"frame")+' in view':plural(L.length,"frame"))+' · '+usd(r.cost)+' · '+h(r.status)+'</div></div>';};
+  var head=function(r,L,tagL){return '<div style="padding:8px 9px;border-bottom:1px solid var(--border)"><b>'+tagL+' · <span class="mono">'+h(r.id)+'</span></b><div class="dim" style="font-size:11.5px">'+h(r.agent)+' · '+(L.length<r.frames?L.length+' of '+plural(r.frames,"frame")+' shown':plural(L.length,"frame"))+' · '+usd(r.cost)+' · '+h(r.status)+'</div></div>';};
   var same=A.id===B.id,fa=LA[d],fb=LB[d];
-  return {t:"Bisect · "+A.id.slice(-6)+" against "+B.id.slice(-6),s:same?"The same run on both sides has nothing to bisect.":d<0?"No frame differs on what it did.":"First differing frame · seq "+d,w:true,
+  return {t:"Bisect "+A.id.slice(-6)+" against "+B.id.slice(-6),s:same?"The same run on both sides has nothing to bisect.":d<0?"No frame differs in what it did.":"The runs first differ at frame "+d+".",w:true,
    b:(same?'<div class="warn">Choose two different runs.</div>':
     '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">'+
      '<div class="panel" style="margin:0">'+head(A,LA,"A")+'<div class="bis-side" style="padding:4px 0">'+side(LA,A)+'</div></div>'+
      '<div class="panel" style="margin:0">'+head(B,LB,"B")+'<div class="bis-side" style="padding:4px 0">'+side(LB,B)+'</div></div></div>'+
-    (d>=0?frSec("First differing frame · "+d,'<div class="grid g2" style="gap:12px"><div class="callout"><b>A</b> · '+h(bisWhat(fa,A))+(fa?'<div class="dim mono" style="font-size:11px;margin-top:4px">'+h(fa.sum)+'</div>':'')+'</div>'+
+    (d>=0?frSec("First differing frame",'<div class="grid g2" style="gap:12px"><div class="callout"><b>A</b> · '+h(bisWhat(fa,A))+(fa?'<div class="dim mono" style="font-size:11px;margin-top:4px">'+h(fa.sum)+'</div>':'')+'</div>'+
       '<div class="callout"><b>B</b> · '+h(bisWhat(fb,B))+(fb?'<div class="dim mono" style="font-size:11px;margin-top:4px">'+h(fb.sum)+'</div>':'')+'</div></div>'+
-      '<div class="note" style="margin-top:12px">'+(d===0?'The runs part at their first frame.':d===1?'Frame 0 did the same thing on both sides.':'Frames 0–'+(d-1)+' did the same thing on both sides.')+' Everything after frame '+d+' is downstream of this difference; the two runs cost '+usd(A.cost)+' and '+usd(B.cost)+'.</div>',"aligned by seq"):
-     '<div class="note" style="margin-top:12px">The runs match on every frame in view.</div>')),
+      '<div class="note" style="margin-top:12px">'+(d===0?'The runs part at their first frame.':d===1?'Frame 0 did the same thing on both sides.':'Frames 0–'+(d-1)+' did the same thing on both sides.')+' Everything after frame '+d+' follows from this difference. The two runs cost '+usd(A.cost)+' and '+usd(B.cost)+'.</div>',"aligned by frame number"):
+     '<div class="note" style="margin-top:12px">The runs match on every frame shown.</div>')),
    f:'<button class="btn" onclick="S.bis.done=false;render()">Choose again</button><span class="grow"></span>'+
     (d>=0&&!same?'<button class="btn primary" onclick="S.bis=null;closeDialog();S.tab.run=\'player\';S.frame='+d+';go(\'#/'+ORG.slug+'/'+A.ws+'/runs/'+A.id+'\');render()">Open frame '+d+' in run A</button>':'<button class="btn" onclick="closeDialog()">Close</button>')};
 };
 DLG_EXT.runexport=function(){
   var R=run(S.frameRun)||RUNS[0],sealed=R.status!=="live"&&R.status!=="parked";
-  return {t:"Export this run",s:"segment, attestation, key ids and the verifier",w:false,
-   b:'<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>run '+h(R.id)+' · '+plural(R.frames,"frame")+(sealed?' and the seal':'')+'</option><option>task '+h(R.task)+' · every run</option><option>agent '+h(R.agent)+' · all runs</option></select></div>'+
+  return {t:"Export this run",s:"The segment, attestation, key IDs and verifier.",w:false,
+   b:'<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>run '+h(R.id)+' · '+plural(R.frames,"frame")+(sealed?' and the seal':'')+'</option>'+(R.task&&R.task!=="—"?'<option>task '+h(R.task)+' · every run</option>':'')+'<option>agent '+h(R.agent)+' · all runs</option></select></div>'+
     '<div class="field"><label>Format</label><select aria-label="Format"><option>Signed bundle (segment + verifier)</option><option>Frames as NDJSON</option><option>Receipts as CSV</option></select></div>'+
-    frKv([["Segment",'<span class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</span> · '+R.frames+' frame envelopes'],["Replay grade",h(R.grade)],["Seal",sealed?"included · verifies offline":"not yet — the run is open, so the bundle carries checkpoints only"]])+
-    '<div class="callout" style="margin-top:12px">Runs as <span class="mono">export_data</span> — a governed action with third-party egress. Bodies for erased subjects are not in the bundle; their digests are, so the chain still verifies.</div>',
+    frKv([["Segment",'<span class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</span> · '+R.frames+' frame envelopes'],["Replay grade",h(R.grade)],["Seal",sealed?"included · verifies offline":"not yet. The run is open, so the bundle carries checkpoints only."]])+
+    '<div class="callout" style="margin-top:12px">Runs as <span class="mono">export_data</span>, a governed action with third-party egress. Bodies for erased subjects are left out, but their digests are included, so the chain still verifies.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="queueExport()">Build bundle</button>'};
 };
 

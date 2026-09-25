@@ -818,11 +818,11 @@ for (const theme of ["light", "dark"]) {
   }), "run rig: the strip sits above the tab bar");
 
   // Both readings, and the change each asks for.
-  ok(/Wrong model tier/.test(await rig()), "run rig: an overkill model is badged in the header");
-  ok(/Wrong effort setting/.test(await rig()), "run rig: an overkill effort setting is badged in the header");
+  ok(/Heavier model than needed/.test(await rig()), "run rig: an overkill model is badged in the header");
+  ok(/More effort than needed/.test(await rig()), "run rig: an overkill effort setting is badged in the header");
   await page.evaluate(() => { S.tab.run = "cost"; render(); });
   await page.waitForTimeout(200);
-  ok(/generated · not the record/.test(await panel()), "run fit: the panel says the reading is generated");
+  ok(/Generated estimate/.test(await panel()), "run fit: the panel says the reading is generated");
   ok(/Read from this run only/.test(await panel()), "run fit: the panel cites what it read");
   ok(/Move this agent to/.test(await panel()), "run fit: the model card offers the change");
   ok(/Set effort to/.test(await panel()), "run fit: the effort card offers the change");
