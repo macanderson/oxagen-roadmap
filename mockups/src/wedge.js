@@ -86,7 +86,7 @@ function pWork(r){
   var counts={backlog:tkWaiting(),orders:woWaiting(),workflows:0,findings:findingsOpen().length};
   var tabs='<div class="tabs" role="tablist" aria-label="Work">'+WORK_TABS.map(function(x){
     return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="go(\''+workHash(x[0])+'\')">'+x[1]+
-      (counts[x[0]]?'<span class="n">'+counts[x[0]]+'</span>':'')+'</button>';}).join("")+'</div>';
+      (counts[x[0]]?'<span class="vh"> </span><span class="n" title="'+counts[x[0]]+' '+({backlog:"to certify",orders:"to accept",findings:"open"}[x[0]]||"")+'">'+counts[x[0]]+'</span>':'')+'</button>';}).join("")+'</div>';
   var sel=Object.keys(S.tsel).filter(function(k){return S.tsel[k];});
   var acts=t==="backlog"?'<button class="btn" onclick="openDialog(\'intake\',\'providers\')">Intake</button>'+dispatchButton(sel)
     :t==="workflows"?'<button class="btn primary" onclick="wfzOpen()">New workflow</button>':'';
@@ -100,6 +100,9 @@ function pWork(r){
 function woOf(t){return t.wo?woById(t.wo):null;}
 function backlogTab(){
   var rows=wsTasks();
+  if(!rows.length&&!wsProviders().length) return '<div class="panel">'+emptyState("No issue tracker is connected to this workspace",
+    "Connect one to import its issues as work items, or write a work item here.",
+    '<button class="btn primary" onclick="openDialog(\'intake\',\'providers\')">Connect an issue tracker</button>')+'</div>';
   var ready=rows.filter(function(t){return t.ready==="ready"&&!tkGraphBlocked(t);}).length,
       drafts=rows.filter(function(t){return t.ready==="draft"||t.ready==="changed";}).length,
       inwo=rows.filter(function(t){return t.ready==="sent";}).length;
@@ -109,8 +112,8 @@ function backlogTab(){
   var nsel=Object.keys(S.tsel).length;
   var banner=changed.length?'<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
     '<div class="grow"><b>'+changed.length+' work item'+(changed.length>1?'s':'')+' changed after certification</b>'+
-    h(changed[0].num)+' was edited upstream on '+h(changed[0].updatedAt)+'. It left ready until somebody certifies its definition of done again.</div>'+
-    '<button class="btn" onclick="go(\''+taskUrl(changed[0])+'\')">Review it</button></div>':'';
+    h(changed[0].num)+' was edited upstream on '+h(changed[0].updatedAt)+'. It is no longer ready. Certify its definition of done again to send it.</div>'+
+    '<button class="btn" onclick="go(\''+taskUrl(changed[0])+'\')">Review changes</button></div>':'';
   var trs=rows.map(function(t){
     var ok=tkSelectable(t), on=!!S.tsel[t.id], wo=woOf(t);
     return '<tr '+rowClick("go('"+taskUrl(t)+"')","Open "+t.num)+(on?' aria-selected="true"':'')+'>'+
@@ -128,11 +131,10 @@ function backlogTab(){
      tile("Ready to send",ready,"certified and unblocked")+
      tile("Waiting on you",drafts+toAccept,drafts+" to certify \u00b7 "+toAccept+" to accept",(drafts+toAccept)?"var(--st-approval)":null)+
      tile("In work orders",inwo,"sent to an agent or a workflow")+
-     '<button class="stat click" onclick="go(\''+workHash("orders")+'\')" aria-label="Open the work orders with a live run"><span class="k">Live now</span><span class="v">'+live.length+'</span>'+
+     '<button class="stat click" onclick="go(\''+workHash("orders")+'\')" aria-label="Open the work orders with a live run"><span class="k">Live work orders</span><span class="v">'+live.length+'</span>'+
       '<span class="s">work orders with a live run'+(parked?' \u00b7 '+parked+' parked on a person':'')+'</span></button></div>'+
    banner+
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Backlog</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Only a ready work item can be selected and sent.</p></div>'+
+   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Backlog</h3></div>'+
    '<div class="sp">'+(nsel?'<span class="b b-q">'+nsel+' selected</span><button class="btn sm" onclick="S.tsel={};render()">Clear</button>':'')+
      '<span class="chips" role="group" aria-label="View"'+fut("dependencies")+'><button class="btn sm'+(S.tkView!=="graph"?' sel':'')+'" aria-pressed="'+(S.tkView!=="graph")+'" onclick="tkView(\'list\')">List</button><button class="btn sm'+(S.tkView==="graph"?' sel':'')+'" aria-pressed="'+(S.tkView==="graph")+'" onclick="tkView(\'graph\')">Graph</button></span></div></div>'+
    (S.tkView==="graph"?tkGraph(rows):'<div class="tw"><table><thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th>Labels</th><th>Status</th><th>Blocked by</th><th>Owner</th><th>Readiness</th><th>Work order</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>')+
@@ -204,7 +206,7 @@ function findingsTab(){
      tile("At stake",usd(fmt2(total)),(total/spendN*100).toFixed(1)+'% of '+usd(fmt2(spendN))+' this month')+
      tile("Findings",FINDINGS.length,FINDINGS.length-picked+' open \u00b7 '+picked+' in work')+
      tile("Evidence","every one","opens to the runs it cites")+
-     tile("Basis","measured","minus the counterfactual, at the price each call paid")+'</div>'+
+     tile("Basis","measured","measured cost minus the estimated cost without the issue, at the price each call paid")+'</div>'+
    '<div class="grid" style="gap:10px">'+cards+'</div>'+
    '<div class="note" style="margin-top:14px">A finding becomes work when a person picks it up: Create work item opens a backlog item with the finding as its source and a drafted definition of done. Fix records the change directly when no agent needs to do it.</div>';
 }
@@ -341,7 +343,7 @@ function resolveEnvelope(slug,brief,opt){
   var left=M.budget.volatileTok, ranked=volC.filter(function(f){return (f.score||0)>0;}).length;
   volC.forEach(function(f,i){
     if(!(f.score>0)){ f.reason="below_relevance_floor"; f.why="relevance 0 for this brief"; cut.push(f); return; }
-    if(f.tok>left){ f.reason="over_budget"; f.why="ranked "+(i+1)+" of "+ranked+" for this brief, relevance "+f.score+". "+tokn(f.tok)+" tok did not fit in the "+tokn(left)+" left"; cut.push(f); return; }
+    if(f.tok>left){ f.reason="over_budget"; f.why="rank "+(i+1)+" of "+ranked+" · needs "+tokn(f.tok)+" tok, "+tokn(left)+" left"; cut.push(f); return; }
     left-=f.tok; sel.push(f);});
   /* the agent definition's instructions */
   var def=defDoc(defSlug(a)).doc||{}, ins=def.instructions&&def.instructions.body;
@@ -457,7 +459,7 @@ function woRunsPanel(w,wf){
     return '<tr'+(R?' class="click" onclick="go(\''+wsBase(w.ws)+'/runs/'+h(x.run)+'\')"':'')+'>'+
      '<td>'+(R?'<a class="mono" href="'+wsBase(w.ws)+'/runs/'+h(x.run)+'" onclick="event.stopPropagation()">'+h(x.run)+'</a>':'<span class="mono">'+h(x.run)+'</span>')+
        (R&&R.taskTitle?'<div class="dim" style="font-size:11.5px">'+h(R.taskTitle)+'</div>':'')+'</td>'+
-     '<td>'+(st?h(st.role)+(x.returned?' <span class="dim">returned</span>':''):'<span class="dim">—</span>')+'</td>'+
+     '<td>'+(st?h(st.role)+(x.returned?' <span class="dim">sent back</span>':''):'<span class="dim">—</span>')+'</td>'+
      '<td>'+(a?agentCard(a,{layout:"list",sub:"",sz:22,link:true,onclick:"event.stopPropagation()"}):st?'<span class="mono" style="font-size:12px">'+h(String(st.agent).split(".").pop())+'</span>':'')+'</td>'+
      '<td>'+(R?statusBadge(runStatus(R)):'<span class="b '+(x.state==="live"?'b-allowed':'b-q')+'"><span class="d"></span>'+h(x.state)+'</span>')+'</td>'+
      '<td>'+(R?tierBadge(R.tier):'<span class="dim">—</span>')+'</td>'+
@@ -894,7 +896,7 @@ function stgCompilerTab(w){
   return '<div class="panel pad" style="margin-bottom:14px"><div class="stg-pv">'+
    '<div class="field" style="margin:0"><label for="pvSel">Agent</label><select id="pvSel" onchange="pvAgent(this.value)">'+L.map(function(x){
      return '<option value="'+h(x.slug)+'"'+(x.slug===S.pv.agent?' selected':'')+'>'+h(x.a.name)+' · '+h(x.a.harnessLabel)+'</option>';}).join("")+'</select>'+
-    '<div class="hint">'+tierBadge(A.a.tier)+' works in <span class="mono">'+h(A.repo)+'</span></div></div>'+
+    '<div class="hint">Tier: '+tierBadge(A.a.tier)+' · Repository: <span class="mono">'+h(A.repo)+'</span></div></div>'+
    '<div class="field" style="margin:0"><label for="pvText">Brief</label><textarea id="pvText" rows="2" oninput="pvInput(this.value)" placeholder="What a work order would send">'+h(pvPrompt())+'</textarea>'+
     '<div class="hint">Sends nothing. Nothing here reaches an agent.</div></div></div>'+
    (chips.length?'<div class="kf" role="group" aria-label="Pick a brief" style="padding:10px 0 0;border:0">'+chips.map(function(p){
@@ -944,7 +946,7 @@ function pSteering(){
     :t==="assignments"?stgAssignmentsTab(w):t==="compiler"?stgCompilerTab(w):t==="sources"?stgSourcesTab(w):stgProposalsTab(w,t);
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Steering</h1>'+
    '<p>Every source that can steer an agent here, and the frames it emits.</p></div>'+
-   '<div class="acts">'+govChip(w)+(SK_ON[w.slug]?'<button class="btn sm gov-chip" onclick="openDialog(\'skcfg\')" title="How skills resolve in this workspace">Skills: <span class="mono">'+h(SK_CFG.ver)+'</span></button>':'')+
+   '<div class="acts">'+govChip(w)+(SK_ON[w.slug]?'<button class="btn sm gov-chip" onclick="openDialog(\'skcfg\')" title="How skills resolve in this workspace, settings version '+h(SK_CFG.ver)+'">Skills settings</button>':'')+
     '<button class="btn" onclick="wzOpen(\'import\')">Import Markdown</button>'+newSourceBtn(t!=="prs")+'</div></div>'+tabs+body;
 }
 DLG_EXT.newsrc=function(){
@@ -1108,7 +1110,7 @@ function spendView(v){ go(spendHref2(S.spendBy,null,v)); }
 function spendPartGo(x){ go("#/"+ORG.slug+"/"+S.ws+"/spend/optimization"+(x&&x!=="waste"?"?part="+x:"")); }
 /* The month to date by day, from the daily rollup. Seeded from the month's total so it never moves. */
 function spendDays(total){
-  var n=24, seed=11, w=[], s=0, i;
+  var n=11, seed=11, w=[], s=0, i;
   function rnd(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;}
   for(i=0;i<n;i++){ var d=new Date(Date.UTC(2026,8,i+1)).getUTCDay(), x=(d===0||d===6?0.45:1)*(0.8+rnd()*0.45); w.push(x); s+=x; }
   return w.map(function(x,i){return {day:i+1,usd:total*x/s};});
@@ -1118,9 +1120,9 @@ function spendDayChart(total){
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>September by day</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">From the daily rollup, rebuilt from frames. Weekends run lighter.</p></div>'+
    '<span class="sp mono dim" style="font-size:11px">'+fmt$(total)+' to date</span></div>'+
-   '<div class="panel-b"><div class="sp-days" role="img" aria-label="Spend by day, 1 to 24 September">'+D.map(function(d){
+   '<div class="panel-b"><div class="sp-days" role="img" aria-label="Spend by day, 1 to 11 September">'+D.map(function(d){
      return '<i style="height:'+Math.max(4,Math.round(d.usd/mx*100))+'%"'+tipAttr("Sep "+d.day+" · "+fmt$(d.usd))+'></i>';}).join("")+'</div>'+
-   '<div class="sp-days-x"><span>Sep 1</span><span>Sep 12</span><span>Sep 24</span></div></div></div>';
+   '<div class="sp-days-x"><span>Sep 1</span><span>Sep 6</span><span>Sep 11</span></div></div></div>';
 }
 /* ---- the grouped table ---- */
 function spendRows(by){
@@ -1261,7 +1263,7 @@ function spendOptimization(){
        '<button class="btn sm" onclick="act(\'Rule shared with '+h(x.name)+'. It quotes the turns it was read from.\')">Share with '+h(x.name.split(" ")[0])+'</button></div></article>';}).join("")+'</div>'
      :'<div class="panel-b"><p class="muted" style="margin:0">No prompt habit stands out in this workspace’s recorded turns.</p></div>')+'</div>';
   var part=S.spendPart||"waste";
-  var seg='<div class="kf stg-seg" role="group" aria-label="Optimization">'+[["waste","Unproductive spend"],["tokens","Tokens and cache"],["agents","Agents",recs.length],["habits","Operator habits",habits.length]].map(function(x){
+  var seg='<div class="kf stg-seg" role="group" aria-label="Optimization">'+[["waste","Unproductive spend"],["tokens","Tokens and cache"],["agents","Recommendations",recs.length],["habits","Operator habits",habits.length]].map(function(x){
     return '<button class="btn sm" aria-pressed="'+(part===x[0])+'" onclick="spendPartGo(\''+x[0]+'\')">'+h(x[1])+(x[2]!=null?' <span class="dim">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
   return seg+(part==="tokens"?spendTokens(WT):part==="agents"?recHtml:part==="habits"?habHtml:spendWaste("body"));
 }
@@ -1279,10 +1281,10 @@ function pSpend(){
   var tabs='<div class="tabs" role="tablist">'+[["overview","Overview"],["budgets","Budgets",SPEND.budgets.length],["optimization","Optimization"]].map(function(x){
     return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="spendView(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(spendMonthTotal()))+'</span><span class="s">'+basisChip("gateway_observed")+' + '+basisChip("client_attested")+' · USD</span></div>'+
+   '<div class="stat"><span class="k">Organization spend</span><span class="v">'+usd(fmt2(spendMonthTotal()))+'</span><span class="s">'+basisChip("gateway_observed")+' + '+basisChip("client_attested")+' · USD</span></div>'+
    '<div class="stat"><span class="k">Tokens</span><span class="v">'+tokn(WT.total)+'</span><span class="s">'+per(WT.cacheRate)+' served from cache</span></div>'+
    '<div class="stat"><span class="k">Observed by the gateway</span><span class="v">'+per(WT.observed)+'</span><span class="s">of tokens counted by the proxy</span></div>'+
-   '<div class="stat click" onclick="spendView(\'optimization\')"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s">'+wasteShareText()+' of spend · Optimization</span></div></div>';
+   '<div class="stat click" onclick="spendView(\'optimization\')"><span class="k">Unproductive spend</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s">'+wasteShareText()+' of spend · Optimization</span></div></div>';
   var body=t==="budgets"?spendBudgets():t==="optimization"?spendOptimization():spendOverview();
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Spend</h1>'+
    '<p>What the tokens bought, with the basis on every number.</p></div>'+
@@ -1300,9 +1302,9 @@ function agentsTiles(w,list){
   var b=SPEND.budgets.filter(function(x){return x.scope==="workspace · "+w.slug;})[0], used=b?n$(b.used)/n$(b.limit):null;
   var held=MANDATES.filter(function(m){var a=agent(m.agent);return m.status==="active"&&a&&a.ws===w.slug;});
   return '<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat click" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/work/orders\')"><span class="k">Live now</span><span class="v">'+live.length+'</span><span class="s">'+
+   '<div class="stat click" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/work/orders\')"><span class="k">Live runs</span><span class="v">'+live.length+'</span><span class="s">'+
      (parked.length?parked.length+' parked on a person · ':'')+list.length+' agents registered</span></div>'+
-   '<div class="stat click" onclick="apdToggle(true)"><span class="k">Waiting on you</span><span class="v">'+wait.length+'</span><span class="s">approval'+(wait.length===1?'':'s')+' in the drawer</span></div>'+
+   '<div class="stat click" onclick="apdToggle(true)"><span class="k">Waiting on you</span><span class="v">'+(wait.length+skWaiting(w))+'</span><span class="s">'+plural(wait.length,"approval","approvals")+' in the drawer'+(skWaiting(w)?' · '+plural(skWaiting(w),"question from an agent","questions from agents"):'')+'</span></div>'+
    '<div class="stat click" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/spend/budgets\')"><span class="k">Spend against budget</span><span class="v">'+(b?per(used):'—')+'</span><span class="s">'+
      (b?usd(b.used)+' of '+usd(b.limit)+' · '+h(b.mode)+' · '+h(b.period):'no workspace budget set')+'</span></div>'+
    '<div class="stat"><span class="k">Delegations held</span><span class="v">'+held.length+'</span><span class="s">'+
@@ -1359,7 +1361,7 @@ function permDelegation(a){
        '<dt>Granted by</dt><dd>'+h(grant)+', second approver '+h(m.second||"none")+'</dd>'+
        '<dt>Window</dt><dd>'+h(m.from)+' to '+h(m.to)+'</dd>'+
        '<dt>Effect</dt><dd class="mono" style="font-size:12px">'+h(m.effect)+'</dd>'+
-       '<dt>Limits</dt><dd>'+usd(m.perCall)+' a call · '+usd(m.perPeriod)+' '+h(m.period)+' · '+h(m.callsPerDay)+' calls a day</dd>'+
+       '<dt>Limits</dt><dd>Auto-approve limit '+usd(m.perCall)+' a call · '+usd(m.perPeriod)+' '+h(m.period)+' · '+h(m.callsPerDay)+' calls a day</dd>'+
        '<dt>Position</dt><dd>'+usd(m.used)+' settled, '+usd(m.reserved)+' reserved, <b>'+usd(m.remaining)+'</b> left'+bar+'</dd></dl>'+
       '<dl class="kv"><dt>Tools</dt><dd class="mono" style="font-size:12px">'+h(m.tools)+'</dd>'+
        '<dt>Counterparties</dt><dd>allow <span class="mono">'+h(m.allow)+'</span>, deny <span class="mono">'+h(m.deny)+'</span></dd>'+
@@ -1368,7 +1370,7 @@ function permDelegation(a){
       (on?'<div class="tw" style="margin-top:10px"><table data-lt="off"><thead><tr><th>When</th><th>Call</th><th class="num">Amount</th><th>State</th><th>External</th><th>Receipt</th></tr></thead><tbody>'+
         (m.ledger||[]).map(function(x){var sb={settled:"allowed",reserved:"approval",released:"denied"}[x.state]||"q";
           return '<tr><td class="mono" style="font-size:11.5px">'+h(x.when)+'</td><td class="mono" style="font-size:11.5px">'+h(x.call)+'</td><td class="num">'+usd(x.amount)+'</td>'+
-           '<td><span class="b b-'+sb+'"><span class="d"></span>'+h(x.state)+'</span></td><td class="mono dim" style="font-size:11px">'+h(x.ext)+'</td>'+
+           '<td><span class="b b-'+sb+'"><span class="d"></span>'+h(x.state==="released"&&x.why?"Released ("+x.why+")":x.state)+'</span></td><td class="mono dim" style="font-size:11px">'+h(x.ext)+'</td>'+
            '<td>'+(x.rcp?receiptLink(x.rcp):'<span class="dim">—</span>')+'</td></tr>';}).join("")+'</tbody></table></div>'
        :'<button class="lnk" style="font-size:12px;margin-top:8px" onclick="go(\''+base+'?delegation='+encodeURIComponent(m.id)+'\')">Show the ledger</button>')+
       '</div>';}).join("")+
