@@ -78,7 +78,6 @@ Both run the same code. A customer moves from one to the other by pointing its e
 
 - The hooks stay. They veto the harness's built-in tools (Bash, Edit, Write), deliver steering at session start, and record events. The gateway never sees those tools.
 - `tachod` fetches run tokens for the harness (`apiKeyHelper` for Claude Code) and holds no vendor key.
-- It syncs skills and agent files from the control plane (below).
 - It relays a stdio MCP server that must run on the laptop (below).
 
 ## Keys and the kill switch
@@ -113,7 +112,12 @@ The workspace already registers MCP servers in `mcp.mcp_servers`, with encrypted
 
 ### Importing what the harness has
 
-Enrollment reads the MCP servers already configured in the harness at user scope. It proposes each one into the workspace toolbelt, moves its credential into custody, and replaces the entry with the gateway's. It uses displace-and-restore, so `unenroll` puts every file back byte for byte.
+Enrollment reads the MCP servers already configured in the harness, in the user's config and in the repository. It proposes each one into the workspace toolbelt, moves its credential into custody, and replaces the entry with the gateway's:
+
+- **In the user's config,** enrollment edits the file directly, with displace-and-restore, so `unenroll` puts every file back byte for byte.
+- **In the repository** (`.mcp.json`, `.codex/config.toml`, `.cursor/mcp.json`, `.stella/mcp.toml`), Oxagen opens a pull request, the way a context record lands. The entry then reaches every checkout and every cloud session that clones the repository.
+
+A cloud session of Claude Code on the web loads the repository's `.mcp.json`, so its MCP calls reach the gateway once the gateway's domain is on the environment's network allowlist. Its model calls do not: Anthropic's infrastructure makes them with the user's subscription ([cloud sessions](https://code.claude.com/docs/en/claude-code-on-the-web)).
 
 ### Pinning
 
@@ -122,7 +126,7 @@ On a managed device the harness reaches MCP servers through the gateway only:
 - **Claude Code:** `managed-mcp.json` holds the gateway entries, with `allowManagedMcpServersOnly: true`. The allowlist matches by `serverUrl` ([managed MCP](https://code.claude.com/docs/en/managed-mcp)).
 - **Codex:** `requirements.toml` holds an `[mcp_servers.<id>]` entry per server, with a `url` identity, and `features.apps = false` ([managed configuration](https://learn.chatgpt.com/docs/enterprise/managed-configuration)).
 - **Cursor:** the Enterprise MCP Allowlist in Cursor's team settings allows the gateway's URLs only. Oxagen cannot write it. The admin guide gives the pattern ([model and integration management](https://cursor.com/docs/enterprise/model-and-integration-management)).
-- **Stella:** needs a user-scope and managed-scope server list first (`stella` #6564).
+- **Stella:** the gateway entries reach `.stella/mcp.toml` through a pull request. Stella skips that file in an untrusted checkout, and nothing lets an admin pin its server set until it gains a managed server list (`stella` #6564).
 - **Claude Desktop:** its enterprise policy is an on/off switch for local servers. Oxagen's entry is the one it writes today.
 
 ### Laptop-only servers
@@ -142,8 +146,8 @@ The vendor runs these tools, so no gateway sees them: claude.ai connectors in Cl
 |---|---|
 | Context records | Session start, as today. The gateway adds the per-prompt selection (#3296): it sees every model call, so it can add the `may` and `info` records that fit each turn |
 | Style preferences | A context record of kind `preference`, delivered the same way, with its own place in the app |
-| Skills | `tachod` syncs published skills into each harness's user-scope skills directory (ADR-093 §6). No file is written into the repository |
-| Agent profiles | `tachod` writes the per-harness agent files from each agent definition (ADR-101:82-84). The definition's `instructions` go out at session start |
+| Skills | A pull request puts each published skill in the directory each harness reads (`.claude/skills/` and the others), as `propose_skill` already writes `.oxagen/skills/` |
+| Agent profiles | The pull request that commits an agent definition also writes the per-harness agent files (`.claude/agents/` and the others), as `mission-control-spec.md` §6.2 specifies and ADR-101:82-84 leaves unbuilt. The definition's `instructions` go out at session start |
 | Memories | `tachod` reads each harness's memory files, under the workspace's retention policy, and imports them into the agent's memory store. Recall goes out at session start and per prompt through the gateway |
 
 The in-app agent is Oxagen's own and is not part of this. #4310 takes the workspace toolbelt and rules off it.
@@ -212,7 +216,7 @@ It keeps ADR-078 §4. There is still one tool builder, and it is the server's.
 - Killing a run aborts its model call in flight and refuses its next one, whatever its token's expiry.
 - A run that lasts several days keeps working across token refreshes, and through a control plane outage.
 - A budget refuses the next call once the run's observed spend reaches it.
-- Skills, agent files, and context records published in Oxagen appear in each harness without a commit to the repository.
+- Skills, agent files, and context records published in Oxagen reach each harness through a pull request to the repository.
 - A Claude Code run on a laptop sends a question to a Codex run in CI, and the Codex run's record shows the model request that carried it.
 - An agent with the grant starts a run of another agent on another runtime, and the parent receives the child's outcome as a message.
 - A customer-hosted gateway serves the same run with keys only in the customer's KMS, and no prompt body reaches Oxagen.
