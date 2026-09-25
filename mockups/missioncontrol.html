@@ -10194,7 +10194,7 @@ var PLANE_MODES=[
  ["dedicated","Dedicated","Your own database cluster and object-storage bucket. Identity, IAM, billing and the price book stay in shared infrastructure."],
  ["firewall","Behind the firewall","The same containers, as a signed bundle you run. Outbound only, and optional. Fully air-gapped is supported, not degraded."]];
 var FW_OUTBOUND=[
- ["GitHub Enterprise Server · github.a-intel.internal","repo binding, pull requests, checks, code graph","in use","allowed"],
+ ["GitHub Enterprise Server · github.a-intel.internal","repository link, pull requests, checks, code graph","in use","allowed"],
  ["Model providers","none, every tier resolves inside the network","not used","q"],
  ["Voyage AI","none, embeddings served in-firewall","not used","q"],
  ["Signed usage report · meter.oxagen.com","licence metering: run counts and retained GB, no content","weekly","allowed"],
@@ -11056,7 +11056,7 @@ function skTrOperator(ans){
   if(ans) return '<div class="sx-tr"><div class="sx-msg gw"><div class="mh"><b>Answered</b>'+skBadge("allowed","closed")+'<span class="tm">09:17:38Z</span></div>'+
    '<p>'+h(PEOPLE[SKRUN.op].name)+' chose <b>'+(ans==="link"?"link to core-platform":"create the workspace edge")+'</b>. '+
    'Receipt <span class="mono">'+(ans==="link"?"rcp_01K6QW44":"rcp_01K6QW45")+'</span>, waited 3m 36s.</p>'+
-   '<p style="font-size:12px;color:var(--muted)">Binding a repository is a governed action, so this answer went through the same path as approving a payment: '+
+   '<p style="font-size:12px;color:var(--muted)">Linking a repository is a governed action, so this answer went through the same path as approving a payment: '+
    'a rule, a grant, a receipt, and a name that stays on it.</p></div></div>';
   return '<div class="sx-tr">'+
    '<div class="sx-msg gw"><div class="mh"><b>control.interject</b><span class="sx-chip held">the loop is held</span><span class="tm">09:14:02Z</span></div>'+
@@ -11365,7 +11365,7 @@ SCENARIOS["sixty-seconds-to-governed"]={title:"Sixty seconds to governed", ws:"c
    note:"Nothing is written before that frame: no agent, no run, no pull request. When it lands, Oxagen unlocks here and the scenario stays on this step.",
    route:function(o){return {page:"welcome",step:"run",org:o,ws:"core-platform"};},
    setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}}},
-  {say:"The installer read the git remote, so binding the main repo is one click: the GitHub App, pull requests, checks and the code graph.",
+  {say:"The installer read the git remote, so linking the main repo is one click: the GitHub App, pull requests, checks and the code graph.",
    note:"Skip for now and the workspace stays provisional for "+OB_PROVISIONAL_DAYS+" days. Runs record and spend counts; Steering records and agent definitions stay off.",
    route:function(o){return {page:"welcome",step:"run",org:o,ws:"core-platform"};},
    setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}S.reg.repo=null;obScnUnprov();},
@@ -12041,7 +12041,7 @@ function dialog(){
      '<div class="field"><label for="nw-main">Main repository</label><select id="nw-main"><option>a-intel/warehouse</option><option>a-intel/data-platform</option></select>'+
      '<div class="hint">Required at creation. A workspace without a main repo cannot exist.</div></div>'+
      '<div class="field"><label for="nw-branch">Production branch</label><select id="nw-branch"><option value="main">main (GitHub’s default, suggested)</option><option value="release">release</option><option value="production">production</option></select>'+
-     '<div class="hint">The only branch whose commits update the code graph. If GitHub’s default changes later you are prompted; the binding never moves on its own.</div></div>'+
+     '<div class="hint">The only branch whose commits update the code graph. If GitHub’s default changes later you are prompted; the setting never moves on its own.</div></div>'+
      '<div class="field"><label for="nw-gov">Governance mode</label><select id="nw-gov"><option value="team">team: a code-owner review is required</option><option value="solo">solo: the author may merge</option><option value="regulated">regulated: a named approver and a ledger entry</option></select></div>'+
      '<div class="field"><label for="nw-ret">Retention mode</label><select id="nw-ret"><option value="content_exact">Exact content: keep prompts and tool bodies in full</option><option value="digest_only">Digest only: recorded as a completeness gap</option></select></div>'+
      '<div class="note">Until the GitHub App links the main repo the workspace is provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</div>',
@@ -12753,7 +12753,7 @@ function wsArchive(slug){var i=-1;WS.forEach(function(w,ix){if(w.slug===slug)i=i
 function wsArchiveDlg(){
   var w=S.dlg==="archivews"?wsById(S.dlgArg):null; if(!w) return {t:"Archive workspace",w:false,b:"",f:""};
   var n=AGENTS.filter(function(a){return a.ws===w.slug;}).length;
-  return {t:"Archive workspace",s:w.name,w:false,b:'<p style="font-size:13px">Archiving freezes <b>'+h(w.name)+'</b>: runs, frames, records and spend stay readable forever; agents cannot start, tools cannot be granted, and the main repo binding is released.</p>'+
+  return {t:"Archive workspace",s:w.name,w:false,b:'<p style="font-size:13px">Archiving freezes <b>'+h(w.name)+'</b>: runs, frames, records and spend stay readable forever; agents cannot start, tools cannot be granted, and the main repo link is released.</p>'+
    (n?'<div class="warn">'+n+' agent'+(n>1?'s are':' is')+' registered here. Retire or move them first.</div>':'<div class="note">No agents here. Archiving is an org-owner action, recorded as a security event.</div>'),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n?' disabled':'')+' onclick="wsArchive(\''+h(w.slug)+'\')">Archive</button>'};
 }
@@ -13445,7 +13445,7 @@ function obRepoPanel(){
    '<div class="row" style="margin-bottom:6px"><span class="b b-q mono">git@github.com:'+h(w.main)+'.git</span></div>'+
    '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Read from the git remote of <span class="mono">~/src/platform</span>, the directory the installer ran in. Production branch <span class="mono">'+h(w.branch)+'</span>.</p>'+
    '<button class="btn'+(r.first?"":" primary")+'" onclick="obBind()">'+OB_ICON.github+'<span>Link '+h(w.main)+' as the main repo</span></button>'+
-   '<p class="muted" style="font-size:12.5px;margin:12px 0 0">One click installs the GitHub App on <span class="mono">'+h(w.main)+'</span>: repo binding, pull requests, checks, merge handling and the code graph.</p>'+
+   '<p class="muted" style="font-size:12.5px;margin:12px 0 0">One click installs the GitHub App on <span class="mono">'+h(w.main)+'</span>: repository link, pull requests, checks, merge handling and the code graph.</p>'+
    '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> and '+h(w.slug)+' stays <b>provisional for '+plural(OB_PROVISIONAL_DAYS,"day")+'</b>. Runs record and spend counts, but Steering records and agent definitions stay off until a main repo is linked.</p></div></div>';
 }
 function pWelcome(r){
