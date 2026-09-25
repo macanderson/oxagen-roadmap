@@ -4,8 +4,8 @@
 |---|---|
 | Route | `#/a-intel/core-platform/work` (app `/{org}/{ws}/work`). Old routes that land here: the workspace root `#/a-intel/core-platform` (app `/{org}/{ws}`, 307), and the mockup's `#/:org/:ws/tasks` and `#/:org/:ws/tasks/tasks` (rewritten in place) |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: D1 (Work is the primary surface), D2 (a run is a child of one work order), D3 (the Fleet page retires and its waiting count moves here), D9 (a finding becomes a work item), D16 (Approvals is a drawer), D17 (future-only marks); Vocabulary › Work; Work › Objects, Rules and Shipped today. `docs/fleet-operations-ia.md` › Work. `docs/tasks-spec.md` §3, §6.2 (statuses), §7 (people), §8.6 (readiness), §9.1 to §9.5 (selecting, the send menu, the work order screen, mentions, what sending records) |
-| Design | `mockups/src/wedge.js` → `pWork()`, `backlogTab()`, `wiLogo()`; `mockups/src/engine.js` → `dispatchButton()`, `dispatchMenu()`, `dspList()`, `tkSelectable()`, `tkWhyNot()`, `readyBadge()`, `tkPerson()`, `woOpen()`, `woDraftPrompt()`, `mentCands()`, `mentRefs()`, `DLG_EXT.wo`, `woSend()`; data `mockups/fixtures/tasks.json`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| Spec | `docs/work-graph-spec.md` §5 (readiness on the graph), §6 (queued sends), §7 (sends and targets), §11.1; `docs/fleet-operations-wedge.md`: D1 (Work is the primary surface), D2 (a run is a child of one work order), D3 (the Fleet page retires and its waiting count moves here), D9 (a finding becomes a work item), D16 (Approvals is a drawer), D17 (future-only marks); Vocabulary › Work; Work › Objects, Rules and Shipped today. `docs/fleet-operations-ia.md` › Work. `docs/tasks-spec.md` §3, §6.2 (statuses), §7 (people), §8.6 (readiness), §9.1 to §9.5 (selecting, the send menu, the work order screen, mentions, what sending records) |
+| Design | `mockups/src/wedge.js` → `pWork()`, `backlogTab()`, `wiLogo()`; `mockups/src/engine.js` → `tkBlockedByCell()`, `tkReadySub()`, `tkLayers()`, `tkGraph()`, `tkGraphCard()`, `woQueued()`, `woBlockedLine()`, `woExpiresField()`; `mockups/src/engine.js` → `dispatchButton()`, `dispatchMenu()`, `dspList()`, `tkSelectable()`, `tkWhyNot()`, `readyBadge()`, `tkPerson()`, `woOpen()`, `woDraftPrompt()`, `mentCands()`, `mentRefs()`, `DLG_EXT.wo`, `woSend()`; data `mockups/fixtures/tasks.json`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
 | Storybook | `Oxagen / Work / Backlog`: Loaded, Loaded · mobile, Loaded · future-only fields marked |
 | Audit | `work-backlog.audit-prompt.md` |
@@ -26,7 +26,7 @@ A work item arrives from a connected issue provider, from a finding a person pic
 
 | Tile | Value on the demo record | Caption |
 |---|---|---|
-| Ready to send | 3 | “certified and open” |
+| Ready to send | 3 | “certified and unblocked”. A ready work item the graph blocks is not counted |
 | Waiting on you | 8, in the approval colour while above zero | “7 to certify · 1 to accept” |
 | In work orders | 3 | “sent to an agent or a workflow” |
 | Live now | 7 | “work orders with a live run · 6 parked on a person”. The parked clause appears only while a run is parked |
@@ -45,14 +45,17 @@ Columns, in order:
 | Work item | The provider’s logo as an SVG (or the Oxagen mark, titled “Written in Oxagen”, for an item written in Oxagen), the number in mono, and the subject under it |
 | Labels | Colour chips in the colours the Intake dialog sets |
 | Status | Dot and word: Open, In review, Blocked, Closed |
+| Blocked by | Each blocker’s number in mono as a link with its state dot (open, done, or closed without done), “none” with no blocker, and “closed as Won’t do” beside a blocker that closed without done. The provider’s Blocked status stays in the Status column, and the two are never folded into one. Outlined as future-only |
 | Owner | The mapped member with avatar. An account that is not mapped reads as its provider handle with the provider’s logo and a `not mapped`, `bot` or `requester` badge |
-| Readiness | `drafting`, `draft`, `changed`, `ready`, `in a work order`, `accepted`, `closed` |
+| Readiness | `drafting`, `draft`, `changed`, `ready`, `in a work order`, `accepted`, `closed`. A `ready` item with an open blocker reads “blocked by #612, #618” under the badge, and one held by a queued work order reads “queued in wo_01K6TB2X” |
 | Work order | The work order’s id as a link, with `live` beside it while one of its runs is live, or a dash. Outlined as future-only |
 | Updated | The provider’s update time, in mono |
 
 The demo record holds 16 rows: #482 (`in a work order`, under `wo_01K5RS7M4N`, live), WI-14 (written in Oxagen from finding `fnd_01K5RT2A`, `draft`), #612, PLAT-231 and #618 (`ready`), #633, PLAT-240, #621 and #604 (`draft`), PLAT-244 (`drafting`), #590 (`changed`), PLAT-219 (`draft`, Blocked), #599 and #587 (`in a work order`), #571 (`accepted`) and PLAT-201 (`closed`).
 
-**Selection.** A checkbox is enabled only when the readiness is `ready` and the status category is `open`. A disabled checkbox carries its reason as its title:
+**List and Graph.** Two chips in the panel header (`aria-pressed`) switch the body. Graph draws the open work items by layer (`docs/work-graph-spec.md` §3): one column per layer, unblocked items in layer 0, each item a card with its logo, number, subject, readiness badge and a checkbox under the same rule as the list. A line joins each blocker to the item it blocks, in the rule colour, and the lines into a selected item in the approval colour. Gold appears nowhere in the drawing and no node is called a frame. A card opens the item. Under the drawing: “Unblocked tasks sit in layer 0. A line joins each blocker to the task it blocks.” On a phone the Graph is a list by layer with a “Layer N” heading between the groups. The demo record draws #640 in layer 1 after #612 and #618, and #644 in layer 1 after #633. Outlined as future-only.
+
+**Selection.** A checkbox is enabled when the readiness is `ready` and the status category is `open`, whether or not the graph blocks the item, unless a queued work order already holds it. A disabled checkbox carries its reason as its title:
 
 | Why | Title |
 |---|---|
@@ -61,6 +64,7 @@ The demo record holds 16 rows: #482 (`in a work order`, under `wo_01K5RS7M4N`, l
 | `draft` | “Its definition of done is a draft. Certify it first.” |
 | `changed` | “The work item changed after it was certified. Certify it again first.” |
 | `in a work order` | “Already in a work order.” |
+| `ready`, in a queued work order | “Already queued in wo_01K6TB2X. Withdraw it to send elsewhere.” |
 | `accepted` | “Accepted and done.” |
 | `closed` | “Closed upstream.” |
 
@@ -75,19 +79,20 @@ A selected row is tinted (`aria-selected`). A row click opens the work item (`wo
 - **Agents you operate**: every agent in the workspace whose operator is the signed-in person. Each row (`role=menuitem`) shows the harness mark as an SVG, the avatar, the name, “<harness> · <host>” (“no host” when none) and the tier badge. The seven agents the demo seeds come first (Bug fixer, Validator, Documenter, Architect, Stella CI, Release manager, Triage), then the rest by name. Twelve are listed, then “16 more. Type to narrow.” With no match: “No agent you operate matches.”
 - **Workflows**: every published workflow, each with its stages’ harness marks in order and “4 stages then you”. A workflow still in a pull request is not listed. With no match: “No published workflow matches.”
 - An agent somebody else operates is never listed (the demo’s Docs writer, operated by Priya Natarajan). Picking a row opens the work order dialog.
+- The design adds a checkbox on each row and **Continue** under the lists, so a send can name several targets and make one work order per target (`docs/work-graph-spec.md` §7). The mockup does not draw the checkboxes; its fixture carries a finished two-target send instead (`work-orders.md`).
 
 ### The work order dialog (`wo`)
 
 Title “Work order”, subtitle “2 work items to Bug fixer” (or the workflow’s name). Six sections, in order.
 
-1. **Work items.** One chip per work item: the provider logo, the number, the subject, and a remove button (`aria-label` “Remove <number>”) while more than one remains. Hint “Each work item is tagged to this work order, and each shows it on its own page.”
+1. **Work items.** One chip per work item: the provider logo, the number, the subject, “blocked by #612, #618” on an item the graph blocks, and a remove button (`aria-label` “Remove <number>”) while more than one remains. Hint “Each work item is tagged to this work order, and each shows it on its own page.” When any item is blocked, one more line: “1 of 1 task is blocked. Oxagen sends this work order when it is unblocked, and expires it on 2026-09-25 if it is not.”
 2. **Sent to.** A select (`aria-label` “Sent to”) of the agents you operate, each “Name (Harness)”, and a “Workflows” group of the published workflows. Hint “Agents where you are the registered operator, and the published workflows made of them.” Under it, the agent card (harness mark, avatar, name, “Claude Code on mbell-mbp-16”, tier badge, `operator: you`), or the workflow’s stage chain ending in **Accept** by You.
 3. **Definition of done.** “8 items from 2 work items. Certified items are read-only here.” One numbered row per distinct item: its text, its tag chip, one chip per work item it came from (“#612”, “PLAT-231”), and in a workflow the role of the stage that owns it. Two work items that ask for the same thing produce one row with two chips. An input (“Add an item for this work order”) with **Add item**. Enter adds too. Hint “An item you add here is certified by your send, and belongs to this work order only.” An added item carries the chip “work order”.
 4. **Prompt.** The label reads `drafted by oxagen.assistant`, and `edited by you` from the first keystroke. **Draft it again** replaces the text with a new draft. A monospace textarea (`aria-label` “Prompt”, 16 rows) holds the drafted brief: “You have a work order from Marcus Bell, your operator, in Core platform.”, the work items with their links, “Definition of done. Each item was certified by a person.” and the numbered items with their tags and source numbers, the workflow’s stages and “Hand off with hand_off_work_order when your items are claimed.” when there is one, the repositories and the branch (“You may change a-intel/platform. Work on the branch wo/s2m4qf. Open one pull request. Never push to a production branch and never merge.”), the `claim_dod_item` instruction, and “Follow @ctx.release.never-merge.” Hint “Type @ to reference a Steering record or an agent profile. A record enters the brief as its statement. A profile enters as the agent’s name, harness and job, and grants it nothing.” **References** lists every mention: a Steering record with its kind glyph, its id and “188 tok”; an agent profile with its harness mark, avatar, name and “profile”; an unresolved one as `@<id>` and “not found”. A mention still being typed is not flagged. With none: “No references yet. Type @ to add a Steering record or an agent profile.”
 5. **Repositories.** “The repositories this work order may change. Branches and pull requests only.” One checkbox per main and linked repository, pre-checked from the work items: “a-intel/platform” with “main repo · production branch main”, and each linked repository with “linked repo · production branch <branch>”. One outside the agent’s toolbelt is disabled, with “· outside Bug fixer’s toolbelt”. Then the gold-edged checkbox **I confirm the repositories**: “Bug fixer may push branches and open pull requests on a-intel/platform. Nothing is merged without a person.” Changing a repository or the target clears the confirmation.
-6. **Spend cap.** A USD field (`aria-label` “Spend cap in US dollars”), default 12.00. Hint “USD for the whole work order, every stage and every return. Each run also stays inside its own agent’s budget of $2.00 per run.” When any stage runs on Cursor, a warning: “Cursor is not metered. Cursor’s model calls do not pass through the Oxagen gateway, so the cap counts every stage but that one.”
+6. **Spend cap.** A USD field (`aria-label` “Spend cap in US dollars”), default 12.00. Hint “USD for the whole work order, every stage and every return. Each run also stays inside its own agent’s budget of $2.00 per run.” When any stage runs on Cursor, a warning: “Cursor is not metered. Cursor’s model calls do not pass through the Oxagen gateway, so the cap counts every stage but that one.” When any item is blocked, **Expires** follows: a date (`aria-label` “Expires”), default 14 days from the send and at most 90, with the hint “A queued work order that is still waiting on this date expires, and its tasks go back to ready.”
 
-Footer: “needs `work_order.send` on core-platform”, **Cancel**, **Send to Bug fixer** (gold). Send stays disabled until the repositories are confirmed, at least one repository is checked, and the brief is not empty.
+Footer: “needs `work_order.send` on core-platform”, **Cancel**, **Send to Bug fixer** (gold), or **Queue until unblocked** (gold) when any item is blocked. Send stays disabled until the repositories are confirmed, at least one repository is checked, and the brief is not empty.
 
 **The mention list.** Typing `@` in the brief opens a list under the box (`role=listbox`, `aria-label` “Mentions”; each entry `role=option`): Steering records (kind glyph, `@<id>`, the statement cut at 70 characters, “rule · 188 tok”) and the workspace’s agent profiles (harness mark, avatar, `@<key>`, name, “Claude Code · you operate it”). Enter or Tab inserts the first entry, a click inserts any, and Escape closes the list. With no match: “Nothing matches @<text>.” Typing never moves the caret.
 
@@ -122,6 +127,9 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | Spend cap and the per-run budget hint | `S.wo.cap`, `AGENTS[].budget` | `tasks.work_orders` cap; a per-run budget | `set_spend_budget` sets an organization or workspace ceiling only (`packages/oxagen/src/contracts/billing.budget.set.ts:55`) | ❌ |
 | Sending | `woSend()` | `send_work_order`, a governed action | none | ❌ |
 | Waiting count on the Work nav item | `tkWaiting()` + `woWaiting()` | the same rollups | none | ❌ |
+| Blocked by column, the reason under a ready badge, and the layers of the Graph | `TASKS[].blockedBy`, `tkLayers()` | `tasks.task_dependencies`; `list_tasks` `blockedBy`; `get_work_graph` (`work-graph-spec.md` §9, §10) | none. No connector reads a link between records | ❌ |
+| Queued send: the blocked line, **Expires**, **Queue until unblocked** | `woQueued()`, `S.wo.expires` | `send_work_order` with `when: unblocked` and `expiresAt` (§6) | none | ❌ |
+| A queued work order holding an item | `TASKS[].queued` | `tasks.work_orders` in state `queued` (§6.1) | none | ❌ |
 
 ## Future-only fields
 
@@ -145,6 +153,10 @@ The mockup marks nothing else on this tab, but every Work field here is future-o
 - Every tile is a rollup of the rows: Ready to send counts `ready` rows, In work orders counts `in a work order` rows, and Waiting on you adds the drafts and changed certifications to the work orders waiting on you. The Work nav count is the same sum.
 - `node tools/check-tasks.mjs` walks flows 4 (selecting and the send menu), 5 (the work order and sending) and 6 (a workflow as the target) on this tab.
 
+- A work item the graph blocks can be selected, and its work order is queued until every upstream item is accepted in Oxagen or closed as Done in the provider (`docs/work-graph-spec.md` §5.2, §6). An item a queued work order holds cannot be selected again.
+- Ready to send counts `ready` rows the graph does not block. The Blocked by column and the Graph carry the rest.
+- `node tools/check-tasks.mjs` walks flows 9 (the blocked reason and the checkbox rule), 10 (queueing) and 11 (the Graph view) on this tab.
+
 ## States
 
 Loaded only. This change designs the loaded state. The build uses the shell’s standard loading, error, empty and denied panels until they are designed.
@@ -160,7 +172,7 @@ The thumb bar holds Work (lit, with its count, 8), Agents, Tools, Spend and More
 The design names these. None exists in `packages/iam` today.
 
 - Read: `work.read`
-- Writes, each a governed action recorded in Audit: `work_order.send` (send a work order to an agent you operate)
+- Writes, each a governed action recorded in Audit: `work_order.send` (send or queue a work order to agents you operate)
 
 ## Backend gaps this page depends on
 
@@ -170,6 +182,9 @@ The design names these. None exists in `packages/iam` today.
 - The workflow file schema (`.oxagen/workflows/*.toml`) and its ADR (`tasks-spec.md` §17.2)
 - `context_record` and `task` types in the mention grammar (§17.6), and a token cost on a Steering record
 - The repositories an agent’s toolbelt may write, and a per-run budget per agent
+
+- A dependency between two work items, read from the provider or added by a person, and the derived blocked reason (`docs/work-graph-spec.md` §4, §5)
+- A queued work order with an expiry, its release in the transaction that unblocks its last item, and a send with several targets (§6, §7)
 
 ## Rules every build of this page must keep
 
@@ -185,3 +200,6 @@ The design names these. None exists in `packages/iam` today.
 - An agent somebody else operates is never offered as a target.
 - A provider account that is not mapped is shown as itself, never as a member.
 - Every harness shows its own mark, and no harness is the default in a list.
+- The provider’s `blocked` status and the graph’s blocked reason are two columns, never one.
+- The Graph draws state in the `--st-*` hues and the rule colour, never gold, and calls no node a frame.
+- A queued work order is a person’s send held by Oxagen. Nothing on this tab queues on its own.

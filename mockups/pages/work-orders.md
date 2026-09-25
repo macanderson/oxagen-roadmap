@@ -4,8 +4,8 @@
 |---|---|
 | Route | `#/a-intel/core-platform/work/orders` (app `/{org}/{ws}/work/orders`). Old routes that land here: the mockup’s `#/:org/:ws/tasks/work-orders` (rewritten in place), and the app’s Fleet runs at a later page, `/{org}/{ws}?cursor=…` (308, the cursor dropped). The end of onboarding lands here too |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: D1 (Work is the primary surface), D2 (a run is a child of exactly one work order, and a run started outside Oxagen is filed under a direct work order), D3 (the Fleet runs table becomes each work order’s runs), D17; Vocabulary › Work (Work order, Dispatched work order, Direct work order); Work › Objects, Rules 1 to 4, Shipped today. `docs/fleet-operations-ia.md` › Work. `docs/fleet-operations-routes.md` › Workspace and Work. `docs/tasks-spec.md` §9.5, §9.6, §11. The first run: `onboarding-run.md` ends here, and ADR-099 in `macanderson/oxagen` sets the 14-day provisional window |
-| Design | `mockups/src/wedge.js` → `pWork()`, `workOrdersTab()`, `woKindBadge()`, `fileDirect()`, `fileRuns()`, `runParent()`, `woShown()`, `woLive()`, `woSpend()`; `mockups/src/engine.js` → `woTargetCell()`, `woBadge()` and `WO_ST`, `woClaimed()`, `woItems()`, `obFirstRun()`, `obFirstBanners()`, `obOfferCard()`, `obBind()`, `regFinish()`; data `mockups/fixtures/tasks.json` (`workOrders`), the runs in `mockups/fixtures/runs.json` (each run no dispatched work order holds is filed under a direct one at load), and `BILLING` for the offer. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| Spec | `docs/work-graph-spec.md` §6.2 (states), §7 (sends and targets), §11.1; `docs/fleet-operations-wedge.md`: D1 (Work is the primary surface), D2 (a run is a child of exactly one work order, and a run started outside Oxagen is filed under a direct work order), D3 (the Fleet runs table becomes each work order’s runs), D17; Vocabulary › Work (Work order, Dispatched work order, Direct work order); Work › Objects, Rules 1 to 4, Shipped today. `docs/fleet-operations-ia.md` › Work. `docs/fleet-operations-routes.md` › Workspace and Work. `docs/tasks-spec.md` §9.5, §9.6, §11. The first run: `onboarding-run.md` ends here, and ADR-099 in `macanderson/oxagen` sets the 14-day provisional window |
+| Design | `mockups/src/wedge.js` → `pWork()`, `workOrdersTab()`, `woSiblings()`, `woSend_()`, `woSendIndex()`, `woSendState()`, `woWaitsOnHtml()`, `woKindBadge()`, `fileDirect()`, `fileRuns()`, `runParent()`, `woShown()`, `woLive()`, `woSpend()`; `mockups/src/engine.js` → `woTargetCell()`, `woBadge()` and `WO_ST`, `woClaimed()`, `woItems()`, `obFirstRun()`, `obFirstBanners()`, `obOfferCard()`, `obBind()`, `regFinish()`; data `mockups/fixtures/tasks.json` (`workOrders`), the runs in `mockups/fixtures/runs.json` (each run no dispatched work order holds is filed under a direct one at load), and `BILLING` for the offer. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
 | Storybook | `Oxagen / Work / Work orders`: Loaded, Loaded · mobile, Loaded · future-only fields marked |
 | Audit | `work-orders.audit-prompt.md` |
@@ -31,7 +31,7 @@ Columns, in order:
 | Sent to | The agent’s harness mark, avatar and name, or a workflow’s stage marks and its name |
 | Latest run | The run id as a link to the run, `live` while it is live, and “4 runs” under it when the work order started more than one. “none yet” before the first run |
 | Items claimed | Claimed over total (“3 / 4”), or a dash when the work order has no items |
-| State | A dot and a word: `sent`, `in progress`, `waiting on you`, `returned`, `parked for you`, `stopped`, `accepted` or `closed` |
+| State | A dot and a word: `queued` (with “waits on #633” under it), `sent`, `in progress`, `waiting on you`, `returned`, `parked for you`, `stopped`, `expired`, `accepted` or `closed` |
 | Spend | The sum of its runs’ cost in USD, or a dash |
 | Sent by | Avatar and name, and the time it was sent or opened in mono |
 
@@ -52,6 +52,12 @@ Straight after onboarding the workspace holds one run, the installer’s smoke s
 - Every count reads off the one run. The sidebar and the thumb bar carry no counts, and the sidebar foot reads “1 agent”. The tab counts follow the same rule: nothing waits on a person yet.
 
 **Shell.** The sidebar with Work lit and its count (none on the first run). Breadcrumbs “Anderson Intelligence Corp. / Core platform / Work”. ⌘K, notifications, the Approvals button with the organization’s count, and the avatar.
+
+### A send with several work orders
+
+A send to several targets (`docs/work-graph-spec.md` §7) makes one work order per target. The tab shows them under one row: the title, the send id in mono with “2 work orders”, the work items, the targets’ harness marks with “2 targets”, “one per target” in place of a run, a dash for items claimed, the group state (`partial` while the children’s states differ, else the shared state), a dash for spend, and the sender. Its children follow, indented, each with “1 of 2 in this send” under its id. The design opens the children on a click; the mockup always shows them. The demo record holds send `snd_01K6TC59`, `wo_01K6TC5A` (Bug fixer on Claude Code, `in progress`) and `wo_01K6TC5B` (Validator on Codex, `sent`), so the row reads `partial`. Outlined as future-only.
+
+`wo_01K6TB2X` is `queued` for Release manager, waiting on #633, with an expiry of 2026-09-25.
 
 ## Data sources
 
@@ -75,6 +81,8 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | Onboarding offer | `BILLING.discount`, `OB_OFFER_DAYS` | a recorded onboarding offer | none. The app says so: “the onboarding offer is not recorded yet (spec §20, deferred)” (`apps/app/messages/billing.json:60`) | ❌ |
 | The first run’s cost and basis | `fr.cost`, `fr.basis` | the run’s cost | `run.list.ts:277` | ✅ |
 | “Oxagen billed $0.00 for it” | `BILLING.tier2`, `runsIncluded` | the governed actions billed for one run | none. The rate card carries the included allowance (`get_rate_card`, `packages/oxagen/src/contracts/billing.action_rate_card.ts:38` and `:44`), and nothing prices one run’s governed actions | ❌ |
+| `queued`, `expired`, and what a queued work order waits on | `WORKORDERS[].status`, `.expires`, `woWaitsOn()` | `tasks.work_orders` `queued`, `expired`, `expires_at` (`work-graph-spec.md` §6, §9) | none | ❌ |
+| A send and its children | `SENDS`, `WORKORDERS[].send` | `tasks.sends`; `list_sends` (§7) | none | ❌ |
 
 ## Future-only fields
 
@@ -94,6 +102,10 @@ The mockup marks nothing else on this tab, but every work order field is future-
 - A work order’s Spend is the sum of its runs’ cost, and each run keeps its own basis.
 - On the first run, the list holds the one smoke run under its direct work order, and every count reads off that run. **Show the seeded workspace** puts the first-run view away; in the product the list already holds every run there is, so the button hides the banner and nothing else. **Not now** dismisses the offer for the session. **Bind a-intel/platform** binds the main repository and ends the provisional window.
 - `node tools/check-tasks.mjs` walks the send that lands a new work order at the top of this list (flow 5).
+
+- A work order is `in progress` from its start receipt, not from its send. A released work order with no receipt reads `sent` (`docs/work-graph-spec.md` §6.2).
+- Siblings of a send sit side by side with no rank, no score, and no winner.
+- `node tools/check-tasks.mjs` walks flow 14 (a send with two work orders) on this tab.
 
 ## States
 
@@ -134,3 +146,4 @@ The design names this. It does not exist in `packages/iam` today.
 - Every number that is money shows its basis. A work order’s Spend adds runs, and each run keeps the basis it was recorded with.
 - On a direct work order, Sent by reads the run’s operator as recorded. Where the record attributes the run to the host’s enroller (`host_enroller`), the build says enrolled by, never started by.
 - A run is never shown without its work order, and a work order is never shown without its runs.
+- A send row is a rollup of its children and never a work order of its own. No run, claim or cost is typed on it.
