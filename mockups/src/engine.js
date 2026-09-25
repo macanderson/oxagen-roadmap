@@ -9023,12 +9023,16 @@ function steerTextField(dflt,rows){
   var v=S.steerText==null?dflt:S.steerText;
   return '<div class="field"><label>Steering text</label><textarea id="steer-text" rows="'+(rows||4)+'" aria-label="Steering text">'+h(v)+'</textarea></div>';
 }
-function steerModeField(){
+/* fleet: the Steer the fleet dialog, whose options speak to every selected agent; otherwise one run */
+function steerModeField(fleet){
   var on=S.steerInt;
   return '<div class="field"><label>Delivery</label>'+
    '<div class="steer-mode'+(on?" on":"")+'"><div class="grow"><b>'+(on?"Interrupt now":"At the boundary")+'</b>'+
-    '<div class="d">'+(on?"Every selected agent with a run in flight stops where it stands. The in-flight tool call is canceled and recorded, the turn is cut, and this steer is the first thing it reads. Idle agents read it at their next run.":
-     "Each agent finishes the turn it is on, then reads this before its next model call. Nothing in flight is cut. Idle agents read it at their next run.")+'</div></div>'+
+    '<div class="d">'+(fleet
+      ?(on?"Every selected agent with a run in flight stops where it stands. The in-flight tool call is canceled and recorded, the turn is cut, and this steer is the first thing it reads. Idle agents read it at their next run.":
+        "Each agent finishes the turn it is on, then reads this before its next model call. Nothing in flight is cut. Idle agents read it at their next run.")
+      :(on?"The run stops where it stands. The in-flight tool call is canceled and recorded, the turn is cut, and this steer is the first thing it reads.":
+        "The agent finishes the turn it is on, then reads this before its next model call. Nothing in flight is cut."))+'</div></div>'+
     '<button class="ks-sw int'+(on?" on":"")+'" role="switch" aria-checked="'+(on?"true":"false")+'" aria-label="Interrupt" onclick="steerToggleInt()"><span class="lbl">Interrupt</span><i></i></button></div>'+
    '</div>';
 }
@@ -9042,7 +9046,7 @@ function steerFleetBody(){
     '<span class="row" style="gap:6px"><button class="btn sm ghost" onclick="steerSelAll(true)">All</button><button class="btn sm ghost" onclick="steerSelAll(false)">None</button></span></div>'+
     '<div class="steer-list">'+rows+'</div>'+
     '<div class="hint">Every agent in '+h(ws().name)+', selected by default.</div></div>'+
-   steerTextField(STEER_DEFAULT,3)+steerModeField();
+   steerTextField(STEER_DEFAULT,3)+steerModeField(true);
 }
 function steerFoot(fleet){
   var n=fleet?steerCount():1, on=S.steerInt, who=fleet?(n+' agent'+(n===1?'':'s')+' · '+steerLive()+' in flight'):'this run';
