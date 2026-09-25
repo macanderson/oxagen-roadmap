@@ -77,7 +77,7 @@ A run is a child record. Its route stays flat, `/{org}/{ws}/runs/{run}`, and its
 | Decision trace | `/{org}/{ws}/runs/{run}` | Envelope, exclusions, choices, frames, plan changes when recorded, self-reported uncertainty when reported, and evidence |
 | Transcript | `/{org}/{ws}/runs/{run}/transcript` | The recorded conversation and calls, with search and kind filters. Returned thinking is labelled as the provider's text |
 | Cost | `/{org}/{ws}/runs/{run}/cost` | Tokens by class, spend by area, the per-turn waterfall and the model fit |
-| Evidence | `/{org}/{ws}/runs/{run}/evidence` | Outputs, issues touched, definition-of-done claims, approvals decided, and the chain and seal |
+| Evidence | `/{org}/{ws}/runs/{run}/evidence` | The definition-of-done claims, the run's approvals, the issues it touched, linked work, and the chain and seal. The outputs stay in the right column on every tab |
 
 The header keeps Pause, Resume, Steer, Cancel and Export by the run's state. Fork replay and Bisect are gone. The right column keeps the repository panel and the outputs.
 

@@ -29,11 +29,13 @@ Close enough is a fail.
 ## What is not in the design
 
 The build must not have any of these. Each one found is a FAIL: a witness runner, an oracle, a
-flip, a `proof.observed` frame, a Proof tab, a Verdict column, a `proven` chip, a definition of
-done (Done column, tile, tab, certificate, `dod.*` frames), a trust score or spend score, a
-percentile band, proven or accepted or unproven spend, spend per proven run, a witness-run tab set,
-an incident kind `witness_tampered` or `witness_probe`, an approvals panel on a page, an interjection
-banner on a page, an assistant button in the topbar. And, cut by the fleet operations wedge: a Fleet
+flip, a `proof.observed` frame, a Proof tab, a Verdict column, a `proven` chip, the run definition of
+done from `docs/dod-spec.md` (Done column, tile, tab, certificate, `dod.*` frames), a trust score or
+spend score, a percentile band, proven or accepted or unproven spend, spend per proven run, a
+witness-run tab set, an incident kind `witness_tampered` or `witness_probe`, an approvals panel on any
+page other than a run (whose approvals strip and Evidence tab show that run's approvals), an
+interjection banner on a page, an assistant button in the topbar. A work item's definition of done
+(`docs/tasks-spec.md` §8, certified by a person) is part of the design and is not the run's. And, cut by the fleet operations wedge: a Fleet
 page, a Tasks page, a mandate page, the skills console (Catalog, Search, In the loop, Reflection,
 Versions) and skill reflection, the Steering Library shelves, Memory, Ontology and Gates tabs, fork
 replay, bisect, the frame player, transcript playback, replay grades, spend drill pages, and any
@@ -51,7 +53,8 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
    `/steering/compiler/{agent}`, `/steering/proposals[/prs]`), Runtimes, Spend (`/spend[/budgets|/optimization]`),
    Repositories, three organization pages (`/{org}`, `/{org}/billing`, `/{org}/audit`), the seven
    sign-in flows, the Register agent gate and the onboarding gate. Every old route in
-   `docs/fleet-operations-routes.md` lands where the map says. Any other route is a FAIL.
+   `docs/fleet-operations-routes.md` lands where the map says. The Repositories tabs are
+   `working-copies`, `changes[/{id}]` and `configuration`. Any other route is a FAIL.
 2. Account is a dialog from the user menu, not a page. Approvals are a drawer from the topbar and a
    strip on Run, not a page and not a panel on any page. Intake is a dialog on Work, not a page.
    Onboarding is not a page.
@@ -112,8 +115,8 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
     gate redirects an unauthenticated request for any app route to Log in and back after.
 
 ### E. Cross-cutting rules
-19. Trust language: every enforcement tier, replay grade, attestation and cost basis shows the
-    recorded value and nothing stronger. The ladder is `observe`, `harness`, `gateway`, `contained`,
+19. Trust language: every enforcement tier, attestation and cost basis shows the recorded value and
+    nothing stronger. No replay grade appears anywhere (D14). The ladder is `observe`, `harness`, `gateway`, `contained`,
     all real; a run's basis is `gateway_observed` only when the proxy counted it and
     `client_attested` otherwise; a class the harness did not report is marked absent, never zero.
 20. Money always carries its basis; every token figure carries its basis; headers are rollups of

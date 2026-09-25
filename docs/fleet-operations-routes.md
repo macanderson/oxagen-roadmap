@@ -67,7 +67,7 @@ The mockup drew Tasks at `#/:org/:ws/tasks…`. The app never built it, so these
 | `?tab=context`, `policy`, `frames`, `player`, `approvals` | `/{org}/{ws}/runs/{run}` | 308 | The Decision trace absorbed the context, policy and governed actions tabs |
 | `?tab=issues`, `chain`, `proof`, `dod`, `ladder` | `/{org}/{ws}/runs/{run}/evidence` | 308 | Evidence absorbed the issues and chain and seal tabs |
 | `?kinds=`, `?frames=`, `?body=` | the same query values on `/transcript` | 308 | Transcript filters keep their names |
-| `?reads=`, `?spine=` | the same query values on `/evidence` | 308 | The outputs spine moved to Evidence |
+| `?reads=`, `?spine=` | the same query values on any run tab | same | The outputs spine stays in the right column of every tab |
 
 `routes.run` gains a `tab` of `trace`, `transcript`, `cost` or `evidence`, and `trace` is the bare path.
 
