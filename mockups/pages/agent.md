@@ -18,7 +18,7 @@ This spec owns the agent header and the tab bar, which every tab shares, and the
 
 ## What is on the page
 
-**Header.** Eyebrow “Agent”. The h1 is the agent card in its detail layout: the avatar, the agent key in mono (“a-intel.core.triage”) and the harness label (“Codex CLI”). Under it one row of badges: the lifecycle status as a dot and a word (“enrolled”), the tier as recorded (“gateway”), and “operator Marcus Bell”. Then the agent's description (“Labels incoming issues, reproduces where it can, and opens a proposal when it cannot.”). Actions, in this order, none of them gold:
+**Header.** Eyebrow “Agent”. The h1 is the agent card in its detail layout: the avatar, the agent key in mono (“a-intel.core.triage”), and the harness mark and label (“Codex CLI”). Under it one row of badges: the lifecycle status as a dot and a word (“enrolled”), the tier as recorded (“gateway”), and “operator Marcus Bell”. Then the agent's description (“Labels incoming issues, reproduces where it can, and opens a proposal when it cannot.”). Actions, in this order, none of them gold:
 
 - **Edit avatar** opens the avatar editor for the agent (“Avatar · Triage”).
 - **Rotate credential** opens `rotatecred`.

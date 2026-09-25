@@ -340,11 +340,12 @@ function avDescribe(av){
   if(av.kind==="photo") return av.src?"photo · "+Math.max(1,Math.round(av.src.length*0.75/1024))+" KB":"photo · none chosen yet";
   return (av.kind==="icon"?"icon · "+(AV_ICONS[av.icon]?av.icon:"bot"):"initials · "+(av.font||"sans"))+" · "+avTone(av.tone)+" tone";
 }
-/* who is involved in a run: the agent that acted, carrying the operator's authority */
+/* who is involved in a run: the agent that acted, carrying the operator's authority. The card's
+   harness mark names the harness, so the second line gives the agent's name alone. */
 function involved(R){
   var a=agent(R.agent), p=PEOPLE[R.op];
   return '<div class="inv">'+
-   (a?agentCard(a,{layout:"compact",sub:h(a.name)+' \u00b7 '+h(a.harnessLabel)}):'')+
+   (a?agentCard(a,{layout:"compact",sub:h(a.name)}):'')+
    '<span class="inv-arrow">on behalf of →</span>'+
    (p?'<a class="inv-i" href="'+spendHref("operator",R.op)+'" onclick="event.preventDefault();spendGo(\'operator\',\''+h(R.op)+'\')" title="Open '+h(p.name)+'">'+
      personAv(R.op,30)+'<span class="tx"><b>'+h(p.name)+'</b><span>operator · '+h(p.role)+'</span></span></a>':'')+'</div>';
@@ -1635,7 +1636,7 @@ function apdRow(a){
   var title=a.amount?usd(a.amount)+' '+h(a.currency)+' · '+h(a.tool):h(a.tool);
   return '<button class="apd-row'+(crit?' crit':'')+(done?' done':'')+'" onclick="apdSelect(\''+a.id+'\')" aria-label="Open approval '+h(a.id)+'">'+
    '<span class="g">'+icon("shield")+'</span>'+
-   '<span class="tt"><b>'+title+'</b><span>'+h(a.agent.split(".").pop())+(r?' · '+h(r.taskTitle):'')+(w?' · '+h(w.name):'')+'</span>'+
+   '<span class="tt"><b>'+title+'</b><span>'+agMark(a.agent)+h(a.agent.split(".").pop())+(r?' · '+h(r.taskTitle):'')+(w?' · '+h(w.name):'')+'</span>'+
     (r&&runParent(r)?'<span class="mono" style="font-size:11px">'+(runParent(r).kind==="direct"?'direct · ':'work order · ')+h(runParent(r).id)+'</span>':'')+
     '<span class="m">'+riskBadge(a.risk)+(a.side==="irreversible"?'<span class="b b-denied">Irreversible</span>':'')+(a.tainted?'<span class="b b-critical"><span class="d"></span>tainted</span>':'')+'</span></span>'+
    (done?'<span class="b '+(st.status==="approved"?'b-allowed':'b-denied')+'" style="flex:none"><span class="d"></span>'+h(st.status)+'</span>'
@@ -1644,7 +1645,7 @@ function apdRow(a){
 function apdInterjectionRow(x){
   var w=x.ws;
   return '<div class="apd-row inter" style="cursor:default"><span class="g">'+icon("assistant")+'</span>'+
-   '<span class="tt"><b>'+h(SKRUN.agent.split(".").pop())+' is paused and needs a decision</b><span>It’s working in <span class="mono">'+h(SKRUN.repo)+'</span>, which isn’t linked to any workspace, so there’s no skill configuration to apply. No cost since 09:14. If nobody answers within 30 min, the request is denied.</span></span>'+
+   '<span class="tt"><b>'+hxIcon(SKRUN.harness,13,true)+' '+h(SKRUN.agent.split(".").pop())+' is paused and needs a decision</b><span>It’s working in <span class="mono">'+h(SKRUN.repo)+'</span>, which isn’t linked to any workspace, so there’s no skill configuration to apply. No cost since 09:14. If nobody answers within 30 min, the request is denied.</span></span>'+
    '<button class="btn sm primary" style="flex:none" onclick="apdToggle(false);go(\'#/'+ORG.slug+'/'+w.slug+'/runs/'+SKRUN.id+'\')">Answer</button></div>';
 }
 function apdBody(){
@@ -1756,7 +1757,7 @@ function fourHop(a){
     '<div class="hm">role <span class="mono">'+h(p.role)+'</span> in <span class="mono">'+h(a.ws)+'</span><br>'+
     '<span class="dim">'+(r?'task '+h(r.task)+' · '+h(r.taskTitle):'run '+h(a.run))+'</span></div></div>'+
    '<div class="hop"><div class="hn"><i>2</i>Agent</div><b class="mono">'+h(a.agent)+'</b>'+
-    '<div class="hm">'+(ag?h(ag.harnessLabel)+' · ':'')+'tier '+h(a.tier)+'<br>'+
+    '<div class="hm">'+(ag?hxIcon(ag.harness,13)+' '+h(ag.harnessLabel)+' · ':'')+'tier '+h(a.tier)+'<br>'+
     '<span class="dim mono">'+h(a.run)+'</span></div></div>'+
    '<div class="hop"><div class="hn"><i>3</i>Action</div>'+toolCell(a.tool,{sz:"sm"})+
     '<div class="hm">'+(a.amount?usd(a.amount)+' '+h(a.currency)+' → ':'')+'<span class="mono">'+h(a.counterparty)+'</span><br>'+
@@ -1824,7 +1825,7 @@ function approvalCardSm(a){
       (S.apOpen[a.id]?'Hide details':'Details')+'</button></div>';
   return '<div class="apsm'+(crit?' crit':'')+(done?' done':'')+'" id="apsm-'+a.id+'">'+
    '<div class="apsm-h"><span class="g">'+icon("shield")+'</span>'+
-    '<span class="tt"><b>'+title+'</b><span>'+h(a.agent)+(r?' · '+h(r.taskTitle):'')+'</span></span>'+clk+'</div>'+
+    '<span class="tt"><b>'+title+'</b><span>'+agMark(a.agent)+h(a.agent)+(r?' · '+h(r.taskTitle):'')+'</span></span>'+clk+'</div>'+
    '<div class="apsm-m">'+riskBadge(a.risk)+
     '<span class="b '+(a.side==="irreversible"?"b-denied":"b-q")+'">'+h(a.side.charAt(0).toUpperCase()+a.side.slice(1))+'</span>'+
     (a.tainted?'<span class="b b-critical"><span class="d"></span>tainted</span>':'')+tierBadge(a.tier)+'</div>'+
@@ -2974,7 +2975,7 @@ function transcriptTab(R,compacted){
    '<div class="tx-play">'+
     '<button class="btn sm ghost" onclick="S.tx.think=!S.tx.think;S.tx.open={};render()">'+(S.tx.think?"collapse the provider’s thinking":"expand the provider’s thinking")+'</button>'+
    '</div></div>';
-  var runbar='<div class="tx-runbar"><span class="name">'+h(R.task&&R.task!=="—"?R.task:R.id)+'</span><span class="meta">'+h(R.agent)+' · '+h(R.model)+' · '+plural(R.turn,"turn")+' · '+plural(R.steps,"step")+(synth?' · projected from the run record':' · '+plural(all.length,"entry","entries"))+'</span>'+
+  var runbar='<div class="tx-runbar"><span class="name">'+h(R.task&&R.task!=="—"?R.task:R.id)+'</span><span class="meta">'+agMark(R.agent)+h(R.agent)+' · '+h(R.model)+' · '+plural(R.turn,"turn")+' · '+plural(R.steps,"step")+(synth?' · projected from the run record':' · '+plural(all.length,"entry","entries"))+'</span>'+
    '<span class="tx-chips" style="margin-left:0">'+(S.tx.errs?'<span class="tx-chip err">errors only</span>':'')+(runStatus(R)==="paused"?'<span class="tx-chip warn">⏸ paused</span>':R.status==="live"?'<span class="tx-chip ok">● live</span>':R.status==="parked"?'<span class="tx-chip warn">⏸ parked</span>':'')+'</span>'+
    '<span class="tx-burn"><span>burn</span><span class="bar"><i id="txbar"></i></span><b id="txburn">'+txMoney2(0)+'</b><span>of '+txMoney2(total)+'</span></span></div>';
   var feed='<div class="tx-feed" id="txfeed" data-n="'+rows.length+'" data-paced="'+paced+'">'+(rows.length?html:'<div class="tx-empty">'+(S.tx.errs?'No failed calls in this run.':S.tx.q?'Nothing matches this search.':'Nothing to show with these filters.')+'</div>')+'</div>';
@@ -3541,7 +3542,7 @@ function fdTurn(f,R){
 }
 function fdAgent(f,R){
   var a=agent(R.agent);
-  if(f.kind==="agent_start")return frKv([["Run",'<b class="mono" style="color:var(--fg)">'+h(R.id)+'</b>'],["Agent",'<span class="mono">'+h(R.agent)+'</span>'+(a?' · '+h(a.harnessLabel):'')],
+  if(f.kind==="agent_start")return frKv([["Run",'<b class="mono" style="color:var(--fg)">'+h(R.id)+'</b>'],["Agent",(a?hxIcon(a.harness,13)+' ':'')+'<span class="mono">'+h(R.agent)+'</span>'+(a?' · '+h(a.harnessLabel):'')],
     ["Operator",h(PEOPLE[R.op]?PEOPLE[R.op].name:R.op)+" · initiating principal"],["Workspace",h(R.ws)],["Task",R.task&&R.task!=="—"?h(R.task)+" · "+h(R.taskTitle):h(R.taskTitle)+' <span class="dim">· no linked task</span>'],
     ["Policy version","pol_v41"],["Enforcement tier",tierBadge(R.tier)]])+
    '<div class="note" style="margin-top:12px">Everything above is built by oxagen, never by the agent. It cannot name its own operator or choose its own tier.</div>';
@@ -4285,7 +4286,7 @@ function aIdentity(a,r){
     '<dt>Principal</dt><dd class="mono">'+h(a.principal||"prn_pending")+
      '<span class="sub">minted at registration and never reused, so a retired agent\'s runs keep their identity</span></dd>'+
     '<dt>Kind</dt><dd>agent · workspace <span class="mono">'+h(w.slug)+'</span> required</dd>'+
-    '<dt>Harness</dt><dd>'+h(a.harnessLabel)+' <span class="mono dim">'+h(a.harnessV||"—")+'</span></dd>'+
+    '<dt>Harness</dt><dd>'+hxName(a.harness,a.harnessLabel)+' <span class="mono dim">'+h(a.harnessV||"—")+'</span></dd>'+
     '<dt>Model class</dt><dd>'+h(a.model)+' → <span class="mono">'+
      h(a.model==="light"?"z-ai/glm-flash-latest":"z-ai/glm-latest")+'</span></dd>'+
     '<dt>Operator</dt><dd>'+h(op.name)+
@@ -4460,7 +4461,7 @@ function aRuntimeHost(a){
    '<div class="panel-b"><dl class="kv">'+
    '<dt>Runtime</dt><dd class="mono">'+h((rt&&rt.name)||a.host||"—")+
     (rt?'<span class="sub">'+h(rt.kind+' · '+rt.os+' · started by '+rt.started)+'</span>':'')+'</dd>'+
-   '<dt>Harness</dt><dd>'+h((rt&&rt.harness)||a.harnessLabel)+' <span class="mono dim">'+
+   '<dt>Harness</dt><dd>'+hxName((rt&&rt.harness)||a.harness,(rt&&rt.harness)||a.harnessLabel)+' <span class="mono dim">'+
     h((rt&&rt.harnessV)||a.harnessV||"—")+'</span><span class="sub">the runtime is shared. Every agent on it is seen through the same hooks.</span></dd>'+
    '<dt>Device key</dt><dd class="mono">'+h(a.devKey||"—")+'<span class="sub">signs checkpoints; oxagen countersigns at ingest</span></dd>'+
    '<dt>Collector</dt><dd class="mono">oxagend '+h((rt&&rt.collector)||a.collector||"1.6.2")+
@@ -6741,7 +6742,7 @@ function pRuntimes(r){
     return '<tr onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/runtimes/'+h(rt.id)+'\')" style="cursor:pointer">'+
      '<td><b style="font-weight:500">'+h(rt.name)+'</b><span class="sub mono">'+h(rt.os)+'</span></td>'+
      '<td><span class="b b-q">'+h(rt.kind)+'</span></td>'+
-     '<td>'+h(rt.harness)+' <span class="mono dim">'+h(rt.harnessV)+'</span></td>'+
+     '<td>'+hxName(rt.harness)+' <span class="mono dim">'+h(rt.harnessV)+'</span></td>'+
      '<td>'+h(rt.model)+'</td>'+
      '<td>'+tierBadge(rt.tier)+'</td>'+
      '<td class="num">'+(ag.length||'<span class="dim">0</span>')+
@@ -6787,7 +6788,7 @@ function rtDetail(rt){
    '<div class="panel-b"><dl class="kv">'+
    '<dt>Workspace</dt><dd>'+h(rtWs(rt))+'</dd>'+
    '<dt>Owner</dt><dd>'+h(rtPerson(rt.owner))+'</dd>'+
-   '<dt>Harness</dt><dd>'+h(rt.harness)+' <span class="mono dim">'+h(rt.harnessV)+'</span></dd>'+
+   '<dt>Harness</dt><dd>'+hxName(rt.harness)+' <span class="mono dim">'+h(rt.harnessV)+'</span></dd>'+
    (on?'<dt>Collector</dt><dd class="mono">oxagend '+h(rt.collector)+'<span class="sub" style="font-family:var(--font)">'+
      (rt.gaps?h(plural(rt.gaps,"telemetry gap")+" in the last 24h. A gap is a hole in the record, not a failed run."):"0 telemetry gaps in the last 24h")+'</span></dd>'+
    '<dt>Hook binary</dt><dd class="mono">oxagen-hook '+h(rt.collector)+'<span class="sub" style="font-family:var(--font)">Refuses a call if it cannot reach oxagen and has no cached policy</span></dd>'
@@ -7267,7 +7268,7 @@ function spendTokens(WT){
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By harness</h3><span class="b b-q" style="margin-left:auto">'+per(WT.observed)+' of tokens observed by the gateway</span></div>'+
     '<div class="tw"><table><thead><tr><th>Harness</th><th class="num">Agents</th><th class="num">Tokens</th><th class="num">Cache hit</th><th class="num">Spend</th><th>Basis</th></tr></thead><tbody>'+
     hs.map(function(x){var obs=tokShare(x.observed,x.total);
-      return '<tr><td><b>'+h(x.label)+'</b></td><td class="num">'+x.agents+'</td><td class="num">'+tokn(x.total)+'</td><td class="num">'+per(tokShare(x.cacheRead,x.tokIn))+'</td><td class="num">'+fmt$(x.spend)+'</td>'+
+      return '<tr><td><b>'+hxName(x.label)+'</b></td><td class="num">'+x.agents+'</td><td class="num">'+tokn(x.total)+'</td><td class="num">'+per(tokShare(x.cacheRead,x.tokIn))+'</td><td class="num">'+fmt$(x.spend)+'</td>'+
        '<td>'+(obs>=0.999?basisChip("gateway_observed") :obs<=0.001?basisChip("client_attested") :basisChip("gateway_observed")+' '+per(obs)+' · '+basisChip("client_attested")+' '+per(1-obs))+'</td></tr>';}).join("")+
     '</tbody></table></div><div class="panel-b"><div class="note">Observed means the gateway\u2019s proxy counted the tokens from the bytes that passed through it. Self-reported means the harness\u2019s own telemetry said so; a class it does not report is marked absent, never zero, and a cache hit rate over a mixed fleet is never computed from missing data as if it were zero.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>By agent</h3></div>'+
@@ -7340,7 +7341,7 @@ function spendWaste(parts){
     var badges=x.badges.map(function(b){return '<span class="b b-'+b[1]+'"><span class="d"></span>'+h(b[0])+'</span>';}).join(SEP);
     var frac=Math.min(1,parseFloat(x.wasted)/parseFloat(r.cost));
     return '<div class="act-card" style="margin:0"><div class="t" style="flex-wrap:wrap"><a class="mono" href="'+href+'" style="font-size:12px">'+h(r.id)+'</a>'+
-     '<span class="dim" style="font-size:12px">'+h(r.agent)+' · '+h(PEOPLE[r.op].name)+' · '+h(r.started)+'</span>'+
+     '<span class="dim" style="font-size:12px">'+agMark(r.agent)+h(r.agent)+' · '+h(PEOPLE[r.op].name)+' · '+h(r.started)+'</span>'+
      '<span style="margin-left:auto;font-variant-numeric:tabular-nums"><b style="color:var(--st-critical)">'+usd(x.wasted)+' unproductive</b> <span class="dim">of '+usd(r.cost)+'</span></span></div>'+
      '<div class="row" style="margin-bottom:8px">'+badges+'</div>'+
      '<div class="bar" style="margin-bottom:8px"><i style="width:'+Math.round(frac*100)+'%;background:var(--st-critical)"></i></div>'+
@@ -8115,7 +8116,7 @@ function auditReceipts(){
   var rows=hits.map(function(r){
     return '<tr class="click" tabindex="0" onclick="openDialog(\'receipt\',\''+r.id+'\')" onkeydown="if(event.key===\'Enter\')this.click()">'+
      '<td class="mono t-main" style="font-size:12px">'+h(r.id)+'</td><td class="mono dim" style="font-size:11.5px;white-space:nowrap">'+h(r.at)+'</td>'+
-     '<td><div class="mono" style="font-size:12px;color:var(--fg)">'+h(r.agent)+'</div><div class="t-sub">'+h(r.operator)+' · '+h(r.ws)+'</div></td>'+
+     '<td><div class="mono" style="font-size:12px;color:var(--fg)">'+agMark(r.agent)+h(r.agent)+'</div><div class="t-sub">'+h(r.operator)+' · '+h(r.ws)+'</div></td>'+
      '<td>'+toolCell(r.tool,{sz:"sm"})+'</td><td>'+auditBadge(AUD_DEC[r.decision]||"q",AUD_DEC_LABEL[r.decision]||r.decision)+'</td>'+
      '<td class="num mono" style="font-size:12px">'+h(r.amount)+'</td><td class="mono" style="font-size:11.5px">'+h(r.effect)+'</td><td>'+tierBadge(r.tier)+'</td></tr>';}).join("");
   var chips=["stripe","harness","observe","deny","a-intel.finops.invoice-bot","pi_3QaL8f2Xk"];
@@ -9330,7 +9331,7 @@ DLG_EXT.deliveryreport=function(){
   });
   var cls={applied:"b-allowed",queued:"b-approval",expired:"b-denied",canceled:"b-denied",failed:"b-denied"};
   var trs=rows.map(function(r){
-    return '<tr><td><span class="mono" style="font-size:12px">'+h(r.agent)+'</span><div class="mono dim" style="font-size:11px">'+(r.run?h(r.run):'no run in flight')+'</div></td>'+
+    return '<tr><td><span class="mono" style="font-size:12px">'+agMark(r.agent)+h(r.agent)+'</span><div class="mono dim" style="font-size:11px">'+(r.run?h(r.run):'no run in flight')+'</div></td>'+
      '<td><span class="b '+cls[r.status]+'"><span class="d"></span>'+h(r.status)+'</span></td>'+
      '<td class="mono" style="font-size:11.5px;white-space:nowrap">'+h(r.mode)+'</td>'+
      '<td class="mono num" style="font-size:11.5px;white-space:nowrap">'+h(r.when)+'</td>'+
@@ -9979,7 +9980,11 @@ function cmdMenu(){
 /* The agent card. a is an agent record or key; o.layout is "list" (default), "compact" or "detail";
    o.sub replaces the second line (harness by default; compact adds the 30-day figures); o.link
    wraps it in a link to the agent (compact defaults to linked, list and detail to not). One
-   markup, one CSS family, so an agent looks the same in a table, on a run, and on its own page. */
+   markup, one CSS family, so an agent looks the same in a table, on a run, and on its own page.
+   The harness mark leads the card, as it does on Work. On the detail layout it leads the harness
+   name under the key instead, where the 60px avatar would dwarf it. */
+/* The harness mark alone, before an agent key written as text. Empty for a key no agent record holds. */
+function agMark(k,s){var a=typeof k==="string"?agent(k):k;return a?hxIcon(a.harness,s||13,true)+' ':"";}
 function agentCard(a,o){
   if(typeof a==="string")a=agent(a);
   o=o||{}; var lay=o.layout||"list";
@@ -9987,7 +9992,8 @@ function agentCard(a,o){
   var sz=o.sz||(lay==="detail"?60:lay==="compact"?30:26);
   var sub=o.sub!=null?o.sub:lay==="compact"?h(a.harnessLabel)+' \u00b7 '+plural((a.runs30||0).toLocaleString(),"run")+' 30d \u00b7 '+usd(a.spend30):h(a.harnessLabel);
   var link=o.link!=null?o.link:lay==="compact";
-  var inner=agentAv(a,sz)+'<span class="agid"><span class="tkey">'+h(a.key)+'</span>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</span>';
+  var det=lay==="detail", mark=det?"":hxIcon(a.harness,lay==="compact"?16:15,sub.indexOf(h(a.harnessLabel))<0);
+  var inner=mark+agentAv(a,sz)+'<span class="agid"><span class="tkey">'+h(a.key)+'</span>'+(sub?'<span class="sub">'+(det?hxIcon(a.harness,15)+' ':'')+sub+'</span>':'')+'</span>';
   return link?'<a class="agc agc-'+lay+'" href="'+agentUrl(a)+'"'+(o.onclick?' onclick="'+o.onclick+'"':'')+'>'+inner+'</a>':'<span class="agc agc-'+lay+'">'+inner+'</span>';
 }
 /* The 30-day rollup for one agent, which is what the score strip's window is. Prefer the
@@ -10427,7 +10433,7 @@ function incidentResolveDlg(){
    first frame. Nothing completes until that frame reaches Oxagen — the ping is also the installer's smoke
    test, so there is one path, not two. Cancel is on every step (and Esc) and leaves nothing behind.
    Mutable state lives on S.reg and is null outside the flow; timers are tracked so Cancel can clear them. */
-var REG_TABS=[{id:"cc",n:"Claude Code",s:"one click · harness"},{id:"codex",n:"Codex CLI",s:"one click · harness"},{id:"sdk",n:"SDK agent",s:"five lines · harness"}];
+var REG_TABS=[{id:"cc",n:"Claude Code",s:"one click · harness",hx:"claude-code"},{id:"codex",n:"Codex CLI",s:"one click · harness",hx:"codex-cli"},{id:"sdk",n:"SDK agent",s:"five lines · harness",hx:"custom"}];
 var REG_TOKEN="oxe_1time_7QK4M2NV9XR3T8ZP";
 var REG_HOST="mbell-mbp.local";
 var REG_PKG={macos:{f:"oxagen-agent-2.4.0.pkg",s:"14.2 MB",note:"notarized · Developer ID",sha:"sha256:3f9c71d2…b40a"},
@@ -10584,7 +10590,7 @@ function regWrap(){
   return '<div><p class="eyebrow">Step 2 of 3</p><h1>'+(S.reg.mode==="onboard"?"Wrap an agent":"Wrap the agent")+'</h1>'+
    '<p class="reg-lead">The installer carries a one-time enrollment token for <span class="mono">'+h(key)+'</span>, so nothing is copied or pasted.</p></div>'+
    '<div class="reg-card"><div class="reg-tabs" role="tablist" aria-label="How to wrap the agent">'+REG_TABS.map(function(t){
-     return '<button type="button" role="tab" aria-selected="'+(r.tab===t.id)+'" onclick="S.reg.tab=\''+t.id+'\';render()"><span class="n">'+t.n+'</span><span class="s">'+t.s+'</span></button>';}).join("")+'</div>'+panel+'</div>'+
+     return '<button type="button" role="tab" aria-selected="'+(r.tab===t.id)+'" onclick="S.reg.tab=\''+t.id+'\';render()"><span class="n hxn">'+hxIcon(t.id==="sdk"&&regTabFor(r.harness)==="sdk"?r.harness:t.hx,15)+'<span>'+t.n+'</span></span><span class="s">'+t.s+'</span></button>';}).join("")+'</div>'+panel+'</div>'+
    '<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\''+(S.reg.mode==="onboard"?"organization":"name")+'\')">Back</button>'+
    '<div class="sp"><span class="reg-cap">Nothing completes until a frame arrives.</span><button class="btn" onclick="regInstall(null)">I already installed it</button></div></div>';
 }
@@ -14052,7 +14058,7 @@ document.addEventListener("click",function(e){
   };
   var GENERIC=["summarizer","weekly-digest","meeting-scribe","doc-linker","label-bot","stale-closer","owner-finder","backlog-groomer","status-poster"];
   var SUFFIX=["us","eu","apac","2","3","batch","nightly","canary"];
-  var HARN=[["claude-code","Claude Code",42],["codex-cli","Codex CLI",16],["stella","stella",14],["claude-agent-sdk","Claude Agent SDK",12],["openai-agents","OpenAI Agents SDK",7],["langgraph","LangGraph",5],["custom","Other (SDK-wrapped)",4]];
+  var HARN=[["claude-code","Claude Code",42],["codex-cli","Codex CLI",16],["stella","stella",14],["claude-agent-sdk","Claude Agent SDK",12],["openai-agents-sdk","OpenAI Agents SDK",7],["langgraph","LangGraph",5],["custom","Other (SDK-wrapped)",4]];
   var DESC={
     "pr-reviewer":"Reviews every pull request against the workspace rules and leaves one comment per finding. Never approves, never merges.",
     "dependency-bot":"Opens one pull request per dependency bump with the changelog inlined. Waits for CI; a person merges.",
@@ -14690,8 +14696,9 @@ S.tsel={}; S.dodEdit={}; S.tkDrafting={}; S.wo=null; S.ipz=null; S.wfz=null; S.d
 })();
 
 /* ---- marks. Provider and harness logos are the simple-icons paths (CC0), drawn at one size and in the
-   brand colour where the brand has one. Codex, Stella and ServiceNow have no mark in that set: Codex is a
-   terminal glyph, Stella the house star, and ServiceNow a green ring. Each provider also carries its own
+   brand colour where the brand has one. Codex, Stella, ServiceNow and a wrapped SDK agent have no mark in
+   that set: Codex is a terminal glyph, Stella the asterisk from the house brand kit, ServiceNow a green
+   ring, and a wrapped agent a plug. Each provider also carries its own
    word for the unit of work (issue, incident, case, ticket) and for a comment only staff can read, so no
    screen says "issue" about a help desk. Trackers come first, so Jira stays the third card. ---- */
 var IP_KIND={
@@ -14718,18 +14725,32 @@ function ipUnitA(k){var u=IP_KIND[k].unit;return (/^[aeiou]/.test(u)?"an ":"a ")
 /* The providers the Fields tab and the field editors show a column for: the connected ones, in IP_KIND order. */
 function tkCols(){var have={};wsProviders().forEach(function(p){have[p.kind]=1;});return Object.keys(IP_KIND).filter(function(k){return have[k];});}
 var HX={
- "claude-code":{c:"#D97757",f:"m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"},
- "claude-agent-sdk":{c:"#D97757",f:"M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"},
- cursor:{c:"currentColor",f:"M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"},
- "codex-cli":{c:"currentColor",s:'<rect x="2.5" y="4" width="19" height="16" rx="3.5"/><path d="m7 9.5 3 2.5-3 2.5M12.5 15H17"/>'},
- stella:{c:"var(--gold)",f:"M12 1.5l2.9 7.6L22.5 12l-7.6 2.9L12 22.5l-2.9-7.6L1.5 12l7.6-2.9z"}
+ "claude-code":{l:"Claude Code",c:"#D97757",f:"m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"},
+ "claude-agent-sdk":{l:"Claude Agent SDK",c:"#D97757",f:"M17.3041 3.541h-3.6718l6.696 16.918H24Zm-10.6082 0L0 20.459h3.7442l1.3693-3.5527h7.0052l1.3693 3.5528h3.7442L10.5363 3.5409Zm-.3712 10.2232 2.2914-5.9456 2.2914 5.9456Z"},
+ cursor:{l:"Cursor",c:"currentColor",f:"M11.503.131 1.891 5.678a.84.84 0 0 0-.42.726v11.188c0 .3.162.575.42.724l9.609 5.55a1 1 0 0 0 .998 0l9.61-5.55a.84.84 0 0 0 .42-.724V6.404a.84.84 0 0 0-.42-.726L12.497.131a1.01 1.01 0 0 0-.996 0M2.657 6.338h18.55c.263 0 .43.287.297.515L12.23 22.918c-.062.107-.229.064-.229-.06V12.335a.59.59 0 0 0-.295-.51l-9.11-5.257c-.109-.063-.064-.23.061-.23"},
+ "codex-cli":{l:"Codex CLI",c:"currentColor",s:'<rect x="2.5" y="4" width="19" height="16" rx="3.5"/><path d="m7 9.5 3 2.5-3 2.5M12.5 15H17"/>'},
+ stella:{l:"stella",c:"var(--gold)",f:STELLA_ASTERISK,v:"346.864 0 58.68 58.68"},
+ "openai-agents-sdk":{l:"OpenAI Agents SDK",c:"currentColor",f:"M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"},
+ langgraph:{l:"LangGraph",c:"currentColor",f:"M5 19H10A5 5 0 115 14ZM19 14A5 5 0 1114 19H19ZM10 5A5 5 0 105 10V5ZM19 5V10A5 5 0 1014 5Z"},
+ custom:{l:"Other (SDK-wrapped)",c:"currentColor",s:'<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>'}
 };
 HX.codex=HX["codex-cli"];
-function hxIcon(harness,size){
-  var m=HX[harness], s=size||15;
-  if(!m) return '<span class="hx" style="width:'+s+'px;height:'+s+'px" title="'+h(harness)+'">'+avSvg("bot")+'</span>';
+/* Runtimes record the harness by its label, agents by its key. Either one finds the mark. */
+var HX_BY_LABEL={};
+Object.keys(HX).forEach(function(k){HX_BY_LABEL[HX[k].l.toLowerCase()]=k;});
+function hxKey(harness){var k=String(harness||"");return HX[k]?k:HX_BY_LABEL[k.toLowerCase()]||k;}
+/* The harness mark. Pass alone when no text beside it names the harness, so a screen reader still hears it. */
+function hxIcon(harness,size,alone){
+  var k=hxKey(harness), m=HX[k], s=size||15, name=m?m.l:String(harness||"harness");
+  var a11y=alone?' role="img" aria-label="'+h(name)+'"':'';
+  if(!m) return '<span class="hx" style="width:'+s+'px;height:'+s+'px" title="'+h(name)+'"'+a11y+'>'+avSvg("bot")+'</span>';
   var body=m.f?'<path fill="'+m.c+'" d="'+m.f+'"/>':'<g fill="none" stroke="'+m.c+'" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">'+m.s+'</g>';
-  return '<span class="hx" style="width:'+s+'px;height:'+s+'px" title="'+h(harness)+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+body+'</svg></span>';
+  return '<span class="hx" style="width:'+s+'px;height:'+s+'px" title="'+h(name)+'"'+a11y+'><svg viewBox="'+(m.v||"0 0 24 24")+'" aria-hidden="true">'+body+'</svg></span>';
+}
+/* The mark followed by the harness name, for a Harness column or a Harness row. */
+function hxName(harness,label,size){
+  var m=HX[hxKey(harness)];
+  return '<span class="hxn">'+hxIcon(harness,size||14)+'<span>'+h(label||(m?m.l:harness))+'</span></span>';
 }
 
 /* ---- lookups ---- */

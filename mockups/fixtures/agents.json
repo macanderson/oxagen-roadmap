@@ -129,7 +129,7 @@
  {
   "key": "a-intel.finops.invoice-bot",
   "name": "Invoice bot",
-  "harness": "claude-agent-sdk",
+  "harness": "openai-agents-sdk",
   "harnessLabel": "OpenAI Agents SDK",
   "ws": "finops",
   "operator": "dana",

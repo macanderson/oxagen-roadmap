@@ -28,7 +28,7 @@ Read the run as it happened: the prompt the operator wrote, what the model said 
 
 There is no playback transport: no play, no pause, no step, no speed and no position counter (D14).
 
-**The run bar.** The task reference (`a-intel/platform#482`, or the run id when the run has none); "a-intel.core.release-manager · claude-opus-5 · 7 turns · 41 steps · 38 entries", which ends "projected from the run record" in place of the entry count on a run with no recorded transcript; the chips "errors only" while that filter is on, and "● live", "⏸ paused" or "⏸ parked"; and "burn" with a bar and "$4.13" "of $4.13", the cost of the entries in view against the run's total.
+**The run bar.** The task reference (`a-intel/platform#482`, or the run id when the run has none); the agent's harness mark, then "a-intel.core.release-manager · claude-opus-5 · 7 turns · 41 steps · 38 entries", which ends "projected from the run record" in place of the entry count on a run with no recorded transcript; the chips "errors only" while that filter is on, and "● live", "⏸ paused" or "⏸ parked"; and "burn" with a bar and "$4.13" "of $4.13", the cost of the entries in view against the run's total.
 
 **The feed.** One row per entry, in time order, each with a clock (`09:14:02.0`), a node, and the entry:
 

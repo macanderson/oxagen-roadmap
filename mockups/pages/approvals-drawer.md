@@ -29,7 +29,7 @@ Put every decision that waits on a person in one place that opens from every pag
 - Then one row per pending approval across the organization, soonest expiry first (the order `list_approvals` returns; the mockup keeps its fixture order). Each row is a button (aria-label "Open approval <id>") with:
   - the shield glyph;
   - the title: the amount, currency and tool ("$2,450.00 USD · stripe__create_payment@4"), or the tool alone ("github__create_release@2");
-  - the agent's short name, the run's title and the workspace ("release-manager · Cut 4.11.0 release notes · Core platform");
+  - the agent's harness mark and short name, the run's title and the workspace ("release-manager · Cut 4.11.0 release notes · Core platform");
   - the run's work order in mono: "work order · wo_01K5RS7M4N" for a dispatched one, "direct · wo_01K5RN8F3J2GHY6T" for a direct one;
   - the badges: risk ("high", "critical"), "irreversible" and "tainted" where they apply;
   - on the right, the countdown in m:ss, in warning ink under two minutes.
@@ -43,7 +43,7 @@ The demo record lists 1 interjection and 16 pending approvals from six workspace
 **The card**, the drawer's second view: "‹ All approvals" above the full approval card for the row picked. It is the same card a run's parked approval shows.
 
 - The head: the eyebrow "Approval required" (or "Approval approved", "Approval denied", "Approval expired"), the amount with its currency or the tool, the compact agent card, the tool and counterparty ("stripe__create_payment@4 → vendor:aws") with the task under it, and the badges: risk, `side_effect <value>`, "tainted", `egress <value>`, and the tier the approval recorded. On the right: "times out in" and the countdown (or "resolved" and a dash), "parked 09:31:08Z · timeout 10m", and "When it expires, the call ends and the agent is told why.".
-- The four-hop chain, numbered: 1 Operator (the name, the role in the workspace, the task), 2 Agent (the key, the harness and tier, the run id), 3 Action (the tool's label and id, the amount and counterparty, risk, side effect and egress), 4 Rule ("4 rules required approval", the policy and the mandate, the rule that parked it).
+- The four-hop chain, numbered: 1 Operator (the name, the role in the workspace, the task), 2 Agent (the key, the harness mark and name, the tier, the run id), 3 Action (the tool's label and id, the amount and counterparty, risk, side effect and egress), 4 Rule ("4 rules required approval", the policy and the mandate, the rule that parked it).
 - Remaining authority, when a mandate backs the call: a bar of settled, reserved by this call, and remaining, "of $5,000.00 USD", with the legend "settled $1,284.60 (25.7%)", "reserved by this call $2,450.00 (49.0%)" and "remaining $1,265.40".
 - Two columns. Mandate (Mandate, a link to the agent's Delegation; Granted by; Purpose; Per call; Approval above; Valid to), or Grant when no mandate backs it (Operator; Policy, with when and by whom it was activated; Rule; Tier, with one line on what that tier means for this call). Then The call (Tool version, Input digest, Idempotency, "Amount (µUSD)" when an amount leads, Requested, and Run, a link to the run).
 - Taint, when tainted: "tainted · 1 source", the line "Arguments that derive from untrusted tool output. Taint on a write raises the decision to approval.", and each source: its frame (a link), the argument path and the tool and note.
