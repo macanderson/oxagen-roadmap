@@ -26,10 +26,10 @@ Say what this workspace's month cost and where the money went. One table groups 
 
 | Tile | Number | Line beneath |
 |---|---|---|
-| Spend | $439,498.34 | `gateway_observed` + `client_attested` · USD |
+| Spend | $439,498.34 | Observed by gateway + Reported by harness · USD |
 | Tokens | 20,503,823,758 | 80% served from cache |
 | Observed by the gateway | 92% | of tokens counted by the proxy |
-| Wasted | $3,591.92, in the critical ink | 0.8% of spend · Optimization |
+| Wasted | $85,768.79, in the critical ink | 20% of spend · Optimization |
 
 The Wasted tile opens Optimization. Its share is computed from the Wasted and Spend figures, so it cannot disagree with them.
 
@@ -39,7 +39,7 @@ The Wasted tile opens Optimization. Its share is computed from the Wasted and Sp
 
 **Group by.** A segmented control (`role="group"`, labelled "Group by") with the caption "Group by" and six buttons, the current one `aria-pressed`: Work order · Operator · Agent · Model · Tool · Cost center. A button writes `?by=` and closes any open side panel.
 
-**The table.** Heading "By <grouping>" ("By work order", "By operator", "By agent", "By model", "By tool", "By cost center") and the subtext "Select a row to open it here. There is no drill page." The shell's list tools sit above the rows: the search field "Search this list", up to three filters, each on a column of two to eight short values (such as "All · Kind" on By work order and "All · Provider key" on By model), Rows (5, 10, 25, 50 or All, with 10 by default), sortable column headers, and a pager that counts the rows (1,166 work orders, ten to a page). Rows open ordered by spend, largest first.
+**The table.** Heading "By <grouping>" ("By work order", "By operator", "By agent", "By model", "By tool", "By cost center") and the subtext "Select a row to open it here. There is no drill page." The shell's list tools sit above the rows: the search field "Search this list", up to three filters, each on a column of two to eight short values (such as "Any kind" on By work order and "Any provider key" on By model), Rows (5, 10, 25, 50 or All, with 10 by default), sortable column headers, and a pager that counts the rows (1,169 work orders, ten to a page). Rows open ordered by spend, largest first.
 
 Columns, in order:
 
@@ -48,11 +48,11 @@ Columns, in order:
 | Work order | Work order (the id in mono over the title) · Kind (`direct` or `dispatched`) · Sent by · Runs · Items accepted ("N of M", or a dash) · Per accepted item (a dash when none was accepted) · Spend |
 | Operator | Operator (the name over the role, such as `workspace.owner · core-platform`) · Agents · Runs · Tokens · Cache hit · Budget position (a bar, red above 80%, over "N% of $X") · Spend · Share |
 | Agent | Agent (the agent card) · Runs · Tokens per run · Cache hit · Trend (a badge, such as "-4%" or "+5%") · Spend · Share |
-| Model | Model (the id in mono, and each of Oxagen's own routes adds "Oxagen’s own work · <provider>") · Provider key · Model calls · Cache hit (a dash where the route reports no cache) · Spend · Share |
+| Model | Model (the id in mono, and each of Oxagen's own routes adds "oxagen’s own work · <provider>") · Provider key · Model calls · Cache hit (a dash where the route reports no cache) · Spend · Share |
 | Tool | Tool (the name in mono over its kind, such as `harness`, `jira` or `stripe`) · Calls · Runs · Per call · Spend · Share |
 | Cost center | Cost center (the label in mono, and `~none` adds "no agent or workspace label"; a label deleted since its runs rolled up keeps its row and adds a `deleted` badge) · Agents · Workspaces · Spend · Share |
 
-Two groupings end on a note. By work order: "1,166 work orders in view, most of them direct: a run started from an operator’s own terminal. The rest of the month’s runs roll up the same way." By cost center: "A run with no label is charged to ~none, so the centers sum to the month (ADR-142)."
+Two groupings end on a note. By work order: "1,169 work orders in view, most of them direct: a run started from an operator’s own terminal. The rest of the month’s runs roll up the same way." By cost center: "A run with no label is charged to ~none, so the centers sum to the month (ADR-142)."
 
 Selecting a row writes `&key=`, marks the row (`aria-selected`) and opens the side panel. Selecting the open row again closes it. While a panel is open, the table narrows to the name column, Spend and, on every grouping but By work order, Share. The panel takes the right column (340 px).
 
@@ -131,7 +131,7 @@ The design leaves these fields unmarked, although no contract carries them today
 - **Cost centers** (ADR-142). A run is charged to its agent's label if the label is live, else to its workspace's, else to `~none`. A run keeps the cost center its first rollup resolved, so a statement for a closed month stays where finance booked it. **Export the statement** downloads the organization's month as CSV: one line per center and one for `~none`, each with its run count, unpriced runs, cost in micros and cents, basis and run ids, and a total line. Micros reconcile, and cents are rounded once per line, half to even.
 - **The operator panel** is the operator review's record for one person. It shows spend cut by the person who started the run, and outcome per dollar for bounded tasks: items accepted from the work orders the person dispatched, and spend per accepted item. It links to the person's prompt habits on Optimization. It carries no score, no rank, no severity and no verdict. The review also splits the person's spend by agent and by workspace. The design's panel shows the totals, and the split waits on a read that carries it.
 - **The agent panel** counts the recommendations Optimization lists for the agent and links to them.
-- **Money.** Every amount carries its basis (`gateway_observed`, `client_attested`, both, or `estimated`) as the record states it. Amounts are integer micros on the wire and are rounded once, at display or at a statement line. A figure no frame priced prints "not recorded", never a zero.
+- **Money.** Every amount carries its basis (Observed by gateway `gateway_observed`, Reported by harness `client_attested`, both, or `estimated`) as the record states it. Amounts are integer micros on the wire and are rounded once, at display or at a statement line. A figure no frame priced prints "not recorded", never a zero.
 - **Actions.** **Set a budget** opens `budget`. **Export report** opens `spendexport` and exports the month's statement as CSV. **Export the statement** needs org Owner, Admin or Billing. For anyone else it opens no dialog and shows a toast that names who holds the role (`ccDenied()`). Neither export changes anything.
 
 ## States

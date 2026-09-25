@@ -218,14 +218,14 @@
   <ul>
     <li>Rule, in the CSS comment at engine.css 494 to 497: people are round, and agents, workspaces, and organizations are squircles. Five tones: solid, soft, and line from the theme, and gold and dark gold from the brand. No free color, no gradient.</li>
     <li><code>.avx.f-serif</code> sets Georgia (with system serif fallbacks), which is the one font family anywhere in the product outside Geist, Space Grotesk, and Monaspace Neon. It is not a departure: it is the operator's own choice of initials font for their avatar, the same way a person picks a photo.</li>
-    <li><code>.avat</code> (engine.css 493) predates the tone system and has exactly one caller, a fallback avatar in the evidence dialog for an agent id the fixtures do not carry a record for (engine.js 9518). That caller overrides <code>.avat</code>'s own circular radius with an inline <code>border-radius:9px</code>, so <code>.avat</code>'s own shape never actually appears on screen.</li>
+    <li><code>.avat</code> (engine.css 493) predates the tone system and has exactly one caller, a fallback avatar in the evidence dialog for an agent id the fixtures do not carry a record for (engine.js 9521). That caller overrides <code>.avat</code>'s own circular radius with an inline <code>border-radius:9px</code>, so <code>.avat</code>'s own shape never actually appears on screen.</li>
   </ul>
 </section>
 
 <section class="dx-sec">
   <h2 id="findings">Findings</h2>
   
-  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>A dead shape with a live caller</h4><p>The components index lists <code>.avat</code> among the rules with no emitter. That is stale: <code>.avat</code> has exactly one caller, the evidence dialog's placeholder avatar for an agent id with no matching record (engine.js 9518). The caller overrides the class's own 52px circular radius with an inline <code>border-radius:9px</code>, so <code>.avat</code>'s own definition still renders nothing a person can see. The index's finding should read &quot;one caller, and it overrides the class&quot; rather than &quot;no emitter&quot;.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>A dead shape with a live caller</h4><p>The components index lists <code>.avat</code> among the rules with no emitter. That is stale: <code>.avat</code> has exactly one caller, the evidence dialog's placeholder avatar for an agent id with no matching record (engine.js 9521). The caller overrides the class's own 52px circular radius with an inline <code>border-radius:9px</code>, so <code>.avat</code>'s own definition still renders nothing a person can see. The index's finding should read &quot;one caller, and it overrides the class&quot; rather than &quot;no emitter&quot;.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>One legacy shape beside the tone system</h4><p><code>.avat</code> is a flat circle with no kind, no tone, and no shape rule, left over from before <code>avatarHtml()</code>. Its one caller could use <code>agentAv()</code> with a fallback record instead, retiring <code>.avat</code> entirely.</p></div>
 </section>
 

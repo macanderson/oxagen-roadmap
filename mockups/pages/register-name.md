@@ -65,7 +65,7 @@ The card fills the width with 16 px gutters. Buttons are full width and at least
 
 ## Rules every build of this page must keep
 
-- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger. A client-attested window is labelled as such.
+- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger. A window the harness reported is labeled as such.
 - Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice.
 - Every explanation is a chain of links to frames, records, and commits, not a summary.
 - Exactly one gold action per screen. Gold is identity and never encodes state. State reads as a dot and a word, so it survives greyscale.
