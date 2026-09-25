@@ -21,7 +21,7 @@ This spec is the design authority for the change. `fleet-operations-ia.md` lays 
 
 | # | Decision |
 |---|---|
-| D1 | Work is the primary surface. The workspace opens on Work, whose tabs are Backlog, Work orders, Workflows and Findings. |
+| D1 | Work is the primary surface. The workspace opens on Work, whose tabs are Backlog, In progress, Work orders, Workflows and Findings. |
 | D2 | A run is a child record of exactly one work order. A run an operator starts outside Oxagen is filed under a direct work order that Oxagen opens for it. |
 | D3 | The Fleet page retires. Its population view moves to Agents. Its runs table becomes the runs of each work order and each agent's Activity tab. Its waiting count is the Approvals drawer's count, shown on every page. |
 | D4 | A Steering Source and a SteeringFrame are two objects and never collapse into one. A source is durable material a person or an agent wrote. A SteeringFrame is what Oxagen resolved from a source for one run at one injection point. |

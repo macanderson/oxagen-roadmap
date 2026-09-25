@@ -138,8 +138,8 @@ export default {
     ["--mono", "`.kv.code` values and any `dd.mono`"],
   ],
   helpers: [
-    ["frKv(rows)", "engine.js:3402", "Writes a `dl.kv` from an array of `[label, value]` pairs, dropping any falsy row. About 15 calls, mostly frame detail."],
-    ["kvl(pairs, cls)", "engine.js:9679", "The same shape again: a `dl.kv` from pairs, with an optional extra class. 7 calls, all in the account dialog."],
+    ["frKv(rows)", "engine.js:3416", "Writes a `dl.kv` from an array of `[label, value]` pairs, dropping any falsy row. About 15 calls, mostly frame detail."],
+    ["kvl(pairs, cls)", "engine.js:9693", "The same shape again: a `dl.kv` from pairs, with an optional extra class. 7 calls, all in the account dialog."],
   ],
   sourceNotes: [
     "87 more sites write `<dl class=\"kv\">` or `<div class=\"kv\">` inline as strings, across the approval card, the agent tabs, Organization, Billing, Steering, and every frame-detail reader that does not go through `frKv()`.",

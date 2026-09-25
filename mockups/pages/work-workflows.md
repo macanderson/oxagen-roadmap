@@ -20,7 +20,7 @@ Component help for this tab lives in `mockups/help/work-workflows.md`.
 
 **Header.** As `work-backlog.md`: eyebrow the workspace name and h1 “Work”, with no subtext. The explanation is in `mockups/help/work-backlog.md`, Header. On Workflows the action is **New workflow** (gold; opens the builder).
 
-**Tabs**: Backlog `7` · Work orders `1` · Workflows · Findings `36`, with Workflows selected. Workflows carries no count.
+**Tabs**: Backlog `7` · In progress · Work orders `1` · Workflows · Findings `36`, with Workflows selected. Workflows carries no count.
 
 The tab body is the Workflows panel at full width. The mockup outlines the whole body as future-only.
 

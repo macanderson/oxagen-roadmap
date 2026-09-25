@@ -164,7 +164,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <tbody>
 <tr>
 <td>D1</td>
-<td>Work is the primary surface. The workspace opens on Work, whose tabs are Backlog, Work orders, Workflows and Findings.</td>
+<td>Work is the primary surface. The workspace opens on Work, whose tabs are Backlog, In progress, Work orders, Workflows and Findings.</td>
 </tr>
 <tr>
 <td>D2</td>
@@ -13079,7 +13079,7 @@ sandbox before its connector is built.</li>
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
   <h1>Work in flight</h1>
-  <dl class="facts"><dt>Status</dt><dd>Spec v1, for design review. No code is written against it yet. The fleet operations wedge renamed Tasks to Work (<code>fleet-operations-wedge.md</code>). This spec keeps the words of <code>tasks-spec.md</code>: a task is a work item, and the Tasks page is Work.</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Extends</dt><dd><code>tasks-spec.md</code> (providers, the task record, the definition of done, work orders, and workflows). §2 lists every line of it this spec changes.</dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs agents, it does not run them), ADR-162 (a run resolves an issue when dispatch, PR link, and merge agree), ADR-101 (four first-class harnesses), ADR-113 (the product name, and &quot;Dispatch&quot; reserved), ADR-025 (verb-first capability names, no aliases)</dd><dt>Related</dt><dd><code>mission-control-spec.md</code> §6.7 (taint), §7.3 (delivery modes), §7.6 (messages between agents), <code>creation-spec.md</code> (every definition is a file), <code>dod-spec.md</code></dd><dt>Pages</dt><dd>None yet. The In flight tab (§8.7) and the Scope section of the work order screen (§7.2) need mockup pages and audit prompts before the build.</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Spec v1, for design review. No code is written against it yet. The fleet operations wedge renamed Tasks to Work (<code>fleet-operations-wedge.md</code>). This spec keeps the words of <code>tasks-spec.md</code>: a task is a work item, and the Tasks page is Work.</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Extends</dt><dd><code>tasks-spec.md</code> (providers, the task record, the definition of done, work orders, and workflows). §2 lists every line of it this spec changes.</dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs agents, it does not run them), ADR-162 (a run resolves an issue when dispatch, PR link, and merge agree), ADR-101 (four first-class harnesses), ADR-113 (the product name, and &quot;Dispatch&quot; reserved), ADR-025 (verb-first capability names, no aliases)</dd><dt>Related</dt><dd><code>mission-control-spec.md</code> §6.7 (taint), §7.3 (delivery modes), §7.6 (messages between agents), <code>creation-spec.md</code> (every definition is a file), <code>dod-spec.md</code></dd><dt>Pages</dt><dd><code>mockups/pages/work-in-progress.md</code> draws the first cut of the In progress tab (§8.7). The Scope section of the work order screen (§7.2) needs a mockup page and an audit prompt before the build.</dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#work-in-flight/1-the-situation">1. The situation</a></li><li><a href="#work-in-flight/2-what-this-changes-in-tasks-spec-md">2. What this changes in tasks-spec.md</a></li><li><a href="#work-in-flight/3-csv-upload">3. CSV upload</a></li><li><a href="#work-in-flight/4-fields">4. Fields</a></li><li><a href="#work-in-flight/5-estimates">5. Estimates</a></li><li><a href="#work-in-flight/6-messages-between-agents">6. Messages between agents</a></li><li><a href="#work-in-flight/7-scope-claims">7. Scope claims</a></li><li><a href="#work-in-flight/8-the-plan">8. The plan</a></li><li><a href="#work-in-flight/9-relationship-to-adr-162">9. Relationship to ADR-162</a></li><li><a href="#work-in-flight/10-capabilities">10. Capabilities</a></li><li><a href="#work-in-flight/11-storage">11. Storage</a></li><li><a href="#work-in-flight/12-permissions">12. Permissions</a></li><li><a href="#work-in-flight/13-decisions">13. Decisions</a></li><li><a href="#work-in-flight/14-open-questions">14. Open questions</a></li><li><a href="#work-in-flight/15-definition-of-done-for-the-build">15. Definition of done for the build</a></li></ol></nav>
@@ -13703,9 +13703,12 @@ three bug fixers on three hosts. The work order reaches every host in the pool. 
 it wins, by the conditional update ADR-162 specifies for a dispatch. A later claim is refused and
 recorded. A pool grants nothing and steers no agent, so it is a row in Postgres rather than a file, as
 tasks-spec §6.6 reasons for field settings. On day 1 every agent in a pool is one you operate.</p>
-<h3 id="work-in-flight/8-7-the-in-flight-tab">8.7 The In flight tab</h3>
-<p>A fifth tab on the Work page, beside Backlog, Work orders, Workflows, and Findings. One row per open work order,
-grouped by plan:</p>
+<h3 id="work-in-flight/8-7-the-in-progress-tab">8.7 The In progress tab</h3>
+<p>The second tab on the Work page, after Backlog. A work item leaves the Backlog when a send puts it in a
+work order and appears here, one row per work item, until a person accepts it. The mockup
+(<code>mockups/pages/work-in-progress.md</code>) draws the work item, its labels, owner, work order, target, state,
+and items claimed. When the plan (§8) ships, each row also carries its work order’s columns below,
+and the rows group by plan:</p>
 <div class="tw"><table>
 <thead>
 <tr>

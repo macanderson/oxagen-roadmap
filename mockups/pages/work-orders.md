@@ -20,7 +20,7 @@ Component help for this tab lives in `mockups/help/work-orders.md`.
 
 **Header.** As `work-backlog.md`: eyebrow the workspace name and h1 “Work”, with no subtext. The explanation is in `mockups/help/work-backlog.md`, Header. The Work orders tab has no header action.
 
-**Tabs**: Backlog `7` · Work orders `1` · Workflows · Findings `36`, with Work orders selected. Its count is the work orders waiting on you to accept.
+**Tabs**: Backlog `7` · In progress · Work orders `1` · Workflows · Findings `36`, with Work orders selected. Its count is the work orders waiting on you to accept.
 
 **Work orders panel.** Heading “Work orders”, with no subtext. The explanation is in `mockups/help/work-orders.md`, Work orders. Filter chips in the panel header, each with its count, the chosen one marked: **All** `282` · **Dispatched** `4` · **Direct** `278` · **Live** `7`. Live keeps the work orders with a live run. The shared list bar: a search field (“Search this list”), a State facet (“All · State”, over the states present), Rows (5, 10, 25, 50, All), and a pager (“1–10 of 282”). Rows sort newest first, by when the work order was sent or opened.
 

@@ -1019,7 +1019,7 @@ function route(){
   if(sec==="work"){
     if(p[3]==="items"&&p[4]) return {page:"workitem",org:org,ws:w,id:decodeURIComponent(p[4])};
     if(p[3]==="orders"&&p[4]) return {page:"workorder",org:org,ws:w,id:decodeURIComponent(p[4])};
-    var wt=({orders:"orders",workflows:"workflows",findings:"findings"})[p[3]]||"backlog";
+    var wt=({"in-progress":"in-progress",orders:"orders",workflows:"workflows",findings:"findings"})[p[3]]||"backlog";
     S.tab.work=wt;
     if(HQ.get("intake")) hashDialog("intake",HQ.get("intake"));
     if(wt==="findings"&&HQ.get("finding")) hashDialog("evidence",HQ.get("finding"));
@@ -2447,17 +2447,31 @@ function copyPath(txt){
 }
 /* Longer text than a path, so a refusal cannot be shown in a toast to select by hand. The toast waits
    for the clipboard to answer, tries a selected textarea when it refuses, and says so when both do. */
-function copyText(txt,said){
+function copyText(txt,said,btn){
+  var done=function(){ act(said); copiedState(btn); };
   var byHand=function(){
     var ta=document.createElement("textarea"), ok=false;
     ta.value=txt; ta.setAttribute("readonly",""); ta.style.cssText="position:fixed;top:0;left:0;opacity:0";
     document.body.appendChild(ta); ta.select();
     try{ ok=document.execCommand("copy"); }catch(e){ ok=false; }
     ta.remove();
-    if(ok) act(said); else act("The browser refused the clipboard. Nothing was copied.","denied");
+    if(ok) done(); else act("The browser refused the clipboard. Nothing was copied.","denied");
   };
-  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){act(said);},byHand); return; } }catch(e){}
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done,byHand); return; } }catch(e){}
   byHand();
+}
+/* The button that copied says so where the eye already is, and the toast says what went. The label comes
+   back after 1.6s. A render in that time rebuilds the header from strings, and the button it drops is
+   restored off the page, which costs nothing. A refused copy never reaches here. */
+var COPIED_ICO='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5"/></svg>';
+function copiedState(btn){
+  if(!btn||!btn.isConnected) return;
+  if(!btn.classList.contains("copied")){ btn.dataset.label=btn.innerHTML; btn.style.minWidth=btn.offsetWidth+"px"; }
+  btn.innerHTML=COPIED_ICO+"Copied"; btn.classList.add("copied");
+  clearTimeout(btn.copiedT);
+  btn.copiedT=setTimeout(function(){
+    btn.innerHTML=btn.dataset.label; btn.classList.remove("copied"); btn.style.minWidth=""; delete btn.dataset.label;
+  },1600);
 }
 /* The second header strip: the repository, the branch, the pull requests, and the checkout. */
 function runWhere(R){
@@ -13393,16 +13407,65 @@ function optText(t){
   if(!/^[a-z][a-z ]*$/.test(t)||/^(oxagen|stella)\b/.test(t)) return t;
   return t.charAt(0).toUpperCase()+t.slice(1);
 }
+function ltAny(label){return "Any "+(/^[A-Z][a-z]/.test(label)?label.charAt(0).toLowerCase()+label.slice(1):label);}
+/* The face of a multi-select filter: "Any labels", or the first pick as the table draws it and "+N". */
+function ltMultiFace(f,sel){
+  if(!sel.length) return '<span class="lt-mt">'+h(ltAny(f.label))+'</span>';
+  var first=f.opts.filter(function(o){return o.v===sel[0];})[0];
+  return (first?'<span class="lt-mv">'+first.html+'</span>':'')+(sel.length>1?'<span class="lt-mn">+'+(sel.length-1)+'</span>':'');
+}
+var LT_MN=0;
+function ltMulti(st,f){
+  var sel=st.f[f.key]=Array.isArray(st.f[f.key])?st.f[f.key]:[], id="ltm-"+(++LT_MN);
+  return '<span class="lt-m" data-k="'+h(f.key)+'"><button type="button" class="lt-mb" popovertarget="'+id+'" aria-haspopup="true" aria-expanded="false"'+(sel.length?' data-on':'')+
+     ' aria-label="Filter by '+h(f.label)+(sel.length?', '+sel.length+' selected':'')+'">'+ltMultiFace(f,sel)+'</button>'+
+   '<div class="lt-pop" id="'+id+'" popover role="group" aria-label="'+h(f.label)+'">'+
+   f.opts.map(function(o){return '<label class="lt-o"><input type="checkbox" value="'+h(o.v)+'"'+(sel.indexOf(o.v)>=0?' checked':'')+'><span class="lt-ov">'+o.html+'</span><span class="lt-on">'+o.n+'</span></label>';}).join("")+
+   '<div class="lt-pf"><button type="button" class="btn sm" data-clear'+(sel.length?'':' disabled')+'>Clear</button></div></div></span>';
+}
+/* A multi-select filter opens under its button. The popover sits in the top layer, so a panel that
+   clips its overflow cannot cut it off, and a click outside or Escape closes it. */
+function ltMultiWire(m,st,f,apply){
+  var btn=m.querySelector(".lt-mb"), pop=m.querySelector(".lt-pop");
+  function sync(){
+    var sel=st.f[f.key];
+    btn.innerHTML=ltMultiFace(f,sel);
+    btn.toggleAttribute("data-on",sel.length>0);
+    btn.setAttribute("aria-label","Filter by "+f.label+(sel.length?", "+sel.length+" selected":""));
+    pop.querySelector("[data-clear]").disabled=!sel.length;
+  }
+  function onScroll(e){ if(!pop.contains(e.target)) pop.hidePopover(); }
+  pop.addEventListener("toggle",function(e){
+    var open=e.newState==="open";
+    btn.setAttribute("aria-expanded",String(open));
+    if(open){
+      var r=btn.getBoundingClientRect();
+      pop.style.top=Math.round(r.bottom+4)+"px";
+      pop.style.left=Math.round(Math.max(8,Math.min(r.left,innerWidth-pop.offsetWidth-8)))+"px";
+      document.addEventListener("scroll",onScroll,true);
+    } else document.removeEventListener("scroll",onScroll,true);
+  });
+  pop.addEventListener("change",function(){
+    st.f[f.key]=[].slice.call(pop.querySelectorAll("input:checked")).map(function(i){return i.value;});
+    st.page=1; sync(); apply();
+  });
+  pop.querySelector("[data-clear]").addEventListener("click",function(){
+    pop.querySelectorAll("input:checked").forEach(function(i){i.checked=false;});
+    st.f[f.key]=[]; st.page=1; sync(); apply();
+  });
+}
 function ltBar(st,opts,apply){
   var html='<div class="lt"><input class="lt-q" type="search" placeholder="'+h(opts.ph)+'" aria-label="'+h(opts.ph)+'" value="'+h(st.q)+'">';
   (opts.filters||[]).forEach(function(f){
-    html+='<select class="lt-f" data-k="'+h(f.key)+'" aria-label="Filter by '+h(f.label)+'"><option value="">Any '+h(/^[A-Z][a-z]/.test(f.label)?f.label.charAt(0).toLowerCase()+f.label.slice(1):f.label)+'</option>'+
+    if(f.multi){ html+=ltMulti(st,f); return; }
+    html+='<select class="lt-f" data-k="'+h(f.key)+'" aria-label="Filter by '+h(f.label)+'"><option value="">'+h(ltAny(f.label))+'</option>'+
       f.values.map(function(v){var t=keyText(v);return '<option value="'+h(v)+'"'+(st.f[f.key]===v?' selected':'')+'>'+h(optText(t))+'</option>';}).join("")+'</select>';});
   if(opts.sorts){ html+='<label class="lt-sort">Sort<select class="lt-s">'+opts.sorts.map(function(s,i){return '<option value="'+i+'"'+((st.sort==null?0:st.sort)===i?' selected':'')+'>'+h(s.label)+'</option>';}).join("")+'</select></label>'; }
   html+='<label class="lt-rows">Rows<select class="lt-per" aria-label="Rows per page">'+LT_PER.map(function(p){return '<option value="'+p+'"'+(st.per===p?' selected':'')+'>'+(p||"All")+'</option>';}).join("")+'</select></label></div>';
   var bar=ltEl(html);
   bar.querySelector(".lt-q").addEventListener("input",function(e){st.q=e.target.value;st.page=1;apply();});
   bar.querySelectorAll(".lt-f").forEach(function(s){s.addEventListener("change",function(e){st.f[s.getAttribute("data-k")]=e.target.value;st.page=1;apply();});});
+  (opts.filters||[]).forEach(function(f){ if(f.multi) ltMultiWire(bar.querySelector('.lt-m[data-k="'+f.key+'"]'),st,f,apply); });
   var ss=bar.querySelector(".lt-s"); if(ss)ss.addEventListener("change",function(e){st.sort=+e.target.value;st.page=1;apply();});
   bar.querySelector(".lt-per").addEventListener("change",function(e){st.per=+e.target.value;st.page=1;apply();});
   return bar;
@@ -13425,11 +13488,31 @@ function ltLead(n){
 }
 function ltFacets(cols,vals,rows){
   if(rows<4)return [];
-  var c=cols.filter(function(col){ if(!col.name||col.num)return false;
+  var c=cols.filter(function(col){ if(!col.name||col.num||col.multi||col.off)return false;
     var set={},n=0,ok=true; vals.forEach(function(v){var t=v[col.i].f; if(!t)return; if(t.length>28)ok=false; if(/^\d{4}-\d\d-\d\d/.test(t))ok=false; if(!set[t]){set[t]=1;n++;}});
     if(!ok||n<2||n>8||n>=rows)return false; col.values=Object.keys(set).sort(); return true;});
   c.sort(function(a,b){var pa=LT_FACET.test(a.name)?0:1,pb=LT_FACET.test(b.name)?0:1; return pa-pb||a.values.length-b.values.length;});
   return c.slice(0,3).map(function(col){return {key:String(col.i),label:col.name,values:col.values};});
+}
+/* A column whose header carries data-facet="multi" filters on every value in a cell, where the
+   facets above read only the first. Each value is an element carrying data-fv, and its option shows
+   that element as the table draws it: a label in its color, an owner with an avatar. data-fo orders
+   the options where the fixture has an order; the rest sort by name. A row matches any value picked. */
+function ltMultiFacets(cols,rows,vals){
+  return cols.filter(function(col){return col.multi;}).map(function(col){
+    var by={}, opts=[];
+    rows.forEach(function(r,i){
+      var seen={}, mine=[];
+      [].slice.call(r.cells[col.i]?r.cells[col.i].querySelectorAll("[data-fv]"):[]).forEach(function(e){
+        var v=e.getAttribute("data-fv"); if(seen[v])return; seen[v]=1; mine.push(v);
+        if(!by[v]){ var fo=e.getAttribute("data-fo"); by[v]={v:v,html:e.outerHTML,t:ltCellText(e),o:fo==null?null:+fo,n:0}; opts.push(by[v]); }
+        by[v].n++;
+      });
+      vals[i][col.i].m=mine;
+    });
+    opts.sort(function(a,b){ if(a.o!=null&&b.o!=null)return a.o-b.o; if(a.o!=null||b.o!=null)return a.o!=null?-1:1; return a.t.localeCompare(b.t,undefined,{sensitivity:"base"}); });
+    return opts.length>1?{key:String(col.i),label:col.name,multi:true,opts:opts}:null;
+  }).filter(Boolean);
 }
 
 /* A cell's text as it reads on screen. textContent runs adjacent elements together ("platformmbell",
@@ -13451,7 +13534,8 @@ function ltTable(table,prefix){
   var tbody=table.tBodies[0], rows=[].slice.call(tbody.rows);
   var ths=[].slice.call(table.tHead.rows[0].cells);
   if(ths.some(function(t){return t.colSpan>1;}))return;
-  var cols=ths.map(function(th,i){return {i:i,name:th.textContent.trim(),num:th.classList.contains("num")};});
+  /* data-facet on a header: "multi" filters on every value in the cell, "off" keeps the column out of the filters */
+  var cols=ths.map(function(th,i){var fa=th.getAttribute("data-facet");return {i:i,name:th.textContent.trim(),num:th.classList.contains("num"),multi:fa==="multi",off:fa==="off"};});
   var sig=cols.map(function(c){return c.name;}).join("/");
   var st=ltState(prefix,sig);
   /* A cell may name its own value in data-v, for sorting and filtering, where its text carries a
@@ -13461,7 +13545,9 @@ function ltTable(table,prefix){
   /* a dash is an empty cell, so a column of counts with a few dashes still reads as numbers */
   cols.forEach(function(c){ if(c.num)return; var k=0,tot=0; vals.forEach(function(v){var t=v[c.i].t; if(t&&t!=="—"&&t!=="-"){tot++; if(v[c.i].n!=null)k++;}}); if(tot&&k/tot>=.6)c.num=true; });
   var texts=rows.map(function(r){return r.textContent.replace(/\s+/g," ").toLowerCase();});
-  var facets=ltFacets(cols,vals,rows.length);
+  var facets=ltFacets(cols,vals,rows.length), multis=ltMultiFacets(cols,rows,vals);
+  /* with a multi-select filter the bar holds four filters at most, in column order */
+  if(multis.length) facets=facets.slice(0,Math.max(0,4-multis.length)).concat(multis).sort(function(a,b){return a.key-b.key;});
   var tw=table.closest(".tw")||table, host=tw.parentNode, ph="Search this list";
   /* A page-level search box sitting directly above the table becomes the list's
      search, so no list ever shows two. */
@@ -13481,7 +13567,9 @@ function ltTable(table,prefix){
     var q=st.q.trim().toLowerCase();
     var idx=rows.map(function(_,i){return i;}).filter(function(i){
       if(q&&texts[i].indexOf(q)<0)return false;
-      for(var k in st.f){ if(st.f[k]&&vals[i][+k]&&vals[i][+k].f!==st.f[k])return false; } return true; });
+      for(var k in st.f){ var fk=st.f[k], v=vals[i][+k]; if(!v)continue;
+        if(Array.isArray(fk)){ if(fk.length&&!(v.m||[]).some(function(x){return fk.indexOf(x)>=0;}))return false; }
+        else if(fk&&v.f!==fk)return false; } return true; });
     if(st.sort!=null&&cols[st.sort]){var c=cols[st.sort]; idx.sort(function(a,b){return ltCmp(vals[a][c.i],vals[b][c.i],c.num,st.dir)||(a-b);});}
     var total=idx.length, per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per)); if(st.page>pages)st.page=pages;
     /* a row the address selected opens on its own page, once per selection, so paging stays the reader's */
@@ -14626,9 +14714,10 @@ function tkWaiting(){return wsTasks().filter(function(t){return t.ready==="draft
 function woWaiting(){return wsWorkOrders().filter(function(w){return w.status==="waiting on you";}).length;}
 
 /* ---- small renderers ---- */
+/* data-fv and data-fo let a list filter on every chip in a cell, in the order Intake sets */
 function lblChip(k){
   var l=tLabel(k); if(!l)return "";
-  return '<span class="lbl" style="--lc:'+h(l.color)+'"><i aria-hidden="true"></i>'+h(l.name)+'</span>';
+  return '<span class="lbl" style="--lc:'+h(l.color)+'" data-fv="'+h(l.key)+'" data-fo="'+TLABELS.indexOf(l)+'"><i aria-hidden="true"></i>'+h(l.name)+'</span>';
 }
 function lblChips(ks){return '<span class="lbls">'+(ks||[]).map(lblChip).join("")+'</span>';}
 function tStatusBadge(k){
@@ -14651,8 +14740,9 @@ function readyBadge(t){var m=READY[t.ready]||READY.draft;return '<span class="b 
 function tkPerson(id,opts){
   var p=tPerson(id); opts=opts||{};
   if(!p) return '<span class="dim">—</span>';
-  if(p.state==="mapped"&&PEOPLE[p.to]) return '<span class="tkp">'+personAv(p.to,20)+'<span>'+h(PEOPLE[p.to].name)+(opts.handle?'<span class="dim mono" style="font-size:11px;margin-left:6px">'+ipLogo(p.kind,11)+' '+h(p.handle)+'</span>':'')+'</span></span>';
-  return '<span class="tkp">'+ipLogo(p.kind,14)+'<span class="mono">'+h(p.handle)+'</span>'+
+  /* data-fv names the member, so two accounts mapped to one person filter as that person */
+  if(p.state==="mapped"&&PEOPLE[p.to]) return '<span class="tkp" data-fv="'+h(p.to)+'">'+personAv(p.to,20)+'<span>'+h(PEOPLE[p.to].name)+(opts.handle?'<span class="dim mono" style="font-size:11px;margin-left:6px">'+ipLogo(p.kind,11)+' '+h(p.handle)+'</span>':'')+'</span></span>';
+  return '<span class="tkp" data-fv="'+h(p.id)+'">'+ipLogo(p.kind,14)+'<span class="mono">'+h(p.handle)+'</span>'+
     '<span class="vh"> (</span>'+(p.state==="bot"||p.state==="requester"?'<span class="b b-q" style="font-size:10px">'+p.state+'</span>':'<span class="b b-q" style="font-size:10px" title="Not mapped to a workspace member">not mapped</span>')+'<span class="vh">)</span></span>';
 }
 var DOD_TAGS=["code","test","docs","review"];
@@ -15172,7 +15262,7 @@ function pTask(r){
   var res=t.resolution?tRes(t.resolution):null;
   return '<div class="phead"><div class="t"><p class="eyebrow">'+wiLogo(t,13)+' <span class="id">'+h(t.num)+'</span>'+tkDiscBadge(t)+'</p><h1>'+h(t.subject)+'</h1>'+
    '<p>'+(own?(t.finding?'Written in Oxagen from finding <span class="mono">'+h(t.finding)+'</span>':'Written in Oxagen'):'Imported from '+h(k.l))+'. Updated '+h(t.updatedAt)+'.'+(t.ready==="ready"&&tkGraphBlocked(t)?' Blocked by '+h(tkOpenBlockers(t).map(function(b){return tkNum(b.task);}).join(" and "))+'.':'')+'</p></div>'+
-   '<div class="acts"><button class="btn" onclick="copyTaskPrompt(\''+t.id+'\')" title="Copy the work item and its work orders as text">Copy prompt</button>'+
+   '<div class="acts"><button class="btn" onclick="copyTaskPrompt(\''+t.id+'\',this)" title="Copy the work item and its work orders as text">Copy prompt</button>'+
    (own?(t.finding?'<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/work/findings?finding='+h(t.finding)+'\')">Open the finding</button>':'')
      :'<a class="btn" href="'+h(providerUrl(t))+'" target="_blank" rel="noopener">Open in '+h(k.l)+'</a>')+prim+'</div></div>'+
    changedBanner+
@@ -15288,7 +15378,7 @@ function pWorkOrder(r){
    (direct?'<p>Oxagen opened it on '+h(w.sent)+' for a run '+h((PEOPLE[w.by]||{}).name||w.by)+' started outside Oxagen'+(w.ref?', titled from its task reference <span class="mono">'+h(w.ref)+'</span>':'')+'.</p>'
      :w.status==="queued"?'<p>Queued by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' for '+h(tgt)+'. It is sent when '+h(woWaitsOnText(w))+' is done, or expires on '+h(w.expires||"")+'.'+woSubMore(w)+'</p>'
      :'<p>Sent by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' to '+h(tgt)+'.'+woSubMore(w)+'</p>')+'</div>'+
-   '<div class="acts">'+(direct?'':'<button class="btn" onclick="copyWoPrompt(\''+w.id+'\')" title="Copy the brief as sent with its references">Copy brief</button>')+
+   '<div class="acts">'+(direct?'':'<button class="btn" onclick="copyWoPrompt(\''+w.id+'\',this)" title="Copy the brief as sent with its references">Copy brief</button>')+
    (w.status==="queued"?'<button class="btn" onclick="openDialog(\'worelease\',\''+w.id+'\')">Send now</button><button class="btn danger" onclick="openDialog(\'wowithdraw\',\''+w.id+'\')">Withdraw</button>'
     :w.status==="sent"&&!w.started&&!w.runs.length?'<button class="btn danger" onclick="openDialog(\'wowithdraw\',\''+w.id+'\')">Withdraw</button>'
     :(w.status==="stopped"||w.status==="expired")&&!direct?(w.retriedAs?'':'<button class="btn" onclick="woRetry(\''+w.id+'\')">Send again</button>')
@@ -15382,13 +15472,13 @@ function woPromptText(id){
   if(pr) L.push("- Pull request "+pr);
   return L.join("\n");
 }
-function copyTaskPrompt(id){
+function copyTaskPrompt(id,btn){
   var n=taskWorkOrders(taskById(id)||{id:id}).length;
-  copyText(taskPromptText(id),"Prompt copied, with "+(n?n+" work order"+(n>1?"s":""):"no work order")+".");
+  copyText(taskPromptText(id),"Prompt copied, with "+(n?n+" work order"+(n>1?"s":""):"no work order")+".",btn);
 }
-function copyWoPrompt(id){
+function copyWoPrompt(id,btn){
   var n=((woById(id)||{}).tasks||[]).length;
-  copyText(woPromptText(id),"Brief copied, with "+n+" work item"+(n>1?"s":"")+".");
+  copyText(woPromptText(id),"Brief copied, with "+n+" work item"+(n>1?"s":"")+".",btn);
 }
 
 /* ============================== the work order dialog ==============================

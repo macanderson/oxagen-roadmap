@@ -162,7 +162,7 @@ export default {
     ["--gold, --on-gold", "The one primary action"],
   ],
   helpers: [
-    ["srcHead(o, kindLabel, title, badges, lead, acts)", "wedge.js:1011", "The header of a Steering source: back link, title, badge row, lead, and actions. It drops a title over 90 characters to 20px."],
+    ["srcHead(o, kindLabel, title, badges, lead, acts)", "wedge.js:1055", "The header of a Steering source: back link, title, badge row, lead, and actions. It drops a title over 90 characters to 20px."],
     ["pWork()", "wedge.js:74", "A plain page header, written inline, as most pages write theirs."],
   ],
   sourceNotes: [

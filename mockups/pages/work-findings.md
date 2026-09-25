@@ -20,7 +20,7 @@ Component help for this tab lives in `mockups/help/work-findings.md`.
 
 **Header.** As `work-backlog.md`: eyebrow the workspace name and h1 “Work”, with no subtext. The explanation is in `mockups/help/work-backlog.md`, Header. The Findings tab has no header action.
 
-**Tabs**: Backlog `7` · Work orders `1` · Workflows · Findings `36`, with Findings selected. Its count is the open findings nobody has picked up.
+**Tabs**: Backlog `7` · In progress · Work orders `1` · Workflows · Findings `36`, with Findings selected. Its count is the open findings nobody has picked up.
 
 **Tiles**, four across, one value and one caption each:
 

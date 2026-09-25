@@ -70,7 +70,7 @@ function woKindBadge(w){
 }
 
 /* ============================== Work ============================== */
-var WORK_TABS=[["backlog","Backlog"],["orders","Work orders"],["workflows","Workflows"],["findings","Findings"]];
+var WORK_TABS=[["backlog","Backlog"],["in-progress","In progress"],["orders","Work orders"],["workflows","Workflows"],["findings","Findings"]];
 function pWork(r){
   var w=ws(), t=r&&r.tab||S.tab.work||"backlog";
   if(S.state==="loading") return skeleton();
@@ -90,24 +90,55 @@ function pWork(r){
   var sel=Object.keys(S.tsel).filter(function(k){return S.tsel[k];});
   var acts=t==="backlog"?'<button class="btn" onclick="openDialog(\'intake\',\'providers\')">Intake</button>'+dispatchButton(sel)
     :t==="workflows"?'<button class="btn primary" onclick="wfzOpen()">New workflow</button>':'';
-  var body=t==="orders"?workOrdersTab(fr):t==="workflows"?'<div'+fut("workflows")+'>'+tkWfTab()+'</div>':t==="findings"?findingsTab():backlogTab();
+  var body=t==="orders"?workOrdersTab(fr):t==="in-progress"?inProgressTab():t==="workflows"?'<div'+fut("workflows")+'>'+tkWfTab()+'</div>':t==="findings"?findingsTab():backlogTab();
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Work</h1>'+
    '</div><div class="acts">'+acts+'</div></div>'+
-   obFirstBanners(w,fr)+(fr?obOfferCard(fr):'')+tabs+body;
+   obFirstBanners(w,fr)+(fr?obOfferCard(fr):workStats())+tabs+body;
+}
+
+/* ---- Work stats: four rollups of the rows under the tabs, for the workspace or for you ----
+   My work is a work item you own, a work order you sent, and an approval that names you as an
+   approver. A work order waits on the person who sent it to accept, so In review follows the sender. */
+function wiMine(t){var p=tPerson(t.owner),w=woOf(t);return !!(p&&p.state==="mapped"&&p.to===TK_ME)||!!(w&&w.by===TK_ME);}
+function wiOpen(t){return t.ready!=="sent"&&t.ready!=="accepted"&&t.ready!=="closed";}
+function wiInReview(t){var w=woOf(t);return t.ready==="sent"&&!!w&&w.status==="waiting on you";}
+function apMine(a){var me=PEOPLE[TK_ME];return !!me&&String(a.approvers||"").indexOf(me.name)>=0;}
+function workStats(){
+  /* a workspace with no tracker and no work item shows the Backlog's connect panel instead */
+  if(!wsTasks().length&&!wsProviders().length) return '';
+  var mine=S.workScope==="mine";
+  var rows=wsTasks().filter(function(t){return !mine||wiMine(t);});
+  var open=rows.filter(wiOpen), ready=open.filter(function(t){return t.ready==="ready"&&!tkGraphBlocked(t);}).length;
+  var prog=rows.filter(function(t){return t.ready==="sent"&&!wiInReview(t);}), review=rows.filter(wiInReview).length;
+  var live=prog.filter(function(t){var w=woOf(t);return w&&woLive(w);}).length;
+  var aps=APPROVALS.filter(function(a){return a.ws===S.ws&&apState(a.id).status==="pending"&&(!mine||apMine(a));}).length;
+  function card(k,v,s,on,label,why,col){
+    return '<button class="stat click" onclick="'+on+'" aria-label="'+h(label)+'"'+(why?fut(why):'')+'><span class="k">'+k+'</span>'+
+      '<span class="v"'+(col?' style="color:'+col+'"':'')+'>'+v+'</span><span class="s">'+s+'</span></button>';
+  }
+  return '<div class="wk-stats"><div class="seg" role="group" aria-label="Scope">'+
+     '<button class="btn sm" aria-pressed="'+!mine+'" onclick="S.workScope=\'all\';render()">All work</button>'+
+     '<button class="btn sm" aria-pressed="'+mine+'" onclick="S.workScope=\'mine\';render()">My work</button></div>'+
+   '<div class="grid g4">'+
+     card("Open",open.length,ready+" ready to send","go(\'"+workHash("backlog")+"\')","Open the Backlog","work items")+
+     card("In progress",prog.length,live+" with a live run","go(\'"+workHash("in-progress")+"\')","Open the work items in progress","work items and work orders")+
+     card("In review",review,mine?"waiting on you to accept":"waiting on a person to accept","go(\'"+workHash("in-progress")+"\')","Open the work items in review","work items and work orders")+
+     card("Pending approvals",aps,mine?"calls you can approve":"calls waiting on an approver","apdToggle(true)","Open the approvals",null,aps?"var(--st-approval)":null)+
+   '</div></div>';
 }
 
 /* ---- Backlog: every open work item ---- */
 function woOf(t){return t.wo?woById(t.wo):null;}
+/* The work order a work item is in, as a link, with live beside it while one of its runs is live. */
+function woCell(wo){
+  return wo?'<a class="mono" style="font-size:11.5px" href="'+woUrl(wo)+'" onclick="event.stopPropagation()">'+h(wo.id)+'</a>'+(woLive(wo)?' <span class="b b-allowed"><span class="d"></span>live</span>':''):'<span class="dim">\u2014</span>';
+}
+/* A work item in a work order has left the Backlog: it is on In progress until a person accepts it. */
 function backlogTab(){
-  var rows=wsTasks();
-  if(!rows.length&&!wsProviders().length) return '<div class="panel">'+emptyState("No issue tracker is connected to this workspace",
+  var all=wsTasks(), rows=all.filter(function(t){return t.ready!=="sent";});
+  if(!all.length&&!wsProviders().length) return '<div class="panel">'+emptyState("No issue tracker is connected to this workspace",
     "Connect one to import its issues as work items, or write a work item here.",
     '<button class="btn primary" onclick="openDialog(\'intake\',\'providers\')">Connect an issue tracker</button>')+'</div>';
-  var ready=rows.filter(function(t){return t.ready==="ready"&&!tkGraphBlocked(t);}).length,
-      drafts=rows.filter(function(t){return t.ready==="draft"||t.ready==="changed";}).length,
-      inwo=rows.filter(function(t){return t.ready==="sent";}).length;
-  var orders=wsWorkOrders(), live=orders.filter(woLive), toAccept=woWaiting();
-  var parked=wsRunCounts(S.ws).parked;
   var changed=rows.filter(function(t){return t.ready==="changed";});
   var nsel=Object.keys(S.tsel).length;
   var banner=changed.length?'<div class="banner" style="margin-bottom:14px" data-help="changed-banner"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
@@ -125,20 +156,33 @@ function backlogTab(){
      '<td'+fut("dependencies")+'>'+tkBlockedByCell(t)+'</td>'+
      '<td>'+tkPerson(t.owner)+'</td>'+
      '<td>'+readyBadge(t)+tkReadySub(t)+'</td>'+
-     '<td'+fut("work orders")+'>'+(wo?'<a class="mono" style="font-size:11.5px" href="'+woUrl(wo)+'" onclick="event.stopPropagation()">'+h(wo.id)+'</a>'+(woLive(wo)?' <span class="b b-allowed"><span class="d"></span>live</span>':''):'<span class="dim">\u2014</span>')+'</td>'+
+     '<td'+fut("work orders")+'>'+woCell(wo)+'</td>'+
      '<td class="mono dim" style="font-size:11.5px">'+h(t.updatedAt)+'</td></tr>';}).join("");
-  return '<div class="grid g4" style="margin-bottom:16px"'+fut("work items and work orders")+'>'+
-     tile("Ready to send",ready,"certified and unblocked")+
-     tile("Waiting on you",drafts+toAccept,drafts+" to certify \u00b7 "+toAccept+" to accept",(drafts+toAccept)?"var(--st-approval)":null)+
-     tile("In work orders",inwo,"sent to an agent or a workflow")+
-     '<button class="stat click" onclick="go(\''+workHash("orders")+'\')" aria-label="Open the work orders with a live run"><span class="k">Live work orders</span><span class="v">'+live.length+'</span>'+
-      '<span class="s">work orders with a live run'+(parked?' \u00b7 '+parked+' parked on a person':'')+'</span></button></div>'+
-   banner+
+  return banner+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Backlog</h3></div>'+
    '<div class="sp">'+(nsel?'<span class="b b-q">'+nsel+' selected</span><button class="btn sm" onclick="S.tsel={};render()">Clear</button>':'')+
      '<span class="chips" role="group" aria-label="View"'+fut("dependencies")+'><button class="btn sm'+(S.tkView!=="graph"?' sel':'')+'" aria-pressed="'+(S.tkView!=="graph")+'" onclick="tkView(\'list\')">List</button><button class="btn sm'+(S.tkView==="graph"?' sel':'')+'" aria-pressed="'+(S.tkView==="graph")+'" onclick="tkView(\'graph\')">Graph</button></span></div></div>'+
-   (S.tkView==="graph"?tkGraph(rows):'<div class="tw"><table><thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th>Labels</th><th>Status</th><th>Blocked by</th><th>Owner</th><th>Readiness</th><th>Work order</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>')+
+   (S.tkView==="graph"?tkGraph(all):'<div class="tw"><table><thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th data-facet="multi">Labels</th><th>Status</th><th>Blocked by</th><th data-facet="multi">Owner</th><th>Readiness</th><th data-facet="off">Work order</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>')+
    '</div>';
+}
+/* ---- In progress: every work item in a work order, with where it went and how far it got ---- */
+function inProgressTab(){
+  var rows=wsTasks().filter(function(t){return t.ready==="sent";});
+  var trs=rows.map(function(t){
+    var wo=woOf(t), items=wo?woItems(wo).length:0;
+    return '<tr '+rowClick("go('"+taskUrl(t)+"')","Open "+t.num)+'>'+
+     '<td><span class="tk-t">'+wiLogo(t,14)+'<span class="mono dim" style="font-size:11.5px">'+h(t.num)+'</span></span><div class="tk-s">'+h(t.subject)+'</div></td>'+
+     '<td>'+lblChips(t.labels)+'</td>'+
+     '<td>'+tkPerson(t.owner)+'</td>'+
+     '<td'+fut("work orders")+'>'+woCell(wo)+'</td>'+
+     '<td'+fut("work orders")+'>'+(wo?woTargetCell(wo):'<span class="dim">\u2014</span>')+'</td>'+
+     '<td'+fut("work orders")+'>'+(wo?woBadge(wo):'<span class="dim">\u2014</span>')+'</td>'+
+     '<td class="num"'+fut("work orders")+'>'+(items?woClaimed(wo)+' / '+items:'<span class="dim">\u2014</span>')+'</td>'+
+     '<td class="mono dim" style="font-size:11.5px">'+h(t.updatedAt)+'</td></tr>';}).join("");
+  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>In progress</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Work items sent to an agent or a workflow in a work order.</p></div></div>'+
+   '<div class="tw"><table><thead><tr><th>Work item</th><th data-facet="multi">Labels</th><th data-facet="multi">Owner</th><th>Work order</th><th>Sent to</th><th>State</th><th class="num">Items claimed</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A work item stays here until you accept every item of its work order. It then returns to the Backlog as Accepted.</div></div></div>';
 }
 /* A work item written in Oxagen, or opened from a finding, carries the Oxagen mark where a provider item carries its provider's. */
 function wiLogo(t,size){
