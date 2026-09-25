@@ -86,6 +86,10 @@ const ROUTES = [
   ...workspaceRoutes("core-platform", ["triage", "release-manager", "pr-reviewer", "stale-closer-eu", "dependency-bot"]),
   ...workspaceRoutes("finops", ["invoice-bot", "cost-reporter-us"]),
   ...RUNS.map((r) => `#/${ORG}/core-platform/runs/${r}`),
+  // The run's other tabs, for a sealed, a halted and a held run: the Transcript, Cost, Memories and
+  // Evidence carry frame chips, prices and chain text the Decision trace does not.
+  ...["run_01K5RS7M2E8FJ3QW", "run_01K5RH3G8K5PAS7D", "run_01K6QW3D5N7TYBA2"].flatMap((r) =>
+    ["transcript", "cost", "memory", "evidence"].map((t) => `#/${ORG}/core-platform/runs/${r}/${t}`)),
   `#/${ORG}/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4`,
 ].filter((h) => !only || h.includes(only));
 

@@ -2600,7 +2600,7 @@ function runInstruments(R){
   var costCols=s.cost.map(function(c,i){
     return '<button type="button" class="c fk-model'+(i===s.n-1&&R.status==="live"?" cur":"")+'"'+tipAttr("Turn "+(i+1)+" · $"+c.toFixed(2)+" · cache "+per(s.cache[i])+(i===s.peak?" · dearest turn":""))+' aria-label="turn '+(i+1)+' $'+c.toFixed(2)+'" onclick="runTab(\'cost\')">'+
       (i===s.peak?'<span class="lab">$'+c.toFixed(2)+'</span>':'')+'<i style="height:'+Math.max(4,Math.round(c/mx*100))+'%"></i></button>';}).join("");
-  var t1=instTile("Cost so far",h(R.basis),usd(R.cost)+'<small>USD</small>',
+  var t1=instTile("Cost so far",h(keyText(R.basis)),usd(R.cost)+' <small>USD</small>',
     '<b>$'+s.perTurn.toFixed(2)+'</b> per turn · turn '+(s.peak+1)+' was the dearest'+(medRun!=null?' · '+deltaHtml(total,medRun,function(d){return "$"+d.toFixed(2);},false)+' vs this agent’s median run $'+medRun.toFixed(2):''),
     '<div class="cols">'+costCols+'<span class="base"></span></div><div class="ax"><span>turn 1</span><span>turn '+s.n+(R.status==="live"?" · live":"")+'</span></div>',
     'Cache hit <b>'+per(R.cache)+'</b> · saved about <b>'+usd(s.saved.toFixed(2))+'</b> compared with no cache');
@@ -2898,7 +2898,7 @@ function txAnswerIdx(rows,R){
 }
 function txGovChip(g){
   if(!g)return "";
-  return '<button class="tx-chip gov'+(g.o==="approve"?" appr":"")+'" title="policy decision · frame '+g.fr+'" onclick="openFrame('+g.fr+')">⚖ '+h(g.o)+' · '+h(g.rule)+' · fr '+g.fr+'</button>';
+  return '<button class="tx-chip gov'+(g.o==="approve"?" appr":"")+'" title="policy decision · frame '+g.fr+'" onclick="openFrame('+g.fr+')">⚖ '+h(g.o)+' · '+h(g.rule)+' · frame '+g.fr+'</button>';
 }
 function txRow(R,e,i,cum,rows,answerIdx){
   var q=S.tx.q.trim(),open=!!S.tx.open[i],inner="",dot="",body=e.body||"";
@@ -2908,7 +2908,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
   } else if(e.kind==="steer"){
     inner='<div class="tx-role steer"><div class="tx-rolegut"><span class="tx-roletag">STEER</span></div><div><div class="tx-prose">“'+txHi(body,q)+'”</div>'+
      '<div class="tx-sub"><span>'+h(e.meta.by)+' · '+h(e.meta.role)+'</span><span>delivered at the next boundary · '+e.meta.tok+' tok</span>'+
-     (e.fr!=null?'<button class="tx-chip gov appr" onclick="openFrame('+e.fr+')">control.steer · fr '+e.fr+'</button>':'')+'</div></div></div>';
+     (e.fr!=null?'<button class="tx-chip gov appr" onclick="openFrame('+e.fr+')">control.steer · frame '+e.fr+'</button>':'')+'</div></div></div>';
   } else if(e.kind==="text"){
     var isAns=i===answerIdx,f=txFold(body),folded=!isAns&&!open&&f.rest.length>0;
     inner='<div class="tx-role agent"><div class="tx-rolegut"><span class="tx-roletag">'+(isAns?"ANSWER":"AGENT")+'</span></div><div class="tx-prose'+(isAns?' tx-answer':'')+'">'+
@@ -2922,14 +2922,14 @@ function txRow(R,e,i,cum,rows,answerIdx){
     var m=e.meta||{};
     inner='<div class="tx-usage"><span class="u">usage: '+h(m.model||"")+(m.tin!=null?' · in '+tokn(m.tin)+' · cache '+tokn(m.cache||0)+' · out '+tokn(m.tout||0):'')+(m.req?' · '+h(m.req):'')+'</span>'+
      '<span class="tx-chips"><span class="tx-chip cost">'+txMoney(m.cost||0)+'</span><span class="tx-chip burn">Σ '+txMoney(cum)+'</span>'+
-     (e.fr!=null?'<button class="tx-chip gov" onclick="openFrame('+e.fr+')">model.response · fr '+e.fr+'</button>':'')+'</span></div>';
+     (e.fr!=null?'<button class="tx-chip gov" onclick="openFrame('+e.fr+')">model.response · frame '+e.fr+'</button>':'')+'</span></div>';
   } else if(e.kind==="context_recall"){
     var m2=e.meta||{},list=open?CTXF:CTXF.slice(0,3),hid=CTXF.length-list.length,hidTok=0;
     CTXF.slice(list.length).forEach(function(f){hidTok+=f.tok;});
     inner='<div><button class="tx-fold" style="color:var(--st-proven);font-weight:600;font-size:12.5px" onclick="txOpen('+i+')">◉ recall · '+plural(m2.frames,"frame")+' · '+tokn(m2.tok)+' tok · '+m2.scored+' scored · '+m2.ms+' ms</button>'+
      '<div class="tx-recall">'+list.map(function(f){return '<span class="k">'+h(f.kind)+'</span><span class="l">'+txHi(f.label,q)+(open?' <span class="dim">· '+h(f.node)+' · score '+f.score+'</span>':'')+'</span><span class="n">'+tokn(f.tok)+' tok</span>';}).join("")+'</div>'+
      (hid>0?'<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⋯ '+hid+' more · '+tokn(hidTok)+' tok · provenance</button>':'')+
-     (e.fr!=null?'<div class="tx-sub" style="margin-left:20px"><button class="tx-chip gov" onclick="openFrame('+e.fr+')">context.assembled · fr '+e.fr+'</button><button class="tx-chip" style="cursor:pointer" onclick="runTab(\'trace\')">open the Context tab</button></div>':'')+'</div>';
+     (e.fr!=null?'<div class="tx-sub" style="margin-left:20px"><button class="tx-chip gov" onclick="openFrame('+e.fr+')">context.assembled · frame '+e.fr+'</button><button class="tx-chip" style="cursor:pointer" onclick="runTab(\'trace\')">open the Context tab</button></div>':'')+'</div>';
   } else if(e.kind==="tool"){
     var r=e.res,failed=!!(r&&r.err),pending=!r,cls=e.cls||"execute";
     dot='<span class="tx-dot'+(cls==="mutate"?' solid':'')+'" style="color:var(--'+(failed?'st-failed':'tx-'+cls)+')"></span>';
@@ -2937,7 +2937,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
     if(e.diff){var st=diffStat(txDiffRows(e.diff.before,e.diff.after));chips+='<span class="tx-chip"><span style="color:var(--st-allowed)">+'+st.add+'</span> <span style="color:var(--st-denied)">−'+st.del+'</span></span>';}
     if(r&&r.ms!=null)chips+='<span class="tx-chip'+(failed?' err':'')+'">'+(r.ms>=1000?(r.ms/1000).toFixed(1)+' s':r.ms+' ms')+'</span>';
     if(r&&r.body&&!e.diff){var ln=r.body.split("\n").length;if(ln>1)chips+='<span class="tx-chip'+(failed?' err':'')+'">'+ln+' lines</span>';}
-    if(e.parked)chips+='<button class="tx-chip gov appr" onclick="openFrame('+e.parked.fr+')">⏸ parked · '+h(e.parked.ap)+' · fr '+e.parked.fr+'</button>';
+    if(e.parked)chips+='<button class="tx-chip gov appr" onclick="openFrame('+e.parked.fr+')">⏸ parked · '+h(e.parked.ap)+' · frame '+e.parked.fr+'</button>';
     else if(pending)chips+='<span class="tx-chip">running…</span>';
     chips+=txGovChip(e.gov);
     if(e.raw)chips+='<button class="tx-fold" onclick="txOpen('+i+')" aria-label="'+(open?"hide":"show")+' arguments">'+(open?"⏶":"⋯")+'</button>';
@@ -3130,7 +3130,7 @@ function runGraphOf(R){
 }
 function edgeChip(it){
   var lab=it.edge==="observed"?"observed":it.edge==="stated"?"stated":"inferred"+(it.conf!=null?" · "+Math.round(it.conf*100)+"%":"");
-  var frs=(it.fr||[]).map(function(f){return '<button class="edge" onclick="openFrame('+f+')">fr '+f+'</button>';}).join("");
+  var frs=(it.fr||[]).map(function(f){return SEP+'<button class="edge" onclick="openFrame('+f+')">frame '+f+'</button>';}).join("");
   return '<span class="ev"><span class="edge '+h(it.edge)+'">'+lab+'</span>'+frs+'</span>';
 }
 /* Where an artifact lives on the forge. A reference with no address stays plain text. */
@@ -3835,7 +3835,7 @@ function costTab(R){
     '<div class="hr"></div><dl class="kv">'+
     '<dt>Effective input price</dt><dd>$1.88 per million across all input classes</dd>'+
     '<dt>Cache write cost share</dt><dd>'+(m.cacheWrite?pct(m.cacheWrite,m.tokIn):'0.0%, nothing written this run')+'</dd>'+
-    '<dt>Basis</dt><dd><span class="basis">'+h(R.basis)+'</span>'+(R.basis==="gateway_observed"?' · counted by the proxy from the bytes that passed through it':' · the harness\u2019s own telemetry; absent classes are marked, never zero')+'</dd>'+
+    '<dt>Basis</dt><dd>'+basisChip(R.basis)+(R.basis==="gateway_observed"?' · counted by the proxy from the bytes that passed through it':' · the harness\u2019s own telemetry; absent classes are marked, never zero')+'</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(R.ratio)+' · '+s.adv+' of '+R.steps+' steps advanced the task</dd></dl></div></div></div>';
 }
 

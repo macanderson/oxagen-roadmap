@@ -16,7 +16,7 @@
   "k": "control.interject",
   "c": "gov",
   "t": "09:14:02.146Z",
-  "d": "skills.enabled = true and no config resolves · policy unbound = ask",
+  "d": "skills.enabled = true and no config resolves · policy for an unlinked repository = ask",
   "hot": true
  },
  {
