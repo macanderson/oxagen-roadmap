@@ -1,12 +1,21 @@
 [
  {
+  "v": "pol_v42",
+  "state": "draft",
+  "by": "Priya Natarajan",
+  "at": "2026-09-11 08:02",
+  "rules": 39,
+  "tests": "44 / 44 pass",
+  "note": "Would require approval for every irreversible tool call in core-platform."
+ },
+ {
   "v": "pol_v41",
   "state": "active",
   "by": "Priya Natarajan",
   "at": "2026-09-08 16:22",
   "rules": 38,
   "tests": "42 / 42 pass",
-  "note": "Raises any tainted write to approval; adds aws_billing to the financial class."
+  "note": "Raises any tainted write to approval. Adds AWS Billing to the financial class."
  },
  {
   "v": "pol_v40",
@@ -16,14 +25,5 @@
   "rules": 36,
   "tests": "39 / 39 pass",
   "note": "Narrowed triage's toolbelt to read-only on a-intel/mobile."
- },
- {
-  "v": "pol_v42",
-  "state": "draft",
-  "by": "Priya Natarajan",
-  "at": "2026-09-11 08:02",
-  "rules": 39,
-  "tests": "44 / 44 pass",
-  "note": "Would require approval for every irreversible tool call in core-platform."
  }
 ]

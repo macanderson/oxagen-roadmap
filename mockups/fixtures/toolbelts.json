@@ -7,7 +7,7 @@
    "owner": "platform",
    "tools": ["github__get_file_contents@2", "github__get_commit@1", "github__list_pull_requests@2"],
    "updated": "2026-09-02 09:20 UTC",
-   "by": "mbell"
+   "by": "marcus"
   },
   {
    "id": "tb_repo_contributor",
@@ -16,7 +16,7 @@
    "owner": "platform",
    "tools": ["github__create_pull_request@3", "github__create_issue_comment@2", "open_context_pr@1"],
    "updated": "2026-09-02 09:22 UTC",
-   "by": "mbell"
+   "by": "marcus"
   },
   {
    "id": "tb_release_control",
@@ -25,7 +25,7 @@
    "owner": "platform",
    "tools": ["github__merge_pull_request@4", "github__create_release@2", "github__delete_branch@1"],
    "updated": "2026-09-06 14:05 UTC",
-   "by": "mbell",
+   "by": "marcus",
    "note": "Every tool here is irreversible or denied. A grant reaching this toolbelt still meets the policy at the call."
   },
   {
@@ -44,7 +44,7 @@
    "owner": "platform",
    "tools": ["claude_code__Bash@2.1", "claude_code__Edit@2.1", "claude_code__WebFetch@2.1"],
    "updated": "2026-09-08 08:12 UTC",
-   "by": "mbell",
+   "by": "marcus",
    "note": "Harness-native. Delivered only to an agent on the harness tier or above, because nothing below it installs a hook."
   },
   {
@@ -63,7 +63,7 @@
    "owner": "platform",
    "tools": ["send_message@1", "slack__post_message@2"],
    "updated": "2026-09-09 21:40 UTC",
-   "by": "mbell"
+   "by": "marcus"
   },
   {
    "id": "tb_payments",
@@ -72,7 +72,7 @@
    "owner": "finops",
    "tools": ["stripe__create_payment@5"],
    "updated": "2026-09-05 11:52 UTC",
-   "by": "dsong",
+   "by": "dana",
    "note": "Assigning this toolbelt authorizes nothing. A financial call is denied before dispatch unless the agent holds a mandate covering it."
   },
   {
@@ -82,7 +82,7 @@
    "owner": "finops",
    "tools": ["aws_billing__get_cost_and_usage@1"],
    "updated": "2026-08-19 09:02 UTC",
-   "by": "dsong"
+   "by": "dana"
   }
  ],
  "assign": {
