@@ -45,7 +45,7 @@ The demo record holds 282: four dispatched and 278 direct. The dispatched ones a
 
 Straight after onboarding the workspace holds one run, the installer’s smoke session, and Work opens on this tab with that run alone. **Open Oxagen** at the end of onboarding (`regFinish()` in onboard mode) sets the first-run view, goes to `/work/orders`, and toasts in gold “Welcome to Oxagen. First frame received from a-intel.core.release-manager, its run is live under a direct work order, and the organization is out of the gate.” Scenario W1, step 6, stops here. Under the header, in order:
 
-- **Provisional banner**, while no main repository is bound: the badge `provisional`, “Core platform is provisional until 25 Sep 2026.”, “Runs record and spend counts. Steering records and agent definitions stay off until a main repo is bound, because there is nowhere to publish them to.”, and **Bind a-intel/platform**, which installs the GitHub App on the repository, removes the banner and toasts.
+- **Provisional banner**, while no main repository is linked: the badge `provisional`, “Core platform is provisional until 25 Sep 2026.”, “Runs record and spend counts. Steering records and agent definitions stay off until a main repo is linked, because there is nowhere to publish them to.”, and **Link a-intel/platform**, which installs the GitHub App on the repository, removes the banner and toasts.
 - **First run banner**: the badge `first run`, “One run so far.”, “This workspace has recorded the installer’s smoke session, `run_01K5RV2N8QH4TZ01X` from `a-intel.core.release-manager`, filed under a direct work order, and nothing else.”, and **Show the seeded workspace**, which puts the first-run view away.
 - **Onboarding offer** panel: heading “Onboarding offer”, **Not now** (a ghost button, `aria-label` “Dismiss the onboarding offer”), “**Convert by 18 Sep 2026 for 20% off usage for 12 months.**”, “That is 7 days from your first run. `run_01K5RV2N8QH4TZ01X` cost **$0.02** USD, `client_attested`. Oxagen billed **$0.00** for it: the included monthly allowance covered it, and Oxagen never marks up tokens.”, and **See plans** (opens Billing).
 - The tabs, with Work orders selected, and the Work orders panel with one row: “Installer smoke session”, `wo_01K5RV2N8QH4TZ01X`, `direct`, work items “smoke”, Release manager, the run `live`, a dash, `in progress`, $0.02, Marcus Bell 2026-09-11 14:02. The chips read All `1` · Dispatched `0` · Direct `1` · Live `1`.
@@ -76,7 +76,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | Spend | `woSpend()` | the work order’s runs’ cost, each with its basis | Each run’s cost and basis ship (`run.list.ts:277`; `gateway_observed`, `client_attested`, `mixed`, `estimated` in `packages/oxagen/src/contracts/spend.shared.ts:13-17`). `get_spend` rolls up by task reference (`packages/oxagen/src/contracts/spend.get.ts:38`), not by work order | 🟡 |
 | Sent by, for a direct work order | `R.op` | the run’s operator | `operatorName` with `operatorAttribution` (`initiator` or `host_enroller`) (`run.list.ts:242-260`) | ✅ |
 | Filter chip counts | rollups over the rows | rollups over `list_work_orders` | none | ❌ |
-| Provisional banner and Bind | `ws().provisional`, `obBind()` | `get_onboarding_state` `provisional`; `bind_main_repository` | `provisional.until` and `mainRepoBoundAt` (`packages/oxagen/src/contracts/onboarding.state.get.ts:77-84`); `bind_main_repository` (`packages/oxagen/src/contracts/repository.main.bind.ts:71`). The banner renders on Fleet today (`apps/app/src/features/onboarding/gate.tsx:132-174`) | ✅ |
+| Provisional banner and Link | `ws().provisional`, `obBind()` | `get_onboarding_state` `provisional`; `bind_main_repository` | `provisional.until` and `mainRepoBoundAt` (`packages/oxagen/src/contracts/onboarding.state.get.ts:77-84`); `bind_main_repository` (`packages/oxagen/src/contracts/repository.main.bind.ts:71`). The banner renders on Fleet today (`apps/app/src/features/onboarding/gate.tsx:132-174`) | ✅ |
 | First run banner: the run and its agent | `S.firstRun`, `obFirstRun()` | `get_onboarding_state` `firstRunId` | `firstRunId` (`onboarding.state.get.ts:71`). The banner renders on Fleet today (`gate.tsx:151-154`, copy in `apps/app/messages/onboarding.json:297-303`). “Filed under a direct work order” is future-only | 🟡 |
 | Onboarding offer | `BILLING.discount`, `OB_OFFER_DAYS` | a recorded onboarding offer | none. The app says so: “the onboarding offer is not recorded yet (spec §20, deferred)” (`apps/app/messages/billing.json:60`) | ❌ |
 | The first run’s cost and basis | `fr.cost`, `fr.basis` | the run’s cost | `run.list.ts:277` | ✅ |
@@ -100,7 +100,7 @@ The mockup marks nothing else on this tab, but every work order field is future-
 - A direct work order is titled from the run’s task reference, or from its first prompt when it has none. Its sender is the run’s operator. It has no definition of done until a person attaches it to a backlog item, so its Items claimed reads a dash.
 - The chips filter the rows: Dispatched keeps what a person sent, Direct what Oxagen opened, Live what has a live run. The counts are rollups of the rows.
 - A work order’s Spend is the sum of its runs’ cost, and each run keeps its own basis.
-- On the first run, the list holds the one smoke run under its direct work order, and every count reads off that run. **Show the seeded workspace** puts the first-run view away; in the product the list already holds every run there is, so the button hides the banner and nothing else. **Not now** dismisses the offer for the session. **Bind a-intel/platform** binds the main repository and ends the provisional window.
+- On the first run, the list holds the one smoke run under its direct work order, and every count reads off that run. **Show the seeded workspace** puts the first-run view away; in the product the list already holds every run there is, so the button hides the banner and nothing else. **Not now** dismisses the offer for the session. **Link a-intel/platform** links the main repository and ends the provisional window.
 - `node tools/check-tasks.mjs` walks the send that lands a new work order at the top of this list (flow 5).
 
 - A work order is `in progress` from its start receipt, not from its send. A released work order with no receipt reads `sent` (`docs/work-graph-spec.md` §6.2).
@@ -122,7 +122,7 @@ The thumb bar holds Work (lit, with its count), Agents, Tools, Spend and More. M
 The design names this. It does not exist in `packages/iam` today.
 
 - Read: `work.read`
-- No write on this tab. **Bind a-intel/platform** is `bind_main_repository`, which ships and is recorded in Audit.
+- No write on this tab. **Link a-intel/platform** is `bind_main_repository`, which ships and is recorded in Audit.
 
 ## Backend gaps this page depends on
 

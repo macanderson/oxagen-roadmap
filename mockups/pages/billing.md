@@ -16,7 +16,7 @@ The plan, the one priced meter, the reported meters, the invoices and the price 
 
 ## What is on the page
 
-**Header**: eyebrow "Organization", h1 "Billing", subtext "What <organization name> pays Oxagen."
+**Header**: eyebrow "Organization", h1 "Billing", subtext "What <organization name> pays oxagen."
 Actions: **Change plan** (gold; opens `plan`).
 
 **Summary tiles** (one number and one basis line each):
@@ -26,8 +26,8 @@ Actions: **Change plan** (gold; opens `plan`).
 - **Due <date>**: $, "USD · after the onboarding discount".
 
 Left column:
-- **This period**: badge "Stripe invoices, Oxagen meter"; Line, Basis, Amount. Rows: **Governed actions · N used** (basis: the blocks × $30.00 and the included allowance), **Tokens** ("Not priced. Your own model spend is on Spend.", $0.00), **Evidence retention** ("N GB held · 13 months included", $0.00), **Onboarding discount** (the offer, "20% off usage for 12 months (converted …)", and its amount with a true minus, "−$954.00"), **Total** (no basis, USD).
-- **Meters**: Meter, This period, Note. Rows lead with **Governed actions** (the billable unit, the included allowance this month), then **Sealed runs with at least one model call** (reported, not priced), **Retained evidence** (13 months included), **Runs Oxagen halted before any model call** (free), **Runs of the in-app agent** (free). Notes read Priced, Reported, or Free. A note under the table: only governed actions are priced; a governed action is a call oxagen decided, delivered and recorded; runs, tokens and retained evidence are reported and not priced.
+- **This period**: Line, Basis, Amount. Rows: **Governed actions · N used** (basis: the blocks × $30.00 and the included allowance), **Tokens** ("Not priced. Your own model spend is on Spend.", $0.00), **Evidence retention** ("N GB held · 13 months included", $0.00), **Onboarding discount** (the offer, "20% off usage for 12 months (converted …)", and its amount with a true minus, "−$954.00"), **Total** (no basis, USD).
+- **Meters**: Meter, This period, Note. Rows lead with **Governed actions** (the billable unit, the included allowance this month), then **Sealed runs with at least one model call** (reported, not priced), **Retained evidence** (13 months included), **Runs oxagen halted before any model call** (free), **Runs of the in-app agent** (free). Notes read Priced, Reported, or Free. A note under the table: only governed actions are priced; a governed action is a call oxagen decided, delivered and recorded; runs, tokens and retained evidence are reported and not priced.
 - **Invoices**: Invoice, Period, Governed actions, Amount, Status (Paid or Open), Paid (the date, or "Not paid"), **Open in Stripe ↗**. The list starts in March 2026, the month the organization converted to a paid plan.
 
 Right column:
@@ -37,11 +37,11 @@ Right column:
 - **Buy governed actions**: a **Governed actions** quantity in blocks of 10,000, the total at the organization's contracted rate, a note that Checkout saves the card, and **Continue to Checkout** (opens Stripe Checkout). An owner or a billing member can buy; everyone else sees the line naming who can. An organization billed by invoice does not buy blocks and is told so.
 - **Token balance**: the balance, the basis "Pays for the tokens Oxagen buys for the in-app agent, at cost with no markup. The balance is the cap.", preset top-up amounts, a whole-dollar amount with its minimum, and **Continue to Checkout**. When the balance is spent, a line says the in-app agent's turns on Oxagen's model key stop until a top-up lands. A top-up needs a Build plan or above.
 
-These three panels are kept from the shipped Billing page (Mac, 2026-09-23). The rendered mock does not draw them yet. This section is their design. None of their buttons is gold. The token balance is the cap on the price list's "Tokens Oxagen buys for you" row. It buys nothing else and prices nothing.
+These three panels are kept from the shipped Billing page (Mac, 2026-09-23). The rendered mock does not draw them yet. This section is their design. None of their buttons is gold. The token balance is the cap on the price list's "Tokens oxagen buys for you" row. It buys nothing else and prices nothing.
 
 **Dialogs this page opens:** `plan` (a Plan select with "Team (usage-based, monthly, cancel any time)" and "Enterprise (annual, committed use at 20–30% off, from $60,000)", a note, **Change plan**; the toast "Plan change staged in Stripe. Stripe holds the plan and the invoices; oxagen counts the governed actions."), `incident` (error state), `request-access` (denied state).
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Work, Agents, Tools, Steering, Runtimes, Spend, Repositories; Organization nav: Organization, Billing, Audit; the assistant launcher, agent count, data plane and connection badge at the foot), top bar (Menu, breadcrumbs, ⌘K "Search or run an action", Notifications with the unread count, **Approvals** with the count of everything waiting on you across the organization, account avatar → Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out). The Approvals button opens the right-hand drawer `#apdrawer`: heading "Approvals" with an "N waiting on you in all workspaces" badge and a close button, an open interjection row with **Answer**, one row per pending approval (tool and amount, agent, task, workspace, risk badges, countdown), the full approval card with **Approve** and **Deny** when a row is picked and "‹ All approvals" to return, "N resolved today" beneath. Escape closes it. There is no assistant button in the top bar.
+**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Work, Agents, Tools, Steering, Runtimes, Spend, Repositories; Organization nav: Organization, Billing, Audit; the assistant launcher, agent count, data plane and connection badge at the foot), top bar (Menu, breadcrumbs, ⌘K "Search or run an action", Notifications with the unread count, **Approvals** with the count of everything waiting on you across the organization, account avatar → Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out). The Approvals button opens the right-hand drawer `#apdrawer`: heading "Approvals" with an "N waiting on you in all workspaces" badge and a close button, an open question row with **Answer**, one row per pending approval (tool and amount, agent, task, workspace, risk badges, countdown), the full approval card with **Approve** and **Deny** when a row is picked and "‹ All approvals" to return, "N resolved today" beneath. Escape closes it. There is no assistant button in the top bar.
 
 ## Data sources
 
@@ -73,7 +73,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - **empty**: "Nothing billable yet". You pay per governed action: a call Oxagen decided, delivered and recorded. The free tier has every governance feature on, an included monthly allowance, thirty days of evidence and three seats. Action: **Back to Work**. Below the empty panel, **Buy governed actions** stays so an organization can buy its first block.
 - **loading**: the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
 - **error**: "Billing could not be loaded". The control plane answered `502 stripe_unreachable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
-- **access denied**: "You cannot see billing". Your roles on the organization do not include `org.billing`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it. Actions: **Request access** (opens `request-access`), **Back to Fleet**. Below: *Signed in as* (name, role), *Needed* (the permission), *Decided by* (`pol_v41`, deny wins over every allow).
+- **access denied**: "You cannot see billing". Your roles on the organization do not include `org.billing`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it. Actions: **Request access** (opens `request-access`), **Back to Work**. Below: *Signed in as* (name, role), *Needed* (the permission), *Decided by* (`pol_v41`, deny wins over every allow).
 
 ## Mobile
 
@@ -91,7 +91,7 @@ The top bar collapses to hamburger, current crumb, search glyph, notifications, 
 
 ## Rules every build of this page must keep
 
-- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a client-attested figure is labelled as such and is never rendered as observed.
+- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a figure the harness reported is labeled as such and is never rendered as observed.
 - Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice.
 - Every explanation is a chain of links to frames, records and commits, not a summary.
 - A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.

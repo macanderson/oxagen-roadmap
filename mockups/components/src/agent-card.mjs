@@ -87,7 +87,7 @@ export default {
     ["--dim", "List and compact layouts' second line"],
   ],
   helpers: [
-    ["agentCard(a, o)", "engine.js:9983", "The one function that draws an agent identity. `o.layout` picks list, compact, or detail. 17 calls."],
+    ["agentCard(a, o)", "engine.js:9986", "The one function that draws an agent identity. `o.layout` picks list, compact, or detail. 17 calls."],
   ],
   sourceNotes: [
     "`o.sub` overrides the second line outright, so a caller can put a run's turn number or a mandate's toolbelt count there instead of the harness. Several call sites do.",

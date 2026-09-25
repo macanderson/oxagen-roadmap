@@ -33,8 +33,8 @@ flip, a `proof.observed` frame, a Proof tab, a Verdict column, a `proven` chip, 
 done from `docs/dod-spec.md` (Done column, tile, tab, certificate, `dod.*` frames), a trust score or
 spend score, a percentile band, proven or accepted or unproven spend, spend per proven run, a
 witness-run tab set, an incident kind `witness_tampered` or `witness_probe`, an approvals panel on any
-page other than a run (whose approvals strip and Evidence tab show that run's approvals), an
-interjection banner on a page, an assistant button in the topbar. A work item's definition of done
+page other than a run (whose approvals strip and Evidence tab show that run's approvals), a
+question banner on a page, an assistant button in the topbar. A work item's definition of done
 (`docs/tasks-spec.md` §8, certified by a person) is part of the design and is not the run's. And, cut by the fleet operations wedge: a Fleet
 page, a Tasks page, a mandate page, the skills console (Catalog, Search, In the loop, Reflection,
 Versions) and skill reflection, the Steering Library shelves, Memory, Ontology and Gates tabs, fork
@@ -81,9 +81,9 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
    `notification_read` audit event. The footer reads "N unread · select one to mark it read", or "All read" with Mark all read
    disabled. Mark all read closes the dialog. The unread dot goes once nothing is unread.
 7. The approvals drawer. The badge counts every pending approval across the organization plus an
-   open interjection; it is present on every page including organization pages. Clicking opens a
-   right-hand drawer titled "Approvals" with the count, a list under "N waiting on you" (an
-   interjection row with "Answer", then approval rows: shield glyph, amount or tool version,
+   open question; it is present on every page including organization pages. Clicking opens a
+   right-hand drawer titled "Approvals" with the count, a list under "N waiting on you" (a
+   question row with "Answer", then approval rows: shield glyph, amount or tool version,
    agent, run title, workspace, the run's work order (direct or dispatched, with its id), risk and
    side-effect chips, a live countdown), then "N resolved
    today". Selecting a row shows the full approval card (four-hop chain, rules that fired, taint,

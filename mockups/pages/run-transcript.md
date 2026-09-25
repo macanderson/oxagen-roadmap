@@ -35,25 +35,25 @@ There is no playback transport: no play, no pause, no step, no speed and no posi
 | Entry | What it shows |
 |---|---|
 | Prompt | The tag "YOU", the prompt as written, and "Marcus Bell · operator", "task a-intel/platform#482" and "first prompt" |
-| Steer | The tag "STEER", the steer in quotes, "Marcus Bell · operator authority", "delivered at the next boundary · 22 tok", and the chip "control.steer · fr 10" |
+| Steer | The tag "STEER", the steer in quotes, "Marcus Bell · operator authority", "delivered at the next boundary · 22 tok", and the chip "control.steer · frame 10" |
 | Model text | The tag "AGENT", or "ANSWER" on the last text of a sealed run. A text longer than one sentence folds to its first sentence behind "⏵" and "…"; "⏶" folds it back |
 | Returned thinking | "⏵ thinking the provider returned · 1 line", titled "Text the provider returned as thinking. It is not the model’s hidden reasoning.", folded to its first sentence unless opened or expanded for the whole tab |
-| Usage | The model, input, cache and output tokens and the request id; the chips for the step's cost ("$0.4126"), the cost so far ("Σ $0.4126") and the frame ("model.response · fr 3") |
-| Recall | "◉ recall · 6 frames · 11,204 tok · 41 scored · 3.1 ms", the first three context frames (kind, label, tokens), "⋯ 3 more · 5,218 tok · provenance", and the chip "context.assembled · fr 1" |
-| Tool call | "●", or "✗" on a failed call; the tool's name ("Bash", `github__list_pull_requests`); its arguments on the same line; chips for the diff stat ("+20 −0"), the duration ("1.1 s", "41 ms"), the output's line count ("11 lines"), "⏸ parked · apr_01K5RS3K7 · fr 15" on a parked call, "running…" while no result has arrived, the decision ("⚖ allow · rg_0088 · fr 5", "⚖ approve · rg_0093 · fr 14") and "⋯", which shows the raw arguments |
+| Usage | The model, input, cache and output tokens and the request id; the chips for the step's cost ("$0.4126"), the cost so far ("Σ $0.4126") and the frame ("model.response · frame 3") |
+| Recall | "◉ recall · 6 frames · 11,204 tok · 41 scored · 3.1 ms", the first three context frames (kind, label, tokens), "⋯ 3 more · 5,218 tok · provenance", and the chip "context.assembled · frame 1" |
+| Tool call | "●", or "✗" on a failed call; the tool's name ("Bash", `github__list_pull_requests`); its arguments on the same line; chips for the diff stat ("+20 −0"), the duration ("1.1 s", "41 ms"), the output's line count ("11 lines"), "⏸ parked · apr_01K5RS3K7 · frame 15" on a parked call, "running…" while no result has arrived, the decision ("⚖ allow · rg_0088 · frame 5", "⚖ approve · rg_0093 · frame 14") and "⋯", which shows the raw arguments |
 | Tool output | Six lines around the first line that reads as an error or a warning, then "⋯ N more lines"; opened, the whole output and "⏶ collapse" |
 | File change | The path, "new file" when the call created it, the stat, the first 12 lines of the diff and "⋯ N more lines" |
 | Seal | "sealed <time>" once the run is sealed |
 
 A `TodoWrite` call is a tool row ("6 items · plan version 1", output "Todos updated"). The Decision trace reads the same calls as plan versions.
 
-A parked call carries a line under it saying the call is held at the gateway for up to ten minutes and the model sees a wait with a reason, not a failure. The mockup's line ends "Approve or deny from the card under Governed actions."; that tab no longer exists, and a build names the Approvals drawer and the frame. The recall row's second chip reads "open the Context tab" in the mockup and opens the Decision trace; a build labels it by where it goes.
+A parked call carries a line under it saying the call is held at the gateway for up to ten minutes and the model sees a wait with a reason, not a failure. The mockup's line ends "Approve or deny it from the card under Governed actions."; that tab no longer exists, and a build names the Approvals drawer and the frame. The recall row's second chip reads "open the Context tab" in the mockup and opens the Decision trace; a build labels it by where it goes.
 
-**Under the feed**, the note: "The transcript is what the agent showed its operator. The gateway’s own frames sit behind the ⚖ chips. Thinking is the text a provider returned, labelled as that. Oxagen has no access to a model’s hidden reasoning."
+**Under the feed**, the note: "The transcript is what the agent showed its operator. Select ⚖ to see what the gateway recorded."
 
-**Empty results.** "no failed calls in this run." under the errors filter, "nothing matches this search." under a query, and "nothing to show with these filters." when the chips hide every row.
+**Empty results.** "No failed calls in this run." under the errors filter, "Nothing matches this search." under a query, and "Nothing to show with these filters." when the chips hide every row.
 
-**A compacted run** shows, above the tools row: "**Compacted.** This transcript is rendered from the archive segment; the frames left the graph after the hot window and nothing was recomputed."
+**A compacted run** shows, above the tools row: "**Compacted.** This transcript is read from the archive. Its frames were moved out of the live record, and nothing was recomputed."
 
 **Dialogs this tab opens:** `frame` (every "fr N" chip and every ⚖ chip), and the run dialogs from the header (`run.md`).
 

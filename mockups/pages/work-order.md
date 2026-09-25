@@ -172,7 +172,7 @@ The design names these, from `tasks-spec.md` §14. Neither exists in `packages/i
 - A Steering Source and a SteeringFrame are never shown as each other. Each SteeringFrame names this work order as its source at the brief’s digest, and the work order is never listed as a frame.
 - The page reads the record. No inference, no score, and no model-written account of why. A claim is the agent’s word, labelled with the agent and the run. A handoff note is quoted evidence, and the page says so.
 - No person is scored or ranked.
-- Every enforcement claim states the tier. Each stage shows its agent’s recorded tier, and the repository limit holds only as far as that tier enforces it: refused on `gateway` and `contained`, a client-attested hook on `harness`, recorded only on `observe`.
+- Every enforcement claim states the tier. Each stage shows its agent’s recorded tier, and the repository limit holds only as far as that tier enforces it: refused on `gateway` and `contained`, a hook the harness reports on `harness`, recorded only on `observe`.
 - Headers are rollups of the rows beneath them: Items claimed and Items accepted count the Definition of done rows, and Spend sums the runs.
 - Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
 - At most one gold action per screen: **Accept the work** once every item is claimed, and none before that.

@@ -35,10 +35,10 @@ const RULES = [
   ["brand case", /Oxagen|Stella/],
   ["storage tag", /postgres|kms \+|tools\.policy_versions/i],
   ["math notation", /[∩∈≠]/],
-  ["US spelling", /colour|behaviour|labelling|[Cc]ancelled/],
+  ["US spelling", /colour|behaviour|labelling|cancelled|neighbour/i],
   ["uppercased id", /\b(WO|TSK|RUN)_[0-9A-Z]{6,}\b|A-INTEL\//],
   // The rest of the review's glossary: one term per concept, and no internal names in page copy.
-  ["retired term", /\bfr \d|interjection|Wasted spend|[Mm]odel tier|Wrong (model )?tier|light tier|client tier|\bseams?\b|issue provider|Bind it|not bound|volatile selection|\bshelf\b|text plane|gate plane|a call at most|(^|\n)PER CALL\n/],
+  ["retired term", /\bfr \d|interjection|Wasted spend|[Mm]odel tier|Wrong (model )?tier|light tier|client tier|\bseams?\b|issue provider|Bind it|\bBind\b|not bound|\bunbound\b|[Vv]olatile selection|[Cc]lient-attested|\bshelf\b|text plane|gate plane|a call at most|(^|\n)PER CALL\n/],
   ["internal name", /\bkernel\b|reflector|archiver|player[’']s window|manifest gate|deny generation|hook boundary|shared plane|opt-down|[Bb]elt computation/],
   ["rhetoric", /earns the word|stronger word than|says more than that|refuses to say otherwise|not a verdict|It is not a result/],
   ["empty slot", /Task —\.|\btask —|µUSD/],
@@ -62,6 +62,7 @@ function workspaceRoutes(ws, agents) {
   return [
     b,
     ...["tasks", "work-orders", "workflows", "providers", "fields", "people"].map((t) => `${b}/tasks/${t}`),
+    `${b}/work/findings`,
     `${b}/tasks/tsk_01K6S7C5PA`, `${b}/tasks/tsk_01K6S2M4QF`,
     ...["wo_01K6T9QX", "wo_01K6TA2M", "wo_01K6RZ41"].map((w) => `${b}/tasks/work-orders/${w}`),
     `${b}/agents`,
@@ -86,6 +87,10 @@ const ROUTES = [
   ...workspaceRoutes("core-platform", ["triage", "release-manager", "pr-reviewer", "stale-closer-eu", "dependency-bot"]),
   ...workspaceRoutes("finops", ["invoice-bot", "cost-reporter-us"]),
   ...RUNS.map((r) => `#/${ORG}/core-platform/runs/${r}`),
+  // The run's other tabs, for a sealed, a halted and a held run: the Transcript, Cost, Memories and
+  // Evidence carry frame chips, prices and chain text the Decision trace does not.
+  ...["run_01K5RS7M2E8FJ3QW", "run_01K5RH3G8K5PAS7D", "run_01K6QW3D5N7TYBA2"].flatMap((r) =>
+    ["transcript", "cost", "memory", "evidence"].map((t) => `#/${ORG}/core-platform/runs/${r}/${t}`)),
   `#/${ORG}/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4`,
 ].filter((h) => !only || h.includes(only));
 
@@ -95,7 +100,7 @@ const OVERLAYS = [
   ["approvals drawer", "apdToggle(true)"],
   ["approval", "apdToggle(true); var p=apdPending()[0]; if(p) apdSelect(p.id)"],
   ["assistant", "asstToggle(true)"],
-  ...["create", "newws", "mintkey", "import", "funding", "switch", "budget", "role", "notifs", "plan", "steerfleet"]
+  ...["create", "newws", "mintkey", "import", "funding", "switch", "budget", "role", "notifs", "plan", "steerfleet", "more"]
     .map((k) => [`dialog ${k}`, `openDialog('${k}')`]),
   // Dialogs that need a record to open. The retire dialog said Deregister until 2026-09-25 because
   // no route or overlay here ever opened it.

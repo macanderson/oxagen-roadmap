@@ -11,7 +11,7 @@
 //
 // The flows, in order:
 //   1. connect Jira through the six-step wizard from Intake, create one value in Jira, leave one account
-//      not mapped, and see it under Providers
+//      not mapped, and see it under Trackers
 //  1b. connect ServiceNow with creation off, and see its column under Fields
 //   2. draft a definition of done with the assistant, edit it, and certify it
 //   3. a certified work item that changes upstream leaves ready

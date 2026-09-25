@@ -175,11 +175,11 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 318 to 322 (bar and meter), 765 (bar hold), 1395 to 1398 (stacked ratio), 1376 to 1379 (legend), 2057 to 2060 (meter, defined a second time)</td><td>The rules that draw it</td></tr>
-      <tr><td><code>stgMeter(label, used, max, unit, sub)</code> at <code>engine.js:6385</code></td><td>Single-value meter with <code>role=&quot;img&quot;</code> and an aria-label stating the percent. Holds at 90%.</td></tr>
+      <tr><td><code>stgMeter(label, used, max, unit, sub)</code> at <code>engine.js:6388</code></td><td>Single-value meter with <code>role=&quot;img&quot;</code> and an aria-label stating the percent. Holds at 90%.</td></tr>
       <tr><td><code>tokBars(t, opts)</code> at <code>engine.js:192</code></td><td>One composition meter per prompt part, plus output and reasoning, each in its own hue.</td></tr>
-      <tr><td><code>stack3(parts, total)</code> at <code>engine.js:2585</code></td><td>One <code>.stk</code> segment per part, sized by flex, each with a tooltip.</td></tr>
-      <tr><td><code>stackLeg(parts)</code> at <code>engine.js:2588</code></td><td>The <code>.leg</code> row naming each part <code>stack3()</code> drew.</td></tr>
-      <tr><td><code>mandateBar(m, showReserve)</code> at <code>engine.js:1736</code></td><td>The <code>.mbar</code> budget bar plus its own <code>.mlegend</code>, for a mandate card and the mandate page.</td></tr>
+      <tr><td><code>stack3(parts, total)</code> at <code>engine.js:2588</code></td><td>One <code>.stk</code> segment per part, sized by flex, each with a tooltip.</td></tr>
+      <tr><td><code>stackLeg(parts)</code> at <code>engine.js:2591</code></td><td>The <code>.leg</code> row naming each part <code>stack3()</code> drew.</td></tr>
+      <tr><td><code>mandateBar(m, showReserve)</code> at <code>engine.js:1739</code></td><td>The <code>.mbar</code> budget bar plus its own <code>.mlegend</code>, for a mandate card and the mandate page.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -208,7 +208,7 @@
 ## Inputs
 
 1. mockups/components/meter.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 318 to 322 (bar and meter), 765 (bar hold), 1395 to 1398 (stacked ratio), 1376 to 1379 (legend), 2057 to 2060 (meter, defined a second time). The mockup renders it with stgMeter(label, used, max, unit, sub) (engine.js:6385), tokBars(t, opts) (engine.js:192), stack3(parts, total) (engine.js:2585), stackLeg(parts) (engine.js:2588), mandateBar(m, showReserve) (engine.js:1736).
+2. The design source: mockups/src/engine.css lines 318 to 322 (bar and meter), 765 (bar hold), 1395 to 1398 (stacked ratio), 1376 to 1379 (legend), 2057 to 2060 (meter, defined a second time). The mockup renders it with stgMeter(label, used, max, unit, sub) (engine.js:6388), tokBars(t, opts) (engine.js:192), stack3(parts, total) (engine.js:2588), stackLeg(parts) (engine.js:2591), mandateBar(m, showReserve) (engine.js:1739).
 3. The build's implementation: find it by its root selector (.bar, .meter, .stk) or its name, and list every route that renders it.
 4. Where to see it in the design: Run (Decision trace, Tokens, Instruments), Spend, Agents (30-day token use, mandates), Steering (record page). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

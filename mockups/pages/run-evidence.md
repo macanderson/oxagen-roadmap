@@ -46,23 +46,23 @@ A direct work order has no items, and the panel is absent.
 - Issue: the reference in mono and the title under it.
 - Status: "open", "closed", "in progress" or "blocked", as a dot and a word.
 - Relation: "task", "referenced", or the relation with its reason ("resolves · the draft lists each fix once").
-- Edge: "stated", "observed", or "inferred" with its confidence ("inferred · 70%"), and one chip per frame it cites ("fr 9", "fr 12"), each opening that frame.
+- Edge: "stated", "observed", or "inferred" with its confidence ("inferred · 70%"), and one chip per frame it cites ("frame 9", "frame 12"), each opening that frame.
 - "View ↗", the tracker's own page for the issue, or "no link".
 
 The demo run lists `a-intel/platform#482` (task, stated), `#480` (referenced, closed, observed), `#471` and `#465` (inferred). With none: "No issue is linked to this session." Under the table: "A session can touch more than one issue: the task it was started for, and any it read, referenced or closed on the way. The relation says which, the edge says how Oxagen knows, and the status is read from the tracker when the page loads."
 
-**Linked work.** Eyebrow "Linked work" and a legend: "observed" (written by Oxagen from a tool call routed through it), "stated" (carried by the task), and "inferred" (a light-tier model read the frames and proposed it, scored and cited), with the count of inferred items against the total ("2 of 5"). Two panels, each with a count:
+**Linked work.** Eyebrow "Linked work" and a legend: "observed" (written by oxagen from a tool call routed through it), "stated" (carried by the task), and "inferred" (a light model read the frames and proposed it, scored and cited), with the count of inferred items against the total ("2 of 5"). Two panels, each with a count:
 
-- Repositories: one row per repository, a link to the forge, with its ref and note and its edge chip (`a-intel/platform`, "a4c91e2 · main · read; branch release/4.11.0-notes pushed · main untouched", observed, fr 5, fr 7). Empty: "no repository was touched".
-- Pull requests and artifacts: one row per branch, release, pull request or file, each reference a link to the forge where it has one, with its state and edge chip. Empty: "nothing was produced yet".
+- Repositories: one row per repository, a link to the forge, with its ref and note and its edge chip (`a-intel/platform`, "a4c91e2 · main · read; branch release/4.11.0-notes pushed · main untouched", observed, frame 5, frame 7). Empty: "No repository was touched."
+- Pull requests and artifacts: one row per branch, release, pull request or file, each reference a link to the forge where it has one, with its state and edge chip. Empty: "Nothing produced yet."
 
 Then **Files changed**: "+20 −0 · 1 file · as the harness reported them", and one row per file with its note and stat (`release/4.11.0-notes.md`, "new file · 2 writes", +20 −0) that opens its diff in place.
 
 **Chain and seal**, three panels:
 
-- **Hash chain**, with the badge "no gaps": Frames ("186 · dense seq 0 … 185", then "· the seal is envelope <N>" once sealed), Rule ("hash = SHA256(prev_hash ‖ canonical(envelope))"), `telemetry_gap` frames (a count, and that a gap is recorded and never repaired), Checkpoints ("9 · every 20 frames · signed by the host device key, countersigned by Oxagen at ingest") and Completeness gaps ("none, every body recorded"). The note says frames from a wrapped agent are client-attested: producer-signed and countersigned at ingest, so Oxagen attests receipt and chain integrity, not the truth of the content, and frames Oxagen writes itself are Oxagen-attested.
-- **Seal and attestation**. Live: "The seal is computed at run end, for every terminal outcome. Until then the chain is verifiable frame by frame but there is no Merkle root and no attestation." Sealed: the badge "sealed", Merkle root, Over, Archive segment, Signature ("ed25519 · <attester key>"), Signs over ("run_id, attempt_id, frame_count, merkle_root, archive_segment_digest, enforcement_tier, completeness_gaps"), Enforcement tier (the tier badge and "computed from what was actually routed, not from what the adapter could do on paper"), and Verify offline with "Export the bundle", which opens `runexport`.
-- **Checkpoints**, with "<in view> of <total>": a table Frame · Covers · Chain head · Signature ("countersigned"), each frame a link to it. With none in view: "No checkpoint frame is in view; the recorder writes one every 20 frames."
+- **Hash chain**, with the badge "no gaps": Frames ("186 · dense seq 0 … 185", then "· the seal is envelope <N>" once sealed), Rule ("hash = SHA256(prev_hash ‖ canonical(envelope))"), `telemetry_gap` frames (a count, and that a gap is recorded and never repaired), Checkpoints ("9 · every 20 frames · signed by the host device key, countersigned by oxagen at ingest") and Completeness gaps ("none, every body recorded"). The note says frames from a wrapped agent are reported by harness: producer-signed and countersigned at ingest, so Oxagen attests receipt and chain integrity, not the truth of the content, and frames Oxagen writes itself are Oxagen-attested.
+- **Seal and attestation**. Live: "The seal is computed at run end, for every terminal outcome. Until then the chain is verifiable frame by frame but there is no Merkle root and no attestation." Sealed: the badge "sealed", Merkle root, Over, Archive segment, Signature ("ed25519 · <attester key>"), Signs over ("run_id, attempt_id, frame_count, merkle_root, archive_segment_digest, enforcement_tier, completeness_gaps"), Enforcement tier (the tier badge and "computed from what was routed, not from what the adapter supports"), and Verify offline with "Export the bundle", which opens `runexport`.
+- **Checkpoints**, with "<in view> of <total>": a table Frame · Covers · Chain head · Signature ("countersigned"), each frame a link to it. With none in view: "No checkpoint frame is shown. The recorder writes one every 20 frames."
 
 There is no replay grade, no replay ladder, no Fork replay and no Bisect on this tab.
 
@@ -136,7 +136,7 @@ Loaded only. This change designs the loaded state. The build uses the shell's st
 - A frame (a recorded event) and a SteeringFrame (a resolved input) never share a name on screen.
 - The tab reads the record. No inference is shown as a record: an inferred edge is labelled inferred with its confidence and the frames it leaned on. No score and no model-written account of why.
 - No person is scored or ranked. The definition of done says who claimed and who accepted, and nothing more.
-- Every enforcement claim states the tier. The seal's enforcement tier is the one computed from what was routed. Frames a wrapped agent produced are client-attested, and the page says so.
+- Every enforcement claim states the tier. The seal's enforcement tier is the one computed from what was routed. Frames a wrapped agent produced are reported by harness, and the page says so.
 - No replay grade, no Fork replay and no Bisect.
 - Headers are rollups of the rows beneath them: "<N> in this session" counts the issue rows, each Linked work panel counts its rows, and the Checkpoints count is its rows against the recorder's total.
 - Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.

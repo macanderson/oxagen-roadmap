@@ -11,6 +11,7 @@
 //
 //   node tools/build-components.mjs           # write the pages
 //   node tools/build-components.mjs --check   # exit 1 if a committed page is not what the registry makes
+//   node tools/build-components.mjs --fix     # first move each drifted helper line to where it is defined
 //
 // Registry strings take three inline marks: `code`, **bold**, and [text](href). Example markup is
 // raw HTML that engine.css draws, written into its <template> exactly as dedented, since any added
@@ -26,6 +27,7 @@ const OUT = path.join(root, "mockups/components");
 const INDEX = path.join(root, "mockups/components.html");
 const MANIFEST = path.join(OUT, "manifest.json");
 const check = process.argv.includes("--check");
+const fix = process.argv.includes("--fix");
 
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 const md = (s) => esc(s)
@@ -262,7 +264,8 @@ ${foot}`;
 
 // A helper row names a function and where it is: ["listify()", "engine.js:13785", …]. The engine moves
 // under every pull request, so a line number goes stale without anyone touching this registry. Each
-// row's line must define or call the function it names, or the build says where it moved.
+// row's line must define or call the function it names, or the build says where it moved. With --fix
+// the build writes the new line into the module instead, so an engine edit costs one command.
 const SOURCES = {};
 const sourceLines = (f) => (SOURCES[f] ??= readFileSync(path.join(root, "mockups/src", f), "utf8").split("\n"));
 const lineErrors = [];
@@ -276,6 +279,11 @@ function helperDrift(c) {
     if ((lines[+m[2] - 1] || "").includes(name)) continue;
     const def = new RegExp(`^\\s*(function ${name}\\(|var ${name}\\s*=)`);
     const at = lines.findIndex((l) => def.test(l));
+    if (fix && at >= 0) {
+      const file = path.join(SRC, `${c.slug}.mjs`), was = `["${sig}", "${where}"`, now = `["${sig}", "${m[1]}.js:${at + 1}"`;
+      const text = readFileSync(file, "utf8");
+      if (text.includes(was)) { writeFileSync(file, text.split(was).join(now)); console.log(`fixed ${c.slug}: ${name} ${where} → ${m[1]}.js:${at + 1}`); continue; }
+    }
     out.push(`${c.slug}: ${name} is not at ${where}${at >= 0 ? `; it is defined at ${m[1]}.js:${at + 1}` : ""}`);
   }
   return out;
@@ -342,7 +350,7 @@ out.set(MANIFEST, JSON.stringify({
 
 if (lineErrors.length) {
   for (const e of lineErrors) console.log("drift " + e);
-  console.log(`${lineErrors.length} registry errors; fix them in mockups/components/src`);
+  console.log(`${lineErrors.length} registry errors; fix them in mockups/components/src, or run with --fix to move drifted lines`);
   process.exit(1);
 }
 

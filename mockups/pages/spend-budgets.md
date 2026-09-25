@@ -20,26 +20,26 @@ List every spend ceiling that governs this workspace and where each stands again
 
 **Header, tiles and tabs** as `spend.md`, with Budgets (4) selected. The header's **Set a budget** stays the one gold action.
 
-**Budgets panel.** Heading "Budgets", with a small **Set a budget** beside it, which opens `budget` and is not gold. The shell's list tools sit above the rows: the search field "Search this list", the filters "All · Period" (monthly, per run) and "All · Mode" (hard, soft), Rows (5, 10, 25, 50, All), sortable column headers, and a pager over the four rows.
+**Budgets panel.** Heading "Budgets", with a small **Set a budget** beside it, which opens `budget` and is not gold. The shell's list tools sit above the rows: the search field "Search this list", the filters "Any period" (Monthly, Per run) and "Any mode" (Hard, Soft), Rows (5, 10, 25, 50, All), sortable column headers, and a pager over the four rows.
 
 Columns, in order: Scope · Period · Limit · Used · Mode · Position · and a last column of row actions.
 
 | Scope | Period | Limit | Used | Mode | Position |
 |---|---|---|---|---|---|
-| organization · a-intel | monthly | $25,000.00 | $18,402.66 | soft | 74% |
-| workspace · core-platform | monthly | $18,000.00 | $14,213.78 | hard | 79% |
-| workspace · finops | monthly | $4,000.00 | $2,044.25 | hard | 51% |
-| agent · a-intel.core.triage | per run | $0.40 | $0.29 | hard | 72% |
+| organization · a-intel | monthly | $598,000.00 | $439,498.34 | soft | 73% |
+| workspace · core-platform | monthly | $122,000.00 | $95,603.33 | hard | 78% |
+| workspace · finops | monthly | $38,000.00 | $19,281.15 | hard | 51% |
+| agent · a-intel.core.triage | per run | $1.00 | $0.94 | hard | 94% |
 
 - **Mode** is a badge: `hard` in the denied ink, `soft` in the approval ink.
 - **Position** is a bar over the percentage used. The bar turns red above 80% and is green below.
 - Each row carries **Edit** (opens `budgetedit`) and **Remove** (red, opens `budgetdel`).
 
-A note closes the panel: "A hard budget is checked at each hook boundary, from a running counter fed by the usage each harness reports. A breach is a policy.decision frame and a pause, never a silent stop. A soft budget sends a notice."
+A note closes the panel: "A hard budget is checked at each checkpoint, from a running counter fed by the usage each harness reports. A breach is a policy.decision frame and a pause, never a silent stop. A soft budget sends a notice."
 
 **Dialogs this page opens:** `budget`, `budgetedit` and `budgetdel`. The header's `spendexport` is specified in `spend.md`.
 
-- **`budget`**, "Set a budget". Scope: organization · a-intel, workspace · core-platform, workspace · finops, operator · Marcus Bell, agent · a-intel.core.triage (the agent is selected by default). Period: per run, daily, monthly (per run by default). Limit (USD), default 0.25, with the hint "Highest run this month: $0.29." Mode: "hard: checked at each checkpoint, pauses at the next one" or "soft: recorded and reported, never blocks". Footer: **Cancel**, **Set it** (gold). Setting one adds a row and reports "Budget set on <scope>: $<limit> <period>, <mode>. A breach is a policy.decision frame and, by policy, a pause." A limit that is not a number is refused with "A budget needs a limit in USD."
+- **`budget`**, "Set a budget". Scope: organization · a-intel, workspace · core-platform, workspace · finops, operator · Marcus Bell, agent · a-intel.core.triage (the agent is selected by default). Period: per run, daily, monthly (per run by default). Limit (USD), default 0.25, with the hint "Highest run this month: $0.94." Mode: "hard: checked at each checkpoint, pauses at the next one" or "soft: recorded and reported, never blocks". Footer: **Cancel**, **Set it** (gold). Setting one adds a row and reports "Budget set on <scope>: $<limit> <period>, <mode>. A breach is a policy.decision frame and, by policy, a pause." A limit that is not a number is refused with "A budget needs a limit in USD."
 - **`budgetedit`**, "Edit the budget on <scope>". The same four fields, filled from the row. Under Scope, the hint "Changing the scope moves the budget. The spend already recorded against the old scope stays there." Beneath the fields, the note "A lower limit applies from the next boundary. It does not undo spend already recorded in this period, so a budget cut below what is used reads as breached at once." Footer: **Cancel**, **Save** (gold). Saving reports "Budget on <scope> set to $<limit> <period>, <mode>. It applies from the next boundary."
 - **`budgetdel`**, "Remove the budget on <scope>?". The note "<scope> has no ceiling after this. Runs there are still metered and still cost money, and the spend already recorded stays on the ledger." On a hard budget, the warning "This is a hard budget. Removing it means nothing pauses a run on this scope at a checkpoint." Footer: **Keep it**, **Remove it** (red). Removing reports "Budget on <scope> removed. Runs there are metered and uncapped."
 
@@ -53,12 +53,12 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 | Another workspace's ceiling (`workspace · finops` on Core platform) | `SPEND.budgets` | none | `get_spend_budget` answers the organization's ceiling and the active workspace's (`apps/app/src/data/contracts/spend.ts:230-249`), so no read puts another workspace's row here | ❌ |
 | An agent's per-run ceiling (`agent · a-intel.core.triage`, per run) | `SPEND.budgets` | the agent's ceiling with what it used | The ceiling exists: the agent definition's `budget.per_run_micros` (`packages/oxagen/src/contracts/agent.propose.ts:225`) is signed into the mandate as `session_limit_usd` (`packages/handlers/src/lib/tacho-mandate.ts:191-214`), and the loopback model proxy refuses the next call at it (`packages/tacho/src/collector/model-proxy.ts:863-885`). No budget read lists it with what it used. The app says so (`apps/app/messages/spend.json`, `spend.budgets.scopesMissing`) | 🟡 |
 | An operator's ceiling, and a daily period | `BUDGET_SCOPES` | an operator scope and a daily period | No operator ceiling exists. An agent's `per_day_micros` is signed as `daily_limit_usd` only to a host that advertises the daily budget feature (`tacho-mandate.ts:180-214`; ADR-160, Proposed) | ❌ |
-| Mode `hard` | `SPEND.budgets[].mode` | an enforced ceiling | `set_spend_budget` with `enabled: true`: the kernel's admission gate denies a metered `invoke()` over the ceiling before any provider call (`packages/billing/src/spend-budget-gate.ts:1-19`; `packages/oxagen/src/contracts/billing.budget.set.ts:54-74`) | ✅ |
+| Mode `hard` | `SPEND.budgets[].mode` | an enforced ceiling | `set_spend_budget` with `enabled: true`: the admission gate denies a metered `invoke()` over the ceiling before any provider call (`packages/billing/src/spend-budget-gate.ts:1-19`; `packages/oxagen/src/contracts/billing.budget.set.ts:54-74`) | ✅ |
 | Mode `soft` | `SPEND.budgets[].mode` | a ceiling that notifies and never blocks | No soft mode ships. `enabled: false` keeps a ceiling that gates nothing. An enforced ceiling notifies org admins at 50%, 80% and 95% once per period (`spend-budget-gate.ts:16-18`). The staged `set_budget` carries hard and soft (`packages/oxagen/src/contracts/v2/set-budget.ts:139`) and is inert until cutover (`v2/_define.ts:5-15`) | ❌ |
 | Set a budget, Edit | the `budget` and `budgetedit` dialogs | `set_spend_budget` | Organization or workspace scope, monthly or a rolling window in days, a limit, and whether it is enforced (`billing.budget.set.ts:14-52`; the app's dialog, `apps/app/src/features/spend/budget-dialog.tsx`). Setting a ceiling replaces the one its scope has. Operator and agent scopes, per-run and daily periods, and soft mode are not built | 🟡 |
 | Remove | the `budgetdel` dialog | a delete | No capability deletes a ceiling. `set_spend_budget` with `enabled: false` stops it gating and keeps the row | ❌ |
 | "Highest run this month" | a constant in `budgetForm()` | the month's dearest run in the scope | none | ❌ |
-| Where a ceiling is checked (the note) | copy | the gate that enforces each scope | The organization and workspace ceilings: the kernel gate on every scoped, metered `invoke()`, from a running counter in Postgres, failing open on a store error (`spend-budget-gate.ts:1-14`). An agent's per-run ceiling: the loopback model proxy, per model call (`model-proxy.ts:863-885`). Nothing checks a ceiling at a hook boundary | 🟡 |
+| Where a ceiling is checked (the note) | copy | the gate that enforces each scope | The organization and workspace ceilings: the admission gate on every scoped, metered `invoke()`, from a running counter in Postgres, failing open on a store error (`spend-budget-gate.ts:1-14`). An agent's per-run ceiling: the loopback model proxy, per model call (`model-proxy.ts:863-885`). Nothing checks a ceiling at a checkpoint | 🟡 |
 
 The app's Budgets tab also carries the gateway model lists and the recorded workspace session ceiling (`get_tacho_session_policy`; `apps/app/src/features/spend/gateway-policy.tsx`). The design does not draw that section.
 
@@ -70,7 +70,7 @@ The view carries no `data-future` mark, and the catalog gives it no future story
 
 - **Which ceilings appear.** The organization's ceiling and this workspace's, plus the per-run ceilings of this workspace's agents. A ceiling is one row per scope: setting one replaces the ceiling its scope has.
 - **Used and Position.** Used is the spend recorded against the scope in the period to date. Position is Used over Limit. The bar turns red above 80%.
-- **Where each ceiling is checked, with its tier.** An organization or workspace ceiling is checked by the kernel's admission gate on every scoped, metered `invoke()`, from the recorders' running counter. Over the limit, the gate denies before any provider call. At 50%, 80% and 95% it notifies the organization's admins once per period. It fails open when its store is down, so the page claims a stop only for calls routed through Oxagen, and only while the gate can read its counter. An agent's per-run ceiling is checked by the loopback model proxy on the host, on each model call routed through it (the `gateway` tier). On the `observe` and `harness` tiers a ceiling is a recorded number, never a stop (§12.5).
+- **Where each ceiling is checked, with its tier.** An organization or workspace ceiling is checked by the admission gate on every scoped, metered `invoke()`, from the recorders' running counter. Over the limit, the gate denies before any provider call. At 50%, 80% and 95% it notifies the organization's admins once per period. It fails open when its store is down, so the page claims a stop only for calls routed through Oxagen, and only while the gate can read its counter. An agent's per-run ceiling is checked by the loopback model proxy on the host, on each model call routed through it (the `gateway` tier). On the `observe` and `harness` tiers a ceiling is a recorded number, never a stop (§12.5).
 - **Lowering a limit** applies from the next check. It does not undo spend already recorded in the period, so a limit set below Used reads as breached at once.
 - **Removing** a ceiling leaves the scope metered and uncapped, and the spend already recorded stays on the ledger.
 - **Every write is a governed action** and lands in Audit with the person's name. Raising a ceiling is the override that clears a denial.

@@ -45,7 +45,7 @@ The organization group follows, unchanged: Organization, Billing and Audit. The 
 
 | Drawer | Opens from | Holds |
 |---|---|---|
-| Approvals | The shield button in the top bar, on every page, with the count of everything waiting on you | Every call parked for a person across the organization, and every open interjection. Picking one shows the full approval card, the same one the run shows. Each row names the run's work order |
+| Approvals | The shield button in the top bar, on every page, with the count of everything waiting on you | Every call parked for a person across the organization, and every open question. Picking one shows the full approval card, the same one the run shows. Each row names the run's work order |
 | Stella | The launcher at the foot of the sidebar, More on a phone, and ⌘K | The in-app agent. It reads the page it was opened from (`ask_assistant` `pageContext`), so on a run it can answer from that run's Decision trace. Its changes go through the same governed actions a person uses |
 
 ## Work
@@ -89,7 +89,7 @@ The header keeps Pause, Resume, Steer, Cancel and Export by the run's state. For
 | Agent | `/{org}/{ws}/agents/{agent}` | Overview: composition, current work, tokens and recommendations |
 | Identity | `/{org}/{ws}/agents/{agent}/identity` | Principal, credentials and the run credential |
 | Steering | `/{org}/{ws}/agents/{agent}/steering` | The SteeringFrames this agent receives by type, and the sources they come from |
-| Toolbelt | `/{org}/{ws}/agents/{agent}/toolbelt` | The computed belt, each tool's decision, and what is off the belt |
+| Toolbelt | `/{org}/{ws}/agents/{agent}/toolbelt` | The computed toolbelt, each tool's decision, and what is off the toolbelt |
 | Runtime | `/{org}/{ws}/agents/{agent}/runtime` | Host, harness, hooks, proxy and the tier earned |
 | Permissions | `/{org}/{ws}/agents/{agent}/permissions` | Roles, budgets, and Delegation: every mandate the agent holds, as the delegation frames it emits |
 | Activity | `/{org}/{ws}/agents/{agent}/activity` | The work orders this agent worked, their runs, tamper incidents and the accounting |
@@ -137,6 +137,32 @@ Unchanged: Organization (People, Roles, Invitations, Workspaces, Model funding a
 | Steering Source | The frames it emits, the agents it reaches, and its pull requests |
 | Finding | Its evidence runs, and the work item it became |
 | Agent | Its current work order, its runs, its sources, its toolbelt and its delegations |
+
+## Vocabulary
+
+The pages use one term per concept. Mac's copy specification of 2026-09-24 (#87, §2) sets the list. `tools/check-copy.mjs` walks every route and fails on a retired word. Where the wedge's design docs used a different word, the specification wins on the pages and in the page specs. A view id or a file name, such as `run-interjection`, is an identifier and keeps its spelling.
+
+| Concept | Page word | Retired |
+|---|---|---|
+| A named set of tools on an agent | toolbelt | belt |
+| How a toolbelt reaches the model | All tools sent, Searchable | Full belt, Searchable belt |
+| Where tools come from | provider | server |
+| Where work items come from | issue tracker | issue provider |
+| How much a runtime can enforce | tier: observe, harness, gateway, contained | seam, client tier |
+| The size of model an agent uses | model class: light, complex | model tier, light tier, Wrong tier |
+| A run held for a person's answer | question | interjection |
+| The part of steering picked for each prompt | per-prompt selection | volatile selection |
+| The part of steering sent on every prompt | stable prefix | shelf, text plane, gate plane |
+| A step in a run's record | frame, written out | fr 12 |
+| Spend that bought no progress | unproductive spend | wasted spend |
+| The amount above which a call waits for a person | auto-approve limit | a call at most, per call |
+| A repository's relation to the workspace | main repository, linked repository, not linked | bind, not bound |
+| Spend basis `gateway_observed` | Observed by gateway | the raw key |
+| Spend basis `client_attested` | Reported by harness | the raw key |
+| Where a hard budget or a steer takes effect | the next checkpoint | hook boundary |
+| The product and the assistant | oxagen, stella | Oxagen, Stella |
+
+The pages also leave out internal component names: kernel, reflector, archiver, manifest gate, deny generation, belt computation, shared plane, and opt-down. A page names what the component does instead, or defines the name once in a "How it works" disclosure.
 
 ## Unique views
 

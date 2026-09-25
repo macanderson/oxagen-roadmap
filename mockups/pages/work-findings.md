@@ -29,17 +29,17 @@ Recorded problems with money behind them, and the evidence for each: a cache wri
 | Evidence | every one | “opens to the runs it cites” |
 | Basis | measured | “minus the counterfactual, at the price each call paid” |
 
-**The list.** The shared list bar: a search field (“Search findings”), facets Level (“All · Level”: agent, operator, tool, workspace) and Confidence (“All · Confidence”: high, medium), **Sort** (Rank; Savings, high first; Savings, low first; Finding A–Z), Rows (5, 10, 25, 50, All), and a pager (“1–10 of 37”). One card per finding, ranked by the money at stake:
+**The list.** The shared list bar: a search field (“Search findings”), facets Level (“Any level”: agent, operator, tool, workspace) and Confidence (“Any confidence”: high, medium), **Sort** (Rank; Savings, high first; Savings, low first; Finding A–Z), Rows (5, 10, 25, 50, All), and a pager (“1–10 of 37 (page 1 of 4)”). One card per finding, ranked by the money at stake:
 
 - the rank;
 - the kind in bold (“Unpaged results”), the level badge (`tool`), and the confidence badge (“high confidence” or “medium confidence”);
 - the operator whose runs the finding cites (avatar and name) and the subject in mono (“Diego Marchetti · a-intel.mobile.backlog-groomer-canary”);
 - one sentence of why (“Across 8,388 calls in 30 days the result body averaged 27k tokens and re-entered the context on every later turn of the run.”);
-- the evidence line in mono (“evidence 6,256 runs · 8,388 tool calls · last 30 days · trend -6% over 30 days”);
+- the evidence line in mono (“evidence 6,256 runs · 8,388 tool calls · last 30 days · trend −6% over 30 days”);
 - on the right, the saving (“$3,981.89”), “at stake · 13% of identified”, and a bar of that share;
 - the actions **Create work item**, **Evidence** and **Fix**. A finding already picked up shows **In work · WI-14**, a link to its work item, in place of **Create work item**.
 
-The demo record holds 37 findings of nine kinds: Unpaged results, Refetching a stable list, Duplicate tool calls, Unproductive tail, Wrong tier, Repeated shell commands, Tool-list bloat, Cache misses after a stable prefix changed, and Cache writes never read. One is in work: `fnd_01K5RT2A` (Tool-list bloat on triage, $188.40) became WI-14.
+The demo record holds 37 findings of nine kinds: Unpaged results, Refetching a stable list, Duplicate tool calls, Unproductive tail, Wrong model class, Repeated shell commands, Tool-list bloat, Cache misses after a stable prefix changed, and Cache writes never read. One is in work: `fnd_01K5RT2A` (Tool-list bloat on triage, $188.40) became WI-14.
 
 **Note** under the list: “A finding becomes work when a person picks it up: Create work item opens a backlog item with the finding as its source and a drafted definition of done. Fix records the change directly when no agent needs to do it.”
 
@@ -50,9 +50,9 @@ The demo record holds 37 findings of nine kinds: Unpaged results, Refetching a s
 Opened by **Evidence**, by the address `?finding=<id>`, and from a work item’s **Open the finding**. Title “Evidence · Duplicate tool calls”. Subtitle “fnd_01K5RHD7B · agent · last 30 days · basis client_attested”.
 
 - Four figures: **At stake** (“$2,398.16”, “measured cost minus the estimated cost without the issue”), **Confidence** (“High”, the trend “+11% over 30 days”), **Signal** (“12 steps”, “identical input digests per run · baseline 1 step”), **Evidence** (“1,313 runs · 6,007 model calls”, “client_attested · every run sealed”).
-- **Recent runs with unproductive spend**: Run · Task · Started · Cost · Unproductive · What was wasted, then a total row: “3 most recent of 1,313 runs”, the cost total, the wasted total, and “45% of what these runs cost”. A row closes the dialog and opens the run.
+- **Recent runs with unproductive spend**: Run · Task · Started · Cost · Unproductive · What was wasted, then a total row: “3 most recent of 1,313 runs”, the cost total, the unproductive total, and “45% of what these runs cost”. A row closes the dialog and opens the run.
 - **How we know**: the method, step by step (Measured, Re-read, Never used, Counterfactual), then “Counterfactual: <the alternative>. The saving is the difference, priced at what each call paid.”
-- **Who is involved**: the operator (avatar, name, “workspace.owner · core-platform · operator on every run below”, and one line on the pattern) and the agent’s card (harness, belt, runs and spend over 30 days).
+- **Who is involved**: the operator (avatar, name, “workspace.owner · core-platform · operator on every run below”, and one line on the pattern) and the agent’s card (harness, toolbelt, runs and spend over 30 days).
 - Footer: “Every run above is a sealed record. Open one to read the frames the arithmetic came from.”, **Close**, **Fix** (gold; opens the Fix dialog).
 
 ### The Fix dialog (`fix`)
@@ -60,7 +60,7 @@ Opened by **Evidence**, by the address `?finding=<id>`, and from a work item’s
 Chosen by the finding’s kind. Two shapes:
 
 - **A pull request** (Duplicate tool calls). Title “Fix · Open a pull request”, subtitle “Duplicate tool calls on a-intel.core.status-poster-us · $2398.16 at stake”. An eyebrow naming the branch (`context/ctx.release.no-reread-changelog`) and “one concern per PR · the agent reads this on its next run”. The Steering record file it adds (`.oxagen/rules/ctx.release.no-reread-changelog.toml`: schema, lineage, kind `rule`, workspace scope, the statement “Do not re-read CHANGELOG.md more than once in a run; cache the first read.”, strength `should`, `constraint_effect = "forbid"`, and the finding, its runs and its saving as evidence). **Why a pull request**, a paragraph ending with a link to the evidence. **Checks that will run**: Schema, Lineage uniqueness, record_hash recomputation, Secret and PII scan, Conflict against active records, and `constraint_effect ∈ {require, forbid}`, each “on push”. The note: “Merge is the publication. Until then the record steers nothing; after it, the Spend page shows the repeat reads disappearing on the next a-intel.core.status-poster-us run.” Footer “Opens on a-intel/platform as a-intel/platform#519 · team mode, a code-owner review is required.”, **Cancel**, **Open the pull request** (gold). It toasts “Branch context/ctx.release.no-reread-changelog pushed and a-intel/platform#519 opened with fnd_01K5RHD7B as supporting evidence.”
-- **A help article** (every other kind). Title “Fix · <the article>” (Unpaged results: “Fix · Why a month of line items should never enter the context window”), subtitle “Help article · Unpaged results · chosen by the finding kind”. **Why this costs money**; the pair **What your agent does today** and **The fix**, as code; **How to apply it**, the steps; three figures: **What you save** (“$3981.89”, “per 30 days on <subject>”), **Evidence** (a link to the evidence dialog, “high confidence”), **Where the fix lives** (“the agent’s own code” or “workspace config”, “Oxagen cannot change it for you; it can show you exactly where”). Footer “Oxagen records the change as a definition change when you apply it, so the saving is attributable on Spend.”, **Close**, and the kind’s action (gold; Unpaged results: **Request grouped totals**).
+- **A help article** (every other kind). Title “Fix · <the article>” (Unpaged results: “Fix · Why a month of line items should never enter the context window”), subtitle “Help article · Unpaged results · chosen by the finding kind”. **Why this costs money**; the pair **What your agent does today** and **The fix**, as code; **How to apply it**, the steps; three figures: **What you save** (“$3981.89”, “per 30 days on <subject>”), **Evidence** (a link to the evidence dialog, “high confidence”), **Where the fix lives** (“the agent’s own code” or “workspace config”, “oxagen cannot change it for you; it can show you exactly where”). Footer “oxagen records the change as a definition change when you apply it, so the saving is attributable on Spend.”, **Close**, and the kind’s action (gold; Unpaged results: **Request grouped totals**).
 
 **Shell.** The sidebar with Work lit and its count. Breadcrumbs “Anderson Intelligence Corp. / Core platform / Work”. ⌘K, notifications, the Approvals button with the organization’s count, and the avatar.
 
@@ -71,7 +71,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | Element | Mockup collection | Target store or contract | Backing today in macanderson/oxagen | Status |
 |---|---|---|---|---|
 | Findings of four kinds: Cache writes never read, Duplicate tool calls, Repeated shell commands, Unpaged results | `FINDINGS` | `list_findings` | `packages/oxagen/src/contracts/finding.list.ts:23-69`; the kinds at `finding.shared.ts:15-20` and the table check at `20260915201000_cost_findings.sql:51` | ✅ |
-| Findings of five more kinds: Refetching a stable list, Unproductive tail, Wrong tier, Tool-list bloat, Cache misses after a stable prefix changed | `FINDINGS` | the findings job (`mission-control-spec.md` §12.8) | none. The job detects the four kinds above | ❌ |
+| Findings of five more kinds: Refetching a stable list, Unproductive tail, Wrong model class, Tool-list bloat, Cache misses after a stable prefix changed | `FINDINGS` | the findings job (`mission-control-spec.md` §12.8) | none. The job detects the four kinds above | ❌ |
 | Level, subject, saving with its basis, confidence, window, why, fix, runs and calls | `FINDINGS[]`, `EVIDENCE[].confidence` | `list_findings` | `finding.shared.ts:33-56`: `level`, `subject`, `saving`, `confidence`, `window`, `why`, `fix`, `runs`, `calls` | ✅ |
 | Rank, share of identified, and the share bar | derived from `save` | derived from `saving` | the list is ranked by saving (`finding.list.ts:2`) | ✅ |
 | Trend | `EVIDENCE[].trend` | a trend over the window | none | ❌ |

@@ -20,8 +20,8 @@ You are auditing the **Working copies** tab of Repositories in Oxagen (`#/a-inte
 Work through every check. For each, record PASS, FAIL or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
 
 1. **Route and shell.** The tab is a path segment and survives a reload. Repositories is lit in the sidebar. The Working copies tab is selected, and its count equals the copies not in sync, or is absent while no copy is recorded.
-2. **Gold.** Connect a directory is the one gold action; the header's Add Oxagen to a repository is plain on this tab. Two golds on the page is a FAIL.
-3. **Panel.** Heading "Working copies", its subtext, and Connect a directory. Columns in order: Directory · Repository · Branch · `.oxagen/` · Symlinks · Bundle · Last seen. Directory carries the path, the machine and the person. Branch carries its head. `.oxagen/` is a badge with its word (`in sync`, `behind`, `uncommitted`, `unbound`) and the uncommitted count. Missing or renamed columns are FAILs.
+2. **Gold.** Connect a directory is the one gold action; the header's Add .oxagen/ is plain on this tab. Two golds on the page is a FAIL.
+3. **Panel.** Heading "Working copies", its subtext, and Connect a directory. Columns in order: Directory · Repository · Branch · `.oxagen/` · Symlinks · Bundle · Last seen. Directory carries the path, the machine and the person. Branch carries its head. `.oxagen/` is a badge with its word (`in sync`, `behind`, `uncommitted`, `not linked`) and the uncommitted count. Missing or renamed columns are FAILs.
 4. **No banner.** Nothing above the table restates what the `.oxagen/` cells say. A banner is a finding.
 5. **Rows open the dialog.** Click, Enter and Space open `workcopy`, and each row has an accessible name naming the path and the machine.
 6. **The empty list.** With no copy recorded, the panel says no directory is linked, keeps Connect a directory as the gold action, and says a directory is linked by running `oxagen init` in it and never by a typed path.
