@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>State surfaces</title>
+<meta name="description" content="What a page shows while it loads, when it is empty, when it fails, and when you lack the role.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>State surfaces</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Feedback</p>
+  <h1>State surfaces</h1>
+  <p class="dx-lead">Every page has four states besides loaded. Loading draws the page's shape in shimmering blocks. Empty says what is missing, where it comes from, and the one action that fills it. Error says what failed and that nothing changed, then offers to try again. Denied names the permission you lack and who can grant it. The mockup pins a state with <code>?state=</code> so each one can be reviewed.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.state-wrap, .sk</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 366 to 375</span>
+    <span><b>Used on</b> Work, Run, Agents, an agent, Tools, Steering, Spend, Repositories, Runtimes, Organization, Billing, Audit</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-empty">
+    <figcaption class="dx-story-h"><b>Empty</b><span>Work with no connected issue tracker. The heading names what is missing and the one gold action fills it.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="empty" data-name="Empty">
+<div class="state-wrap" style="padding:36px 20px">
+  <div class="ico" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg></div>
+  <h2>No work in Core platform yet</h2>
+  <p>Work arrives from a connected issue tracker, from a finding a person picks up, or written here. A run an agent starts on its own is filed under a direct work order.</p>
+  <div class="acts"><button class="btn primary">Connect an issue tracker</button></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-loading">
+    <figcaption class="dx-story-h"><b>Loading</b><span><code>skeleton()</code> draws four stat boxes and a panel of seven rows. The shimmer stops under reduced motion.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="loading" data-name="Loading">
+<div aria-busy="true" aria-label="Loading">
+  <div class="grid g4" style="margin-bottom:16px"><div class="sk b"></div><div class="sk b"></div><div class="sk b"></div><div class="sk b"></div></div>
+  <div class="panel"><div class="panel-h"><div class="sk t" style="width:180px"></div></div>
+    <div class="panel-b"><div class="sk r" style="margin-bottom:8px"></div><div class="sk r" style="margin-bottom:8px"></div><div class="sk r" style="margin-bottom:8px"></div><div class="sk r" style="margin-bottom:8px"></div></div></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-error">
+    <figcaption class="dx-story-h"><b>Error</b><span>What failed, the code the control plane gave, that nothing changed, and what still ran. Try again is the one action.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="error" data-name="Error">
+<div class="state-wrap" style="padding:36px 20px">
+  <div class="ico" style="color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 40%,transparent)" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>
+  <h2>This file could not be loaded</h2>
+  <p>The control plane answered <code>502 git_read_unreachable</code>. Nothing was changed. Runs kept recording while this page was down. The collector on each host writes the frames.</p>
+  <div class="acts"><button class="btn primary">Try again</button><button class="btn">Open an incident</button></div>
+  <p class="mono dim" style="margin-top:16px;font-size:11.5px">request 01K5RSXQ7F2E, us-east-1, 2026-09-11 09:16:04Z</p>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-denied">
+    <figcaption class="dx-story-h"><b>Denied</b><span>The permission you lack, who can grant it, and how the refusal was decided.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="denied" data-name="Denied">
+<div class="state-wrap" style="padding:36px 20px">
+  <div class="ico" style="color:var(--st-denied);border-color:color-mix(in srgb,var(--st-denied) 40%,transparent)" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+  <h2>You need access to this agent's definition</h2>
+  <p>Your roles on <b>a-intel</b> do not include <code>agent.write on core-platform</code>. An organization owner can grant it. The grant is a governed action and lands in the audit record with your name on it.</p>
+  <div class="acts"><button class="btn primary">Request access</button><button class="btn">Back to Work</button></div>
+  <dl class="kv" style="margin-top:20px;text-align:left;max-width:420px">
+    <dt>Signed in as</dt><dd>Marcus Bell <span class="mono">workspace.member</span></dd>
+    <dt>Needed</dt><dd><span class="mono">agent.write on core-platform</span></dd>
+    <dt>Decided by</dt><dd><span class="mono">pol_v41</span>, where a deny outranks every allow</dd>
+  </dl>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-in-panel">
+    <figcaption class="dx-story-h"><b>Empty inside a panel</b><span>A section with nothing in it keeps its panel and says so in one line, with the action beside it.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="in-panel" data-name="Empty inside a panel">
+<div class="panel">
+  <div class="panel-h"><h3>Budgets</h3><div class="sp"><button class="btn sm">Set a budget</button></div></div>
+  <div class="panel-b"><p class="muted" style="margin:0;font-size:13px">No ceiling is set for Core platform or for a-intel.</p></div>
+</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Surface</td><td><code>.state-wrap</code></td><td>A centered grid with 60px by 20px padding, replacing the page body under its header.</td></tr>
+      <tr><td>Icon</td><td><code>.state-wrap .ico</code></td><td>A 44px tile on <code>--panel</code> with a 12px radius and a <code>--border</code> edge. Error tints it <code>--st-failed</code> and denied <code>--st-denied</code>.</td></tr>
+      <tr><td>Heading</td><td><code>.state-wrap h2</code></td><td>The state in words, 7px above the text. Geist, like every h2.</td></tr>
+      <tr><td>Text</td><td><code>.state-wrap p</code></td><td>13px <code>--muted</code>, at most 52 characters wide.</td></tr>
+      <tr><td>Actions</td><td><code>.state-wrap .acts</code></td><td>Centered buttons, the one gold action first.</td></tr>
+      <tr><td>Detail</td><td><code>.state-wrap .kv</code>, <code>p.mono.dim</code></td><td>The facts behind a denial, or the request id behind an error.</td></tr>
+      <tr><td>Skeleton block</td><td><code>.sk</code></td><td>A shimmering bar from <code>--hl</code> to <code>--panel</code>, 11px tall, 6px radius, cycling every 1.5 seconds.</td></tr>
+      <tr><td>Skeleton sizes</td><td><code>.sk.t</code>, <code>.sk.b</code>, <code>.sk.r</code></td><td>A title (22px), a stat box (64px), and a row (38px).</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  <p class="dx-sub">A page has all four states. The mockup draws the states each renderer branches on.</p>
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Loading: before the first answer for a page, never for a background refresh.</li><li>Empty: the page loaded and holds nothing yet.</li><li>Error: the page's data could not be read.</li><li>Denied: your roles do not include the permission the page needs.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>One empty section of a loaded page: keep its <a href="panel.html">panel</a> and write one line inside it.</li><li>A list that a search emptied: the <a href="list-table.html">list table</a> says &quot;No rows match.&quot;</li><li>An action that failed: say so in a <a href="toast.html">toast</a> or beside the field.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex"><div class="state-wrap" style="padding:20px;width:100%"><h2>Oops! Something went wrong</h2><p>Sorry, we couldn't load this page. Please try again later.</p></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>An apology and no facts. It names nothing that failed, and says nothing about whether anything changed.</p></div>
+    <div class="dx-do"><div class="dx-ex"><div class="state-wrap" style="padding:20px;width:100%"><h2>This file could not be loaded</h2><p>The control plane answered <code>502 git_read_unreachable</code>. Nothing was changed.</p><div class="acts"><button class="btn primary">Try again</button></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>What failed, the code, what did not change, and one action.</p></div>
+  </div>
+  <ul>
+    <li>Every state keeps the page header, so you know where you are.</li>
+    <li>An empty state has exactly one action, the one that fills it, and it is the gold primary.</li>
+    <li>An error says what did not change and what kept running. A page that could not load never implies data was lost.</li>
+    <li>A denied state names the exact permission, who can grant it, and a way to ask.</li>
+    <li>A field no source backs yet renders as not recorded inside a loaded page. That is not an empty state.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Empty heading</b>: what is missing and where: &quot;No work in Core platform yet&quot;.</li>
+    <li><b>Empty text</b>: where the thing comes from, in one or two sentences.</li>
+    <li><b>Error heading</b>: the thing and the verb: &quot;This file could not be loaded&quot;.</li>
+    <li><b>Error text</b>: the control plane's code in <code>code</code>, then &quot;Nothing was changed.&quot; Never an apology, and never blame.</li>
+    <li><b>Denied heading</b>: what you need, stated positively: &quot;You need access to this agent's definition&quot;.</li>
+    <li><b>Denied text</b>: the permission in <code>code</code>, who can grant it, and what the grant records.</li>
+    <li><b>Request id</b>: the id, region, and time in mono, separated by commas.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The state's heading is an h2 under the page h1, so the outline stays whole.</li>
+    <li>The icon is <code>aria-hidden</code>. The heading carries the meaning.</li>
+    <li>Loading marks its region <code>aria-busy=&quot;true&quot;</code>, and the loaded page announces itself by moving focus or through a polite live region. The mockup does neither. See Findings.</li>
+    <li>The shimmer stops under <code>prefers-reduced-motion</code> through the global rule at engine.css 49.</li>
+    <li>Error and denied text is <code>--muted</code>, 6.91:1 on <code>--ink</code> in dark and 4.83:1 in light.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>The surface keeps its centered layout with 16px page padding. Buttons wrap and take the phone button height.</li>
+    <li>The skeleton's four stat blocks sit two to a row.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--panel, --border</code></td><td>Icon tile</td></tr>
+      <tr><td><code>--st-failed</code></td><td>Error icon</td></tr>
+      <tr><td><code>--st-denied</code></td><td>Denied icon</td></tr>
+      <tr><td><code>--muted</code></td><td>Text</td></tr>
+      <tr><td><code>--dim</code></td><td>Request id</td></tr>
+      <tr><td><code>--hl, --panel</code></td><td>Skeleton shimmer</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 366 to 375</td><td>The rules that draw it</td></tr>
+      <tr><td><code>skeleton()</code> at <code>engine.js:851</code></td><td>The loading state: four stat blocks and a panel of seven rows.</td></tr>
+      <tr><td><code>emptyState(t, p, acts)</code> at <code>engine.js:858</code></td><td>The empty state with a heading, text, and actions.</td></tr>
+      <tr><td><code>errorState(what, code)</code> at <code>engine.js:863</code></td><td>The error state with the control plane's code, Try again, and Open an incident.</td></tr>
+      <tr><td><code>deniedState(what, need)</code> at <code>engine.js:872</code></td><td>The denied state with the permission, Request access, and the facts.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>Each page renderer branches on <code>S.state</code>, which <code>?state=loaded|empty|loading|error|denied</code> sets. <code>mockups/catalog.mjs</code> records which states each page has.</li>
+    <li>About 19 to 21 page functions call each helper.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Rule breaks in the error and denied copy</h4><p>The error text ends &quot;Frames are written by the collector on each host, not by oxagen&quot;, a &quot;not&quot; contrast in the passive voice. Its id line reads <code>trace 01K5RSXQ7F2E · us-east-1 · …</code>, which uses a retired word and mid-dots. The denied text joins two sentences with a semicolon, and its heading reads &quot;You cannot see&quot;. The examples above show the rewrites.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Definition terms outside a list</h4><p><code>deniedState()</code> writes <code>dt</code> and <code>dd</code> inside a <code>div.kv</code>. They are only valid inside a <code>dl</code>.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Loading is silent</h4><p>The skeleton sets no <code>aria-busy</code>, and nothing announces when the page arrives. A screen reader hears nothing until you move.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>One icon for every empty page</h4><p>Every empty state uses the same table icon, whatever is missing.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's state surfaces against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>State surfaces audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the state surfaces component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/state-surfaces.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 366 to 375. The mockup renders it with skeleton() (engine.js:851), emptyState(t, p, acts) (engine.js:858), errorState(what, code) (engine.js:863), deniedState(what, need) (engine.js:872).
+3. The build's implementation: find it by its root selector (.state-wrap, .sk) or its name, and list every route that renders it.
+4. Where to see it in the design: Work, Run, Agents, an agent, Tools, Steering, Spend, Repositories, Runtimes, Organization, Billing, Audit. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Coverage. Every page renders loading, empty, error, and denied. Force each one (a slow response, an empty workspace, a 502, and a role without the permission) and record what each page shows.
+2. Header. Each state keeps the page header and the tabs.
+3. Empty. The heading names what is missing, the text says where it comes from, and there is exactly one action, the gold primary, that fills it.
+4. Error. The heading names what failed, the text quotes the control plane's code and says nothing was changed, and Try again reloads only the failed data. An apology, a vague message, or a stack trace is a FAIL.
+5. Denied. The text names the exact permission and who can grant it, and offers a way to request it. The request lands in the audit record.
+6. Loading. The skeleton matches the page's shape, marks its region busy, and the arrival of the page is announced. The shimmer stops under reduced motion.
+7. Copy. No state's text uses a semicolon, a mid-dot, a &quot;not&quot; contrast, the word trace, or an apology.
+8. Markup. Definition terms sit inside a dl, and the state's heading is an h2.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: The surface keeps its centered layout with 16px page padding. Buttons wrap and take the phone button height. The skeleton's four stat blocks sit two to a row.
+13. Accessibility. The state's heading is an h2 under the page h1, so the outline stays whole. The icon is `aria-hidden`. The heading carries the meaning. Loading marks its region `aria-busy=&quot;true&quot;`, and the loaded page announces itself by moving focus or through a polite live region. The mockup does neither. See Findings. The shimmer stops under `prefers-reduced-motion` through the global rule at engine.css 49. Error and denied text is `--muted`, 6.91:1 on `--ink` in dark and 4.83:1 in light.
+14. One implementation. The build draws the state surfaces from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# State surfaces: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="tooltip.html"><span>Previous</span>Tooltip</a><a class="nx" href="note.html"><span>Next</span>Note</a></nav>
+</main>
+</div>
+</body>
+</html>

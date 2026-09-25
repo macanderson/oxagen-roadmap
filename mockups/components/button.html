@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Button</title>
+<meta name="description" content="An action a person takes, with one gold primary per screen.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Button</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Actions and input</p>
+  <h1>Button</h1>
+  <p class="dx-lead">A button runs an action on the page it sits on: save, deny, open a dialog, close a pull request. The default button is neutral. One button per screen may be the gold primary, and it marks the action the screen exists for. Destructive actions are red, and icon buttons carry a label a screen reader can speak.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.btn</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 135 to 144, icon button 117 to 120, wand 1028 to 1031, solid danger 2121 to 2122, link 1775 to 1776, phone 665 to 666</span>
+    <span><b>Used on</b> every page, every dialog, the approvals drawer</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-variants">
+    <figcaption class="dx-story-h"><b>Variants</b><span>Default, the one gold primary, danger, ghost, and selected.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="variants" data-name="Variants">
+<button class="btn">Export report</button>
+<button class="btn primary">Set a budget</button>
+<button class="btn danger">Deny with this reason</button>
+<button class="btn ghost">Details</button>
+<button class="btn sel">Live <span class="dim">2</span></button>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-small">
+    <figcaption class="dx-story-h"><b>Small</b><span><code>.sm</code> for actions inside a panel header, a row, or a card.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="small" data-name="Small">
+<button class="btn sm">Edit</button>
+<button class="btn sm primary">Approve</button>
+<button class="btn sm danger">Remove</button>
+<button class="btn sm ghost" aria-expanded="false">Details</button>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-disabled">
+    <figcaption class="dx-story-h"><b>Disabled</b><span>Disabled drops to 45% opacity. A disabled action says why nearby.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="disabled" data-name="Disabled">
+<button class="btn primary" disabled>Retire agent</button>
+<button class="btn danger" disabled>Retire agent</button>
+<span class="muted" style="font-size:12px">Tick the check to confirm.</span>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-dialog-footer">
+    <figcaption class="dx-story-h"><b>Dialog footer</b><span>Cancel first, then the action. A destructive dialog's action is the danger button, and the dialog has no gold button.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="dialog-footer" data-name="Dialog footer">
+<div style="display:grid;gap:14px">
+  <div class="dlg-f" style="border:1px solid var(--border);border-radius:10px"><button class="btn">Cancel</button><button class="btn primary">Send the invitation</button></div>
+  <div class="dlg-f" style="border:1px solid var(--border);border-radius:10px"><button class="btn">Cancel</button><button class="btn danger">Retire agent</button></div>
+  <div class="dlg-f" style="border:1px solid var(--border);border-radius:10px"><button class="btn">Keep it open</button><button class="btn danger solid">Close pull request</button></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-icon">
+    <figcaption class="dx-story-h"><b>Icon buttons</b><span>32px square. Pressed turns the border and icon gold. A count sits on the top right.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="icon" data-name="Icon buttons">
+<button class="iconbtn" aria-label="Close">×</button>
+<button class="iconbtn" aria-label="Notifications"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="dot"></span></button>
+<button class="iconbtn apd-btn" aria-pressed="false" aria-controls="apdrawer" aria-label="Approvals, 3 waiting on you across all workspaces"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg><span class="cnt">3</span></button>
+<button class="iconbtn" aria-pressed="true" aria-label="Approvals, 3 waiting on you across all workspaces"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></button>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-wand">
+    <figcaption class="dx-story-h"><b>Assist button</b><span>The wand asks the assistant to write a field. It is the one fill that is neither panel nor gold.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="wand" data-name="Assist button">
+<label class="muted" style="font-size:12px;font-weight:600">Description</label>
+<button class="btn wand" title="Have the assistant write it" aria-label="Have the assistant write it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg></button>
+<button class="btn wand" disabled title="Have the assistant write it" aria-label="Have the assistant write it"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg></button>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-link">
+    <figcaption class="dx-story-h"><b>Link button</b><span><code>.lnk</code> is a button that reads as a link inside a sentence.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="link" data-name="Link button">
+<p style="margin:0;font-size:13px">Showing constraints and procedures. <button class="lnk" style="font-size:12px">Show every type</button></p>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Button</td><td><code>.btn</code></td><td>13px Geist 500, 7px by 13px padding, a 9px radius, a <code>--border</code> edge on <code>--panel</code>, <code>--fg</code> text. Hover lifts the border to <code>--rule</code> and the ground to <code>--hl</code>.</td></tr>
+      <tr><td>Primary</td><td><code>.btn.primary</code></td><td><code>--gold</code> ground and border, <code>--on-gold</code> text, 600. Hover is <code>--gold-bright</code>.</td></tr>
+      <tr><td>Small</td><td><code>.btn.sm</code></td><td>12px, 4px by 9px padding, a 7px radius.</td></tr>
+      <tr><td>Danger</td><td><code>.btn.danger</code></td><td><code>--st-failed</code> text and a border at 40% of it. Hover tints the ground at 12%.</td></tr>
+      <tr><td>Solid danger</td><td><code>.btn.danger.solid</code></td><td>A <code>--st-failed</code> fill with white text, for the final step of an irreversible action.</td></tr>
+      <tr><td>Ghost</td><td><code>.btn.ghost</code></td><td>No ground. For a secondary action that should recede, such as Details.</td></tr>
+      <tr><td>Selected</td><td><code>.btn.sel</code></td><td><code>--hl</code> ground, <code>--rule</code> border, <code>--fg</code> 600. Used by filter rows.</td></tr>
+      <tr><td>Disabled</td><td><code>.btn:disabled</code></td><td>45% opacity and a not-allowed cursor.</td></tr>
+      <tr><td>Icon button</td><td><code>.iconbtn</code></td><td>32px square, an 8px radius, <code>--muted</code> icon. Pressed is gold. <code>.dot</code> is a 6px <code>--st-approval</code> marker and <code>.cnt</code> a count pill.</td></tr>
+      <tr><td>Assist</td><td><code>.btn.wand</code></td><td>A 30px square filled with <code>--fg</code> and a 16px wand icon in <code>--ink</code>.</td></tr>
+      <tr><td>Link button</td><td><code>.lnk</code></td><td>No box. <code>--accent-text</code>, underlined, in the surrounding type.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  <p class="dx-sub">One gold action per screen. Every other button is neutral.</p>
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>An action on this page: save, approve, deny, open a dialog, export.</li><li>A dialog's footer: Cancel, then the action.</li><li>A row or card action, as <code>.sm</code>.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Moving to another page: use a link. A button that only navigates is a link styled as a button.</li><li>Switching a view of one list: use a <a href="segmented-control.html">segmented control</a>.</li><li>An on or off setting: use a <a href="switch.html">switch</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><button class="btn primary">Save</button><button class="btn primary">Save and publish</button></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Two gold buttons. The screen no longer says which action matters.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><button class="btn">Save draft</button><button class="btn primary">Publish</button></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>One gold primary, and the other action is neutral.</p></div>
+    <div class="dx-dont"><div class="dx-ex dx-row"><button class="btn">OK</button><button class="btn">Click here</button></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Labels that name no action. A person must read the dialog to know what OK does.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><button class="btn">Cancel</button><button class="btn danger">Retire agent</button></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>A verb and its object. The destructive action is red and says what goes.</p></div>
+  </div>
+  <ul>
+    <li><b>One primary.</b> At most one <code>.btn.primary</code> is visible on a screen, dialog included. A dialog over a page takes the page's place.</li>
+    <li><b>Order.</b> In a dialog footer, Cancel comes first and the action last, at the right. On a phone the order reverses, so the action sits first under the thumb.</li>
+    <li><b>Destructive.</b> A reversible removal is <code>.danger</code>. An irreversible one asks for confirmation, names what ends and what is kept, and uses <code>.danger.solid</code> or a disabled <code>.danger</code> until the person ticks a check.</li>
+    <li><b>Assist.</b> The wand is the one assist action in a field. It is never gold, because gold is already spent on the step's primary action.</li>
+    <li><b>Loading.</b> A button that waits on the control plane keeps its label and is disabled until the answer arrives. The result arrives as a <a href="toast.html">toast</a>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Label</b>: a verb, then its object when the verb alone is unclear: &quot;Set a budget&quot;, &quot;Retire agent&quot;, &quot;Deny with this reason&quot;. Sentence case, no end punctuation.</li>
+    <li><b>Never</b>: OK, Submit, Click here, Yes, or No. The label names the action.</li>
+    <li><b>Counts</b> inside a button sit in <code>.dim</code> after the label: &quot;Live 2&quot;.</li>
+    <li><b>Icon labels</b>: an icon button's <code>aria-label</code> names the action and its object, and a count is part of it: &quot;Approvals, 3 waiting on you across all workspaces&quot;.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>Every button is a <code>button</code> element with <code>type=&quot;button&quot;</code> unless it submits a form.</li>
+    <li>An icon-only button has an <code>aria-label</code>. A toggle has <code>aria-pressed</code>. A button that opens a panel has <code>aria-expanded</code> or <code>aria-controls</code>.</li>
+    <li>Focus shows the gold ring (<code>:focus-visible</code>, 2px, offset 2px).</li>
+    <li>Disabled buttons cannot take focus, so the reason they are disabled must sit in text nearby, not in a tooltip on the button.</li>
+    <li>Danger text is <code>--st-failed</code>, which is 3.51:1 on <code>--panel</code> in dark. See Findings.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>Buttons grow to 40px tall at 14px, and <code>.sm</code> to 36px at 13px.</li>
+    <li>A dialog footer reverses its order, and each button takes half the width at 46px tall (engine.css 687 to 688).</li>
+    <li>Icon buttons keep 32px but sit in a 44px hit area in the thumb bar and headers.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--panel, --border, --fg</code></td><td>Default button</td></tr>
+      <tr><td><code>--hl, --rule</code></td><td>Hover and selected</td></tr>
+      <tr><td><code>--gold, --gold-bright, --on-gold</code></td><td>The one primary</td></tr>
+      <tr><td><code>--st-failed</code></td><td>Danger text, border, and solid fill</td></tr>
+      <tr><td><code>--muted</code></td><td>Icon button icon</td></tr>
+      <tr><td><code>--st-approval</code></td><td>Icon button dot and count</td></tr>
+      <tr><td><code>--accent-text</code></td><td>Link button (see Findings)</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 135 to 144, icon button 117 to 120, wand 1028 to 1031, solid danger 2121 to 2122, link 1775 to 1776, phone 665 to 666</td><td>The rules that draw it</td></tr>
+      <tr><td><code>dialog()</code> at <code>engine.js:9506</code></td><td>Writes a dialog's footer buttons from <code>d.f</code>.</td></tr>
+      <tr><td><code>act(msg, tone)</code> at <code>engine.js:1974</code></td><td>What most buttons call when they finish: a toast in the button's tone.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>Buttons are written inline: about 173 <code>btn primary</code>, 226 <code>btn sm</code>, 60 <code>btn danger</code>, 5 <code>btn ghost</code>, and 18 wand buttons.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>No destructive token</h4><p><code>.btn.danger</code> uses <code>--st-failed</code>, which is 3.51:1 on <code>--panel</code> and 3.94:1 on <code>--ink</code> in dark, below 4.5:1 for 13px text. The brand kit's <code>--destructive</code> (<code>#D5584D</code> dark, <code>#992F28</code> light) clears 4.5:1 both ways and is not in <code>engine.css</code>.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Hard-coded white and black</h4><p><code>.btn.danger.solid</code> sets <code>#fff</code> text and mixes <code>#000</code> into its hover. <code>.iconbtn .cnt</code> sets <code>#000</code> text. None follows a token.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold beyond the one action</h4><p>A pressed icon button turns gold, and <code>.lnk</code> sets link text in <code>--accent-text</code>. Pressed is a state and a link is not the screen's action. <code>--fg</code> would carry both.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Many hand-written buttons</h4><p>The mockup writes every button inline. The build should draw them from one component with a variant, a size, and a disabled reason.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's button against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Button audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the button component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/button.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 135 to 144, icon button 117 to 120, wand 1028 to 1031, solid danger 2121 to 2122, link 1775 to 1776, phone 665 to 666. The mockup renders it with dialog() (engine.js:9506), act(msg, tone) (engine.js:1974).
+3. The build's implementation: find it by its root selector (.btn) or its name, and list every route that renders it.
+4. Where to see it in the design: every page, every dialog, the approvals drawer. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Gold count. On every route, dialog, and drawer, count visible gold buttons. More than one is a FAIL. List the route and both labels.
+2. Labels. Every button label is a verb or a verb and object in sentence case. OK, Submit, Yes, No, Click here, or a label that names no action is a FAIL.
+3. Variants. Default, primary, small, danger, solid danger, ghost, selected, and disabled match the reference's sizes, radius, padding, weight, and tokens in both themes.
+4. Danger contrast. Measure danger text against its ground in both themes. Under 4.5:1 is a FAIL, and report which token the build uses.
+5. Destructive flow. Every irreversible action names what ends and what is kept, and its button stays disabled until the person confirms.
+6. Icon buttons. Each has an aria-label that names the action and object, and a toggle exposes aria-pressed. A count badge is part of the label.
+7. Order. Dialog footers put Cancel first and the action last. On a phone the order reverses and each button is at least 46px tall.
+8. Disabled reason. Every disabled button has its reason in visible text nearby.
+9. Native element. Every clickable control that acts on the page is a button element. A div or span with a click handler is a FAIL.
+10. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+11. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+12. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+13. Phone. At 390 by 844 with a touch pointer: Buttons grow to 40px tall at 14px, and `.sm` to 36px at 13px. A dialog footer reverses its order, and each button takes half the width at 46px tall (engine.css 687 to 688). Icon buttons keep 32px but sit in a 44px hit area in the thumb bar and headers.
+14. Accessibility. Every button is a `button` element with `type=&quot;button&quot;` unless it submits a form. An icon-only button has an `aria-label`. A toggle has `aria-pressed`. A button that opens a panel has `aria-expanded` or `aria-controls`. Focus shows the gold ring (`:focus-visible`, 2px, offset 2px). Disabled buttons cannot take focus, so the reason they are disabled must sit in text nearby, not in a tooltip on the button. Danger text is `--st-failed`, which is 3.51:1 on `--panel` in dark. See Findings.
+15. One implementation. The build draws the button from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Button: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="source-editor.html"><span>Previous</span>Source editor</a><a class="nx" href="form-field.html"><span>Next</span>Form field</a></nav>
+</main>
+</div>
+</body>
+</html>

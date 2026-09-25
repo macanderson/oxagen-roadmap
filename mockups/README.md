@@ -3,7 +3,7 @@
 The authoritative design of rev1: what the product has to have, to the spec, every last detail.
 It is the first mockup rebuilt as the product looks when every phase of the plan has shipped,
 without witness runs, proof, definitions of done and agent credit scores, and with token
-accounting and coaching added. The first mockup is kept as `future_state_mockups/`; v2 is `v2/`.
+accounting and coaching added. The first mockup is kept as `future_state_mockups/`.
 The per-page specs and audit prompts in `pages/` describe this mockup and are what a build of
 rev1 is measured against.
 

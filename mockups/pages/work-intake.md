@@ -18,7 +18,7 @@ Six providers, in two groups. The issue trackers are GitHub, Linear and Jira. Th
 
 ## What is on the page
 
-**The dialog.** It opens over Backlog from **Intake** in the Work header (on Providers), from the address (`?intake=providers`, `fields` or `people`), and from the old Tasks tab addresses. Title “Intake”. Subtitle “2 issue providers connected to Core platform. Each imported issue becomes a work item.” A segmented control (`role=group`, `aria-label` “Intake”) with **Providers**, **Fields** and **People**, the current part pressed (`aria-pressed`). A close button (`aria-label` “Close”). Footer: **Connect an issue provider** (plain; opens the wizard) and **Done** (gold; closes the dialog). The page behind is Backlog (`work-backlog.md`).
+**The dialog.** It opens over Backlog from **Intake** in the Work header (on Providers), from the address (`?intake=providers`, `fields` or `people`), and from the old Tasks tab addresses. Title “Intake”. Subtitle “2 issue trackers connected to Core platform. Each imported issue becomes a work item.” A segmented control (`role=group`, `aria-label` “Intake”) with **Providers**, **Fields** and **People**, the current part pressed (`aria-pressed`). A close button (`aria-label` “Close”). Footer: **Connect an issue tracker** (plain; opens the wizard) and **Done** (gold; closes the dialog). The page behind is Backlog (`work-backlog.md`).
 
 ### Providers
 
@@ -65,7 +65,7 @@ A connected help desk gets its own column: ServiceNow’s Done reads `close code
 
 ### The connection wizard (`ipwz`)
 
-Title “Connect an issue provider”, subtitle “Import work items from an issue tracker or a help desk”. When editing: “Edit <provider>”, “Scope, fields and the writes it may make”. A six-step rail (`role=list`): Provider, Authorize, Scope, Fields, People, Review. The current step carries `aria-current="step"`, and a finished step shows a check. The footer opens with “needs `issue_provider.connect` on core-platform”.
+Title “Connect an issue tracker”, subtitle “Import work items from an issue tracker or a help desk”. When editing: “Edit <provider>”, “Scope, fields and the writes it may make”. A six-step rail (`role=list`): Provider, Authorize, Scope, Fields, People, Review. The current step carries `aria-current="step"`, and a finished step shows a check. The footer opens with “needs `issue_provider.connect` on core-platform”.
 
 1. **Provider.** “Choose where the work items come from. You can connect more than one, and more than one account of the same provider.” Two groups, **Issue trackers** (GitHub, Linear, Jira) and **Help desks** (ServiceNow, Salesforce, Zendesk). Each card shows the logo, the name, `connected` on one already connected, and its line (GitHub “Issues from the repositories the Oxagen GitHub App can reach.”, Linear “Issues from the Linear teams you choose.”, and the four lines of the dashed cards). Footer **Cancel**, **Next** (gold, disabled until a provider is chosen).
 2. **Authorize.** The logo and one paragraph on how this provider authorizes. GitHub: “Oxagen uses the GitHub App already installed on **a-intel** for your repositories. Importing issues needs one more permission, which an organization owner approves on github.com.” Linear: “Oxagen asks Linear for a token that acts as the Oxagen app. Anything it posts is signed by Oxagen, not by you.” Jira: “Oxagen asks Atlassian for a token on one Jira Cloud site. Jira Server and Data Center are not supported yet.” The help desks name their OAuth application and say the token acts within the authorizing account’s roles. Jira adds a **Site** field (`a-intel.atlassian.net`), ServiceNow **Instance**, Salesforce **My Domain**, Zendesk **Subdomain**.
@@ -136,7 +136,7 @@ The Intake dialog carries no `data-future` mark, and the catalog gives it no fut
 
 Loaded only. This change designs the loaded state. The build uses the shell’s standard loading, error, empty and denied panels until they are designed.
 
-Within loaded, a workspace with no connection shows the six dashed provider cards and “0 issue providers connected to <workspace>.” in the subtitle.
+Within loaded, a workspace with no connection shows the six dashed provider cards and “0 issue trackers connected to <workspace>.” in the subtitle.
 
 ## Mobile
 

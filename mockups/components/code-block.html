@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Code block</title>
+<meta name="description" content="Source, payloads, and commands in Monaspace Neon, with a labelled readout and a side-by-side pair.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Code block</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Code</p>
+  <h1>Code block</h1>
+  <p class="dx-lead">A code block shows text a person reads character by character: a tool call's input, a TOML file, a command, a JSON payload. It is set in Monaspace Neon (<code>--mono</code>) on the deepest ground. Inline code marks one identifier inside a sentence. A readout labels a slab of what the model read, and a code pair sets two sources side by side.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>pre, code</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 300 to 304, 359 to 363, 390, 461 to 467, 1532 to 1533</span>
+    <span><b>Used on</b> Run frame detail, Run transcript, Tools schema dialog, Fix dialog, Steering sources, Organization API keys</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-block">
+    <figcaption class="dx-story-h"><b>Code block</b><span>A <code>pre</code> with comment, key, and string tokens. <code>frJson()</code> writes JSON this way.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="block" data-name="Code block">
+        <pre><span class="c">// the tools block of the next model request, verbatim</span>
+{
+  <span class="k">"name"</span>: <span class="s">"github__create_pull_request"</span>,
+  <span class="k">"version"</span>: 3,
+  <span class="k">"input"</span>: {
+    <span class="k">"repo"</span>: <span class="s">"a-intel/platform"</span>,
+    <span class="k">"base"</span>: <span class="s">"main"</span>,
+    <span class="k">"head"</span>: <span class="s">"release/4.11.0"</span>
+  }
+}</pre>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-states">
+    <figcaption class="dx-story-h"><b>Value tones</b><span><code>.n</code> marks a number or a pending value, <code>.dn</code> a denied one, and <code>.bad</code> a failure.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="states" data-name="Value tones">
+        <pre><span class="c"># policy v41, the rule that answered</span>
+rule        = <span class="s">"merge.requires_approval"</span>
+answer      = <span class="dn">"routed"</span>
+wait_s      = <span class="n">600</span>
+tamper      = <span class="bad">"chain_break at frame 188"</span></pre>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-inline">
+    <figcaption class="dx-story-h"><b>Inline code</b><span>One identifier, path, or command inside a sentence.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="inline" data-name="Inline code">
+<p style="margin:0">The control plane answered <code>503 work_index_unavailable</code>. Nothing was changed. Retry after <code>oxagen status</code> reports the index as ready.</p>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-readout">
+    <figcaption class="dx-story-h"><b>Readout</b><span>A labelled slab of what the model or the gateway read, written by <code>readout()</code>.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="readout" data-name="Readout">
+        <div class="readout"><div class="rh">canonical input<span class="sp">exactly what the gateway will dispatch</span></div><pre style="white-space:pre-wrap;word-break:break-word">{
+  <span class="k">"amount"</span>: 1284,
+  <span class="k">"currency"</span>: <span class="s">"usd"</span>,
+  <span class="k">"customer"</span>: <span class="s">"cus_Q2x81"</span>
+}</pre></div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-pair">
+    <figcaption class="dx-story-h"><b>Code pair</b><span>Two labelled sources read across, written by <code>codePair()</code>. <code>.cpair.one</code> holds a single pane.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="pair" data-name="Code pair">
+        <div class="cpair"><div><div class="lab">What your agent does today<span class="sp">python</span></div><pre>rows = billing.get_line_items(
+    days=<span class="n">30</span>)
+<span class="c"># 41,200 tokens enter the context</span></pre></div><div><div class="lab">What the fix does<span class="sp">python</span></div><pre>rows = billing.get_line_items(
+    days=<span class="n">30</span>, page_size=<span class="n">200</span>)
+<span class="c"># one page per call</span></pre></div></div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Block</td><td><code>pre</code></td><td>Monaspace Neon 12px on a 1.55 line, <code>--body</code> on <code>--void</code>, a 1px <code>--border</code>, a 10px radius, 12px by 14px padding. Scrolls sideways.</td></tr>
+      <tr><td>Comment</td><td><code>pre .c</code></td><td>A comment or an annotation in <code>--dim</code>.</td></tr>
+      <tr><td>Key</td><td><code>pre .k</code></td><td>An object key in <code>--gold</code> (see Findings).</td></tr>
+      <tr><td>String</td><td><code>pre .s</code></td><td>A string value in <code>--st-allowed</code>.</td></tr>
+      <tr><td>Number</td><td><code>pre .n</code></td><td>A number or a pending value in <code>--st-approval</code>.</td></tr>
+      <tr><td>Denied value</td><td><code>pre .dn</code></td><td>A value a rule denied, in <code>--st-denied</code>.</td></tr>
+      <tr><td>Failure</td><td><code>pre .bad</code></td><td>A broken value, in <code>--st-failed</code>.</td></tr>
+      <tr><td>Inline code</td><td><code>code</code></td><td>0.9em Monaspace Neon on <code>--hl</code>, with a 4px radius.</td></tr>
+      <tr><td>Readout</td><td><code>.readout</code>, <code>.rh</code>, <code>.rh .sp</code>, <code>.rb</code></td><td>A <code>--void</code> frame with a 10.5px mono capital label on <code>--hl</code>. Its <code>pre</code> drops its own border.</td></tr>
+      <tr><td>Code pair</td><td><code>.cpair</code>, <code>.lab</code>, <code>.lab .sp</code></td><td>Two equal columns that never stack in a dialog. Each pane caps at 300px and scrolls.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A payload, a file, or a command a person compares or copies exactly.</li><li>What the model or the gateway read, as a readout with its label.</li><li>One source against another, as a code pair.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A changed file: use a <a href="diff.html">diff</a>.</li><li>A file a person edits: use the <a href="source-editor.html">source editor</a>.</li><li>A handful of fields: use a <a href="key-value-list.html">key-value list</a> with mono values.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div style="display:grid;gap:8px;width:100%"><pre>before: page_size unset</pre><pre>after: page_size = 200</pre></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Two sources stacked. The reader holds the first in their head to compare it with the second.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="cpair" style="width:100%;margin:0"><div><div class="lab">Before</div><pre>page_size unset</pre></div><div><div class="lab">After</div><pre>page_size = 200</pre></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>A code pair reads across, one label per pane.</p></div>
+    <div class="dx-dont"><div class="dx-ex dx-row"><p style="margin:0;color:var(--body)">Run <b>oxagen status</b> and check <b>index_ready</b>.</p></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Commands and keys in bold body text. They copy with the wrong characters and read as emphasis.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><p style="margin:0;color:var(--body)">Run <code>oxagen status</code> and check <code>index_ready</code>.</p></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>Inline code for every command, key, and path.</p></div>
+  </div>
+  <ul>
+    <li>A code block holds text the record holds. Label a generated or redacted block with a readout that says so (&quot;1 field redacted before write&quot;).</li>
+    <li>Keep the language's own words inside a block. The product's glossary applies to the prose around it, and <code>check-copy.mjs</code> skips <code>pre</code> and <code>code</code> for that reason.</li>
+    <li>Wrap long payloads with <code>white-space:pre-wrap</code> only when the block is a readout of a record. Source code scrolls sideways so its lines stay whole.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li>The face is Monaspace Neon (<code>--mono</code>) for every block, inline span, and readout label. Its texture healing rides <code>calt</code> and its code ligatures ride <code>liga</code>. Both are on by default, and nothing may turn them off. <a href="../typography.html#mono">Typography</a> has the rule.</li>
+    <li>A comment in a block states one fact in the product's voice (&quot;one page per call&quot;). It never argues for a design.</li>
+    <li>A readout label names the slab in lowercase (&quot;canonical input&quot;, &quot;output&quot;). Its right side states one fact about it.</li>
+    <li>A code pair's labels are plain nouns or a short phrase in sentence case. The right side names the language or what the pane enforces.</li>
+    <li>Inline code carries ids, keys, paths, commands, frame kinds, and verdict values. A key shown to a person as a word uses its label instead (&quot;Observed by gateway&quot;, with <code>gateway_observed</code> in a tooltip).</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>A <code>pre</code> is read line by line by a screen reader, so every block carries a label before it: a readout header, a code pair label, or a sentence.</li>
+    <li>Token colors are the third signal. The key, string, and value positions carry the meaning without them.</li>
+    <li>A block that scrolls sideways is reachable by keyboard: it scrolls with the arrow keys once focused, or it wraps.</li>
+    <li>Block text is <code>--body</code> on <code>--void</code>, 16.55:1 in dark and 13.55:1 in light.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>A block keeps its 12px size and scrolls sideways inside its own box. The page never scrolls sideways.</li>
+    <li>A code pair stacks to one column in the phone dialog layer (<code>#layer.phone .cpair</code>).</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--mono</code></td><td>Face for every part</td></tr>
+      <tr><td><code>--void</code></td><td>Block and readout ground</td></tr>
+      <tr><td><code>--border</code></td><td>Block border</td></tr>
+      <tr><td><code>--body</code></td><td>Block text</td></tr>
+      <tr><td><code>--hl</code></td><td>Inline code ground and readout header</td></tr>
+      <tr><td><code>--dim</code></td><td>Comments, readout label, code pair label</td></tr>
+      <tr><td><code>--gold</code></td><td>Object keys (see Findings)</td></tr>
+      <tr><td><code>--st-allowed, --st-approval, --st-denied, --st-failed</code></td><td>String, number, denied, and failure tones</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 300 to 304, 359 to 363, 390, 461 to 467, 1532 to 1533</td><td>The rules that draw it</td></tr>
+      <tr><td><code>frJson(o, ind)</code> at <code>engine.js:3363</code></td><td>Writes a JSON value with <code>.k</code> keys and <code>.s</code> strings.</td></tr>
+      <tr><td><code>frPre(o)</code> at <code>engine.js:3372</code></td><td>Wraps <code>frJson()</code> in a wrapping <code>pre</code> for the frame detail.</td></tr>
+      <tr><td><code>readout(title, right, inner)</code> at <code>engine.js:3728</code></td><td>The labelled slab of what the model read. Two calls, both in frame detail.</td></tr>
+      <tr><td><code>codePair(panes, cls)</code> at <code>engine.js:1337</code></td><td>Two labelled panes. Used by the fix dialog and the schema dialog.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>The engine writes 44 more <code>pre</code> blocks and four <code>code</code> spans inline as strings.</li>
+    <li><code>.readout pre</code> drops its border and ground so the frame's border is the only one.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold object keys</h4><p><code>pre .k</code> colors every JSON key <code>--gold</code>, and the source editor's <code>.tk-k</code> uses <code>--accent-text</code>. A frame with twenty keys puts twenty gold marks on the screen. The brand keeps gold to identity and one action. A neutral key color (<code>--fg</code>) would keep the structure readable.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Quiet labels</h4><p>The readout label and the code pair label are <code>--dim</code>. On <code>--hl</code> in dark that is 3.08:1, and on <code>--panel</code> 3.67:1, both below 4.5:1 for 10.5px text.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Failure red on the deepest ground</h4><p><code>pre .bad</code> uses <code>--st-failed</code>, which is 4.16:1 on <code>--void</code> in dark. A broken value is a word a person must read.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's code block against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Code block audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the code block component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/code-block.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 300 to 304, 359 to 363, 390, 461 to 467, 1532 to 1533. The mockup renders it with frJson(o, ind) (engine.js:3363), frPre(o) (engine.js:3372), readout(title, right, inner) (engine.js:3728), codePair(panes, cls) (engine.js:1337).
+3. The build's implementation: find it by its root selector (pre, code) or its name, and list every route that renders it.
+4. Where to see it in the design: Run frame detail, Run transcript, Tools schema dialog, Fix dialog, Steering sources, Organization API keys. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Face. Every `pre`, `code`, readout label, and code pair label computes to Monaspace Neon. A fallback family (ui-monospace, SF Mono, Menlo, Consolas, JetBrains Mono, Geist Mono, Courier) in first position is a FAIL. `font-variant-ligatures:none` on any of them is a FAIL.
+2. Block. 12px on a 1.55 line, `--body` on `--void`, a 1px `--border`, a 10px radius, and 12px by 14px padding. A long line scrolls inside the block, and the page does not scroll sideways.
+3. Inline code. 0.9em Monaspace Neon on `--hl` with 0.12em by 0.38em padding and a 4px radius. Commands, keys, paths, ids, and verdict values in prose use it. Bold or quoted body text in their place is a FAIL.
+4. Tokens. Comments, keys, strings, numbers, denied values, and failures use the six token classes and their tokens. A raw hex color on a token is a FAIL. Report whether keys are gold.
+5. Readout. A labelled frame on `--void` with a 10.5px mono capital label on `--hl` and an optional right-side fact. Its inner `pre` has no border of its own. A redacted payload says how many fields were redacted.
+6. Code pair. Two equal columns that stay side by side in a desktop dialog, each labelled, each capped at 300px with its own scroll. Two sources stacked vertically on desktop is a FAIL.
+7. Content. The text inside a block is what the record holds, byte for byte. A block that paraphrases a payload is a FAIL.
+8. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+9. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+10. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+11. Phone. At 390 by 844 with a touch pointer: A block keeps its 12px size and scrolls sideways inside its own box. The page never scrolls sideways. A code pair stacks to one column in the phone dialog layer (`#layer.phone .cpair`).
+12. Accessibility. A `pre` is read line by line by a screen reader, so every block carries a label before it: a readout header, a code pair label, or a sentence. Token colors are the third signal. The key, string, and value positions carry the meaning without them. A block that scrolls sideways is reachable by keyboard: it scrolls with the arrow keys once focused, or it wraps. Block text is `--body` on `--void`, 16.55:1 in dark and 13.55:1 in light.
+13. One implementation. The build draws the code block from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Code block: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="list-item.html"><span>Previous</span>List item</a><a class="nx" href="diff.html"><span>Next</span>Diff</a></nav>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tool cell</title>
+<meta name="description" content="A tool's category icon, its plain-language label, and its API name, in one cell.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Tool cell</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Data display</p>
+  <h1>Tool cell</h1>
+  <p class="dx-lead">A tool cell is how a tool call reads anywhere in the product: on the Tools page, in a toolbelt, in an approval, in the command menu. It leads with the label a person understands (&quot;Merge pull request&quot;) and keeps the literal API name (<code>github__merge_pull_request@3</code>) second, in mono, so the two never have to be reconciled by eye. A category icon and color mark what kind of thing the tool does before either name is read.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.tc</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 253 to 263, 297</span>
+    <span><b>Used on</b> Tools, Agent (Toolbelt tab), Approvals, Tool dialogs, Command menu, Registration and connection wizards</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-default">
+    <figcaption class="dx-story-h"><b>Default</b><span>Label first, API name second, from a Toolbelt row.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="default" data-name="Default">
+<span class="tc t-vcs" title="github__merge_pull_request@3: Merge pull request · Source control">
+  <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6a9 9 0 0 0-9 9V3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/></svg></span>
+  <span class="tl">Merge pull request</span><span class="ta">github__merge_pull_request<span class="v">@3</span></span>
+</span>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-sub">
+    <figcaption class="dx-story-h"><b>With a sub-fact</b><span><code>{sub}</code> appends one more fact after the API name, from the approve dialog.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="sub" data-name="With a sub-fact">
+<span class="tc t-finance" title="stripe__create_payment@4: Create payment · Financial control">
+  <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span>
+  <span class="tl">Create payment</span><span class="ta">stripe__create_payment<span class="v">@4</span> · provider Stripe</span>
+</span>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-sizes">
+    <figcaption class="dx-story-h"><b>Sizes</b><span><code>.sm</code> for a table row, the plain size for a list, <code>.lg</code> for a dialog's own subject line.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="sizes" data-name="Sizes">
+<div class="row" style="gap:20px;align-items:center;flex-wrap:wrap">
+  <span class="tc sm t-read" title="github__get_file_contents@2: Get file contents · Read-only">
+    <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg></span>
+    <span class="tl">Get file contents</span><span class="ta">github__get_file_contents<span class="v">@2</span></span>
+  </span>
+  <span class="tc t-vcs" title="github__create_pull_request@3: Create pull request · Source control">
+    <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6a9 9 0 0 0-9 9V3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/></svg></span>
+    <span class="tl">Create pull request</span><span class="ta">github__create_pull_request<span class="v">@3</span></span>
+  </span>
+  <span class="tc lg t-finance" title="stripe__create_payment@4: Create payment · Financial control">
+    <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span>
+    <span class="tl">Create payment</span><span class="ta">stripe__create_payment<span class="v">@4</span></span>
+  </span>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-api-mode">
+    <figcaption class="dx-story-h"><b>API-name mode</b><span><code>.api</code>, from <code>S.toolNames===&quot;api&quot;</code>, swaps the order: the API name leads in mono, the label follows.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="api-mode" data-name="API-name mode">
+<span class="tc api t-vcs" title="github__merge_pull_request@3: Merge pull request · Source control">
+  <span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6a9 9 0 0 0-9 9V3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/></svg></span>
+  <span class="tl">github__merge_pull_request<span class="v">@3</span></span><span class="ta">Merge pull request</span>
+</span>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Cell</td><td><code>.tc</code></td><td>An inline grid, icon column then two stacked text rows, 10px column gap, left-aligned, clipped to its width.</td></tr>
+      <tr><td>Icon tile</td><td><code>.tc .ti</code></td><td>A 28px <code>--hl</code> tile, 8px radius, 1px <code>--border</code>, holding a 15px category icon in <code>--fg</code>.</td></tr>
+      <tr><td>Label</td><td><code>.tc .tl</code></td><td>13px Geist 600, <code>--fg</code>, one line, ellipsis when it runs out of room.</td></tr>
+      <tr><td>API name</td><td><code>.tc .ta</code></td><td>11px Monaspace Neon, <code>--muted</code>, one line, ellipsis when it runs out of room.</td></tr>
+      <tr><td>Version</td><td><code>.tc .ta .v</code></td><td>The <code>@N</code> suffix of the API name, in <code>--dim</code>.</td></tr>
+      <tr><td>Small size</td><td><code>.tc.sm</code></td><td>22px icon tile, 12.5px label, 10.5px API name, for a table row.</td></tr>
+      <tr><td>Large size</td><td><code>.tc.lg</code></td><td>42px icon tile, 18px label, 12px API name, for a dialog's own subject line.</td></tr>
+      <tr><td>API-name mode</td><td><code>.tc.api</code></td><td>Swaps the two rows: the API name leads in mono, the label follows in the font face.</td></tr>
+      <tr><td>Category tint</td><td><code>.tc.t-*</code></td><td>Each of the ten call categories sets the icon tile's tone via <code>TCAT</code>, such as <code>.t-vcs</code> for source control.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Any place a tool call or a tool definition is named: a table row, a toolbelt, an approval, a dialog title, the command menu.</li><li>A place that needs the category (read-only, financial, source control, and so on) visible before either name is read.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A tool's full input or output: use a <a href="code-block.html">code block</a> or a readout.</li><li>A hazard or a decision on a call: pair the tool cell with a risk badge, never fold the risk into the cell itself.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><span style="font-family:var(--mono);font-size:12px">github__merge_pull_request@3</span></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>The literal API name with no label, no category icon, and no version styling. A person has to already know what the call does.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><span class="tc t-vcs" title="github__merge_pull_request@3: Merge pull request"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6a9 9 0 0 0-9 9V3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/></svg></span><span class="tl">Merge pull request</span><span class="ta">github__merge_pull_request<span class="v">@3</span></span></span></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>The label leads, the API name and version stay available in mono, and the category icon marks it as source control before either name is read.</p></div>
+  </div>
+  <ul>
+    <li>The label leads and the API name follows, everywhere, except in API-name mode, which every reader on the page shares via <code>S.toolNames</code>. A page never mixes the two orders.</li>
+    <li>The category tint always matches the tool's actual category from <code>TCAT</code>. A generic or default tint on an unrecognized tool is still a real category (<code>record</code>), never a blank tile.</li>
+    <li>A tool cell never carries its own risk or decision. Those sit beside it as a separate <a href="badge.html">badge</a>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Label</b>: a plain, verb-first phrase in sentence case (&quot;Merge pull request&quot;, &quot;Create payment&quot;), never the raw function name reformatted.</li>
+    <li><b>API name</b>: the literal tool id exactly as called, with its harness or MCP prefix kept when the tool is not harness-native.</li>
+    <li><b>Version</b>: the <code>@N</code> suffix, always attached to the API name, never dropped even when the label is unambiguous.</li>
+    <li><b>Sub-fact</b>: one short fact appended after the API name, such as the provider it is called through, never a second sentence.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The whole cell carries a <code>title</code> with the API name, version, label, and category, so someone with a pointer gets the full identity on hover.</li>
+    <li>Label and API name are two separate text nodes in DOM order, so a screen reader reads the plain-language name first and the literal id second.</li>
+    <li>Category is carried by an icon plus a named class, never by tile color alone: the <code>title</code> also states the category in words.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>The label and API name switch from a single truncated line to normal wrapping (<code>white-space:normal</code>) inside the phone shell, so neither name is cut off.</li>
+    <li>Inside a table, a tool cell drops its 220px minimum width on a phone, since the table itself becomes labelled cards.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--hl</code></td><td>Icon tile ground</td></tr>
+      <tr><td><code>--border</code></td><td>Icon tile border</td></tr>
+      <tr><td><code>--fg</code></td><td>Icon glyph, label</td></tr>
+      <tr><td><code>--muted</code></td><td>API name</td></tr>
+      <tr><td><code>--dim</code></td><td>Version suffix</td></tr>
+      <tr><td><code>--mono</code></td><td>API name and version</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 253 to 263, 297</td><td>The rules that draw it</td></tr>
+      <tr><td><code>toolCell(id, o)</code> at <code>engine.js:767</code></td><td>The one component every tool display goes through. <code>o.sz</code> picks a size, <code>o.sub</code> appends a fact, <code>S.toolNames===&quot;api&quot;</code> swaps label and API name. 16 calls.</td></tr>
+      <tr><td><code>toolMeta(id)</code> at <code>engine.js:749</code></td><td>Resolves a tool id to its label and category, from <code>TOOLMETA</code> or a verb-based guess for an id the table does not name.</td></tr>
+      <tr><td><code>catSvg(c)</code> at <code>engine.js:764</code></td><td>The category's icon, from the shared <code>TCAT</code> map.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li><code>TCAT</code> (engine.js 701 to 723) defines the ten categories a call can belong to: read-only, data query, record write, messaging, file mutation, code execution, source control, infrastructure, access, and financial control, each with its own icon and one-sentence description.</li>
+    <li>A tool id <code>toolMeta()</code> does not recognize still gets a category, guessed from its verb (get, post, deploy, and so on), so no tool cell ever renders with an empty or default tile.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-q">note</span>Order is a shared setting, not a per-cell choice</h4><p>API-name mode is the single flag <code>S.toolNames</code>, read fresh by every <code>toolCell()</code> call at render. A build that lets one screen show the API name first and another show the label first, without one shared setting driving both, would break the rule that a page never mixes the two orders.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's tool cell against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Tool cell audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the tool cell component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/tool-cell.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 253 to 263, 297. The mockup renders it with toolCell(id, o) (engine.js:767), toolMeta(id) (engine.js:749), catSvg(c) (engine.js:764).
+3. The build's implementation: find it by its root selector (.tc) or its name, and list every route that renders it.
+4. Where to see it in the design: Tools, Agent (Toolbelt tab), Approvals, Tool dialogs, Command menu, Registration and connection wizards. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Anatomy. Every tool cell renders a category icon tile, a label, and an API name with its version, in that DOM order regardless of which line displays first.
+2. Order. The label leads and the API name follows by default. API-name mode reverses both lines together, driven by one shared setting. A cell that mixes the two orders on the same screen is a FAIL.
+3. Category. The icon tile's tint and glyph match the tool's real category. An unrecognized tool id still resolves to a category by its verb, never a blank or ungrouped tile.
+4. Sizes. `.sm` and `.lg` scale the icon tile, label, and API name together. Report any size where only one part scales.
+5. Truncation. The label and API name each ellipsis on overflow at their fixed sizes, and switch to wrapping in the phone shell so nothing is cut off with no way to read it.
+6. Version. The `@N` suffix is always attached to the API name in `--dim`, never dropped or merged into the name itself.
+7. Accessibility. The cell's `title` states the API name, version, label, and category together, so someone with a pointer gets the full identity without opening anything.
+8. One implementation. List every place the build renders a tool's name and icon by hand instead of through one shared component, with its file and line.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: The label and API name switch from a single truncated line to normal wrapping (`white-space:normal`) inside the phone shell, so neither name is cut off. Inside a table, a tool cell drops its 220px minimum width on a phone, since the table itself becomes labelled cards.
+13. Accessibility. The whole cell carries a `title` with the API name, version, label, and category, so someone with a pointer gets the full identity on hover. Label and API name are two separate text nodes in DOM order, so a screen reader reads the plain-language name first and the literal id second. Category is carried by an icon plus a named class, never by tile color alone: the `title` also states the category in words.
+14. One implementation. The build draws the tool cell from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Tool cell: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="key-value-list.html"><span>Previous</span>Key-value list</a><a class="nx" href="agent-card.html"><span>Next</span>Agent card</a></nav>
+</main>
+</div>
+</body>
+</html>

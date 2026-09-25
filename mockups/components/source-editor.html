@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Source editor</title>
+<meta name="description" content="A file editor with line numbers, syntax color, find, and a status bar, set in Monaspace Neon.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Source editor</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Code</p>
+  <h1>Source editor</h1>
+  <p class="dx-lead">The source editor edits a file that lives in the repository: an agent definition, a Steering source, a skill. Saving opens a pull request, so the editor shows whether the file is modified and never writes on its own. It is a real textarea laid over a painted copy of the same text, and both layers share one font, size, line height, and padding so each glyph sits on its colored twin. The face is Monaspace Neon, with texture healing and ligatures on.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.ed</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 942 to 973, ground 2123 to 2125, dialog and prose variants 1891 to 1900, phone 965</span>
+    <span><b>Used on</b> agent Source, Steering source, skill source, the agent, tool, skill, and record wizards</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-toml">
+    <figcaption class="dx-story-h"><b>Agent definition</b><span>A TOML file with the current line highlighted, an unknown value underlined, and the key hints in the status bar.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="toml" data-name="Agent definition">
+        <div class="panel ed">
+          <div class="ed-bar"><span class="mono" style="color:var(--fg)">.oxagen/agents/release-manager.toml</span><span class="ed-dot" title="unsaved changes"></span><span class="dim">unchanged</span><span class="ed-sp"></span><label class="ed-find"><input placeholder="Find  ⌘F" aria-label="Find in file" value=""><span class="mono dim"></span></label></div>
+          <div class="ed-scroll" style="min-height:0;max-height:none">
+            <div class="ed-gut" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</div>
+            <div class="ed-wrap"><div class="ed-cl" style="top:calc(var(--ed-pad) + var(--ed-lh) * 2)"></div><pre class="ed-mk" aria-hidden="true"></pre><pre class="ed-hl" aria-hidden="true"><span class="tk-c"># The release manager. Saving opens a pull request against a-intel/platform.</span>
+<span class="tk-t">[agent]</span>
+<span class="tk-k">key</span> <span class="tk-p">=</span> <span class="tk-s">"a-intel.core.release-manager"</span>
+<span class="tk-k">harness</span> <span class="tk-p">=</span> <span class="tk-s">"claude-code"</span>
+<span class="tk-k">operator</span> <span class="tk-p">=</span> <span class="tk-s">"marcus@a-intel.example"</span>
+
+<span class="tk-t">[budget]</span>
+<span class="tk-k">monthly_usd</span> <span class="tk-p">=</span> <span class="tk-n">400</span>
+<span class="tk-k">per_run_usd</span> <span class="tk-p">=</span> <span class="tk-n">4.00</span>
+<span class="tk-k">enforce</span> <span class="tk-p">=</span> <span class="tk-b">true</span>
+
+<span class="tk-t">[toolbelt]</span>
+<span class="tk-k">name</span> <span class="tk-p">=</span> <span class="tk-s">"release"</span>
+<span class="tk-k">deny_tools</span> <span class="tk-p">=</span> <span class="tk-p">[</span><span class="tk-s">"git_push --force"</span><span class="tk-p">]</span>
+<span class="tk-k">retries</span> <span class="tk-p">=</span> <span class="tk-e">three</span></pre><textarea class="ed-t" readonly spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label=".oxagen/agents/release-manager.toml"># The release manager. Saving opens a pull request against a-intel/platform.
+[agent]
+key = "a-intel.core.release-manager"
+harness = "claude-code"
+operator = "marcus@a-intel.example"
+
+[budget]
+monthly_usd = 400
+per_run_usd = 4.00
+enforce = true
+
+[toolbelt]
+name = "release"
+deny_tools = ["git_push --force"]
+retries = three</textarea></div>
+          </div>
+          <div class="ed-status"><span>Ln 3, Col 1</span><span>TOML</span><span>Spaces: 2</span><span>LF</span><span>UTF-8</span><span class="ed-sp"></span><span class="keys dim">⌘S save, Tab indent, ⇧Tab outdent, ⌘/ comment, ⌘F find, ⌘Z undo</span></div>
+        </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-dirty">
+    <figcaption class="dx-story-h"><b>Modified in a dialog</b><span><code>.ced.sm</code> shortens the editor inside a dialog. The dot fills and the state reads modified.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="dirty" data-name="Modified in a dialog">
+        <div class="panel ed ced sm">
+          <div class="ed-bar"><span class="mono" style="color:var(--fg)">.oxagen/steering/release-train.toml</span><span class="ed-dot" data-on="1" title="unsaved changes"></span><span class="dim">modified</span><span class="ed-sp"></span><label class="ed-find"><input placeholder="Find  ⌘F" aria-label="Find in file" value=""><span class="mono dim"></span></label></div>
+          <div class="ed-scroll" style="min-height:0;max-height:none">
+            <div class="ed-gut" aria-hidden="true">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</div>
+            <div class="ed-wrap"><div class="ed-cl" style="top:calc(var(--ed-pad) + var(--ed-lh) * 2)"></div><pre class="ed-mk" aria-hidden="true"></pre><pre class="ed-hl" aria-hidden="true"><span class="tk-c"># The release manager. Saving opens a pull request against a-intel/platform.</span>
+<span class="tk-t">[agent]</span>
+<span class="tk-k">key</span> <span class="tk-p">=</span> <span class="tk-s">"a-intel.core.release-manager"</span>
+<span class="tk-k">harness</span> <span class="tk-p">=</span> <span class="tk-s">"claude-code"</span>
+<span class="tk-k">operator</span> <span class="tk-p">=</span> <span class="tk-s">"marcus@a-intel.example"</span>
+
+<span class="tk-t">[budget]</span>
+<span class="tk-k">monthly_usd</span> <span class="tk-p">=</span> <span class="tk-n">400</span>
+<span class="tk-k">per_run_usd</span> <span class="tk-p">=</span> <span class="tk-n">4.00</span>
+<span class="tk-k">enforce</span> <span class="tk-p">=</span> <span class="tk-b">true</span>
+
+<span class="tk-t">[toolbelt]</span>
+<span class="tk-k">name</span> <span class="tk-p">=</span> <span class="tk-s">"release"</span>
+<span class="tk-k">deny_tools</span> <span class="tk-p">=</span> <span class="tk-p">[</span><span class="tk-s">"git_push --force"</span><span class="tk-p">]</span>
+<span class="tk-k">retries</span> <span class="tk-p">=</span> <span class="tk-e">three</span></pre><textarea class="ed-t" readonly spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" wrap="off" aria-label=".oxagen/steering/release-train.toml"># The release manager. Saving opens a pull request against a-intel/platform.
+[agent]
+key = "a-intel.core.release-manager"
+harness = "claude-code"
+operator = "marcus@a-intel.example"
+
+[budget]
+monthly_usd = 400
+per_run_usd = 4.00
+enforce = true
+
+[toolbelt]
+name = "release"
+deny_tools = ["git_push --force"]
+retries = three</textarea></div>
+          </div>
+          <div class="ed-status"><span>Ln 9, Col 20</span><span>TOML</span><span>15 lines</span><span>LF</span><span>UTF-8</span></div>
+        </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-tokens">
+    <figcaption class="dx-story-h"><b>Syntax tokens</b><span>Each class is one token kind. Colors come from theme tokens, so both themes follow.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="tokens" data-name="Syntax tokens">
+        <pre style="margin:0"><span class="tk-c"># tk-c comment</span>
+<span class="tk-t">[tk-t table]</span>
+<span class="tk-k">tk_k_key</span> <span class="tk-p">=</span> <span class="tk-s">"tk-s string"</span>
+<span class="tk-k">count</span> <span class="tk-p">=</span> <span class="tk-n">42</span>  <span class="tk-c"># tk-n number</span>
+<span class="tk-k">on</span> <span class="tk-p">=</span> <span class="tk-b">true</span>  <span class="tk-c"># tk-b boolean</span>
+<span class="tk-k">retries</span> <span class="tk-p">=</span> <span class="tk-e">three</span>  <span class="tk-c"># tk-e error</span></pre>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Editor</td><td><code>.panel.ed</code></td><td>A panel with <code>--ed-lh:20px</code> and <code>--ed-pad:12px</code>, the line height and padding every layer shares.</td></tr>
+      <tr><td>Bar</td><td><code>.ed-bar</code></td><td>The file path in mono <code>--fg</code>, the modified dot, the state word, and find. 12px <code>--muted</code> on <code>--panel-h</code>.</td></tr>
+      <tr><td>Modified dot</td><td><code>.ed-dot</code>, <code>[data-on]</code></td><td>An 8px ring in <code>--rule</code>, filled <code>--st-approval</code> when the file differs from the saved copy.</td></tr>
+      <tr><td>Find</td><td><code>.ed-find input</code></td><td>A 170px mono input on <code>--ink</code>. The count of matches sits beside it.</td></tr>
+      <tr><td>Scroll</td><td><code>.ed-scroll</code></td><td>One grid that scrolls both layers together: gutter, then content. 12.5px Monaspace Neon on a 20px line, tab size 2, on <code>--panel</code>.</td></tr>
+      <tr><td>Gutter</td><td><code>.ed-gut</code></td><td>Line numbers in <code>--dim</code>, right-aligned, sticky on the left with a <code>--border</code> edge.</td></tr>
+      <tr><td>Find marks</td><td><code>.ed-mk mark</code></td><td>The bottom layer: transparent text with gold marks at 28%, the current match at 55% with a gold outline.</td></tr>
+      <tr><td>Painted text</td><td><code>.ed-hl</code></td><td>The middle layer: the same text with token spans, in <code>--body</code>.</td></tr>
+      <tr><td>Textarea</td><td><code>.ed-t</code></td><td>The top layer: the real textarea, text transparent, caret in <code>--fg</code>. It owns the caret, the selection, and every key.</td></tr>
+      <tr><td>Current line</td><td><code>.ed-cl</code></td><td>A <code>--hl</code> band behind the caret's line.</td></tr>
+      <tr><td>Status</td><td><code>.ed-status</code></td><td>Position, language, indent, line ending, encoding, and the key hints. 11px <code>--muted</code> on <code>--panel-h</code>.</td></tr>
+      <tr><td>Dialog size</td><td><code>.ced.sm</code></td><td>190 to 300px tall instead of up to the viewport less 300px.</td></tr>
+      <tr><td>Prose wrap</td><td><code>.ced.wrap</code></td><td>Markdown and prose wrap at the column, and the gutter measures each wrapped line.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  <p class="dx-sub">The editor edits a file in the repository. A value in the database is a form field.</p>
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A file under <code>.oxagen/</code>: an agent definition, a Steering source, a skill's bundle, a record.</li><li>A draft a wizard writes before it opens a pull request.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Showing code that nobody edits here: use a <a href="code-block.html">code block</a>.</li><li>Showing a change: use a <a href="diff.html">diff</a>.</li><li>A single setting: use a <a href="form-field.html">form field</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex"><div class="field" style="width:100%;margin:0"><textarea rows="3" style="font-family:var(--font)">[budget]
+monthly_usd = 400</textarea></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A file in a plain textarea set in Geist. Columns drift, there are no line numbers, and nothing says it opens a pull request.</p></div>
+    <div class="dx-do"><div class="dx-ex"><pre style="width:100%;margin:0"><span class="tk-t">[budget]</span>
+<span class="tk-k">monthly_usd</span> <span class="tk-p">=</span> <span class="tk-n">400</span></pre></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>Source is set in Monaspace Neon with its tokens colored, in the editor or a code block.</p></div>
+  </div>
+  <ul>
+    <li><b>Monaspace Neon only.</b> The textarea and the painted layer both compute to <code>--mono</code> at the same size, line height, padding, and letter spacing. Any difference moves the caret off its glyph.</li>
+    <li><b>Ligatures and texture healing on.</b> <code>calt</code> and <code>liga</code> are on by default. Never set <code>font-variant-ligatures:none</code> on either layer.</li>
+    <li><b>Saving opens a pull request.</b> The page header's Save opens one, and Discard returns the file to the saved copy. The bar says modified until then.</li>
+    <li><b>Behavior.</b> <code>edMount()</code> wires the textarea, <code>edPaint()</code> repaints the highlighted layer and the gutter on every input, and <code>edKey()</code> handles Tab, Shift Tab, comment, find, and save.</li>
+    <li><b>Wide lines.</b> A long line widens the content column and the scroll container scrolls both layers as one. The textarea never scrolls on its own.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Path</b>: the repository path in mono, exactly as it is stored: <code>.oxagen/agents/release-manager.toml</code>.</li>
+    <li><b>State</b>: one word, <code>unchanged</code> or <code>modified</code>.</li>
+    <li><b>Status</b>: <code>Ln 3, Col 1</code>, the language name, <code>Spaces: 2</code>, <code>LF</code>, <code>UTF-8</code>, then the key hints.</li>
+    <li><b>Key hints</b>: comma-separated, with the platform's modifier symbols: ⌘S save, ⌘F find.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The textarea is the one focusable element and carries an <code>aria-label</code> equal to the path. The gutter, marks, and painted layer are <code>aria-hidden</code>.</li>
+    <li>Tab inserts two spaces, so Escape then Tab must leave the editor. The status bar's hints should name that way out. See Findings.</li>
+    <li>The caret is <code>--fg</code>, and a selection is <code>--st-approval</code> at 32%, which reads in both themes.</li>
+    <li>Syntax color is decoration. Nothing in the file depends on color to be understood.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>The key hints hide (engine.css 965). The rest of the status bar wraps.</li>
+    <li>The editor keeps horizontal scrolling for long lines. The page itself does not scroll sideways.</li>
+    <li>The textarea is 16px in the phone shell, like every input, so the painted layer must match it there.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--mono</code></td><td>Every layer's face: Monaspace Neon</td></tr>
+      <tr><td><code>--panel</code></td><td>Content and gutter ground</td></tr>
+      <tr><td><code>--panel-h</code></td><td>Bar and status ground</td></tr>
+      <tr><td><code>--hl</code></td><td>Current line</td></tr>
+      <tr><td><code>--dim</code></td><td>Line numbers, comments</td></tr>
+      <tr><td><code>--body</code></td><td>Plain text</td></tr>
+      <tr><td><code>--accent-text</code></td><td>Keys (see Findings)</td></tr>
+      <tr><td><code>--st-allowed, --st-approval, --st-proven, --k-constraint</code></td><td>Strings, numbers, tables, booleans</td></tr>
+      <tr><td><code>--st-failed</code></td><td>Error underline</td></tr>
+      <tr><td><code>--gold</code></td><td>Find marks and the find input's focus</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 942 to 973, ground 2123 to 2125, dialog and prose variants 1891 to 1900, phone 965</td><td>The rules that draw it</td></tr>
+      <tr><td><code>pAgentSource(r)</code> at <code>engine.js:1192</code></td><td>The agent Source page: the header, tabs, and the TOML editor.</td></tr>
+      <tr><td><code>edMount()</code> at <code>engine.js:1218</code></td><td>Wires the textarea's events and restores the selection after a render.</td></tr>
+      <tr><td><code>edPaint()</code> at <code>engine.js:1235</code></td><td>Repaints the highlighted layer, the gutter, the find marks, and the current line.</td></tr>
+      <tr><td><code>edKey(e)</code> at <code>engine.js:1266</code></td><td>Tab and Shift Tab indent, ⌘/ comments, ⌘F finds, ⌘S saves.</td></tr>
+      <tr><td><code>hlToml(src)</code> at <code>engine.js:1162</code></td><td>The TOML highlighter: one regex pass that writes token classes.</td></tr>
+      <tr><td><code>cedHtml(key, path, lang, opts)</code> at <code>engine.js:11521</code></td><td>The same editor for other languages, sized for a dialog with <code>small</code> or wrapped for prose.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li><code>CED_LANG</code> (engine.js 11405) lists the languages the shared editor highlights: TOML, Markdown, JSON, TypeScript, Python, and Go.</li>
+    <li>In the product app, <code>apps/app/src/ui/code-editor.tsx</code> builds the same two-layer editor and sets both layers in <code>--font-mono</code>, which is Monaspace Neon.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-q">note</span>Two grounds in the stylesheet</h4><p><code>.ed-scroll</code> sets <code>--void</code> at line 953, and line 2124 overrides it to <code>--panel</code> in both themes. The comment at 2123 says the override is intended. The first rule can go.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold keys</h4><p><code>.tk-k</code> colors TOML keys with <code>--accent-text</code>, so a definition file shows gold on every line. Gold is identity and one action. A kind hue such as <code>--k-rule</code> would separate keys without spending gold.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>State hues for syntax</h4><p>Strings use <code>--st-allowed</code>, numbers <code>--st-approval</code>, and tables <code>--st-proven</code>. A green string reads as allowed to anyone who has learned the badges. Dedicated syntax tokens would keep the two apart.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>No way out named</h4><p>Tab indents inside the editor, and nothing on screen says how to move focus out. Escape then Tab is the common pattern, and the status bar should say so.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's source editor against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Source editor audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the source editor component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/source-editor.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 942 to 973, ground 2123 to 2125, dialog and prose variants 1891 to 1900, phone 965. The mockup renders it with pAgentSource(r) (engine.js:1192), edMount() (engine.js:1218), edPaint() (engine.js:1235), edKey(e) (engine.js:1266), hlToml(src) (engine.js:1162), cedHtml(key, path, lang, opts) (engine.js:11521).
+3. The build's implementation: find it by its root selector (.ed) or its name, and list every route that renders it.
+4. Where to see it in the design: agent Source, Steering source, skill source, the agent, tool, skill, and record wizards. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Face. The editor's textarea and its highlighted layer both compute to Monaspace Neon. Any other first family, including a fallback, is a FAIL. Quote getComputedStyle(textarea).fontFamily and the same for the highlighted layer.
+2. Alignment. Both layers share font size, line height, padding, letter spacing, tab size, and white-space. Type a line of 200 characters, then place the caret at its end. The caret must sit after the last glyph. Drift is a FAIL.
+3. Ligatures. Neither layer sets font-variant-ligatures none or drops calt or liga.
+4. Chrome. The bar shows the path, a modified dot, the state word, and find. The status bar shows position, language, indent, line ending, and encoding. Compare each to the reference.
+5. Saving. Editing marks the file modified. Save opens a pull request and does not write the file directly. Discard restores the saved copy.
+6. Keys. Tab and Shift Tab indent, the comment shortcut toggles comments, find highlights every match and counts them, and there is a keyboard way out of the editor.
+7. Highlighting. Comments, tables, keys, strings, numbers, booleans, and errors each get their own token class and color, in both themes.
+8. Dialog and prose. Inside a dialog the editor is shortened, and prose wraps at the column with the gutter matching each wrapped line.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: The key hints hide (engine.css 965). The rest of the status bar wraps. The editor keeps horizontal scrolling for long lines. The page itself does not scroll sideways. The textarea is 16px in the phone shell, like every input, so the painted layer must match it there.
+13. Accessibility. The textarea is the one focusable element and carries an `aria-label` equal to the path. The gutter, marks, and painted layer are `aria-hidden`. Tab inserts two spaces, so Escape then Tab must leave the editor. The status bar's hints should name that way out. See Findings. The caret is `--fg`, and a selection is `--st-approval` at 32%, which reads in both themes. Syntax color is decoration. Nothing in the file depends on color to be understood.
+14. One implementation. The build draws the source editor from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Source editor: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="diff.html"><span>Previous</span>Diff</a><a class="nx" href="button.html"><span>Next</span>Button</a></nav>
+</main>
+</div>
+</body>
+</html>

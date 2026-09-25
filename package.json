@@ -4,16 +4,14 @@
   "type": "module",
   "scripts": {
     "dev": "node tools/dev.mjs",
-    "build": "node tools/build-roadmap.mjs && node tools/build-mockup.mjs && node tools/build-mockup-v2.mjs && node tools/build-mockup-future.mjs && node tools/build-stories.mjs && node tools/build-stories.mjs --dir mockups/future_state_mockups --title \"Future state\" && python3 tools/build-docs.py && node tools/build-badges.mjs",
-    "check": "node tools/build-roadmap.mjs --check && node tools/build-mockup.mjs --check && node tools/build-mockup-v2.mjs --check && node tools/build-mockup-future.mjs --check && node tools/build-stories.mjs --check && node tools/build-stories.mjs --check --dir mockups/future_state_mockups --title \"Future state\" && python3 tools/build-docs.py --check && node tools/build-badges.mjs --check && node tools/check-mockup.mjs && node tools/check-creation.mjs && node tools/check-tasks.mjs && node tools/check-api.mjs && node tools/check-assistant.mjs && node tools/check-record-e2e.mjs && node tools/check-refresh.mjs && node tools/check-copy.mjs",
+    "build": "node tools/build-roadmap.mjs && node tools/build-mockup.mjs && node tools/build-mockup-future.mjs && node tools/build-stories.mjs && node tools/build-stories.mjs --dir mockups/future_state_mockups --title \"Future state\" && python3 tools/build-docs.py && node tools/build-badges.mjs",
+    "check": "node tools/build-roadmap.mjs --check && node tools/build-mockup.mjs --check && node tools/build-mockup-future.mjs --check && node tools/build-stories.mjs --check && node tools/build-stories.mjs --check --dir mockups/future_state_mockups --title \"Future state\" && python3 tools/build-docs.py --check && node tools/build-badges.mjs --check && node tools/check-mockup.mjs && node tools/check-creation.mjs && node tools/check-tasks.mjs && node tools/check-api.mjs && node tools/check-assistant.mjs && node tools/check-record-e2e.mjs && node tools/check-refresh.mjs && node tools/build-components.mjs --check && node tools/check-design-docs.mjs && node tools/check-copy.mjs",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build && node tools/build-mockup.mjs --out storybook-static/missioncontrol.html && node tools/build-mockup-v2.mjs --out storybook-static/v2/missioncontrol.html && node tools/build-mockup-future.mjs --out storybook-static/future_state_mockups/missioncontrol.html",
+    "build-storybook": "storybook build && node tools/build-mockup.mjs --out storybook-static/missioncontrol.html && node tools/build-mockup-future.mjs --out storybook-static/future_state_mockups/missioncontrol.html",
     "roadmap": "node tools/build-roadmap.mjs",
     "refresh": "node tools/refresh-roadmap.mjs",
-    "mockups:v2": "node tools/build-mockup-v2.mjs",
     "mockups:future": "node tools/build-mockup-future.mjs",
-    "check:future": "MOCKUP=future node tools/check-mockup.mjs",
-    "check:v2": "node --test tools/mockup-v2.test.mjs"
+    "check:future": "MOCKUP=future node tools/check-mockup.mjs"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^5.3.1",
