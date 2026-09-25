@@ -13,7 +13,9 @@
 //   node tools/build-components.mjs --check   # exit 1 if a committed page is not what the registry makes
 //
 // Registry strings take three inline marks: `code`, **bold**, and [text](href). Example markup is
-// raw HTML that engine.css draws. The audit prompt is plain text, so its marks stay as written.
+// raw HTML that engine.css draws, written into its <template> exactly as dedented, since any added
+// indent would shift the lines of a <pre> or a <textarea>. The audit prompt is plain text, so its
+// marks stay as written.
 import { readdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -35,7 +37,6 @@ const dedent = (s) => {
   const min = Math.min(...lines.filter((l) => l.trim()).map((l) => l.match(/^\s*/)[0].length));
   return lines.map((l) => l.slice(Number.isFinite(min) ? min : 0)).join("\n");
 };
-const indent = (s, n) => s.split("\n").map((l) => (l ? " ".repeat(n) + l : l)).join("\n");
 
 const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">';
 
@@ -117,7 +118,7 @@ function story(s) {
     <figcaption class="dx-story-h"><b>${esc(s.name)}</b>${s.note ? `<span>${md(s.note)}</span>` : ""}</figcaption>
     <div class="${cls}"></div>
     <template data-story="${esc(s.id)}" data-name="${esc(s.name)}">
-${indent(dedent(s.html), 6)}
+${dedent(s.html)}
     </template>
   </figure>`;
 }

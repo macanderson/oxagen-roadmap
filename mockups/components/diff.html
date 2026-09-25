@@ -54,28 +54,28 @@
     <figcaption class="dx-story-h"><b>Unified</b><span><code>diffHtml(rows, 2)</code>: two lines of context, and a gap row for the lines it skips.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="unified" data-name="Unified">
-      <div class="diff"><div class="dl gap"><span></span><span></span><span>⋯</span></div><div class="dl"><span>3</span><span>3</span><span>  model = "claude-sonnet-5"</span></div><div class="dl"><span>4</span><span>4</span><span>  harness = "claude-code"</span></div><div class="dl del"><span>5</span><span></span><span>- budget.per_run_usd = 20</span></div><div class="dl add"><span></span><span>5</span><span>+ budget.per_run_usd = 25</span></div><div class="dl add"><span></span><span>6</span><span>+ budget.mode = "enforced"</span></div><div class="dl"><span>6</span><span>7</span><span>  [toolbelt]</span></div><div class="dl gap"><span></span><span></span><span>⋯</span></div></div>
+<div class="diff"><div class="dl gap"><span></span><span></span><span>⋯</span></div><div class="dl"><span>3</span><span>3</span><span>  model = "claude-sonnet-5"</span></div><div class="dl"><span>4</span><span>4</span><span>  harness = "claude-code"</span></div><div class="dl del"><span>5</span><span></span><span>- budget.per_run_usd = 20</span></div><div class="dl add"><span></span><span>5</span><span>+ budget.per_run_usd = 25</span></div><div class="dl add"><span></span><span>6</span><span>+ budget.mode = "enforced"</span></div><div class="dl"><span>6</span><span>7</span><span>  [toolbelt]</span></div><div class="dl gap"><span></span><span></span><span>⋯</span></div></div>
     </template>
   </figure>
   <figure class="dx-story" id="story-stat">
     <figcaption class="dx-story-h"><b>Change count</b><span><code>.dstat</code> sits in the header above a diff: additions, then deletions with a true minus.</span></figcaption>
     <div class="dx-canvas on-panel"></div>
     <template data-story="stat" data-name="Change count">
-      <p class="eyebrow q" style="margin:0"><span class="mono" style="text-transform:none;letter-spacing:0">.oxagen/agents/release-manager.toml</span> <span class="dstat"><b class="a">+2</b> <b class="d">−1</b></span></p>
+<p class="eyebrow q" style="margin:0"><span class="mono" style="text-transform:none;letter-spacing:0">.oxagen/agents/release-manager.toml</span> <span class="dstat"><b class="a">+2</b> <b class="d">−1</b></span></p>
     </template>
   </figure>
   <figure class="dx-story" id="story-split">
     <figcaption class="dx-story-h"><b>Split</b><span><code>diffSplitHtml(rows, 2, labels)</code>: base left, draft right. The missing half of a one-sided change is a hatch.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="split" data-name="Split">
-      <div class="diff two"><div class="dl2 hd"><span class="ln"></span><span class="tx">main</span><span class="ln"></span><span class="tx">your draft</span></div><div class="dl2 same"><span class="ln">3</span><span class="tx">  model = "claude-sonnet-5"</span><span class="ln">3</span><span class="tx">  model = "claude-sonnet-5"</span></div><div class="dl2"><span class="ln del">4</span><span class="tx del">  budget.per_run_usd = 20</span><span class="ln add">4</span><span class="tx add">  budget.per_run_usd = 25</span></div><div class="dl2"><span class="ln e"></span><span class="tx e"></span><span class="ln add">5</span><span class="tx add">  budget.mode = "enforced"</span></div><div class="dl2 same"><span class="ln">5</span><span class="tx">  [toolbelt]</span><span class="ln">6</span><span class="tx">  [toolbelt]</span></div><div class="dl2 gap"><span class="tx">⋯</span></div></div>
+<div class="diff two"><div class="dl2 hd"><span class="ln"></span><span class="tx">main</span><span class="ln"></span><span class="tx">your draft</span></div><div class="dl2 same"><span class="ln">3</span><span class="tx">  model = "claude-sonnet-5"</span><span class="ln">3</span><span class="tx">  model = "claude-sonnet-5"</span></div><div class="dl2"><span class="ln del">4</span><span class="tx del">  budget.per_run_usd = 20</span><span class="ln add">4</span><span class="tx add">  budget.per_run_usd = 25</span></div><div class="dl2"><span class="ln e"></span><span class="tx e"></span><span class="ln add">5</span><span class="tx add">  budget.mode = "enforced"</span></div><div class="dl2 same"><span class="ln">5</span><span class="tx">  [toolbelt]</span><span class="ln">6</span><span class="tx">  [toolbelt]</span></div><div class="dl2 gap"><span class="tx">⋯</span></div></div>
     </template>
   </figure>
   <figure class="dx-story" id="story-empty">
     <figcaption class="dx-story-h"><b>No change</b><span>A draft that matches its base shows a sentence in place of an empty diff.</span></figcaption>
     <div class="dx-canvas on-panel"></div>
     <template data-story="empty" data-name="No change">
-      <div class="panel"><div class="panel-b dim">Nothing changed yet.</div></div>
+<div class="panel"><div class="panel-b dim">Nothing changed yet.</div></div>
     </template>
   </figure>
 </section>

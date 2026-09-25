@@ -54,7 +54,7 @@ export default {
     "In the phone shell, touch targets are at least 44px and inputs are 16px.",
   ],
   findings: [
-    { tag: "open", title: "Three segmented control idioms", body: "`.seg` with `aria-pressed` buttons (5 sites), `.btn.sm.sel` groups (7 sites), and `span.chips[role=group]` (Backlog). One idiom would give one keyboard model and one look. See [Segmented control](components/segmented-control.html)." },
+    { tag: "open", title: "Four segmented control idioms", body: "`.seg` with `aria-pressed` buttons (5 sites), `.btn.sm.sel` groups (7 sites), `span.chips[role=group]` (Backlog), and `.kf` with inline overrides (the Agents panel). One idiom would give one keyboard model and one look. See [Segmented control](components/segmented-control.html)." },
     { tag: "open", title: "Label colors do not follow the theme", body: "Work item labels take an inline `--lc` hex from `LBL_SWATCHES` (engine.js 15943) and `fixtures/tasks.json`. Nine are dark-theme token values frozen as hex and three match no token (`#E0803A`, `#C9A227`, `#3B82F6`), so none switch in light." },
     { tag: "open", title: "No destructive token", body: "The brand kit defines `--destructive`, the one red that clears 4.5:1 as text and as a fill in both themes. `engine.css` uses `--st-failed` for danger buttons instead, which is 3.51:1 on `--panel` in dark." },
     { tag: "note", title: "Rules with no emitter", body: "`.srclink`, `.compbar`, `.legend`, `.mtr`, `.rl-tog`, `.fp-bar`, `.def-bar`, `.avat`, `.tid`, `.ctxi`, `.ctxg`, `.stack`, and `.agc .scs` are styled but nothing renders them. `approvalCardSm()` is never called, so the `.apsm*` rules are unused except `.apsm-clk`." },

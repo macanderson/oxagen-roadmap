@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Badge</title>
+<meta name="description" content="A short word in a bordered pill that names a state or a label.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Badge</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Data display</p>
+  <h1>Badge</h1>
+  <p class="dx-lead">A badge names one state or one label in a word or two: the answer a rule gave, a run's status, a tier, a risk level. A badge with a dot is a state, and a badge without one is a label. The word always carries the meaning, and the color repeats it.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.b</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 184 to 193, 59, 2049, link chips 2147 to 2149, live 376 to 378</span>
+    <span><b>Used on</b> every page, Agents, Run, Tools, Work, Spend, approvals drawer</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-states">
+    <figcaption class="dx-story-h"><b>State badges</b><span>A dot badge is a state. Each tone maps to one meaning.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="states" data-name="State badges">
+      <span class="b b-allowed"><span class="d"></span>allowed</span>
+      <span class="b b-approval"><span class="d"></span>waiting on Priya</span>
+      <span class="b b-denied"><span class="d"></span>denied</span>
+      <span class="b b-proven"><span class="d"></span>sealed</span>
+      <span class="b b-failed"><span class="d"></span>failed</span>
+      <span class="b b-critical"><span class="d"></span>tamper incident</span>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-labels">
+    <figcaption class="dx-story-h"><b>Label badges</b><span>No dot. A neutral <code>.b-q</code> label names a kind or a source. A toned label names a level.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="labels" data-name="Label badges">
+      <span class="b b-q">direct</span>
+      <span class="b b-q">compacted</span>
+      <span class="b b-q">low</span>
+      <span class="b b-approval">medium</span>
+      <span class="b b-denied">high</span>
+      <span class="b b-critical">critical</span>
+      <span class="b b-denied">irreversible</span>
+      <span class="b b-approval">write</span>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-tier">
+    <figcaption class="dx-story-h"><b>Tier badges</b><span>A tier is lowercase Monaspace Neon. Its title says what the tier governs.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="tier" data-name="Tier badges">
+      <span class="b b-tier b-q" title="Recorded only. No hook is installed and nothing is delivered.">observe</span>
+      <span class="b b-tier b-approval" title="Hooks installed. Steering is delivered and four hook events can refuse a call.">harness</span>
+      <span class="b b-tier b-allowed" title="Model and MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it.">gateway</span>
+      <span class="b b-tier b-proven" title="The agent runs in an OS sandbox whose only network exit is the gateway.">contained</span>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-live">
+    <figcaption class="dx-story-h"><b>Live run</b><span>A live run is the one state drawn without a pill: a pulsing dot and the word.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="live" data-name="Live run">
+      <span class="live"><span class="p"></span>live</span>
+      <span class="b b-approval">parked for approval</span>
+      <span class="b b-denied">halted</span>
+      <span class="b b-q">sealed</span>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-in-table">
+    <figcaption class="dx-story-h"><b>In a table</b><span>Badges sit in cells next to the facts they qualify. An empty count is a dash.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="in-table" data-name="In a table">
+      <div class="panel"><div class="tw"><table class="narrow">
+        <thead><tr><th>Tool</th><th>Risk</th><th>Effect</th><th>Mandates</th></tr></thead>
+        <tbody>
+          <tr><td class="tkey">github__merge_pull_request</td><td><span class="b b-denied">high</span></td><td><span class="b b-denied">irreversible</span></td><td><span class="b b-approval"><span class="d"></span>2</span></td></tr>
+          <tr><td class="tkey">github__list_commits</td><td><span class="b b-q">low</span></td><td><span class="b b-q">read</span></td><td><span class="dim">—</span></td></tr>
+        </tbody>
+      </table></div></div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-link">
+    <figcaption class="dx-story-h"><b>Link badge and id</b><span><code>a.b.lk</code> makes a badge a link, such as a repository. <code>.id</code> keeps an identifier's case.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="link" data-name="Link badge and id">
+      <a class="b b-q lk" href="#">a-intel/platform</a>
+      <span class="b b-q"><span class="id mono">wo_01K6T9QX</span></span>
+      <span class="b b-tier b-na" title="not yet available">contained · not yet available</span>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Pill</td><td><code>.b</code></td><td>An inline flex pill: 11px Geist 600 at 0.02em, 2px by 7px padding, a 6px radius, a 1px border, line height 1.5, no wrapping.</td></tr>
+      <tr><td>Dot</td><td><code>.b .d</code></td><td>A 5px circle in the text color. It marks the badge as a state.</td></tr>
+      <tr><td>Tone</td><td><code>.b-allowed</code>, <code>.b-approval</code>, <code>.b-denied</code>, <code>.b-proven</code>, <code>.b-failed</code>, <code>.b-critical</code></td><td>Text in the state token, a border at 42% of it, and a ground at 11% (12% for critical).</td></tr>
+      <tr><td>Neutral</td><td><code>.b-q</code></td><td>Text in <code>--muted</code> on <code>--hl</code> with a <code>--border</code> edge.</td></tr>
+      <tr><td>Tier</td><td><code>.b-tier</code></td><td>10.5px Monaspace Neon 500, lowercase. Combined with a tone.</td></tr>
+      <tr><td>Not available</td><td><code>.b-tier.b-na</code></td><td>A dashed border and <code>--dim</code> text.</td></tr>
+      <tr><td>Identifier</td><td><code>.b .id</code></td><td>Keeps an id's case inside a badge.</td></tr>
+      <tr><td>Link</td><td><code>a.b.lk</code>, <code>button.b.lk</code></td><td>A badge that opens something. The border turns gold on hover.</td></tr>
+      <tr><td>Live</td><td><code>.live</code>, <code>.live .p</code></td><td>11px 600 in <code>--st-allowed</code> with a 6px dot that pulses every 1.8 seconds.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  <p class="dx-sub">Word first, shape second, color third.</p>
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>The answer a rule gave: allowed, denied, routed to a person.</li><li>A run's or a record's status: live, parked, sealed, halted.</li><li>A level or a kind a person filters on: risk, side effect, tier, origin.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A context kind, a frame type, a tool category, a hazard, or a gate: use the <a href="typed-badges.html">typed badges</a>. Each has its own grammar.</li><li>A removable value, a label with a color, or a person: use a <a href="chips.html">chip</a>.</li><li>A number that matters on its own: put it in a <a href="stat-box.html">stat box</a> or a table cell.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><span class="b b-allowed"><span class="d"></span></span><span class="b b-failed"><span class="d"></span></span></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Dots with no word. A reader in grayscale, or with a screen reader, gets nothing.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><span class="b b-allowed"><span class="d"></span>allowed</span><span class="b b-failed"><span class="d"></span>failed</span></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>The word carries the state and the tone repeats it.</p></div>
+    <div class="dx-dont"><div class="dx-ex dx-row"><span class="b" style="color:var(--gold);border-color:var(--gold)"><span class="d"></span>recommended</span></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A gold badge. Gold is identity and one action per screen, never a state.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><span class="b b-q">recommended</span></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>A neutral label for anything that is not a state.</p></div>
+  </div>
+  <ul>
+    <li>One badge, one meaning. A tone always means the same thing across the product: allowed is healthy or permitted, approval is waiting or in flight, denied is refused or a warning, failed is broken, critical needs a person now.</li>
+    <li>A dot means state and no dot means label. Kind badges never use a dot and never use a state hue.</li>
+    <li>A badge sits next to the thing it qualifies, after the name in a row or a header.</li>
+    <li>A list of badges carries the hidden separator <code>SEP</code> between them, so it reads and copies as a list.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Word</b>: one to three words, lowercase, in the record's own vocabulary: allowed, denied, waiting on Priya, parked for approval, sealed.</li>
+    <li><b>No punctuation</b> inside a badge: no mid-dot, no comma. <code>observed, approved</code> and <code>pausing · next boundary</code> are two facts. See Findings.</li>
+    <li><b>Counts</b> in a badge are plain numbers. A zero count is a dash in <code>--dim</code> outside the badge, not a badge reading 0.</li>
+    <li><b>Title</b>: a badge whose word is a term (a tier, a risk level) carries a <code>title</code> with its definition.</li>
+    <li><b>Keys</b>: a stored key shows its label (<code>keyText()</code>), never the raw key.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The word is real text, so a screen reader reads it. The dot is decoration.</li>
+    <li>A badge that opens something is an <code>a</code> or a <code>button</code> (<code>.lk</code>), never a <code>span</code> with a click handler.</li>
+    <li>Contrast: a badge word is 11px, so it needs 4.5:1 on its tinted ground. Several tones fall short today. See Findings and <a href="../colors.html#state">Colors</a>.</li>
+    <li>The live dot's pulse stops under <code>prefers-reduced-motion</code> through the global rule at engine.css 49.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>Badges keep their size. In a card table they wrap to the next line rather than truncating.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--st-allowed</code></td><td>Allowed, healthy, live</td></tr>
+      <tr><td><code>--st-approval</code></td><td>Waiting on a person, in flight, write</td></tr>
+      <tr><td><code>--st-denied</code></td><td>Denied, warning, high risk, irreversible</td></tr>
+      <tr><td><code>--st-proven</code></td><td>Sealed, posted, published</td></tr>
+      <tr><td><code>--st-failed</code></td><td>Failed, broken</td></tr>
+      <tr><td><code>--st-critical</code></td><td>Critical, tamper incident</td></tr>
+      <tr><td><code>--muted, --hl, --border</code></td><td>Neutral label</td></tr>
+      <tr><td><code>--dim</code></td><td>Not available</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 184 to 193, 59, 2049, link chips 2147 to 2149, live 376 to 378</td><td>The rules that draw it</td></tr>
+      <tr><td><code>statusBadge(st)</code> at <code>engine.js:646</code></td><td>A run's status. <code>live</code> returns the pulsing <code>.live</code> instead of a pill.</td></tr>
+      <tr><td><code>tierBadge(t)</code> at <code>engine.js:664</code></td><td>A tier with its definition as the title. 25 calls.</td></tr>
+      <tr><td><code>riskBadge(r)</code> at <code>engine.js:674</code></td><td>low, medium, high, critical.</td></tr>
+      <tr><td><code>effBadge(e)</code> at <code>engine.js:678</code></td><td>A side effect: irreversible or write.</td></tr>
+      <tr><td><code>finBadge(f)</code> at <code>engine.js:682</code></td><td>A financial class as a critical label, or a dim none.</td></tr>
+      <tr><td><code>originBadge(o)</code> at <code>engine.js:685</code></td><td>Where a tool schema came from: observed, or observed and approved.</td></tr>
+      <tr><td><code>stBadge(m)</code> at <code>engine.js:6912</code></td><td>A dot badge from a status map. 13 calls.</td></tr>
+      <tr><td><code>tStatusBadge(k)</code> at <code>engine.js:14767</code></td><td>A work item's status.</td></tr>
+      <tr><td><code>readyBadge(t)</code> at <code>engine.js:14781</code></td><td>A work item's readiness.</td></tr>
+      <tr><td><code>permChips(perms, max)</code> at <code>engine.js:10052</code></td><td>Permissions as mono neutral badges with <code>SEP</code> between them.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>About 313 more badges are written inline as <code>class=&quot;b b-…&quot;</code>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Badge words below 4.5:1</h4><p>On <code>--panel</code> in dark, denied is 4.15:1, critical 3.69:1, and failed 3.21:1 on their own tint. In light, allowed is 4.36:1. <a href="../colors.html#state">Colors</a> computes the live values.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Two facts in one badge</h4><p><code>statusBadge()</code> writes <code>pausing · next boundary</code>, <code>originBadge()</code> writes <code>observed, approved</code>, and <code>tierBadge()</code> appends <code>· not yet available</code>. A badge holds one fact.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>A symbol in a word</h4><p><code>statusBadge()</code> writes the paused state as <code>⏸ paused</code>. A symbol inside a badge reads aloud as its Unicode name.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold on hover</h4><p>A link badge's border turns gold on hover. Hover is a state, and <code>--rule</code> would carry it.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Sealed has two looks</h4><p><code>statusBadge()</code> draws sealed as a neutral label, while the tab count and the chain view use <code>.b-proven</code>. One run state should have one badge.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's badge against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Badge audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the badge component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/badge.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 184 to 193, 59, 2049, link chips 2147 to 2149, live 376 to 378. The mockup renders it with statusBadge(st) (engine.js:646), tierBadge(t) (engine.js:664), riskBadge(r) (engine.js:674), effBadge(e) (engine.js:678), finBadge(f) (engine.js:682), originBadge(o) (engine.js:685), stBadge(m) (engine.js:6912), tStatusBadge(k) (engine.js:14767), readyBadge(t) (engine.js:14781), permChips(perms, max) (engine.js:10052).
+3. The build's implementation: find it by its root selector (.b) or its name, and list every route that renders it.
+4. Where to see it in the design: every page, Agents, Run, Tools, Work, Spend, approvals drawer. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Word. Every badge has visible text. A badge that is only a dot or only a color is a FAIL.
+2. Dot means state. Every badge with a dot names a state, and no label or kind badge has a dot.
+3. Tone map. Each tone means one thing across the build: allowed, approval, denied, proven, failed, critical. List every badge whose tone disagrees with its word, such as a failed state in the approval tone.
+4. Look. 11px Geist 600, a 6px radius, 2px by 7px padding, a border at 42% and a ground at 11% of the tone. Tier badges are lowercase 10.5px Monaspace Neon.
+5. Contrast. Measure each tone's word against its blended tint on --panel and --ink in both themes. Under 4.5:1 is a FAIL.
+6. One fact. No badge contains a mid-dot, a comma, or two facts.
+7. Links. A badge that opens something is a link or a button with a name that says where it goes.
+8. No gold. No badge uses gold for its text, border, or ground, at rest or on hover.
+9. Keys. No badge shows a raw stored key.
+10. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+11. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+12. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+13. Phone. At 390 by 844 with a touch pointer: Badges keep their size. In a card table they wrap to the next line rather than truncating.
+14. Accessibility. The word is real text, so a screen reader reads it. The dot is decoration. A badge that opens something is an `a` or a `button` (`.lk`), never a `span` with a click handler. Contrast: a badge word is 11px, so it needs 4.5:1 on its tinted ground. Several tones fall short today. See Findings and [Colors](../colors.html#state). The live dot's pulse stops under `prefers-reduced-motion` through the global rule at engine.css 49.
+15. One implementation. The build draws the badge from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Badge: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+</main>
+</div>
+</body>
+</html>

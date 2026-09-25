@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>List table</title>
+<meta name="description" content="A table in a panel with search, filters, sortable columns, a rows select, and a pager.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>List table</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Data display</p>
+  <h1>List table</h1>
+  <p class="dx-lead">Every list in the product gets the same controls: a search box, up to three filters, sortable columns, a rows-per-page select, and a pager. Pages write a plain table, and the engine's <code>listify()</code> adds the controls after each render, so no page writes its own and no list shows two search boxes. This is the table panel in the screenshot that started this reference: the Agents list.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.lt, .lp</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 889 to 915</span>
+    <span><b>Used on</b> Agents, Work orders, Backlog, Tools, Spend budgets, Repositories, Runtimes, Audit, Organization</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-loaded">
+    <figcaption class="dx-story-h"><b>Loaded list</b><span>The Agents panel with two filters the engine chose, a column sorted descending, and page 1 of 3.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="loaded" data-name="Loaded list">
+      <div class="panel">
+        <div class="panel-h"><div style="flex:1;min-width:0"><h3>Registered in Core platform</h3><p class="muted" style="margin:2px 0 0;font-size:12px">Each row names the reusable objects this agent holds a reference to.</p></div></div>
+        <div class="lt">
+          <input class="lt-q" type="search" placeholder="Search this list" aria-label="Search this list" value="">
+          <select class="lt-f" data-k="4" aria-label="Filter by Health"><option value="">Any health</option><option value="healthy">Healthy</option><option value="degraded">Degraded</option></select>
+          <select class="lt-f" data-k="5" aria-label="Filter by Runtime"><option value="">Any runtime</option><option value="gateway">Gateway</option><option value="harness">Harness</option></select>
+          <label class="lt-rows">Rows<select class="lt-per" aria-label="Rows per page"><option value="5">5</option><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="0">All</option></select></label>
+        </div>
+        <div class="tw"><table>
+          <thead><tr>
+            <th class="sortable" tabindex="0" role="button" aria-sort="none">Agent</th>
+            <th class="sortable" tabindex="0" role="button" aria-sort="none">Owner</th>
+            <th class="num sortable" tabindex="0" role="button" aria-sort="descending">Runs</th>
+            <th class="num sortable" tabindex="0" role="button" aria-sort="none">Spend</th>
+            <th class="sortable" tabindex="0" role="button" aria-sort="none">Health</th>
+            <th class="sortable" tabindex="0" role="button" aria-sort="none">Runtime</th>
+          </tr></thead>
+          <tbody>
+            <tr><td class="tkey">a-intel.core.triage</td><td>Priya Natarajan</td><td class="num">1,340</td><td class="num">$402.11</td><td><span class="b b-allowed"><span class="d"></span>healthy</span></td><td><span class="b b-tier b-allowed">gateway</span></td></tr>
+            <tr><td class="tkey">a-intel.core.release-manager</td><td>Marcus Bell</td><td class="num">412</td><td class="num">$186.40</td><td><span class="b b-allowed"><span class="d"></span>healthy</span></td><td><span class="b b-tier b-allowed">gateway</span></td></tr>
+            <tr><td class="tkey">a-intel.core.pr-reviewer</td><td>Marcus Bell</td><td class="num">288</td><td class="num">$94.02</td><td><span class="b b-denied"><span class="d"></span>degraded</span></td><td><span class="b b-tier b-q">harness</span></td></tr>
+          </tbody>
+        </table></div>
+        <div class="lp"><span class="lp-n">1–10 of 23 (page 1 of 3)</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page" disabled>‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 3" aria-current="page">1</button><button class="btn sm" data-p="2" aria-label="Page 2 of 3">2</button><button class="btn sm" data-p="3" aria-label="Page 3 of 3">3</button><button class="btn sm" data-p="next" aria-label="Next page">›</button></span></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-empty">
+    <figcaption class="dx-story-h"><b>No match</b><span>A search that matches nothing keeps the headers and says so in one row. The pager reads None.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="empty" data-name="No match">
+      <div class="panel">
+        <div class="lt">
+          <input class="lt-q" type="search" placeholder="Search this list" aria-label="Search this list" value="stale-closer">
+          <label class="lt-rows">Rows<select class="lt-per" aria-label="Rows per page"><option value="10" selected>10</option></select></label>
+        </div>
+        <div class="tw"><table>
+          <thead><tr><th class="sortable" tabindex="0" role="button" aria-sort="none">Agent</th><th class="sortable" tabindex="0" role="button" aria-sort="none">Owner</th><th class="num sortable" tabindex="0" role="button" aria-sort="none">Runs</th></tr></thead>
+          <tbody><tr class="lt-empty"><td colspan="3">No rows match.</td></tr></tbody>
+        </table></div>
+        <div class="lp"><span class="lp-n">None</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page" disabled>‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 1" aria-current="page">1</button><button class="btn sm" data-p="next" aria-label="Next page" disabled>›</button></span></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-long">
+    <figcaption class="dx-story-h"><b>Long pager</b><span>Past seven pages the pager keeps the first, the last, and the pages around the current one.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="long" data-name="Long pager">
+      <div class="panel">
+        <div class="lp"><span class="lp-n">41–50 of 703 (page 5 of 71)</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page">‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 71">1</button><span class="el">…</span><button class="btn sm" data-p="4" aria-label="Page 4 of 71">4</button><button class="btn sm" data-p="5" aria-label="Page 5 of 71" aria-current="page">5</button><button class="btn sm" data-p="6" aria-label="Page 6 of 71">6</button><span class="el">…</span><button class="btn sm" data-p="71" aria-label="Page 71 of 71">71</button><button class="btn sm" data-p="next" aria-label="Next page">›</button></span></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-free">
+    <figcaption class="dx-story-h"><b>Outside a panel</b><span>When the host is not a panel, the bar and pager take <code>.free</code>: their own border, radius, and spacing.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="free" data-name="Outside a panel">
+      <div>
+        <div class="lt free">
+          <input class="lt-q" type="search" placeholder="Search findings" aria-label="Search findings" value="">
+          <label class="lt-sort">Sort<select class="lt-s"><option value="0" selected>Rank</option><option value="1">Savings, high first</option><option value="2">Savings, low first</option><option value="3">Finding A–Z</option></select></label>
+          <label class="lt-rows">Rows<select class="lt-per" aria-label="Rows per page"><option value="10" selected>10</option></select></label>
+        </div>
+        <p class="muted" style="margin:0;font-size:12.5px">Cards sit here. A card list has no column headers, so it sorts from the Sort select.</p>
+        <div class="lp free"><span class="lp-n">1–7 of 7</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page" disabled>‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 1" aria-current="page">1</button><button class="btn sm" data-p="next" aria-label="Next page" disabled>›</button></span></div>
+      </div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Control bar</td><td><code>.lt</code></td><td>A wrapping row on <code>--panel</code> under the panel header, 9px by 12px padding, with a <code>--border</code> underline.</td></tr>
+      <tr><td>Search</td><td><code>.lt .lt-q</code></td><td>A <code>type=search</code> input on <code>--ink</code>, 12.5px, growing from 200px. Its border turns gold on focus.</td></tr>
+      <tr><td>Filter</td><td><code>.lt select.lt-f</code></td><td>A select per filtered column, labelled &quot;Filter by&quot; the column. Its first option reads &quot;Any&quot; and the column name.</td></tr>
+      <tr><td>Sort</td><td><code>.lt .lt-sort</code></td><td>A Sort select, only on card lists, which have no headers to click.</td></tr>
+      <tr><td>Rows</td><td><code>.lt .lt-rows</code></td><td>Rows per page: 5, 10, 25, 50, or All. Default 10. It sits at the right end of the bar.</td></tr>
+      <tr><td>Sortable header</td><td><code>th.sortable</code></td><td>A header with a ↕ mark in <code>--rule</code>. Sorted, it shows ↑ or ↓ in gold and its text turns <code>--fg</code>.</td></tr>
+      <tr><td>Empty row</td><td><code>tr.lt-empty</code></td><td>One row across every column reading &quot;No rows match.&quot; in <code>--dim</code>.</td></tr>
+      <tr><td>Pager</td><td><code>.lp</code></td><td>The range in 11.5px Monaspace Neon, then previous, page numbers, and next. The current page has a gold border and gold text.</td></tr>
+      <tr><td>Free form</td><td><code>.lt.free</code>, <code>.lp.free</code></td><td>The bar and pager outside a panel, each with its own border and a 10px radius.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  <p class="dx-sub">Write a plain table in a panel. The engine does the rest.</p>
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Any list of records inside a <a href="panel.html">panel</a>: agents, work orders, tools, budgets, audit events.</li><li>A list of cards that needs search and paging: findings, records, rules. <code>ltCards()</code> adds the same bar with a Sort select.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A table of three to five fixed rows that never grows, such as a key and label map: add <code>data-lt=&quot;off&quot;</code> to the table.</li><li>A table with grouped headers. <code>ltTable()</code> skips a table whose header uses <code>colspan</code>.</li><li>Values about one record: use a <a href="key-value-list.html">key-value list</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex"><div class="panel" style="width:100%"><div class="panel-b" style="padding:10px 12px"><div class="field" style="margin:0"><input placeholder="Search agents" aria-label="Search agents"></div></div><div class="lt"><input class="lt-q" type="search" placeholder="Search this list" aria-label="Search this list"></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A page-level search above the list's own. <code>ltTable()</code> absorbs a lone search field placed directly above the table, so write one or neither.</p></div>
+    <div class="dx-do"><div class="dx-ex"><div class="panel" style="width:100%"><div class="lt"><input class="lt-q" type="search" placeholder="Search agents" aria-label="Search agents"></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>One search box. Its placeholder came from the page's field, which the engine removed.</p></div>
+  </div>
+  <ul>
+    <li><b>Filters are chosen, not written.</b> A column earns a filter when it holds 2 to 8 distinct short values (28 characters or fewer) across at least 4 rows, and the values are not unique per row. At most three per list, and columns whose names match status, state, tier, kind, role, risk, or a similar word come first.</li>
+    <li><b>Sorting</b> cycles ascending, descending, and back to the page's order. A column is numeric when 60% of its filled cells are numbers, so a column of counts with a few dashes still sorts as numbers.</li>
+    <li><b>Cell values.</b> A cell may carry <code>data-v</code> to override its sort and filter value. A cell's filter value is its first readable text, skipping avatar initials, a status dot, and the second line.</li>
+    <li><b>Selection.</b> A row the address selects (<code>aria-selected=&quot;true&quot;</code>) opens on its own page once, and paging stays yours after that.</li>
+    <li><b>State per list.</b> Search, filters, sort, rows, and page are kept per list for the session.</li>
+    <li><b>Opting out.</b> <code>data-lt=&quot;off&quot;</code> on the table. Use it for short fixed tables only.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Search placeholder</b>: &quot;Search this list&quot;, or the page's own wording when a page field was absorbed (&quot;Search findings&quot;).</li>
+    <li><b>Filter first option</b>: &quot;Any&quot; and the column name in lowercase: &quot;Any health&quot;, &quot;Any runtime&quot;. Option text is sentence case, and provider ids read as the provider's name (&quot;GitHub&quot;).</li>
+    <li><b>Stored keys</b> in a filter show their label from <code>KEY_LABEL</code>, such as &quot;Observed by gateway&quot;.</li>
+    <li><b>Range</b>: <code>1–10 of 23 (page 1 of 3)</code>. The en dash here is a range in data, and the page count shows only when there is more than one page. Thousands take separators: <code>41–50 of 1,703</code>.</li>
+    <li><b>Empty</b>: &quot;No rows match.&quot; for a table and &quot;Nothing matches.&quot; for a card list. The pager reads &quot;None&quot;.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The search has an <code>aria-label</code> equal to its placeholder, each filter has &quot;Filter by&quot; and the column name, and the rows select has &quot;Rows per page&quot;.</li>
+    <li>Each sortable header is focusable and sorts on Enter or Space. Its <code>aria-sort</code> reads ascending, descending, or none.</li>
+    <li>The mockup puts <code>role=&quot;button&quot;</code> on the <code>th</code> itself, which replaces its column header role, and <code>aria-sort</code> is only valid on a column header. A build should keep the <code>th</code> and put a <code>button</code> inside it. See Findings.</li>
+    <li>Each pager button is labelled with its page and the total (&quot;Page 2 of 3&quot;), and the current one has <code>aria-current=&quot;page&quot;</code>. Previous and next are disabled at the ends.</li>
+    <li>The range text is plain text a screen reader reaches. A build should also announce the new range after a search or a filter, such as through a polite live region.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>The search takes the full width of the bar, and the rows select stops pushing right.</li>
+    <li>Tables become labelled cards (<code>cardTables()</code>). The bar and pager stay above and below the cards.</li>
+    <li>Controls take the phone sizes: inputs and selects at 16px, pager buttons 36px tall.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--panel</code></td><td>Bar and pager ground</td></tr>
+      <tr><td><code>--ink</code></td><td>Search and select ground</td></tr>
+      <tr><td><code>--border</code></td><td>Bar underline, input borders</td></tr>
+      <tr><td><code>--gold</code></td><td>Focus border, sort arrow, current page (see Findings)</td></tr>
+      <tr><td><code>--muted</code></td><td>Rows and Sort labels, pager text</td></tr>
+      <tr><td><code>--dim</code></td><td>Range, placeholder, empty row</td></tr>
+      <tr><td><code>--rule</code></td><td>Unsorted ↕ mark</td></tr>
+      <tr><td><code>--fg</code></td><td>Sorted header text</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 889 to 915</td><td>The rules that draw it</td></tr>
+      <tr><td><code>listify()</code> at <code>engine.js:13785</code></td><td>After every render, runs <code>ltTable()</code> on each table in the page and the dialog layer, and <code>ltCards()</code> on each card list.</td></tr>
+      <tr><td><code>ltTable(table, prefix)</code> at <code>engine.js:13685</code></td><td>Reads the table, picks filters, makes headers sortable, and inserts the bar and pager.</td></tr>
+      <tr><td><code>ltBar(st, opts, apply)</code> at <code>engine.js:13633</code></td><td>Writes the control bar: search, filters, an optional Sort, and Rows.</td></tr>
+      <tr><td><code>ltPager(st, total, onPage)</code> at <code>engine.js:13608</code></td><td>Writes the range and the page buttons, with ellipses past seven pages.</td></tr>
+      <tr><td><code>ltCards(cfg)</code> at <code>engine.js:13754</code></td><td>The same bar and pager for card lists, configured in <code>LT_CARDS</code>.</td></tr>
+      <tr><td><code>cardTables()</code> at <code>engine.js:13851</code></td><td>Turns tables into labelled cards in the phone shell.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li><code>LT_PER</code> (engine.js 13583) holds the row choices, and <code>LT_FACET</code> (13585) the column names that sort first as filters.</li>
+    <li>34 tables opt out with <code>data-lt=&quot;off&quot;</code>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-allowed"><span class="d"></span>fixed</span>Filter labels had a mid-dot</h4><p>The first filter option read <code>All · State</code>. PR #101 changed it to &quot;Any state&quot;, which follows the label rule.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>A button role on the header cell</h4><p><code>th.sortable</code> carries <code>role=&quot;button&quot;</code>, which removes its column header role, so its <code>aria-sort</code> has no effect for a screen reader. A <code>button</code> inside the <code>th</code> keeps both.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold marks the sort and the current page</h4><p>The sort arrow and the current page button are gold. Both are state, which the brand keeps off gold. <code>--fg</code> carries the same meaning.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Range and empty row contrast</h4><p>The range and the empty row are <code>--dim</code>: 3.67:1 on <code>--panel</code> in dark and 2.56:1 in light. Both are words a person reads.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Sort select has no own label</h4><p>The card-list Sort select is named by its wrapping <code>label</code>, which works. The Rows select carries both, so the two differ for no reason.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's list table against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>List table audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the list table component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/list-table.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 889 to 915. The mockup renders it with listify() (engine.js:13785), ltTable(table, prefix) (engine.js:13685), ltBar(st, opts, apply) (engine.js:13633), ltPager(st, total, onPage) (engine.js:13608), ltCards(cfg) (engine.js:13754), cardTables() (engine.js:13851).
+3. The build's implementation: find it by its root selector (.lt, .lp) or its name, and list every route that renders it.
+4. Where to see it in the design: Agents, Work orders, Backlog, Tools, Spend budgets, Repositories, Runtimes, Audit, Organization. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Coverage. Every list of records in the build has the search, the filters, sortable columns, the rows select, and the pager. List any list that lacks one, and any list that draws its own copy of these controls.
+2. One search. No list shows two search boxes. A page search above a list is the list's search.
+3. Filters. Each filter's options are the column's distinct values, the first option reads Any and the column name, options are sentence case, and stored keys show their labels. Report each list's filters and whether the rule (2 to 8 values over 4 or more rows, at most three) chose them.
+4. Sorting. Clicking a header, or Enter or Space on it, cycles ascending, descending, and the original order. Numbers sort as numbers, with dashes treated as empty. aria-sort is exposed on a column header element.
+5. Rows and pager. Rows offers 5, 10, 25, 50, and All, defaulting to 10. The range reads exactly as the reference (1–10 of 23 (page 1 of 3)), with separators, and past seven pages the pager keeps the first, the last, and the neighbors of the current page.
+6. Empty result. A search that matches nothing keeps the headers and shows one row reading No rows match., and the pager reads None.
+7. State. Search, filters, sort, rows, and page survive a re-render of the same list.
+8. Selection. A row selected by the address opens on the page that holds it.
+9. Announcements. After a search or filter, the new range is announced to a screen reader.
+10. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+11. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+12. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+13. Phone. At 390 by 844 with a touch pointer: The search takes the full width of the bar, and the rows select stops pushing right. Tables become labelled cards (`cardTables()`). The bar and pager stay above and below the cards. Controls take the phone sizes: inputs and selects at 16px, pager buttons 36px tall.
+14. Accessibility. The search has an `aria-label` equal to its placeholder, each filter has &quot;Filter by&quot; and the column name, and the rows select has &quot;Rows per page&quot;. Each sortable header is focusable and sorts on Enter or Space. Its `aria-sort` reads ascending, descending, or none. The mockup puts `role=&quot;button&quot;` on the `th` itself, which replaces its column header role, and `aria-sort` is only valid on a column header. A build should keep the `th` and put a `button` inside it. See Findings. Each pager button is labelled with its page and the total (&quot;Page 2 of 3&quot;), and the current one has `aria-current=&quot;page&quot;`. Previous and next are disabled at the ends. The range text is plain text a screen reader reaches. A build should also announce the new range after a search or a filter, such as through a polite live region.
+15. One implementation. The build draws the list table from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# List table: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+</main>
+</div>
+</body>
+</html>
