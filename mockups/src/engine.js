@@ -10626,7 +10626,7 @@ function regRun(){
      '<div class="row" style="margin-top:12px">'+tierBadge("harness")+'<span class="b b-q">chain intact</span></div>'+
      '<p class="muted" style="font-size:12.5px;margin:12px 0 0">The tier is computed from what was actually routed, not from what the adapter can do on paper. The hooks answered, so this run is <b>harness</b>: delivered, recorded, client-attested, fail-open.</p></div></div>';
     foot='<div class="reg-foot">'+regCancelBtn()+''+
-     '<div class="sp"><span class="reg-cap" id="regAuto">'+(r.runId?'Unlocked · <span class="mono">'+h(r.runId)+'</span> is live':'Opening automatically…')+'</span><button class="btn primary" onclick="regFinish()">'+(ob?"Open Oxagen":"Open in Work")+'</button></div></div>';
+     '<div class="sp"><span class="reg-cap" id="regAuto">'+(r.runId?'Unlocked · <span class="mono">'+h(r.runId)+'</span> is live':'Opening automatically…')+'</span><button class="btn primary" onclick="regFinish()">'+(ob?"Open oxagen":"Open in Work")+'</button></div></div>';
   } else {
     body='<div class="reg-card"><div class="ch"><span class="reg-spin"></span><h3>Waiting for the first frame</h3><span class="sp">polling · 1s</span></div>'+
      '<div class="cb"><div class="row" style="margin-bottom:12px"><span class="b b-q mono">'+h(key)+'</span><span class="b b-q">'+h(hl)+'</span><span class="b b-q">host '+REG_HOST+'</span></div>'+

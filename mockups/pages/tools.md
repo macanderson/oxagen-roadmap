@@ -28,7 +28,7 @@ The fleet operations wedge left this tab's design alone. Two things around it mo
 
 - **Import a provider** (plain) opens `import`.
 - **New tool** opens the tool creation wizard (`wzOpen('tool')`). It is gold on the Tools and Kill switches tabs. On Toolbelts, Providers and Policy it is plain, because those tabs carry their own gold.
-- **Flip a kill switch** (danger) opens `switch` on the class switch "every moves_funds tool".
+- **Kill switches…** (danger) opens `switch` on the class switch "every moves_funds tool".
 
 After a switch is flipped, a banner sits between the header and the tab bar on every tab. `tools-switches.md` specifies it.
 
