@@ -20,8 +20,8 @@
       "title": "Fleet",
       "area": "workspace",
       "route": "#/a-intel/core-platform",
-      "spec_path": "mockups/pages/fleet.md",
-      "scope_verdict": "keep",
+      "spec_path": "docs/fleet-operations-collapse.md",
+      "scope_verdict": "cut",
       "built_status": "partial",
       "built_evidence": [
         "apps/app/src/app/[org]/[ws]/page.tsx",
@@ -37,7 +37,7 @@
         "apps/app/src/ui/generated-summary.tsx",
         "apps/app/src/ui/replay-grade.tsx"
       ],
-      "gap_summary": "Reads are live and, since PR #3282, rows can be told apart: each row shows the generated name over the id and task ref, the generated summary, the agent card with its source, the operator, status, replay grade, cost with basis, frames and started, and links to the Run page. Two stat tiles, Spend today, cache hit rate, the approvals panel with the mandate bar and the onboarding rail are live. The panel still only reads: approve and deny (resolve_approval, the one billable action) are not wired anywhere in the app, and no row carries tier, verdict or Done. P0 because Fleet is the day-one page and its one governed write is missing.",
+      "gap_summary": "Cut by the fleet operations wedge (2026-09-24): the workspace opens on Work, the tiles, Steer and Register agent move to Agents, and live work is each work order's runs (docs/fleet-operations-collapse.md). Reads are live and, since PR #3282, rows can be told apart: each row shows the generated name over the id and task ref, the generated summary, the agent card with its source, the operator, status, replay grade, cost with basis, frames and started, and links to the Run page. Two stat tiles, Spend today, cache hit rate, the approvals panel with the mandate bar and the onboarding rail are live. The panel still only reads: approve and deny (resolve_approval, the one billable action) are not wired anywhere in the app, and no row carries tier, verdict or Done. P0 because Fleet is the day-one page and its one governed write is missing.",
       "gaps": [
         "Approve/deny dialog calling resolve_approval (WL-40) is absent; resolve_approval is not in capability-ui-map.json",
         "Halt/Cancel from the Fleet list (WL-41): dispatch_command is wired on the Run page only, not on a Fleet row",
@@ -66,6 +66,146 @@
           "number": 2953
         }
       ]
+    },
+    {
+      "id": "work-backlog",
+      "title": "Work",
+      "area": "workspace",
+      "route": "#/a-intel/core-platform/work",
+      "spec_path": "mockups/pages/work-backlog.md",
+      "scope_verdict": "new",
+      "built_status": "not-started",
+      "built_evidence": [],
+      "gap_summary": "New in the fleet operations wedge (2026-09-24). The backlog: every open work item from the connected providers, findings and people, with readiness, and the send to an agent or workflow. Nothing in macanderson/oxagen stores a work item, a work order, a workflow or an intake connection, and the app has no route under apps/app/src/app/[org]/[ws]/work (docs/fleet-operations-wedge.md, Work, Shipped today).",
+      "gaps": [
+        "No page and no route: #/:org/:ws/work does not exist in the build"
+      ],
+      "backend_gaps": [
+        "work item, work order, workflow and intake stores and their capabilities",
+        "a work order id on the run record (today the run's only link to work is the free-text taskRef)"
+      ],
+      "plan_lane": null,
+      "issue_links": []
+    },
+    {
+      "id": "work-intake",
+      "title": "Intake",
+      "area": "workspace",
+      "route": "#/a-intel/core-platform/work?intake=providers",
+      "spec_path": "mockups/pages/work-intake.md",
+      "scope_verdict": "new",
+      "built_status": "not-started",
+      "built_evidence": [],
+      "gap_summary": "New in the fleet operations wedge (2026-09-24). The Intake dialog: issue providers, the thirteen fields with statuses, resolutions and labels, and people mapping. Nothing in macanderson/oxagen stores a work item, a work order, a workflow or an intake connection, and the app has no route under apps/app/src/app/[org]/[ws]/work (docs/fleet-operations-wedge.md, Work, Shipped today).",
+      "gaps": [
+        "No page and no route: #/:org/:ws/work does not exist in the build"
+      ],
+      "backend_gaps": [
+        "work item, work order, workflow and intake stores and their capabilities",
+        "a work order id on the run record (today the run's only link to work is the free-text taskRef)"
+      ],
+      "plan_lane": null,
+      "issue_links": []
+    },
+    {
+      "id": "work-item",
+      "title": "Work item",
+      "area": "workspace",
+      "route": "#/a-intel/core-platform/work/items/tsk_01K5RS482Q",
+      "spec_path": "mockups/pages/work-item.md",
+      "scope_verdict": "new",
+      "built_status": "not-started",
+      "built_evidence": [],
+      "gap_summary": "New in the fleet operations wedge (2026-09-24). One work item: its source issue, the definition of done a person certifies, and the work orders that carry it. Nothing in macanderson/oxagen stores a work item, a work order, a workflow or an intake connection, and the app has no route under apps/app/src/app/[org]/[ws]/work (docs/fleet-operations-wedge.md, Work, Shipped today).",
+      "gaps": [
+        "No page and no route: #/:org/:ws/work does not exist in the build"
+      ],
+      "backend_gaps": [
+        "work item, work order, workflow and intake stores and their capabilities",
+        "a work order id on the run record (today the run's only link to work is the free-text taskRef)"
+      ],
+      "plan_lane": null,
+      "issue_links": []
+    },
+    {
+      "id": "work-orders",
+      "title": "Work orders",
+      "area": "workspace",
+      "route": "#/a-intel/core-platform/work/orders",
+      "spec_path": "mockups/pages/work-orders.md",
+      "scope_verdict": "new",
+      "built_status": "not-started",
+      "built_evidence": [],
+      "gap_summary": "New in the fleet operations wedge (2026-09-24). Every work order, dispatched and direct, with its latest run, claims and spend. Nothing in macanderson/oxagen stores a work item, a work order, a workflow or an intake connection, and the app has no route under apps/app/src/app/[org]/[ws]/work (docs/fleet-operations-wedge.md, Work, Shipped today).",
+      "gaps": [
+        "No page and no route: #/:org/:ws/work does not exist in the build"
+      ],
+      "backend_gaps": [
+        "work item, work order, workflow and intake stores and their capabilities",
+        "a work order id on the run record (today the run's only link to work is the free-text taskRef)"
+      ],
+      "plan_lane": null,
+      "issue_links": []
+    },
+    {
+      "id": "work-order",
+      "title": "Work order",
+      "area": "workspace",
+      "route": "#/a-intel/core-platform/work/orders/wo_01K5RS7M4N",
+      "spec_path": "mockups/pages/work-order.md",
+      "scope_verdict": "new",
+      "built_status": "not-started",
+      "built_evidence": [],
+      "gap_summary": "New in the fleet operations wedge (2026-09-24). One work order: the stage chain, the definition of done with claims and acceptance, the brief as sent, the SteeringFrames its send emitted, and its runs. Nothing in macanderson/oxagen stores a work item, a work order, a workflow or an intake connection, and the app has no route under apps/app/src/app/[org]/[ws]/work (docs/fleet-operations-wedge.md, Work, Shipped today).",
+      "gaps": [
+        "No page and no route: #/:org/:ws/work does not exist in the build"
+      ],
+      "backend_gaps": [
+        "work item, work order, workflow and intake stores and their capabilities",
+        "a work order id on the run record (today the run's only link to work is the free-text taskRef)"
+      ],
+      "plan_lane": null,
+      "issue_links": []
+    },
+    {
+      "id": "work-workflows",
+      "title": "Workflows",
+      "area": "workspace",
+      "route": "#/a-intel/core-platform/work/workflows",
+      "spec_path": "mockups/pages/work-workflows.md",
+      "scope_verdict": "new",
+      "built_status": "not-started",
+      "built_evidence": [],
+      "gap_summary": "New in the fleet operations wedge (2026-09-24). Workflows that chain agents and end with a person. Nothing in macanderson/oxagen stores a work item, a work order, a workflow or an intake connection, and the app has no route under apps/app/src/app/[org]/[ws]/work (docs/fleet-operations-wedge.md, Work, Shipped today).",
+      "gaps": [
+        "No page and no route: #/:org/:ws/work does not exist in the build"
+      ],
+      "backend_gaps": [
+        "work item, work order, workflow and intake stores and their capabilities",
+        "a work order id on the run record (today the run's only link to work is the free-text taskRef)"
+      ],
+      "plan_lane": null,
+      "issue_links": []
+    },
+    {
+      "id": "work-findings",
+      "title": "Findings",
+      "area": "workspace",
+      "route": "#/a-intel/core-platform/work/findings",
+      "spec_path": "mockups/pages/work-findings.md",
+      "scope_verdict": "new",
+      "built_status": "not-started",
+      "built_evidence": [],
+      "gap_summary": "New in the fleet operations wedge (2026-09-24). Findings with money behind them, each one a work item when a person picks it up. Nothing in macanderson/oxagen stores a work item, a work order, a workflow or an intake connection, and the app has no route under apps/app/src/app/[org]/[ws]/work (docs/fleet-operations-wedge.md, Work, Shipped today).",
+      "gaps": [
+        "No page and no route: #/:org/:ws/work does not exist in the build"
+      ],
+      "backend_gaps": [
+        "work item, work order, workflow and intake stores and their capabilities",
+        "a work order id on the run record (today the run's only link to work is the free-text taskRef)"
+      ],
+      "plan_lane": null,
+      "issue_links": []
     },
     {
       "id": "run",
@@ -99,7 +239,7 @@
         "packages/oxagen/src/contracts/run.export.ts",
         "packages/oxagen/src/contracts/tacho.command.dispatch.ts"
       ],
-      "gap_summary": "PR #3282 (WL-35, merged 2026-09-18) built the page: a header with the generated name and summary (summarize_run, feedback 4), the cost large with its basis (feedback 5), status and replay grade, the agent and operator cards, three tabs (Transcript at three zoom levels, Frames with a frame-body drawer, Cost), Pause, Resume, Steer and Cancel on live runs through dispatch_command, and Export and Summarize on sealed runs. 39 component tests, 15 control tests and 11 action tests prove it. Still missing: an approvals strip with approve and deny (no UI invokes resolve_approval), a stream (the page renders per request, no SSE route exists), the Proof, Policy, Chain and Done tabs, fork and bisect, and the <RunOutputs> spine. P0 stays because the flight recorder is the product's first sentence and half of it is in.",
+      "gap_summary": "Redesigned by the fleet operations wedge (2026-09-24): the Decision trace is the first tab, and Transcript, Cost and Evidence follow. Fork replay, bisect and the frame player are cut. PR #3282 (WL-35, merged 2026-09-18) built the page: a header with the generated name and summary (summarize_run, feedback 4), the cost large with its basis (feedback 5), status and replay grade, the agent and operator cards, three tabs (Transcript at three zoom levels, Frames with a frame-body drawer, Cost), Pause, Resume, Steer and Cancel on live runs through dispatch_command, and Export and Summarize on sealed runs. 39 component tests, 15 control tests and 11 action tests prove it. Still missing: an approvals strip with approve and deny (no UI invokes resolve_approval), a stream (the page renders per request, no SSE route exists), the Proof, Policy, Chain and Done tabs, fork and bisect, and the <RunOutputs> spine. P0 stays because the flight recorder is the product's first sentence and half of it is in.",
       "gaps": [
         "Approvals-on-this-run strip and approve/deny: resolve_approval is not bound in capability-ui-map.json and no UI calls it",
         "Live updates: no SSE or stream route under apps/app/src/app; the page renders per request and re-reads after a dialog",
@@ -157,7 +297,7 @@
         "apps/app/src/data/live/agents.ts",
         "packages/database/atlas/migrations/20260915013000_agent_identity_and_definition_of_record.sql"
       ],
-      "gap_summary": "The identities list is live over the agent identity and definition-of-record tables (ADR-057) with incidents. Trust/spend scores and percentiles were cut (#2969). The list lacks the mockup's score distribution and the New agent wizard entry. The mockup renamed the nav item and the page to Agents and dropped the tier-ladder panel when the agent ontology landed in #63 (docs/agent-ontology-ia.md); the build still says Agent IAM. The registry carries two column sets there, Composition and the rev1 Operations set, and the build has neither control nor the composition columns.",
+      "gap_summary": "Redesigned by the fleet operations wedge (2026-09-24): the tiles, Steer and Register agent from the Fleet page. The identities list is live over the agent identity and definition-of-record tables (ADR-057) with incidents. Trust/spend scores and percentiles were cut (#2969). The list lacks the mockup's score distribution and the New agent wizard entry. The mockup renamed the nav item and the page to Agents and dropped the tier-ladder panel when the agent ontology landed in #63 (docs/agent-ontology-ia.md); the build still says Agent IAM. The registry carries two column sets there, Composition and the rev1 Operations set, and the build has neither control nor the composition columns.",
       "gaps": [
         "Nav and page still read Agent IAM; the registry is the agent registry",
         "No Composition column set (Agent, Purpose, Owner, Steering, Toolbelt, Runtime, Principal, Health, Activity) and no control to choose it",
@@ -238,8 +378,8 @@
       "title": "Mandate",
       "area": "workspace",
       "route": "#/a-intel/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4",
-      "spec_path": "mockups/pages/mandate.md",
-      "scope_verdict": "keep",
+      "spec_path": "mockups/pages/agent-permissions.md",
+      "scope_verdict": "cut",
       "built_status": "not-started",
       "built_evidence": [
         "packages/oxagen/src/contracts/mandate.get.ts",
@@ -249,7 +389,7 @@
         "apps/app/src/ui/mandate-bar.tsx",
         "apps/app/src/features/tools/mandates-ledger.tsx"
       ],
-      "gap_summary": "The mandate store, ledger and every contract (get, grant, limits.update, list, request, revoke) exist (ADR-059), and the mandate bar and Tools ledger tab read them. The detail page /mandates/{mandate} itself was not added by #2957 and is still owed, so grant, revoke and limit edits have no UI.",
+      "gap_summary": "Cut by the fleet operations wedge (2026-09-24): every mandate is Delegation on the agent's Permissions tab, and the mandate route lands there (docs/fleet-operations-collapse.md). The mandate store, ledger and every contract (get, grant, limits.update, list, request, revoke) exist (ADR-059), and the mandate bar and Tools ledger tab read them. The detail page /mandates/{mandate} itself was not added by #2957 and is still owed, so grant, revoke and limit edits have no UI.",
       "gaps": [
         "The /{org}/{ws}/mandates/{mandate} route and page",
         "Grant, revoke and update-limits dialogs (contracts exist, no UI)",
@@ -325,7 +465,7 @@
         "docs/adr/ADR-097-steering-and-gating-are-two-planes-authored-on-one-surface-and-compiled-twice.md",
         "packages/database/atlas/migrations/20260915060000_steering_proposals_and_context_pr.sql"
       ],
-      "gap_summary": "Records, proposals and Context PRs tabs are live with open_context_pr, merge_context_pr and dismiss_proposal (ADR-061). Phase 0 merged on 2026-09-18 (#3289, ADR-091): the bundle's context.system now compiles every active must and should record, the etag moves when a record merges, and a wrapped Claude Code run receives it through the SessionStart hook. Issue #2592 stays open until a merged record is seen in a production run, and #3302 means a record published through publish_context_record (no kind or force) never reaches an agent. The six-phase plan is decided (#3294: ADR-093 one assembler, ADR-097 two planes). Phase 1 (one SteeringItem, assembleSteering, the steering.manifest frame, #3296) and Phase 2 (this page becomes the hub with seven tabs, #3297) are not started. Phase 2's shape is now decided in the mockup (the agent ontology landed in #63 (docs/agent-ontology-ia.md)): five tabs, not seven. Library holds Records, Skills, Memory and Ontology as shelves of one list, Assignments is new and says which agent receives what, Policy is renamed Gates because Tools has its own Policy tab, and Preview is renamed Compiler. Every rev1 route still resolves. The build has Records, Proposals and Context PRs and none of the five-tab shape.",
+      "gap_summary": "Redesigned by the fleet operations wedge (2026-09-24): Sources, Assignments, Compiler and Proposals replace the Library shelves, Gates and the skills console. Records, proposals and Context PRs tabs are live with open_context_pr, merge_context_pr and dismiss_proposal (ADR-061). Phase 0 merged on 2026-09-18 (#3289, ADR-091): the bundle's context.system now compiles every active must and should record, the etag moves when a record merges, and a wrapped Claude Code run receives it through the SessionStart hook. Issue #2592 stays open until a merged record is seen in a production run, and #3302 means a record published through publish_context_record (no kind or force) never reaches an agent. The six-phase plan is decided (#3294: ADR-093 one assembler, ADR-097 two planes). Phase 1 (one SteeringItem, assembleSteering, the steering.manifest frame, #3296) and Phase 2 (this page becomes the hub with seven tabs, #3297) are not started. Phase 2's shape is now decided in the mockup (the agent ontology landed in #63 (docs/agent-ontology-ia.md)): five tabs, not seven. Library holds Records, Skills, Memory and Ontology as shelves of one list, Assignments is new and says which agent receives what, Policy is renamed Gates because Tools has its own Policy tab, and Preview is renamed Compiler. Every rev1 route still resolves. The build has Records, Proposals and Context PRs and none of the five-tab shape.",
       "gaps": [
         "Library tab: one list with Records, Skills, Memory and Ontology as shelves, and one count both read",
         "Assignments tab: which agents receive which artifacts, and by what scope",
@@ -471,10 +611,10 @@
     },
     {
       "id": "record",
-      "title": "Context record",
+      "title": "Steering source",
       "area": "workspace",
-      "route": "#/a-intel/core-platform/steering/records/ctx.release.never-merge",
-      "spec_path": "mockups/pages/record.md",
+      "route": "#/a-intel/core-platform/steering/sources/record/ctx.release.never-merge",
+      "spec_path": "mockups/pages/steering-source.md",
       "scope_verdict": "thin",
       "built_status": "not-started",
       "built_evidence": [
@@ -482,7 +622,7 @@
         "apps/app/src/ui/record-card.tsx",
         "apps/app/src/data/contracts/steering.ts"
       ],
-      "gap_summary": "No route exists for one record. The kernel can read a record (context.records.get) and the six kinds are typed in the app (RECORD_KINDS), but the per-kind panel, the statement editor and the save-as-pull-request path are not built.",
+      "gap_summary": "Renamed by the fleet operations wedge (2026-09-24): a Steering record is one kind of Steering source, and its page is the Steering source page. No route exists for one record. The kernel can read a record (context.records.get) and the six kinds are typed in the app (RECORD_KINDS), but the per-kind panel, the statement editor and the save-as-pull-request path are not built.",
       "gaps": [
         "The /steering/records/{lineage} route",
         "Statement editor that opens a pull request",
@@ -514,7 +654,7 @@
         "packages/database/atlas/migrations/20260915020000_cost_price_book_and_rollups.sql",
         "packages/database/atlas/migrations/20260915201000_cost_findings.sql"
       ],
-      "gap_summary": "Findings, by operator, by agent, by tool, wasted spend and budgets tabs with the drill are live over the price book and rollup store (ADR-060, ADR-062), with set budget, record fix, dismiss finding and export statement. Proven spend prints as a figure but has no writer until the witness lands; the per-key drill export and finer budget periods wait on contracts.",
+      "gap_summary": "Redesigned by the fleet operations wedge (2026-09-24): Overview with one grouping and a side panel, Budgets and Optimization. Findings move to Work. Findings, by operator, by agent, by tool, wasted spend and budgets tabs with the drill are live over the price book and rollup store (ADR-060, ADR-062), with set budget, record fix, dismiss finding and export statement. Proven spend prints as a figure but has no writer until the witness lands; the per-key drill export and finer budget periods wait on contracts.",
       "gaps": [
         "Proven vs unproven and productive ratio stay null until witness verdicts are written (G7)",
         "Export this view from a drill (export_statement takes no key)",
@@ -535,8 +675,8 @@
       "title": "Skills",
       "area": "workspace",
       "route": "#/a-intel/core-platform/skills",
-      "spec_path": "mockups/pages/skills.md",
-      "scope_verdict": "new",
+      "spec_path": "mockups/pages/steering.md",
+      "scope_verdict": "cut",
       "built_status": "partial",
       "built_evidence": [
         "apps/app/src/app/[org]/[ws]/skills/page.tsx",
@@ -545,7 +685,7 @@
         "packages/oxagen/src/contracts/skill.list.ts",
         "docs/adr/ADR-090-oxagen-governs-skill-resolution.md"
       ],
-      "gap_summary": "One section is live: the skill names harness sessions reported at start (list_skills over tacho.sessions.skills_available). ADR-090 (#3284, 2026-09-18) reversed the 2026-09-15 narrowing: Oxagen governs skill resolution, skills ship off by default, the config of record is .oxagen/skills.toml through the repository binding, and Skills becomes a tab under Steering (ADR-097). The spec now lists W13 as adopted. Nothing of that is code yet: the resolution catalog, search, in-the-loop, reflection and versions tabs, the off-by-default gate, search_skills and every dialog have no store and render nothing.",
+      "gap_summary": "Cut by the fleet operations wedge (2026-09-24): skills are a source kind on Steering › Sources, the search is the Compiler, and the interjection stays in the Approvals drawer (docs/fleet-operations-collapse.md). One section is live: the skill names harness sessions reported at start (list_skills over tacho.sessions.skills_available). ADR-090 (#3284, 2026-09-18) reversed the 2026-09-15 narrowing: Oxagen governs skill resolution, skills ship off by default, the config of record is .oxagen/skills.toml through the repository binding, and Skills becomes a tab under Steering (ADR-097). The spec now lists W13 as adopted. Nothing of that is code yet: the resolution catalog, search, in-the-loop, reflection and versions tabs, the off-by-default gate, search_skills and every dialog have no store and render nothing.",
       "gaps": [
         "Resolution catalog with version, digest, load cost, proof rate and pinning",
         "Search, In the loop, Reflection and Versions tabs",
@@ -576,13 +716,13 @@
       "title": "Skills · off (the default)",
       "area": "workspace",
       "route": "#/a-intel/finops/skills",
-      "spec_path": "mockups/pages/skills-off.md",
-      "scope_verdict": "new",
+      "spec_path": "mockups/pages/steering.md",
+      "scope_verdict": "cut",
       "built_status": "not-started",
       "built_evidence": [
         "apps/app/src/features/skills/sections.tsx"
       ],
-      "gap_summary": "There is no skills.enabled workspace setting and no gate screen; the built Skills page shows the inventory regardless. Depends on the skills resolution store.",
+      "gap_summary": "Cut by the fleet operations wedge (2026-09-24): skills are a source kind on Steering › Sources, the search is the Compiler, and the interjection stays in the Approvals drawer (docs/fleet-operations-collapse.md). There is no skills.enabled workspace setting and no gate screen; the built Skills page shows the inventory regardless. Depends on the skills resolution store.",
       "gaps": [
         "skills.enabled = false as the created value and the turn-on explainer screen"
       ],
@@ -597,12 +737,12 @@
       "id": "skill-source",
       "title": "Skill source",
       "area": "workspace",
-      "route": "#/a-intel/core-platform/skills/a-intel.release-notes-from-prs/source",
-      "spec_path": "mockups/pages/skill-source.md",
+      "route": "#/a-intel/core-platform/steering/sources/skill/a-intel.release-notes-from-prs",
+      "spec_path": "mockups/pages/steering-source-skill.md",
       "scope_verdict": "new",
       "built_status": "not-started",
       "built_evidence": [],
-      "gap_summary": "No route and no skill index. The SKILL.md editor with version bump and pull request depends entirely on a skill store and the repo binding.",
+      "gap_summary": "Renamed by the fleet operations wedge (2026-09-24): the skill's Steering source page, with its bundle and entrypoints as capability descriptors. No route and no skill index. The SKILL.md editor with version bump and pull request depends entirely on a skill store and the repo binding.",
       "gaps": [
         "The /skills/{id}/source route and editor",
         "Version bump and digest recompute on the pull request"
@@ -1193,7 +1333,7 @@
       "id": "wizard-skill",
       "title": "Wizard · Add a skill",
       "area": "wizard",
-      "route": "#/a-intel/core-platform/skills (Add a skill)",
+      "route": "#/a-intel/core-platform/steering (New source)",
       "spec_path": "docs/creation-spec.md",
       "scope_verdict": "new",
       "built_status": "not-started",
@@ -1215,7 +1355,7 @@
       "id": "wizard-record",
       "title": "Wizard · Write a context record",
       "area": "wizard",
-      "route": "#/a-intel/core-platform/steering (Write a context record)",
+      "route": "#/a-intel/core-platform/steering (New source)",
       "spec_path": "docs/creation-spec.md",
       "scope_verdict": "new",
       "built_status": "not-started",
@@ -2155,26 +2295,111 @@
     "org": "a-intel",
     "pages": [
       {
-        "id": "fleet",
-        "title": "Fleet",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform",
+        "id": "work-backlog",
+        "title": "Backlog",
+        "group": "Work",
+        "hash": "#/a-intel/core-platform/work",
         "states": [
-          "loaded",
-          "empty",
-          "loading",
-          "error",
-          "denied"
+          "loaded"
+        ]
+      },
+      {
+        "id": "work-intake",
+        "title": "Intake",
+        "group": "Work",
+        "hash": "#/a-intel/core-platform/work?intake=providers",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "work-item",
+        "title": "Work item",
+        "group": "Work",
+        "hash": "#/a-intel/core-platform/work/items/tsk_01K5RS482Q",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "work-orders",
+        "title": "Work orders",
+        "group": "Work",
+        "hash": "#/a-intel/core-platform/work/orders",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "work-order",
+        "title": "Work order",
+        "group": "Work",
+        "hash": "#/a-intel/core-platform/work/orders/wo_01K5RS7M4N",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "work-workflows",
+        "title": "Workflows",
+        "group": "Work",
+        "hash": "#/a-intel/core-platform/work/workflows",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "work-findings",
+        "title": "Findings",
+        "group": "Work",
+        "hash": "#/a-intel/core-platform/work/findings",
+        "states": [
+          "loaded"
         ]
       },
       {
         "id": "run",
-        "title": "Run",
-        "group": "Workspace",
+        "title": "Decision trace",
+        "group": "Runs",
         "hash": "#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW",
         "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "run-transcript",
+        "title": "Transcript",
+        "group": "Runs",
+        "hash": "#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW/transcript",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "run-cost",
+        "title": "Cost",
+        "group": "Runs",
+        "hash": "#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW/cost",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "run-evidence",
+        "title": "Evidence",
+        "group": "Runs",
+        "hash": "#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW/evidence",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "run-interjection",
+        "title": "Held for an answer",
+        "group": "Runs",
+        "hash": "#/a-intel/core-platform/runs/run_01K6QW3D5N7TYBA2",
+        "states": [
           "loaded",
-          "empty",
           "loading",
           "error",
           "denied"
@@ -2183,20 +2408,16 @@
       {
         "id": "agents",
         "title": "Agents",
-        "group": "Workspace",
+        "group": "Agents",
         "hash": "#/a-intel/core-platform/agents",
         "states": [
-          "loaded",
-          "empty",
-          "loading",
-          "error",
-          "denied"
+          "loaded"
         ]
       },
       {
         "id": "agent",
-        "title": "Agent",
-        "group": "Workspace",
+        "title": "Overview",
+        "group": "Agents",
         "hash": "#/a-intel/core-platform/agents/triage",
         "states": [
           "loaded",
@@ -2207,10 +2428,10 @@
         ]
       },
       {
-        "id": "agent-toolbelt",
-        "title": "Agent · Toolbelt",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/agents/triage/toolbelt",
+        "id": "agent-identity",
+        "title": "Identity",
+        "group": "Agents",
+        "hash": "#/a-intel/core-platform/agents/triage/identity",
         "states": [
           "loaded",
           "loading",
@@ -2220,9 +2441,18 @@
       },
       {
         "id": "agent-steering",
-        "title": "Agent · Steering",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/agents/triage/steering",
+        "title": "Steering",
+        "group": "Agents",
+        "hash": "#/a-intel/core-platform/agents/release-manager/steering",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "agent-toolbelt",
+        "title": "Toolbelt",
+        "group": "Agents",
+        "hash": "#/a-intel/core-platform/agents/triage/toolbelt",
         "states": [
           "loaded",
           "loading",
@@ -2232,8 +2462,8 @@
       },
       {
         "id": "agent-runtime",
-        "title": "Agent · Runtime",
-        "group": "Workspace",
+        "title": "Runtime",
+        "group": "Agents",
         "hash": "#/a-intel/core-platform/agents/triage/runtime",
         "states": [
           "loaded",
@@ -2244,57 +2474,35 @@
       },
       {
         "id": "agent-permissions",
-        "title": "Agent · Permissions",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/agents/triage/permissions",
+        "title": "Permissions",
+        "group": "Agents",
+        "hash": "#/a-intel/finops/agents/invoice-bot/permissions",
         "states": [
-          "loaded",
-          "loading",
-          "error",
-          "denied"
+          "loaded"
         ]
       },
       {
         "id": "agent-activity",
-        "title": "Agent · Activity",
-        "group": "Workspace",
+        "title": "Activity",
+        "group": "Agents",
         "hash": "#/a-intel/core-platform/agents/triage/activity",
         "states": [
-          "loaded",
-          "loading",
-          "error",
-          "denied"
+          "loaded"
         ]
       },
       {
         "id": "agent-source",
-        "title": "Agent source",
-        "group": "Workspace",
+        "title": "Source",
+        "group": "Agents",
         "hash": "#/a-intel/core-platform/agents/release-manager/source",
         "states": [
-          "loaded",
-          "loading",
-          "error",
-          "denied"
-        ]
-      },
-      {
-        "id": "mandate",
-        "title": "Mandate",
-        "group": "Workspace",
-        "hash": "#/a-intel/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4",
-        "states": [
-          "loaded",
-          "empty",
-          "loading",
-          "error",
-          "denied"
+          "loaded"
         ]
       },
       {
         "id": "tools",
         "title": "Tools",
-        "group": "Workspace",
+        "group": "Tools",
         "hash": "#/a-intel/core-platform/tools",
         "states": [
           "loaded",
@@ -2305,9 +2513,9 @@
         ]
       },
       {
-        "id": "toolbelts",
-        "title": "Tools · Toolbelts",
-        "group": "Workspace",
+        "id": "tools-toolbelts",
+        "title": "Toolbelts",
+        "group": "Tools",
         "hash": "#/a-intel/core-platform/tools/toolbelts",
         "states": [
           "loaded",
@@ -2318,9 +2526,9 @@
         ]
       },
       {
-        "id": "providers",
-        "title": "Tools · Providers",
-        "group": "Workspace",
+        "id": "tools-providers",
+        "title": "Providers",
+        "group": "Tools",
         "hash": "#/a-intel/core-platform/tools/providers",
         "states": [
           "loaded",
@@ -2331,113 +2539,98 @@
         ]
       },
       {
+        "id": "tools-policy",
+        "title": "Policy",
+        "group": "Tools",
+        "hash": "#/a-intel/core-platform/tools/policy",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "tools-switches",
+        "title": "Kill switches",
+        "group": "Tools",
+        "hash": "#/a-intel/core-platform/tools/switches",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
         "id": "steering",
-        "title": "Steering · Library",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/steering/library",
+        "title": "Sources",
+        "group": "Steering",
+        "hash": "#/a-intel/core-platform/steering",
         "states": [
-          "loaded",
-          "empty",
-          "loading",
-          "error",
-          "denied"
+          "loaded"
         ]
       },
       {
-        "id": "steering-records",
-        "title": "Steering · Library · Records",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/steering/records",
+        "id": "steering-source",
+        "title": "Steering record",
+        "group": "Steering",
+        "hash": "#/a-intel/core-platform/steering/sources/record/ctx.release.notes-format",
         "states": [
-          "loaded",
-          "empty",
-          "loading",
-          "error",
-          "denied"
+          "loaded"
         ]
       },
       {
-        "id": "steering-memory",
-        "title": "Steering · Library · Memory",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/steering/memory",
+        "id": "steering-source-skill",
+        "title": "Skill",
+        "group": "Steering",
+        "hash": "#/a-intel/core-platform/steering/sources/skill/a-intel.release-notes-from-prs",
         "states": [
-          "loaded",
-          "empty",
-          "loading",
-          "error",
-          "denied"
-        ]
-      },
-      {
-        "id": "steering-ontology",
-        "title": "Steering · Library · Ontology",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/steering/ontology",
-        "states": [
-          "loaded",
-          "empty",
-          "loading",
-          "error",
-          "denied"
+          "loaded"
         ]
       },
       {
         "id": "steering-assignments",
-        "title": "Steering · Assignments",
-        "group": "Workspace",
+        "title": "Assignments",
+        "group": "Steering",
         "hash": "#/a-intel/core-platform/steering/assignments",
         "states": [
-          "loaded",
-          "empty",
-          "loading",
-          "error",
-          "denied"
-        ]
-      },
-      {
-        "id": "steering-gates",
-        "title": "Steering · Gates",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/steering/gates",
-        "states": [
-          "loaded",
-          "empty",
-          "loading",
-          "error",
-          "denied"
-        ]
-      },
-      {
-        "id": "steering-proposals",
-        "title": "Steering · Proposals",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/steering/proposals",
-        "states": [
-          "loaded",
-          "empty",
-          "loading",
-          "error",
-          "denied"
+          "loaded"
         ]
       },
       {
         "id": "steering-compiler",
-        "title": "Steering · Compiler",
-        "group": "Workspace",
+        "title": "Compiler",
+        "group": "Steering",
         "hash": "#/a-intel/core-platform/steering/compiler/release-manager",
         "states": [
-          "loaded",
-          "empty",
-          "loading",
-          "error",
-          "denied"
+          "loaded"
+        ]
+      },
+      {
+        "id": "steering-proposals",
+        "title": "Proposals",
+        "group": "Steering",
+        "hash": "#/a-intel/core-platform/steering/proposals",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "steering-prs",
+        "title": "Pull requests",
+        "group": "Steering",
+        "hash": "#/a-intel/core-platform/steering/proposals/prs",
+        "states": [
+          "loaded"
         ]
       },
       {
         "id": "runtimes",
         "title": "Runtimes",
-        "group": "Workspace",
+        "group": "Runtimes",
         "hash": "#/a-intel/core-platform/runtimes",
         "states": [
           "loaded",
@@ -2450,7 +2643,7 @@
       {
         "id": "runtime",
         "title": "Runtime",
-        "group": "Workspace",
+        "group": "Runtimes",
         "hash": "#/a-intel/core-platform/runtimes/mbell-mbp-16",
         "states": [
           "loaded",
@@ -2460,9 +2653,36 @@
         ]
       },
       {
+        "id": "spend",
+        "title": "Overview",
+        "group": "Spend",
+        "hash": "#/a-intel/core-platform/spend",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "spend-budgets",
+        "title": "Budgets",
+        "group": "Spend",
+        "hash": "#/a-intel/core-platform/spend/budgets",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
+        "id": "spend-optimization",
+        "title": "Optimization",
+        "group": "Spend",
+        "hash": "#/a-intel/core-platform/spend/optimization",
+        "states": [
+          "loaded"
+        ]
+      },
+      {
         "id": "repositories",
         "title": "Repositories",
-        "group": "Workspace",
+        "group": "Repositories",
         "hash": "#/a-intel/core-platform/repositories",
         "states": [
           "loaded",
@@ -2473,22 +2693,10 @@
         ]
       },
       {
-        "id": "record",
-        "title": "Context record",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/steering/records/ctx.release.never-merge",
-        "states": [
-          "loaded",
-          "loading",
-          "error",
-          "denied"
-        ]
-      },
-      {
-        "id": "spend",
-        "title": "Spend",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/spend",
+        "id": "repositories-copies",
+        "title": "Working copies",
+        "group": "Repositories",
+        "hash": "#/a-intel/core-platform/repositories/copies",
         "states": [
           "loaded",
           "empty",
@@ -2498,10 +2706,10 @@
         ]
       },
       {
-        "id": "skills",
-        "title": "Steering · Library · Skills",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/steering/skills",
+        "id": "repositories-changes",
+        "title": "Changes",
+        "group": "Repositories",
+        "hash": "#/a-intel/core-platform/repositories/changes",
         "states": [
           "loaded",
           "empty",
@@ -2511,36 +2719,34 @@
         ]
       },
       {
-        "id": "skills-off",
-        "title": "Steering · Library · Skills · off (the default)",
-        "group": "Workspace",
-        "hash": "#/a-intel/finops/steering/skills",
+        "id": "repositories-config",
+        "title": "Configuration",
+        "group": "Repositories",
+        "hash": "#/a-intel/core-platform/repositories/config",
+        "states": [
+          "loaded",
+          "empty",
+          "loading",
+          "error",
+          "denied"
+        ]
+      },
+      {
+        "id": "approvals-drawer",
+        "title": "Approvals",
+        "group": "Drawers",
+        "hash": "#/a-intel/core-platform/work",
         "states": [
           "loaded"
         ]
       },
       {
-        "id": "skill-source",
-        "title": "Skill source",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/steering/skills/a-intel.release-notes-from-prs/source",
+        "id": "stella-drawer",
+        "title": "Stella",
+        "group": "Drawers",
+        "hash": "#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW",
         "states": [
-          "loaded",
-          "loading",
-          "error",
-          "denied"
-        ]
-      },
-      {
-        "id": "run-interjection",
-        "title": "Run · interjection",
-        "group": "Workspace",
-        "hash": "#/a-intel/core-platform/runs/run_01K6QW3D5N7TYBA2",
-        "states": [
-          "loaded",
-          "loading",
-          "error",
-          "denied"
+          "loaded"
         ]
       },
       {
@@ -2788,12 +2994,6 @@
         "title": "Money Asked, A Human Answered"
       },
       {
-        "n": 4,
-        "id": "flight-recorder",
-        "ws": "core-platform",
-        "title": "Oxagen Flight Recorder"
-      },
-      {
         "n": 6,
         "id": "learned-approved-changed",
         "ws": "core-platform",
@@ -2822,12 +3022,6 @@
         "id": "the-account",
         "ws": "core-platform",
         "title": "The Account"
-      },
-      {
-        "n": 13,
-        "id": "in-the-loop",
-        "ws": "core-platform",
-        "title": "In the Loop"
       }
     ]
   },

@@ -695,7 +695,7 @@ Written here ───┘                           │
 </table></div>
 <p>The assembler checks each frame's hash against its source version before it delivers the frame. A mismatch excludes the frame as <code>steering_drift</code> and raises the incident of spec §10.2.</p>
 <h3 id="wedge/exclusion-reasons">Exclusion reasons</h3>
-<p>The closed vocabulary of spec §10.5, with <code>tier</code> from today's manifest and <code>unapproved_digest</code> from skill resolution.</p>
+<p>The closed vocabulary of spec §10.5, with <code>tier</code> from today's manifest, <code>unapproved_digest</code> from skill resolution and <code>overridden_by_must</code> from the assembler's precedence rule.</p>
 <div class="tw"><table>
 <thead>
 <tr>
@@ -759,6 +759,11 @@ Written here ───┘                           │
 <td><code>source_unavailable</code></td>
 <td>Its source did not answer in time</td>
 <td>No</td>
+</tr>
+<tr>
+<td><code>overridden_by_must</code></td>
+<td>A published <code>must</code> outranks recalled memory on the same concern</td>
+<td>No. Today's manifest has no reason for it</td>
 </tr>
 <tr>
 <td><code>unapproved_digest</code></td>
@@ -1336,6 +1341,12 @@ Written here ───┘                           │
 <td>Work, Backlog</td>
 <td><code>#/a-intel/core-platform/work</code></td>
 <td><code>work-backlog.md</code></td>
+</tr>
+<tr>
+<td><code>work-intake</code></td>
+<td>Work, Intake dialog</td>
+<td><code>#/a-intel/core-platform/work?intake=providers</code></td>
+<td><code>work-intake.md</code></td>
 </tr>
 <tr>
 <td><code>work-item</code></td>
@@ -2182,7 +2193,7 @@ Written here ───┘                           │
 <header class="mast">
   <p class="eyebrow">Oxagen · Deletion list</p>
   <h1>Fleet operations deletion list</h1>
-  <dl class="facts"><dt>Status</dt><dd>Draft for review. Updated as the mockup change lands</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Design authority</dt><dd><code>fleet-operations-wedge.md</code></dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Proposed with the mockup change</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Design authority</dt><dd><code>fleet-operations-wedge.md</code></dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#collapse/surfaces">Surfaces</a></li><li><a href="#collapse/page-specs-stories-and-scenarios">Page specs, stories and scenarios</a></li><li><a href="#collapse/in-the-app">In the app</a></li></ol></nav>
@@ -2291,9 +2302,225 @@ Written here ───┘                           │
 </tbody>
 </table></div>
 <h2 id="collapse/page-specs-stories-and-scenarios">Page specs, stories and scenarios</h2>
-<p>Filled in with the file lists when the mockup change lands.</p>
+<h3 id="collapse/page-specs">Page specs</h3>
+<p>Each deleted spec's content that still holds moved into the spec that replaces it. The audit prompt
+beside each deleted spec is deleted with it.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Deleted spec</th>
+<th>Replaced by</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>mockups/pages/fleet.md</code></td>
+<td><code>work-backlog.md</code>, <code>work-orders.md</code> (first run) and <code>agents.md</code> (tiles, Steer, Register agent)</td>
+</tr>
+<tr>
+<td><code>mockups/pages/tasks.md</code></td>
+<td><code>work-backlog.md</code>, <code>work-orders.md</code>, <code>work-workflows.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/tasks-providers.md</code></td>
+<td><code>work-intake.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/task.md</code></td>
+<td><code>work-item.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/mandate.md</code></td>
+<td><code>agent-permissions.md</code> (Delegation)</td>
+</tr>
+<tr>
+<td><code>mockups/pages/skills.md</code>, <code>skills-off.md</code></td>
+<td><code>steering.md</code> (Sources, kind skill), <code>steering-compiler.md</code>, <code>run-interjection.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/skill-source.md</code></td>
+<td><code>steering-source-skill.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/record.md</code></td>
+<td><code>steering-source.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/steering-records.md</code>, <code>steering-memory.md</code>, <code>steering-ontology.md</code></td>
+<td><code>steering.md</code> (Sources) and <code>steering-source.md</code></td>
+</tr>
+<tr>
+<td><code>mockups/pages/steering-gates.md</code></td>
+<td><code>tools-policy.md</code>, and policy sources on <code>steering.md</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>New specs, one per unique view (<code>fleet-operations-ia.md</code>, Unique views): <code>work-backlog</code>, <code>work-intake</code>,
+<code>work-item</code>, <code>work-orders</code>, <code>work-workflows</code>, <code>work-findings</code>, <code>run-transcript</code>, <code>run-cost</code>,
+<code>run-evidence</code>, <code>approvals-drawer</code>, <code>stella-drawer</code>, <code>agent-identity</code>, <code>agent-steering</code>,
+<code>agent-toolbelt</code>, <code>agent-runtime</code>, <code>agent-permissions</code>, <code>agent-activity</code>, <code>tools-toolbelts</code>,
+<code>tools-providers</code>, <code>tools-policy</code>, <code>tools-switches</code>, <code>steering-source</code>, <code>steering-source-skill</code>,
+<code>steering-prs</code>, <code>runtime</code>, <code>spend-budgets</code>, <code>spend-optimization</code>, <code>repositories-copies</code>,
+<code>repositories-changes</code> and <code>repositories-config</code>. Rewritten: <code>run</code>, <code>run-interjection</code>, <code>agents</code>,
+<code>agent</code>, <code>agent-source</code>, <code>work-order</code>, <code>tools</code>, <code>steering</code>, <code>steering-assignments</code>,
+<code>steering-compiler</code>, <code>steering-proposals</code>, <code>runtimes</code>, <code>spend</code> and <code>repositories</code>.</p>
+<h3 id="collapse/stories">Stories</h3>
+<p><code>node tools/build-stories.mjs</code> removed the stories of every deleted page (<code>fleet</code>, <code>tasks</code>,
+<code>tasks-work-orders</code>, <code>tasks-workflows</code>, <code>tasks-providers</code>, <code>tasks-fields</code>, <code>tasks-people</code>, <code>task</code>,
+<code>mandate</code>, <code>toolbelts</code>, <code>providers</code>, <code>record</code>, <code>skills</code>, <code>skills-off</code>, <code>skill-source</code>,
+<code>steering-records</code>, <code>steering-memory</code>, <code>steering-ontology</code> and <code>steering-gates</code>) and of the two retired
+scenarios. It writes one story file per unique view. A redesigned view has a loaded story in each
+shell, and a view with future-only fields has a third story that outlines them.
+<code>mockups/stories/_view.js</code>, which every story imports and which was missing on <code>main</code>, is restored with
+<code>future</code> and <code>drawer</code> controls.</p>
+<h3 id="collapse/scenarios">Scenarios</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>W4 The flight recorder</td>
+<td>Retired. It walked the frame player, the Context tab, fork replay and bisect, all cut</td>
+</tr>
+<tr>
+<td>W13 In the loop</td>
+<td>Retired. It walked the skills console. The interjection it ended on stays in the Approvals drawer</td>
+</tr>
+<tr>
+<td>W1 Sixty seconds to governed</td>
+<td>Step 6 lands on Work, on the smoke run's direct work order</td>
+</tr>
+<tr>
+<td>W2 Stop it, steer it</td>
+<td>Opens on the work order, reads the steer as an <code>invocation</code> frame in the Decision trace, and steers the fleet from Agents</td>
+</tr>
+<tr>
+<td>W3 Money asked, a human answered</td>
+<td>Answers from the Approvals drawer, reads the mandate as Delegation and as a <code>delegation</code> frame</td>
+</tr>
+<tr>
+<td>W6 Learned, approved, changed</td>
+<td>Walks Sources, the pull request, the Compiler and the Decision trace</td>
+</tr>
+<tr>
+<td>W8 Every dollar, every operator</td>
+<td>Groups spend by work order, operator and agent, reads operator habits, and picks up a finding in Work</td>
+</tr>
+<tr>
+<td>W11 Whose account it is</td>
+<td>Opens from Work</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="collapse/fixtures-and-code">Fixtures and code</h3>
+<ul>
+<li>Deleted fixtures: <code>sk-created.json</code>, <code>sk-hist.json</code>, <code>sk-queries.json</code> and <code>sk-reflect.json</code>, read only
+by the skills console.</li>
+<li>Added fixtures: <code>sources.json</code> (the registration, documents, skill bundles, withheld skills and a run's
+skill resolution). <code>tasks.json</code> gained a dispatched work order, its work item and a work item opened
+from a finding. <code>transcripts.json</code> gained the live release run's <code>TodoWrite</code> plan versions and an
+<code>oxagen__report_status</code> call.</li>
+<li><code>mockups/src/wedge.js</code> holds the new views and <code>mockups/src/boot.js</code> the first render.
+<code>tools/build-mockup.mjs</code> appends both to <code>engine.js</code>.</li>
+<li>119 functions and 17 variables left <code>mockups/src/engine.js</code> once nothing reached them: the Fleet
+page, the Tasks list, the mandate page, the skills console and reflection, the Library shelves and
+the Memory, Ontology and Gates tabs, the old Compiler, the spend drill pages and coaching severity,
+the frame player, fork replay, bisect and the transcript playback.</li>
+</ul>
 <h2 id="collapse/in-the-app">In the app</h2>
-<p>Filled in with the lane's list when the mockup change lands.</p>
+<p>What a lane that builds the wedge in <code>macanderson/oxagen</code> deletes, merges or adds. Read <code>DEREGISTERED.md</code>
+first: a feature taken off the surfaces whose code stays is registered there, and its files are not
+deleted without an ADR. Every route change keeps the old address working (<code>fleet-operations-routes.md</code>).</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Lane or path</th>
+<th>Action</th>
+<th>Into</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>apps/app/src/app/[org]/[ws]/(fleet)</code> and <code>apps/app/src/features/fleet/</code></td>
+<td>Merge</td>
+<td>Work becomes the workspace root. <code>stat-strip</code> tiles and <code>steer-fleet</code> move to Agents. The runs table becomes each work order's Runs panel. <code>approval-decision</code> stays with the Approvals drawer</td>
+</tr>
+<tr>
+<td><code>apps/app/src/features/spend/fleet-tiles.tsx</code></td>
+<td>Move</td>
+<td>The Agents tiles</td>
+</tr>
+<tr>
+<td><code>apps/app/src/app/[org]/[ws]/mandates/[mandate]</code> and <code>apps/app/src/features/mandate/</code></td>
+<td>Merge</td>
+<td>Agent › Permissions › Delegation. The route redirects to <code>agents/{agent}/permissions?delegation={mandate}</code></td>
+</tr>
+<tr>
+<td><code>apps/app/src/app/[org]/[ws]/skills</code> and <code>apps/app/src/features/skills/</code> (console, search, versions)</td>
+<td>Merge</td>
+<td>Sources, kind skill, and the skill's source page. The interjection stays</td>
+</tr>
+<tr>
+<td><code>apps/app/src/features/steering/</code> (shelves, library, memory shelf, records shelf, deliveries, freshness)</td>
+<td>Merge</td>
+<td>Sources, Assignments, Compiler and Proposals. Freshness and the gate settings move to Tools › Policy</td>
+</tr>
+<tr>
+<td><code>apps/app/src/features/record/</code></td>
+<td>Rename</td>
+<td>The Steering source page, kind <code>record</code></td>
+</tr>
+<tr>
+<td><code>apps/app/src/features/run/</code> (<code>frame-player.tsx</code>, <code>player-bar.tsx</code>, <code>player-model.ts</code>, <code>player-hues.ts</code>, <code>replay-actions.tsx</code>, <code>timeline.tsx</code>, <code>policy-tab.tsx</code>, <code>context-tab.tsx</code>, <code>issues-tab.tsx</code>)</td>
+<td>Merge or delete</td>
+<td>The Decision trace and Evidence. The player, replay and bisect are cut</td>
+</tr>
+<tr>
+<td><code>apps/app/src/features/spend/</code> (<code>drill.tsx</code>, <code>coaching.tsx</code>, <code>findings*.tsx</code>)</td>
+<td>Merge or move</td>
+<td>The Overview side panel and Optimization. Findings move to Work</td>
+</tr>
+<tr>
+<td><code>apps/app/src/shared/safe-path.ts</code></td>
+<td>Change</td>
+<td>The route builders in <code>fleet-operations-routes.md</code></td>
+</tr>
+<tr>
+<td><code>apps/app/e2e/routes.ts</code></td>
+<td>Change</td>
+<td>The page-load route table follows the new routes. The suite keeps exactly <code>login</code>, <code>pay</code> and <code>page-load</code></td>
+</tr>
+<tr>
+<td><code>apps/app/capability-ui-map.json</code></td>
+<td>Change</td>
+<td>Bindings for the moved controls, checked by <code>pnpm check:ui-parity</code></td>
+</tr>
+<tr>
+<td><code>apps/app/messages/</code> and <code>src/i18n/messages.d.ts</code></td>
+<td>Change</td>
+<td>The new strings, regenerated with <code>pnpm --filter @oxagen/app gen:messages</code></td>
+</tr>
+<tr>
+<td>New: work items, work orders, workflows and intake</td>
+<td>Add</td>
+<td>Contracts, handlers and stores. Every Work view is future-only until they ship</td>
+</tr>
+<tr>
+<td>New: frame types and per-frame provenance on <code>steering.manifest</code>, and a Compiler capability</td>
+<td>Add</td>
+<td>The Decision trace envelope and the Compiler (#3879)</td>
+</tr>
+<tr>
+<td>New: <code>report_status</code></td>
+<td>Add</td>
+<td>Self-reported uncertainty in the Decision trace</td>
+</tr>
+</tbody>
+</table></div>
 
 <footer class="colophon"><span>Oxagen · Deletion list</span><span>Source: <code>docs/fleet-operations-collapse.md</code></span></footer>
 </main>

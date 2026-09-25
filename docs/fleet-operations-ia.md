@@ -145,6 +145,7 @@ Every unique view has a page spec in `mockups/pages/` and a loaded story in Stor
 | Id | View | Mockup route | Spec |
 |---|---|---|---|
 | `work-backlog` | Work, Backlog | `#/a-intel/core-platform/work` | `work-backlog.md` |
+| `work-intake` | Work, Intake dialog | `#/a-intel/core-platform/work?intake=providers` | `work-intake.md` |
 | `work-item` | Work item | `#/a-intel/core-platform/work/items/tsk_01K5RS482Q` | `work-item.md` |
 | `work-orders` | Work, Work orders | `#/a-intel/core-platform/work/orders` | `work-orders.md` |
 | `work-order` | Work order | `#/a-intel/core-platform/work/orders/wo_01K5RS7M4N` | `work-order.md` |

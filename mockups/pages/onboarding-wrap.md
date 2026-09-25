@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/welcome/wrap` |
 | Scope | onboarding gate |
-| Spec | §14 Mission Control; Appendix F onboarding (the gate) |
+| Spec | §14; Appendix F onboarding (the gate) |
 | Design | `mockups/src/engine.js` → `pWelcome(r) → regWrap()` in onboard mode, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · access denied |
 | Storybook | `Oxagen / … / onboarding-wrap`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
@@ -37,14 +37,14 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## Functionality
 
 - Identical to `register-wrap.md`. **Download for <OS>** records the harness, toasts “Signed installer for <OS> downloaded with the one-time token embedded.”, and moves to Start a run. **I have already installed it — continue** moves there without changing the harness.
-- **Back** returns to Name the organization, not to an agent name step. Either Cancel (`obExit`) clears the onboarding state and goes to Fleet.
+- **Back** returns to Name the organization, not to an agent name step. Either Cancel (`obExit`) clears the onboarding state and goes to Work.
 - The tier ladder shows all four tiers as real: `harness` for this agent, `gateway` and `contained` as the next rungs, and `observe` as the fallback for a Codex CLI without an approval hook.
 
 ## States
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell), Claude Code tab and macOS selected.
 - **loading**: the shell and the rail stay. The card is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
-- **access denied**: “You cannot see onboarding”, then “Your roles on Anderson Intelligence Corp. do not include `org.create for marcus@a-intel.example`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Fleet**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “org.create for marcus@a-intel.example”, *Decided by* “pol_v41 · deny wins over every allow”.
+- **access denied**: “You cannot see onboarding”, then “Your roles on Anderson Intelligence Corp. do not include `org.create for marcus@a-intel.example`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Work**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “org.create for marcus@a-intel.example”, *Decided by* “pol_v41 · deny wins over every allow”.
 
 ## Mobile
 

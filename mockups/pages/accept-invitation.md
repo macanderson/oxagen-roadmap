@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/welcome/invite` |
 | Scope | auth |
-| Spec | §14 Mission Control; Appendix F sign-in flows |
+| Spec | §14; Appendix F sign-in flows |
 | Design | `mockups/src/engine.js` → `pWelcome(r) → obInvite()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
 | Storybook | `Oxagen / … / accept-invitation`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
@@ -36,7 +36,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- **Accept invitation** (`obSignedIn`) signs in and lands on Fleet with the toast “Signed in as Marcus Bell. The session is recorded like any other governed action.”
+- **Accept invitation** (`obSignedIn`) signs in and lands on Work with the toast “Signed in as Marcus Bell. The session is recorded like any other governed action.”
 - **Decline** toasts “Invitation declined. The inviter is told; nothing else changes.”
 - Not you? goes to Log in so the invited address can sign in.
 

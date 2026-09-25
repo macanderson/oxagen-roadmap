@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/welcome/two-factor` |
 | Scope | auth |
-| Spec | §14 Mission Control; Appendix F sign-in flows |
+| Spec | §14; Appendix F sign-in flows |
 | Design | `mockups/src/engine.js` → `pWelcome(r) → obTwoFactor()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error |
 | Storybook | `Oxagen / … / two-factor`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
@@ -35,7 +35,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Submit (`obSignedIn`) signs in and lands on Fleet with the toast “Signed in as Marcus Bell. The session is recorded like any other governed action.”
+- Submit (`obSignedIn`) signs in and lands on Work with the toast “Signed in as Marcus Bell. The session is recorded like any other governed action.”
 - **Use a recovery code instead** toasts “Recovery codes are single use. 8 of 10 remain.”
 - The expiry countdown shows how long the current code stays valid. Three wrong codes lock the account for 15 minutes.
 

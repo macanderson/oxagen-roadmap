@@ -1,4 +1,4 @@
-# Mission Control mockup
+# Oxagen mockup
 
 The authoritative design of rev1: what the product has to have, to the spec, every last detail.
 It is the first mockup rebuilt as the product looks when every phase of the plan has shipped,
@@ -13,13 +13,45 @@ rev1 is measured against.
 - `npm run storybook` serves it at `/missioncontrol.html` from the sources on every request.
 - `node tools/check-mockup.mjs` runs the headless checks over every page, state, shell and scenario.
 
-The URL contract: `?debug=true`, `?state=`, `?mobile=`, `?theme=` and the `#/a-intel/...`
-routes. `mockups/catalog.mjs` lists every page and scenario.
+The URL contract: `?debug=true`, `?state=`, `?mobile=`, `?theme=`, `?future=1` (outline every field
+no contract carries today), `?drawer=approvals|stella` and the `#/a-intel/...` routes, which take a
+query of their own (`#/a-intel/core-platform/spend?by=operator&key=marcus`). `mockups/catalog.mjs`
+lists every unique view and scenario.
 
 The file opens as the product. The mockup chrome — the state bar, the scenario rail, the
 scenario nav item, the onboarding demo entry points and Exit demo — appears only under
 `?debug=true`, so a reviewer's first open shows the design and nothing else. `?product=1` is
 the old spelling of the same default and still works.
+
+## The fleet operations wedge (2026-09-24)
+
+`docs/fleet-operations-wedge.md` is the design authority, `docs/fleet-operations-ia.md` the
+navigation and the unique views, `docs/fleet-operations-routes.md` the old routes and where they
+land, and `docs/fleet-operations-collapse.md` what was deleted or merged. Where the sections below
+this one describe an earlier state, this section wins.
+
+- **Work is primary.** The workspace opens on Work: Backlog, Work orders, Workflows and Findings. A
+  run is a child record of one work order. A run started outside Oxagen is filed under a direct work
+  order. The Fleet page and the Tasks page are gone; their tiles moved to Agents and Work, and
+  Providers, Fields and People are the Intake dialog on Backlog.
+- **The Decision trace** is a run's first tab: the envelope of SteeringFrames it received by
+  injection point and type, the exclusions with their reasons, the calls it chose, its frames, plan
+  changes and self-reported uncertainty when the record holds them, and the evidence. It reads the
+  record and claims nothing about hidden reasoning. Transcript, Cost and Evidence are the other tabs.
+  Fork replay, bisect, the frame player and the transcript playback are cut.
+- **Steering** is Sources, Assignments, Compiler and Proposals. A Steering Source (a Steering
+  record, a skill, an ADR, the product vision, an agent definition, workspace instructions, a
+  glossary term, a memory, a policy, a mandate or a toolbelt) is durable; a SteeringFrame is what the
+  assembler resolved from one for one run, with its source, version and hash. One resolver,
+  `resolveEnvelope()` in `src/wedge.js`, feeds the Compiler, an agent's Steering tab and the trace.
+  The Library shelves, the Memory and Ontology tabs, Gates and the skills console are gone.
+- **Agents** carries the fleet tiles, Steer and Register agent; Permissions carries every mandate as
+  Delegation, and the mandate page is gone. **Spend** is Overview (one grouping and a side panel),
+  Budgets and Optimization, where operator habits read as rules to adopt, with no rank.
+- **Future-only fields** carry `data-future` and a reason. `?future=1` outlines them, and each
+  redesigned view has a Storybook story that does.
+- **Scenarios.** W4 (the flight recorder) and W13 (in the loop) are retired. W1, W2, W3, W6 and W8
+  walk the new views.
 
 ## What changed from the future-state mockup
 

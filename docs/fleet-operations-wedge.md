@@ -196,7 +196,7 @@ The assembler checks each frame's hash against its source version before it deli
 
 ### Exclusion reasons
 
-The closed vocabulary of spec §10.5, with `tier` from today's manifest and `unapproved_digest` from skill resolution.
+The closed vocabulary of spec §10.5, with `tier` from today's manifest, `unapproved_digest` from skill resolution and `overridden_by_must` from the assembler's precedence rule.
 
 | Reason | Meaning | Recorded today |
 |---|---|---|
@@ -211,6 +211,7 @@ The closed vocabulary of spec §10.5, with `tier` from today's manifest and `una
 | `prefix_overflow` | The session-start prefix is full | No |
 | `duplicate` | Another frame carries the same body | No |
 | `source_unavailable` | Its source did not answer in time | No |
+| `overridden_by_must` | A published `must` outranks recalled memory on the same concern | No. Today's manifest has no reason for it |
 | `unapproved_digest` | A skill whose digest changed after a person approved it | Yes, in `preview_skill_search` |
 
 Each exclusion names the numbers that decided it: the budget, what was already spent, the frame's cost, its score, or the newer version. The same sources, run and budget give the same exclusions.

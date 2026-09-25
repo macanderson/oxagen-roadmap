@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/welcome/verify` |
 | Scope | auth |
-| Spec | §14 Mission Control; Appendix F sign-in flows |
+| Spec | §14; Appendix F sign-in flows |
 | Design | `mockups/src/engine.js` → `pWelcome(r) → obVerify()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error |
 | Storybook | `Oxagen / … / verify-email`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
