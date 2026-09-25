@@ -51,7 +51,8 @@ header.mast{display:grid;gap:18px;padding-block:6px 32px;border-bottom:1px solid
 .wordmark{font-weight:600;font-size:22px;letter-spacing:-.01em;color:var(--text);text-decoration:none}
 .wordmark .x{color:var(--gold)}
 .eyebrow{display:inline-flex;align-items:center;gap:8px;width:max-content;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0;padding:5px 12px;border:1px solid var(--line);border-radius:var(--r-pill);background:color-mix(in srgb,var(--panel) 60%,transparent)}
-h1,h2,h3{font-family:var(--font-display)}
+/* The display face stops at h2 here: h3 renders near 19px, under Space Grotesk's 20px floor. */
+h1,h2{font-family:var(--font-display)}
 h1{font-weight:700;font-size:clamp(var(--s4),5vw,var(--s5));line-height:1.08;letter-spacing:-.02em;color:var(--text);margin:0;text-wrap:balance;max-width:24ch}
 h1 .accent{background-image:var(--grad-ember);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
 .dek{margin:0;max-width:64ch;color:var(--muted);font-size:var(--s1);line-height:1.5;text-wrap:pretty}
