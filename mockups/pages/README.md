@@ -74,9 +74,10 @@ Tools › Policy, and `/steering/preview/<agent>` on the Compiler. The full tabl
 ## Creation
 
 The five creation wizards (agent, tool, skill, Steering record, and the `.oxagen/` directory itself)
-are dialogs rather than pages, so they have no `<page>.md`. Their spec is `docs/creation-spec.md`,
-and the pages they end at (`steering-source`, `steering-source-skill` and `repositories`) are
-specified here.
+are dialogs rather than pages, so they have no `<page>.md`. Their spec is `docs/creation-spec.md`.
+Each ends on a pull request: the record wizard opens `steering-prs` with it selected, and the others
+list theirs on `repositories-changes`. The editing half is `steering-source` for a published record
+and `steering-source-skill` for a skill.
 
 ## What the design assumes
 
