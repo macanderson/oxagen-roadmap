@@ -16,13 +16,15 @@ The workflows a work order can be sent to, and how to write a new one. A workflo
 
 ## What is on the page
 
-**Header.** As `work-backlog.md`: eyebrow the workspace name, h1 “Work”, subtext “What the agents work on, and what waits on you.” On Workflows the action is **New workflow** (gold; opens the builder).
+Component help for this tab lives in `mockups/help/work-workflows.md`.
+
+**Header.** As `work-backlog.md`: eyebrow the workspace name and h1 “Work”, with no subtext. The explanation is in `mockups/help/work-backlog.md`, Header. On Workflows the action is **New workflow** (gold; opens the builder).
 
 **Tabs**: Backlog `7` · Work orders `1` · Workflows · Findings `36`, with Workflows selected. Workflows carries no count.
 
-The tab body is two panels side by side, the first two thirds wide. The mockup outlines the whole body as future-only.
+The tab body is the Workflows panel at full width. The mockup outlines the whole body as future-only.
 
-**Workflows panel.** Heading “Workflows”, subtext “A workflow is a file in .oxagen/workflows that names its stages in order.” The shared list bar: a search field and Rows, with a pager (“1–3 of 3”). Columns, in order:
+**Workflows panel.** Heading “Workflows”, with no subtext. The explanation is in `mockups/help/work-workflows.md`, Workflows. The shared list bar: a search field and Rows, with a pager (“1–3 of 3”). Columns, in order:
 
 | Column | Content |
 |---|---|
@@ -39,15 +41,7 @@ A row opens the workflow’s dialog, `wfview`. The demo record holds three:
 | Fix and review | `.oxagen/workflows/fix-and-review.toml` | Fix → Review → You | `published` `a4c91e2` | 9 |
 | Docs pass | `.oxagen/workflows/docs-pass.toml` | Document → Review → You | `pull request open` `a-intel/platform#526` | 0 |
 
-**How a workflow runs**, five numbered facts:
-
-1. “Each stage is its own run, by its own agent, on the runtime that agent is enrolled on.”
-2. “A stage owns the definition-of-done items with its tags. Its brief names those items and the handoff it received.”
-3. “When a stage hands off, Oxagen sends the next stage its brief. The handoff note arrives as quoted evidence, never as an instruction.”
-4. “A stage may return the work to an earlier stage, up to the number of returns the file allows. After that the work order parks for you in Approvals.”
-5. “The last stage is always a person. Every item is accepted by you, and every pull request is merged by a person.”
-
-Then the note: “Every agent in a workflow must be one you operate. A workflow that names an agent somebody else operates cannot be sent by you.”
+The tab has one panel. A second panel, How a workflow runs, listed five facts about what happens after a send. It taught the design and no shipped screen draws it, so it is gone. Those facts, and the rule that every agent in a workflow is one you operate, are in `mockups/help/work-workflows.md`, Workflows.
 
 ### The workflow dialog (`wfview`)
 
@@ -68,11 +62,11 @@ on_fail = "stop"
 by = "operator"   # the last stage is always a person
 ```
 
-The note: “Published at a4c91e2. A change to this file is a pull request.”, or for a workflow in review “In a-intel/platform#526. It can be used when it merges.” Footer **Close**, **Change it** (opens the builder on this workflow).
+The note: “Published at a4c91e2.”, or for a workflow in review “In a-intel/platform#526. It can be used when it merges.” That a change is a pull request is in `mockups/help/work-workflows.md`, Workflow dialog. Footer **Close**, **Change it** (opens the builder on this workflow).
 
 ### The workflow builder (`wfnew`)
 
-Title “New workflow”, or “Change a workflow” from **Change it**. Subtitle “Stages in order, each an agent you operate, and a person last”.
+Title “New workflow”, or “Change a workflow” from **Change it**, with no subtitle. The explanation is in `mockups/help/work-workflows.md`, Workflow builder.
 
 - **In your own words**: a two-line text area with the placeholder “A bug fixer passes a fix to a validator, which passes it to a documenter, which passes it to an architect for final review.”, and the wand (`aria-label` “Have the assistant draft the stages”).
 - **Name**: a text field.
@@ -80,13 +74,13 @@ Title “New workflow”, or “Change a workflow” from **Change it**. Subtitl
 - The fixed last stage: its number, **Accept**, your avatar, and “You accept every item. This stage cannot be removed.”
 - **Add a stage**.
 - The file as it will be committed, under its path (`.oxagen/workflows/<slug>.toml`, or `workflow.toml` before the workflow has a name).
-- The note: “A workflow is a file. It exists when the pull request merges, and a reviewer can stop it there.”
+- No note under the file. That a workflow exists when its pull request merges is in `mockups/help/work-workflows.md`, Workflow builder.
 
 Footer “needs `context.propose` on core-platform”, **Cancel**, **Open pull request** (gold; disabled without a name).
 
-A new builder starts with one stage: Fix, Bug fixer, owning code and test, stopping on failure. The wand reads the roles in the order the sentence names them: the placeholder’s sentence gives Fix (Bug fixer, owns code, stops), Validate (Validator, owns test, returns to stage 1 at most 2 times), Document (Documenter, owns docs, stops) and Review (Architect, owns review, returns to stage 1 at most once), and names the workflow “Fix, validate, document, review” when the name is empty. It toasts in gold “oxagen.assistant drafted 4 stages from your sentence. Read them before anybody reviews them.” With no sentence it toasts “Write a sentence first. The assistant turns it into stages; it does not decide what the workflow is.” With no role it knows: “No role the assistant knows appears in that sentence. Add the stages by hand.”
+A new builder starts with one stage: Fix, Bug fixer, owning code and test, stopping on failure. The wand reads the roles in the order the sentence names them: the placeholder’s sentence gives Fix (Bug fixer, owns code, stops), Validate (Validator, owns test, returns to stage 1 at most 2 times), Document (Documenter, owns docs, stops) and Review (Architect, owns review, returns to stage 1 at most once), and names the workflow “Fix, validate, document, review” when the name is empty. It toasts in gold “oxagen.assistant drafted 4 stages from your sentence.” With no sentence it toasts “Write a sentence first.” With no role it knows: “No role the assistant knows appears in that sentence. Add the stages by hand.”
 
-**Open pull request** adds the workflow to the list as `pull request open` with its number, and toasts in gold “a-intel/platform#527 opened: add .oxagen/workflows/<slug>.toml. It can be used when it merges.”
+**Open pull request** adds the workflow to the list as `pull request open` with its number, and toasts in gold “a-intel/platform#527 opened: add .oxagen/workflows/<slug>.toml.”
 
 **Where a workflow is used.** A published workflow appears in the send menu and the work order dialog of `work-backlog.md`, with its stages’ harness marks, and a work order sent to it shows its stage chain on `work-order.md`.
 
@@ -109,7 +103,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | The builder’s agent select: agents you operate | `myAgents()` | `list_agents` `operatorId` | `principals.parent_user_id` (`agent.list.ts:71-72`) | ✅ |
 | The wand: stages drafted from a sentence | `wfWand()` | `oxagen.assistant` drafting the file | `ask_assistant` exists (`packages/oxagen/src/contracts/assistant.ask.ts:61`) and drafts no workflow | ❌ |
 | Open pull request | `wfOpenPr()` | `propose_workflow` (`tasks-spec.md` §12) | none. `open_context_pr` opens a pull request for one Steering record under `.oxagen/rules/` only (`packages/oxagen/src/contracts/context.pr.open.ts:96`) | ❌ |
-| How a workflow runs (handoffs, returns, the park) | static copy | `hand_off_work_order`, `return_work_order`, the park in Approvals | none | ❌ |
+| Handoffs, returns and the park (component help only) | none | `hand_off_work_order`, `return_work_order`, the park in Approvals | none | ❌ |
 | `needs` on a stage, the layers, and **After** | `WORKFLOWS[].stages[].needs`, `wfDepths()` | `.oxagen/workflows/*.toml` at `oxagen-workflow/v0.2` (`work-graph-spec.md` §8.1) | none | ❌ |
 
 ## Future-only fields
@@ -118,7 +112,7 @@ The mockup marks the whole tab body with `data-future` (`?future=1` outlines it)
 
 | Mark | Reason in the mockup | What a build shows instead today |
 |---|---|---|
-| The Workflows panel and How a workflow runs | “workflows” | Neither. No `/work/workflows` route exists in `apps/app` today, and nothing lists a workflow file |
+| The Workflows panel | “workflows” | Neither. No `/work/workflows` route exists in `apps/app` today, and nothing lists a workflow file |
 
 The `wfview` dialog and the builder carry no mark of their own, and every field in them is future-only too. A build renders the tab’s values as `not recorded` and leaves out **New workflow**, **Change it** and **Open pull request** until `propose_workflow` and the workflow file schema ship. Two things on the tab ship today: each stage agent’s harness, name and tier, and the list of agents you operate.
 
@@ -142,7 +136,7 @@ Loaded only. This change designs the loaded state. The build uses the shell’s 
 
 ## Mobile
 
-The thumb bar holds Work (lit, with its count), Agents, Tools, Spend and More. More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. **New workflow** sits under the subtext. The tab strip scrolls sideways inside itself. The two panels stack, the list first. The table becomes labelled cards, the stages wrapping inside their cell. `wfview` and the builder are bottom sheets with full-width footer buttons, and the stage chain stacks one card per row without arrows. The file previews scroll sideways inside their own block. Touch targets are at least 44 px and inputs 16 px. The page never scrolls sideways.
+The thumb bar holds Work (lit, with its count), Agents, Tools, Spend and More. More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. **New workflow** sits under the subtext. The tab strip scrolls sideways inside itself. The panel runs full width. The table becomes labelled cards, the stages wrapping inside their cell. `wfview` and the builder are bottom sheets with full-width footer buttons, and the stage chain stacks one card per row without arrows. The file previews scroll sideways inside their own block. Touch targets are at least 44 px and inputs 16 px. The page never scrolls sideways.
 
 ## Permissions
 
