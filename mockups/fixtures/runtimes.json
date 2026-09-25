@@ -17,7 +17,7 @@
   "settings": "user settings",
   "checkpoint": "seq 41,208 · 2026-09-11 09:12:44Z",
   "gaps": 0,
-  "owner": "mbell"
+  "owner": "marcus"
  },
  {
   "id": "ci-runner-07",
@@ -37,8 +37,8 @@
   "settings": "managed settings, locked",
   "checkpoint": "seq 12,904 · 2026-09-11 09:15:58Z",
   "gaps": 0,
-  "owner": "mbell",
-  "note": "The only runtime here under an OS sandbox whose sole egress is the gateway, which is what earns the contained tier."
+  "owner": "marcus",
+  "note": "The only runtime here in an OS sandbox whose only network exit is the gateway. That is what makes it contained."
  },
  {
   "id": "mbp-01",
@@ -79,7 +79,7 @@
   "settings": "managed settings, locked",
   "checkpoint": "seq 6,730 · 2026-09-11 08:52:10Z",
   "gaps": 0,
-  "owner": "dsong"
+  "owner": "dana"
  },
  {
   "id": "priya-mbp-14",
@@ -100,7 +100,7 @@
   "checkpoint": "seq 2,118 · 2026-09-11 07:58:33Z",
   "gaps": 0,
   "owner": "priya",
-  "note": "Model calls go from the harness to its provider, so spend on this runtime is client-attested."
+  "note": "Model calls go from the harness straight to its provider, so spend on this runtime is reported by harness."
  },
  {
   "id": "ci-runner-08",
@@ -120,7 +120,7 @@
   "settings": "—",
   "checkpoint": "—",
   "gaps": 0,
-  "owner": "mbell",
-  "note": "Provisioned and never enrolled. Anything that runs here is recorded only, and no report about it can say more than observe."
+  "owner": "marcus",
+  "note": "Provisioned but never enrolled. Anything that runs here is recorded only, at the observe tier."
  }
 ]

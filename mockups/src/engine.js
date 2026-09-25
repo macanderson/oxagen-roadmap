@@ -661,9 +661,9 @@ function statusBadge(st){
    egress is the gateway, the only tier that earns the word enforced against the machine's operator)
    with Phase 5, so every rung is real and a badge names the one the run actually earned. */
 var TIERS=[["observe","Recorded only. No hook is installed and nothing is delivered."],
- ["harness","Hooks installed. Steering is delivered and the four blocking hook events can refuse: client-attested and fail-open."],
- ["gateway","Model and MCP traffic routed through the gateway. Metering observed, budgets enforced on routed traffic."],
- ["contained","The agent runs under an OS sandbox whose only egress is the gateway. The only tier that earns the word enforced."]];
+ ["harness","Hooks installed. Steering is delivered and four hook events can refuse a call. The harness reports spend, and a call goes ahead if its hook fails."],
+ ["gateway","Model and MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it."],
+ ["contained","The agent runs in an OS sandbox whose only network exit is the gateway."]];
 var TIER_NA={};
 function tierBadge(t){
   if(!t) return '';
@@ -7855,6 +7855,9 @@ function rtHealth(rt){
   return '<span class="b b-'+(ok?"allowed":"approval")+'"><span class="d"></span>'+h(ok?"healthy":rt.health)+'</span>';
 }
 function rtWs(rt){var x=wsBySlug(rt.ws);return x?x.name:rt.ws;}
+// A host provisioned but never enrolled has no collector, no hooks and no checkpoint.
+function rtEnrolled(rt){return rt.health!=="not enrolled";}
+function rtPerson(k){return PEOPLE[k]?PEOPLE[k].name:k;}
 
 function pRuntimes(r){
   var w=ws();
@@ -7864,10 +7867,10 @@ function pRuntimes(r){
   var L=RUNTIMES.filter(function(x){return x.ws===w.slug;});
   var sel=r&&r.id?rtById(r.id):null;
   var head='<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Runtimes</h1>'+
-   '<p>The hosts agents run on, and what each host’s seam earns.</p></div>'+
+   '<p>The hosts your agents run on, and the enforcement tier each one supports.</p></div>'+
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'wrap\')">Enroll a runtime</button></div></div>';
   if(S.state==="empty"||!L.length) return head+emptyState("No runtime is enrolled",
-    "Until a host enrolls, an agent has an identity and a toolbelt but no hook is installed. Its runs are graded <span class=\"mono\">observe</span>, and no report can say more.",
+    "Until a host enrolls, an agent has an identity and a toolbelt but no hooks. Its runs are recorded at the <span class=\"mono\">observe</span> tier.",
     '<button class="btn primary" onclick="openDialog(\'wrap\')">Enroll a runtime</button>'+
     '<button class="btn" onclick="openDialog(\'register\')">Show CLI steps</button>');
   if(sel) return head+rtDetail(sel);
@@ -7881,35 +7884,40 @@ function pRuntimes(r){
      '<td>'+h(rt.model)+'</td>'+
      '<td>'+tierBadge(rt.tier)+'</td>'+
      '<td class="num">'+(ag.length||'<span class="dim">0</span>')+
-       (ag.length?'<span class="sub mono">'+h(ag.map(function(a){return a.key;}).join(", "))+'</span>':'<span class="sub">enrolled, nothing assigned</span>')+'</td>'+
-     '<td class="mono" style="font-size:11.5px">oxagend '+h(rt.collector)+
-       '<span class="sub">'+(rt.gaps?h(rt.gaps+" telemetry gap"+(rt.gaps>1?"s":"")+" in 24h"):"0 gaps in 24h")+'</span></td>'+
-     '<td class="num">'+rt.hookCount+' of 5'+(rt.hookCount<5?'<span class="sub">some calls are recorded, not decided</span>':'')+'</td>'+
+       (ag.length?'<span class="sub mono">'+h(ag.map(function(a){return a.key;}).join(", "))+'</span>':'<span class="sub">'+(rtEnrolled(rt)?'No agent assigned':'Not enrolled')+'</span>')+'</td>'+
+     (rtEnrolled(rt)?'<td class="mono" style="font-size:11.5px">oxagend '+h(rt.collector)+
+       '<span class="sub">'+(rt.gaps?h(rt.gaps+" telemetry gap"+(rt.gaps>1?"s":"")+" in 24h"):"0 gaps in 24h")+'</span></td>'
+       :'<td>—<span class="sub">Not installed</span></td>')+
+     '<td class="num">'+rt.hookCount+' of 5'+(!rt.hookCount?'<span class="sub">No hooks installed</span>':rt.hookCount<5?'<span class="sub">Some calls are recorded without a decision</span>':'')+'</td>'+
      '<td>'+rtHealth(rt)+'</td>'+
      '<td class="mono" style="font-size:11px">'+h(rt.checkpoint)+'</td></tr>';}).join("");
 
-  var deg=L.filter(function(x){return x.health!=="ok";}).length;
-  var idle=L.filter(function(x){return !rtAgents(x.id).length;}).length;
+  var deg=L.filter(function(x){return rtEnrolled(x)&&x.health!=="ok";});
+  var unen=L.filter(function(x){return !rtEnrolled(x);}).length;
+  var idle=L.filter(function(x){return rtEnrolled(x)&&!rtAgents(x.id).length;}).length;
+  var top=L.filter(rtEnrolled).sort(function(a,b){return TIER_RANK[b.tier]-TIER_RANK[a.tier];})[0];
   return head+
    '<div class="grid g4" style="margin-bottom:14px">'+
-   '<div class="stat"><span class="k">Runtimes</span><span class="v">'+L.length+'</span><span class="s">'+idle+' with no agent assigned</span></div>'+
-   '<div class="stat"><span class="k">Agents hosted</span><span class="v">'+L.reduce(function(n,x){return n+rtAgents(x.id).length;},0)+'</span><span class="s">a host is shared; its hooks see every one of them</span></div>'+
-   '<div class="stat"><span class="k">Highest tier earned</span><span class="v" style="font-size:15px;padding-top:6px">'+
-     tierBadge(L.slice().sort(function(a,b){return TIER_RANK[b.tier]-TIER_RANK[a.tier];})[0].tier)+
-     '</span><span class="s">computed per run from what was actually routed</span></div>'+
-   '<div class="stat"><span class="k">Degraded</span><span class="v">'+deg+'</span><span class="s">'+(deg?"a gap is a hole in the record, not a failed run":"every collector is reporting")+'</span></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Enrolled hosts</h3>'+
+   '<div class="stat"><span class="k">Runtimes</span><span class="v">'+L.length+'</span><span class="s">'+
+     (unen?unen+' not enrolled':idle?idle+' with no agent assigned':'All enrolled')+'</span></div>'+
+   '<div class="stat"><span class="k">Agents hosted</span><span class="v">'+L.reduce(function(n,x){return n+rtAgents(x.id).length;},0)+'</span><span class="s">Several agents can share one host</span></div>'+
+   '<div class="stat"><span class="k">Highest tier</span><span class="v" style="font-size:15px;padding-top:6px">'+
+     (top?tierBadge(top.tier):'—')+
+     '</span><span class="s">'+(top?'Computed per run from routed traffic':'No host is enrolled')+'</span></div>'+
+   '<div class="stat" title="A telemetry gap is a hole in the record, not a failed run."><span class="k">Health</span><span class="v">'+(deg.length?deg.length+' degraded':'Healthy')+'</span><span class="s">'+
+     (deg.length?h(deg.map(function(x){return x.name+(x.gaps?' has telemetry gaps':' is '+x.health);}).join(". ")):'Every collector is reporting')+'</span></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Hosts</h3>'+
    '<span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Runtime</th><th>Kind</th><th>Harness</th><th>Model surface</th><th>Tier</th>'+
    '<th>Agents</th><th>Collector</th><th>Hooks</th><th>Health</th><th>Last checkpoint</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">The tier is a property of the seam, not of the agent: two agents on one host earn the same tier, and the same agent moved to a weaker host earns less. It is computed per run from what was actually routed and is never upgraded after the fact.</div></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The tier ladder</h3></div>'+
+   '<div class="panel-b"><div class="note">The tier belongs to the host, not the agent. Two agents on one host get the same tier, and an agent moved to a host with a lower tier gets that lower tier. The tier is computed per run from what was actually routed and is never raised afterward.</div></div></div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Tier ladder</h3></div>'+
    '<div class="panel-b">'+tierLadder(null)+
-   '<div class="note" style="margin-top:13px">Only <span class="mono">contained</span> earns the word enforced. On <span class="mono">observe</span> nothing is delivered and nothing can refuse, which is why an agent with no runtime still has an identity and a toolbelt and receives no steering.</div></div></div>';
+   '<div class="note" style="margin-top:13px">Only <span class="mono">contained</span> is fully enforced: all traffic must pass through oxagen. On <span class="mono">observe</span>, nothing is delivered and nothing can be blocked. An agent with no runtime still has an identity and a toolbelt, but it receives no steering.</div></div></div>';
 }
 
 function rtDetail(rt){
-  var ag=rtAgents(rt.id), base="#/"+ORG.slug+"/"+S.ws;
+  var ag=rtAgents(rt.id), base="#/"+ORG.slug+"/"+S.ws, on=rtEnrolled(rt);
   return '<div class="row" style="margin-bottom:14px"><button class="btn sm" onclick="go(\''+base+'/runtimes\')">← All runtimes</button></div>'+
    '<div class="grid">'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+h(rt.name)+'</h3>'+
@@ -7917,17 +7925,18 @@ function rtDetail(rt){
     rtHealth(rt)+'</div>'+
    '<div class="panel-b"><dl class="kv">'+
    '<dt>Workspace</dt><dd>'+h(rtWs(rt))+'</dd>'+
-   '<dt>Owner</dt><dd class="mono">'+h(rt.owner)+'</dd>'+
+   '<dt>Owner</dt><dd>'+h(rtPerson(rt.owner))+'</dd>'+
    '<dt>Harness</dt><dd>'+h(rt.harness)+' <span class="mono dim">'+h(rt.harnessV)+'</span></dd>'+
-   '<dt>Collector</dt><dd class="mono">oxagend '+h(rt.collector)+'<span class="sub">'+
-     (rt.gaps?h(rt.gaps+" telemetry gap"+(rt.gaps>1?"s":"")+" in the last 24h"):"0 telemetry gaps in the last 24h")+'</span></dd>'+
-   '<dt>Hook binary</dt><dd class="mono">oxagen-hook '+h(rt.collector)+' · fails closed against its cached bundle</dd>'+
-   '<dt>Hooks written</dt><dd class="mono" style="font-size:11.5px">'+h(rt.hooks)+
-     '<span class="sub" style="font-family:var(--font)">'+(rt.hookCount<5?'Fewer than five events are wired, so some calls are recorded rather than decided.':'Five run as command hooks. The first four can refuse.')+'</span></dd>'+
-   '<dt>Model surface</dt><dd>'+h(rt.model)+'<span class="sub">'+(TIER_RANK[rt.tier]>=2?'every model call leaves through it; tokens are counted from the bytes that pass':'model traffic goes from the harness to its provider; routing it is the gateway tier')+'</span></dd>'+
-   '<dt>Settings</dt><dd>'+h(rt.settings)+'</dd>'+
-   '<dt>Tier earned</dt><dd>'+tierBadge(rt.tier)+'<span class="sub">computed per run from what was actually routed</span></dd>'+
-   '<dt>Last checkpoint</dt><dd class="mono">'+h(rt.checkpoint)+' · chain intact</dd>'+
+   (on?'<dt>Collector</dt><dd class="mono">oxagend '+h(rt.collector)+'<span class="sub" style="font-family:var(--font)">'+
+     (rt.gaps?h(rt.gaps+" telemetry gap"+(rt.gaps>1?"s":"")+" in the last 24h. A gap is a hole in the record, not a failed run."):"0 telemetry gaps in the last 24h")+'</span></dd>'+
+   '<dt>Hook binary</dt><dd class="mono">oxagen-hook '+h(rt.collector)+'<span class="sub" style="font-family:var(--font)">Refuses a call if it cannot reach oxagen and has no cached policy</span></dd>'
+   :'<dt>Collector</dt><dd>—<span class="sub">Not installed. This host is not enrolled.</span></dd>')+
+   '<dt>Hooks installed</dt><dd'+(rt.hookCount?' class="mono" style="font-size:11.5px"':'')+'>'+h(rt.hookCount?rt.hooks:"None")+
+     '<span class="sub" style="font-family:var(--font)">'+(!rt.hookCount?'Runs here are recorded only.':rt.hookCount<5?'Fewer than five events are wired, so some calls are recorded without a decision.':'Five run as command hooks. The first four can refuse a call.')+'</span></dd>'+
+   '<dt>Model surface</dt><dd>'+h(rt.model)+'<span class="sub">'+(TIER_RANK[rt.tier]>=2?'Every model call goes through it, and tokens are counted from the traffic.':'Model calls go from the harness straight to its provider. Routing them through oxagen is the gateway tier.')+'</span></dd>'+
+   '<dt>Settings</dt><dd>'+(rt.settings&&rt.settings!=="—"?h(rt.settings):'—<span class="sub">Not written until the host enrolls</span>')+'</dd>'+
+   '<dt>Tier</dt><dd>'+tierBadge(rt.tier)+'<span class="sub">Computed per run from routed traffic</span></dd>'+
+   '<dt>Last checkpoint</dt><dd'+(on?' class="mono"':'')+'>'+(on?h(rt.checkpoint)+' · chain intact':'—<span class="sub">No run has been recorded here</span>')+'</dd>'+
    (rt.note?'<dt>Note</dt><dd>'+h(rt.note)+'</dd>':'')+
    '</dl></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Agents on this host</h3>'+
@@ -7935,18 +7944,22 @@ function rtDetail(rt){
    (ag.length?'<div class="tw"><table><thead><tr><th>Agent</th><th>Operator</th><th>Tier</th><th>Principal</th><th>Runs 30d</th></tr></thead><tbody>'+
      ag.map(function(a){
        return '<tr onclick="go(\''+agentUrl(a)+'\')" style="cursor:pointer"><td>'+agentCard(a,{link:false})+'</td>'+
-        '<td>'+h(a.operator)+'</td><td>'+tierBadge(a.tier)+'</td>'+
+        '<td>'+h(rtPerson(a.operator))+'</td><td>'+tierBadge(a.tier)+'</td>'+
         '<td class="mono" style="font-size:11px">'+h(a.principal||"—")+'</td>'+
         '<td class="num">'+(a.runs30||0).toLocaleString()+'</td></tr>';}).join("")+'</tbody></table></div>'
-    :'<div class="panel-b dim">This host is enrolled and no agent is assigned to it. It records nothing until one runs here.</div>')+
-   '<div class="panel-b"><div class="note">Every agent here is seen through the same hooks and earns the same tier. An agent’s identity, its steering and its toolbelt are its own; only the seam is shared.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Rollback</h3></div><div class="panel-b">'+
+    :'<div class="panel-b dim">'+(on?'No agent is assigned to this host. It records nothing until one runs here.':'This host is not enrolled, so no agent runs here yet.')+'</div>')+
+   (ag.length?'<div class="panel-b"><div class="note">Every agent here runs through the same hooks and gets the same tier. Each agent keeps its own identity, steering, and toolbelt.</div></div>':'')+'</div>'+
+   (on?'<div class="panel"><div class="panel-h"><h3>Unenroll this host from the CLI</h3></div><div class="panel-b">'+
    '<pre>oxagen agent unenroll --host '+h(rt.id)+' \\\n  --restore-settings</pre>'+
-   '<div class="note" style="margin-top:12px">If hooks are stripped by hand instead, the next run records <span class="mono">hooks_removed</span> and the tier falls to <span class="mono">observe</span>. It is never upgraded after the fact.</div>'+
+   '<div class="note" style="margin-top:12px">If someone removes the hooks by hand instead, the next run records '+keyLabel("hooks_removed")+' and the tier drops to <span class="mono">observe</span>. The tier is never raised afterward.</div>'+
    '<div class="row" style="margin-top:14px">'+
-   '<button class="btn" onclick="act(\'Smoke session queued on '+h(rt.name)+'. One turn, recorded like any other run.\')">Run a smoke session</button>'+
+   '<button class="btn" onclick="act(\'Test session queued on '+h(rt.name)+'. One turn, recorded like any other run.\')">Run a test session</button>'+
    '<button class="btn danger" onclick="openDialog(\'unenroll\',\''+h(rt.id)+'\')">Unenroll</button></div>'+
-   '</div></div></div>';
+   '</div></div>'
+   :'<div class="panel"><div class="panel-h"><h3>Enroll this host</h3></div><div class="panel-b">'+
+   '<p class="muted" style="margin:0 0 10px">Run the installer on the host itself. Enrolling installs the hooks and the collector.</p>'+
+   '<button class="btn primary" onclick="openDialog(\'wrap\')">Enroll a runtime</button></div></div>')+
+   '</div>';
 }
 
 /* ============================== Repositories ==============================
