@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prose</title>
+<meta name="description" content="The English rules for every word Oxagen writes: voice, headings, casing, punctuation, numbers, vocabulary, claims, interface strings, and the checks that enforce them.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="docs-kit/fonts.css">
+<link rel="stylesheet" href="src/engine.css">
+<link rel="stylesheet" href="docs-kit/docs.css">
+<script src="docs-kit/docs.js"></script>
+<style>
+.pr-pairs td{vertical-align:top}
+.pr-pairs td[data-bad-example]{color:var(--muted)}
+.pr-words{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:0 0 22px}
+.pr-words .dx-card p{font-size:12.5px;line-height:1.7;color:var(--body)}
+</style>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="typography.html">Typography</a>
+    <a href="colors.html">Colors</a>
+    <a href="prose.html" aria-current="page">Prose</a>
+    <a href="components.html">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-hero">
+  <p class="eyebrow">Design reference</p>
+  <h1>Prose</h1>
+  <p class="dx-lead">Every word Oxagen writes follows one set of English rules: the interface, the docs, the page specs, the audit prompts, issues, and commit messages. The voice is a senior engineer who has read the logs and is telling you what happened. State the fact, name the number, stop.</p>
+  <div class="dx-meta">
+    <span><b>Sources</b> the <code>clear-prose</code> skill, <code>oxagen-branding</code> <code>voice.md</code> and <code>words.md</code>, issue #87</span>
+    <span><b>Enforced by</b> <code>tools/check-copy.mjs</code></span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="voice">Voice</h2>
+  <p class="dx-sub">Five traits, and the interface never explains its own design.</p>
+  <div class="dx-tbl"><div class="tw"><table class="pr-pairs">
+    <thead><tr><th>Trait</th><th>What it means</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td><b>Plain</b></td><td>Short words and short sentences. A technical word is fine where it is the right word, on the page that defines it.</td><td>Every frame is hash-chained to the one before it.</td></tr>
+      <tr><td><b>Specific</b></td><td>Numbers, names, and paths where another product would put an adjective. A number is measured and dated, or it stays out.</td><td>34 of the 52 tools on the toolbelt were not called once in 1,340 runs.</td></tr>
+      <tr><td><b>Unhurried</b></td><td>No urgency and no excitement. Nothing is "finally here".</td><td>Budget saved. It applies from the next check.</td></tr>
+      <tr><td><b>Dry</b></td><td>Understatement over emphasis. If a sentence reads stronger with the intensifier gone, remove it.</td><td>Blocked once, held on the second stop.</td></tr>
+      <tr><td><b>Honest to the record</b></td><td>Say what the evidence supports and stop. Scope every control claim.</td><td>Observe mode records the call without enforcing it.</td></tr>
+    </tbody>
+  </table></div></div>
+  <div class="dx-note"><b>No design reasoning in the interface.</b> A page states what is true and what you can do. It does not argue for its own design, weigh its own words, or tell you what a figure is not. The copy review (issue #87) removed lines such as <code>It is not a result</code> and <code>says more than that</code>.</div>
+  <h3>Tone by surface</h3>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Surface</th><th>Tone</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>Interface strings</td><td>Terse, present tense. A fragment where a fragment reads faster.</td><td>Denied by rule <code>no-push-main</code>.</td></tr>
+      <tr><td>Access requests</td><td>The request first, then the answer, then who gave it.</td><td>Push to <code>release/2026.09</code> requested by release-manager. Waiting on Priya, rule <code>release-branch</code>.</td></tr>
+      <tr><td>Errors</td><td>What happened, then what to do. Never an apology.</td><td>Request denied by rule <code>no-push-main</code>. Push to a branch and open a pull request.</td></tr>
+      <tr><td>Docs</td><td>Second person, imperative, one step per sentence.</td><td>Open the Agents page and choose Register agent.</td></tr>
+      <tr><td>Specs, audits, issues</td><td>Facts in order, each one checkable. The reader has to act on it.</td><td>Columns in order: Scope, Period, Limit, Used, Mode, Position.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="rules">Rules that never bend</h2>
+  <p class="dx-sub">Ten rules apply to every surface.</p>
+  <ol class="dx-rules">
+    <li><div><b>No em dashes and no en dashes as separators.</b><p>No double hyphen standing in for one either. Use a period, a comma, a colon, or parentheses.</p></div></li>
+    <li><div><b>No exclamation points.</b></div></li>
+    <li><div><b>Active voice, actor first.</b><p>"The rule denies the push," never "the push is denied by the rule."</p></div></li>
+    <li><div><b>One idea per sentence.</b><p>A semicolon means two sentences. Write them as two.</p></div></li>
+    <li><div><b>Sentence case</b><p>For headings, buttons, labels, tabs, menu items, and table headers.</p></div></li>
+    <li><div><b>The Oxford comma.</b><p>"Access, budget, and equipment."</p></div></li>
+    <li><div><b>Say "you", never "users".</b><p>In product copy, name Oxagen or stella. Never "we".</p></div></li>
+    <li><div><b>Numbers over adjectives.</b><p>"Two hooks, sixty seconds" beats "fast setup." Numerals for data, words when a number opens a sentence.</p></div></li>
+    <li><div><b>Every claim is one the record can back.</b><p>Never strengthen a claim past the evidence. An allowed request means a rule allowed it, and nothing more.</p></div></li>
+    <li><div><b>Open on the reader's situation.</b><p>Start with what the reader is looking at or trying to do, not with what the product is.</p></div></li>
+  </ol>
+</section>
+
+<section class="dx-sec">
+  <h2 id="headings">Headings and labels</h2>
+  <p class="dx-sub">A heading names the thing, and a caption states one fact.</p>
+  <ul>
+    <li>A heading, panel title, tab, table header, or label is a plain noun or noun phrase: "Spend by area", "Repository", "Toolbelt".</li>
+    <li>No label carries a comma, a mid-dot, or a "not" or "never" contrast. Mac banned the aphoristic style on 2026-09-21. It is hard to scan and too dense.</li>
+    <li>Subtext under a heading is one sentence or nothing. A caption states one fact.</li>
+    <li>A button starts with a verb and names its object when the verb alone is unclear: "Set a budget", "Retire agent", "Steer".</li>
+    <li>Descriptive header captions and sort-order labels are cut. The table header's sort arrow says the order.</li>
+  </ul>
+  <div class="dx-tbl"><div class="tw"><table class="pr-pairs">
+    <thead><tr><th>Avoid</th><th>Use</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td data-bad-example>Retrieval, in numbers</td><td>Retrieval stats</td><td>A comma tail</td></tr>
+      <tr><td data-bad-example>Summary · what this run changed</td><td>Summary</td><td>A mid-dot and a second idea</td></tr>
+      <tr><td data-bad-example>ordered by the frames, not by kind</td><td>Frame order</td><td>A "not" contrast</td></tr>
+      <tr><td data-bad-example>what Oxagen injected, and what it cut</td><td>Injected context</td><td>Two ideas and a comma</td></tr>
+      <tr><td data-bad-example>Recent Agent Runs</td><td>Recent runs</td><td>Title case</td></tr>
+      <tr><td data-bad-example>Click here to configure your budget settings</td><td>Set a budget</td><td>A button is a verb and an object</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="casing">Casing and names</h2>
+  <p class="dx-sub">Sentence case everywhere, and names as their owners write them.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Name</th><th>In the interface</th><th>In docs and specs</th></tr></thead>
+    <tbody>
+      <tr><td>The product</td><td><code>oxagen</code>, lowercase (issue #87, enforced by <code>check-copy</code>)</td><td>Oxagen, as a name. These reference pages are docs.</td></tr>
+      <tr><td>The assistant</td><td><code>stella</code>, lowercase, with the gold asterisk in its mark</td><td>Stella</td></tr>
+      <tr><td>The wordmarks</td><td colspan="2">Always lowercase: oxagen, stella</td></tr>
+      <tr><td>Pages</td><td colspan="2">Capitalized as names: Work, Agents, Tools, Steering, Spend, Runtimes, Repositories, Organization, Billing, Audit</td></tr>
+      <tr><td>Acronyms</td><td colspan="2">Keep their capitals: PR, CI, US, EU, APAC. <code>title()</code> keeps them when it sentence-cases a string.</td></tr>
+      <tr><td>Agents</td><td>Sentence case with the region in parentheses, from <code>agentTitle()</code>: "Stale closer (EU)"</td><td>The id in mono: <code>a-intel.core.release-manager</code></td></tr>
+      <tr><td>Other products</td><td colspan="2">As their owners write them: Claude Code, Codex CLI, GitHub, Linear, Jira, ServiceNow</td></tr>
+      <tr><td>Identifiers</td><td colspan="2">Their own case, in mono, never uppercased: <code>run_01K5RS7M2E8FJ3QW</code>, <code>wo_01K6T9QX</code>, <code>a-intel/platform#590</code></td></tr>
+      <tr><td>Definition of done</td><td>Written out in full</td><td><code>dod</code>, lowercase, as a noun</td></tr>
+    </tbody>
+  </table></div></div>
+  <div class="dx-note"><b>Mission Control is retired.</b> GitHub's control plane carries the name, so Oxagen stopped using it on 2026-09-19. Write Oxagen, or the operator console. <code>missioncontrol.html</code> is a legacy file name.</div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="punctuation">Punctuation</h2>
+  <p class="dx-sub">Periods and commas do the work.</p>
+  <ul>
+    <li><b>Separators.</b> A period, a comma, a colon, or parentheses. Never an em dash, an en dash between words, or a double hyphen.</li>
+    <li><b>Semicolons.</b> None in anything a customer reads. Two ideas are two sentences.</li>
+    <li><b>Colons</b> introduce a list or a definition.</li>
+    <li><b>The mid-dot</b> may separate values in a data line, such as a card's meta line. Never in a heading, label, caption, button, or sentence.</li>
+    <li><b>Ranges.</b> In a sentence, write "10 to 20". A pager figure uses an en dash with no spaces: <code>1–10 of 23 (page 1 of 3)</code>.</li>
+    <li><b>Quotes.</b> Double quotes for a quoted string. Code, keys, and paths go in monospace instead of quotes.</li>
+    <li><b>Exclamation points.</b> None.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="numbers">Numbers and units</h2>
+  <p class="dx-sub">Every figure goes through the engine's helpers, so the same figure reads the same way everywhere.</p>
+  <div class="dx-tbl"><div class="tw"><table class="pr-pairs">
+    <thead><tr><th>Figure</th><th>Rule</th><th>Avoid</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td>Money</td><td><code>usd()</code>: a dollar sign, thousands separators, two decimals, more only when the source carries them</td><td data-bad-example>$2450.00, $6.05USD</td><td>$2,450.00</td></tr>
+      <tr><td>Yearly projection</td><td><code>usd0()</code>: whole dollars, since cents would be false precision</td><td data-bad-example>$14,203.37 a year</td><td>$14,203 a year</td></tr>
+      <tr><td>Negative</td><td><code>minus()</code>: a true minus sign (U+2212)</td><td data-bad-example>-$4.20, -12%</td><td>−$4.20, −12%</td></tr>
+      <tr><td>Count</td><td><code>plural()</code>: the singular for one</td><td data-bad-example>1 turns</td><td>1 turn, 3 turns</td></tr>
+      <tr><td>Large count</td><td>Thousands separators always</td><td data-bad-example>41200 tokens</td><td>41,200 tokens</td></tr>
+      <tr><td>Unit</td><td>A space between the value and a word unit. Symbols attach.</td><td data-bad-example>12tokens, 5m28selapsed</td><td>12 tokens, 62%, $4.13</td></tr>
+      <tr><td>Duration</td><td><code>dur()</code>: minutes and seconds, one decimal under ten seconds</td><td data-bad-example>328 seconds</td><td>5m 28s, 4.2s</td></tr>
+      <tr><td>Time in a list</td><td>24-hour, hours and minutes</td><td data-bad-example>3:44 PM</td><td>15:44</td></tr>
+      <tr><td>Date in docs</td><td>ISO</td><td data-bad-example>Sept 25th</td><td>2026-09-25</td></tr>
+      <tr><td>Stored money</td><td>Micros are storage. Show dollars.</td><td data-bad-example>4130000 µUSD</td><td>$4.13</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>Numerals for data. Words when a number opens a sentence: "Three agents are over budget."</li>
+    <li>Every figure agrees with the same figure elsewhere on the page and in the navigation. The copy review found 274, 278, and 247 agents on three pages; one number is right.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="empty">Empty values</h2>
+  <p class="dx-sub">A missing value says it is missing, and why when it can.</p>
+  <ul>
+    <li>An empty cell or value is <code>—</code> in <code>--dim</code>. A column of counts with a few dashes still reads as numbers.</li>
+    <li>Where a reason fits, say it: "not recorded for harness runs", "none yet", "no agent".</li>
+    <li>A field no source backs today reads "not recorded". It never shows a fixture value or a plausible guess.</li>
+    <li>Never render <code>undefined</code>, <code>null</code>, <code>NaN</code>, or an empty slot such as <code>Task —.</code></li>
+    <li>Never print a zero the record did not give. Zero means the record says zero.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="vocabulary">Vocabulary</h2>
+  <p class="dx-sub">One term per concept, used exactly on labels and detail pages.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Term</th><th>Means</th><th>Not</th></tr></thead>
+    <tbody>
+      <tr><td>run</td><td>One session of one agent under one operator, on one task</td><td>session, trace, execution, job</td></tr>
+      <tr><td>turn</td><td>One prompt through to the point the agent stops</td><td>round, iteration</td></tr>
+      <tr><td>step</td><td>One model call or one tool call</td><td>action event, span</td></tr>
+      <tr><td>frame</td><td>One recorded event in a run, hash-chained</td><td>log line, event, trace</td></tr>
+      <tr><td>operator</td><td>The person accountable for an agent and its runs</td><td>user, owner, initiator</td></tr>
+      <tr><td>agent</td><td>A registered principal with its own identity</td><td>bot, assistant</td></tr>
+      <tr><td>workspace</td><td>A governance partition inside an organization</td><td>project, team space</td></tr>
+      <tr><td>governed action</td><td>One call routed through Oxagen that it checked and recorded</td><td>invocation, transaction</td></tr>
+      <tr><td>request</td><td>An agent asking for a system, scope, or action at the moment of use</td><td>grant, token</td></tr>
+      <tr><td>rule</td><td>What answers a request: allow, deny, or route to a person</td><td>guardrail, filter</td></tr>
+      <tr><td>allowed, denied, routed</td><td>The three answers a rule gives</td><td>blocked, escalated, flagged</td></tr>
+      <tr><td>toolbelt</td><td>The tools an agent carries</td><td>belt, loadout</td></tr>
+      <tr><td>provider</td><td>A source of tools, such as an MCP provider</td><td>server</td></tr>
+      <tr><td>issue tracker</td><td>Where work items come from: GitHub, Linear, Jira</td><td>issue provider</td></tr>
+      <tr><td>tier</td><td>How much of a run Oxagen sees and governs: harness, gateway, contained</td><td>client tier, light tier</td></tr>
+      <tr><td>model class</td><td>A group of models priced and chosen together</td><td>model tier</td></tr>
+      <tr><td>Observed by gateway</td><td>A spend basis the gateway measured</td><td><code>gateway_observed</code> in prose</td></tr>
+      <tr><td>Reported by harness</td><td>A spend basis the harness reported</td><td><code>client_attested</code> in prose</td></tr>
+      <tr><td>retire</td><td>Remove an agent from service and keep its record</td><td>deregister</td></tr>
+      <tr><td>work item, work order</td><td>A unit of work, and the dispatch of work to an agent</td><td>ticket, job</td></tr>
+      <tr><td>Steering source, SteeringFrame</td><td>A durable source of guidance, and what one run received from it</td><td>a frame, when you mean a source</td></tr>
+    </tbody>
+  </table></div></div>
+  <p>Around these terms, familiar explanatory words are fine. "The agent asks for permission to push" can sit beside a row that reads <code>waiting on Priya, rule release-branch</code>.</p>
+</section>
+
+<section class="dx-sec">
+  <h2 id="retired">Retired and internal terms</h2>
+  <p class="dx-sub">Words the copy review took out of page copy.</p>
+  <div class="dx-tbl"><div class="tw"><table class="pr-pairs">
+    <thead><tr><th>Retired</th><th>Write instead</th></tr></thead>
+    <tbody>
+      <tr><td data-bad-example>belt</td><td>toolbelt</td></tr>
+      <tr><td data-bad-example>server</td><td>provider</td></tr>
+      <tr><td data-bad-example>issue provider</td><td>issue tracker</td></tr>
+      <tr><td data-bad-example>Deregister</td><td>Retire</td></tr>
+      <tr><td data-bad-example>Wrap it</td><td>Add <code>.oxagen/</code></td></tr>
+      <tr><td data-bad-example>model tier</td><td>model class</td></tr>
+      <tr><td data-bad-example>Wasted spend</td><td>Wasted, as the Run page's stat names it</td></tr>
+      <tr><td data-bad-example>fr 41</td><td>frame 41</td></tr>
+      <tr><td data-bad-example>Mission Control</td><td>Oxagen, or the operator console</td></tr>
+      <tr><td data-bad-example>session, trace, execution, invocation</td><td>run, or step for one call</td></tr>
+      <tr><td data-bad-example>interjection, seam, shelf, light tier, client tier, Bind it, not bound, volatile selection, text plane, gate plane, a call at most, PER CALL</td><td>No single replacement is recorded. Say what it is in plain words.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li><b>Internal names</b> never reach page copy: kernel, reflector, archiver, manifest gate, deny generation, hook boundary, shared plane, opt-down, belt computation.</li>
+    <li><b>Storage names</b> never reach page copy: database names, table names such as <code>tools.policy_versions</code>, and key services.</li>
+    <li><b>Stored keys</b> show as labels, with the key in a tooltip. <code>KEY_LABEL</code> in <code>engine.js</code> holds the map; see <a href="#identifiers">Identifiers and keys</a>.</li>
+    <li><b>Math notation</b> such as the intersection, element, and not-equal signs becomes plain words.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="avoid">Words to avoid</h2>
+  <p class="dx-sub">Cut these on sight.</p>
+  <div class="pr-words">
+    <div class="dx-card"><span class="dx-k">Words that mean nothing</span><p data-bad-example>seamless, robust, powerful, revolutionary, cutting-edge, next-generation, game-changing, best-in-class, world-class, enterprise-grade, comprehensive, holistic, end-to-end, turnkey, frictionless, effortless, intelligent, smart, magic</p></div>
+    <div class="dx-card"><span class="dx-k">Intensifiers</span><p data-bad-example>very, really, truly, genuinely, incredibly, extremely, deeply, highly, super</p></div>
+    <div class="dx-card"><span class="dx-k">Emotional and fear sells</span><p data-bad-example>excited, thrilled, proud, delighted, love, passionate, finally, at last, imagine, liability, exposed, unchecked, rogue, dangerous, protect, safeguard</p></div>
+    <div class="dx-card"><span class="dx-k">Category words owned by others</span><p data-bad-example>Mission Control, observability, evals, guardrails, trust layer, safety layer, AI ops, LLMOps, AgentOps, orchestration as a category</p></div>
+    <div class="dx-card"><span class="dx-k">Overclaims</span><p data-bad-example>guaranteed, always and never about outcomes, 100%, zero, eliminates, proven for anything a dod did, verified for anything a model did</p></div>
+    <div class="dx-card"><span class="dx-k">Product words Oxagen does not use</span><p data-bad-example>AI-powered, LLM-powered, agentic as an adjective for the product, copilot, autonomous as a compliment</p></div>
+    <div class="dx-card"><span class="dx-k">Words that hand over the keys</span><p data-bad-example>connect your agent to, give the agent access to, full access, the agent's API key, the agent's token, one-click connect, auto-approve as a feature, least privilege</p></div>
+    <div class="dx-card"><span class="dx-k">Filler openers</span><p data-bad-example>In today's world, As AI agents become, With the rise of, It's no secret that, We believe, We're on a mission</p></div>
+  </div>
+  <div class="dx-tbl"><div class="tw"><table class="pr-pairs narrow">
+    <thead><tr><th>Avoid</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td data-bad-example>leverage, utilize</td><td>use</td></tr>
+      <tr><td data-bad-example>enable you to</td><td>lets you, or cut it</td></tr>
+      <tr><td data-bad-example>in order to</td><td>to</td></tr>
+      <tr><td data-bad-example>gain visibility into</td><td>see</td></tr>
+      <tr><td data-bad-example>auto-approved</td><td>allowed by rule</td></tr>
+      <tr><td data-bad-example>escalated to a human</td><td>routed to a person</td></tr>
+      <tr><td data-bad-example>connect your agent to GitHub</td><td>the agent can request GitHub</td></tr>
+      <tr><td data-bad-example>the agent has access to Slack</td><td>Slack is in the agent's mandate</td></tr>
+      <tr><td data-bad-example>enforced on every call</td><td>checked on governed calls, for actions routed through Oxagen</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="claims">Claims</h2>
+  <p class="dx-sub">Say exactly what the record supports.</p>
+  <ul>
+    <li><b>Scope every control claim.</b> "For actions routed through Oxagen" or "on governed calls". Never "on every call" or "on every run" alone.</li>
+    <li><b>Observe mode is recorded, not enforced.</b> Say which one applies.</li>
+    <li><b>An answer means only what it says.</b> An allowed request means a rule allowed it, not that the action was safe.</li>
+    <li><b>Credentials.</b> For mediated connections, Oxagen uses the connection credential on the agent's behalf and the agent does not receive it. Never promise that an agent has nothing to leak.</li>
+    <li><b>Savings.</b> No savings claim without the measured workload and its conditions.</li>
+    <li><b>Compliance.</b> No SOC 2 claim beyond what the actual report states.</li>
+    <li><b>People.</b> An operator review reports what the record shows, with each habit's definition beside it. It never grades or ranks the person.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="ui">Interface strings</h2>
+  <p class="dx-sub">Terse, present tense, and specific to the object on screen.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Element</th><th>Rule</th><th>Example</th></tr></thead>
+    <tbody>
+      <tr><td>Button</td><td>A verb, then the object when the verb alone is unclear. One gold action per screen.</td><td>Set a budget</td></tr>
+      <tr><td>Destructive button</td><td>Names what goes.</td><td>Retire agent</td></tr>
+      <tr><td>Tab</td><td>A plain noun. A count sits beside it in mono.</td><td>Transcript 48</td></tr>
+      <tr><td>Field label</td><td>A noun. The hint below says what a valid value looks like.</td><td>Monthly limit</td></tr>
+      <tr><td>Placeholder</td><td>An example or an instruction, never the label.</td><td>Search this list</td></tr>
+      <tr><td>Hint</td><td>One sentence.</td><td>One concern per pull request.</td></tr>
+      <tr><td>Empty state</td><td>What is missing, where it comes from, and the one action that fills it.</td><td>No work in Core platform yet. Connect an issue tracker.</td></tr>
+      <tr><td>Error</td><td>What happened, then what to do. No apology and no blame.</td><td>The control plane answered <code>503 work_index_unavailable</code>. Nothing was changed.</td></tr>
+      <tr><td>Denied state</td><td>The permission it needs and who can grant it.</td><td>You need <code>spend.read</code>. An org Owner or Billing admin can grant it.</td></tr>
+      <tr><td>Confirmation</td><td>The consequence, what stays, and what goes.</td><td>Runs stay metered, and recorded spend stays on the ledger.</td></tr>
+      <tr><td>Toast</td><td>A fact in the past tense.</td><td>Budget saved.</td></tr>
+      <tr><td>Tooltip</td><td>One fact, the same on hover and on focus.</td><td>Turn 7, $0.61, cache 72%</td></tr>
+      <tr><td>State word</td><td>Lowercase in a badge, the rule's own word.</td><td>allowed, denied, waiting on Priya</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="identifiers">Identifiers and keys</h2>
+  <p class="dx-sub">An identifier is shown as it is stored, and a key is shown as a word.</p>
+  <ul>
+    <li>Ids, paths, branches, commands, digests, and frame kinds are set in monospace and keep their case.</li>
+    <li>An id inside a capital label is wrapped in <code>.id</code>, so CSS does not uppercase it.</li>
+    <li>A stored key shown to a person reads as its label, with the key in a tooltip:</li>
+  </ul>
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Key</th><th>Label</th></tr></thead>
+    <tbody>
+      <tr><td><code>gateway_observed</code></td><td>Observed by gateway</td></tr>
+      <tr><td><code>client_attested</code></td><td>Reported by harness</td></tr>
+      <tr><td><code>moves_funds</code></td><td>Moves funds</td></tr>
+      <tr><td><code>commits_spend</code></td><td>Commits spend</td></tr>
+      <tr><td><code>third_party</code></td><td>Third party</td></tr>
+      <tr><td><code>hooks_removed</code></td><td>Hooks removed</td></tr>
+      <tr><td><code>chain_break</code></td><td>Chain break</td></tr>
+      <tr><td><code>unknown_tool</code></td><td>Unknown tool</td></tr>
+      <tr><td><code>initiating_principal</code></td><td>Person who started the run</td></tr>
+      <tr><td><code>policy.decision</code></td><td>Policy decision</td></tr>
+      <tr><td><code>per_run_micros</code></td><td>Per-run budget</td></tr>
+      <tr><td><code>cache_write_5m</code></td><td>Cache write (5 min)</td></tr>
+      <tr><td><code>input_uncached</code></td><td>Uncached input</td></tr>
+      <tr><td><code>content_exact</code></td><td>Exact content match</td></tr>
+      <tr><td><code>deny_tools</code></td><td>Denied tools</td></tr>
+      <tr><td><code>above_micros</code></td><td>Auto-approve limit</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="spelling">Spelling</h2>
+  <p class="dx-sub">US English.</p>
+  <div class="dx-tbl"><div class="tw"><table class="pr-pairs narrow">
+    <thead><tr><th>Avoid</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td data-bad-example>colour</td><td>color</td></tr>
+      <tr><td data-bad-example>behaviour</td><td>behavior</td></tr>
+      <tr><td data-bad-example>labelling</td><td>labeling</td></tr>
+      <tr><td data-bad-example>cancelled</td><td>canceled</td></tr>
+      <tr><td data-bad-example>organisation</td><td>organization</td></tr>
+      <tr><td data-bad-example>centre</td><td>center</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessible writing</h2>
+  <p class="dx-sub">Words a screen reader speaks follow the same rules as words on screen.</p>
+  <ul>
+    <li>A link names its destination. Never "click here" or "learn more" alone.</li>
+    <li>An icon-only button has an <code>aria-label</code> with the action and its object: "Close approvals", "Remove item 2".</li>
+    <li>A row or card that opens something is labelled with what it opens: "Open wo_01K5RS7M4N".</li>
+    <li>A list of chips carries a hidden <code>, </code> between items (<code>SEP</code>), so it reads and copies as a list.</li>
+    <li>Never point by color or position ("the red badge", "on the right"). Name the thing.</li>
+    <li>State is a word. A color or a shape repeats it and never replaces it.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="docs">Docs, specs, and internal writing</h2>
+  <p class="dx-sub">Internal text is read by someone who has to act on it.</p>
+  <ul>
+    <li><b>Docs.</b> Second person, imperative, one step per sentence. The working command first, the reason in one line after. No marketing language.</li>
+    <li><b>Page specs and audit prompts.</b> Quote the interface copy exactly, so an audit can compare it character by character.</li>
+    <li><b>Issues.</b> The problem, the file paths, how to reproduce it, the constraints already found, which pillar it moves, and what done looks like.</li>
+    <li><b>Pull requests and commits.</b> What changed and why, in plain sentences. Name each unrelated fix on its own.</li>
+    <li><b>Code comments.</b> The same rules. A comment says why the code is the way it is.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="checks">Automated checks</h2>
+  <p class="dx-sub"><code>node tools/check-copy.mjs</code> walks the product build and fails on each rule below.</p>
+  <div class="dx-tbl"><div class="tw"><table class="pr-pairs">
+    <thead><tr><th>Rule</th><th>It catches</th><th>Write instead</th></tr></thead>
+    <tbody>
+      <tr><td><code>empty value</code></td><td data-bad-example>undefined, null, NaN in a sentence</td><td><code>—</code> and a reason</td></tr>
+      <tr><td><code>plural</code></td><td data-bad-example>1 turns, 1 files</td><td><code>plural()</code></td></tr>
+      <tr><td><code>unit spacing</code></td><td data-bad-example>12tokens, 6.05USD</td><td>A space before a word unit</td></tr>
+      <tr><td><code>thousands separator</code></td><td data-bad-example>$2450.00</td><td><code>usd()</code></td></tr>
+      <tr><td><code>glossary</code></td><td data-bad-example>server, belt, Deregister, Wrap it, Pr Reviewer, Us, Eu</td><td>provider, toolbelt, Retire, Add .oxagen/, PR reviewer, US, EU</td></tr>
+      <tr><td><code>brand case</code></td><td data-bad-example>Oxagen, Stella in page copy</td><td>oxagen, stella</td></tr>
+      <tr><td><code>storage tag</code></td><td>A database, key service, or table name</td><td>Nothing. Storage stays out of page copy.</td></tr>
+      <tr><td><code>math notation</code></td><td>Set and comparison symbols</td><td>Plain words</td></tr>
+      <tr><td><code>US spelling</code></td><td data-bad-example>colour, behaviour, labelling, Cancelled</td><td>color, behavior, labeling, Canceled</td></tr>
+      <tr><td><code>uppercased id</code></td><td data-bad-example>WO_01K6T9QX, A-INTEL/</td><td>Wrap the id in <code>.id</code></td></tr>
+      <tr><td><code>retired term</code></td><td>The retired terms above</td><td>The replacements above</td></tr>
+      <tr><td><code>internal name</code></td><td>kernel, reflector, and the other internal names</td><td>What it does, in plain words</td></tr>
+      <tr><td><code>rhetoric</code></td><td data-bad-example>earns the word, not a verdict, It is not a result</td><td>The fact alone</td></tr>
+      <tr><td><code>empty slot</code></td><td data-bad-example>Task —., µUSD</td><td>A complete sentence, dollars</td></tr>
+      <tr><td><code>orphan pager</code></td><td>A pager figure run into the next number</td><td><code>1–10 of 23 (page 1 of 3)</code></td></tr>
+      <tr><td><code>chip separator</code></td><td>Chips run together in the text</td><td><code>SEP</code> between chips</td></tr>
+      <tr><td><code>minus sign</code></td><td data-bad-example>-$4.20, -12%</td><td><code>minus()</code></td></tr>
+      <tr><td><code>raw key</code></td><td data-bad-example>gateway_observed in prose</td><td>Its label from <code>KEY_LABEL</code></td></tr>
+      <tr><td><code>empty tile</code></td><td>A stat box with a label and no value</td><td><code>—</code> and a reason</td></tr>
+    </tbody>
+  </table></div></div>
+  <p>It reads 192 routes and 14 overlays. A view it never opens, such as an empty state or a dialog missing from its overlay list, is not checked. That gap is how "issue provider" outlived the copy review in three places.</p>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  <p class="dx-sub">What the 2026-09-25 review of the copy rules found.</p>
+  <div class="dx-find"><h4><span class="b b-allowed"><span class="d"></span>fixed</span>A retired term in three views</h4><p>The Work empty state, the Intake dialog, and the connection wizard said "issue provider". They say "issue tracker" now, and the page specs and <code>check-tasks.mjs</code> follow.</p></div>
+  <div class="dx-find" id="find-copy-main"><h4><span class="b b-approval"><span class="d"></span>open</span>The copy check fails on main</h4><p><code>node tools/check-copy.mjs</code> reports findings on <code>origin/main</code> as well as on this branch, so <code>npm run check</code> cannot pass today. The largest groups are retired terms, brand case, and the glossary.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Interjection</h4><p><code>check-copy</code> retires the word, but the approvals drawer titles a row "Interjection" when a run waits on an answer, and the page spec is named <code>run-interjection</code>. The replacement word is Mac's to pick.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>A mid-dot in the list filters</h4><p><code>listify()</code> labels each filter's first option <code>All · State</code>, which puts a mid-dot in a label. "All states" follows the rule.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Auto-approve limit</h4><p><code>KEY_LABEL</code> shows <code>above_micros</code> as "Auto-approve limit". The brand's avoid list names auto-approve and replaces it with "allowed by rule".</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's copy against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Prose audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing every word in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its English rules. Be exact and adversarial: the rules are the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/prose.html in the roadmap repo. Read it in full: voice, the ten rules, headings and labels, casing and names, punctuation, numbers, empty values, vocabulary, retired and internal terms, words to avoid, claims, interface strings, identifiers and keys, spelling, and accessible writing.
+2. tools/check-copy.mjs. Its RULES and PROSE_ONLY arrays are the automated subset. Run the same patterns over the build's rendered text.
+3. The build's string sources: components, locale files, error messages, empty states, toasts, dialogs, tooltips, and aria-labels.
+4. Routes to sample: every page in the navigation, every tab, every dialog, the approvals drawer, the assistant, each page's empty, error, and denied state, and the phone shell at 390 by 844.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence: the route, the element, the exact text, and the source file and line.
+
+1. Automated patterns. Run every check-copy pattern over each route's visible text, with pre and code hidden, and the raw key pattern with .mono hidden too. Every match is a FAIL. Include views check-copy never opens: empty states and every dialog.
+2. Punctuation. No em dash, no en dash between words, no double hyphen, no semicolon, and no exclamation point in visible text or aria-labels. A pager figure such as 1–10 of 23 is allowed.
+3. Headings and labels. Every heading, panel title, tab, table header, label, and caption is sentence case and a plain noun, with no comma, no mid-dot, and no "not" or "never" contrast. Subtext under a heading is one sentence or nothing.
+4. Buttons. Each starts with a verb, is sentence case, and names its object when the verb alone is unclear. Count gold buttons per screen: more than one is a FAIL.
+5. Brand and names. The interface writes oxagen and stella in lowercase. Acronyms keep capitals (PR, CI, US, EU, APAC). Other products are written as their owners write them. "Mission Control" anywhere is a FAIL.
+6. Vocabulary. Each concept uses the one term in the vocabulary table. Any "Not" word from that table in page copy is a FAIL: quote it.
+7. Retired and internal terms. None appear in page copy. Storage names and raw keys never appear in prose. A stored key shows its KEY_LABEL label with the key in a tooltip.
+8. Numbers. Money matches usd() or usd0(). Negatives use a true minus sign. Counts use plural(). Units are spaced. Thousands take separators. Durations match dur(). Micros never show.
+9. Agreement. The same figure reads the same everywhere it appears: page, navigation, tab counts, drawer badges. Quote every pair that disagrees.
+10. Empty values. A missing value renders as a dash in --dim with a reason where one fits, or "not recorded" for an unbacked field. undefined, null, NaN, an empty slot, or an invented zero is a FAIL.
+11. Claims. Every control claim is scoped to actions routed through Oxagen or to governed calls. Observe mode reads as recorded, not enforced. No savings, leak, or compliance claim without its evidence.
+12. Interface strings. Errors say what happened, then what to do, with no apology. Empty states name the one action. Confirmations state what stays and what goes. Toasts state a past-tense fact.
+13. No design reasoning. No string explains the design, weighs its own words, or says what a figure is not.
+14. Accessible writing. Links name their destination. Icon buttons carry an aria-label with the action and object. Chip lists carry a hidden separator. No string points by color or position.
+15. Spelling. US English throughout.
+
+## Output
+
+Return one markdown report:
+
+# Prose: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Every failing string
+| Route | Element | Text as shown | Rule | Write instead |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the rule says. The exact replacement string.
+
+Rules: never mark PASS on an assumption. Read the rendered text and the source. Quote strings exactly. If the build cannot be started, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+
+</main>
+</div>
+</body>
+</html>
