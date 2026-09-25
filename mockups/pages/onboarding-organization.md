@@ -16,14 +16,14 @@ Step 1 of 3 of the gate after sign-up: name the organization and its first works
 
 ## What is on the page
 
-**Header.** Eyebrow “Step 1 of 3”, h1 “Name your organization”, lead “The organization is the tenant: it owns its own graph database, its own encryption key, its billing account, and the namespace that appears in every agent key.”
+**Header.** Eyebrow “Step 1 of 3”, h1 “Name your organization”, no lead. What the organization owns is in the component help (`mockups/help/onboarding-organization.md`, Page header).
 Actions (card footer): **Cancel** · caption “Creates `org_a-intel` and its graph database.” · **Continue** (gold). The shell carries a second **Cancel** at the top right.
 
 - **Organization name**: input `#ob-org`, demo value “Anderson Intelligence Corp.”.
 - Two-column grid: **Address**: read-only input `#ob-url`, `oxagen.com/a-intel`, hint “Derived from the name. You can change it later.” · **Namespace**: input `#ob-ns` (`maxlength=6`), `a-intel`, hint “2–6 characters, **immutable**. Every agent key starts with it: `a-intel.<workspace>.<agent>`”.
-- Divider, then h3 “First workspace”. Two-column grid: **Workspace name**: input `#ob-ws`, `core-platform` · **Governance mode**: select `#ob-mode` with `solo`, `team` (selected), `regulated`. Dim copy: “A workspace is a governance partition: one main repo, one steering set, its own agents, tool grants and budgets.”
+- Divider, then h3 “First workspace”. Two-column grid: **Workspace name**: input `#ob-ws`, `core-platform` · **Governance mode**: select `#ob-mode` with `solo`, `team` (selected), `regulated`. No copy under the grid. What a workspace is is in the component help (`mockups/help/onboarding-organization.md`, Organization form).
 
-**Shell.** No sidebar and no topbar, so this page has no approvals button and no approvals drawer. The gate shell (`regShell` in onboard mode): brandmark, `marcus@a-intel.example`, **Cancel** (the demo labels it “Exit demo”; the product build says “Cancel”); a three-step rail (`nav` labelled “Onboarding”): 1 Name the organization, 2 Wrap an agent, 3 Start a run, with step 1 current (`aria-current="step"`) and steps 2 and 3 disabled; the caption “The operator console opens when an agent first connects to oxagen. That connection also tests the install.” The phone layout is the same card at full width.
+**Shell.** No sidebar and no topbar, so this page has no approvals button and no approvals drawer. The gate shell (`regShell` in onboard mode): brandmark, `marcus@a-intel.example`, **Cancel** (the demo labels it “Exit demo”; the product build says “Cancel”); a three-step rail (`nav` labelled “Onboarding”): 1 Name the organization, 2 Wrap an agent, 3 Start a run, with step 1 current (`aria-current="step"`) and steps 2 and 3 disabled; no caption under the card (the gate's rationale is in `mockups/help/register-name.md`, Gate shell). The phone layout is the same card at full width.
 
 ## Data sources
 

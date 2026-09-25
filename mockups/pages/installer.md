@@ -16,10 +16,10 @@ The signed installer package’s own screens: download, installing, connected. T
 
 ## What is on the page
 
-**Header.** No eyebrow and no h1. The card header is h3 “Oxagen Agent Installer” with `Oxagen-Agent-2.4.0.pkg` at the right. Each screen has its own h2.
+**Header.** No eyebrow and no h1. The card header is h3 “oxagen Agent Installer” with `oxagen-agent-2.4.0.pkg` at the right. Each screen has its own h2.
 Actions: **Install** (gold) · **Cancel** on the Download screen; **Back to Oxagen** (gold) on the Connected screen. Under the card, a switch row “Installer screen” with **Download** · **Installing** · **Connected** (`aria-pressed` on the one showing).
 
-- **Download** (screen 0): h2 “Install the oxagen agent”. Copy: “One signed package installs the collector, the hook binary and a login item, then enrolls this host to **Anderson Intelligence Corp. / Core platform**. The one-time enrollment token is embedded, so there is nothing to paste.” Facts (`kvl`): **Package** `Oxagen-Agent-2.4.0.pkg` · **Size** 14.2 MB · **Signature** notarized · Developer ID · **Checksum** `sha256:3f9c71d2…b40a` · **Token** `oxe_1time_7QK4M2NV9XR3T8ZP`. Buttons **Install** · **Cancel**. Dim: “Installs to your user account only. No sudo, no system extension, and nothing leaves the host except frames.”
+- **Download** (screen 0): h2 “Install the oxagen agent”. Copy: “One signed package installs the collector, the hook binary and a login item, then enrolls this host to **Anderson Intelligence Corp. / Core platform**. The one-time enrollment token is embedded, so there is nothing to paste.” Facts (`kvl`): **Package** `oxagen-agent-2.4.0.pkg` · **Size** 14.2 MB · **Signature** notarized · Developer ID · **Checksum** `sha256:3f9c71d2…b40a` · **Token** `oxe_1time_7QK4M2NV9XR3T8ZP`. Buttons **Install** · **Cancel**. Dim: “Installs to your user account only. No sudo, no system extension, and nothing leaves the host except frames.”
 - **Installing** (screen 1): h2 “Installing”, “Step N of 8”, a progress bar, and the eight steps (`OB_INSTALL`) with ✓ done, › now, · pending: Install the oxagend collector to /usr/local/bin · Install the oxagen-hook binary · Register a login item (launchd: com.oxagen.oxagend) · Write Claude Code hooks to ~/.claude/settings.json · Fetch the signed policy bundle and cache it · Register the Oxagen MCP endpoint as a tool server · Enroll this host with an Ed25519 device key · Run a one-turn smoke session. No buttons.
 - **Connected** (screen 2): “connected” (dot and word) with `14:02:11` at the right. h2 “Connected to Anderson Intelligence Corp.”. Copy: “The smoke session produced its first frame and Oxagen countersigned it. `a-intel.core.release-manager` is wrapped at **harness** tier.” One frame row: seq 0 `14:02:11` `agent_start` “device key ed25519:7f3a…c19e · countersigned on ingest”. Copy: “Roll back at any time. This removes the hooks, the login item and the base URL, and restores your previous settings file:” then `oxagen agent unenroll --host mbell-mbp.local --restore`. **Back to Oxagen** · “The operator console is already unlocking in your browser.”
 
@@ -43,7 +43,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell), on the Download screen.
-- **error**: the card body is replaced and the screen switch row is hidden. h2 “Enrollment token rejected”, then “The token `oxe_1time_7QK4M2NV9XR3T8ZP` has already been used, at 13:58 on 11 Sep 2026 by host `mbp-marcus`. Enrollment tokens are single use.”, then “Nothing was installed. Generate a fresh token from the wrap step and run the installer again.” Action: **Back to wrap an agent** (returns to Wrap an agent). No gold action.
+- **error**: the card body is replaced and the screen switch row is hidden. h2 “Enrollment token rejected”, then the inline error “The token `oxe_1time_7QK4M2NV9XR3T8ZP` has already been used.”, then “It was used at 13:58 on 11 Sep 2026 by host `mbp-marcus`. Enrollment tokens are single use.”, then “Nothing was installed. Generate a fresh token from the wrap step and run the installer again.” Action: **Back to wrap an agent** (returns to Wrap an agent). No gold action.
 
 ## Mobile
 

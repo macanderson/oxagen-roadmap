@@ -16,17 +16,17 @@ Step 1 of 3 of Register agent: reserve the agent key. The key is held during set
 
 ## What is on the page
 
-**Header.** Eyebrow “Step 1 of 3”, h1 “Name the agent”, lead “This key is held for you during setup and can’t be changed later. Nothing is saved until the agent connects for the first time.”
+**Header.** Eyebrow “Step 1 of 3”, h1 “Name the agent”, lead “This key is held for you during setup and can’t be changed later.” Why nothing is saved yet is in the component help (`mockups/help/register-name.md`, Page header).
 Actions (card footer): **Cancel** · **Continue** (gold). The shell carries a second **Cancel** at the top right.
 
 - Card, a two-by-two grid of fields:
-  - **Agent name**: input `#regSlug`, demo value `perf-watch`. Hint “The agent key becomes `a-intel.core.perf-watch`.” The key in the hint and in the note below rewrites on every keystroke (`regKeyLive`).
-  - **Workspace**: read-only input, “Core platform · a-intel/platform”. Hint “Its definition file lands in `.oxagen/agents/` in the main repo.”
+  - **Agent name**: input `#regSlug`, demo value `perf-watch`. Hint “The agent key becomes `a-intel.core.perf-watch`.” The key in the hint rewrites on every keystroke (`regKeyLive`).
+  - **Workspace**: read-only input, “Core platform · a-intel/platform”. No hint.
   - **Harness**: select with `claude-code`, `codex-cli`, `stella`, `claude-agent-sdk`, `custom`. Hint “Picks the installer on the next step. It can be changed there.”
-  - **Model class**: select with `complex`, `light`. Hint “The harness calls the model with its own key. The tier is recorded on every frame.”
-- Note under the grid: “Continue creates a one-time enrollment token for `a-intel.core.perf-watch`. Nothing is saved and no PR opens until the agent first connects. That first session then opens the pull request that adds the definition file.”
+  - **Model class**: select with `complex`, `light`. No hint.
+- No note under the grid. Where the definition file lands, what the model class means, and what Continue creates and does not write are in the component help (`mockups/help/register-name.md`, Agent form).
 
-**Shell.** No sidebar and no topbar, so this page has no approvals button and no approvals drawer. The gate shell (`regShell`) is the brandmark, the signed-in email `marcus@a-intel.example`, and a **Cancel** button, then a three-step rail (`nav` labelled “Register an agent”): 1 Name the agent, 2 Wrap the agent, 3 Wait for the first frame. The current step carries `aria-current="step"`, a done step shows ✓ and is a button back to that step, and a later step is disabled. Under the card a caption reads “Registration finishes when the agent first connects to oxagen. That connection also tests the install. Cancel at any time. Nothing is saved until the agent connects.” The phone layout is the same card at full width.
+**Shell.** No sidebar and no topbar, so this page has no approvals button and no approvals drawer. The gate shell (`regShell`) is the brandmark, the signed-in email `marcus@a-intel.example`, and a **Cancel** button, then a three-step rail (`nav` labelled “Register an agent”): 1 Name the agent, 2 Wrap the agent, 3 Wait for the first frame. The current step carries `aria-current="step"`, a done step shows ✓ and is a button back to that step, and a later step is disabled. There is no caption under the card. What finishes registration is in the component help (`mockups/help/register-name.md`, Gate shell). The phone layout is the same card at full width.
 
 ## Data sources
 
@@ -42,7 +42,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - The slug is normalised live: lower case, letters, digits, and hyphens only, and `agent` when empty (`regSlug`). The key is `<org>.<first segment of the workspace slug>.<slug>`, so `core-platform` gives `a-intel.core.perf-watch`.
 - Changing the harness preselects the matching tab on the wrap step (`regTabFor`: Claude Code, Codex CLI, or SDK agent for everything else).
 - Continue goes to `/register/wrap`. Nothing is written yet.
-- Either Cancel (`regCancel`) clears `S.reg` and its timers, returns to Work, and toasts “Registration cancelled. Nothing was installed and nothing was written.”
+- Either Cancel (`regCancel`) clears `S.reg` and its timers, returns to Work, and toasts “Registration canceled. Nothing was installed and nothing was written.”
 
 ## States
 

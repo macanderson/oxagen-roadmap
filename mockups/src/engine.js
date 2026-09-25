@@ -10488,32 +10488,26 @@ function regShell(step,inner){
   var steps=ob?[{id:"organization",n:1,lab:"Name the organization"},{id:"wrap",n:2,lab:"Wrap an agent"},{id:"run",n:3,lab:"Start a run"}]
               :[{id:"name",n:1,lab:"Name the agent"},{id:"wrap",n:2,lab:"Wrap the agent"},{id:"run",n:3,lab:"Wait for the first frame"}];
   var cur=step==="wrap"?2:step==="run"?3:1, me=PEOPLE.marcus;
-  return '<div class="reg-gate"><div class="reg-top"><div class="brandmark">'+LOGO+'</div><span class="who">'+h(me.email)+'</span>'+
+  return '<div class="reg-gate" data-help="register-name/gate-shell"><div class="reg-top"><div class="brandmark">'+LOGO+'</div><span class="who">'+h(me.email)+'</span>'+
    '<button class="btn sm" onclick="regCancel()">'+(ob&&!PRODUCT?"Exit demo":"Cancel")+'</button></div>'+
-   '<div class="reg-in"><nav class="reg-steps" aria-label="'+(ob?"Onboarding":"Register an agent")+'">'+steps.map(function(s){
+   '<div class="reg-in"><div data-help="register-name/step-rail"><nav class="reg-steps" aria-label="'+(ob?"Onboarding":"Register an agent")+'">'+steps.map(function(s){
      var done=s.n<cur;
      return '<button type="button"'+(done?' class="done" onclick="regNav(\''+s.id+'\')"':'')+(s.n===cur?' aria-current="step"':'')+(s.n>cur?' disabled':'')+'>'+
-      '<span class="sn">'+(done?'✓':s.n)+'</span><span class="slab">'+h(s.lab)+'</span></button>';}).join("")+'</nav>'+
-   inner+
-   '<p class="reg-cap" style="margin-top:22px;text-align:center">'+(ob
-    ?'The operator console opens when an agent first connects to oxagen. That connection also tests the install.'
-    :'Registration finishes when the agent first connects to oxagen. That connection also tests the install. Cancel at any time. Nothing is saved until the agent connects.')+'</p></div></div>';
+      '<span class="sn">'+(done?'✓':s.n)+'</span><span class="slab">'+h(s.lab)+'</span></button>';}).join("")+'</nav></div>'+
+   inner+'</div></div>';
 }
 function regName(){
   var r=S.reg, w=ws(), key=regKey();
   function opts(list,cur,names){return list.map(function(o){return '<option value="'+o+'"'+(cur===o?' selected':'')+'>'+h(names&&names[o]||o)+'</option>';}).join("");}
-  return '<div><p class="eyebrow">Step 1 of 3</p><h1>Name the agent</h1>'+
-   '<p class="reg-lead">This key is held for you during setup and can\u2019t be changed later. Nothing is saved until the agent connects for the first time.</p></div>'+
-   '<div class="reg-card"><div class="cb">'+
-   '<div class="grid g2"><div class="field"><label for="regSlug">Agent name</label><input id="regSlug" value="'+h(r.slug)+'" oninput="regKeyLive()">'+
+  return '<div data-help="header"><p class="eyebrow">Step 1 of 3</p><h1>Name the agent</h1>'+
+   '<p class="reg-lead">This key is held for you during setup and can\u2019t be changed later.</p></div>'+
+   '<div class="reg-card" data-help="agent-form"><div class="cb">'+
+   '<div class="grid g2"><div class="field" data-help="register-name/agent-key"><label for="regSlug">Agent name</label><input id="regSlug" value="'+h(r.slug)+'" oninput="regKeyLive()">'+
     '<div class="hint">The agent key becomes <span class="mono regKeyLive">'+h(key)+'</span>.</div></div>'+
-   '<div class="field"><label>Workspace</label><input value="'+h(w.name)+' · '+h(w.main)+'" aria-label="Workspace" readonly>'+
-    '<div class="hint">Its definition file lands in <span class="mono">.oxagen/agents/</span> in the main repo.</div></div></div>'+
+   '<div class="field"><label>Workspace</label><input value="'+h(w.name)+' · '+h(w.main)+'" aria-label="Workspace" readonly></div></div>'+
    '<div class="grid g2"><div class="field"><label>Harness</label><select aria-label="Harness" onchange="S.reg.harness=this.value;S.reg.tab=regTabFor(this.value);render()">'+opts(["claude-code","codex-cli","stella","claude-agent-sdk","custom"],r.harness,REG_HARNESS)+'</select>'+
     '<div class="hint">Picks the installer on the next step. It can be changed there.</div></div>'+
-   '<div class="field"><label>Model class</label><select aria-label="Model class" onchange="S.reg.tier=this.value">'+opts(["complex","light"],r.tier)+'</select>'+
-    '<div class="hint">The harness calls the model with its own key. The tier is recorded on every frame.</div></div></div>'+
-   '<div class="note">Continue creates a one-time enrollment token for <span class="mono regKeyLive">'+h(key)+'</span>. Nothing is written to the database and no PR opens until the agent first connects. That first session then opens the pull request that adds the definition file.</div>'+
+   '<div class="field"><label>Model class</label><select aria-label="Model class" onchange="S.reg.tier=this.value">'+opts(["complex","light"],r.tier)+'</select></div></div>'+
    '</div></div>'+
    '<div class="reg-foot">'+regCancelBtn()+'<div class="sp"><button class="btn primary" onclick="regNav(\'wrap\')">Continue</button></div></div>';
 }
@@ -10521,26 +10515,24 @@ function regWrap(){
   var r=S.reg, key=regKey();
   var osName={macos:"macOS",windows:"Windows",linux:"Linux"};
   var osFile=REG_PKG[r.os];
-  function osTabs(){return '<div class="reg-os" role="tablist" aria-label="Operating system">'+["macos","windows","linux"].map(function(o){
-    return '<button type="button" role="tab" aria-selected="'+(r.os===o)+'" onclick="S.reg.os=\''+o+'\';render()">'+osName[o]+'</button>';}).join("")+'</div>';}
-  function tok(){return '<div class="reg-tok">one-time enrollment token embedded<br><b>'+REG_TOKEN+'</b><br><span class="dim">expires in 30 min · single use</span></div>';}
+  function osTabs(){return '<div data-help="register-wrap/os-tabs"><div class="reg-os" role="tablist" aria-label="Operating system">'+["macos","windows","linux"].map(function(o){
+    return '<button type="button" role="tab" aria-selected="'+(r.os===o)+'" onclick="S.reg.os=\''+o+'\';render()">'+osName[o]+'</button>';}).join("")+'</div></div>';}
+  function tok(){return '<div class="reg-tok" data-help="register-wrap/enrollment-token">one-time enrollment token embedded<br><b>'+REG_TOKEN+'</b><br><span class="dim">expires in 30 min · single use</span></div>';}
   function earn(rows){return '<div class="reg-earn">'+rows.map(function(x){return '<div><span>'+x[0]+'</span>'+tierBadge(x[1])+(x[2]||'')+'</div>';}).join("")+'</div>';}
   var panel;
   if(r.tab==="cc"){
-    panel='<section class="reg-wp" role="tabpanel"><div class="wm"><h3>Claude Code <span class="b" style="color:var(--st-allowed);border-color:color-mix(in srgb,var(--st-allowed) 45%,transparent);background:color-mix(in srgb,var(--st-allowed) 12%,transparent)">recommended</span></h3>'+
-     '<p>The installer writes the hooks, installs the <span class="mono">oxagend</span> collector and the <span class="mono">oxagen-hook</span> binary, registers them to start at login, and enrolls this host with an Ed25519 device key. Nothing is copied or pasted: the one-time enrollment token is embedded in the download.</p>'+
-     earn([["This agent","harness"],["Next rung","gateway"],["Top rung","contained"]])+
-     '<p class="dim">The tier is computed per run from what was actually routed, never from what the adapter can do on paper. Hooks deliver steering and can refuse at four events. The harness reports what they did, and they fail open.</p></div>'+
-     '<div class="wa"><p class="eyebrow q">Download</p>'+osTabs()+
+    panel='<section class="reg-wp" role="tabpanel"><div class="wm" data-help="register-wrap/claude-code-panel"><h3>Claude Code <span class="b" style="color:var(--st-allowed);border-color:color-mix(in srgb,var(--st-allowed) 45%,transparent);background:color-mix(in srgb,var(--st-allowed) 12%,transparent)">recommended</span></h3>'+
+     '<p>The installer writes the hooks, installs the <span class="mono">oxagend</span> collector and the <span class="mono">oxagen-hook</span> binary, registers them to start at login, and enrolls this host with an Ed25519 device key.</p>'+
+     earn([["This agent","harness"],["Next rung","gateway"],["Top rung","contained"]])+'</div>'+
+     '<div class="wa" data-help="register-wrap/download"><p class="eyebrow q">Download</p>'+osTabs()+
      '<button class="btn primary" style="justify-content:center" onclick="regInstall(\'claude-code\')">Download for '+osName[r.os]+'</button>'+
      '<div class="dim mono" style="font-size:11px;line-height:1.6">'+osFile.f+'<br>'+osFile.s+' · '+osFile.note+'<br>'+osFile.sha+'</div>'+tok()+
      '<span class="dim" style="font-size:12px">or run</span><pre>oxagen agent enroll --token '+REG_TOKEN+'</pre></div></section>';
   } else if(r.tab==="codex"){
-    panel='<section class="reg-wp" role="tabpanel"><div class="wm"><h3>Codex CLI</h3>'+
-     '<p>The same installer, with the Codex profile. It writes <span class="mono">~/.codex/config.toml</span>: the oxagen MCP endpoint, the notify hook to the collector, and the approval policy routed through oxagen.</p>'+
-     earn([["This agent","harness",' <span class="b b-q">or observe</span>'],["Next rung","gateway"],["Top rung","contained"]])+
-     '<p class="dim">Which of the two the native tools earn depends on the harness version. On versions that do not expose an approval hook the agent is recorded only, and the run says so.</p></div>'+
-     '<div class="wa"><p class="eyebrow q">Download</p>'+osTabs()+
+    panel='<section class="reg-wp" role="tabpanel"><div class="wm" data-help="register-wrap/codex-cli-panel"><h3>Codex CLI</h3>'+
+     '<p>The installer writes <span class="mono">~/.codex/config.toml</span>: the oxagen MCP endpoint, the notify hook to the collector, and the approval policy routed through oxagen.</p>'+
+     earn([["This agent","harness",' <span class="b b-q">or observe</span>'],["Next rung","gateway"],["Top rung","contained"]])+'</div>'+
+     '<div class="wa" data-help="register-wrap/download"><p class="eyebrow q">Download</p>'+osTabs()+
      '<button class="btn primary" style="justify-content:center" onclick="regInstall(\'codex-cli\')">Download for '+osName[r.os]+'</button>'+
      '<div class="dim mono" style="font-size:11px;line-height:1.6">'+osFile.f+'<br>'+osFile.s+' · '+osFile.note+'<br>profile: codex-cli</div>'+tok()+
      '<span class="dim" style="font-size:12px">or run</span><pre>oxagen agent enroll --harness codex-cli</pre></div></section>';
@@ -10549,22 +10541,21 @@ function regWrap(){
      ts:{install:"npm i @oxagen/sdk",code:'<span class="k">import</span> { oxagen } <span class="k">from</span> <span class="s">"@oxagen/sdk"</span>;\n<span class="k">const</span> agent = oxagen.agent.wrap({\n  key: <span class="s">"'+h(key)+'"</span>,\n  token: process.env.OXAGEN_AGENT_TOKEN,\n});'},
      py:{install:"pip install oxagen",code:'<span class="k">from</span> oxagen <span class="k">import</span> oxagen\nagent = oxagen.agent.wrap(\n    key=<span class="s">"'+h(key)+'"</span>,\n    token=os.environ[<span class="s">"OXAGEN_AGENT_TOKEN"</span>],\n)'},
      go:{install:"go get github.com/oxagen/oxagen-go",code:'<span class="k">import</span> <span class="s">"github.com/oxagen/oxagen-go"</span>\nagent := oxagen.Agent.Wrap(oxagen.WrapOptions{\n    Key:   <span class="s">"'+h(key)+'"</span>,\n    Token: os.Getenv(<span class="s">"OXAGEN_AGENT_TOKEN"</span>),\n})'}}[r.lang];
-    panel='<section class="reg-wp" role="tabpanel"><div class="wm"><h3>SDK agent</h3>'+
-     '<p>Five lines in your own process. <span class="mono">oxagen.agent.wrap({})</span> installs a frame emitter, the checkpoint gate before each turn, and the oxagen MCP endpoint as the agent’s tool provider. Works with the OpenAI Agents SDK, the Claude Agent SDK, stella, and any custom loop.</p>'+
+    panel='<section class="reg-wp" role="tabpanel"><div class="wm" data-help="register-wrap/sdk-agent-panel"><h3>SDK agent</h3>'+
+     '<p><span class="mono">oxagen.agent.wrap({})</span> installs a frame emitter, the checkpoint gate before each turn, and the oxagen MCP endpoint as the agent’s tool provider.</p>'+
      earn([["This agent","harness"],["Next rung","gateway"],["Top rung","contained"]])+'</div>'+
-     '<div class="wa"><p class="eyebrow q">Agent credential</p>'+
+     '<div class="wa" data-help="register-wrap/agent-credential"><p class="eyebrow q">Agent credential</p>'+
      '<div class="reg-tok">issued once to the operator<br><b>ox_live_••••••••••••3f7a</b><br><span class="dim">hashed at rest · purpose-locked · revocable</span></div>'+
-     '<p class="dim" style="margin:0;font-size:12px">Set it as <span class="mono">OXAGEN_AGENT_TOKEN</span>. oxagen mints short-lived run tokens from it at run start. Revoking the credential kills every run token at the next call.</p>'+
+     '<p class="dim" style="margin:0;font-size:12px">Set it as <span class="mono">OXAGEN_AGENT_TOKEN</span>.</p>'+
      '<pre><span class="c">$</span> '+h(sdk.install)+'</pre></div>'+
      '<div class="wfull"><div class="row"><div class="reg-os" role="tablist" aria-label="Language" style="max-width:300px;flex:1">'+["ts","py","go"].map(function(l){
        return '<button type="button" role="tab" aria-selected="'+(r.lang===l)+'" onclick="S.reg.lang=\''+l+'\';render()">'+({ts:"TypeScript",py:"Python",go:"Go"}[l])+'</button>';}).join("")+'</div>'+
      '<button class="btn" style="margin-left:auto" onclick="act(\'Five lines copied.\')">Copy the five lines</button></div>'+
-     '<pre>'+sdk.code+'</pre></div></section>';
+     '<pre data-help="register-wrap/sdk-snippet">'+sdk.code+'</pre></div></section>';
   }
-  return '<div><p class="eyebrow">Step 2 of 3</p><h1>'+(S.reg.mode==="onboard"?"Wrap an agent":"Wrap the agent")+'</h1>'+
-   '<p class="reg-lead">The installer carries a one-time enrollment token for <span class="mono">'+h(key)+'</span>, so nothing is copied or pasted.</p></div>'+
-   '<div class="reg-card"><div class="reg-tabs" role="tablist" aria-label="How to wrap the agent">'+REG_TABS.map(function(t){
-     return '<button type="button" role="tab" aria-selected="'+(r.tab===t.id)+'" onclick="S.reg.tab=\''+t.id+'\';render()"><span class="n hxn">'+hxIcon(t.id==="sdk"&&regTabFor(r.harness)==="sdk"?r.harness:t.hx,15)+'<span>'+t.n+'</span></span><span class="s">'+t.s+'</span></button>';}).join("")+'</div>'+panel+'</div>'+
+  return '<div data-help="header"><p class="eyebrow">Step 2 of 3</p><h1>'+(S.reg.mode==="onboard"?"Wrap an agent":"Wrap the agent")+'</h1></div>'+
+   '<div class="reg-card"><div data-help="register-wrap/harness-tabs"><div class="reg-tabs" role="tablist" aria-label="How to wrap the agent">'+REG_TABS.map(function(t){
+     return '<button type="button" role="tab" aria-selected="'+(r.tab===t.id)+'" onclick="S.reg.tab=\''+t.id+'\';render()"><span class="n hxn">'+hxIcon(t.id==="sdk"&&regTabFor(r.harness)==="sdk"?r.harness:t.hx,15)+'<span>'+t.n+'</span></span><span class="s">'+t.s+'</span></button>';}).join("")+'</div></div>'+panel+'</div>'+
    '<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\''+(S.reg.mode==="onboard"?"organization":"name")+'\')">Back</button>'+
    '<div class="sp"><span class="reg-cap">Nothing completes until a frame arrives.</span><button class="btn" onclick="regInstall(null)">I already installed it</button></div></div>';
 }
@@ -10585,12 +10576,9 @@ function regLines(){
 function regRun(){
   var r=S.reg, key=regKey(), me=PEOPLE.marcus, hl=REG_HARNESS[r.harness]||r.harness;
   var ob=r.mode==="onboard";
-  var head=ob?'<div><p class="eyebrow">Step 3 of 3</p><h1>Start a run</h1>'+
-   '<p class="reg-lead">The operator console opens the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen, and lands you on Work looking at your own run.</p></div>'
-   :'<div><p class="eyebrow">Step 3 of 3</p><h1>Wait for the first frame</h1>'+
-   '<p class="reg-lead">Registration completes the moment the first frame from <span class="mono">'+h(key)+'</span> reaches oxagen and lands you on Work looking at its run.</p></div>';
+  var head='<div data-help="header"><p class="eyebrow">Step 3 of 3</p><h1>'+(ob?'Start a run':'Wait for the first frame')+'</h1></div>';
   if(S.state==="error") return head+
-   '<div class="reg-card"><div class="reg-err"><h2>The collector cannot reach oxagen</h2>'+
+   '<div class="reg-card"><div class="reg-err" data-help="register-run/collector-unreachable"><h2>The collector cannot reach oxagen</h2>'+
    '<p>The host <span class="mono">'+REG_HOST+'</span> enrolled, but every request to <span class="mono">https://ingest.oxagen.com/v1</span> has been refused for 94 seconds (<span class="mono">ECONNREFUSED</span>, 6 attempts). No frame has arrived, so registration will not complete.</p>'+
    '<p>Check that outbound 443 to <span class="mono">ingest.oxagen.com</span> is allowed, then run <span class="mono">oxagen agent status</span>.</p>'+
    '<p class="mono dim" style="font-size:11px">request req_01JQ8F4B1PC7QM · host '+REG_HOST+'</p>'+
@@ -10599,20 +10587,19 @@ function regRun(){
   var lines=regLines(), shown=r.first?lines.length:Math.min(r.log,lines.length-1);
   var body, foot;
   if(r.first){
-    body='<div class="reg-card"><div class="ch"><span class="reg-ok"><span class="dot"></span>connected</span><h3>First frame received</h3><span class="sp">14:02:11.402</span></div>'+
+    body='<div class="reg-card"><div class="ch" data-help="register-run/first-frame-received"><span class="reg-ok"><span class="dot"></span>connected</span><h3>First frame received</h3><span class="sp">14:02:11.402</span></div>'+
      '<div class="cb"><div class="reg-frames">'+
      '<div><span class="sq">0</span><span class="ts">14:02:11.402</span><span class="kd">agent_start</span><span class="bd">harness='+h(r.harness)+' · host='+REG_HOST+' · attested=device-key · countersigned</span></div>'+
      '<div><span class="sq">1</span><span class="ts">14:02:11.418</span><span class="kd">oxagen:run.start</span><span class="bd">agent='+h(key)+' · operator='+h(me.name)+' · tier=harness · steering=none published</span></div></div>'+
-     '<div class="row" style="margin-top:12px">'+tierBadge("harness")+'<span class="b b-q">chain intact</span></div>'+
-     '<p class="muted" style="font-size:12.5px;margin:12px 0 0">The tier is computed from what was actually routed, not from what the adapter can do on paper. The hooks answered, so this run is <b>harness</b>: delivered, recorded, reported by the harness, and fail-open.</p></div></div>';
+     '<div class="row" style="margin-top:12px">'+tierBadge("harness")+'<span class="b b-q">chain intact</span></div></div></div>';
     foot='<div class="reg-foot">'+regCancelBtn()+''+
      '<div class="sp"><span class="reg-cap" id="regAuto">'+(r.runId?'Unlocked · <span class="mono">'+h(r.runId)+'</span> is live':'Opening automatically…')+'</span><button class="btn primary" onclick="regFinish()">'+(ob?"Open oxagen":"Open in Work")+'</button></div></div>';
   } else {
-    body='<div class="reg-card"><div class="ch"><span class="reg-spin"></span><h3>Waiting for the first frame</h3><span class="sp">polling · 1s</span></div>'+
+    body='<div class="reg-card"><div class="ch" data-help="register-run/waiting-for-the-first-frame"><span class="reg-spin"></span><h3>Waiting for the first frame</h3><span class="sp">polling · 1s</span></div>'+
      '<div class="cb"><div class="row" style="margin-bottom:12px"><span class="b b-q mono">'+h(key)+'</span><span class="b b-q">'+h(hl)+'</span><span class="b b-q">host '+REG_HOST+'</span></div>'+
-     '<div class="reg-log">'+lines.slice(0,shown).map(function(l,i){return '<div class="'+(l.hit?'hit':'')+(i===shown-1?' new':'')+'"><span class="t">'+l.t+'</span><span>'+l.x+'</span></div>';}).join("")+
+     '<div class="reg-log" data-help="register-run/setup-log">'+lines.slice(0,shown).map(function(l,i){return '<div class="'+(l.hit?'hit':'')+(i===shown-1?' new':'')+'"><span class="t">'+l.t+'</span><span>'+l.x+'</span></div>';}).join("")+
      '<div><span class="t">&nbsp;</span><span class="dim">waiting…</span></div></div>'+
-     '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Start '+h(hl)+' in any repository on <span class="mono">'+REG_HOST+'</span>. The installer already ran a one-turn smoke session; if it is still in flight this flips on its own.</p></div></div>';
+     '<p class="muted" style="font-size:12.5px;margin:12px 0 0">Start '+h(hl)+' in any repository on <span class="mono">'+REG_HOST+'</span>.</p></div></div>';
     foot='<div class="reg-foot">'+regCancelBtn()+'<button class="btn" onclick="regNav(\'wrap\')">Back</button>'+
      '<div class="sp">'+(ob&&!S.scn?'<button class="btn ghost" onclick="obGo(\'installer\')">Open the installer</button>':'')+'<span class="reg-cap">This step completes when the first frame arrives.</span></div></div>';
   }
@@ -10690,7 +10677,7 @@ function obGo(step){
   var hh=obHash(step); if(location.hash!==hh)location.hash=hh; else render();
 }
 function obExit(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);if(!PRODUCT)act('Onboarding demo closed. Nothing was written.');}
-function obSignedIn(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Signed in as '+PEOPLE.marcus.name+'. The session is recorded like any other governed action.');}
+function obSignedIn(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Signed in as '+PEOPLE.marcus.name+'.');}
 function obBind(){if(S.reg)S.reg.repo="bound";delete ws().provisional;render();act('GitHub App installed on '+ws().main+'. Main repo linked. Pull requests, checks, and the code graph are on.');}
 function obSkip(){
   var w=ws(); if(S.reg)S.reg.repo="skipped";
@@ -10784,13 +10771,13 @@ function obInstaller(){
   var st=S.ob.inst||0, pkg=REG_PKG.macos, w=ws(), key=ORG.slug+"."+w.slug.split("-")[0]+"."+obNew().slug;
   var body;
   function shell(inner){
-    return obShell('<div class="reg-card" style="margin-top:0"><div class="ch"><h3>oxagen Agent Installer</h3><span class="sp">'+h(pkg.f)+'</span></div><div class="cb">'+inner+'</div></div>'+
-     (S.state==="error"?'':'<div class="row" style="justify-content:center;margin-top:14px;flex-wrap:wrap"><span class="dim" style="font-size:12px">Installer screen</span>'+
+    return obShell('<div class="reg-card" style="margin-top:0"><div class="ch" data-help="installer-window"><h3>oxagen Agent Installer</h3><span class="sp">'+h(pkg.f)+'</span></div><div class="cb" data-help="'+(S.state==="error"?"token-rejected":["download-screen","installing-screen","connected-screen"][st])+'">'+inner+'</div></div>'+
+     (S.state==="error"?'':'<div class="row" data-help="screen-switch" style="justify-content:center;margin-top:14px;flex-wrap:wrap"><span class="dim" style="font-size:12px">Installer screen</span>'+
       ["Download","Installing","Connected"].map(function(l,i){return '<button class="btn sm'+(st===i?' sel':' ghost')+'" aria-pressed="'+(st===i)+'" onclick="obInstallScreen('+i+')">'+l+'</button>';}).join("")+'</div>'),true);
   }
   if(S.state==="error") return shell('<h2 style="font-size:19px;margin:0 0 8px">Enrollment token rejected</h2>'+
    obErr('The token <span class="mono">'+h(REG_TOKEN)+'</span> has already been used.')+
-   '<p class="muted" style="font-size:13px;margin:8px 0 8px">The token <span class="mono">'+h(REG_TOKEN)+'</span> has already been used, at 13:58 on '+h(obDate(0))+' by host <span class="mono">mbp-marcus</span>. Enrollment tokens are single use.</p>'+
+   '<p class="muted" style="font-size:13px;margin:8px 0 8px">It was used at 13:58 on '+h(obDate(0))+' by host <span class="mono">mbp-marcus</span>. Enrollment tokens are single use.</p>'+
    '<p class="muted" style="font-size:13px;margin:0 0 14px">Nothing was installed. Generate a fresh token from the wrap step and run the installer again.</p>'+
    '<button class="btn" onclick="obGo(\'wrap\')">Back to wrap an agent</button>');
   if(st===0) body='<h2 style="font-size:19px;margin:0 0 6px">Install the oxagen agent</h2>'+
@@ -10829,7 +10816,7 @@ function obAccountTab(){
 
 /* ---- auth shell and form pieces ---- */
 function obShell(inner,wide){
-  return '<div class="ob-auth"><div class="ob-top"><div class="brandmark">'+LOGO+'</div>'+
+  return '<div class="ob-auth"><div class="ob-top" data-help="signup/auth-shell"><div class="brandmark">'+LOGO+'</div>'+
    (PRODUCT?'':'<button class="btn sm" onclick="obExit()">Exit demo</button>')+'</div>'+
    '<div class="ob-card'+(wide?" wide":"")+'">'+inner+'</div></div>';
 }
@@ -10840,7 +10827,7 @@ function obPrimary(label,busy){
 }
 function obSso(next){
   var go_=next==="work"?"obSignedIn()":"obGo('organization')";
-  return '<div class="ob-sso"><button type="button" class="btn" onclick="'+go_+'">'+OB_ICON.google+'<span>Continue with Google</span></button>'+
+  return '<div class="ob-sso" data-help="signup/single-sign-on"><button type="button" class="btn" onclick="'+go_+'">'+OB_ICON.google+'<span>Continue with Google</span></button>'+
    '<button type="button" class="btn" onclick="'+go_+'">'+OB_ICON.github+'<span>Continue with GitHub</span></button>'+
    '</div>';
 }
@@ -10867,41 +10854,41 @@ function obCodeBack(e,inp){if(e.key==="Backspace"&&!inp.value&&inp.previousEleme
 /* ---- the auth screens ---- */
 function obSignup(){
   var err=S.state==="error", me=PEOPLE.marcus;
-  return obShell('<div class="ob-h"><p class="eyebrow">Create your account</p><h1>Govern the agents you already run.</h1>'+
+  return obShell('<div class="ob-h" data-help="header"><p class="eyebrow">Create your account</p><h1>Govern the agents you already run.</h1>'+
    '<p class="ob-lead">Wrap Claude Code, Codex CLI, stella or an SDK agent, with an included monthly allowance of governed actions and every governance feature on.</p></div>'+
    '<div class="ob-panel">'+(err?obErr('<b>That email is already registered.</b> Log in instead, or reset your password.'):'')+
    obSso("organization")+'<div class="ob-or">or</div>'+
-   '<form class="ob-form" onsubmit="event.preventDefault();obGo(\'verify\')">'+
+   '<form class="ob-form" data-help="sign-up-form" onsubmit="event.preventDefault();obGo(\'verify\')">'+
    '<div class="field"><label for="ob-name">Name</label><input id="ob-name" type="text" value="'+h(me.name)+'" autocomplete="name"></div>'+
    '<div class="field"><label for="ob-email">Work email</label><input id="ob-email" type="email" class="'+(err?"ob-bad":"")+'" value="'+h(me.email)+'" autocomplete="email">'+
     (err?'<div class="hint" style="color:var(--st-failed)">An account for this address was created on 9 Sep 2026.</div>':'')+'</div>'+
-   '<div class="field"><label for="ob-pw">Password</label>'+obPwField("ob-pw")+'</div>'+
+   '<div class="field" data-help="signup/password-field"><label for="ob-pw">Password</label>'+obPwField("ob-pw")+'</div>'+
    obPrimary("Create account","Creating account…")+
-   '<p class="hint" style="margin:0;font-size:11.5px;color:var(--dim);line-height:1.45">By creating an account you agree to the oxagen <a class="lnk" href="https://oxagen.sh/terms" target="_blank" rel="noopener">Terms</a> and <a class="lnk" href="https://oxagen.sh/privacy" target="_blank" rel="noopener">Privacy Notice</a>. oxagen never stores your model provider keys in plain text, and never returns them once saved.</p></form></div>'+
+   '<p class="hint" style="margin:0;font-size:11.5px;color:var(--dim);line-height:1.45">By creating an account you agree to the oxagen <a class="lnk" href="https://oxagen.sh/terms" target="_blank" rel="noopener">Terms</a> and <a class="lnk" href="https://oxagen.sh/privacy" target="_blank" rel="noopener">Privacy Notice</a>.</p></form></div>'+
    '<p class="ob-foot">Already have an account? <a href="#/welcome/login">Log in</a></p>'+
    '<div class="ob-tags"><span class="b b-q">included monthly allowance</span><span class="b b-q">no token markup</span><span class="b b-q">SOC 2 evidence built in</span></div>');
 }
 function obVerify(){
   var err=S.state==="error", me=PEOPLE.marcus;
-  return obShell('<div class="ob-h"><p class="eyebrow">Step 1 of 2</p><h1>Check your email</h1>'+
+  return obShell('<div class="ob-h" data-help="header"><p class="eyebrow">Step 1 of 2</p><h1>Check your email</h1>'+
    '<p class="ob-lead">We sent a six-digit code to <span class="mono">'+h(me.email)+'</span>. It is good for 10 minutes.</p></div>'+
-   '<div class="ob-panel">'+(err?obErr('<b>That code has expired.</b> Codes last 10 minutes. Send a new one below.'):'')+
+   '<div class="ob-panel" data-help="verification-form">'+(err?obErr('<b>That code has expired.</b> Codes last 10 minutes. Send a new one below.'):'')+
    '<form class="ob-form" onsubmit="event.preventDefault();obGo(\'organization\')">'+
-   '<div class="field"><label for="ob-vc1">Verification code</label>'+obCodes("ob-vc",err?"":"481502")+'</div>'+
+   '<div class="field" data-help="verify-email/code-inputs"><label for="ob-vc1">Verification code</label>'+obCodes("ob-vc",err?"":"481502")+'</div>'+
    obPrimary("Verify email","Verifying…")+'</form>'+
    '<div class="row" style="font-size:13px"><span class="muted">Did not arrive?</span><button type="button" class="ob-link" onclick="act(\'A new code is on its way. The old one is void.\')">Send a new code</button><span class="mono dim" style="margin-left:auto">0:42</span></div></div>'+
    '<p class="ob-foot">Wrong address? <a href="#/welcome">Change it</a></p>');
 }
 function obLogin(){
   var me=PEOPLE.marcus, p=PEOPLE.priya;
-  if(S.state==="denied") return obShell('<div class="ob-state deny"><div class="glyph">'+icon("lock")+'</div><h2>This account is suspended</h2>'+
+  if(S.state==="denied") return obShell('<div class="ob-state deny" data-help="suspended-account"><div class="glyph">'+icon("lock")+'</div><h2>This account is suspended</h2>'+
    '<p>'+h(p.name)+' (organization owner, '+h(ORG.name)+') suspended <span class="mono">'+h(me.email)+'</span> on 9 Sep 2026. Runs already recorded are kept; no new run tokens are minted.</p>'+
    '<button class="btn" onclick="act(\'A message to the organization owner is drafted. Nothing else changes until they act.\')">Contact your organization owner</button></div>');
   var err=S.state==="error";
-  return obShell('<div class="ob-h"><p class="eyebrow">Welcome back</p><h1>Log in to oxagen</h1></div>'+
+  return obShell('<div class="ob-h" data-help="header"><p class="eyebrow">Welcome back</p><h1>Log in to oxagen</h1></div>'+
    '<div class="ob-panel">'+(err?obErr('<b>Email or password is wrong.</b> Check both and try again, or reset your password.'):'')+
    obSso("work")+'<div class="ob-or">or</div>'+
-   '<form class="ob-form" onsubmit="event.preventDefault();obGo(\'two-factor\')">'+
+   '<form class="ob-form" data-help="log-in-form" onsubmit="event.preventDefault();obGo(\'two-factor\')">'+
    '<div class="field"><label for="ob-li-email">Work email</label><input id="ob-li-email" type="email" class="'+(err?"ob-bad":"")+'" value="'+h(me.email)+'" autocomplete="username"></div>'+
    '<div class="field"><div class="row" style="justify-content:space-between;margin-bottom:5px"><label for="ob-li-pw" style="margin:0">Password</label><a href="#/welcome/forgot" style="font-size:12px;color:var(--accent-text);text-decoration:none">Forgot password?</a></div>'+obPwField("ob-li-pw","current-password",true)+'</div>'+
    '<label class="ob-check"><input type="checkbox" checked><span>Keep me logged in on this device for 30 days</span></label>'+
@@ -10910,87 +10897,84 @@ function obLogin(){
 }
 function obTwoFactor(){
   var err=S.state==="error", me=PEOPLE.marcus;
-  return obShell('<div class="ob-h"><p class="eyebrow">Step 2 of 2</p><h1>Two-factor authentication</h1>'+
+  return obShell('<div class="ob-h" data-help="header"><p class="eyebrow">Step 2 of 2</p><h1>Two-factor authentication</h1>'+
    '<p class="ob-lead">Enter the six-digit code from your authenticator app for <span class="mono">'+h(me.email)+'</span>.</p></div>'+
-   '<div class="ob-panel">'+(err?obErr('<b>That code is wrong.</b> 2 attempts left before a 15-minute lockout.'):'')+
+   '<div class="ob-panel" data-help="two-factor-form">'+(err?obErr('<b>That code is wrong.</b> 2 attempts left before a 15-minute lockout.'):'')+
    '<form class="ob-form" onsubmit="event.preventDefault();obSignedIn()">'+
-   '<div class="field"><label for="ob-tf1">Authentication code</label>'+obCodes("ob-tf",err?"":"602914")+'</div>'+
+   '<div class="field" data-help="verify-email/code-inputs"><label for="ob-tf1">Authentication code</label>'+obCodes("ob-tf",err?"":"602914")+'</div>'+
    obPrimary("Verify","Verifying…")+'</form>'+
    '<div class="row" style="font-size:13px"><button type="button" class="ob-link" onclick="act(\'Recovery codes are single use. 8 of 10 remain.\')">Use a recovery code instead</button><span class="mono dim" style="margin-left:auto">expires 0:24</span></div></div>'+
    '<p class="ob-foot"><a href="#/welcome/login">Back to log in</a></p>');
 }
 function obForgot(){
   var err=S.state==="error", me=PEOPLE.marcus;
-  if(S.ob.forgotSent) return obShell('<div class="ob-state ok"><div class="glyph">'+OB_ICON.inbox+'</div><h2>Reset link sent</h2>'+
+  if(S.ob.forgotSent) return obShell('<div class="ob-state ok" data-help="reset-link-sent"><div class="glyph">'+OB_ICON.inbox+'</div><h2>Reset link sent</h2>'+
    '<p>If an account exists for <span class="mono">'+h(me.email)+'</span> a reset link is on its way. The link is good for 60 minutes and can be used once.</p>'+
    '<button class="btn" onclick="obGo(\'reset\')">Open the link</button></div><p class="ob-foot"><a href="#/welcome/login">Back to log in</a></p>');
-  return obShell('<div class="ob-h"><p class="eyebrow">Password</p><h1>Reset your password</h1><p class="ob-lead">We will email a link that is good for 60 minutes.</p></div>'+
-   '<div class="ob-panel">'+(err?obErr('<b>We could not send that email.</b> Our mail provider returned a 502. Try again in a minute.'):'')+
+  return obShell('<div class="ob-h" data-help="header"><p class="eyebrow">Password</p><h1>Reset your password</h1><p class="ob-lead">We will email a link that is good for 60 minutes.</p></div>'+
+   '<div class="ob-panel" data-help="reset-request-form">'+(err?obErr('<b>We could not send that email.</b> Our mail provider returned a 502. Try again in a minute.'):'')+
    '<form class="ob-form" onsubmit="event.preventDefault();S.ob.forgotSent=true;render()">'+
    '<div class="field"><label for="ob-fp">Work email</label><input id="ob-fp" type="email" value="'+h(me.email)+'" autocomplete="username"></div>'+
    obPrimary("Send reset link","Sending…")+'</form></div><p class="ob-foot"><a href="#/welcome/login">Back to log in</a></p>');
 }
 function obReset(){
   var me=PEOPLE.marcus;
-  if(S.state==="denied") return obShell('<div class="ob-state deny"><div class="glyph">'+OB_ICON.warn+'</div><h2>This reset link has expired</h2>'+
+  if(S.state==="denied") return obShell('<div class="ob-state deny" data-help="expired-link"><div class="glyph">'+OB_ICON.warn+'</div><h2>This reset link has expired</h2>'+
    '<p>Reset links last 60 minutes and can be used once. This one was issued at 12:58 on 11 Sep 2026. Request a new one and it will arrive in under a minute.</p>'+
    '<button class="btn" onclick="S.ob.forgotSent=false;obGo(\'forgot\')">Request a new link</button></div>');
   var err=S.state==="error";
-  return obShell('<div class="ob-h"><p class="eyebrow">Password</p><h1>Set a new password</h1><p class="ob-lead">For <span class="mono">'+h(me.email)+'</span>. Setting a new password logs out every other device.</p></div>'+
-   '<div class="ob-panel">'+(err?obErr('<b>The two passwords do not match.</b> Retype the confirmation.'):'')+
+  return obShell('<div class="ob-h" data-help="header"><p class="eyebrow">Password</p><h1>Set a new password</h1><p class="ob-lead">For <span class="mono">'+h(me.email)+'</span>. Setting a new password logs out every other device.</p></div>'+
+   '<div class="ob-panel" data-help="new-password-form">'+(err?obErr('<b>The two passwords do not match.</b> Retype the confirmation.'):'')+
    '<form class="ob-form" onsubmit="event.preventDefault();S.ob.forgotSent=false;obGo(\'login\');act(\'Password set. Every other device was logged out.\')">'+
-   '<div class="field"><label for="ob-rp">New password</label>'+obPwField("ob-rp")+'</div>'+
+   '<div class="field" data-help="signup/password-field"><label for="ob-rp">New password</label>'+obPwField("ob-rp")+'</div>'+
    '<div class="field"><label for="ob-rp2">Confirm new password</label><input id="ob-rp2" type="password" class="'+(err?"ob-bad":"")+'" value="'+(err?"Rq7!mesa-latice":h(S.ob.pw))+'"></div>'+
    obPrimary("Set password","Saving…")+'</form></div>');
 }
 function obInvite(){
   var me=PEOPLE.marcus, p=PEOPLE.priya, d=PEOPLE.dana, w=ws();
-  if(S.state==="denied") return obShell('<div class="ob-state deny"><div class="glyph">'+icon("lock")+'</div><h2>This invitation is for a different account</h2>'+
+  if(S.state==="denied") return obShell('<div class="ob-state deny" data-help="wrong-account"><div class="glyph">'+icon("lock")+'</div><h2>This invitation is for a different account</h2>'+
    '<p>'+h(p.name)+' sent it to <span class="mono">'+h(me.email)+'</span>. You are logged in as <span class="mono">'+h(d.email)+'</span>. Log out and back in as the invited address, or ask '+h(p.name)+' to send a new invitation.</p>'+
    '<button class="btn" onclick="obGo(\'login\')">Log in as someone else</button></div>');
   var err=S.state==="error";
-  return obShell('<div class="ob-h"><p class="eyebrow">Invitation</p><h1>Join '+h(ORG.name)+' on oxagen</h1></div>'+
-   '<div class="ob-panel">'+(err?obErr('<b>This invitation has already been accepted.</b> It was used on 10 Sep 2026 at 09:14. Log in instead.'):'')+
+  return obShell('<div class="ob-h" data-help="header"><p class="eyebrow">Invitation</p><h1>Join '+h(ORG.name)+' on oxagen</h1></div>'+
+   '<div class="ob-panel" data-help="invitation-card">'+(err?obErr('<b>This invitation has already been accepted.</b> It was used on 10 Sep 2026 at 09:14. Log in instead.'):'')+
    '<div class="row" style="flex-wrap:nowrap">'+personAv("priya",38)+'<div style="min-width:0"><div style="font-size:14px;font-weight:600">'+h(p.name)+'</div><div class="muted" style="font-size:12.5px">organization owner · invited you on 11 Sep 2026</div></div></div>'+
    '<div class="hr" style="margin:0"></div>'+
    kvl([["Organization",h(ORG.name)+' <span class="mono dim">('+h(ORG.slug)+')</span>'],["Organization role","member"],["Workspace",h(w.slug)+' <span class="mono dim">(main repo '+h(w.main)+')</span>'],["Workspace role","owner"],["Invitation expires","18 Sep 2026"]])+
    '<p class="dim" style="margin:0;font-size:12px;line-height:1.5">As workspace owner you can register agents, grant tools, set budgets, and approve parked calls in '+h(w.slug)+'. You cannot change organization billing or the data plane.</p>'+
    '<div class="row"><button class="btn primary" onclick="obSignedIn()">'+(S.state==="loading"?'<span class="ob-spin"></span><span>Accepting…</span>':'Accept invitation')+'</button>'+
-   '<button class="btn" onclick="act(\'Invitation declined. The inviter is told; nothing else changes.\')">Decline</button></div></div>'+
+   '<button class="btn" onclick="act(\'Invitation declined. The inviter is told.\')">Decline</button></div></div>'+
    '<p class="ob-foot">Signed in as <span class="mono">'+h(me.email)+'</span> · <a href="#/welcome/login">Not you?</a></p>', true);
 }
 
 /* ---- gate step 1 (the org); steps 2 and 3 are regWrap/regRun in onboard mode ---- */
 function obOrg(){
   var err=S.state==="error", w=ws();
-  return '<div><p class="eyebrow">Step 1 of 3</p><h1>Name your organization</h1>'+
-   '<p class="reg-lead">The organization is the tenant: it owns its own graph database, its own encryption key, its billing account, and the namespace that appears in every agent key.</p></div>'+
-   '<div class="reg-card"><div class="cb">'+(err?obErr('<b>That namespace is taken.</b> <span class="mono">'+h(ORG.slug)+'</span> belongs to another organization. Pick a different 2–6 character namespace.')+'<div style="height:14px"></div>':'')+
+  return '<div data-help="header"><p class="eyebrow">Step 1 of 3</p><h1>Name your organization</h1></div>'+
+   '<div class="reg-card" data-help="organization-form"><div class="cb">'+(err?obErr('<b>That namespace is taken.</b> <span class="mono">'+h(ORG.slug)+'</span> belongs to another organization. Pick a different 2–6 character namespace.')+'<div style="height:14px"></div>':'')+
    '<div class="field"><label for="ob-org">Organization name</label><input id="ob-org" type="text" value="'+h(ORG.name)+'"></div>'+
    '<div class="grid g2"><div class="field"><label for="ob-url">Address</label><input id="ob-url" class="mono" value="oxagen.com/'+h(ORG.slug)+'" readonly><div class="hint">Derived from the name. You can change it later.</div></div>'+
-   '<div class="field"><label for="ob-ns">Namespace</label><input id="ob-ns" class="mono'+(err?" ob-bad":"")+'" value="'+h(ORG.slug)+'" maxlength="6"><div class="hint">2–6 characters, <b>immutable</b>. Every agent key starts with it: <span class="mono">'+h(ORG.slug)+'.&lt;workspace&gt;.&lt;agent&gt;</span></div></div></div>'+
+   '<div class="field" data-help="namespace"><label for="ob-ns">Namespace</label><input id="ob-ns" class="mono'+(err?" ob-bad":"")+'" value="'+h(ORG.slug)+'" maxlength="6"><div class="hint">2–6 characters, <b>immutable</b>. Every agent key starts with it: <span class="mono">'+h(ORG.slug)+'.&lt;workspace&gt;.&lt;agent&gt;</span></div></div></div>'+
    '<div class="hr"></div><h3 style="font-size:13px;margin:0 0 10px">First workspace</h3>'+
    '<div class="grid g2"><div class="field"><label for="ob-ws">Workspace name</label><input id="ob-ws" value="'+h(w.slug)+'"></div>'+
    '<div class="field"><label for="ob-mode">Governance mode</label><select id="ob-mode"><option>solo</option><option selected>team</option><option>regulated</option></select></div></div>'+
-   '<div class="dim" style="font-size:12px;line-height:1.5">A workspace is a governance partition: one main repo, one steering set, its own agents, tool grants and budgets.</div>'+
    '</div></div>'+
    '<div class="reg-foot">'+regCancelBtn()+'<div class="sp"><span class="reg-cap">Creates <span class="mono">org_'+h(ORG.slug)+'</span> and its graph database.</span><button class="btn primary" onclick="regNav(\'wrap\')">Continue</button></div></div>';
 }
 /* step 3, onboard mode: the repo the installer saw — bind it, or stay provisional */
 function obRepoPanel(){
   var r=S.reg, w=ws();
-  if(r.repo==="bound") return '<div class="reg-card ob-repo"><div class="ch"><span class="reg-ok"><span class="dot"></span>linked</span><h3>Main repo</h3></div><div class="cb">'+
-   '<div class="row" style="margin-bottom:10px"><span class="b b-q mono">'+h(w.main)+'</span><span class="b b-q">production branch: '+h(w.branch)+'</span><span class="b b-allowed"><span class="d"></span>GitHub App installed</span></div>'+
-   '<p class="muted" style="font-size:12.5px;margin:0">Steering records and agent definitions will live in <span class="mono">'+h(w.main)+'</span> under <span class="mono">.oxagen/</span>, published through pull requests.</p></div></div>';
-  if(r.repo==="skipped") return '<div class="reg-card ob-repo"><div class="ch"><span class="b b-denied">provisional</span><h3>No main repo linked</h3></div><div class="cb">'+
+  if(r.repo==="bound") return '<div class="reg-card ob-repo"><div class="ch" data-help="onboarding-run/repository-panel"><span class="reg-ok"><span class="dot"></span>linked</span><h3>Main repo</h3></div><div class="cb">'+
+   '<div class="row"><span class="b b-q mono">'+h(w.main)+'</span><span class="b b-q">production branch: '+h(w.branch)+'</span><span class="b b-allowed"><span class="d"></span>GitHub App installed</span></div></div></div>';
+  if(r.repo==="skipped") return '<div class="reg-card ob-repo"><div class="ch" data-help="onboarding-run/repository-panel"><span class="b b-denied">provisional</span><h3>No main repo linked</h3></div><div class="cb">'+
    '<p class="muted" style="font-size:12.5px;margin:0 0 10px"><b>'+h(w.slug)+' is provisional until '+h(w.provisional?w.provisional.until:obDate(OB_PROVISIONAL_DAYS))+'</b> ('+OB_PROVISIONAL_DAYS+' days). Runs record and spend counts. Steering records and agent definitions stay off until a main repo is linked.</p>'+
    '<button class="btn sm" onclick="obBind()">Link '+h(w.main)+' now</button></div></div>';
-  return '<div class="reg-card ob-repo"><div class="ch"><h3>Repository detected</h3><span class="sp">reported by the installer</span></div><div class="cb">'+
+  return '<div class="reg-card ob-repo"><div class="ch" data-help="onboarding-run/repository-panel"><h3>Repository detected</h3><span class="sp">reported by the installer</span></div><div class="cb">'+
    '<div class="row" style="margin-bottom:6px"><span class="b b-q mono">git@github.com:'+h(w.main)+'.git</span></div>'+
-   '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Read from the git remote of <span class="mono">~/src/platform</span>, the directory the installer ran in. Production branch <span class="mono">'+h(w.branch)+'</span>.</p>'+
+   '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Read from the git remote of <span class="mono">~/src/platform</span>. Production branch <span class="mono">'+h(w.branch)+'</span>.</p>'+
    '<button class="btn'+(r.first?"":" primary")+'" onclick="obBind()">'+OB_ICON.github+'<span>Link '+h(w.main)+' as the main repo</span></button>'+
    '<p class="muted" style="font-size:12.5px;margin:12px 0 0">One click installs the GitHub App on <span class="mono">'+h(w.main)+'</span>: repository link, pull requests, checks, merge handling and the code graph.</p>'+
-   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> and '+h(w.slug)+' stays <b>provisional for '+plural(OB_PROVISIONAL_DAYS,"day")+'</b>. Runs record and spend counts, but Steering records and agent definitions stay off until a main repo is linked.</p></div></div>';
+   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> and '+h(w.slug)+' stays <b>provisional for '+plural(OB_PROVISIONAL_DAYS,"day")+'</b>.</p></div></div>';
 }
 function pWelcome(r){
   var step=r.step||"signup";
