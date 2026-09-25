@@ -50,7 +50,7 @@ Each block's header: the mandate id (mono), its status as a dot and a word (“a
 | Tools | `stripe__create_payment@*, aws_billing__purchase_savings_plan@2` |
 | Counterparties | “allow vendor:aws, vendor:github, deny *” |
 | Approval | “above $250.00, always for moves_funds, by role:org.billing” |
-| SteeringFrame | The `delegation` type badge, the frame id `delegation:mnd_7K2ETQ4@11559f20a6b0`, and its body: “monthly infrastructure invoices, PO-4471: up to $250.00 USD a call and $5,000.00 a month, stripe__create_payment@*, aws_billing__purchase_savings_plan@2, until 2026-12-31. Above $250.00 a person approves.” |
+| SteeringFrame | The `delegation` type badge, the frame id `delegation:mnd_7K2ETQ4@2e98897c4612`, and its body: “monthly infrastructure invoices, PO-4471: $5,000.00 USD a month, stripe__create_payment@*, aws_billing__purchase_savings_plan@2, until 2026-12-31. Calls above the auto-approve limit of $250.00 wait for a person.” |
 
 The mockup draws the SteeringFrame row on the expired `mnd_5T2HVX` too. An ended mandate emits no frame, so a build leaves that row out of an ended block.
 

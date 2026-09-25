@@ -26,16 +26,16 @@ Say what this workspace's month cost and where the money went. One table groups 
 
 | Tile | Number | Line beneath |
 |---|---|---|
-| Spend | $439,498.34 | Observed by gateway + Reported by harness · USD |
+| Organization spend | $439,498.34 | Observed by gateway + Reported by harness · USD |
 | Tokens | 20,503,823,758 | 80% served from cache |
 | Observed by the gateway | 92% | of tokens counted by the proxy |
-| Wasted | $85,768.79, in the critical ink | 20% of spend · Optimization |
+| Unproductive spend | $85,768.79, in the critical ink | 20% of spend · Optimization |
 
-The Wasted tile opens Optimization. Its share is computed from the Wasted and Spend figures, so it cannot disagree with them.
+The Unproductive spend tile opens Optimization. Its share is computed from the unproductive and organization spend figures, so it cannot disagree with them.
 
 **Tabs**: Overview · Budgets (4) · Optimization. Each is a path segment: `/spend`, `/spend/budgets`, `/spend/optimization`. Changing the tab drops the grouping and the key.
 
-**September by day.** A panel with the caption "From the daily rollup, rebuilt from frames. Weekends run lighter." and, at its right, "$439,498.34 to date". One bar per day from 1 to 24 September, in one image (`role="img"`, labelled "Spend by day, 1 to 24 September"). Each bar's tooltip reads "Sep <day> · <amount>". The axis reads Sep 1, Sep 12 and Sep 24.
+**September by day.** A panel with the caption "From the daily rollup, rebuilt from frames. Weekends run lighter." and, at its right, "$439,498.34 to date". One bar per day from 1 to 11 September, in one image (`role="img"`, labeled "Spend by day, 1 to 11 September"). Each bar's tooltip reads "Sep <day> · <amount>". The axis reads Sep 1, Sep 6 and Sep 11.
 
 **Group by.** A segmented control (`role="group"`, labelled "Group by") with the caption "Group by" and six buttons, the current one `aria-pressed`: Work order · Operator · Agent · Model · Tool · Cost center. A button writes `?by=` and closes any open side panel.
 
@@ -80,7 +80,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. The mockup collection is
 | Spend tile | `SPEND.spend` plus Oxagen's own routes, through `spendMonthTotal()` | `get_spend` total for the month (`cost.daily_totals`) | `packages/oxagen/src/contracts/spend.get.ts:34-73`; the tile, `apps/app/src/features/spend/summary.tsx:36-49` | ✅ |
 | Tokens tile and its cache share | `wsTok()` | the token classes on every `get_spend` row | `packages/oxagen/src/contracts/spend.shared.ts:107-116`; `apps/app/src/features/spend/summary.tsx:26-28, 50-59` | ✅ |
 | Observed by the gateway | `wsTok().observed` | the share of tokens by basis | No read counts tokens by basis. The app prints "not recorded" (`apps/app/src/features/spend/summary.tsx:60-62`) | ❌ |
-| Wasted tile | `SPEND.wasteTotal`, `wasteShareText()` | `list_waste`: `wasted` and `share` | `packages/oxagen/src/contracts/spend.waste.ts:26-56`, with one cause, `cache_write_never_read` (line 14); `apps/app/src/features/spend/summary.tsx:63-78` | 🟡 |
+| Unproductive spend tile | `SPEND.wasteTotal`, `wasteShareText()` | `list_waste`: `wasted` and `share` | `packages/oxagen/src/contracts/spend.waste.ts:26-56`, with one cause, `cache_write_never_read` (line 14); `apps/app/src/features/spend/summary.tsx:63-78` | 🟡 |
 | September by day | `spendDays()`, seeded from the month's total | `cost.daily_totals`, one row per UTC day and group | The table keeps a row per day (`packages/database/src/schema/cost.ts:388-395`). No contract answers the workspace's month by day. `get_spend_drill` answers a daily series for one operator, agent or tool (`packages/oxagen/src/contracts/spend.drill.ts:59-117`) | 🟡 |
 | By work order | `WORKORDERS`, `woSpend()`, `woItems()` | `work_order_id` on the run record, and the work order store | Nothing stores a work order. The run's `taskRef` is free text and null for wrapped runs (wedge, Work, Shipped today). The shipped `task` level keys on the run's goal (ADR-142 §5; `apps/app/src/features/spend/tables.tsx:557-591`) | ❌ |
 | By operator | `SPEND.byOperator`, `operatorTok()` | `get_spend` at `operator` | Operator, Role, Runs, Spend, Tokens and Cache hit ship (`apps/app/src/features/spend/tables.tsx:177-268`). Agents and Budget position print "not recorded" (lines 243-245, 259-261) | 🟡 |

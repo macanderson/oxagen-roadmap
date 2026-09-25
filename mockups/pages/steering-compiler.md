@@ -22,7 +22,7 @@ It runs the same resolver that builds an agent's Steering tab and a run's Decisi
 
 **Controls** panel.
 
-- **Agent**: a select labelled "Agent", with one option per agent in the workspace. Each option reads "<name> · <harness>": "Release manager · Claude Code", "stella CI · stella", "Triage · Codex CLI", "Docs writer · Other (SDK-wrapped)", "PR reviewer · Claude Code" and the rest, so an agent named in the address is always in the list. Under the select, the agent's tier badge and "works in a-intel/platform". Changing the agent writes `/steering/compiler/<slug>` into the address.
+- **Agent**: a select labelled "Agent", with one option per agent in the workspace. Each option reads "<name> · <harness>": "Release manager · Claude Code", "stella CI · stella", "Triage · Codex CLI", "Docs writer · Other (SDK-wrapped)", "PR reviewer · Claude Code" and the rest, so an agent named in the address is always in the list. Under the select, the line "Tier: <badge> · Repository: a-intel/platform". Changing the agent writes `/steering/compiler/<slug>` into the address.
 - **Brief**: a two-line text area labelled "Brief", with the placeholder "What a work order would send". Under it: "Sends nothing. Nothing here reaches an agent."
 - Six brief chips in a group labelled "Pick a brief", with `aria-pressed` on the one in use: "Cut the 4.11.0 release notes", "CI is green, merge the release pull request", "Label the flaky checkout e2e test on Safari", "Plan the ledger entries migration for billing", "Tighten the CLI reference style guide" and "Pay the September AWS invoice". Each agent has a standing brief (Release manager's is the first), and choosing an agent selects it while the text area is untouched.
 
@@ -63,7 +63,7 @@ It runs the same resolver that builds an agent's Steering tab and a run's Decisi
 |---|---|---|
 | `below_relevance_floor` | 7 | "relevance 0 for this brief" |
 | `out_of_scope` | 8 | "scoped to a-intel/mobile; this agent works in a-intel/platform", "scoped to a-intel/billing; this agent works in a-intel/platform", "scoped to the agent docs-writer", "applies to triage, docs-writer", "no agent holds the tool it gates", or a withheld skill's scope |
-| `over_budget` | 3 | "ranked 5 of 11 for this brief, relevance 4. 231 tok did not fit in the 141 left" |
+| `over_budget` | 3 | "rank 5 of 11 · needs 231 tok, 141 left" |
 | `overridden_by_gate` | 2 | the rule that denies the tool: "definition deny_tools: github__merge_pull_request@*" |
 | `overridden_by_must` | 1 | "a published must beats recalled memory: ctx.release.never-merge" |
 | `superseded` | 1 | "replaced by ctx.platform.safari-e2e-flake, published 2026-09-02" |
@@ -81,7 +81,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 |---|---|---|---|---|
 | The agents in the select | `STEERING_PREVIEW.agents` via `stgAgents()`, `AGENTS` | The agent registry | `list_agents` returns name, harness and key (`packages/oxagen/src/contracts/agent.list.ts:142`, `:58-75`) | ✅ |
 | Tier under the select | `AGENTS[].tier` | The tier the latest session recorded | `list_agents` `enforcementTier` (`agent.list.ts:83`) | ✅ |
-| "works in <repository>" | `STEERING_PREVIEW.agents[].repo` | The repository the agent works in | The registry carries no repository per agent | ❌ |
+| "Tier: <badge> · Repository: <repository>" | `STEERING_PREVIEW.agents[].repo` | The repository the agent works in | The registry carries no repository per agent | ❌ |
 | The standing briefs and the chips | `STEERING_PREVIEW.prompts` | A work order's brief, or a standing brief per agent | Nothing stores a work order or a brief (wedge spec, Work, Shipped today) | ❌ |
 | The envelope | `resolveEnvelope()` over `assembleSteering()` and `stgItems()` | A read-only capability that runs the assembler for one agent and one brief | None (#3879). `assembleSteering` (`packages/steering-assembler/src/assemble.ts:251`) runs only inside the policy bundle build (`packages/handlers/src/lib/tacho-steering.ts:226`), over Steering records alone (`:195`) | ❌ |
 | Frame types, source versions and hashes | `frameOf()`, `srcCell()` | Every SteeringFrame's `type`, `source.version` and `hash` | `steering.manifest` items carry id, kind, force, tokens, outcome and reason (`packages/tacho/src/wire.ts:643-654`) | ❌ |
@@ -99,7 +99,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 | The " · #<hash>" part of every Source cell | `per-frame provenance` | Nothing after the version |
 | Every Reason badge other than `tier`, `over_budget` and `superseded` | `steering.manifest records tier, budget and superseded today` | The reason reads "not recorded" |
 
-The Exclusions section as a whole carries no mark in the mockup and is future-only in `macanderson/oxagen` for the same reason as the envelope (#3879). So are the standing briefs, the brief chips, "works in <repository>" and the per-prompt meter. A build renders each as not recorded; the agent select and the tier are the only live data on the tab until the capability ships.
+The Exclusions section as a whole carries no mark in the mockup and is future-only in `macanderson/oxagen` for the same reason as the envelope (#3879). So are the standing briefs, the brief chips, the "Repository: <repository>" line and the per-prompt meter. A build renders each as not recorded; the agent select and the tier are the only live data on the tab until the capability ships.
 
 ## Functionality
 
@@ -109,7 +109,7 @@ The Exclusions section as a whole carries no mark in the mockup and is future-on
   1. Scope first. A source whose scope does not match the agent or its repository is excluded as `out_of_scope`, and so is a gate notice for a tool no agent holds.
   2. Then lineage and precedence. An item a newer version replaced is `superseded`, and recalled memory that a published `must` contradicts is `overridden_by_must`.
   3. Gate notices and the `must` and `should` sources fill the session-start prefix, which a gate notice never gives way in.
-  4. The `may` and `info` candidates are ranked by relevance to the brief and packed under the per-prompt budget. A candidate with relevance 0 is `below_relevance_floor`; one that does not fit is `over_budget`, with its rank, its relevance, its cost and what was left.
+  4. The `may` and `info` candidates are ranked by relevance to the brief and packed under the per-prompt budget. A candidate with relevance 0 is `below_relevance_floor`; one that does not fit is `over_budget`, with its rank, its cost and what was left.
   5. The agent definition's instructions add a `procedure` at `should`. Each active mandate adds a `delegation` at `must`.
   6. Each synced skill adds its `SKILL.md` as a `procedure`, each reference as a `context` and each entrypoint as a `capability` descriptor, in Checkout files. A withheld skill is excluded as `unapproved_digest` or `out_of_scope`, before ranking.
   7. The toolbelt adds one `capability` per tool it shows the model. A harness's own tools are not frames. A tool the toolbelt denies is excluded as `overridden_by_gate`, with the rule.

@@ -28,11 +28,11 @@ Actions:
 
 | Kind | Actions |
 |---|---|
-| dispatched | **Copy brief** (plain; title “Copy the brief as sent with its references”), **Stop the work order** (red; while the work order is neither accepted, stopped nor closed), **Accept the work** (gold when every item is claimed and the work order is open; otherwise plain and disabled, titled “Every item must be claimed first”) |
+| dispatched | **Copy brief** (plain; title “Copy the brief as sent with its references”), **Stop work order** (red; while the work order is neither accepted, stopped nor closed), **Accept all items** (gold when every item is claimed and the work order is open; otherwise plain and disabled, titled “Every item must be claimed first”) |
 | dispatched, `queued` | **Copy brief**, **Send now** (plain; opens `worelease`), **Withdraw** (red; opens `wowithdraw`) |
 | dispatched, `sent` with no start receipt | **Copy brief**, **Withdraw** (red) |
 | dispatched, `stopped` or `expired` | **Copy brief**, **Send again** (plain; opens the work order dialog with the same items, target, brief and repositories, and records `retry_of`) |
-| direct | **Stop the work order** (red; while its run is live, parked or paused), **Attach to a work item** (plain and disabled, titled “A direct work order has no definition of done until you attach it to a backlog item”; outlined as future-only) |
+| direct | **Stop work order** (red; while its run is live, parked or paused), **Attach to a work item** (plain and disabled, titled “A direct work order has no definition of done until you attach it to a backlog item”; outlined as future-only) |
 
 **Tiles**, four across, outlined as future-only:
 
@@ -49,9 +49,9 @@ Then two columns, the main column two thirds wide.
 
 **Main column**
 
-- **Runs**: “1 run. Each is a child record of this work order.” Columns: Run (the id as a link and the run’s title under it) · Stage (the role, with “returned” beside a stage run that returned the work) · Agent (avatar and agent key) · Status (dot and word) · Tier · Cost (USD, the basis under it) · Started. A row opens the run. With none: “No run yet. The runtime starts the first one with `oxagen work start wo_01K6TF1169Q`.”
+- **Runs**: “1 run. Each is a child record of this work order.” Columns: Run (the id as a link and the run’s title under it) · Stage (the role, with “sent back” beside a stage run that sent the work back) · Agent (avatar and agent key) · Status (dot and word) · Tier · Cost (USD, the basis under it) · Started. A row opens the run. With none: “No run yet. The runtime starts the first one with `oxagen work start wo_01K6TF1169Q`.”
 - **Definition of done**: “4 items from 1 work item.” Columns: Item (the text and its tag chip) · Work item (the numbers it came from, “#482”, or “work order” for an item the send added) · Stage (the role that owns it) · State (`open`, `claimed`, `accepted`, as a dot and a word) · Evidence (what the claim cited, then the agent’s name and the run in mono). The table does not page. On a direct work order: “None. A direct work order has no definition of done until you attach it to a backlog item.”
-- **Handoffs**: every stage run in order, as “<role>” or “<role> returned the work”, its run id, and its note (“Returned: the backwards pair still passes. Item 2 is not met.”), or “running” while that run is live. Note: “A handoff note reaches the next stage as quoted evidence. It is never an instruction to that agent.” A direct work order has one run and no handoff. The mockup still draws the panel there, with the run and “running” even once the run is sealed, and a build leaves the panel out. A stage that needed two stages shows the note from each, with its stage and run.
+- **Handoffs**: every stage run in order, as “<role>” or “<role> sent the work back”, its run id, and its note (“Returned: the backwards pair still passes. Item 2 is not met.”), or “running” while that run is live. Note: “A handoff note reaches the next stage as quoted evidence. It is never an instruction to that agent.” A direct work order has one run and no handoff. The mockup still draws the panel there, with the run and “running” even once the run is sealed, and a build leaves the panel out. A stage that needed two stages shows the note from each, with its stage and run.
 
 **Side column**
 
@@ -68,13 +68,13 @@ Then two columns, the main column two thirds wide.
 
 - **`woaccept`**: “Accept the work”, subtitle the title. “You accept 3 items the agents claimed, with the evidence each one cited.” Note: “Accepting records `accept_work_order` with your name. It does not merge anything. The pull request a-intel/platform#523 is merged by a person on GitHub.” Note, by the connection’s close switch: on, “The GitHub connection closes each issue as Done, the resolution for work a person accepted.”; off, “The GitHub connection has close on accept off, so each issue stays open there until somebody closes it. Turned on, it closes each one as Done.” Footer **Cancel**, **Accept every item** (gold). Accepting marks every item `accepted`, the work order `accepted`, and each work item `accepted`, and toasts in gold “Accepted. accept_work_order recorded. a-intel/platform#599 stays open in GitHub, because close on accept is off for that connection.”
 - **`worelease`**: “Send this work order now?”, subtitle the title. “#633 is still open. The agent reads its brief without the work #633 was meant to finish first.” Then the note “The prompt gains one line: `Sent before #633 was done, by Marcus Bell.`” Footer **Keep it queued**, **Send now** (plain, never gold). Releasing sets the state `sent`, moves each item to `in a work order`, and toasts “Sent to Release manager. release_work_order recorded, with #633 still open.”
-- **`wowithdraw`**: “Withdraw this work order?”, “Nothing has started. The tasks go back to ready.”, and the note that certified definitions of done are unchanged and withdrawing records `withdraw_work_order`. Footer **Keep it**, **Withdraw** (red). Withdrawing sets the state `stopped` and toasts “Withdrawn. The tasks are ready again.” From the start receipt on, the button and dialog are **Stop the work order** and `wostop`.
+- **`wowithdraw`**: “Withdraw this work order?”, “Nothing has started. The tasks go back to ready.”, and the note that certified definitions of done are unchanged and withdrawing records `withdraw_work_order`. Footer **Keep it**, **Withdraw** (red). Withdrawing sets the state `stopped` and toasts “Withdrawn. The tasks are ready again.” From the start receipt on, the button and dialog are **Stop work order** and `wostop`.
 - **`woaccept`** on a work order of a send with several adds one note: “Accepting stops wo_01K6TC5B, which carries the same work items.” Accepting stops those siblings at their next boundary.
 - **`wostop`**: “Stop this work order?”, “The live run gets a cancel at its next boundary, and no later stage starts.”, and the note “Branches and pull requests stay where they are. The work items go back to ready, and their certified definitions of done are unchanged.” Footer **Keep it running**, **Stop it** (red). Stopping toasts “Stopped. The runtime is told at its next boundary; the work items go back to ready.”
 
 **Shell.** The sidebar with Work lit and its count. Breadcrumbs “Anderson Intelligence Corp. / Core platform / Work orders / wo_01K5RS7M4N”, the last in mono. ⌘K, notifications, the Approvals button with the organization’s count, and the avatar.
 
-**Demo work orders:** `wo_01K5RS7M4N` (dispatched to Release manager, one stage, in progress, 3 of 4 claimed, $4.13 of a $10.00 cap, its run `run_01K5RS7M2E8FJ3QW` live), `wo_01K6T9QX` (the Fix, validate, document, review workflow at stage 2 after one return, four runs, 2 of 4 claimed), `wo_01K6TA2M` (Stella CI, waiting on you with every item claimed, so **Accept the work** is gold), `wo_01K6RZ41` (accepted on 2026-09-08 16:40), and two direct ones. `wo_01K5RQ4B9C7XTN2P` holds a sealed Stella CI run whose task reference is `a-intel/platform#482`. The mockup attaches that backlog item by its number, so this one shows #482 and its four items, all `open`, beside a disabled **Attach to a work item**. `wo_01K53TV12GW6ARFD` holds a live run Mikael Larsen started, with no work item attached, and shows the “None” lines.
+**Demo work orders:** `wo_01K5RS7M4N` (dispatched to Release manager, one stage, in progress, 3 of 4 claimed, $4.13 of a $10.00 cap, its run `run_01K5RS7M2E8FJ3QW` live), `wo_01K6T9QX` (the Fix, validate, document, review workflow at stage 2 after one return, four runs, 2 of 4 claimed), `wo_01K6TA2M` (Stella CI, waiting on you with every item claimed, so **Accept all items** is gold), `wo_01K6RZ41` (accepted on 2026-09-08 16:40), and two direct ones. `wo_01K5RQ4B9C7XTN2P` holds a sealed Stella CI run whose task reference is `a-intel/platform#482`. The mockup attaches that backlog item by its number, so this one shows #482 and its four items, all `open`, beside a disabled **Attach to a work item**. `wo_01K53TV12GW6ARFD` holds a live run Mikael Larsen started, with no work item attached, and shows the “None” lines.
 
 ## Data sources
 
@@ -97,8 +97,8 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | Pull request | `w.runs[].pr` | the run’s pull requests | `get_run_work` returns connected pull requests and their checks (`run.work.get.ts:127`) | ✅ |
 | Brief and its digest | `w.prompt`, `w.digest` | `tasks.work_orders` prompt and digest | none | ❌ |
 | SteeringFrames from this send | `woFrames()` | frames of type `invocation`, `goal` and `constraint` with the work order as source (wedge spec, Steering › Emissions) | none. `steering.manifest` items carry no type, hash or provenance (`packages/tacho/src/wire.ts:626-697`) | ❌ |
-| Stop the work order | `woStop()` | `stop_work_order`, which cancels the live run through `dispatch_command` | `dispatch_command` queues `cancel` for a run (`packages/oxagen/src/contracts/tacho.command.dispatch.ts:107-134`). Nothing stops a work order or its later stages | 🟡 |
-| Accept the work, and the close write-back | `woAccept()`, `woClose()` | `accept_work_order`; the provider close write-back | none | ❌ |
+| Stop work order | `woStop()` | `stop_work_order`, which cancels the live run through `dispatch_command` | `dispatch_command` queues `cancel` for a run (`packages/oxagen/src/contracts/tacho.command.dispatch.ts:107-134`). Nothing stops a work order or its later stages | 🟡 |
+| Accept all items, and the close write-back | `woAccept()`, `woClose()` | `accept_work_order`; the provider close write-back | none | ❌ |
 | Copy brief | `woPromptText()` | `get_work_order` | none | ❌ |
 | Attach to a work item | none | attaching a direct work order to a backlog item | none | ❌ |
 | Queued state, expiry, release, and withdraw | `WORKORDERS[].status`, `.expires`, `woWaitsOn()` | `tasks.work_orders` `queued`, `expired`, `expires_at`, `released_at`; `release_work_order`, `withdraw_work_order` (`work-graph-spec.md` §6, §10) | none | ❌ |
@@ -119,21 +119,21 @@ The mockup marks these with `data-future` (`?future=1` outlines them):
 | The `direct` badge | direct, eyebrow | “direct work orders” | `not recorded` |
 | **Attach to a work item** | direct, header | “direct work orders” | Left out |
 
-The mockup marks nothing else, but every work order field here is future-only: the header, the stage chain’s stages, the definition of done, the handoffs, the work items, the repositories list and the brief. A build renders each as `not recorded` and leaves out **Accept the work**, **Copy brief** and **Attach to a work item** until their contracts ship. No `/work/orders/{order}` route exists in `apps/app` today. What a build can show from the record is each run: the Run page (`apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx`) shows one run with its agent, status, tier, cost and pull requests, and cancels a live run through `dispatch_command`.
+The mockup marks nothing else, but every work order field here is future-only: the header, the stage chain’s stages, the definition of done, the handoffs, the work items, the repositories list and the brief. A build renders each as `not recorded` and leaves out **Accept all items**, **Copy brief** and **Attach to a work item** until their contracts ship. No `/work/orders/{order}` route exists in `apps/app` today. What a build can show from the record is each run: the Run page (`apps/app/src/app/[org]/[ws]/runs/[run]/page.tsx`) shows one run with its agent, status, tier, cost and pull requests, and cancels a live run through `dispatch_command`.
 
 ## Functionality
 
 - A dispatched work order starts runs through the agent’s runtime: `oxagen work start <wo>` starts the harness with the brief as its first prompt (`tasks-spec.md` §9.6). A workflow stage starts one run per attempt. Oxagen runs no agent.
-- A claim is the agent’s word: `claim_dod_item` with the item and its evidence, shown with the agent and the run. **Accept the work** turns gold only when every item is claimed. Accepting records `accept_work_order` with your name, accepts every claimed item, and merges nothing: a person merges the pull request in the repository.
+- A claim is the agent’s word: `claim_dod_item` with the item and its evidence, shown with the agent and the run. **Accept all items** turns gold only when every item is claimed. Accepting records `accept_work_order` with your name, accepts every claimed item, and merges nothing: a person merges the pull request in the repository.
 - The connection’s close switch decides what accepting does in the provider: on, each work item closes there as Done; off, it stays open, and the dialog says so.
-- **Stop the work order** cancels the live run at its next boundary through `dispatch_command` and starts no later stage. Branches and pull requests stay. The work items go back to ready with their certifications intact.
+- **Stop work order** cancels the live run at its next boundary through `dispatch_command` and starts no later stage. Branches and pull requests stay. The work items go back to ready with their certifications intact.
 - In a workflow, a stage hands off with `hand_off_work_order` and a note, and the next stage receives the note as quoted evidence. A stage that finds an earlier item unmet returns the work with `return_work_order`, up to the returns the file allows. When a stage exhausts its returns, the work order parks for the operator in the Approvals drawer.
 - The brief is shown exactly as sent, with its digest, and nothing on the page edits it. The copied brief is the same text, followed by its references.
 - The send emits SteeringFrames with this work order as their source and the brief digest as their version. A sent brief cannot change, so those frames cannot either.
 - A direct work order holds one run. It shows no brief and no definition of done, because it has neither, until a person attaches it to a backlog item.
 - `node tools/check-tasks.mjs` walks flows 5 (a sent work order opens here with nothing claimed), 7 (a claimed work order is accepted) and 8 (the copied brief names its work items) on this page.
 
-- A work order is `in progress` only from its start receipt (`docs/work-graph-spec.md` §6.2). **Withdraw** applies before it and **Stop the work order** after it, and no toast says nothing started for a work order that has one.
+- A work order is `in progress` only from its start receipt (`docs/work-graph-spec.md` §6.2). **Withdraw** applies before it and **Stop work order** after it, and no toast says nothing started for a work order that has one.
 - **Send now** is a person’s decision, recorded with the blockers still open, and never gold.
 - Stages that need the same stage start together as separate runs under one cap, and the page draws them in one column (§8.2).
 - **Send again** creates a retry that names the original. Cost stays on the old record.
@@ -175,7 +175,7 @@ The design names these, from `tasks-spec.md` §14. Neither exists in `packages/i
 - Every enforcement claim states the tier. Each stage shows its agent’s recorded tier, and the repository limit holds only as far as that tier enforces it: refused on `gateway` and `contained`, a hook the harness reports on `harness`, recorded only on `observe`.
 - Headers are rollups of the rows beneath them: Items claimed and Items accepted count the Definition of done rows, and Spend sums the runs.
 - Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
-- At most one gold action per screen: **Accept the work** once every item is claimed, and none before that.
+- At most one gold action per screen: **Accept all items** once every item is claimed, and none before that.
 - A future-only field is marked in the design and renders as not recorded in a build until its contract ships.
 - The page never shows a claim as accepted. Accept is enabled only when every item is claimed, and accepting merges nothing.
 - The brief is shown as sent, with its digest, and cannot be edited here.

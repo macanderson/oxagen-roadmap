@@ -142,7 +142,7 @@ export default {
     ["kindBadge(k)", "engine.js:1501", "Kind badge with icon and word. 4 calls."],
     ["kindGlyph(k)", "engine.js:1502", "Icon-only kind glyph. 2 calls."],
     ["ftBadge(t)", "wedge.js:237", "Frame-type badge, word and CSS mark, no icon. 10 calls."],
-    ["typeStrip(list, ctx)", "wedge.js:444", "Counts by frame type as a strip. A `ctx` turns each entry into a filter button."],
+    ["typeStrip(list, ctx)", "wedge.js:446", "Counts by frame type as a strip. A `ctx` turns each entry into a filter button."],
     ["catBadge(c)", "engine.js:766", "Tool category badge with icon and word. 5 calls."],
     ["hazard(risk, effect)", "engine.js:789", "Risk mark plus an optional side-effect glyph. 15 calls."],
     ["gate(g, note)", "engine.js:805", "Gate badge, with the reasoning in its title."],

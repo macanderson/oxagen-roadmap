@@ -93,13 +93,13 @@ Each section has a number, a heading and one sentence under it.
 
 **2 Exclusions.** "24 resolved and not delivered, each with its reason." One table with the columns Type · Frame · Source · Reason · Tokens. Frame carries the body, the "enforced by" line where a gate backs it, and the injection point it would have entered. Reason is the reason in mono, from the closed vocabulary, with the numbers that decided it under it. The table shows the first 6 rows and "Show all 24", then "Show the first 6". With nothing excluded it reads "Nothing was excluded."
 
-The closed vocabulary, each badge titled with its meaning: `tier`, `over_budget`, `superseded`, `below_relevance_floor`, `out_of_scope`, `widens_workspace_scope`, `overridden_by_gate`, `steering_drift`, `prefix_overflow`, `duplicate`, `source_unavailable`, `overridden_by_must` and `unapproved_digest`. Every badge but `tier`, `over_budget` and `superseded` is marked future-only. The demo run excludes:
+The closed vocabulary, each badge reading the reason in words, with its key and meaning in the title: `tier`, `over_budget`, `superseded`, `below_relevance_floor`, `out_of_scope`, `widens_workspace_scope`, `overridden_by_gate`, `steering_drift`, `prefix_overflow`, `duplicate`, `source_unavailable`, `overridden_by_must` and `unapproved_digest`. Every badge but `tier`, `over_budget` and `superseded` is marked future-only. The demo run excludes:
 
 | Reason | Count | What decided it, as the row states it |
 |---|---|---|
 | `below_relevance_floor` | 4 | "relevance 0 for this brief" |
 | `out_of_scope` | 8 | "scoped to a-intel/mobile; this agent works in a-intel/platform", "applies to triage, docs-writer", "no agent holds the tool it gates", "scoped to the agent docs-writer" |
-| `over_budget` | 6 | "ranked 11 of 14 for this brief, relevance 2. 25 tok did not fit in the 15 left" |
+| `over_budget` | 6 | "rank 11 of 14 · needs 25 tok, 15 left" |
 | `overridden_by_gate` | 2 | the gate's rule, "definition deny_tools: github__delete_*@*" |
 | `overridden_by_must` | 1 | "a published must beats recalled memory: ctx.release.never-merge" |
 | `superseded` | 1 | "replaced by ctx.platform.safari-e2e-flake, published 2026-09-02" |

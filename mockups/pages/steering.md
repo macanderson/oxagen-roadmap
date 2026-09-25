@@ -29,7 +29,7 @@ This spec also owns the parts every Steering tab shares: the header with its gov
 - Subtext: "Every source that can steer an agent here, and the frames it emits."
 - Actions, left to right:
   - The governance chip, "Governance: team (code-owner review)", with the mode in mono. It opens `govmode`. It is never gold.
-  - The skills chip, "Skills: skl_v7", with the configuration version in mono and the title "How skills resolve in this workspace". It renders only in a workspace with skills on, and it opens `skcfg`. It is never gold.
+  - The skills chip, "Skills settings", with the title "How skills resolve in this workspace, settings version skl_v7". It renders only in a workspace with skills on, and it opens `skcfg`. It is never gold.
   - **Import Markdown**, plain on every tab. It opens the Markdown import below.
   - **New source**. Gold on Sources, Assignments, Compiler and Proposals. Plain on the Pull requests view, where Merge pull request holds the gold. It opens `newsrc`.
 

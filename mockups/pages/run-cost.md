@@ -30,7 +30,7 @@ The action opens `fitchange`: the title ("Set effort to high"), the argument, th
 
 | Tile | Basis | Figure | Line, chart and foot |
 |---|---|---|---|
-| Cost so far | `gateway_observed` | $4.13 USD | "$0.59 per turn · turn 5 was the dearest · +$1.24 vs this agent’s median run $2.89"; one column per turn, the dearest labelled; "Cache hit 83% · saved about $1.71 compared with no cache" |
+| Cost so far (Cost on a sealed run) | `gateway_observed` | $4.13 USD | "$0.59 per turn · turn 5 was the dearest · +$1.24 vs this agent’s median run $2.89"; one column per turn, the dearest labelled; "Cache hit 83% · saved about $1.71 compared with no cache" |
 | Wall clock | "so far", or "start to seal" | 13m 3s elapsed | "77% of it waiting on a person · 1 call waited for approval"; a stacked bar of model, tool, waiting on a person and harness with each duration; "Running 12 batches in parallel took 20s instead of 27s one at a time." |
 | Tokens | "in and out" | 768,981 tokens | "732,270 in · 36,711 out · 12,482 of the output was reasoning"; a stacked bar of cache read, fresh input and output; "Cache hit 83% of input · 33,285 tokens per model call · effective input price $1.88 per million · nothing written to cache" |
 | Turns and steps | "16 of 186 frames shown" | 7 turns · 41 steps · 186 frames | "A step is one model call or one tool call. A frame is one recorded event."; steps per turn split into model and tool calls; "1.6 tools per batch · 0.86 tool calls per model call" |

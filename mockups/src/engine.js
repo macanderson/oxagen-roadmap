@@ -4342,7 +4342,7 @@ function aIdentity(a,r){
      '<span class="sub">every run of this agent carries their name as <span class="mono">initiating_principal</span></span></dd>'+
     '<dt>Workspace</dt><dd>'+h(w.name)+' <span class="mono dim">'+h(w.slug)+'</span>'+
      '<span class="sub">the principal is scoped to it and cannot be used in another</span></dd>'+
-    '<dt>Runtime</dt><dd class="mono">'+h(a.host||"not enrolled")+
+    '<dt>Runtime</dt><dd class="mono">'+h(a.host||(a.enrolled?"a host outside this workspace":"not enrolled"))+
      '<span class="sub">'+(a.enrolled?'its device key countersigns this agent\'s checkpoints':'nothing signs its checkpoints yet')+'</span></dd>'+
     '<dt>Delegation</dt><dd>subagents narrow, never widen'+
      '<span class="sub">a subagent may do only what both this agent and the invoking person are granted</span></dd>'+
@@ -4384,7 +4384,7 @@ function aOverview(a,r){
       (belts.length?plural(beltTotal(a),"tool")+' · ':'from role grants · no named toolbelt · ')+beltModeLabel(beltPresentation(a)),
       ["Open toolbelt",'S.tab.agent=\'toolbelt\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/toolbelt\')'])+
     part("Runtime",'<span class="mono">'+h(a.host||"—")+'</span> '+tierBadge(a.tier),
-      rt?h(rt.kind)+' · '+h(rt.harness)+' '+h(rt.harnessV)+' · '+h(rt.os):'no host is enrolled',
+      rt?h(rt.kind)+' · '+h(rt.harness)+' '+h(rt.harnessV)+' · '+h(rt.os):a.enrolled?'enrolled on a host outside this workspace':'no host is enrolled',
       ["Open runtime",'S.tab.agent=\'runtime\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/runtime\')'])+
     part("Owner",h(op.name)+' <span class="mono dim">'+h(op.role)+'</span>',
       'accountable for every run this agent makes')+
@@ -14166,6 +14166,14 @@ document.addEventListener("click",function(e){
         digest:"sha256:"+hex(16),commit:x.head,budget:m2(pick([0.4,0.6,0.8,1,1.5,2,3])),budgetUsed:Math.round(rf(0.05,0.98)*100)/100,
         desc:DESC[base]||("Runs "+title(base).toLowerCase()+" for "+w.name+". Opens a pull request or a proposal; never merges, never pays."),
         avatar:av,mandates:[],incidents:incidents,model:rnd()<0.6?"complex":"light"};
+      /* Enrolled unless it runs at the observe tier, which is what an agent with no hook records at.
+         Its host is a runtime of the same tier in its workspace when the workspace lists one.
+         No random draws here, so the generated organization is unchanged. */
+      if(tier!=="observe"){
+        made.enrolled=true; made.status="enrolled"; made.principal="prn_01K"+made.digest.slice(7,23).toUpperCase();
+        var hosts=RUNTIMES.filter(function(r){return r.ws===w.slug&&r.tier===tier&&r.health!=="not enrolled";});
+        if(hosts.length) made.host=hosts[n%hosts.length].id;
+      }
       perWsAgents[w.slug].push(made); madeAgents.push(made);
       n++;
     }
@@ -14758,7 +14766,7 @@ S.tsel={}; S.dodEdit={}; S.tkDrafting={}; S.wo=null; S.ipz=null; S.wfz=null; S.d
       desc:x.desc,avatar:{kind:"icon",icon:x.icon,tone:x.tone},mandates:[],incidents:0,model:"complex",host:x.host,
       enrolled:true,principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCN"+["K","M","P","Q"][i],devKey:"ed25519:"+["5d31…a0c4","b812…6e27","0f9e…d153","c47a…29b8"][i]});
     /* Spend by agent was built before these four joined, so each joins it here and the list counts every agent. */
-    if(SPEND.byAgent) SPEND.byAgent.push({k:x.key,runs:x.runs30,spend:mc(num$(x.spend30)),trend:["+4%","−2%","+9%","−6%"][i]});
+    if(SPEND.byAgent) SPEND.byAgent.push({k:x.key,runs:x.runs30,spend:x.spend30,trend:["+4%","−2%","+9%","−6%"][i]});
   });
   WS.forEach(function(w){if(w.slug==="core-platform")w.agents+=TK.agents.length;});
   ORG.agents=AGENTS.length;
@@ -15402,7 +15410,7 @@ function pTask(r){
     (t.ready==="changed"?'<div class="panel-b" style="border-top:1px solid var(--border)"><div class="row" style="flex-wrap:nowrap"><span class="grow" style="flex:1;font-size:12.5px">oxagen.assistant suggests an item for the new scope: <b>Notes added after an incident closes are exported too</b></span><button class="btn sm" onclick="var t=taskById(\''+t.id+'\');t.dod.push({t:\'Notes added after an incident closes are exported too\',k:\'check\',tag:\'code\',src:\'assistant\'});render()">Add item</button></div></div>':'')+
     '</div>';
   var notes=(t.notes||[]).length?'<div class="panel"><div class="panel-h"><h3>Assistant notes</h3></div><div class="panel-b"><ul class="tk-notes">'+t.notes.map(function(n){return '<li>'+h(n)+'</li>';}).join("")+'</ul></div></div>':'';
-  var hist=[[own?"Written":"Imported",t.createdAt,own?(t.finding?"from finding "+t.finding:"in Oxagen"):"from "+k.l]];
+  var hist=[[own?"Written":"Imported",t.createdAt,own?(t.finding?"from finding "+t.finding:"in oxagen"):"from "+k.l]];
   if(t.dod.length) hist.push(["Definition of done drafted",t.createdAt,"oxagen.assistant"]);
   if(t.certifiedAt) hist.push(["Certified",t.certifiedAt,PEOPLE[t.certifiedBy].name]);
   if(t.ready==="changed") hist.push(["Changed in "+k.l,t.updatedAt,"No longer ready"]);

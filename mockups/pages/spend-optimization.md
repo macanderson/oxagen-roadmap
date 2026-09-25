@@ -35,7 +35,7 @@ Show where this workspace's money bought nothing and what would change it. Four 
 | idle while parked | 563 | $2,295.66 | turns spent re-checking an approval that had not arrived |
 | halted early | 1,097 | $2,057.83 | a policy deny at turn 1 after the prompt was already paid for |
 
-The six amounts sum to the Wasted tile, $85,768.79. A run can show more than one cause.
+The six amounts sum to the Unproductive spend tile, $85,768.79. A run can show more than one cause.
 
 **Runs with unproductive spend.** One card per run, seven in the design. Each card: the run id (a link to the run), "<agent> · <operator> · <started>", "$<unproductive> unproductive of $<cost>", badges naming what the frames show (such as "chain break", "retry loop ×3", "context bloat +1,900 tok", "idle while parked", "halted turn 1"), a bar of the unproductive share, the work order's title and what bought nothing, "<frames> frames · <steps> steps · cache <N>% · <model>", **Open the run** and **Show the frames**. A note closes the panel. It says that unproductive spend means the frames show the tokens bought nothing, names the four patterns it covers (a repeated call, a cold prefix, a turn spent waiting, and a chain that broke), and says that work a person accepted is never counted.
 
@@ -126,7 +126,7 @@ The one waste cause that ships, a cache written and never read, appears in By ca
 ## Functionality
 
 - **Parts in the URL.** `?part=` names the part, so each is a link. The old Tokens, Coaching and Waste tabs land here.
-- **Unproductive spend** is a claim about frames, not about outcomes: the frames show the tokens bought nothing. Work a person accepted is never counted. The By cause amounts sum to the Wasted tile, and a run with two causes counts toward both run counts.
+- **Unproductive spend** is a claim about frames, not about outcomes: the frames show the tokens bought nothing. Work a person accepted is never counted. The By cause amounts sum to the Unproductive spend tile, and a run with two causes counts toward both run counts.
 - **Tokens.** The By token class total equals the Tokens tile. The cache hit rate is `cache_read ÷ (input_uncached + cache_read)`, weighted by tokens. A class a harness does not report is marked absent, never zero, and a cache hit rate over a mixed fleet is never computed from missing data as if it were zero (§12.6).
 - **Recommendations** are read from the same rollup the Tokens and cache part prints, so the two cannot disagree. Each names its signal, the numbers behind it, the money a month, and one action. An action opens the place where a person makes the change. Nothing on this page changes an agent by itself.
 - **Operator habits** follow the operator review in `docs/VISION.md`. A habit is read from the recorded turns of the operator's runs and carries one rule the operator can adopt. The review names four habits: turns to completion, restarts on the same task, steering overridden by hand instead of written as a rule, and routed requests the operator approved every time. The design draws two, prompts per session (turns to completion) and briefs that make the agent re-read. The list is alphabetical by name. It carries no rank number, score, severity, grade or verdict, and it never orders people by money. Sharing a rule sends it to the person with the turns it was read from.
@@ -162,7 +162,7 @@ The thumb bar holds Work (8), Agents, Tools, Spend and More (3), with Spend lit.
 - Every figure reads the record. No inference, no score, and no model-written account of why. A recommendation or a habit names the recorded numbers it came from.
 - No person is scored or ranked. Operator habits are alphabetical by name, with no rank, no severity and no verdict, and the page says the record reports what happened.
 - Every money figure states its basis, and every enforcement claim states its tier. Self-reported tokens are labelled Reported by harness (`client_attested`), never observed.
-- Headers are rollups of the rows beneath them. By cause sums to the Wasted tile. By token class sums to the Tokens tile. The part counts equal their lists.
+- Headers are rollups of the rows beneath them. By cause sums to the Unproductive spend tile. By token class sums to the Tokens tile. The part counts equal their lists.
 - Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
 - Exactly one gold action per screen: **Set a budget** in the header. Every action in the parts is a plain button.
 - A future-only field is marked in the design and renders as not recorded in a build until its contract ships.

@@ -44,7 +44,7 @@ Older addresses still land on the tab that absorbed them: `…/enrollment` on Ru
 - **Per model call**: “2,586 tok in the mean request”.
 - **Basis**: “observed by the gateway proxy from the bytes that passed through it”, or on an agent whose spend is reported by the harness “self-reported by the harness · absent classes are marked, never zero”.
 
-**Optimization.** The badge reads “2 from the token record”. At most three items, ordered by the money at stake. Each item is a badge with its title, a signal line in mono, “$<amount> a month at stake”, and one action. On the demo record:
+**Optimization.** The badge reads “2 suggestions”, or “3 of <N> suggestions” when there are more than three. At most three items, ordered by the money at stake. Each item is a badge with its title, a signal line in mono, “$<amount> a month at stake”, and one action. On the demo record:
 
 | Item | Signal | At stake | Action |
 |---|---|---|---|

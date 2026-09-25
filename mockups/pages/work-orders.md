@@ -31,7 +31,7 @@ Columns, in order:
 | Sent to | The agent’s harness mark, avatar and name, or a workflow’s stage marks and its name |
 | Latest run | The run id as a link to the run, `live` while it is live, and “4 runs” under it when the work order started more than one. “none yet” before the first run |
 | Items claimed | Claimed over total (“3 / 4”), or a dash when the work order has no items |
-| State | A dot and a word: `queued` (with “waits on #633” under it), `sent`, `in progress`, `waiting on you`, `returned`, `parked for you`, `stopped`, `expired`, `accepted` or `closed` |
+| State | A dot and a word: Queued (with “waits on #633” under it), Sent, In progress, Waiting on you, Sent back, Parked for you, Stopped, Expired, Accepted or Closed |
 | Spend | The sum of its runs’ cost in USD, or a dash |
 | Sent by | Avatar and name, and the time it was sent or opened in mono |
 

@@ -38,7 +38,7 @@ The agent header and the tab bar are as `agent.md` specifies, with Identity sele
 
 | Row | Value | Sub-line |
 |---|---|---|
-| Key | “oxa_live_trag…c4e0” | “shown once at issue and stored as a hash” |
+| Key | “ox_live_trag…c4e0” | “shown once at issue and stored as a hash” |
 | Purpose lock | `run_start, control_channel` | none |
 | Issued | “2026-07-21 15:08 to Marcus Bell”. With no credential issued the mockup prints a bare dash where the date belongs (on pr-reviewer); a build says none is issued | none |
 | Last used | “2026-09-11 14:19:02”, or “never” for an agent that is not enrolled | none |

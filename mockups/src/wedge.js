@@ -297,7 +297,9 @@ var XR={over_budget:"It did not fit the token budget",below_relevance_floor:"It 
  widens_workspace_scope:"A repository source tried to widen a workspace source",prefix_overflow:"The session-start prefix is full",
  duplicate:"Another frame carries the same body",source_unavailable:"Its source did not answer in time",tier:"Not carried by the session-start delivery"};
 var XR_SHIPPED={over_budget:1,superseded:1,tier:1};
-function xrBadge(r){return '<span class="b b-q mono" title="'+h(XR[r]||"")+'"'+(XR_SHIPPED[r]?'':fut("steering.manifest records tier, budget and superseded today"))+'>'+h(r)+'</span>';}
+/* A reason reads as words on the page; its key stays in the title for anyone matching it to a manifest. */
+function xrLabel(r){return r==="tier"?"Not at session start":String(r).replace(/_/g," ").replace(/^./,function(c){return c.toUpperCase();});}
+function xrBadge(r){return '<span class="b b-q" title="'+h(r)+': '+h(XR[r]||"")+'"'+(XR_SHIPPED[r]?'':fut("steering.manifest records tier, budget and superseded today"))+'>'+h(xrLabel(r))+'</span>';}
 function mapCut(c){
   var r=c.reason==="out of scope"?"out_of_scope":c.reason==="superseded"?"superseded":c.reason==="lower precedence"?"overridden_by_must"
     :(c.it.score===0?"below_relevance_floor":"over_budget");
@@ -351,7 +353,7 @@ function resolveEnvelope(slug,brief,opt){
   /* mandates: one delegation frame per active mandate the agent holds */
   MANDATES.filter(function(m){return m.agent===a.key&&m.status==="active";}).forEach(function(m){
     sel.push(frameOf("delegation",{kind:"mandate",id:m.id,version:"grant v"+(m.grantV||3),path:"granted by "+m.by},
-      m.purpose+": up to "+usd(m.perCall)+" "+m.currency+" a call and "+usd(m.perPeriod)+" a "+String(m.period).replace(/ly$/,"")+", "+m.tools+", until "+m.to+". Above "+usd(m.approvalAbove)+" a person approves.",{force:"must",point:"session_start"}));});
+      m.purpose+": "+usd(m.perPeriod)+" "+m.currency+" a "+String(m.period).replace(/ly$/,"")+", "+m.tools+", until "+m.to+". Calls above the auto-approve limit of "+usd(m.approvalAbove)+" wait for a person.",{force:"must",point:"session_start"}));});
   /* skills: the bundle synced into the checkout; withheld skills emit nothing and are listed as exclusions */
   M.skills.forEach(function(s){
     var B=(SOURCES.bundles||{})[s.id]; var src={kind:"skill",id:s.id,version:s.ver,path:s.path};
@@ -741,7 +743,7 @@ function steeringSources(wslug){
         href:srcUrl("skill",s.id,wslug),home:"Steering"});});
     (SOURCES.withheld||[]).filter(function(x){return (x.ws||"core-platform")===wslug;}).forEach(function(x){
       add({g:"skill",kind:"skill",id:x.id,title:x.why,path:".oxagen/skills/"+x.id.split(".").pop()+"/",emits:{},scope:"workspace",version:x.ver,hash:"",
-        status:"withheld",why:"withheld as "+x.reason,href:srcUrl("skill",x.id,wslug),home:"Steering"});});
+        status:"withheld",why:"withheld: "+xrLabel(x.reason).toLowerCase(),href:srcUrl("skill",x.id,wslug),home:"Steering"});});
   }
   wsAgentsOf(wslug).forEach(function(a){
     var slug=defSlug(a);
@@ -1340,7 +1342,7 @@ function aPermissions(a,r){
 }
 function mandateFrame(m){
   return frameOf("delegation",{kind:"mandate",id:m.id,version:"grant v"+(m.grantV||3),path:"granted by "+m.by},
-    m.purpose+": up to "+usd(m.perCall)+" "+m.currency+" a call and "+usd(m.perPeriod)+" a "+String(m.period).replace(/ly$/,"")+", "+m.tools+", until "+m.to+". Above "+usd(m.approvalAbove)+" a person approves.",{force:"must",point:"session_start"});
+    m.purpose+": "+usd(m.perPeriod)+" "+m.currency+" a "+String(m.period).replace(/ly$/,"")+", "+m.tools+", until "+m.to+". Calls above the auto-approve limit of "+usd(m.approvalAbove)+" wait for a person.",{force:"must",point:"session_start"});
 }
 function permDelegation(a){
   var mine=MANDATES.filter(function(m){return m.agent===a.key;});
