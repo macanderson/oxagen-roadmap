@@ -1,0 +1,20 @@
+{
+  "month": "September 2026",
+  "centers": [
+    { "id": "cc_01K2P4A1QX", "label": "ENG-1001", "description": "Platform engineering", "createdAt": "2026-07-14", "by": "dana" },
+    { "id": "cc_01K2P4A2RM", "label": "ENG-1040", "description": "Release engineering", "createdAt": "2026-07-14", "by": "dana" },
+    { "id": "cc_01K2P4A3TB", "label": "FIN-2040", "description": "Finance operations", "createdAt": "2026-07-20", "by": "dana" },
+    { "id": "cc_01K3B7C9HD", "label": "MKT-3300", "description": null, "createdAt": "2026-08-30", "by": "priya" }
+  ],
+  "workspaces": { "core-platform": null, "finops": "FIN-2040", "data-platform": "ENG-1001" },
+  "agents": {
+    "a-intel.core.stella-ci": "ENG-1001",
+    "a-intel.core.triage": "ENG-1001",
+    "a-intel.core.release-manager": "ENG-1040"
+  },
+  "assign": [
+    { "label": "ENG-1001", "ws": "core-platform", "n": 17 },
+    { "label": "ENG-1040", "ws": "core-platform", "n": 2 }
+  ],
+  "columns": ["line", "cost_center", "runs", "unpriced_runs", "cost_micros", "cost_cents", "currency", "basis", "run_ids"]
+}

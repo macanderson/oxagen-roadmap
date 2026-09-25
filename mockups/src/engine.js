@@ -5070,6 +5070,7 @@ function aIdentity(a,r){
      h(a.model==="light"?"z-ai/glm-flash-latest":"z-ai/glm-latest")+'</span></dd>'+
     '<dt>Operator</dt><dd>'+h(op.name)+
      '<span class="sub">accountable for every run · IAM field <span class="mono">initiating_principal</span></span></dd>'+
+    '<dt>Cost center</dt><dd data-cc-cell>'+ccAgentCell(a)+'</dd>'+
     '<dt>Lifecycle state</dt><dd><span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span>'+
      '<span class="sub">registered → enrolled → active → retired. Deregistering retires the principal and never deletes it, so old runs keep their identity.</span></dd>'+
     '<dt>First frame</dt><dd class="mono">'+h(a.firstFrame||"—")+'</dd>'+
@@ -8532,7 +8533,7 @@ function pSpend(){
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'\')">Back to Fleet</button>');
 
   var tabs='<div class="tabs" role="tablist">'+
-   [["findings","Findings",FINDINGS.length],["tokens","Tokens"],["coaching","Coaching",coachCount()],["operator","By operator"],["agent","By agent"],
+   [["findings","Findings",FINDINGS.length],["tokens","Tokens"],["coaching","Coaching",coachCount()],["operator","By operator"],["agent","By agent"],["cost_center","By cost center"],
     ["model","By model"],["tool","By tool"],["waste","Wasted spend",SPEND.wasteRunsList.length],["budgets","Budgets",SPEND.budgets.length]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="spendGo(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
@@ -8604,6 +8605,8 @@ function pSpend(){
        '<td class="mono dim" style="font-size:11px">client_attested</td></tr>';}).join("")+
      '<tr><td colspan="3"><b>Total</b> <span class="dim" style="font-size:11.5px">· the month’s spend</span></td><td class="num" id="spendModelTotal"><b>'+usd(fmt2(spendMonthTotal()))+'</b></td><td></td><td></td></tr>'+
      '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">The Oxagen line and the light, embed and rerank rows are Oxagen’s own work, routed by tier and billed back at vendor cost plus a published markup; they count toward the organization’s funding cap and are set under <a href="#/'+ORG.slug+'">Organization → Model routes</a>.</p></div></div>';
+  } else if(t==="cost_center"){
+    body=spendCostCenters();
   } else if(t==="tool"){
     body=spendByTool();
   } else if(t==="waste"){
@@ -9142,7 +9145,7 @@ function pOrganization(){
 
   var tabs='<div class="tabs" role="tablist">'+
    [["people","People",MEMBERS.length],["roles","Roles",ROLES.length],["invitations","Invitations",INVITES.length],["workspaces","Workspaces",WS.length],
-    ["funding","Model funding and routes"],["plane","Data plane"],["keys","API keys"]]
+    ["costcenters","Cost centers",CC.centers.length],["funding","Model funding and routes"],["plane","Data plane"],["keys","API keys"]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="orgTab(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var body="";
@@ -9184,6 +9187,8 @@ function pOrganization(){
       '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
+  } else if(t==="costcenters"){
+    body=orgCostCenters();
   } else if(t==="funding"){
     body=orgKeyPanel()+'<div style="height:14px"></div>'+orgRoutesPanel();
   } else if(t==="plane"){
@@ -9212,9 +9217,213 @@ function pOrganization(){
      '<pre>$ oxagen login --org a-intel\n$ oxagen run list --workspace core-platform --since 24h\n$ oxagen run export run_01K5RS7M2E8FJ3QW --with-bodies --out ./run_01K5RS7M2E8FJ3QW.bundle\n$ oxagen agent status a-intel.finops.invoice-bot</pre></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>'+h(ORG.name)+'</h1>'+
-   '<p>People, roles, invitations, workspaces, model funding and routes, and API keys.</p></div>'+
+   '<p>People, roles, invitations, workspaces, cost centers, model funding and routes, and API keys.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'invite\')">Invite</button>'+
    '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button></div></div>'+tabs+body;
+}
+
+/* ---- Cost centers (ADR-142): the labels spend is charged back to. An agent's label wins over its
+   workspace's, and spend with neither is its own row on Spend. The calls mirror oxagen's
+   list_cost_centers, create_cost_center, set_cost_center, delete_cost_center and
+   export_cost_center_statement. Owners, admins and billing members write; everyone else reads. ---- */
+var CC=FIXTURES.COST_CENTERS;
+var CC_LABEL=/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+CC.deleted=[];
+function ccWriter(role){return /^org\.(owner|admin|billing)\b/.test(role||"");}
+function ccCanEdit(){return ccWriter(me().role);}
+function ccHolders(){return Object.keys(PEOPLE).filter(function(k){return ccWriter(PEOPLE[k].role);}).map(function(k){return PEOPLE[k].name;});}
+function ccHoldersText(){var n=ccHolders();return n.length>1?n.slice(0,-1).join(", ")+" and "+n[n.length-1]:n[0]||"nobody";}
+function ccDenied(what){act("Only an organization Owner, Admin or Billing member "+(what||"changes cost centers")+". "+ccHoldersText()+(ccHolders().length>1?" hold":" holds")+" that role.","denied");}
+function ccOf(label){for(var i=0;i<CC.centers.length;i++){if(CC.centers[i].label===label)return CC.centers[i];}return null;}
+/* The fleet is generated after this block loads, so the first reader does two things once:
+   charges the fixture's counted agents (the first n unnamed agents of a workspace, by key) to
+   their labels, and rolls the month's spend up by label from SPEND.byAgent. The rollup is frozen
+   there, the way the product's is: a label changed later moves new runs, never rolled-up ones. */
+function ccReady(){
+  if(CC.rolled) return;
+  (CC.assign||[]).forEach(function(x){
+    AGENTS.filter(function(a){return a.ws===x.ws&&!CC.agents[a.key];})
+     .sort(function(a,b){return a.key<b.key?-1:1;}).slice(0,x.n)
+     .forEach(function(a){CC.agents[a.key]=x.label;});
+  });
+  var by={}, order=[];
+  SPEND.byAgent.forEach(function(r){
+    var a=agent(r.k), key=a?ccLabelOf(a).label:null, id=key||"";
+    if(!by[id]){by[id]={key:key,runs:0,cents:0};order.push(id);}
+    by[id].runs+=r.runs; by[id].cents+=Math.round(n$(r.spend)*100);
+  });
+  CC.rolled=order.map(function(id){return by[id];})
+   .sort(function(a,b){return a.key===null?1:b.key===null?-1:b.cents-a.cents;});
+}
+function ccAgents(label){ccReady();return Object.keys(CC.agents).filter(function(k){return CC.agents[k]===label;}).length;}
+function ccWorkspaces(label){return Object.keys(CC.workspaces).filter(function(k){return CC.workspaces[k]===label;}).length;}
+/* Which label an agent's runs roll up to, and why: its own, its workspace's, or none. */
+function ccOfAgent(a){ccReady();return ccLabelOf(a);}
+function ccLabelOf(a){
+  if(CC.agents[a.key]) return {label:CC.agents[a.key],from:"agent"};
+  if(CC.workspaces[a.ws]) return {label:CC.workspaces[a.ws],from:"workspace"};
+  return {label:null,from:null};
+}
+function ccOptions(cur,none){
+  return '<option value=""'+(cur?'':' selected')+'>'+h(none)+'</option>'+
+   CC.centers.map(function(c){return '<option value="'+h(c.label)+'"'+(c.label===cur?' selected':'')+'>'+h(c.label)+(c.description?' · '+h(c.description):'')+'</option>';}).join("");
+}
+
+function orgCostCenters(){
+  var edit=ccCanEdit();
+  var lead='<p class="muted" style="margin:0 0 10px;font-size:12.5px">Spend is charged to the agent’s cost center, or to its workspace’s when the agent names none. Spend with neither is shown on Spend as its own row.</p>'+
+   (edit?'':'<div class="note" data-cc-readonly style="margin:0 0 10px">You can read this list. Changing it takes an organization Owner, Admin or Billing role, which '+h(ccHoldersText())+(ccHolders().length>1?' hold':' holds')+'.</div>');
+  var labels=CC.centers.length?'<div class="tw"><table data-cc-labels>'+
+    '<thead><tr><th>Label</th><th>Description</th><th class="num">Agents</th><th class="num">Workspaces</th><th>Added</th><th></th></tr></thead><tbody>'+
+    CC.centers.map(function(c){
+     return '<tr data-cost-center="'+h(c.label)+'"><td class="mono">'+h(c.label)+'</td>'+
+      '<td>'+(c.description?h(c.description):'<span class="dim">No description</span>')+'</td>'+
+      '<td class="num">'+ccAgents(c.label)+'</td><td class="num">'+ccWorkspaces(c.label)+'</td>'+
+      '<td class="mono dim" style="font-size:11px">'+h(c.createdAt)+' · '+h(PEOPLE[c.by]?PEOPLE[c.by].name:c.by)+'</td>'+
+      '<td class="rowacts"><button class="btn sm danger" onclick="'+(edit?'openDialog(\'ccdel\',\''+h(c.label)+'\')':'ccDenied()')+'">Delete</button></td></tr>';}).join("")+
+    '</tbody></table></div>'
+   :'<div class="panel-b"><p class="muted" data-cc-empty style="margin:0">This organization has no cost centers.</p></div>';
+  var wsTable='<div class="tw"><table data-cc-workspaces>'+
+   '<thead><tr><th>Workspace</th><th>Cost center</th><th class="num">Agents</th><th></th></tr></thead><tbody>'+
+   WS.map(function(w){var cur=CC.workspaces[w.slug]||null;
+    return '<tr data-cc-ws="'+h(w.slug)+'"><td><b>'+h(w.name)+'</b><div class="dim mono" style="font-size:11px">'+h(w.slug)+'</div></td>'+
+     '<td>'+(cur?'<span class="mono">'+h(cur)+'</span>':'<span class="dim">None</span>')+'</td>'+
+     '<td class="num">'+w.agents+'</td>'+
+     '<td class="rowacts"><button class="btn sm" onclick="'+(edit?'openDialog(\'ccws\',\''+h(w.slug)+'\')':'ccDenied()')+'">Change</button></td></tr>';}).join("")+
+   '</tbody></table></div>';
+  return '<div class="panel" data-cc-panel><div class="panel-h"><h3>Cost centers</h3>'+
+    '<div class="sp"><button class="btn sm" onclick="'+(edit?'openDialog(\'ccadd\')':'ccDenied()')+'">Add a cost center</button></div></div>'+
+    '<div class="panel-b" style="padding-bottom:0">'+lead+'</div>'+labels+'</div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Workspace cost centers</h3></div>'+wsTable+
+    '<div class="panel-b"><div class="note">An agent charged to its own label keeps it whatever its workspace names. Charge an agent from its Identity tab.</div></div></div>';
+}
+
+DLG_EXT.ccadd=function(){
+  return {t:"Add a cost center",w:false,
+   b:'<div class="field"><label for="cc-label">Label</label><input id="cc-label" placeholder="ENG-1001" maxlength="64" autocomplete="off">'+
+     '<div class="hint">Up to 64 letters, digits, dots, underscores or hyphens, such as ENG-1001.</div></div>'+
+    '<div class="field"><label for="cc-desc">Description</label><input id="cc-desc" maxlength="280" placeholder="Optional"></div>'+
+    '<div class="hint" id="cc-err" role="alert" style="color:var(--st-failed)" hidden></div>'+
+    '<div class="note">A label you deleted earlier comes back with its description. Nothing is charged to it until you charge a workspace or an agent.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ccAdd()">Add</button>'};
+};
+function ccAdd(){
+  if(!ccCanEdit()) return ccDenied();
+  var el=document.getElementById("cc-label"), d=document.getElementById("cc-desc"), err=document.getElementById("cc-err");
+  var label=(el.value||"").trim(), desc=(d.value||"").trim();
+  var fail=!CC_LABEL.test(label)?"A label is 1 to 64 letters, digits, dots, underscores or hyphens, and starts with a letter or digit.":
+   ccOf(label)?label+" is already on the list.":"";
+  if(fail){err.textContent=fail;err.hidden=false;el.setAttribute("aria-invalid","true");el.focus();return;}
+  var back=null;
+  CC.deleted=CC.deleted.filter(function(c){if(c.label===label){back=c;return false;}return true;});
+  var c=back||{id:"cc_01K5"+label.replace(/[^A-Za-z0-9]/g,"").toUpperCase().slice(0,6),label:label,description:desc||null,createdAt:"2026-09-11",by:SESSION_USER};
+  if(back&&desc) c.description=desc;
+  CC.centers.push(c);
+  auditEvent("cost_center_created",me().name,(back?"Restored ":"Added ")+label+" to the organization’s cost centers","info",c.id);
+  closeDialog();
+  act(back?"Restored "+label+". Nothing is charged to it until you charge a workspace or an agent.":"Added "+label+". Charge a workspace or an agent to it and their next runs roll up there.");
+}
+
+DLG_EXT.ccdel=function(label){
+  var c=ccOf(label); if(!c) return noSuch("Cost center");
+  var na=ccAgents(label), nw=ccWorkspaces(label);
+  return {t:"Delete "+label,w:false,
+   b:'<p style="font-size:13px;margin:0 0 10px">Runs already rolled up keep this label. New runs from an agent or workspace that names it fall back to the workspace’s cost center, or to none.</p>'+
+    '<div class="'+(na||nw?'warn':'note')+'" data-cc-del-count>'+(na||nw?
+      na+(na===1?' agent':' agents')+' and '+nw+(nw===1?' workspace name':' workspaces name')+' '+h(label)+' today.'
+      :'No agent or workspace names '+h(label)+', so no run changes where it rolls up.')+'</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="ccDelete(\''+h(label)+'\')">Delete</button>'};
+};
+function ccDelete(label){
+  if(!ccCanEdit()) return ccDenied();
+  var c=ccOf(label); if(!c) return;
+  var na=ccAgents(label);
+  CC.centers=CC.centers.filter(function(x){return x.label!==label;});
+  CC.deleted.push(c);
+  Object.keys(CC.agents).forEach(function(k){if(CC.agents[k]===label) delete CC.agents[k];});
+  Object.keys(CC.workspaces).forEach(function(k){if(CC.workspaces[k]===label) CC.workspaces[k]=null;});
+  auditEvent("cost_center_deleted",me().name,"Deleted "+label+" from the organization’s cost centers","info",c.id);
+  closeDialog();
+  act("Deleted "+label+". Runs already rolled up keep it."+(na?" "+na+(na===1?" agent falls":" agents fall")+" back to the workspace’s cost center, or to none.":""));
+}
+
+DLG_EXT.ccws=function(slug){
+  var w=null; WS.forEach(function(x){if(x.slug===slug)w=x;}); if(!w) return noSuch("Workspace");
+  return {t:"Cost center for "+w.name,w:false,
+   b:'<div class="field"><label for="cc-pick">Cost center</label><select id="cc-pick">'+ccOptions(CC.workspaces[slug]||null,"None")+'</select>'+
+     '<div class="hint">Runs rolled up after this change are charged to the new label.</div></div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ccSetWs(\''+h(slug)+'\')">Save</button>'};
+};
+function ccSetWs(slug){
+  if(!ccCanEdit()) return ccDenied();
+  var v=document.getElementById("cc-pick").value||null, w=null; WS.forEach(function(x){if(x.slug===slug)w=x;});
+  CC.workspaces[slug]=v;
+  auditEvent("cost_center_set",me().name,"Charged workspace "+slug+" to "+(v||"no cost center"),"info",slug);
+  closeDialog();
+  act(v?w.name+" is charged to "+v+". Runs rolled up after this change land there, except an agent’s that names its own label.":w.name+" names no cost center. Its agents’ runs roll up to their own labels, or to the No cost center row.");
+}
+
+DLG_EXT.ccagent=function(key){
+  var a=agent(key); if(!a) return noSuch("Agent");
+  var body=CC.centers.length?
+    '<p style="font-size:13px;margin:0 0 10px">Runs rolled up after this change are charged to the label you choose. Runs already rolled up keep the label they had.</p>'+
+    '<div class="field"><label for="cc-pick">Cost center</label><select id="cc-pick">'+ccOptions(CC.agents[a.key]||null,"None (inherit the workspace’s)")+'</select>'+
+     '<div class="hint">Workspace '+h(a.ws)+' names '+(CC.workspaces[a.ws]?'<span class="mono">'+h(CC.workspaces[a.ws])+'</span>':'none')+'. An agent’s own label wins over it.</div></div>'
+   :'<p class="muted" style="font-size:13px;margin:0">This organization has no cost centers. Add one on the Organization page, then charge this agent to it here.</p>';
+  return {t:"Cost center for "+a.name,w:false,b:body,
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+(CC.centers.length?'<button class="btn primary" onclick="ccSetAgent(\''+h(a.key)+'\')">Save</button>':'')};
+};
+function ccSetAgent(key){
+  if(!ccCanEdit()) return ccDenied();
+  var a=agent(key), v=document.getElementById("cc-pick").value||null;
+  if(v) CC.agents[key]=v; else delete CC.agents[key];
+  var now=ccOfAgent(a);
+  auditEvent("cost_center_set",me().name,"Charged agent "+key+" to "+(v||"its workspace’s cost center"),"info",key);
+  closeDialog();
+  act(v?a.name+" is charged to "+v+". Runs rolled up after this change land there.":
+   a.name+" names no cost center of its own. Its runs roll up to "+(now.label?now.label+", its workspace’s":"the No cost center row")+".");
+}
+function ccAgentCell(a){
+  var c=ccOfAgent(a), edit=ccCanEdit();
+  var val=c.label?'<span class="mono">'+h(c.label)+'</span>':'<span class="dim">None</span>';
+  var why=c.from==="agent"?"its own label, which wins over the workspace’s":
+   c.from==="workspace"?"inherited from workspace "+h(a.ws):"neither it nor its workspace names one, so its runs land on Spend’s No cost center row";
+  return val+' <button class="btn sm" data-cc-agent onclick="'+(edit?'openDialog(\'ccagent\',\''+h(a.key)+'\')':'ccDenied()')+'">Change</button>'+
+   '<span class="sub" data-cc-from="'+(c.from||"none")+'">'+why+'</span>';
+}
+
+function spendCostCenters(){
+  ccReady();
+  var total=CC.rolled.reduce(function(s,r){return s+r.cents;},0), runs=CC.rolled.reduce(function(s,r){return s+r.runs;},0);
+  return '<div class="panel" data-cc-spend><div class="panel-h"><div style="flex:1;min-width:0"><h3>By cost center</h3>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">Every agent’s runs this month, each charged to the agent’s cost center, or to its workspace’s when the agent names none.</p></div>'+
+    '<div class="sp"><button class="btn sm" onclick="'+(ccCanEdit()?'openDialog(\'ccexport\')':'ccDenied(\'can export the chargeback statement\')')+'">Export the chargeback statement</button></div></div>'+
+   '<div class="tw"><table><thead><tr><th>Cost center</th><th class="num">Runs</th><th class="num">Spend</th><th class="num">Share of spend</th></tr></thead><tbody>'+
+   CC.rolled.map(function(r){
+    var name=r.key===null?'<span class="dim">No cost center</span>':'<span class="mono">'+h(r.key)+'</span>'+(ccOf(r.key)?'':' <span class="b b-q">deleted</span>');
+    return '<tr data-cc-row="'+h(r.key||"")+'" data-cents="'+r.cents+'"'+(r.key===null?' data-unassigned="true"':'')+'><td>'+name+'</td>'+
+     '<td class="num">'+r.runs.toLocaleString("en-US")+'</td><td class="num">'+usd(fmt2(r.cents/100))+'</td>'+
+     '<td class="num">'+(total?(r.cents/total*100).toFixed(1):"0.0")+'%</td></tr>';}).join("")+
+   '<tr data-cc-total data-cents="'+total+'" data-runs="'+runs+'"><td><b>Total</b></td><td class="num"><b>'+runs.toLocaleString("en-US")+'</b></td><td class="num"><b>'+usd(fmt2(total/100))+'</b></td><td class="num">100%</td></tr>'+
+   '</tbody></table></div><div class="panel-b"><div class="note">Every run lands on exactly one row, so the rows sum to the runs’ spend. Share is a row’s spend divided by that total. The strip above also counts Oxagen’s own routed work, which no cost center is charged for. The chargeback statement covers every workspace.</div></div></div>';
+}
+
+DLG_EXT.ccexport=function(){
+  if(!ccCanEdit()) return {t:"Export the chargeback statement",w:false,
+   b:'<div class="warn">Only an organization Owner, Admin or Billing member can export the chargeback statement.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  return {t:"Export the chargeback statement",s:"CSV · every workspace",w:false,
+   b:'<div class="field"><label for="cc-month">Month</label><select id="cc-month"><option value="2026-09">September 2026 (to date)</option><option value="2026-08">August 2026</option><option value="2026-07">July 2026</option></select></div>'+
+    '<div class="field"><label>Columns</label><div class="row" style="flex-wrap:wrap;gap:4px">'+
+     CC.columns.map(function(c){return '<span class="b b-q mono" style="font-size:11px">'+h(c)+'</span>';}).join("")+'</div></div>'+
+    '<div class="note">One line per cost center, one for spend with no cost center, and the organization total they sum to. Each line lists the run ids behind it, and cost is in micros and in cents.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ccExport()">Export CSV</button>'};
+};
+function ccExport(){
+  var m=(document.getElementById("cc-month")||{}).value||"2026-09";
+  auditEvent("cost_center_statement_exported",me().name,"Exported the chargeback statement for "+m,"info","cost-centers-"+m+".csv");
+  closeDialog();
+  act("Exported cost-centers-"+m+".csv. In the product this downloads the file. A mockup writes nothing to disk.");
 }
 
 /* ---- Organization records (W10 · cio-console port). Identity, routes and workspace settings the tabs read.

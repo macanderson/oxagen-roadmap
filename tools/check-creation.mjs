@@ -1079,7 +1079,8 @@ for (const theme of ["light", "dark"]) {
   const tabs = await page.evaluate(() =>
     [...document.querySelectorAll('[role="tab"]')].map((t) => t.textContent.replace(/\d+$/, "").trim()));
   ok(tabs.includes("Data plane"), "organization: the Data plane tab is present, got " + tabs.join(" ~ "));
-  ok(tabs.length === 7, "organization: seven tabs, got " + tabs.length + ": " + tabs.join(" ~ "));
+  ok(tabs.includes("Cost centers"), "organization: the Cost centers tab is present, got " + tabs.join(" ~ "));
+  ok(tabs.length === 8, "organization: eight tabs, got " + tabs.length + ": " + tabs.join(" ~ "));
 
   const sub = await page.evaluate(() => {
     const ps = [...document.querySelectorAll(".phead .t p")];
@@ -1474,6 +1475,126 @@ for (const theme of ["light", "dark"]) {
   ok(/^Exported/.test(ex), "reflection: research.read exports, got " + ex);
   ok(e2.length === 0, "run memories: no JavaScript error as priya: " + e2.join(" | "));
   await pg.close();
+}
+
+// Cost centers (ADR-142): the labels on Organization, the charge on an agent's Identity tab, and the
+// rollup on Spend. An organization Owner, Admin or Billing member writes. Marcus, a workspace owner,
+// reads, and every write he tries names who can. The rollup must sum to the month's spend and runs
+// to the cent, which only holds if it is derived from the generated fleet rather than typed in.
+{
+  const as = async (who, hash) => {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    const errs = []; pg.on("pageerror", e => errs.push(String(e.message || e)));
+    await pg.goto(FILE + "?product=1&state=loaded&mobile=0" + (who ? "&as=" + who : "") + hash);
+    await pg.waitForTimeout(300);
+    return { pg, errs };
+  };
+  const toast = pg => pg.evaluate(() => S.toast || "");
+  const rows = pg => pg.evaluate(() => [...document.querySelectorAll("tr[data-cost-center]")].map(t => t.dataset.costCenter));
+
+  const m = await as("", "#/a-intel");
+  await m.pg.evaluate(() => orgTab("costcenters")); await m.pg.waitForTimeout(150);
+  const r = await m.pg.evaluate(() => ({
+    tab: [...document.querySelectorAll(".tabs .tab")].map(b => b.textContent).find(t => /^Cost centers/.test(t)) || "",
+    ro: document.querySelector("[data-cc-readonly]")?.innerText || "",
+    ws: document.querySelectorAll("tr[data-cc-ws]").length, wsWant: WS.length,
+  }));
+  ok(r.tab === "Cost centers4", "cost centers: Organization has the tab with its count, got " + r.tab);
+  ok((await rows(m.pg)).join() === "ENG-1001,ENG-1040,FIN-2040,MKT-3300", "cost centers: the four labels list, got " + (await rows(m.pg)).join());
+  ok(/Owner, Admin or Billing/.test(r.ro) && /Dana Okafor/.test(r.ro), "cost centers: a reader is told who can change the list, got " + r.ro);
+  ok(r.ws === r.wsWant, "cost centers: every workspace has a row, got " + r.ws + " of " + r.wsWant);
+  await m.pg.evaluate(() => [...document.querySelectorAll("[data-cc-panel] button")].find(b => /Add a cost center/.test(b.textContent)).click());
+  ok(/^Only an organization Owner, Admin or Billing member/.test(await toast(m.pg)) && !(await dlg(m.pg)),
+    "cost centers: a reader's add is refused without a dialog, got " + (await toast(m.pg)));
+  await m.pg.evaluate(() => { location.hash = "#/a-intel/core-platform/spend/cost_center"; }); await m.pg.waitForTimeout(250);
+  await m.pg.evaluate(() => [...document.querySelectorAll("[data-cc-spend] button")].find(b => /chargeback/.test(b.textContent)).click());
+  ok(/can export the chargeback statement/.test(await toast(m.pg)), "cost centers: a reader's export is refused, got " + (await toast(m.pg)));
+  ok(m.errs.length === 0, "cost centers: no JavaScript error as marcus: " + m.errs.join(" | "));
+  await m.pg.close();
+
+  const d = await as("dana", "#/a-intel");
+  await d.pg.evaluate(() => orgTab("costcenters")); await d.pg.waitForTimeout(150);
+  const cells = await d.pg.evaluate(() => Object.fromEntries([...document.querySelectorAll("tr[data-cost-center]")].map(t =>
+    [t.dataset.costCenter, [...t.querySelectorAll("td.num")].map(c => +c.textContent).join("/")])));
+  ok(!(await d.pg.evaluate(() => document.querySelector("[data-cc-readonly]"))), "cost centers: a Billing member gets no read-only note");
+  ok(cells["ENG-1001"] === "19/1" && cells["ENG-1040"] === "3/0" && cells["FIN-2040"] === "0/1" && cells["MKT-3300"] === "0/0",
+    "cost centers: each label counts the agents and workspaces that name it, got " + JSON.stringify(cells));
+
+  for (const [label, re, what] of [["bad label", /A label is 1 to 64 letters/, "a label with a space is refused"],
+                                   ["ENG-1001", /ENG-1001 is already on the list/, "a duplicate label is refused"]]) {
+    await d.pg.evaluate(() => openDialog("ccadd")); await d.pg.waitForTimeout(80);
+    await type(d.pg, "#cc-label", label);
+    await d.pg.evaluate(() => ccAdd());
+    const e = await d.pg.evaluate(() => document.getElementById("cc-err")?.textContent || "");
+    ok(re.test(e), "cost centers: " + what + ", got " + e);
+    await d.pg.evaluate(() => closeDialog());
+  }
+  await d.pg.evaluate(() => openDialog("ccadd")); await d.pg.waitForTimeout(80);
+  await type(d.pg, "#cc-label", "OPS-5100"); await type(d.pg, "#cc-desc", "Operations");
+  await d.pg.evaluate(() => ccAdd()); await d.pg.waitForTimeout(80);
+  ok(/^Added OPS-5100\./.test(await toast(d.pg)), "cost centers: adding a label says so, got " + (await toast(d.pg)));
+  ok((await rows(d.pg)).includes("OPS-5100"), "cost centers: the new label lists");
+  ok(await d.pg.evaluate(() => AUDIT[0].ev === "cost_center_created" && /OPS-5100/.test(AUDIT[0].what)), "cost centers: adding a label writes cost_center_created");
+
+  await d.pg.evaluate(() => openDialog("ccdel", "ENG-1040")); await d.pg.waitForTimeout(80);
+  const dc = await d.pg.evaluate(() => document.querySelector("[data-cc-del-count]")?.textContent || "");
+  ok(dc === "3 agents and 0 workspaces name ENG-1040 today.", "cost centers: deleting names what still points at the label, got " + dc);
+  await d.pg.evaluate(() => [...document.querySelectorAll("#layer .dlg-f button")].find(b => b.textContent === "Delete").click());
+  await d.pg.waitForTimeout(80);
+  ok(/^Deleted ENG-1040\. Runs already rolled up keep it\. 3 agents fall back/.test(await toast(d.pg)), "cost centers: deleting says where the agents go, got " + (await toast(d.pg)));
+  ok(!(await rows(d.pg)).includes("ENG-1040") && await d.pg.evaluate(() => !Object.values(CC.agents).includes("ENG-1040")),
+    "cost centers: a deleted label leaves the list and every agent that named it");
+  ok(await d.pg.evaluate(() => AUDIT[0].ev === "cost_center_deleted"), "cost centers: deleting writes cost_center_deleted");
+
+  await d.pg.evaluate(() => openDialog("ccws", "growth")); await d.pg.waitForTimeout(80);
+  await d.pg.selectOption("#cc-pick", "MKT-3300");
+  await d.pg.evaluate(() => ccSetWs("growth")); await d.pg.waitForTimeout(80);
+  ok(/^Growth is charged to MKT-3300\./.test(await toast(d.pg)), "cost centers: charging a workspace says so, got " + (await toast(d.pg)));
+  ok(await d.pg.evaluate(() => document.querySelector('tr[data-cc-ws="growth"]').innerText.includes("MKT-3300")), "cost centers: the workspace row shows its new label");
+
+  await d.pg.evaluate(() => { location.hash = "#/a-intel/core-platform/spend/cost_center"; }); await d.pg.waitForTimeout(250);
+  const s = await d.pg.evaluate(() => {
+    const t = document.querySelector("[data-cc-total]"), rs = [...document.querySelectorAll("tr[data-cc-row]")];
+    return { heading: document.querySelector("[data-cc-spend] h3")?.textContent, total: +t.dataset.cents, runs: +t.dataset.runs,
+      sum: rs.reduce((n, r) => n + +r.dataset.cents, 0), want: Math.round(n$(SPEND.spend) * 100), wantRuns: SPEND.runs,
+      none: rs.filter(r => r.dataset.unassigned === "true").map(r => r.cells[0].textContent),
+      deleted: rs.filter(r => /deleted/.test(r.cells[0].textContent)).map(r => r.dataset.ccRow) };
+  });
+  ok(s.heading === "By cost center", "cost centers: Spend has the tab, got " + s.heading);
+  ok(s.sum === s.total && s.total === s.want, "cost centers: the rows sum to the month's spend to the cent, got " + s.sum + " / " + s.total + " / " + s.want);
+  ok(s.runs === s.wantRuns, "cost centers: the rows sum to the month's runs, got " + s.runs + " of " + s.wantRuns);
+  ok(s.none.join() === "No cost center", "cost centers: spend with no label is one row, got " + s.none.join());
+  ok(s.deleted.join() === "ENG-1040", "cost centers: a deleted label keeps the runs already rolled up, got " + s.deleted.join());
+  await d.pg.evaluate(() => [...document.querySelectorAll("[data-cc-spend] button")].find(b => /chargeback/.test(b.textContent)).click());
+  await d.pg.waitForTimeout(80);
+  ok(/cost_micros/.test((await dlg(d.pg))?.body || ""), "cost centers: the export lists its columns");
+  await d.pg.evaluate(() => ccExport()); await d.pg.waitForTimeout(80);
+  ok(/^Exported cost-centers-2026-09\.csv\./.test(await toast(d.pg)) && await d.pg.evaluate(() => AUDIT[0].ev === "cost_center_statement_exported"),
+    "cost centers: exporting says so and writes cost_center_statement_exported, got " + (await toast(d.pg)));
+
+  for (const [ws, pick, from, re] of [["core-platform", "a-intel.core.stella-ci", "agent", /its own label, which wins over the workspace/],
+                                      ["data-platform", null, "workspace", /inherited from workspace data-platform/],
+                                      ["security", null, "none", /No cost center row/]]) {
+    const key = await d.pg.evaluate(([w, k]) => k || AGENTS.find(a => a.ws === w && !CC.agents[a.key]).key, [ws, pick]);
+    await d.pg.evaluate(([w, k]) => { location.hash = "#/a-intel/" + w + "/agents/" + k.split(".").pop() + "/identity"; }, [ws, key]);
+    await d.pg.waitForTimeout(250);
+    const c = await d.pg.evaluate(() => ({ from: document.querySelector("[data-cc-from]")?.dataset.ccFrom, text: document.querySelector("[data-cc-cell]")?.innerText || "" }));
+    ok(c.from === from && re.test(c.text), "cost centers: an agent's Identity tab says where its runs roll up (" + from + "), got " + JSON.stringify(c));
+  }
+  ok(d.errs.length === 0, "cost centers: no JavaScript error as dana: " + d.errs.join(" | "));
+  await d.pg.close();
+
+  const ph = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const pe = []; ph.on("pageerror", e => pe.push(String(e.message || e)));
+  for (const hash of ["#/a-intel", "#/a-intel/core-platform/spend/cost_center"]) {
+    await ph.goto(FILE + "?product=1&state=loaded&mobile=1&theme=dark&as=dana" + hash);
+    await ph.waitForTimeout(300);
+    if (hash === "#/a-intel") { await ph.evaluate(() => orgTab("costcenters")); await ph.waitForTimeout(150); }
+    const over = await ph.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    ok(over <= 0, "cost centers: no sideways scroll on a phone in the dark theme at " + hash + ", got " + over + "px");
+  }
+  ok(pe.length === 0, "cost centers: no JavaScript error on a phone: " + pe.join(" | "));
+  await ph.close();
 }
 
 await browser.close();
