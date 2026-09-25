@@ -467,7 +467,7 @@
       ],
       "gap_summary": "Redesigned by the fleet operations wedge (2026-09-24): Sources, Assignments, Compiler and Proposals replace the Library shelves, Gates and the skills console. Records, proposals and Context PRs tabs are live with open_context_pr, merge_context_pr and dismiss_proposal (ADR-061). Phase 0 merged on 2026-09-18 (#3289, ADR-091): the bundle's context.system now compiles every active must and should record, the etag moves when a record merges, and a wrapped Claude Code run receives it through the SessionStart hook. Issue #2592 stays open until a merged record is seen in a production run, and #3302 means a record published through publish_context_record (no kind or force) never reaches an agent. The six-phase plan is decided (#3294: ADR-093 one assembler, ADR-097 two planes). Phase 1 (one SteeringItem, assembleSteering, the steering.manifest frame, #3296) and Phase 2 (this page becomes the hub with seven tabs, #3297) are not started. Phase 2's shape is now decided in the mockup (the agent ontology landed in #63 (docs/agent-ontology-ia.md)): five tabs, not seven. Library holds Records, Skills, Memory and Ontology as shelves of one list, Assignments is new and says which agent receives what, Policy is renamed Gates because Tools has its own Policy tab, and Preview is renamed Compiler. Every rev1 route still resolves. The build has Records, Proposals and Context PRs and none of the five-tab shape.",
       "gaps": [
-        "Library tab: one list with Records, Skills, Memory and Ontology as shelves, and one count both read",
+        "Sources: one list over every source kind with a kind filter, and one count both read",
         "Assignments tab: which agents receive which artifacts, and by what scope",
         "Gates tab: the gate plane, renamed from Policy",
         "Compiler tab: one assembly in full, renamed from Preview",
@@ -624,7 +624,7 @@
       ],
       "gap_summary": "Renamed by the fleet operations wedge (2026-09-24): a Steering record is one kind of Steering source, and its page is the Steering source page. No route exists for one record. The kernel can read a record (context.records.get) and the six kinds are typed in the app (RECORD_KINDS), but the per-kind panel, the statement editor and the save-as-pull-request path are not built.",
       "gaps": [
-        "The /steering/records/{lineage} route",
+        "The /steering/sources/record/{lineage} route",
         "Statement editor that opens a pull request",
         "Provenance from the publishing commit rather than a column",
         "Rendered/cited effect counters (needs frame rollup)"
@@ -1225,7 +1225,7 @@
       ],
       "gap_summary": "Built as the register/run step plus the first-run banner on Fleet; the standalone /welcome/run screen does not exist by design (ADR-065).",
       "gaps": [
-        "First-run Fleet celebration state links to a Run page that is a stub"
+        "The first run lands on Fleet rather than on Work under its direct work order, and links to a Run page that is a stub"
       ],
       "backend_gaps": [
         "G16 first-frame unlock (built)"
@@ -3172,7 +3172,9 @@
       "spec_refs": [
         "docs/capabilities/list_approvals.md",
         "docs/capabilities/",
-        "pages/fleet.md"
+        "pages/work-orders.md",
+        "pages/agents.md",
+        "pages/approvals-drawer.md"
       ],
       "pillar": "innovation,reliability",
       "labels": [
@@ -3332,7 +3334,7 @@
       "has_spec_backing": true,
       "spec_refs": [
         "docs/capabilities/",
-        "pages/mandate.md",
+        "pages/agent-permissions.md",
         "pages/agent.md"
       ],
       "pillar": "innovation,reliability",
@@ -3556,7 +3558,7 @@
       "spec_refs": [
         "docs/specs/in-app-agent-on-stella-serve/spec.md",
         "docs/capabilities/",
-        "pages/fleet.md"
+        "pages/stella-drawer.md"
       ],
       "pillar": "efficiency,reliability",
       "labels": [
