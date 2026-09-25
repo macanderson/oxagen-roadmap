@@ -22,7 +22,7 @@ Component help for this tab lives in `mockups/help/work-workflows.md`.
 
 **Tabs**: Backlog `7` · Work orders `1` · Workflows · Findings `36`, with Workflows selected. Workflows carries no count.
 
-The tab body is two panels side by side, the first two thirds wide. The mockup outlines the whole body as future-only.
+The tab body is the Workflows panel at full width. The mockup outlines the whole body as future-only.
 
 **Workflows panel.** Heading “Workflows”, with no subtext. The explanation is in `mockups/help/work-workflows.md`, Workflows. The shared list bar: a search field and Rows, with a pager (“1–3 of 3”). Columns, in order:
 
@@ -41,15 +41,7 @@ A row opens the workflow’s dialog, `wfview`. The demo record holds three:
 | Fix and review | `.oxagen/workflows/fix-and-review.toml` | Fix → Review → You | `published` `a4c91e2` | 9 |
 | Docs pass | `.oxagen/workflows/docs-pass.toml` | Document → Review → You | `pull request open` `a-intel/platform#526` | 0 |
 
-**How a workflow runs**, five numbered facts:
-
-1. “Each stage is its own run, by its own agent, on the runtime that agent is enrolled on.”
-2. “A stage owns the definition-of-done items with its tags. Its brief names those items and the handoff it received.”
-3. “When a stage hands off, Oxagen sends the next stage its brief. The handoff note arrives as quoted evidence, never as an instruction.”
-4. “A stage may return the work to an earlier stage, up to the number of returns the file allows. After that the work order parks for you in Approvals.”
-5. “The last stage is always a person. Every item is accepted by you, and every pull request is merged by a person.”
-
-No note sits under the five facts. The rule that every agent in a workflow is one you operate is in `mockups/help/work-workflows.md`, How a workflow runs. The panel itself is explanatory and stays for now, pending the lead’s decision.
+The tab has one panel. A second panel, How a workflow runs, listed five facts about what happens after a send. It taught the design and no shipped screen draws it, so it is gone. Those facts, and the rule that every agent in a workflow is one you operate, are in `mockups/help/work-workflows.md`, Workflows.
 
 ### The workflow dialog (`wfview`)
 
@@ -111,7 +103,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | The builder’s agent select: agents you operate | `myAgents()` | `list_agents` `operatorId` | `principals.parent_user_id` (`agent.list.ts:71-72`) | ✅ |
 | The wand: stages drafted from a sentence | `wfWand()` | `oxagen.assistant` drafting the file | `ask_assistant` exists (`packages/oxagen/src/contracts/assistant.ask.ts:61`) and drafts no workflow | ❌ |
 | Open pull request | `wfOpenPr()` | `propose_workflow` (`tasks-spec.md` §12) | none. `open_context_pr` opens a pull request for one Steering record under `.oxagen/rules/` only (`packages/oxagen/src/contracts/context.pr.open.ts:96`) | ❌ |
-| How a workflow runs (handoffs, returns, the park) | static copy | `hand_off_work_order`, `return_work_order`, the park in Approvals | none | ❌ |
+| Handoffs, returns and the park (component help only) | none | `hand_off_work_order`, `return_work_order`, the park in Approvals | none | ❌ |
 | `needs` on a stage, the layers, and **After** | `WORKFLOWS[].stages[].needs`, `wfDepths()` | `.oxagen/workflows/*.toml` at `oxagen-workflow/v0.2` (`work-graph-spec.md` §8.1) | none | ❌ |
 
 ## Future-only fields
@@ -120,7 +112,7 @@ The mockup marks the whole tab body with `data-future` (`?future=1` outlines it)
 
 | Mark | Reason in the mockup | What a build shows instead today |
 |---|---|---|
-| The Workflows panel and How a workflow runs | “workflows” | Neither. No `/work/workflows` route exists in `apps/app` today, and nothing lists a workflow file |
+| The Workflows panel | “workflows” | Neither. No `/work/workflows` route exists in `apps/app` today, and nothing lists a workflow file |
 
 The `wfview` dialog and the builder carry no mark of their own, and every field in them is future-only too. A build renders the tab’s values as `not recorded` and leaves out **New workflow**, **Change it** and **Open pull request** until `propose_workflow` and the workflow file schema ship. Two things on the tab ship today: each stage agent’s harness, name and tier, and the list of agents you operate.
 
@@ -144,7 +136,7 @@ Loaded only. This change designs the loaded state. The build uses the shell’s 
 
 ## Mobile
 
-The thumb bar holds Work (lit, with its count), Agents, Tools, Spend and More. More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. **New workflow** sits under the subtext. The tab strip scrolls sideways inside itself. The two panels stack, the list first. The table becomes labelled cards, the stages wrapping inside their cell. `wfview` and the builder are bottom sheets with full-width footer buttons, and the stage chain stacks one card per row without arrows. The file previews scroll sideways inside their own block. Touch targets are at least 44 px and inputs 16 px. The page never scrolls sideways.
+The thumb bar holds Work (lit, with its count), Agents, Tools, Spend and More. More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. **New workflow** sits under the subtext. The tab strip scrolls sideways inside itself. The panel runs full width. The table becomes labelled cards, the stages wrapping inside their cell. `wfview` and the builder are bottom sheets with full-width footer buttons, and the stage chain stacks one card per row without arrows. The file previews scroll sideways inside their own block. Touch targets are at least 44 px and inputs 16 px. The page never scrolls sideways.
 
 ## Permissions
 

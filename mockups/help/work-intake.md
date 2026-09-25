@@ -41,6 +41,8 @@ You come here to check that a tracker is connected and healthy: how many work it
 ### Rationale
 A write into someone else's tracker is the part of intake a person most needs to see and control (`docs/tasks-spec.md` §5.4). So the four write-back switches sit on the card, each with an On or Off badge, in the provider's own words for its unit and its staff-only note. No screen says "issue" about a help desk. Six providers ship in two groups: GitHub, Linear and Jira as issue trackers, and ServiceNow, Salesforce Service Cloud and Zendesk as help desks. Each keeps its own logo, and none is the default. The Events and Last sync rows exist because a missed event costs up to 15 minutes before the reconcile catches it, and a person reading a stale item needs to see why.
 
+Trackers once ended with a panel, How imports work, of five numbered rules: events, reconcile, fields, writes and creates. It taught the design and no shipped screen draws it, so it left the page and the rules are in Logic below. They state `docs/tasks-spec.md` §5.3, §5.4, §5.6 and §6.1 once, beside the cards they govern, so a person connecting a tracker sees the boundary before granting a token.
+
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
@@ -49,6 +51,8 @@ A write into someone else's tracker is the part of intake a person most needs to
 | Writes to the provider | `IPROV[].writeback` | `update_issue_provider`, and the write-back governed actions | none |
 | Sync now, Edit scope and fields, Disconnect | `act()`, `ipzOpen()`, `openDialog('ipoff')` | `sync_issue_provider`, `update_issue_provider`, `disconnect_issue_provider` | none |
 | Dashed provider cards | `IP_KIND` | the provider catalog | none |
+
+| Events and reconcile | `IPROV[].events`, `.synced` | provider webhooks (the data connectors' `ingestion.webhook_subscriptions` for GitHub, Linear, Zendesk and Salesforce) and a 15-minute changed-since read | partial |
 
 Authorization is partial because the GitHub App installation ships (`ingestion.github_installations`), and `get_run_issue_providers` reads it and the Linear connections for run follow-through only. The GitHub, Linear, Zendesk and Salesforce connectors ship read-only into the graph. No Jira or ServiceNow connector exists.
 
@@ -60,35 +64,16 @@ Authorization is partial because the GitHub App installation ships (`ingestion.g
 5. Each provider in `IP_KIND` with no connection gets a dashed card with its logo, its name, its `desc` line and **Connect**. Connect calls `ipzOpen(kind)`, which opens the wizard at step 2 with that provider chosen.
 6. The demo record holds GitHub (142 items) and Linear (88 items), both with certify and send on and status and close off. Jira, ServiceNow, Salesforce and Zendesk are dashed.
 
+How imports work, for every connection:
+
+7. **Events.** Each provider sends an event when an issue, incident, case or ticket changes. Oxagen treats the event as a hint, reads the unit again, and updates the work item. GitHub sends `issues` and `issue_comment` through the App, Linear and Jira register webhooks, Salesforce uses Change Data Capture on `Case`, and a Zendesk trigger fires a webhook. ServiceNow offers no webhook a token can register, so a ServiceNow connection reads on the reconcile alone until an admin adds an outbound business rule. A read older than the stored updated time is dropped.
+8. **Reconcile.** Every 15 minutes Oxagen lists what changed since its last read, so a missed event costs at most 15 minutes. A nightly pass reads everything in scope.
+9. **Fields.** Oxagen reads the thirteen fields on the Fields part and nothing else. Custom fields are not read.
+10. **Writes.** Oxagen writes to a provider only what the switches on its card allow. It never edits a subject or a description, never deletes a unit, never assigns anyone, and never replies to a requester.
+11. **Creates.** Oxagen creates a status, resolution or label in a provider only when you choose Create for it. It never renames or deletes a provider value, including one it created.
+
 ### States
 With no connection the grid holds six dashed cards. The mockup draws no reason under Needs attention. On a phone the cards stack one per row and the card footer buttons wrap. A build renders each value as not recorded until `list_issue_providers` ships.
-
-## How imports work
-
-How imports work states five rules for how Oxagen reads a provider and what it may write or create there.
-
-### Purpose
-Before you connect a tracker, or trust what a card shows, you want to know what Oxagen reads, how fresh it is, and the limits on what it writes. The panel answers that in five numbered lines: events, reconcile, fields, writes and creates.
-
-### Rationale
-The five lines state the rules of `docs/tasks-spec.md` §5.3, §5.4, §5.6 and §6.1 once, beside the cards they govern. They exist so that a person connecting a tracker sees the boundary before granting a token. The panel is entirely explanatory, and the app would not need it once this help ships. It stays on the page for now because the brief for this change forbids deleting a whole panel, and the lead has been asked whether to drop it.
-
-### Data sources
-| Field | Mockup source | Target store | Status |
-|---|---|---|---|
-| The five facts | static copy in `tkProvTab()`, drawn by `wzChecks()` | product copy backed by `tasks-spec.md` §5.3 to §5.6 | none |
-| Events | the `events` line | provider webhooks; the data connectors' `ingestion.webhook_subscriptions` for GitHub, Linear, Zendesk and Salesforce | partial |
-| Reconcile | the `reconcile` line | a 15-minute changed-since read and a nightly full read | none |
-
-### Logic
-1. **Events.** Each provider sends an event when an issue, incident, case or ticket changes. Oxagen treats the event as a hint, reads the unit again, and updates the work item. GitHub sends `issues` and `issue_comment` through the App, Linear and Jira register webhooks, Salesforce uses Change Data Capture on `Case`, and a Zendesk trigger fires a webhook. ServiceNow offers no webhook a token can register, so a ServiceNow connection reads on the reconcile alone until an admin adds an outbound business rule. A read older than the stored updated time is dropped.
-2. **Reconcile.** Every 15 minutes Oxagen lists what changed since its last read, so a missed event costs at most 15 minutes. A nightly pass reads everything in scope.
-3. **Fields.** Oxagen reads the thirteen fields on the Fields part and nothing else. Custom fields are not read.
-4. **Writes.** Oxagen writes to a provider only what the switches on its card allow. It never edits a subject or a description, never deletes a unit, never assigns anyone, and never replies to a requester.
-5. **Creates.** Oxagen creates a status, resolution or label in a provider only when you choose Create for it. It never renames or deletes a provider value, including one it created.
-
-### States
-The panel is static and reads the same in every state. On a phone the numbered lines wrap. A build may drop the panel once this help ships, because every rule in it is here.
 
 ## Work item fields
 

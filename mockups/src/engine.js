@@ -15284,15 +15284,8 @@ function tkWfTab(){
      '<td>'+(wf.state==="published"?'<span class="b b-allowed"><span class="d"></span>Published</span><div class="dim mono" style="font-size:11px">'+h(wf.commit)+'</div>'
        :'<span class="b b-approval"><span class="d"></span>In review</span><div class="dim mono" style="font-size:11px">'+h(wf.pr)+'</div>')+'</td>'+
      '<td class="num">'+wf.used+'</td></tr>';}).join("");
-  return '<div class="split23"><div class="panel"><div class="panel-h"><h3>Workflows</h3></div>'+
-   '<div class="tw"><table><thead><tr><th>Workflow</th><th>Stages</th><th>State</th><th class="num">Work orders</th></tr></thead><tbody>'+trs+'</tbody></table></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>How a workflow runs</h3></div><div class="panel-b">'+
-   wzChecks([["1","Each stage is its own run, by its own agent, on the runtime that agent is enrolled on."],
-     ["2","A stage owns the definition-of-done items with its tags. Its brief names those items and the handoff it received."],
-     ["3","When a stage hands off, oxagen sends the next stage its brief. The handoff note arrives as quoted evidence, never as an instruction."],
-     ["4","A stage may send the work back to an earlier stage, up to the number of times the file allows. After that, the work order waits for you in Approvals."],
-     ["5","The last stage is always a person. Every item is accepted by you, and every pull request is merged by a person."]])+
-   '</div></div></div>';
+  return '<div class="panel"><div class="panel-h"><h3>Workflows</h3></div>'+
+   '<div class="tw"><table><thead><tr><th>Workflow</th><th>Stages</th><th>State</th><th class="num">Work orders</th></tr></thead><tbody>'+trs+'</tbody></table></div></div>';
 }
 
 /* ---- tab: providers ---- */
@@ -15326,13 +15319,7 @@ function tkProvTab(){
     return '<div class="panel ipc avail"><div class="panel-b"><div class="row" style="flex-wrap:nowrap">'+ipLogo(k,24)+'<div style="flex:1;min-width:0"><b>'+h(IP_KIND[k].l)+'</b>'+
       '<div class="muted" style="font-size:12px">'+h(IP_KIND[k].desc)+'</div></div>'+
       '<button class="btn sm" onclick="ipzOpen(\''+k+'\')">Connect</button></div></div></div>';});
-  return '<div class="grid g2" data-help="work-intake/trackers">'+cards.join("")+avail.join("")+'</div>'+
-   '<div class="panel" style="margin-top:14px" data-help="work-intake/how-imports-work"><div class="panel-h"><h3>How imports work</h3></div><div class="panel-b">'+
-   wzChecks([["events","Each provider sends an event when an issue, incident, case, or ticket changes. oxagen reads it again and updates the work item."],
-     ["reconcile","Every 15 minutes oxagen lists what changed since the last read, so a missed event costs at most 15 minutes."],
-     ["fields","oxagen reads the thirteen fields on the Fields tab and nothing else. Custom fields are not read."],
-     ["writes","oxagen writes to a provider only what the switches on its card allow. It never edits a subject or a description, and it never replies to a requester."],
-     ["creates","oxagen creates a status, resolution, or label in a provider only when you choose Create for it. It never renames or deletes one."]])+'</div></div>';
+  return '<div class="grid g2" data-help="work-intake/trackers">'+cards.join("")+avail.join("")+'</div>';
 }
 
 /* ---- tab: fields ---- */

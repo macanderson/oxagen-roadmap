@@ -1,6 +1,6 @@
 # Workflows
 
-<!-- work-workflows: the Workflows tab, its two panels, and the workflow dialog and builder. The header and tab bar fall back to work-backlog/header and work-backlog/tabs. -->
+<!-- work-workflows: the Workflows tab, its one panel, and the workflow dialog and builder. The header and tab bar fall back to work-backlog/header and work-backlog/tabs. -->
 
 ## Workflows
 
@@ -12,6 +12,10 @@ You come here to see which chains of agents you can send work to, and to write a
 ### Rationale
 A workflow is a file in `.oxagen/workflows/` that names its stages in order, each an agent you operate, and ends with a person (wedge Vocabulary › Work). It runs nothing itself. Oxagen sequences a work order through the stages, and each stage is its own run. That keeps ADR-043 intact: the old `workflow.*` capabilities ran agent turns on Oxagen's workers and were removed, and this object is a file that orders work orders (`tasks-spec.md` §10.4, §17 decision 2). Because it is a file, it changes only by pull request and exists when that pull request merges. The State column exists so a workflow still in review is visible and clearly not usable. The Work orders column is a rollup of the work orders sent to it, never a typed number.
 
+The tab once carried a second panel, How a workflow runs, with five numbered facts about what happens after a send. It taught the design and no shipped screen draws it, so it left the page and its facts are in Logic below. They come from `tasks-spec.md` §10.3 and §10.4 and `work-graph-spec.md` §8.2. A handoff note is quoted evidence and never an instruction, because one agent must not steer the next. Returns are bounded, so a disagreement between two agents ends with a person in the Approvals drawer instead of a loop. The last stage is a person, so acceptance and every merge stay human.
+
+The note under those facts moved here too. Every agent in a workflow must be one you operate. A workflow that names an agent somebody else operates cannot be sent by you (`tasks-spec.md` §10.4). A workflow grants nothing: each stage acts under its own agent's toolbelt and the work order's repositories.
+
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
@@ -20,6 +24,7 @@ A workflow is a file in `.oxagen/workflows/` that names its stages in order, eac
 | Work orders per workflow | `WORKFLOWS[].used` | a count over `tasks.work_orders` by target | none |
 | Each stage agent's harness mark | `AGENTS[].harness` through `agent()` | `list_agents` `harness` (`agent.list.ts:24-31`) | live |
 | Layers and ∥ | `WORKFLOWS[].stages[].needs`, `wfDepths()` | `oxagen-workflow/v0.2` `needs` (`work-graph-spec.md` §8.1) | none |
+| Handoffs, returns, the park | none | `hand_off_work_order`, `return_work_order`, the park in Approvals | none |
 
 ### Logic
 1. `pWork()` renders `tkWfTab()` inside a `data-future` wrapper, so `?future=1` outlines the whole tab body.
@@ -27,38 +32,19 @@ A workflow is a file in `.oxagen/workflows/` that names its stages in order, eac
 3. `wfLayerText()` groups the stages by `wfDepths()`. A stage's depth is one more than the deepest stage it needs, and a stage with no `needs` needs the stage before it (`stageNeeds()`), so a v0.1 file reads as a straight line. Stages in one layer are joined by ∥ (titled "run beside each other"), layers by →, and the cell ends with "→ You".
 4. State draws `Published` and the commit, or the mockup's `In review` badge and the pull request number for a workflow whose state is `pull request open`.
 5. Work orders prints `wf.used`. The fixture holds 1 for Fix, validate, document, review, which matches the one work order (`wo_01K6T9QX`) sent to it. The page spec's table still reads 4 and 9. A build counts `tasks.work_orders` by target.
+6. The panel runs the full width of the tab. `tkWfTab()` returns the one panel.
+
+How a workflow runs, once a work order is sent to it:
+
+7. Each stage is its own run, by its own agent, on the runtime that agent is enrolled on, under its own mandate and budget.
+8. A stage owns the definition-of-done items with its tags. Its brief names those items and the handoff it received. `woOwner()` gives an item whose tag no stage lists to the last agent stage.
+9. When a stage hands off with `hand_off_work_order`, Oxagen sends the next stage its brief with the handoff note quoted as evidence. A stage that needs two stages receives both notes, each with its stage and run.
+10. A stage may send the work back with `return_work_order` to the stage the file names, at most `max_returns` times (1 to 3). Past that the work order parks for you in Approvals.
+11. `[accept]` is fixed. The last stage is always a person: you accept every item, and a person merges every pull request.
+12. The builder lists only `myAgents()`. The mockup's send menu (`dspList()`) lists every published workflow and does not check who operates its agents. A build leaves out a workflow that names an agent somebody else operates.
 
 ### States
 Loaded only. The tab shares the page's loading, error and denied panels. A workspace with no workflow shows the table with no rows and **New workflow**. On a phone the table becomes labelled cards and the stages wrap inside their cell.
-
-## How a workflow runs
-
-The panel states, in five numbered facts, how Oxagen carries a work order through a workflow's stages.
-
-### Purpose
-You are about to send work to a workflow, or you are reading one, and you want to know what happens after the send. The panel answers that without a trip to the docs: who runs each stage, which items each stage owns, how a handoff travels, what a failure does, and who finishes.
-
-### Rationale
-Every fact comes from `tasks-spec.md` §10.3 and §10.4 and `work-graph-spec.md` §8.2. A handoff note is quoted evidence and never an instruction, because one agent must not steer the next (`tasks-spec.md` §10.3). Returns are bounded so a disagreement between two agents ends with a person in the Approvals drawer instead of a loop. The last stage is a person so that acceptance, and every merge, stays human.
-
-The note under the facts moved here. Every agent in a workflow must be one you operate. A workflow that names an agent somebody else operates cannot be sent by you (`tasks-spec.md` §10.4). A workflow grants nothing: each stage acts under its own agent's toolbelt and the work order's repositories.
-
-### Data sources
-| Field | Mockup source | Target store | Status |
-|---|---|---|---|
-| The five facts | static copy in `tkWfTab()`, drawn by `wzChecks()` | none, this is product copy | none |
-| Handoffs, returns, the park | none | `hand_off_work_order`, `return_work_order`, the park in Approvals | none |
-
-### Logic
-1. Fact 1: each stage is its own run, by its own agent, on the runtime that agent is enrolled on, under its own mandate and budget.
-2. Fact 2: a stage owns the definition-of-done items with its tags. `woOwner()` gives an item whose tag no stage lists to the last agent stage.
-3. Fact 3: `hand_off_work_order` carries a note, and Oxagen sends the next stage its brief with the note quoted. A stage that needs two stages receives both notes, each with its stage and run.
-4. Fact 4: `return_work_order` sends the work back to the stage the file names, at most `max_returns` times (1 to 3). Past that the work order parks for you in Approvals.
-5. Fact 5: `[accept]` is fixed. You accept every item, and a person merges every pull request.
-6. The builder lists only `myAgents()`. The mockup's send menu (`dspList()`) lists every published workflow and does not check who operates its agents. A build leaves out a workflow that names an agent somebody else operates.
-
-### States
-Static. The panel stays on the page for now, because the review brief forbids deleting a whole panel and the lead has the decision. Once this help ships, a build may drop the panel and give the Workflows list the full width. On a phone it stacks under the list.
 
 ## Workflow dialog {#dialog/wfview}
 

@@ -40,13 +40,7 @@ Then **Writes to <provider>**, four lines, each with an `on` or `off` badge, in 
 
 A dashed card for each provider not yet connected, with its logo, its name, one line and **Connect** (opens the wizard at step 2): Jira “Jira Cloud issues from the projects you choose.”, ServiceNow “Incidents from the assignment groups you choose.”, Salesforce “Service Cloud cases from the queues you choose.”, Zendesk “Tickets from the Zendesk groups you choose.”
 
-**How imports work**, five numbered facts. Their full account is in `mockups/help/work-intake.md`, How imports work:
-
-- events: “Each provider sends an event when an issue, incident, case, or ticket changes. oxagen reads it again and updates the work item.”
-- reconcile: “Every 15 minutes oxagen lists what changed since the last read, so a missed event costs at most 15 minutes.”
-- fields: “oxagen reads the thirteen fields on the Fields tab and nothing else. Custom fields are not read.”
-- writes: “oxagen writes to a provider only what the switches on its card allow. It never edits a subject or a description, and it never replies to a requester.”
-- creates: “oxagen creates a status, resolution, or label in a provider only when you choose Create for it. It never renames or deletes one.”
+Nothing sits under the cards. A panel, How imports work, once listed five rules (events, reconcile, fields, writes, creates). It taught the design and no shipped screen draws it, so it is gone. The rules are in `mockups/help/work-intake.md`, Trackers.
 
 ### Fields
 
