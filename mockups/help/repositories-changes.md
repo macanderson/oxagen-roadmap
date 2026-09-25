@@ -72,7 +72,7 @@ The change is in force from that commit, not from the moment someone clicked. Th
 - The head holds **← All changes**, the title, the CI light and the state badge. The panel carries `data-help="pull-request"` because its heading is the title.
 - Checks run in order, and the first failure stops the run. On a failure the note reads "<check> stopped the run.", then what it asserted, then "The checks behind it stayed queued, merge is disabled, and nothing was published."
 - `oxprCanMerge()` is true only when every check reported, none failed, and the state is not merged. **Merge pull request** is gold then, and the header's **Add .oxagen/** turns plain. Otherwise Merge is disabled.
-- The line beside the buttons reads "GitHub enforces <mode> governance." (`govLabel()`) or "Merge stays disabled until every check reports."
+- The line beside the buttons reads "Governance mode <mode>." (`govLabel()`, the mode's name with no enforcement claim, since no shipped gate runs a code-owner review) or "Merge stays disabled until every check reports."
 - **Close pull request** (red) opens `closepr`, which another page's help covers.
 - Merged reads "Merged. The file is on <base> and the promotion event is on the ledger." Closed reads "Closed without merging. The comment on <pull request> names who closed it and links back here."
 

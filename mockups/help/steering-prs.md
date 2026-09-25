@@ -108,7 +108,7 @@ The checks run the same rules as `stella context validate` (`docs/mission-contro
 - An import's checks are worded for the set ("9 files, 9 records, 9 lineages").
 - The promoter's `CTXPR.checks` carry no predicates in the mockup, so they always pass. A build runs real checks on both kinds.
 - Merge re-runs every predicate with `prRecheck()`. A check that passed and no longer does blocks the merge: "A check that passed no longer does. <number> is blocked and nothing was published."
-- The merge bar reads "Checks are running. Merge is blocked until all 6 report." while checks run, "6 checks passed. Governance team: <name> owns .oxagen/rules/." once they pass, and "A check failed. Nothing merges and nothing is published. Change the file and open it again." Then **Close pull request** and **Merge pull request**, gold only once every check passed.
+- The merge bar reads "Checks are running. Merge is blocked until all 6 report." while checks run, "6 checks passed. Governance mode team." once they pass (the mode's name from `govLabel()`, with no claim about who owns `.oxagen/rules/`), and "A check failed. Nothing merges and nothing is published. Change the file and open it again." Then **Close pull request** and **Merge pull request**, gold only once every check passed.
 - After the merge the bar reads "Merged by <name>" with the time and "squashed into main as <commit>", plus **Open the record** and **See it in Records** for a person's, or **See them in Records** for an import with several records.
 - Under `team`, a build refuses a merge by the record's author, as `merge_context_pr` does. The mockup lets the author merge.
 

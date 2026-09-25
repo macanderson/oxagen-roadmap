@@ -248,7 +248,12 @@ Every time a run, or a Markdown import, said what this memory says, with the fol
 It shows the evidence a memory rests on and how close it is to becoming a proposal. A person follows a saying to the run and frame it came from.
 
 ### Rationale
-Memories fold by concept: one memory keeps every saying that said the same thing. The fold setting decides when a memory becomes a proposal, and the list is the same one the memory dialog shows, so the two never disagree. An imported saying counts toward the sayings and never toward the runs, so an import alone never makes a proposal.
+Memories fold by concept: one memory keeps every saying that said the same thing. The fold setting decides when a memory becomes a proposal, and the list is the same one the memory dialog (`dialog/memory`, documented in `run-memories.md`) shows, so the two never disagree. `memSaysList()` and `memFoldLine()` are shared by this panel and that dialog.
+
+The fold line states only the memory's position against the setting. What follows from each position is here:
+- A proposed memory's proposal cites every saying in the list, so the argument for the record is the list itself.
+- A memory that meets the setting is proposed by the promoter on its next pass. Nothing proposes it at the moment it crosses the line.
+- An imported saying counts toward the sayings and never toward the runs, so an import alone never makes a proposal. Runs earn a proposal. A file can only add weight to one.
 
 ### Data sources
 | Field | Mockup source | Target store | Status |
@@ -260,7 +265,7 @@ Memories fold by concept: one memory keeps every saying that said the same thing
 ### Logic
 1. The panel renders only when the memory holds sayings, with the count as a badge.
 2. `memSaysList(m)` quotes each saying with who said it, then its run and frame as a link to that run's Memories tab, or `<file>:L<line>` and "imported".
-3. The fold line: "Proposed as <proposal> when it reached 3 sayings from 2 runs. The proposal cites every saying above.", "It has <n> sayings from <r> runs, which meets the setting. The promoter proposes it on its next pass.", or "It becomes a proposal at 3 sayings from 2 runs. It has <n> from <r> run.", with the import sentence added when a saying is imported.
+3. The fold line, from `memFoldOf()`: "Proposed as <proposal> when it reached 3 sayings from 2 runs." when `proposedAs` is set, "It has <n> sayings from <r> runs, which meets the setting." when the counts meet `S.memFold`, and otherwise "It becomes a proposal at 3 sayings from 2 runs. It has <n> from <r> run." (runs singular for one). An imported saying adds to `<n>` and never to `<r>`.
 
 ### States
 No sayings, no panel. On a phone the quotes wrap and the links stay tappable.

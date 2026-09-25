@@ -21,7 +21,7 @@ The header replaced the shelves of the old Steering hub. Records, Instructions, 
 
 ### Logic
 1. `pSteering()` reads the tab from `tab("steering","sources")`. The Pull requests view is `prs`, and it lights Proposals.
-2. `govChip(w)` renders "Governance: <mode> (<review rule>)" from `GOV_L` and opens `govmode` with the workspace slug.
+2. `govChip(w)` renders "Governance: <mode>" from `govLabel()`, the mode's name alone, and opens `govmode` with the workspace slug. The chip claims no review rule: no shipped gate runs a code-owner review, so a label such as "team (code-owner review)" would promise a check that never happens.
 3. The skills chip renders only where `SK_ON` is true: Core platform has it, FinOps does not. Its title reads "How skills resolve in this workspace, settings version skl_v7", and it opens `skcfg`.
 4. Import Markdown is plain on every tab and opens the Markdown import wizard (`dialog/wz-import`).
 5. `newSourceBtn(t!=="prs")` makes New source gold everywhere except the Pull requests view.
@@ -130,7 +130,17 @@ The dialog picks a governance mode and previews the `.oxagen/rules/governance.to
 It changes who may merge a change to Steering in this workspace. A person opens it from the governance chip, compares the three modes, and opens the pull request.
 
 ### Rationale
-The mode is a file on the main repository, not a settings row, so changing it is a pull request like every other source. Oxagen reads the file on the production branch when a pull request is opened and again when it is merged. Raising the mode therefore takes effect on everything already in flight. Lowering it is an organization-owner action with approval, recorded as a security event. Each mode suits a team shape. `solo` fits one person, or a repository nobody else reviews. `team` is what a missing file means, and what most repositories want. `regulated` adds separation of duties: the author of a record may not be its approver. Oxagen writes this file in two places: the Repository wizard creates it, and this dialog changes it.
+The mode is a file on the main repository, not a settings row, so changing it is a pull request like every other source. Oxagen reads the file on the production branch when a pull request is opened and again when it is merged. Raising the mode therefore takes effect on everything already in flight. Lowering it is an organization-owner action with approval, recorded as a security event. Oxagen writes this file in two places: the Repository wizard creates it, and this dialog changes it.
+
+The three modes, as the merge gate enforces them (`packages/handlers/src/context.steering.policy.ts`, and the shipped app's own pull request panel says the same):
+
+| Mode | Who merges | Suits |
+|---|---|---|
+| `solo` | Any workspace member, the author included | One person, or a repository nobody else reviews |
+| `team` | An org Owner or Admin, or a workspace Owner, other than the author | What a missing file means, and what most repositories want |
+| `regulated` | An org Owner or Admin other than the author, recorded as the accountable approver | Separation of duties: the author of a record is never its approver |
+
+Every merge, in every mode, appends the promotion event to the hash-chained ledger. No mode runs a code-owner review. The card text says only what the gate enforces, so it names who merges and nothing more. The shipped governance dialog in `apps/app/messages/steering.json` still says "A code-owner review is required." for `team`, which the gate does not check; A build states the gate.
 
 ### Data sources
 | Field | Mockup source | Target store | Status |
@@ -143,7 +153,7 @@ The mode is a file on the main repository, not a settings row, so changing it is
 
 ### Logic
 1. `govChip(w)` opens `govmode` with the workspace slug. `DLG_EXT.govmode` finds the workspace with `wsBySlug(S.dlgArg)`.
-2. `S.govPick` holds the pick, and the mode in force carries "· now". Each card shows the mode's first line from `WZ_MODES`.
+2. `S.govPick` holds the pick, and the mode in force carries "· now". Each card shows the gate line from `WZ_MODES`: "Any workspace member merges, the author included.", "An org Owner or Admin, or a workspace Owner, other than the author merges." and "An org Owner or Admin other than the author merges, recorded as the accountable approver."
 3. The preview is `oxGovernanceToml(pick)`: two comment lines, `mode`, and `separation_of_duties = true` for `regulated` only.
 4. Open the pull request calls `govSet()`. Picking the mode in force reports "Governance mode is already team. Nothing to change." Otherwise it reports "Pull request opened on a-intel/platform: .oxagen/rules/governance.toml sets mode = <mode>."
 5. The mockup sets the chip at once. A build reads the chip off the file, so the chip changes when the pull request merges. Under `solo`, `set_governance_mode` commits straight to the production branch.
@@ -365,7 +375,9 @@ What each kind can never do, and how it reaches a run (`KIND_USE`):
 5. **Pull request.** One file, `.oxagen/rules/<lineage>.toml`. `wzRecOpenPr()` numbers the pull request with `prNextNumber()`, starts the checks and lands on the Pull requests view with it selected. The toast names the branch, the number and the six queued checks.
 
 ### States
-The wand note in `wzDesc` ("Press the wand. oxagen.assistant rewrites what you wrote...") is shared with the skill, agent and tool wizards and still renders on step 1 until the wand has run. It is the shared helper's to change. The wizard has no refused state. On a phone the kind cards stack in one column.
+The wand note in `wzDesc`, "Press the wand to have oxagen.assistant write the file’s prose. The next step opens when it has.", shows on step 1 while the text is typed and the wand has not run. The agent, tool and skill wizards share it.
+
+The drafting turn that the wand and the drafting card (`wzDraftNote()`, "Drafted by oxagen.assistant from what you wrote.") stand for is recorded with frames and a receipt and billed to Oxagen. It is not one of your runs, so it appears in neither Work nor Spend. Every line it drafts is yours to change before anybody reviews it. The assistant rewrites what you give it and does not decide what you are building, which is why the wand refuses an empty box ("Write a line or two first.") and its toast says only what it wrote. This paragraph answers for every wizard that uses the two helpers. The wizard has no refused state. On a phone the kind cards stack in one column.
 
 ## Skill wizard {#dialog/wz-skill}
 
@@ -398,7 +410,7 @@ A skill is a file with a version and a digest (D12, ADR-090). All three ways in 
 4. **Pull request.** The files: `SKILL.md` added or modified, a bundle's extra files, and `.oxagen/skills.toml` for a pin. Six checks. On merge, a replacement repins every agent that resolves the skill at its next run, a run in flight keeps the old version, and the digest is taken at merge.
 
 ### States
-The toast names `<main>#525`. The mockup keeps no record of this pull request, so it does not appear on Repositories › Changes. A build lists it there with kind `skill`. The wand and drafting notes come from the shared helpers.
+The toast names `<main>#525`. The mockup keeps no record of this pull request, so it does not appear on Repositories › Changes. A build lists it there with kind `skill`. The wand note and the drafting card come from `wzDesc()` and `wzDraftNote()`. What they stand for is in the Steering record wizard section.
 
 ## Repository wizard {#dialog/wz-init}
 
@@ -422,17 +434,17 @@ What Oxagen still cannot do in the repository:
 |---|---|---|---|
 | Candidate repositories | `wzInitCandidates()` over `REPOS` | The installation's repositories | shipped |
 | Role and branch | `S.wz.role`, `S.wz.branch` | `bind_main_repository` or `link_repository`, then `set_production_branch` | shipped |
-| Governance mode | `WZ_MODES`, `oxGovernanceToml()` | `.oxagen/rules/governance.toml` | partial |
+| Governance mode | `WZ_MODES`, `oxGovernanceToml()` | `.oxagen/rules/governance.toml` | shipped |
 | Drafted files | `oxWorkspaceToml()`, `wzInitFiles()` | `open_init_pr` | shipped |
 | Five checks | `wzPrStep()` rows | `open_init_pr` refusals | shipped |
 
-The shipped merge gate differs from the card text: `team` needs an organization Owner or Admin, or a workspace Owner, other than the author, and no code-owner review is checked (`repositories.md`).
+The mode cards state the shipped merge gate, the same lines as the Governance mode dialog (`dialog/govmode`), where the three modes are documented.
 
 ### Logic
 `wzOpen('init', repo)` opens it from a repository's Add .oxagen/ on Repositories. `wzSteps()` returns Repository, Branch & governance, Permissions, Review and Pull request. The footer names "needs repository.admin on <workspace>".
 
 1. **Repository.** The select lists only repositories with no `.oxagen/`. Make it the main repository is disabled for the current main. The note names today's main.
-2. **Branch & governance.** GitHub's default first, then three mode cards with `team` preset.
+2. **Branch & governance.** GitHub's default first, then three mode cards with `team` preset, each saying who merges under it.
 3. **Permissions.** Contents and Pull requests read and write, Checks write, Metadata and Issues read, each with its purpose.
 4. **Review.** Both TOML files in full.
 5. **Pull request.** Six files on `oxagen/init` against the repository itself, and five checks: schema, layout, governance, secret scan and no authority. A file that parses but names no mode would block every later pull request, so the check refuses it.
