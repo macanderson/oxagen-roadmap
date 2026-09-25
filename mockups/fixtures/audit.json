@@ -40,10 +40,10 @@
   "ref": "run_01K5RG6H1L4OIU9Y"
  },
  {
-  "t": "07:41:31",
+  "t": "07:41:39",
   "ev": "tool_call.denied",
   "who": "a-intel.core.triage",
-  "what": "bash__run@1 · tainted argument · approval expired",
+  "what": "bash__run@1 · tainted argument · approval canceled when the run halted",
   "sev": "warning",
   "ref": "apr_01K5RH8M2"
  },

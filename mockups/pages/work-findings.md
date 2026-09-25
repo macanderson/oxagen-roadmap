@@ -12,7 +12,7 @@
 
 ## Job
 
-Recorded problems with money behind them, and the evidence for each: a cache write never read, a repeated call, an unpaged result. Findings are work, so they live in Work: a person reads the evidence, then picks the finding up as a work item for an agent, or records the fix directly when no agent needs to do it. Findings rank by the money at stake. Each saving is measured minus the counterfactual over the runs the finding cites, at the price each call paid.
+Recorded problems with money behind them, and the evidence for each: a cache write never read, a repeated call, an unpaged result. Findings are work, so they live in Work: a person reads the evidence, then picks the finding up as a work item for an agent, or records the fix directly when no agent needs to do it. Findings rank by the money at stake. Each saving is the measured cost minus the estimated cost without the issue, over the runs the finding cites, at the price each call paid.
 
 ## What is on the page
 
@@ -24,10 +24,10 @@ Recorded problems with money behind them, and the evidence for each: a cache wri
 
 | Tile | Value on the demo record | Caption |
 |---|---|---|
-| At stake | $30,682.11 | “7.0% of $439,498.34 this month” |
+| At stake | $30,682.11 | “7.0% of $439,705.21 this month” |
 | Findings | 37 | “36 open · 1 in work” |
 | Evidence | every one | “opens to the runs it cites” |
-| Basis | measured | “minus the counterfactual, at the price each call paid” |
+| Basis | measured | “measured cost minus the estimated cost without the issue, at the price each call paid” |
 
 **The list.** The shared list bar: a search field (“Search findings”), facets Level (“Any level”: agent, operator, tool, workspace) and Confidence (“Any confidence”: high, medium), **Sort** (Rank; Savings, high first; Savings, low first; Finding A–Z), Rows (5, 10, 25, 50, All), and a pager (“1–10 of 37 (page 1 of 4)”). One card per finding, ranked by the money at stake:
 
@@ -102,7 +102,7 @@ The mockup marks nothing else, but the trend, the “in work” count, and the p
 ## Functionality
 
 - Findings rank by the money at stake. The Sort select reorders them by saving or by name, and the facets narrow them by level and confidence.
-- Each saving is measured minus the counterfactual over the runs the finding cites, at the price each call paid. The evidence shows the runs, the people and the arithmetic, and every run it cites is sealed.
+- Each saving is the measured cost minus the estimated cost without the issue, over the runs the finding cites, at the price each call paid. The evidence shows the runs, the people and the arithmetic, and every run it cites is sealed.
 - A finding becomes a work item only when a person picks it up. **Create work item** writes the item with the finding as its source, and `oxagen.assistant` drafts its definition of done. The finding keeps its evidence, and its card links to the item.
 - **Fix** opens the change that removes the waste, chosen by the finding’s kind: a pull request that adds a Steering record, or a help article whose action records the fix. Recording a fix is a governed action: the finding becomes applied, and later passes of the job cite only runs that start after it.
 - Every tile is a rollup of the cards: At stake is the sum of the savings, Findings counts them, and each card’s share is its saving over that sum.

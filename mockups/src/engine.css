@@ -56,7 +56,7 @@ a:hover{text-decoration:underline}
 .eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-text);font-weight:600;margin:0 0 10px}
 .eyebrow.q{color:var(--muted)}
 /* Identifiers keep their case inside uppercase labels: wo_01K6T9QX, a-intel/platform#590, workspace.owner. */
-.eyebrow.id,.eyebrow .id,.b .id,.stat .k .id,th .id,.k .id{text-transform:none}
+.eyebrow.id,.eyebrow .id,.b .id,.stat .k .id,th .id,.k .id,.stage .r .id{text-transform:none}
 h1,h2,h3,h4{margin:0;letter-spacing:-.015em}
 /* Space Grotesk sets the page h1 and the wordmarks, and nothing below 20px. Every other heading,
    panel title and label is Geist: the display face loses its shape at small sizes. */
@@ -2216,7 +2216,7 @@ tr[aria-selected="true"] td{background:color-mix(in srgb,var(--gold) 7%,transpar
 .stage .r{display:flex;align-items:center;gap:6px;font-size:10.5px;text-transform:uppercase;letter-spacing:.1em;color:var(--dim);font-weight:600}
 .stage .r i{font-style:normal;display:inline-grid;place-items:center;width:17px;height:17px;border-radius:50%;border:1px solid var(--rule);font-size:10px;letter-spacing:0}
 .stage .ag{display:flex;align-items:center;gap:6px;font-size:13px;min-width:0}
-.stage .ag b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stage .ag b{overflow-wrap:anywhere}
 .stage .sub{font-size:11.5px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px;align-items:center}
 .stage.done{border-color:color-mix(in srgb,var(--st-allowed) 40%,var(--border))}
 .stage.done .r i{background:var(--st-allowed);border-color:var(--st-allowed);color:var(--ink)}

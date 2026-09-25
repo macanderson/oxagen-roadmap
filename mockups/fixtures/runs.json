@@ -291,17 +291,17 @@
   "grade": "full",
   "task": "PO-4471",
   "taskTitle": "September infrastructure invoices",
-  "summary": "Matched three September infrastructure invoices to PO-4471, totalling $18,472.36, and prepared one Stripe payment under mandate mnd_7K2ETQ4. It is parked on approval for stripe__create_payment; no money has moved.",
+  "summary": "Matched three September infrastructure invoices to PO-4471, totalling $2,450.00, and prepared one Stripe payment under mandate mnd_7K2ETQ4. It is parked on approval for stripe__create_payment; no money has moved.",
   "touched": [
    "PO-4471",
    "mnd_7K2ETQ4",
-   "3 invoices \u00b7 $18,472.36"
+   "3 invoices \u00b7 $2,450.00"
   ],
   "outputs": [
    {
     "kind": "task",
     "name": "PO-4471",
-    "where": "the ledger",
+    "where": "Ledger entry",
     "state": "linked",
     "note": "September infrastructure invoices",
     "fr": 1
@@ -309,9 +309,9 @@
    {
     "kind": "read",
     "name": "3 invoices",
-    "where": "the ledger",
+    "where": "Ledger entry",
     "state": "read",
-    "note": "matched to PO-4471 \u00b7 $18,472.36",
+    "note": "matched to PO-4471 \u00b7 $2,450.00",
     "fr": 7
    },
    {
@@ -332,7 +332,7 @@
    },
    {
     "kind": "would",
-    "name": "$18,472.36 payment",
+    "name": "$2,450.00 payment",
     "where": "Stripe",
     "state": "withheld",
     "note": "prepared, not sent"
@@ -695,7 +695,7 @@
    {
     "kind": "task",
     "name": "PO-4471",
-    "where": "the ledger",
+    "where": "Ledger entry",
     "state": "linked",
     "note": "August statement reconciliation",
     "fr": 1
@@ -703,7 +703,7 @@
    {
     "kind": "read",
     "name": "August statement",
-    "where": "the ledger",
+    "where": "Ledger entry",
     "state": "read",
     "note": "read line by line against PO-4471",
     "fr": 4

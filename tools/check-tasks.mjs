@@ -179,7 +179,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await footBtn(page, "Certify").click();
   t = await text(page);
   ok(/Certified by Marcus Bell/.test(t), "certify: the work item is certified");
-  ok(/ready/.test(await text(page, ".phead")) || /Create work order and send to agent/.test(t), "certify: the work item can be sent");
+  ok(/ready/.test(await text(page, ".phead")) || /Send to an agent/.test(t), "certify: the work item can be sent");
   await shot(page, "03-certified");
   await done(page, errs, "certify");
 }
@@ -290,8 +290,8 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/label Won't do/.test(await dlgText(page)), "resolution: the GitHub mapping names the label Oxagen creates");
   await page.close();
   const w = await open(H + "/orders/wo_01K6TA2M");
-  ok(!(await w.page.locator(".phead button", { hasText: "Accept the work" }).isDisabled()), "accept: enabled when every item is claimed");
-  await w.page.click(".phead >> text=Accept the work");
+  ok(!(await w.page.locator(".phead button", { hasText: "Accept all items" }).isDisabled()), "accept: enabled when every item is claimed");
+  await w.page.click(".phead >> text=Accept all items");
   await footBtn(w.page, "Accept all items").click();
   ok(/3 \/ 3/.test(await text(w.page)) && /accepted/i.test(await text(w.page)), "accept: every item accepted");
   await done(w.page, [...errs, ...w.errs], "accept");
@@ -422,7 +422,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await page.click('tr[aria-label="Open wo_01K6TC5A"]');
   await page.waitForTimeout(200);
   ok(/1 of 2 in send snd_01K6TC59/.test(await text(page, ".phead")) && (await page.locator(".panel-h h3", { hasText: /^Send$/ }).count()) === 1, "send: the work order names its send and shows the Send panel");
-  await page.click(".phead >> text=Stop the work order");
+  await page.click(".phead >> text=Stop work order");
   await page.click("#layer .dlg-f >> text=Stop it");
   await page.waitForTimeout(150);
   ok(/Send again/.test(await text(page, ".phead")), "send: a stopped work order offers Send again");

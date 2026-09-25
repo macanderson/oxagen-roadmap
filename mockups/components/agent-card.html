@@ -167,8 +167,8 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 1311 to 1341 (agent card, its three layouts, and the rule comment above them), 1345 (a steer-list override), 2173 to 2174 (the harness mark inside the card)</td><td>The rules that draw it</td></tr>
-      <tr><td><code>hxIcon(harness, size, alone)</code> at <code>engine.js:14819</code></td><td>The harness mark, found by key or by label. <code>alone</code> adds <code>role=&quot;img&quot;</code> and an <code>aria-label</code> when no text beside the mark names the harness.</td></tr>
-      <tr><td><code>agentCard(a, o)</code> at <code>engine.js:10064</code></td><td>The one function that draws an agent identity. <code>o.layout</code> picks list, compact, or detail. 17 calls.</td></tr>
+      <tr><td><code>hxIcon(harness, size, alone)</code> at <code>engine.js:14925</code></td><td>The harness mark, found by key or by label. <code>alone</code> adds <code>role=&quot;img&quot;</code> and an <code>aria-label</code> when no text beside the mark names the harness.</td></tr>
+      <tr><td><code>agentCard(a, o)</code> at <code>engine.js:10069</code></td><td>The one function that draws an agent identity. <code>o.layout</code> picks list, compact, or detail. 17 calls.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -195,7 +195,7 @@
 ## Inputs
 
 1. mockups/components/agent-card.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 1311 to 1341 (agent card, its three layouts, and the rule comment above them), 1345 (a steer-list override), 2173 to 2174 (the harness mark inside the card). The mockup renders it with hxIcon(harness, size, alone) (engine.js:14819), agentCard(a, o) (engine.js:10064).
+2. The design source: mockups/src/engine.css lines 1311 to 1341 (agent card, its three layouts, and the rule comment above them), 1345 (a steer-list override), 2173 to 2174 (the harness mark inside the card). The mockup renders it with hxIcon(harness, size, alone) (engine.js:14925), agentCard(a, o) (engine.js:10069).
 3. The build's implementation: find it by its root selector (.agc) or its name, and list every route that renders it.
 4. Where to see it in the design: Agents, Work, Run, Approvals, Spend, Tools, Steering. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

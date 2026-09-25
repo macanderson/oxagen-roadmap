@@ -192,10 +192,10 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 616 to 622, 2219 to 2227</td><td>The rules that draw it</td></tr>
-      <tr><td><code>userMenu()</code> at <code>engine.js:1771</code></td><td>The account menu: header, four settings items, a divider, theme and sign-out.</td></tr>
-      <tr><td><code>dispatchMenu(ids)</code> at <code>engine.js:15181</code></td><td>The send-to menu shell: header, search field, and <code>dspList()</code>.</td></tr>
-      <tr><td><code>dspList()</code> at <code>engine.js:15172</code></td><td>Filters agents you operate and published workflows by the search text and renders both groups.</td></tr>
-      <tr><td><code>mentListHtml()</code> at <code>engine.js:15737</code></td><td>The @-mention list while typing a work item prompt, a listbox rather than a menu (see Findings).</td></tr>
+      <tr><td><code>userMenu()</code> at <code>engine.js:1773</code></td><td>The account menu: header, four settings items, a divider, theme and sign-out.</td></tr>
+      <tr><td><code>dispatchMenu(ids)</code> at <code>engine.js:15287</code></td><td>The send-to menu shell: header, search field, and <code>dspList()</code>.</td></tr>
+      <tr><td><code>dspList()</code> at <code>engine.js:15278</code></td><td>Filters agents you operate and published workflows by the search text and renders both groups.</td></tr>
+      <tr><td><code>mentListHtml()</code> at <code>engine.js:15843</code></td><td>The @-mention list while typing a work item prompt, a listbox rather than a menu (see Findings).</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -224,7 +224,7 @@
 ## Inputs
 
 1. mockups/components/menu.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 616 to 622, 2219 to 2227. The mockup renders it with userMenu() (engine.js:1771), dispatchMenu(ids) (engine.js:15181), dspList() (engine.js:15172), mentListHtml() (engine.js:15737).
+2. The design source: mockups/src/engine.css lines 616 to 622, 2219 to 2227. The mockup renders it with userMenu() (engine.js:1773), dispatchMenu(ids) (engine.js:15287), dspList() (engine.js:15278), mentListHtml() (engine.js:15843).
 3. The build's implementation: find it by its root selector (.menu) or its name, and list every route that renders it.
 4. Where to see it in the design: every page (account menu), Work (send to agent), Work order (mention list). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

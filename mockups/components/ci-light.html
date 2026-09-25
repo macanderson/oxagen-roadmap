@@ -172,10 +172,10 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 2135 to 2145</td><td>The rules that draw it</td></tr>
-      <tr><td><code>ciLight(c, label)</code> at <code>engine.js:7154</code></td><td>Picks the state from a counts object and writes the dot, title, and count. An optional label appends a <code>.dim</code> caption.</td></tr>
-      <tr><td><code>ciCounts(list)</code> at <code>engine.js:7144</code></td><td>Tallies an array of per-check states into <code>{pass, fail, running, queued, total, done}</code>.</td></tr>
-      <tr><td><code>ciFromSt(def, st)</code> at <code>engine.js:7149</code></td><td>Builds a plausible per-check state list from a change's overall status, for fixture data with no real per-check log.</td></tr>
-      <tr><td><code>oxprCiLight(p)</code> at <code>engine.js:7160</code></td><td>The Repositories Changes table's own wrapper: counts a proposal's checks and calls <code>ciLight()</code>.</td></tr>
+      <tr><td><code>ciLight(c, label)</code> at <code>engine.js:7159</code></td><td>Picks the state from a counts object and writes the dot, title, and count. An optional label appends a <code>.dim</code> caption.</td></tr>
+      <tr><td><code>ciCounts(list)</code> at <code>engine.js:7149</code></td><td>Tallies an array of per-check states into <code>{pass, fail, running, queued, total, done}</code>.</td></tr>
+      <tr><td><code>ciFromSt(def, st)</code> at <code>engine.js:7154</code></td><td>Builds a plausible per-check state list from a change's overall status, for fixture data with no real per-check log.</td></tr>
+      <tr><td><code>oxprCiLight(p)</code> at <code>engine.js:7165</code></td><td>The Repositories Changes table's own wrapper: counts a proposal's checks and calls <code>ciLight()</code>.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -201,7 +201,7 @@
 ## Inputs
 
 1. mockups/components/ci-light.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 2135 to 2145. The mockup renders it with ciLight(c, label) (engine.js:7154), ciCounts(list) (engine.js:7144), ciFromSt(def, st) (engine.js:7149), oxprCiLight(p) (engine.js:7160).
+2. The design source: mockups/src/engine.css lines 2135 to 2145. The mockup renders it with ciLight(c, label) (engine.js:7159), ciCounts(list) (engine.js:7149), ciFromSt(def, st) (engine.js:7154), oxprCiLight(p) (engine.js:7165).
 3. The build's implementation: find it by its root selector (.ci) or its name, and list every route that renders it.
 4. Where to see it in the design: Repositories (Changes table), Steering (Context PRs). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
