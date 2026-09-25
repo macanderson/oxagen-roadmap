@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Components</title>
+<meta name="description" content="The reusable components inside Oxagen's pages, each with live examples, rules, and an audit prompt.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="docs-kit/fonts.css">
+<link rel="stylesheet" href="src/engine.css">
+<link rel="stylesheet" href="docs-kit/docs.css">
+<script src="docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="typography.html">Typography</a>
+    <a href="colors.html">Colors</a>
+    <a href="prose.html">Prose</a>
+    <a href="components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-hero">
+  <p class="eyebrow">Design reference</p>
+  <h1>Components</h1>
+  <p class="dx-lead">Every component on this page is drawn by <code>mockups/src/engine.css</code>, the same stylesheet the mockup ships, so an example here is the component a build is measured against. Each has its own page with its anatomy, examples in both themes, usage, content, accessibility and phone rules, the tokens it uses, where the mockup defines it, and an audit prompt. The app shell (the sidebar, the top bar, the phone thumb bar) is out of scope.</p>
+  <div class="dx-meta">
+    <span><b>Components</b> 1</span>
+    <span><b>Registry</b> <code>mockups/components/src/</code></span>
+    <span><b>Build</b> <code>node tools/build-components.mjs</code></span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="catalog">Catalog</h2>
+  <p class="dx-sub">Every reusable component inside a page, grouped by job.</p>
+
+  <h3>Data display</h3>
+  <p class="dx-muted" style="margin:0 0 12px;font-size:13px">Figures, records, and states: the parts that carry what the record says.</p>
+  <div class="dx-g3">
+    <a class="dx-card" href="components/stat-box.html"><h3>Stat box</h3><p>One figure with its label and one line of context.</p><p><code>.stat</code></p></a>
+  </div>
+
+
+
+
+</section>
+
+<section class="dx-sec">
+  <h2 id="page-bound">Page-bound components</h2>
+  <p class="dx-sub">Components that appear on one page. Their page spec in <code>mockups/pages/</code> documents them.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Component</th><th>Root</th><th>Page</th></tr></thead>
+    <tbody>
+      <tr><td>Generated summary</td><td><code>.sumry</code></td><td>Run</td></tr>
+      <tr><td>Column chart</td><td><code>.cols</code>, <code>.ax</code></td><td>Run</td></tr>
+      <tr><td>Instrument tile</td><td><code>.inst</code></td><td>Run</td></tr>
+      <tr><td>Run timeline</td><td><code>.rt</code></td><td>Run</td></tr>
+      <tr><td>Decision trace section</td><td><code>dtSection()</code> in <code>wedge.js</code></td><td>Run</td></tr>
+      <tr><td>Transcript</td><td><code>.tx-*</code></td><td>Run, Transcript tab</td></tr>
+      <tr><td>Finding card</td><td><code>.fnd</code></td><td>Work, Findings tab</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Reference page anatomy</h2>
+  <p class="dx-sub">Every component page has the same sections in the same order.</p>
+  <ol class="dx-rules">
+    <li><div><b>Examples</b><p>Live examples of every variant and state, rendered from markup in <code>&lt;template&gt;</code> elements. Markup under each one copies with a button.</p></div></li>
+    <li><div><b>Anatomy</b><p>Each part, its selector, and what it holds.</p></div></li>
+    <li><div><b>Usage</b><p>When to use it, when to use something else, and paired examples to use and to avoid.</p></div></li>
+    <li><div><b>Content</b><p>The copy rules that apply to its words and figures. <a href="prose.html">Prose</a> has the full set.</p></div></li>
+    <li><div><b>Accessibility</b><p>Roles, labels, keyboard, focus, and contrast.</p></div></li>
+    <li><div><b>Phone</b><p>What changes in the phone shell at 390px.</p></div></li>
+    <li><div><b>Tokens</b><p>Every token it reads. <a href="colors.html">Colors</a> and <a href="typography.html">Typography</a> define them.</p></div></li>
+    <li><div><b>Source</b><p>The <code>engine.css</code> lines and the <code>engine.js</code> helpers that render it.</p></div></li>
+    <li><div><b>Findings</b><p>Where the mockup departs from its own rules today.</p></div></li>
+    <li><div><b>Audit prompt</b><p>A prompt to paste into an agent session that audits a build's version, check by check.</p></div></li>
+  </ol>
+</section>
+
+<section class="dx-sec">
+  <h2 id="storybook">Storybook</h2>
+  
+  <ul>
+    <li>Each component is one module in <code>mockups/components/src/</code>. Its <code>stories</code> array holds every example as markup, and <code>node tools/build-components.mjs</code> writes the pages from it. <code>--check</code> fails when a committed page is stale, and <code>npm run check</code> runs it.</li>
+    <li><code>mockups/components/manifest.json</code> lists every component with each story's markup. A component-level Storybook can read it and render one story per entry inside a decorator that loads <code>src/engine.css</code> and <code>docs-kit/fonts.css</code>.</li>
+    <li>Example markup carries every class and ARIA attribute the engine emits, and no <code>onclick</code> or <code>onkeydown</code>. A story wires its own handlers.</li>
+    <li>The page-level stories in <code>mockups/stories/</code> stay as they are. They frame whole pages of <code>missioncontrol.html</code>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Composition rules</h2>
+  
+  <ul>
+    <li>Use a component that exists before inventing one. A new pattern gets a module here first.</li>
+    <li>One gold action per screen. Every component's secondary actions are neutral.</li>
+    <li>Headings follow the page outline: the page h1 in the page header, h2 for a section or a dialog, h3 for a panel or a card, h4 for a group.</li>
+    <li>A table lives in a panel. The engine's <code>listify()</code> adds the search, filters, rows, and pager to every table, so no page writes its own.</li>
+    <li>An empty value is <code>—</code> in <code>--dim</code>, with a reason where one fits. A field no source backs reads &quot;not recorded&quot;.</li>
+    <li>State is a word first, then a shape, then a color.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  <p class="dx-sub">Rules every component shares.</p>
+  <ul>
+    <li>Every interactive element shows the gold focus ring (<code>:focus-visible</code>, 2px, offset 2px).</li>
+    <li>A row or card that opens something is keyboard operable: <code>rowClick()</code> gives it <code>role=&quot;button&quot;</code>, <code>tabindex=&quot;0&quot;</code>, a label, and Enter and Space.</li>
+    <li>An icon-only button has an <code>aria-label</code>. A list of chips carries a hidden <code>, </code> between items (<code>SEP</code>), so it reads and copies as a list.</li>
+    <li>In the phone shell, touch targets are at least 44px and inputs are 16px.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  <p class="dx-sub">Issues that span more than one component.</p>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Three segmented control idioms</h4><p><code>.seg</code> with <code>aria-pressed</code> buttons (5 sites), <code>.btn.sm.sel</code> groups (7 sites), and <code>span.chips[role=group]</code> (Backlog). One idiom would give one keyboard model and one look. See <a href="components/segmented-control.html">Segmented control</a>.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Label colors do not follow the theme</h4><p>Work item labels take an inline <code>--lc</code> hex from <code>LBL_SWATCHES</code> (engine.js 15943) and <code>fixtures/tasks.json</code>. Nine are dark-theme token values frozen as hex and three match no token (<code>#E0803A</code>, <code>#C9A227</code>, <code>#3B82F6</code>), so none switch in light.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>No destructive token</h4><p>The brand kit defines <code>--destructive</code>, the one red that clears 4.5:1 as text and as a fill in both themes. <code>engine.css</code> uses <code>--st-failed</code> for danger buttons instead, which is 3.51:1 on <code>--panel</code> in dark.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Rules with no emitter</h4><p><code>.srclink</code>, <code>.compbar</code>, <code>.legend</code>, <code>.mtr</code>, <code>.rl-tog</code>, <code>.fp-bar</code>, <code>.def-bar</code>, <code>.avat</code>, <code>.tid</code>, <code>.ctxi</code>, <code>.ctxg</code>, <code>.stack</code>, and <code>.agc .scs</code> are styled but nothing renders them. <code>approvalCardSm()</code> is never called, so the <code>.apsm*</code> rules are unused except <code>.apsm-clk</code>.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Rules defined twice</h4><p><code>.chips</code> (763 and 917), <code>.lst</code> and <code>.li</code> (551 and 589), and <code>.meter .lab</code> (321 and 2057) each have two definitions, and the later one wins.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Short part names</h4><p><code>.k</code>, <code>.v</code>, <code>.s</code>, <code>.d</code>, <code>.n</code>, <code>.t</code>, and <code>.sub</code> mean different parts under <code>.stat</code>, <code>.b</code>, <code>.check</code>, and <code>pre</code>. Every page here names a part with its root.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Hard-coded values</h4><p><code>.scrim</code> and <code>.apd-scrim</code> use <code>rgba(0,0,0,…)</code>, <code>.btn.danger.solid</code> uses <code>#fff</code>, and <code>.iconbtn .cnt</code> uses <code>#000</code>. Each is correct in dark and none follows a token.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit every component in a build.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Component set audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing every reusable component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against the component reference. Be exact and adversarial: the reference is the spec, and close enough is a fail.
+
+## Inputs
+
+1. mockups/components.html in the roadmap repo, then every page it links. Each component page ends with its own audit prompt.
+2. mockups/typography.html, mockups/colors.html, and mockups/prose.html, which every component inherits.
+3. The build's component library and every route that renders a page.
+
+## Procedure
+
+1. Inventory. For each component below, find the build's shared implementation and every place that draws it by hand. A component with no shared implementation is a FAIL.
+   - Stat box (.stat): mockups/components/stat-box.html
+2. Run each component's audit prompt in turn and keep its report.
+3. Gold. On every routed page, count gold elements that are not the marks, the focus ring, or a focused input. More than one is a FAIL.
+4. Headings. Every page has one h1; panels use h3, dialogs h2, groups h4; no heading carries a comma, a mid-dot, or a &quot;not&quot; contrast.
+5. Lists. Every table sits in a panel and carries the search, filters, rows, and pager, with an empty result that reads &quot;No rows match.&quot;
+6. Empty values. Every missing value renders as a dash in --dim with its reason, and no fixture value reaches production.
+7. Phone. At 390 by 844, tables become labelled cards, dialogs become bottom sheets, and nothing scrolls sideways.
+8. New patterns. List every component in the build that matches nothing in the reference. Each is a note for the reviewer: document it or replace it.
+
+## Output
+
+Return one markdown report:
+
+# Components: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| Component | Shared implementation | Hand-drawn copies | Result | Worst fail |
+|---|---|---|---|---|
+
+Then each component's report, in the order above, and a final list of fails ranked most severe first.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. If the build cannot be started, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+</main>
+</div>
+</body>
+</html>

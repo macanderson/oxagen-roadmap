@@ -117,7 +117,7 @@ a.dx-card:hover{border-color:var(--rule);background:var(--panel-h)}
 /* ---------- guidance ---------- */
 /* State by shape, as the brand draws it: a double border for the approved pattern, a single one for
    the pattern to avoid. The word says which, so neither depends on colour. */
-.dx-dd{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:0 0 22px}
+.dx-dd{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:0 0 22px;align-items:start}
 .dx-do,.dx-dont{border-radius:12px;background:var(--panel);min-width:0;overflow:hidden}
 .dx-do{border:3px double var(--rule)}
 .dx-dont{border:1px solid var(--rule)}
@@ -194,6 +194,13 @@ a.dx-card:hover{border-color:var(--rule);background:var(--panel-h)}
 .dx-spec .facts b{color:var(--fg);font-size:13px;font-weight:600}
 .dx-spec .facts code{font-size:11px}
 
+/* previous and next component */
+.dx-pn{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:40px 0 0;padding-top:28px;border-top:1px solid var(--border)}
+.dx-pn a{display:block;border:1px solid var(--border);border-radius:12px;padding:12px 16px;background:var(--panel);color:var(--fg);text-decoration:none;font-size:14px;font-weight:600}
+.dx-pn a:hover{border-color:var(--rule)}
+.dx-pn a span{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-bottom:2px}
+.dx-pn a.nx{text-align:right}
+
 /* utility */
 .dx-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .dx-mt{margin-top:14px}
@@ -220,5 +227,6 @@ a.dx-card:hover{border-color:var(--rule);background:var(--panel-h)}
   .dx-spec{grid-template-columns:minmax(0,1fr)}
   .dx-spec .facts{border-left:0;border-top:1px solid var(--border)}
   .dx-kv{grid-template-columns:minmax(0,1fr);gap:2px 0}
+  .dx-dd{grid-template-columns:minmax(0,1fr)}
   .dx-kv dd{margin-bottom:8px}
 }

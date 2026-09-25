@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stat box</title>
+<meta name="description" content="One figure with its label and one line of context.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Stat box</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Data display</p>
+  <h1>Stat box</h1>
+  <p class="dx-lead">A stat box shows one figure a person checks at a glance: a count, an amount, a rate. The label names the figure, the value states it, and the subline gives the one fact that makes it readable. Stat boxes sit in a row at the top of a page or a tab.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.stat</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 177 to 181, 764, 2087 to 2093, phone 679 to 680</span>
+    <span><b>Used on</b> Work, Run, Agents, Spend, Runtimes, Billing, agent Overview</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-row">
+    <figcaption class="dx-story-h"><b>Row of four</b><span>The common case: a <code>.grid.g4</code> row at the top of a page.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="row" data-name="Row of four">
+      <div class="grid g4">
+        <div class="stat"><span class="k">Runs</span><span class="v">1,340</span><span class="s">last 30 days</span></div>
+        <div class="stat"><span class="k">Spend</span><span class="v">$402.11</span><span class="s"><span class="basis" title="gateway_observed">Observed by gateway</span></span></div>
+        <div class="stat"><span class="k">Cache hit</span><span class="v">62%</span><span class="s">of input tokens</span></div>
+        <div class="stat"><span class="k">Wasted</span><span class="v">$38.20</span><span class="s">9% of spend</span></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-unit">
+    <figcaption class="dx-story-h"><b>Value with a unit</b><span>A unit that is not part of the figure goes in <code>small</code>.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="unit" data-name="Value with a unit">
+      <div class="grid g3">
+        <div class="stat"><span class="k">Tokens per run</span><span class="v">41,200<small>tokens</small></span><span class="s">median of 88 runs</span></div>
+        <div class="stat"><span class="k">Wall clock</span><span class="v">12m 04s</span><span class="s">from first prompt to seal</span></div>
+        <div class="stat"><span class="k">Tier</span><span class="v" style="font-size:17px">gateway</span><span class="s">metered at the gateway</span></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-tone">
+    <figcaption class="dx-story-h"><b>State tone</b><span>Color on the value only, and the label or subline names the state.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="tone" data-name="State tone">
+      <div class="grid g3">
+        <div class="stat"><span class="k">Waiting on you</span><span class="v" style="color:var(--st-approval)">3</span><span class="s">approvals past their first hour</span></div>
+        <div class="stat"><span class="k">Over budget</span><span class="v" style="color:var(--st-failed)">2</span><span class="s">agents above their monthly ceiling</span></div>
+        <div class="stat"><span class="k">Healthy runtimes</span><span class="v" style="color:var(--st-allowed)">14</span><span class="s">of 15 enrolled</span></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-empty">
+    <figcaption class="dx-story-h"><b>Empty value</b><span>No figure renders as a dash, and the subline says why.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="empty" data-name="Empty value">
+      <div class="grid g3">
+        <div class="stat"><span class="k">Cache hit</span><span class="v">—</span><span class="s">not recorded for harness runs</span></div>
+        <div class="stat"><span class="k">Spend</span><span class="v">$0.00</span><span class="s">no governed calls this month</span></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-click">
+    <figcaption class="dx-story-h"><b>Clickable</b><span>A stat that opens a filtered view is a <code>button.stat.click</code> with a label that names where it goes.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="click" data-name="Clickable">
+      <div class="grid g3">
+        <button class="stat click" aria-label="Open the work orders with a live run"><span class="k">Live now</span><span class="v">2</span><span class="s">work orders with a live run</span></button>
+        <button class="stat click" aria-label="Open the approvals waiting on you"><span class="k">Waiting on you</span><span class="v" style="color:var(--st-approval)">3</span><span class="s">open the approvals</span></button>
+      </div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Container</td><td><code>.stat</code></td><td>A <code>--panel</code> box with a 1px <code>--border</code>, a 12px radius, and 13px by 15px padding.</td></tr>
+      <tr><td>Label</td><td><code>.stat .k</code></td><td>The name of the figure: 10.5px Geist 600 at 0.1em, set in capitals by CSS.</td></tr>
+      <tr><td>Value</td><td><code>.stat .v</code></td><td>The figure: 23px Geist 700, tabular figures, line height 1.15.</td></tr>
+      <tr><td>Unit</td><td><code>.stat .v small</code></td><td>A unit or qualifier beside the figure: 12px, 500, <code>--muted</code>.</td></tr>
+      <tr><td>Subline</td><td><code>.stat .s</code></td><td>One fact that makes the figure readable: 11.5px, <code>--muted</code>.</td></tr>
+      <tr><td>Basis chip</td><td><code>.stat .s .basis</code></td><td>Where a spend figure came from, drawn by <code>basisChip()</code>: 10.5px Monaspace Neon.</td></tr>
+      <tr><td>Clickable</td><td><code>button.stat.click</code></td><td>The whole box is one button; hover lifts the border to <code>--rule</code>.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A figure a person checks every visit: runs, spend, waiting approvals, cache hit.</li><li>The first row of a page or a tab, three to six boxes wide.</li><li>A figure that opens the view behind it, as a clickable stat.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A figure with a history: use a <a href="meter.html">meter</a> or a chart beside it.</li><li>A list of values: use a <a href="key-value-list.html">key-value list</a>.</li><li>A state with no figure: use a <a href="badge.html">badge</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="stat" style="width:240px"><span class="k">Runs and spend</span><span class="v">1,340 / $402</span><span class="s">runs · spend · 30 days</span></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Two figures in one value and three facts in the subline. Nobody can read either figure at a glance.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="grid g2" style="width:100%"><div class="stat"><span class="k">Runs</span><span class="v">1,340</span><span class="s">last 30 days</span></div><div class="stat"><span class="k">Spend</span><span class="v">$402.11</span><span class="s">last 30 days</span></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>One figure per box, and each subline states one fact.</p></div>
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="stat" style="width:240px"><span class="k">Budget left</span><span class="v" style="color:var(--gold)">$1,240.00</span><span class="s">of $2,000.00</span></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A gold value. Gold is identity and the one action, never a figure or a state.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="stat" style="width:240px"><span class="k">Budget left</span><span class="v">$1,240.00</span><span class="s">of $2,000.00 this month</span></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>A neutral value. Color it with a state token only when the state is named beside it.</p></div>
+  </div>
+  <ul>
+    <li>A row of stat boxes has one subject. The Run page's row is Tokens, Prompts, Cost, Wasted, Wall clock, and Cache hit.</li>
+    <li>Every figure agrees with the same figure elsewhere on the page and in the navigation: a tab count, a table total, a drawer badge.</li>
+    <li>Only a stat that opens something is clickable. A clickable stat needs no chevron. The hover border and the pointer say it opens.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Label</b>: a plain noun of one to three words, written in sentence case (&quot;Waiting on you&quot;, &quot;Cache hit&quot;). CSS sets the capitals. An id inside a label is wrapped in <code>.id</code> so it keeps its case.</li>
+    <li><b>Value</b>: one figure, formatted by the engine's helpers: <code>usd()</code> for money (&quot;$1,284.50&quot;, a true minus &quot;−$4.20&quot;), <code>plural()</code> for counts, <code>dur()</code> for durations (&quot;12m 04s&quot;). Thousands take separators.</li>
+    <li><b>Unit</b>: in <code>small</code> when it is not part of the figure (&quot;41,200 tokens&quot;). A percent sign or a dollar sign stays in the figure.</li>
+    <li><b>Empty value</b>: <code>—</code>, with the reason in the subline (&quot;not recorded for harness runs&quot;). Never blank, never <code>undefined</code> or <code>NaN</code>, and never a zero the record did not give.</li>
+    <li><b>Subline</b>: one fact, starting in lowercase, with no mid-dot, comma list, or design reasoning. A spend figure names its basis with <code>basisChip()</code>: Observed by gateway or Reported by harness.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The DOM order is label, value, subline, so a screen reader reads &quot;Runs, 1,340, last 30 days&quot;.</li>
+    <li>A static stat box is not focusable. A clickable one is a real <code>button</code> with an <code>aria-label</code> that names where it goes.</li>
+    <li>Color never carries the state alone. A toned value has its state in the label or the subline.</li>
+    <li>The label and subline must clear 4.5:1 on <code>--panel</code>. The label's <code>--dim</code> does not today; see Findings.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>Padding drops to 11px by 12px and the value to 17px, so an eleven-digit token total fits half the width (engine.css 676 to 680).</li>
+    <li>Stat boxes sit two to a row, and a clickable stat keeps a 44px minimum touch height.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--panel</code></td><td>Ground</td></tr>
+      <tr><td><code>--border</code></td><td>Border at rest</td></tr>
+      <tr><td><code>--rule</code></td><td>Border on hover, clickable only</td></tr>
+      <tr><td><code>--dim</code></td><td>Label (see Findings)</td></tr>
+      <tr><td><code>--fg</code></td><td>Value</td></tr>
+      <tr><td><code>--muted</code></td><td>Subline and unit</td></tr>
+      <tr><td><code>--st-approval, --st-failed, --st-allowed</code></td><td>Value tone, with the state named beside it</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 177 to 181, 764, 2087 to 2093, phone 679 to 680</td><td>The rules that draw it</td></tr>
+      <tr><td><code>tile(k, v, s, col)</code> at <code>engine.js:7296</code></td><td>Writes one stat box; <code>col</code> sets the value's tone. About 15 calls.</td></tr>
+      <tr><td><code>runStatRow(R)</code> at <code>engine.js:2470</code></td><td>The Run page's row of six, with a local tile of its own.</td></tr>
+      <tr><td><code>basisChip(k)</code> at <code>engine.js:631</code></td><td>The spend basis chip in the subline.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>44 more stat boxes are written inline as strings (Spend, Runtimes, Billing, agent Overview, Memory, and the evidence and fix dialogs), and three local functions shadow <code>tile()</code>: <code>runStatRow</code> (2470), the import wizard (12124), and a pass or fail tile at 5781.</li>
+    <li>Compact contexts shrink the value: <code>.recon-tiles</code> (17px), <code>.ev-claim .stat</code> (19px), and <code>.rstats .stat</code> in the Run side column.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Label contrast</h4><p>The label is <code>--dim</code>, which is 3.67:1 on <code>--panel</code> in dark and 2.56:1 in light. A label is a word a person reads, so it belongs on <code>--muted</code> (6.91:1 and 4.83:1). See <a href="../colors.html#findings">Colors</a>.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Many hand-written copies</h4><p>One helper and 44 inline copies draw the stat box, and three local functions shadow the helper. One shared implementation in the build keeps them identical.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Tone by inline style</h4><p>The value's tone is an inline <code>style=&quot;color:var(--st-…)&quot;</code>. A modifier class (<code>.v.t-approval</code>) would let an audit find every toned value.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Two facts in a subline</h4><p>Some sublines join two facts with a mid-dot, such as &quot;2 to certify · 1 to accept&quot;. The caption rule allows one fact.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's stat box against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Stat box audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the stat box component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/stat-box.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 177 to 181, 764, 2087 to 2093, phone 679 to 680. The mockup renders it with tile(k, v, s, col) (engine.js:7296), runStatRow(R) (engine.js:2470), basisChip(k) (engine.js:631).
+3. The build's implementation: find it by its root selector (.stat) or its name, and list every route that renders it.
+4. Where to see it in the design: Work, Run, Agents, Spend, Runtimes, Billing, agent Overview. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Anatomy. Every stat box renders the label, the value, and the subline in that DOM order, in a `--panel` box with a 1px `--border`, a 12px radius, and 13px by 15px padding.
+2. Label. 10.5px Geist 600 at 0.1em tracking, capitals by `text-transform` only. The source string is sentence case. An id inside the label keeps its case.
+3. Value. 23px Geist 700 at −0.02em, tabular figures, line height 1.15. Money matches `usd()` (dollar sign, separators, two decimals, a true minus). A unit sits in a 12px 500 `--muted` `small`.
+4. Empty value. A missing figure renders &quot;—&quot; with the reason in the subline. A blank value, `undefined`, `NaN`, or a zero the record did not give is a FAIL.
+5. Tone. Only the value takes a color, only from a state token, and the label or subline names the state. A gold value is a FAIL.
+6. Clickable stat. A stat that navigates is a `button` with an `aria-label` naming its destination, a `--rule` border on hover, and the gold focus ring on keyboard focus. A clickable `div` is a FAIL.
+7. Agreement. Each figure equals the same figure elsewhere on the page: a tab count, a table total, a navigation or drawer badge. Quote any pair that disagrees.
+8. Subline. One fact, no mid-dot, no comma list, no design reasoning.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: Padding drops to 11px by 12px and the value to 17px, so an eleven-digit token total fits half the width (engine.css 676 to 680). Stat boxes sit two to a row, and a clickable stat keeps a 44px minimum touch height.
+13. Accessibility. The DOM order is label, value, subline, so a screen reader reads &quot;Runs, 1,340, last 30 days&quot;. A static stat box is not focusable. A clickable one is a real `button` with an `aria-label` that names where it goes. Color never carries the state alone. A toned value has its state in the label or the subline. The label and subline must clear 4.5:1 on `--panel`. The label's `--dim` does not today; see Findings.
+14. One implementation. The build draws the stat box from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Stat box: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+</main>
+</div>
+</body>
+</html>

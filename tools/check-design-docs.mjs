@@ -56,7 +56,9 @@ for (const file of pages) {
       const monaspace = document.fonts ? document.fonts.check('12px "Monaspace Neon"') : true;
       const emptyStories = [...document.querySelectorAll(".dx-story")].filter((f) => !f.querySelector(".dx-canvas")?.children.length).map((f) => f.id || f.querySelector("b")?.textContent);
       const off = document.createElement("style");
-      off.textContent = "pre,code,.mono,kbd,template,.dx-code,[data-bad-example],.dx-dont .dx-ex{display:none!important}";
+      // Examples are product markup, which check-copy.mjs reads by its own rules (an empty value is
+      // a dash there), so the prose scan skips them along with code.
+      off.textContent = "pre,code,.mono,kbd,template,.dx-code,.dx-canvas,.dx-ex,[data-bad-example]{display:none!important}";
       document.head.appendChild(off);
       const text = document.body.innerText;
       off.remove();
@@ -82,7 +84,7 @@ for (const file of pages) {
     if (r.themed !== theme) fail(file, `${tag}: ?theme=${theme} did not apply`);
     if (!r.title || r.title.split(/\s+/).length > 4) fail(file, `${tag}: title "${r.title}" is not a two to four word name`);
     for (const d of r.dashes) fail(file, `${tag}: dash or exclamation in prose: …${d}…`);
-    if (file.startsWith(COMP) && width === 1440 && theme === "dark")
+    if (file.startsWith(COMP + path.sep) && width === 1440 && theme === "dark")
       for (const s of COMPONENT_SECTIONS) if (!r.sections.includes(s)) fail(file, `missing section #${s}`);
     await page.close();
   }

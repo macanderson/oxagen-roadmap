@@ -1,0 +1,45 @@
+{
+  "generated": "by tools/build-components.mjs from mockups/components/src; do not edit",
+  "components": [
+    {
+      "slug": "stat-box",
+      "name": "Stat box",
+      "group": "Data display",
+      "summary": "One figure with its label and one line of context.",
+      "root": ".stat",
+      "page": "components/stat-box.html",
+      "stories": [
+        {
+          "id": "row",
+          "name": "Row of four",
+          "canvas": "ink",
+          "html": "<div class=\"grid g4\">\n  <div class=\"stat\"><span class=\"k\">Runs</span><span class=\"v\">1,340</span><span class=\"s\">last 30 days</span></div>\n  <div class=\"stat\"><span class=\"k\">Spend</span><span class=\"v\">$402.11</span><span class=\"s\"><span class=\"basis\" title=\"gateway_observed\">Observed by gateway</span></span></div>\n  <div class=\"stat\"><span class=\"k\">Cache hit</span><span class=\"v\">62%</span><span class=\"s\">of input tokens</span></div>\n  <div class=\"stat\"><span class=\"k\">Wasted</span><span class=\"v\">$38.20</span><span class=\"s\">9% of spend</span></div>\n</div>"
+        },
+        {
+          "id": "unit",
+          "name": "Value with a unit",
+          "canvas": "ink",
+          "html": "<div class=\"grid g3\">\n  <div class=\"stat\"><span class=\"k\">Tokens per run</span><span class=\"v\">41,200<small>tokens</small></span><span class=\"s\">median of 88 runs</span></div>\n  <div class=\"stat\"><span class=\"k\">Wall clock</span><span class=\"v\">12m 04s</span><span class=\"s\">from first prompt to seal</span></div>\n  <div class=\"stat\"><span class=\"k\">Tier</span><span class=\"v\" style=\"font-size:17px\">gateway</span><span class=\"s\">metered at the gateway</span></div>\n</div>"
+        },
+        {
+          "id": "tone",
+          "name": "State tone",
+          "canvas": "ink",
+          "html": "<div class=\"grid g3\">\n  <div class=\"stat\"><span class=\"k\">Waiting on you</span><span class=\"v\" style=\"color:var(--st-approval)\">3</span><span class=\"s\">approvals past their first hour</span></div>\n  <div class=\"stat\"><span class=\"k\">Over budget</span><span class=\"v\" style=\"color:var(--st-failed)\">2</span><span class=\"s\">agents above their monthly ceiling</span></div>\n  <div class=\"stat\"><span class=\"k\">Healthy runtimes</span><span class=\"v\" style=\"color:var(--st-allowed)\">14</span><span class=\"s\">of 15 enrolled</span></div>\n</div>"
+        },
+        {
+          "id": "empty",
+          "name": "Empty value",
+          "canvas": "ink",
+          "html": "<div class=\"grid g3\">\n  <div class=\"stat\"><span class=\"k\">Cache hit</span><span class=\"v\">—</span><span class=\"s\">not recorded for harness runs</span></div>\n  <div class=\"stat\"><span class=\"k\">Spend</span><span class=\"v\">$0.00</span><span class=\"s\">no governed calls this month</span></div>\n</div>"
+        },
+        {
+          "id": "click",
+          "name": "Clickable",
+          "canvas": "ink",
+          "html": "<div class=\"grid g3\">\n  <button class=\"stat click\" aria-label=\"Open the work orders with a live run\"><span class=\"k\">Live now</span><span class=\"v\">2</span><span class=\"s\">work orders with a live run</span></button>\n  <button class=\"stat click\" aria-label=\"Open the approvals waiting on you\"><span class=\"k\">Waiting on you</span><span class=\"v\" style=\"color:var(--st-approval)\">3</span><span class=\"s\">open the approvals</span></button>\n</div>"
+        }
+      ]
+    }
+  ]
+}
