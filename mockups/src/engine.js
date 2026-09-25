@@ -2454,17 +2454,31 @@ function copyPath(txt){
 }
 /* Longer text than a path, so a refusal cannot be shown in a toast to select by hand. The toast waits
    for the clipboard to answer, tries a selected textarea when it refuses, and says so when both do. */
-function copyText(txt,said){
+function copyText(txt,said,btn){
+  var done=function(){ act(said); copiedState(btn); };
   var byHand=function(){
     var ta=document.createElement("textarea"), ok=false;
     ta.value=txt; ta.setAttribute("readonly",""); ta.style.cssText="position:fixed;top:0;left:0;opacity:0";
     document.body.appendChild(ta); ta.select();
     try{ ok=document.execCommand("copy"); }catch(e){ ok=false; }
     ta.remove();
-    if(ok) act(said); else act("The browser refused the clipboard. Nothing was copied.","denied");
+    if(ok) done(); else act("The browser refused the clipboard. Nothing was copied.","denied");
   };
-  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(function(){act(said);},byHand); return; } }catch(e){}
+  try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done,byHand); return; } }catch(e){}
   byHand();
+}
+/* The button that copied says so where the eye already is, and the toast says what went. The label comes
+   back after 1.6s. A render in that time rebuilds the header from strings, and the button it drops is
+   restored off the page, which costs nothing. A refused copy never reaches here. */
+var COPIED_ICO='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5"/></svg>';
+function copiedState(btn){
+  if(!btn||!btn.isConnected) return;
+  if(!btn.classList.contains("copied")){ btn.dataset.label=btn.innerHTML; btn.style.minWidth=btn.offsetWidth+"px"; }
+  btn.innerHTML=COPIED_ICO+"Copied"; btn.classList.add("copied");
+  clearTimeout(btn.copiedT);
+  btn.copiedT=setTimeout(function(){
+    btn.innerHTML=btn.dataset.label; btn.classList.remove("copied"); btn.style.minWidth=""; delete btn.dataset.label;
+  },1600);
 }
 /* The second header strip: the repository, the branch, the pull requests, and the checkout. */
 function runWhere(R){
@@ -15587,7 +15601,7 @@ function pTask(r){
   var res=t.resolution?tRes(t.resolution):null;
   return '<div class="phead"><div class="t"><p class="eyebrow">'+wiLogo(t,13)+' <span class="id">'+h(t.num)+'</span></p><h1>'+h(t.subject)+'</h1>'+
    '<p>'+(own?(t.finding?'Written in Oxagen from finding <span class="mono">'+h(t.finding)+'</span>':'Written in Oxagen'):'Imported from '+h(k.l))+'. Updated '+h(t.updatedAt)+'.'+(t.ready==="ready"&&tkGraphBlocked(t)?' Blocked by '+h(tkOpenBlockers(t).map(function(b){return tkNum(b.task);}).join(" and "))+'.':'')+'</p></div>'+
-   '<div class="acts"><button class="btn" onclick="copyTaskPrompt(\''+t.id+'\')" title="Copy the work item and its work orders as text">Copy prompt</button>'+
+   '<div class="acts"><button class="btn" onclick="copyTaskPrompt(\''+t.id+'\',this)" title="Copy the work item and its work orders as text">Copy prompt</button>'+
    (own?(t.finding?'<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/work/findings?finding='+h(t.finding)+'\')">Open the finding</button>':'')
      :'<a class="btn" href="'+h(providerUrl(t))+'" target="_blank" rel="noopener">Open in '+h(k.l)+'</a>')+prim+'</div></div>'+
    changedBanner+
@@ -15703,7 +15717,7 @@ function pWorkOrder(r){
    (direct?'<p>Oxagen opened it on '+h(w.sent)+' for a run '+h((PEOPLE[w.by]||{}).name||w.by)+' started outside Oxagen'+(w.ref?', titled from its task reference <span class="mono">'+h(w.ref)+'</span>':'')+'.</p>'
      :w.status==="queued"?'<p>Queued by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' for '+h(tgt)+'. It is sent when '+h(woWaitsOnText(w))+' is done, or expires on '+h(w.expires||"")+'.'+woSubMore(w)+'</p>'
      :'<p>Sent by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' to '+h(tgt)+'.'+woSubMore(w)+'</p>')+'</div>'+
-   '<div class="acts">'+(direct?'':'<button class="btn" onclick="copyWoPrompt(\''+w.id+'\')" title="Copy the brief as sent with its references">Copy brief</button>')+
+   '<div class="acts">'+(direct?'':'<button class="btn" onclick="copyWoPrompt(\''+w.id+'\',this)" title="Copy the brief as sent with its references">Copy brief</button>')+
    (w.status==="queued"?'<button class="btn" onclick="openDialog(\'worelease\',\''+w.id+'\')">Send now</button><button class="btn danger" onclick="openDialog(\'wowithdraw\',\''+w.id+'\')">Withdraw</button>'
     :w.status==="sent"&&!w.started&&!w.runs.length?'<button class="btn danger" onclick="openDialog(\'wowithdraw\',\''+w.id+'\')">Withdraw</button>'
     :(w.status==="stopped"||w.status==="expired")&&!direct?(w.retriedAs?'':'<button class="btn" onclick="woRetry(\''+w.id+'\')">Send again</button>')
@@ -15797,13 +15811,13 @@ function woPromptText(id){
   if(pr) L.push("- Pull request "+pr);
   return L.join("\n");
 }
-function copyTaskPrompt(id){
+function copyTaskPrompt(id,btn){
   var n=taskWorkOrders(taskById(id)||{id:id}).length;
-  copyText(taskPromptText(id),"Prompt copied, with "+(n?n+" work order"+(n>1?"s":""):"no work order")+".");
+  copyText(taskPromptText(id),"Prompt copied, with "+(n?n+" work order"+(n>1?"s":""):"no work order")+".",btn);
 }
-function copyWoPrompt(id){
+function copyWoPrompt(id,btn){
   var n=((woById(id)||{}).tasks||[]).length;
-  copyText(woPromptText(id),"Brief copied, with "+n+" work item"+(n>1?"s":"")+".");
+  copyText(woPromptText(id),"Brief copied, with "+n+" work item"+(n>1?"s":"")+".",btn);
 }
 
 /* ============================== the work order dialog ==============================

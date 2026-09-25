@@ -888,6 +888,12 @@
           "html": "<button class=\"btn primary\" disabled>Retire agent</button>\n<button class=\"btn danger\" disabled>Retire agent</button>\n<span class=\"muted\" style=\"font-size:12px\">Tick the check to confirm.</span>"
         },
         {
+          "id": "copied",
+          "name": "Copied",
+          "canvas": "ink",
+          "html": "<button class=\"btn\">Copy prompt</button>\n<button class=\"btn copied\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 8.5l3.2 3L13 5\"/></svg>Copied</button>\n<button class=\"btn primary sm\">Copy prompt</button>\n<button class=\"btn primary sm copied\"><svg viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M3 8.5l3.2 3L13 5\"/></svg>Copied</button>"
+        },
+        {
           "id": "dialog-footer",
           "name": "Dialog footer",
           "canvas": "panel",

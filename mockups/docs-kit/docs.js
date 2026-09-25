@@ -5,7 +5,8 @@
    - Stories: each <figure class="dx-story"> holds its markup in a <template>. The page renders the
      template into the figure's canvas and prints the same markup under "Markup", so the example and
      its code cannot drift. A later component Storybook can read the same templates.
-   - Copy: a button with data-copy="#id" copies that element's text, with a fallback for file://.
+   - Copy: a button with data-copy="#id" copies that element's text, with a fallback for file://. The
+     button then shows a check and "Copied" for 1.6s.
    - Contents: the left column lists the page's h2 sections and marks the one in view. */
 (function(){
   var KEY="ox-docs-theme";
@@ -44,15 +45,19 @@
       document.body.removeChild(t);
     });
   }
+  /* The same copied state as the engine's copiedState(): a check and "Copied" for 1.6s, drawn by .btn.copied
+     in engine.css. A second press inside the 1.6s keeps the first label. */
+  var COPIED='<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5"/></svg>Copied';
   function wireCopy(btn){
+    var label=null,t=null;
     btn.addEventListener("click",function(){
       var sel=btn.getAttribute("data-copy"),src=sel&&document.querySelector(sel);
       if(!src)return;
       var text=src.tagName==="TEMPLATE"?dedent(src.innerHTML):src.textContent.replace(/^\n/,"");
-      var label=btn.textContent;
       copyText(text).then(function(){
-        btn.textContent="Copied";say(btn.getAttribute("data-copied")||"Copied to the clipboard");
-        setTimeout(function(){btn.textContent=label},1600);
+        if(label===null){label=btn.innerHTML;btn.style.minWidth=btn.offsetWidth+"px";}
+        btn.innerHTML=COPIED;btn.classList.add("copied");say(btn.getAttribute("data-copied")||"Copied to the clipboard");
+        clearTimeout(t);t=setTimeout(function(){btn.innerHTML=label;btn.classList.remove("copied");btn.style.minWidth="";label=null},1600);
       },function(){say("Copy failed. Select the text and copy it by hand.")});
     });
   }

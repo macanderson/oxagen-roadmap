@@ -154,7 +154,7 @@ export default {
     ["edPaint()", "engine.js:1296", "Repaints the highlighted layer, the gutter, the find marks, and the current line."],
     ["edKey(e)", "engine.js:1327", "Tab and Shift Tab indent, ⌘/ comments, ⌘F finds, ⌘S saves."],
     ["hlToml(src)", "engine.js:1222", "The TOML highlighter: one regex pass that writes token classes."],
-    ["cedHtml(key, path, lang, opts)", "engine.js:11594", "The same editor for other languages, sized for a dialog with `small` or wrapped for prose."],
+    ["cedHtml(key, path, lang, opts)", "engine.js:11608", "The same editor for other languages, sized for a dialog with `small` or wrapped for prose."],
   ],
   sourceNotes: [
     "`CED_LANG` (engine.js 11405) lists the languages the shared editor highlights: TOML, Markdown, JSON, TypeScript, Python, and Go.",

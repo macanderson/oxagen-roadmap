@@ -306,10 +306,13 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: t => { window.__copied = t; return Promise.resolve(); } } });
   });
   const copied = page => page.evaluate(() => window.__copied || "");
+  // The button that copied shows a check and "Copied" in place of its label, and nothing else in the header does.
+  const flashed = page => page.evaluate(() => [...document.querySelectorAll(".phead .btn.copied")].map(b => (b.querySelector("svg") ? "check " : "") + b.textContent.trim()).join("|"));
   const w = await open(H + "/orders/wo_01K6T9QX");
   await grab(w.page);
   await w.page.click(".phead >> text=Copy brief");
   await w.page.waitForTimeout(100);
+  ok(await flashed(w.page) === "check Copied", "copy: Copy brief turns into a check and Copied");
   let c = await copied(w.page);
   ok(/You have a work order from Marcus Bell/.test(c) && /claim_dod_item/.test(c), "copy: the work order copies the brief as sent");
   ok(/Work order wo_01K6T9QX: Same-minute migration stamps/.test(c) && /sha256:ab41c7e09f3d2865/.test(c), "copy: the work order names itself and its digest");
@@ -325,8 +328,19 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/Certified by Marcus Bell/.test(c) && /\[test\] A test covers a same-minute pair/.test(c), "copy: the work item carries its certified definition of done");
   ok(/wo_01K6T9QX: Same-minute migration stamps/.test(c) && /work\/orders\/wo_01K6T9QX/.test(c), "copy: the work item links its work order");
   ok(/Prompt copied, with 1 work order\./.test(await text(t.page, "#toast")), "copy: the work item toast counts the work orders");
+  ok(await flashed(t.page) === "check Copied", "copy: Copy prompt turns into a check and Copied");
+  await t.page.waitForTimeout(1700);
+  ok(await flashed(t.page) === "" && /Copy prompt/.test(await text(t.page, ".phead .acts")), "copy: Copy prompt returns to its label after 1.6s");
   await t.page.close();
   const d = await open(H + "/items/tsk_01K6S7C5PA");
+  // A refused clipboard, and a refused fallback, leave the button as it was and say so.
+  await d.page.evaluate(() => {
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText: () => Promise.reject(new Error("denied")) } });
+    document.execCommand = () => false;
+  });
+  await d.page.click(".phead >> text=Copy prompt");
+  await d.page.waitForTimeout(100);
+  ok(await flashed(d.page) === "" && /The browser refused the clipboard\. Nothing was copied\./.test(await text(d.page, "#toast")), "copy: a refused copy keeps the label and says so");
   await grab(d.page);
   await d.page.click(".phead >> text=Copy prompt");
   await d.page.waitForTimeout(100);

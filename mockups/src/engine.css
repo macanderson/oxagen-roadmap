@@ -132,7 +132,7 @@ p{margin:0 0 10px;color:var(--body)}
 #viewport.phone .phead .acts{margin-left:0;width:100%}
 
 /* ---------- buttons ---------- */
-.btn{border:1px solid var(--border);background:var(--panel);color:var(--fg);border-radius:9px;padding:7px 13px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:7px;transition:border-color .15s,background .15s}
+.btn{border:1px solid var(--border);background:var(--panel);color:var(--fg);border-radius:9px;padding:7px 13px;font-size:13px;font-weight:500;display:inline-flex;align-items:center;gap:7px;transition:border-color .15s,background .15s,color .15s}
 .btn:hover{border-color:var(--rule);background:var(--hl)}
 .btn.primary{background:var(--gold);border-color:var(--gold);color:var(--on-gold);font-weight:600}
 .btn.primary:hover{background:var(--gold-bright);border-color:var(--gold-bright)}
@@ -2430,3 +2430,13 @@ tr.on>td{background:var(--panel-h)}
 tr.wo-group td{background:var(--panel-h)}
 tr.wo-child td:first-child{padding-left:28px}
 @media (max-width:640px){.stages.layered{flex-wrap:wrap}.stage-col{flex:1 1 100%}}
+
+/* ---------- copied ----------
+   A copy that landed. The button's label becomes a check and "Copied" for 1.6s, then returns: copiedState()
+   in engine.js, wireCopy() in docs-kit/docs.js. The 8% ground keeps the light theme's green text above 4.5:1.
+   The rules sit here, not with the buttons, so the line numbers the component specs cite stay put. */
+.btn.copied,.btn.copied:hover{color:var(--st-allowed);background:color-mix(in srgb,var(--st-allowed) 8%,var(--panel));border-color:color-mix(in srgb,var(--st-allowed) 40%,transparent);justify-content:center}
+.btn.copied svg{width:14px;height:14px;flex:none;animation:copied-pop .24s cubic-bezier(.3,1.5,.6,1)}
+.btn.copied svg path{stroke-dasharray:16;animation:copied-draw .3s .06s ease-out backwards}
+@keyframes copied-pop{from{transform:scale(.5);opacity:0}}
+@keyframes copied-draw{from{stroke-dashoffset:16}}
