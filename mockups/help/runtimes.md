@@ -23,7 +23,7 @@ The shipped contracts are `packages/oxagen/src/contracts/tacho.enrollment_token.
 ### Logic
 1. `pRuntimes(r)` builds the header once and prepends it to the list, to one host's page and to the empty state.
 2. **Enroll a runtime** opens Register agent at "Name the agent" (`register-name.md`). It is a flow, and no dialog stays open.
-3. One host's page (`runtime.md`) keeps this header. Its `?` falls back to this section.
+3. One host's page draws the same header. Its `?` opens that page's own section, `runtime/header`.
 4. Creating an enrollment token needs `runtime.enroll`, an org Owner or Admin. The token is then the host's single-use credential for `enroll_host`.
 
 ### States
