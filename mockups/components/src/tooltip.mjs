@@ -90,9 +90,9 @@ export default {
     ["--mono", "Node type"],
   ],
   helpers: [
-    ["tipAttr(s)", "engine.js:2065", "Writes the `data-tip` attribute and the four event handlers. 16 calls, across the run instruments, the calls panel, the token bars, the step stack, and the Spend charts."],
+    ["tipAttr(s)", "engine.js:2066", "Writes the `data-tip` attribute and the four event handlers. 16 calls, across the run instruments, the calls panel, the token bars, the step stack, and the Spend charts."],
     ["rtTip(node, ev)", "engine.js:2066", "Creates `#rtip` once, sets its text from `data-tip`, and positions it above the target, flipping below when it would clip the top of the viewport."],
-    ["rtTipHide()", "engine.js:2076", "Hides `#rtip` on mouseleave or blur."],
+    ["rtTipHide()", "engine.js:2077", "Hides `#rtip` on mouseleave or blur."],
   ],
   findings: [
     { tag: "open", title: "No Escape to dismiss", body: "Nothing in `engine.js` calls `rtTipHide()` on Escape. The dialog, the drawer, and the mention list all close on Escape. The tooltip only hides on `mouseleave` or `blur`, so a keyboard reader must tab away to clear it." },

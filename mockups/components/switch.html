@@ -196,11 +196,11 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 729 to 738, commit dialog 1013 to 1017, Skills 1620 to 1623</td><td>The rules that draw it</td></tr>
-      <tr><td><code>switchCard(s)</code> at <code>engine.js:8270</code></td><td>The kill switch row on the Tools page, with its dynamic on and off label.</td></tr>
-      <tr><td><code>switchDialog()</code> at <code>engine.js:8404</code></td><td>The confirm dialog: blast radius, reason field, and the effect and reversibility copy.</td></tr>
-      <tr><td><code>doFlip(id)</code> at <code>engine.js:8424</code></td><td>Applies the flip after the confirm dialog's action button, and raises the persistent kill banner when a switch turns on.</td></tr>
-      <tr><td><code>cmSet(k, v)</code> at <code>engine.js:1394</code></td><td>Sets a field on the open commit, including the PR toggle's <code>pr</code> flag.</td></tr>
-      <tr><td><code>steerToggleInt()</code> at <code>engine.js:9158</code></td><td>Flips the fleet steer's Interrupt delivery mode.</td></tr>
+      <tr><td><code>switchCard(s)</code> at <code>engine.js:8271</code></td><td>The kill switch row on the Tools page, with its dynamic on and off label.</td></tr>
+      <tr><td><code>switchDialog()</code> at <code>engine.js:8405</code></td><td>The confirm dialog: blast radius, reason field, and the effect and reversibility copy.</td></tr>
+      <tr><td><code>doFlip(id)</code> at <code>engine.js:8425</code></td><td>Applies the flip after the confirm dialog's action button, and raises the persistent kill banner when a switch turns on.</td></tr>
+      <tr><td><code>cmSet(k, v)</code> at <code>engine.js:1395</code></td><td>Sets a field on the open commit, including the PR toggle's <code>pr</code> flag.</td></tr>
+      <tr><td><code>steerToggleInt()</code> at <code>engine.js:9159</code></td><td>Flips the fleet steer's Interrupt delivery mode.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -229,7 +229,7 @@
 ## Inputs
 
 1. mockups/components/switch.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 729 to 738, commit dialog 1013 to 1017, Skills 1620 to 1623. The mockup renders it with switchCard(s) (engine.js:8270), switchDialog() (engine.js:8404), doFlip(id) (engine.js:8424), cmSet(k, v) (engine.js:1394), steerToggleInt() (engine.js:9158).
+2. The design source: mockups/src/engine.css lines 729 to 738, commit dialog 1013 to 1017, Skills 1620 to 1623. The mockup renders it with switchCard(s) (engine.js:8271), switchDialog() (engine.js:8405), doFlip(id) (engine.js:8425), cmSet(k, v) (engine.js:1395), steerToggleInt() (engine.js:9159).
 3. The build's implementation: find it by its root selector (.ks-sw) or its name, and list every route that renders it.
 4. Where to see it in the design: Tools (Kill switches tab), Agents (definition editor, commit dialog), Steering (fleet steer, Library Skills). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

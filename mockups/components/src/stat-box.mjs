@@ -125,9 +125,9 @@ export default {
     ["--st-approval, --st-failed, --st-allowed", "Value tone, with the state named beside it"],
   ],
   helpers: [
-    ["tile(k, v, s, col)", "engine.js:2486", "Writes one stat box. `col` sets the value's tone. About 15 calls."],
-    ["runStatRow(R)", "engine.js:2483", "The Run page's row of six, with a local tile of its own."],
-    ["basisChip(k)", "engine.js:636", "The spend basis chip in the subline."],
+    ["tile(k, v, s, col)", "engine.js:2487", "Writes one stat box. `col` sets the value's tone. About 15 calls."],
+    ["runStatRow(R)", "engine.js:2484", "The Run page's row of six, with a local tile of its own."],
+    ["basisChip(k)", "engine.js:637", "The spend basis chip in the subline."],
   ],
   sourceNotes: [
     "44 more stat boxes are written inline as strings (Spend, Runtimes, Billing, agent Overview, Memory, and the evidence and fix dialogs), and three local functions shadow `tile()`: `runStatRow` (2483), the import wizard (12152), and a pass or fail tile at 5798.",

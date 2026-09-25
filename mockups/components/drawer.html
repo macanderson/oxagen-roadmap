@@ -263,13 +263,13 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 2065 to 2092, countdown 811 to 824</td><td>The rules that draw it</td></tr>
-      <tr><td><code>apdButton()</code> at <code>engine.js:1623</code></td><td>The topbar trigger, with the live count.</td></tr>
-      <tr><td><code>apdToggle(v)</code> at <code>engine.js:1629</code></td><td>Opens or closes the drawer and clears the selection on close.</td></tr>
-      <tr><td><code>apdRow(a)</code> at <code>engine.js:1632</code></td><td>One approval row, pending or resolved.</td></tr>
-      <tr><td><code>apdInterjectionRow(x)</code> at <code>engine.js:1644</code></td><td>The paused-agent row, with its own Answer button.</td></tr>
-      <tr><td><code>apdBody(a)</code> at <code>engine.js:1650</code></td><td>The list, or the selected approval's card when <code>S.apd.sel</code> is set.</td></tr>
-      <tr><td><code>apdHtml()</code> at <code>engine.js:1664</code></td><td>The scrim and the panel, assembled from <code>apdBody()</code>.</td></tr>
-      <tr><td><code>approvalCard(a)</code> at <code>engine.js:1836</code></td><td>The full card shown for a selected row, shared with the Run page.</td></tr>
+      <tr><td><code>apdButton()</code> at <code>engine.js:1624</code></td><td>The topbar trigger, with the live count.</td></tr>
+      <tr><td><code>apdToggle(v)</code> at <code>engine.js:1630</code></td><td>Opens or closes the drawer and clears the selection on close.</td></tr>
+      <tr><td><code>apdRow(a)</code> at <code>engine.js:1633</code></td><td>One approval row, pending or resolved.</td></tr>
+      <tr><td><code>apdInterjectionRow(x)</code> at <code>engine.js:1645</code></td><td>The paused-agent row, with its own Answer button.</td></tr>
+      <tr><td><code>apdBody(a)</code> at <code>engine.js:1651</code></td><td>The list, or the selected approval's card when <code>S.apd.sel</code> is set.</td></tr>
+      <tr><td><code>apdHtml()</code> at <code>engine.js:1665</code></td><td>The scrim and the panel, assembled from <code>apdBody()</code>.</td></tr>
+      <tr><td><code>approvalCard(a)</code> at <code>engine.js:1837</code></td><td>The full card shown for a selected row, shared with the Run page.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -298,7 +298,7 @@
 ## Inputs
 
 1. mockups/components/drawer.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 2065 to 2092, countdown 811 to 824. The mockup renders it with apdButton() (engine.js:1623), apdToggle(v) (engine.js:1629), apdRow(a) (engine.js:1632), apdInterjectionRow(x) (engine.js:1644), apdBody(a) (engine.js:1650), apdHtml() (engine.js:1664), approvalCard(a) (engine.js:1836).
+2. The design source: mockups/src/engine.css lines 2065 to 2092, countdown 811 to 824. The mockup renders it with apdButton() (engine.js:1624), apdToggle(v) (engine.js:1630), apdRow(a) (engine.js:1633), apdInterjectionRow(x) (engine.js:1645), apdBody(a) (engine.js:1651), apdHtml() (engine.js:1665), approvalCard(a) (engine.js:1837).
 3. The build's implementation: find it by its root selector (.apd) or its name, and list every route that renders it.
 4. Where to see it in the design: every page (topbar). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
