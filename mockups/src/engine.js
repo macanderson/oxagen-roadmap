@@ -4585,10 +4585,10 @@ DLG_EXT.runexport=function(){
    Every cell in the composition view is a reference to a reusable object, so the registry page
    that owns that object is one click away and nothing is described twice. */
 function agentHealth(a){
-  if(tamperCount(a)) return ["critical","tamper",tamperCount(a)+" open incident"+(tamperCount(a)>1?"s":"")];
-  if(!a.enrolled) return ["q","not enrolled","no hook is installed, so its runs are recorded only"];
-  if(a.tier==="observe") return ["approval","observe","enrolled, and nothing is delivered or refused yet"];
-  return ["allowed","healthy","frames arriving, chain intact"];
+  if(tamperCount(a)) return ["critical","Tamper",plural(tamperCount(a),"open incident")];
+  if(!a.enrolled) return ["q","Not enrolled","Not monitored: no hook installed"];
+  if(a.tier==="observe") return ["approval","Observe","enrolled, and nothing is delivered or refused yet"];
+  return ["allowed","Healthy","frames arriving, chain intact"];
 }
 /* The steering that reaches one agent, or null when no preview prompt is set up for it. */
 function agentSteering(a){
@@ -4611,8 +4611,8 @@ function pAgents(){
   if(S.state==="denied") return deniedState("the agents in this workspace","agent.read on core-platform");
   if(S.state==="empty") return emptyState("No agent registered in "+w.name,
     "An agent's identity lives in oxagen. Its definition is a file in <span class=\"mono\">.oxagen/agents/</span> in the main repo. Registering one opens a Context PR, and nothing is saved until it merges.",
-    '<button class="btn primary" onclick="openDialog(\'wrap\')">Wrap Claude Code</button>'+
-    '<button class="btn" onclick="openDialog(\'register\')">Register an agent</button>');
+    '<button class="btn primary" onclick="openDialog(\'register\')">Register agent</button>'+
+    '<button class="btn" onclick="openDialog(\'wrap\')">Wrap Claude Code…</button>');
 
   var list=AGENTS.filter(function(a){return a.ws===w.slug;}), view=agentViewSet();
   var acts=function(a){
@@ -4630,18 +4630,18 @@ function pAgents(){
        '<td>'+agentCard(a)+'</td>'+
        '<td style="font-size:12px;max-width:26ch">'+h(a.desc)+'</td>'+
        '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(a.operator,22)+h(PEOPLE[a.operator].name)+'</span></td>'+
-       '<td>'+(M?plural((M.gates.length+M.prefix.length+M.volatile.length),"item")+'<div class="dim mono" style="font-size:10px">'+tokn(M.tok.total)+' tok'+(M.delivered?'':' · not delivered')+'</div>'
+       '<td>'+(M?plural((M.gates.length+M.prefix.length+M.volatile.length),"record")+'<div class="dim mono" style="font-size:10px">'+tokn(M.tok.total)+' tok'+(M.delivered?'':' · not delivered')+'</div>'
                :'<span class="dim">—</span>')+'</td>'+
        '<td>'+plural(beltTotal(a),"tool")+'<div class="dim" style="font-size:10px">'+(belts.length?plural(belts.length,"toolbelt"):'from role grants')+' · '+beltModeLabel(a.beltMode)+'</div></td>'+
        '<td class="mono" style="font-size:11.5px">'+h(a.host||"—")+'<div class="dim" style="font-size:10px;font-family:var(--font)">'+h(rt?rt.kind+" · "+a.tier:a.tier)+'</div></td>'+
        '<td class="mono dim" style="font-size:11px">'+h(a.principal||"prn_pending")+'</td>'+
        '<td><span class="b b-'+hl[0]+'"><span class="d"></span>'+h(hl[1])+'</span></td>'+
-       '<td class="num">'+a.runs30.toLocaleString()+'<div class="dim mono" style="font-size:10px">runs 30d</div></td>'+
+       '<td class="num">'+plural(a.runs30,"run")+'<div class="dim mono" style="font-size:10px">(30 days)</div></td>'+
        acts(a)+'</tr>';
     }).join("");
   } else {
     head='<th>Agent</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
-      '<th class="num">Tools</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Tokens 30d</th>'+
+      '<th class="num">Tools</th><th class="num">Runs (30 days)</th><th class="num">Spend (30 days)</th><th class="num">Tokens (30 days)</th>'+
       '<th>Mandates</th><th>Incidents</th><th></th>';
     rows=list.map(function(a){
       return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">'+
@@ -4666,8 +4666,8 @@ function pAgents(){
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Agents</h1>'+
    '<p>Every actor in this workspace and what it is made of.</p></div>'+
    '<div class="acts"><button class="btn" onclick="wzOpen(\'agent\')">New agent</button>'+
-   '<button class="btn" onclick="openDialog(\'register\')">Register an agent</button>'+
-   '<button class="btn primary" onclick="openDialog(\'wrap\')">Wrap Claude Code</button></div></div>'+
+   '<button class="btn" onclick="openDialog(\'wrap\')">Wrap Claude Code…</button>'+
+   '<button class="btn primary" onclick="openDialog(\'register\')">Register agent</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
    /* Every tile here is a count, so every tile derives from a record. The workspace's own
       agent and enrolment counts come from the workspace row; the mandate and incident counts
@@ -4675,9 +4675,10 @@ function pAgents(){
    (function(){
      var orgAgents=AGENTS.length?AGENTS:[], allAgents=WS.reduce(function(n,x){return n+(x.agents||0);},0);
      var withMandate=orgAgents.filter(function(x){return (x.mandates||[]).length;});
-     return '<div class="stat"><span class="k">Agents here</span><span class="v">'+w.agents+'</span><span class="s">'+allAgents+' across the organization · '+list.length+' listed below</span></div>'+
-     '<div class="stat"><span class="k">Enrolled</span><span class="v">'+(w.enrolled==null?w.agents:w.enrolled)+'</span><span class="s">'+(w.enrolled!=null&&w.enrolled<w.agents?(w.agents-w.enrolled)+' not yet enrolled':list.filter(function(x){return x.tier==="observe";}).length+' listed here on the observe tier, the rest on harness')+'</span></div>'+
-     '<div class="stat"><span class="k">Holding a mandate</span><span class="v">'+withMandate.length+'</span><span class="s">'+(withMandate.length?withMandate.map(function(x){return x.key+' · in '+(wsBySlug(x.ws)||{name:x.ws}).name;}).join(', '):'no agent holds one')+'</span></div>'+
+     var nEnrolled=list.filter(function(x){return x.enrolled;}).length;
+     return '<div class="stat"><span class="k">Agents</span><span class="v">'+list.length+'</span><span class="s">'+list.length+' in this workspace · '+allAgents+' in the organization</span></div>'+
+     '<div class="stat"><span class="k">Enrolled</span><span class="v">'+nEnrolled+'</span><span class="s">'+nEnrolled+' enrolled · '+(list.length-nEnrolled)+' not enrolled</span></div>'+
+     '<div class="stat"><span class="k">Holding a mandate</span><span class="v">'+withMandate.length+'</span><span class="s">'+(withMandate.length?withMandate.map(function(x){return x.key+(x.ws===w.slug?'':' in '+(wsBySlug(x.ws)||{name:x.ws}).name);}).join(', '):'no agent holds one')+'</span></div>'+
      fleetTamperStat(list);
    })()+'</div>'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Registered in '+h(w.name)+'</h3>'+
@@ -4686,7 +4687,7 @@ function pAgents(){
      : 'Each row is what this agent did and what it cost over the last 30 days.')+'</p></div>'+
    '<div class="sp">'+viewPick+'<span class="mono dim" style="font-size:11px">.oxagen/agents/ @ '+h(list[0]?list[0].commit:"")+'</span></div></div>'+
    '<div class="tw"><table><thead><tr>'+head+'</tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">An agent has one principal and runs on one runtime. Its steering, its toolbelts and '+
+   '<div class="panel-b"><div class="note">An agent has one principal and runs on one runtime. Its steering, its toolbelts, and '+
    'its tools are workspace objects it refers to, so changing one changes every agent that refers to it.</div></div></div>';
 }
 
@@ -4867,7 +4868,7 @@ function fleetTamperStat(list){
   return '<div class="stat"><span class="k">Tamper incidents</span>'+
    '<span class="v"'+(all.length?' style="color:var(--st-critical)"':'')+'>'+all.length+'</span>'+
    '<span class="s">'+(newest
-     ? h(String(newest.scope).split(" · ")[0])+' · '+h(newest.kind)+', '+h(String(newest.at).slice(0,10))+
+     ? h(String(newest.scope).split(" · ")[0])+' · '+keyLabel(newest.kind)+', '+h(String(newest.at).slice(0,10))+
        (open?' · '+open+' open':' · all resolved')
      : 'none in the retention window')+'</span></div>';
 }
@@ -15344,7 +15345,7 @@ document.addEventListener("click",function(e){
       var tier=wpick([["gateway",68],["harness",19],["contained",8],["observe",5]]), tierNative=(wpick([["harness",1]]),tier);
       var incidents=wpick([[0,94],[1,5],[2,1]]);
       var av=rnd()<0.62?{kind:"icon",icon:ICONS[(n*7+w.slug.length)%ICONS.length],tone:TONES[n%3]}:{kind:"initials",text:slug.split("-").map(function(s){return s.charAt(0).toUpperCase();}).join("").slice(0,3),font:FONTS[n%3],tone:TONES[(n+1)%3]};
-      var made={key:"a-intel."+x.pre+"."+slug,name:agentTitle(slug),harness:hn[0],harnessLabel:hn[1],ws:w.slug,operator:wpick(ops),status:"enrolled",
+      var made={key:"a-intel."+x.pre+"."+slug,name:agentTitle(slug),harness:hn[0],harnessLabel:hn[1],ws:w.slug,operator:wpick(ops),status:"registered",
         tier:tier,tierNative:tierNative,belt:(bw=ri(3,58)),beltMode:(rnd(),bw>FULL_BELT_LIMIT?"searchable":"full"),runs30:runs30,spend30:m2(spend),ratio:ratio,
         digest:"sha256:"+hex(16),commit:x.head,budget:m2(pick([0.4,0.6,0.8,1,1.5,2,3])),budgetUsed:Math.round(rf(0.05,0.98)*100)/100,
         desc:DESC[base]||("Runs "+title(base).toLowerCase()+" for "+w.name+". Opens a pull request or a proposal; never merges, never pays."),
@@ -15907,7 +15908,8 @@ S.tsel={}; S.dodEdit={}; S.tkDrafting={}; S.wo=null; S.ipz=null; S.wfz=null; S.d
     AGENTS.push({key:x.key,name:x.name,harness:x.harness,harnessLabel:x.harnessLabel,ws:"core-platform",operator:TK_ME,status:"enrolled",
       tier:x.tier,tierNative:x.tier,belt:belts[i],beltMode:"full",runs30:x.runs30,spend30:x.spend30,ratio:0.41,
       digest:"sha256:"+["4b1e","9a07","c2d5","e6f3"][i]+"0d7a1c5e93b2",commit:"a4c91e2",budget:"2.00",budgetUsed:0.28,
-      desc:x.desc,avatar:{kind:"icon",icon:x.icon,tone:x.tone},mandates:[],incidents:0,model:"complex",host:x.host});
+      desc:x.desc,avatar:{kind:"icon",icon:x.icon,tone:x.tone},mandates:[],incidents:0,model:"complex",host:x.host,
+      enrolled:true,principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCN"+["K","M","P","Q"][i],devKey:"ed25519:"+["5d31…a0c4","b812…6e27","0f9e…d153","c47a…29b8"][i]});
   });
   WS.forEach(function(w){if(w.slug==="core-platform")w.agents+=TK.agents.length;});
   ORG.agents=AGENTS.length;
