@@ -9851,7 +9851,7 @@ function accountBody(){
      '<div class="row" style="margin-top:4px"><button class="btn" onclick="act(\'Export queued. You will get a signed bundle and a verifier script.\')">Export my activity</button>'+
      '<button class="btn" onclick="act(\'An organization export needs an org owner. Priya Natarajan has been asked.\')">Export the organization</button></div></div>'+
      '<div class="field"><label>Erasure</label>'+
-     '<div class="hint">Erasure of a data subject is a support request.</div></div>'+
+     '<div class="hint">Erasure runs as <span class="mono">erase_data</span> on the API.</div></div>'+
      '<div class="field"><label>Retention</label>'+kvl([
        ["frame bodies","7 years from the seal · write-once · per-organization key"],
        ["run ledger","forever: run, attempt, seal, attestation, frame digests, and costs"],

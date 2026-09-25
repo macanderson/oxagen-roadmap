@@ -217,7 +217,7 @@ Account is a dialog from the user menu, not a page (whole-app audit A2). Several
 | Roles | fixed | `list_orgs` role; `change_member_role` writes it (`org.member_role.change.ts`) | partial |
 | Two-factor, passkey, sessions | fixed | none in `packages/oxagen/src/contracts` | future-only |
 | Export | toasts | `export_data` (`privacy.data.export.ts`) | shipped |
-| Erasure | a line of text | `erase_data` (`privacy.data.erase.ts`): confirmed, revokes every session, schedules the hard delete; organization scope needs Owner | shipped; the mockup still says support request |
+| Erasure | one line naming `erase_data` | `erase_data` (`privacy.data.erase.ts`): confirmed, revokes every session, schedules the hard delete; organization scope needs Owner | shipped on the API; the app offers no button, as the mockup does |
 | Retention | fixed | the organization's retention settings | partial |
 
 ### Logic
@@ -225,7 +225,7 @@ Account is a dialog from the user menu, not a page (whole-app audit A2). Several
 2. Profile: Edit avatar calls `openAvatar('person:marcus')`, and the editor returns here on Save or Cancel.
 3. Preferences: the theme select applies at once. The Preview shows a date, number, money and duration in the chosen format.
 4. Security: Regenerate codes, Add and Revoke post toasts in the mockup.
-5. Privacy: the two export buttons queue an export. An organization export asks an owner.
+5. Privacy: the two export buttons queue an export. An organization export asks an owner. Erasure has no button: it runs on the API with explicit confirmation, ends every sign-in at once, and schedules the hard delete, which is why the tab only names the capability.
 6. Save posts "Saved." `set_preferences` is a partial write: only the fields sent change.
 
 ### States
