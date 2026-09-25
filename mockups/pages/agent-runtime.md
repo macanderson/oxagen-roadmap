@@ -16,49 +16,51 @@ Where the agent runs and the tier its hooks earn. The tab answers which host the
 
 ## What is on the page
 
+With component help off, the page carries no explainer text; each part's specification is in `mockups/help/agent-runtime.md`.
+
 The agent header and the tab bar are as `agent.md` specifies, with Runtime selected. For an agent with an enrolled host, the body is three panels.
 
-**Host.** The header carries the host's health badge (“degraded”) and **Open the runtime**, which opens `#/a-intel/core-platform/runtimes/mbp-01`. Rows:
+**Host.** Rows carry a sub-line only where it is data; the explanations the Harness, Device key, Hooks written, Model proxy, oxagen MCP endpoint and Settings rows used to carry are in the component help (`mockups/help/agent-runtime.md`, Host). The header carries the host's health badge (“degraded”) and **Open the runtime**, which opens `#/a-intel/core-platform/runtimes/mbp-01`. Rows:
 
 | Row | Value | Sub-line |
 |---|---|---|
 | Runtime | `mbp-01` | “workstation · macOS 15.5 · arm64 · started by launchd at login” |
-| Harness | “Codex CLI 1.4.0” | “the runtime is shared. Every agent on it is seen through the same hooks.” |
-| Device key | “ed25519:9c4a…e17b” | “signs checkpoints; oxagen countersigns at ingest” |
+| Harness | “Codex CLI 1.4.0” | none |
+| Device key | “ed25519:9c4a…e17b” | none |
 | Collector | “oxagend 1.6.1” | “2 telemetry gaps in the last 24h”, or on a clean host “last frame 4 seconds ago · 0 telemetry gaps in the last 24h” |
 | Hook binary | “oxagen-hook 1.6.1 · fails closed against its cached bundle” | none |
-| Hooks written | “SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, Stop” | “Five run as command hooks. The first four can refuse.”, or “Fewer than five events are wired, so some calls are recorded rather than decided.” |
-| Model proxy | “loopback proxy on the host” on `gateway` and `contained`, else “not routed” | “every model call leaves through it. Tokens are counted from the bytes that pass.”, or “model traffic goes from the harness to its provider. Routing it is the gateway tier.” |
-| oxagen MCP endpoint | `mcp.oxagen.com/w/core-platform` | “providers registered here are routed through oxagen, which decides each call” |
-| Settings | “user settings” | “an enterprise managed enrollment writes locked settings instead” |
+| Hooks written | “SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, Stop” | none with all five wired; with fewer, “N of 5 events wired” (“4 of 5 events wired”) |
+| Model proxy | “loopback proxy on the host” on `gateway` and `contained`, else “not routed” | none |
+| oxagen MCP endpoint | `mcp.oxagen.com/w/core-platform` | none |
+| Settings | “user settings” | none |
 | Tier earned | The tier badge (`gateway`) | none |
 | First frame | “2026-04-18 09:51:33Z” | none |
 | Last checkpoint | “seq 88,412 · 2026-09-11 08:41:02Z · chain intact” | none |
 | Note | The runtime's note, when it has one: “The collector is a minor version behind and reported two telemetry gaps in the last 24 hours.” | none |
 
-**What this tier delivers.** Subtext: “The tier is computed per run from what was actually routed.” **All runtimes** in the header opens Runtimes. The body starts with the tier ladder, an ordered list (`aria-label` “The tier ladder”) with the agent's rung marked “this agent”:
+**What this tier delivers.** The panel has no subtext; how the tier is computed is in the component help (`mockups/help/agent-runtime.md`, What this tier delivers). **All runtimes** in the header opens Runtimes. The body starts with the tier ladder, an ordered list (`aria-label` “The tier ladder”) with the agent's rung marked “this agent”:
 
 1. `observe`: “Recorded only. No hook is installed and nothing is delivered.”
 2. `harness`: “Hooks installed. Steering is delivered and four hook events can refuse a call. The harness reports spend, and a call goes ahead if its hook fails.”
 3. `gateway`: “Model and MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it.”
 4. `contained`: “The agent runs in an OS sandbox whose only network exit is the gateway.”
 
-Then six rows whose answer follows the agent's tier:
+Then six rows whose answer follows the agent's tier. Each answer is a terse fact; the long form of each (who counts the tokens, which credential a call carries, what fail-open means, how a shared budget reserves) is in the component help (`mockups/help/agent-runtime.md`, What this tier delivers):
 
 | Row | `observe` | `harness` | `gateway` and `contained` |
 |---|---|---|---|
-| Model calls | “not routed through oxagen. The harness calls its provider with its own key and reports usage. Spend is Reported by harness.” | as `observe` | “routed through the loopback proxy on the host. Tokens are counted from the bytes that pass through it and the run token is the only credential the call carries. Spend is Observed by gateway.” |
-| Tool calls over MCP | “recorded only” | “the providers registered with oxagen are routed through oxagen, which decides each call. Any other MCP tool the harness holds is not.” | “every provider the harness reaches over MCP is reached through the gateway and decided by oxagen.” |
-| Harness-native tools | “recorded only” | “the four blocking hook events can refuse. The result is reported by the harness, and a failed hook lets the call through (fail-open)” | the same on `gateway`; on `contained`, “the four blocking hook events can refuse, and the sandbox refuses a write to the settings file, the hook entries or the hook binary” |
-| Budgets | “a recorded number and a notice in steering, never a stop” | as `observe` | “enforced before the call: a run budget by the proxy, a shared budget by a reservation on the control plane” |
+| Model calls | “not routed through oxagen · spend Reported by harness” | as `observe` | “routed through the loopback proxy on the host · spend Observed by gateway” |
+| Tool calls over MCP | “recorded only” | “decided by oxagen for registered providers · recorded only for any other MCP tool” | “routed through the gateway and decided by oxagen” |
+| Harness-native tools | “recorded only” | “refused by the four blocking hook events · reported by the harness · fail-open” | the same on `gateway`; on `contained`, “refused by the four blocking hook events · the sandbox refuses writes to the hook settings and binary” |
+| Budgets | “recorded, with a notice in steering” | as `observe` | “enforced before the call” |
 | Steering | “not delivered: no hook is installed” | “delivered at SessionStart and UserPromptSubmit, and as files in the checkout” | as `harness` |
 | Credentials held by this agent | “none” | “none” | “none” |
 
-A note closes the panel: “Only contained is fully enforced: all traffic must pass through oxagen.” The note conflicts with the `gateway` rung and the Budgets answer, which say enforced for routed traffic. The rule a build keeps is the wedge's: enforced only for calls routed through Oxagen, with the tier stated.
+No note closes the panel. The note “Only contained is fully enforced” is gone, and with it the conflict it had with the `gateway` rung and the Budgets answer. The rule a build keeps is the wedge's: enforced only for calls routed through Oxagen, with the tier stated.
 
-**Unenroll this host from the CLI.** A code block: `oxagen agent unenroll --host mbp-01 \` over `  --restore-settings`. A note: “If hooks are stripped by hand instead, the next run records Hooks removed and the tier falls to observe. It is never upgraded after the fact.” Actions: **Run a test session** (a toast: “Test session queued. One turn, recorded like any other run.”) and **Unenroll** (danger; opens `unenroll`).
+**Unenroll this host from the CLI.** A code block: `oxagen agent unenroll --host mbp-01 \` over `  --restore-settings`. No note follows it; what happens when hooks are stripped by hand is in the component help (`mockups/help/agent-runtime.md`, Unenroll this host from the CLI). Actions: **Run a test session** (a toast: “Test session queued.”) and **Unenroll** (danger; opens `unenroll`).
 
-**No host enrolled.** For an agent with no enrolled host, the body is one panel instead: “No runtime is enrolled”, “Until one is, runs are recorded at the observe tier: nothing is delivered and nothing can be blocked.”, **Enroll a runtime** (gold; opens the Register agent gate at `#/a-intel/core-platform/register`) and **Show CLI steps** (opens `register`). The demo shows it on `#/a-intel/core-platform/agents/pr-reviewer/runtime`.
+**No host enrolled.** For an agent with no enrolled host, the body is one panel instead: “No runtime is enrolled”, “Runs are recorded at the observe tier.” (what the observe tier withholds is in the component help, `mockups/help/agent-runtime.md`, Host), **Enroll a runtime** (gold; opens the Register agent gate at `#/a-intel/core-platform/register`) and **Show CLI steps** (opens `register`). The demo shows it on `#/a-intel/core-platform/agents/pr-reviewer/runtime`.
 
 **Dialogs this tab opens.**
 

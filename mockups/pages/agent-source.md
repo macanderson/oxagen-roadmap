@@ -18,14 +18,16 @@ The instructions in this file reach the agent as a `procedure` SteeringFrame, li
 
 ## What is on the page
 
-**Header.** The eyebrow reads “Agent · Source”, with Agent a link to the agent's Overview. The h1 is the path in mono: `.oxagen/agents/release-manager.toml`. Chips: the main repository (`a-intel/platform`), the branch at its commit (`main @ a4c91e2`, or the pending branch as a badge when a commit sits on a branch that has not merged), “source of truth”, and the agent key (`a-intel.core.release-manager`). Subtext: “The agent definition is this file. Saving opens a pull request against the main repo. Nothing is written to oxagen’s database.” Actions, in this order:
+With component help off, the page carries no explainer text; each part's specification is in `mockups/help/agent-source.md` (Page header and Editor), and the tab bar's is in `mockups/help/agent.md`.
+
+**Header.** The eyebrow reads “Agent · Source”, with Agent a link to the agent's Overview. The h1 is the path in mono: `.oxagen/agents/release-manager.toml`. Chips: the main repository (`a-intel/platform`), the branch at its commit (`main @ a4c91e2`, or the pending branch as a badge when a commit sits on a branch that has not merged), “source of truth”, and the agent key (`a-intel.core.release-manager`). The header has no subtext; that the file is the definition and that Save opens a pull request, never a database write, is in the component help (`mockups/help/agent-source.md`, Page header). Actions, in this order:
 
 - **Discard** returns the draft to the base. It is disabled while the draft is unchanged.
 - **Save** (gold) opens the commit dialog.
 
 **Tabs.** The agent's eight tabs (`agent.md`), with Definition selected. Each opens its tab. This page draws the tab bar without the counts the other tabs carry, which is a mockup defect: a build shows the same counts on every tab.
 
-**Editor.** One panel.
+**Editor.** One panel, carrying the help key `data-help="editor"`.
 
 - A bar: the path, a dot and a word for the draft's state (“unchanged” or “modified”, the dot filled when modified), and a find field (placeholder “Find  ⌘F”, `aria-label` “Find in file”) with its match count (the match in view and the total once one is selected).
 - A gutter of line numbers beside a textarea labelled with the path. The text is highlighted as TOML: keys, strings, numbers, booleans, table headers and comments. The demo file is 21 lines:

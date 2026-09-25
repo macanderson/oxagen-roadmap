@@ -5,7 +5,7 @@
 | Route | `#/a-intel/finops/agents/invoice-bot/permissions`, and `…/permissions?delegation=mnd_7K2ETQ4` to open the Delegation section on one mandate. Old routes that land here: `…/agents/<agent>/budgets` and `…/agents/<agent>/mandates` in place; the mockup's `#/:org/:ws/agents/<agent>/mandates/<mandate>` becomes `…/permissions?delegation=<mandate>` in place; the app's `/{org}/{ws}/mandates/{mandate}` answers a lookup 308 to `/{org}/{ws}/agents/{agent}/permissions?delegation={mandate}`, and `routes.mandate` retires. The mandate page is cut |
 | Scope | workspace |
 | Spec | `docs/fleet-operations-wedge.md`: D11 (a mandate is a Steering Source that emits delegation frames, managed on this tab; there is no mandate page), D5 and the Frame types row for `delegation` (never cut; the gate also enforces it), the Emissions row for Mandate, D17, and the Cuts row for the Mandate page. `docs/fleet-operations-ia.md` (Agents) and `docs/fleet-operations-routes.md` (Agents, Tools). ADR-059 in `macanderson/oxagen` for mandates, consequence roles and the ledger. The agent header and the tab bar are specified in `agent.md` |
-| Design | `mockups/src/wedge.js` → `aPermissions()`, `permDelegation()` and `mandateFrame()`; `mockups/src/engine.js` → `permRoles()`, `permBudgets()`, `permMandates()` (the no-mandate panel), `iamWire()`, `iamMoney()`, `iamChain()`, `receiptLink()`, and the dialogs `assignrole`, `budget`, `mandateedit`, `mandaterevoke`, `receipt` and `mandate`; built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| Design | `mockups/src/wedge.js` → `aPermissions()`, `permDelegation()` and `mandateFrame()`; `mockups/src/engine.js` → `permRoles()`, `permBudgets()`, `permMandates()` (the no-mandate panel), `iamWire()`, `iamMoney()`, `receiptLink()`, and the dialogs `assignrole`, `budget`, `mandateedit`, `mandaterevoke`, `receipt` and `mandate`; built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
 | Storybook | `Oxagen / Agents / Permissions`: Loaded, Loaded · mobile, and Loaded · future-only fields marked |
 | Audit | `agent-permissions.audit-prompt.md` |
@@ -16,27 +16,29 @@ What the agent may do, as three kinds of limit on its principal: the roles it ho
 
 ## What is on the page
 
+With component help off, the page carries no explainer text; each part's specification is in `mockups/help/agent-permissions.md`.
+
 The agent header and the tab bar are as `agent.md` specifies, with Permissions selected and its count (1) equal to the mandates the agent holds. The body is Roles and Budgets side by side, then Delegation across the width.
 
-**Roles.** Subtext: “A subagent can use only what both its own grants and the invoking person's grants allow. Subagents can only narrow.” **Assign a role** in the header opens `assignrole`. A wire joins each held role and the operator with “and” into the toolbelt: `agent.finance.pay` and `agent.graph.read` and “Dana Okafor” (`org.billing · finops`) = “8 tool versions”, “the toolbelt its model is shown”. Rows:
+**Roles.** The panel has no subtext. Its explanation is in the component help (`mockups/help/agent-permissions.md`, Roles). **Assign a role** in the header opens `assignrole`. A wire joins each held role and the operator with “and” into the toolbelt: `agent.finance.pay` and `agent.graph.read` and “Dana Okafor” (`org.billing · finops`) = “8 tool versions”, “the toolbelt its model is shown”. Rows:
 
 | Row | Value | Sub-line |
 |---|---|---|
 | Each held role (`agent.finance.pay`, `agent.graph.read`) | The role's permission ids, joined with mid-dots (“mandate.draw · invoice.read”) | The role's description (“draw on a mandate; nothing without one”) |
 | Resource scope | “side_effects: read, write · repositories: a-intel/finops-agents · egress: third_party · max_hops 2” | none |
 | Spend ceiling | “$5.00 USD” over “per run, checked at each checkpoint”, then “$15.00 USD” over “per day, on reported spend” | none |
-| Can move money | A badge “1 mandate”, followed by a clause that it may move money only inside it; with no mandate, a badge “no” and a clause that a financial call is denied before dispatch | none |
+| Can move money | A badge “1 mandate”, followed by “, and only inside it”; with no mandate, a badge “no” followed by “ · no mandate” | none |
 
-With no role held, the one row reads “Roles” with “None held. It can reach only its own run channel.” A note closes the panel: “Assigning a toolbelt grants nothing. It widens what the model is shown. Every call on it is still decided against these roles, the policy on the tool, and the mandate ledger.”
+With no role held, the one row reads “Roles” with “None held. It can reach only its own run channel.” No note closes the panel. Why assigning a toolbelt grants nothing is in the component help (`mockups/help/agent-permissions.md`, Roles).
 
-**Budgets.** Subtext: “Hard limit, checked at each checkpoint against reported spend. If the harness stops reporting, the run is not paused (fail-open). On the gateway and contained tiers the proxy blocks the call before it is sent.” **Set budget** in the header opens `budget`. Two meters:
+**Budgets.** The panel has no subtext. How a breach is checked on each tier, and what happens when the harness stops reporting, is in the component help (`mockups/help/agent-permissions.md`, Budgets). **Set budget** in the header opens `budget`. Two meters:
 
 - “Per-run hard limit”, “$5.00”, with a bar of the month's highest run against the ceiling and the caption “highest run this month $3.28 · basis: price book 2026-09 at the provider's list rate”.
 - “Per-day hard limit”, “$1.10 of $15.00”, with a bar and the caption “resets 00:00 UTC · mode hard · currency USD”.
 
-Rows: Mode (“Hard limit, checked at each checkpoint against reported spend”), On a breach (“pause at the next checkpoint, a policy.decision frame, and the operator notified”) and Delegation ceiling (“max_hops 2 · a subagent inherits this ceiling and may only lower it”).
+Rows: Mode, which states the agent's tier (“Hard limit, blocked at the proxy before the call is sent” on `gateway` and `contained`; otherwise “Hard limit, checked at each checkpoint against reported spend · fail-open”), On a breach (“pause at the next checkpoint, a policy.decision frame, and the operator notified”) and Delegation ceiling (`max_hops 2`).
 
-**Delegation.** Subtext: “Authority a person delegated to this agent. Each active mandate reaches it as a delegation frame, and the gate enforces the same limits on every call.” The header badge counts the active mandates (“1 active”). One block per mandate the agent holds, active or ended, newest first. The demo holds `mnd_7K2ETQ4` (active) and `mnd_5T2HVX` (expired).
+**Delegation.** The panel has no subtext. Its explanation is in the component help (`mockups/help/agent-permissions.md`, Delegation). The header badge counts the active mandates (“1 active”). One block per mandate the agent holds, active or ended, newest first. The demo holds `mnd_7K2ETQ4` (active) and `mnd_5T2HVX` (expired).
 
 Each block's header: the mandate id (mono), its status as a dot and a word (“active”, “expired”), its purpose (“monthly infrastructure invoices, PO-4471”), **Change limits** (opens `mandateedit` on that mandate) and **Revoke** (danger; opens `mandaterevoke` on that mandate). Then two columns of rows:
 
@@ -65,18 +67,18 @@ The ledger. The block the address names with `?delegation=<id>` is highlighted a
 
 State is a dot and a word: settled, reserved or released. A receipt id opens the `receipt` dialog. Three of the fixture's draws ($2,450.00 reserved, $884.60 and $400.00 settled) exceed the mandate's $250.00 per-call limit, which the gate refuses before dispatch; the demo ledger needs draws inside the limit.
 
-A note closes the section: “A mandate is the only thing that lets this agent move money. Every draw reserves, then settles or releases. Its tools appear on the toolbelt gated mandate + approval, never plain allowed.”
+No note closes the section. The ledger mechanics (reserve, then settle or release) and how a mandate's tools are gated on the toolbelt are in the component help (`mockups/help/agent-permissions.md`, Delegation).
 
-**No mandate.** An agent that holds no mandate shows one panel in place of Delegation: “No mandate”, subtext “Nothing in a grant, a role, or a toolbelt can substitute for one.”, the badge “cannot move money”, a paragraph that a financial call from the agent is denied before dispatch, whether or not the tool is on its toolbelt, and before any credential is minted. Then a four-step chain: Call (“stripe__create_payment@5 · amount $1,204.18 USD”), Financial class (“Moves funds, read from the tool version's declared amount_path”), Mandate lookup (“none for a-intel.core.triage”), Decision (“Blocked · no mandate · mandate ledger unchanged · no credential minted”). **Request a mandate** opens `mandate`. The demo shows it on `#/a-intel/core-platform/agents/triage/permissions`.
+**No mandate.** An agent that holds no mandate shows one panel in place of Delegation: the heading “No mandate”, no subtext, the badge “cannot move money”, and **Request a mandate**, which opens `mandate`. The panel draws no paragraph and no worked example. The order in which the gate denies a financial call from an agent with no mandate is in the component help (`mockups/help/agent-permissions.md`, Delegation). The demo shows it on `#/a-intel/core-platform/agents/triage/permissions`.
 
 **Dialogs this tab opens.**
 
 - `assignrole`, “Assign a role”, for this agent (see `agents.md`).
 - `budget`, “Set a budget”: Scope, Period (per run, daily, monthly), Limit (USD, with the hint “Highest run this month: <amount>.”), Mode (hard or soft), **Cancel** and **Set it**. Opened here, its agent scope names this agent. The mockup's dialog names `a-intel.core.triage` and triage's highest run from every agent's tab, which is a defect.
-- `mandateedit`, “Edit mnd_7K2ETQ4” with the agent key: “Auto-approve limit per call (USD)” (“A call above this parks for a person, and no rule elsewhere can release it.”), the per-period limit (“Monthly limit (USD)”), Valid to, and the note that lowering a limit below what is already reserved applies from the next call and that raising one needs the second approver. **Cancel** and **Save**.
-- `mandaterevoke`, “Revoke mnd_7K2ETQ4?”: what the agent can no longer do, what is reserved and released at the next boundary, what already settled and stays on the ledger, and “The ledger is kept, never deleted. A revoked mandate still answers for every draw it made.” **Cancel** and **Revoke it**. The mockup offers Change limits and Revoke on an ended mandate too; `update_mandate_limits` acts on an active mandate and `revoke_mandate` refuses one that has ended, so a build offers both on active mandates only.
+- `mandateedit`, “Edit mnd_7K2ETQ4” with the agent key: “Auto-approve limit per call (USD)” (“A call above this parks for a person.”), the per-period limit (“Monthly limit (USD)”), Valid to, and the note “Raising a limit needs the second approver, Priya Natarajan.” **Cancel** and **Save**, which closes the dialog with “Limits saved on mnd_7K2ETQ4.” What lowering a limit below the reserved amount does is in the component help (`mockups/help/agent-permissions.md`, Change limits).
+- `mandaterevoke`, “Revoke mnd_7K2ETQ4?”: what the agent can no longer do, what is reserved and released at the next boundary, and what already settled and stays on the ledger, all in one warning. No note follows it; why the ledger is kept is in the component help (`mockups/help/agent-permissions.md`, Revoke a mandate). **Cancel** and **Revoke it**. The mockup offers Change limits and Revoke on an ended mandate too; `update_mandate_limits` acts on an active mandate and `revoke_mandate` refuses one that has ended, so a build offers both on active mandates only.
 - `receipt`, “Receipt <id>”: the tool, time and agent, the decision and tier, the amount, then Who (Operator, Agent, “Run · turn · step”, and the work order it served, which the build labels Work order where the mockup says Task) and What (tool version, schema digest, input digest, the amount read from its path, the counterparty).
-- `mandate`, from Request a mandate. The mockup titles it “Grant a mandate”: Agent, Effect (commits_spend, moves_funds, changes_entitlement), Auto-approve limit per call (USD), Per period (USD), Period, Calls per day, Counterparties allowed, Tools, the hint “A call that moves funds always needs approval, whatever the limit.”, Purpose, Valid from and Valid to (“Mandates expire. There is no unbounded option.”), **Cancel** and **Grant the mandate**. From this tab it carries this agent and files a request (`request_mandate`) that a holder of the consequence's role grants. The mockup pre-fills `a-intel.finops.invoice-bot` from every agent and grants directly, which is a defect.
+- `mandate`, from Request a mandate. The mockup titles it “Grant a mandate”: Agent, Effect (commits_spend, moves_funds, changes_entitlement), Auto-approve limit per call (USD), Per period (USD), Period, Calls per day, Counterparties allowed, Tools, the hint “A call that moves funds always needs approval, whatever the limit.”, Purpose, Valid from and Valid to (“Mandates expire. There is no unbounded option.”), **Cancel** and **Grant the mandate**, which closes with “Mandate granted.” Effect carries no hint and no note closes the form; how amounts are read and who may grant are in the component help (`mockups/help/agent-permissions.md`, Grant a mandate). From this tab it carries this agent and files a request (`request_mandate`) that a holder of the consequence's role grants. The mockup pre-fills `a-intel.finops.invoice-bot` from every agent and grants directly, which is a defect.
 
 ## Data sources
 
@@ -91,7 +93,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 | Can move money | `a.mandates` | Active mandates | `list_mandates` (`mandate.list.ts:28`); `list_agents` `mandates` (`agent.list.ts:117-121`) | ✅ |
 | Per run meter: highest run this month | `a.budgetUsed` | The agent's dearest run this month | Run cost is on `list_runs` rows (`run.list.ts:476`); no per-agent maximum is read | 🟡 |
 | Per day meter: spent today | `a.usedDay` | The agent's spend today | `get_spend` grouped by agent over a day range (`spend.get.ts:34`) | 🟡 |
-| Mode and On a breach | fixed text | The bundle budget's mode and what a breach does | `deriveBundleBudget` signs `enforced` or `observed` (`tacho-mandate.ts:178-212`). A pause at the next checkpoint and the operator notice are not recorded as described | 🟡 |
+| Mode and On a breach | `a.tier` via `TIER_RANK`, and fixed text | The bundle budget's mode and what a breach does | `deriveBundleBudget` signs `enforced` or `observed` (`tacho-mandate.ts:178-212`). A pause at the next checkpoint and the operator notice are not recorded as described | 🟡 |
 | Delegation ceiling `max_hops` | fixed text | A subagent hop limit | No such field | ❌ |
 | Set budget | `budget` dialog | A per-agent ceiling | `set_spend_budget` takes scope `org` or `workspace` only (`billing.budget.set.ts:55`, `billing.budget.get.ts:9`). A per-agent ceiling is written in the definition file (`commit_agent_definition`) | 🟡 |
 | Mandates: id, status, purpose, window, effect | `MANDATES` | `list_mandates`, `get_mandate`: `id`, `status`, `purpose`, `validFrom`, `validTo`, `consequenceTags` | `mandates/schemas.ts:630-655`; table `tools.mandates` (`packages/database/src/schema/tools.ts:30-99`). The starter tag is `moves_money`; the mockup's `moves_funds` and `commits_spend` are custom tags | ✅ |
@@ -107,7 +109,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 | Change limits | `mandateedit` | `update_mandate_limits` on an active mandate | `mandate.limits.update.ts:59` | ✅ |
 | Revoke | `mandaterevoke` | `revoke_mandate` with a reason | `mandate.revoke.ts:10`; it refuses a mandate that has already ended | ✅ |
 | Request a mandate | `mandate` | `request_mandate`, a draft a person with the consequence role grants | `mandate.request.ts:9`; `grant_mandate` (`mandate.grant.ts:16`) | ✅ |
-| No-mandate chain | fixed text over `a.key` | The gate's denial when no mandate covers a financial call | The mandate gate decides at dispatch (ADR-059). The chain's example call is illustrative | 🟡 |
+| No-mandate decision order (component help only; the page no longer draws it) | `mockups/help/agent-permissions.md`, Delegation | The gate's denial when no mandate covers a financial call | The mandate gate decides at dispatch (ADR-059). The chain's example call is illustrative | 🟡 |
 
 ## Future-only fields
 

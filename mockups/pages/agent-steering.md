@@ -18,9 +18,11 @@ The Compiler, this tab and a run's Decision trace read one resolver, so for the 
 
 ## What is on the page
 
+With component help off, the page carries no explainer text; each part's specification is in `mockups/help/agent-steering.md`.
+
 The agent header and the tab bar are as `agent.md` specifies, with Steering selected. The body is three numbered sections.
 
-**Delivery warning.** On an agent whose tier is `observe`, a warning comes first: “Assembled, not delivered. This agent is on the observe tier. No hook is installed, so nothing below reaches it.” The demo agent is on `gateway`, so the demo does not show it.
+**Delivery warning.** On an agent whose tier is `observe`, a warning comes first: “Not delivered. This agent is on the observe tier. No hook is installed, so nothing below reaches it.” The demo agent is on `gateway`, so the demo does not show it.
 
 **1 · What it receives.** The sentence: “44 SteeringFrames for its standing brief, “Cut the 4.11.0 release notes”.” **Open in the Compiler** on the right opens `#/a-intel/core-platform/steering/compiler/release-manager`. The standing brief is the agent's preview prompt, or its description when no prompt is set up. On pr-reviewer the description ends in a full stop inside the quotation marks and the sentence adds its own after them, a copy defect a build avoids.
 
@@ -39,7 +41,7 @@ The agent header and the tab bar are as `agent.md` specifies, with Steering sele
 - Each injection point is a table, Type · SteeringFrame · Source · Force · Tokens. Type is the type badge. SteeringFrame is the body, with “enforced by <gate>” under a gate-backed frame that is not a capability (“enforced by gate.never-merge”). Source is the source kind (“Product vision”, “ADR”, “Steering record”, “Policy”, “Skill”, “Memory”, “Glossary term”, “Agent definition”, “Toolbelt”), the source id as a link to where it is managed, and the source version with the frame's hash (“a4c91e2 · #bdec8418”). A toolbelt's version is the date it last changed (`tb_context_graph`, “updated 2026-08-30”). Force is `must`, `should`, `may` or `info`. Tokens is the frame's cost, or a dash for a descriptor that costs nothing (a skill entrypoint). Rows sort by type, then force, then id. A table shows four rows and **Show all N**, which turns into **Show the first 4**.
 - Two fixture defects show in this section. Three Steering records render with no version (`ctx.release.platform-only`, `ctx.release.semver`, `ctx.release.milestone-4-11`), and frames with different bodies share a hash (`#3f0b8c1d` on both `ctx.release.never-merge` and `gate.never-merge`, `#c02fa77e` on both `ctx.mobile.no-codegen` and `gate.mobile-codegen` in section 2, and a skill's description line and its `SKILL.md` both carry the skill's digest). Every frame carries its source version, and its hash is over its own body (D6).
 
-**2 · Excluded.** The sentence: “24 resolved for this agent and not delivered, each with its reason.” One table, Type · SteeringFrame · Source · Reason · Tokens, with the injection point under each body. Reason is a mono badge from the closed vocabulary, with the numbers that decided it under it:
+**2 · Excluded.** The sentence: “24 resolved for this agent and not delivered.” Why each exclusion carries its reason is in the component help (`mockups/help/agent-steering.md`, Excluded). One table, Type · SteeringFrame · Source · Reason · Tokens, with the injection point under each body. Reason is a mono badge from the closed vocabulary, with the numbers that decided it under it:
 
 | Reason | Demo count | What the line under it says |
 |---|---|---|
@@ -53,7 +55,7 @@ The agent header and the tab bar are as `agent.md` specifies, with Steering sele
 
 A withheld skill's body reads “Withheld before ranking. The agent is told the count and the reason, never the name.” The withheld mobile skill's scope line says “This run works in a-intel/platform” on a tab that resolves no run; a build says this agent, as the other scope lines do. The table shows six rows and **Show all 24**. With nothing excluded: “Nothing was excluded.” With a type picked and none of it excluded: “Nothing of this type was excluded.”
 
-**3 · Sources.** The sentence: “26 sources reach this agent, each managed where it lives.” One table, Source · Emits here · Frames · Managed in, one row per source. Source is the kind, the id as a link and the version. Emits here is the type badges the source emits for this agent. Frames is the count of its frames in section 1, and the counts sum to 44. Managed in is Steering, Tools or Agents. A toolbelt is one row (five toolbelts, 13 capability frames among them), and a skill whose description line and files both arrive is one row. List controls: “Any managed in” and “Any emits here” facets, the second offering one type per option, Rows (5, 10, 25, 50, All) and a pager (“1–10 of 26”).
+**3 · Sources.** The sentence: “26 sources reach this agent.” That each source is managed where it lives is in the component help (`mockups/help/agent-steering.md`, Sources). One table, Source · Emits here · Frames · Managed in, one row per source. Source is the kind, the id as a link and the version. Emits here is the type badges the source emits for this agent. Frames is the count of its frames in section 1, and the counts sum to 44. Managed in is Steering, Tools or Agents. A toolbelt is one row (five toolbelts, 13 capability frames among them), and a skill whose description line and files both arrive is one row. List controls: “Any managed in” and “Any emits here” facets, the second offering one type per option, Rows (5, 10, 25, 50, All) and a pager (“1–10 of 26”).
 
 The tab opens no dialog. Every link leaves for the page that manages the source, or for the Compiler.
 

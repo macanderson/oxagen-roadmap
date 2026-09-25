@@ -43,7 +43,7 @@ specified under Markdown import in `mockups/pages/steering.md`.
 
 | Page | Action | Opens |
 |---|---|---|
-| Agents | **New agent** | `wzOpen("agent")` |
+| Agents | **Write a new agent…** | `wzOpen("agent")` |
 | Tools | **New tool** | `wzOpen("tool")` |
 | Steering › Sources | **New source**, then **Write one** on the Steering record card | `DLG_EXT.newsrc`, then `wzOpen("record")` |
 | Steering › Sources | **New source**, then **Add one** on the Skill card | `DLG_EXT.newsrc`, then `wzOpen("skill")` |
@@ -53,9 +53,10 @@ Skills are a kind of Steering Source, not a page of their own. Sources lists eve
 with a kind filter (`mockups/pages/steering.md`). The New source chooser also registers a document
 and defines a glossary term, which are dialogs of their own and not wizards of this spec.
 
-**New agent** is not **Register an agent**. Register wraps an agent that already runs on a machine
-or in CI; New agent writes one that does not exist yet. Both end on a pull request; they start from
-opposite ends.
+**Write a new agent…** is not **Register agent**. Register wraps an agent that already runs on a
+machine or in CI; Write a new agent… writes one that does not exist yet. Both end on a pull request;
+they start from opposite ends. The wizard's first step points the other way in one line: “To wrap an
+agent that already runs, register it instead.”, where register links to the Register agent gate.
 
 ## 2. The wizard shell
 
