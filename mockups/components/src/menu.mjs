@@ -121,9 +121,9 @@ export default {
   ],
   helpers: [
     ["userMenu()", "engine.js:1714", "The account menu: header, four settings items, a divider, theme and sign-out."],
-    ["dispatchMenu(ids)", "engine.js:15182", "The send-to menu shell: header, search field, and `dspList()`."],
-    ["dspList()", "engine.js:15173", "Filters agents you operate and published workflows by the search text and renders both groups."],
-    ["mentListHtml()", "engine.js:15738", "The @-mention list while typing a work item prompt, a listbox rather than a menu (see Findings)."],
+    ["dispatchMenu(ids)", "engine.js:15193", "The send-to menu shell: header, search field, and `dspList()`."],
+    ["dspList()", "engine.js:15184", "Filters agents you operate and published workflows by the search text and renders both groups."],
+    ["mentListHtml()", "engine.js:15749", "The @-mention list while typing a work item prompt, a listbox rather than a menu (see Findings)."],
   ],
   sourceNotes: [
     "A document-level click handler (engine.js 13936) closes the open layer on any click outside `.rel`, shared by the account and dispatch menus.",

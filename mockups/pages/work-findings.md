@@ -24,7 +24,7 @@ Recorded problems with money behind them, and the evidence for each: a cache wri
 
 | Tile | Value on the demo record | Caption |
 |---|---|---|
-| At stake | $30,682.11 | “7.0% of $439,498.34 this month” |
+| At stake | $30,682.11 | “7.0% of $439,705.21 this month” |
 | Findings | 37 | “36 open · 1 in work” |
 | Evidence | every one | “opens to the runs it cites” |
 | Basis | measured | “measured cost minus the estimated cost without the issue, at the price each call paid” |

@@ -26,7 +26,7 @@ Say what this workspace's month cost and where the money went. One table groups 
 
 | Tile | Number | Line beneath |
 |---|---|---|
-| Organization spend | $439,498.34 | Observed by gateway + Reported by harness · USD |
+| Organization spend | $439,705.21 | Observed by gateway + Reported by harness · USD |
 | Tokens | 20,503,823,758 | 80% served from cache |
 | Observed by the gateway | 92% | of tokens counted by the proxy |
 | Unproductive spend | $85,768.79, in the critical ink | 20% of spend · Optimization |
@@ -35,7 +35,7 @@ The Unproductive spend tile opens Optimization. Its share is computed from the u
 
 **Tabs**: Overview · Budgets (4) · Optimization. Each is a path segment: `/spend`, `/spend/budgets`, `/spend/optimization`. Changing the tab drops the grouping and the key.
 
-**September by day.** A panel with the caption "From the daily rollup, rebuilt from frames. Weekends run lighter." and, at its right, "$439,498.34 to date". One bar per day from 1 to 11 September, in one image (`role="img"`, labeled "Spend by day, 1 to 11 September"). Each bar's tooltip reads "Sep <day> · <amount>". The axis reads Sep 1, Sep 6 and Sep 11.
+**September by day.** A panel with the caption "From the daily rollup, rebuilt from frames. Weekends run lighter." and, at its right, "$439,705.21 to date". One bar per day from 1 to 11 September, in one image (`role="img"`, labeled "Spend by day, 1 to 11 September"). Each bar's tooltip reads "Sep <day> · <amount>". The axis reads Sep 1, Sep 6 and Sep 11.
 
 **Group by.** A segmented control (`role="group"`, labelled "Group by") with the caption "Group by" and six buttons, the current one `aria-pressed`: Work order · Operator · Agent · Model · Tool · Cost center. A button writes `?by=` and closes any open side panel.
 

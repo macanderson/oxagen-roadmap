@@ -30,10 +30,10 @@ Agents replaces the population half of the Fleet page (D3). Runs are listed unde
 |---|---|---|---|
 | Live runs | Live runs in this workspace, counted by `wsRunCounts()`: each run's own status, plus a workflow stage run that only its work order records. The same count Work uses | “6 parked on a person · 68 agents registered”. The parked clause appears only when a run is parked; the agent count is every agent registered in the workspace | Work › Work orders (`#/a-intel/core-platform/work/orders`) |
 | Waiting on you | Pending approvals whose run is in this workspace, or that name no run, plus open questions from agents | “<N> approvals in the drawer”, singular at one, then “· 1 question from an agent” while a question is open | The Approvals drawer |
-| Spend against budget | The workspace budget's used share, as a percent | “$95,603.33 of $122,000.00 · hard · monthly”: used, limit, mode and period. With no workspace budget the number is a dash and the caption is “no workspace budget set” | Spend › Budgets |
-| Delegations held | Active mandates held by agents in this workspace | The holders' slugs joined with commas (FinOps: “invoice-bot, cost-reporter, ledger-reconciler”), or “no agent here holds a mandate” | Nothing. Each holder's mandates are on its Permissions tab |
+| Spend against budget | The workspace budget's used share, as a percent | “$95,810.20 of $122,000.00 · hard · monthly”: used, limit, mode and period. With no workspace budget the number is a dash and the caption is “no workspace budget set” | Spend › Budgets |
+| Delegations held | Active mandates held by agents in this workspace | The holders' slugs joined with commas (FinOps: “invoice-bot, savings-planner, ledger-reconciler”), or “no agent here holds a mandate” | Nothing. Each holder's mandates are on its Permissions tab |
 
-On the demo record the tiles read 9, 7, 78% and 0.
+On the demo record the tiles read 9, 8, 79% and 0.
 
 **Registered in Core platform** panel. The heading names the workspace. The subtext follows the column set: “Each row names the reusable objects this agent holds a reference to.” on Composition, and “Each row is what this agent did and what it cost over the last 30 days.” on Operations. The panel header carries, on the right:
 

@@ -155,8 +155,8 @@ export default {
     ["finBadge(f)", "engine.js:683", "A financial class as a critical label, or a dim none."],
     ["originBadge(o)", "engine.js:686", "Where a tool schema came from: observed, or observed and approved."],
     ["stBadge(m)", "engine.js:6920", "A dot badge from a status map. 13 calls."],
-    ["tStatusBadge(k)", "engine.js:14865", "A work item's status."],
-    ["readyBadge(t)", "engine.js:14879", "A work item's readiness."],
+    ["tStatusBadge(k)", "engine.js:14876", "A work item's status."],
+    ["readyBadge(t)", "engine.js:14890", "A work item's readiness."],
     ["permChips(perms, max)", "engine.js:10060", "Permissions as mono neutral badges with `SEP` between them."],
   ],
   sourceNotes: [

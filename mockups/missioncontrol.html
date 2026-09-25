@@ -15774,7 +15774,7 @@ function crecPanel(rec){
     var forb=rec.ce==="forbid";
     return head+
      '<div class="crec-bound '+(forb?"forbid":"require")+'"><span class="w">'+h(rec.ce||"forbid")+'</span>'+
-      '<span class="d">'+(forb?(rec.grant?"This record carries an enforcement grant, so it compiles to text and to a gate. A call routed through oxagen that crosses this boundary is denied before it is dispatched, with this record cited as the reason. The gate and its notice are on Steering, under Policy."
+      '<span class="d">'+(forb?(rec.grant?"This record carries an enforcement grant, so it compiles to text and to a gate. A call routed through oxagen that crosses this boundary is denied before it is dispatched, with this record cited as the reason. The gate is on Tools › Policy, and its notice is on Steering › Sources."
                                        :"This record carries no enforcement grant, so it compiles to text. The agent reads the boundary in its stable prefix. Nothing refuses a call because of it until a grant compiles a gate.")
                               :"A run that has not done this cannot proceed past the point that needs it. The check is on the run, not on the call.")+'</span></div>'+
      deliver+
@@ -17200,11 +17200,22 @@ S.tsel={}; S.dodEdit={}; S.tkDrafting={}; S.wo=null; S.ipz=null; S.wfz=null; S.d
       digest:"sha256:"+["4b1e","9a07","c2d5","e6f3"][i]+"0d7a1c5e93b2",commit:"a4c91e2",budget:"2.00",budgetUsed:0.28,
       desc:x.desc,avatar:{kind:"icon",icon:x.icon,tone:x.tone},mandates:[],incidents:0,model:"complex",host:x.host,
       enrolled:true,principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCN"+["K","M","P","Q"][i],devKey:"ed25519:"+["5d31…a0c4","b812…6e27","0f9e…d153","c47a…29b8"][i]});
-    /* Spend by agent was built before these four joined, so each joins it here and the list counts every agent. */
-    if(SPEND.byAgent) SPEND.byAgent.push({k:x.key,runs:x.runs30,spend:x.spend30,trend:["+4%","−2%","+9%","−6%"][i]});
+    /* Spend was totaled before these four joined, so each joins Spend by agent and the month's total here,
+       and the rollups by agent, by cost center and in total still agree to the cent. */
+    if(SPEND.byAgent){
+      SPEND.byAgent.push({k:x.key,runs:x.runs30,spend:x.spend30,trend:["+4%","−2%","+9%","−6%"][i]});
+      SPEND.spend=fmt2(Math.round((money(SPEND.spend)+money(x.spend30))*100)/100); SPEND.runs+=x.runs30;
+    }
   });
   WS.forEach(function(w){if(w.slug==="core-platform")w.agents+=TK.agents.length;});
   ORG.agents=AGENTS.length;
+  /* The monthly budgets read the month's spend, so they take the four agents' spend too. */
+  var added=TK.agents.reduce(function(t,x){return t+money(x.spend30);},0);
+  (SPEND.budgets||[]).forEach(function(b){
+    if(b.period!=="monthly")return;
+    if(b.scope==="organization \u00b7 "+ORG.slug) b.used=fmt2(spendMonthTotal());
+    if(b.scope==="workspace \u00b7 core-platform") b.used=fmt2(Math.round((money(b.used)+added)*100)/100);
+  });
 })();
 
 /* Kill-switch blast radius. Counted here, after the last agent is added, so a switch's agent count
