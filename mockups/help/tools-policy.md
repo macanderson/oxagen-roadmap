@@ -55,7 +55,7 @@ The gateway reads the version on every tool call, before the call leaves. No mod
 
 Each call writes one `policy.decision` frame naming the version and the rules that fired. The Decision trace reads that decision back without re-running it (D8).
 
-Each row on the page used to carry these explanations. The rows now carry the fact, and the explanations moved here.
+The shipped app draws this panel as the same five terms (`apps/app/src/features/tools/policy.tsx`, `WhereAVersionLives`), so it is app UI and stays. Each row on the page used to carry these explanations. The rows now carry the fact, and the explanations moved here.
 
 ### Data sources
 | Field | Mockup source | Target store | Status |
@@ -77,7 +77,7 @@ The 18 facts a policy rule can read from a call and the record.
 It answers "can a rule express what I need". Read it before you draft a version.
 
 ### Rationale
-Every condition comes from the call and the record, none from prose (§6.12). The list runs from the tool version and its classification (risk, side effect, egress, financial class), through argument values by path (amount, counterparty, repository, path prefix, recipient domain), to taint and its sources, time window, rate, sequence, operator role, enforcement tier, and budget and mandate position. Category is absent on purpose: it is a registry attribute and decides nothing.
+Every condition comes from the call and the record, none from prose (§6.12). The list runs from the tool version and its classification (risk, side effect, egress, financial class), through argument values by path (amount, counterparty, repository, path prefix, recipient domain), to taint and its sources, time window, rate, sequence, operator role, enforcement tier, and budget and mandate position. Category is absent on purpose: it is a registry attribute and decides nothing. The shipped app draws the same 18 chips under the same eyebrow (`Conditions` in `apps/app/src/features/tools/policy.tsx`).
 
 ### Data sources
 | Field | Mockup source | Target store | Status |
@@ -98,7 +98,7 @@ One example rule, glossed in a plain sentence above its source.
 It shows what a rule looks like: the call it governs, then the condition that lets it through. This one denies a payment unless the same run already priced it.
 
 ### Rationale
-A sequence rule is the kind of rule people least expect a policy to express, and the one that stops a class of mistakes: paying before quoting. The page names no policy language, and a plain sentence above the source says what the rule denies and what lets it through, so a reader who does not know the syntax still knows the effect. The sentence "A rule names the call it governs, then the condition that lets it through." moved here.
+A sequence rule is the kind of rule people least expect a policy to express, and the one that stops a class of mistakes: paying before quoting. The page names no policy language, and a plain sentence above the source says what the rule denies and what lets it through, so a reader who does not know the syntax still knows the effect. The shipped app draws the same example (`SequenceRule` in `apps/app/src/features/tools/policy.tsx`). The sentence "A rule names the call it governs, then the condition that lets it through." moved here.
 
 ### Data sources
 | Field | Mockup source | Target store | Status |
