@@ -34,7 +34,7 @@ A version is Cedar source. A rule is a `permit` or a `forbid` over the agent, th
 - **Editor** (`data-help="editor"`): the shared source editor on `<version>.cedar`, with line numbers, find, the modified dot and the status bar, which names Cedar. On an active or superseded version it is read-only and says so.
 - **Problems** panel, under the editor. One row per problem, sorted by line, each with a **Line n** button: "A rule starts with permit or forbid. This one starts with advice.", "context.tool.side_efect is not in the schema.", "This rule has no @id, so no test or decision can name it.", "Two rules use @id(\"rg_0093\").", "This { is never closed.", "This rule has no closing ;.". With none: "No problems."
 
-**Tests tab.** A **Tests** panel. The header carries the run badge ("44 / 44 pass", a failed badge "43 / 44 pass", or "not run yet"), **Add test** (plain, `policytest`) on a draft, and **Run tests** (plain). Columns in order: Call · Agent · Facts · Expected · Result · Decided by.
+**Tests tab.** A **Tests** panel. The header carries the run badge ("44 / 44 pass", a failed badge "43 / 44 pass", or "not run yet"), **Add test** (plain, `policytest`) on a draft, and **Run tests** (plain). List controls (`ltTable()`): "Search this list", the filters "Any expected" and "Any agent", **Rows** (10 by default) and the pager (`1–10 of 44`). Columns in order: Call · Agent · Facts · Expected · Result · Decided by.
 
 - *Call*: the tool and its version in mono (`github__create_release@2`).
 - *Agent*: the agent key in mono.
@@ -80,7 +80,7 @@ The renderer puts no `data-future` mark on this page, and the catalog gives it n
 - A test is a call and its expected decision. The result names the rule that decided it. When no rule permits a call, Cedar denies it.
 - A draft diffs against the version it was drafted from. Any other version diffs against the next older version kept here.
 - Activation (`tools-policy.md`) refuses until the draft is saved, the saved rules have no problems, and every test ran against them and passed.
-- The page's prose names no policy language. The editor names Cedar in its status bar, as every source editor names its grammar.
+- The page's prose names no policy language. Proposed in #127, for Mac to accept or reject: the editor names Cedar in its status bar, as every source editor names its grammar.
 
 ## States
 
@@ -113,6 +113,6 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Tools lit. The hea
 - Only a draft changes. A version that has decided anything is never edited.
 - The source is the truth. Nothing on the page states a count, a decision or a change that the source does not hold.
 - A test result is shown only for the text it ran against. A pass is never shown for rules it did not test.
-- Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. The page's prose names no policy language. The editor's status bar names Cedar.
+- Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. The page's prose names no policy language. Whether the editor's status bar names Cedar is proposed in #127.
 - Exactly one gold action per screen: Activate on a draft, Draft new version on the active version, Restore on a superseded one.
 - A not-loaded state replaces the page body and keeps the shell.

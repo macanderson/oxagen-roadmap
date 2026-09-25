@@ -128,7 +128,7 @@ It answers "what exactly does this version say", and on a draft it is where you 
 
 ### Rationale
 
-The rules are Cedar. Tool policy is written in Cedar because its evaluator is formally verified and its policies can be analysed, so a question such as "could any agent ever delete a repository" has an answer from the text (`docs/mission-control-spec.md` §6.12, ADR 0004). The editor names the grammar in its status bar as it names TOML on an agent's source, because a person writing a rule needs to know which language to look up. The rest of the page names no policy language.
+The rules are Cedar. Tool policy is written in Cedar because its evaluator is formally verified and its policies can be analysed, so a question such as "could any agent ever delete a repository" has an answer from the text (`docs/mission-control-spec.md` §6.12, ADR 0004). Proposed in #127, for Mac to accept or reject: the editor names the grammar in its status bar as it names TOML on an agent's source, because a person writing a rule needs to know which language to look up. The rest of the page names no policy language.
 
 A rule is a `permit` or a `forbid` over the principal (the agent), the action (the tool) and the resource, with `when` and `unless` conditions over the call's context. `@id` names the rule. Cedar has no third effect, so a rule that parks a call for a person is a `forbid` with `@decision("require_approval")` that lifts once `context.approval.granted` holds. Every condition comes from the call and the record, never from prose.
 
@@ -162,7 +162,7 @@ It answers "will this compile" while you type, before you save or run a test.
 
 ### Rationale
 
-A draft with problems saves, because a draft is work in progress. It does not activate: the activation dialog refuses while the saved rules have a problem. The editor checks what it can see without the schema service: an effect other than `permit` or `forbid`, a bracket left open or closed twice, a string never closed, a rule with no `;`, a rule with no `@id` or a repeated one, a `@decision` other than `require_approval` on a `forbid`, and a `context` path the schema does not hold. The full validation against the Cedar schema runs on save in the product.
+A draft with problems saves, because a draft is work in progress. It does not activate: the activation dialog refuses while the saved rules have a problem. The editor checks what it can see without the schema service: an effect other than `permit` or `forbid`, a bracket left open or closed twice, a string never closed, a rule with no `;`, a rule with no `@id` or a repeated one, a `@decision` other than `require_approval` on a `forbid`, and a `context` path the schema does not hold.
 
 ### Data sources
 

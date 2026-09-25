@@ -92,7 +92,7 @@ The renderer puts no `data-future` mark on this tab, and the catalog gives it no
 - A version compiles from the rules written here, the enforcement grants on each agent and the role grants on each operator. A grant is never restated as a rule.
 - The Tests badge reads as a pass only when the tests ran against the saved rules. A fresh draft, or a draft whose rules changed since the last run, reads "not run yet".
 - A policy version is not a Steering record and never reaches a model. What reaches the model is each gate's notice: one `constraint` SteeringFrame per gate, force `must`, delivered in the session start prefix and never cut for budget. A frame a gate disagrees with is excluded as `overridden_by_gate`, and the gate's notice is delivered instead. The notice names the gate that enforces it.
-- The Policy tab names no policy language. Where rule source is shown, a plain sentence above it says what the rule denies and what lets it through. The rules are Cedar, and the version page's editor names Cedar in its status bar, as every source editor names its grammar.
+- The Policy tab names no policy language. Where rule source is shown, a plain sentence above it says what the rule denies and what lets it through. The rules are Cedar. Proposed in #127: the version page's editor names Cedar in its status bar, as every source editor names its grammar.
 - Every write is a governed action recorded in Audit.
 
 ## States

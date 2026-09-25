@@ -5561,7 +5561,8 @@ function polJump(v,line){
 /* After render: a ?rule= address or a jump asked for from another tab lands the caret on that rule. */
 function polMount(r){
   var j=S.polJump; if(j==null||(r.tab||"rules")!=="rules") return;
-  S.polJump=null;
+  /* the query is dropped below, so the same ?rule= link can jump again */
+  S.polJump=null; S.polJumpFor=null;
   if(typeof j==="string"){
     var hit=null; polParse(cedText(polKey(r.id))).rules.forEach(function(x){if(x.id===j)hit=x;});
     try{history.replaceState(null,"",polUrl(r.id));}catch(e){}
