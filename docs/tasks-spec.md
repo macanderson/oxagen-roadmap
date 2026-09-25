@@ -23,7 +23,7 @@ the pull request and decide whether it did the job, against a standard that exis
 This spec joins them. Oxagen reads your tasks from the tracker or the help desk, drafts a definition
 of done for each one, and waits for a person to certify it. A certified task is ready. You pick ready tasks and send
 them to an agent you operate in a **work order**: one screen that merges every definition of done,
-drafts the prompt, lets you edit it and reference context records and other agents with `@`, and
+drafts the prompt, lets you edit it and reference steering records and other agents with `@`, and
 asks you to confirm the repositories the agent may change. A workflow chains agents, so a bug fixer
 hands to a validator, then a documenter, then an architect, and you accept the result.
 
@@ -43,7 +43,7 @@ what is out with which agent, and what came back.
 | A definition of done drafted by `oxagen.assistant` for every open task imported | Drafting from linked pull requests and comments |
 | Certification by a person, and readiness | Certification rules per label or per repository |
 | One or more ready tasks sent in a work order to one agent you operate | Rules that send without a person |
-| An editable prompt with `@` mentions of context records and agent profiles | `@` mentions of tasks, files and runs |
+| An editable prompt with `@` mentions of steering records and agent profiles | `@` mentions of tasks, files and runs |
 | Repository confirmation and a spend cap per work order | Per-item budgets |
 | Workflows of agents you operate, as files in `.oxagen/workflows/` | Workflows that include agents another person operates |
 | Claims by the agent and acceptance by a person | Acceptance that closes the task and merges nothing else |
@@ -509,16 +509,16 @@ checked, and the prompt is not empty.
 
 ### 9.4 Mentions
 
-Typing `@` in the prompt lists matching context records (`@ctx.release.never-merge`) and agent profiles
+Typing `@` in the prompt lists matching steering records (`@ctx.release.never-merge`) and agent profiles
 (`@a-intel.core.validator`). Enter or Tab inserts the first match, and a click inserts any. Below the
 box, **References** lists every mention the prompt holds:
 
-- A **context record** enters the brief as its statement, with its record hash and its token cost.
+- A **steering record** enters the brief as its statement, with its record hash and its token cost.
 - An **agent profile** enters as the agent's name, harness, and job. It grants that agent nothing and
   sends it nothing. Work reaches another agent only through a workflow stage.
 - A mention that resolves to nothing is flagged `not found`, and it stays text.
 
-The mention grammar in `packages/ai/src/prompts/mentions.ts` has no context-record or task type. It
+The mention grammar in `packages/ai/src/prompts/mentions.ts` has no steering-record or task type. It
 needs both (§17).
 
 ### 9.5 What sending records
@@ -665,10 +665,10 @@ The runs a work order starts are metered like any run.
 | `claim_dod_item` | mcp, agent | Agent only |
 | `hand_off_work_order`, `return_work_order` | mcp, agent | Agent only |
 | `accept_work_order`, `stop_work_order` | api, app, cli | Signed-in person only |
-| `propose_workflow` | api, app, cli | Opens the pull request, as `open_context_pr` does |
+| `propose_workflow` | api, app, cli | Opens the pull request, as `open_steering_pr` does |
 
 Existing capabilities it reuses: `suggest_connection_mappings` (field suggestions in step 4),
-`open_context_pr` (workflows), `dispatch_command` (canceling a live run on stop), `ask_assistant`
+`open_steering_pr` (workflows), `dispatch_command` (canceling a live run on stop), `ask_assistant`
 (drafting). The agent-facing tools (`get_work_order`, `claim_dod_item`, `hand_off_work_order`,
 `return_work_order`) must load in Claude Code, Codex, Cursor, and Stella (ADR-101).
 
@@ -737,7 +737,7 @@ Legend: ✅ exists · 🟡 partial · ❌ missing. Read from `macanderson/oxagen
 | The operator | Derived from `principals.parent_user_id` in `list_agents` | ✅ |
 | Starting a run from Oxagen | No capability starts a run. `dispatch_command` reaches live runs only. ARP carries a brief the operator starts. | ❌ |
 | Workflows | Removed by ADR-043 in their old form | ❌ |
-| Mentions of context records | The grammar has no context-record or task type | ❌ |
+| Mentions of steering records | The grammar has no steering-record or task type | ❌ |
 | The run's task reference | `cost.run_totals.task_ref`, with nothing recording one | 🟡 |
 
 ## 17. Decisions this needs
@@ -753,7 +753,7 @@ Each becomes an ADR before the code it governs merges.
    later compile the first.
 5. **The product words.** "Work order" and "send". ADR-113 reserves "Dispatch" as a name only the
    founder decides, so neither the UI nor a capability name uses it for this.
-6. **The mention grammar gains `context_record` and `task`.** `packages/ai/src/prompts/mentions.ts`.
+6. **The mention grammar gains `steering_record` and `task`.** `packages/ai/src/prompts/mentions.ts`.
 7. **The words of done.** A closed task's resolutions are `Done`, `Won't do`, `Duplicate`, `Canceled`,
    and `Other`, in every vertical. A provider's own words stay in its mapping (§6.3).
 8. **Oxagen creates a provider value only when a person chooses Create, and never renames or deletes
@@ -793,7 +793,7 @@ Each becomes an ADR before the code it governs merges.
 - [ ] A person certifies a definition of done, the certification records its digest and task version, and the task becomes ready.
 - [ ] A certified task that changes upstream leaves ready and shows both versions.
 - [ ] Only ready, open tasks can be selected. The send menu lists only agents the sender operates, each with its harness mark, and published workflows made of them.
-- [ ] The work order screen merges every definition of done, tags each item with its tasks, drafts an editable prompt, resolves `@` mentions of context records and agent profiles, and will not send until the repositories are confirmed.
+- [ ] The work order screen merges every definition of done, tags each item with its tasks, drafts an editable prompt, resolves `@` mentions of steering records and agent profiles, and will not send until the repositories are confirmed.
 - [ ] A work order reaches the agent's runtime by one of the paths in §9.6, and the run records it as its task reference.
 - [ ] A workflow file chains agents, hands off with quoted notes, returns within its bound, and parks for the operator when the bound is spent.
 - [ ] The agent claims items with evidence, and a person accepts them. Nothing merges without a person.

@@ -35,7 +35,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## Functionality
 
 - Polling stops when the user leaves the step or the state is not loaded.
-- On the first frame the Context PR that adds `.oxagen/agents/<slug>.toml` is opened by the smoke session.
+- On the first frame the Steering PR that adds `.oxagen/agents/<slug>.toml` is opened by the smoke session.
 
 ## States
 

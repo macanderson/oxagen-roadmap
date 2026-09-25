@@ -12,7 +12,7 @@
 
 ## Job
 
-The way in: a record becomes a proposal, a proposal becomes a pull request, a merge publishes it. This is the flow the Steering page already had, unchanged in substance. Context PRs is now a view inside this tab instead of a tab of its own.
+The way in: a record becomes a proposal, a proposal becomes a pull request, a merge publishes it. This is the flow the Steering page already had, unchanged in substance. Steering PRs is now a view inside this tab instead of a tab of its own.
 
 ## What is on the page
 
@@ -20,11 +20,11 @@ The way in: a record becomes a proposal, a proposal becomes a pull request, a me
 
 **The seven tabs, in this order:** Records (N published) · Skills (N in scope) · Memory (N) · Ontology (N) · Policy (N gates) · Proposals (N candidates plus open pull requests) · Preview. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. The hash is read on load and on `hashchange`; a tab changed by code writes the hash back with `replaceState`, so every view is a link. The bare route `#/:org/:ws/steering` is Records.
 
-Header action: **Write a context record** (gold; opens the record wizard: describe, kind, statement, checks, pull request). The header gives up the gold when the view below holds the one primary action (Open the Context PR on a proposal, Merge pull request on a pull request that passed).
+Header action: **Write a steering record** (gold; opens the record wizard: describe, kind, statement, checks, pull request). The header gives up the gold when the view below holds the one primary action (Open the Steering PR on a proposal, Merge pull request on a pull request that passed).
 
-- A two-way control under the tabs: **Candidates (N)** and **Context PRs (N)**, with the line “a record becomes a proposal, a proposal becomes a pull request, a merge publishes it”. Candidates is `/steering/proposals`; Context PRs is `/steering/proposals/prs` (`/steering/prs` still resolves).
-- **Candidates**: proposals that steer nothing until merged, each a record card with its source, its support line computed from the supporting runs, its id, its state badge, and **Review**. Review opens the proposal: rationale, the measure, the supporting runs, the drafted record file, and **Open the Context PR**.
-- **Context PRs**: Pull request · Branch · **Opened by** · State. A row is selectable; the selected pull request is shown below it. Two things open one, and the table says which: the **promoter**, out of runs it aggregated into a proposal, and **a person**, out of the record wizard. The lifecycle is the same for both.
+- A two-way control under the tabs: **Candidates (N)** and **Steering PRs (N)**, with the line “a record becomes a proposal, a proposal becomes a pull request, a merge publishes it”. Candidates is `/steering/proposals`; Steering PRs is `/steering/proposals/prs` (`/steering/prs` still resolves).
+- **Candidates**: proposals that steer nothing until merged, each a record card with its source, its support line computed from the supporting runs, its id, its state badge, and **Review**. Review opens the proposal: rationale, the measure, the supporting runs, the drafted record file, and **Open the Steering PR**.
+- **Steering PRs**: Pull request · Branch · **Opened by** · State. A row is selectable; the selected pull request is shown below it. Two things open one, and the table says which: the **promoter**, out of runs it aggregated into a proposal, and **a person**, out of the record wizard. The lifecycle is the same for both.
   - Several operator pull requests may be open at once. Each keeps its own state, its own file, and its own checks.
   - The selected PR shows the file it carries (`.oxagen/rules/<lineage>.toml`), the pull request body, the Checks list with each check's own result text computed for that record, and either **What merge will do** or, once merged, the **promotion_event**.
   - **A check can fail, and a failed check stops the run where it stopped.** Merge stays disabled and nothing is published.
@@ -46,19 +46,19 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 | Element | Mockup collection | Target store | Backing today (repo) | Status |
 |---|---|---|---|---|
-| Proposals | `PROPOSALS`, `PRP_SUPPORT`, `PRP_META` | `PROPOSES`, `PROMOTED_BY` | `agent.context_promotions`; `agent.memory_promotion.*` | 🟡 |
-| Context PRs | `CTXPR`, `S.recprs`, `OXPRS` | GitHub pull requests on the main repo | the promotions ledger; Context PR state from GitHub is a gap | 🟡 |
+| Proposals | `PROPOSALS`, `PRP_SUPPORT`, `PRP_META` | `PROPOSES`, `PROMOTED_BY` | `agent.steering_promotions`; `agent.memory_promotion.*` | 🟡 |
+| Steering PRs | `CTXPR`, `S.recprs`, `OXPRS` | GitHub pull requests on the main repo | the promotions ledger; Steering PR state from GitHub is a gap | 🟡 |
 
 ## Functionality
 
 - The tab count is candidates plus open pull requests.
-- Merging is done on GitHub through the Context PR. The page shows what merge will do and the check results.
-- A pull request opened from the record wizard lands here, on the Context PRs view, with its row selected.
+- Merging is done on GitHub through the Steering PR. The page shows what merge will do and the check results.
+- A pull request opened from the record wizard lands here, on the Steering PRs view, with its row selected.
 
 ## States
 
 - **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: the hub header and the seven tabs stay, and the tab body is “No proposals yet”. Nothing has been proposed from this workspace's runs, and no pull request is open against `.oxagen/rules/`. Action: **Write a context record**.
+- **empty**: the hub header and the seven tabs stay, and the tab body is “No proposals yet”. Nothing has been proposed from this workspace's runs, and no pull request is open against `.oxagen/rules/`. Action: **Write a steering record**.
 - **loading**: the shell stays; the page body, hub header included, is replaced by the skeleton (four tile blocks and a panel of seven rows).
 - **error**: “Steering could not be loaded”, `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied**: “You cannot see this workspace’s steering”. The roles the signed-in person holds on the organization do not include `steering.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).
@@ -70,11 +70,11 @@ The seven tabs are one scrolling strip with scroll snap, and the tab in view is 
 ## Permissions
 
 - Read: `steering.read`
-- Writes (each a governed action recorded in Audit): `context.propose (open a Context PR)`, `context.review`, `context.retire`
+- Writes (each a governed action recorded in Audit): `context.propose (open a Steering PR)`, `context.review`, `context.retire`
 
 ## Backend gaps this page depends on
 
-- Context PR state from GitHub
+- Steering PR state from GitHub
 
 ## Rules every build of this page must keep
 

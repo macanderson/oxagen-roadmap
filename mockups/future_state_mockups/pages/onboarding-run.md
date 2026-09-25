@@ -20,7 +20,7 @@ Step 3 of 3 of the gate: start a run. The operator console opens the moment the 
 Actions: **Cancel** · **Back** · **Open the installer**
 
 - **Waiting for the first frame** — the live log and the auto-open countdown (see `register-run.md`).
-- **Repository detected** — read from the git remote of the directory the installer ran in: **Bind <repo> as the main repo** (installs the GitHub App: binding, Context PRs, checks, merge handling, code graph) or **Skip for now** (the workspace stays *provisional* for N days: runs record and spend counts; steering, context records and agent definitions stay off until a main repo is bound). Bound / provisional cards afterwards.
+- **Repository detected** — read from the git remote of the directory the installer ran in: **Bind <repo> as the main repo** (installs the GitHub App: binding, Steering PRs, checks, merge handling, code graph) or **Skip for now** (the workspace stays *provisional* for N days: runs record and spend counts; steering, steering records and agent definitions stay off until a main repo is bound). Bound / provisional cards afterwards.
 
 
 **Shell.** No sidebar or top bar: the brandmark, then a centred card; the phone layout is the same card at full width.

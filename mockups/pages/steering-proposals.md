@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/core-platform/steering/proposals`. A proposal's review opens in place on the same address. The Pull requests view, `/steering/proposals/prs`, has its own spec, `steering-prs.md` |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: D4, D7 (Steering record), D13 (a memory becomes a Steering record only through a proposal); the vocabulary row Proposal; the Steering section Shipped today (proposals and their pull requests ship through `list_proposals`, `get_context_pr`, `open_context_pr` and `merge_context_pr`). `docs/fleet-operations-ia.md` (Steering, Proposals). ADR-061 in `macanderson/oxagen` |
+| Spec | `docs/fleet-operations-wedge.md`: D4, D7 (Steering record), D13 (a memory becomes a Steering record only through a proposal); the vocabulary row Proposal; the Steering section Shipped today (proposals and their pull requests ship through `list_proposals`, `get_steering_pr`, `open_steering_pr` and `merge_steering_pr`). `docs/fleet-operations-ia.md` (Steering, Proposals). ADR-061 in `macanderson/oxagen` |
 | Design | `mockups/src/wedge.js`: `stgProposalsTab`, inside `pSteering`; `mockups/src/engine.js`: `recordCard`, `prpBadge`, `prpDetail`, `prpStats`, `PRP_SUPPORT`, `PRP_META`, `DLG_EXT.ctxpr`, `ctxprOpen`, `memOpenProposal`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs`. Fixtures: `mockups/fixtures/proposals.json`, and `mockups/fixtures/memory.json` for the memory behind `prp_01K5RX1N` |
 | States | loaded |
 | Storybook | `Oxagen / Steering / Proposals`: Loaded, and Loaded · mobile |
@@ -46,7 +46,7 @@ A proposal argues from runs, and a person decides whether that is enough. There 
 | PREFERENCE, may | candidate | "Campaign briefs are a table of channel, audience, budget and owner." | post-run review · 14 runs | "9 briefs rewritten by hand" | `ctx.growth.brief-as-table` |
 | FACT, info | open pull request, 4 / 4 pass | "The production branch of a-intel/mobile is release, not main." | post-run review · run_01K5RMYJ6V9CRJM9 | "4 runs targeted main" | `ctx.mobile.release-branch` |
 
-The mockup's third proposal reads "open Context PR" in its state badge; the product word is "open pull request". Every Steering record pull request runs the same six checks, so a checks badge counts out of six; the fixture's "5 / 5", "7 / 7" and "4 / 4" are not a design.
+The mockup's third proposal uses an older name in its state badge; the product word is "open pull request". Every Steering record pull request runs the same six checks, so a checks badge counts out of six; the fixture's "5 / 5", "7 / 7" and "4 / 4" are not a design.
 
 **A proposal's review.** Review replaces the list with one proposal (`prp_01K5RU4A` below). **All proposals** returns to the list.
 
@@ -94,7 +94,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 
 | Element | Mockup collection | Target store or contract | Backing today in `macanderson/oxagen` | Status |
 |---|---|---|---|---|
-| The proposals | `PROPOSALS` (`fixtures/proposals.json` and six more added in `engine.js`) | `agent.context_proposals` | `list_proposals` returns id, lineage, kind, force, constraint effect, scope, statement, rationale, source, support, status, pull request and checks (`packages/oxagen/src/contracts/context.proposal.list.ts:12`, `context.steering.shared.ts:207-246`) | ✅ |
+| The proposals | `PROPOSALS` (`fixtures/proposals.json` and six more added in `engine.js`) | `agent.steering_proposals` | `list_proposals` returns id, lineage, kind, force, constraint effect, scope, statement, rationale, source, support, status, pull request and checks (`packages/oxagen/src/contracts/context.proposal.list.ts:12`, `context.steering.shared.ts:207-246`) | ✅ |
 | State badge | `PROPOSALS[].state`, `prpBadge()` | The proposal's status | `status`: proposed, pr_open, checks_running, checks_passed, checks_failed, merged or rejected (`context.steering.shared.ts:57-65`) | ✅ |
 | Checks badge | `PROPOSALS[].checks`, `S.ctxpr` | Passed of six | `checks` `{ passed, total }` (`context.steering.shared.ts:239-241`) | ✅ |
 | "from <source>" | `PROPOSALS[].from` | Who raised it | `source` (`context.proposal.create.ts:41`) | ✅ |
@@ -104,12 +104,12 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 | Promoter evidence | `PRP_META[].rationale` | The proposal's rationale | `rationale` | ✅ |
 | Supporting runs: Run | `PRP_SUPPORT[].run` | The runs the proposal cites | `support.runs` | ✅ |
 | Supporting runs: agent, date, Frame, Outcome and Record kind | `PRP_SUPPORT[]` | Each cited run's terminal status, citing frame and record | None. Evidence links may carry `frame:<run>/<seq>` refs, but no read joins a run's outcome (#3881) | ❌ |
-| Pull request panel: Target, Branch, File, Governance | `CTXPR`, `wsGov()` | The pull request the proposal opens | `get_context_pr` returns the repository, branch, path, governance mode and who may merge (`context.pr.get.ts:9`, `context.pr.open.ts:27-94`) | ✅ |
-| Open a pull request | `DLG_EXT.ctxpr`, `ctxprOpen()` | Push `context/<lineage>`, open the pull request, run the six checks | `open_context_pr` (`context.pr.open.ts:96`). It takes the proposal id only (`:113-117`); the dialog's fields restate the proposal and change nothing in it | ✅ |
-| If it publishes: Reaches and As | `PRP_META`, `stgBundle()` | Scope, force and the next steering version | The scope and force ship with the proposal; `get_context_pr` `onMerge.bundleVersion` gives the version after the merge (`context.pr.open.ts:68-80`) | ✅ |
+| Pull request panel: Target, Branch, File, Governance | `CTXPR`, `wsGov()` | The pull request the proposal opens | `get_steering_pr` returns the repository, branch, path, governance mode and who may merge (`steering.pr.get.ts:9`, `steering.pr.open.ts:27-94`) | ✅ |
+| Open a pull request | `DLG_EXT.ctxpr`, `ctxprOpen()` | Push `context/<lineage>`, open the pull request, run the six checks | `open_steering_pr` (`steering.pr.open.ts:96`). It takes the proposal id only (`:113-117`); the dialog's fields restate the proposal and change nothing in it | ✅ |
+| If it publishes: Reaches and As | `PRP_META`, `stgBundle()` | Scope, force and the next steering version | The scope and force ship with the proposal; `get_steering_pr` `onMerge.bundleVersion` gives the version after the merge (`steering.pr.open.ts:68-80`) | ✅ |
 | If it publishes: Costs and Baseline | `PRP_META[].tok`, `measure()` | Tokens a turn, before and after, and the baseline measure | None | ❌ |
 | The proposal a memory made (`prp_01K5RX1N`): one row per saying, the fold that raised it | `PROPOSALS`, `MEMORY[].sayings` and `proposedAs`, `PRP_META` | A saying per run on the memory, and the fold that raises a proposal at the setting | None. `list_memory_promotions` (`packages/oxagen/src/contracts/agent.memory_promotion.list.ts:11`) lists promotions and does not name the sayings behind one | ❌ |
-| The authors "the promoter", "findings job" and "post-run review" | `PROPOSALS[].from` | Jobs that raise proposals from runs and findings | None of the jobs is built (ADR-061). A proposal today comes from `propose_record` (`context.proposal.create.ts:12`) or an agent's `record_proposal` append (`append_record`, `context.records.append.ts:28`) | ❌ |
+| The authors "the promoter", "findings job" and "post-run review" | `PROPOSALS[].from` | Jobs that raise proposals from runs and findings | None of the jobs is built (ADR-061). A proposal today comes from `propose_record` (`context.proposal.create.ts:12`) or an agent's `record_proposal` append (`append_record`, `steering.records.append.ts:28`) | ❌ |
 
 ## Future-only fields
 
@@ -135,9 +135,9 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 
 ## Permissions
 
-- Read: the Steering read, `steering.read on core-platform` in the mockup's denied panel. `list_proposals` and `get_context_pr` allow an organization Owner or Admin and a workspace Owner, Member or Viewer.
+- Read: the Steering read, `steering.read on core-platform` in the mockup's denied panel. `list_proposals` and `get_steering_pr` allow an organization Owner or Admin and a workspace Owner, Member or Viewer.
 - Writes, each a governed action recorded in Audit:
-  - Open a pull request: `open_context_pr`, an organization Owner or Admin, or a workspace Owner or Member. An agent that calls it waits for approval.
+  - Open a pull request: `open_steering_pr`, an organization Owner or Admin, or a workspace Owner or Member. An agent that calls it waits for approval.
   - Raise a proposal: `propose_record`, the same roles.
   - Dismiss a proposal: `dismiss_proposal`, an organization Owner or Admin, or a workspace Owner. It ships, and this view has no control for it.
 
@@ -156,7 +156,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 - A Steering Source and a SteeringFrame are never shown as each other, and a frame (a recorded event) and a SteeringFrame (a resolved input) never share a name on screen.
 - Every enforcement claim states the tier. "Enforced" only for calls routed through Oxagen.
 - Headers are rollups of the rows beneath them: the Proposals count is the cards, the Pull requests count is the open pull requests, and the tiles are the supporting runs.
-- The vocabulary holds: Steering record and pull request. No "context record" and no "Context PR" in the view's copy.
+- The vocabulary holds: Steering record and pull request. No older name for either in the view's copy.
 - Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing. The Proposals panel carries no caption.
 - Exactly one gold action per screen. New source holds it in the header; while the promoter's proposal has no pull request, its review offers Open a pull request as gold too, and a build gives that screen one gold only.
 - A future-only field renders as not recorded in a build until its contract ships.

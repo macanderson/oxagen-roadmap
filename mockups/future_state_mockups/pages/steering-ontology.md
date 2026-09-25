@@ -20,7 +20,7 @@ A home for the entity and term definitions that steer. It is a small tab, not a 
 
 **The seven tabs, in this order:** Records (N published) · Skills (N in scope) · Memory (N) · Ontology (N) · Policy (N gates) · Proposals (N candidates plus open pull requests) · Preview. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. The hash is read on load and on `hashchange`; a tab changed by code writes the hash back with `replaceState`, so every view is a link. The bare route `#/:org/:ws/steering` is Records.
 
-Header action: **Write a context record** (gold; opens the record wizard: describe, kind, statement, checks, pull request).
+Header action: **Write a steering record** (gold; opens the record wizard: describe, kind, statement, checks, pull request).
 
 - A lead note: an ontology note defines one entity or one term the way this workspace uses it. It compiles to text like any other item, enters the volatile selection as `info`, and grants nothing.
 - **Entity and term definitions** table: Term (with its id) · Kind (`entity` or `term`) · Definition · Force · About (the repositories, records, or skills it is linked to) · Token cost · File (`.oxagen/ontology/<id>.toml @ <commit>`).
@@ -44,7 +44,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: the hub header and the seven tabs stay, and the tab body is “No ontology notes yet”. Notes are files under `.oxagen/ontology/` on the main repo, published by a merge. Action: **Write a context record**.
+- **empty**: the hub header and the seven tabs stay, and the tab body is “No ontology notes yet”. Notes are files under `.oxagen/ontology/` on the main repo, published by a merge. Action: **Write a steering record**.
 - **loading**: the shell stays; the page body, hub header included, is replaced by the skeleton (four tile blocks and a panel of seven rows).
 - **error**: “Steering could not be loaded”, `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied**: “You cannot see this workspace’s steering”. The roles the signed-in person holds on the organization do not include `steering.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).
@@ -56,7 +56,7 @@ The seven tabs are one scrolling strip with scroll snap, and the tab in view is 
 ## Permissions
 
 - Read: `steering.read`
-- Writes: `context.propose`, the same governed action that opens any Context PR.
+- Writes: `context.propose`, the same governed action that opens any Steering PR.
 
 ## Backend gaps this page depends on
 

@@ -741,14 +741,14 @@ Status comes from table and contract names in the repo. <strong>Batch 3 lanes mu
 <td><strong>Steering</strong> · records</td>
 <td><code>RECORDS</code></td>
 <td><code>:Record</code> + git</td>
-<td><code>agent.context_records</code>, <code>context_record_versions</code>; <code>context.record.*</code></td>
+<td><code>agent.steering_records</code>, <code>steering_record_versions</code>; <code>steering.record.*</code></td>
 <td>✅</td>
 </tr>
 <tr>
-<td>Steering · proposals, Context PRs</td>
+<td>Steering · proposals, Steering PRs</td>
 <td><code>PROPOSALS</code></td>
 <td><code>PROPOSES</code>, <code>PROMOTED_BY</code></td>
-<td><code>agent.context_promotions</code>; <code>agent.memory_promotion.*</code></td>
+<td><code>agent.steering_promotions</code>; <code>agent.memory_promotion.*</code></td>
 <td>🟡</td>
 </tr>
 <tr>
@@ -1963,7 +1963,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <tr>
 <td>P6</td>
 <td><strong>Steering</strong></td>
-<td>tabs records/proposals/prs/effect/retirement; <code>RecordKindBadge</code> (W6); Context PR dialog</td>
+<td>tabs records/proposals/prs/effect/retirement; <code>RecordKindBadge</code> (W6); Steering PR dialog</td>
 <td></td>
 </tr>
 <tr>
@@ -2037,7 +2037,7 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 <tr>
 <td>A6</td>
 <td>steering</td>
-<td><code>agent.context_records(_versions)</code>, <code>context_promotions</code></td>
+<td><code>agent.steering_records(_versions)</code>, <code>steering_promotions</code></td>
 <td>effect, retirement</td>
 </tr>
 <tr>
@@ -2099,8 +2099,8 @@ test(&quot;fleet · phone&quot;, async ({ page }) =&gt; {
 </tr>
 <tr>
 <td>Steering</td>
-<td><code>context.record.*</code>, <code>agent.memory_promotion.*</code></td>
-<td>Context PR through GitHub App (M3)</td>
+<td><code>steering.record.*</code>, <code>agent.memory_promotion.*</code></td>
+<td>Steering PR through GitHub App (M3)</td>
 </tr>
 <tr>
 <td>Spend</td>
@@ -2332,8 +2332,8 @@ stories for new components; PR body lists each §3 row you touched with its stat
 </tr>
 </tbody>
 </table></div>
-<p>The review's defects are filed on their own and are fixed by the phase named: #3302 (the <code>publish_context_record</code> path leaves <code>kind</code> and <code>force</code> NULL, Phase 1), #3303 (<code>additionalInstructions</code> is unbudgeted and never checked against a rule, Phase 1), #3304 (Codex and Stella spend is absent, Phase 4) and #3305 (the public decks describe the removed runtime, no phase).</p>
-<p><strong>What is true on <code>main</code> today.</strong> Active <code>must</code> and <code>should</code> records reach a wrapped Claude Code run through the bundle's <code>context.system</code> at <code>SessionStart</code> (Phase 0, PR #3289, ADR-091). <code>may</code> and <code>info</code> records, bundle permissions and budget (always empty, <code>budget.mode = &quot;observed&quot;</code>) and skills (inventory only) do not steer any Claude Code or Codex run. Operator steer commands are the only live text channel from the server to a running wrapped agent. The wrapped tier is a recorder plus a kill switch that tells the agent what the workspace requires. No model proxy exists and no sandbox exists. The MCP gateway is real and server-enforced, and it is registered only into Claude Desktop. Spend for Claude Code is self-reported, and Codex and Stella report none. Memory reaches only the in-app agent, capped at 6. No application imports <code>packages/engram</code> or <code>packages/context-provider</code>, though <code>tools/scripts/package.json</code> and <code>apps/app/next.config.ts</code> still name <code>@oxagen/engram</code>. The graph holds no steering. This paragraph describes <code>main</code> with Phase 0 on it, and it stays true until the Phase 4 branches merge.</p>
+<p>The review's defects are filed on their own and are fixed by the phase named: #3302 (the <code>publish_steering_record</code> path leaves <code>kind</code> and <code>force</code> NULL, Phase 1), #3303 (<code>additionalInstructions</code> is unbudgeted and never checked against a rule, Phase 1), #3304 (Codex and Stella spend is absent, Phase 4) and #3305 (the public decks describe the removed runtime, no phase).</p>
+<p><strong>What is true on <code>main</code> today.</strong> Active <code>must</code> and <code>should</code> records reach a wrapped Claude Code run through the bundle's <code>context.system</code> at <code>SessionStart</code> (Phase 0, PR #3289, ADR-091). <code>may</code> and <code>info</code> records, bundle permissions and budget (always empty, <code>budget.mode = &quot;observed&quot;</code>) and skills (inventory only) do not steer any Claude Code or Codex run. Operator steer commands are the only live text channel from the server to a running wrapped agent. The wrapped tier is a recorder plus a kill switch that tells the agent what the workspace requires. No model proxy exists and no sandbox exists. The MCP gateway is real and server-enforced, and it is registered only into Claude Desktop. Spend for Claude Code is self-reported, and Codex and Stella report none. Memory reaches only the in-app agent, capped at 6. No application imports <code>packages/engram</code> or <code>packages/steering-provider</code>, though <code>tools/scripts/package.json</code> and <code>apps/app/next.config.ts</code> still name <code>@oxagen/engram</code>. The graph holds no steering. This paragraph describes <code>main</code> with Phase 0 on it, and it stays true until the Phase 4 branches merge.</p>
 <h3 id="8-1-phase-0-make-one-record-steer-one-agent">8.1 Phase 0. Make one record steer one agent</h3>
 <div class="tw"><table>
 <thead>
@@ -2349,11 +2349,11 @@ stories for new components; PR body lists each §3 row you touched with its stat
 </tr>
 <tr>
 <td><strong>Seam</strong></td>
-<td><code>packages/handlers/src/lib/tacho-host.ts</code> (<code>unsignedBundle</code>, which took <code>context: { system: null }</code> before this phase and now takes <code>contextSystem</code> from <code>readWorkspaceSteering</code> in <code>packages/handlers/src/lib/tacho-steering.ts</code>). The records come from <code>agent.context_records</code> (<code>packages/database/src/schema/agent.ts:1303</code>) through <code>packages/handlers/src/context.steering.store.ts</code>. The wire already allows it (<code>packages/tacho/src/wire.ts:375</code>, 16 KiB), and the daemon already delivers it (<code>packages/tacho/src/collector/hook-handler.ts:322</code>). The bundle etag already covers content, and the steering version is already the promotion ledger length (<code>context.steering.store.ts:190</code>), so a merge bumps the bundle with no new plumbing.</td>
+<td><code>packages/handlers/src/lib/tacho-host.ts</code> (<code>unsignedBundle</code>, which took <code>context: { system: null }</code> before this phase and now takes <code>contextSystem</code> from <code>readWorkspaceSteering</code> in <code>packages/handlers/src/lib/tacho-steering.ts</code>). The records come from <code>agent.steering_records</code> (<code>packages/database/src/schema/agent.ts:1303</code>) through <code>packages/handlers/src/context.steering.store.ts</code>. The wire already allows it (<code>packages/tacho/src/wire.ts:375</code>, 16 KiB), and the daemon already delivers it (<code>packages/tacho/src/collector/hook-handler.ts:322</code>). The bundle etag already covers content, and the steering version is already the promotion ledger length (<code>context.steering.store.ts:190</code>), so a merge bumps the bundle with no new plumbing.</td>
 </tr>
 <tr>
 <td><strong>Done when</strong></td>
-<td>A record merged through a Context PR changes what a wrapped Claude Code run is told at <code>SessionStart</code>. The run's <code>oxagen.context_digest</code> attribute shows the new digest. A workspace with no <code>must</code> or <code>should</code> records still sends <code>null</code>. A text over 16 KiB is cut from the end (<code>should</code> before <code>must</code>) and the cut is logged.</td>
+<td>A record merged through a Steering PR changes what a wrapped Claude Code run is told at <code>SessionStart</code>. The run's <code>oxagen.context_digest</code> attribute shows the new digest. A workspace with no <code>must</code> or <code>should</code> records still sends <code>null</code>. A text over 16 KiB is cut from the end (<code>should</code> before <code>must</code>) and the cut is logged.</td>
 </tr>
 <tr>
 <td><strong>Unblocks</strong></td>
@@ -2384,15 +2384,15 @@ stories for new components; PR body lists each §3 row you touched with its stat
 <tbody>
 <tr>
 <td><strong>Scope</strong></td>
-<td><code>SteeringItem</code> and <code>assembleSteering(run, budget)</code> returning the stable prefix, the volatile selection and the manifest (spec §10.5 is the contract). Source adapters: the record registry, <code>:AgentMemory</code>, gate notices from rules and mandates, skill descriptions, and <code>promptConfig.additionalInstructions</code>. The index port with its Postgres implementation. The signed local index seam for wrapped runs (spec §10.5): the bundle gains <code>steering.items</code>, every active item in the host's scope with its id, hash, kind, force, scope, validity, body and scoring terms, compiled beside <code>context.system</code> and emitted only to a host that advertises <code>BUNDLE_FEATURE_STEERING_ITEMS</code> in <code>bundleFeatures</code>, the same gate <code>gateway_tools</code> uses today, because <code>policyBundleSchema</code> is strict and an older daemon would reject the whole bundle. A host without the feature keeps <code>context.system</code> and Phase 0's behaviour; the field becomes required once the fleet is upgraded. The assembler's pure core lives in <code>@oxagen/tacho</code>, the leaf, so <code>tacho-hook</code> builds the prefix per session at <code>SessionStart</code> from the items in scope of the session's repository binding, and ranks the volatile selection at <code>UserPromptSubmit</code> with the prompt on the machine, under a tight timeout, failing open. <code>@oxagen/context-provider</code> imports the same core and adds the adapters and the Postgres index. Precedence fixed in one place. The two publish paths collapse so every row carries <code>kind</code> and <code>force</code>. The in-app agent uses the same assembler. The <code>steering.manifest</code> frame.</td>
+<td><code>SteeringItem</code> and <code>assembleSteering(run, budget)</code> returning the stable prefix, the volatile selection and the manifest (spec §10.5 is the contract). Source adapters: the record registry, <code>:AgentMemory</code>, gate notices from rules and mandates, skill descriptions, and <code>promptConfig.additionalInstructions</code>. The index port with its Postgres implementation. The signed local index seam for wrapped runs (spec §10.5): the bundle gains <code>steering.items</code>, every active item in the host's scope with its id, hash, kind, force, scope, validity, body and scoring terms, compiled beside <code>context.system</code> and emitted only to a host that advertises <code>BUNDLE_FEATURE_STEERING_ITEMS</code> in <code>bundleFeatures</code>, the same gate <code>gateway_tools</code> uses today, because <code>policyBundleSchema</code> is strict and an older daemon would reject the whole bundle. A host without the feature keeps <code>context.system</code> and Phase 0's behaviour; the field becomes required once the fleet is upgraded. The assembler's pure core lives in <code>@oxagen/tacho</code>, the leaf, so <code>tacho-hook</code> builds the prefix per session at <code>SessionStart</code> from the items in scope of the session's repository binding, and ranks the volatile selection at <code>UserPromptSubmit</code> with the prompt on the machine, under a tight timeout, failing open. <code>@oxagen/steering-provider</code> imports the same core and adds the adapters and the Postgres index. Precedence fixed in one place. The two publish paths collapse so every row carries <code>kind</code> and <code>force</code>. The in-app agent uses the same assembler. The <code>steering.manifest</code> frame.</td>
 </tr>
 <tr>
 <td><strong>Seam</strong></td>
-<td><code>packages/context-provider</code> becomes the assembler's home and reuses <code>packWithinBudget</code> (<code>packages/context-provider/src/budget.ts:37</code>). <code>packages/engram</code> is deleted or folded in. Deleting it needs an ADR that names the files (the de-registered rule in <code>CLAUDE.md</code>), so folding is the default. No application imports it, and <code>tools/scripts/package.json</code> and <code>apps/app/next.config.ts</code> still name it, so either path edits both. <code>packages/tacho/src/collector/hook-handler.ts:383</code> (<code>UserPromptSubmit</code>). <code>packages/tacho/src/wire.ts</code> (the bundle schema gains <code>steering.items</code>) and <code>packages/handlers/src/lib/tacho-host.ts</code> (compiles them). A new <code>packages/tacho/src/steering/</code> for the pure core, which keeps the leaf constraint because it imports nothing from <code>@oxagen/*</code>. <code>packages/handlers/src/context.record.publish.ts</code> and <code>packages/handlers/src/context.pr.merge.ts</code> (the two publish paths). <code>packages/agent/src/runtime/assistant-turn.ts</code> and <code>assistant-recall.ts:23</code> (<code>RECALL_LIMIT = 6</code>), and <code>packages/ai/src/prompts/registry.ts:82</code> (the unconditional append of additional instructions). Phase 0's compile step moves behind the assembler's prefix. Amended 2026-09-22 by ADR-144: the assembler lives in <code>packages/steering-assembler</code>, and <code>packages/context-provider</code> and <code>packages/engram</code> are deleted.</td>
+<td><code>packages/steering-provider</code> becomes the assembler's home and reuses <code>packWithinBudget</code> (<code>packages/steering-provider/src/budget.ts:37</code>). <code>packages/engram</code> is deleted or folded in. Deleting it needs an ADR that names the files (the de-registered rule in <code>CLAUDE.md</code>), so folding is the default. No application imports it, and <code>tools/scripts/package.json</code> and <code>apps/app/next.config.ts</code> still name it, so either path edits both. <code>packages/tacho/src/collector/hook-handler.ts:383</code> (<code>UserPromptSubmit</code>). <code>packages/tacho/src/wire.ts</code> (the bundle schema gains <code>steering.items</code>) and <code>packages/handlers/src/lib/tacho-host.ts</code> (compiles them). A new <code>packages/tacho/src/steering/</code> for the pure core, which keeps the leaf constraint because it imports nothing from <code>@oxagen/*</code>. <code>packages/handlers/src/steering.record.publish.ts</code> and <code>packages/handlers/src/steering.pr.merge.ts</code> (the two publish paths). <code>packages/agent/src/runtime/assistant-turn.ts</code> and <code>assistant-recall.ts:23</code> (<code>RECALL_LIMIT = 6</code>), and <code>packages/ai/src/prompts/registry.ts:82</code> (the unconditional append of additional instructions). Phase 0's compile step moves behind the assembler's prefix. Amended 2026-09-22 by ADR-144: the assembler lives in <code>packages/steering-assembler</code>, and <code>packages/steering-provider</code> and <code>packages/engram</code> are deleted.</td>
 </tr>
 <tr>
 <td><strong>Done when</strong></td>
-<td>Every run that reached an injection point carries a <code>steering.manifest</code> frame listing what was rendered and what was cut, with a reason each. One function produces what the wrapped agent and the in-app agent are told. Two sessions on one host in two repositories each receive their own repository-scoped <code>must</code>. A <code>UserPromptSubmit</code> on a wrapped run ranks with the prompt on the machine, no request from <code>tacho-hook</code> to Oxagen's servers carries the prompt, and a rig proves it. A daemon built before <code>steering.items</code> still parses every bundle the control plane signs for it, and an enrollment test with a host that advertises only <code>gateway_tools</code> proves it. A slow or failing assembler never holds a prompt: the hook answers <code>{}</code> and the manifest says <code>fail_open</code>. A recalled memory is never rendered as a rule. No <code>agent.context_records</code> row has a null <code>kind</code> or <code>force</code>.</td>
+<td>Every run that reached an injection point carries a <code>steering.manifest</code> frame listing what was rendered and what was cut, with a reason each. One function produces what the wrapped agent and the in-app agent are told. Two sessions on one host in two repositories each receive their own repository-scoped <code>must</code>. A <code>UserPromptSubmit</code> on a wrapped run ranks with the prompt on the machine, no request from <code>tacho-hook</code> to Oxagen's servers carries the prompt, and a rig proves it. A daemon built before <code>steering.items</code> still parses every bundle the control plane signs for it, and an enrollment test with a host that advertises only <code>gateway_tools</code> proves it. A slow or failing assembler never holds a prompt: the hook answers <code>{}</code> and the manifest says <code>fail_open</code>. A recalled memory is never rendered as a rule. No <code>agent.steering_records</code> row has a null <code>kind</code> or <code>force</code>.</td>
 </tr>
 <tr>
 <td><strong>Unblocks</strong></td>
@@ -2597,7 +2597,7 @@ stories for new components; PR body lists each §3 row you touched with its stat
 </tr>
 <tr>
 <td>Milestone <strong>M3</strong> (steering delivery)</td>
-<td>Phase 0 and Phase 1 deliver it. The rest of M3 (records endpoint, reflector, promoter, Context PRs) is unchanged</td>
+<td>Phase 0 and Phase 1 deliver it. The rest of M3 (records endpoint, reflector, promoter, Steering PRs) is unchanged</td>
 <td>M3's acceptance test ends &quot;merging it changes the next run's context&quot;. That half was never true</td>
 </tr>
 <tr>
@@ -2611,7 +2611,7 @@ stories for new components; PR body lists each §3 row you touched with its stat
 <td>The witness runner is built on the Phase 5 launcher</td>
 </tr>
 <tr>
-<td>Lanes <strong>P5</strong> and <strong>A5</strong> (Steering page and adapter: records, proposals, Context PRs)</td>
+<td>Lanes <strong>P5</strong> and <strong>A5</strong> (Steering page and adapter: records, proposals, Steering PRs)</td>
 <td>They stand as built. Phase 2 extends the same route to seven tabs</td>
 <td>One screen</td>
 </tr>

@@ -191,7 +191,7 @@ p{margin:0 0 10px;color:var(--body)}
 .b-critical{color:var(--st-critical);border-color:color-mix(in srgb,var(--st-critical) 42%,transparent);background:color-mix(in srgb,var(--st-critical) 12%,transparent)}
 .b-q{color:var(--muted);border-color:var(--border);background:var(--hl)}
 .b-tier{font-family:var(--mono);font-size:10.5px;font-weight:500;text-transform:lowercase}
-/* Context records. The statement is the record; kind is the second thing you see.
+/* Steering records. The statement is the record; kind is the second thing you see.
    Structural rule: an icon badge is a KIND, a dot badge is a STATE. Kind hues never reuse a state hue and never use gold. */
 .k-rule{--kc:var(--k-rule)} .k-constraint{--kc:var(--k-constraint)} .k-procedure{--kc:var(--k-procedure)}
 .k-fact{--kc:var(--k-fact)} .k-memory{--kc:var(--k-memory)} .k-preference{--kc:var(--k-preference)}
@@ -1809,7 +1809,7 @@ tr.dod-fail td{background:color-mix(in srgb,var(--st-failed) 6%,transparent)}
 .sx-stat.held .sv{color:var(--sk-held)}
 
 /* ---------- creating things: the wizard, and the surfaces it drafts into ----------
-   One shape for an agent, a tool, a skill and a context record, because all four are a file in a
+   One shape for an agent, a tool, a skill and a steering record, because all four are a file in a
    repository. Nothing here paints a colour that is not a house token, and gold stays identity:
    the step you are on, and the one primary button that opens the pull request. */
 .lnk{background:none;border:0;padding:0;font:inherit;color:var(--accent-text);text-decoration:underline;text-underline-offset:2px}
@@ -1939,7 +1939,7 @@ button.wz-opt:hover{border-color:var(--rule)}
 .ced.wrap .ed-gut{white-space:normal}
 .ced.wrap .ed-gut>div{min-height:var(--ed-lh);line-height:var(--ed-lh)}
 
-/* ---------- one context record ---------- */
+/* ---------- one steering record ---------- */
 .crec-h .crec-hl{display:flex;gap:12px;align-items:flex-start}
 .crec-h .crec-hl .kt{flex:none;width:36px;height:36px;border-radius:9px;display:grid;place-items:center;color:var(--kc);background:color-mix(in srgb,var(--kc) 14%,transparent);border:1px solid color-mix(in srgb,var(--kc) 32%,transparent);margin-top:2px}
 .crec-h .crec-hl .kt svg{width:18px;height:18px}
@@ -2164,7 +2164,7 @@ body.asst-resizing{cursor:ew-resize;user-select:none}
 .ed-scroll,.ed-gut{background:var(--panel)}
 .ed-bar,.ed-status{background:var(--panel-h)}
 
-/* v3: the CI status light on Context PRs */
+/* v3: the CI status light on Steering PRs */
 .ci{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:var(--muted);white-space:nowrap}
 .ci-l{width:10px;height:10px;border-radius:50%;background:var(--rule);flex:none;display:inline-grid;place-items:center;position:relative}
 .ci-l.queued{background:var(--rule)}

@@ -62,7 +62,7 @@ depended on proof: it is what the frames show bought nothing, so it stays with o
 - The workspace governance mode (`solo`, `team`, `regulated`) is a setting: a chip on the Steering
   header opens a dialog that shows the three modes and the `governance.toml` it would write, the
   Edit workspace dialog carries the same select, and the Organization workspaces table reads it
-  off the workspace. Changing it opens a Context PR; nothing else writes that file.
+  off the workspace. Changing it opens a Steering PR; nothing else writes that file.
 
 - The Run page leads with the generated summary, then one row of stat boxes (Tokens, Prompts,
   Cost, Wasted, Wall clock, Cache hit), then the tabs (Transcript open by default, Issues, Governed

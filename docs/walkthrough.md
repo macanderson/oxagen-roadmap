@@ -270,7 +270,7 @@ Scenario: `learned-approved-changed` starts on Sources ([W6](../mockups/missionc
 
 A source page shows the file or record, its versions, the frames it emits with their types and hashes, its assignments, the runs that received its frames, and its pull requests. Editing it opens a pull request.
 
-**Sources** · Prompt: [steering-source.audit-prompt.md](../mockups/pages/steering-source.audit-prompt.md), [W6 prompt](demo-mockup-prompts.md#w6-it-learned-you-approved-it-changed) · Spec: [Steering](fleet-operations-wedge.md#steering), [§10.3 Context PR lifecycle](mission-control-spec.md#103-context-pr-lifecycle) · Plan: [Batch 2, lane P5](implementation-plan.md#batch-2-pages-on-fixtures-10-lanes-in-parallel) · Page: [Steering source](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/steering/sources/record/ctx.release.notes-format) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/steering/sources/record/ctx.release.notes-format)), [steering-source.md](../mockups/pages/steering-source.md)
+**Sources** · Prompt: [steering-source.audit-prompt.md](../mockups/pages/steering-source.audit-prompt.md), [W6 prompt](demo-mockup-prompts.md#w6-it-learned-you-approved-it-changed) · Spec: [Steering](fleet-operations-wedge.md#steering), [§10.3 Steering PR lifecycle](mission-control-spec.md#103-steering-pr-lifecycle) · Plan: [Batch 2, lane P5](implementation-plan.md#batch-2-pages-on-fixtures-10-lanes-in-parallel) · Page: [Steering source](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/steering/sources/record/ctx.release.notes-format) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/steering/sources/record/ctx.release.notes-format)), [steering-source.md](../mockups/pages/steering-source.md)
 
 #### A skill
 
@@ -294,13 +294,13 @@ The Compiler takes an agent and a brief and shows the envelope the assembler wou
 
 Proposals are candidates from memory, findings, steers and people, each with its support. Accepting one opens a Steering record pull request.
 
-**Sources** · Prompt: [steering-proposals.audit-prompt.md](../mockups/pages/steering-proposals.audit-prompt.md), [W6 prompt](demo-mockup-prompts.md#w6-it-learned-you-approved-it-changed) · Spec: [§10.3 Context PR lifecycle](mission-control-spec.md#103-context-pr-lifecycle) · Plan: [Batch 2, lane P5](implementation-plan.md#batch-2-pages-on-fixtures-10-lanes-in-parallel) · Page: [Steering · Proposals](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/steering/proposals) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/steering/proposals)), [steering-proposals.md](../mockups/pages/steering-proposals.md)
+**Sources** · Prompt: [steering-proposals.audit-prompt.md](../mockups/pages/steering-proposals.audit-prompt.md), [W6 prompt](demo-mockup-prompts.md#w6-it-learned-you-approved-it-changed) · Spec: [§10.3 Steering PR lifecycle](mission-control-spec.md#103-steering-pr-lifecycle) · Plan: [Batch 2, lane P5](implementation-plan.md#batch-2-pages-on-fixtures-10-lanes-in-parallel) · Page: [Steering · Proposals](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/steering/proposals) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/steering/proposals)), [steering-proposals.md](../mockups/pages/steering-proposals.md)
 
 #### Pull requests
 
 Open Steering record pull requests with their six checks. Merge is on when every check passed, and the merge is the publication.
 
-**Sources** · Prompt: [steering-prs.audit-prompt.md](../mockups/pages/steering-prs.audit-prompt.md), [W6 prompt](demo-mockup-prompts.md#w6-it-learned-you-approved-it-changed) · Spec: [§10.3 Context PR lifecycle](mission-control-spec.md#103-context-pr-lifecycle) · Plan: [Batch 2, lane P5](implementation-plan.md#batch-2-pages-on-fixtures-10-lanes-in-parallel) · Page: [Steering · Pull requests](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/steering/proposals/prs) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/steering/proposals/prs)), [steering-prs.md](../mockups/pages/steering-prs.md)
+**Sources** · Prompt: [steering-prs.audit-prompt.md](../mockups/pages/steering-prs.audit-prompt.md), [W6 prompt](demo-mockup-prompts.md#w6-it-learned-you-approved-it-changed) · Spec: [§10.3 Steering PR lifecycle](mission-control-spec.md#103-steering-pr-lifecycle) · Plan: [Batch 2, lane P5](implementation-plan.md#batch-2-pages-on-fixtures-10-lanes-in-parallel) · Page: [Steering · Pull requests](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/steering/proposals/prs) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/steering/proposals/prs)), [steering-prs.md](../mockups/pages/steering-prs.md)
 
 ### 20. Runtimes
 
@@ -348,7 +348,7 @@ Working copies are the checkouts on operators' machines linked to the workspace.
 
 Changes lists the pull requests Oxagen opened, Steering record pull requests among them, with their checks. Every creation wizard ends here.
 
-**Sources** · Prompt: [repositories-changes.audit-prompt.md](../mockups/pages/repositories-changes.audit-prompt.md) · Spec: [§10.3 Context PR lifecycle](mission-control-spec.md#103-context-pr-lifecycle) · Plan: [data mapping](implementation-plan.md#31-workspace-pages) · Page: [Repositories · Changes](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/repositories/changes) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/repositories/changes)), [repositories-changes.md](../mockups/pages/repositories-changes.md)
+**Sources** · Prompt: [repositories-changes.audit-prompt.md](../mockups/pages/repositories-changes.audit-prompt.md) · Spec: [§10.3 Steering PR lifecycle](mission-control-spec.md#103-steering-pr-lifecycle) · Plan: [data mapping](implementation-plan.md#31-workspace-pages) · Page: [Repositories · Changes](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/repositories/changes) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/repositories/changes)), [repositories-changes.md](../mockups/pages/repositories-changes.md)
 
 #### Configuration
 
@@ -390,7 +390,7 @@ Audit is the organization's record, written by the kernel and never by an agent:
 
 ### 26. Register another agent
 
-Every later agent arrives through Register Agent, opened from Agents, which reuses the onboarding gate's wrap and first-frame components in three steps. Step 1 reserves the agent key, which is immutable once the first frame arrives. Step 2 wraps the agent with the harness chosen in step 1, and the installer carries the enrollment token. Step 3 waits for the first frame; registration completes when it arrives, the smoke session opens the Context PR that adds the agent's definition file, and the operator lands on Fleet looking at its run.
+Every later agent arrives through Register Agent, opened from Agents, which reuses the onboarding gate's wrap and first-frame components in three steps. Step 1 reserves the agent key, which is immutable once the first frame arrives. Step 2 wraps the agent with the harness chosen in step 1, and the installer carries the enrollment token. Step 3 waits for the first frame; registration completes when it arrives, the smoke session opens the Steering PR that adds the agent's definition file, and the operator lands on Fleet looking at its run.
 
 **Sources (name)** · Prompt: [register-name.audit-prompt.md](../mockups/pages/register-name.audit-prompt.md), [W1 prompt](demo-mockup-prompts.md#w1-sixty-seconds-to-governed) · Spec: [§6.2 Agent identity and credentials](mission-control-spec.md#62-agent-identity-and-credentials) · Plan: [Batch 1, lane L5](implementation-plan.md#batch-1-foundations-5-lanes-in-parallel) · Page: [Register agent · Name](../mockups/missioncontrol.html?product=1&state=loaded&mobile=0#/a-intel/core-platform/register/name) ([mobile](../mockups/missioncontrol.html?product=1&state=loaded&mobile=1#/a-intel/core-platform/register/name)), [register-name.md](../mockups/pages/register-name.md)
 

@@ -50,7 +50,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Registering opens a Context PR that adds `.oxagen/agents/<slug>.toml`; nothing is written to Postgres until the first frame arrives.
+- Registering opens a Steering PR that adds `.oxagen/agents/<slug>.toml`; nothing is written to Postgres until the first frame arrives.
 - Deregister retires the principal (never deletes it) so its runs keep their identity; the file removal is a pull request.
 - Tile counts are rollups: Identities here and Enrolled from the workspace row, Holding a mandate and Tamper incidents summed over the agent records across the organization, which is the scope their captions name.
 - The Incidents column and the Tamper incidents tile read `agentTamper(a)` off the same `INCIDENTS` record the Audit page reads, so the two pages cannot disagree.
@@ -59,7 +59,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: “No identities registered in Core platform”. “An agent's identity lives in Postgres; its definition is a file in `.oxagen/agents/` in the main repo. Registering one opens a Context PR — nothing is written to Postgres first.” Actions: **Wrap Claude Code** (gold), **Register an agent**.
+- **empty**: “No identities registered in Core platform”. “An agent's identity lives in Postgres; its definition is a file in `.oxagen/agents/` in the main repo. Registering one opens a Steering PR — nothing is written to Postgres first.” Actions: **Wrap Claude Code** (gold), **Register an agent**.
 - **loading**: the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
 - **error**: “Identities could not be loaded”. “The control plane answered `503 iam_principals_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the line “trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z”.
 - **access denied**: “You cannot see the identities in this workspace”. “Your roles on Anderson Intelligence Corp. do not include `agent.read on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (opens `request-access`), **Back to Fleet**. Below: *Signed in as* (Marcus Bell · workspace.owner · core-platform), *Needed* (`agent.read on core-platform`), *Decided by* (`pol_v41` · deny wins over every allow).

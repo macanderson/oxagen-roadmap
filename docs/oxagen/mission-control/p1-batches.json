@@ -190,7 +190,7 @@
         "name": "register_agent",
         "file": "register-agent.ts",
         "group": "Identity and access",
-        "does": "opens a Context PR adding `.oxagen/agents/<slug>.toml` and the generated harness files; identity is created on merge",
+        "does": "opens a Steering PR adding `.oxagen/agents/<slug>.toml` and the generated harness files; identity is created on merge",
         "absorbs": [
           {
             "name": "create_agent_def",
@@ -210,7 +210,7 @@
         "name": "update_agent",
         "file": "update-agent.ts",
         "group": "Identity and access",
-        "does": "a Context PR changing the definition; identity and belt update on merge",
+        "does": "a Steering PR changing the definition; identity and belt update on merge",
         "absorbs": [
           {
             "name": "update_agent_def",
@@ -234,7 +234,7 @@
         "name": "retire_agent",
         "file": "retire-agent.ts",
         "group": "Identity and access",
-        "does": "a Context PR removing the file; principal retired, never deleted",
+        "does": "a Steering PR removing the file; principal retired, never deleted",
         "absorbs": [
           {
             "name": "delete_agent_def",
@@ -1080,8 +1080,8 @@
         "does": "by kind, scope, status, lineage",
         "absorbs": [
           {
-            "name": "list_context_records",
-            "path": "packages/oxagen/src/contracts/context.record.list.ts"
+            "name": "list_steering_records",
+            "path": "packages/oxagen/src/contracts/steering.record.list.ts"
           },
           {
             "name": "list_memories",
@@ -1136,8 +1136,8 @@
             "path": "packages/oxagen/src/contracts/agent.memory.promote.ts"
           },
           {
-            "name": "promote_context_record",
-            "path": "packages/oxagen/src/contracts/context.record.promote.ts"
+            "name": "promote_steering_record",
+            "path": "packages/oxagen/src/contracts/steering.record.promote.ts"
           },
           {
             "name": "suggest_promotion_rationales",
@@ -1146,14 +1146,14 @@
         ]
       },
       {
-        "name": "open_context_pr",
-        "file": "open-context-pr.ts",
+        "name": "open_steering_pr",
+        "file": "open-steering-pr.ts",
         "group": "Context and steering",
         "does": "the pull request",
         "absorbs": [
           {
-            "name": "publish_context_record",
-            "path": "packages/oxagen/src/contracts/context.record.publish.ts"
+            "name": "publish_steering_record",
+            "path": "packages/oxagen/src/contracts/steering.record.publish.ts"
           }
         ]
       },

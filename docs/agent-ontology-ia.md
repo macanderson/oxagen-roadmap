@@ -202,7 +202,7 @@ window. Seven tabs become five, and each one is a different kind of thing.
 | **Library** | Every steering artifact, with its kind as a filter | Records, Skills, Memory, Ontology |
 | **Assignments** | Which artifacts reach which agents, and by what scope | New |
 | **Gates** | The gate plane: what refuses a call, and the notice each gate puts back into steering | Policy, renamed |
-| **Proposals** | Candidates and open Context PRs | Proposals |
+| **Proposals** | Candidates and open Steering PRs | Proposals |
 | **Compiler** | What compiled, from what, at what precedence and token cost, what was dropped, what conflicted | Preview, renamed |
 
 The kind filter on Library carries every type in the ontology: rule, constraint, procedure, fact,

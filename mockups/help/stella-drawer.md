@@ -69,7 +69,7 @@ Every change Stella makes is a governed action through the capabilities a person
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
 | Capability, pull request, file, change, decision, receipt | the canned card in `asstSheet()` | the governed actions on the turn's run, read with `get_run` on the `arun_…` id | partial: the reply returns no card structure |
-| The demo action | `open_context_pr` | `commit_agent_definition` for an agent definition change | partial |
+| The demo action | `open_steering_pr` | `commit_agent_definition` for an agent definition change | partial |
 | Receipt | `openDialog('receipt', 'rcp_01K5RTB4Q')` | a receipt read by id | future-only |
 
 ### Logic

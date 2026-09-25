@@ -21,13 +21,13 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 
 1. **Route and shell.** The build serves the route. Steering is lit in the sidebar. There is no Skills nav entry. The breadcrumb ends on Steering.
 2. **Hub header and tabs.** h1 “Steering”. Seven tabs in this order: Records, Skills, Memory, Ontology, Policy, Proposals, Preview. This tab is selected. Each tab is a URL segment, and reloading the URL lands on the same tab.
-3. **One gold action.** Write a context record is the one gold action on Records.
+3. **One gold action.** Write a steering record is the one gold action on Records.
 4. **Sections and tables.** The build has each item below with the same headings and every column named, in that order.
    - Published records: cards newest first; kind chips; on each card kind, force, constraint effect, token cost, the compilation chip (“compiles to text” or “compiles to text and a gate”), scope, effect, id, commit, date, Open.
    - The compilation chip with a grant is a button and opens the Policy tab.
    - On disk: the `.oxagen/` tree with `skills/` and `ontology/`.
    - Where Oxagen can inject: five points, the fifth dashed and not available yet.
-5. **Actions.** Open routes to the record page. Write a context record opens the record wizard, which ends on a Context PR listed under Proposals. A stub says what the product would do.
+5. **Actions.** Open routes to the record page. Write a steering record opens the record wizard, which ends on a Steering PR listed under Proposals. A stub says what the product would do.
 6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows are wired to the named store; 🟡 rows are wired for the fields that exist and render `NotBacked` for the rest; ❌ rows render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
 7. **States.** Force each state and compare copy and controls with the design:
    - **empty** (`state=empty`): the hub header and tabs stay; the body is “Nothing steers this workspace yet”.

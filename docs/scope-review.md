@@ -35,7 +35,7 @@ Each row asks the same four questions: who buys because of it, does it work befo
 | Tools, registry and policy | Security review | Yes | Thin | Registry, approval rules, mandates and kill switches stay. Policy simulation against real history, two-person mandates and the published assurance suite are out. |
 | Billing, plan and invoices | Procurement | Yes | Thin | Billing sells governed action units (below). |
 | Organization, people and roles | Buyer's admin | Yes | Thin | Members, roles, invitations and API keys stay. SSO and SCIM wait for the customer who blocks on them. |
-| Steering, records and Context PRs | Engineering lead | After setup | Thin | Record to proposal to pull request stays. Effect metrics, retirement candidates and promotion thresholds are out until someone has merged fifty of these. |
+| Steering, records and Steering PRs | Engineering lead | After setup | Thin | Record to proposal to pull request stays. Effect metrics, retirement candidates and promotion thresholds are out until someone has merged fifty of these. |
 | Audit, archive and exports | Compliance | Yes | Defer | The write-once archive at seal time stays, because it is nearly free and the chain depends on it. Legal holds, crypto-shredding and cent-level reconciliation are out. |
 | Ontology, graph and connectors | Nobody yet | No | Cut | The largest cost in the spec and the weakest link to first revenue. The code graph of the main repo stays, because the witness author reads it. |
 

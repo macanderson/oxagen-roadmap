@@ -105,7 +105,7 @@ The kind picks the shape, so no model rates the fix. Duplicate tool calls is a b
 |---|---|---|---|
 | Article: why, before and after, steps | `FIX[kind]` | help content by finding kind | none |
 | The action that records the change | the article's action | `record_finding_fix` (`finding.fix.record.ts:16-34`) | live |
-| The pull request | `FIX[kind]` `shape` `pr` | a proposal from the finding, then `open_context_pr` (`context.pr.open.ts:96`) | partial |
+| The pull request | `FIX[kind]` `shape` `pr` | a proposal from the finding, then `open_steering_pr` (`steering.pr.open.ts:96`) | partial |
 
 ### Logic
 1. `fixDlg()` builds only while `S.dlg` is `fix`, and reads `FIX[f.kind]`. Duplicate tool calls has `shape` `pr`. The eight other kinds are articles. Both shapes title the dialog "Fix for <kind>" ("Fix for duplicate tool calls"). The pull request's subtitle reads "Pull request for <subject> · <saving> at stake", and an article's subtitle is the article's own title. The titles once read "Fix · …" and "Evidence · …", and a label carries no mid-dot.

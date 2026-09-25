@@ -120,10 +120,10 @@ footer.colophon{margin-top:72px;padding-top:20px;border-top:1px solid var(--line
   <a class="wordmark" href="https://oxagen.sh">o<span class="x">x</span>agen</a>
   <p class="eyebrow">Oxagen · Specification</p>
   <h1>Oxagen Mission Control: Product and Technical Specification</h1>
-  <dl class="facts"><dt>Status</dt><dd>Draft for review</dd><dt>Date</dt><dd>2026-09-11</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Supersedes</dt><dd>The <code>oxagen-platform</code> and <code>oxagen</code> codebases as products. Carries forward the designs named in §16.</dd><dt>Builds on</dt><dd>Context Graph Protocol <code>contextgraph/1.0</code> and the <code>contextgraph/lifecycle/1.0-draft</code> profile (repo at <code>origin/main</code>, ADRs 0001 to 0018). Stella's context-record and Context PR corpus. Oxagen ADR-024, 025, 042, 043, 051, 052, 053 and the current wrapper spec (in the repo today under <code>docs/specs/tacho/</code>, renamed here).</dd><dt>Amended</dt><dd>2026-09-13, by Oxagen ADR-055 (<code>docs/adr/ADR-055-gau-buckets-and-contracted-rates.md</code>) and <code>apps/app/ARCHITECTURE.md</code> §3.9: the billing model. Blocks marked <strong>Amendment 2026-09-13 (ADR-055)</strong> supersede the text they follow in §0 row 13, §12.1, A.8, A.11 and Appendix E. (A.11 was A.10 before ADR-090 inserted the <code>skills</code> schema.)</dd><dt>Amended 2026-09-18</dt><dd>By the steering, graph and gateway review of 2026-09-18, approved in full by the maintainer on 2026-09-18 (<code>docs/audits/2026-09-18-steering-graph-gateway-review.md</code>). One assembler with a manifest frame, two planes compiled twice, the gateway on loopback in <code>tachod</code>, the four-word tier ladder, the contained tier, skills as governed files under Steering, and the six-phase refactor path. Rewritten: §4.2, §7.1 to §7.3, §10.4, §12.5, and the §9 storage paragraph. New: §10.5 to §10.7, §13.6, §17.2 and §21. Corrected in place, where the text described something as present that is not built: §0 rows 6, 7 and 10, §1, §2.1, §3, §4.1, §4.5, §6.2, §6.8, §7.4, §7.5, §8.2, §9.1, §12.6, §14, §15, §17, §18 and Appendix D. Sections marked <strong>Status of this section</strong> describe a target and name the phase that delivers it.</dd><dt>Not built at 2026-09-18</dt><dd>This specification is written in the present tense as a target. Read against oxagen <code>main</code> at <code>02278c913</code>, these things it names do not exist yet, wherever a section mentions them: the model proxy, base URL enrollment, run tokens, budgets enforced at a proxy, any sandbox, the witness runner, a skills package or skills tables, <code>:Record</code> nodes in the graph, and any delivery of a <code>may</code> or <code>info</code> record to a wrapped agent. §7.1, §10.4 and §17.2 say what is built and which phase delivers the rest. Phase 0 merged the same day (oxagen PR #3289, <code>c9db463e9</code>, ADR-091): active <code>must</code> and <code>should</code> records reach a wrapped agent through the bundle's <code>context.system</code>. Phase 4 is in build (branches <code>gateway-model-proxy</code> and <code>desktop-install-hardening</code>) and is not on <code>main</code>. The ADRs are ADR-091 on <code>main</code>, and ADR-093 to ADR-097 in oxagen draft PR #3294.</dd><dt>Canonical copy</dt><dd>The canonical copy of this specification is <code>docs/mission-control-spec.md</code> in https://github.com/macanderson/roadmap, the copy the mockups render and the one that carries the maintainer decisions of 2026-09-14 and 2026-09-15. This file is the copy carried in the oxagen monorepo for build agents. No build step joins the two, so a change is made in both by hand, in the same change set. The sections named in the row above are identical in both copies. Still diverged, and to be reconciled toward the canonical copy: §0 rows 1, 4, 5, 8, 11 and 13 to 16, §2, §4.4, §5.3, §6.12, §6.13, §8, §11, §12.1 to §12.4, §13, §14's page count, §19, §20 and Appendices A, B, E and F. This copy alone carries ADR-090 (the Skills tools and the <code>skills</code> tables) and the de-registered rule of §2.2.</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Draft for review</dd><dt>Date</dt><dd>2026-09-11</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Supersedes</dt><dd>The <code>oxagen-platform</code> and <code>oxagen</code> codebases as products. Carries forward the designs named in §16.</dd><dt>Builds on</dt><dd>Context Graph Protocol <code>contextgraph/1.0</code> and the <code>contextgraph/lifecycle/1.0-draft</code> profile (repo at <code>origin/main</code>, ADRs 0001 to 0018). Stella's steering-record and Steering PR corpus. Oxagen ADR-024, 025, 042, 043, 051, 052, 053 and the current wrapper spec (in the repo today under <code>docs/specs/tacho/</code>, renamed here).</dd><dt>Amended</dt><dd>2026-09-13, by Oxagen ADR-055 (<code>docs/adr/ADR-055-gau-buckets-and-contracted-rates.md</code>) and <code>apps/app/ARCHITECTURE.md</code> §3.9: the billing model. Blocks marked <strong>Amendment 2026-09-13 (ADR-055)</strong> supersede the text they follow in §0 row 13, §12.1, A.8, A.11 and Appendix E. (A.11 was A.10 before ADR-090 inserted the <code>skills</code> schema.)</dd><dt>Amended 2026-09-18</dt><dd>By the steering, graph and gateway review of 2026-09-18, approved in full by the maintainer on 2026-09-18 (<code>docs/audits/2026-09-18-steering-graph-gateway-review.md</code>). One assembler with a manifest frame, two planes compiled twice, the gateway on loopback in <code>tachod</code>, the four-word tier ladder, the contained tier, skills as governed files under Steering, and the six-phase refactor path. Rewritten: §4.2, §7.1 to §7.3, §10.4, §12.5, and the §9 storage paragraph. New: §10.5 to §10.7, §13.6, §17.2 and §21. Corrected in place, where the text described something as present that is not built: §0 rows 6, 7 and 10, §1, §2.1, §3, §4.1, §4.5, §6.2, §6.8, §7.4, §7.5, §8.2, §9.1, §12.6, §14, §15, §17, §18 and Appendix D. Sections marked <strong>Status of this section</strong> describe a target and name the phase that delivers it.</dd><dt>Not built at 2026-09-18</dt><dd>This specification is written in the present tense as a target. Read against oxagen <code>main</code> at <code>02278c913</code>, these things it names do not exist yet, wherever a section mentions them: the model proxy, base URL enrollment, run tokens, budgets enforced at a proxy, any sandbox, the witness runner, a skills package or skills tables, <code>:Record</code> nodes in the graph, and any delivery of a <code>may</code> or <code>info</code> record to a wrapped agent. §7.1, §10.4 and §17.2 say what is built and which phase delivers the rest. Phase 0 merged the same day (oxagen PR #3289, <code>c9db463e9</code>, ADR-091): active <code>must</code> and <code>should</code> records reach a wrapped agent through the bundle's <code>context.system</code>. Phase 4 is in build (branches <code>gateway-model-proxy</code> and <code>desktop-install-hardening</code>) and is not on <code>main</code>. The ADRs are ADR-091 on <code>main</code>, and ADR-093 to ADR-097 in oxagen draft PR #3294.</dd><dt>Canonical copy</dt><dd>The canonical copy of this specification is <code>docs/mission-control-spec.md</code> in https://github.com/macanderson/roadmap, the copy the mockups render and the one that carries the maintainer decisions of 2026-09-14 and 2026-09-15. This file is the copy carried in the oxagen monorepo for build agents. No build step joins the two, so a change is made in both by hand, in the same change set. The sections named in the row above are identical in both copies. Still diverged, and to be reconciled toward the canonical copy: §0 rows 1, 4, 5, 8, 11 and 13 to 16, §2, §4.4, §5.3, §6.12, §6.13, §8, §11, §12.1 to §12.4, §13, §14's page count, §19, §20 and Appendices A, B, E and F. This copy alone carries ADR-090 (the Skills tools and the <code>skills</code> tables) and the de-registered rule of §2.2.</dd></dl>
 </header>
 <div class="grid">
-<nav class="toc" aria-label="Contents"><p>Contents</p><ol><li><a href="#0-the-call-sheet">0. The call sheet</a></li><li><a href="#1-why-this-product-in-one-page">1. Why this product, in one page</a></li><li><a href="#2-scope">2. Scope</a></li><li><a href="#3-vocabulary">3. Vocabulary</a></li><li><a href="#4-architecture">4. Architecture</a></li><li><a href="#5-tenancy-and-isolation">5. Tenancy and isolation</a></li><li><a href="#6-identity-access-and-the-toolbelt">6. Identity, access, and the toolbelt</a></li><li><a href="#7-the-gateway-and-intervention">7. The gateway and intervention</a></li><li><a href="#8-runs-and-frames">8. Runs and frames</a></li><li><a href="#9-context-records-how-agents-learn">9. Context records: how agents learn</a></li><li><a href="#10-the-repository-steering-and-context-prs">10. The repository, steering, and Context PRs</a></li><li><a href="#11-the-knowledge-graph-and-dynamic-ontologies">11. The knowledge graph and dynamic ontologies</a></li><li><a href="#12-cost-accounted-to-the-token-attributed-to-the-operator-reconciled-to-the-cent">12. Cost: accounted to the token, attributed to the operator, reconciled to the cent</a></li><li><a href="#13-audit-retention-and-the-fidelity-call">13. Audit, retention, and the fidelity call</a></li><li><a href="#14-mission-control">14. Mission Control</a></li><li><a href="#15-non-functional-requirements">15. Non-functional requirements</a></li><li><a href="#16-carry-over-leave-behind">16. Carry over, leave behind</a></li><li><a href="#17-delivery-plan">17. Delivery plan</a></li><li><a href="#18-risks-and-open-decisions">18. Risks and open decisions</a></li><li><a href="#19-demo-wow-scenarios">19. Demo Wow! Scenarios</a></li><li><a href="#21-maintainer-decisions-of-2026-09-18">21. Maintainer decisions of 2026-09-18</a></li><li><a href="#appendix-a-postgres-tables-target">Appendix A. Postgres tables (target)</a></li><li><a href="#appendix-b-neo4j-model-per-organization-database">Appendix B. Neo4j model (per organization database)</a></li><li><a href="#appendix-c-frame-envelope-gateway-kind-example">Appendix C. Frame envelope (gateway kind example)</a></li><li><a href="#appendix-d-tool-grant-example">Appendix D. Tool grant example</a></li><li><a href="#appendix-e-the-agent-tools-that-survive">Appendix E. The agent tools that survive</a></li><li><a href="#appendix-f-the-pages-that-survive">Appendix F. The pages that survive</a></li></ol></nav>
+<nav class="toc" aria-label="Contents"><p>Contents</p><ol><li><a href="#0-the-call-sheet">0. The call sheet</a></li><li><a href="#1-why-this-product-in-one-page">1. Why this product, in one page</a></li><li><a href="#2-scope">2. Scope</a></li><li><a href="#3-vocabulary">3. Vocabulary</a></li><li><a href="#4-architecture">4. Architecture</a></li><li><a href="#5-tenancy-and-isolation">5. Tenancy and isolation</a></li><li><a href="#6-identity-access-and-the-toolbelt">6. Identity, access, and the toolbelt</a></li><li><a href="#7-the-gateway-and-intervention">7. The gateway and intervention</a></li><li><a href="#8-runs-and-frames">8. Runs and frames</a></li><li><a href="#9-steering-records-how-agents-learn">9. Steering records: how agents learn</a></li><li><a href="#10-the-repository-steering-and-steering-prs">10. The repository, steering, and Steering PRs</a></li><li><a href="#11-the-knowledge-graph-and-dynamic-ontologies">11. The knowledge graph and dynamic ontologies</a></li><li><a href="#12-cost-accounted-to-the-token-attributed-to-the-operator-reconciled-to-the-cent">12. Cost: accounted to the token, attributed to the operator, reconciled to the cent</a></li><li><a href="#13-audit-retention-and-the-fidelity-call">13. Audit, retention, and the fidelity call</a></li><li><a href="#14-mission-control">14. Mission Control</a></li><li><a href="#15-non-functional-requirements">15. Non-functional requirements</a></li><li><a href="#16-carry-over-leave-behind">16. Carry over, leave behind</a></li><li><a href="#17-delivery-plan">17. Delivery plan</a></li><li><a href="#18-risks-and-open-decisions">18. Risks and open decisions</a></li><li><a href="#19-demo-wow-scenarios">19. Demo Wow! Scenarios</a></li><li><a href="#21-maintainer-decisions-of-2026-09-18">21. Maintainer decisions of 2026-09-18</a></li><li><a href="#appendix-a-postgres-tables-target">Appendix A. Postgres tables (target)</a></li><li><a href="#appendix-b-neo4j-model-per-organization-database">Appendix B. Neo4j model (per organization database)</a></li><li><a href="#appendix-c-frame-envelope-gateway-kind-example">Appendix C. Frame envelope (gateway kind example)</a></li><li><a href="#appendix-d-tool-grant-example">Appendix D. Tool grant example</a></li><li><a href="#appendix-e-the-agent-tools-that-survive">Appendix E. The agent tools that survive</a></li><li><a href="#appendix-f-the-pages-that-survive">Appendix F. The pages that survive</a></li></ol></nav>
 <main>
 <h2 id="0-the-call-sheet">0. The call sheet</h2>
 <p>This table lists every decision that shapes the rest of the document, in one place. Each decision is argued in its own section.</p>
@@ -178,12 +178,12 @@ footer.colophon{margin-top:72px;padding-top:20px;border-top:1px solid var(--line
 </tr>
 <tr>
 <td>9</td>
-<td>Agents learn by appending <strong>context records</strong> (the protocol's record kinds). They never learn by writing frames. Records are canonically hashed and countersigned. Canonical hashing puts a record in one standard form before hashing, so the same content always gives the same hash. Countersigned means a second party adds its own signature.</td>
+<td>Agents learn by appending <strong>steering records</strong> (the protocol's record kinds). They never learn by writing frames. Records are canonically hashed and countersigned. Canonical hashing puts a record in one standard form before hashing, so the same content always gives the same hash. Countersigned means a second party adds its own signature.</td>
 <td>§9</td>
 </tr>
 <tr>
 <td>10</td>
-<td>A workspace links to one or more GitHub repositories. Exactly one of them is its <strong>main repo</strong>, bound at creation. The main repo is the place where the workspace's steering and configuration are managed in source control. Published steering and every agent definition live there under <code>.oxagen/</code>. Stella reads that folder natively through a symlink, a file system pointer to another path. Oxagen mirrors the same folder into each coding harness's own agent format in the same pull request. Linked repos may carry repository-scoped records of their own. A <strong>Context PR</strong> is a GitHub pull request (PR), a proposed change that others review before it is merged. Merge is the promotion event. Nothing steers until it is published. Storage stays plural, with one writer per fact (§4.2). Git is the system of control, which is GitOps: steering changes are managed through git. One assembler decides what reaches an agent and records what it cut (§10.5).</td>
+<td>A workspace links to one or more GitHub repositories. Exactly one of them is its <strong>main repo</strong>, bound at creation. The main repo is the place where the workspace's steering and configuration are managed in source control. Published steering and every agent definition live there under <code>.oxagen/</code>. Stella reads that folder natively through a symlink, a file system pointer to another path. Oxagen mirrors the same folder into each coding harness's own agent format in the same pull request. Linked repos may carry repository-scoped records of their own. A <strong>Steering PR</strong> is a GitHub pull request (PR), a proposed change that others review before it is merged. Merge is the promotion event. Nothing steers until it is published. Storage stays plural, with one writer per fact (§4.2). Git is the system of control, which is GitOps: steering changes are managed through git. One assembler decides what reaches an agent and records what it cut (§10.5).</td>
 <td>§10</td>
 </tr>
 <tr>
@@ -244,7 +244,7 @@ footer.colophon{margin-top:72px;padding-top:20px;border-top:1px solid var(--line
 <li>Run recording, the frame chain (the ordered, linked sequence of frames in a run), checkpoints (saved points a run can be restored from), attestation (a signed statement that a record is what it claims to be), replay in two forms (render and fork), and bisect between two runs (narrowing down the step where two runs start to differ).</li>
 <li>Cost ledger, price book, budgets, provider reconciliation (matching Oxagen's cost records against the provider's bill), and spend views.</li>
 <li>Knowledge graph per organization. It includes the ontology engine (the ontology is the set of entity types and the relationships between them), three connectors (GitHub, Linear, Postgres), entity resolution (deciding when two source records describe the same entity), and provenance (the record of where each fact came from).</li>
-<li>Context records, reflection, promotion, Context PRs (a PR is a pull request, a proposed change submitted for review), and steering delivery.</li>
+<li>Steering records, reflection, promotion, Steering PRs (a PR is a pull request, a proposed change submitted for review), and steering delivery.</li>
 <li>Mission Control UI, API, MCP endpoint, and a thin CLI (<code>oxagen</code>) for enrollment and administration.</li>
 <li>Audit archive, retention, erasure, legal hold (keeping records past their normal deletion date because of a legal matter), and export.</li>
 </ul>
@@ -342,8 +342,8 @@ ADR under <code>docs/adr/</code> that names the files.</p>
 <td>The protocol's atomic retrieval unit (<code>ContextFrame</code>), meaning the smallest piece of evidence the system fetches. It is evidence served into a prompt. Each context frame is typed, has a budget, and carries provenance (a record of where the evidence came from).</td>
 </tr>
 <tr>
-<td><strong>Context record</strong></td>
-<td>The protocol's immutable record (<code>ContextRecord</code>), one that cannot change once written. It holds what an agent or a person asserts, learns, proposes, or decides. There are twelve kinds.</td>
+<td><strong>Steering record</strong></td>
+<td>The protocol's immutable record (<code>SteeringRecord</code>), one that cannot change once written. It holds what an agent or a person asserts, learns, proposes, or decides. There are twelve kinds.</td>
 </tr>
 <tr>
 <td><strong>Steering</strong></td>
@@ -370,12 +370,12 @@ ADR under <code>docs/adr/</code> that names the files.</p>
 <td>What <code>tachod</code> grows into: hook adapter, loopback model proxy, MCP aggregator, control channel (§7.1).</td>
 </tr>
 <tr>
-<td><strong>Context PR</strong></td>
+<td><strong>Steering PR</strong></td>
 <td>A pull request (PR, a proposed change submitted for review) on the workspace repository. It proposes a change to steering.</td>
 </tr>
 <tr>
 <td><strong>Governed action</strong></td>
-<td>One top-level kernel call that passed IAM and the other gates, ran its handler, and wrote an audit record. The kernel is the system's core, a gate is a check a call must pass, and an audit record is a log entry of what happened. This is the billable unit (ADR-052). Invoices and the UI (user interface) show it as <strong>action</strong>. A governed action is something <em>Oxagen enforced</em>. A tool call is something <em>an agent did</em>. The two overlap only where an agent's tool call went through the tool gateway. A harness-native tool call under the harness tier is a tool call but not a governed action. Oxagen observed it but did not gate it. A denied tool call is recorded but is not a governed action. Denials are free. Some things are governed actions but are not the worker's tool calls. These include a human granting a role, a Context PR merge, a repo sync, an approval decision, and every call the in-app agent makes.</td>
+<td>One top-level kernel call that passed IAM and the other gates, ran its handler, and wrote an audit record. The kernel is the system's core, a gate is a check a call must pass, and an audit record is a log entry of what happened. This is the billable unit (ADR-052). Invoices and the UI (user interface) show it as <strong>action</strong>. A governed action is something <em>Oxagen enforced</em>. A tool call is something <em>an agent did</em>. The two overlap only where an agent's tool call went through the tool gateway. A harness-native tool call under the harness tier is a tool call but not a governed action. Oxagen observed it but did not gate it. A denied tool call is recorded but is not a governed action. Denials are free. Some things are governed actions but are not the worker's tool calls. These include a human granting a role, a Steering PR merge, a repo sync, an approval decision, and every call the in-app agent makes.</td>
 </tr>
 <tr>
 <td><strong>Enforcement tier</strong></td>
@@ -422,7 +422,7 @@ ADR under <code>docs/adr/</code> that names the files.</p>
   │ control ledger│   │ one db / org │   │ WORM, keyed │   │ per workspace│
   │ identity, IAM │   │ graph, runs, │   │ frame bodies│   │ published    │
   │ tools, prices │   │ frames,      │   │ archive     │   │ steering     │
-  │ cost, billing │   │ records,     │   │ segments    │   │ (Context PRs)│
+  │ cost, billing │   │ records,     │   │ segments    │   │ (Steering PRs)│
   │ approvals     │   │ ontology     │   │             │   │              │
   └───────────────┘   └──────────────┘   └─────────────┘   └──────────────┘
                               ▲
@@ -440,11 +440,11 @@ ADR under <code>docs/adr/</code> that names the files.</p>
 <li><strong>Kernel.</strong> One <code>invoke()</code> call runs the pipeline that exists today. The steps are: resolve the agent tool, validate the input, enter tenant scope (limit the call to one organization's data), make the IAM decision (IAM is identity and access management, the check of who may do what), which is always audited, admit the call against the budget, pass the approval gate, run the handler, validate the output, and write the audit record. The shape carries over unchanged. The count drops to about seventy agent tools.</li>
 <li><strong>Recorder.</strong> Consumes batches of frames and checks that each frame chain is intact. Writes frame nodes to Neo4j and frame bodies to object storage. Prices model frames and updates run rollups (summed totals per run).</li>
 <li><strong>Reflector.</strong> After a seal (the step that closes a run's record), it produces observation and memory records from the run.</li>
-<li><strong>Promoter.</strong> Collects records across runs, produces proposals, opens Context PRs, and records promotion events when a Context PR merges. A Context PR is a pull request, a proposed change that reviewers approve before it merges.</li>
+<li><strong>Promoter.</strong> Collects records across runs, produces proposals, opens Steering PRs, and records promotion events when a Steering PR merges. A Steering PR is a pull request, a proposed change that reviewers approve before it merges.</li>
 <li><strong>Ontology engine.</strong> Profiles ingested sources, proposes ontology versions, activates them, and builds entities with provenance (a record of where each fact came from). The ontology is the graph's definition of entity types and how they relate.</li>
 <li><strong>Reconciler.</strong> Matches the cost ledger to the provider's usage exports and invoices.</li>
 <li><strong>Archiver.</strong> Seals archive segments, compacts frame nodes older than the hot window (the recent period kept in the graph for fast queries), and enforces retention rules and holds.</li>
-<li><strong>GitHub App.</strong> Binds repositories, creates Context PRs, runs checks, handles merges, and re-indexes after changes.</li>
+<li><strong>GitHub App.</strong> Binds repositories, creates Steering PRs, runs checks, handles merges, and re-indexes after changes.</li>
 <li><strong>Engine.</strong> <code>stella serve</code> running in its own container. The in-app agent service reaches it over HTTP (§4.4). It runs no model and no tool itself.</li>
 <li><strong>Model layer.</strong> The one path for every model call Oxagen makes on its own behalf (the in-app agent, reflector, promoter, and ontology engine). Calls route by tier through OpenRouter (§4.5), a service that forwards model calls to many vendors. Customer agents' model calls never touch this layer. They go to the customer's own vendor with the customer's own credential, through the gateway's loopback proxy once Phase 4 ships (§7.1).</li>
 </ul>
@@ -574,13 +574,13 @@ ADR under <code>docs/adr/</code> that names the files.</p>
 </tbody>
 </table></div>
 <p>Platform engineers call this pattern GitOps: the desired state lives in git, a controller reconciles the live system to it, and drift is detected and reported. Oxagen is the controller. Steering, skills and definitions are the desired state. The registry, the index and the wrapped agents are the live system.</p>
-<p><strong>Today.</strong> Records live in Postgres (<code>agent.context_records</code>, <code>packages/database/src/schema/agent.ts:1303</code>) with their versions, promotions ledger and proposals, mirrored in git as <code>.oxagen/rules/*.toml</code>. The graph holds no steering: neither <code>packages/ontology</code> nor <code>packages/ingestion</code> writes a <code>:Record</code> node. Memory is in the graph as <code>:AgentMemory</code> and reaches only the in-app agent (§10.4). The knowledge graph is off unless <code>NEO4J_URI</code> is set. ClickHouse is still in the tree. Retiring it is a target of this specification and is not part of the 2026-09-18 refactor path.</p>
+<p><strong>Today.</strong> Records live in Postgres (<code>agent.steering_records</code>, <code>packages/database/src/schema/agent.ts:1303</code>) with their versions, promotions ledger and proposals, mirrored in git as <code>.oxagen/rules/*.toml</code>. The graph holds no steering: neither <code>packages/ontology</code> nor <code>packages/ingestion</code> writes a <code>:Record</code> node. Memory is in the graph as <code>:AgentMemory</code> and reaches only the in-app agent (§10.4). The knowledge graph is off unless <code>NEO4J_URI</code> is set. ClickHouse is still in the tree. Retiring it is a target of this specification and is not part of the 2026-09-18 refactor path.</p>
 <h3 id="4-3-language-and-runtime">4.3 Language and runtime</h3>
 <p>TypeScript on Node runs the control plane (the part that sets and enforces rules), the gateway, the services, and the UI. Hono handles HTTP, Drizzle handles Postgres access, and the official Neo4j driver sits behind one graph service. The official <code>@contextgraphprotocol/typescript-sdk</code> is the source of protocol types (ADR-036). An SDK is a software development kit, a library that developers build on. Zod schemas remain the runtime validators at the trust boundary (the point where outside input enters the system). They are compile-checked against the SDK types. Rust stays in Stella and the protocol crates (Rust packages). Stella is deployed as a service, never embedded. The gateway's hot path is streaming pass-through. A Node process adds well under thirty milliseconds at the median for a proxied model call, which is the budget in §15.</p>
 <h3 id="4-4-the-in-app-agent-and-the-stella-engine">4.4 The in-app agent and the Stella engine</h3>
 <p>The in-app agent is a turn on <code>stella serve</code>, reached over HTTP (ADR-053, carried unchanged). The engine runs as its own container next to the control plane. Oxagen opens a run, posts a turn, and reads the event stream. <strong>The engine never calls a model and never runs a tool.</strong> Each completion and each tool call comes back to Oxagen as a reverse request, meaning the engine asks Oxagen to do the work:</p>
 <ul>
-<li>A <strong>tool call</strong> is answered through <code>kernel.invoke()</code>. It passes the IAM, entitlement (what the plan allows), approval, and budget gates like every other call. It writes an audit record and bills as one governed action. The engine sees a tool result, never a credential. The in-app agent's tools are agent tool contracts only: bind a repository, register an agent, grant a tool, set a budget, query the graph, open a run, explain a frame, and open a Context PR.</li>
+<li>A <strong>tool call</strong> is answered through <code>kernel.invoke()</code>. It passes the IAM, entitlement (what the plan allows), approval, and budget gates like every other call. It writes an audit record and bills as one governed action. The engine sees a tool result, never a credential. The in-app agent's tools are agent tool contracts only: bind a repository, register an agent, grant a tool, set a budget, query the graph, open a run, explain a frame, and open a Steering PR.</li>
 <li>A <strong>completion</strong> is answered through the model layer (§4.5). The key stays in Oxagen. The engine sees only text.</li>
 <li>The engine holds no authority. Its only configuration is a bearer token (a secret string sent with each request to prove identity) and the tool set named <code>remote</code>. Oxagen owns all persistence. The turn's checkpoint (a saved snapshot of the turn's state) and its events are frames in a run of the in-app agent. So a turn can be replayed from Oxagen's record like any other run.</li>
 <li>The engine is a required service. If it is down, the in-app agent says so with a named error. Nothing falls back to an in-process loop.</li>
@@ -603,7 +603,7 @@ ADR under <code>docs/adr/</code> that names the files.</p>
 <tbody>
 <tr>
 <td><code>complex</code></td>
-<td>in-app agent turns, reflection reasoning, promotion rationale, ontology diff explanation, conflict analysis, Context PR bodies</td>
+<td>in-app agent turns, reflection reasoning, promotion rationale, ontology diff explanation, conflict analysis, Steering PR bodies</td>
 <td><code>z-ai/glm-latest</code></td>
 <td>GLM 5.3 (1.3M context)</td>
 </tr>
@@ -743,7 +743,7 @@ color = &quot;blue&quot;
 sandbox = &quot;read-only&quot;
 </code></pre>
 <p><strong>One source, every harness.</strong> Each coding harness keeps agent definitions in its own place and format. Claude Code reads <code>.claude/agents/&lt;name&gt;.md</code> (front matter plus instructions). Codex CLI reads its own agent files. Stella reads the canonical format (the single official form). Oxagen generates the harness files from the canonical one, in the same pull request. So the repo carries <code>.oxagen/agents/release-manager.toml</code> and beside it <code>.claude/agents/release-manager.md</code> and the Codex equivalent. Each generated file has a header naming the source file and its digest, and is marked generated. The set of formats is an adapter table in Oxagen. A harness changing its format is a table change, not a product change. Stella needs no generated file: <code>.stella/agents</code> is a symlink to <code>.oxagen/agents</code> (§10.2). A pull request that edits a generated file without regenerating it fails the checks. The canonical file is the only one a person or agent edits.</p>
-<p><strong>The loop the operator sees.</strong> Creating or changing an agent in Mission Control (<code>register_agent</code>, <code>update_agent</code>) does not write Postgres first. It opens a Context PR on the main repo. That PR adds or changes the canonical file and the generated files. The checks validate the definition: the schema, tools that exist in the registry, no <code>irreversible</code> without a mandate, and instructions that pass the secret and PII scan. Merge creates or updates the principal, the roles the definition asks for, and the toolbelt. The next time the operator opens their coding agent in that repo, the agent is there. The same works in reverse. An agent definition committed by hand appears in Mission Control on merge. Its identity is created, and its status is <code>unenrolled</code> until credentials are issued. Deleting an agent is a PR that removes the file. The principal is retired, never deleted, so its runs keep their identity.</p>
+<p><strong>The loop the operator sees.</strong> Creating or changing an agent in Mission Control (<code>register_agent</code>, <code>update_agent</code>) does not write Postgres first. It opens a Steering PR on the main repo. That PR adds or changes the canonical file and the generated files. The checks validate the definition: the schema, tools that exist in the registry, no <code>irreversible</code> without a mandate, and instructions that pass the secret and PII scan. Merge creates or updates the principal, the roles the definition asks for, and the toolbelt. The next time the operator opens their coding agent in that repo, the agent is there. The same works in reverse. An agent definition committed by hand appears in Mission Control on merge. Its identity is created, and its status is <code>unenrolled</code> until credentials are issued. Deleting an agent is a PR that removes the file. The principal is retired, never deleted, so its runs keep their identity.</p>
 <h3 id="6-3-roles-and-grants">6.3 Roles and grants</h3>
 <p>One grant table: <code>iam.role_grants(role_id, subject_kind, subject, effect, resource_scope)</code>.</p>
 <ul>
@@ -972,7 +972,7 @@ sandbox = &quot;read-only&quot;
 <p>Tool policy is written in <strong>Cedar</strong>, an open policy language (the decision the wrapper design already reserved). It is compiled from three inputs: role grants and resource scopes (§6.3), mandates (§6.9), and workspace rules authored on the Tools page or as records in the main repo. Policy is:</p>
 <ul>
 <li><strong>Deterministic.</strong> Same call, same policy version, same answer. No model in the decision path, ever.</li>
-<li><strong>Versioned and signed.</strong> Every decision cites the policy version. Every bundle carries it. A policy change is a governed action with approval and, in regulated mode, a Context PR.</li>
+<li><strong>Versioned and signed.</strong> Every decision cites the policy version. Every bundle carries it. A policy change is a governed action with approval and, in regulated mode, a Steering PR.</li>
 <li><strong>Testable.</strong> Policies ship with test cases (this call must be denied, this one must require approval) that run on every change.</li>
 <li><strong>Simulated.</strong> Before a policy version is activated, Oxagen replays it against the workspace's last N days of tool calls from the frames. It reports what would have changed: calls that would now be denied, calls that would now need approval, and calls the new version would allow that the old version denied. A CIO sees the effect of a control before it is switched on, on their own agents' real history.</li>
 </ul>
@@ -1486,7 +1486,7 @@ sandbox = &quot;read-only&quot;
 <h3 id="7-7-outbound-events-series-a">7.7 Outbound events (Series A)</h3>
 <p>Customers subscribe to what happens in their runs and receive it in their own systems. Nothing is invented for this. Every event maps to a frame kind or an audit event.</p>
 <ul>
-<li><strong>Catalog.</strong> <code>run.started</code>, <code>run.sealed</code>, <code>run.proven</code>, <code>approval.requested</code>, <code>approval.resolved</code>, <code>tool_call.denied</code>, <code>kill_switch.flipped</code>, <code>mandate.exception</code>, <code>budget.breached</code>, <code>incident.raised</code>, <code>context_pr.opened</code>, <code>context_pr.merged</code>, <code>ontology.activated</code>, <code>repository.indexed</code>, <code>reconciliation.exception</code>. New kinds are added to the catalog, never emitted ad hoc.</li>
+<li><strong>Catalog.</strong> <code>run.started</code>, <code>run.sealed</code>, <code>run.proven</code>, <code>approval.requested</code>, <code>approval.resolved</code>, <code>tool_call.denied</code>, <code>kill_switch.flipped</code>, <code>mandate.exception</code>, <code>budget.breached</code>, <code>incident.raised</code>, <code>steering_pr.opened</code>, <code>steering_pr.merged</code>, <code>ontology.activated</code>, <code>repository.indexed</code>, <code>reconciliation.exception</code>. New kinds are added to the catalog, never emitted ad hoc.</li>
 <li><strong>Subscriptions</strong> at workspace or organization scope name the event kinds and optional filters (agent, operator, severity). Only those events are emitted. Everything else never leaves.</li>
 <li><strong>Two delivery modes on one unique endpoint per subscription</strong>, generated at creation. Push: Oxagen sends a signed webhook, an HTTP request to the customer's URL when an event happens. It is signed with HMAC, a keyed hash that proves who sent it, using a rotating secret. It carries a delivery id for safe retries, is ordered per run, and is delivered at least once with backoff. A dead-letter view, the list of deliveries that failed after all retries, sits on the Audit page. Pull: the customer reads from an Oxagen-hosted streaming endpoint unique to the subscription, with a replay window.</li>
 <li><strong>Payloads</strong> carry ids, kind, time, scope, and a compact body with a link to the run and frame. Never raw prompt or tool bodies. Redaction rules apply.</li>
@@ -1720,16 +1720,16 @@ sandbox = &quot;read-only&quot;
 <p><strong>What a proven run leaves behind.</strong> For each proven run, the seal stores the tuple a training example needs: the task and its acceptance criteria, the context frame and record ids the worker was given, the diff digest against the target, the witness verdict with its oracle kind, and the cost. That is the labeled example. It is produced as a side effect of the work, with no person reading it. Nothing else about training is built in v1. §12.8's proven spend and productive ratio read the same frame.</p>
 <p><strong>Where this runs.</strong> The witness runner is the one execution plane Oxagen operates. It is not the worker's runtime, and ADR-043 stands. It runs witnesses, not agents. It has no model access except the author call. It is ephemeral per witness run. For customers on a dedicated data plane, it runs inside their plane.</p>
 <hr />
-<h2 id="9-context-records-how-agents-learn">9. Context records: how agents learn</h2>
-<p>Agents do not write frames as memory. When an agent wants to remember something, it appends a <strong>context record</strong>. The record goes through Oxagen's exchange-provider endpoint (<code>context/append</code>, lifecycle profile). Any harness can send one. Stella sends records natively. Other agents use the SDK wrapper's <code>remember()</code> and <code>propose()</code> calls, or an MCP tool on the tool gateway.</p>
+<h2 id="9-steering-records-how-agents-learn">9. Steering records: how agents learn</h2>
+<p>Agents do not write frames as memory. When an agent wants to remember something, it appends a <strong>steering record</strong>. The record goes through Oxagen's exchange-provider endpoint (<code>context/append</code>, lifecycle profile). Any harness can send one. Stella sends records natively. Other agents use the SDK wrapper's <code>remember()</code> and <code>propose()</code> calls, or an MCP tool on the tool gateway.</p>
 <ul>
-<li><strong>Kinds accepted from agents:</strong> <code>observation</code>, <code>memory</code>, <code>knowledge</code> (fact, assumption, decision), <code>evidence</code>, <code>record_proposal</code>, <code>context_use</code>, <code>context_use_feedback</code>. An agent may only <em>propose</em> a <code>directive</code>. It becomes active only through a Context PR (§10). The promoter writes <code>promotion_event</code>, never an agent.</li>
+<li><strong>Kinds accepted from agents:</strong> <code>observation</code>, <code>memory</code>, <code>knowledge</code> (fact, assumption, decision), <code>evidence</code>, <code>record_proposal</code>, <code>context_use</code>, <code>context_use_feedback</code>. An agent may only <em>propose</em> a <code>directive</code>. It becomes active only through a Steering PR (§10). The promoter writes <code>promotion_event</code>, never an agent.</li>
 <li><strong>Identity and hash.</strong> A hash is a short fingerprint computed from a record's bytes. <code>record_hash</code> is SHA-256 over the RFC 8785 canonical bytes, with the hash member removed. RFC 8785 is the standard that defines one canonical, meaning fixed and repeatable, byte layout for JSON. The protocol and Stella compute it the same way. Oxagen adopts Stella's null-stripping divergence so all three agree. <code>record_id</code> is derived from the content. A correction is a new record on the same <code>lineage_id</code>. A lineage is the chain of records that revise one idea over time. Superseded is derived, never stored.</li>
 <li><strong>Attestation.</strong> Oxagen countersigns every accepted record. To countersign means to add its own signature beside any existing one (<code>RecordAttestation</code>, detached, Ed25519). An agent that holds a key may sign first. The graph keeps both signatures.</li>
 <li><strong>Scope.</strong> <code>scope</code> uses the protocol's portable keys (<code>organization_id</code>, <code>workspace_id</code>, <code>repository_id</code>, <code>user_id</code>, <code>session_id</code>, <code>task_id</code>). <code>sharing_scope ∈ {user, repository, workspace, organization}</code> widens visibility. The sharing scope sets how far beyond its author a record can be seen. Oxagen enforces sharing authorization before persistence and on every read, per the profile.</li>
 <li><strong>Provenance.</strong> Provenance is the trail that shows where a record came from. <code>provenance.source_refs</code> point at frames (<code>frame:&lt;run&gt;/&lt;seq&gt;</code>) and at other records. <code>evidence_links</code> point at frames or tool outputs by digest. An evidence link is a pointer to the proof behind a record. So every learned thing walks back to the exact frame that taught it.</li>
 <li><strong>Retention.</strong> Oxagen honors or refuses <code>requested_retention</code> before persistence. A refusal returns <code>retention_rejected</code>. The accepted value is stored on the record.</li>
-<li><strong>Storage.</strong> A record's system of record is the Postgres registry (<code>agent.context_records</code>, its versions, the promotions ledger and proposals), and its published text is in git (§4.2). From Phase 3 every record is also projected into the organization's graph as a <code>:Record</code> node, one direction registry to graph, verified by hash. Each node carries <code>ws</code>, <code>kind</code>, <code>lineage_id</code>, <code>record_hash</code>, <code>status</code>, and temporal fields. Typed edges connect the nodes: <code>DERIVED_FROM → :Frame|:Record</code>, <code>EVIDENCED_BY → :Frame</code>, <code>SUPERSEDES</code>, <code>REFINES</code>, <code>CONTRADICTS</code>, <code>PROPOSES → :Record</code>, <code>PROMOTED_BY → :Record(promotion_event)</code>, <code>ABOUT → :Entity</code>. The <code>ABOUT</code> edges are why the graph earns the index: &quot;records relevant to the files and entities this run touches&quot;. <strong>Status 2026-09-18:</strong> no <code>:Record</code> node exists. Neither <code>packages/ontology</code> nor <code>packages/ingestion</code> writes one, and the graph holds no steering.</li>
+<li><strong>Storage.</strong> A record's system of record is the Postgres registry (<code>agent.steering_records</code>, its versions, the promotions ledger and proposals), and its published text is in git (§4.2). From Phase 3 every record is also projected into the organization's graph as a <code>:Record</code> node, one direction registry to graph, verified by hash. Each node carries <code>ws</code>, <code>kind</code>, <code>lineage_id</code>, <code>record_hash</code>, <code>status</code>, and temporal fields. Typed edges connect the nodes: <code>DERIVED_FROM → :Frame|:Record</code>, <code>EVIDENCED_BY → :Frame</code>, <code>SUPERSEDES</code>, <code>REFINES</code>, <code>CONTRADICTS</code>, <code>PROPOSES → :Record</code>, <code>PROMOTED_BY → :Record(promotion_event)</code>, <code>ABOUT → :Entity</code>. The <code>ABOUT</code> edges are why the graph earns the index: &quot;records relevant to the files and entities this run touches&quot;. <strong>Status 2026-09-18:</strong> no <code>:Record</code> node exists. Neither <code>packages/ontology</code> nor <code>packages/ingestion</code> writes one, and the graph holds no steering.</li>
 <li><strong>What a record is to an agent.</strong> A published record is one kind of <code>SteeringItem</code> (§10.5). Its <code>force</code> decides where it competes: <code>must</code> and <code>should</code> in the stable prefix, <code>may</code> and <code>info</code> in the volatile selection. Status 2026-09-18: no published record reaches a wrapped agent (§10.4). Phase 0 of §17.2 is the first delivery.</li>
 </ul>
 <h3 id="9-1-reflection">9.1 Reflection</h3>
@@ -1741,19 +1741,19 @@ sandbox = &quot;read-only&quot;
 </ul>
 <p>Reflection uses a model. It runs through Oxagen's own model layer (§4.5) under a service principal. Its own cost is therefore a frame in a run of its own.</p>
 <h3 id="9-2-aggregation-and-promotion">9.2 Aggregation and promotion</h3>
-<p>The promoter aggregates records across runs by lineage and by entity. A candidate becomes a <code>record_proposal</code> when a workspace policy's thresholds are met. The thresholds are: support across at least N runs and M distinct agents, confidence above a floor, no active contradiction, and no open proposal on the lineage. The thresholds belong to the product, not the protocol. A proposal carries <code>proposed_kind</code> (a directive kind or knowledge kind), a rationale, the supporting record ids, and the sharing scope it asks for. Proposals appear in Mission Control and become Context PRs (§10.3). Ranking uses citation pressure and confidence with decay. Citation pressure is how often later records cite a record. Decay means older support counts for less as time passes. Both come from the two-axis memory model.</p>
+<p>The promoter aggregates records across runs by lineage and by entity. A candidate becomes a <code>record_proposal</code> when a workspace policy's thresholds are met. The thresholds are: support across at least N runs and M distinct agents, confidence above a floor, no active contradiction, and no open proposal on the lineage. The thresholds belong to the product, not the protocol. A proposal carries <code>proposed_kind</code> (a directive kind or knowledge kind), a rationale, the supporting record ids, and the sharing scope it asks for. Proposals appear in Mission Control and become Steering PRs (§10.3). Ranking uses citation pressure and confidence with decay. Citation pressure is how often later records cite a record. Decay means older support counts for less as time passes. Both come from the two-axis memory model.</p>
 <hr />
-<h2 id="10-the-repository-steering-and-context-prs">10. The repository, steering, and Context PRs</h2>
+<h2 id="10-the-repository-steering-and-steering-prs">10. The repository, steering, and Steering PRs</h2>
 <p>People trust pull requests, proposed code changes that named reviewers approve before they merge. Every engineering organization already runs them, with named reviewers, required checks, and a history the customer can verify without Oxagen. So Oxagen governs the records that steer agents the same way teams govern code. Each record is authored in the workspace's main repo, proposed as a pull request, and published on merge. The registry keeps everything about those records. Git decides what is in force. Section 4.2 states the rule. This section describes the mechanism.</p>
 <h3 id="10-1-repositories-one-main-repo-any-number-of-linked-repos">10.1 Repositories: one main repo, any number of linked repos</h3>
 <p>A workspace links to one or more GitHub repositories through the Oxagen GitHub App, an installed integration with its own repository access. Each link records the installation, the repository, the <strong>production branch</strong>, whether the repository uses GitHub Issues, and a <code>role</code>. The production branch follows §11.4. GitHub's default branch, the branch a repository treats as its primary line, is offered as the suggestion. The customer confirms or changes it. If GitHub's default branch changes later, Oxagen raises a prompt rather than silently moving the binding.</p>
 <ul>
-<li><strong><code>main</code></strong>, exactly one per workspace, required at creation. The main repo is where the workspace's steering and configuration are managed in source control. That covers published steering records, the promotion ledger (the log of each promotion event), governance mode, and the workspace's Oxagen configuration file. That file is <code>.oxagen/workspace.toml</code>. It declares linked repos, tool servers, budgets, and ontology sources. Oxagen reconciles those declarations against Postgres and reports drift, any gap between the file and the live state. Workspace-scoped Context PRs are opened here. A workspace without a main repo cannot exist. Changing which repo is main is an org-owner action with approval, recorded as a security event.</li>
-<li><strong><code>linked</code></strong>, zero or more. These are the repositories the workspace's agents work on. Oxagen ingests each one into the graph (§11.2). Each is a valid <code>resource_scope.repositories</code> target in grants. Each may carry its own <code>.oxagen/rules/</code> holding records with <code>sharing_scope = &quot;repository&quot;</code>. Those records steer only runs on that repo. Repository-scoped Context PRs are opened on the linked repo itself.</li>
+<li><strong><code>main</code></strong>, exactly one per workspace, required at creation. The main repo is where the workspace's steering and configuration are managed in source control. That covers published steering records, the promotion ledger (the log of each promotion event), governance mode, and the workspace's Oxagen configuration file. That file is <code>.oxagen/workspace.toml</code>. It declares linked repos, tool servers, budgets, and ontology sources. Oxagen reconciles those declarations against Postgres and reports drift, any gap between the file and the live state. Workspace-scoped Steering PRs are opened here. A workspace without a main repo cannot exist. Changing which repo is main is an org-owner action with approval, recorded as a security event.</li>
+<li><strong><code>linked</code></strong>, zero or more. These are the repositories the workspace's agents work on. Oxagen ingests each one into the graph (§11.2). Each is a valid <code>resource_scope.repositories</code> target in grants. Each may carry its own <code>.oxagen/rules/</code> holding records with <code>sharing_scope = &quot;repository&quot;</code>. Those records steer only runs on that repo. Repository-scoped Steering PRs are opened on the linked repo itself.</li>
 </ul>
 <p>A repository may be linked to more than one workspace in the same organization. It is main for at most one. The graph node for a repository is shared across the workspaces that link it. Each link edge sets <code>ws</code>, so isolation holds per workspace.</p>
 <h3 id="10-2-on-disk-layout-oxagen">10.2 On-disk layout: <code>.oxagen/</code></h3>
-<p>The directory is <code>.oxagen/</code>. The word <code>.stella</code> never appears in an Oxagen product, in a customer's repository, or in this specification's file names. The file format inside it is the context-record format Stella already implements and validates. Nothing is invented. Only the directory name is Oxagen's.</p>
+<p>The directory is <code>.oxagen/</code>. The word <code>.stella</code> never appears in an Oxagen product, in a customer's repository, or in this specification's file names. The file format inside it is the steering-record format Stella already implements and validates. Nothing is invented. Only the directory name is Oxagen's.</p>
 <pre><code>.oxagen/
   workspace.toml             # linked repos, tool servers, budgets, ontology sources (main repo only)
   rules/
@@ -1766,19 +1766,19 @@ sandbox = &quot;read-only&quot;
   skills/&lt;id&gt;/SKILL.md       # governed skills, delivered to the harness by sync (§10.6)
   ontology/                  # optional, §11.8: one file per class and relation type
 </code></pre>
-<p>Each record is one TOML file, a plain-text settings format. The file holds <code>schema = &quot;context-record/v0.1&quot;</code>, the record's <code>lineage_id</code>, kind, statement, steering and enforcement blocks, truth probes, and <code>record_hash</code>, a fingerprint of the record's content. Custom agents never parse the file. Oxagen serves published records as context frames and as compiled steering text. So the file format is a publication concern, not an integration concern.</p>
+<p>Each record is one TOML file, a plain-text settings format. The file holds <code>schema = &quot;steering-record/v0.1&quot;</code>, the record's <code>lineage_id</code>, kind, statement, steering and enforcement blocks, truth probes, and <code>record_hash</code>, a fingerprint of the record's content. Custom agents never parse the file. Oxagen serves published records as context frames and as compiled steering text. So the file format is a publication concern, not an integration concern.</p>
 <p><strong>Stella symlinks, it does not copy.</strong> When Stella initializes in a repository and finds <code>.oxagen/</code>, it creates symlinks, pointers to another path rather than copies. The same happens when a workspace is bound after Stella was already initialized there. The symlinks are <code>.stella/rules → ../.oxagen/rules</code>, <code>.stella/proposals → ../.oxagen/proposals</code>, and <code>.stella/agents → ../.oxagen/agents</code>. With them, Stella's loader, its CI validation, and <code>stella context propose</code> work unchanged on the Oxagen-governed files. There is no second copy that could drift. <code>.stella/private/</code> stays a real, gitignored directory. Oxagen reads <code>.oxagen/</code> and nothing else. Whatever sits under <code>.stella/</code> is invisible to Oxagen, and Oxagen never inspects it. The symlink is Stella's responsibility (Stella issue #6507). Stella refuses to initialize a second rules directory beside an existing <code>.oxagen/</code>.</p>
 <p>The layout is the same in the main repo and in a linked repo. What differs is the sharing scope. Records in the main repo carry <code>sharing_scope = &quot;workspace&quot;</code> and apply to every run in the workspace. They may instead carry <code>organization</code> when the org allows a workspace to publish org-wide. Records in a linked repo carry <code>sharing_scope = &quot;repository&quot;</code> and apply only to runs whose repository binding is that repo. A linked-repo record that claims workspace scope fails the checks. Precedence at run time follows Stella's authority rule. Repository records may narrow what workspace records allow. They may never widen it.</p>
 <p><strong>Published</strong> means the record file exists under <code>.oxagen/rules/</code> on the default (or context) branch of the main repo. For repository-scoped records, the file exists on that branch of the linked repo. The steering index (§10.5) stores every published record by <code>record_hash</code> and by the repo and commit it came from. Oxagen verifies the index against the merged commit. A mismatch is a <code>steering_drift</code> incident that blocks delivery of that record until resolved. The index never silently outranks git for steering. Git never holds anything but steering, skills and configuration.</p>
-<h3 id="10-3-context-pr-lifecycle">10.3 Context PR lifecycle</h3>
-<pre><code>proposal (graph)  →  Context PR (GitHub)  →  checks  →  review per mode  →  merge  →  promotion_event (graph + ledger)  →  published (index)  →  delivered (bundle, frames)
+<h3 id="10-3-steering-pr-lifecycle">10.3 Steering PR lifecycle</h3>
+<pre><code>proposal (graph)  →  Steering PR (GitHub)  →  checks  →  review per mode  →  merge  →  promotion_event (graph + ledger)  →  published (index)  →  delivered (bundle, frames)
 </code></pre>
 <ol>
 <li><strong>Open.</strong> The promoter, a person in Mission Control, or <code>stella context propose</code> opens a branch <code>context/&lt;lineage&gt;</code> with the single record file. It also opens a PR. The PR body carries the rationale, the supporting record ids, evidence links, and an Oxagen check-run link. One concern per PR. The target is the main repo for workspace-scoped records and the linked repo for repository-scoped ones. The promoter picks the scope from where the evidence came, either all supporting runs on one repo or across repos.</li>
 <li><strong>Checks</strong> are Oxagen GitHub App check runs with the same rules as <code>stella context validate</code>. They cover schema, lineage uniqueness, <code>record_hash</code> recomputation, and a secret and PII scan. They detect conflicts against active records, so a <code>forbid</code> against an active <code>require</code> on the same subject fails. They run truth probes where declared. They enforce the <code>constraint_effect ∈ {require, forbid}</code> rule, which means a record can never grant authority.</li>
 <li><strong>Review.</strong> In <code>solo</code> mode, the author may merge. In <code>team</code> mode, a code-owner review is required. In <code>regulated</code> mode, a named approver from a role must approve, and Oxagen records that as an accountable approval. A <code>promotions.jsonl</code> entry is appended in the same merge.</li>
 <li><strong>Merge</strong> triggers a <code>promotion_event</code> record in the graph. That record holds <code>from_status</code>, <code>to_status</code>, subject lineage, approver, PR url, and commit sha. Merge also triggers re-indexing from the merged commit, a bundle version bump for the workspace, and a <code>steering_published</code> audit event.</li>
-<li><strong>Retirement</strong> is a Context PR that sets <code>status = &quot;archived&quot;</code> in place. Files are never deleted.</li>
+<li><strong>Retirement</strong> is a Steering PR that sets <code>status = &quot;archived&quot;</code> in place. Files are never deleted.</li>
 </ol>
 <p>Oxagen honors enforcement grants only when they appear in the promotion ledger, never from a private local approval. An enforcement grant is a <code>blocking</code> directive that arms a tool guard. This rule carries over from Stella's authority rule.</p>
 <h3 id="10-4-delivery">10.4 Delivery</h3>
@@ -1840,8 +1840,8 @@ sandbox = &quot;read-only&quot;
 </thead>
 <tbody>
 <tr>
-<td>Context records</td>
-<td>Postgres <code>agent.context_records</code> with versions, the promotions ledger and proposals. Mirrored in git as <code>.oxagen/rules/*.toml</code></td>
+<td>Steering records</td>
+<td>Postgres <code>agent.steering_records</code> with versions, the promotions ledger and proposals. Mirrored in git as <code>.oxagen/rules/*.toml</code></td>
 <td><strong>Active <code>must</code> and <code>should</code> records, yes</strong>, since PR #3289 (ADR-091). <code>readWorkspaceSteering</code> (<code>packages/handlers/src/lib/tacho-steering.ts</code>) compiles them into the bundle's <code>context.system</code>, under the host's 16,384-character cap. <code>may</code> and <code>info</code> records reach nothing until Phase 1. ADR-051's injection path was removed by ADR-043, and this is its replacement; issue #2592 closes when a merged record is seen in a real run's <code>agent_start</code></td>
 </tr>
 <tr>
@@ -1865,9 +1865,9 @@ sandbox = &quot;read-only&quot;
 <td>In-app agent only, capped at 6 items by a constant (<code>assistant-recall.ts:23</code>)</td>
 </tr>
 <tr>
-<td><code>packages/engram</code> and <code>packages/context-provider</code></td>
-<td>A second memory system, and the only real token budgeter (<code>packWithinBudget</code>, <code>packages/context-provider/src/budget.ts:37</code>)</td>
-<td><strong>No.</strong> No application imports either. <code>@oxagen/engram</code> is still named by <code>packages/context-provider</code>, <code>tools/scripts/package.json</code> and <code>apps/app/next.config.ts</code>, and <code>@oxagen/context-provider</code> only by the env registry (<code>packages/config/src/registry.ts</code>). No app, handler or function calls them</td>
+<td><code>packages/engram</code> and <code>packages/steering-provider</code></td>
+<td>A second memory system, and the only real token budgeter (<code>packWithinBudget</code>, <code>packages/steering-provider/src/budget.ts:37</code>)</td>
+<td><strong>No.</strong> No application imports either. <code>@oxagen/engram</code> is still named by <code>packages/steering-provider</code>, <code>tools/scripts/package.json</code> and <code>apps/app/next.config.ts</code>, and <code>@oxagen/steering-provider</code> only by the env registry (<code>packages/config/src/registry.ts</code>). No app, handler or function calls them</td>
 </tr>
 <tr>
 <td>Decision rules, mandates, auto-approval</td>
@@ -1888,8 +1888,8 @@ sandbox = &quot;read-only&quot;
 </table></div>
 <h3 id="10-5-the-assembler-contract">10.5 The assembler contract</h3>
 <blockquote>
-<p><strong>Status of this section (2026-09-18).</strong> Not built. This is the contract Phase 1 implements (§17.2), decided by ADR-093 &quot;One assembler decides what reaches the agent, and records what it cut&quot; and ADR-097 &quot;Steering and gating are two planes, authored on one surface and compiled twice&quot;. Phase 0 ships the smallest slice of it: active records with <code>force</code> of <code>must</code> or <code>should</code>, compiled into <code>context.system</code>. Phase 0 is on <code>main</code> (oxagen PR #3289, <code>c9db463e9</code>, ADR-091), and its <code>compileSteering</code> is the first version of the stable prefix. Phase 1 moves it behind <code>assembleSteering</code> without changing what a host receives for a workspace that has only records (ADR-093 §1). The assembler's home is <code>packages/context-provider</code>, which no application imports today.</p>
-<p><strong>Amended 2026-09-22 (ADR-144).</strong> The assembler lives in <code>packages/steering-assembler</code>, not <code>packages/context-provider</code>. Both <code>packages/context-provider</code> and <code>packages/engram</code> are deleted. The manifest rides the bundle as <code>context.manifest</code> behind the <code>steering_manifest</code> feature, and the host seals it as the <code>steering.manifest</code> frame.</p>
+<p><strong>Status of this section (2026-09-18).</strong> Not built. This is the contract Phase 1 implements (§17.2), decided by ADR-093 &quot;One assembler decides what reaches the agent, and records what it cut&quot; and ADR-097 &quot;Steering and gating are two planes, authored on one surface and compiled twice&quot;. Phase 0 ships the smallest slice of it: active records with <code>force</code> of <code>must</code> or <code>should</code>, compiled into <code>context.system</code>. Phase 0 is on <code>main</code> (oxagen PR #3289, <code>c9db463e9</code>, ADR-091), and its <code>compileSteering</code> is the first version of the stable prefix. Phase 1 moves it behind <code>assembleSteering</code> without changing what a host receives for a workspace that has only records (ADR-093 §1). The assembler's home is <code>packages/steering-provider</code>, which no application imports today.</p>
+<p><strong>Amended 2026-09-22 (ADR-144).</strong> The assembler lives in <code>packages/steering-assembler</code>, not <code>packages/steering-provider</code>. Both <code>packages/steering-provider</code> and <code>packages/engram</code> are deleted. The manifest rides the bundle as <code>context.manifest</code> behind the <code>steering_manifest</code> feature, and the host seals it as the <code>steering.manifest</code> frame.</p>
 </blockquote>
 <p><strong>Two planes that never merge.</strong> <em>Steering</em> is what the model reads: advisory, ranked, budgeted, and it may be dropped. <em>Gating</em> is what the kernel refuses: deterministic, never budgeted, never ranked, and it works when Neo4j is down. A deny rule must never compete for context, because a relevance score could then drop it. So there is <strong>one authoring surface and two compilations</strong>:</p>
 <div class="tw"><table>
@@ -1940,7 +1940,7 @@ sandbox = &quot;read-only&quot;
 <tr>
 <td><code>kind</code></td>
 <td><code>record</code> | <code>skill</code> | <code>memory</code> | <code>ontology</code> | <code>policy</code> | <code>instruction</code></td>
-<td>It names the source family. <code>policy</code> is a gate notice. <code>instruction</code> is the workspace's additional instructions. A context record keeps its own six-way classification (<code>rule</code>, <code>constraint</code>, <code>procedure</code>, <code>fact</code>, <code>memory</code>, <code>preference</code>) on its row. The two are different columns with different vocabularies, and the adapter must not conflate them (ADR-093 §2)</td>
+<td>It names the source family. <code>policy</code> is a gate notice. <code>instruction</code> is the workspace's additional instructions. A steering record keeps its own six-way classification (<code>rule</code>, <code>constraint</code>, <code>procedure</code>, <code>fact</code>, <code>memory</code>, <code>preference</code>) on its row. The two are different columns with different vocabularies, and the adapter must not conflate them (ADR-093 §2)</td>
 </tr>
 <tr>
 <td><code>force</code></td>
@@ -2021,9 +2021,9 @@ interface SteeringAssembly {
 <tbody>
 <tr>
 <td>Record registry</td>
-<td><code>agent.context_records</code> with status <code>active</code>, through the index port</td>
+<td><code>agent.steering_records</code> with status <code>active</code>, through the index port</td>
 <td><code>record</code></td>
-<td>A row with no <code>force</code> (one published through <code>publish_context_record</code> before the two publish paths collapse) is read as <code>info</code> and listed in the manifest as <code>unclassified</code></td>
+<td>A row with no <code>force</code> (one published through <code>publish_steering_record</code> before the two publish paths collapse) is read as <code>info</code> and listed in the manifest as <code>unclassified</code></td>
 </tr>
 <tr>
 <td>Memory</td>
@@ -2072,7 +2072,7 @@ interface SteeringAssembly {
 <li><strong>Verify.</strong> Drop any published item whose <code>verify</code> says <code>steering_drift</code>, with that reason. Drift also raises the incident of §10.2.</li>
 <li><strong>Apply precedence</strong> (below).</li>
 <li><strong>Build the prefix.</strong> Gate notices first, then <code>must</code>, then <code>should</code>, then the <code>instruction</code> item. Inside each group order by <code>valid_from</code>, then <code>id</code>, so the text is stable and the bundle's etag moves only when content does. If the text would pass <code>prefix_max_bytes</code>, cut from the end (<code>should</code> before <code>must</code>, never a gate notice) with reason <code>prefix_overflow</code>. A workspace whose gate notices and <code>must</code> items alone pass the cap fails the publication check that would have caused it (§10.3), so the overflow is caught at the pull request and not at the agent.</li>
-<li><strong>Select the volatile items.</strong> Score <code>may</code> and <code>info</code> candidates against the prompt through the index. With no prompt, or on a host whose retention mode is <code>digest_only</code> (the prompt may not leave the machine), the score is the force weight alone and the manifest records <code>query: none</code>. Pack best-first with <code>packWithinBudget</code> (<code>packages/context-provider/src/budget.ts</code>), which skips an item that does not fit and keeps walking, under <code>volatile_max_tokens</code> and <code>volatile_max_items</code>. Ties break on <code>id</code>. Everything not packed is cut with reason <code>over_budget</code> or <code>below_relevance_floor</code>.</li>
+<li><strong>Select the volatile items.</strong> Score <code>may</code> and <code>info</code> candidates against the prompt through the index. With no prompt, or on a host whose retention mode is <code>digest_only</code> (the prompt may not leave the machine), the score is the force weight alone and the manifest records <code>query: none</code>. Pack best-first with <code>packWithinBudget</code> (<code>packages/steering-provider/src/budget.ts</code>), which skips an item that does not fit and keeps walking, under <code>volatile_max_tokens</code> and <code>volatile_max_items</code>. Ties break on <code>id</code>. Everything not packed is cut with reason <code>over_budget</code> or <code>below_relevance_floor</code>.</li>
 <li><strong>Render.</strong> The prefix opens with a line that says these items govern. The volatile block opens with a line that says its items are advisory and that the governing items win any conflict.</li>
 <li><strong>Write the manifest.</strong></li>
 </ol>
@@ -2139,7 +2139,7 @@ interface SteeringAssembly {
 </table></div>
 <p><code>reason</code> is a closed vocabulary: <code>over_budget</code>, <code>below_relevance_floor</code>, <code>out_of_scope</code>, <code>superseded</code>, <code>widens_workspace_scope</code>, <code>overridden_by_gate</code>, <code>steering_drift</code>, <code>prefix_overflow</code>, <code>duplicate</code>, <code>source_unavailable</code>. The manifest carries ids, hashes and digests. It never carries bodies or the prompt.</p>
 <p>Today the prefix is compiled on the server when the bundle is built (<code>unsignedBundle</code>, <code>packages/handlers/src/lib/tacho-host.ts:255</code>) as one <code>context.system</code> per host, and its manifest is stored with the bundle version. That is Phase 0, and it has two limits this section removes in Phase 1. One host bundle holds one prefix, so two sessions on one host in two repositories cannot each get their own repository-scoped <code>must</code>. And the prompt at <code>UserPromptSubmit</code> exists only inside <code>tachod</code>, and ADR-093 forbids sending it to Oxagen's servers, so the volatile ranking for a wrapped run cannot run on the server.</p>
-<p><strong>The signed local index (Phase 1).</strong> The server compiles into the signed bundle <code>steering.items</code>, gated the way every new bundle field is gated: <code>policyBundleSchema</code> is <code>.strict()</code> (<code>packages/tacho/src/wire.ts</code>), so a daemon built before the field rejects the whole bundle. A host advertises the fields it can read in <code>bundleFeatures</code> at enrollment and in its health report, and the control plane emits <code>steering.items</code> only to a host that named <code>BUNDLE_FEATURE_STEERING_ITEMS</code>, exactly as <code>gateway_tools</code> is emitted today (<code>BUNDLE_FEATURE_GATEWAY_TOOLS</code>, <code>tacho-host.ts</code>). A host that does not advertise it keeps <code>context.system</code> and the Phase 0 behaviour. The field becomes required, and the gate goes away, once the fleet is upgraded. <code>steering.items</code> is every active item in the host's scope, each with its <code>id</code>, <code>hash</code>, <code>kind</code>, <code>force</code>, <code>scope</code> (repository ids included), <code>valid_from</code>, <code>valid_to</code>, <code>body</code> and the terms the ranker scores on. <code>context.system</code> stays as the workspace-scope prefix, the fallback for a session that cannot run the local assembly. At <code>SessionStart</code> the hook adapter builds the prefix for that session from the items whose scope matches the session's repository binding, resolved from <code>cwd</code> to the same binding the run's <code>repo.bound</code> frame records, and seals the <code>steering.manifest</code> frame naming the bundle version and the prefix digest it delivered, beside the <code>oxagen.context_digest</code> attribute it already writes. At <code>UserPromptSubmit</code> the same core ranks the volatile candidates against the prompt on the machine, and the volatile manifest is sealed at that injection point. The assembler's pure core (scope, verify, precedence, prefix build, packing) lives in <code>@oxagen/tacho</code>, the leaf package, which compiles it into <code>tacho-hook</code>. <code>@oxagen/context-provider</code> imports that core and adds the source adapters and the Postgres index for the in-app agent and Preview. One function, two hosts. The prompt never leaves the machine, and no request from <code>tacho-hook</code> to Oxagen's servers carries it.</p>
+<p><strong>The signed local index (Phase 1).</strong> The server compiles into the signed bundle <code>steering.items</code>, gated the way every new bundle field is gated: <code>policyBundleSchema</code> is <code>.strict()</code> (<code>packages/tacho/src/wire.ts</code>), so a daemon built before the field rejects the whole bundle. A host advertises the fields it can read in <code>bundleFeatures</code> at enrollment and in its health report, and the control plane emits <code>steering.items</code> only to a host that named <code>BUNDLE_FEATURE_STEERING_ITEMS</code>, exactly as <code>gateway_tools</code> is emitted today (<code>BUNDLE_FEATURE_GATEWAY_TOOLS</code>, <code>tacho-host.ts</code>). A host that does not advertise it keeps <code>context.system</code> and the Phase 0 behaviour. The field becomes required, and the gate goes away, once the fleet is upgraded. <code>steering.items</code> is every active item in the host's scope, each with its <code>id</code>, <code>hash</code>, <code>kind</code>, <code>force</code>, <code>scope</code> (repository ids included), <code>valid_from</code>, <code>valid_to</code>, <code>body</code> and the terms the ranker scores on. <code>context.system</code> stays as the workspace-scope prefix, the fallback for a session that cannot run the local assembly. At <code>SessionStart</code> the hook adapter builds the prefix for that session from the items whose scope matches the session's repository binding, resolved from <code>cwd</code> to the same binding the run's <code>repo.bound</code> frame records, and seals the <code>steering.manifest</code> frame naming the bundle version and the prefix digest it delivered, beside the <code>oxagen.context_digest</code> attribute it already writes. At <code>UserPromptSubmit</code> the same core ranks the volatile candidates against the prompt on the machine, and the volatile manifest is sealed at that injection point. The assembler's pure core (scope, verify, precedence, prefix build, packing) lives in <code>@oxagen/tacho</code>, the leaf package, which compiles it into <code>tacho-hook</code>. <code>@oxagen/steering-provider</code> imports that core and adds the source adapters and the Postgres index for the in-app agent and Preview. One function, two hosts. The prompt never leaves the machine, and no request from <code>tacho-hook</code> to Oxagen's servers carries it.</p>
 <p><strong>Failure behaviour.</strong> The assembler call fails open: a slow or failing assembler never blocks a prompt at the hook tier, and the cost is a turn with the prefix and no volatile selection (ADR-093). That is a statement about steering, which is advisory. It is not the hook process's gate path, which fails closed against its cached bundle (§7.1).</p>
 <ul>
 <li>The <code>UserPromptSubmit</code> call runs under a tight timeout (<code>deadline_ms</code>, default 250). On a timeout or any error the hook answers <code>{}</code>, the prompt proceeds with no volatile selection, and a <code>steering.manifest</code> frame is sealed with <code>fail_open</code> set. A slow assembler never holds a prompt.</li>
@@ -2147,7 +2147,7 @@ interface SteeringAssembly {
 <li>One adapter failing degrades one source. The rest of the assembly stands.</li>
 <li>The gate compilation shares none of this. A gate never fails open because steering did.</li>
 </ul>
-<p><strong>One assembler, everywhere.</strong> The in-app agent's <code>packages/agent/src/runtime/assistant-turn.ts</code> calls the same function with <code>injection_point: &quot;in_app_turn&quot;</code>, in place of its own recall cap and its unconditional append. Preview calls it with <code>injection_point: &quot;preview&quot;</code>, which seals no frame. From Phase 4 the proxy calls it with <code>injection_point: &quot;model_request&quot;</code>. ADR-094 fixes the rule for that tier: no prompt body is sent to Oxagen's servers, and the proxy ships the seam for the per-turn injection before the Phase 1 assembler exists. For a wrapped run the ranking runs on the machine, in <code>tacho-hook</code>, against the signed items the bundle carries (above, and ADR-093). ADR-094 does not speak to it. <code>packages/engram</code> is deleted or folded into <code>packages/context-provider</code>, so two memory systems become one. The two publish paths (<code>packages/handlers/src/context.record.publish.ts</code> and <code>packages/handlers/src/context.pr.merge.ts</code>) collapse, so every row carries <code>kind</code> and <code>force</code>.</p>
+<p><strong>One assembler, everywhere.</strong> The in-app agent's <code>packages/agent/src/runtime/assistant-turn.ts</code> calls the same function with <code>injection_point: &quot;in_app_turn&quot;</code>, in place of its own recall cap and its unconditional append. Preview calls it with <code>injection_point: &quot;preview&quot;</code>, which seals no frame. From Phase 4 the proxy calls it with <code>injection_point: &quot;model_request&quot;</code>. ADR-094 fixes the rule for that tier: no prompt body is sent to Oxagen's servers, and the proxy ships the seam for the per-turn injection before the Phase 1 assembler exists. For a wrapped run the ranking runs on the machine, in <code>tacho-hook</code>, against the signed items the bundle carries (above, and ADR-093). ADR-094 does not speak to it. <code>packages/engram</code> is deleted or folded into <code>packages/steering-provider</code>, so two memory systems become one. The two publish paths (<code>packages/handlers/src/steering.record.publish.ts</code> and <code>packages/handlers/src/steering.pr.merge.ts</code>) collapse, so every row carries <code>kind</code> and <code>force</code>.</p>
 <h3 id="10-6-skills-are-steering-and-they-are-files">10.6 Skills are steering, and they are files</h3>
 <blockquote>
 <p><strong>Status of this section (2026-09-18).</strong> Not built. On oxagen <code>main</code> at <code>02278c913</code> the only skills data is <code>tacho.sessions.skills_available</code>, an inventory of the skill names a harness reported. ADR-008 describes a skills package, tables and a loader that do not exist. Governed skills delivered by sync arrive in Phase 2 (§17.2). ADR-090 (skill resolution) is checked against this section in the ADR amendments of 2026-09-18. Where that check changes ADR-090, §14 and the <code>skills</code> tables of Appendix A follow it.</p>
@@ -2161,7 +2161,7 @@ interface SteeringAssembly {
 <p>Skills live under Steering (§10.7). They have no top-level navigation entry of their own.</p>
 <h3 id="10-7-one-screen-steering-is-the-hub">10.7 One screen: Steering is the hub</h3>
 <blockquote>
-<p><strong>Status of this section (2026-09-18).</strong> Phase 2 (§17.2). Today Steering lists records, proposals and Context PRs, and Skills is a separate page that shows the reported inventory. The mockups depict Phase 2 complete.</p>
+<p><strong>Status of this section (2026-09-18).</strong> Phase 2 (§17.2). Today Steering lists records, proposals and Steering PRs, and Skills is a separate page that shows the reported inventory. The mockups depict Phase 2 complete.</p>
 </blockquote>
 <p>One screen owns everything that can steer. Its tabs, in this order:</p>
 <div class="tw"><table>
@@ -2174,7 +2174,7 @@ interface SteeringAssembly {
 <tbody>
 <tr>
 <td><strong>Records</strong></td>
-<td>Published context records, by kind and force, with their lineage and the pull request that published each</td>
+<td>Published steering records, by kind and force, with their lineage and the pull request that published each</td>
 </tr>
 <tr>
 <td><strong>Skills</strong></td>
@@ -2194,7 +2194,7 @@ interface SteeringAssembly {
 </tr>
 <tr>
 <td><strong>Proposals</strong></td>
-<td>Candidates and open Context PRs with their checks. Nothing here steers until it merges</td>
+<td>Candidates and open Steering PRs with their checks. Nothing here steers until it merges</td>
 </tr>
 <tr>
 <td><strong>Preview</strong></td>
@@ -2202,7 +2202,7 @@ interface SteeringAssembly {
 </tr>
 </tbody>
 </table></div>
-<p>The route is <code>/{org}/{ws}/steering/{tab}</code>, with <code>records</code> as the default tab. A view inside a tab is one more segment: the Skills views at <code>/steering/skills/{view}</code>, and open Context PRs at <code>/steering/proposals/prs</code>. Skills and Ontology have no top-level navigation entry of their own any more. <code>/{org}/{ws}/skills</code> redirects to <code>/{org}/{ws}/steering/skills</code>.</p>
+<p>The route is <code>/{org}/{ws}/steering/{tab}</code>, with <code>records</code> as the default tab. A view inside a tab is one more segment: the Skills views at <code>/steering/skills/{view}</code>, and open Steering PRs at <code>/steering/proposals/prs</code>. Skills and Ontology have no top-level navigation entry of their own any more. <code>/{org}/{ws}/skills</code> redirects to <code>/{org}/{ws}/steering/skills</code>.</p>
 <hr />
 <h2 id="11-the-knowledge-graph-and-dynamic-ontologies">11. The knowledge graph and dynamic ontologies</h2>
 <h3 id="11-1-layers-in-the-organization-database">11.1 Layers in the organization database</h3>
@@ -2252,7 +2252,7 @@ interface SteeringAssembly {
 <ol>
 <li><strong>Ingest.</strong> A connector syncs a source into <code>:SourceRecord</code> nodes. The cursor and health live in Postgres, and the records live in the graph, so the connector dual-write pattern carries over. Three connectors ship in v1: GitHub (§11.4: every linked repo and the main repo), Linear (teams, projects, issues), and Postgres (tables selected by the customer).</li>
 <li><strong>Profile.</strong> A deterministic profiler reads a sample of source records per source type. It computes candidate classes (from record types and tables), properties (names, inferred types, cardinality, nullability), relation types (foreign keys, reference fields, mention patterns), and natural keys (the fields that identify an item on their own). A model names and describes candidates only after the deterministic pass. It never invents a class the profiler did not see.</li>
-<li><strong>Propose.</strong> The result is a pull request on the main repo (§11.8). The branch changes the ontology files. The PR body holds a diff against the active version (classes added, properties changed, relations added) and the migration plan for existing entities. Proposals from the engine, from the Ontology page, and from a hand edit all take this path, with the same checks a Context PR gets. The graph records the proposal's provenance: which source records and which profiler run inferred each change.</li>
+<li><strong>Propose.</strong> The result is a pull request on the main repo (§11.8). The branch changes the ontology files. The PR body holds a diff against the active version (classes added, properties changed, relations added) and the migration plan for existing entities. Proposals from the engine, from the Ontology page, and from a hand edit all take this path, with the same checks a Steering PR gets. The graph records the proposal's provenance: which source records and which profiler run inferred each change.</li>
 <li><strong>Activate.</strong> Merge is activation. The merged manifest freezes a new immutable version and moves the workspace's pin. The graph then indexes it by digest, applies labels and constraints, migrates entities, and stamps <code>valid_from</code>. Nothing activates any other way. Prior versions remain queryable <code>as_of</code>.</li>
 <li><strong>Materialize.</strong> This step builds the entities. Entities are upserted with natural keys and resolved across sources. This entity resolution (matching the same entity across sources) uses email, URL, external id, and a model-assisted match. The confidence threshold for that match is a workspace setting. Every entity is always linked to its source records.</li>
 </ol>
@@ -2422,7 +2422,7 @@ interface SteeringAssembly {
         SIGNED_CONTRACT.json       # start_label, end_label, cardinality, description, properties[]
     github/                        # the built-in fragment, marked source = &quot;builtin&quot;, never edited by hand
 </code></pre>
-<p><strong>A proposal is a pull request, and merge is activation</strong> (§11.2). The engine's inferred changes, an edit on the Ontology page, and a hand edit all become a branch and a PR on the main repo. The PR gets the checks a Context PR gets plus the registry's own: schema validity, naming, no orphaned relation, no label removed while entities carry it without a migration plan, and a diff against the pinned version. The merged manifest freezes a new immutable version and moves the pin. The graph indexes the active version by digest and keeps every version for <code>as_of</code> queries. It holds each proposal's provenance (which source records and which profiler run inferred each class), and it holds all the entities. The Postgres <code>schema_registry.*</code> tables are gone. Enabled state and enforcement mode live in the manifest.</p>
+<p><strong>A proposal is a pull request, and merge is activation</strong> (§11.2). The engine's inferred changes, an edit on the Ontology page, and a hand edit all become a branch and a PR on the main repo. The PR gets the checks a Steering PR gets plus the registry's own: schema validity, naming, no orphaned relation, no label removed while entities carry it without a migration plan, and a diff against the pinned version. The merged manifest freezes a new immutable version and moves the pin. The graph indexes the active version by digest and keeps every version for <code>as_of</code> queries. It holds each proposal's provenance (which source records and which profiler run inferred each class), and it holds all the entities. The Postgres <code>schema_registry.*</code> tables are gone. Enabled state and enforcement mode live in the manifest.</p>
 <p><strong>Size, so nobody fears the repository.</strong> An ontology is the schema, not the data. Entities (instances) never go to git. They belong to the graph, in the millions. Per workspace, an ontology is tens to a few hundred classes. Organization-wide, a Fortune 500 company's business ontology, all workspaces merged, lands in the range of a few hundred to about a thousand classes, a few thousand properties, and a few hundred to a couple of thousand relation types. That is one file per class and relation type, so low thousands of small files, which is a modest repository. Steering records are a separate count: hundreds to low thousands per workspace at maturity, again one file each.</p>
 <h2 id="12-cost-accounted-to-the-token-attributed-to-the-operator-reconciled-to-the-cent">12. Cost: accounted to the token, attributed to the operator, reconciled to the cent</h2>
 <h3 id="12-1-what-is-being-reconciled">12.1 What is being reconciled</h3>
@@ -2899,8 +2899,8 @@ interface SteeringAssembly {
 </tr>
 <tr>
 <td><strong>Steering</strong></td>
-<td>The hub for everything that can steer. Tabs, in this order: <strong>Records</strong>, <strong>Skills</strong>, <strong>Memory</strong>, <strong>Ontology</strong>, <strong>Policy</strong>, <strong>Proposals</strong>, <strong>Preview</strong> (§10.7). Preview: pick an agent and a prompt, and see exactly what would be injected, what was cut, and why. Skills and Ontology have no top-level navigation entry of their own (2026-09-18). Status: the hub is Phase 2 of §17.2. Today the page lists records, proposals and Context PRs</td>
-<td>open Context PR, review, add a skill, retire a memory, preview an agent's steering</td>
+<td>The hub for everything that can steer. Tabs, in this order: <strong>Records</strong>, <strong>Skills</strong>, <strong>Memory</strong>, <strong>Ontology</strong>, <strong>Policy</strong>, <strong>Proposals</strong>, <strong>Preview</strong> (§10.7). Preview: pick an agent and a prompt, and see exactly what would be injected, what was cut, and why. Skills and Ontology have no top-level navigation entry of their own (2026-09-18). Status: the hub is Phase 2 of §17.2. Today the page lists records, proposals and Steering PRs</td>
+<td>open Steering PR, review, add a skill, retire a memory, preview an agent's steering</td>
 </tr>
 <tr>
 <td><strong>Spend</strong></td>
@@ -3089,8 +3089,8 @@ interface SteeringAssembly {
 </tr>
 <tr>
 <td><strong>M3 Teach</strong> (weeks 10–15)</td>
-<td>The records endpoint, the reflector, the promoter, Context PRs through the GitHub App, steering delivery, and effect metrics.</td>
-<td>An agent learns something. The lesson becomes a Context PR. Merging it changes the next run's context, and the frame shows the change.</td>
+<td>The records endpoint, the reflector, the promoter, Steering PRs through the GitHub App, steering delivery, and effect metrics.</td>
+<td>An agent learns something. The lesson becomes a Steering PR. Merging it changes the next run's context, and the frame shows the change.</td>
 </tr>
 <tr>
 <td><strong>M4 Ground</strong> (weeks 13–18)</td>
@@ -3122,7 +3122,7 @@ interface SteeringAssembly {
 <tbody>
 <tr>
 <td><strong>The wedge</strong></td>
-<td>Tenancy and identity. The gateway (the model proxy, the tool gateway, wrapping for Stella, Claude Code, Codex, and SDK agents, and one-click installers on three platforms). The toolbelt with approvals, mandates, and kill switches. Runs and frames with render replay. Main and linked repos. Records, Context PRs, and agent definitions in git. Spend accounted to the operator, with findings. The GitHub link with issues and the code graph. Voyage embeddings, search, and graph questions. The Ontology page. Proof ingested from Stella's own ladder. The free tier and gated onboarding. Milestones M0 to M3 and the coding-team half of M4.</td>
+<td>Tenancy and identity. The gateway (the model proxy, the tool gateway, wrapping for Stella, Claude Code, Codex, and SDK agents, and one-click installers on three platforms). The toolbelt with approvals, mandates, and kill switches. Runs and frames with render replay. Main and linked repos. Records, Steering PRs, and agent definitions in git. Spend accounted to the operator, with findings. The GitHub link with issues and the code graph. Voyage embeddings, search, and graph questions. The Ontology page. Proof ingested from Stella's own ladder. The free tier and gated onboarding. Milestones M0 to M3 and the coding-team half of M4.</td>
 <td>Customer 1 in production and paying. Five paying accounts opens the seed round.</td>
 </tr>
 <tr>
@@ -3245,7 +3245,7 @@ interface SteeringAssembly {
 </tbody>
 </table></div>
 <p>Two parts of Phase 4 wait for Phase 1, because Phase 1 writes what they carry. Per-turn volatile injection at the proxy lands when the Phase 1 assembler exists, and the proxy ships the seam for it (ADR-094). Bundle permissions are filled from the second compilation, which Phase 1 writes (ADR-097 §3).</p>
-<p>The review's defects are filed on their own: #3302 (the <code>publish_context_record</code> path leaves <code>kind</code> and <code>force</code> NULL), #3303 (<code>additionalInstructions</code> is unbudgeted and never checked against a rule), #3304 (Codex and Stella spend is absent) and #3305 (the public decks describe the removed runtime).</p>
+<p>The review's defects are filed on their own: #3302 (the <code>publish_steering_record</code> path leaves <code>kind</code> and <code>force</code> NULL), #3303 (<code>additionalInstructions</code> is unbudgeted and never checked against a rule), #3304 (Codex and Stella spend is absent) and #3305 (the public decks describe the removed runtime).</p>
 <p><strong>Decided 2026-09-18: subscription logins pass through the proxy.</strong> Both OpenAI and Anthropic work through a base URL proxy, subscription logins included, and neither vendor's terms explicitly forbid it: validated by the maintainer on 2026-09-18 (ADR-094). The review listed this as its one unverified risk. It is closed, and it does not gate Phase 4.</p>
 <hr />
 <h2 id="18-risks-and-open-decisions">18. Risks and open decisions</h2>
@@ -3286,7 +3286,7 @@ interface SteeringAssembly {
 <tr>
 <td>Ontology in git</td>
 <td>Graph-only in v1</td>
-<td>Regulated customers may ask for ontology changes as Context PRs. The proposal object already has a diff</td>
+<td>Regulated customers may ask for ontology changes as Steering PRs. The proposal object already has a diff</td>
 </tr>
 <tr>
 <td>Approval tokens</td>
@@ -3295,7 +3295,7 @@ interface SteeringAssembly {
 </tr>
 <tr>
 <td>Steering format</td>
-<td><code>.oxagen/rules</code>, in the context-record TOML format that Stella implements. Stella symlinks to it</td>
+<td><code>.oxagen/rules</code>, in the steering-record TOML format that Stella implements. Stella symlinks to it</td>
 <td>The directory name is fixed. If a second agent needs its own path, it gets a symlink the same way Stella does</td>
 </tr>
 <tr>
@@ -3392,7 +3392,7 @@ interface SteeringAssembly {
 </tr>
 <tr>
 <td>W6</td>
-<td>It learned, you approved, it changed: record to proposal to Context PR to merge to the next run</td>
+<td>It learned, you approved, it changed: record to proposal to Steering PR to merge to the next run</td>
 <td>Steering, Run, Agents (definition in git)</td>
 <td><a href="https://claude.ai/code/artifact/2bbadccb-92ff-4ade-8f6d-704d9c66dafe">W6 mockup</a></td>
 <td>mocked</td>
@@ -3514,7 +3514,7 @@ interface SteeringAssembly {
 <td><a href="https://github.com/macanderson/tmp-oxagen-mockups/blob/main/docs/w13-in-the-loop-scenario.md">W13 scenario</a></td>
 </tr>
 <tr>
-<td>Steering (records, proposals, Context PR, retirement)</td>
+<td>Steering (records, proposals, Steering PR, retirement)</td>
 <td><code>/{org}/{ws}/steering</code></td>
 <td>loaded, empty, error, denied, phone</td>
 <td><a href="https://claude.ai/code/artifact/2bbadccb-92ff-4ade-8f6d-704d9c66dafe">W6 mockup</a>, <a href="https://claude.ai/code/artifact/317226a1-c2ff-43ce-a439-4a54f8b8288b">W11 mockup</a>, <a href="https://claude.ai/code/artifact/3fcf949a-c455-4efd-af36-1c2d1f13088e">W12 mockup</a></td>
@@ -6274,7 +6274,7 @@ does not price the work, and is not evidence about a person.</p>
 <td>Context</td>
 <td><code>Record</code></td>
 <td><code>record_id</code>, <code>lineage_id</code>, <code>record_kind</code>, <code>record_hash</code>, <code>status</code>, <code>sharing_scope</code>, <code>confidence</code>, <code>origin</code>, <code>attestation</code></td>
-<td>a context record (§9)</td>
+<td>a steering record (§9)</td>
 </tr>
 <tr>
 <td>Run</td>
@@ -6435,7 +6435,7 @@ does not price the work, and is not evidence about a person.</p>
 <td><code>PROMOTED_BY</code></td>
 <td><code>Record</code> → <code>Record</code> (promotion event)</td>
 <td><code>pr_url</code>, <code>commit_sha</code>, <code>approver</code></td>
-<td>merge of a Context PR</td>
+<td>merge of a Steering PR</td>
 </tr>
 <tr>
 <td>Context</td>
@@ -6918,17 +6918,17 @@ does not price the work, and is not evidence about a person.</p>
 <tr>
 <td><code>register_agent</code></td>
 <td>create_agent_def, suggest_agent_def, summarize_agent_def</td>
-<td>opens a Context PR adding <code>.oxagen/agents/&lt;slug&gt;.toml</code> and the generated harness files; identity is created on merge</td>
+<td>opens a Steering PR adding <code>.oxagen/agents/&lt;slug&gt;.toml</code> and the generated harness files; identity is created on merge</td>
 </tr>
 <tr>
 <td><code>update_agent</code></td>
 <td>update_agent_def, revise_agent_def, publish_agent_def, deploy_agent</td>
-<td>a Context PR changing the definition; identity and belt update on merge</td>
+<td>a Steering PR changing the definition; identity and belt update on merge</td>
 </tr>
 <tr>
 <td><code>retire_agent</code></td>
 <td>delete_agent_def</td>
-<td>a Context PR removing the file; principal retired, never deleted</td>
+<td>a Steering PR removing the file; principal retired, never deleted</td>
 </tr>
 <tr>
 <td><code>get_agent</code></td>
@@ -7267,7 +7267,7 @@ does not price the work, and is not evidence about a person.</p>
 </tr>
 <tr>
 <td><code>list_records</code></td>
-<td>list_context_records, list_memories, list_memory_citations, get_citation_stats</td>
+<td>list_steering_records, list_memories, list_memory_citations, get_citation_stats</td>
 <td>by kind, scope, status, lineage</td>
 </tr>
 <tr>
@@ -7282,12 +7282,12 @@ does not price the work, and is not evidence about a person.</p>
 </tr>
 <tr>
 <td><code>propose_record</code></td>
-<td>promote_memory, promote_context_record, suggest_promotion_rationales</td>
+<td>promote_memory, promote_steering_record, suggest_promotion_rationales</td>
 <td>a proposal</td>
 </tr>
 <tr>
-<td><code>open_context_pr</code></td>
-<td>publish_context_record</td>
+<td><code>open_steering_pr</code></td>
+<td>publish_steering_record</td>
 <td>the pull request</td>
 </tr>
 <tr>
@@ -7549,7 +7549,7 @@ does not price the work, and is not evidence about a person.</p>
 <td><strong>Steering</strong></td>
 <td><code>/{org}/{ws}/steering</code></td>
 <td><code>knowledge/memory</code></td>
-<td>records, proposals, Context PRs, effect, retirement</td>
+<td>records, proposals, Steering PRs, effect, retirement</td>
 </tr>
 <tr>
 <td>7</td>

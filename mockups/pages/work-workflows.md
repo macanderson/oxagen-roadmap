@@ -102,7 +102,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | Each stage agent’s harness, name and tier | `AGENTS[]` | `list_agents` | `harness`, `name`, `enforcementTier` (`packages/oxagen/src/contracts/agent.list.ts:24-31`, `:63`, `:83`) | ✅ |
 | The builder’s agent select: agents you operate | `myAgents()` | `list_agents` `operatorId` | `principals.parent_user_id` (`agent.list.ts:71-72`) | ✅ |
 | The wand: stages drafted from a sentence | `wfWand()` | `oxagen.assistant` drafting the file | `ask_assistant` exists (`packages/oxagen/src/contracts/assistant.ask.ts:61`) and drafts no workflow | ❌ |
-| Open pull request | `wfOpenPr()` | `propose_workflow` (`tasks-spec.md` §12) | none. `open_context_pr` opens a pull request for one Steering record under `.oxagen/rules/` only (`packages/oxagen/src/contracts/context.pr.open.ts:96`) | ❌ |
+| Open pull request | `wfOpenPr()` | `propose_workflow` (`tasks-spec.md` §12) | none. `open_steering_pr` opens a pull request for one Steering record under `.oxagen/rules/` only (`packages/oxagen/src/contracts/steering.pr.open.ts:96`) | ❌ |
 | Handoffs, returns and the park (component help only) | none | `hand_off_work_order`, `return_work_order`, the park in Approvals | none | ❌ |
 | `needs` on a stage, the layers, and **After** | `WORKFLOWS[].stages[].needs`, `wfDepths()` | `.oxagen/workflows/*.toml` at `oxagen-workflow/v0.2` (`work-graph-spec.md` §8.1) | none | ❌ |
 
@@ -148,7 +148,7 @@ The design names these. Neither exists in `packages/iam` for a workflow today.
 ## Backend gaps this page depends on
 
 - The workflow file schema (`oxagen-workflow/v0.1`) and its ADR, which names the difference from the `workflow.*` capabilities ADR-043 removed (`tasks-spec.md` §17.2)
-- `propose_workflow`, opening the pull request as `open_context_pr` does for a record
+- `propose_workflow`, opening the pull request as `open_steering_pr` does for a record
 - Reading the published workflows for the send menu and the work order
 - Sequencing a work order through the stages: `hand_off_work_order`, `return_work_order`, the return bound and the park in Approvals (§10.3)
 - The workflow stage’s SteeringFrames: the stage brief as `invocation`, its items as `constraint`, and the prior handoff as quoted `context` (wedge spec, Steering › Emissions)

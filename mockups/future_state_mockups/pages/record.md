@@ -1,4 +1,4 @@
-# Context record
+# Steering record
 
 | | |
 |---|---|
@@ -7,12 +7,12 @@
 | Spec | §10 Context and steering; `docs/creation-spec.md` §5; Appendix F page 8 (Steering) |
 | Design | `mockups/src/engine.js` → `pRecord(r)`, `crecPanel(rec)`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
-| Storybook | `Oxagen / Workspace / Context record`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / Workspace / Steering record`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
 | Audit | `record.audit-prompt.md` |
 
 ## Job
 
-One published context record, presented by its kind. The statement is the record, so the statement is the headline; the lineage, the commit and the counters are metadata and read like it. The statement itself is editable in a real source editor, and saving opens a pull request — a published record is changed the way it was published.
+One published steering record, presented by its kind. The statement is the record, so the statement is the headline; the lineage, the commit and the counters are metadata and read like it. The statement itself is editable in a real source editor, and saving opens a pull request — a published record is changed the way it was published.
 
 ## What is on the page
 
@@ -20,7 +20,7 @@ One published context record, presented by its kind. The statement is the record
 Actions: **Discard** (enabled only when the statement is modified) · **Propose a change** (gold)
 
 - **Statement editor** — the shared code editor (`cedHtml`) over the statement and nothing else, path `.oxagen/rules/<lineage>.toml · statement`. Line-number gutter, markdown syntax highlighting, current-line band, **Find ⌘F** with a match count, a status line with `Ln/Col`, the grammar, a line and character count, and the key hints. The bar carries the record’s token cost in the compiled bundle.
-- **Lineage** panel — lineage, file path on the main repo, the commit that published it and when, the effect line (`rendered · cited · violated`), and the schema (`context-record/v0.1`).
+- **Lineage** panel — lineage, file path on the main repo, the commit that published it and when, the effect line (`rendered · cited · violated`), and the schema (`steering-record/v0.1`).
 - **The kind panel** — one per kind, and no two alike. This is the page’s reason to exist:
 
 | Kind | What its panel shows |
@@ -46,11 +46,11 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
-| The record | `RECORDS` (`fixtures/records.json`) via `stgRecord(id)` | `.oxagen/rules/<lineage>.toml` on the workspace main repo; the Postgres registry indexes it (the graph becomes the index in Phase 3) | `agent.context_records` | 🟡 |
+| The record | `RECORDS` (`fixtures/records.json`) via `stgRecord(id)` | `.oxagen/rules/<lineage>.toml` on the workspace main repo; the Postgres registry indexes it (the graph becomes the index in Phase 3) | `agent.steering_records` | 🟡 |
 | The statement draft | `S.cedVal["rec:<id>"]` / `S.cedBase` | the working tree of a branch, never a row | — | ❌ |
 | Bundle share | `STEER_BUNDLE` via `stgBundle()` | compiled policy bundle, per version | `agent.policy_bundles` | 🟡 |
 | Effect counters | `rec.effect` | rollups over `frame.context_rendered` / `context_cited` | frame index | 🟡 |
-| Pending proposal | `S.recPending[id]` | Context PR lifecycle (spec §10.3) | `agent.context_promotions` | 🟡 |
+| Pending proposal | `S.recPending[id]` | Steering PR lifecycle (spec §10.3) | `agent.steering_promotions` | 🟡 |
 
 ## Functionality
 

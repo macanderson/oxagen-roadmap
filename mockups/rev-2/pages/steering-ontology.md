@@ -16,7 +16,7 @@ A home for the entity and term definitions that steer. It is a small tab, not a 
 
 ## What is on the page
 
-**Hub header.** Eyebrow: the workspace name, h1 “Steering”, subtext “Everything that can steer an agent in this workspace competes in one assembler.” Actions: the governance chip **Governance: team** and **Write a context record** (gold; opens the record wizard). The chip and its `govmode` dialog are specified in `steering.md`.
+**Hub header.** Eyebrow: the workspace name, h1 “Steering”, subtext “Everything that can steer an agent in this workspace competes in one assembler.” Actions: the governance chip **Governance: team** and **Write a steering record** (gold; opens the record wizard). The chip and its `govmode` dialog are specified in `steering.md`.
 
 **The seven tabs, in this order:** Records (59) · Skills (6) · Memory (6) · Ontology (4) · Policy (6) · Proposals (15) · Preview. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. The hash is read on load and on `hashchange`; a tab changed by code writes the hash back with `replaceState`, so every view is a link. Ontology is selected.
 
@@ -38,14 +38,14 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- A note is authored through the same pull request flow as a record: Write a context record, kind chosen in the wizard.
+- A note is authored through the same pull request flow as a record: Write a steering record, kind chosen in the wizard.
 - Delivery never waits for the graph.
 - The badge count is the row count and the tab count is the same number.
 
 ## States
 
 - **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: the hub header, the chip, and the seven tabs stay; the header holds no gold. The body is “No ontology notes yet”: “A note defines one entity or one term the way this workspace uses it. Notes are files under `.oxagen/ontology/` on a-intel/platform, published by a merge.” Action: **Write a context record** (gold).
+- **empty**: the hub header, the chip, and the seven tabs stay; the header holds no gold. The body is “No ontology notes yet”: “A note defines one entity or one term the way this workspace uses it. Notes are files under `.oxagen/ontology/` on a-intel/platform, published by a merge.” Action: **Write a steering record** (gold).
 - **loading**: the shell stays; the page body, hub header included, is replaced by the skeleton (four tile blocks and a panel of seven rows).
 - **error**: “Steering could not be loaded”. “The control plane answered `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the trace line.
 - **access denied**: “You cannot see this workspace’s steering”, naming `steering.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).
@@ -57,7 +57,7 @@ The seven tabs are one scrolling strip with scroll snap, and the tab in view is 
 ## Permissions
 
 - Read: `steering.read`
-- Writes: `context.propose`, the same governed action that opens any Context PR.
+- Writes: `context.propose`, the same governed action that opens any Steering PR.
 
 ## Backend gaps this page depends on
 

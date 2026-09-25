@@ -17,7 +17,7 @@ It answers two questions on every page: where am I, and where does something wai
 | Workspace name, main repository, branch, provisional date | `WS` (`fixtures/ws.json`), `ws()` | `list_workspaces` (`workspace.list.ts`) | partial |
 | Work count | `tkWaiting()` plus `woWaiting()` | work items whose definition of done is a draft or changed, plus work orders waiting on you | future-only: `get_nav_counts` returns no Work count |
 | Tools count | `proposals()` over `TOOLS` | observed output schemas waiting for approval | future-only |
-| Steering count | `stgNavCount()`: `PROPOSALS` plus `recprOpenCount()` | `get_nav_counts` open proposals (`agent.context_proposals`) | partial: record pull requests are not counted |
+| Steering count | `stgNavCount()`: `PROPOSALS` plus `recprOpenCount()` | `get_nav_counts` open proposals (`agent.steering_proposals`) | partial: record pull requests are not counted |
 | Runtimes count | `RUNTIMES` whose `health` is not `ok` | runtime health | future-only: no runtime capability in the contracts |
 | Repositories count | `oxprOpen()` | pull requests Oxagen opened | future-only |
 | Audit count | `INCIDENTS`, open and critical | `get_nav_counts` incidents (`tacho.incidents`) | shipped |
@@ -128,7 +128,7 @@ The bell is on every page, and the dialog carries each event's own sentence, so 
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
 | Title, body, time, tone | `NOTIFS` (`fixtures/notifs.json`, 8 items, 3 unread) | `list_notifications` (`notification.list.ts`): `title`, `kind`, `event` | shipped |
-| Kind in mono | `NOTIFS[].kind` (`approval.requested`, `budget.breached`, `context_pr.opened`, `run.sealed` and more) | `event`: `approval.requested`, `approval.resolved` or `budget.breached`; `kind`: system, approval, run, member or security | partial: five of the mockup's eight kinds have no producer |
+| Kind in mono | `NOTIFS[].kind` (`approval.requested`, `budget.breached`, `steering_pr.opened`, `run.sealed` and more) | `event`: `approval.requested`, `approval.resolved` or `budget.breached`; `kind`: system, approval, run, member or security | partial: five of the mockup's eight kinds have no producer |
 | Mark read | `notifRead(i)`, `markAllRead()` | `mark_notification` (`notification.mark.ts`) | shipped |
 | Read audit event | `auditEvent("notification_read", …)` | none: the contract calls the mark a settings write, not a governed action | future-only |
 

@@ -50,7 +50,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Registering opens a Context PR that adds `.oxagen/agents/<slug>.toml`; nothing is written to Postgres until the first frame arrives.
+- Registering opens a Steering PR that adds `.oxagen/agents/<slug>.toml`; nothing is written to Postgres until the first frame arrives.
 - The score colour is a percentile among every scored agent on Oxagen (green ≥ p90, none p10–p90, amber < p10, red < p5), recomputed per render from `PLATFORM` (`scoreCuts()`); the score itself is the agent’s own 0–1000.
 - Deregister retires the principal (never deletes it) so its runs keep their identity; the file removal is a pull request.
 - Tile counts are rollups over `AGENTS` for the workspace; the organization count is over every workspace.
@@ -58,7 +58,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded** — the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty** — “No identities registered in <workspace>” — identity lives in Postgres, definition in `.oxagen/agents/`; registering opens a Context PR. Actions: **Wrap Claude Code**, **Register an agent**.
+- **empty** — “No identities registered in <workspace>” — identity lives in Postgres, definition in `.oxagen/agents/`; registering opens a Steering PR. Actions: **Wrap Claude Code**, **Register an agent**.
 - **loading** — the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so the operator keeps their bearings.
 - **error** — “Identities could not be loaded” — `503 iam_principals_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied** — “You cannot see the identities in this workspace” — the roles the signed-in person holds on the organization do not include `agent.read on core-platform`. Copy explains an owner can grant it and that the grant is itself a governed action in the audit record. Actions: **Request access** (opens the request-access dialog), **Back to Fleet**. Below: *Signed in as* (name · role), *Needed* (the permission), *Decided by* (`pol_v41` · deny wins over every allow).

@@ -58,7 +58,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Each saving is measured minus counterfactual over the runs it cites, at the price each call actually paid. Evidence opens the runs, the people and the arithmetic; Fix opens the change that removes it (a Context PR or a help article by finding kind).
+- Each saving is measured minus counterfactual over the runs it cites, at the price each call actually paid. Evidence opens the runs, the people and the arithmetic; Fix opens the change that removes it (a Steering PR or a help article by finding kind).
 - Every tile is a rollup of the rows beneath it: the Spend tile equals the Total row of By model, and the Tokens tile equals the By token class total. Coaching derives at read time from the same rollup the Tokens tab prints, so the two cannot disagree.
 - Tokens are counted per model call by class and by prompt part (conversation, tool results, context frames, tool definitions, steering, system). Observed means the gateway proxy counted them from the bytes that passed through it. Self-reported means the harness said so; a class it does not report is marked absent, never zero, and a cache hit rate over a mixed fleet is never computed from missing data as if it were zero.
 - Every run has exactly one operator. A run that arrived without one is attributed to the agent's owning operator and flagged, never dropped and never spread.

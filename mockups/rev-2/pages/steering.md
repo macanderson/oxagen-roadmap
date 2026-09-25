@@ -18,9 +18,9 @@ The page depicts every phase of the steering and gateway plan (0 to 5) as shippe
 
 ## What is on the page
 
-**Hub header.** Eyebrow: the workspace name (“Core platform”), h1 “Steering”, subtext “Everything that can steer an agent in this workspace competes in one assembler.” Actions, left to right: the governance chip **Governance: team** (`govChip`, the mode in mono) and **Write a context record** (gold; opens the record wizard: describe, kind, statement, checks, pull request). On Records the header holds the gold action. A tab that holds its own primary action takes the gold from the header. The chip stays on every tab and in the empty state.
+**Hub header.** Eyebrow: the workspace name (“Core platform”), h1 “Steering”, subtext “Everything that can steer an agent in this workspace competes in one assembler.” Actions, left to right: the governance chip **Governance: team** (`govChip`, the mode in mono) and **Write a steering record** (gold; opens the record wizard: describe, kind, statement, checks, pull request). On Records the header holds the gold action. A tab that holds its own primary action takes the gold from the header. The chip stays on every tab and in the empty state.
 
-**Governance mode dialog** (`govmode`, opened by the chip). Title “Governance mode · <workspace name>”, subtitle “.oxagen/rules/governance.toml on <main repo>”. Three cards in one column, `solo` (“The author may merge their own.”), `team` (“A code-owner review is required.”), `regulated` (“A named approver from a role must approve, and the promotion ledger is hash-chained.”), each with its hint line, the current mode marked “· now”, the picked card highlighted. Under the cards, the `governance.toml` the pick would write (`oxGovernanceToml`: `mode = "<mode>"`, `separation_of_duties = true` only for `regulated`). A note: the mode is read off the file when a pull request is opened and again when it is merged, so raising it takes effect on everything already in flight; lowering it is an org-owner action with approval, recorded as a security event. Footer **Cancel** · **Open the Context PR** (gold). Confirming sets the workspace mode and reports “Context PR opened on <main repo>: .oxagen/rules/governance.toml sets mode = <mode>. It takes effect on merge for everything already in flight; nothing else in Oxagen writes that file.”; picking the current mode reports that nothing changed. The Edit workspace dialog (`editws`) carries the same value as a select, `wsGov`.
+**Governance mode dialog** (`govmode`, opened by the chip). Title “Governance mode · <workspace name>”, subtitle “.oxagen/rules/governance.toml on <main repo>”. Three cards in one column, `solo` (“The author may merge their own.”), `team` (“A code-owner review is required.”), `regulated` (“A named approver from a role must approve, and the promotion ledger is hash-chained.”), each with its hint line, the current mode marked “· now”, the picked card highlighted. Under the cards, the `governance.toml` the pick would write (`oxGovernanceToml`: `mode = "<mode>"`, `separation_of_duties = true` only for `regulated`). A note: the mode is read off the file when a pull request is opened and again when it is merged, so raising it takes effect on everything already in flight; lowering it is an org-owner action with approval, recorded as a security event. Footer **Cancel** · **Open the Steering PR** (gold). Confirming sets the workspace mode and reports “Steering PR opened on <main repo>: .oxagen/rules/governance.toml sets mode = <mode>. It takes effect on merge for everything already in flight; nothing else in Oxagen writes that file.”; picking the current mode reports that nothing changed. The Edit workspace dialog (`editws`) carries the same value as a select, `wsGov`.
 
 **The seven tabs, in this order:** Records (59) · Skills (6) · Memory (6) · Ontology (4) · Policy (6) · Proposals (15) · Preview. The count is published records, skills in scope while skills are on, memory items, ontology notes, gates, and candidates plus open pull requests; Preview carries none. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. The hash is read on load and on `hashchange`; a tab changed by code writes the hash back with `replaceState`, so every view is a link. The bare route `#/:org/:ws/steering` is Records.
 
@@ -47,7 +47,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 | Element | Mockup collection | Target store | Backing today (repo) | Status |
 |---|---|---|---|---|
-| Records | `RECORDS` (with `tok`, `grant`, `about`, `hash`, `repo`) | git `.oxagen/rules/` is the system of record; the Postgres registry is the index | `agent.context_records`, `context_record_versions`; `context.record.*` | ✅ |
+| Records | `RECORDS` (with `tok`, `grant`, `about`, `hash`, `repo`) | git `.oxagen/rules/` is the system of record; the Postgres registry is the index | `agent.steering_records`, `steering_record_versions`; `steering.record.*` | ✅ |
 | Compiled bundle | `STEER_BUNDLE` in `engine.js` | `context.system` in the signed bundle (Phase 0) | compiled from active `must` and `should` records | 🟡 |
 | Token cost and enforcement grant | `RECORDS[].tok`, `RECORDS[].grant` | `SteeringItem.token_cost`, `SteeringItem.enforcement_grant` | every row carries `kind` and `force` after the two publish paths collapse (Phase 1) | 🟡 |
 | Governance mode | `WS[].governance` via `wsGov()` | `.oxagen/rules/governance.toml` on the main repo, read on open and on merge | read by `context.steering.policy.ts`; nothing writes it | 🟡 |
@@ -56,14 +56,14 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## Functionality
 
 - A record can never grant authority. An enforcement grant compiles a gate the policy already allows a record to narrow; it never widens one.
-- Changing the governance mode is a Context PR against `governance.toml`, never a settings write. The chip reads the workspace's current value; the dialog's pick is session state until Open the Context PR.
+- Changing the governance mode is a Steering PR against `governance.toml`, never a settings write. The chip reads the workspace's current value; the dialog's pick is session state until Open the Steering PR.
 - The old routes `#/:org/:ws/skills`, `#/:org/:ws/skills/<view>`, and `#/:org/:ws/skills/<id>/source` still resolve. `route()` rewrites them in place to `#/:org/:ws/steering/skills…`, so no link in the mockup, a scenario, or a document breaks.
 - `#/:org/:ws/steering/prs` is kept as an alias of `#/:org/:ws/steering/proposals/prs`.
 
 ## States
 
 - **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: the hub header, the governance chip, and the seven tabs stay; the header holds no gold. The body is “Nothing steers this workspace yet”: “Published records live in `.oxagen/rules/` on a-intel/platform. A record becomes published by being merged, never by being saved here.” Action: **Write a context record** (gold).
+- **empty**: the hub header, the governance chip, and the seven tabs stay; the header holds no gold. The body is “Nothing steers this workspace yet”: “Published records live in `.oxagen/rules/` on a-intel/platform. A record becomes published by being merged, never by being saved here.” Action: **Write a steering record** (gold).
 - **loading**: the shell stays; the page body, hub header included, is replaced by the skeleton (four tile blocks and a panel of seven rows).
 - **error**: “Steering could not be loaded”. “The control plane answered `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the line “trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z”.
 - **access denied**: “You cannot see this workspace’s steering”. “Your roles on Anderson Intelligence Corp. do not include `steering.read on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access**, **Back to Fleet**. Below: *Signed in as* (Marcus Bell · workspace.owner · core-platform), *Needed* (`steering.read on core-platform`), *Decided by* (`pol_v41` · deny wins over every allow).
@@ -75,11 +75,11 @@ The seven tabs are one scrolling strip with scroll snap, and the tab in view is 
 ## Permissions
 
 - Read: `steering.read`
-- Writes (each a governed action recorded in Audit): `context.propose (open a Context PR)`, `context.review`, `context.retire`; changing the governance mode opens a Context PR under `context.propose`, and lowering it needs an org-owner approval.
+- Writes (each a governed action recorded in Audit): `context.propose (open a Steering PR)`, `context.review`, `context.retire`; changing the governance mode opens a Steering PR under `context.propose`, and lowering it needs an org-owner approval.
 
 ## Backend gaps this page depends on
 
-- Context PR state from GitHub
+- Steering PR state from GitHub
 - The registry port the assembler reads through (Phase 1), and its move to the graph behind the same port (Phase 3)
 - Writing `governance.toml`: it is read on every open and merge and written by nothing today
 

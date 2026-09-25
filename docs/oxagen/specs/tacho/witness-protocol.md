@@ -220,7 +220,7 @@ a fraction of the cost. If escape data later shows workers fitting the witness,
 this is the first thing to revisit.
 
 **Criteria ratification with a frozen `AC_HASH`.** Declined because the
-workspace already has an acceptance model. `stella-core::context_record::contract`
+workspace already has an acceptance model. `stella-core::steering_record::contract`
 already carries a typed acceptance model (`ArtifactContract`, `Requirement`,
 `RequirementKind::{COMMAND, SEMANTIC_VERIFIER}`, `ContractValidation`,
 `contract_hash`) implementing the Context Graph Protocol's lifecycle §8.12–8.14.

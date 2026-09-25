@@ -37,7 +37,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 - The poll (`regSchedule`) starts 520 ms after the loaded render and adds a log line every 780 ms. At the sixth line it flips to First frame received. It stops when you leave the step or the state is not loaded.
 - After the flip a six-second countdown runs in `#regAuto` (“Opening automatically…”, then “Opening automatically in N…”) and then `regFinish` runs. **Open in Fleet** runs it at once.
-- `regFinish` writes the agent (status enrolled, tier `harness`) and its smoke run (“Installer smoke session”, cost 0.02 with basis `client_attested`, replay grade full) once per flow, clears `S.reg`, goes to Fleet, and toasts “a-intel.core.perf-watch registered — first frame received. Its smoke run is live on Fleet.” in gold. The smoke session opens the Context PR that adds `.oxagen/agents/<slug>.toml`.
+- `regFinish` writes the agent (status enrolled, tier `harness`) and its smoke run (“Installer smoke session”, cost 0.02 with basis `client_attested`, replay grade full) once per flow, clears `S.reg`, goes to Fleet, and toasts “a-intel.core.perf-watch registered — first frame received. Its smoke run is live on Fleet.” in gold. The smoke session opens the Steering PR that adds `.oxagen/agents/<slug>.toml`.
 - **Back** returns to the wrap step and resets the log. Cancel after the frame toasts “Registration cancelled. The enrollment was revoked and the smoke run discarded.”; before it, the toast in `register-name.md`.
 
 ## States

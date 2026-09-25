@@ -12,7 +12,7 @@ You are auditing the **Repositories** page of Oxagen (`#/a-intel/core-platform/r
 
 1. The page spec: `pages/repositories.md` (read it first, in full).
 2. The design, rendered: the `repositories` stories in Storybook (`npm run storybook`), one per state (loaded, empty, loading, error, access denied), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright.
-3. The product spec for context: `docs/mission-control-spec.md` §10 (the repository, steering and Context PRs), §11.2 (GitHub: events in, code graph up to date), Appendix F; `docs/creation-spec.md` (the one shape all five wizards share); the data mapping in `docs/implementation-plan.md` §3.
+3. The product spec for context: `docs/mission-control-spec.md` §10 (the repository, steering and Steering PRs), §11.2 (GitHub: events in, code graph up to date), Appendix F; `docs/creation-spec.md` (the one shape all five wizards share); the data mapping in `docs/implementation-plan.md` §3.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/repositories[/<tab>]`.
 
 ## Procedure

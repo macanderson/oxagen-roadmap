@@ -7,7 +7,7 @@ export default {
   group: "Data display",
   order: 35,
   summary: "Five fixed-vocabulary badges, one per axis: a record's kind, a frame's type, a tool's category, its hazard, and the gate in front of it.",
-  lead: "A typed badge names what a thing is inside a closed list: a context record's kind, a SteeringFrame's type, a tool's category, its hazard, or the gate a rule put in front of it. None of these five ever changes on its own, so none of them is a [badge](badge.html)'s dot and word for a state. Engine rule: an icon badge is a kind, a dot badge is a state, and kind hues never reuse a state hue or gold.",
+  lead: "A typed badge names what a thing is inside a closed list: a steering record's kind, a SteeringFrame's type, a tool's category, its hazard, or the gate a rule put in front of it. None of these five ever changes on its own, so none of them is a [badge](badge.html)'s dot and word for a state. Engine rule: an icon badge is a kind, a dot badge is a state, and kind hues never reuse a state hue or gold.",
   root: ".kb, .ft, .tcb, .hz, .gt",
   css: "lines 196 to 207 (kind), 264 to 265 (tool category), 266 to 270 (hazard), 271 to 276 (gate), wedge.js 234 to 236 and 2269 to 2276 (frame type)",
   usedOn: ["Steering", "Run (Decision trace, Transcript)", "Tools", "Agents (mandates)"],
@@ -15,7 +15,7 @@ export default {
     {
       id: "kind",
       name: "Kind badge",
-      note: "The six context-record kinds, each with its own hue and icon. `kindGlyph()` draws the same icon with no word, for a tight column.",
+      note: "The six steering-record kinds, each with its own hue and icon. `kindGlyph()` draws the same icon with no word, for a tight column.",
       html: `
         <div class="row" style="gap:8px;flex-wrap:wrap;align-items:center">
           <span class="kb k-rule" title="A directive that steers behavior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h14M13 7l5 5-5 5"/></svg>rule</span>
@@ -31,7 +31,7 @@ export default {
     {
       id: "frame-type",
       name: "Frame type",
-      note: "Eight SteeringFrame types, lowercase and monospace. Four (`invariant`, `constraint`, `procedure`, `context`) reuse a context-record hue. The rest have a hue of their own.",
+      note: "Eight SteeringFrame types, lowercase and monospace. Four (`invariant`, `constraint`, `procedure`, `context`) reuse a steering-record hue. The rest have a hue of their own.",
       html: `
         <div class="ft-strip">
           <span class="ft-n"><span class="ft ft-goal" title="The outcome the work serves">goal</span><b>4</b></span>
@@ -85,7 +85,7 @@ export default {
     ["Kind hue", "`.k-rule`, `.k-constraint`, `.k-procedure`, `.k-fact`, `.k-memory`, `.k-preference`", "Sets `--kc`. Drives the kind badge, the kind glyph, and `.rec`'s left rule and icon tile on [Record card](record-card.html)."],
     ["Kind glyph", "`.kg`", "The same icon with no word, for a table cell or a caption line."],
     ["Frame type badge", "`.ft`", "A lowercase monospace word with a small square mark (`::before`) in `currentColor`, never an icon. The square keeps a type from reading as a state, which draws a round dot."],
-    ["Frame type hue", "`.ft-goal`, `.ft-invariant`, `.ft-constraint`, `.ft-delegation`, `.ft-procedure`, `.ft-context`, `.ft-invocation`, `.ft-capability`", "Sets `--fc`. Four share a context-record hue. The other four take `--fk-model`, `--fk-gov`, `--fk-op`, and `--fk-tool`."],
+    ["Frame type hue", "`.ft-goal`, `.ft-invariant`, `.ft-constraint`, `.ft-delegation`, `.ft-procedure`, `.ft-context`, `.ft-invocation`, `.ft-capability`", "Sets `--fc`. Four share a steering-record hue. The other four take `--fk-model`, `--fk-gov`, `--fk-op`, and `--fk-tool`."],
     ["Frame type strip", "`.ft-strip`, `.ft-n`", "Counts by type, wrapped in a flex row. `typeStrip()` makes each entry a filter button when given a view."],
     ["Tool category badge", "`.tcb`", "An SVG icon at 12px and a two-word label, colored `--body` on `--hl` with a `--rule` border. Never colored by the category."],
     ["Hazard risk mark", "`.hz.hz-low`, `.hz-medium`, `.hz-high`, `.hz-critical`", "A shape (circle, diamond, triangle, filled triangle) plus the risk word, in a state hue."],
@@ -149,7 +149,7 @@ export default {
     ["toolGate(t)", "engine.js:878", "Decides which gate a tool sits behind today (a kill switch outranks a mandate outranks approval) and renders it with `gate()`. 5 calls."],
   ],
   sourceNotes: [
-    "The six context-record kinds and their icons live in `KINDS` (engine.js:707). `kindBadge()` falls back to `KINDS.rule` for any kind it does not recognize.",
+    "The six steering-record kinds and their icons live in `KINDS` (engine.js:707). `kindBadge()` falls back to `KINDS.rule` for any kind it does not recognize.",
     "The eight frame types and their descriptions live in `FT` (wedge.js:224 to 233).",
     "The ten tool categories and their icons live in `TCAT` (engine.js:701). `toolMeta()` classifies any tool name the table does not list, by its verb.",
   ],

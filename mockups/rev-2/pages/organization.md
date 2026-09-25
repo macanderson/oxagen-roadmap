@@ -31,7 +31,7 @@ Actions: **Invite** (opens `invite`), **Create a workspace** (gold; opens `newws
 
 **Dialogs this page opens:** `invite`, `member`, `role`, `removemember`, `newws`, `editws`, `archivews`, `roleedit`, `roledel`, `editroute`, `funding`, `mintkey`, `rotateorgkey`, `revokeorgkey`, `plane`, `apikey`, `rotatekey`, `revokekey`.
 
-The **Edit workspace** dialog (`editws`) has Name, Main repository (read-only, changing it is an org-owner action with approval), Production branch, **Governance mode** (select `wsGov`: `solo`, `team`, `regulated`, each with its one-line meaning; written to `.oxagen/rules/governance.toml` through a Context PR and in effect on merge), Namespace (immutable), Retention mode (`content_exact`, `digest_only`), and the facts Toolbelt limit, Default budget, Agents; **Cancel**, **Save**. The **Create a workspace** dialog (`newws`) has Name, Namespace, Main repository, Production branch, Governance mode, Retention mode; **Create**.
+The **Edit workspace** dialog (`editws`) has Name, Main repository (read-only, changing it is an org-owner action with approval), Production branch, **Governance mode** (select `wsGov`: `solo`, `team`, `regulated`, each with its one-line meaning; written to `.oxagen/rules/governance.toml` through a Steering PR and in effect on merge), Namespace (immutable), Retention mode (`content_exact`, `digest_only`), and the facts Toolbelt limit, Default budget, Agents; **Cancel**, **Save**. The **Create a workspace** dialog (`newws`) has Name, Namespace, Main repository, Production branch, Governance mode, Retention mode; **Create**.
 
 **Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet, Agent IAM, Tools, Steering, Repositories, Spend; Organization nav: Organization, Billing, Audit; the assistant launcher, agent count, data plane and connection badge at the foot), top bar (Menu, breadcrumbs, ⌘K "Search or run an action", Notifications with the unread count, **Approvals** with the count of everything waiting on you across the organization, account avatar → Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out). The Approvals button opens the right-hand drawer `#apdrawer`: heading "Approvals" with an "N waiting" badge and a close button, an open interjection row with **Answer it**, one row per pending approval (tool and amount, agent, task, workspace, risk badges, countdown), the full approval card with **Approve** and **Deny** when a row is picked and "‹ All approvals" to return, "N resolved today" beneath. Escape closes it. There is no assistant button in the top bar.
 
@@ -53,7 +53,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 - Changing a role is a governed action: it passes IAM and writes an audit record. Membership writes are free; `resolve_approval` is the only billable action (2026-09-15, maintainer decision).
 - **Create a workspace** opens an in-app form that calls `create_workspace`. It ships in rev1 with the fix for `macanderson/oxagen#3029`, where the org-only `create_workspace` REST mount fails before its handler (2026-09-15, maintainer decision).
-- The governance mode is a workspace setting (`solo`, `team`, `regulated`). The Workspaces table reads it off the workspace; the Edit workspace and Create a workspace dialogs set it; saving a change opens a Context PR that writes `.oxagen/rules/governance.toml` on the main repo. Raising the mode takes effect on everything in flight; lowering it is an org-owner action with approval, recorded as a security event.
+- The governance mode is a workspace setting (`solo`, `team`, `regulated`). The Workspaces table reads it off the workspace; the Edit workspace and Create a workspace dialogs set it; saving a change opens a Steering PR that writes `.oxagen/rules/governance.toml` on the main repo. Raising the mode takes effect on everything in flight; lowering it is an org-owner action with approval, recorded as a security event.
 - API key rotation ships in rev1: **Rotate** opens `rotatekey` and calls `rotate_api_key` (2026-09-15, maintainer decision).
 - No control on this page is gated on the enterprise license; custom roles in the role editor are on for every tier (2026-09-15, maintainer decision).
 - A workspace owns one main repo, one steering set, its agents, tool grants and budgets; a workspace without a main repo cannot exist (it is *provisional*). Archiving needs zero registered agents.
@@ -75,13 +75,13 @@ The top bar collapses to hamburger, current crumb, search glyph, notifications, 
 ## Permissions
 
 - Read: `org.admin (owner)`
-- Writes (each a governed action recorded in Audit): `org.member.invite / change role / remove`, `workspace.create / edit / archive` (a governance change opens a Context PR), `iam.role.create / edit / delete`, `org.funding.set`, `org.route.set`, `org.model_key.mint / rotate / revoke`, `api.key.create / rotate / revoke`, `org.data_plane.request`
+- Writes (each a governed action recorded in Audit): `org.member.invite / change role / remove`, `workspace.create / edit / archive` (a governance change opens a Steering PR), `iam.role.create / edit / delete`, `org.funding.set`, `org.route.set`, `org.model_key.mint / rotate / revoke`, `api.key.create / rotate / revoke`, `org.data_plane.request`
 
 ## Backend gaps this page depends on
 
 - role editor writes
 - funding and routes are hard-coded
-- governance mode has no store; it is a file on the main repo written by a Context PR
+- governance mode has no store; it is a file on the main repo written by a Steering PR
 
 ## Rules every build of this page must keep
 
