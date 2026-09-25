@@ -117,7 +117,7 @@ export default {
       "**Sorting** cycles ascending, descending, and back to the page's order. A column is numeric when 60% of its filled cells are numbers, so a column of counts with a few dashes still sorts as numbers.",
       "**Cell values.** A cell may carry `data-v` to override its sort and filter value. A cell's filter value is its first readable text, skipping avatar initials, a status dot, and the second line.",
       "**Selection.** A row the address selects (`aria-selected=\"true\"`) opens on its own page once, and paging stays yours after that.",
-      "**State per list.** Search, filters, sort, rows, and page are kept per list for the session.",
+      "**State per list.** Search, filters, sort, rows, and page are kept per list until the page reloads.",
       "**Opting out.** `data-lt=\"off\"` on the table. Use it for short fixed tables only.",
     ],
   },

@@ -54,72 +54,72 @@
     <figcaption class="dx-story-h"><b>Loaded list</b><span>The Agents panel with two filters the engine chose, a column sorted descending, and page 1 of 3.</span></figcaption>
     <div class="dx-canvas on-panel"></div>
     <template data-story="loaded" data-name="Loaded list">
-      <div class="panel">
-        <div class="panel-h"><div style="flex:1;min-width:0"><h3>Registered in Core platform</h3><p class="muted" style="margin:2px 0 0;font-size:12px">Each row names the reusable objects this agent holds a reference to.</p></div></div>
-        <div class="lt">
-          <input class="lt-q" type="search" placeholder="Search this list" aria-label="Search this list" value="">
-          <select class="lt-f" data-k="4" aria-label="Filter by Health"><option value="">Any health</option><option value="healthy">Healthy</option><option value="degraded">Degraded</option></select>
-          <select class="lt-f" data-k="5" aria-label="Filter by Runtime"><option value="">Any runtime</option><option value="gateway">Gateway</option><option value="harness">Harness</option></select>
-          <label class="lt-rows">Rows<select class="lt-per" aria-label="Rows per page"><option value="5">5</option><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="0">All</option></select></label>
-        </div>
-        <div class="tw"><table>
-          <thead><tr>
-            <th class="sortable" tabindex="0" role="button" aria-sort="none">Agent</th>
-            <th class="sortable" tabindex="0" role="button" aria-sort="none">Owner</th>
-            <th class="num sortable" tabindex="0" role="button" aria-sort="descending">Runs</th>
-            <th class="num sortable" tabindex="0" role="button" aria-sort="none">Spend</th>
-            <th class="sortable" tabindex="0" role="button" aria-sort="none">Health</th>
-            <th class="sortable" tabindex="0" role="button" aria-sort="none">Runtime</th>
-          </tr></thead>
-          <tbody>
-            <tr><td class="tkey">a-intel.core.triage</td><td>Priya Natarajan</td><td class="num">1,340</td><td class="num">$402.11</td><td><span class="b b-allowed"><span class="d"></span>healthy</span></td><td><span class="b b-tier b-allowed">gateway</span></td></tr>
-            <tr><td class="tkey">a-intel.core.release-manager</td><td>Marcus Bell</td><td class="num">412</td><td class="num">$186.40</td><td><span class="b b-allowed"><span class="d"></span>healthy</span></td><td><span class="b b-tier b-allowed">gateway</span></td></tr>
-            <tr><td class="tkey">a-intel.core.pr-reviewer</td><td>Marcus Bell</td><td class="num">288</td><td class="num">$94.02</td><td><span class="b b-denied"><span class="d"></span>degraded</span></td><td><span class="b b-tier b-q">harness</span></td></tr>
-          </tbody>
-        </table></div>
-        <div class="lp"><span class="lp-n">1–10 of 23 (page 1 of 3)</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page" disabled>‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 3" aria-current="page">1</button><button class="btn sm" data-p="2" aria-label="Page 2 of 3">2</button><button class="btn sm" data-p="3" aria-label="Page 3 of 3">3</button><button class="btn sm" data-p="next" aria-label="Next page">›</button></span></div>
-      </div>
+<div class="panel">
+  <div class="panel-h"><div style="flex:1;min-width:0"><h3>Registered in Core platform</h3><p class="muted" style="margin:2px 0 0;font-size:12px">Each row names the reusable objects this agent holds a reference to.</p></div></div>
+  <div class="lt">
+    <input class="lt-q" type="search" placeholder="Search this list" aria-label="Search this list" value="">
+    <select class="lt-f" data-k="4" aria-label="Filter by Health"><option value="">Any health</option><option value="healthy">Healthy</option><option value="degraded">Degraded</option></select>
+    <select class="lt-f" data-k="5" aria-label="Filter by Runtime"><option value="">Any runtime</option><option value="gateway">Gateway</option><option value="harness">Harness</option></select>
+    <label class="lt-rows">Rows<select class="lt-per" aria-label="Rows per page"><option value="5">5</option><option value="10" selected>10</option><option value="25">25</option><option value="50">50</option><option value="0">All</option></select></label>
+  </div>
+  <div class="tw"><table>
+    <thead><tr>
+      <th class="sortable" tabindex="0" role="button" aria-sort="none">Agent</th>
+      <th class="sortable" tabindex="0" role="button" aria-sort="none">Owner</th>
+      <th class="num sortable" tabindex="0" role="button" aria-sort="descending">Runs</th>
+      <th class="num sortable" tabindex="0" role="button" aria-sort="none">Spend</th>
+      <th class="sortable" tabindex="0" role="button" aria-sort="none">Health</th>
+      <th class="sortable" tabindex="0" role="button" aria-sort="none">Runtime</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="tkey">a-intel.core.triage</td><td>Priya Natarajan</td><td class="num">1,340</td><td class="num">$402.11</td><td><span class="b b-allowed"><span class="d"></span>healthy</span></td><td><span class="b b-tier b-allowed">gateway</span></td></tr>
+      <tr><td class="tkey">a-intel.core.release-manager</td><td>Marcus Bell</td><td class="num">412</td><td class="num">$186.40</td><td><span class="b b-allowed"><span class="d"></span>healthy</span></td><td><span class="b b-tier b-allowed">gateway</span></td></tr>
+      <tr><td class="tkey">a-intel.core.pr-reviewer</td><td>Marcus Bell</td><td class="num">288</td><td class="num">$94.02</td><td><span class="b b-denied"><span class="d"></span>degraded</span></td><td><span class="b b-tier b-q">harness</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="lp"><span class="lp-n">1–10 of 23 (page 1 of 3)</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page" disabled>‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 3" aria-current="page">1</button><button class="btn sm" data-p="2" aria-label="Page 2 of 3">2</button><button class="btn sm" data-p="3" aria-label="Page 3 of 3">3</button><button class="btn sm" data-p="next" aria-label="Next page">›</button></span></div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-empty">
     <figcaption class="dx-story-h"><b>No match</b><span>A search that matches nothing keeps the headers and says so in one row. The pager reads None.</span></figcaption>
     <div class="dx-canvas on-panel"></div>
     <template data-story="empty" data-name="No match">
-      <div class="panel">
-        <div class="lt">
-          <input class="lt-q" type="search" placeholder="Search this list" aria-label="Search this list" value="stale-closer">
-          <label class="lt-rows">Rows<select class="lt-per" aria-label="Rows per page"><option value="10" selected>10</option></select></label>
-        </div>
-        <div class="tw"><table>
-          <thead><tr><th class="sortable" tabindex="0" role="button" aria-sort="none">Agent</th><th class="sortable" tabindex="0" role="button" aria-sort="none">Owner</th><th class="num sortable" tabindex="0" role="button" aria-sort="none">Runs</th></tr></thead>
-          <tbody><tr class="lt-empty"><td colspan="3">No rows match.</td></tr></tbody>
-        </table></div>
-        <div class="lp"><span class="lp-n">None</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page" disabled>‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 1" aria-current="page">1</button><button class="btn sm" data-p="next" aria-label="Next page" disabled>›</button></span></div>
-      </div>
+<div class="panel">
+  <div class="lt">
+    <input class="lt-q" type="search" placeholder="Search this list" aria-label="Search this list" value="stale-closer">
+    <label class="lt-rows">Rows<select class="lt-per" aria-label="Rows per page"><option value="10" selected>10</option></select></label>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th class="sortable" tabindex="0" role="button" aria-sort="none">Agent</th><th class="sortable" tabindex="0" role="button" aria-sort="none">Owner</th><th class="num sortable" tabindex="0" role="button" aria-sort="none">Runs</th></tr></thead>
+    <tbody><tr class="lt-empty"><td colspan="3">No rows match.</td></tr></tbody>
+  </table></div>
+  <div class="lp"><span class="lp-n">None</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page" disabled>‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 1" aria-current="page">1</button><button class="btn sm" data-p="next" aria-label="Next page" disabled>›</button></span></div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-long">
     <figcaption class="dx-story-h"><b>Long pager</b><span>Past seven pages the pager keeps the first, the last, and the pages around the current one.</span></figcaption>
     <div class="dx-canvas on-panel"></div>
     <template data-story="long" data-name="Long pager">
-      <div class="panel">
-        <div class="lp"><span class="lp-n">41–50 of 703 (page 5 of 71)</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page">‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 71">1</button><span class="el">…</span><button class="btn sm" data-p="4" aria-label="Page 4 of 71">4</button><button class="btn sm" data-p="5" aria-label="Page 5 of 71" aria-current="page">5</button><button class="btn sm" data-p="6" aria-label="Page 6 of 71">6</button><span class="el">…</span><button class="btn sm" data-p="71" aria-label="Page 71 of 71">71</button><button class="btn sm" data-p="next" aria-label="Next page">›</button></span></div>
-      </div>
+<div class="panel">
+  <div class="lp"><span class="lp-n">41–50 of 703 (page 5 of 71)</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page">‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 71">1</button><span class="el">…</span><button class="btn sm" data-p="4" aria-label="Page 4 of 71">4</button><button class="btn sm" data-p="5" aria-label="Page 5 of 71" aria-current="page">5</button><button class="btn sm" data-p="6" aria-label="Page 6 of 71">6</button><span class="el">…</span><button class="btn sm" data-p="71" aria-label="Page 71 of 71">71</button><button class="btn sm" data-p="next" aria-label="Next page">›</button></span></div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-free">
     <figcaption class="dx-story-h"><b>Outside a panel</b><span>When the host is not a panel, the bar and pager take <code>.free</code>: their own border, radius, and spacing.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="free" data-name="Outside a panel">
-      <div>
-        <div class="lt free">
-          <input class="lt-q" type="search" placeholder="Search findings" aria-label="Search findings" value="">
-          <label class="lt-sort">Sort<select class="lt-s"><option value="0" selected>Rank</option><option value="1">Savings, high first</option><option value="2">Savings, low first</option><option value="3">Finding A–Z</option></select></label>
-          <label class="lt-rows">Rows<select class="lt-per" aria-label="Rows per page"><option value="10" selected>10</option></select></label>
-        </div>
-        <p class="muted" style="margin:0;font-size:12.5px">Cards sit here. A card list has no column headers, so it sorts from the Sort select.</p>
-        <div class="lp free"><span class="lp-n">1–7 of 7</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page" disabled>‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 1" aria-current="page">1</button><button class="btn sm" data-p="next" aria-label="Next page" disabled>›</button></span></div>
-      </div>
+<div>
+  <div class="lt free">
+    <input class="lt-q" type="search" placeholder="Search findings" aria-label="Search findings" value="">
+    <label class="lt-sort">Sort<select class="lt-s"><option value="0" selected>Rank</option><option value="1">Savings, high first</option><option value="2">Savings, low first</option><option value="3">Finding A–Z</option></select></label>
+    <label class="lt-rows">Rows<select class="lt-per" aria-label="Rows per page"><option value="10" selected>10</option></select></label>
+  </div>
+  <p class="muted" style="margin:0;font-size:12.5px">Cards sit here. A card list has no column headers, so it sorts from the Sort select.</p>
+  <div class="lp free"><span class="lp-n">1–7 of 7</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page" disabled>‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 1" aria-current="page">1</button><button class="btn sm" data-p="next" aria-label="Next page" disabled>›</button></span></div>
+</div>
     </template>
   </figure>
 </section>
@@ -159,7 +159,7 @@
     <li><b>Sorting</b> cycles ascending, descending, and back to the page's order. A column is numeric when 60% of its filled cells are numbers, so a column of counts with a few dashes still sorts as numbers.</li>
     <li><b>Cell values.</b> A cell may carry <code>data-v</code> to override its sort and filter value. A cell's filter value is its first readable text, skipping avatar initials, a status dot, and the second line.</li>
     <li><b>Selection.</b> A row the address selects (<code>aria-selected=&quot;true&quot;</code>) opens on its own page once, and paging stays yours after that.</li>
-    <li><b>State per list.</b> Search, filters, sort, rows, and page are kept per list for the session.</li>
+    <li><b>State per list.</b> Search, filters, sort, rows, and page are kept per list until the page reloads.</li>
     <li><b>Opting out.</b> <code>data-lt=&quot;off&quot;</code> on the table. Use it for short fixed tables only.</li>
   </ul>
 </section>
@@ -301,7 +301,7 @@ Verdict: PASS or FAIL (n fails, m notes)
 Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
   </div>
 </section>
-<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+<nav class="dx-pn" aria-label="Components"><a href="table.html"><span>Previous</span>Table</a><a class="nx" href="badge.html"><span>Next</span>Badge</a></nav>
 </main>
 </div>
 </body>

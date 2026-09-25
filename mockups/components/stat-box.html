@@ -54,54 +54,54 @@
     <figcaption class="dx-story-h"><b>Row of four</b><span>The common case: a <code>.grid.g4</code> row at the top of a page.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="row" data-name="Row of four">
-      <div class="grid g4">
-        <div class="stat"><span class="k">Runs</span><span class="v">1,340</span><span class="s">last 30 days</span></div>
-        <div class="stat"><span class="k">Spend</span><span class="v">$402.11</span><span class="s"><span class="basis" title="gateway_observed">Observed by gateway</span></span></div>
-        <div class="stat"><span class="k">Cache hit</span><span class="v">62%</span><span class="s">of input tokens</span></div>
-        <div class="stat"><span class="k">Wasted</span><span class="v">$38.20</span><span class="s">9% of spend</span></div>
-      </div>
+<div class="grid g4">
+  <div class="stat"><span class="k">Runs</span><span class="v">1,340</span><span class="s">last 30 days</span></div>
+  <div class="stat"><span class="k">Spend</span><span class="v">$402.11</span><span class="s"><span class="basis" title="gateway_observed">Observed by gateway</span></span></div>
+  <div class="stat"><span class="k">Cache hit</span><span class="v">62%</span><span class="s">of input tokens</span></div>
+  <div class="stat"><span class="k">Wasted</span><span class="v">$38.20</span><span class="s">9% of spend</span></div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-unit">
     <figcaption class="dx-story-h"><b>Value with a unit</b><span>A unit that is not part of the figure goes in <code>small</code>.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="unit" data-name="Value with a unit">
-      <div class="grid g3">
-        <div class="stat"><span class="k">Tokens per run</span><span class="v">41,200<small>tokens</small></span><span class="s">median of 88 runs</span></div>
-        <div class="stat"><span class="k">Wall clock</span><span class="v">12m 04s</span><span class="s">from first prompt to seal</span></div>
-        <div class="stat"><span class="k">Tier</span><span class="v" style="font-size:17px">gateway</span><span class="s">metered at the gateway</span></div>
-      </div>
+<div class="grid g3">
+  <div class="stat"><span class="k">Tokens per run</span><span class="v">41,200<small>tokens</small></span><span class="s">median of 88 runs</span></div>
+  <div class="stat"><span class="k">Wall clock</span><span class="v">12m 04s</span><span class="s">from first prompt to seal</span></div>
+  <div class="stat"><span class="k">Tier</span><span class="v" style="font-size:17px">gateway</span><span class="s">metered at the gateway</span></div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-tone">
     <figcaption class="dx-story-h"><b>State tone</b><span>Color on the value only, and the label or subline names the state.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="tone" data-name="State tone">
-      <div class="grid g3">
-        <div class="stat"><span class="k">Waiting on you</span><span class="v" style="color:var(--st-approval)">3</span><span class="s">approvals past their first hour</span></div>
-        <div class="stat"><span class="k">Over budget</span><span class="v" style="color:var(--st-failed)">2</span><span class="s">agents above their monthly ceiling</span></div>
-        <div class="stat"><span class="k">Healthy runtimes</span><span class="v" style="color:var(--st-allowed)">14</span><span class="s">of 15 enrolled</span></div>
-      </div>
+<div class="grid g3">
+  <div class="stat"><span class="k">Waiting on you</span><span class="v" style="color:var(--st-approval)">3</span><span class="s">approvals past their first hour</span></div>
+  <div class="stat"><span class="k">Over budget</span><span class="v" style="color:var(--st-failed)">2</span><span class="s">agents above their monthly ceiling</span></div>
+  <div class="stat"><span class="k">Healthy runtimes</span><span class="v" style="color:var(--st-allowed)">14</span><span class="s">of 15 enrolled</span></div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-empty">
     <figcaption class="dx-story-h"><b>Empty value</b><span>No figure renders as a dash, and the subline says why.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="empty" data-name="Empty value">
-      <div class="grid g3">
-        <div class="stat"><span class="k">Cache hit</span><span class="v">—</span><span class="s">not recorded for harness runs</span></div>
-        <div class="stat"><span class="k">Spend</span><span class="v">$0.00</span><span class="s">no governed calls this month</span></div>
-      </div>
+<div class="grid g3">
+  <div class="stat"><span class="k">Cache hit</span><span class="v">—</span><span class="s">not recorded for harness runs</span></div>
+  <div class="stat"><span class="k">Spend</span><span class="v">$0.00</span><span class="s">no governed calls this month</span></div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-click">
     <figcaption class="dx-story-h"><b>Clickable</b><span>A stat that opens a filtered view is a <code>button.stat.click</code> with a label that names where it goes.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="click" data-name="Clickable">
-      <div class="grid g3">
-        <button class="stat click" aria-label="Open the work orders with a live run"><span class="k">Live now</span><span class="v">2</span><span class="s">work orders with a live run</span></button>
-        <button class="stat click" aria-label="Open the approvals waiting on you"><span class="k">Waiting on you</span><span class="v" style="color:var(--st-approval)">3</span><span class="s">open the approvals</span></button>
-      </div>
+<div class="grid g3">
+  <button class="stat click" aria-label="Open the work orders with a live run"><span class="k">Live now</span><span class="v">2</span><span class="s">work orders with a live run</span></button>
+  <button class="stat click" aria-label="Open the approvals waiting on you"><span class="k">Waiting on you</span><span class="v" style="color:var(--st-approval)">3</span><span class="s">open the approvals</span></button>
+</div>
     </template>
   </figure>
 </section>
@@ -199,13 +199,13 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 177 to 181, 764, 2087 to 2093, phone 679 to 680</td><td>The rules that draw it</td></tr>
-      <tr><td><code>tile(k, v, s, col)</code> at <code>engine.js:7296</code></td><td>Writes one stat box. <code>col</code> sets the value's tone. About 15 calls.</td></tr>
-      <tr><td><code>runStatRow(R)</code> at <code>engine.js:2470</code></td><td>The Run page's row of six, with a local tile of its own.</td></tr>
-      <tr><td><code>basisChip(k)</code> at <code>engine.js:631</code></td><td>The spend basis chip in the subline.</td></tr>
+      <tr><td><code>tile(k, v, s, col)</code> at <code>engine.js:2486</code></td><td>Writes one stat box. <code>col</code> sets the value's tone. About 15 calls.</td></tr>
+      <tr><td><code>runStatRow(R)</code> at <code>engine.js:2483</code></td><td>The Run page's row of six, with a local tile of its own.</td></tr>
+      <tr><td><code>basisChip(k)</code> at <code>engine.js:636</code></td><td>The spend basis chip in the subline.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
-    <li>44 more stat boxes are written inline as strings (Spend, Runtimes, Billing, agent Overview, Memory, and the evidence and fix dialogs), and three local functions shadow <code>tile()</code>: <code>runStatRow</code> (2470), the import wizard (12124), and a pass or fail tile at 5781.</li>
+    <li>44 more stat boxes are written inline as strings (Spend, Runtimes, Billing, agent Overview, Memory, and the evidence and fix dialogs), and three local functions shadow <code>tile()</code>: <code>runStatRow</code> (2483), the import wizard (12152), and a pass or fail tile at 5798.</li>
     <li>Compact contexts shrink the value: <code>.recon-tiles</code> (17px), <code>.ev-claim .stat</code> (19px), and <code>.rstats .stat</code> in the Run side column.</li>
   </ul>
 </section>
@@ -230,7 +230,7 @@
 ## Inputs
 
 1. mockups/components/stat-box.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 177 to 181, 764, 2087 to 2093, phone 679 to 680. The mockup renders it with tile(k, v, s, col) (engine.js:7296), runStatRow(R) (engine.js:2470), basisChip(k) (engine.js:631).
+2. The design source: mockups/src/engine.css lines 177 to 181, 764, 2087 to 2093, phone 679 to 680. The mockup renders it with tile(k, v, s, col) (engine.js:2486), runStatRow(R) (engine.js:2483), basisChip(k) (engine.js:636).
 3. The build's implementation: find it by its root selector (.stat) or its name, and list every route that renders it.
 4. Where to see it in the design: Work, Run, Agents, Spend, Runtimes, Billing, agent Overview. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -272,7 +272,7 @@ Verdict: PASS or FAIL (n fails, m notes)
 Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
   </div>
 </section>
-<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+<nav class="dx-pn" aria-label="Components"><a href="segmented-control.html"><span>Previous</span>Segmented control</a><a class="nx" href="table.html"><span>Next</span>Table</a></nav>
 </main>
 </div>
 </body>

@@ -123,7 +123,7 @@ export default {
       "**Order.** In a dialog footer, Cancel comes first and the action last, at the right. On a phone the order reverses, so the action sits first under the thumb.",
       "**Destructive.** A reversible removal is `.danger`. An irreversible one asks for confirmation, names what ends and what is kept, and uses `.danger.solid` or a disabled `.danger` until the person ticks a check.",
       "**Assist.** The wand is the one assist action in a field. It is never gold, because gold is already spent on the step's primary action.",
-      "**Loading.** A button that waits on the server keeps its label and is disabled until the answer arrives. The result arrives as a [toast](toast.html).",
+      "**Loading.** A button that waits on the control plane keeps its label and is disabled until the answer arrives. The result arrives as a [toast](toast.html).",
     ],
   },
   content: [

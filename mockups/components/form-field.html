@@ -51,52 +51,52 @@
   <h2 id="examples">Examples</h2>
   <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
   <figure class="dx-story" id="story-text">
-    <figcaption class="dx-story-h"><b>Text, select, and textarea</b><span>A label tied to its control, and a hint that says what a valid value looks like.</span></figcaption>
+    <figcaption class="dx-story-h"><b>Text inputs</b><span>A label tied to its control, and a hint that says what a valid value looks like.</span></figcaption>
     <div class="dx-canvas on-panel"></div>
-    <template data-story="text" data-name="Text, select, and textarea">
-      <div style="max-width:480px">
-        <div class="field"><label for="f-email">Email</label><input id="f-email" type="email" value="rowan@a-intel.example"><div class="hint">The invitation goes to this address and expires in seven days.</div></div>
-        <div class="field"><label for="f-role">Role</label><select id="f-role"><option>Workspace member</option><option>Workspace admin</option><option>Billing</option></select></div>
-        <div class="field"><label for="f-why">Reason</label><textarea id="f-why" rows="3">The push to main skips review. Push to a branch and open a pull request.</textarea><div class="hint">The agent reads this as the reason for the denial.</div></div>
-      </div>
+    <template data-story="text" data-name="Text inputs">
+<div style="max-width:480px">
+  <div class="field"><label for="f-email">Email</label><input id="f-email" type="email" value="rowan@a-intel.example"><div class="hint">The invitation goes to this address and expires in seven days.</div></div>
+  <div class="field"><label for="f-role">Role</label><select id="f-role"><option>Workspace member</option><option>Workspace admin</option><option>Billing</option></select></div>
+  <div class="field"><label for="f-why">Reason</label><textarea id="f-why" rows="3">The push to main skips review. Push to a branch and open a pull request.</textarea><div class="hint">The agent reads this as the reason for the denial.</div></div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-two-up">
     <figcaption class="dx-story-h"><b>Two fields in a row</b><span><code>.fields</code> puts two fields side by side and stacks them under 560px.</span></figcaption>
     <div class="dx-canvas on-panel"></div>
     <template data-story="two-up" data-name="Two fields in a row">
-      <div class="fields" style="max-width:520px">
-        <div class="field"><label for="f-limit">Monthly limit</label><input id="f-limit" value="$2,000.00"><div class="hint">In US dollars.</div></div>
-        <div class="field"><label for="f-mode">Mode</label><select id="f-mode"><option>Enforced</option><option>Recorded only</option></select></div>
-      </div>
+<div class="fields" style="max-width:520px">
+  <div class="field"><label for="f-limit">Monthly limit</label><input id="f-limit" value="$2,000.00"><div class="hint">In US dollars.</div></div>
+  <div class="field"><label for="f-mode">Mode</label><select id="f-mode"><option>Enforced</option><option>Recorded only</option></select></div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-readonly">
     <figcaption class="dx-story-h"><b>Read-only</b><span>A value set elsewhere, on <code>--hl</code> in <code>--muted</code>, with a hint that says where to change it.</span></figcaption>
     <div class="dx-canvas on-panel"></div>
     <template data-story="readonly" data-name="Read-only">
-      <div style="max-width:480px">
-        <div class="field"><label for="f-mail">Email</label><input id="f-mail" readonly value="marcus@a-intel.example"><div class="hint">Your identity provider sets this.</div></div>
-      </div>
+<div style="max-width:480px">
+  <div class="field"><label for="f-mail">Email</label><input id="f-mail" readonly value="marcus@a-intel.example"><div class="hint">Your identity provider sets this.</div></div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-check">
     <figcaption class="dx-story-h"><b>Checkbox card</b><span>A choice with its consequence. The title is mono by default, for a permission or a key.</span></figcaption>
     <div class="dx-canvas on-panel"></div>
     <template data-story="check" data-name="Checkbox card">
-      <div style="max-width:480px">
-        <label class="check"><input type="checkbox" checked><span class="grow"><span class="n">spend.read</span><span class="d">See spend, budgets, and the findings on this workspace.</span></span></label>
-        <label class="check"><input type="checkbox"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Registering again creates a new principal.</span></span></label>
-        <label class="check off"><input type="checkbox" disabled><span class="grow"><span class="n">billing.write</span><span class="d">Only an org owner can grant this.</span></span></label>
-      </div>
+<div style="max-width:480px">
+  <label class="check"><input type="checkbox" checked><span class="grow"><span class="n">spend.read</span><span class="d">See spend, budgets, and the findings on this workspace.</span></span></label>
+  <label class="check"><input type="checkbox"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Registering again creates a new principal.</span></span></label>
+  <label class="check off"><input type="checkbox" disabled><span class="grow"><span class="n">billing.write</span><span class="d">Only an org owner can grant this.</span></span></label>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-small-select">
     <figcaption class="dx-story-h"><b>Small select</b><span><code>.sel-sm</code> sits inside a table row or a list item.</span></figcaption>
     <div class="dx-canvas row"></div>
     <template data-story="small-select" data-name="Small select">
-      <span class="muted" style="font-size:12px">Tag</span>
-      <select class="sel-sm" aria-label="Tag of item 1"><option>code</option><option selected>test</option><option>docs</option><option>review</option></select>
+<span class="muted" style="font-size:12px">Tag</span>
+<select class="sel-sm" aria-label="Tag of item 1"><option>code</option><option selected>test</option><option>docs</option><option>review</option></select>
     </template>
   </figure>
 </section>
@@ -269,7 +269,7 @@ Verdict: PASS or FAIL (n fails, m notes)
 Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
   </div>
 </section>
-<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+<nav class="dx-pn" aria-label="Components"><a href="button.html"><span>Previous</span>Button</a><a class="nx" href="switch.html"><span>Next</span>Switch</a></nav>
 </main>
 </div>
 </body>

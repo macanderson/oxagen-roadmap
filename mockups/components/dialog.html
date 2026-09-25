@@ -54,69 +54,69 @@
     <figcaption class="dx-story-h"><b>Form dialog</b><span>Shown over its scrim. The scrim is <code>position:fixed</code> in the product. The inline override keeps it in this canvas.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="form" data-name="Form dialog">
-      <div class="scrim" style="position:relative;inset:auto;z-index:auto;padding:28px 18px;border-radius:12px">
-        <div class="dlg" role="dialog" aria-modal="true" aria-label="Invite a person">
-          <div class="dlg-h"><h2>Invite a person</h2><button class="iconbtn x" aria-label="Close">×</button></div>
-          <div class="dlg-b">
-            <div class="field"><label for="iv-email">Email</label><input id="iv-email" value="rowan@a-intel.example"></div>
-            <div class="field"><label for="iv-role">Role</label><select id="iv-role"><option>workspace.member · core-platform</option><option>workspace.owner · core-platform</option><option>org.auditor</option><option>org.billing</option></select></div>
-            <div class="note">An invitation is the only way into the organization. It expires in seven days, and accepting it requires a verified email and two-factor.</div>
-          </div>
-          <div class="dlg-f"><button class="btn">Cancel</button><button class="btn primary">Send the invitation</button></div>
-        </div>
-      </div>
+<div class="scrim" style="position:relative;inset:auto;z-index:auto;padding:28px 18px;border-radius:12px">
+  <div class="dlg" role="dialog" aria-modal="true" aria-label="Invite a person">
+    <div class="dlg-h"><h2>Invite a person</h2><button class="iconbtn x" aria-label="Close">×</button></div>
+    <div class="dlg-b">
+      <div class="field"><label for="iv-email">Email</label><input id="iv-email" value="rowan@a-intel.example"></div>
+      <div class="field"><label for="iv-role">Role</label><select id="iv-role"><option>workspace.member · core-platform</option><option>workspace.owner · core-platform</option><option>org.auditor</option><option>org.billing</option></select></div>
+      <div class="note">An invitation is the only way into the organization. It expires in seven days, and accepting it requires a verified email and two-factor.</div>
+    </div>
+    <div class="dlg-f"><button class="btn">Cancel</button><button class="btn primary">Send the invitation</button></div>
+  </div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-confirm">
     <figcaption class="dx-story-h"><b>Destructive confirm</b><span>The subtitle names the record, the body says what ends and what is kept, and the danger button stays disabled until the check is ticked.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="confirm" data-name="Destructive confirm">
-      <div class="dlg" role="dialog" aria-modal="true" aria-label="Retire agent">
-        <div class="dlg-h sub"><div class="grow"><h2>Retire agent</h2><p>a-intel.core.triage</p></div><button class="iconbtn x" aria-label="Close">×</button></div>
-        <div class="dlg-b">
-          <p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a pull request archives <span class="mono">.oxagen/agents/triage.toml</span>.</p>
-          <dl class="kv"><dt>Kept</dt><dd>every run, frame and receipt</dd><dt>Ends</dt><dd>2 roles, 1 mandate, the host enrollment</dd><dt>In flight</dt><dd><span style="color:var(--st-failed)">1 live run</span>, canceled at the next boundary and recorded</dd></dl>
-          <label class="check" style="margin-top:12px"><input type="checkbox"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Registering again creates a new principal.</span></span></label>
-        </div>
-        <div class="dlg-f"><button class="btn">Cancel</button><button class="btn danger" disabled>Retire agent</button></div>
-      </div>
+<div class="dlg" role="dialog" aria-modal="true" aria-label="Retire agent">
+  <div class="dlg-h sub"><div class="grow"><h2>Retire agent</h2><p>a-intel.core.triage</p></div><button class="iconbtn x" aria-label="Close">×</button></div>
+  <div class="dlg-b">
+    <p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a pull request archives <span class="mono">.oxagen/agents/triage.toml</span>.</p>
+    <dl class="kv"><dt>Kept</dt><dd>every run, frame and receipt</dd><dt>Ends</dt><dd>2 roles, 1 mandate, the host enrollment</dd><dt>In flight</dt><dd><span style="color:var(--st-failed)">1 live run</span>, canceled at the next boundary and recorded</dd></dl>
+    <label class="check" style="margin-top:12px"><input type="checkbox"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Registering again creates a new principal.</span></span></label>
+  </div>
+  <div class="dlg-f"><button class="btn">Cancel</button><button class="btn danger" disabled>Retire agent</button></div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-tabs">
     <figcaption class="dx-story-h"><b>Tabs in a dialog</b><span>Tabs sit flush between the header and the body, with the dialog's 18px side padding.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="tabs" data-name="Tabs in a dialog">
-      <div class="dlg" role="dialog" aria-modal="true" aria-label="Account">
-        <div class="dlg-h"><h2>Account</h2><button class="iconbtn x" aria-label="Close">×</button></div>
-        <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true">Profile</button><button class="tab" role="tab" aria-selected="false">Preferences</button><button class="tab" role="tab" aria-selected="false">Security</button><button class="tab" role="tab" aria-selected="false">Privacy</button></div>
-        <div class="dlg-b">
-          <div class="fields"><div class="field"><label for="ac-name">Name</label><input id="ac-name" value="Marcus Bell"></div><div class="field"><label for="ac-email">Email</label><input id="ac-email" value="marcus@a-intel.example" readonly></div></div>
-          <div class="field"><label for="ac-tz">Time zone</label><select id="ac-tz"><option>America/New_York</option><option>UTC</option></select><div class="hint">Times on every page read in this zone. Frames keep UTC.</div></div>
-        </div>
-        <div class="dlg-f"><button class="btn">Cancel</button><button class="btn primary">Save profile</button></div>
-      </div>
+<div class="dlg" role="dialog" aria-modal="true" aria-label="Account">
+  <div class="dlg-h"><h2>Account</h2><button class="iconbtn x" aria-label="Close">×</button></div>
+  <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true">Profile</button><button class="tab" role="tab" aria-selected="false">Preferences</button><button class="tab" role="tab" aria-selected="false">Security</button><button class="tab" role="tab" aria-selected="false">Privacy</button></div>
+  <div class="dlg-b">
+    <div class="fields"><div class="field"><label for="ac-name">Name</label><input id="ac-name" value="Marcus Bell"></div><div class="field"><label for="ac-email">Email</label><input id="ac-email" value="marcus@a-intel.example" readonly></div></div>
+    <div class="field"><label for="ac-tz">Time zone</label><select id="ac-tz"><option>America/New_York</option><option>UTC</option></select><div class="hint">Times on every page read in this zone. Frames keep UTC.</div></div>
+  </div>
+  <div class="dlg-f"><button class="btn">Cancel</button><button class="btn primary">Save profile</button></div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-wide">
     <figcaption class="dx-story-h"><b>Wide review</b><span><code>.dlg.wide</code> is 820px for a review that compares two sources side by side. The footer note names the governed action.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="wide" data-name="Wide review">
-              <div class="dlg wide" role="dialog" aria-modal="true" aria-label="Approve an observed output schema">
-                <div class="dlg-h"><h2>Approve an observed output schema</h2><button class="iconbtn x" aria-label="Close">×</button></div>
-                <div class="dlg-b">
-                  <dl class="kv" style="margin-bottom:14px"><dt>Observations</dt><dd><span class="num">1,284</span> responses over 30 days, from 3 agents</dd><dt>Digest on approval</dt><dd class="mono">sha256:1bc4f9a07b02</dd></dl>
-                  <div class="cpair"><div><div class="lab">Inferred output schema<span class="sp">what approval enforces</span></div><pre>{
-        "ok": "boolean",
-        "channel": "string",
-        "ts": "string"
-      }</pre></div><div><div class="lab">One recorded response<span class="sp">for comparison</span></div><pre>{
-        "ok": true,
-        "channel": "C07RELEASE",
-        "ts": "1726650112.004"
-      }</pre></div></div>
-                </div>
-                <div class="dlg-f"><span class="grow">Approving records <span class="mono">approve_tool_schema</span> as a governed action.</span><button class="btn">Not yet</button><button class="btn primary">Approve schema</button></div>
-              </div>
+        <div class="dlg wide" role="dialog" aria-modal="true" aria-label="Approve an observed output schema">
+          <div class="dlg-h"><h2>Approve an observed output schema</h2><button class="iconbtn x" aria-label="Close">×</button></div>
+          <div class="dlg-b">
+            <dl class="kv" style="margin-bottom:14px"><dt>Observations</dt><dd><span class="num">1,284</span> responses over 30 days, from 3 agents</dd><dt>Digest on approval</dt><dd class="mono">sha256:1bc4f9a07b02</dd></dl>
+            <div class="cpair"><div><div class="lab">Inferred output schema<span class="sp">what approval enforces</span></div><pre>{
+  "ok": "boolean",
+  "channel": "string",
+  "ts": "string"
+}</pre></div><div><div class="lab">One recorded response<span class="sp">for comparison</span></div><pre>{
+  "ok": true,
+  "channel": "C07RELEASE",
+  "ts": "1726650112.004"
+}</pre></div></div>
+          </div>
+          <div class="dlg-f"><span class="grow">Approving records <span class="mono">approve_tool_schema</span> as a governed action.</span><button class="btn">Not yet</button><button class="btn primary">Approve schema</button></div>
+        </div>
     </template>
   </figure>
 </section>
@@ -219,10 +219,10 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 471 to 490, phone 682 to 694</td><td>The rules that draw it</td></tr>
-      <tr><td><code>dialog()</code> at <code>engine.js:9479</code></td><td>Builds the scrim, shell, header, tabs, body, and footer from a <code>{t, s, w, tabs, b, f}</code> record. The shell markup is at 9662 to 9667.</td></tr>
-      <tr><td><code>openDialog(kind, arg)</code> at <code>engine.js:8234</code></td><td>Opens a dialog by kind and remembers the dialog to return to.</td></tr>
-      <tr><td><code>closeDialog()</code> at <code>engine.js:8411</code></td><td>Closes it, or returns to the dialog it was opened from.</td></tr>
-      <tr><td><code>DLG_EXT</code> at <code>engine.js</code></td><td>The registry of dialogs defined outside <code>dialog()</code>, such as <code>budgetedit</code> and <code>budgetdel</code>.</td></tr>
+      <tr><td><code>dialog()</code> at <code>engine.js:9506</code></td><td>Builds the scrim, shell, header, tabs, body, and footer from a <code>{t, s, w, tabs, b, f}</code> record. The shell markup is at 9662 to 9667.</td></tr>
+      <tr><td><code>openDialog(kind, arg)</code> at <code>engine.js:8261</code></td><td>Opens a dialog by kind and remembers the dialog to return to.</td></tr>
+      <tr><td><code>closeDialog()</code> at <code>engine.js:8438</code></td><td>Closes it, or returns to the dialog it was opened from.</td></tr>
+      <tr><td><code>DLG_EXT</code> at <code>engine.js:23</code></td><td>The registry of dialogs defined outside <code>dialog()</code>, such as <code>budgetedit</code> and <code>budgetdel</code>.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -235,7 +235,7 @@
   <h2 id="findings">Findings</h2>
   
   <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>No focus management</h4><p><code>render()</code> writes the dialog into <code>#layer</code> and moves no focus. Focus stays on the page behind, Tab walks out of the dialog, and closing does not return focus to the opener. A build needs all three.</p></div>
-  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Retired term in the retire dialog</h4><p>The agent retire dialog reads &quot;Deregister agent&quot; and its button &quot;Deregister&quot; (engine.js 10256 and 10263). The copy review replaced deregister with retire, and <code>check-copy.mjs</code> never opens the <code>delagent</code> dialog, so nothing caught it.</p></div>
+  <div class="dx-find"><h4><span class="b b-allowed"><span class="d"></span>fixed</span>Retired term in the retire dialog</h4><p>The retire dialog read &quot;Deregister agent&quot; with a Deregister button, a term the copy review retired, and <code>check-copy.mjs</code> never opened it. It reads Retire agent now, the page specs quote it, and <code>check-copy.mjs</code> opens the dialog.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>Scrim color is fixed</h4><p>The scrim is <code>rgba(0,0,0,.68)</code> in both themes (engine.css 471). It follows no token.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>Two footer note idioms</h4><p>Most footers use <code>.dlg-f .grow</code>. The schema review writes an inline <code>margin-right:auto</code> span instead (engine.js 9707).</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>Vague action labels</h4><p>Set a budget's action reads &quot;Set it&quot; (engine.js 9569). The action names its record elsewhere, as in &quot;Send the invitation&quot;.</p></div>
@@ -252,7 +252,7 @@
 ## Inputs
 
 1. mockups/components/dialog.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 471 to 490, phone 682 to 694. The mockup renders it with dialog() (engine.js:9479), openDialog(kind, arg) (engine.js:8234), closeDialog() (engine.js:8411), DLG_EXT (engine.js).
+2. The design source: mockups/src/engine.css lines 471 to 490, phone 682 to 694. The mockup renders it with dialog() (engine.js:9506), openDialog(kind, arg) (engine.js:8261), closeDialog() (engine.js:8438), DLG_EXT (engine.js:23).
 3. The build's implementation: find it by its root selector (.dlg) or its name, and list every route that renders it.
 4. Where to see it in the design: Work (Intake), Agents, Spend (Set a budget), Organization (Invite a person), Tools, Steering. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -294,7 +294,7 @@ Verdict: PASS or FAIL (n fails, m notes)
 Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
   </div>
 </section>
-<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+<nav class="dx-pn" aria-label="Components"><a href="menu.html"><span>Previous</span>Menu</a><a class="nx" href="drawer.html"><span>Next</span>Drawer</a></nav>
 </main>
 </div>
 </body>

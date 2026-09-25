@@ -40,7 +40,7 @@ export default {
     {
       id: "error",
       name: "Error",
-      note: "What failed, the code the server gave, that nothing changed, and what still ran. Try again is the one action.",
+      note: "What failed, the code the control plane gave, that nothing changed, and what still ran. Try again is the one action.",
       html: `
         <div class="state-wrap" style="padding:36px 20px">
           <div class="ico" style="color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 40%,transparent)" aria-hidden="true">${ICO_ERROR}</div>
@@ -118,7 +118,7 @@ export default {
     "**Empty heading**: what is missing and where: \"No work in Core platform yet\".",
     "**Empty text**: where the thing comes from, in one or two sentences.",
     "**Error heading**: the thing and the verb: \"This file could not be loaded\".",
-    "**Error text**: the server's code in `code`, then \"Nothing was changed.\" Never an apology, and never blame.",
+    "**Error text**: the control plane's code in `code`, then \"Nothing was changed.\" Never an apology, and never blame.",
     "**Denied heading**: what you need, stated positively: \"You need access to this agent's definition\".",
     "**Denied text**: the permission in `code`, who can grant it, and what the grant records.",
     "**Request id**: the id, region, and time in mono, separated by commas.",
@@ -145,7 +145,7 @@ export default {
   helpers: [
     ["skeleton()", "engine.js:851", "The loading state: four stat blocks and a panel of seven rows."],
     ["emptyState(t, p, acts)", "engine.js:858", "The empty state with a heading, text, and actions."],
-    ["errorState(what, code)", "engine.js:863", "The error state with the server's code, Try again, and Open an incident."],
+    ["errorState(what, code)", "engine.js:863", "The error state with the control plane's code, Try again, and Open an incident."],
     ["deniedState(what, need)", "engine.js:872", "The denied state with the permission, Request access, and the facts."],
   ],
   sourceNotes: [
@@ -163,7 +163,7 @@ export default {
       "Coverage. Every page renders loading, empty, error, and denied. Force each one (a slow response, an empty workspace, a 502, and a role without the permission) and record what each page shows.",
       "Header. Each state keeps the page header and the tabs.",
       "Empty. The heading names what is missing, the text says where it comes from, and there is exactly one action, the gold primary, that fills it.",
-      "Error. The heading names what failed, the text quotes the server's code and says nothing was changed, and Try again reloads only the failed data. An apology, a vague message, or a stack trace is a FAIL.",
+      "Error. The heading names what failed, the text quotes the control plane's code and says nothing was changed, and Try again reloads only the failed data. An apology, a vague message, or a stack trace is a FAIL.",
       "Denied. The text names the exact permission and who can grant it, and offers a way to request it. The request lands in the audit record.",
       "Loading. The skeleton matches the page's shape, marks its region busy, and the arrival of the page is announced. The shimmer stops under reduced motion.",
       "Copy. No state's text uses a semicolon, a mid-dot, a \"not\" contrast, the word trace, or an apology.",

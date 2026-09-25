@@ -157,7 +157,7 @@ export default {
   ],
   findings: [
     { tag: "open", title: "No focus management", body: "`render()` writes the dialog into `#layer` and moves no focus. Focus stays on the page behind, Tab walks out of the dialog, and closing does not return focus to the opener. A build needs all three." },
-    { tag: "open", title: "Retired term in the retire dialog", body: "The agent retire dialog reads \"Deregister agent\" and its button \"Deregister\" (engine.js 10256 and 10263). The copy review replaced deregister with retire, and `check-copy.mjs` never opens the `delagent` dialog, so nothing caught it." },
+    { tag: "fixed", title: "Retired term in the retire dialog", body: "The retire dialog read \"Deregister agent\" with a Deregister button, a term the copy review retired, and `check-copy.mjs` never opened it. It reads Retire agent now, the page specs quote it, and `check-copy.mjs` opens the dialog." },
     { tag: "note", title: "Scrim color is fixed", body: "The scrim is `rgba(0,0,0,.68)` in both themes (engine.css 471). It follows no token." },
     { tag: "note", title: "Two footer note idioms", body: "Most footers use `.dlg-f .grow`. The schema review writes an inline `margin-right:auto` span instead (engine.js 9707)." },
     { tag: "note", title: "Vague action labels", body: "Set a budget's action reads \"Set it\" (engine.js 9569). The action names its record elsewhere, as in \"Send the invitation\"." },

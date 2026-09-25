@@ -284,7 +284,7 @@ monthly_usd = 400</textarea></div></div><p class="dx-why"><b><svg viewBox="0 0 1
       <tr><td><code>edMount()</code> at <code>engine.js:1218</code></td><td>Wires the textarea's events and restores the selection after a render.</td></tr>
       <tr><td><code>edPaint()</code> at <code>engine.js:1235</code></td><td>Repaints the highlighted layer, the gutter, the find marks, and the current line.</td></tr>
       <tr><td><code>edKey(e)</code> at <code>engine.js:1266</code></td><td>Tab and Shift Tab indent, ⌘/ comments, ⌘F finds, ⌘S saves.</td></tr>
-      <tr><td><code>hlToml(src)</code> at <code>engine.js:1161</code></td><td>The TOML highlighter: one regex pass that writes token classes.</td></tr>
+      <tr><td><code>hlToml(src)</code> at <code>engine.js:1162</code></td><td>The TOML highlighter: one regex pass that writes token classes.</td></tr>
       <tr><td><code>cedHtml(key, path, lang, opts)</code> at <code>engine.js:11521</code></td><td>The same editor for other languages, sized for a dialog with <code>small</code> or wrapped for prose.</td></tr>
     </tbody>
   </table></div></div>
@@ -314,7 +314,7 @@ monthly_usd = 400</textarea></div></div><p class="dx-why"><b><svg viewBox="0 0 1
 ## Inputs
 
 1. mockups/components/source-editor.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 942 to 973, ground 2123 to 2125, dialog and prose variants 1891 to 1900, phone 965. The mockup renders it with pAgentSource(r) (engine.js:1192), edMount() (engine.js:1218), edPaint() (engine.js:1235), edKey(e) (engine.js:1266), hlToml(src) (engine.js:1161), cedHtml(key, path, lang, opts) (engine.js:11521).
+2. The design source: mockups/src/engine.css lines 942 to 973, ground 2123 to 2125, dialog and prose variants 1891 to 1900, phone 965. The mockup renders it with pAgentSource(r) (engine.js:1192), edMount() (engine.js:1218), edPaint() (engine.js:1235), edKey(e) (engine.js:1266), hlToml(src) (engine.js:1162), cedHtml(key, path, lang, opts) (engine.js:11521).
 3. The build's implementation: find it by its root selector (.ed) or its name, and list every route that renders it.
 4. Where to see it in the design: agent Source, Steering source, skill source, the agent, tool, skill, and record wizards. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -356,7 +356,7 @@ Verdict: PASS or FAIL (n fails, m notes)
 Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
   </div>
 </section>
-<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+<nav class="dx-pn" aria-label="Components"><a href="diff.html"><span>Previous</span>Diff</a><a class="nx" href="button.html"><span>Next</span>Button</a></nav>
 </main>
 </div>
 </body>

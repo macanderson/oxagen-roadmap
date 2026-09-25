@@ -287,7 +287,8 @@ const CSS = readFileSync(path.join(root, "mockups/src/engine.css"), "utf8");
 const JS = ["engine.js", "wedge.js"].map((f) => readFileSync(path.join(root, "mockups/src", f), "utf8")).join("\n");
 // toolCell() and catChips() write the tool category as t-<category>, from TCAT_ORDER.
 const TCAT = (JS.match(/var TCAT_ORDER=\[([^\]]*)\]/) || ["", ""])[1].match(/[a-z]+/g) || [];
-const EMITTED = new Set(TCAT.map((t) => `t-${t}`));
+// agentCard() writes its layout as agc-<layout>.
+const EMITTED = new Set([...TCAT.map((t) => `t-${t}`), "agc-list", "agc-compact", "agc-detail"]);
 for (const m of JS.matchAll(/class=\\?"([^"\\']*)/g)) for (const k of m[1].split(/\s+/)) if (/^[a-z][\w-]*$/.test(k)) EMITTED.add(k);
 const esc2 = (k) => k.replace(/[-]/g, "\\-");
 function unknownClasses(c) {

@@ -54,68 +54,68 @@
     <figcaption class="dx-story-h"><b>State badges</b><span>A dot badge is a state. Each tone maps to one meaning.</span></figcaption>
     <div class="dx-canvas row"></div>
     <template data-story="states" data-name="State badges">
-      <span class="b b-allowed"><span class="d"></span>allowed</span>
-      <span class="b b-approval"><span class="d"></span>waiting on Priya</span>
-      <span class="b b-denied"><span class="d"></span>denied</span>
-      <span class="b b-proven"><span class="d"></span>sealed</span>
-      <span class="b b-failed"><span class="d"></span>failed</span>
-      <span class="b b-critical"><span class="d"></span>tamper incident</span>
+<span class="b b-allowed"><span class="d"></span>allowed</span>
+<span class="b b-approval"><span class="d"></span>waiting on Priya</span>
+<span class="b b-denied"><span class="d"></span>denied</span>
+<span class="b b-proven"><span class="d"></span>sealed</span>
+<span class="b b-failed"><span class="d"></span>failed</span>
+<span class="b b-critical"><span class="d"></span>tamper incident</span>
     </template>
   </figure>
   <figure class="dx-story" id="story-labels">
     <figcaption class="dx-story-h"><b>Label badges</b><span>No dot. A neutral <code>.b-q</code> label names a kind or a source. A toned label names a level.</span></figcaption>
     <div class="dx-canvas row"></div>
     <template data-story="labels" data-name="Label badges">
-      <span class="b b-q">direct</span>
-      <span class="b b-q">compacted</span>
-      <span class="b b-q">low</span>
-      <span class="b b-approval">medium</span>
-      <span class="b b-denied">high</span>
-      <span class="b b-critical">critical</span>
-      <span class="b b-denied">irreversible</span>
-      <span class="b b-approval">write</span>
+<span class="b b-q">direct</span>
+<span class="b b-q">compacted</span>
+<span class="b b-q">low</span>
+<span class="b b-approval">medium</span>
+<span class="b b-denied">high</span>
+<span class="b b-critical">critical</span>
+<span class="b b-denied">irreversible</span>
+<span class="b b-approval">write</span>
     </template>
   </figure>
   <figure class="dx-story" id="story-tier">
     <figcaption class="dx-story-h"><b>Tier badges</b><span>A tier is lowercase Monaspace Neon. Its title says what the tier governs.</span></figcaption>
     <div class="dx-canvas row"></div>
     <template data-story="tier" data-name="Tier badges">
-      <span class="b b-tier b-q" title="Recorded only. No hook is installed and nothing is delivered.">observe</span>
-      <span class="b b-tier b-approval" title="Hooks installed. Steering is delivered and four hook events can refuse a call.">harness</span>
-      <span class="b b-tier b-allowed" title="Model and MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it.">gateway</span>
-      <span class="b b-tier b-proven" title="The agent runs in an OS sandbox whose only network exit is the gateway.">contained</span>
+<span class="b b-tier b-q" title="Recorded only. No hook is installed and nothing is delivered.">observe</span>
+<span class="b b-tier b-approval" title="Hooks installed. Steering is delivered and four hook events can refuse a call.">harness</span>
+<span class="b b-tier b-allowed" title="Model and MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it.">gateway</span>
+<span class="b b-tier b-proven" title="The agent runs in an OS sandbox whose only network exit is the gateway.">contained</span>
     </template>
   </figure>
   <figure class="dx-story" id="story-live">
     <figcaption class="dx-story-h"><b>Live run</b><span>A live run is the one state drawn without a pill: a pulsing dot and the word.</span></figcaption>
     <div class="dx-canvas row"></div>
     <template data-story="live" data-name="Live run">
-      <span class="live"><span class="p"></span>live</span>
-      <span class="b b-approval">parked for approval</span>
-      <span class="b b-denied">halted</span>
-      <span class="b b-q">sealed</span>
+<span class="live"><span class="p"></span>live</span>
+<span class="b b-approval">parked for approval</span>
+<span class="b b-denied">halted</span>
+<span class="b b-q">sealed</span>
     </template>
   </figure>
   <figure class="dx-story" id="story-in-table">
     <figcaption class="dx-story-h"><b>In a table</b><span>Badges sit in cells next to the facts they qualify. An empty count is a dash.</span></figcaption>
     <div class="dx-canvas on-panel"></div>
     <template data-story="in-table" data-name="In a table">
-      <div class="panel"><div class="tw"><table class="narrow">
-        <thead><tr><th>Tool</th><th>Risk</th><th>Effect</th><th>Mandates</th></tr></thead>
-        <tbody>
-          <tr><td class="tkey">github__merge_pull_request</td><td><span class="b b-denied">high</span></td><td><span class="b b-denied">irreversible</span></td><td><span class="b b-approval"><span class="d"></span>2</span></td></tr>
-          <tr><td class="tkey">github__list_commits</td><td><span class="b b-q">low</span></td><td><span class="b b-q">read</span></td><td><span class="dim">—</span></td></tr>
-        </tbody>
-      </table></div></div>
+<div class="panel"><div class="tw"><table class="narrow">
+  <thead><tr><th>Tool</th><th>Risk</th><th>Effect</th><th>Mandates</th></tr></thead>
+  <tbody>
+    <tr><td class="tkey">github__merge_pull_request</td><td><span class="b b-denied">high</span></td><td><span class="b b-denied">irreversible</span></td><td><span class="b b-approval"><span class="d"></span>2</span></td></tr>
+    <tr><td class="tkey">github__list_commits</td><td><span class="b b-q">low</span></td><td><span class="b b-q">read</span></td><td><span class="dim">—</span></td></tr>
+  </tbody>
+</table></div></div>
     </template>
   </figure>
   <figure class="dx-story" id="story-link">
     <figcaption class="dx-story-h"><b>Link badge and id</b><span><code>a.b.lk</code> makes a badge a link, such as a repository. <code>.id</code> keeps an identifier's case.</span></figcaption>
     <div class="dx-canvas row"></div>
     <template data-story="link" data-name="Link badge and id">
-      <a class="b b-q lk" href="#">a-intel/platform</a>
-      <span class="b b-q"><span class="id mono">wo_01K6T9QX</span></span>
-      <span class="b b-tier b-na" title="not yet available">contained · not yet available</span>
+<a class="b b-q lk" href="#">a-intel/platform</a>
+<span class="b b-q"><span class="id mono">wo_01K6T9QX</span></span>
+<span class="b b-tier b-na" title="not yet available">contained · not yet available</span>
     </template>
   </figure>
 </section>
@@ -240,7 +240,7 @@
   <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Two facts in one badge</h4><p><code>statusBadge()</code> writes <code>pausing · next boundary</code>, <code>originBadge()</code> writes <code>observed, approved</code>, and <code>tierBadge()</code> appends <code>· not yet available</code>. A badge holds one fact.</p></div>
   <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>A symbol in a word</h4><p><code>statusBadge()</code> writes the paused state as <code>⏸ paused</code>. A symbol inside a badge reads aloud as its Unicode name.</p></div>
   <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold on hover</h4><p>A link badge's border turns gold on hover. Hover is a state, and <code>--rule</code> would carry it.</p></div>
-  <div class="dx-find"><h4><span class="b b-q">note</span>Sealed has two looks</h4><p><code>statusBadge()</code> draws sealed as a neutral label, while the tab count and the chain view use <code>.b-proven</code>. One run state should have one badge.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Sealed has two looks</h4><p><code>statusBadge()</code> and the run list's status map (engine.js 400) draw sealed as a neutral label, while the artifact state map (3150) draws it as <code>.b-proven</code>. One state should have one badge.</p></div>
 </section>
 
 <section class="dx-sec">
@@ -297,7 +297,7 @@ Verdict: PASS or FAIL (n fails, m notes)
 Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
   </div>
 </section>
-<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+<nav class="dx-pn" aria-label="Components"><a href="list-table.html"><span>Previous</span>List table</a><a class="nx" href="typed-badges.html"><span>Next</span>Typed badges</a></nav>
 </main>
 </div>
 </body>

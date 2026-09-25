@@ -74,7 +74,7 @@
     </template>
   </figure>
   <figure class="dx-story" id="story-error">
-    <figcaption class="dx-story-h"><b>Error</b><span>What failed, the code the server gave, that nothing changed, and what still ran. Try again is the one action.</span></figcaption>
+    <figcaption class="dx-story-h"><b>Error</b><span>What failed, the code the control plane gave, that nothing changed, and what still ran. Try again is the one action.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="error" data-name="Error">
 <div class="state-wrap" style="padding:36px 20px">
@@ -160,7 +160,7 @@
     <li><b>Empty heading</b>: what is missing and where: &quot;No work in Core platform yet&quot;.</li>
     <li><b>Empty text</b>: where the thing comes from, in one or two sentences.</li>
     <li><b>Error heading</b>: the thing and the verb: &quot;This file could not be loaded&quot;.</li>
-    <li><b>Error text</b>: the server's code in <code>code</code>, then &quot;Nothing was changed.&quot; Never an apology, and never blame.</li>
+    <li><b>Error text</b>: the control plane's code in <code>code</code>, then &quot;Nothing was changed.&quot; Never an apology, and never blame.</li>
     <li><b>Denied heading</b>: what you need, stated positively: &quot;You need access to this agent's definition&quot;.</li>
     <li><b>Denied text</b>: the permission in <code>code</code>, who can grant it, and what the grant records.</li>
     <li><b>Request id</b>: the id, region, and time in mono, separated by commas.</li>
@@ -213,7 +213,7 @@
       <tr><td><code>mockups/src/engine.css</code> lines 366 to 375</td><td>The rules that draw it</td></tr>
       <tr><td><code>skeleton()</code> at <code>engine.js:851</code></td><td>The loading state: four stat blocks and a panel of seven rows.</td></tr>
       <tr><td><code>emptyState(t, p, acts)</code> at <code>engine.js:858</code></td><td>The empty state with a heading, text, and actions.</td></tr>
-      <tr><td><code>errorState(what, code)</code> at <code>engine.js:863</code></td><td>The error state with the server's code, Try again, and Open an incident.</td></tr>
+      <tr><td><code>errorState(what, code)</code> at <code>engine.js:863</code></td><td>The error state with the control plane's code, Try again, and Open an incident.</td></tr>
       <tr><td><code>deniedState(what, need)</code> at <code>engine.js:872</code></td><td>The denied state with the permission, Request access, and the facts.</td></tr>
     </tbody>
   </table></div></div>
@@ -254,7 +254,7 @@ Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and li
 1. Coverage. Every page renders loading, empty, error, and denied. Force each one (a slow response, an empty workspace, a 502, and a role without the permission) and record what each page shows.
 2. Header. Each state keeps the page header and the tabs.
 3. Empty. The heading names what is missing, the text says where it comes from, and there is exactly one action, the gold primary, that fills it.
-4. Error. The heading names what failed, the text quotes the server's code and says nothing was changed, and Try again reloads only the failed data. An apology, a vague message, or a stack trace is a FAIL.
+4. Error. The heading names what failed, the text quotes the control plane's code and says nothing was changed, and Try again reloads only the failed data. An apology, a vague message, or a stack trace is a FAIL.
 5. Denied. The text names the exact permission and who can grant it, and offers a way to request it. The request lands in the audit record.
 6. Loading. The skeleton matches the page's shape, marks its region busy, and the arrival of the page is announced. The shimmer stops under reduced motion.
 7. Copy. No state's text uses a semicolon, a mid-dot, a &quot;not&quot; contrast, the word trace, or an apology.
@@ -285,7 +285,7 @@ Verdict: PASS or FAIL (n fails, m notes)
 Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
   </div>
 </section>
-<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+<nav class="dx-pn" aria-label="Components"><a href="tooltip.html"><span>Previous</span>Tooltip</a><a class="nx" href="note.html"><span>Next</span>Note</a></nav>
 </main>
 </div>
 </body>

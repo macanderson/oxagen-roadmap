@@ -108,7 +108,7 @@ export default {
     ],
     rules: [
       "Exactly one segment is pressed.",
-      "The choice persists for the session. The engine keeps it in `S` and re-renders.",
+      "The choice holds until the page reloads. The engine keeps it in `S` and re-renders.",
       "A filter's counts come from the same rows the list shows, so All equals the list's total.",
       "Never gold. A pressed segment uses `--hl` and `--fg`.",
     ],

@@ -54,122 +54,122 @@
     <figcaption class="dx-story-h"><b>Records in a panel</b><span>Clickable rows, a <code>.sub</code> second line, right-aligned figures, and an empty cell.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="default" data-name="Records in a panel">
-      <div class="panel">
-        <div class="panel-h"><h3>Agents</h3></div>
-        <div class="tw">
-          <table>
-            <thead><tr><th>Agent</th><th>Runtime</th><th>Owner</th><th class="num">Runs</th><th class="num">Spend</th></tr></thead>
-            <tbody>
-              <tr class="click" tabindex="0" role="button" aria-label="Open a-intel.core.release-manager">
-                <td><span class="tkey">a-intel.core.release-manager</span><span class="sub">Prepares release notes and cuts the tag</span></td>
-                <td class="mono">mbell-mbp-16</td>
-                <td>Marcus Bell</td>
-                <td class="num">412</td>
-                <td class="num">$186.40</td>
-              </tr>
-              <tr class="click" tabindex="0" role="button" aria-label="Open a-intel.core.triage">
-                <td><span class="tkey">a-intel.core.triage</span><span class="sub">Labels and routes new issues</span></td>
-                <td class="mono">ci-runner-04</td>
-                <td>Priya Natarajan</td>
-                <td class="num">1,340</td>
-                <td class="num">$402.11</td>
-              </tr>
-              <tr class="click" tabindex="0" role="button" aria-label="Open a-intel.finops.invoice-bot">
-                <td><span class="tkey">a-intel.finops.invoice-bot</span><span class="sub">Reconciles supplier invoices</span></td>
-                <td class="mono">ci-runner-08</td>
-                <td>Amara Lindqvist</td>
-                <td class="num">88</td>
-                <td class="num"><span class="dim">—</span></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<div class="panel">
+  <div class="panel-h"><h3>Agents</h3></div>
+  <div class="tw">
+    <table>
+      <thead><tr><th>Agent</th><th>Runtime</th><th>Owner</th><th class="num">Runs</th><th class="num">Spend</th></tr></thead>
+      <tbody>
+        <tr class="click" tabindex="0" role="button" aria-label="Open a-intel.core.release-manager">
+          <td><span class="tkey">a-intel.core.release-manager</span><span class="sub">Prepares release notes and cuts the tag</span></td>
+          <td class="mono">mbell-mbp-16</td>
+          <td>Marcus Bell</td>
+          <td class="num">412</td>
+          <td class="num">$186.40</td>
+        </tr>
+        <tr class="click" tabindex="0" role="button" aria-label="Open a-intel.core.triage">
+          <td><span class="tkey">a-intel.core.triage</span><span class="sub">Labels and routes new issues</span></td>
+          <td class="mono">ci-runner-04</td>
+          <td>Priya Natarajan</td>
+          <td class="num">1,340</td>
+          <td class="num">$402.11</td>
+        </tr>
+        <tr class="click" tabindex="0" role="button" aria-label="Open a-intel.finops.invoice-bot">
+          <td><span class="tkey">a-intel.finops.invoice-bot</span><span class="sub">Reconciles supplier invoices</span></td>
+          <td class="mono">ci-runner-08</td>
+          <td>Amara Lindqvist</td>
+          <td class="num">88</td>
+          <td class="num"><span class="dim">—</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-narrow">
     <figcaption class="dx-story-h"><b>Narrow table</b><span><code>table.narrow</code> drops the 560px minimum for a side column or a dialog.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="narrow" data-name="Narrow table">
-      <div class="panel" style="max-width:340px">
-        <div class="panel-h"><h3>Tool calls by tool</h3></div>
-        <div class="tw">
-          <table class="narrow">
-            <thead><tr><th>Tool</th><th class="num">Calls</th></tr></thead>
-            <tbody>
-              <tr><td class="mono">github__create_pull_request</td><td class="num">41</td></tr>
-              <tr><td class="mono">github__list_commits</td><td class="num">1,206</td></tr>
-              <tr><td class="mono">fs__read_file</td><td class="num">318</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<div class="panel" style="max-width:340px">
+  <div class="panel-h"><h3>Tool calls by tool</h3></div>
+  <div class="tw">
+    <table class="narrow">
+      <thead><tr><th>Tool</th><th class="num">Calls</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">github__create_pull_request</td><td class="num">41</td></tr>
+        <tr><td class="mono">github__list_commits</td><td class="num">1,206</td></tr>
+        <tr><td class="mono">fs__read_file</td><td class="num">318</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-selection">
     <figcaption class="dx-story-h"><b>Selectable rows</b><span>A checkbox column, a selected row tinted gold, and a row that cannot be selected says why.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="selection" data-name="Selectable rows">
-      <div class="panel">
-        <div class="panel-h"><h3>Backlog</h3><div class="sp"><span class="b b-q">1 selected</span><button class="btn sm">Clear</button></div></div>
-        <div class="tw">
-          <table>
-            <thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th>Status</th><th>Updated</th></tr></thead>
-            <tbody>
-              <tr class="click" tabindex="0" role="button" aria-label="Open PLAT-1893" aria-selected="true">
-                <td class="ck"><input type="checkbox" aria-label="Select PLAT-1893" checked></td>
-                <td><span class="mono dim" style="font-size:11.5px">PLAT-1893</span><div>Cut 4.11.0 release notes</div></td>
-                <td><span class="b b-allowed"><span class="d"></span>Ready</span></td>
-                <td class="mono dim" style="font-size:11.5px">2026-09-24 14:02</td>
-              </tr>
-              <tr class="click" tabindex="0" role="button" aria-label="Open PLAT-1901">
-                <td class="ck"><input type="checkbox" aria-label="Select PLAT-1901" disabled title="Not ready: its definition of done is not certified"></td>
-                <td><span class="mono dim" style="font-size:11.5px">PLAT-1901</span><div>Retry flaky checkout test</div></td>
-                <td><span class="b b-approval"><span class="d"></span>Needs certification</span></td>
-                <td class="mono dim" style="font-size:11.5px">2026-09-24 09:41</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<div class="panel">
+  <div class="panel-h"><h3>Backlog</h3><div class="sp"><span class="b b-q">1 selected</span><button class="btn sm">Clear</button></div></div>
+  <div class="tw">
+    <table>
+      <thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th>Status</th><th>Updated</th></tr></thead>
+      <tbody>
+        <tr class="click" tabindex="0" role="button" aria-label="Open PLAT-1893" aria-selected="true">
+          <td class="ck"><input type="checkbox" aria-label="Select PLAT-1893" checked></td>
+          <td><span class="mono dim" style="font-size:11.5px">PLAT-1893</span><div>Cut 4.11.0 release notes</div></td>
+          <td><span class="b b-allowed"><span class="d"></span>Ready</span></td>
+          <td class="mono dim" style="font-size:11.5px">2026-09-24 14:02</td>
+        </tr>
+        <tr class="click" tabindex="0" role="button" aria-label="Open PLAT-1901">
+          <td class="ck"><input type="checkbox" aria-label="Select PLAT-1901" disabled title="Not ready: its definition of done is not certified"></td>
+          <td><span class="mono dim" style="font-size:11.5px">PLAT-1901</span><div>Retry flaky checkout test</div></td>
+          <td><span class="b b-approval"><span class="d"></span>Needs certification</span></td>
+          <td class="mono dim" style="font-size:11.5px">2026-09-24 09:41</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-groups">
     <figcaption class="dx-story-h"><b>Grouped rows</b><span>A <code>tr.tgrp</code> heads each group, and a critical or high-risk row carries a left rule.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="groups" data-name="Grouped rows">
-      <div class="panel">
-        <div class="tw">
-          <table>
-            <thead><tr><th>Tool</th><th>Decision</th><th class="num">Calls</th></tr></thead>
-            <tbody>
-              <tr class="tgrp t-vcs"><td colspan="2"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6a9 9 0 0 0-9 9V3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/></svg></span><b>Source control</b><span class="muted">Changes code history: branches, pull requests, merges, releases, repositories.</span></td><td class="dim" style="font-size:11px;white-space:nowrap">2 tools</td></tr>
-              <tr class="hz-row-high click" tabindex="0" role="button" aria-label="Open github__merge_pull_request"><td class="mono">github__merge_pull_request</td><td><span class="b b-approval"><span class="d"></span>Needs approval</span></td><td class="num">12</td></tr>
-              <tr class="click" tabindex="0" role="button" aria-label="Open github__create_pull_request"><td class="mono">github__create_pull_request</td><td><span class="b b-allowed"><span class="d"></span>Allowed</span></td><td class="num">41</td></tr>
-              <tr class="tgrp t-finance"><td colspan="2"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span><b>Financial control</b><span class="muted">Moves funds or commits spend.</span></td><td class="dim" style="font-size:11px;white-space:nowrap">1 tool</td></tr>
-              <tr class="hz-row-critical click" tabindex="0" role="button" aria-label="Open stripe__create_payment"><td class="mono">stripe__create_payment</td><td><span class="b b-approval"><span class="d"></span>Needs approval</span></td><td class="num">3</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<div class="panel">
+  <div class="tw">
+    <table>
+      <thead><tr><th>Tool</th><th>Decision</th><th class="num">Calls</th></tr></thead>
+      <tbody>
+        <tr class="tgrp t-vcs"><td colspan="2"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6a9 9 0 0 0-9 9V3"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/></svg></span><b>Source control</b><span class="muted">Changes code history: branches, pull requests, merges, releases, repositories.</span></td><td class="dim" style="font-size:11px;white-space:nowrap">2 tools</td></tr>
+        <tr class="hz-row-high click" tabindex="0" role="button" aria-label="Open github__merge_pull_request"><td class="mono">github__merge_pull_request</td><td><span class="b b-approval"><span class="d"></span>Needs approval</span></td><td class="num">12</td></tr>
+        <tr class="click" tabindex="0" role="button" aria-label="Open github__create_pull_request"><td class="mono">github__create_pull_request</td><td><span class="b b-allowed"><span class="d"></span>Allowed</span></td><td class="num">41</td></tr>
+        <tr class="tgrp t-finance"><td colspan="2"><span class="ti"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg></span><b>Financial control</b><span class="muted">Moves funds or commits spend.</span></td><td class="dim" style="font-size:11px;white-space:nowrap">1 tool</td></tr>
+        <tr class="hz-row-critical click" tabindex="0" role="button" aria-label="Open stripe__create_payment"><td class="mono">stripe__create_payment</td><td><span class="b b-approval"><span class="d"></span>Needs approval</span></td><td class="num">3</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-current">
     <figcaption class="dx-story-h"><b>Current row</b><span><code>tr.on</code> marks the row whose detail the side panel shows, on <code>--panel-h</code>.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="current" data-name="Current row">
-      <div class="panel" style="max-width:560px">
-        <div class="tw">
-          <table class="narrow">
-            <thead><tr><th>Operator</th><th class="num">Runs</th><th class="num">Spend</th></tr></thead>
-            <tbody>
-              <tr class="click on" aria-selected="true"><td>Priya Natarajan</td><td class="num">612</td><td class="num">$1,284.60</td></tr>
-              <tr class="click" aria-selected="false"><td>Marcus Bell</td><td class="num">431</td><td class="num">$904.12</td></tr>
-              <tr class="click" aria-selected="false"><td>Amara Lindqvist</td><td class="num">97</td><td class="num">$212.08</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+<div class="panel" style="max-width:560px">
+  <div class="tw">
+    <table class="narrow">
+      <thead><tr><th>Operator</th><th class="num">Runs</th><th class="num">Spend</th></tr></thead>
+      <tbody>
+        <tr class="click on" aria-selected="true"><td>Priya Natarajan</td><td class="num">612</td><td class="num">$1,284.60</td></tr>
+        <tr class="click" aria-selected="false"><td>Marcus Bell</td><td class="num">431</td><td class="num">$904.12</td></tr>
+        <tr class="click" aria-selected="false"><td>Amara Lindqvist</td><td class="num">97</td><td class="num">$212.08</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
     </template>
   </figure>
 </section>
@@ -275,9 +275,9 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 234 to 245, 1334, 2174 to 2177, 2350, phone 696 to 708</td><td>The rules that draw it</td></tr>
-      <tr><td><code>rowClick(on, label)</code> at <code>engine.js:6889</code></td><td>Makes a row a keyboard button. 17 calls.</td></tr>
-      <tr><td><code>cardTables()</code> at <code>engine.js:13812</code></td><td>Turns every single-header table into labelled cards on a phone.</td></tr>
-      <tr><td><code>keyLabel(k)</code> at <code>engine.js:629</code></td><td>Shows a stored key as its label with the key in a tooltip.</td></tr>
+      <tr><td><code>rowClick(on, label)</code> at <code>engine.js:6908</code></td><td>Makes a row a keyboard button. 17 calls.</td></tr>
+      <tr><td><code>cardTables()</code> at <code>engine.js:13851</code></td><td>Turns every single-header table into labelled cards on a phone.</td></tr>
+      <tr><td><code>keyLabel(k)</code> at <code>engine.js:634</code></td><td>Shows a stored key as its label with the key in a tooltip.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -307,7 +307,7 @@
 ## Inputs
 
 1. mockups/components/table.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 234 to 245, 1334, 2174 to 2177, 2350, phone 696 to 708. The mockup renders it with rowClick(on, label) (engine.js:6889), cardTables() (engine.js:13812), keyLabel(k) (engine.js:629).
+2. The design source: mockups/src/engine.css lines 234 to 245, 1334, 2174 to 2177, 2350, phone 696 to 708. The mockup renders it with rowClick(on, label) (engine.js:6908), cardTables() (engine.js:13851), keyLabel(k) (engine.js:634).
 3. The build's implementation: find it by its root selector (table) or its name, and list every route that renders it.
 4. Where to see it in the design: Work, Agents, Tools, Spend, Repositories, Organization, Audit. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -349,7 +349,7 @@ Verdict: PASS or FAIL (n fails, m notes)
 Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
   </div>
 </section>
-<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+<nav class="dx-pn" aria-label="Components"><a href="stat-box.html"><span>Previous</span>Stat box</a><a class="nx" href="list-table.html"><span>Next</span>List table</a></nav>
 </main>
 </div>
 </body>

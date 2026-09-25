@@ -2,6 +2,212 @@
   "generated": "by tools/build-components.mjs from mockups/components/src; do not edit",
   "components": [
     {
+      "slug": "page-header",
+      "name": "Page header",
+      "group": "Page structure",
+      "summary": "The eyebrow, the page title, one line of subtext, and the page's actions.",
+      "root": ".phead",
+      "page": "components/page-header.html",
+      "stories": [
+        {
+          "id": "default",
+          "name": "Default",
+          "canvas": "ink",
+          "html": "<div class=\"phead\">\n  <div class=\"t\">\n    <p class=\"eyebrow\">Core platform</p>\n    <h1>Spend</h1>\n    <p>What the tokens bought, with the basis on every number.</p>\n  </div>\n  <div class=\"acts\">\n    <button class=\"btn\">Export report</button>\n    <button class=\"btn primary\">Set a budget</button>\n  </div>\n</div>"
+        },
+        {
+          "id": "three-actions",
+          "name": "Three actions",
+          "canvas": "ink",
+          "html": "<div class=\"phead\">\n  <div class=\"t\">\n    <p class=\"eyebrow\">Core platform</p>\n    <h1>Agents</h1>\n    <p>Every actor in this workspace and what it is made of.</p>\n  </div>\n  <div class=\"acts\">\n    <button class=\"btn\">Steer</button>\n    <button class=\"btn\">New agent</button>\n    <button class=\"btn primary\">Register agent</button>\n  </div>\n</div>"
+        },
+        {
+          "id": "no-actions",
+          "name": "No actions",
+          "canvas": "ink",
+          "html": "<div class=\"phead\">\n  <div class=\"t\">\n    <p class=\"eyebrow\">a-intel</p>\n    <h1>Audit</h1>\n    <p>Every event the record holds for this organization.</p>\n  </div>\n</div>"
+        },
+        {
+          "id": "back-link",
+          "name": "Record with a back link and badges",
+          "canvas": "ink",
+          "html": "<div class=\"phead\">\n  <div class=\"t\">\n    <p class=\"eyebrow\"><a href=\"#/a-intel/core-platform/steering\">Steering</a></p>\n    <h1>Do not re-read CHANGELOG.md more than once in a run</h1>\n    <div class=\"row\" style=\"margin-top:8px\"><span class=\"b b-allowed\"><span class=\"d\"></span>published</span><span class=\"b b-q mono\">ctx.release.no-reread-changelog</span><span class=\"b b-q\">v3</span></div>\n    <p style=\"margin-top:8px\">Supported by 682 duplicate tool calls across 212 runs of the release manager.</p>\n  </div>\n  <div class=\"acts\">\n    <button class=\"btn\">Archive</button>\n    <button class=\"btn primary\">Edit</button>\n  </div>\n</div>"
+        },
+        {
+          "id": "id-title",
+          "name": "Identifier as the title",
+          "canvas": "ink",
+          "html": "<div class=\"phead\">\n  <div class=\"t\">\n    <p class=\"eyebrow\"><a href=\"#/a-intel/core-platform/agents/release-manager\">Agent</a></p>\n    <h1 class=\"mono\" style=\"font-size:18px\">.oxagen/agents/release-manager.toml</h1>\n    <div class=\"row\" style=\"margin-top:8px\"><span class=\"b b-q mono\">main</span><span class=\"b b-q mono\">main @ a4c91e2</span><span class=\"b b-q\">source of truth</span></div>\n  </div>\n  <div class=\"acts\"><button class=\"btn\">Open in GitHub</button></div>\n</div>"
+        },
+        {
+          "id": "long-title",
+          "name": "Long title",
+          "canvas": "ink",
+          "html": "<div class=\"phead\">\n  <div class=\"t\">\n    <p class=\"eyebrow\"><a href=\"#/a-intel/core-platform/steering\">Steering</a></p>\n    <h1 style=\"font-size:20px\">Before a release branch is cut, confirm that every pull request merged since the last tag has a changelog entry</h1>\n  </div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "panel",
+      "name": "Panel",
+      "group": "Page structure",
+      "summary": "A bordered box that holds one subject under a shaded header.",
+      "root": ".panel",
+      "page": "components/panel.html",
+      "stories": [
+        {
+          "id": "title-body",
+          "name": "Title and body",
+          "canvas": "ink",
+          "html": "<div class=\"panel\">\n  <div class=\"panel-h\"><h3>Billable units</h3></div>\n  <div class=\"panel-b\">\n    <p style=\"margin:0\">A governed action is a call oxagen decided, delivered, and recorded, with its receipt in the chain.</p>\n  </div>\n</div>"
+        },
+        {
+          "id": "subtext-actions",
+          "name": "Subtext and actions",
+          "canvas": "ink",
+          "html": "<div class=\"panel\">\n  <div class=\"panel-h\">\n    <div style=\"flex:1;min-width:0\"><h3>Budgets</h3><p class=\"muted\" style=\"margin:2px 0 0;font-size:12px\">Every ceiling that governs Core platform.</p></div>\n    <div class=\"sp\"><button class=\"btn sm\">Export CSV</button><button class=\"btn sm\">Set a budget</button></div>\n  </div>\n  <div class=\"panel-b\"><p class=\"muted\" style=\"margin:0;font-size:12.5px\">3 ceilings apply: the organization's, this workspace's, and one agent's per-run ceiling.</p></div>\n</div>"
+        },
+        {
+          "id": "table-footer",
+          "name": "Table and footer note",
+          "canvas": "ink",
+          "html": "<div class=\"panel\">\n  <div class=\"panel-h\"><h3>Work orders</h3></div>\n  <div class=\"tw\"><table class=\"narrow\">\n    <thead><tr><th>Work order</th><th>Agent</th><th class=\"num\">Spend</th></tr></thead>\n    <tbody>\n      <tr><td><b>Cut 4.11.0 release notes</b></td><td class=\"mono\" style=\"font-size:12px\">a-intel.core.release-manager</td><td class=\"num\">$4.13</td></tr>\n      <tr><td><b>Triage new issues</b></td><td class=\"mono\" style=\"font-size:12px\">a-intel.core.triage</td><td class=\"num\"><span class=\"dim\">—</span></td></tr>\n    </tbody>\n  </table></div>\n  <div class=\"panel-b\" style=\"border-top:1px solid var(--border)\"><div class=\"note\">A work order is done when you accept every item, and nothing merges without a person.</div></div>\n</div>"
+        },
+        {
+          "id": "padded",
+          "name": "Padded panel",
+          "canvas": "ink",
+          "html": "<div class=\"panel pad\">\n  <p class=\"eyebrow q\">Plan</p>\n  <p style=\"margin:0\">Team, billed monthly. 12 of 20 seats in use.</p>\n</div>"
+        },
+        {
+          "id": "available",
+          "name": "Available card",
+          "canvas": "ink",
+          "html": "<div class=\"grid g2\">\n  <div class=\"panel ipc\"><div class=\"panel-h\"><h3>GitHub Issues</h3><span class=\"b b-allowed\" style=\"margin-left:auto\"><span class=\"d\"></span>connected</span></div><div class=\"panel-b\"><p class=\"muted\" style=\"margin:0;font-size:12.5px\">a-intel/platform, 214 open issues.</p></div></div>\n  <div class=\"panel ipc avail\"><div class=\"panel-h\"><h3>Linear</h3></div><div class=\"panel-b\"><p class=\"muted\" style=\"margin:0;font-size:12.5px\">Not connected.</p></div></div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "layout-grid",
+      "name": "Layout grid",
+      "group": "Page structure",
+      "summary": "The grids, splits, and rows that place panels and stat boxes on a page.",
+      "root": ".grid",
+      "page": "components/layout-grid.html",
+      "stories": [
+        {
+          "id": "g4",
+          "name": "Four columns",
+          "canvas": "ink",
+          "html": "<div class=\"grid g4\">\n  <div class=\"stat\"><span class=\"k\">Runs</span><span class=\"v\">1,340</span><span class=\"s\">last 30 days</span></div>\n  <div class=\"stat\"><span class=\"k\">Spend</span><span class=\"v\">$402.11</span><span class=\"s\">last 30 days</span></div>\n  <div class=\"stat\"><span class=\"k\">Cache hit</span><span class=\"v\">62%</span><span class=\"s\">of input tokens</span></div>\n  <div class=\"stat\"><span class=\"k\">Wasted</span><span class=\"v\">$38.20</span><span class=\"s\">9% of spend</span></div>\n</div>"
+        },
+        {
+          "id": "g3",
+          "name": "Three columns",
+          "canvas": "ink",
+          "html": "<div class=\"grid g3\">\n  <div class=\"panel pad\"><p class=\"eyebrow q\">Operator</p><p style=\"margin:0\">Marcus Bell</p></div>\n  <div class=\"panel pad\"><p class=\"eyebrow q\">Runtime</p><p class=\"mono\" style=\"margin:0\">mbell-mbp-16</p></div>\n  <div class=\"panel pad\"><p class=\"eyebrow q\">Tier</p><p class=\"mono\" style=\"margin:0\">gateway</p></div>\n</div>"
+        },
+        {
+          "id": "g2",
+          "name": "Two columns",
+          "canvas": "ink",
+          "html": "<div class=\"grid g2\">\n  <div class=\"panel\"><div class=\"panel-h\"><h3>Toolbelt</h3></div><div class=\"panel-b\"><p class=\"muted\" style=\"margin:0;font-size:12.5px\">18 tools, 4 need approval.</p></div></div>\n  <div class=\"panel\"><div class=\"panel-h\"><h3>Steering</h3></div><div class=\"panel-b\"><p class=\"muted\" style=\"margin:0;font-size:12.5px\">9 sources assigned.</p></div></div>\n</div>"
+        },
+        {
+          "id": "split",
+          "name": "Main and side",
+          "canvas": "ink",
+          "html": "<div class=\"split\">\n  <div class=\"panel\"><div class=\"panel-h\"><h3>Transcript</h3></div><div class=\"panel-b\"><p class=\"muted\" style=\"margin:0;font-size:12.5px\">48 entries.</p></div></div>\n  <div class=\"panel\"><div class=\"panel-h\"><h3>Repository</h3></div><div class=\"panel-b\"><p class=\"mono\" style=\"margin:0;font-size:12px\">a-intel/platform</p></div></div>\n</div>"
+        },
+        {
+          "id": "split23",
+          "name": "Two thirds and one third",
+          "canvas": "ink",
+          "html": "<div class=\"split23\">\n  <div class=\"panel\"><div class=\"panel-h\"><h3>Spend by agent</h3></div><div class=\"panel-b\"><p class=\"muted\" style=\"margin:0;font-size:12.5px\">12 agents this month.</p></div></div>\n  <div class=\"panel\"><div class=\"panel-h\"><h3>Spend by area</h3></div><div class=\"panel-b\"><p class=\"muted\" style=\"margin:0;font-size:12.5px\">6 areas.</p></div></div>\n</div>"
+        },
+        {
+          "id": "row",
+          "name": "Row and divider",
+          "canvas": "ink",
+          "html": "<div class=\"panel pad\">\n  <div class=\"row\"><span class=\"b b-allowed\"><span class=\"d\"></span>live</span><span class=\"b b-q\">direct</span><span class=\"b b-tier b-allowed\">gateway</span><button class=\"btn sm\">Open run</button></div>\n  <div class=\"hr\"></div>\n  <div class=\"row2\">\n    <div class=\"field\" style=\"margin:0\"><label>Owner</label><input value=\"Marcus Bell\" aria-label=\"Owner\"></div>\n    <div class=\"field\" style=\"margin:0\"><label>Runtime</label><input value=\"mbell-mbp-16\" aria-label=\"Runtime\"></div>\n  </div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "tabs",
+      "name": "Tabs",
+      "group": "Page structure",
+      "summary": "The views of one page or record, with one open and a count beside each.",
+      "root": ".tabs",
+      "page": "components/tabs.html",
+      "stories": [
+        {
+          "id": "page",
+          "name": "Page tabs with counts",
+          "canvas": "ink",
+          "html": "<div class=\"tabs\" role=\"tablist\" aria-label=\"Work\">\n  <button class=\"tab\" role=\"tab\" aria-selected=\"true\">Backlog<span class=\"vh\"> </span><span class=\"n\">3</span></button>\n  <button class=\"tab\" role=\"tab\" aria-selected=\"false\">Work orders<span class=\"vh\"> </span><span class=\"n\">2</span></button>\n  <button class=\"tab\" role=\"tab\" aria-selected=\"false\">Workflows</button>\n  <button class=\"tab\" role=\"tab\" aria-selected=\"false\">Findings<span class=\"vh\"> </span><span class=\"n\">7</span></button>\n</div>"
+        },
+        {
+          "id": "record",
+          "name": "Record tabs with a state and a figure",
+          "canvas": "ink",
+          "html": "<div class=\"tabs\" role=\"tablist\" aria-label=\"Run\">\n  <button class=\"tab\" role=\"tab\" aria-selected=\"true\" title=\"1\">Decision trace<span class=\"st\" title=\"A call is parked for approval\"></span></button>\n  <button class=\"tab\" role=\"tab\" aria-selected=\"false\" title=\"2\">Transcript<span class=\"vh\"> </span><span class=\"n\" title=\"48 transcript entries\">48</span></button>\n  <button class=\"tab\" role=\"tab\" aria-selected=\"false\" title=\"3\">Cost<span class=\"vh\"> </span><span class=\"n money\" title=\"Cost of this run\">$4.13</span></button>\n  <button class=\"tab\" role=\"tab\" aria-selected=\"false\" title=\"4\">Memories<span class=\"vh\"> </span><span class=\"n\" title=\"2 memories\">2</span></button>\n  <button class=\"tab\" role=\"tab\" aria-selected=\"false\" title=\"5\">Evidence<span class=\"vh\"> </span><span class=\"n\" title=\"The chain is sealed\">sealed</span></button>\n</div>"
+        },
+        {
+          "id": "states",
+          "name": "Tab state dots",
+          "canvas": "ink",
+          "html": "<div class=\"tabs\" role=\"tablist\" aria-label=\"Tools\">\n  <button class=\"tab\" role=\"tab\" aria-selected=\"false\">Tools<span class=\"vh\"> </span><span class=\"n\" style=\"color:var(--st-approval)\" title=\"2 schemas need approval\">2</span></button>\n  <button class=\"tab\" role=\"tab\" aria-selected=\"true\">Toolbelts<span class=\"vh\"> </span><span class=\"n\" title=\"6 toolbelts\">6</span></button>\n  <button class=\"tab\" role=\"tab\" aria-selected=\"false\">Providers<span class=\"st ok\" title=\"Every provider is connected\"></span></button>\n  <button class=\"tab\" role=\"tab\" aria-selected=\"false\">Kill switches<span class=\"st bad\" title=\"1 kill switch on\"></span></button>\n</div>"
+        },
+        {
+          "id": "dialog",
+          "name": "Tabs in a dialog",
+          "canvas": "panel",
+          "html": "<div class=\"dlg\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Account\" style=\"position:relative;max-width:520px;margin:0\">\n  <div class=\"dlg-h\"><h2>Account</h2><button class=\"iconbtn x\" aria-label=\"Close\">×</button></div>\n  <div class=\"tabs\" role=\"tablist\" aria-label=\"Account\">\n    <button class=\"tab\" role=\"tab\" aria-selected=\"true\">Profile</button>\n    <button class=\"tab\" role=\"tab\" aria-selected=\"false\">Preferences</button>\n    <button class=\"tab\" role=\"tab\" aria-selected=\"false\">Security</button>\n  </div>\n  <div class=\"dlg-b\"><p class=\"muted\" style=\"margin:0\">The profile fields sit here.</p></div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "segmented-control",
+      "name": "Segmented control",
+      "group": "Page structure",
+      "summary": "Two to five choices, one pressed, that change how one list is drawn or filtered.",
+      "root": ".seg",
+      "page": "components/segmented-control.html",
+      "stories": [
+        {
+          "id": "seg",
+          "name": "Segmented control",
+          "canvas": "ink",
+          "html": "<div class=\"seg\" role=\"group\" aria-label=\"Tool names\">\n  <button class=\"btn sm\" aria-pressed=\"true\">Labels</button>\n  <button class=\"btn sm\" aria-pressed=\"false\">API names</button>\n</div>"
+        },
+        {
+          "id": "layout",
+          "name": "Layout pick",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:10px\">\n  <div class=\"seg\" role=\"group\" aria-label=\"Layout\">\n    <button class=\"btn sm\" aria-pressed=\"true\">By category</button>\n    <button class=\"btn sm\" aria-pressed=\"false\">Flat</button>\n  </div>\n  <span class=\"b b-q\">18 of 52 shown</span>\n</div>"
+        },
+        {
+          "id": "filter-counts",
+          "name": "Filter with counts",
+          "canvas": "panel",
+          "html": "<div class=\"panel\">\n  <div class=\"panel-h\">\n    <h3>Work orders</h3>\n    <div class=\"sp\">\n      <div class=\"seg\" role=\"group\" aria-label=\"Show\">\n        <button class=\"btn sm\" aria-pressed=\"true\">All <span class=\"dim\">6</span></button>\n        <button class=\"btn sm\" aria-pressed=\"false\">Live <span class=\"dim\">2</span></button>\n        <button class=\"btn sm\" aria-pressed=\"false\">Waiting on you <span class=\"dim\">1</span></button>\n        <button class=\"btn sm\" aria-pressed=\"false\">Done <span class=\"dim\">3</span></button>\n      </div>\n    </div>\n  </div>\n</div>"
+        },
+        {
+          "id": "columns",
+          "name": "Column set on the Agents panel",
+          "canvas": "panel",
+          "html": "<div class=\"panel\">\n  <div class=\"panel-h\">\n    <h3>Registered in Core platform</h3>\n    <div class=\"sp\">\n      <div class=\"kf\" role=\"group\" aria-label=\"Columns\" style=\"padding:0;border:0\">\n        <button class=\"btn sm\" aria-pressed=\"true\">Composition</button>\n        <button class=\"btn sm\" aria-pressed=\"false\">Operations</button>\n      </div>\n    </div>\n  </div>\n</div>"
+        },
+        {
+          "id": "idioms",
+          "name": "The two idioms to retire",
+          "canvas": "ink",
+          "html": "<div style=\"display:grid;gap:14px\">\n  <div class=\"row\" style=\"gap:6px\"><button class=\"btn sm sel\">All <span class=\"dim\">6</span></button><button class=\"btn sm\">Live <span class=\"dim\">2</span></button><button class=\"btn sm\">Done <span class=\"dim\">3</span></button></div>\n  <span class=\"chips\" role=\"group\" aria-label=\"View\" style=\"max-width:220px;margin:0\"><button class=\"btn sm sel\" aria-pressed=\"true\">List</button><button class=\"btn sm\" aria-pressed=\"false\">Graph</button></span>\n</div>"
+        }
+      ]
+    },
+    {
       "slug": "stat-box",
       "name": "Stat box",
       "group": "Data display",
@@ -38,6 +244,972 @@
           "name": "Clickable",
           "canvas": "ink",
           "html": "<div class=\"grid g3\">\n  <button class=\"stat click\" aria-label=\"Open the work orders with a live run\"><span class=\"k\">Live now</span><span class=\"v\">2</span><span class=\"s\">work orders with a live run</span></button>\n  <button class=\"stat click\" aria-label=\"Open the approvals waiting on you\"><span class=\"k\">Waiting on you</span><span class=\"v\" style=\"color:var(--st-approval)\">3</span><span class=\"s\">open the approvals</span></button>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "table",
+      "name": "Table",
+      "group": "Data display",
+      "summary": "Rows of records with one column per field, inside a panel.",
+      "root": "table",
+      "page": "components/table.html",
+      "stories": [
+        {
+          "id": "default",
+          "name": "Records in a panel",
+          "canvas": "ink",
+          "html": "<div class=\"panel\">\n  <div class=\"panel-h\"><h3>Agents</h3></div>\n  <div class=\"tw\">\n    <table>\n      <thead><tr><th>Agent</th><th>Runtime</th><th>Owner</th><th class=\"num\">Runs</th><th class=\"num\">Spend</th></tr></thead>\n      <tbody>\n        <tr class=\"click\" tabindex=\"0\" role=\"button\" aria-label=\"Open a-intel.core.release-manager\">\n          <td><span class=\"tkey\">a-intel.core.release-manager</span><span class=\"sub\">Prepares release notes and cuts the tag</span></td>\n          <td class=\"mono\">mbell-mbp-16</td>\n          <td>Marcus Bell</td>\n          <td class=\"num\">412</td>\n          <td class=\"num\">$186.40</td>\n        </tr>\n        <tr class=\"click\" tabindex=\"0\" role=\"button\" aria-label=\"Open a-intel.core.triage\">\n          <td><span class=\"tkey\">a-intel.core.triage</span><span class=\"sub\">Labels and routes new issues</span></td>\n          <td class=\"mono\">ci-runner-04</td>\n          <td>Priya Natarajan</td>\n          <td class=\"num\">1,340</td>\n          <td class=\"num\">$402.11</td>\n        </tr>\n        <tr class=\"click\" tabindex=\"0\" role=\"button\" aria-label=\"Open a-intel.finops.invoice-bot\">\n          <td><span class=\"tkey\">a-intel.finops.invoice-bot</span><span class=\"sub\">Reconciles supplier invoices</span></td>\n          <td class=\"mono\">ci-runner-08</td>\n          <td>Amara Lindqvist</td>\n          <td class=\"num\">88</td>\n          <td class=\"num\"><span class=\"dim\">—</span></td>\n        </tr>\n      </tbody>\n    </table>\n  </div>\n</div>"
+        },
+        {
+          "id": "narrow",
+          "name": "Narrow table",
+          "canvas": "ink",
+          "html": "<div class=\"panel\" style=\"max-width:340px\">\n  <div class=\"panel-h\"><h3>Tool calls by tool</h3></div>\n  <div class=\"tw\">\n    <table class=\"narrow\">\n      <thead><tr><th>Tool</th><th class=\"num\">Calls</th></tr></thead>\n      <tbody>\n        <tr><td class=\"mono\">github__create_pull_request</td><td class=\"num\">41</td></tr>\n        <tr><td class=\"mono\">github__list_commits</td><td class=\"num\">1,206</td></tr>\n        <tr><td class=\"mono\">fs__read_file</td><td class=\"num\">318</td></tr>\n      </tbody>\n    </table>\n  </div>\n</div>"
+        },
+        {
+          "id": "selection",
+          "name": "Selectable rows",
+          "canvas": "ink",
+          "html": "<div class=\"panel\">\n  <div class=\"panel-h\"><h3>Backlog</h3><div class=\"sp\"><span class=\"b b-q\">1 selected</span><button class=\"btn sm\">Clear</button></div></div>\n  <div class=\"tw\">\n    <table>\n      <thead><tr><th class=\"ck\"><span class=\"vh\">Select</span></th><th>Work item</th><th>Status</th><th>Updated</th></tr></thead>\n      <tbody>\n        <tr class=\"click\" tabindex=\"0\" role=\"button\" aria-label=\"Open PLAT-1893\" aria-selected=\"true\">\n          <td class=\"ck\"><input type=\"checkbox\" aria-label=\"Select PLAT-1893\" checked></td>\n          <td><span class=\"mono dim\" style=\"font-size:11.5px\">PLAT-1893</span><div>Cut 4.11.0 release notes</div></td>\n          <td><span class=\"b b-allowed\"><span class=\"d\"></span>Ready</span></td>\n          <td class=\"mono dim\" style=\"font-size:11.5px\">2026-09-24 14:02</td>\n        </tr>\n        <tr class=\"click\" tabindex=\"0\" role=\"button\" aria-label=\"Open PLAT-1901\">\n          <td class=\"ck\"><input type=\"checkbox\" aria-label=\"Select PLAT-1901\" disabled title=\"Not ready: its definition of done is not certified\"></td>\n          <td><span class=\"mono dim\" style=\"font-size:11.5px\">PLAT-1901</span><div>Retry flaky checkout test</div></td>\n          <td><span class=\"b b-approval\"><span class=\"d\"></span>Needs certification</span></td>\n          <td class=\"mono dim\" style=\"font-size:11.5px\">2026-09-24 09:41</td>\n        </tr>\n      </tbody>\n    </table>\n  </div>\n</div>"
+        },
+        {
+          "id": "groups",
+          "name": "Grouped rows",
+          "canvas": "ink",
+          "html": "<div class=\"panel\">\n  <div class=\"tw\">\n    <table>\n      <thead><tr><th>Tool</th><th>Decision</th><th class=\"num\">Calls</th></tr></thead>\n      <tbody>\n        <tr class=\"tgrp t-vcs\"><td colspan=\"2\"><span class=\"ti\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 6a9 9 0 0 0-9 9V3\"/><circle cx=\"18\" cy=\"6\" r=\"3\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/></svg></span><b>Source control</b><span class=\"muted\">Changes code history: branches, pull requests, merges, releases, repositories.</span></td><td class=\"dim\" style=\"font-size:11px;white-space:nowrap\">2 tools</td></tr>\n        <tr class=\"hz-row-high click\" tabindex=\"0\" role=\"button\" aria-label=\"Open github__merge_pull_request\"><td class=\"mono\">github__merge_pull_request</td><td><span class=\"b b-approval\"><span class=\"d\"></span>Needs approval</span></td><td class=\"num\">12</td></tr>\n        <tr class=\"click\" tabindex=\"0\" role=\"button\" aria-label=\"Open github__create_pull_request\"><td class=\"mono\">github__create_pull_request</td><td><span class=\"b b-allowed\"><span class=\"d\"></span>Allowed</span></td><td class=\"num\">41</td></tr>\n        <tr class=\"tgrp t-finance\"><td colspan=\"2\"><span class=\"ti\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"5\" rx=\"2\"/><line x1=\"2\" x2=\"22\" y1=\"10\" y2=\"10\"/></svg></span><b>Financial control</b><span class=\"muted\">Moves funds or commits spend.</span></td><td class=\"dim\" style=\"font-size:11px;white-space:nowrap\">1 tool</td></tr>\n        <tr class=\"hz-row-critical click\" tabindex=\"0\" role=\"button\" aria-label=\"Open stripe__create_payment\"><td class=\"mono\">stripe__create_payment</td><td><span class=\"b b-approval\"><span class=\"d\"></span>Needs approval</span></td><td class=\"num\">3</td></tr>\n      </tbody>\n    </table>\n  </div>\n</div>"
+        },
+        {
+          "id": "current",
+          "name": "Current row",
+          "canvas": "ink",
+          "html": "<div class=\"panel\" style=\"max-width:560px\">\n  <div class=\"tw\">\n    <table class=\"narrow\">\n      <thead><tr><th>Operator</th><th class=\"num\">Runs</th><th class=\"num\">Spend</th></tr></thead>\n      <tbody>\n        <tr class=\"click on\" aria-selected=\"true\"><td>Priya Natarajan</td><td class=\"num\">612</td><td class=\"num\">$1,284.60</td></tr>\n        <tr class=\"click\" aria-selected=\"false\"><td>Marcus Bell</td><td class=\"num\">431</td><td class=\"num\">$904.12</td></tr>\n        <tr class=\"click\" aria-selected=\"false\"><td>Amara Lindqvist</td><td class=\"num\">97</td><td class=\"num\">$212.08</td></tr>\n      </tbody>\n    </table>\n  </div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "list-table",
+      "name": "List table",
+      "group": "Data display",
+      "summary": "A table in a panel with search, filters, sortable columns, a rows select, and a pager.",
+      "root": ".lt, .lp",
+      "page": "components/list-table.html",
+      "stories": [
+        {
+          "id": "loaded",
+          "name": "Loaded list",
+          "canvas": "panel",
+          "html": "<div class=\"panel\">\n  <div class=\"panel-h\"><div style=\"flex:1;min-width:0\"><h3>Registered in Core platform</h3><p class=\"muted\" style=\"margin:2px 0 0;font-size:12px\">Each row names the reusable objects this agent holds a reference to.</p></div></div>\n  <div class=\"lt\">\n    <input class=\"lt-q\" type=\"search\" placeholder=\"Search this list\" aria-label=\"Search this list\" value=\"\">\n    <select class=\"lt-f\" data-k=\"4\" aria-label=\"Filter by Health\"><option value=\"\">Any health</option><option value=\"healthy\">Healthy</option><option value=\"degraded\">Degraded</option></select>\n    <select class=\"lt-f\" data-k=\"5\" aria-label=\"Filter by Runtime\"><option value=\"\">Any runtime</option><option value=\"gateway\">Gateway</option><option value=\"harness\">Harness</option></select>\n    <label class=\"lt-rows\">Rows<select class=\"lt-per\" aria-label=\"Rows per page\"><option value=\"5\">5</option><option value=\"10\" selected>10</option><option value=\"25\">25</option><option value=\"50\">50</option><option value=\"0\">All</option></select></label>\n  </div>\n  <div class=\"tw\"><table>\n    <thead><tr>\n      <th class=\"sortable\" tabindex=\"0\" role=\"button\" aria-sort=\"none\">Agent</th>\n      <th class=\"sortable\" tabindex=\"0\" role=\"button\" aria-sort=\"none\">Owner</th>\n      <th class=\"num sortable\" tabindex=\"0\" role=\"button\" aria-sort=\"descending\">Runs</th>\n      <th class=\"num sortable\" tabindex=\"0\" role=\"button\" aria-sort=\"none\">Spend</th>\n      <th class=\"sortable\" tabindex=\"0\" role=\"button\" aria-sort=\"none\">Health</th>\n      <th class=\"sortable\" tabindex=\"0\" role=\"button\" aria-sort=\"none\">Runtime</th>\n    </tr></thead>\n    <tbody>\n      <tr><td class=\"tkey\">a-intel.core.triage</td><td>Priya Natarajan</td><td class=\"num\">1,340</td><td class=\"num\">$402.11</td><td><span class=\"b b-allowed\"><span class=\"d\"></span>healthy</span></td><td><span class=\"b b-tier b-allowed\">gateway</span></td></tr>\n      <tr><td class=\"tkey\">a-intel.core.release-manager</td><td>Marcus Bell</td><td class=\"num\">412</td><td class=\"num\">$186.40</td><td><span class=\"b b-allowed\"><span class=\"d\"></span>healthy</span></td><td><span class=\"b b-tier b-allowed\">gateway</span></td></tr>\n      <tr><td class=\"tkey\">a-intel.core.pr-reviewer</td><td>Marcus Bell</td><td class=\"num\">288</td><td class=\"num\">$94.02</td><td><span class=\"b b-denied\"><span class=\"d\"></span>degraded</span></td><td><span class=\"b b-tier b-q\">harness</span></td></tr>\n    </tbody>\n  </table></div>\n  <div class=\"lp\"><span class=\"lp-n\">1–10 of 23 (page 1 of 3)</span><span class=\"lp-pg\"><button class=\"btn sm\" data-p=\"prev\" aria-label=\"Previous page\" disabled>‹</button><button class=\"btn sm\" data-p=\"1\" aria-label=\"Page 1 of 3\" aria-current=\"page\">1</button><button class=\"btn sm\" data-p=\"2\" aria-label=\"Page 2 of 3\">2</button><button class=\"btn sm\" data-p=\"3\" aria-label=\"Page 3 of 3\">3</button><button class=\"btn sm\" data-p=\"next\" aria-label=\"Next page\">›</button></span></div>\n</div>"
+        },
+        {
+          "id": "empty",
+          "name": "No match",
+          "canvas": "panel",
+          "html": "<div class=\"panel\">\n  <div class=\"lt\">\n    <input class=\"lt-q\" type=\"search\" placeholder=\"Search this list\" aria-label=\"Search this list\" value=\"stale-closer\">\n    <label class=\"lt-rows\">Rows<select class=\"lt-per\" aria-label=\"Rows per page\"><option value=\"10\" selected>10</option></select></label>\n  </div>\n  <div class=\"tw\"><table>\n    <thead><tr><th class=\"sortable\" tabindex=\"0\" role=\"button\" aria-sort=\"none\">Agent</th><th class=\"sortable\" tabindex=\"0\" role=\"button\" aria-sort=\"none\">Owner</th><th class=\"num sortable\" tabindex=\"0\" role=\"button\" aria-sort=\"none\">Runs</th></tr></thead>\n    <tbody><tr class=\"lt-empty\"><td colspan=\"3\">No rows match.</td></tr></tbody>\n  </table></div>\n  <div class=\"lp\"><span class=\"lp-n\">None</span><span class=\"lp-pg\"><button class=\"btn sm\" data-p=\"prev\" aria-label=\"Previous page\" disabled>‹</button><button class=\"btn sm\" data-p=\"1\" aria-label=\"Page 1 of 1\" aria-current=\"page\">1</button><button class=\"btn sm\" data-p=\"next\" aria-label=\"Next page\" disabled>›</button></span></div>\n</div>"
+        },
+        {
+          "id": "long",
+          "name": "Long pager",
+          "canvas": "panel",
+          "html": "<div class=\"panel\">\n  <div class=\"lp\"><span class=\"lp-n\">41–50 of 703 (page 5 of 71)</span><span class=\"lp-pg\"><button class=\"btn sm\" data-p=\"prev\" aria-label=\"Previous page\">‹</button><button class=\"btn sm\" data-p=\"1\" aria-label=\"Page 1 of 71\">1</button><span class=\"el\">…</span><button class=\"btn sm\" data-p=\"4\" aria-label=\"Page 4 of 71\">4</button><button class=\"btn sm\" data-p=\"5\" aria-label=\"Page 5 of 71\" aria-current=\"page\">5</button><button class=\"btn sm\" data-p=\"6\" aria-label=\"Page 6 of 71\">6</button><span class=\"el\">…</span><button class=\"btn sm\" data-p=\"71\" aria-label=\"Page 71 of 71\">71</button><button class=\"btn sm\" data-p=\"next\" aria-label=\"Next page\">›</button></span></div>\n</div>"
+        },
+        {
+          "id": "free",
+          "name": "Outside a panel",
+          "canvas": "ink",
+          "html": "<div>\n  <div class=\"lt free\">\n    <input class=\"lt-q\" type=\"search\" placeholder=\"Search findings\" aria-label=\"Search findings\" value=\"\">\n    <label class=\"lt-sort\">Sort<select class=\"lt-s\"><option value=\"0\" selected>Rank</option><option value=\"1\">Savings, high first</option><option value=\"2\">Savings, low first</option><option value=\"3\">Finding A–Z</option></select></label>\n    <label class=\"lt-rows\">Rows<select class=\"lt-per\" aria-label=\"Rows per page\"><option value=\"10\" selected>10</option></select></label>\n  </div>\n  <p class=\"muted\" style=\"margin:0;font-size:12.5px\">Cards sit here. A card list has no column headers, so it sorts from the Sort select.</p>\n  <div class=\"lp free\"><span class=\"lp-n\">1–7 of 7</span><span class=\"lp-pg\"><button class=\"btn sm\" data-p=\"prev\" aria-label=\"Previous page\" disabled>‹</button><button class=\"btn sm\" data-p=\"1\" aria-label=\"Page 1 of 1\" aria-current=\"page\">1</button><button class=\"btn sm\" data-p=\"next\" aria-label=\"Next page\" disabled>›</button></span></div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "badge",
+      "name": "Badge",
+      "group": "Data display",
+      "summary": "A short word in a bordered pill that names a state or a label.",
+      "root": ".b",
+      "page": "components/badge.html",
+      "stories": [
+        {
+          "id": "states",
+          "name": "State badges",
+          "canvas": "ink",
+          "html": "<span class=\"b b-allowed\"><span class=\"d\"></span>allowed</span>\n<span class=\"b b-approval\"><span class=\"d\"></span>waiting on Priya</span>\n<span class=\"b b-denied\"><span class=\"d\"></span>denied</span>\n<span class=\"b b-proven\"><span class=\"d\"></span>sealed</span>\n<span class=\"b b-failed\"><span class=\"d\"></span>failed</span>\n<span class=\"b b-critical\"><span class=\"d\"></span>tamper incident</span>"
+        },
+        {
+          "id": "labels",
+          "name": "Label badges",
+          "canvas": "ink",
+          "html": "<span class=\"b b-q\">direct</span>\n<span class=\"b b-q\">compacted</span>\n<span class=\"b b-q\">low</span>\n<span class=\"b b-approval\">medium</span>\n<span class=\"b b-denied\">high</span>\n<span class=\"b b-critical\">critical</span>\n<span class=\"b b-denied\">irreversible</span>\n<span class=\"b b-approval\">write</span>"
+        },
+        {
+          "id": "tier",
+          "name": "Tier badges",
+          "canvas": "ink",
+          "html": "<span class=\"b b-tier b-q\" title=\"Recorded only. No hook is installed and nothing is delivered.\">observe</span>\n<span class=\"b b-tier b-approval\" title=\"Hooks installed. Steering is delivered and four hook events can refuse a call.\">harness</span>\n<span class=\"b b-tier b-allowed\" title=\"Model and MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it.\">gateway</span>\n<span class=\"b b-tier b-proven\" title=\"The agent runs in an OS sandbox whose only network exit is the gateway.\">contained</span>"
+        },
+        {
+          "id": "live",
+          "name": "Live run",
+          "canvas": "ink",
+          "html": "<span class=\"live\"><span class=\"p\"></span>live</span>\n<span class=\"b b-approval\">parked for approval</span>\n<span class=\"b b-denied\">halted</span>\n<span class=\"b b-q\">sealed</span>"
+        },
+        {
+          "id": "in-table",
+          "name": "In a table",
+          "canvas": "panel",
+          "html": "<div class=\"panel\"><div class=\"tw\"><table class=\"narrow\">\n  <thead><tr><th>Tool</th><th>Risk</th><th>Effect</th><th>Mandates</th></tr></thead>\n  <tbody>\n    <tr><td class=\"tkey\">github__merge_pull_request</td><td><span class=\"b b-denied\">high</span></td><td><span class=\"b b-denied\">irreversible</span></td><td><span class=\"b b-approval\"><span class=\"d\"></span>2</span></td></tr>\n    <tr><td class=\"tkey\">github__list_commits</td><td><span class=\"b b-q\">low</span></td><td><span class=\"b b-q\">read</span></td><td><span class=\"dim\">—</span></td></tr>\n  </tbody>\n</table></div></div>"
+        },
+        {
+          "id": "link",
+          "name": "Link badge and id",
+          "canvas": "ink",
+          "html": "<a class=\"b b-q lk\" href=\"#\">a-intel/platform</a>\n<span class=\"b b-q\"><span class=\"id mono\">wo_01K6T9QX</span></span>\n<span class=\"b b-tier b-na\" title=\"not yet available\">contained · not yet available</span>"
+        }
+      ]
+    },
+    {
+      "slug": "typed-badges",
+      "name": "Typed badges",
+      "group": "Data display",
+      "summary": "Five fixed-vocabulary badges, one per axis: a record's kind, a frame's type, a tool's category, its hazard, and the gate in front of it.",
+      "root": ".kb, .ft, .tcb, .hz, .gt",
+      "page": "components/typed-badges.html",
+      "stories": [
+        {
+          "id": "kind",
+          "name": "Kind badge",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:8px;flex-wrap:wrap;align-items:center\">\n  <span class=\"kb k-rule\" title=\"A directive that steers behavior\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h14M13 7l5 5-5 5\"/></svg>rule</span>\n  <span class=\"kb k-constraint\" title=\"A hard boundary: require or forbid\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z\"/><path d=\"M9 12h6\"/></svg>constraint</span>\n  <span class=\"kb k-procedure\" title=\"Steps, in order\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01\"/></svg>procedure</span>\n  <span class=\"kb k-fact\" title=\"A checkable claim about the world\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8\"/><circle cx=\"12\" cy=\"12\" r=\"2.5\"/></svg>fact</span>\n  <span class=\"kb k-memory\" title=\"A durable recollection\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 3h12v18l-6-4-6 4z\"/></svg>memory</span>\n  <span class=\"kb k-preference\" title=\"Soft and often unfalsifiable\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z\"/></svg>preference</span>\n  <span class=\"kg k-rule\" title=\"rule\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h14M13 7l5 5-5 5\"/></svg></span>\n  <span class=\"kg k-fact\" title=\"fact\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8\"/><circle cx=\"12\" cy=\"12\" r=\"2.5\"/></svg></span>\n</div>"
+        },
+        {
+          "id": "frame-type",
+          "name": "Frame type",
+          "canvas": "ink",
+          "html": "<div class=\"ft-strip\">\n  <span class=\"ft-n\"><span class=\"ft ft-goal\" title=\"The outcome the work serves\">goal</span><b>4</b></span>\n  <span class=\"ft-n\"><span class=\"ft ft-invariant\" title=\"Holds for every run in its scope. No narrower source, work order or steer relaxes it\">invariant</span><b>2</b></span>\n  <span class=\"ft-n\"><span class=\"ft ft-constraint\" title=\"A requirement or prohibition for this scope\">constraint</span><b>6</b></span>\n  <span class=\"ft-n\"><span class=\"ft ft-delegation\" title=\"Authority a person delegated: what, how much and until when\">delegation</span><b>1</b></span>\n  <span class=\"ft-n\"><span class=\"ft ft-procedure\" title=\"How to do something\">procedure</span><b>9</b></span>\n  <span class=\"ft-n\"><span class=\"ft ft-context\" title=\"A fact the agent needs\">context</span><b>12</b></span>\n  <span class=\"ft-n\"><span class=\"ft ft-invocation\" title=\"What the agent was asked to do, and by whom\">invocation</span><b>1</b></span>\n  <span class=\"ft-n\"><span class=\"ft ft-capability\" title=\"A callable the agent may use, described. Oxagen never runs it\">capability</span><b>3</b></span>\n</div>"
+        },
+        {
+          "id": "tool-category",
+          "name": "Tool category",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:8px;flex-wrap:wrap\">\n  <span class=\"tcb t-read\" title=\"Observes and returns. Changes nothing anywhere.\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg>Read-only</span>\n  <span class=\"tcb t-vcs\" title=\"Changes code history: branches, pull requests, merges, releases, repositories.\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 6a9 9 0 0 0-9 9V3\"/><circle cx=\"18\" cy=\"6\" r=\"3\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/></svg>Source control</span>\n  <span class=\"tcb t-finance\" title=\"Moves funds or commits spend. Never callable without a mandate.\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"5\" rx=\"2\"/><line x1=\"2\" x2=\"22\" y1=\"10\" y2=\"10\"/></svg>Financial control</span>\n</div>"
+        },
+        {
+          "id": "hazard",
+          "name": "Hazard",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:14px;flex-wrap:wrap\">\n  <span class=\"hz hz-low\" title=\"Risk: low\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8\"/><path d=\"M12 12h.01\"/></svg><span>Low</span></span>\n  <span class=\"hz hz-medium\" title=\"Risk: medium\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3l9 9-9 9-9-9z\"/><path d=\"M12 12h.01\"/></svg><span>Medium</span></span><span class=\"hz he-write\" title=\"Side effect: write\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 20h4L18 10l-4-4L4 16z\"/><path d=\"M12 8l4 4\"/></svg><span>Write</span></span>\n  <span class=\"hz hz-critical\" title=\"Risk: critical\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3 2 20h20L12 3z\" fill=\"currentColor\"/><path d=\"M12 10v4M12 17.5v.5\" style=\"stroke:var(--ink)\"/></svg><span>Critical</span></span><span class=\"hz he-irreversible\" title=\"Side effect: irreversible\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"11\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/></svg><span>Irreversible</span></span>\n</div>"
+        },
+        {
+          "id": "gate",
+          "name": "Gate",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:8px;flex-wrap:wrap\">\n  <span class=\"gt gt-allow\" title=\"Allowed by policy v14 wherever a grant reaches this version.\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 12.5l4.5 4.5L19 7.5\"/></svg>Allowed</span>\n  <span class=\"gt gt-require_approval\" title=\"Rule rg_0093 in policy v14: every irreversible call needs approval.\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z\"/><path d=\"M12 8v4l2.5 1.5\"/></svg>Needs approval</span>\n  <span class=\"gt gt-mandate\" title=\"Financial effect: moves funds. A mandate is required, and its own rule decides when a person approves.\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v18M16.5 7.5c0-1.7-2-3-4.5-3S7.5 5.8 7.5 7.5s2 2.7 4.5 3.3 4.5 1.6 4.5 3.5-2 3.2-4.5 3.2-4.5-1.3-4.5-3\"/></svg>Mandate + approval</span>\n  <span class=\"gt gt-deny\" title=\"Denied by policy v14.\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M6 6l12 12\"/></svg>Blocked</span>\n  <span class=\"gt gt-killed\" title=\"Turned on by Priya Natarajan. Vendor incident, rolling back until the patch ships.\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3v9\"/><path d=\"M6.3 6.3a8 8 0 1 0 11.4 0\"/></svg>Stopped by kill switch</span>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "chips",
+      "name": "Chips",
+      "group": "Data display",
+      "summary": "Eight small inline blocks that each name one thing inside a list: a role, a check, a provenance edge, a work item, a label, a DoD tag, a person, or a mention.",
+      "root": ".rl-chip, .sx-chip, .edge, .chip, .lbl, .tg, .tkp, .mref",
+      "page": "components/chips.html",
+      "stories": [
+        {
+          "id": "role",
+          "name": "Role chip",
+          "canvas": "ink",
+          "html": "<div>\n  <span class=\"rl-chip\"><span>a-intel.platform.writer</span><button type=\"button\" aria-label=\"Remove a-intel.platform.writer\" title=\"Remove role\">×</button></span><span class=\"vh\">, </span><span class=\"rl-chip\"><span>a-intel.pr.author</span><button type=\"button\" aria-label=\"Remove a-intel.pr.author\" title=\"Remove role\">×</button></span>\n  <div><button class=\"btn sm\" style=\"margin-top:6px\">Assign role</button></div>\n</div>"
+        },
+        {
+          "id": "self-check",
+          "name": "Self-check chip",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:6px;flex-wrap:wrap\">\n  <span class=\"sx-chip src\">a-intel/platform</span>\n  <span class=\"sx-chip\">rule</span>\n  <span class=\"sx-chip\">1,204 tok</span>\n  <span class=\"sx-chip ok\">cited 41% → 68% of loads</span>\n  <span class=\"sx-chip held\">the loop is held</span>\n  <span class=\"sx-chip res\">research only</span>\n</div>"
+        },
+        {
+          "id": "provenance",
+          "name": "Provenance edge",
+          "canvas": "ink",
+          "html": "<span class=\"ev\"><span class=\"edge observed\">observed</span></span>\n<span class=\"ev\" style=\"margin-left:10px\"><span class=\"edge stated\">stated</span></span>\n<span class=\"ev\" style=\"margin-left:10px\"><span class=\"edge inferred\">inferred · 74%</span><button class=\"edge\" type=\"button\">fr 12</button><button class=\"edge\" type=\"button\">fr 14</button></span>"
+        },
+        {
+          "id": "removable",
+          "name": "Removable chip",
+          "canvas": "ink",
+          "html": "<div class=\"wo-work items\" style=\"max-width:420px\">\n  <span class=\"chip\"><span class=\"ipl\" title=\"GitHub\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" role=\"img\" aria-label=\"GitHub\"><path fill=\"currentColor\" d=\"M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12\"/></svg></span><span class=\"mono\">PLAT-1893</span><span>Cut 4.11.0 release notes</span></span>\n  <span class=\"chip\"><span class=\"ipl\" title=\"GitHub\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" role=\"img\" aria-label=\"GitHub\"><path fill=\"currentColor\" d=\"M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12\"/></svg></span><span class=\"mono\">PLAT-1901</span><span>Retry flaky checkout test</span><button type=\"button\" aria-label=\"Remove PLAT-1901\">×</button></span>\n</div>"
+        },
+        {
+          "id": "label",
+          "name": "Label",
+          "canvas": "ink",
+          "html": "<span class=\"lbls\">\n  <span class=\"lbl\" style=\"--lc:#D6455E\"><i aria-hidden=\"true\"></i>P0</span>\n  <span class=\"lbl\" style=\"--lc:#C0453C\"><i aria-hidden=\"true\"></i>Bug</span>\n  <span class=\"lbl\" style=\"--lc:#9D8BE3\"><i aria-hidden=\"true\"></i>Documentation</span>\n</span>"
+        },
+        {
+          "id": "dod-tag",
+          "name": "DoD tag",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:6px\">\n  <span class=\"tg tg-code\">code</span>\n  <span class=\"tg tg-test\">test</span>\n  <span class=\"tg tg-docs\">docs</span>\n  <span class=\"tg tg-review\">review</span>\n</div>"
+        },
+        {
+          "id": "person",
+          "name": "Person chip",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:16px;flex-wrap:wrap\">\n  <span class=\"tkp\"><span class=\"avx person f-sans tn-soft\" style=\"width:20px;height:20px;font-size:8px\" aria-hidden=\"true\">PN</span><span>Priya Natarajan</span></span>\n  <span class=\"tkp\"><span class=\"ipl\" title=\"GitHub\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" role=\"img\" aria-label=\"GitHub\"><path fill=\"currentColor\" d=\"M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12\"/></svg></span><span class=\"mono\">rwan-oss</span><span class=\"vh\"> (</span><span class=\"b b-q\" style=\"font-size:10px\" title=\"Not mapped to a workspace member\">not mapped</span><span class=\"vh\">)</span></span>\n</div>"
+        },
+        {
+          "id": "mention",
+          "name": "Mention chip",
+          "canvas": "ink",
+          "html": "<div class=\"mrefs\">\n  <span class=\"mref\"><span class=\"kg k-rule\" title=\"rule\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h14M13 7l5 5-5 5\"/></svg></span><span class=\"mono\">rec_release_gate</span><span class=\"dim\">340 tok</span></span>\n  <span class=\"mref\"><span class=\"hx\" style=\"width:13px;height:13px\" title=\"claude-code\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path fill=\"#D97757\" d=\"m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z\"/></svg></span><span>a-intel.core.release-manager</span><span class=\"dim\">profile</span></span>\n  <span class=\"mref bad\"><span class=\"mono\">@marcus.b</span><span>not found</span></span>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "meter",
+      "name": "Meter",
+      "group": "Data display",
+      "summary": "A figure shown as a fraction of a ceiling, or a total shown as its named parts, in a thin bar.",
+      "root": ".bar, .meter, .stk",
+      "page": "components/meter.html",
+      "stories": [
+        {
+          "id": "budget",
+          "name": "Single-value meter",
+          "canvas": "ink",
+          "html": "<div class=\"meter\"><div class=\"lab\"><span>Session-start prefix</span><b>1,161 of 4,096 tok</b></div><div class=\"bar\" role=\"img\" aria-label=\"Session-start prefix: 28 percent used\"><i style=\"width:28%\"></i></div><div class=\"dim\" style=\"font-size:11.5px\">16 KiB in the signed bundle, header included</div></div>\n<div class=\"meter\" style=\"margin-top:14px\"><div class=\"lab\"><span>Volatile selection</span><b>3,844 of 4,096 tok</b></div><div class=\"bar\" role=\"img\" aria-label=\"Volatile selection: 94 percent used\"><i class=\"hold\" style=\"width:94%\"></i></div><div class=\"dim\" style=\"font-size:11.5px\">picked for this brief under the workspace budget</div></div>"
+        },
+        {
+          "id": "composition",
+          "name": "Composition meter",
+          "canvas": "ink",
+          "html": "<div style=\"display:grid;gap:9px\">\n  <div class=\"meter\"><div class=\"lab\">Conversation<b>18,204 <span class=\"dim\" style=\"font-weight:500\">· 41%</span></b></div><div class=\"bar\"><i style=\"width:100%;background:var(--st-allowed)\"></i></div></div>\n  <div class=\"meter\"><div class=\"lab\">Tool definitions<b>9,880 <span class=\"dim\" style=\"font-weight:500\">· 22%</span></b></div><div class=\"bar\"><i style=\"width:54%;background:var(--st-approval)\"></i></div></div>\n  <div class=\"meter\"><div class=\"lab\">Context frames<b>7,412 <span class=\"dim\" style=\"font-weight:500\">· 17%</span></b></div><div class=\"bar\"><i style=\"width:41%;background:var(--st-proven)\"></i></div></div>\n  <div class=\"meter\"><div class=\"lab\">Tool results<b>5,006 <span class=\"dim\" style=\"font-weight:500\">· 11%</span></b></div><div class=\"bar\"><i style=\"width:27%;background:var(--muted)\"></i></div></div>\n  <div class=\"meter\"><div class=\"lab\">Output<b>2,890 <span class=\"dim\" style=\"font-weight:500\">· 6%</span></b></div><div class=\"bar\"><i style=\"width:16%;background:var(--fg)\"></i></div></div>\n  <div class=\"meter\"><div class=\"lab\">Reasoning<b>1,240 <span class=\"dim\" style=\"font-weight:500\">· 3%</span></b></div><div class=\"bar\"><i style=\"width:7%;background:var(--muted)\"></i></div></div>\n</div>"
+        },
+        {
+          "id": "stacked",
+          "name": "Stacked ratio",
+          "canvas": "ink",
+          "html": "<div>\n  <div class=\"stk\"><i class=\"fk-model\" style=\"flex:41\" title=\"model · 41%\"></i><i class=\"fk-tool\" style=\"flex:33\" title=\"tool · 33%\"></i><i class=\"fk-gov\" style=\"flex:20\" title=\"waiting on a person · 20%\"></i><i class=\"neu\" style=\"flex:6\" title=\"harness · 6%\"></i></div>\n  <div class=\"leg\" style=\"margin-top:8px\"><span><i class=\"fk-model\"></i>model <b>2m 04s</b></span><span><i class=\"fk-tool\"></i>tool <b>1m 40s</b></span><span><i class=\"fk-gov\"></i>waiting on a person <b>1m 01s</b></span><span><i class=\"neu\"></i>harness <b>18s</b></span></div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "ci-light",
+      "name": "CI light",
+      "group": "Data display",
+      "summary": "One dot for a set of checks, and how many of them have reported.",
+      "root": ".ci",
+      "page": "components/ci-light.html",
+      "stories": [
+        {
+          "id": "states",
+          "name": "The four states",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:18px;flex-wrap:wrap\">\n  <span class=\"ci\" title=\"queued\"><span class=\"ci-l queued\" aria-label=\"queued\"></span><span class=\"mono\">0 / 5</span></span>\n  <span class=\"ci\" title=\"running\"><span class=\"ci-l run\" aria-label=\"running\"></span><span class=\"mono\">3 / 5</span></span>\n  <span class=\"ci\" title=\"all passed\"><span class=\"ci-l pass\" aria-label=\"all passed\"></span><span class=\"mono\">5 / 5</span></span>\n  <span class=\"ci\" title=\"1 failed\"><span class=\"ci-l fail pulse\" aria-label=\"1 failed\"></span><span class=\"mono\">4 / 5</span></span>\n</div>"
+        },
+        {
+          "id": "settled-fail",
+          "name": "Failed and settled",
+          "canvas": "ink",
+          "html": "<span class=\"ci\" title=\"1 failed\"><span class=\"ci-l fail\" aria-label=\"1 failed\"></span><span class=\"mono\">5 / 5</span></span>"
+        },
+        {
+          "id": "table",
+          "name": "In the Changes table",
+          "canvas": "panel",
+          "html": "<div class=\"panel\"><div class=\"tw\"><table class=\"narrow\">\n  <thead><tr><th>Change</th><th>Checks</th><th>State</th></tr></thead>\n  <tbody>\n    <tr><td><b>context/release-manager-no-reread</b></td><td><span class=\"ci\" title=\"running\"><span class=\"ci-l run\" aria-label=\"running\"></span><span class=\"mono\">3 / 5</span></span></td><td><span class=\"b b-q\">Open</span></td></tr>\n    <tr><td><b>context/triage-label-map</b></td><td><span class=\"ci\" title=\"all passed\"><span class=\"ci-l pass\" aria-label=\"all passed\"></span><span class=\"mono\">5 / 5</span></span></td><td><span class=\"b b-allowed\"><span class=\"d\"></span>Ready</span></td></tr>\n  </tbody>\n</table></div></div>"
+        }
+      ]
+    },
+    {
+      "slug": "avatar",
+      "name": "Avatar",
+      "group": "Data display",
+      "summary": "The shape that stands for a person or an agent, everywhere a record names one.",
+      "root": ".avx",
+      "page": "components/avatar.html",
+      "stories": [
+        {
+          "id": "person",
+          "name": "Person",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:14px\">\n  <span class=\"avx person f-serif tn-solid\" style=\"width:44px;height:44px;font-size:16px\" aria-hidden=\"true\">PN</span>\n  <span class=\"avx person f-sans tn-soft\" style=\"width:44px;height:44px;font-size:16px\" aria-hidden=\"true\">MB</span>\n</div>"
+        },
+        {
+          "id": "agent",
+          "name": "Agent",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:14px\">\n  <span class=\"avx agent ic tn-solid\" style=\"width:44px;height:44px\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\"/><path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09\"/><path d=\"M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z\"/><path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05\"/></svg></span>\n  <span class=\"avx agent f-mono tn-soft\" style=\"width:44px;height:44px;font-size:16px\" aria-hidden=\"true\">CI</span>\n</div>"
+        },
+        {
+          "id": "tones",
+          "name": "Three tones",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:14px\">\n  <span class=\"avx agent ic tn-solid\" style=\"width:36px;height:36px\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M11 2v2\"/><path d=\"M5 2v2\"/><path d=\"M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1\"/><path d=\"M8 15a6 6 0 0 0 12 0v-3\"/><circle cx=\"20\" cy=\"10\" r=\"2\"/></svg></span>\n  <span class=\"avx agent ic tn-soft\" style=\"width:36px;height:36px\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M11 2v2\"/><path d=\"M5 2v2\"/><path d=\"M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1\"/><path d=\"M8 15a6 6 0 0 0 12 0v-3\"/><circle cx=\"20\" cy=\"10\" r=\"2\"/></svg></span>\n  <span class=\"avx agent ic tn-line\" style=\"width:36px;height:36px\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M11 2v2\"/><path d=\"M5 2v2\"/><path d=\"M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1\"/><path d=\"M8 15a6 6 0 0 0 12 0v-3\"/><circle cx=\"20\" cy=\"10\" r=\"2\"/></svg></span>\n</div>"
+        },
+        {
+          "id": "photo",
+          "name": "Photo",
+          "canvas": "ink",
+          "html": "<span class=\"avx person tn-soft\" style=\"width:44px;height:44px\" aria-hidden=\"true\"><img src=\"data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2096%2096%22%3E%3Crect%20width%3D%2296%22%20height%3D%2296%22%20fill%3D%22%23292722%22%2F%3E%3Cpath%20d%3D%22M14%2098c2-24%2016-34%2034-34s32%2010%2034%2034z%22%20fill%3D%22%239B958A%22%2F%3E%3Ccircle%20cx%3D%2248%22%20cy%3D%2238%22%20r%3D%2217%22%20fill%3D%22%23DDD8CD%22%2F%3E%3Cpath%20d%3D%22M31%2036c0-14%208-21%2017-21s17%207%2017%2021c-4-6-9-9-17-9s-13%203-17%209z%22%20fill%3D%22%2310100F%22%2F%3E%3C%2Fsvg%3E\" alt=\"\"></span>"
+        },
+        {
+          "id": "sizes",
+          "name": "Sizes in context",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:14px;align-items:center\">\n  <span class=\"avx person f-sans tn-soft\" style=\"width:18px;height:18px;font-size:8px\" aria-hidden=\"true\">MB</span>\n  <span class=\"avx person f-sans tn-soft\" style=\"width:38px;height:38px;font-size:14px\" aria-hidden=\"true\">MB</span>\n  <span class=\"avx person f-sans tn-soft\" style=\"width:52px;height:52px;font-size:19px\" aria-hidden=\"true\">MB</span>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "key-value-list",
+      "name": "Key-value list",
+      "group": "Data display",
+      "summary": "One record's fields, a label and a value per row.",
+      "root": ".kv",
+      "page": "components/key-value-list.html",
+      "stories": [
+        {
+          "id": "default",
+          "name": "Default rows",
+          "canvas": "ink",
+          "html": "<dl class=\"kv\">\n  <dt>Tool version</dt><dd class=\"mono\">stripe__create_payment@4</dd>\n  <dt>Input digest</dt><dd class=\"mono\">sha256:c81f04ea6b2d93a7</dd>\n  <dt>Idempotency</dt><dd class=\"mono\">idk_c81f04ea</dd>\n</dl>"
+        },
+        {
+          "id": "sub",
+          "name": "Second line",
+          "canvas": "ink",
+          "html": "<dl class=\"kv\">\n  <dt>Agent key</dt><dd class=\"mono\">a-intel.core.release-manager</dd>\n  <dt>Principal</dt><dd class=\"mono\">prn_01JQ8W3F2M6XKD7A9RZT4BVCNE<span class=\"sub\">minted at registration and never reused, so a retired agent's runs keep their identity</span></dd>\n  <dt>Operator</dt><dd>Marcus Bell<span class=\"sub\">accountable for every run · IAM field <span class=\"mono\">initiating_principal</span></span></dd>\n</dl>"
+        },
+        {
+          "id": "mono-list",
+          "name": "All-mono list",
+          "canvas": "ink",
+          "html": "<dl class=\"kv code\">\n  <dt>date</dt><dd>11 September 2026, 15:47 UTC</dd>\n  <dt>number</dt><dd>18,472.36</dd>\n  <dt>money</dt><dd>$18,472.36 USD</dd>\n  <dt>duration</dt><dd>6 m 11 s</dd>\n</dl>"
+        },
+        {
+          "id": "empty",
+          "name": "Empty value",
+          "canvas": "ink",
+          "html": "<dl class=\"kv\">\n  <dt>Source</dt><dd>the agent's hooks</dd>\n  <dt>Cause</dt><dd><span class=\"dim\">—</span></dd>\n  <dt>Billed</dt><dd><span style=\"color:var(--st-allowed)\">no</span></dd>\n</dl>"
+        },
+        {
+          "id": "chain-tab",
+          "name": "Run chain tab",
+          "canvas": "panel",
+          "html": "<div class=\"grid g2\">\n  <div class=\"panel\"><div class=\"panel-h\"><h3>Hash chain</h3><span class=\"b b-allowed\" style=\"margin-left:auto\"><span class=\"d\"></span>no gaps</span></div><div class=\"panel-b\">\n    <dl class=\"kv\"><dt>Frames</dt><dd class=\"num\">212 · dense seq 0 … 211</dd>\n    <dt>Rule</dt><dd class=\"mono\" style=\"font-size:11.5px\">hash = SHA256(prev_hash ‖ canonical(envelope))</dd>\n    <dt>Checkpoints</dt><dd>10 · every 20 frames · signed by the host device key, countersigned by oxagen at ingest</dd></dl>\n  </div></div>\n  <div class=\"panel\"><div class=\"panel-h\"><h3>Seal and attestation</h3><span class=\"b b-allowed\" style=\"margin-left:auto\"><span class=\"d\"></span>sealed</span></div><div class=\"panel-b\">\n    <dl class=\"kv\"><dt>Merkle root</dt><dd class=\"mono\" style=\"word-break:break-all\">sha256:b41e07c9a2f5308d6e14bb90c7f2a331</dd>\n    <dt>Archive segment</dt><dd class=\"mono\">seg_01K5RS7M2E8FJ3QW.ndjson.zst</dd>\n    <dt>Signature</dt><dd class=\"mono\">ed25519 · a-intel</dd></dl>\n  </div></div>\n</div>"
+        },
+        {
+          "id": "denied",
+          "name": "Denied state",
+          "canvas": "panel",
+          "html": "<div class=\"kv\" style=\"margin-top:0;text-align:left;max-width:420px\">\n  <dt>Signed in as</dt><dd>Marcus Bell · <span class=\"mono\">workspace.member</span></dd>\n  <dt>Needed</dt><dd><span class=\"mono\">agent.read on core-platform</span></dd>\n  <dt>Decided by</dt><dd><span class=\"mono\">pol_v41</span> · deny wins over every allow</dd>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "tool-cell",
+      "name": "Tool cell",
+      "group": "Data display",
+      "summary": "A tool's category icon, its plain-language label, and its API name, in one cell.",
+      "root": ".tc",
+      "page": "components/tool-cell.html",
+      "stories": [
+        {
+          "id": "default",
+          "name": "Default",
+          "canvas": "ink",
+          "html": "<span class=\"tc t-vcs\" title=\"github__merge_pull_request@3: Merge pull request · Source control\">\n  <span class=\"ti\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 6a9 9 0 0 0-9 9V3\"/><circle cx=\"18\" cy=\"6\" r=\"3\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/></svg></span>\n  <span class=\"tl\">Merge pull request</span><span class=\"ta\">github__merge_pull_request<span class=\"v\">@3</span></span>\n</span>"
+        },
+        {
+          "id": "sub",
+          "name": "With a sub-fact",
+          "canvas": "ink",
+          "html": "<span class=\"tc t-finance\" title=\"stripe__create_payment@4: Create payment · Financial control\">\n  <span class=\"ti\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"5\" rx=\"2\"/><line x1=\"2\" x2=\"22\" y1=\"10\" y2=\"10\"/></svg></span>\n  <span class=\"tl\">Create payment</span><span class=\"ta\">stripe__create_payment<span class=\"v\">@4</span> · provider Stripe</span>\n</span>"
+        },
+        {
+          "id": "sizes",
+          "name": "Sizes",
+          "canvas": "ink",
+          "html": "<div class=\"row\" style=\"gap:20px;align-items:center;flex-wrap:wrap\">\n  <span class=\"tc sm t-read\" title=\"github__get_file_contents@2: Get file contents · Read-only\">\n    <span class=\"ti\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\"/><circle cx=\"12\" cy=\"12\" r=\"3\"/></svg></span>\n    <span class=\"tl\">Get file contents</span><span class=\"ta\">github__get_file_contents<span class=\"v\">@2</span></span>\n  </span>\n  <span class=\"tc t-vcs\" title=\"github__create_pull_request@3: Create pull request · Source control\">\n    <span class=\"ti\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 6a9 9 0 0 0-9 9V3\"/><circle cx=\"18\" cy=\"6\" r=\"3\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/></svg></span>\n    <span class=\"tl\">Create pull request</span><span class=\"ta\">github__create_pull_request<span class=\"v\">@3</span></span>\n  </span>\n  <span class=\"tc lg t-finance\" title=\"stripe__create_payment@4: Create payment · Financial control\">\n    <span class=\"ti\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"20\" height=\"14\" x=\"2\" y=\"5\" rx=\"2\"/><line x1=\"2\" x2=\"22\" y1=\"10\" y2=\"10\"/></svg></span>\n    <span class=\"tl\">Create payment</span><span class=\"ta\">stripe__create_payment<span class=\"v\">@4</span></span>\n  </span>\n</div>"
+        },
+        {
+          "id": "api-mode",
+          "name": "API-name mode",
+          "canvas": "ink",
+          "html": "<span class=\"tc api t-vcs\" title=\"github__merge_pull_request@3: Merge pull request · Source control\">\n  <span class=\"ti\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M15 6a9 9 0 0 0-9 9V3\"/><circle cx=\"18\" cy=\"6\" r=\"3\"/><circle cx=\"6\" cy=\"18\" r=\"3\"/></svg></span>\n  <span class=\"tl\">github__merge_pull_request<span class=\"v\">@3</span></span><span class=\"ta\">Merge pull request</span>\n</span>"
+        }
+      ]
+    },
+    {
+      "slug": "agent-card",
+      "name": "Agent card",
+      "group": "Data display",
+      "summary": "The one way an agent identity is drawn: an avatar, its key, and a second line, in one of three layouts.",
+      "root": ".agc",
+      "page": "components/agent-card.html",
+      "stories": [
+        {
+          "id": "list",
+          "name": "List layout",
+          "canvas": "ink",
+          "html": "<table class=\"narrow\"><tbody>\n  <tr><td><span class=\"agc agc-list\"><span class=\"avx agent ic tn-soft\" style=\"width:26px;height:26px\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\"/><path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09\"/><path d=\"M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z\"/><path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05\"/></svg></span><span class=\"agid\"><span class=\"tkey\">a-intel.core.release-manager</span><span class=\"sub\">Claude Code</span></span></span></td></tr>\n  <tr><td><a class=\"agc agc-list\" href=\"#/a-intel/core-platform/agents/triage\"><span class=\"avx agent ic tn-soft\" style=\"width:26px;height:26px\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"11\" cy=\"11\" r=\"7\"/><path d=\"m20 20-3.5-3.5\"/></svg></span><span class=\"agid\"><span class=\"tkey\">a-intel.core.triage</span><span class=\"sub\">Codex CLI</span></span></a></td></tr>\n</tbody></table>"
+        },
+        {
+          "id": "compact",
+          "name": "Compact layout",
+          "canvas": "ink",
+          "html": "<a class=\"agc agc-compact\" href=\"#/a-intel/core-platform/agents/release-manager\"><span class=\"avx agent ic tn-soft\" style=\"width:30px;height:30px\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\"/><path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09\"/><path d=\"M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z\"/><path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05\"/></svg></span><span class=\"agid\"><span class=\"tkey\">a-intel.core.release-manager</span><span class=\"sub\">Claude Code · 412 runs 30d · $186.40</span></span></a>"
+        },
+        {
+          "id": "detail",
+          "name": "Detail layout",
+          "canvas": "ink",
+          "html": "<h1 class=\"mono\" style=\"font-size:20px;margin:0\"><span class=\"agc agc-detail\"><span class=\"avx agent ic tn-soft\" style=\"width:60px;height:60px\" aria-hidden=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5\"/><path d=\"M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09\"/><path d=\"M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z\"/><path d=\"M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05\"/></svg></span><span class=\"agid\"><span class=\"tkey\">a-intel.core.release-manager</span><span class=\"sub\">Claude Code</span></span></span></h1>"
+        }
+      ]
+    },
+    {
+      "slug": "timeline",
+      "name": "Timeline",
+      "group": "Data display",
+      "summary": "A short sequence of steps, read top to bottom or left to right.",
+      "root": ".chain",
+      "page": "components/timeline.html",
+      "stories": [
+        {
+          "id": "vertical",
+          "name": "Vertical chain",
+          "canvas": "ink",
+          "html": "<ul class=\"chain\">\n  <li class=\"on\"><span class=\"h\">Priced</span><div>A governed action: a call oxagen decided, delivered and recorded, with its receipt in the chain.</div></li>\n  <li class=\"on\"><span class=\"h\">Reported</span><div>Sealed runs, tokens by class and retained evidence. Reported, never priced.</div></li>\n  <li class=\"on\"><span class=\"h\">Free</span><div>Denials, runs oxagen halted before a model call, and runs of the in-app agent.</div></li>\n</ul>"
+        },
+        {
+          "id": "steps",
+          "name": "Plain steps",
+          "canvas": "ink",
+          "html": "<ul class=\"chain\">\n  <li class=\"on\"><div style=\"font-size:12.5px;color:var(--body)\">Add <span class=\"mono\">page_size</span> to the billing call.</div></li>\n  <li class=\"on\"><div style=\"font-size:12.5px;color:var(--body)\">Cache the first page for the rest of the run.</div></li>\n  <li class=\"on\"><div style=\"font-size:12.5px;color:var(--body)\">Open a pull request. The Spend page confirms the drop on the next sealed run.</div></li>\n</ul>"
+        },
+        {
+          "id": "stages",
+          "name": "Stage chain",
+          "canvas": "panel",
+          "html": "<div class=\"stages\">\n  <div class=\"stage done\"><span class=\"r\"><i>1</i>Draft</span><span class=\"ag\"><span class=\"avx agent tn-solid f-mono\" style=\"width:18px;height:18px;font-size:8px\">CI</span><b>stella CI</b></span><span class=\"sub\">owns tests, lint</span></div>\n  <span class=\"stage-arrow\" aria-hidden=\"true\">→</span>\n  <div class=\"stage on\"><span class=\"r\"><i>2</i>Review</span><span class=\"ag\"><span class=\"avx agent tn-solid\" style=\"width:18px;height:18px;font-size:8px\">RM</span><b>Release manager</b></span><span class=\"sub\">owns changelog, release notes</span></div>\n  <span class=\"stage-arrow\" aria-hidden=\"true\">→</span>\n  <div class=\"stage you\"><span class=\"r\"><i>3</i>Accept</span><span class=\"ag\"><span class=\"avx person tn-soft f-serif\" style=\"width:18px;height:18px;font-size:8px\">MB</span><b>You</b></span><span class=\"sub\">a person accepts every item</span></div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "record-card",
+      "name": "Record card",
+      "group": "Data display",
+      "summary": "One context record: its statement first, its kind second, and its scope, id, and publish facts last.",
+      "root": ".rec",
+      "page": "components/record-card.html",
+      "stories": [
+        {
+          "id": "kinds",
+          "name": "All six kinds",
+          "canvas": "ink",
+          "html": "<div class=\"recs\">\n  <div class=\"rec k-rule\"><div class=\"kt\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h14M13 7l5 5-5 5\"/></svg></div><div class=\"rm\">\n    <div class=\"r-top\"><span class=\"kb k-rule\" title=\"A directive that steers behavior\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h14M13 7l5 5-5 5\"/></svg>rule</span><span class=\"b b-q\" title=\"steering force\">must</span><span class=\"sp\"><span class=\"b b-allowed\"><span class=\"d\"></span>published</span></span></div>\n    <p class=\"r-st\">Every pull request into main needs one human review before merge.</p>\n    <div class=\"r-meta\"><span><b>workspace: core-platform</b></span><span class=\"mono\">rec_pr_review</span><span class=\"mono\">a1b2c3d</span><span>2026-08-14</span></div>\n  </div></div>\n  <div class=\"rec k-constraint\"><div class=\"kt\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z\"/><path d=\"M9 12h6\"/></svg></div><div class=\"rm\">\n    <div class=\"r-top\"><span class=\"kb k-constraint\" title=\"A hard boundary: require or forbid\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z\"/><path d=\"M9 12h6\"/></svg>constraint</span><span class=\"b b-denied\" title=\"constraint effect\">forbid</span><span class=\"sp\"><span class=\"b b-allowed\"><span class=\"d\"></span>published</span></span></div>\n    <p class=\"r-st\">Never delete a repository without an organization owner's approval.</p>\n    <div class=\"r-meta\"><span><b>organization: a-intel</b></span><span class=\"mono\">rec_no_repo_delete</span><span>2026-07-02</span></div>\n  </div></div>\n  <div class=\"rec k-procedure\"><div class=\"kt\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01\"/></svg></div><div class=\"rm\">\n    <div class=\"r-top\"><span class=\"kb k-procedure\" title=\"Steps, in order\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01\"/></svg>procedure</span><span class=\"sp\"><span class=\"b b-allowed\"><span class=\"d\"></span>published</span></span></div>\n    <p class=\"r-st\">1. Open the failing check. 2. Reproduce it locally. 3. Fix the root cause. 4. Add a regression test. 5. Open a pull request.</p>\n    <div class=\"r-meta\"><span><b>workspace: core-platform</b></span><span class=\"mono\">rec_ci_fix_procedure</span><span>2026-06-19</span></div>\n  </div></div>\n  <div class=\"rec k-fact\"><div class=\"kt\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8\"/><circle cx=\"12\" cy=\"12\" r=\"2.5\"/></svg></div><div class=\"rm\">\n    <div class=\"r-top\"><span class=\"kb k-fact\" title=\"A checkable claim about the world\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8\"/><circle cx=\"12\" cy=\"12\" r=\"2.5\"/></svg>fact</span><span class=\"sp\"><span class=\"b b-allowed\"><span class=\"d\"></span>published</span></span></div>\n    <p class=\"r-st\">The billing workspace's production database lives in us-east-1.</p>\n    <div class=\"r-meta\"><span><b>workspace: finops</b></span><span>delivered at run start</span><span class=\"mono\">rec_billing_region</span><span>2026-05-30</span></div>\n  </div></div>\n  <div class=\"rec k-memory\"><div class=\"kt\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 3h12v18l-6-4-6 4z\"/></svg></div><div class=\"rm\">\n    <div class=\"r-top\"><span class=\"kb k-memory\" title=\"A durable recollection\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 3h12v18l-6-4-6 4z\"/></svg>memory</span><span class=\"sp\"><span class=\"b b-q\">steers nothing yet</span></span></div>\n    <p class=\"r-st\">The team prefers pull requests under 400 lines, reviewed the same day.</p>\n    <div class=\"r-meta\"><span>from <b>3 runs</b></span><span><b>workspace: core-platform</b></span><span class=\"mono\">rec_small_prs</span></div>\n  </div></div>\n  <div class=\"rec k-preference\"><div class=\"kt\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z\"/></svg></div><div class=\"rm\">\n    <div class=\"r-top\"><span class=\"kb k-preference\" title=\"Soft and often unfalsifiable\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z\"/></svg>preference</span><span class=\"sp\"><button class=\"btn sm\">Open</button></span></div>\n    <p class=\"r-st\">Release notes read better in an active voice, not a passive one.</p>\n    <div class=\"r-meta\"><span><b>workspace: core-platform</b></span><span class=\"mono\">rec_release_notes_voice</span><span>2026-04-11</span></div>\n  </div></div>\n</div>"
+        },
+        {
+          "id": "archived",
+          "name": "Archived",
+          "canvas": "ink",
+          "html": "<div class=\"recs\">\n  <div class=\"rec k-rule archived\"><div class=\"kt\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h14M13 7l5 5-5 5\"/></svg></div><div class=\"rm\">\n    <div class=\"r-top\"><span class=\"kb k-rule\" title=\"A directive that steers behavior\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h14M13 7l5 5-5 5\"/></svg>rule</span><span class=\"sp\"><span class=\"b b-q\">archived</span></span></div>\n    <p class=\"r-st\">Squash every pull request on merge. Superseded by the merge-queue rule.</p>\n    <div class=\"r-meta\"><span><b>workspace: core-platform</b></span><span class=\"mono\">rec_squash_merge</span><span>2026-02-03</span></div>\n  </div></div>\n</div>"
+        },
+        {
+          "id": "kind-filter",
+          "name": "Kind filter row",
+          "canvas": "ink",
+          "html": "<div class=\"kf\" role=\"group\" aria-label=\"Filter by kind\">\n  <button type=\"button\" class=\"btn sm k-rule\" aria-pressed=\"true\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M4 12h14M13 7l5 5-5 5\"/></svg>rule</button>\n  <button type=\"button\" class=\"btn sm k-constraint\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z\"/><path d=\"M9 12h6\"/></svg>constraint</button>\n  <button type=\"button\" class=\"btn sm k-procedure\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01\"/></svg>procedure</button>\n  <button type=\"button\" class=\"btn sm k-fact\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8\"/><circle cx=\"12\" cy=\"12\" r=\"2.5\"/></svg>fact</button>\n  <button type=\"button\" class=\"btn sm k-memory\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 3h12v18l-6-4-6 4z\"/></svg>memory</button>\n  <button type=\"button\" class=\"btn sm k-preference\" aria-pressed=\"false\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z\"/></svg>preference</button>\n  <button type=\"button\" class=\"btn sm k-item\" aria-pressed=\"false\">item</button>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "list-item",
+      "name": "List item",
+      "group": "Data display",
+      "summary": "One row in a bordered list: an icon, two lines of text, and a timestamp.",
+      "root": ".lst",
+      "page": "components/list-item.html",
+      "stories": [
+        {
+          "id": "notifications",
+          "name": "Notification list",
+          "canvas": "ink",
+          "html": "<div class=\"lst\">\n  <div class=\"li unread\" role=\"button\" tabindex=\"0\" aria-label=\"Mark read: Approval waiting · github__merge_pull_request@3\"><span class=\"ic t-approval\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 7v5l3 2\"/></svg></span>\n    <div class=\"bd2\"><div class=\"t1\">Approval waiting · github__merge_pull_request@3</div><div class=\"t2\">a-intel.core.release-manager on run_01K5ZB4T8P wants to merge a-intel/platform#1893 into main. Rule merge.requires_approval. Expires 15:54.</div>\n    <div class=\"mono dim\" style=\"font-size:11px;margin-top:3px\">approval.requested</div></div>\n    <time>15:44</time></div>\n  <div class=\"li unread\" role=\"button\" tabindex=\"0\" aria-label=\"Mark read: Hard budget reached · a-intel.core.docs-writer\"><span class=\"ic t-failed\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3 2 20h20L12 3z\"/><path d=\"M12 10v4M12 17.5v.5\"/></svg></span>\n    <div class=\"bd2\"><div class=\"t1\">Hard budget reached · a-intel.core.docs-writer</div><div class=\"t2\">$0.80 per run reached at turn 3 of run_01K5ZA0J2M. The run was paused at the next checkpoint.</div>\n    <div class=\"mono dim\" style=\"font-size:11px;margin-top:3px\">budget.breached</div></div>\n    <time>15:21</time></div>\n  <div class=\"li\"><span class=\"ic t-gold\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"6\" cy=\"5\" r=\"2.5\"/><circle cx=\"6\" cy=\"19\" r=\"2.5\"/><circle cx=\"18\" cy=\"8\" r=\"2.5\"/><path d=\"M6 7.5v9M18 10.5c0 4-12 2-12 6\"/></svg></span>\n    <div class=\"bd2\"><div class=\"t1\">Context PR opened · a-intel/platform#519</div><div class=\"t2\">The promoter proposed a rule on lineage ctx.release.no-reread-changelog. Supported by 682 duplicate tool calls across 212 runs.</div>\n    <div class=\"mono dim\" style=\"font-size:11px;margin-top:3px\">context_pr.opened</div></div>\n    <time>13:02</time></div>\n  <div class=\"li\"><span class=\"ic t-allowed\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m5 12 5 5 9-10\"/></svg></span>\n    <div class=\"bd2\"><div class=\"t1\">Run sealed · run_01K5YX2D6R</div><div class=\"t2\">a-intel.core.stella-ci sealed a-intel/platform#1887: 212 frames, 38,400 tokens, $2.41 observed by gateway.</div>\n    <div class=\"mono dim\" style=\"font-size:11px;margin-top:3px\">run.sealed</div></div>\n    <time>15:09</time></div>\n  <div class=\"li\"><span class=\"ic t-critical\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3 2 20h20L12 3z\"/><path d=\"M12 10v4M12 17.5v.5\"/></svg></span>\n    <div class=\"bd2\"><div class=\"t1\">Kill switch flipped · tool version</div><div class=\"t2\">Priya Natarajan disabled slack__post_message@7 across a-intel after a schema regression.</div>\n    <div class=\"mono dim\" style=\"font-size:11px;margin-top:3px\">kill_switch.flipped</div></div>\n    <time>2026-09-09</time></div>\n</div>"
+        },
+        {
+          "id": "security",
+          "name": "Security list",
+          "canvas": "ink",
+          "html": "<div class=\"lst\">\n  <div class=\"li\"><div class=\"ic\" style=\"background:color-mix(in srgb,var(--st-allowed) 14%,transparent);color:var(--st-allowed)\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4\" y=\"10\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 10V7a4 4 0 0 1 8 0v3\"/></svg></div>\n    <div class=\"bd2\"><div class=\"t1\">Authenticator app</div><div class=\"t2\">TOTP, added 2026-08-22. 8 of 10 recovery codes unused.</div></div>\n    <button class=\"btn sm\">Regenerate codes</button></div>\n  <div class=\"li\"><div class=\"bd2\"><div class=\"t1\">MacBook Pro · Chrome 141<span class=\"b b-allowed\"><span class=\"d\"></span>this device</span></div><div class=\"t2\">San Francisco · 73.15.240.8</div></div><time>now, this session</time></div>\n  <div class=\"li\"><div class=\"bd2\"><div class=\"t1\">iPhone 17 · Safari</div><div class=\"t2\">San Francisco · 73.15.240.8</div></div><time>2026-09-11 08:12Z</time><button class=\"btn sm\">Revoke</button></div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "code-block",
+      "name": "Code block",
+      "group": "Code",
+      "summary": "Source, payloads, and commands in Monaspace Neon, with a labelled readout and a side-by-side pair.",
+      "root": "pre, code",
+      "page": "components/code-block.html",
+      "stories": [
+        {
+          "id": "block",
+          "name": "Code block",
+          "canvas": "ink",
+          "html": "        <pre><span class=\"c\">// the tools block of the next model request, verbatim</span>\n{\n  <span class=\"k\">\"name\"</span>: <span class=\"s\">\"github__create_pull_request\"</span>,\n  <span class=\"k\">\"version\"</span>: 3,\n  <span class=\"k\">\"input\"</span>: {\n    <span class=\"k\">\"repo\"</span>: <span class=\"s\">\"a-intel/platform\"</span>,\n    <span class=\"k\">\"base\"</span>: <span class=\"s\">\"main\"</span>,\n    <span class=\"k\">\"head\"</span>: <span class=\"s\">\"release/4.11.0\"</span>\n  }\n}</pre>"
+        },
+        {
+          "id": "states",
+          "name": "Value tones",
+          "canvas": "ink",
+          "html": "        <pre><span class=\"c\"># policy v41, the rule that answered</span>\nrule        = <span class=\"s\">\"merge.requires_approval\"</span>\nanswer      = <span class=\"dn\">\"routed\"</span>\nwait_s      = <span class=\"n\">600</span>\ntamper      = <span class=\"bad\">\"chain_break at frame 188\"</span></pre>"
+        },
+        {
+          "id": "inline",
+          "name": "Inline code",
+          "canvas": "panel",
+          "html": "<p style=\"margin:0\">The control plane answered <code>503 work_index_unavailable</code>. Nothing was changed. Retry after <code>oxagen status</code> reports the index as ready.</p>"
+        },
+        {
+          "id": "readout",
+          "name": "Readout",
+          "canvas": "ink",
+          "html": "        <div class=\"readout\"><div class=\"rh\">canonical input<span class=\"sp\">exactly what the gateway will dispatch</span></div><pre style=\"white-space:pre-wrap;word-break:break-word\">{\n  <span class=\"k\">\"amount\"</span>: 1284,\n  <span class=\"k\">\"currency\"</span>: <span class=\"s\">\"usd\"</span>,\n  <span class=\"k\">\"customer\"</span>: <span class=\"s\">\"cus_Q2x81\"</span>\n}</pre></div>"
+        },
+        {
+          "id": "pair",
+          "name": "Code pair",
+          "canvas": "ink",
+          "html": "        <div class=\"cpair\"><div><div class=\"lab\">What your agent does today<span class=\"sp\">python</span></div><pre>rows = billing.get_line_items(\n    days=<span class=\"n\">30</span>)\n<span class=\"c\"># 41,200 tokens enter the context</span></pre></div><div><div class=\"lab\">What the fix does<span class=\"sp\">python</span></div><pre>rows = billing.get_line_items(\n    days=<span class=\"n\">30</span>, page_size=<span class=\"n\">200</span>)\n<span class=\"c\"># one page per call</span></pre></div></div>"
+        }
+      ]
+    },
+    {
+      "slug": "diff",
+      "name": "Diff",
+      "group": "Code",
+      "summary": "A line diff of one file, unified for narrow panels and split side by side for review.",
+      "root": ".diff",
+      "page": "components/diff.html",
+      "stories": [
+        {
+          "id": "unified",
+          "name": "Unified",
+          "canvas": "ink",
+          "html": "<div class=\"diff\"><div class=\"dl gap\"><span></span><span></span><span>⋯</span></div><div class=\"dl\"><span>3</span><span>3</span><span>  model = \"claude-sonnet-5\"</span></div><div class=\"dl\"><span>4</span><span>4</span><span>  harness = \"claude-code\"</span></div><div class=\"dl del\"><span>5</span><span></span><span>- budget.per_run_usd = 20</span></div><div class=\"dl add\"><span></span><span>5</span><span>+ budget.per_run_usd = 25</span></div><div class=\"dl add\"><span></span><span>6</span><span>+ budget.mode = \"enforced\"</span></div><div class=\"dl\"><span>6</span><span>7</span><span>  [toolbelt]</span></div><div class=\"dl gap\"><span></span><span></span><span>⋯</span></div></div>"
+        },
+        {
+          "id": "stat",
+          "name": "Change count",
+          "canvas": "panel",
+          "html": "<p class=\"eyebrow q\" style=\"margin:0\"><span class=\"mono\" style=\"text-transform:none;letter-spacing:0\">.oxagen/agents/release-manager.toml</span> <span class=\"dstat\"><b class=\"a\">+2</b> <b class=\"d\">−1</b></span></p>"
+        },
+        {
+          "id": "split",
+          "name": "Split",
+          "canvas": "ink",
+          "html": "<div class=\"diff two\"><div class=\"dl2 hd\"><span class=\"ln\"></span><span class=\"tx\">main</span><span class=\"ln\"></span><span class=\"tx\">your draft</span></div><div class=\"dl2 same\"><span class=\"ln\">3</span><span class=\"tx\">  model = \"claude-sonnet-5\"</span><span class=\"ln\">3</span><span class=\"tx\">  model = \"claude-sonnet-5\"</span></div><div class=\"dl2\"><span class=\"ln del\">4</span><span class=\"tx del\">  budget.per_run_usd = 20</span><span class=\"ln add\">4</span><span class=\"tx add\">  budget.per_run_usd = 25</span></div><div class=\"dl2\"><span class=\"ln e\"></span><span class=\"tx e\"></span><span class=\"ln add\">5</span><span class=\"tx add\">  budget.mode = \"enforced\"</span></div><div class=\"dl2 same\"><span class=\"ln\">5</span><span class=\"tx\">  [toolbelt]</span><span class=\"ln\">6</span><span class=\"tx\">  [toolbelt]</span></div><div class=\"dl2 gap\"><span class=\"tx\">⋯</span></div></div>"
+        },
+        {
+          "id": "empty",
+          "name": "No change",
+          "canvas": "panel",
+          "html": "<div class=\"panel\"><div class=\"panel-b dim\">Nothing changed yet.</div></div>"
+        }
+      ]
+    },
+    {
+      "slug": "source-editor",
+      "name": "Source editor",
+      "group": "Code",
+      "summary": "A file editor with line numbers, syntax color, find, and a status bar, set in Monaspace Neon.",
+      "root": ".ed",
+      "page": "components/source-editor.html",
+      "stories": [
+        {
+          "id": "toml",
+          "name": "Agent definition",
+          "canvas": "panel",
+          "html": "        <div class=\"panel ed\">\n          <div class=\"ed-bar\"><span class=\"mono\" style=\"color:var(--fg)\">.oxagen/agents/release-manager.toml</span><span class=\"ed-dot\" title=\"unsaved changes\"></span><span class=\"dim\">unchanged</span><span class=\"ed-sp\"></span><label class=\"ed-find\"><input placeholder=\"Find  ⌘F\" aria-label=\"Find in file\" value=\"\"><span class=\"mono dim\"></span></label></div>\n          <div class=\"ed-scroll\" style=\"min-height:0;max-height:none\">\n            <div class=\"ed-gut\" aria-hidden=\"true\">1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15</div>\n            <div class=\"ed-wrap\"><div class=\"ed-cl\" style=\"top:calc(var(--ed-pad) + var(--ed-lh) * 2)\"></div><pre class=\"ed-mk\" aria-hidden=\"true\"></pre><pre class=\"ed-hl\" aria-hidden=\"true\"><span class=\"tk-c\"># The release manager. Saving opens a pull request against a-intel/platform.</span>\n<span class=\"tk-t\">[agent]</span>\n<span class=\"tk-k\">key</span> <span class=\"tk-p\">=</span> <span class=\"tk-s\">\"a-intel.core.release-manager\"</span>\n<span class=\"tk-k\">harness</span> <span class=\"tk-p\">=</span> <span class=\"tk-s\">\"claude-code\"</span>\n<span class=\"tk-k\">operator</span> <span class=\"tk-p\">=</span> <span class=\"tk-s\">\"marcus@a-intel.example\"</span>\n\n<span class=\"tk-t\">[budget]</span>\n<span class=\"tk-k\">monthly_usd</span> <span class=\"tk-p\">=</span> <span class=\"tk-n\">400</span>\n<span class=\"tk-k\">per_run_usd</span> <span class=\"tk-p\">=</span> <span class=\"tk-n\">4.00</span>\n<span class=\"tk-k\">enforce</span> <span class=\"tk-p\">=</span> <span class=\"tk-b\">true</span>\n\n<span class=\"tk-t\">[toolbelt]</span>\n<span class=\"tk-k\">name</span> <span class=\"tk-p\">=</span> <span class=\"tk-s\">\"release\"</span>\n<span class=\"tk-k\">deny_tools</span> <span class=\"tk-p\">=</span> <span class=\"tk-p\">[</span><span class=\"tk-s\">\"git_push --force\"</span><span class=\"tk-p\">]</span>\n<span class=\"tk-k\">retries</span> <span class=\"tk-p\">=</span> <span class=\"tk-e\">three</span></pre><textarea class=\"ed-t\" readonly spellcheck=\"false\" autocapitalize=\"off\" autocomplete=\"off\" autocorrect=\"off\" wrap=\"off\" aria-label=\".oxagen/agents/release-manager.toml\"># The release manager. Saving opens a pull request against a-intel/platform.\n[agent]\nkey = \"a-intel.core.release-manager\"\nharness = \"claude-code\"\noperator = \"marcus@a-intel.example\"\n\n[budget]\nmonthly_usd = 400\nper_run_usd = 4.00\nenforce = true\n\n[toolbelt]\nname = \"release\"\ndeny_tools = [\"git_push --force\"]\nretries = three</textarea></div>\n          </div>\n          <div class=\"ed-status\"><span>Ln 3, Col 1</span><span>TOML</span><span>Spaces: 2</span><span>LF</span><span>UTF-8</span><span class=\"ed-sp\"></span><span class=\"keys dim\">⌘S save, Tab indent, ⇧Tab outdent, ⌘/ comment, ⌘F find, ⌘Z undo</span></div>\n        </div>"
+        },
+        {
+          "id": "dirty",
+          "name": "Modified in a dialog",
+          "canvas": "panel",
+          "html": "        <div class=\"panel ed ced sm\">\n          <div class=\"ed-bar\"><span class=\"mono\" style=\"color:var(--fg)\">.oxagen/steering/release-train.toml</span><span class=\"ed-dot\" data-on=\"1\" title=\"unsaved changes\"></span><span class=\"dim\">modified</span><span class=\"ed-sp\"></span><label class=\"ed-find\"><input placeholder=\"Find  ⌘F\" aria-label=\"Find in file\" value=\"\"><span class=\"mono dim\"></span></label></div>\n          <div class=\"ed-scroll\" style=\"min-height:0;max-height:none\">\n            <div class=\"ed-gut\" aria-hidden=\"true\">1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15</div>\n            <div class=\"ed-wrap\"><div class=\"ed-cl\" style=\"top:calc(var(--ed-pad) + var(--ed-lh) * 2)\"></div><pre class=\"ed-mk\" aria-hidden=\"true\"></pre><pre class=\"ed-hl\" aria-hidden=\"true\"><span class=\"tk-c\"># The release manager. Saving opens a pull request against a-intel/platform.</span>\n<span class=\"tk-t\">[agent]</span>\n<span class=\"tk-k\">key</span> <span class=\"tk-p\">=</span> <span class=\"tk-s\">\"a-intel.core.release-manager\"</span>\n<span class=\"tk-k\">harness</span> <span class=\"tk-p\">=</span> <span class=\"tk-s\">\"claude-code\"</span>\n<span class=\"tk-k\">operator</span> <span class=\"tk-p\">=</span> <span class=\"tk-s\">\"marcus@a-intel.example\"</span>\n\n<span class=\"tk-t\">[budget]</span>\n<span class=\"tk-k\">monthly_usd</span> <span class=\"tk-p\">=</span> <span class=\"tk-n\">400</span>\n<span class=\"tk-k\">per_run_usd</span> <span class=\"tk-p\">=</span> <span class=\"tk-n\">4.00</span>\n<span class=\"tk-k\">enforce</span> <span class=\"tk-p\">=</span> <span class=\"tk-b\">true</span>\n\n<span class=\"tk-t\">[toolbelt]</span>\n<span class=\"tk-k\">name</span> <span class=\"tk-p\">=</span> <span class=\"tk-s\">\"release\"</span>\n<span class=\"tk-k\">deny_tools</span> <span class=\"tk-p\">=</span> <span class=\"tk-p\">[</span><span class=\"tk-s\">\"git_push --force\"</span><span class=\"tk-p\">]</span>\n<span class=\"tk-k\">retries</span> <span class=\"tk-p\">=</span> <span class=\"tk-e\">three</span></pre><textarea class=\"ed-t\" readonly spellcheck=\"false\" autocapitalize=\"off\" autocomplete=\"off\" autocorrect=\"off\" wrap=\"off\" aria-label=\".oxagen/steering/release-train.toml\"># The release manager. Saving opens a pull request against a-intel/platform.\n[agent]\nkey = \"a-intel.core.release-manager\"\nharness = \"claude-code\"\noperator = \"marcus@a-intel.example\"\n\n[budget]\nmonthly_usd = 400\nper_run_usd = 4.00\nenforce = true\n\n[toolbelt]\nname = \"release\"\ndeny_tools = [\"git_push --force\"]\nretries = three</textarea></div>\n          </div>\n          <div class=\"ed-status\"><span>Ln 9, Col 20</span><span>TOML</span><span>15 lines</span><span>LF</span><span>UTF-8</span></div>\n        </div>"
+        },
+        {
+          "id": "tokens",
+          "name": "Syntax tokens",
+          "canvas": "ink",
+          "html": "        <pre style=\"margin:0\"><span class=\"tk-c\"># tk-c comment</span>\n<span class=\"tk-t\">[tk-t table]</span>\n<span class=\"tk-k\">tk_k_key</span> <span class=\"tk-p\">=</span> <span class=\"tk-s\">\"tk-s string\"</span>\n<span class=\"tk-k\">count</span> <span class=\"tk-p\">=</span> <span class=\"tk-n\">42</span>  <span class=\"tk-c\"># tk-n number</span>\n<span class=\"tk-k\">on</span> <span class=\"tk-p\">=</span> <span class=\"tk-b\">true</span>  <span class=\"tk-c\"># tk-b boolean</span>\n<span class=\"tk-k\">retries</span> <span class=\"tk-p\">=</span> <span class=\"tk-e\">three</span>  <span class=\"tk-c\"># tk-e error</span></pre>"
+        }
+      ]
+    },
+    {
+      "slug": "button",
+      "name": "Button",
+      "group": "Actions and input",
+      "summary": "An action a person takes, with one gold primary per screen.",
+      "root": ".btn",
+      "page": "components/button.html",
+      "stories": [
+        {
+          "id": "variants",
+          "name": "Variants",
+          "canvas": "ink",
+          "html": "<button class=\"btn\">Export report</button>\n<button class=\"btn primary\">Set a budget</button>\n<button class=\"btn danger\">Deny with this reason</button>\n<button class=\"btn ghost\">Details</button>\n<button class=\"btn sel\">Live <span class=\"dim\">2</span></button>"
+        },
+        {
+          "id": "small",
+          "name": "Small",
+          "canvas": "ink",
+          "html": "<button class=\"btn sm\">Edit</button>\n<button class=\"btn sm primary\">Approve</button>\n<button class=\"btn sm danger\">Remove</button>\n<button class=\"btn sm ghost\" aria-expanded=\"false\">Details</button>"
+        },
+        {
+          "id": "disabled",
+          "name": "Disabled",
+          "canvas": "ink",
+          "html": "<button class=\"btn primary\" disabled>Retire agent</button>\n<button class=\"btn danger\" disabled>Retire agent</button>\n<span class=\"muted\" style=\"font-size:12px\">Tick the check to confirm.</span>"
+        },
+        {
+          "id": "dialog-footer",
+          "name": "Dialog footer",
+          "canvas": "panel",
+          "html": "<div style=\"display:grid;gap:14px\">\n  <div class=\"dlg-f\" style=\"border:1px solid var(--border);border-radius:10px\"><button class=\"btn\">Cancel</button><button class=\"btn primary\">Send the invitation</button></div>\n  <div class=\"dlg-f\" style=\"border:1px solid var(--border);border-radius:10px\"><button class=\"btn\">Cancel</button><button class=\"btn danger\">Retire agent</button></div>\n  <div class=\"dlg-f\" style=\"border:1px solid var(--border);border-radius:10px\"><button class=\"btn\">Keep it open</button><button class=\"btn danger solid\">Close pull request</button></div>\n</div>"
+        },
+        {
+          "id": "icon",
+          "name": "Icon buttons",
+          "canvas": "ink",
+          "html": "<button class=\"iconbtn\" aria-label=\"Close\">×</button>\n<button class=\"iconbtn\" aria-label=\"Notifications\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\"/></svg><span class=\"dot\"></span></button>\n<button class=\"iconbtn apd-btn\" aria-pressed=\"false\" aria-controls=\"apdrawer\" aria-label=\"Approvals, 3 waiting on you across all workspaces\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\"/></svg><span class=\"cnt\">3</span></button>\n<button class=\"iconbtn\" aria-pressed=\"true\" aria-label=\"Approvals, 3 waiting on you across all workspaces\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9\"/><path d=\"M10.3 21a1.94 1.94 0 0 0 3.4 0\"/></svg></button>"
+        },
+        {
+          "id": "wand",
+          "name": "Assist button",
+          "canvas": "ink",
+          "html": "<label class=\"muted\" style=\"font-size:12px;font-weight:600\">Description</label>\n<button class=\"btn wand\" title=\"Have the assistant write it\" aria-label=\"Have the assistant write it\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72\"/><path d=\"m14 7 3 3\"/><path d=\"M5 6v4\"/><path d=\"M19 14v4\"/><path d=\"M10 2v2\"/><path d=\"M7 8H3\"/><path d=\"M21 16h-4\"/><path d=\"M11 3H9\"/></svg></button>\n<button class=\"btn wand\" disabled title=\"Have the assistant write it\" aria-label=\"Have the assistant write it\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72\"/><path d=\"m14 7 3 3\"/><path d=\"M5 6v4\"/><path d=\"M19 14v4\"/><path d=\"M10 2v2\"/><path d=\"M7 8H3\"/><path d=\"M21 16h-4\"/><path d=\"M11 3H9\"/></svg></button>"
+        },
+        {
+          "id": "link",
+          "name": "Link button",
+          "canvas": "ink",
+          "html": "<p style=\"margin:0;font-size:13px\">Showing constraints and procedures. <button class=\"lnk\" style=\"font-size:12px\">Show every type</button></p>"
+        }
+      ]
+    },
+    {
+      "slug": "form-field",
+      "name": "Form field",
+      "group": "Actions and input",
+      "summary": "A label, a control, and a one-sentence hint, with the checkbox card and the small select.",
+      "root": ".field",
+      "page": "components/form-field.html",
+      "stories": [
+        {
+          "id": "text",
+          "name": "Text inputs",
+          "canvas": "panel",
+          "html": "<div style=\"max-width:480px\">\n  <div class=\"field\"><label for=\"f-email\">Email</label><input id=\"f-email\" type=\"email\" value=\"rowan@a-intel.example\"><div class=\"hint\">The invitation goes to this address and expires in seven days.</div></div>\n  <div class=\"field\"><label for=\"f-role\">Role</label><select id=\"f-role\"><option>Workspace member</option><option>Workspace admin</option><option>Billing</option></select></div>\n  <div class=\"field\"><label for=\"f-why\">Reason</label><textarea id=\"f-why\" rows=\"3\">The push to main skips review. Push to a branch and open a pull request.</textarea><div class=\"hint\">The agent reads this as the reason for the denial.</div></div>\n</div>"
+        },
+        {
+          "id": "two-up",
+          "name": "Two fields in a row",
+          "canvas": "panel",
+          "html": "<div class=\"fields\" style=\"max-width:520px\">\n  <div class=\"field\"><label for=\"f-limit\">Monthly limit</label><input id=\"f-limit\" value=\"$2,000.00\"><div class=\"hint\">In US dollars.</div></div>\n  <div class=\"field\"><label for=\"f-mode\">Mode</label><select id=\"f-mode\"><option>Enforced</option><option>Recorded only</option></select></div>\n</div>"
+        },
+        {
+          "id": "readonly",
+          "name": "Read-only",
+          "canvas": "panel",
+          "html": "<div style=\"max-width:480px\">\n  <div class=\"field\"><label for=\"f-mail\">Email</label><input id=\"f-mail\" readonly value=\"marcus@a-intel.example\"><div class=\"hint\">Your identity provider sets this.</div></div>\n</div>"
+        },
+        {
+          "id": "check",
+          "name": "Checkbox card",
+          "canvas": "panel",
+          "html": "<div style=\"max-width:480px\">\n  <label class=\"check\"><input type=\"checkbox\" checked><span class=\"grow\"><span class=\"n\">spend.read</span><span class=\"d\">See spend, budgets, and the findings on this workspace.</span></span></label>\n  <label class=\"check\"><input type=\"checkbox\"><span class=\"grow\"><span class=\"n\" style=\"font-family:var(--font)\">I understand this cannot be undone</span><span class=\"d\">Registering again creates a new principal.</span></span></label>\n  <label class=\"check off\"><input type=\"checkbox\" disabled><span class=\"grow\"><span class=\"n\">billing.write</span><span class=\"d\">Only an org owner can grant this.</span></span></label>\n</div>"
+        },
+        {
+          "id": "small-select",
+          "name": "Small select",
+          "canvas": "ink",
+          "html": "<span class=\"muted\" style=\"font-size:12px\">Tag</span>\n<select class=\"sel-sm\" aria-label=\"Tag of item 1\"><option>code</option><option selected>test</option><option>docs</option><option>review</option></select>"
+        }
+      ]
+    },
+    {
+      "slug": "switch",
+      "name": "Switch",
+      "group": "Actions and input",
+      "summary": "An on-or-off setting, with the state named in words beside it.",
+      "root": ".ks-sw",
+      "page": "components/switch.html",
+      "stories": [
+        {
+          "id": "kill",
+          "name": "Kill switch",
+          "canvas": "ink",
+          "html": "<button type=\"button\" class=\"ks-sw\" role=\"switch\" aria-checked=\"false\" aria-label=\"Flip the switch on payment-gateway\"><i></i><span class=\"lbl\">Off (calls allowed)</span></button>\n<button type=\"button\" class=\"ks-sw on\" role=\"switch\" aria-checked=\"true\" aria-label=\"Clear the switch on payment-gateway\"><i></i><span class=\"lbl\">On (calls blocked)</span></button>"
+        },
+        {
+          "id": "int",
+          "name": "Immediate toggle",
+          "canvas": "ink",
+          "html": "<button type=\"button\" class=\"ks-sw int\" role=\"switch\" aria-checked=\"false\" aria-label=\"Open a pull request\"><i></i><span class=\"lbl\">PR</span></button>\n<button type=\"button\" class=\"ks-sw int on\" role=\"switch\" aria-checked=\"true\" aria-label=\"Open a pull request\"><i></i><span class=\"lbl\">PR</span></button>"
+        },
+        {
+          "id": "commit",
+          "name": "In the commit dialog",
+          "canvas": "panel",
+          "html": "<div class=\"cm-sw\">\n  <button type=\"button\" class=\"ks-sw int on\" role=\"switch\" aria-checked=\"true\" aria-label=\"Open a pull request\"><i></i><span class=\"lbl\">PR</span></button>\n  <div class=\"tx\"><b>Opens the pull request for <span class=\"mono\">feature/rotate-key</span></b>The commit is already on the branch. This asks the code owners of <span class=\"mono\">.oxagen/agents/</span> to review it against main.</div>\n</div>"
+        },
+        {
+          "id": "skills",
+          "name": "Skills preview",
+          "canvas": "ink",
+          "html": "<div class=\"sx-ga\" style=\"display:flex;align-items:center;gap:10px\">\n  <div class=\"grow\"><div class=\"n\">skills.enabled</div><div class=\"d\">false &rarr; true in <span class=\"mono\">.oxagen/skills/config.toml</span></div></div>\n  <button type=\"button\" class=\"sx-sw\" role=\"switch\" aria-checked=\"true\" aria-label=\"Enabled\"><i></i></button>\n</div>"
+        },
+        {
+          "id": "confirm",
+          "name": "The governed confirm",
+          "canvas": "panel",
+          "html": "<div class=\"dlg\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Flip the switch on payment-gateway\">\n  <div class=\"dlg-h\"><h2>Flip the switch on payment-gateway</h2><button class=\"iconbtn x\" aria-label=\"Close\">&times;</button></div>\n  <div class=\"dlg-b\">\n    <p class=\"muted\" style=\"margin:0 0 14px;font-size:12.5px\">Provider &middot; every agent calling this provider</p>\n    <div class=\"ks-banner crit\"><span class=\"b b-critical\" style=\"flex:none\"><span class=\"d\"></span>blast radius</span>\n      <div class=\"g\"><b>Every write call to Stripe</b>Every affected call is blocked from the next tool call. Runs in flight keep running. Their next call that changes anything is blocked, and the record names this switch and your reason.</div>\n    </div>\n    <div class=\"field\"><label for=\"killwhy\">Reason (recorded on every blocked call and read by the model)</label><textarea id=\"killwhy\" rows=\"2\">Suspected compromise of the Stripe restricted key. Hold every money movement until the rotation is confirmed.</textarea></div>\n  </div>\n  <div class=\"dlg-f\"><span class=\"grow\">You can clear this switch at any time. Nothing is destroyed.</span><button class=\"btn\">Cancel</button><button class=\"btn danger\">Block calls now</button></div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "menu",
+      "name": "Menu",
+      "group": "Actions and input",
+      "summary": "A short list of choices, anchored to the button that opened it.",
+      "root": ".menu",
+      "page": "components/menu.html",
+      "stories": [
+        {
+          "id": "account",
+          "name": "Account menu",
+          "canvas": "panel",
+          "html": "<div class=\"rel\" style=\"width:250px\">\n  <div class=\"menu\" style=\"position:relative;top:auto;right:auto\">\n    <div class=\"menu-hd\"><b>Marcus Bell</b><span>marcus@a-intel.example</span></div>\n    <button class=\"menu-i\">Account</button>\n    <button class=\"menu-i\">Preferences</button>\n    <button class=\"menu-i\">Security and sessions</button>\n    <button class=\"menu-i\">Privacy and data</button>\n    <div class=\"hr\" style=\"margin:5px 0\"></div>\n    <button class=\"menu-i\">Switch theme</button>\n    <button class=\"menu-i\">Sign out</button>\n  </div>\n</div>"
+        },
+        {
+          "id": "dispatch",
+          "name": "Dispatch menu",
+          "canvas": "panel",
+          "html": "<div class=\"rel\" style=\"width:360px\">\n  <div class=\"menu dsp-menu\" role=\"menu\" aria-label=\"Send to\" style=\"position:relative;top:auto;right:auto\">\n    <div class=\"menu-hd\"><b>Send 2 work items to</b><span>agents where you are the registered operator</span></div>\n    <input class=\"dsp-q\" type=\"search\" placeholder=\"Search agents and workflows\" aria-label=\"Search agents and workflows\" value=\"\">\n    <div class=\"menu-l\">Agents you operate</div>\n    <button class=\"menu-i dsp-i\" role=\"menuitem\"><span class=\"tx\"><b>a-intel.core.release-manager</b><span>Claude Code &middot; edge-runner-3</span></span></button>\n    <button class=\"menu-i dsp-i\" role=\"menuitem\"><span class=\"tx\"><b>a-intel.core.triage</b><span>Claude Code &middot; edge-runner-1</span></span></button>\n    <div class=\"menu-l\">Workflows</div>\n    <button class=\"menu-i dsp-i\" role=\"menuitem\"><span class=\"tx\"><b>Release cut</b><span>3 stages then you</span></span></button>\n  </div>\n</div>"
+        },
+        {
+          "id": "empty",
+          "name": "No match",
+          "canvas": "ink",
+          "html": "<div class=\"menu\" style=\"position:relative;top:auto;right:auto;width:280px\">\n  <div class=\"menu-l\">Agents you operate</div>\n  <div class=\"menu-e\">No agent you operate matches.</div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "dialog",
+      "name": "Dialog",
+      "group": "Overlays",
+      "summary": "A task or a decision that needs an answer before the page goes on.",
+      "root": ".dlg",
+      "page": "components/dialog.html",
+      "stories": [
+        {
+          "id": "form",
+          "name": "Form dialog",
+          "canvas": "ink",
+          "html": "<div class=\"scrim\" style=\"position:relative;inset:auto;z-index:auto;padding:28px 18px;border-radius:12px\">\n  <div class=\"dlg\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Invite a person\">\n    <div class=\"dlg-h\"><h2>Invite a person</h2><button class=\"iconbtn x\" aria-label=\"Close\">×</button></div>\n    <div class=\"dlg-b\">\n      <div class=\"field\"><label for=\"iv-email\">Email</label><input id=\"iv-email\" value=\"rowan@a-intel.example\"></div>\n      <div class=\"field\"><label for=\"iv-role\">Role</label><select id=\"iv-role\"><option>workspace.member · core-platform</option><option>workspace.owner · core-platform</option><option>org.auditor</option><option>org.billing</option></select></div>\n      <div class=\"note\">An invitation is the only way into the organization. It expires in seven days, and accepting it requires a verified email and two-factor.</div>\n    </div>\n    <div class=\"dlg-f\"><button class=\"btn\">Cancel</button><button class=\"btn primary\">Send the invitation</button></div>\n  </div>\n</div>"
+        },
+        {
+          "id": "confirm",
+          "name": "Destructive confirm",
+          "canvas": "ink",
+          "html": "<div class=\"dlg\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Retire agent\">\n  <div class=\"dlg-h sub\"><div class=\"grow\"><h2>Retire agent</h2><p>a-intel.core.triage</p></div><button class=\"iconbtn x\" aria-label=\"Close\">×</button></div>\n  <div class=\"dlg-b\">\n    <p style=\"font-size:13px\">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a pull request archives <span class=\"mono\">.oxagen/agents/triage.toml</span>.</p>\n    <dl class=\"kv\"><dt>Kept</dt><dd>every run, frame and receipt</dd><dt>Ends</dt><dd>2 roles, 1 mandate, the host enrollment</dd><dt>In flight</dt><dd><span style=\"color:var(--st-failed)\">1 live run</span>, canceled at the next boundary and recorded</dd></dl>\n    <label class=\"check\" style=\"margin-top:12px\"><input type=\"checkbox\"><span class=\"grow\"><span class=\"n\" style=\"font-family:var(--font)\">I understand this cannot be undone</span><span class=\"d\">Registering again creates a new principal.</span></span></label>\n  </div>\n  <div class=\"dlg-f\"><button class=\"btn\">Cancel</button><button class=\"btn danger\" disabled>Retire agent</button></div>\n</div>"
+        },
+        {
+          "id": "tabs",
+          "name": "Tabs in a dialog",
+          "canvas": "ink",
+          "html": "<div class=\"dlg\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Account\">\n  <div class=\"dlg-h\"><h2>Account</h2><button class=\"iconbtn x\" aria-label=\"Close\">×</button></div>\n  <div class=\"tabs\" role=\"tablist\"><button class=\"tab\" role=\"tab\" aria-selected=\"true\">Profile</button><button class=\"tab\" role=\"tab\" aria-selected=\"false\">Preferences</button><button class=\"tab\" role=\"tab\" aria-selected=\"false\">Security</button><button class=\"tab\" role=\"tab\" aria-selected=\"false\">Privacy</button></div>\n  <div class=\"dlg-b\">\n    <div class=\"fields\"><div class=\"field\"><label for=\"ac-name\">Name</label><input id=\"ac-name\" value=\"Marcus Bell\"></div><div class=\"field\"><label for=\"ac-email\">Email</label><input id=\"ac-email\" value=\"marcus@a-intel.example\" readonly></div></div>\n    <div class=\"field\"><label for=\"ac-tz\">Time zone</label><select id=\"ac-tz\"><option>America/New_York</option><option>UTC</option></select><div class=\"hint\">Times on every page read in this zone. Frames keep UTC.</div></div>\n  </div>\n  <div class=\"dlg-f\"><button class=\"btn\">Cancel</button><button class=\"btn primary\">Save profile</button></div>\n</div>"
+        },
+        {
+          "id": "wide",
+          "name": "Wide review",
+          "canvas": "ink",
+          "html": "        <div class=\"dlg wide\" role=\"dialog\" aria-modal=\"true\" aria-label=\"Approve an observed output schema\">\n          <div class=\"dlg-h\"><h2>Approve an observed output schema</h2><button class=\"iconbtn x\" aria-label=\"Close\">×</button></div>\n          <div class=\"dlg-b\">\n            <dl class=\"kv\" style=\"margin-bottom:14px\"><dt>Observations</dt><dd><span class=\"num\">1,284</span> responses over 30 days, from 3 agents</dd><dt>Digest on approval</dt><dd class=\"mono\">sha256:1bc4f9a07b02</dd></dl>\n            <div class=\"cpair\"><div><div class=\"lab\">Inferred output schema<span class=\"sp\">what approval enforces</span></div><pre>{\n  \"ok\": \"boolean\",\n  \"channel\": \"string\",\n  \"ts\": \"string\"\n}</pre></div><div><div class=\"lab\">One recorded response<span class=\"sp\">for comparison</span></div><pre>{\n  \"ok\": true,\n  \"channel\": \"C07RELEASE\",\n  \"ts\": \"1726650112.004\"\n}</pre></div></div>\n          </div>\n          <div class=\"dlg-f\"><span class=\"grow\">Approving records <span class=\"mono\">approve_tool_schema</span> as a governed action.</span><button class=\"btn\">Not yet</button><button class=\"btn primary\">Approve schema</button></div>\n        </div>"
+        }
+      ]
+    },
+    {
+      "slug": "drawer",
+      "name": "Drawer",
+      "group": "Overlays",
+      "summary": "Every call parked for a person, one drawer, opened from any page.",
+      "root": ".apd",
+      "page": "components/drawer.html",
+      "stories": [
+        {
+          "id": "trigger",
+          "name": "Trigger button",
+          "canvas": "ink",
+          "html": "<button class=\"iconbtn apd-btn\" aria-pressed=\"false\" aria-controls=\"apdrawer\" aria-label=\"Approvals, 4 waiting on you across all workspaces\">\n  <svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z\"/><path d=\"M12 8v4l2.5 1.5\"/></svg>\n  <span class=\"cnt\">4</span>\n</button>\n<button class=\"iconbtn apd-btn\" aria-pressed=\"true\" aria-controls=\"apdrawer\" aria-label=\"Approvals, 4 waiting on you across all workspaces\">\n  <svg width=\"15\" height=\"15\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z\"/><path d=\"M12 8v4l2.5 1.5\"/></svg>\n  <span class=\"cnt\">4</span>\n</button>"
+        },
+        {
+          "id": "list",
+          "name": "Open drawer",
+          "canvas": "panel",
+          "html": "<div class=\"apd-scrim open\" style=\"position:relative;inset:auto;background:none\"></div>\n<aside id=\"apdrawer\" class=\"apd open\" role=\"complementary\" aria-label=\"Approvals\" style=\"position:relative;top:auto;bottom:auto;right:auto;width:100%;max-width:420px;border-left:1px solid var(--border);border-radius:12px;overflow:hidden\">\n  <div class=\"apd-h\"><h3>Approvals</h3><span class=\"b b-approval\"><span class=\"d\"></span>4 waiting on you in all workspaces</span>\n    <button class=\"iconbtn\" style=\"margin-left:auto\" aria-label=\"Close approvals\">\n      <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M6 6l12 12M18 6 6 18\"/></svg>\n    </button>\n  </div>\n  <div class=\"apd-b\">\n    <p class=\"eyebrow q\" style=\"margin:0 0 8px\">4 waiting on you</p>\n    <div class=\"apd-list\">\n      <div class=\"apd-row inter\" style=\"cursor:default\">\n        <span class=\"g\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><circle cx=\"12\" cy=\"12\" r=\"9\"/></svg></span>\n        <span class=\"tt\"><b>a-intel.core.triage is paused and needs a decision</b><span>It's working in <span class=\"mono\">a-intel/edge-config</span>, which isn't linked to any workspace, so there's no skill configuration to apply. No cost since 09:14. If nobody answers within 30 min, the request is denied.</span></span>\n        <button class=\"btn sm primary\" style=\"flex:none\">Answer</button>\n      </div>\n      <button class=\"apd-row crit\" aria-label=\"Open approval ap_stripe_9f21\">\n        <span class=\"g\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z\"/></svg></span>\n        <span class=\"tt\"><b>$1,240.00 USD &middot; stripe__create_payment@5</b><span>invoice-bot &middot; pay Q3 vendor invoice &middot; Core platform</span>\n          <span class=\"mono\" style=\"font-size:11px\">work order &middot; wo_01K6TF3Q</span>\n          <span class=\"m\"><span class=\"b b-critical\">critical</span><span class=\"b b-denied\">Irreversible</span></span></span>\n        <span class=\"apsm-clk warn\" data-countdown=\"ap_stripe_9f21\" data-pre=\"Expires in \" style=\"flex:none\">Expires in 1:48</span>\n      </button>\n      <button class=\"apd-row\" aria-label=\"Open approval ap_gh_4410\">\n        <span class=\"g\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z\"/></svg></span>\n        <span class=\"tt\"><b>github__create_release@2</b><span>release-manager &middot; cut v0.6.0 &middot; Core platform</span>\n          <span class=\"m\"><span class=\"b b-approval\">medium</span></span></span>\n        <span class=\"apsm-clk\" data-countdown=\"ap_gh_4410\" data-pre=\"Expires in \" style=\"flex:none\">Expires in 8:32</span>\n      </button>\n    </div>\n    <p class=\"eyebrow q\" style=\"margin:18px 0 8px\">1 resolved today</p>\n    <div class=\"apd-list\">\n      <button class=\"apd-row done\" aria-label=\"Open approval ap_stripe_7f02\">\n        <span class=\"g\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><path d=\"M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z\"/></svg></span>\n        <span class=\"tt\"><b>$412.00 USD &middot; stripe__create_payment@5</b><span>invoice-bot &middot; Core platform</span></span>\n        <span class=\"b b-allowed\" style=\"flex:none\"><span class=\"d\"></span>approved</span>\n      </button>\n    </div>\n    <div class=\"note\" style=\"margin-top:14px;font-size:11.5px\">Approving allows this exact call once. When the approval expires, the call ends and the agent is told why.</div>\n  </div>\n</aside>"
+        },
+        {
+          "id": "detail",
+          "name": "Row selected",
+          "canvas": "panel",
+          "html": "<aside id=\"apdrawer\" class=\"apd open\" role=\"complementary\" aria-label=\"Approvals\" style=\"position:relative;top:auto;bottom:auto;right:auto;width:100%;max-width:420px;border-left:1px solid var(--border);border-radius:12px;overflow:hidden\">\n  <div class=\"apd-h\"><h3>Approvals</h3><span class=\"b b-approval\"><span class=\"d\"></span>4 waiting on you in all workspaces</span>\n    <button class=\"iconbtn\" style=\"margin-left:auto\" aria-label=\"Close approvals\">\n      <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M6 6l12 12M18 6 6 18\"/></svg>\n    </button>\n  </div>\n  <div class=\"apd-b\">\n    <button class=\"btn sm\" style=\"margin-bottom:12px\">&lsaquo; All approvals</button>\n    <div class=\"apcard crit\" id=\"ap-ap_stripe_9f21\">\n      <div class=\"aphead\">\n        <div style=\"min-width:0\">\n          <p class=\"eyebrow\" style=\"margin-bottom:6px\">Approval required</p>\n          <div class=\"amt\">$1,240.00 <span class=\"cur\">USD</span></div>\n          <div class=\"muted\" style=\"font-size:12.5px;margin-top:4px\"><span class=\"mono\">stripe__create_payment@5</span> &rarr; <span class=\"mono\">Northwind Textiles</span></div>\n          <div class=\"row\" style=\"margin-top:9px\"><span class=\"b b-critical\">critical</span><span class=\"b b-denied\">Irreversible</span></div>\n        </div>\n        <div class=\"r\"><span class=\"eyebrow q\" style=\"font-size:10px;margin:0\">times out in</span><span class=\"clock warn\" data-countdown=\"ap_stripe_9f21\">1:48</span></div>\n      </div>\n      <div class=\"apbody\">\n        <p class=\"muted\" style=\"font-size:11.5px;flex:1;min-width:220px\">Approving allows this exact call once. Denying ends the call, and the agent is told your reason.</p>\n      </div>\n      <div class=\"apfoot\">\n        <span class=\"muted\" style=\"font-size:11.5px;flex:1;min-width:220px\">Approving allows this exact call once. Denying ends the call, and the agent is told your reason.</span>\n        <span class=\"r\"><button class=\"btn ghost sm\">Open run</button><button class=\"btn danger\">Deny payment</button><button class=\"btn primary\">Approve $1,240.00 USD</button></span>\n      </div>\n    </div>\n  </div>\n</aside>"
+        },
+        {
+          "id": "empty",
+          "name": "Nothing waiting",
+          "canvas": "panel",
+          "html": "<aside id=\"apdrawer\" class=\"apd open\" role=\"complementary\" aria-label=\"Approvals\" style=\"position:relative;top:auto;bottom:auto;right:auto;width:100%;max-width:420px;border-left:1px solid var(--border);border-radius:12px;overflow:hidden\">\n  <div class=\"apd-h\"><h3>Approvals</h3><span class=\"b b-q\"><span class=\"d\"></span>0 waiting on you in all workspaces</span>\n    <button class=\"iconbtn\" style=\"margin-left:auto\" aria-label=\"Close approvals\">\n      <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M6 6l12 12M18 6 6 18\"/></svg>\n    </button>\n  </div>\n  <div class=\"apd-b\">\n    <div style=\"text-align:center;padding:26px 6px\">\n      <p class=\"muted\" style=\"font-size:12.5px;margin:0\">Nothing is waiting on you.</p>\n      <p class=\"dim\" style=\"font-size:11.5px;margin:8px 0 0\">A call parks here when policy returns <span class=\"mono\">approve</span>. A denied call never parks. It ends at once and costs nothing.</p>\n    </div>\n  </div>\n</aside>"
+        }
+      ]
+    },
+    {
+      "slug": "toast",
+      "name": "Toast",
+      "group": "Overlays",
+      "summary": "One fact, stated in past tense, after an action finishes.",
+      "root": "#toast",
+      "page": "components/toast.html",
+      "stories": [
+        {
+          "id": "tones",
+          "name": "Tones",
+          "canvas": "ink",
+          "html": "<div id=\"toast\" role=\"status\" aria-live=\"polite\" style=\"position:relative;left:auto;bottom:auto;transform:none;display:grid;gap:8px;justify-items:start\">\n  <div class=\"toast\"><span class=\"d\" style=\"background:var(--st-allowed)\"></span><span>Committed +12 &minus;3 to feature/rotate-key on core-platform.</span></div>\n  <div class=\"toast\"><span class=\"d\" style=\"background:var(--st-approval)\"></span><span>Already approved by Priya Natarajan. A decision is written once.</span></div>\n  <div class=\"toast\"><span class=\"d\" style=\"background:var(--st-denied)\"></span><span>A denial needs a reason. The agent is told it.</span></div>\n  <div class=\"toast\"><span class=\"d\" style=\"background:var(--st-failed)\"></span><span>Approval expired after 10 minutes. stripe__create_payment was not sent, and the agent was told the request timed out.</span></div>\n  <div class=\"toast\"><span class=\"d\" style=\"background:var(--st-critical)\"></span><span>Pause queued for run_01K5RS7M2E8FJ3QW. It takes effect at the next boundary.</span></div>\n  <div class=\"toast\"><span class=\"d\" style=\"background:var(--gold)\"></span><span>oxagen/roadmap#523 opened for feature/rotate-key &middot; Rotate the Stripe restricted key.</span></div>\n</div>"
+        },
+        {
+          "id": "stack",
+          "name": "Stack",
+          "canvas": "ink",
+          "html": "<div id=\"toast\" role=\"status\" aria-live=\"polite\" style=\"position:relative;left:auto;bottom:auto;transform:none;display:grid;gap:8px;justify-items:start\">\n  <div class=\"toast\"><span class=\"d\" style=\"background:var(--st-allowed)\"></span><span>Avatar updated on a-intel.core.triage. The definition change opens as a pull request. The badge shows here now.</span></div>\n  <div class=\"toast\"><span class=\"d\" style=\"background:var(--st-allowed)\"></span><span>All notifications marked read. Audit records who read each one.</span></div>\n</div>"
+        },
+        {
+          "id": "long",
+          "name": "Long message",
+          "canvas": "ink",
+          "html": "<div id=\"toast\" role=\"status\" aria-live=\"polite\" style=\"position:relative;left:auto;bottom:auto;transform:none;display:grid;gap:8px;justify-items:start\">\n  <div class=\"toast\"><span class=\"d\" style=\"background:var(--st-allowed)\"></span><span>Token apt_1bc4f9a07b02 minted. It is single-use and bound to the call digest, this agent, this run, and a 60-second expiry. Credential brokered, stripe__create_payment dispatched.</span></div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "tooltip",
+      "name": "Tooltip",
+      "group": "Overlays",
+      "summary": "One hover layer, text only, the same content on focus.",
+      "root": ".rtip",
+      "page": "components/tooltip.html",
+      "stories": [
+        {
+          "id": "node",
+          "name": "The tooltip node",
+          "canvas": "panel",
+          "html": "<div style=\"position:relative;height:64px\">\n  <div class=\"meter\" style=\"width:220px\">\n    <div class=\"lab\">Input tokens<b>41,200 <span class=\"dim\" style=\"font-weight:500\">&middot; 62%</span></b></div>\n  </div>\n  <div id=\"rtip\" class=\"rtip\" role=\"tooltip\" style=\"position:absolute;left:8px;top:38px\">41,200 tokens &middot; 62% of the call</div>\n</div>"
+        },
+        {
+          "id": "chart",
+          "name": "On a chart segment",
+          "canvas": "ink",
+          "html": "<div class=\"stk\" style=\"width:220px\">\n  <i class=\"fk-model\" style=\"flex:6\" data-tip=\"6 steps advanced the task\"></i>\n  <i style=\"flex:2;background:var(--rule)\" data-tip=\"2 steps did not: retries, re-reads and waits\"></i>\n</div>\n<div id=\"rtip\" class=\"rtip\" role=\"tooltip\" style=\"position:relative;left:auto;top:auto\">2 steps did not: retries, re-reads and waits</div>"
+        },
+        {
+          "id": "native-title",
+          "name": "Native title",
+          "canvas": "ink",
+          "html": "<span class=\"basis\" title=\"gateway_observed\">Observed by gateway</span>\n<span class=\"b b-tier b-allowed\" title=\"Every call runs at a broker the gateway controls.\">gateway</span>"
+        }
+      ]
+    },
+    {
+      "slug": "state-surfaces",
+      "name": "State surfaces",
+      "group": "Feedback",
+      "summary": "What a page shows while it loads, when it is empty, when it fails, and when you lack the role.",
+      "root": ".state-wrap, .sk",
+      "page": "components/state-surfaces.html",
+      "stories": [
+        {
+          "id": "empty",
+          "name": "Empty",
+          "canvas": "ink",
+          "html": "<div class=\"state-wrap\" style=\"padding:36px 20px\">\n  <div class=\"ico\" aria-hidden=\"true\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><rect x=\"3\" y=\"4\" width=\"18\" height=\"16\" rx=\"2\"/><path d=\"M3 10h18\"/></svg></div>\n  <h2>No work in Core platform yet</h2>\n  <p>Work arrives from a connected issue tracker, from a finding a person picks up, or written here. A run an agent starts on its own is filed under a direct work order.</p>\n  <div class=\"acts\"><button class=\"btn primary\">Connect an issue tracker</button></div>\n</div>"
+        },
+        {
+          "id": "loading",
+          "name": "Loading",
+          "canvas": "ink",
+          "html": "<div aria-busy=\"true\" aria-label=\"Loading\">\n  <div class=\"grid g4\" style=\"margin-bottom:16px\"><div class=\"sk b\"></div><div class=\"sk b\"></div><div class=\"sk b\"></div><div class=\"sk b\"></div></div>\n  <div class=\"panel\"><div class=\"panel-h\"><div class=\"sk t\" style=\"width:180px\"></div></div>\n    <div class=\"panel-b\"><div class=\"sk r\" style=\"margin-bottom:8px\"></div><div class=\"sk r\" style=\"margin-bottom:8px\"></div><div class=\"sk r\" style=\"margin-bottom:8px\"></div><div class=\"sk r\" style=\"margin-bottom:8px\"></div></div></div>\n</div>"
+        },
+        {
+          "id": "error",
+          "name": "Error",
+          "canvas": "ink",
+          "html": "<div class=\"state-wrap\" style=\"padding:36px 20px\">\n  <div class=\"ico\" style=\"color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 40%,transparent)\" aria-hidden=\"true\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\"><path d=\"M12 8v5M12 17h.01\"/><circle cx=\"12\" cy=\"12\" r=\"9\"/></svg></div>\n  <h2>This file could not be loaded</h2>\n  <p>The control plane answered <code>502 git_read_unreachable</code>. Nothing was changed. Runs kept recording while this page was down. The collector on each host writes the frames.</p>\n  <div class=\"acts\"><button class=\"btn primary\">Try again</button><button class=\"btn\">Open an incident</button></div>\n  <p class=\"mono dim\" style=\"margin-top:16px;font-size:11.5px\">request 01K5RSXQ7F2E, us-east-1, 2026-09-11 09:16:04Z</p>\n</div>"
+        },
+        {
+          "id": "denied",
+          "name": "Denied",
+          "canvas": "ink",
+          "html": "<div class=\"state-wrap\" style=\"padding:36px 20px\">\n  <div class=\"ico\" style=\"color:var(--st-denied);border-color:color-mix(in srgb,var(--st-denied) 40%,transparent)\" aria-hidden=\"true\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.7\"><rect x=\"4\" y=\"10\" width=\"16\" height=\"10\" rx=\"2\"/><path d=\"M8 10V7a4 4 0 0 1 8 0v3\"/></svg></div>\n  <h2>You need access to this agent's definition</h2>\n  <p>Your roles on <b>a-intel</b> do not include <code>agent.write on core-platform</code>. An organization owner can grant it. The grant is a governed action and lands in the audit record with your name on it.</p>\n  <div class=\"acts\"><button class=\"btn primary\">Request access</button><button class=\"btn\">Back to Work</button></div>\n  <dl class=\"kv\" style=\"margin-top:20px;text-align:left;max-width:420px\">\n    <dt>Signed in as</dt><dd>Marcus Bell <span class=\"mono\">workspace.member</span></dd>\n    <dt>Needed</dt><dd><span class=\"mono\">agent.write on core-platform</span></dd>\n    <dt>Decided by</dt><dd><span class=\"mono\">pol_v41</span>, where a deny outranks every allow</dd>\n  </dl>\n</div>"
+        },
+        {
+          "id": "in-panel",
+          "name": "Empty inside a panel",
+          "canvas": "panel",
+          "html": "<div class=\"panel\">\n  <div class=\"panel-h\"><h3>Budgets</h3><div class=\"sp\"><button class=\"btn sm\">Set a budget</button></div></div>\n  <div class=\"panel-b\"><p class=\"muted\" style=\"margin:0;font-size:13px\">No ceiling is set for Core platform or for a-intel.</p></div>\n</div>"
+        }
+      ]
+    },
+    {
+      "slug": "note",
+      "name": "Note",
+      "group": "Feedback",
+      "summary": "The small print that explains a rule, a caution, or a fact beside its field.",
+      "root": ".note",
+      "page": "components/note.html",
+      "stories": [
+        {
+          "id": "note",
+          "name": "Note",
+          "canvas": "ink",
+          "html": "<div class=\"note\">oxagen never executes steering as an instruction. It enters as evidence at the steering position with operator authority.</div>"
+        },
+        {
+          "id": "deny",
+          "name": "Denial note",
+          "canvas": "ink",
+          "html": "<div class=\"note deny\"><b>This is a class switch.</b> It names no provider or agent. It matches each tool version by the class it declares. A tool imported tomorrow that declares the same class is blocked as soon as it enters the registry.</div>"
+        },
+        {
+          "id": "warn",
+          "name": "Warn",
+          "canvas": "ink",
+          "html": "<div class=\"warn\"><b>Compacted.</b> This transcript is read from the archive. Its frames were moved out of the live record, and nothing was recomputed.</div>"
+        },
+        {
+          "id": "banner",
+          "name": "Banner",
+          "canvas": "ink",
+          "html": "<div class=\"banner\"><span class=\"b b-approval\" style=\"flex:none\"><span class=\"d\"></span>2 awaiting approval</span><span class=\"grow\">Two proposed changes to <span class=\"mono\">.oxagen/steering/</span> are waiting on a reviewer before they compile into any agent's context.</span></div>"
+        },
+        {
+          "id": "callout",
+          "name": "Callout",
+          "canvas": "ink",
+          "html": "<div class=\"callout\">An export is a verifiable bundle: archive segments, attestations, key ids, and a verifier script. The segment was written once, at seal time, and holds the same bytes the graph indexed. A customer's auditor checks it offline, without trusting oxagen or the worker's harness.</div>"
         }
       ]
     }

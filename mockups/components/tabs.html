@@ -54,52 +54,52 @@
     <figcaption class="dx-story-h"><b>Page tabs with counts</b><span>Work's four tabs. A count renders only when it is above zero.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="page" data-name="Page tabs with counts">
-      <div class="tabs" role="tablist" aria-label="Work">
-        <button class="tab" role="tab" aria-selected="true">Backlog<span class="vh"> </span><span class="n">3</span></button>
-        <button class="tab" role="tab" aria-selected="false">Work orders<span class="vh"> </span><span class="n">2</span></button>
-        <button class="tab" role="tab" aria-selected="false">Workflows</button>
-        <button class="tab" role="tab" aria-selected="false">Findings<span class="vh"> </span><span class="n">7</span></button>
-      </div>
+<div class="tabs" role="tablist" aria-label="Work">
+  <button class="tab" role="tab" aria-selected="true">Backlog<span class="vh"> </span><span class="n">3</span></button>
+  <button class="tab" role="tab" aria-selected="false">Work orders<span class="vh"> </span><span class="n">2</span></button>
+  <button class="tab" role="tab" aria-selected="false">Workflows</button>
+  <button class="tab" role="tab" aria-selected="false">Findings<span class="vh"> </span><span class="n">7</span></button>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-record">
     <figcaption class="dx-story-h"><b>Record tabs with a state and a figure</b><span>The Run page. A dot marks a tab that holds something waiting, and Cost carries its figure.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="record" data-name="Record tabs with a state and a figure">
-      <div class="tabs" role="tablist" aria-label="Run">
-        <button class="tab" role="tab" aria-selected="true" title="1">Decision trace<span class="st" title="A call is parked for approval"></span></button>
-        <button class="tab" role="tab" aria-selected="false" title="2">Transcript<span class="vh"> </span><span class="n" title="48 transcript entries">48</span></button>
-        <button class="tab" role="tab" aria-selected="false" title="3">Cost<span class="vh"> </span><span class="n money" title="Cost of this run">$4.13</span></button>
-        <button class="tab" role="tab" aria-selected="false" title="4">Memories<span class="vh"> </span><span class="n" title="2 memories">2</span></button>
-        <button class="tab" role="tab" aria-selected="false" title="5">Evidence<span class="vh"> </span><span class="n" title="The chain is sealed">sealed</span></button>
-      </div>
+<div class="tabs" role="tablist" aria-label="Run">
+  <button class="tab" role="tab" aria-selected="true" title="1">Decision trace<span class="st" title="A call is parked for approval"></span></button>
+  <button class="tab" role="tab" aria-selected="false" title="2">Transcript<span class="vh"> </span><span class="n" title="48 transcript entries">48</span></button>
+  <button class="tab" role="tab" aria-selected="false" title="3">Cost<span class="vh"> </span><span class="n money" title="Cost of this run">$4.13</span></button>
+  <button class="tab" role="tab" aria-selected="false" title="4">Memories<span class="vh"> </span><span class="n" title="2 memories">2</span></button>
+  <button class="tab" role="tab" aria-selected="false" title="5">Evidence<span class="vh"> </span><span class="n" title="The chain is sealed">sealed</span></button>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-states">
     <figcaption class="dx-story-h"><b>Tab state dots</b><span><code>.st</code> is waiting, <code>.st.ok</code> is healthy, and <code>.st.bad</code> is failing. Each dot has a title that says which.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="states" data-name="Tab state dots">
-      <div class="tabs" role="tablist" aria-label="Tools">
-        <button class="tab" role="tab" aria-selected="false">Tools<span class="vh"> </span><span class="n" style="color:var(--st-approval)" title="2 schemas need approval">2</span></button>
-        <button class="tab" role="tab" aria-selected="true">Toolbelts<span class="vh"> </span><span class="n" title="6 toolbelts">6</span></button>
-        <button class="tab" role="tab" aria-selected="false">Providers<span class="st ok" title="Every provider is connected"></span></button>
-        <button class="tab" role="tab" aria-selected="false">Kill switches<span class="st bad" title="1 kill switch on"></span></button>
-      </div>
+<div class="tabs" role="tablist" aria-label="Tools">
+  <button class="tab" role="tab" aria-selected="false">Tools<span class="vh"> </span><span class="n" style="color:var(--st-approval)" title="2 schemas need approval">2</span></button>
+  <button class="tab" role="tab" aria-selected="true">Toolbelts<span class="vh"> </span><span class="n" title="6 toolbelts">6</span></button>
+  <button class="tab" role="tab" aria-selected="false">Providers<span class="st ok" title="Every provider is connected"></span></button>
+  <button class="tab" role="tab" aria-selected="false">Kill switches<span class="st bad" title="1 kill switch on"></span></button>
+</div>
     </template>
   </figure>
   <figure class="dx-story" id="story-dialog">
     <figcaption class="dx-story-h"><b>Tabs in a dialog</b><span>Inside <code>.dlg</code> the strip loses its bottom margin and takes the dialog's 18px side padding.</span></figcaption>
     <div class="dx-canvas on-panel"></div>
     <template data-story="dialog" data-name="Tabs in a dialog">
-      <div class="dlg" role="dialog" aria-modal="true" aria-label="Account" style="position:relative;max-width:520px;margin:0">
-        <div class="dlg-h"><h2>Account</h2><button class="iconbtn x" aria-label="Close">×</button></div>
-        <div class="tabs" role="tablist" aria-label="Account">
-          <button class="tab" role="tab" aria-selected="true">Profile</button>
-          <button class="tab" role="tab" aria-selected="false">Preferences</button>
-          <button class="tab" role="tab" aria-selected="false">Security</button>
-        </div>
-        <div class="dlg-b"><p class="muted" style="margin:0">The profile fields sit here.</p></div>
-      </div>
+<div class="dlg" role="dialog" aria-modal="true" aria-label="Account" style="position:relative;max-width:520px;margin:0">
+  <div class="dlg-h"><h2>Account</h2><button class="iconbtn x" aria-label="Close">×</button></div>
+  <div class="tabs" role="tablist" aria-label="Account">
+    <button class="tab" role="tab" aria-selected="true">Profile</button>
+    <button class="tab" role="tab" aria-selected="false">Preferences</button>
+    <button class="tab" role="tab" aria-selected="false">Security</button>
+  </div>
+  <div class="dlg-b"><p class="muted" style="margin:0">The profile fields sit here.</p></div>
+</div>
     </template>
   </figure>
 </section>
@@ -270,7 +270,7 @@ Verdict: PASS or FAIL (n fails, m notes)
 Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
   </div>
 </section>
-<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+<nav class="dx-pn" aria-label="Components"><a href="layout-grid.html"><span>Previous</span>Layout grid</a><a class="nx" href="segmented-control.html"><span>Next</span>Segmented control</a></nav>
 </main>
 </div>
 </body>

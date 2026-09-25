@@ -12,7 +12,7 @@ export default {
   stories: [
     {
       id: "text",
-      name: "Text, select, and textarea",
+      name: "Text inputs",
       note: "A label tied to its control, and a hint that says what a valid value looks like.",
       canvas: "panel",
       html: `
