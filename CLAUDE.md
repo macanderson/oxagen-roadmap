@@ -18,3 +18,9 @@ docs and mockups, every repo.
 `mockups/` is the authoritative design of rev1 and `mockups/pages/*.md` its per-page specs and
 audit prompts. `mockups/future_state_mockups/` is the first version (witness runner, proof, the
 definition of done, agent scores); it is not the target.
+
+The design reference sits beside the mockup: `mockups/typography.html`, `colors.html`,
+`prose.html`, and `components.html`, with one page per component in `mockups/components/`. Those
+component pages are generated. Edit the module in `mockups/components/src/`, then run
+`node tools/build-components.mjs`. `node tools/check-design-docs.mjs` opens every reference page
+headless in both themes.
