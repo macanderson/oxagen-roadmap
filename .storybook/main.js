@@ -6,7 +6,7 @@ import { mockupPlugin } from "./mockup-plugin.mjs";
 
 export default {
   framework: "@storybook/html-vite",
-  stories: ["../mockups/stories/**/*.mdx", "../mockups/stories/**/*.stories.js", "../mockups/future_state_mockups/stories/**/*.stories.js", "../mockups/v2/stories/**/*.stories.js"],
+  stories: ["../mockups/stories/**/*.mdx", "../mockups/stories/**/*.stories.js", "../mockups/future_state_mockups/stories/**/*.stories.js"],
   addons: [
     "@storybook/addon-docs",
     "@storybook/addon-vitest",
