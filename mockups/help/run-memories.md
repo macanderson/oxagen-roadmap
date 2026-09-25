@@ -89,8 +89,9 @@ Memory is what an agent's own runs left behind. It is recalled, never published,
 2. Cost multiplies `token_cost` by the 30-day recall count.
 3. `memPosition()` reads "Superseded by <source>.", "Yields to <source>, a published must.", or "Competes in the per-prompt selection at force <force>." A superseded memory stays for the runs that carried it and is never selected again.
 4. `memSaysList()` and `memFoldLine()` are shared with the memory's page under Steering. A run saying links to that run's Memories tab. An imported saying shows its file and line. An imported saying counts toward the sayings and never toward the runs.
-5. "The run that left it" opens the source run.
-6. Forget opens `memforget`. The gold action is "Open the proposal" when proposed, otherwise "Promote to a record", which opens the record wizard with the body filled in.
+5. The fold line under the sayings reads the memory's fold state against the workspace setting `S.memFold` (3 sayings from 2 runs on the demo record). Below the setting it says where the memory becomes a proposal and how many sayings and runs it has. At the setting it is ready, and the promoter proposes it on its next pass. Once proposed it names the proposal, which cites every saying. An import alone never makes a proposal, because imported sayings never count toward the runs.
+6. "The run that left it" opens the source run.
+7. Forget opens `memforget`. The gold action is "Open the proposal" when proposed, otherwise "Promote to a record", which opens the record wizard with the body filled in.
 
 ### States
 A missing memory shows "That record is no longer here." `delete_memory` removes the node outright, so a build needs a forget that keeps the hash. On a phone the dialog rises as a sheet.

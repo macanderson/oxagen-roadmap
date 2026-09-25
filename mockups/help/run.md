@@ -202,7 +202,7 @@ The organising principle is time, decided on 2026-09-17 (`design/run-outputs/DEC
 4. A run of reads becomes one mark, "read <names>", with "and N more". "Hide reads" and "Show reads" toggle every read mark through `roToggleReads()`.
 5. Each node shows its glyph, name, state badge from `RO_STATE`, diff stat, "Frame N" (`openFrame()`), where it landed and a note.
 6. A gate node adds "Review the approval", which opens the Decision trace, and the line "the run is stopped here until someone answers". A `would` node is dashed.
-7. The spine carries no caption. Its order is frame order, and the "Frame N" chips show it.
+7. The foot reads "In frame order.", the caption the app draws under its spine (`apps/app/messages/run.json`, `footer`). The "Frame N" chips show the same order.
 8. A node's note is record data from `R.outputs[].note`. The gate note says where the call is parked: "parked at oxagen, on a call routed through it". While the call waits, the model sees a wait with a reason, not a failure. A seal on a `harness` tier run reads "harness tier · reported by the harness": its outputs come from what the harness reported, and Oxagen did not observe them at the gateway.
 
 ### States

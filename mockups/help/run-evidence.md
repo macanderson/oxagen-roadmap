@@ -88,10 +88,10 @@ With no issue the table reads "No issue is linked to this session." Frame chips 
 
 ## Linked work
 
-The Linked work line names the three kinds of edge on this tab and counts the items that carry each one.
+The Linked work line is the legend for the three kinds of edge on this tab, with the count of inferred items.
 
 ### Purpose
-You want to know how far to trust each repository, branch, pull request and file listed under it. The line tells you how many items Oxagen observed, how many the task stated, and how many a model inferred. Hover a chip for its meaning.
+You want to know how far to trust each repository, branch, pull request and file listed under it. The line names each kind of edge in a few words and tells you how many of the rows a model inferred.
 
 ### Rationale
 The panels under this line mix three kinds of knowledge, and they must never read as one. `observed` means Oxagen wrote the edge from a tool call routed through it. `stated` means the task carried it. `inferred` means a light model read the frames and proposed it, scored and cited. An artifact the outputs spine cites a frame for is observed. Before `runs[].outputs` existed, the only source was the flat `touched` list, which nothing cited, so every item read as inferred at 70 percent. That label is no longer honest for a node with a frame, because the same artifact would show twice: once citing its frame, and once as a guess. `runGraphOf()` now marks a node with a frame as observed.
@@ -104,13 +104,13 @@ The panels under this line mix three kinds of knowledge, and they must never rea
 | Inferred items | `RUNGRAPH` edges of kind `inferred` | none | none |
 
 ### Logic
-1. `linkedWork()` counts the edges over the run graph's repositories and artifacts.
-2. `observed` and `inferred` are counted directly. `stated` is the total less the other two.
-3. Each chip carries its meaning as a `title` tooltip.
-4. The counts cover the Repositories and the Pull requests and artifacts panels below. Files changed carries no edge.
+1. `linkedWork()` draws the legend as the app draws it (`apps/app/src/features/run/linked-work.tsx`, `Legend`): each edge chip and its short meaning, "recorded by Oxagen from the run's frames", "carried by the run's task reference" and "proposed by a model that read the frames".
+2. The inferred entry ends with the count of inferred rows over all rows, "2 of 5 rows.", or "None of 5 rows." when nothing was inferred.
+3. The count covers the Repositories and the Pull requests and artifacts panels below. Files changed carries no edge.
+4. The page used to add "scored and cited" to the inferred meaning. The scoring and the citation are what this section's Rationale describes.
 
 ### States
-A run with no artifacts derives its items from `R.touched`, each inferred at 70 percent and titled "named in the generated summary". On the catalog run the line reads observed 3, stated 0 and inferred 2.
+A run with no artifacts derives its items from `R.touched`, each inferred at 70 percent and titled "named in the generated summary". On the catalog run the inferred entry reads "2 of 5 rows."
 
 ## Repositories
 
