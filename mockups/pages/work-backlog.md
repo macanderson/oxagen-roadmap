@@ -18,7 +18,7 @@ A work item arrives from a connected issue tracker, from a finding a person pick
 
 ## What is on the page
 
-**Header.** Eyebrow: the workspace name (“Core platform”). h1 “Work”. Subtext “What the agents work on, and what waits on you.” On the Backlog tab the actions are **Intake** (plain; opens the Intake dialog on Trackers) and **Create work order and send to agent** (gold, with the agents icon and a ▾). The gold button is disabled with the title “Select one or more ready work items” until a work item is selected. It opens the send menu.
+**Header.** Eyebrow: the workspace name (“Core platform”). h1 “Work”. Subtext “What the agents work on, and what waits on you.” On the Backlog tab the actions are **Intake** (plain; opens the Intake dialog on Trackers) and **Send to an agent…** (gold, with the agents icon and a ▾). The gold button is disabled with the title “Select one or more ready work items” until a work item is selected. It opens the send menu.
 
 **Tabs** (`role=tablist`, `aria-label` “Work”), each a path segment: Backlog `7` · Work orders `1` · Workflows · Findings `36`. Backlog counts the definitions of done waiting on a person (drafts and changed certifications). Work orders counts the work orders waiting on you to accept. Findings counts the open findings nobody has picked up. Workflows carries no count. A tab with nothing waiting shows no number. Backlog is selected.
 
@@ -29,13 +29,13 @@ A work item arrives from a connected issue tracker, from a finding a person pick
 | Ready to send | 3 | “certified and unblocked”. A ready work item the graph blocks is not counted |
 | Waiting on you | 8, in the approval colour while above zero | “7 to certify · 1 to accept” |
 | In work orders | 4 | “sent to an agent or a workflow” |
-| Live now | 8 | “work orders with a live run · 6 parked on a person”. The parked clause appears only while a run is parked |
+| Live work orders | 8 | “work orders with a live run · 6 parked on a person”. The parked clause appears only while a run is parked |
 
-Live now is a button (`aria-label` “Open the work orders with a live run”) that opens the Work orders tab.
+Live work orders is a button (`aria-label` “Open the work orders with a live run”) that opens the Work orders tab.
 
-**Changed banner**, while a certified work item changed upstream: the `changed` badge, “1 work item changed after certification”, “a-intel/platform#590 was edited upstream on 2026-09-10 17:44. It left ready until somebody certifies its definition of done again.”, and **Review it**, which opens that work item.
+**Changed banner**, while a certified work item changed upstream: the `changed` badge, “1 work item changed after certification”, “a-intel/platform#590 was edited upstream on 2026-09-10 17:44. It is no longer ready. Certify its definition of done again to send it.”, and **Review changes**, which opens that work item.
 
-**Backlog panel.** Heading “Backlog”, subtext “Only a ready work item can be selected and sent.” While a selection exists, the panel header carries the badge “N selected” and **Clear**. The shared list bar: a search field (“Search this list”), facet selects for Status, Labels and Blocked by (“Any status”, “Any labels”, “Any blocked by”), and Rows (5, 10, 25, 50, All). Every column header sorts. The pager reads “1–10 of 19 (page 1 of 2)”.
+**Backlog panel.** Heading “Backlog”, with no subtext. A checkbox that cannot be ticked says why in its title. While a selection exists, the panel header carries the badge “N selected” and **Clear**. The shared list bar: a search field (“Search this list”), facet selects for Status, Labels and Blocked by (“Any status”, “Any labels”, “Any blocked by”), and Rows (5, 10, 25, 50, All). Every column header sorts. The pager reads “1–10 of 19 (page 1 of 2)”.
 
 Columns, in order:
 
@@ -74,7 +74,7 @@ A selected row is tinted (`aria-selected`). A row click opens the work item (`wo
 
 ### The send menu
 
-**Create work order and send to agent** opens a menu under the button (`role=menu`, `aria-label` “Send to”). Header “Send 2 work items to”, sub “agents where you are the registered operator”. A search field (“Search agents and workflows”) narrows both groups.
+**Send to an agent…** opens a menu under the button (`role=menu`, `aria-label` “Send to”). Header “Send 2 work items to”, sub “agents where you are the registered operator”. A search field (“Search agents and workflows”) narrows both groups.
 
 - **Agents you operate**: every agent in the workspace whose operator is the signed-in person. Each row (`role=menuitem`) shows the harness mark as an SVG, the avatar, the name, “<harness> · <host>” (“no host” when none) and the tier badge. The seven agents the demo seeds come first (Bug fixer, Validator, Documenter, Architect, stella CI, Release manager, Triage), then the rest by name. Twelve are listed, then “16 more. Type to narrow.” With no match: “No agent you operate matches.”
 - **Workflows**: every published workflow, each with its stages’ harness marks in order and “4 stages then you”. A workflow still in a pull request is not listed. With no match: “No published workflow matches.”
@@ -114,7 +114,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | `live` beside a work order | `woLive()` over `RUNS` | the run’s parent work order and its status | Run status ships (`live`, `sealed`, `halted`: `packages/oxagen/src/contracts/run.list.ts:52`). No run names a work order: `taskRef` is a free-text goal (`run.list.ts:285-291`), null for every wrapped session (`packages/handlers/src/run.list.ts:1278`) | ❌ |
 | Ready to send, In work orders, Waiting on you (to certify) | rollups over `TASKS` | rollups over `tasks.tasks` | none | ❌ |
 | Waiting on you (to accept) | `woWaiting()` over `WORKORDERS` | `tasks.work_orders` in state `waiting on you` | none | ❌ |
-| Live now | `woLive()` over `WORKORDERS` | work orders with a live run | none | ❌ |
+| Live work orders | `woLive()` over `WORKORDERS` | work orders with a live run | none | ❌ |
 | “N parked on a person” | `wsRunCounts()` over `RUNS` | live runs holding a pending approval | Pending approvals carry their run (`list_approvals`, `packages/oxagen/src/contracts/agent.approval.list.ts:35` and `:81`). `list_runs` has no `parked` status | 🟡 |
 | Send menu: agents you operate | `myAgents()` over `AGENTS` (`operator`) | `list_agents` `operatorId` | `operatorId` is `principals.parent_user_id` (`packages/oxagen/src/contracts/agent.list.ts:71-72`) | ✅ |
 | Harness mark, host and tier per agent | `AGENTS[].harness`, `.host`, `.tier` | `list_agents` | `harness` (`agent.list.ts:24-31`, `agents_harness_check` in `packages/database/atlas/migrations/20260918210100_agents_harness_codex_cursor.sql:16-17`), `host` (`agent.list.ts:136`), `enforcementTier` (`agent.list.ts:83`) | ✅ |
@@ -161,11 +161,11 @@ The mockup marks nothing else on this tab, but every Work field here is future-o
 
 Loaded only. This change designs the loaded state. The build uses the shell’s standard loading, error, empty and denied panels until they are designed.
 
-Within loaded, a workspace with no connected provider and no written work item (the demo’s `finops`) shows every tile at 0 and the table’s “No rows match.”
+Within loaded, a workspace with no connected provider and no written work item (the demo’s `finops`) shows one panel instead of the tiles and the table: “No issue tracker is connected to this workspace”, “Connect one to import its issues as work items, or write a work item here.”, and **Connect an issue tracker** (gold), which opens Intake on Trackers.
 
 ## Mobile
 
-The thumb bar holds Work (lit, with its count, 8), Agents, Tools, Spend and More (its count is the open critical incidents, 3). More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The two header actions stack, the gold one at full width. The tab strip scrolls sideways inside itself, and the page never does. The tiles sit two by two. The banner stacks its badge, its text and **Review it**. The table becomes labelled cards, each cell labelled with its column header and the checkbox at the top of the card. The send menu opens at full width under the button and scrolls inside itself above the thumb bar. The work order dialog is a bottom sheet with a drag handle and full-width footer buttons, and a workflow’s stage chain stacks one stage per row without arrows. Touch targets are at least 44 px and inputs 16 px.
+The thumb bar holds Work (lit, with its count, 8), Agents, Tools, Spend and More (its count is the open critical incidents, 3). More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The two header actions stack, the gold one at full width. The tab strip scrolls sideways inside itself, and the page never does. The tiles sit two by two. The banner stacks its badge, its text and **Review changes**. The table becomes labelled cards, each cell labelled with its column header and the checkbox at the top of the card. The send menu opens at full width under the button and scrolls inside itself above the thumb bar. The work order dialog is a bottom sheet with a drag handle and full-width footer buttons, and a workflow’s stage chain stacks one stage per row without arrows. Touch targets are at least 44 px and inputs 16 px.
 
 ## Permissions
 
@@ -178,7 +178,7 @@ The design names these. None exists in `packages/iam` today.
 
 - The work item record with readiness and certification (`tasks-spec.md` §6, §8; `list_tasks`, `certify_task_dod`)
 - The work order record and its send (`create_work_order`, `send_work_order`, `list_work_orders`), and delivery to the agent’s runtime (§9.6)
-- A work order id on the run record beside `taskRef` (wedge spec, Open decisions 5), so `live` and Live now read runs by work order
+- A work order id on the run record beside `taskRef` (wedge spec, Open decisions 5), so `live` and Live work orders read runs by work order
 - The workflow file schema (`.oxagen/workflows/*.toml`) and its ADR (`tasks-spec.md` §17.2)
 - `context_record` and `task` types in the mention grammar (§17.6), and a token cost on a Steering record
 - The repositories an agent’s toolbelt may write, and a per-run budget per agent
@@ -195,7 +195,7 @@ The design names these. None exists in `packages/iam` today.
 - Every enforcement claim states the tier. Each agent in the send menu and the dialog shows its recorded tier, and nothing on the tab says a repository limit is enforced beyond what that tier enforces.
 - Headers are rollups of the rows beneath them. The tiles and the Work nav count are sums of the rows, never typed twice.
 - Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
-- Exactly one gold action per screen: **Create work order and send to agent**, or the dialog’s **Send to <target>** while `wo` is open.
+- Exactly one gold action per screen: **Send to an agent…**, or the dialog’s **Send to <target>** while `wo` is open.
 - A future-only field is marked in the design and renders as not recorded in a build until its contract ships.
 - An agent somebody else operates is never offered as a target.
 - A provider account that is not mapped is shown as itself, never as a member.

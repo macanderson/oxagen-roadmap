@@ -45,7 +45,7 @@ The agent header and the tab bar are as `agent.md` specifies, with Steering sele
 |---|---|---|
 | `below_relevance_floor` | 7 | “relevance 0 for this brief” |
 | `out_of_scope` | 8 | The scope that missed: “scoped to a-intel/mobile; this agent works in a-intel/platform”, “scoped to the agent triage”, “applies to triage, docs-writer”, “no agent holds the tool it gates” |
-| `over_budget` | 3 | “ranked 5 of 11 for this brief, relevance 4. 231 tok did not fit in the 141 left” |
+| `over_budget` | 3 | “rank 5 of 11 · needs 231 tok, 141 left” |
 | `overridden_by_gate` | 2 | The gate: “definition deny_tools: github__merge_pull_request@*” |
 | `overridden_by_must` | 1 | “a published must beats recalled memory: ctx.release.never-merge” |
 | `superseded` | 1 | “replaced by ctx.platform.safari-e2e-flake, published 2026-09-02” |

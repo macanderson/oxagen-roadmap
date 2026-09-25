@@ -192,9 +192,9 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 253 to 263, 297</td><td>The rules that draw it</td></tr>
-      <tr><td><code>toolCell(id, o)</code> at <code>engine.js:826</code></td><td>The one component every tool display goes through. <code>o.sz</code> picks a size, <code>o.sub</code> appends a fact, <code>S.toolNames===&quot;api&quot;</code> swaps label and API name. 16 calls.</td></tr>
-      <tr><td><code>toolMeta(id)</code> at <code>engine.js:808</code></td><td>Resolves a tool id to its label and category, from <code>TOOLMETA</code> or a verb-based guess for an id the table does not name.</td></tr>
-      <tr><td><code>catSvg(c)</code> at <code>engine.js:823</code></td><td>The category's icon, from the shared <code>TCAT</code> map.</td></tr>
+      <tr><td><code>toolCell(id, o)</code> at <code>engine.js:827</code></td><td>The one component every tool display goes through. <code>o.sz</code> picks a size, <code>o.sub</code> appends a fact, <code>S.toolNames===&quot;api&quot;</code> swaps label and API name. 16 calls.</td></tr>
+      <tr><td><code>toolMeta(id)</code> at <code>engine.js:809</code></td><td>Resolves a tool id to its label and category, from <code>TOOLMETA</code> or a verb-based guess for an id the table does not name.</td></tr>
+      <tr><td><code>catSvg(c)</code> at <code>engine.js:824</code></td><td>The category's icon, from the shared <code>TCAT</code> map.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -220,7 +220,7 @@
 ## Inputs
 
 1. mockups/components/tool-cell.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 253 to 263, 297. The mockup renders it with toolCell(id, o) (engine.js:826), toolMeta(id) (engine.js:808), catSvg(c) (engine.js:823).
+2. The design source: mockups/src/engine.css lines 253 to 263, 297. The mockup renders it with toolCell(id, o) (engine.js:827), toolMeta(id) (engine.js:809), catSvg(c) (engine.js:824).
 3. The build's implementation: find it by its root selector (.tc) or its name, and list every route that renders it.
 4. Where to see it in the design: Tools, Agent (Toolbelt tab), Approvals, Tool dialogs, Command menu, Registration and connection wizards. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

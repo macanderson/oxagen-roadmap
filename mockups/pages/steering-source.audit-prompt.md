@@ -12,7 +12,7 @@ You are auditing the **Steering source** page of Oxagen (`/{org}/{ws}/steering/s
 
 1. The page spec: `mockups/pages/steering-source.md`. Read it first, in full. `steering.md` specifies the shell and the Sources list this page opens from; `steering-source-skill.md` covers a skill.
 2. The design, rendered: the stories `Oxagen / Steering / Steering record` in Storybook (`npm run storybook`): Loaded, Loaded · mobile, and Loaded · future-only fields marked. Or `mockups/missioncontrol.html?product=1&state=loaded&mobile=<0|1>#<route>`, with `&future=1` to outline the future-only fields, at each of these routes:
-   - `#/a-intel/core-platform/steering/sources/record/ctx.release.notes-format` (a rule), `…/record/ctx.release.never-merge` (a constraint with a grant), `…/record/ctx.platform.release-order` (a procedure), `…/record/ctx.platform.changelog-once` (a fact), `…/record/ctx.platform.safari-e2e-flake` (a memory record), `…/record/ctx.triage.short-labels` (a preference), `…/record/ctx.sec.prefer-the-workspaces-own` (archived);
+   - `#/a-intel/core-platform/steering/sources/record/ctx.release.notes-format` (a rule), `…/record/ctx.release.never-merge` (a constraint with a grant), `…/record/ctx.platform.release-order` (a procedure), `…/record/ctx.platform.changelog-once` (a fact), `…/record/ctx.platform.safari-e2e-flake` (a memory record), `…/record/ctx.triage.short-labels` (a preference), `…/record/ctx.sec.prefer-workspaces-retry-helper` (archived);
    - `…/sources/adr/ADR-021`, `…/sources/adr/ADR-008`, `…/sources/vision/VISION`;
    - `…/sources/memory/mem_01K5QX7C`, `…/sources/glossary/ont.release-train`;
    - `#/a-intel/finops/steering/sources/instruction/ins.finops.additional`.

@@ -26,8 +26,8 @@ Columns, in order: Scope · Period · Limit · Used · Mode · Position · and a
 
 | Scope | Period | Limit | Used | Mode | Position |
 |---|---|---|---|---|---|
-| organization · a-intel | monthly | $598,000.00 | $439,498.34 | soft | 73% |
-| workspace · core-platform | monthly | $122,000.00 | $95,603.33 | hard | 78% |
+| organization · a-intel | monthly | $598,000.00 | $439,705.21 | soft | 74% |
+| workspace · core-platform | monthly | $122,000.00 | $95,810.20 | hard | 79% |
 | workspace · finops | monthly | $38,000.00 | $19,281.15 | hard | 51% |
 | agent · a-intel.core.triage | per run | $1.00 | $0.94 | hard | 94% |
 

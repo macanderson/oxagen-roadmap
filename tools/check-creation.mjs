@@ -392,7 +392,7 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
   const { page, errs } = await open();
   const cases = [
     ["#/a-intel/core-platform/tools", "New tool"],
-    ["#/a-intel/core-platform/agents", "New agent"],
+    ["#/a-intel/core-platform/agents", "Write a new agent…"],
     ["#/a-intel/core-platform/steering?kind=skill", "New source"],
     ["#/a-intel/core-platform/steering", "New source"],
     ["#/a-intel/core-platform/steering", "Import Markdown"],

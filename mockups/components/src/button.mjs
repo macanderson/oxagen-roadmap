@@ -154,8 +154,8 @@ export default {
     ["--accent-text", "Link button (see Findings)"],
   ],
   helpers: [
-    ["dialog()", "engine.js:9569", "Writes a dialog's footer buttons from `d.f`."],
-    ["act(msg, tone)", "engine.js:2036", "What most buttons call when they finish: a toast in the button's tone."],
+    ["dialog()", "engine.js:9574", "Writes a dialog's footer buttons from `d.f`."],
+    ["act(msg, tone)", "engine.js:2040", "What most buttons call when they finish: a toast in the button's tone."],
   ],
   sourceNotes: [
     "Buttons are written inline: about 173 `btn primary`, 226 `btn sm`, 60 `btn danger`, 5 `btn ghost`, and 18 wand buttons.",
