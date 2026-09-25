@@ -232,7 +232,7 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673, copied 2413 to 2421</td><td>The rules that draw it</td></tr>
-      <tr><td><code>dialog()</code> at <code>engine.js:9352</code></td><td>Writes a dialog's footer buttons from <code>d.f</code>.</td></tr>
+      <tr><td><code>dialog()</code> at <code>engine.js:9384</code></td><td>Writes a dialog's footer buttons from <code>d.f</code>.</td></tr>
       <tr><td><code>act(msg, tone)</code> at <code>engine.js:2033</code></td><td>What most buttons call when they finish: a toast in the button's tone.</td></tr>
       <tr><td><code>copiedState(btn)</code> at <code>engine.js:2467</code></td><td>Swaps a button to the copied state for 1.6s. <code>copyText()</code> calls it once the clipboard accepts.</td></tr>
     </tbody>
@@ -262,7 +262,7 @@
 ## Inputs
 
 1. mockups/components/button.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673, copied 2413 to 2421. The mockup renders it with dialog() (engine.js:9352), act(msg, tone) (engine.js:2033), copiedState(btn) (engine.js:2467).
+2. The design source: mockups/src/engine.css lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673, copied 2413 to 2421. The mockup renders it with dialog() (engine.js:9384), act(msg, tone) (engine.js:2033), copiedState(btn) (engine.js:2467).
 3. The build's implementation: find it by its root selector (.btn) or its name, and list every route that renders it.
 4. Where to see it in the design: every page, every dialog, the approvals drawer. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
