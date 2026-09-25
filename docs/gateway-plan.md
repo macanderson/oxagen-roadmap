@@ -9,7 +9,7 @@
 | **Tracks** | `oxagen` #3299 item 6 (MCP), and the ADR this plan asks for (below) |
 | **Source** | `macanderson/oxagen` at `main` `c0a40a9ce`: `packages/tacho/src/collector/model-proxy.ts`, `mcp-gateway.ts`, `packages/agent/src/runtime/materialize-tools.ts`, `packages/database/src/schema/mcp.ts`, `packages/iam/src/machine-key-scope.ts`, `packages/handlers/src/tacho.events.ingest.ts`. Kong's documentation, read 2026-09-25 |
 | **Supersedes in part** | ADR-094 (the gateway runs on the laptop, and prompt bodies never reach Oxagen), ADR-143 (the vendor key sits in a file on the laptop), ADR-122:19 (an agent's own identity cannot call an external tool) |
-| **Related** | `tier-ladder-spec.md`, `oxagen` #4310 (the in-app agent leaves the toolbelt), `stella` #6564 (Stella's MCP scope) |
+| **Related** | `tier-ladder-spec.md`, `oxagen` #4310 (the in-app agent leaves the toolbelt) |
 
 ---
 
@@ -126,7 +126,7 @@ On a managed device the harness reaches MCP servers through the gateway only:
 - **Claude Code:** `managed-mcp.json` holds the gateway entries, with `allowManagedMcpServersOnly: true`. The allowlist matches by `serverUrl` ([managed MCP](https://code.claude.com/docs/en/managed-mcp)).
 - **Codex:** `requirements.toml` holds an `[mcp_servers.<id>]` entry per server, with a `url` identity, and `features.apps = false` ([managed configuration](https://learn.chatgpt.com/docs/enterprise/managed-configuration)).
 - **Cursor:** the Enterprise MCP Allowlist in Cursor's team settings allows the gateway's URLs only. Oxagen cannot write it. The admin guide gives the pattern ([model and integration management](https://cursor.com/docs/enterprise/model-and-integration-management)).
-- **Stella:** the gateway entries reach `.stella/mcp.toml` through a pull request. Stella skips that file in an untrusted checkout, and nothing lets an admin pin its server set until it gains a managed server list (`stella` #6564).
+- **Stella:** the gateway entries reach `.stella/mcp.toml` through a pull request. Stella skips that file in an untrusted checkout, and it has no managed server list an admin could pin.
 - **Claude Desktop:** its enterprise policy is an on/off switch for local servers. Oxagen's entry is the one it writes today.
 
 ### Laptop-only servers
@@ -203,7 +203,7 @@ It keeps ADR-078 §4. There is still one tool builder, and it is the server's.
 2. **Agent identity and tokens.** An agent principal per enrolled agent, grants for external tools, run tokens minted by the gateway and refreshed for the life of the run, and a kill checked on every call.
 3. **The model gateway, Oxagen-hosted.** Port the proxy's routes, metering, budgets, allowlist, and interrupt. Add the per-organization key vault. Enrollment points each harness's base URL at the gateway and removes the local key.
 4. **The MCP gateway.** The toolbelt endpoint per server, OAuth and credential custody, per-tool rules, approval, metering, and billing. Enrollment imports the harness's servers and writes the gateway's entries.
-5. **Pinning** for Claude Code, Codex, and Cursor. Stella follows once #6564 lands.
+5. **Pinning** for Claude Code, Codex, and Cursor.
 6. **Delivery for the rest:** skills sync, the agent-file generator, per-prompt steering, and memory import and recall.
 7. **Agent messages and triggers.** `send_agent_message`, `list_agent_messages`, and `start_agent_run` on the gateway, delivery through the model request or the hook, and work orders routed to the target agent's own runtime.
 8. **The customer-hosted gateway.** Packaging, the outbound control channel, and the customer's KMS.
