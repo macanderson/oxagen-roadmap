@@ -395,6 +395,7 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
     ["#/a-intel/core-platform/agents", "New agent"],
     ["#/a-intel/core-platform/steering?kind=skill", "New source"],
     ["#/a-intel/core-platform/steering", "New source"],
+    ["#/a-intel/core-platform/steering", "Import Markdown"],
   ];
   for (const [hash, label] of cases) {
     await page.evaluate(hh => { location.hash = hh; }, hash);
@@ -409,10 +410,150 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
   await page.evaluate(() => { closeDialog(); openDialog("create"); });
   await page.waitForTimeout(150);
   const cards = await page.evaluate(() => document.querySelectorAll("#layer .wz-card").length);
-  ok(cards === 5, "create chooser: five cards, got " + cards);
+  ok(cards === 6, "create chooser: six cards, got " + cards);
   await shot(page, "create-chooser");
   ok(errs.length === 0, "entry point errors: " + errs.join(" | "));
   await page.close();
+}
+
+/* ---------------- the Markdown import ----------------
+   The sample directory holds five files and four things the importer must skip. stella's reading of
+   it is fixed by the fixture: 24 candidates, three of them duplicates that start rejected, and one
+   that joins an existing memory. Every expectation below is a string the fixture puts there. */
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering");
+  const body = () => page.evaluate(() => document.querySelector("#layer .dlg-b")?.innerText.replace(/\s+/g, " ") || "");
+  const card = (src) => page.evaluate((s) => {
+    const c = [...document.querySelectorAll("#layer .imp-c")].find((x) => x.querySelector(".imp-src").textContent === s);
+    return c ? { st: c.dataset.impSt, as: c.dataset.impAs, text: c.innerText.replace(/\s+/g, " "), force: !!c.querySelector('select[aria-label="Force"]'), mark: c.querySelector("mark")?.textContent || "" } : null;
+  }, src);
+  const press = (src, label) => page.evaluate(([s, l]) => {
+    const c = [...document.querySelectorAll("#layer .imp-c")].find((x) => x.querySelector(".imp-src").textContent === s);
+    [...c.querySelectorAll("button")].find((b) => b.textContent.trim() === l).click();
+  }, [src, label]);
+  const counts = () => page.evaluate(() => document.querySelector("#layer [data-imp-counts]")?.dataset.impCounts || "");
+
+  await page.evaluate(() => wzOpen("import"));
+  await page.waitForTimeout(150);
+  let d = await dlg(page);
+  ok(d.steps.length === 3 && /Files$/.test(d.steps[0]) && /Review$/.test(d.steps[1]) && /Publish$/.test(d.steps[2]), "import: three steps, got " + d.steps.join("|"));
+  ok(d.foot.some((b) => b.t === "Parse with stella" && b.dis), "import: Parse is disabled until a file is listed");
+  await page.evaluate(() => [...document.querySelectorAll("#layer .imp-drop button")].find((b) => /sample directory/.test(b.textContent)).click());
+  await page.waitForTimeout(150);
+  let t = await body();
+  ok(await page.evaluate(() => document.querySelectorAll("#layer .imp-files tbody tr").length) === 5, "import: the sample lists five files");
+  ok(/node_modules\//.test(t) && /\.git\//.test(t) && /not Markdown/.test(t) && /CHANGELOG\.md \(412 KB\)/.test(t) && /over the 200 KB limit/.test(t),
+    "import: the skipped list names each path and why, body: " + t.slice(0, 300));
+  ok(/stella reads 5 files, about \d+ tokens/.test(t) && /usage credits, billed to /.test(t), "import: the cost is stated before stella reads anything");
+  await page.evaluate(() => document.querySelectorAll("#layer .imp-files tbody input[type=checkbox]")[4].click());
+  await page.waitForTimeout(100);
+  ok(/stella reads 4 files/.test(await body()), "import: unticking a file takes it out of the estimate");
+  await page.evaluate(() => document.querySelectorAll("#layer .imp-files tbody input[type=checkbox]")[4].click());
+  await page.waitForTimeout(100);
+  await shot(page, "import-files");
+
+  ok(await primary(page), "import: Parse with stella is enabled");
+  await page.waitForTimeout(200);
+  d = await dlg(page);
+  ok(/Review$/.test(d.cur), "import: parsing lands on Review, got " + d.cur);
+  const n = await page.evaluate(() => ({ all: document.querySelectorAll("#layer .imp-c").length, rej: document.querySelectorAll('#layer .imp-c[data-imp-st="reject"]').length }));
+  ok(n.all === 24, "import: 24 candidates, got " + n.all);
+  ok(n.rej === 3 && (await counts()) === "0/3/21", "import: the three duplicates start rejected, got " + n.rej + " and " + (await counts()));
+  let c = await card("CLAUDE.md:L7");
+  ok(c && c.mark === "Never" && /“never” reads as a constraint that forbids/.test(c.text), "import: an inference names the word it read, got " + (c && c.text.slice(0, 160)));
+  c = await card("AGENTS.md:L7");
+  ok(c && c.st === "reject" && /Repeats CLAUDE\.md:L7 \(100% word overlap\)/.test(c.text), "import: a repeat across files names the first one");
+  c = await card("CLAUDE.md:L28");
+  ok(c && c.st === "reject" && /Already published as/.test(c.text) && /82% word overlap/.test(c.text), "import: a published duplicate names the record");
+  c = await card("apps/api/CLAUDE.md:L3");
+  ok(c && c.as === "memory" && /Joins .* as a saying \(89% word overlap\)/.test(c.text) && /A memory caps at may/.test(c.text),
+    "import: a line close to a memory joins it, and the cap is stated, got " + (c && c.text));
+  c = await card("AGENTS.md:L14-17");
+  ok(c && /numbered steps, so a procedure/.test(c.text), "import: a numbered list is one procedure");
+  ok(!(await card("apps/api/CLAUDE.md:L8")) && !(await card("apps/api/CLAUDE.md:L9")), "import: a fenced block is skipped");
+  ok(!(await card("README.md:L3")) && !!(await card("README.md:L9")), "import: prose without an instruction word is skipped");
+
+  await press("CLAUDE.md:L32", "Memory");
+  await page.waitForTimeout(100);
+  c = await card("CLAUDE.md:L32");
+  ok(c && c.as === "memory" && !c.force && /\binfo\b/.test(c.text), "import: a memory shows its force and offers no select, got " + (c && c.text));
+  await page.evaluate(() => { document.querySelector("#layer .dlg-b").scrollTop = 900; });
+  const y0 = await page.evaluate(() => document.querySelector("#layer .dlg-b").scrollTop);
+  await press("docs/runbooks/release.md:L15", "Accept");
+  await page.waitForTimeout(100);
+  const y1 = await page.evaluate(() => document.querySelector("#layer .dlg-b").scrollTop);
+  ok(y0 > 0 && Math.abs(y1 - y0) < 2, "import: a row decision keeps the scroll position, " + y0 + " then " + y1);
+  await press("docs/runbooks/release.md:L15", "Accept");
+  await page.waitForTimeout(100);
+  ok((await card("docs/runbooks/release.md:L15")).st === "open", "import: pressing Accept again clears it");
+
+  await page.selectOption("#impCandsAs", "memories");
+  await page.waitForTimeout(100);
+  ok(await page.evaluate(() => [...document.querySelectorAll("#layer .imp-c")].every((x) => x.dataset.impAs === "memory")), "import: the batch override sets every candidate");
+  await page.selectOption("#impCandsAs", "");
+  await page.waitForTimeout(100);
+  ok((await card("CLAUDE.md:L7")).as === "record" && (await card("apps/api/CLAUDE.md:L3")).as === "memory",
+    "import: each file's choice puts back the file's setting and keeps the fold");
+  await press("CLAUDE.md:L32", "Memory");
+  await page.waitForTimeout(100);
+
+  await page.evaluate(() => [...document.querySelectorAll("#layer .imp-bar button")].find((b) => b.textContent.trim() === "Accept all").click());
+  await page.waitForTimeout(100);
+  ok((await counts()) === "21/3/0", "import: Accept all leaves the duplicates rejected, got " + (await counts()));
+  await page.evaluate(() => [...document.querySelectorAll("#layer .imp-gh")].find((g) => /README\.md/.test(g.textContent)).querySelectorAll("button")[1].click());
+  await page.waitForTimeout(100);
+  ok((await counts()) === "20/4/0", "import: Reject file rejects that file's candidates, got " + (await counts()));
+  await shot(page, "import-review");
+
+  ok(await primary(page), "import: Review what publishes is enabled");
+  await page.waitForTimeout(200);
+  t = await body();
+  d = await dlg(page);
+  const prs = await page.evaluate(() => [...document.querySelectorAll("#layer [data-imp-pr]")].map((x) => x.dataset.impPr));
+  ok(prs.join("|") === "CLAUDE.md|AGENTS.md|apps/api/CLAUDE.md|docs/runbooks/release.md", "import: one pull request per source file, got " + prs.join("|"));
+  ok(/context\/import-docs-runbooks-release/.test(t) && /\.oxagen\/rules\/ctx\.core\./.test(t), "import: each branch and file is named");
+  ok(/mem_01K5R0N2/.test(t) && /a saying from apps\/api\/CLAUDE\.md:L3/.test(t) && /mem\.import\./.test(t), "import: the memories list the fold and the new memory");
+  ok(d.foot.some((b) => b.t === "Open 4 pull requests and write 2 memories"), "import: the button counts both, got " + d.foot.map((b) => b.t).join("|"));
+  await shot(page, "import-publish");
+
+  const before = await page.evaluate(() => ({ prs: RECPRS.length, mem: MEMORY.length }));
+  ok(await primary(page), "import: publish is enabled");
+  await page.waitForTimeout(250);
+  const after = await page.evaluate(() => {
+    const m = memById("mem_01K5R0N2");
+    return { prs: RECPRS.length, mem: MEMORY.length, dlg: S.dlg, toast: S.toast, ev: AUDIT[0].ev, hash: location.hash,
+      claude: (RECPRS.find((p) => p.src === "CLAUDE.md") || {}).records?.length, say: (m.sayings || []).some((x) => x.file === "apps/api/CLAUDE.md" && x.line === 3),
+      prov: MEMORY[0].provenance, force: MEMORY[0].force };
+  });
+  ok(after.prs - before.prs === 4 && after.mem - before.mem === 1 && after.dlg === null, "import: 4 pull requests and 1 memory, got " + JSON.stringify(after));
+  ok(after.claude === 8, "import: CLAUDE.md's pull request carries its 8 records, got " + after.claude);
+  ok(after.say && /^CLAUDE\.md:L32 · import by /.test(after.prov) && after.force === "info", "import: the fold and the new memory keep file and line");
+  ok(/^Opened 4 pull requests for 18 records\. Wrote 1 memory\. Added 1 saying to existing memories\./.test(after.toast), "import: the toast counts what happened, got " + after.toast);
+  ok(after.ev === "steering_imported" && /\/steering\/proposals\/prs$/.test(after.hash), "import: it is audited and lands on the pull requests, got " + after.hash);
+
+  await page.evaluate(() => openDialog("memory", "mem_01K5R0N2"));
+  await page.waitForTimeout(150);
+  ok(await page.evaluate(() => [...document.querySelectorAll("#layer [data-mem-src]")].some((x) => x.textContent === "apps/api/CLAUDE.md:L3")), "import: the memory shows the imported saying's source");
+  await page.evaluate(() => { const m = MEMORY[0]; openDialog("memory", m.id); });
+  await page.waitForTimeout(150);
+  ok(/Not recalled yet/.test(await body()), "import: a new memory reads as not recalled yet");
+  ok(errs.length === 0, "import: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+
+  const ph = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
+  const pe = []; ph.on("pageerror", (e) => pe.push(String(e.message || e)));
+  await ph.goto(FILE + "?product=1&state=loaded&mobile=1&theme=dark#/a-intel/core-platform/steering");
+  await ph.waitForTimeout(300);
+  await ph.evaluate(() => { wzOpen("import"); impSample(); impParse(); wzGo(2); });
+  await ph.waitForTimeout(200);
+  const r = await ph.evaluate(() => ({ over: document.scrollingElement.scrollWidth - document.scrollingElement.clientWidth,
+    dlgOver: (b => b.scrollWidth - b.clientWidth)(document.querySelector("#layer .dlg-b")),
+    tap: Math.min(...[...document.querySelectorAll("#layer .imp-ctl .btn")].map((b) => b.getBoundingClientRect().height)) }));
+  ok(r.over <= 1 && r.dlgOver <= 1, "import phone: no horizontal overflow, got " + r.over + " and " + r.dlgOver);
+  ok(r.tap >= 43, "import phone: row buttons are tap targets, got " + r.tap + "px");
+  await shot(ph, "import-phone-dark");
+  ok(pe.length === 0, "import phone: no JavaScript error: " + pe.join(" | "));
+  await ph.close();
 }
 
 /* ---------------- the wizards on a phone, and in the dark ---------------- */
@@ -1248,6 +1389,85 @@ for (const theme of ["light", "dark"]) {
   ok(fields.includes(body), "memory: the seeded text reaches the field, got " + fields.slice(0, 160));
   ok(errs.length === 0, "memory: no JavaScript error: " + errs.join(" | "));
   await page.close();
+}
+
+// Memories fold by concept. A memory keeps every saying that said the same thing, its dialog lists
+// them, and a memory that reached the workspace setting opens the proposal those sayings support.
+// The Memory shelf with its fold tile and setting left with the fleet operations wedge.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/steering");
+  const f = await page.evaluate(() => {
+    const L = stgMemory("core-platform");
+    return { n: L.length, sum: L.reduce((n, m) => n + (m.sayings || []).length, 0), want: L.filter(m => m.proposedAs).length,
+      ready: L.filter(m => memFoldOf(m).st === "ready").length, proposed: L.filter(m => memFoldOf(m).st === "proposed").length };
+  });
+  ok(f.sum > f.n, "fold: memories hold more sayings than there are memories, got " + f.sum + " for " + f.n);
+  ok(f.proposed === f.want && f.want > 0, "fold: a proposed memory reads proposed, got " + f.proposed + " of " + f.want);
+  await page.evaluate(() => { S.memFold.sayings = 3; openDialog("memory", "mem_01K5R0N2"); });
+  await page.waitForTimeout(250);
+  const d = await page.evaluate(() => ({
+    says: +document.querySelector("#layer [data-mem-says]")?.dataset.memSays,
+    text: document.querySelector("#layer .dlg").innerText,
+    foot: [...document.querySelectorAll("#layer .dlg .dlg-f button")].map(b => b.textContent.trim()) }));
+  ok(d.says === 3, "fold: the memory lists its three sayings, got " + d.says);
+  ok(/Remember to not use the latest version of node/.test(d.text) && /Use Node version 20/.test(d.text),
+    "fold: both sayings keep their own words");
+  ok(d.foot.includes("Open the proposal") && !d.foot.includes("Promote to a record"),
+    "fold: a proposed memory opens its proposal instead of a second one, got " + d.foot.join(" ~ "));
+  await page.evaluate(() => [...document.querySelectorAll("#layer .dlg .dlg-f button")].find(b => /Open the proposal/.test(b.textContent)).click());
+  await page.waitForTimeout(350);
+  const p = await page.evaluate(() => ({ sel: S.prpSel, hash: location.hash,
+    rows: +document.querySelector("[data-prp-rows]")?.getAttribute("data-prp-rows"),
+    text: document.querySelector("main")?.innerText || document.body.innerText }));
+  ok(p.sel === "prp_01K5RX1N" && /\/steering\/proposals$/.test(p.hash), "fold: the proposal opens, got " + p.sel + " on " + p.hash);
+  ok(p.rows === 3, "fold: the proposal cites each saying as a supporting run, got " + p.rows);
+  ok(/Remember to not use the latest version of node/.test(p.text), "fold: the evidence quotes the sayings");
+  ok(errs.length === 0, "fold: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// The Run page has a Memories tab: what the run started, what it joined, and the self-grade, which
+// only research.read reads. Marcus is refused and sees what was captured; Priya reads the axes.
+{
+  const RD1X = "#/a-intel/core-platform/runs/run_01K5RD1X8N7BVF3G/memory";
+  const { page, errs } = await open(RD1X);
+  const m = await page.evaluate(() => {
+    const R = run("run_01K5RD1X8N7BVF3G");
+    return { tab: S.tab.run, shown: +document.querySelector("[data-run-memories]")?.dataset.runMemories,
+      want: MEMORY.reduce((n, x) => n + (x.sayings || []).filter(y => y.run === R.id).length, 0),
+      text: document.querySelector(".run-main").innerText,
+      sg: document.querySelector("[data-sg]")?.dataset.sg, axes: document.querySelectorAll(".run-main .sx-rax").length,
+      tabBtn: [...document.querySelectorAll(".tabs .tab")].map(b => b.textContent) };
+  });
+  ok(m.tab === "memory" && m.tabBtn.some(t => /^Memories/.test(t)), "run memories: the route opens the tab, got " + m.tab);
+  ok(m.want > 0 && m.shown === m.want, "run memories: one row per saying the run left, got " + m.shown + " of " + m.want);
+  ok(/\bnew\b/.test(m.text) && /\bjoined\b/.test(m.text), "run memories: it tells a started memory from a joined one");
+  ok(m.sg === "refused" && m.axes === 0, "run memories: without research.read the self-grade is refused, got " + m.sg + " with " + m.axes + " axes");
+  ok(/research\.read/.test(m.text) && /Request access/.test(m.text) && /rfl_v3/.test(m.text),
+    "run memories: the refusal names the grant and shows what was captured");
+  ok(errs.length === 0, "run memories: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+
+  const pg = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  const e2 = []; pg.on("pageerror", e => e2.push(String(e.message || e)));
+  await pg.goto(FILE + "?product=1&state=loaded&mobile=0&as=priya" + RD1X);
+  await pg.waitForTimeout(300);
+  const q = await pg.evaluate(() => ({ who: me().name, sg: document.querySelector("[data-sg]")?.dataset.sg,
+    axes: document.querySelectorAll(".run-main .sx-rax").length,
+    promote: [...document.querySelectorAll(".run-main button")].filter(b => /promote/i.test(b.textContent)).length }));
+  ok(q.who === "Priya Natarajan" && q.sg === "read" && q.axes === 4, "run memories: ?as=priya reads the four axes, got " + JSON.stringify(q));
+  ok(q.promote === 0, "run memories: nothing on the tab promotes a self-grade");
+  for (const [id, re, what] of [["run_01K5RS7M2E8FJ3QW", /Nothing is written until the seal[\s\S]*Captured after the seal/, "a live run writes nothing yet"],
+                                ["run_01K4QJ9E4T6YUI1O", /Deleted on 2025-12-29/, "a self-grade past retention is deleted"],
+                                ["run_01K5RQ4B9C7XTN2P", /joined/, "a saying link lands on the run that said it"]]) {
+    await pg.evaluate((h) => { location.hash = h; }, "#/a-intel/core-platform/runs/" + id + "/memory");
+    await pg.waitForTimeout(250);
+    const t = await pg.evaluate(() => document.querySelector(".run-main").innerText);
+    ok(re.test(t), "run memories: " + what + ", got " + t.slice(0, 160).replace(/\s+/g, " "));
+  }
+  /* The Reflection page under Steering › Skills left with the fleet operations wedge; the self-grade is read on the run. */
+  ok(e2.length === 0, "run memories: no JavaScript error as priya: " + e2.join(" | "));
+  await pg.close();
 }
 
 await browser.close();

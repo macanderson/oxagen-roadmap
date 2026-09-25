@@ -3,7 +3,7 @@
 import { view, argTypes } from "../_view.js";
 
 export default {
-  title: "Scenarios/W3 Money Asked, A Human Answered",
+  title: "Future state/Scenarios/W3 Money Asked, A Human Answered",
   argTypes,
   args: { shell: "desktop", theme: "system", product: false, hash: "#/a-intel/finops/scenarios/money-asked/1" },
   render: view,

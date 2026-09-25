@@ -3,7 +3,7 @@
 import { view, argTypes } from "../_view.js";
 
 export default {
-  title: "Scenarios/W9 The Toolbelt, Governed",
+  title: "Future state/Scenarios/W9 The Toolbelt, Governed",
   argTypes,
   args: { shell: "desktop", theme: "system", product: false, hash: "#/a-intel/core-platform/scenarios/toolbelt-governed/1" },
   render: view,

@@ -3,7 +3,7 @@
 import { view, argTypes } from "../_view.js";
 
 export default {
-  title: "Scenarios/W13 In the Loop",
+  title: "Future state/Scenarios/W13 In the Loop",
   argTypes,
   args: { shell: "desktop", theme: "system", product: false, hash: "#/a-intel/core-platform/scenarios/in-the-loop/1" },
   render: view,

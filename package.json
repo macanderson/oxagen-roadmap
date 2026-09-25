@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "dev": "node tools/dev.mjs",
     "build": "node tools/build-roadmap.mjs && node tools/build-mockup.mjs && node tools/build-mockup-v2.mjs && node tools/build-mockup-future.mjs && node tools/build-stories.mjs && node tools/build-stories.mjs --dir mockups/future_state_mockups --title \"Future state\" && python3 tools/build-docs.py && node tools/build-badges.mjs",
     "check": "node tools/build-roadmap.mjs --check && node tools/build-mockup.mjs --check && node tools/build-mockup-v2.mjs --check && node tools/build-mockup-future.mjs --check && node tools/build-stories.mjs --check && node tools/build-stories.mjs --check --dir mockups/future_state_mockups --title \"Future state\" && python3 tools/build-docs.py --check && node tools/build-badges.mjs --check && node tools/check-mockup.mjs && node tools/check-creation.mjs && node tools/check-tasks.mjs && node tools/check-api.mjs && node tools/check-assistant.mjs && node tools/check-record-e2e.mjs && node tools/check-refresh.mjs",
     "storybook": "storybook dev -p 6006",

@@ -4,7 +4,7 @@ One place to see what Oxagen is building next, exactly how it will look, and wha
 
 - **The roadmap app** (`index.html`, built from `roadmap/`): what rev 1 must have and the gaps between the Oxagen mockups and the build, the witness and definition-of-done features (rev 2), the open decisions, and the GitHub issues, live. Published as a claude.ai artifact where Claude is bound to the page, and served by GitHub Pages at https://macanderson.github.io/roadmap/ as a read-only fallback.
 - **The mockups** (`mockups/`): the master mockup, the authoritative design of rev1, every page in every state, desktop and mobile, and the guided scenarios. The roadmap frames them, so a card leads to its wireframe in one click. The first version, with the witness runner and the definition of done, is kept as `mockups/future_state_mockups/` and is not a target.
-- **The documents** (`docs/`): the Mission Control spec, the DoD spec, the witness spec, the desktop spec, the plan, the scope review, and the reviews.
+- **The documents** (`docs/`): the Mission Control spec, the DoD spec, the witness spec, the desktop spec, the in-app agent capability expansion roadmap, the plan, the scope review, and the reviews.
 
 ```
 index.html                    the roadmap app, ONE file: built from roadmap/app.html + roadmap/data.json (edit those, never this)
@@ -143,6 +143,7 @@ the witness runner, proof, the definition of done, agent scores, proven spend, a
 
 ```sh
 npm install
+npm run dev              # Storybook on :6006 and Mission Control on :4400, both live from the sources
 npm run storybook        # every page in every state, desktop and mobile; every scenario
 npm run build-storybook  # a static site in storybook-static/
 ```
@@ -185,6 +186,7 @@ a contents rail per document; a section has a link (`#spec/8-6-definition-of-don
 - `dod-spec.md`: the definition of done for agent runs (future state, not in rev1)
 - `witness-spec.md`: Witness, outcome verification (future state, not in rev1)
 - `desktop-spec.md`: the Oxagen Desktop installer
+- `in-app-agent-capability-expansion-spec.md`: the proposed roadmap for app parity, Workspace Context, visual analysis, artifacts, governed actions and distribution
 - `implementation-plan.md`: how the pages become the Next.js `apps/app` in the oxagen monorepo
 - `fleet-operations-wedge.md`: the design authority for Work, SteeringFrames, the Decision trace and what was cut, with `fleet-operations-ia.md` (navigation and the unique views), `fleet-operations-routes.md` (every old route and where it lands) and `fleet-operations-collapse.md` (the deletion list)
 - `scope-review.md`: the review of 2026-09-14, what it cut and where each cut landed

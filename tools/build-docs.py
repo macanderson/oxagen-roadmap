@@ -37,6 +37,7 @@ CATALOG = [
         ("desktop", "desktop-spec.md", "Specification"),
         ("creation", "creation-spec.md", "Specification"),
         ("tasks", "tasks-spec.md", "Specification"),
+        ("agent-capability", "in-app-agent-capability-expansion-spec.md", "Roadmap specification"),
         ("portability", "agent-portability-atlas.md", "Specification"),
         ("execution-portability", "agent-run-protocol.md", "Draft protocol"),
     ]),

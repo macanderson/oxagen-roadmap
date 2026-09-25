@@ -930,7 +930,7 @@ function pSteering(){
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Steering</h1>'+
    '<p>Every source that can steer an agent here, and the frames it emits.</p></div>'+
    '<div class="acts">'+govChip(w)+(SK_ON[w.slug]?'<button class="btn sm gov-chip" onclick="openDialog(\'skcfg\')" title="How skills resolve in this workspace">Skills: <span class="mono">'+h(SK_CFG.ver)+'</span></button>':'')+
-    newSourceBtn(t!=="prs")+'</div></div>'+tabs+body;
+    '<button class="btn" onclick="wzOpen(\'import\')">Import Markdown</button>'+newSourceBtn(t!=="prs")+'</div></div>'+tabs+body;
 }
 DLG_EXT.newsrc=function(){
   var w=ws();

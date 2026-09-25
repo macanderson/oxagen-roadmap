@@ -64,6 +64,9 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `skrun.json` | `SKRUN` | the interjected run: the agent, operator, harness and the unbound repository it started in |
 | `sk-frames.json` | `SK_FRAMES` | that run's frames while it waits on a person |
 | `sk-after.json` | `SK_AFTER` | the frames each answer writes: link to core-platform, or create the workspace edge |
+| `self-grades.json` | `SELF_GRADES` | each sealed run's self-grade, keyed by run id: the four rubric answers against what the record observed; readable only with `research.read`, and a deleted entry past 180 days |
+| `sk-reflect.json` | `SK_REFLECT` | the reflection rubric: its four questions, the model, and one quarantined self-grade set against the record. The run's Memories tab reads the rubric |
+| `md-import.json` | `MD_IMPORT` | the Markdown import: the sample directory, each file's lines and what stella read from them, the skipped paths with their reason, the size limit and the token price |
 
 ## `runs[].outputs` — the `<RunOutputs>` spine
 

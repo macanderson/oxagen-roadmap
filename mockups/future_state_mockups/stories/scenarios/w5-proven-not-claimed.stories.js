@@ -3,7 +3,7 @@
 import { view, argTypes } from "../_view.js";
 
 export default {
-  title: "Scenarios/W5 Proven, Not Claimed",
+  title: "Future state/Scenarios/W5 Proven, Not Claimed",
   argTypes,
   args: { shell: "desktop", theme: "system", product: false, hash: "#/a-intel/core-platform/scenarios/proven-not-claimed/1" },
   render: view,

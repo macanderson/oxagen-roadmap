@@ -3,7 +3,7 @@
 import { view, argTypes } from "../_view.js";
 
 export default {
-  title: "Scenarios/W1 Sixty Seconds to Governed",
+  title: "Future state/Scenarios/W1 Sixty Seconds to Governed",
   argTypes,
   args: { shell: "desktop", theme: "system", product: false, hash: "#/a-intel/core-platform/scenarios/sixty-seconds-to-governed/1" },
   render: view,

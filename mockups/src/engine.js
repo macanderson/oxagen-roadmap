@@ -16,7 +16,8 @@ var BOOT=(function(){var q=new URLSearchParams(location.search),b=window.BOOT||{
           product:!debug,
           future:q.get("future")==="1"||!!b.future,
           drawer:q.get("drawer")||b.drawer||null,
-          hash:q.get("hash")||b.hash||null};})();
+          hash:q.get("hash")||b.hash||null,
+          as:q.get("as")||b.as||null};})();
 var DEBUG=BOOT.debug;
 var PRODUCT=BOOT.product;
 var DLG_EXT={};   /* lazily built dialogs, registered beside their code; see dialog() */
@@ -111,8 +112,11 @@ function ws(){for(var i=0;i<WS.length;i++){if(WS[i].slug===S.ws)return WS[i];}re
 function wsBySlug(slug){for(var i=0;i<WS.length;i++){if(WS[i].slug===slug)return WS[i];}return null;}
 /* The signed-in person, in one place. The top bar, the account dialog and the denied panel
    must never name different people on the same screen. */
-var SESSION_USER="marcus";
+/* ?as=priya signs in as someone else in the fixtures, so a grant one person holds can be seen from both sides. */
+var SESSION_USER=BOOT.as&&PEOPLE[BOOT.as]?BOOT.as:"marcus";
 function me(){return PEOPLE[SESSION_USER]||PEOPLE.marcus;}
+/* research.read is an organization grant no workspace role inherits. It is what reads a self-grade. */
+function canResearch(){return (me().grants||[]).indexOf("research.read")>=0;}
 
 /* ── Rollups over the fixtures, so a header can never drift from the rows under it. ──
    Each of these replaced a hand-typed total that disagreed with its own table. */
@@ -933,7 +937,7 @@ function route(){
     if(p[4]&&RUN_TAB_ALIAS[p[4]]){ var rt=RUN_TAB_ALIAS[p[4]]; p=hashRewrite([org,w,"runs",p[3]].concat(rt==="trace"?[]:[rt])); }
     /* a tab named in the address wins; a bare run address opens the Decision trace on arrival and
        leaves a tab chosen on this run alone (a handler may set S.tab.run and render in place) */
-    if(p[4]) S.tab.run=({transcript:"transcript",cost:"cost",evidence:"evidence"})[p[4]]||"trace";
+    if(p[4]) S.tab.run=({transcript:"transcript",cost:"cost",memory:"memory",evidence:"evidence"})[p[4]]||"trace";
     else if(S.runTabFor!==p[3]) S.tab.run="trace";
     S.runTabFor=p[3];
     return {page:"run",org:org,ws:w,id:p[3]};
@@ -1637,13 +1641,21 @@ function notifIcon(tone){
   return sv+'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.5"/></svg>';
 }
 function notifsBody(){
-  return '<div class="lst">'+NOTIFS.map(function(n){
-    return '<div class="li'+(n.unread?" unread":"")+'"><span class="ic t-'+n.tone+'">'+notifIcon(n.tone)+'</span>'+
+  return '<div class="lst">'+NOTIFS.map(function(n,i){
+    /* An unread item is a button: selecting it marks that one read. A read item is plain text. */
+    var btn=n.unread?' role="button" tabindex="0" data-notif="'+i+'" aria-label="Mark read: '+h(n.title)+'" onclick="notifRead('+i+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();notifRead('+i+')}"':'';
+    return '<div class="li'+(n.unread?" unread":"")+'"'+btn+'><span class="ic t-'+n.tone+'">'+notifIcon(n.tone)+'</span>'+
      '<div class="bd2"><div class="t1">'+h(n.title)+'</div><div class="t2">'+h(n.body)+'</div>'+
      '<div class="mono dim" style="font-size:11px;margin-top:3px">'+h(n.kind)+'</div></div>'+
      '<time>'+h(n.t)+'</time></div>';}).join("")+'</div>';
 }
-function markAllRead(){for(var i=0;i<NOTIFS.length;i++)NOTIFS[i].unread=false;closeDialog();act('Marked read. Reading a notification is itself recorded, so the audit record shows who saw what.');}
+/* Marks one notification read and keeps focus in the list: on the next unread item, else the dialog. */
+function notifRead(i){
+  if(!NOTIFS[i]||!NOTIFS[i].unread)return;
+  NOTIFS[i].unread=false;render();
+  var next=document.querySelector('.li[data-notif]');if(next)next.focus();
+}
+function markAllRead(){for(var i=0;i<NOTIFS.length;i++)NOTIFS[i].unread=false;closeDialog();act('All notifications marked read. Audit records who read each one.');}
 function userMenu(){
   return '<div class="menu"><div class="menu-hd"><b>Marcus Bell</b><span>marcus@a-intel.example</span></div>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'profile\')">Account</button>'+
@@ -1961,6 +1973,7 @@ function pRun(r){
   if(t==="transcript") bodyHtml=transcriptTab(R,compacted);
   else if(t==="cost") bodyHtml=runFitPanel(R)+runInstruments(R)+runSpendByArea(R)+callsPanel(R)+costTab(R);
   else if(t==="evidence") bodyHtml=runEvidence(R,compacted);
+  else if(t==="memory") bodyHtml=runMemoryTab(R);
   else bodyHtml=decisionTrace(R);
   return head+pauseBanner(R)+'<div class="run-cols"><div class="run-main">'+runSummary(R)+runStatRow(R)+tabs+bodyHtml+'</div>'+
    '<aside class="run-side" aria-label="The work">'+runSide(R)+'</aside></div>';
@@ -2646,14 +2659,85 @@ function runTimeline(R){
 /* The run's four tabs. An old tab id (player, policy, context, issues, chain) lands on the tab that absorbed it. */
 function runTabKey(R){
   var t=tab("run","trace");
-  return RUN_TAB_ALIAS[t]||(/^(trace|transcript|cost|evidence)$/.test(t)?t:"trace");
+  return RUN_TAB_ALIAS[t]||(/^(trace|transcript|cost|memory|evidence)$/.test(t)?t:"trace");
 }
 function runTabs(R,t){
   var parked=0;FRAMES.forEach(function(f){if(f.kind==="policy_decision"&&/approve/.test(f.sum))parked++;});
   var tabs=[["trace","Decision trace","",parked?'<span class="st" title="a call is parked for approval"></span>':""],
    ["transcript","Transcript",txEntries(R).length,""],["cost","Cost",usd(R.cost),""],
-   ["evidence","Evidence",R.sealed?"sealed":"live",""]];
+   ["memory","Memories",runMemories(R).length||"",""],["evidence","Evidence",R.sealed?"sealed":"live",""]];
   return '<div class="tabs" role="tablist" aria-label="Run">'+tabs.map(function(x,i){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" title="'+(i+1)+'" onclick="runTab(\''+x[0]+'\')">'+x[1]+(x[2]!==""&&x[2]!=null?'<span class="n'+(x[0]==="cost"?" money":"")+'">'+h(String(x[2]))+'</span>':'')+x[3]+'</button>';}).join("")+'</div>';
+}
+/* ===================== Memories tab ===================== */
+/* What the run left behind. After the seal the reflector reads the run and writes each lesson as a
+   memory. A lesson that says what an existing memory already says joins it as one more saying, so
+   the tab shows both the memories this run started and the ones it joined. Beside them sits the
+   agent's self-grade, which is a different thing: its own rubric answers, fenced off for research. */
+function runMemories(R){
+  var out=[];
+  MEMORY.forEach(function(m){memSayings(m).forEach(function(x,k){if(x.run===R.id)out.push({m:m,k:k,x:x});});});
+  return out.sort(function(a,b){return a.x.frame-b.x.frame;});
+}
+function runMemoryTab(R){
+  var L=runMemories(R), F=S.memFold, body;
+  if(!R.sealed){
+    body='<div class="panel-b"><div class="note">Nothing is written until the seal. This run is '+h(runStatus(R))+
+     '. When its chain seals, the reflector reads it and writes what it learned here.</div></div>';
+  } else if(!L.length){
+    body='<div class="panel-b"><div class="note">This run wrote no memories. The reflector read the sealed run and found nothing another run would need, and no operator steered it.</div></div>';
+  } else {
+    body='<div class="tw"><table><thead><tr><th>Memory</th><th>Frame</th><th>Fold</th><th>Class</th><th>In the assembler</th></tr></thead><tbody>'+
+     L.map(function(o){
+      var m=o.m, n=memSayings(m).length;
+      var fold=o.k===0?'<span class="b b-allowed"><span class="d"></span>new</span><span class="sub">this run started it</span>'
+        :'<span class="b b-q">joined</span><span class="sub">saying '+(o.k+1)+' of '+n+'</span>';
+      if(m.proposedAs) fold+='<span class="sub">proposed as <span class="mono">'+h(m.proposedAs)+'</span></span>';
+      return '<tr '+rowClick("openDialog('memory','"+h(m.id)+"')","Open "+m.id)+'><td><b style="font-weight:500">'+h(m.body)+'</b>'+
+       '<span class="sub">“'+h(o.x.text)+'”</span><span class="sub mono">'+h(o.x.by)+'</span></td>'+
+       '<td class="mono num">'+o.x.frame+'</td><td>'+fold+'</td>'+
+       '<td><span class="b b-q mono">'+h(m.cls)+'</span></td><td>'+memAsmCell(m,R.ws)+'</td></tr>';}).join("")+
+     '</tbody></table></div>';
+  }
+  return '<div class="note" style="margin-bottom:14px"><b>The reflector writes these after the seal.</b> '+
+    'Each lesson becomes a memory, or joins a memory that already says the same thing. '+
+    'At '+F.sayings+' sayings from '+F.runs+' runs, a memory becomes a steering proposal that cites every saying.</div>'+
+   '<div class="panel" style="margin-bottom:14px" data-run-memories="'+L.length+'"><div class="panel-h"><h3>Memories from this run</h3>'+
+    (L.length?'<span class="b b-q" style="margin-left:auto">'+L.length+'</span>':'')+'</div>'+body+'</div>'+
+   runSelfGrade(R);
+}
+/* The self-grade: the agent's answers to the four rubric questions, set against what the record
+   observed. Reading it takes research.read. Nothing on this panel promotes it. */
+var SELF_GRADES=FIXTURES.SELF_GRADES, SK_REFLECT=FIXTURES.SK_REFLECT;
+function sgAxis(q,a){
+  var gap=a.self-a.obs>=2;
+  return '<div class="sx-rax'+(gap?" gap":"")+'"><div class="rq">'+h(q)+(gap?'<span class="gp">calibration gap</span>':'')+'</div>'+
+   '<div class="rbar"><span class="rlab">self</span><span class="rtrack"><span class="rfill self" style="width:'+(a.self*20)+'%"></span></span><span class="rn">'+a.self+' / 5</span></div>'+
+   '<div class="rbar"><span class="rlab">the record</span><span class="rtrack"><span class="rfill obs" style="width:'+(a.obs*20)+'%"></span></span><span class="rn">'+a.obs+' / 5</span></div>'+
+   '<div class="rsay">“'+h(a.say)+'”</div><div class="note" style="margin-top:6px">the record says: '+h(a.obsLab)+'</div></div>';
+}
+function runSelfGrade(R){
+  var G=SELF_GRADES[R.id], rub=SK_REFLECT.rubric, b;
+  var meta=G&&!G.deleted?'<dl class="kv" style="margin-top:12px"><dt>Captured</dt><dd class="mono">'+h(G.when)+'</dd>'+
+    '<dt>Rubric</dt><dd><span class="mono">'+h(rub)+'</span>, four questions</dd><dt>Model</dt><dd class="mono">'+h(SK_REFLECT.model)+'</dd>'+
+    '<dt>Cost</dt><dd>'+G.tokens.toLocaleString()+' tokens, $'+h(G.cost)+', billed as overhead</dd>'+
+    '<dt>Retention</dt><dd>deleted '+h(SK_CFG.reflect.retain)+' after capture</dd></dl>':'';
+  if(!R.sealed||!G){
+    b='<div class="note">Captured after the seal. This run is '+h(runStatus(R))+'. When its chain seals, Oxagen asks the agent the four questions of rubric <span class="mono">'+h(rub)+'</span> in one out-of-band turn.</div>';
+  } else if(G.deleted){
+    b='<div class="note">Deleted on <span class="mono">'+h(G.deleted)+'</span>, '+h(SK_CFG.reflect.retain)+' after capture. The run’s frames, its seal and the memories it wrote are untouched.</div>';
+  } else if(!canResearch()){
+    b='<div class="sg-lock" data-sg="refused"><span class="ic" aria-hidden="true">'+icon("lock")+'</span><div>'+
+      '<div class="t">Reading a self-grade takes <span class="mono">research.read</span></div>'+
+      '<div class="s">An organization grant that no workspace role inherits. '+h(me().name)+' does not hold it.</div></div></div>'+meta+
+     '<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><button class="btn sm primary" onclick="openDialog(\'request-access\')">Request access</button>'+
+      '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+h(R.ws)+'/steering/skills/reflect\')">How reflection works</button></div>';
+  } else {
+    b='<div class="sx-rub" data-sg="read">'+SK_REFLECT.axes.map(function(ax,i){return sgAxis(ax.q,G.axes[i]);}).join("")+'</div>'+
+     '<div class="note" style="margin-top:12px"><b>Research only.</b> A self-grade never enters a context frame and has no promote action. '+
+      'It cannot become a memory, a proposal or steering, and its tokens never count as productive work.</div>'+meta;
+  }
+  return '<div class="panel"><div class="panel-h"><h3>Self-grade</h3><span class="sx-chip res" style="margin-left:auto">research only</span></div>'+
+   '<div class="panel-b">'+b+'</div></div>';
 }
 var TX_HUE={prompt:"op",text:"model",reasoning:"model",tool:"tool",usage:"gov",context:"ctx",seal:"gov"};
 function txKindChips(R,errN){
@@ -5439,11 +5523,17 @@ var PRP_SUPPORT=(function(){
      dups:((i*47)%209)<47?4:3, outcome:i%9===4?"reverted":i%4===1?"no change":"kept",
      agent:"a-intel.core.release-manager",rec:"rec_01K5"+gen(5000+i,12)});
   }
-  var b=[{run:"run_01K5RH3G8K5PAS7D",date:"2026-09-10",frame:52,outcome:"halted",agent:"a-intel.core.triage",rec:"rec_01K5"+gen(7000,12)}];
+  var b=[{run:"run_01K5RH3G8K5PAS7D",date:"2026-09-10",frame:9,outcome:"halted",agent:"a-intel.core.triage",rec:"rec_01K5"+gen(7000,12)}];
   for(var j=1;j<14;j++) b.push({run:"run_01K5"+gen(7100+j,12),date:day(1+j*2),frame:20+(j*29)%80,outcome:"halted",agent:"a-intel.core.triage",rec:"rec_01K5"+gen(7200+j,12)});
   var c=[["a-intel.core.stella-ci","2026-09-08",63],["a-intel.core.release-manager","2026-09-04",88],["a-intel.core.stella-ci","2026-08-29",41]].map(function(x,k){
     return {run:"run_01K5"+gen(8000+k,12),date:x[1],frame:x[2],outcome:"reverted",agent:x[0],rec:"fnd_01K5"+gen(8100+k,8)};});
-  return {"prp_01K5RU4A":a,"prp_01K5RU7B":b,"prp_01K5RU9C":c};
+  /* prp_01K5RX1N came from a fold, so its supporting runs are the memory's sayings, one row each.
+     The runs fixture carries no verdict field, so the outcome reads the summary's own words. */
+  var d=[];
+  FIXTURES.MEMORY.forEach(function(m){if(m.proposedAs!=="prp_01K5RX1N")return;
+    (m.sayings||[]).forEach(function(x){var r=run(x.run);
+      d.push({run:x.run,date:"2026-09-11",frame:x.frame,agent:r?r.agent:"",outcome:r&&/never passed|nothing merged/.test(r.summary)?"failed":"passed",rec:m.id});});});
+  return {"prp_01K5RU4A":a,"prp_01K5RU7B":b,"prp_01K5RU9C":c,"prp_01K5RX1N":d};
 })();
 /* What the promoter measured for each proposal, and how it argues for it. */
 var PRP_META={
@@ -5463,7 +5553,14 @@ var PRP_META={
   support:function(s){return s.runs+" data-layer drift findings";},
   rationale:function(s){return "Marcus Bell raised this from "+s.runs+" drift findings across "+s.agents+" agents, each a migration renumbered after merge. "+
    "A person's proposal goes through the same six checks as the promoter's.";},
-  measure:function(s){return s.runs+" drift findings in 30 days";}}
+  measure:function(s){return s.runs+" drift findings in 30 days";}},
+ "prp_01K5RX1N":{confidence:0.71,tok:24,recKind:"memory · saying",
+  support:function(s){var o={};s.rows.forEach(function(r){o[r.run]=1;});return s.rows.length+" sayings from "+Object.keys(o).length+" runs";},
+  rationale:function(s){return "Three runs said the same thing in their own words, and the fold kept them as one memory, mem_01K5R0N2. "+
+   s.rows.map(function(r){var m=memById(r.rec),x=(m&&m.sayings||[]).filter(function(y){return y.run===r.run;})[0];
+     return r.agent.split(".").pop()+" wrote \u201c"+(x?x.text:"")+"\u201d in "+r.run+" at frame "+r.frame+".";}).join(" ")+
+   " The third saying reached the workspace setting of "+S.memFold.sayings+" sayings from "+S.memFold.runs+" runs. As a memory it competes at may. As a record it reaches every run in core-platform at should.";},
+  measure:function(s){return s.runs+" sayings from "+s.agents+" agents in one day";}}
 };
 function prpStats(id){
   var rows=PRP_SUPPORT[id]||[], m=PRP_META[id]||{}, ag={}, dups=0, kept=0;
@@ -5512,23 +5609,30 @@ function steerDigestOf(v){
   var seed=v+"|"+STEER_BUNDLE.rules.map(function(r){return r.id+":"+r.tok;}).join(",");
   return "sha256:"+sha7(seed)+sha7(seed+"#")+"c4";
 }
+/* A pull request carries one record, or, from the Markdown importer, every record accepted out of
+   one source file. Everything below reads the list, so the two never take separate paths. */
+function recprRecs(def){ return def.records||[def.record]; }
+function recprRules(def){ return def.rules||[def.rule]; }
 function prPublish(def,on){
-  var rec=def.record, i=RECORDS.indexOf(rec);
+  var recs=recprRecs(def), rules=recprRules(def), rec=recs[0], i=RECORDS.indexOf(rec);
   if(on===(i>=0)) return;
   /* Publishing compiles a new bundle version. Recorded requests keep the version they were sent with
-     (CTXB's steering band reads the one on seq 2), so nothing already recorded moves; the next model call reads it. */
+     (CTXB's steering band reads the one on seq 2), so nothing already recorded moves; the next model call reads it.
+     A pull request with several records is one merge, so it is one compile and one version. */
   if(on){
-    RECORDS.push(rec); STEER_BUNDLE.rules.push(def.rule); STEER_BUNDLE.v++; def.rule.since=STEER_BUNDLE.v;
+    recs.forEach(function(r){RECORDS.push(r);}); STEER_BUNDLE.v++;
+    rules.forEach(function(x){STEER_BUNDLE.rules.push(x); x.since=STEER_BUNDLE.v;});
     if(!STEER_BUNDLE.digest[STEER_BUNDLE.v]) STEER_BUNDLE.digest[STEER_BUNDLE.v]=steerDigestOf(STEER_BUNDLE.v);
-    auditEvent("steering_published",me().name,rec.id+" · "+def.pr+" merged as "+rec.commit+" · bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v,"info",def.evt);
+    auditEvent("steering_published",me().name,(recs.length>1?recs.length+" records from "+def.src:rec.id)+" · "+def.pr+" merged as "+rec.commit+" · bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v,"info",def.evt);
   } else {
-    RECORDS.splice(i,1);
+    recs.forEach(function(r){var k=RECORDS.indexOf(r); if(k>=0) RECORDS.splice(k,1);});
     /* The record and its compiled rule go in together and come out together, so the version moves
        with the rule and not with the record. Splicing on a bare indexOf would pass -1 through and
        take the last rule in the bundle instead — a wrong rule removed and a version decremented
        for a compile that never happened. */
-    var ri=STEER_BUNDLE.rules.indexOf(def.rule);
-    if(ri>=0){ STEER_BUNDLE.rules.splice(ri,1); STEER_BUNDLE.v--; }
+    var out=0;
+    rules.forEach(function(x){var ri=STEER_BUNDLE.rules.indexOf(x); if(ri>=0){ STEER_BUNDLE.rules.splice(ri,1); out++; }});
+    if(out) STEER_BUNDLE.v--;
     for(var k=AUDIT.length-1;k>=0;k--){if(AUDIT[k].ref===def.evt)AUDIT.splice(k,1);}
   }
 }
@@ -5618,7 +5722,7 @@ function prpBadge(p){
 }
 function prpDetail(p){
   var s=prpStats(p.id), m=s.meta, mine=p.id===CTXPR.prp, c=S.ctxpr;
-  var vcls={kept:"allowed",reverted:"failed","no change":"q",halted:"denied"};
+  var vcls={kept:"allowed",reverted:"failed","no change":"q",halted:"denied",passed:"allowed",failed:"failed"};
   var rows=s.rows.map(function(r){
     return '<tr><td><span class="mono" style="font-size:12px">'+h(r.run)+'</span><div class="dim" style="font-size:11.5px">'+h(r.agent)+' · '+h(r.date)+'</div></td>'+
      '<td class="mono num" style="font-size:12px">seq '+r.frame+'</td>'+
@@ -5679,17 +5783,21 @@ function recprById(pr){for(var i=0;i<RECPRS.length;i++){if(RECPRS[i].pr===pr)ret
    RECPRS is newest first, so a higher index was opened earlier and wins the claim. Checking only
    RECORDS is not enough — two pull requests can both run their checks before either merges, and
    without this both reach `passed` and the second publishes a duplicate under a published id. */
-function lineageClaim(def){
-  var id=def.record.id;
-  if(RECORDS.some(function(r){return r.status==="published"&&r.id===id;})) return "published";
-  var mine=RECPRS.indexOf(def), claim=null;
+function lineageHit(def){
+  /* A pull request never collides with its own records, which are in RECORDS once it merges. */
+  var own=recprRecs(def), ids=own.map(function(r){return r.id;}), hit=null;
+  RECORDS.forEach(function(r){ if(!hit&&r.status==="published"&&own.indexOf(r)<0&&ids.indexOf(r.id)>=0) hit={claim:"published",id:r.id}; });
+  if(hit) return hit;
+  var mine=RECPRS.indexOf(def);
   RECPRS.forEach(function(d,j){
-    if(d===def||d.record.id!==id||j<=mine) return;
+    if(d===def||j<=mine) return;
     var st=recprSt(d).st;
-    if(st!=="merged"&&st!=="failed") claim=d.pr;
+    if(st==="merged"||st==="failed") return;
+    recprRecs(d).forEach(function(r){ if(ids.indexOf(r.id)>=0) hit={claim:d.pr,id:r.id}; });
   });
-  return claim;
+  return hit;
 }
+function lineageClaim(def){ var x=lineageHit(def); return x?x.claim:null; }
 function recprSt(def){ return def?(S.recprs[def.pr]||(S.recprs[def.pr]={st:"none",done:0,failed:null,timers:[],mergedAt:null})):null; }
 /* the one the tab is showing: what was selected, else the newest still open, else the newest */
 function recprCur(){
@@ -5751,6 +5859,42 @@ function recprDiscard(pr){
   render(); act("Closed "+def.pr+" without merging. Nothing was published and the branch is gone.");
 }
 
+/* The six checks. They close over this pull request, not over whichever one is selected, so several
+   can be open at once and each still reports on its own files. An import's pull request runs the
+   same six over every file it carries. */
+function recprChecks(def){
+  var recs=recprRecs(def), n=recs.length, one=n===1;
+  function own(r){return recs.indexOf(r)>=0;}
+  return [
+   {n:"Schema",ms:900,
+    test:function(){return recs.every(function(r){return !!tomlOf(recprFileText(def,r));});},
+    ok:"context-record/v0.1 valid · "+(one?"1 file, 1 record, 1 lineage":n+" files, "+n+" records, "+n+" lineages"),
+    bad:one?"the record file does not parse as TOML":"a record file does not parse as TOML"},
+   {n:"Lineage uniqueness",ms:700,
+    /* A real check, not a sentence, and it is re-run at merge because another pull request can
+       claim the lineage after this one went green. */
+    test:function(){return !lineageClaim(def);},
+    ok:function(){return one?"no published record holds "+def.record.id+"; this pull request is its only holder"
+      :"no published record or open pull request holds any of these "+n+" lineages";},
+    bad:function(){var x=lineageHit(def)||{};
+      return x.claim==="published"
+        ?x.id+" is already published. One lineage, one record — amend the published one instead of opening a second under its id."
+        :x.id+" is already claimed by "+x.claim+", which was opened first. Close one of them, or give this record a lineage of its own.";}},
+   {n:"record_hash recomputation",ms:600,
+    ok:function(){return one?"recomputed over the canonical bytes · "+def.hash.slice(0,20)+"… matches the file"
+      :"recomputed over the canonical bytes of "+n+" files · each matches its record_hash";}},
+   {n:"Secret and PII scan",ms:900,ok:"statement, rationale and evidence scanned · 0 findings"},
+   {n:"Conflict against active records",ms:1000,ok:function(){
+      return RECORDS.filter(function(r){return r.status==="published"&&!own(r);}).length+
+        " published records checked · no require or forbid on the same subject";}},
+   {n:"constraint_effect ∈ {require, forbid}",ms:500,ok:function(){
+      if(!one){var c=recs.filter(function(r){return r.ce;}).length;
+        return c?(c+" of "+n+" carry constraint_effect, each require or forbid · grants nothing"):"no constraining kind · the field is absent, which is also a pass";}
+      var e=def.record.ce;
+      return e?("constraint_effect = "+e+" · grants nothing"):"not a constraining kind · the field is absent, which is also a pass";}}
+  ];
+}
+
 /* The wizard's last step. Everything the PR needs is already in the draft; nothing new is stored. */
 function wzRecOpenPr(){
   var z=S.wz; if(!z) return;
@@ -5766,32 +5910,7 @@ function wzRecOpenPr(){
     author:"operator", by:CMD_OP, desc:String(z.desc||"").trim(), ws:w.slug, opened:nowT().slice(0,8),
     mergedAt:function(){return rec.pub+" "+nowT().slice(0,8)+" UTC";}
   };
-  /* The checks close over this pull request, not over whichever one is selected, so several can be
-     open at once and each still reports on its own file. */
-  def.checks=[
-   {n:"Schema",ms:900,
-    test:function(){return !!tomlOf(recprFileText(def));},
-    ok:"context-record/v0.1 valid · 1 file, 1 record, 1 lineage",
-    bad:"the record file does not parse as TOML"},
-   {n:"Lineage uniqueness",ms:700,
-    /* A real check, not a sentence, and it is re-run at merge because another pull request can
-       claim the lineage after this one went green. */
-    test:function(){return !lineageClaim(def);},
-    ok:function(){return "no published record holds "+def.record.id+"; this pull request is its only holder";},
-    bad:function(){var c=lineageClaim(def);
-      return c==="published"
-        ?def.record.id+" is already published. One lineage, one record. Amend the published one instead of opening a second under its id."
-        :def.record.id+" is already claimed by "+c+", which was opened first. Close one of them, or give this record a lineage of its own.";}},
-   {n:"record_hash recomputation",ms:600,
-    ok:function(){return "recomputed over the canonical bytes · "+def.hash.slice(0,20)+"… matches the file";}},
-   {n:"Secret and PII scan",ms:900,ok:"statement, rationale and evidence scanned · 0 findings"},
-   {n:"Conflict against active records",ms:1000,ok:function(){
-      return RECORDS.filter(function(r){return r.status==="published"&&r.id!==def.record.id;}).length+
-        " published records checked · no require or forbid on the same subject";}},
-   {n:"constraint_effect ∈ {require, forbid}",ms:500,ok:function(){
-      var e=def.record.ce;
-      return e?("constraint_effect = "+e+" · grants nothing"):"not a constraining kind · the field is absent, which is also a pass";}}
-  ];
+  def.checks=recprChecks(def);
   RECPRS.unshift(def);
   S.recprs[def.pr]={st:"none",done:0,failed:null,timers:[],mergedAt:null};
   S.wz=null; S.dlg=null; S.dlgArg=null; S.prpSel=null;
@@ -5805,8 +5924,8 @@ function wzRecOpenPr(){
    a quote or a backslash in it must not be able to produce a file that does not parse while the
    schema check says it does. tomlStr and tomlMulti are the same serialisers the agent definition
    editor writes with. */
-function recprFileText(def){
-  var r=def.record, multi=/\n/.test(r.st);
+function recprFileText(def,rec){
+  var r=rec||def.record, multi=/\n/.test(r.st);
   return '# .oxagen/rules/'+r.id+'.toml\n'+
    'schema = "context-record/v0.1"\n'+
    'lineage_id = '+tomlStr(r.id)+'\n'+
@@ -5816,15 +5935,29 @@ function recprFileText(def){
    '[steering]\nstrength = '+tomlStr(r.force)+'\n\n'+
    (r.ce?'[enforcement]\nconstraint_effect = '+tomlStr(r.ce)+'\nblocking = false\n\n'
         :'# no [enforcement] table: a '+r.kind+' constrains nothing\n\n')+
-   'record_hash = '+tomlStr(def.hash)+'\n';
+   'record_hash = '+tomlStr(r.hash||def.hash)+'\n';
 }
 function tomlOf(text){try{return tomlParse(text);}catch(e){return null;}}
 function recprFile(def){
   /* highlighted with the same grammar the source editor uses, so what is shown is what parses */
-  return '<pre>'+hlToml(recprFileText(def))+'</pre>';
+  return recprRecs(def).map(function(r,i){
+    return '<pre'+(i?' style="margin-top:10px"':'')+'>'+hlToml(recprFileText(def,r))+'</pre>';}).join("");
 }
+function recprTok(def){ return recprRecs(def).reduce(function(s,r){return s+r.tok;},0); }
 function recprBody(def){
   var r=def.record, w=ws();
+  if(def.src){
+    var recs=recprRecs(def);
+    return ['## Import '+recs.length+' '+(recs.length===1?'record':'records')+' from '+def.src, '',
+     'stella parsed `'+def.src+'` on '+r.pub+'. '+me().name+' accepted these in the Markdown importer.', '',
+     'One pull request per source file, so a reviewer reads a file’s rules together.', '',
+     '### Records']
+     .concat(recs.map(function(x){return '- `'+x.id+'` · '+x.kind+' · '+x.force+(x.ce?' · '+x.ce:'')+' · from `'+def.src+':L'+x.line+'`\n  '+x.st;}))
+     .concat(['', '### What it costs',
+      'Adds '+recprTok(def)+' steering tokens a turn to every turn in scope.', '',
+      '---',
+      'Opened by '+me().name+' · workspace `'+def.ws+'` · governance `team`']).join('\n');
+  }
   return ['## '+r.st, '',
    'Written by '+me().name+' in the record wizard on '+r.pub+'.', '',
    '### What this asks for',
@@ -5838,7 +5971,7 @@ function recprBody(def){
    'Opened by '+me().name+' · workspace `'+def.ws+'` · governance `team`'].join('\n');
 }
 function recprDetail(def){
-  var st=recprSt(def), r=def.record, n=def.checks.length, l=recprLabel(def);
+  var st=recprSt(def), r=def.record, n=def.checks.length, l=recprLabel(def), recs=recprRecs(def), many=recs.length>1, tok=recprTok(def);
   var merged=st.st==="merged", passed=st.st==="passed", failed=st.st==="failed", sb=stgBundle();
   var checks=def.checks.map(function(k,i){
     var s2=i<st.done?"pass":(failed&&i===st.failed)?"fail":(st.st==="checking"&&i===st.done)?"running":"queued";
@@ -5851,8 +5984,9 @@ function recprDetail(def){
    ? '<div class="panel-b" style="border-top:1px solid var(--border)"><b style="color:var(--st-proven)">Merged by '+h(me().name)+'</b>'+
      '<div class="dim" style="font-size:12px">'+h(st.mergedAt)+' · squashed into main as '+h(r.commit)+'</div>'+
      '<div class="row" style="margin-top:11px;gap:8px;flex-wrap:wrap">'+
-     '<button class="btn primary" onclick="go(\''+crecUrl(r.id)+'\')">Open the record</button>'+
-     '<button class="btn" onclick="S.tab.steering=\'records\';S.prSel=null;render()">See it in Records</button></div></div>'
+     (many?'<button class="btn primary" onclick="S.tab.steering=\'records\';S.prSel=null;render()">See them in Records</button>'
+      :'<button class="btn primary" onclick="go(\''+crecUrl(r.id)+'\')">Open the record</button>'+
+       '<button class="btn" onclick="S.tab.steering=\'records\';S.prSel=null;render()">See it in Records</button>')+'</div></div>'
    : '<div class="panel-b row" style="border-top:1px solid var(--border);gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:12.5px">'+
      (failed?'<b style="color:var(--st-failed)">A check failed.</b> <span class="muted">Nothing merges and nothing is published. Change the file and open it again.</span>'
       :passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
@@ -5862,7 +5996,7 @@ function recprDetail(def){
   var right=merged
    ? '<div class="panel" style="margin-bottom:14px" data-promo-bundle="'+sb.v+'"><div class="panel-h"><h3>promotion_event</h3>'+
      '</div><div class="panel-b"><dl class="kv code">'+
-     '<dt>record_id</dt><dd>'+h(def.promo)+'</dd><dt>lineage_id</dt><dd>'+h(r.id)+'</dd>'+
+     '<dt>record_id</dt><dd>'+h(def.promo)+'</dd><dt>lineage_id</dt><dd>'+h(many?recs.length+' lineages · '+recs.map(function(x){return x.id;}).join(', '):r.id)+'</dd>'+
      '<dt>from → to</dt><dd>authored → <b>published</b></dd>'+
      '<dt>author</dt><dd>'+h(me().name)+' · '+h(me().role)+'</dd>'+
      '<dt>approver</dt><dd>'+h(me().name)+' · '+h(me().role)+'</dd>'+
@@ -5870,7 +6004,7 @@ function recprDetail(def){
      '<dt>commit_sha</dt><dd>'+h(r.commit)+'</dd><dt>merged_at</dt><dd>'+h(st.mergedAt)+'</dd>'+
      '<dt>re-indexed</dt><dd>from the merged commit · '+h(def.hash.slice(0,20))+'… verified</dd>'+
      '<dt>bundle</dt><dd>v'+(sb.v-1)+' → <b>v'+sb.v+'</b> · '+h(sb.digest||"re-signed")+'</dd>'+
-     '<dt>tokens per turn</dt><dd>'+tokn(sb.tok-r.tok)+' → '+tokn(sb.tok)+'</dd>'+
+     '<dt>tokens per turn</dt><dd>'+tokn(sb.tok-tok)+' → '+tokn(sb.tok)+'</dd>'+
      '<dt>audit</dt><dd>steering_published · '+h(def.evt)+'</dd>'+
      '<dt>ledger</dt><dd>promotions.jsonl not written · regulated mode only; this workspace is team</dd></dl>'+
      '<div class="row" style="margin-top:13px;gap:8px;flex-wrap:wrap">'+
@@ -5878,14 +6012,14 @@ function recprDetail(def){
    : '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Merge effects</h3></div><div class="panel-b"><dl class="kv">'+
      '<dt>1</dt><dd>write a promotion_event with the author, the pull request and the commit</dd>'+
      '<dt>2</dt><dd>re-index the record from the merged commit; a hash mismatch blocks delivery</dd>'+
-     '<dt>3</dt><dd>bump the bundle v'+sb.v+' → v'+(sb.v+1)+' and re-sign it · '+tokn(sb.tok)+' → '+tokn(sb.tok+r.tok)+' steering tokens a turn</dd>'+
+     '<dt>3</dt><dd>bump the bundle v'+sb.v+' → v'+(sb.v+1)+' and re-sign it · '+tokn(sb.tok)+' → '+tokn(sb.tok+tok)+' steering tokens a turn</dd>'+
      '<dt>4</dt><dd>emit steering_published to the audit log</dd>'+
      '<dt>5</dt><dd>deliver it on the next model call of every run in '+h(ws().name)+'</dd></dl>'+
      '<div class="note" style="margin-top:12px">Nothing above happens on the way here. The record steers nothing while this pull request is open, which is the whole reason it is a pull request.</div></div></div>';
   return '<div class="split"><div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Pull request · <span class="mono">'+h(def.pr)+'</span></h3>'+
     '<span class="b b-'+l[0]+'" style="margin-left:auto" data-recpr-state="'+st.st+'"><span class="d"></span>'+h(l[1])+'</span></div><div class="panel-b">'+
-    '<p class="eyebrow q">Branch <span class="mono">'+h(def.branch)+'</span> · base main · '+h(def.base)+' · one concern per PR</p>'+
+    '<p class="eyebrow q">Branch <span class="mono">'+h(def.branch)+'</span> · base main · '+h(def.base)+' · '+(def.src?'one source file per PR':'one concern per PR')+'</p>'+
     recprFile(def)+'</div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Pull request body</h3>'+
     '<span class="b b-q" style="margin-left:auto">written by '+h(me().name)+'</span></div>'+
@@ -5902,7 +6036,8 @@ function prSelected(){ return (RECPRS.length&&S.prSel!=="ctxpr")?"recpr":"ctxpr"
 function prTable(){
   var rows=[], cur=recprCur();
   RECPRS.forEach(function(d){var lr=recprLabel(d);
-    rows.push([d.pr,d.pr,d.record.st,d.branch,me().name,ciLight(ciFromSt(d,recprSt(d)))+'<span class="b b-'+lr[0]+'"><span class="d"></span>'+h(lr[1])+'</span>',
+    var rs=recprRecs(d);
+    rows.push([d.pr,d.pr,rs.length>1?rs.length+' records from '+d.src:d.record.st,d.branch,me().name,ciLight(ciFromSt(d,recprSt(d)))+'<span class="b b-'+lr[0]+'"><span class="d"></span>'+h(lr[1])+'</span>',
       cur&&cur.pr===d.pr&&prSelected()==="recpr"]);});
   if(S.ctxpr.st!=="none"){var p=prpById(CTXPR.prp),lc=ctxprLabel();
     rows.push(["ctxpr",CTXPR.pr,p.st,CTXPR.branch,"the promoter",ciLight(ciFromSt(CTXPR,S.ctxpr))+'<span class="b b-'+lc[0]+'"><span class="d"></span>'+h(lc[1])+'</span>',
@@ -6105,6 +6240,13 @@ function stgNorm(x){
     supersededBy:x.supersededBy,yieldsTo:x.yieldsTo,outcome:x.outcome};
 }
 function stgItemById(wslug,id){var L=stgItems(wslug);for(var i=0;i<L.length;i++){if(L[i].id===id)return L[i];}return null;}
+/* A link to the item a memory yields to or was superseded by: a record opens its page, a memory its
+   dialog, anything else is named by its id. */
+function stgItemLinkById(wslug,id){
+  if(stgRecord(id)) return '<button class="lnk mono" style="font-size:12px" onclick="go(\''+crecUrl(id)+'\')">'+h(id)+'</button>';
+  if(memById(id)) return '<button class="lnk mono" style="font-size:12px" onclick="openDialog(\'memory\',\''+h(id)+'\')">'+h(id)+'</button>';
+  return '<span class="mono">'+h(id)+'</span>';
+}
 
 /* ---- the assembler ----
    assembleSteering(run, budget) in the product; here the run is an agent, the repository it works
@@ -6180,6 +6322,78 @@ function stgMeter(label,used,max,unit,sub){
 }
 
 /* ---- Memory ---- */
+/* Memory is aggregated, not collected: every run's notes and every operator steer are folded by
+   lineage into one item per fact, the newest provenance kept, and the recall count is the sum over
+   the runs that pulled it. The strip above the table says how much folded into how little. */
+/* ---- folding ----
+   A memory is one concept, and its sayings are the words runs used for it: "Remember to not use the
+   latest version of node" and "Use Node version 20 the latest version breaks main" are one memory
+   with two sayings. When a memory holds S.memFold.sayings sayings from S.memFold.runs distinct runs,
+   the promoter proposes it as a record and cites every saying as a supporting run. */
+S.memFold={sayings:3,runs:2};
+function memSayings(m){return m.sayings||[];}
+/* A saying imported from a Markdown file carries file and line and no run. It counts as a saying and
+   never as a run, so an imported memory alone never folds into a proposal. */
+function memRunsOf(m){var o={};memSayings(m).forEach(function(x){if(x.run)o[x.run]=1;});return Object.keys(o);}
+function memFoldOf(m){
+  var n=memSayings(m).length, r=memRunsOf(m).length, F=S.memFold;
+  if(m.proposedAs) return {st:"proposed",n:n,r:r};
+  if(n>=F.sayings&&r>=F.runs) return {st:"ready",n:n,r:r};
+  return {st:"below",n:n,r:r,need:Math.max(F.sayings-n,0),needRuns:Math.max(F.runs-r,0)};
+}
+function memFoldSub(m){
+  var f=memFoldOf(m);
+  if(f.st==="proposed") return 'proposed as <span class="mono">'+h(m.proposedAs)+'</span>';
+  if(f.st==="ready") return 'the promoter proposes it on its next pass';
+  if(f.need) return 'needs '+f.need+' more saying'+(f.need>1?'s':'');
+  return f.r?'needs a saying from another run':'needs a saying from a run';
+}
+function memFoldLine(m){
+  var f=memFoldOf(m), F=S.memFold;
+  if(f.st==="proposed") return 'Proposed as <span class="mono">'+h(m.proposedAs)+'</span> when it reached '+F.sayings+' sayings from '+F.runs+' runs. The proposal cites every saying above.';
+  if(f.st==="ready") return 'It has '+f.n+' sayings from '+f.r+' runs, which meets the setting. The promoter proposes it on its next pass.';
+  return 'It becomes a proposal at '+F.sayings+' sayings from '+F.runs+' runs. It has '+f.n+' from '+f.r+' run'+(f.r===1?'':'s')+'.'+
+   (memSayings(m).some(function(x){return x.file;})?' An imported saying counts toward the sayings and never toward the runs, so an import alone never makes a proposal.':'');
+}
+function memOpenProposal(id){closeDialog();S.prpSel=id;go('#/'+ORG.slug+'/'+S.ws+'/steering/proposals');}
+function memAsmCell(m,wslug){
+  return m.supersededBy?'<span class="b b-q">superseded</span><span class="sub">by '+stgItemLinkById(wslug,m.supersededBy)+'</span>'
+    :m.yieldsTo?'<span class="b b-approval"><span class="d"></span>yields</span><span class="sub">to '+stgItemLinkById(wslug,m.yieldsTo)+', a published must</span>'
+    :'<span class="b b-allowed"><span class="d"></span>competes</span>';
+}
+function stgMemoryAgg(L){
+  var runs={}, steers=0, notes=0, imports=0, recalls=0, cls={}, folded=0;
+  L.forEach(function(m){recalls+=m.recalls30||0; cls[m.cls]=(cls[m.cls]||0)+1;
+    String(m.provenance||"").split(/\s*·\s*/).forEach(function(p){if(/^run_/.test(p))runs[p]=1;});
+    memSayings(m).forEach(function(x){folded++; if(x.file){imports++;return;} runs[x.run]=1; if(/operator steer/.test(x.by))steers++; else notes++;});});
+  return {runs:Object.keys(runs).length,steers:steers,notes:notes,imports:imports,recalls:recalls,cls:cls,folded:folded};
+}
+function stgMemoryTab(w){
+  var L=stgMemory(w.slug), G=stgMemoryAgg(L);
+  var F=S.memFold;
+  var rows=L.map(function(m){
+    var st=memAsmCell(m,w.slug), n=memSayings(m).length;
+    return '<tr '+rowClick("openDialog('memory','"+h(m.id)+"')","Open "+m.id)+'><td><b style="font-weight:500">'+h(m.body)+'</b><span class="sub mono">'+h(m.id)+' · '+h(m.provenance)+'</span></td>'+
+     '<td data-mem-fold="'+h(memFoldOf(m).st)+'"><span class="num">'+n+'</span> <span class="dim">of '+F.sayings+'</span><span class="sub">'+memFoldSub(m)+'</span></td>'+
+     '<td><span class="b b-q mono">'+h(m.cls)+'</span></td><td>'+forceBadge(m.force)+'</td>'+
+     '<td>'+h(m.scope)+(m.agent?'<span class="sub mono">'+h(m.agent)+'</span>':'')+'</td>'+
+     '<td class="mono" style="font-size:11.5px">'+h(m.lastRecalled)+'<span class="sub">'+m.recalls30+' recalls in 30 days</span></td>'+
+     '<td class="num">'+tokn(m.token_cost)+' tok</td><td>'+st+'</td></tr>';}).join("");
+  var agg='<div class="grid g4" style="margin-bottom:14px">'+
+   '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s" data-mem-folded="'+G.folded+'">folded from '+G.folded+' sayings</span></div>'+
+   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+'<small>runs</small></span><span class="s" data-mem-imports="'+G.imports+'">'+G.steers+' operator steers'+(G.imports?', ':' and ')+G.notes+' reflections'+(G.imports?', and '+G.imports+' imported line'+(G.imports===1?'':'s'):'')+'</span></div>'+
+   '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
+   '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a rule is proposed as a record instead</span></div></div>';
+  return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
+   '<div class="panel"><div class="panel-h"><h3>Recalled memory</h3><span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
+   '<div class="panel-b mem-fold" style="border-bottom:1px solid var(--border)"><label for="memFoldN">A memory becomes a proposal at</label>'+
+     '<select id="memFoldN" onchange="S.memFold.sayings=+this.value;render()">'+[2,3,4,5].map(function(v){return '<option'+(v===F.sayings?' selected':'')+'>'+v+'</option>';}).join("")+'</select>'+
+     '<label for="memFoldR">sayings from</label><select id="memFoldR" onchange="S.memFold.runs=+this.value;render()">'+[1,2,3].map(function(v){return '<option'+(v===F.runs?' selected':'')+'>'+v+'</option>';}).join("")+'</select>'+
+     '<span>runs.</span><span class="dim">A workspace setting. The promoter reads it on every pass.</span></div>'+
+   '<div class="tw"><table><thead><tr><th>Memory</th><th>Sayings</th><th>Class</th><th>Force</th><th>Scope</th><th>Last recalled</th><th>Token cost</th><th>In the assembler</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+   '<div class="panel-b"><div class="row"><button class="btn sm" onclick="S.pv.preset=\'merge-green\';S.pv.text=null;stgTab(\'compiler\')">See one yield in the compiler</button>'+
+   '<span class="dim" style="font-size:12px">Recall used to reach only the in-app agent, capped at six items. It now goes through the same assembler as every other source.</span></div></div></div>';
+}
 
 /* ---- one memory. The tab told you to promote a memory and no row offered it, and nothing
    forgot one either: a fact an agent got wrong kept being recalled with no way to stop it. ---- */
@@ -6196,15 +6410,21 @@ DLG_EXT.memory=function(id){
    b:'<dl class="kv"><dt>Class</dt><dd><span class="b b-q mono">'+h(m.cls)+'</span> at '+forceBadge(m.force)+'</dd>'+
      '<dt>Scope</dt><dd>'+h(m.scope)+(m.agent?' · <span class="mono">'+h(m.agent)+'</span>':'')+'</dd>'+
      '<dt>Where it came from</dt><dd><span class="mono" style="font-size:11.5px">'+h(m.provenance)+'</span></dd>'+
-     '<dt>Recalled</dt><dd>'+m.recalls30+' times in 30 days, last on '+h(m.lastRecalled)+'</dd>'+
+     '<dt>Recalled</dt><dd>'+(m.recalls30?m.recalls30+' times in 30 days, last on '+h(m.lastRecalled):'Not recalled yet')+'</dd>'+
      '<dt>Cost</dt><dd>'+tokn(m.token_cost)+' tokens every time it is selected, so '+tokn(m.token_cost*m.recalls30)+' over those 30 days</dd>'+
      '<dt>In force since</dt><dd><span class="mono">'+h(m.valid_from)+'</span></dd></dl>'+
      '<div class="note" style="margin-top:12px">'+memPosition(m)+'</div>'+
+     '<div class="field" style="margin-top:12px"><label>Sayings</label><div class="mem-says" data-mem-says="'+memSayings(m).length+'">'+
+      memSayings(m).map(function(x){return '<div class="mem-say"><div class="q">“'+h(x.text)+'”</div>'+
+       '<div class="by"><span>'+h(x.by)+'</span> '+(x.file?'<span class="mono" data-mem-src>'+h(x.file)+':L'+x.line+'</span> <span>imported</span>'
+        :'<a class="mono" href="#/'+ORG.slug+'/'+S.ws+'/runs/'+h(x.run)+'/memory" onclick="closeDialog()">'+h(x.run)+'</a> <span>frame '+x.frame+'</span>')+'</div></div>';}).join("")+
+      '</div><div class="note" style="margin-top:8px">'+memFoldLine(m)+'</div></div>'+
      (/^run_/.test(run)?'<div class="field" style="margin-top:12px"><label>The run that left it</label>'+
        '<button class="btn sm" onclick="closeDialog();go(\'#/'+ORG.slug+'/'+S.ws+'/runs/'+h(run)+'\')">Open '+h(run)+'</button></div>':''),
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn danger" onclick="openDialog(\'memforget\',\''+h(m.id)+'\')">Forget</button>'+
-     '<button class="btn primary" onclick="memPromote(\''+h(m.id)+'\')">Promote to a record</button>'};
+     (m.proposedAs?'<button class="btn primary" onclick="memOpenProposal(\''+h(m.proposedAs)+'\')">Open the proposal</button>'
+      :'<button class="btn primary" onclick="memPromote(\''+h(m.id)+'\')">Promote to a record</button>')};
 };
 DLG_EXT.memforget=function(id){
   var m=memById(id); if(!m)return noSuch("Memory");
@@ -9004,8 +9224,8 @@ function dialog(){
   var kki=(typeof S.dlgArg==="number"&&APIKEYS[S.dlgArg])?S.dlgArg:0, kk=APIKEYS[kki];
   var D={
    notifs:{t:"Notifications",w:false,b:notifsBody(),
-     f:'<div class="grow"><span class="mono">list_notifications</span> · '+notifUnread()+' unread · every kind here maps to a frame kind or an audit event, never to something invented for a bell.</div>'+
-       '<button class="btn" onclick="markAllRead()">Mark all read</button>'},
+     f:'<div class="grow">'+(notifUnread()?notifUnread()+' unread · select one to mark it read':'All read')+'</div>'+
+       '<button class="btn" onclick="markAllRead()"'+(notifUnread()?'':' disabled')+'>Mark all read</button>'},
    approve:{t:"Approve this action",w:false,b:approveBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="resolveApproval(S.dlgArg,\'approved\')">Approve and mint the token</button>'},
    deny:{t:"Deny this action",w:false,b:denyBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="resolveApproval(S.dlgArg,\'denied\')">Deny with this reason</button>'},
    account:{t:"Account",w:false,tabs:accountTabs(),b:accountBody(),f:S.dlgArg==="onboarding"?'<span class="grow">Demo chrome, not product UI. Nothing on these screens writes anything.</span><button class="btn" onclick="closeDialog()">Close</button>':'<span class="grow">Changes here run as <span class="mono">set_preferences</span>, a governed action, audited like any other.</span>'+
@@ -9401,9 +9621,10 @@ var CMDS=[
  {g:"The assistant acts through these same actions",i:[
    ["Open the assistant","!asstToggle(true)"],["Ask why a run came back tampered","!asstToggle(true)"],
    ["Ask what an agent cost this month","!asstToggle(true)"],["Mint a model key for this organization","!openDialog('mintkey')"]]},
- {g:"Create: each one ends on a pull request",i:[
+ {g:"Create",i:[
    ["Create anything","!openDialog('create')"],["New agent","!wzOpen('agent')"],["New tool","!wzOpen('tool')"],
-   ["Add a skill","!wzOpen('skill')"],["New Steering record","!wzOpen('record')"]]},
+   ["Add a skill","!wzOpen('skill')"],["New Steering record","!wzOpen('record')"],
+   ["Import Markdown","!wzOpen('import')"]]},
  {g:"Work orders",i:[["wo_01K5RS7M4N · Cut 4.11.0 release notes · in progress","#/a-intel/core-platform/work/orders/wo_01K5RS7M4N"]]},
  {g:"Runs",i:[["run_01K5RS7M2E8FJ3QW · release-manager · live","#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW"],
     ["run_01K5RQ4B9C7XTN2P · stella-ci · sealed","#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P"],
@@ -10745,21 +10966,62 @@ function asstMount(){
   var sig=S.asstEngine+"|"+ORG.slug+"|"+orgKeyState();
   if(host.getAttribute("data-sig")!==sig){
     host.setAttribute("data-sig",sig);
-    host.innerHTML=asstSheet();
+    host.innerHTML=asstSheet()+asstGrip();
   }
   host.className="asst"+(isPhone()?" phone":"")+(S.asst?" open":"");
+  asstApplyW(host);
   host.setAttribute("aria-hidden",S.asst?"false":"true");
   /* inert keeps the closed panel out of the tab order even mid-transition */
   if(S.asst)host.removeAttribute("inert"); else host.setAttribute("inert","");
 }
+/* "oxagen" set as the house wordmark sets it: Space Grotesk, lowercase, the x in gold. */
+function oxName(){ return '<span class="ox-name">o<span class="x">x</span>agen</span>'; }
+/* Line 1 names the agent, line 2 says whose it is. A down engine or a missing key adds a red dot on
+   the mark and a third line, so the launcher never reads ready when it is not. */
 function asstLaunch(){
-  var st=S.asstEngine==="down"?'<span class="down">engine down</span>'
-    :orgKeyState()==="none"?'<span class="down">no model key</span>'
-    :'<span>'+h(ASST_MODEL)+' · ready</span>';
+  var bad=S.asstEngine==="down"?"engine down":orgKeyState()==="none"?"no model key":"";
   return '<button class="asst-launch" onclick="asstToggle()" aria-controls="asst" aria-expanded="'+(S.asst?"true":"false")+'">'+
-   '<span class="asst-g">'+stellaMark()+'</span>'+
-   '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b>'+st+'</span>'+
+   '<span class="asst-g'+(bad?" bad":"")+'">'+stellaMark()+'</span>'+
+   '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b>'+
+   '<span class="sub">'+oxName()+'’s in-app AI assistant</span>'+
+   (bad?'<span class="down">'+bad+'</span>':'')+'</span>'+
    '<span class="cv"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></button>';
+}
+/* The drawer widens from its right edge and never narrows past where it opened (430px). It always
+   leaves 56px of the page in view. The width is a per-viewer convenience, so it lives in this
+   browser only; a phone keeps the drawer full width and shows no edge. */
+var ASST_MIN=430, ASST_W_KEY="mc.asstW";
+S.asstW=(function(){try{var v=parseInt(localStorage.getItem(ASST_W_KEY),10);return v>=ASST_MIN?v:ASST_MIN;}catch(e){return ASST_MIN;}})();
+function asstMaxW(host){var l=host?parseFloat(getComputedStyle(host).left)||0:0;return Math.max(ASST_MIN,Math.floor(window.innerWidth-l-56));}
+function asstGrip(){
+  return '<div class="asst-grip" role="separator" aria-orientation="vertical" aria-label="Resize the assistant" tabindex="0" '+
+   'aria-valuemin="'+ASST_MIN+'" onpointerdown="asstGripStart(event)" onkeydown="asstGripKey(event)" title="Drag to widen"></div>';
+}
+function asstApplyW(host){
+  host=host||el("asst"); if(!host)return;
+  var w=Math.min(Math.max(ASST_MIN,S.asstW),asstMaxW(host));
+  host.style.setProperty("--asst-w",w+"px");
+  var g=host.querySelector(".asst-grip");
+  if(g){g.setAttribute("aria-valuenow",w);g.setAttribute("aria-valuemax",asstMaxW(host));}
+}
+function asstSetW(w,save){
+  var host=el("asst"); S.asstW=Math.min(Math.max(ASST_MIN,Math.round(w)),asstMaxW(host)); asstApplyW(host);
+  if(save){try{localStorage.setItem(ASST_W_KEY,String(S.asstW));}catch(e){}}
+}
+function asstGripStart(e){
+  var host=el("asst"); if(!host||isPhone())return;
+  e.preventDefault(); host.classList.add("resizing"); document.body.classList.add("asst-resizing");
+  var left=host.getBoundingClientRect().left;
+  function mv(ev){asstSetW(ev.clientX-left,false);}
+  function up(){window.removeEventListener("pointermove",mv);window.removeEventListener("pointerup",up);
+    host.classList.remove("resizing");document.body.classList.remove("asst-resizing");asstSetW(S.asstW,true);}
+  window.addEventListener("pointermove",mv); window.addEventListener("pointerup",up);
+}
+function asstGripKey(e){
+  var host=el("asst"), step=e.shiftKey?64:16, w=S.asstW;
+  if(e.key==="ArrowRight")w+=step; else if(e.key==="ArrowLeft")w-=step;
+  else if(e.key==="Home")w=ASST_MIN; else if(e.key==="End")w=asstMaxW(host); else return;
+  e.preventDefault(); asstSetW(w,true);
 }
 function asstStateBlock(title,body,acts,foot){
   return '<div class="asst-b"><div class="state-wrap" style="padding:30px 6px">'+
@@ -11115,20 +11377,23 @@ var CREATE={
    file:".oxagen/skills/&lt;name&gt;/SKILL.md",need:"skills.admin"},
  record:{l:"Steering record",d:"One statement that steers every agent it reaches.",i:"steering",
    file:".oxagen/rules/&lt;lineage&gt;.toml",need:"steering.write"},
- init:{l:"Oxagen directory",d:"The .oxagen/ tree in a repository that has none. The one the other four need first.",i:"repo",
+ import:{l:"Markdown import",d:"CLAUDE.md, AGENTS.md and any Markdown file, read into records and memories.",i:"dir",
+   file:"CLAUDE.md · AGENTS.md · any .md",need:"steering.write · memory.write"},
+ init:{l:"Oxagen directory",d:"The .oxagen/ tree in a repository that has none. The one the others need first.",i:"repo",
    file:".oxagen/ &lt;in a repository&gt;",need:"repository.admin"}
 };
 
 DLG_EXT.create=function(){
  var w=ws();
- return {t:"Create", s:"Five things, one shape: you describe it, Oxagen drafts the file, you read it, and a pull request publishes it.", w:true,
+ return {t:"Create", s:"You describe it, Oxagen drafts the file, you read it, and a pull request publishes it.", w:true,
   b:'<div class="wz-pick">'+Object.keys(CREATE).map(function(k){var c=CREATE[k];
      return '<button class="wz-card" onclick="wzOpen(\''+k+'\')">'+
       '<span class="ic">'+icon(c.i)+'</span>'+
       '<span class="tx"><b>'+h(c.l)+'</b><span class="d">'+h(c.d)+'</span>'+
       '<span class="fp mono">'+c.file+'</span></span></button>';}).join("")+'</div>'+
-    '<div class="note" style="margin-top:14px">None of these writes a row. Each one ends on a pull request against '+h(w.main)+
-    ', and the thing exists when somebody merges it. The merge is also the only place a reviewer can stop it.</div>',
+    '<div class="note" style="margin-top:14px">Each one ends on a pull request against '+h(w.main)+
+    '. The thing exists when somebody merges it, and that merge is where a reviewer can stop it. '+
+    'A memory from the Markdown import is the exception: it is written when you accept it, and it steers at may or below.</div>',
   f:'<span class="grow mono dim" style="font-size:11px">'+h(w.name)+' · '+h(w.main)+'</span><button class="btn" onclick="closeDialog()">Close</button>'};
 };
 
@@ -11139,7 +11404,8 @@ function wzNew(kind){
     /* skill */ q:"", pick:null, file:null,
     /* agent */ slug:"", harness:"claude-code", tier:"complex", av:null, belt:{},
     /* record */ rkind:null, force:"should", ce:"forbid", scope:"workspace",
-    /* init */ repoName:null, role:"linked", branch:null, mode:"team"};
+    /* init */ repoName:null, role:"linked", branch:null, mode:"team",
+    /* import */ files:null, skipped:[], cands:null, candsAs:null, asAll:"records", spent:0, reading:0, root:null};
 }
 /* `seed` is what the operator was looking at when they asked. Without it, a row's own action
    opens a wizard on whatever the candidate list happens to put first, so clicking Add Oxagen on
@@ -11156,6 +11422,7 @@ function wzSteps(){
   if(z.kind==="tool") return z.path==="import"?["Describe","Recommendation","Import"]:["Describe","Recommendation","Manifest","Code","Pull request"];
   if(z.kind==="skill") return ["Source", z.path==="registry"?"Find it":z.path==="upload"?"Upload":"Describe it","Review","Pull request"];
   if(z.kind==="agent") return ["Describe","Identity","Definition","Toolbelt","Pull request"];
+  if(z.kind==="import") return ["Files","Review","Publish"];
   if(z.kind==="init") return ["Repository","Branch & governance","Permissions","Review","Pull request"];
   return ["Describe","Kind","Statement","Checks","Pull request"];
 }
@@ -11265,10 +11532,434 @@ function wzPrStep(title,lead,files,checks,btn,msg,base){
 }
 function wzOpenPr(msg){ var z=S.wz; S.wz=null; closeDialog(); act(msg,"gold"); }
 
+/* ---- importing Markdown --------------------------------------------------------------------
+   A repository's CLAUDE.md, AGENTS.md and runbooks already say how agents should work there. The
+   importer lists those files, and stella splits them into candidates: one per bullet, one per
+   numbered list, and one per paragraph that carries an instruction word. Each candidate keeps the
+   file and line it came from and the word that decided its kind, so every inference can be checked
+   against the source. Nothing is written until the operator accepts it. Accepted records open one
+   context pull request per source file, so a reviewer reads a file's rules together. Accepted
+   memories are written at once: a memory steers at may or below, and it becomes a record only
+   through a proposal that runs earn. */
+var MD_IMPORT=FIXTURES.MD_IMPORT;
+var IMP_SKIP_DIR={node_modules:"a dependency directory",vendor:"a dependency directory",".git":"version control",dist:"build output",build:"build output"};
+/* The first rule that matches decides. A prohibition comes before "must" because "must not" is
+   both, and the prohibition is the stronger reading. */
+var IMP_RULES=[
+ {re:/\b(never|do not|don['’]t|must not)\b/i,kind:"constraint",force:"must",ce:"forbid",why:"reads as a constraint that forbids"},
+ {re:/\b(must|required?)\b/i,kind:"constraint",force:"must",ce:"require",why:"reads as a constraint that requires"},
+ {re:/\balways\b/i,kind:"rule",force:"must",why:"reads as a rule at must"},
+ {re:/\bshould\b/i,kind:"rule",force:"should",why:"reads as a rule at should"},
+ {re:/\b(prefer|rather)\b/i,kind:"preference",force:"may",why:"reads as a preference"},
+ {re:/\b(remember|last time|incident)\b/i,kind:"memory",force:"info",why:"recalls something that happened, so a memory"}
+];
+var IMP_VERBS={use:1,keep:1,run:1,write:1,add:1,put:1,open:1,name:1,read:1,check:1,call:1,set:1,update:1,leave:1,ask:1,avoid:1};
+var IMP_CLS={preference:"PREFERENCE",rule:"RULE",constraint:"RULE",procedure:"RULE",memory:"EPISODE",fact:"FACT"};
+function impForces(k){ return k==="preference"?["may","info"]:k==="memory"||k==="fact"?["info"]:["must","should","may","info"]; }
+/* A memory never holds must or should. It keeps may, or info when that is what the line asked for. */
+function impMemForce(c){ return c.kind==="memory"||c.kind==="fact"||c.force==="info"?"info":"may"; }
+
+/* A render rebuilds the dialog, and the browser puts a rebuilt scroll box back at the top. The
+   review list is long, so every control on it keeps the reader where they were. */
+function impRender(){
+  var b=document.querySelector("#layer .dlg-b"), y=b?b.scrollTop:0;
+  render();
+  var n=document.querySelector("#layer .dlg-b"); if(n) n.scrollTop=y;
+}
+function impFile(path,lines,as){
+  var chars=lines.join("\n").length;
+  return {path:path,lines:lines,kb:Math.max(0.1,Math.round(chars/102.4)/10),tok:Math.round(chars/3.6),on:true,as:as||"records"};
+}
+/* Where a file is skipped, and why. A dependency or build directory is named once, by its own
+   path, instead of once per file inside it. */
+function impSkipOf(path,kb){
+  var seg=path.split("/");
+  for(var i=0;i<seg.length-1;i++) if(IMP_SKIP_DIR[seg[i]]) return {path:seg.slice(0,i+1).join("/")+"/",why:IMP_SKIP_DIR[seg[i]]};
+  if(!/\.(md|markdown)$/i.test(path)) return {path:path,why:"not Markdown"};
+  if(kb>MD_IMPORT.max_kb) return {path:path,kb:kb,why:"over the "+MD_IMPORT.max_kb+" KB limit"};
+  return null;
+}
+function impSkip(s){
+  var z=S.wz; if(!z) return;
+  if(!z.skipped.some(function(x){return x.path===s.path;})) z.skipped.push(s);
+}
+function impBusy(d){
+  var z=S.wz; if(!z) return;
+  z.reading=Math.max(0,z.reading+d);
+  if(!z.reading) impRender();
+}
+function impTake(path,file){
+  var z=S.wz; if(!z) return;
+  var kb=Math.round(file.size/102.4)/10, s=impSkipOf(path,kb);
+  if(s){ impSkip(s); return; }
+  z.reading++;
+  file.text().then(function(t){
+    if(S.wz!==z) return;
+    z.files=(z.files||[]).filter(function(f){return f.path!==path;});
+    z.files.push(impFile(path,t.split(/\r?\n/),z.asAll));
+    z.cands=null;
+  },function(){ if(S.wz===z) impSkip({path:path,why:"could not be read"}); })
+  .then(function(){ if(S.wz===z) impBusy(-1); });
+}
+/* A dropped directory arrives as an entry tree. readEntries hands back one batch at a time, so it
+   is called until it returns nothing, and a skipped directory is never opened at all. */
+function impWalk(entry,prefix,top){
+  var z=S.wz; if(!z) return;
+  var path=prefix+entry.name;
+  if(entry.isFile){
+    z.reading++;
+    entry.file(function(f){ if(S.wz!==z) return; impTake(path,f); impBusy(-1); },
+      function(){ if(S.wz!==z) return; impSkip({path:path,why:"could not be read"}); impBusy(-1); });
+    return;
+  }
+  if(IMP_SKIP_DIR[entry.name]){ impSkip({path:path+"/",why:IMP_SKIP_DIR[entry.name]}); return; }
+  var rd=entry.createReader(), inner=top?"":path+"/";
+  z.reading++;
+  (function more(){
+    rd.readEntries(function(list){
+      if(S.wz!==z) return;
+      if(!list.length){ impBusy(-1); return; }
+      list.forEach(function(e){ impWalk(e,inner,false); });
+      more();
+    },function(){ if(S.wz===z) impBusy(-1); });
+  })();
+}
+function impDrag(ev,on){ ev.preventDefault(); ev.currentTarget.classList.toggle("over",on); }
+function impDrop(ev){
+  ev.preventDefault(); ev.currentTarget.classList.remove("over");
+  var z=S.wz; if(!z||!ev.dataTransfer) return;
+  var items=ev.dataTransfer.items, ents=[];
+  if(items) for(var i=0;i<items.length;i++){ var e=items[i].webkitGetAsEntry&&items[i].webkitGetAsEntry(); if(e) ents.push(e); }
+  if(ents.length===1&&ents[0].isDirectory){ z.root=ents[0].name; impWalk(ents[0],"",true); }
+  else if(ents.length) ents.forEach(function(e){ impWalk(e,"",false); });
+  else [].slice.call(ev.dataTransfer.files||[]).forEach(function(f){ impTake(f.name,f); });
+  impRender();
+}
+/* A directory picker names each file from the picked directory down. The first segment is that
+   directory, so it becomes the root and the paths start below it. */
+function impPick(inp){
+  var z=S.wz; if(!z||!inp.files) return;
+  [].slice.call(inp.files).forEach(function(f){
+    var p=f.webkitRelativePath||f.name, i=p.indexOf("/");
+    if(f.webkitRelativePath&&i>0){ if(!z.root) z.root=p.slice(0,i); p=p.slice(i+1); }
+    impTake(p,f);
+  });
+  inp.value="";
+  impRender();
+}
+function impSample(){
+  var z=S.wz; if(!z) return;
+  z.root=MD_IMPORT.root; z.cands=null;
+  z.files=MD_IMPORT.files.map(function(f){return impFile(f.path,f.lines.slice(),z.asAll);});
+  z.skipped=MD_IMPORT.skipped.map(function(s){return {path:s.path,why:s.why,kb:s.kb};});
+  impRender();
+}
+function impFileOn(i,on){ var z=S.wz; if(z&&z.files[i]){ z.files[i].on=on; impRender(); } }
+function impFileAs(i,v){ var z=S.wz; if(z&&z.files[i]) z.files[i].as=v; }
+function impFilesAs(v){ var z=S.wz; if(!z) return; z.asAll=v; z.files.forEach(function(f){f.as=v;}); impRender(); }
+function impIncluded(z){ return (z.files||[]).filter(function(f){return f.on;}); }
+function impCost(tok){ return Math.max(0.01,Math.ceil(tok/1000*MD_IMPORT.usd_per_ktok*100)/100); }
+
+/* stella's reading of one line or block. A paragraph with no instruction word is prose about the
+   repository, so it is left out. A bullet always says something, so a bullet with no instruction
+   word is kept as a fact. */
+function impInfer(text,bullet){
+  for(var i=0;i<IMP_RULES.length;i++){
+    var r=IMP_RULES[i], m=r.re.exec(text);
+    if(m) return {kind:r.kind,force:r.force,ce:r.ce||null,at:m.index,len:m[0].length,why:"“"+m[0].toLowerCase()+"” "+r.why};
+  }
+  if(!bullet) return null;
+  var v=/^[A-Za-z]+/.exec(text), w=v&&v[0].toLowerCase();
+  if(w&&IMP_VERBS[w]) return {kind:"rule",force:"should",ce:null,at:0,len:v[0].length,why:"it opens on “"+w+"”, an instruction, so a rule at should"};
+  return {kind:"fact",force:"info",ce:null,at:-1,len:0,why:"no instruction in it, so a fact"};
+}
+function impParseFile(f,fi){
+  var out=[], fence=false, para=null, proc=null;
+  function add(line,end,text,inf){
+    if(!inf) return;
+    out.push({fi:fi,file:f.path,line:line,end:end,text:text,kind:inf.kind,force:inf.force,ce:inf.ce,
+      at:inf.at,len:inf.len,why:inf.why,inf:{kind:inf.kind,force:inf.force}});
+  }
+  function endPara(){ if(para){ add(para.line,para.end,para.text,impInfer(para.text,false)); para=null; } }
+  function endProc(){ if(proc){ add(proc.line,proc.end,proc.items.join("\n"),
+    {kind:"procedure",force:"should",ce:null,at:-1,len:0,why:"numbered steps, so a procedure"}); proc=null; } }
+  f.lines.forEach(function(raw,i){
+    var n=i+1, t=raw.trim();
+    if(/^(```|~~~)/.test(t)){ endPara(); endProc(); fence=!fence; return; }
+    if(fence) return;
+    if(!t||/^#{1,6}\s/.test(t)){ endPara(); endProc(); return; }
+    if(/^\d+[.)]\s+/.test(t)){ endPara(); if(!proc) proc={line:n,end:n,items:[]}; proc.items.push(t); proc.end=n; return; }
+    endProc();
+    var b=/^[-*+]\s+(.*)$/.exec(t);
+    if(b){ endPara(); add(n,n,b[1],impInfer(b[1],true)); return; }
+    if(para){ para.text+=" "+t; para.end=n; } else para={line:n,end:n,text:t};
+  });
+  endPara(); endProc();
+  return out;
+}
+function impJac(a,b){
+  var A={},B={},n=0,u=0,k;
+  wzWords(a).forEach(function(x){A[x]=1;}); wzWords(b).forEach(function(x){B[x]=1;});
+  for(k in A){ u++; if(B[k]) n++; }
+  for(k in B) if(!A[k]) u++;
+  return u?n/u:0;
+}
+/* Word overlap decides a duplicate. A line close to a published record, or to a line an earlier
+   file already said, starts rejected, and the note names what it repeats. A line close to a
+   memory joins that memory as a saying instead of starting a second one. Parsing again keeps the
+   decisions already made on any line whose text did not change. */
+function impParse(){
+  var z=S.wz; if(!z) return;
+  var prev={}, pub=RECORDS.filter(function(r){return r.status==="published";}), mems=stgMemory(z.ws), all=[], tok=0;
+  (z.cands||[]).forEach(function(c){ prev[c.file+":"+c.line]=c; });
+  (z.files||[]).forEach(function(f,fi){
+    if(!f.on) return;
+    tok+=f.tok;
+    impParseFile(f,fi).forEach(function(c){
+      c.id="imp"+all.length; c.target=f.as==="memories"?"memory":"record"; c.st=null; c.dup=null; c.fold=null;
+      var best=null;
+      pub.forEach(function(r){ var j=impJac(c.text,r.st); if(j>=0.5&&(!best||j>best.j)) best={as:"record",id:r.id,j:j}; });
+      if(!best) all.forEach(function(p){ if(p.dup) return; var j=impJac(c.text,p.text); if(j>=0.6&&(!best||j>best.j)) best={as:"file",file:p.file,line:p.line,j:j}; });
+      if(best){ c.dup=best; c.st="reject"; }
+      else mems.forEach(function(m){ var j=impJac(c.text,m.body); if(j>=0.5&&(!c.fold||j>c.fold.j)) c.fold={id:m.id,j:j}; });
+      if(c.fold) c.target="memory";
+      var o=prev[c.file+":"+c.line];
+      if(o&&o.text===c.text){ c.st=o.st; c.target=o.target; c.kind=o.kind; c.force=o.force; c.ce=o.ce; }
+      all.push(c);
+    });
+  });
+  z.cands=all; z.spent=impCost(tok);
+}
+function impCand(id){ var z=S.wz; return z&&z.cands?z.cands.filter(function(c){return c.id===id;})[0]:null; }
+function impSt(id,v){ var c=impCand(id); if(!c) return; c.st=c.st===v?null:v; impRender(); }
+function impTarget(id,v){ var c=impCand(id); if(!c) return; c.target=v; impRender(); }
+function impKind(id,v){
+  var c=impCand(id); if(!c) return;
+  c.kind=v; var fs=impForces(v); if(fs.indexOf(c.force)<0) c.force=fs[0];
+  c.ce=v==="constraint"?(c.ce||"forbid"):null;
+  impRender();
+}
+function impForce(id,v){ var c=impCand(id); if(c){ c.force=v; impRender(); } }
+function impCe(id,v){ var c=impCand(id); if(c) c.ce=v; }
+/* Accept all leaves a duplicate rejected. Accepting one on purpose is still one click on its row. */
+function impAll(v,fi){
+  var z=S.wz; if(!z||!z.cands) return;
+  z.cands.forEach(function(c){ if(fi!=null&&c.fi!==fi) return; if(v==="accept"&&c.dup) return; c.st=v; });
+  impRender();
+}
+/* The batch override sets every candidate. Choosing each file's choice again puts back what the
+   Files step said, with a line that joins a memory still going to that memory. */
+function impCandsAs(v){
+  var z=S.wz; if(!z||!z.cands) return;
+  z.candsAs=v||null;
+  z.cands.forEach(function(c){
+    c.target=v?(v==="memories"?"memory":"record"):(c.fold||z.files[c.fi].as==="memories"?"memory":"record");
+  });
+  impRender();
+}
+function impCounts(z){
+  var C=z.cands||[], n={acc:0,rej:0,und:0,dup:0,rec:0,mem:0};
+  C.forEach(function(c){ n[c.st==="accept"?"acc":c.st==="reject"?"rej":"und"]++; if(c.dup) n.dup++; n[c.target==="memory"?"mem":"rec"]++; });
+  return n;
+}
+function impAccepted(z,target){ return (z.cands||[]).filter(function(c){return c.st==="accept"&&c.target===target;}); }
+function impGroups(list){
+  var by={}, order=[];
+  list.forEach(function(c){ if(!by[c.file]){ by[c.file]={file:c.file,fi:c.fi,cands:[]}; order.push(c.file); } by[c.file].cands.push(c); });
+  return order.map(function(f){return by[f];});
+}
+function impSlug(file){ return file.toLowerCase().replace(/\.(md|markdown)$/,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"file"; }
+function impWordsOf(c){ return wzWords(c.text.replace(/^\d+[.)]\s*/gm,"")); }
+/* Lineages follow the record wizard's shape. A lineage already held by a published record, an open
+   pull request or an earlier line in this import gets a numeric suffix, so the lineage check on
+   each pull request has nothing to fail on. */
+function impLineages(z){
+  var taken={}, out={}, pre="ctx."+ws().slug.split("-")[0]+".";
+  RECORDS.forEach(function(r){ taken[r.id]=1; });
+  RECPRS.forEach(function(d){ recprRecs(d).forEach(function(r){ taken[r.id]=1; }); });
+  impAccepted(z,"record").forEach(function(c){
+    var base=pre+(impWordsOf(c).slice(0,4).join("-")||"imported").slice(0,48), id=base, k=2;
+    while(taken[id]) id=base+"-"+(k++);
+    taken[id]=1; out[c.id]=id;
+  });
+  return out;
+}
+function impSrc(c){ return c.file+":L"+c.line+(c.end>c.line?"-"+c.end:""); }
+function impMemLink(id){ return stgItemLinkById(S.wz.ws,id); }
+
+function impRow(c){
+  var t=c.text, mem=c.target==="memory", id=h(c.id);
+  var txt=c.at>=0?h(t.slice(0,c.at))+'<mark>'+h(t.substr(c.at,c.len))+'</mark>'+h(t.slice(c.at+c.len)):h(t);
+  var pct=function(j){return Math.round(j*100)+"% word overlap";};
+  var notes=[];
+  if(c.dup) notes.push(c.dup.as==="record"
+    ?'Already published as '+impMemLink(c.dup.id)+' ('+pct(c.dup.j)+').'
+    :'Repeats <span class="mono">'+h(c.dup.file)+':L'+c.dup.line+'</span> ('+pct(c.dup.j)+').');
+  if(c.fold) notes.push(mem
+    ?'Joins '+impMemLink(c.fold.id)+' as a saying ('+pct(c.fold.j)+'). An imported saying never counts as a run.'
+    :'Close to memory '+impMemLink(c.fold.id)+' ('+pct(c.fold.j)+'). As a record it stands alone.');
+  if(mem&&(c.force==="must"||c.force==="should")) notes.push('A memory caps at may. Keep it a record to hold it at '+h(c.force)+'.');
+  var changed=c.kind!==c.inf.kind?' You set it to '+h(c.kind)+'.':'';
+  return '<div class="imp-c" data-imp-id="'+id+'" data-imp-st="'+(c.st||"open")+'" data-imp-as="'+c.target+'">'+
+    '<div class="imp-top">'+kindBadge(c.kind)+'<span class="imp-src mono">'+h(impSrc(c))+'</span></div>'+
+    '<p class="imp-t">'+txt+'</p>'+
+    '<p class="imp-why">'+h(c.why)+changed+'</p>'+
+    (notes.length?'<p class="imp-note">'+notes.join(' ')+'</p>':'')+
+    '<div class="imp-ctl">'+
+     '<span class="seg" role="group" aria-label="Import as">'+
+      '<button class="btn sm" aria-pressed="'+!mem+'" onclick="impTarget(\''+id+'\',\'record\')">Record</button>'+
+      '<button class="btn sm" aria-pressed="'+mem+'" onclick="impTarget(\''+id+'\',\'memory\')">Memory</button></span>'+
+     '<select aria-label="Kind" onchange="impKind(\''+id+'\',this.value)">'+Object.keys(KINDS).map(function(k){
+       return '<option value="'+k+'"'+(c.kind===k?' selected':'')+'>'+h(KINDS[k].l)+'</option>';}).join("")+'</select>'+
+     (mem?forceBadge(impMemForce(c))
+      :'<select aria-label="Force" onchange="impForce(\''+id+'\',this.value)">'+impForces(c.kind).map(function(f){
+        return '<option'+(c.force===f?' selected':'')+'>'+f+'</option>';}).join("")+'</select>')+
+     (!mem&&c.kind==="constraint"?'<select aria-label="Constraint effect" onchange="impCe(\''+id+'\',this.value)">'+["forbid","require"].map(function(e){
+        return '<option'+(c.ce===e?' selected':'')+'>'+e+'</option>';}).join("")+'</select>':'')+
+     '<span class="imp-act">'+
+      '<button class="btn sm" aria-pressed="'+(c.st==="accept")+'" onclick="impSt(\''+id+'\',\'accept\')">Accept</button>'+
+      '<button class="btn sm" aria-pressed="'+(c.st==="reject")+'" onclick="impSt(\''+id+'\',\'reject\')">Reject</button></span>'+
+    '</div></div>';
+}
+function impSkipList(z){
+  var by={}, order=[];
+  z.skipped.forEach(function(s){ if(!by[s.why]){ by[s.why]=[]; order.push(s.why); } by[s.why].push(s); });
+  return wzChecks(order.map(function(w){ var L=by[w];
+    return [L.slice(0,3).map(function(s){return s.path+(s.kb?" ("+s.kb+" KB)":"");}).join(", ")+(L.length>3?" and "+(L.length-3)+" more":""),h(w)]; }));
+}
+
+function wzImport(){
+  var z=S.wz, w=ws();
+  if(z.step===1){
+    var F=z.files||[], inc=impIncluded(z), tok=inc.reduce(function(s,f){return s+f.tok;},0);
+    var table=!F.length?'':
+     '<div class="field" style="margin-top:14px"><label>Found'+(z.root?' in <span class="mono">'+h(z.root)+'</span>':'')+'</label>'+
+     '<div class="tw"><table class="narrow imp-files" data-lt="off"><thead><tr><th aria-label="Include"></th><th>File</th>'+
+      '<th class="num">Lines</th><th class="num">KB</th><th class="num">Tokens</th><th>Import as</th></tr></thead><tbody>'+
+      F.map(function(f,i){
+       return '<tr'+(f.on?'':' class="off"')+'><td><input type="checkbox" aria-label="Include '+h(f.path)+'"'+(f.on?' checked':'')+' onchange="impFileOn('+i+',this.checked)"></td>'+
+        '<td class="mono">'+h(f.path)+'</td><td class="num">'+f.lines.length+'</td><td class="num">'+f.kb+'</td><td class="num">'+f.tok+'</td>'+
+        '<td><select aria-label="Import '+h(f.path)+' as" onchange="impFileAs('+i+',this.value)">'+
+         ["records","memories"].map(function(v){return '<option'+(f.as===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select></td></tr>';
+      }).join("")+'</tbody></table></div>'+
+     '<div class="imp-bar"><label for="impAsAll">Import every file as</label><select id="impAsAll" onchange="impFilesAs(this.value)">'+
+      ["records","memories"].map(function(v){return '<option'+(z.asAll===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select></div></div>';
+    return {t:"Import Markdown", s:"Drop a directory or pick files, and Oxagen lists the Markdown it finds.",
+     b:'<div class="wz-drop imp-drop" ondragover="impDrag(event,true)" ondragleave="impDrag(event,false)" ondrop="impDrop(event)">'+
+        '<span class="ic">'+icon("dir")+'</span><span class="grow">Drop a directory or Markdown files here</span>'+
+        '<button class="btn sm" onclick="this.nextElementSibling.click()">Choose a directory</button>'+
+        '<input type="file" webkitdirectory multiple hidden aria-label="Choose a directory" onchange="impPick(this)">'+
+        '<button class="btn sm" onclick="this.nextElementSibling.click()">Choose files</button>'+
+        '<input type="file" accept=".md,.markdown,text/markdown" multiple hidden aria-label="Choose files" onchange="impPick(this)">'+
+        '<button class="btn sm" onclick="impSample()">Use the sample directory</button></div>'+
+       (z.reading?'<p class="dim" role="status" style="margin-top:10px">Reading '+z.reading+' more…</p>':'')+
+       table+
+       (z.skipped.length?'<div class="field" style="margin-top:14px"><label>Skipped</label>'+impSkipList(z)+'</div>':'')+
+       (inc.length?'<div class="note" style="margin-top:14px" data-imp-cost="'+impCost(tok)+'">stella reads '+inc.length+' '+(inc.length===1?'file':'files')+', about '+tok+' tokens. '+
+         'That costs about '+usd(impCost(tok).toFixed(2))+' in usage credits, billed to '+h(ORG.name)+'. Nothing is sent until you choose Parse with stella.</div>'
+        :'<div class="note" style="margin-top:14px">Oxagen skips dependency and build directories, version control, anything that is not Markdown, and any file over '+MD_IMPORT.max_kb+' KB.</div>'),
+     f:wzNext("Parse with stella",inc.length>0&&!z.reading,"impParse();")};
+  }
+  if(z.step===2){
+    var C=z.cands||[], n=impCounts(z), G=impGroups(C);
+    var tile=function(k,v,s){return '<div class="stat"><span class="k">'+k+'</span><span class="v">'+v+'</span><span class="s">'+s+'</span></div>';};
+    return {t:"Review candidates", s:"Accept or reject each line, or a whole file at once.",
+     b:'<div class="grid g4 imp-tiles">'+
+        tile("Files",G.length,"parsed by stella")+
+        tile("Candidates",C.length,n.rec+" as records, "+n.mem+" as memories")+
+        tile("Duplicates",n.dup,"start rejected")+
+        tile("Parse cost",usd((z.spent||0).toFixed(2)),"usage credits")+'</div>'+
+       '<div class="imp-bar">'+
+        '<button class="btn sm" onclick="impAll(\'accept\')">Accept all</button>'+
+        '<button class="btn sm" onclick="impAll(\'reject\')">Reject all</button>'+
+        '<label for="impCandsAs">Import everything as</label><select id="impCandsAs" onchange="impCandsAs(this.value)">'+
+         '<option value=""'+(z.candsAs?'':' selected')+'>each file’s choice</option>'+
+         ["records","memories"].map(function(v){return '<option'+(z.candsAs===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select>'+
+        '<span class="imp-n" data-imp-counts="'+n.acc+'/'+n.rej+'/'+n.und+'">'+n.acc+' accepted, '+n.rej+' rejected, '+n.und+' undecided</span></div>'+
+       (n.dup?'<p class="hint">Accept all leaves the '+n.dup+' duplicates rejected. Accept one on its row to import it anyway.</p>':'')+
+       G.map(function(g){
+         return '<div class="imp-g"><div class="imp-gh"><span class="mono">'+h(g.file)+'</span>'+
+          '<span class="dim">'+g.cands.length+' '+(g.cands.length===1?'candidate':'candidates')+'</span>'+
+          '<button class="btn sm" onclick="impAll(\'accept\','+g.fi+')">Accept file</button>'+
+          '<button class="btn sm" onclick="impAll(\'reject\','+g.fi+')">Reject file</button></div>'+
+          g.cands.map(impRow).join("")+'</div>';
+       }).join("")+
+       '<div class="note">An undecided line is left out. The Markdown files themselves stay as they are.</div>',
+     f:wzNext("Review what publishes",n.acc>0)};
+  }
+  var ids=impLineages(z), recs=impAccepted(z,"record"), mems=impAccepted(z,"memory"), groups=impGroups(recs);
+  var np=groups.length, nm=mems.length;
+  var btn=np&&nm?"Open "+np+" pull "+(np===1?"request":"requests")+" and write "+nm+" "+(nm===1?"memory":"memories")
+    :np?"Open "+np+" pull "+(np===1?"request":"requests"):"Write "+nm+" "+(nm===1?"memory":"memories");
+  return {t:"Publish", s:"Records open one pull request per source file, and memories are written now.",
+   b:(np?'<p style="margin-bottom:14px">Each pull request runs the same six checks as a record you write by hand. A record steers nothing until its pull request merges.</p>'+
+      groups.map(function(g){
+       return '<div class="wz-pr" data-imp-pr="'+h(g.file)+'"><div class="wz-pr-h"><span class="b b-q mono">'+h(w.main)+'</span>'+
+        '<span class="dim">←</span><span class="b b-approval mono">context/import-'+h(impSlug(g.file))+'</span></div>'+
+        wzFiles(g.cands.map(function(c){return ["add",".oxagen/rules/"+ids[c.id]+".toml",'<span class="mono">'+h(impSrc(c))+'</span>'];}))+'</div>';
+      }).join('<div style="height:10px"></div>'):'')+
+     (nm?'<div class="field" style="margin-top:14px"><label>Memories</label>'+
+       wzFiles(mems.map(function(c){ var f=impMemForce(c);
+         return c.fold?["mod",c.fold.id,'a saying from <span class="mono">'+h(impSrc(c))+'</span>']
+          :["add","mem.import."+(impWordsOf(c).slice(0,4).join("-")||"line"),IMP_CLS[c.kind].toLowerCase()+' at '+f+' from <span class="mono">'+h(impSrc(c))+'</span>'];}))+
+       '<div class="hint">Written when you publish, with no pull request. A memory becomes a record only through a proposal that runs earn, and an imported saying never counts as a run.</div></div>':''),
+   f:'<button class="btn primary" onclick="wzImpPublish()">'+h(btn)+'</button>'};
+}
+
+function wzImpPublish(){
+  var z=S.wz; if(!z) return;
+  var w=ws(), day=new Date(storyMs()).toISOString().slice(0,10), ids=impLineages(z), prs=[], made=0, joined=0;
+  impGroups(impAccepted(z,"record")).forEach(function(g){
+    var recs=g.cands.map(function(c){
+      return {id:ids[c.id],kind:c.kind,force:c.force,ce:c.kind==="constraint"?c.ce:null,scope:"workspace",status:"published",isNew:true,
+        tok:stgTokOf(c.text),st:c.text,effect:"rendered 0 · cited 0 · violated 0",commit:null,pub:day,src:g.file,line:c.line};
+    });
+    var head=sha7(g.file+recs.map(function(r){return r.id;}).join(","));
+    recs.forEach(function(r){ r.commit=head; });
+    var rules=recs.map(function(r){return {id:r.id,tok:r.tok,isNew:true};});
+    var def={pr:w.main+"#"+prNextNumber(), branch:"context/import-"+impSlug(g.file), base:CTXPR.base, head:head,
+      record:recs[0], records:recs, rule:rules[0], rules:rules, src:g.file,
+      promo:"rec_01K5"+sha7(head).toUpperCase(), evt:"evt_01K5"+sha7(g.file+head).toUpperCase(),
+      hash:"sha256:"+sha7(head)+sha7(g.file)+"a1",
+      author:"operator", by:CMD_OP, desc:"Imported from "+g.file, ws:w.slug, opened:nowT().slice(0,8),
+      mergedAt:function(){return day+" "+nowT().slice(0,8)+" UTC";}};
+    def.checks=recprChecks(def);
+    RECPRS.unshift(def);
+    S.recprs[def.pr]={st:"none",done:0,failed:null,timers:[],mergedAt:null};
+    prs.push(def);
+  });
+  impAccepted(z,"memory").forEach(function(c){
+    var say={run:null,frame:null,file:c.file,line:c.line,by:CMD_OP+" · import",text:c.text};
+    var m=c.fold&&MEMORY.filter(function(x){return x.id===c.fold.id;})[0];
+    if(m){ m.sayings=(m.sayings||[]).concat([say]); joined++; return; }
+    var slug=impWordsOf(c).slice(0,4).join("-")||"line", id="mem_01K5"+sha7(c.file+":"+c.line+c.text).toUpperCase().slice(0,4);
+    MEMORY.unshift({id:id,lineage:"mem.import."+slug,kind:"memory",cls:IMP_CLS[c.kind],force:impMemForce(c),scope:"workspace",ws:w.slug,
+      body:c.text,token_cost:stgTokOf(c.text),about:impWordsOf(c).slice(0,5),
+      provenance:impSrc(c)+" · import by "+me().name,hash:"sha256:"+sha7(c.text)+sha7(id)+"m1",
+      valid_from:day,lastRecalled:"never",recalls30:0,sayings:[say]});
+    made++;
+  });
+  var nr=prs.reduce(function(s,d){return s+d.records.length;},0), files=impGroups(z.cands.filter(function(c){return c.st==="accept";})).length;
+  auditEvent("steering_imported",me().name,nr+" records in "+prs.length+" pull requests, "+made+" new memories and "+joined+" sayings from "+files+" Markdown files","info",
+    "imp_01K5"+sha7(day+nowT()).toUpperCase());
+  S.wz=null; S.dlg=null; S.dlgArg=null; S.prpSel=null;
+  prs.forEach(recprRun);
+  var parts=[];
+  if(prs.length) parts.push("Opened "+prs.length+" pull "+(prs.length===1?"request":"requests")+" for "+nr+" "+(nr===1?"record":"records")+".");
+  if(made) parts.push("Wrote "+made+" "+(made===1?"memory":"memories")+".");
+  if(joined) parts.push("Added "+joined+" "+(joined===1?"saying":"sayings")+" to existing memories.");
+  if(prs.length) parts.push("The records steer nothing until their pull requests merge.");
+  /* Steering reads its tab from the address, so the landing is a navigation even from Steering itself. */
+  var land=prs.length?stgHash("prs",w.slug):stgHash("memory",w.slug);
+  if(prs.length){ S.tab.steering="prs"; S.prSel=prs[0].pr; } else { S.libKind="memory"; S.tab.steering="library"; }
+  if(location.hash!==land) go(land); else render();
+  act(parts.join(" "),"gold");
+}
+
 DLG_EXT.wz=function(){
   var z=S.wz; if(!z) return {t:"Create",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var c=CREATE[z.kind], part=
-    z.kind==="tool"?wzTool():z.kind==="skill"?wzSkill():z.kind==="agent"?wzAgent():z.kind==="init"?wzInit():wzRecord();
+    z.kind==="import"?wzImport():z.kind==="tool"?wzTool():z.kind==="skill"?wzSkill():z.kind==="agent"?wzAgent():z.kind==="init"?wzInit():wzRecord();
   return {t:part.t||("Create a "+c.l.toLowerCase()), s:part.s||c.d, w:true,
    b:wzRail()+part.b,
    f:'<span class="grow mono dim" style="font-size:11px">needs <span style="color:var(--accent-text)">'+h(c.need)+'</span> on '+h(ws().slug)+'</span>'+
@@ -12896,7 +13587,7 @@ DLG_EXT.more=function(){
      (PRODUCT?'':t("scenarios","Scenarios","guided walkthroughs",'go(\''+base+'/scenarios\')'))+
      '</div><div class="hr"></div><div class="mgrid">'+
      '<button class="mtile" onclick="closeDialog();asstToggle(true)"><span class="ic">'+stellaMark()+'</span>'+
-      '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b><span>ask about a run, or change something</span></span></button>'+
+      '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b><span>'+oxName()+'’s in-app AI assistant</span></span></button>'+
      t("search","Search","or run an action",'openDialog(\'cmd\')')+
      t("bell","Notifications",notifUnread()+" unread",'openDialog(\'notifs\')',notifUnread(),true)+
      t("user","Account",me().name,'openDialog(\'account\',\'profile\')')+
