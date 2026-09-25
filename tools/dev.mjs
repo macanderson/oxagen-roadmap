@@ -5,7 +5,6 @@
 //
 //   http://localhost:4400/                                         rev1, the authoritative design
 //   http://localhost:4400/future_state_mockups/missioncontrol.html the first version
-//   http://localhost:4400/v2/missioncontrol.html                   the shelved redesign
 import { createServer } from "node:http";
 import { spawn } from "node:child_process";
 import { mockupMiddleware } from "../.storybook/mockup-plugin.mjs";
