@@ -9172,8 +9172,8 @@ function spendAgentHistory(E){
 var APIKEYS=[
  {name:"FinOps export",key:"ox_live_7f2c…a19",principal:"svc_finops_export",grants:["cost.read","run.read"],by:"Dana Okafor",last:"2026-09-11 06:00Z",n30:1204,expires:"2027-01-04",st:"ok"},
  {name:"Terraform provisioning",key:"ox_live_a91b…4dd",principal:"svc_terraform",grants:["workspace.write","agent.write","grant.write"],by:"Marcus Bell",last:"2026-09-10 22:14Z",n30:37,expires:"2026-12-01",st:"ok"},
- {name:"Auditor read-only — Brandt KPM",key:"ox_live_3kd0…77c",principal:"svc_auditor_bkpm",grants:["audit.read","receipt.read","export.read"],by:"Sofia Ruiz",last:"2026-09-11 08:41Z",n30:212,expires:"2026-10-02",st:"expiring"},
- {name:"CI smoke checks",key:"ox_live_ee54…0b2",principal:"svc_ci",grants:["run.read"],by:"Helena Vogt",last:"never used",n30:0,expires:"2026-11-15",st:"unused"}
+ {name:"Auditor read-only (Brandt KPM)",key:"ox_live_3kd0…77c",principal:"svc_auditor_bkpm",grants:["audit.read","receipt.read","export.read"],by:"Sofia Ruiz",last:"2026-09-11 08:41Z",n30:212,expires:"2026-10-02",st:"expiring"},
+ {name:"CI smoke checks",key:"ox_live_ee54…0b2",principal:"svc_ci",grants:["run.read"],by:"Helena Vogt",last:"Never used",n30:0,expires:"2026-11-15",st:"unused"}
 ];
 /* The keys tab has its own address (#/a-intel/api-keys) so it can be linked from the command menu and the docs; the other tabs live on #/a-intel. */
 function orgTab(t){
@@ -9185,7 +9185,7 @@ function pOrganization(){
   var t=tab("organization","people");
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Organization","503 control_plane_unavailable");
-  if(S.state==="denied") return deniedState("this organization’s settings","org.admin — members, funding, and the data plane are owner-only");
+  if(S.state==="denied") return deniedState("this organization’s settings","org.admin");
   if(S.state==="empty") return emptyState("This organization has no workspaces",
     "A workspace owns one main repo, one steering set, a set of agents, tool grants, and budgets. A workspace without a main repo cannot exist.",
     '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button>');
@@ -9207,10 +9207,10 @@ function pOrganization(){
        '<td class="mono" style="font-size:11.5px">'+h(p.role.split(" · ")[0])+'</td>'+
        '<td>'+h(m.ws)+'</td><td>'+h(m.mfa)+'</td>'+
        '<td class="mono dim" style="font-size:11px">'+h(m.last)+'</td>'+
-       '<td><span class="b '+(m.status==="active"?"b-allowed":"b-q")+'"><span class="d"></span>'+h(m.status)+'</span></td>'+
+       '<td><span class="b '+(m.status==="active"?"b-allowed":"b-q")+'"><span class="d"></span>'+h(m.status.charAt(0).toUpperCase()+m.status.slice(1))+'</span></td>'+
        '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'member\',\''+m.p+'\')">Open</button><span class="vh">, </span><button class="btn sm" onclick="openDialog(\'role\',\''+m.p+'\')">Change role</button><span class="vh">, </span><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
-     '<div class="note">Changing a role is a governed action. It passes IAM, writes an audit record, and bills as one action.</div></div></div>';
+     '<div class="note">Role changes are recorded in Audit and count as one governed action.</div></div></div>';
   } else if(t==="roles"){
     body=rolesBody();
   } else if(t==="invitations"){
@@ -9239,26 +9239,26 @@ function pOrganization(){
   } else if(t==="plane"){
     body=orgPlaneBody();
   } else {
-    var KST={ok:["b-allowed","active"],expiring:["b-approval","expires in 21 days"],unused:["b-q","never used"]};
+    var KST={ok:["b-allowed","Active"],expiring:["b-approval",""],unused:["b-q","Never used"]};
     body='<div class="panel"><div class="panel-h"><h3>API keys</h3>'+
-     '<span class="dim" style="font-size:12px">each key is a service principal with its own grants</span>'+
+     '<span class="dim" style="font-size:12px">Each key is a service principal with its own grants</span>'+
      '<div class="sp">'+
      '<button class="btn sm" onclick="openDialog(\'apikey\')">Create key</button></div></div><div class="tw"><table>'+
      '<thead><tr><th>Name</th><th>Principal</th><th>Grants</th><th>Created by</th><th>Last used</th><th class="num">Actions 30d</th><th>Expires</th><th></th></tr></thead><tbody>'+
-     APIKEYS.map(function(k,i){var st=KST[k.st];
+     APIKEYS.map(function(k,i){var st=KST[k.st]||KST.ok, lbl=k.st==="expiring"?"Expires in "+plural(Math.max(0,Math.round((Date.parse(k.expires)-Date.UTC(2026,8,11))/864e5)),"day"):st[1];
       return '<tr><td><b>'+h(k.name)+'</b><div class="dim mono" style="font-size:11px">'+h(k.key)+'</div></td>'+
        '<td class="mono" style="font-size:11.5px">'+h(k.principal)+'</td>'+
        '<td style="max-width:26ch">'+k.grants.map(function(g){return '<span class="b b-q" style="margin:0 3px 3px 0;font-family:var(--mono);font-weight:500">'+h(g)+'</span>';}).join(SEP)+'</td>'+
        '<td>'+h(k.by)+'</td><td class="mono dim" style="font-size:11px">'+h(k.last)+'</td>'+
        '<td class="num">'+k.n30.toLocaleString()+'</td>'+
-       '<td><span class="b '+st[0]+'"><span class="d"></span>'+h(st[1])+'</span><div class="dim mono" style="font-size:11px">'+h(k.expires)+'</div></td>'+
-       '<td style="white-space:nowrap"><button class="btn sm" onclick="openDialog(\'rotatekey\','+i+')">Rotate</button> '+
+       '<td><span class="b '+st[0]+'"><span class="d"></span>'+h(lbl)+'</span><div class="dim mono" style="font-size:11px">'+h(k.expires)+'</div></td>'+
+       '<td style="white-space:nowrap"><button class="btn sm" onclick="openDialog(\'rotatekey\','+i+')">Rotate</button><span class="vh">, </span> '+
        '<button class="btn sm danger" onclick="openDialog(\'revokekey\','+i+')">Revoke</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">A key is shown once, at creation, and never again. Keys carry grants, not roles, so an auditor’s key can read receipts and nothing else. Revoking a key ends its service principal’s access at the next call.</div></div></div>'+
      '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Surfaces this reaches</h3>'+
      '</div><div class="panel-b">'+
-     '<p class="muted" style="font-size:12.5px;margin:0 0 10px">One agent tool contract drives the API, MCP, the CLI and these screens, so a key that can do something here can do exactly that much everywhere else. Parity is checked by the manifest gate.</p>'+
+     '<p class="muted" style="font-size:12.5px;margin:0 0 10px">The API, MCP, the CLI and these screens share one set of actions, so a key that can do something here can do exactly that much everywhere else.</p>'+
      '<pre>$ oxagen login --org a-intel\n$ oxagen run list --workspace core-platform --since 24h\n$ oxagen run export run_01K5RS7M2E8FJ3QW --with-bodies --out ./run_01K5RS7M2E8FJ3QW.bundle\n$ oxagen agent status a-intel.finops.invoice-bot</pre></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>'+h(ORG.name)+'</h1>'+
@@ -9448,8 +9448,8 @@ DLG_EXT.role=function(p){
    b:'<div class="field"><label>Person</label><input value="'+h(pp.name)+'" disabled aria-label="Person"></div>'+
     '<div class="field"><label for="roleSel">Role</label><select id="roleSel">'+ROLES.filter(function(r){return r.kind==="human";}).map(function(r){return '<option'+(r.id===cur?' selected':'')+'>'+h(r.id)+'</option>';}).join("")+'</select>'+
     '</div>'+
-    '<div class="note">A grant is a governed action, not a settings change. It writes an audit record and bills as one action. It does not widen what their agents may do: an agent’s effective permission is its own grants intersected with the operator’s.</div>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Role changed. Recorded in the audit record with your name on it.\')">Change it</button>'};
+    '<div class="note">Role changes are recorded in Audit and count as one governed action. A new role does not widen what this person’s agents may do. An agent can only use the permissions it shares with its operator.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Role changed and recorded in Audit with your name.\')">Change it</button>'};
 };
 DLG_EXT.member=function(p){
   var m=orgMember(p), who=PEOPLE[p];
@@ -9460,7 +9460,7 @@ DLG_EXT.member=function(p){
   var base=who.role.split(" · ")[0];
   return {t:who.name,s:who.email,w:true,
    b:'<dl class="kv"><dt>Org role</dt><dd class="mono">'+h(who.role)+'</dd>'+
-    '<dt>Joined</dt><dd>by invitation · accepted with a verified email</dd>'+
+    '<dt>Joined</dt><dd>By invitation, accepted with a verified email</dd>'+
     '<dt>Two-factor</dt><dd>'+h(m.mfa)+'</dd><dt>Last seen</dt><dd class="mono">'+h(m.last)+'</dd>'+
     '</dl>'+
     '<p class="eyebrow" style="margin:16px 0 8px">Role per workspace</p>'+
@@ -9468,8 +9468,8 @@ DLG_EXT.member=function(p){
      orgMemberWs(m).map(function(w){return '<tr><td class="mono" style="font-size:12px">'+h(w.slug)+'</td><td class="mono" style="font-size:12px">'+h(base)+(m.ws==="all"?' <span class="dim">· every workspace</span>':'')+'</td></tr>';}).join("")+
     '</tbody></table></div>'+
     '<p class="eyebrow" style="margin:16px 0 8px">Agents they operate · <span data-member-agents="'+ags.length+'">'+ags.length+'</span></p>'+
-    (ags.length?'<div class="tw"><table class="narrow"><tbody>'+ags.map(function(a){return '<tr data-member-agent><td class="tkey" style="font-size:12px">'+h(a.key)+'</td><td class="mono dim" style="font-size:11.5px">'+h(a.ws)+'</td><td class="num">'+plural(a.runs30.toLocaleString("en-US"),"run")+' · 30 d</td></tr>';}).join("")+'</tbody></table></div>'
-     :'<p class="muted" style="font-size:12.5px;margin:0">None. An agent’s effective permission is its grants intersected with its operator’s, so this person narrows nothing today.</p>')+
+    (ags.length?'<div class="tw"><table class="narrow"><tbody>'+ags.map(function(a){return '<tr data-member-agent><td class="tkey" style="font-size:12px">'+h(a.key)+'</td><td class="mono dim" style="font-size:11.5px">'+h(a.ws)+'</td><td class="num">'+plural(a.runs30,"run")+' in 30 days</td></tr>';}).join("")+'</tbody></table></div>'
+     :'<p class="muted" style="font-size:12.5px;margin:0">None. This person operates no agents.</p>')+
     '<p class="eyebrow" style="margin:16px 0 8px">Mandates</p>'+
     '<dl class="kv"><dt>Granted</dt><dd>'+(granted.length?granted.map(function(x){return '<span class="mono">'+h(x.id)+'</span> to <span class="mono">'+h(x.agent)+'</span> · '+h(x.status);}).join("<br>"):'none')+'</dd>'+
     '<dt>Held by their agents</dt><dd>'+(held.length?held.map(function(s){return '<span class="mono">'+h(s)+'</span>';}).join("<br>"):'none')+'</dd></dl>',
@@ -9477,10 +9477,13 @@ DLG_EXT.member=function(p){
 };
 
 /* ============================== Billing ============================== */
+/* Retained evidence has one figure, BILLING.retainedGb, read by Billing and by Audit › Retention alike. */
+function retainedGbText(){return (Number(BILLING.retainedGb)||0).toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1})+" GB";}
 function pBilling(){
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Billing","502 stripe_unreachable");
-  if(S.state==="denied") return deniedState("billing","org.billing — plan and invoices are readable only by a finance role");
+  if(S.state==="denied") return deniedState("billing","org.billing");
+  var gaIncl=BILLING.includedGau||250000, gaUsed=BILLING.used!=null?BILLING.used:BILLING.billable+gaIncl;
   if(S.state==="empty") return emptyState("Nothing billable yet",
     "You pay per governed action: a call oxagen decided, delivered and recorded. The free tier has every governance feature on, an included monthly allowance, thirty days of evidence and three seats.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'\')">Back to Fleet</button>');
@@ -9490,41 +9493,41 @@ function pBilling(){
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'plan\')">Change plan</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Plan</span><span class="v" style="font-size:19px">'+h(BILLING.plan)+'</span><span class="s">monthly, cancel any time</span></div>'+
-   '<div class="stat"><span class="k">Governed actions this period</span><span class="v">'+BILLING.billable.toLocaleString()+'</span><span class="s">above the included allowance · '+h(BILLING.tier2)+'</span></div>'+
-   '<div class="stat"><span class="k">Retained evidence</span><span class="v" style="font-size:19px">41.2 GB</span><span class="s">13 months included</span></div>'+
+   '<div class="stat"><span class="k">Governed actions this period</span><span class="v">'+ic0(gaUsed)+'</span><span class="s">'+ic0(BILLING.billable)+' above the '+ic0(gaIncl)+' included</span></div>'+
+   '<div class="stat"><span class="k">Retained evidence</span><span class="v" style="font-size:19px">'+retainedGbText()+'</span><span class="s">13 months included</span></div>'+
    '<div class="stat"><span class="k">Due '+h(BILLING.next)+'</span><span class="v">'+usd(BILLING.total)+'</span><span class="s">USD · after the onboarding discount</span></div></div>'+
    '<div class="split"><div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>This period</h3>'+
     '</div><div class="tw"><table>'+
     '<thead><tr><th>Line</th><th>Basis</th><th class="num">Amount</th></tr></thead><tbody>'+
-    '<tr><td>Governed actions 1 – '+BILLING.billable.toLocaleString()+'</td><td class="dim">'+h(BILLING.tier2)+'</td><td class="num">'+usd(BILLING.amount)+'</td></tr>'+
-    '<tr><td>Tokens</td><td class="dim">reported at zero · the customer\u2019s own model spend is on Spend</td><td class="num">$0.00</td></tr>'+
+    '<tr><td>Governed actions · '+ic0(gaUsed)+' used</td><td class="dim">'+h(BILLING.tier2)+'</td><td class="num">'+usd(BILLING.amount)+'</td></tr>'+
+    '<tr><td>Tokens</td><td class="dim">Not priced. Your own model spend is on Spend.</td><td class="num">$0.00</td></tr>'+
     '<tr><td>Evidence retention</td><td class="dim">'+h(BILLING.retention)+'</td><td class="num">$0.00</td></tr>'+
-    '<tr><td>Onboarding discount</td><td class="dim">'+h(BILLING.discount)+'</td><td class="num" style="color:var(--st-proven)">'+h(BILLING.discountAmount)+'</td></tr>'+
-    '<tr><td><b>Total</b></td><td class="dim">rounded to cents once, half-even</td><td class="num"><b>'+usd(BILLING.total)+' USD</b></td></tr>'+
+    '<tr><td>Onboarding discount</td><td class="dim">'+h(BILLING.discount)+'</td><td class="num" style="color:var(--st-proven)">'+usd(BILLING.discountAmount)+'</td></tr>'+
+    '<tr><td><b>Total</b></td><td class="dim"></td><td class="num"><b>'+usd(BILLING.total)+' USD</b></td></tr>'+
     '</tbody></table></div></div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Meters</h3></div><div class="tw"><table>'+
     '<thead><tr><th>Meter</th><th class="num">This period</th><th>Note</th></tr></thead><tbody>'+
     BILLING.meters.map(function(m){return '<tr><td>'+h(m.m)+'</td><td class="num">'+h(m.v)+'</td>'+
      '<td class="dim" style="font-size:11.5px">'+h(m.note)+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><div class="note">One priced meter: the governed action, a call oxagen decided, delivered and recorded. Runs, tokens and retained evidence are reported so the price can move later without rewriting the meter.</div></div></div>'+
+    '</tbody></table></div><div class="panel-b"><div class="note">Only governed actions are priced. A governed action is a call oxagen decided, delivered and recorded. Runs, tokens and retained evidence are reported and not priced.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Invoices</h3></div><div class="tw"><table>'+
     '<thead><tr><th>Invoice</th><th>Period</th><th class="num">Governed actions</th><th class="num">Amount</th><th>Status</th><th>Paid</th><th></th></tr></thead><tbody>'+
     BILLING.invoices.map(function(i){return '<tr><td class="mono">'+h(i.n)+'</td><td>'+h(i.p)+'</td>'+
      '<td class="num">'+i.runs.toLocaleString()+'</td><td class="num">'+usd(i.amt)+'</td>'+
-     '<td><span class="b b-allowed"><span class="d"></span>'+h(i.st)+'</span></td><td>'+h(i.d)+'</td>'+
+     '<td><span class="b b-allowed"><span class="d"></span>'+h(i.st.charAt(0).toUpperCase()+i.st.slice(1))+'</span></td><td>'+(i.st==="open"?'<span class="dim">Not paid</span>':h(i.d))+'</td>'+
      '<td><a href="#">Open in Stripe ↗</a></td></tr>';}).join("")+
     '</tbody></table></div></div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Price list</h3></div><div class="tw"><table class="narrow"><tbody>'+
-    [["Free","every governance feature, an included monthly allowance, 30 days of evidence, 3 seats"],["Governed actions, blocks of 10,000","$30.00 per block at the published rate"],["Negotiated agreement","the same four figures, per organization"],
-     ["Invoice billing","never capped · overage invoiced at the contracted rate at period end"],["Evidence retention","13 months included on paid plans, then $0.10 per GB-month"],
-     ["Tokens oxagen buys for you","at cost, no markup, capped"],["Enterprise, annual","from $60,000 per year"]]
+    [["Free","Every governance feature, an included monthly allowance, 30 days of evidence and 3 seats"],["Governed actions, blocks of 10,000","$30.00 per block at the published rate"],["Negotiated agreement","Custom pricing per organization"],
+     ["Invoice billing","Never capped. Overage is invoiced at the contracted rate at period end."],["Evidence retention","13 months included on paid plans, then $0.10 per GB-month"],
+     ["Tokens oxagen buys for you","At cost, no markup, capped"],["Enterprise, annual","From $60,000 per year"]]
     .map(function(p){return '<tr><td style="font-size:12.5px">'+h(p[0])+'</td><td class="num mono" style="font-size:11.5px">'+h(p[1])+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">No credits, no resellers, and no revenue dashboard. The free tier is the whole product, limited by retention and seats, never by features or volume. Upgrading is a governance decision, not a volume accident.</p></div></div>'+
+    '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">Every plan has every governance feature. Plans differ in evidence retention, seats and the included monthly allowance.</p></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Billable units</h3></div><div class="panel-b">'+
     '<ul class="chain"><li class="on"><span class="h">Priced</span><div>A governed action: a call oxagen decided, delivered and recorded, with its receipt in the chain.</div></li>'+
-    '<li class="on"><span class="h">Reported</span><div>Sealed runs, tokens by class, retained evidence: secondary meters, never priced.</div></li>'+
-    '<li class="on"><span class="h">Free</span><div>Denials, runs oxagen halted before a model call, runs of the in-app agent. You never pay for oxagen saying no.</div></li></ul></div></div></div></div>';
+    '<li class="on"><span class="h">Reported</span><div>Sealed runs, tokens by class and retained evidence. Reported, never priced.</div></li>'+
+    '<li class="on"><span class="h">Free</span><div>Denials, runs oxagen halted before a model call, and runs of the in-app agent.</div></li></ul></div></div></div></div>';
 }
 
 /* ============================== Audit ============================== */
@@ -9616,7 +9619,7 @@ var KEYS=[
 var RETENTION_TIERS=[
  ["Ledger","Database","runs, attempts, seals, attestation, counts, cost, tier, gaps","forever","412k runs"],
  ["Frames","Database","frame rows with digests, cost, policy decisions","hot window · 13 months","2.6M frames"],
- ["Bodies and segments","Object storage, write-once","encrypted bodies; per-seal archive segment, Merkle root, attestation","7 years","41 GB"],
+ ["Bodies and segments","Object storage, write-once","encrypted bodies; per-seal archive segment, Merkle root, attestation","7 years",retainedGbText()],
  ["Control-plane audit","Database","admin actions, IAM changes, repo bindings, plane changes, key rotations","7 years","118k events"]
 ];
 
@@ -9772,7 +9775,7 @@ function auditRetention(){
      ["Hot window","13 months, then frame rows are compacted into the segment. Bodies are never moved."],
      ["Replay of a compacted run","reads the segment, not the hot table. Same bytes, same grade."],
      ["Workspace opt-down",WS.map(function(w){return w.slug+" "+(w.retention||"content_exact");}).join(" · "),1],
-     ["Cold storage cost","41 GB · $0.04 per month. The hot table, not the archive, is what needs a window."]])+'</div></div>'+
+     ["Storage price",retainedGbText()+". Included for 13 months, then $0.10 per GB-month (about "+usd((Number(BILLING.retainedGb)||0)*0.1)+" a month)."]])+'</div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Archive tiers</h3><span style="margin-left:auto">'+auditStore("three stores, one policy")+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Tier</th><th>Where</th><th>What it holds</th><th>Retention</th><th class="num">Held today</th></tr></thead><tbody>'+tiers+'</tbody></table></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Redaction</h3><span class="muted" style="font-size:12.5px">before write, never after</span></div>'+
@@ -11645,7 +11648,7 @@ function dialog(){
      '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Shown once, at creation, and never again.</p>'+
      '<div class="field"><label for="ak-name">Name</label><input id="ak-name" value="Warehouse nightly export"></div>'+
      '<div class="field"><label for="ak-grants">Grants</label><select id="ak-grants"><option>audit.read, receipt.read, export.read</option><option>cost.read, run.read</option><option>workspace.write, agent.write, grant.write</option></select>'+
-     '<div class="hint">A key can reach exactly what a person with those grants can. One agent tool contract drives the API, MCP, the CLI, and these screens.</div></div>'+
+     '<div class="hint">A key can reach exactly what a person with those grants can, in the API, MCP, the CLI and these screens.</div></div>'+
      '<div class="field"><label for="ak-exp">Expires</label><select id="ak-exp"><option value="2026-12-10">90 days</option><option value="2027-03-10">180 days</option><option value="2027-09-11">1 year</option></select></div>'+
      '<div class="note">A key carries grants, not roles. It becomes a service principal and every call it makes is audited against it.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="apikeyCreate()">Create key</button>'},
@@ -11658,9 +11661,9 @@ function dialog(){
      '<div class="warn">Revocation ends the service principal’s access at the next call. Runs it started keep their records.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="apikeyRevoke('+kki+')">Revoke</button>'},
    plan:{t:"Change plan",w:false,b:
-     '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team — usage-based, monthly, cancel any time</option><option>Enterprise — annual, committed use at 20–30% off, from $60,000</option></select></div>'+
+     '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team (usage-based, monthly, cancel any time)</option><option>Enterprise (annual, committed use at 20–30% off, from $60,000)</option></select></div>'+
      '<div class="note">The free tier is in every plan: an included monthly allowance of governed actions and every governance feature on. Enterprise adds a dedicated data plane or behind-the-firewall deployment, and support with an SLA.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Plan change staged in Stripe. oxagen holds the meter; Stripe holds the plan.\')">Change plan</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Plan change staged in Stripe. Stripe holds the plan and the invoices; oxagen counts the governed actions.\')">Change plan</button>'},
    /* ---- audit dialogs (W10 port) — bodies are built by guarded functions in the Audit section ---- */
    receipt:{t:receiptDlgTitle(),s:receiptDlgSub(),w:true,b:receiptDlgBody(),f:receiptDlgFoot()},
    incidentview:{t:incidentDlgTitle(),s:incidentDlgSub(),w:true,b:incidentDlgBody(),f:incidentDlgFoot()},
@@ -12068,16 +12071,16 @@ function rolesBody(){
     return '<tr class="click" onclick="roleOpen(\''+r.id+'\')"><td><span class="tkey">'+h(r.id)+'</span><div class="dim" style="font-size:11.5px">'+h(r.desc)+'</div></td>'+
      '<td>'+roleKindBadge(r.kind)+'</td><td class="mono" style="font-size:11.5px">'+h(r.scope)+'</td>'+
      '<td style="max-width:30ch">'+permChips(r.perms)+'</td>'+
-     '<td style="font-size:12px;white-space:nowrap">'+(n.total?[n.people?plural(n.people,"person","people") :'',n.agents?n.agents+' agent'+(n.agents>1?'s':''):'',n.svc?n.svc+' key'+(n.svc>1?'s':''):''].filter(Boolean).join(' · '):'<span class="dim">nobody</span>')+'</td>'+
+     '<td style="font-size:12px;white-space:nowrap">'+(n.total?[n.people?plural(n.people,"person","people") :'',n.agents?plural(n.agents,"agent"):'',n.svc?plural(n.svc,"key"):''].filter(Boolean).join(' · '):'<span class="dim">Not assigned</span>')+'</td>'+
      '<td style="font-size:11.5px">'+(locked?'<span class="b b-q">built-in</span>':'<span class="dim">'+h(r.by)+' · '+h(r.at)+'</span>')+'</td>'+
      '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="roleOpen(\''+r.id+'\')">'+(locked?'View':'Edit')+'</button><span class="vh">, </span>'+
-      '<button class="btn sm" onclick="roleDup(\''+r.id+'\')">Duplicate</button><span class="vh">, </span>'+
-      '<button class="btn sm danger"'+(locked?' disabled title="Built-in roles cannot be deleted"':busy?' disabled title="Reassign the '+n.total+' holder'+(n.total>1?'s':'')+' first"':'')+' onclick="openDialog(\'roledel\',\''+r.id+'\')">Delete</button></td></tr>';
+      '<button class="btn sm" onclick="roleDup(\''+r.id+'\')">Duplicate</button>'+
+      (locked?'':'<span class="vh">, </span><button class="btn sm danger"'+(busy?' disabled title="Reassign '+plural(n.total,"holder")+' first"':'')+' onclick="openDialog(\'roledel\',\''+r.id+'\')">Delete</button>')+'</td></tr>';
   }).join("");
   return '<div class="panel"><div class="panel-h"><h3>Roles</h3>'+
    '<div class="sp"><button class="btn sm primary" onclick="roleNew()">Create role</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Role</th><th>Kind</th><th>Scope</th><th>Permissions</th><th>Held by</th><th>Origin</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">A role is a permission set, nothing more. An agent can do only what its roles, its operator’s grants, the policy bundle, and the kill switches all allow. A role can widen what an agent may ask for. It cannot widen what its operator may do.</div></div></div>';
+   '<div class="panel-b"><div class="note">An agent can only do what its roles, its operator’s permissions, the policy and the kill switches all allow.</div></div></div>';
 }
 function roleNew(){S.roleEdit={id:"",kind:"agent",scope:"workspace",desc:"",perms:{},isNew:true};openDialog("roleedit");}
 function roleOpen(id){var r=roleById(id);if(!r)return;var p={};r.perms.forEach(function(x){p[x]=true;});S.roleEdit={id:r.id,orig:r.id,kind:r.kind,scope:r.scope,desc:r.desc,perms:p,builtin:r.builtin,isNew:false};openDialog("roleedit");}
@@ -12090,12 +12093,12 @@ function roleSave(){
   var kind=el("roleKind")?el("roleKind").value:d.kind, scope=el("roleScope")?el("roleScope").value:d.scope;
   var perms=Object.keys(d.perms).filter(function(k){return d.perms[k];});
   if(!id){act("A role needs a name.");return;}
-  if(!perms.length){act("A role with no permissions grants nothing — pick at least one.");return;}
+  if(!perms.length){act("A role with no permissions grants nothing. Pick at least one.");return;}
   if(d.isNew){ if(roleById(id)){act("A role named "+id+" already exists.");return;}
     ROLES.push({id:id,kind:kind,scope:scope,desc:desc,perms:perms,builtin:false,by:PEOPLE.marcus.name,at:"2026-09-11"});
-    closeDialog(); act("Role "+id+" created — a governed action, recorded with your name on it.","gold");
+    closeDialog(); act("Role "+id+" created and recorded in Audit with your name.","gold");
   } else { var r=roleById(d.orig); if(r){r.desc=desc;r.kind=kind;r.scope=scope;r.perms=perms;}
-    closeDialog(); act("Role "+d.orig+" updated. Every holder’s effective permission is recomputed at its next call."); }
+    closeDialog(); act("Role "+d.orig+" updated. Each holder gets the new permissions at its next call."); }
 }
 function roleDeleteConfirm(id){
   var i=-1;ROLES.forEach(function(r,ix){if(r.id===id)i=ix;});
@@ -12115,8 +12118,8 @@ function roleEditDlg(){
    '<div class="row" style="justify-content:space-between;margin-bottom:4px"><label style="font-size:12px;font-weight:600;color:var(--muted)">Permissions · <span id="rolePermN">'+n+'</span> selected</label>'+(ro?'<span class="b b-q">built-in · read-only</span>':'')+'</div>'+
    '<div class="perm-grid">'+PERMS.map(function(g){return '<div class="pg"><div class="h">'+h(g[0])+'</div>'+g[1].map(function(p){
      return '<label class="check"><input type="checkbox"'+(d.perms[p]?' checked':'')+(ro?' disabled':'')+' onchange="rolePerm(\''+p+'\',this.checked)"><span class="n mono">'+h(p)+'</span></label>';}).join("")+'</div>';}).join("")+'</div>'+
-   (holders&&holders.total?'<div class="banner" style="margin-bottom:12px"><span>Held by '+holders.total+' principal'+(holders.total>1?'s':'')+'. Saving changes their effective permission at the next call — nothing in flight is cut.</span></div>':'')+
-   '<div class="note">Saving is a governed action: it passes IAM, writes an audit record, and bills as one action. <span class="mono">org.*</span> is the only wildcard and only <span class="mono">org.owner</span> carries it.</div>';
+   (holders&&holders.total?'<div class="banner" style="margin-bottom:12px"><span>Held by '+plural(holders.total,"principal")+'. Saving changes their permissions at their next call. Nothing in flight is cut.</span></div>':'')+
+   '<div class="note">Saving is recorded in Audit and counts as one governed action. <span class="mono">org.*</span> is the only wildcard, and only <span class="mono">org.owner</span> carries it.</div>';
   var f='<button class="btn" onclick="closeDialog()">'+(ro?'Close':'Cancel')+'</button>'+
    (ro?'<button class="btn primary" onclick="roleDup(\''+h(d.orig)+'\')">Duplicate as custom</button>':'<button class="btn primary" onclick="roleSave()">'+(d.isNew?'Create role':'Save changes')+'</button>');
   return {t:d.isNew?"Create a role":(ro?"Built-in role":"Edit role"),s:d.isNew?"":d.orig,w:true,b:b,f:f};
@@ -12126,7 +12129,7 @@ function roleDelDlg(){
   var n=roleAssignees(r.id);
   return {t:"Delete role",s:r.id,w:false,b:
    '<p style="font-size:13px">This removes <span class="mono">'+h(r.id)+'</span> from IAM. Its definition and every grant it carried stay in the audit record.</p>'+
-   (n.total?'<div class="warn">Held by '+n.total+' principal'+(n.total>1?'s':'')+'. Reassign them first — a role cannot be deleted out from under a holder.</div>':'<div class="note">Nobody holds it. Deleting is a governed action and is recorded.</div>'),
+   (n.total?'<div class="warn">Held by '+plural(n.total,"principal")+'. Reassign them first. You cannot delete a role while anyone holds it.</div>':'<div class="note">Not assigned. Deleting it is recorded in Audit.</div>'),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n.total?' disabled':'')+' onclick="roleDeleteConfirm(\''+h(r.id)+'\')">Delete role</button>'};
 }
 
@@ -12376,7 +12379,7 @@ function apikeyCreate(){
   var grants=(el("ak-grants")?el("ak-grants").value:"run.read").split(",").map(function(g){return g.trim();});
   APIKEYS.push({name:name,key:"ox_live_"+rid(4)+"…"+rid(3),
     principal:"svc_"+name.toLowerCase().replace(/[^a-z0-9]+/g,"_").slice(0,20),
-    grants:grants,by:me().name,last:"never used",n30:0,
+    grants:grants,by:me().name,last:"Never used",n30:0,
     expires:el("ak-exp")?el("ak-exp").value:"2026-12-10",st:"unused"});
   closeDialog(); render();
   act("Created. The secret is shown once and stored hashed; api_key.create is in the audit record.");
@@ -15974,7 +15977,8 @@ document.addEventListener("click",function(e){
     WSX[w.slug]={pre:w.pre,head:w.head,owner:owner.key,target:targets[w.slug]};
     PEOPLE[owner.key]={name:w.owner,role:"workspace.owner · "+w.slug,initials:owner.initials,email:(owner.first+"."+owner.last).toLowerCase().replace(/[^a-z.]/g,"")+"@a-intel.example",
       mfa:pick(["passkey","passkey + TOTP","hardware key"]),avatar:{kind:"initials",text:owner.initials,font:FONTS[pcur%3],tone:TONES[pcur%3]}};
-    MEMBERS.push({p:owner.key,ws:w.slug,status:"active",last:stamp(ri(0,2),daySec(1)),mfa:PEOPLE[owner.key].mfa});
+    var seen=ri(0,2); /* one day index for both the date and the time, so a today stamp stays before the mock's 09:14 */
+    MEMBERS.push({p:owner.key,ws:w.slug,status:"active",last:stamp(seen,daySec(seen)),mfa:PEOPLE[owner.key].mfa});
     WS.push({slug:w.slug,name:w.name,main:w.main,branch:w.branch,linked:w.linked,agents:0,owner:w.owner});
   });
   /* the rest of the people: members, a few auditors and billing holders, one more org owner */
@@ -15988,7 +15992,7 @@ document.addEventListener("click",function(e){
     var last=ri(0,9);
     PEOPLE[p.key]={name:p.first+" "+p.last,role:role,initials:p.initials,email:(p.first+"."+p.last).toLowerCase().replace(/[^a-z.]/g,"")+"@a-intel.example",
       mfa:pick(["TOTP","passkey","passkey + TOTP","hardware key"]),avatar:{kind:"initials",text:p.initials,font:FONTS[pcur%3],tone:TONES[(pcur>>1)%3]}};
-    MEMBERS.push({p:p.key,ws:wsOf,status:last>7?"invited":"active",last:last>7?"never":stamp(last,daySec(last)),mfa:PEOPLE[p.key].mfa});
+    MEMBERS.push({p:p.key,ws:wsOf,status:last>7?"invited":"active",last:last>7?"Never":stamp(last,daySec(last)),mfa:PEOPLE[p.key].mfa});
   }
   var OPS=Object.keys(PEOPLE);
   /* operators per workspace: the owner runs most of it, members run the rest */
@@ -16420,8 +16424,8 @@ document.addEventListener("click",function(e){
       size:/bundle/.test(what)?(rf(0.4,6.2)).toFixed(1)+" GB":ri(8,410)+" MB",at:stamp(d,daySec(d)),by:pick(["Sofia Ruiz","Dana Okafor","Priya Natarajan",pick(humans)]),st:rnd()<0.9?"ready":"expired",sig:"ed25519:"+ulid(6)+"…"+hex(4),keys:"kek_aintel_2026Q"+ri(2,3)});
   }
   var KEYN=[["Data platform exports","svc_data_export",["cost.read","run.read","export.create"]],["Grafana read-only","svc_grafana",["run.read","frame.read"]],["Support console","svc_support_console",["run.read","receipt.read"]],["Security SIEM feed","svc_siem",["audit.read","receipt.read"]],
-    ["Terraform · staging","svc_terraform_stg",["workspace.write","agent.write"]],["Release pipeline","svc_release",["run.read","export.create"]],["Growth CRM sync","svc_crm_sync",["run.read"]],["Mobile CI","svc_mobile_ci",["run.read"]],["Auditor read-only — Halden LLP","svc_auditor_hll",["audit.read","receipt.read","export.read"]],["Backfill runner","svc_backfill",["run.read","cost.read"]]];
-  KEYN.forEach(function(k,i){var st=wpick([["ok",70],["expiring",15],["unused",15]]),d=ri(0,20);APIKEYS.push({name:k[0],key:"ox_live_"+hex(4)+"…"+hex(3),principal:k[1],grants:k[2],by:pick(humans),last:st==="unused"?"never used":stamp(d,daySec(d))+"Z",n30:st==="unused"?0:Math.round(skew(3,9000,2.5)),expires:dstr(TODAY+(st==="expiring"?ri(5,25):ri(40,400))*86400000),st:st});});
+    ["Terraform · staging","svc_terraform_stg",["workspace.write","agent.write"]],["Release pipeline","svc_release",["run.read","export.create"]],["Growth CRM sync","svc_crm_sync",["run.read"]],["Mobile CI","svc_mobile_ci",["run.read"]],["Auditor read-only (Halden LLP)","svc_auditor_hll",["audit.read","receipt.read","export.read"]],["Backfill runner","svc_backfill",["run.read","cost.read"]]];
+  KEYN.forEach(function(k,i){var st=wpick([["ok",70],["expiring",15],["unused",15]]),d=ri(0,20);APIKEYS.push({name:k[0],key:"ox_live_"+hex(4)+"…"+hex(3),principal:k[1],grants:k[2],by:pick(humans),last:st==="unused"?"Never used":stamp(d,daySec(d))+"Z",n30:st==="unused"?0:Math.round(skew(3,9000,2.5)),expires:dstr(TODAY+(st==="expiring"?ri(5,25):ri(40,400))*86400000),st:st});});
   for(var vi=0;vi<11;vi++){var f=pick(FIRST).toLowerCase(),s=ri(0,6);INVITES.push({email:f+"."+pick(LAST).toLowerCase().replace(/[^a-z]/g,"")+"@a-intel.example",role:pick(["workspace.member · "+pick(allWs),"org.auditor","workspace.owner · "+pick(allWs)]),by:pick(humans),sent:dstr(TODAY-s*86400000),expires:dstr(TODAY+(7-s)*86400000)});}
   if(parked.length)NOTIFS.push({kind:"approval.requested",tone:"approval",unread:true,t:"15:41",title:"Approval waiting · kubernetes__delete_pod@2",body:"a-intel.infra.k8s-doctor on "+parked[0].id+" wants to delete a crash-looping pod in prod-east. Rule role_grant rg_0121. Expires 15:51."});
   NOTIFS.push(
@@ -16463,12 +16467,12 @@ document.addEventListener("click",function(e){
   });
   /* Governed actions are the unit (ADR-055): the included allowance first, then blocks of 10,000 at $30. */
   var included=BILLING.includedGau||250000, gauTot=SPEND.actions, billable=Math.max(0,gauTot-included), blocks=Math.ceil(billable/10000), amount=blocks*30, disc=amount*0.2;
-  BILLING.runsUsed=runsTot; BILLING.billable=billable; BILLING.tier2=ic(blocks)+" blocks × $30.00 · "+ic(included)+" included"; BILLING.amount=mc(amount); BILLING.discountAmount="-"+mc(disc); BILLING.total=mc(amount-disc);
-  BILLING.retention="13 months included · "+(spendTot/420).toFixed(1)+" GB · $0.00";
+  BILLING.runsUsed=runsTot; BILLING.used=gauTot; BILLING.includedGau=included; BILLING.billable=billable; BILLING.tier2=ic(blocks)+" blocks × $30.00 · "+ic(included)+" included"; BILLING.amount=mc(amount); BILLING.discountAmount="-"+mc(disc); BILLING.total=mc(amount-disc);
+  BILLING.retention=retainedGbText()+" held · 13 months included";
   BILLING.invoices=[]; var mon=["August","July","June","May","April","March","February","January"], base=runsTot*0.93;
-  mon.forEach(function(m,i){var runs=Math.round(base*Math.pow(0.91,i)*rf(0.97,1.03)),gau=Math.round(runs*14.7),bill=Math.ceil(Math.max(0,gau-included)/10000)*30*0.8;BILLING.invoices.push({n:"INV-2026-"+pad(8-i),p:m+" 2026",runs:gau,amt:mc(bill),st:i===0&&rnd()<0.3?"open":"paid",d:"2026-"+pad(9-i)+"-01"});});
-  BILLING.meters=[{m:"Governed actions",v:ic(SPEND.actions),note:"the billable unit · "+ic(included)+" included this month"},{m:"Sealed runs with at least one model call",v:ic(runsTot),note:"reported, not priced"},{m:"Retained evidence",v:(spendTot/420).toFixed(1)+" GB",note:"13 months included"},
-    {m:"Runs oxagen halted before any model call",v:ic(Math.round(runsTot*0.009)),note:"free"},{m:"Runs of the in-app agent",v:ic(Math.round(runsTot*0.03)),note:"free"}];
+  mon.forEach(function(m,i){var runs=Math.round(base*Math.pow(0.91,i)*rf(0.97,1.03)),gau=Math.round(runs*14.7),bill=Math.ceil(Math.max(0,gau-included)/10000)*30*0.8;/* rf() and rnd() still run for every month so the seeded data after this stays put; the organization converted in March, so February and January have no invoice. */if(i<6)BILLING.invoices.push({n:"INV-2026-"+pad(8-i),p:m+" 2026",runs:gau,amt:mc(bill),st:i===0&&rnd()<0.3?"open":"paid",d:"2026-"+pad(9-i)+"-01"});});
+  BILLING.meters=[{m:"Governed actions",v:ic(SPEND.actions),note:"Priced · "+ic(included)+" included this month"},{m:"Sealed runs with at least one model call",v:ic(runsTot),note:"Reported, not priced"},{m:"Retained evidence",v:retainedGbText(),note:"Reported · 13 months included"},
+    {m:"Runs oxagen halted before any model call",v:ic(Math.round(runsTot*0.009)),note:"Free"},{m:"Runs of the in-app agent",v:ic(Math.round(runsTot*0.03)),note:"Free"}];
   /* ---------- spend findings ----------
      One finding per real waste pattern the frames would show, spread across tools, agents,
      operators and workspaces. `kind` is reused from FIX so every card's Fix dialog resolves,
