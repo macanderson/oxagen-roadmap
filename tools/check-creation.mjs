@@ -321,7 +321,7 @@ for (const [kind, [id, signature]] of Object.entries(KINDS)) {
   for (const [other, pair] of Object.entries(KINDS))
     if (other !== kind) ok(!has(pair[1]), kind + ": must not borrow " + other + "'s treatment (" + pair[1] + ")");
   seen.add(signature);
-  ok(has("can never do"), kind + ": says what the kind can never do");
+  ok(has("Limits."), kind + ": says what the kind cannot do, under Limits");
   ok(r.wraps, kind + ": the statement editor wraps — prose that scrolls sideways cannot be read");
   ok(r.noSideScroll, kind + ": the statement editor has no horizontal scroll");
   ok(r.align && r.align.rows >= 1 && r.align.worst <= 1,
@@ -1494,7 +1494,7 @@ for (const theme of ["light", "dark"]) {
     ro: document.querySelector("[data-cc-readonly]")?.innerText || "",
     ws: document.querySelectorAll("tr[data-cc-ws]").length, wsWant: WS.length,
   }));
-  ok(r.tab === "Cost centers4", "cost centers: Organization has the tab with its count, got " + r.tab);
+  ok(r.tab === "Cost centers 4", "cost centers: Organization has the tab with its count, got " + r.tab);
   ok((await rows(m.pg)).join() === "ENG-1001,ENG-1040,FIN-2040,MKT-3300", "cost centers: the four labels list, got " + (await rows(m.pg)).join());
   ok(/Owner, Admin or Billing/.test(r.ro) && /Dana Okafor/.test(r.ro), "cost centers: a reader is told who can change the list, got " + r.ro);
   ok(r.ws === r.wsWant, "cost centers: every workspace has a row, got " + r.ws + " of " + r.wsWant);
