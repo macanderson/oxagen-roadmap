@@ -81,7 +81,7 @@ function islTargets(){
   var side=document.querySelector("#app .side"); if(side) add(side,"shell/sidebar",null);
   var top=document.querySelector("#app .top"); if(top) add(top,"shell/top-bar",null);
   var mn=document.querySelector("#app .mnav"); if(mn) add(mn,"shell/thumb-bar",null);
-  var apd=document.querySelector("#apdrawer.open"); if(apd) add(apd,"approvals-drawer/drawer",apd.querySelector("h2"));
+  var apd=document.querySelector("#apdrawer.open"); if(apd) add(apd,"approvals-drawer/drawer",apd.querySelector("h2, h3"));
   var asst=document.querySelector("#asst.open"); if(asst) add(asst,"stella-drawer/drawer",null);
   /* the page */
   var pg=document.querySelector("#pg")||app;
@@ -106,7 +106,7 @@ function islTargets(){
 
 function islScan(){
   ISL.scanQ=false;
-  if(!ISL.help){ document.querySelectorAll(".hq").forEach(function(b){b.remove();}); document.querySelectorAll(".hq-host").forEach(function(x){x.classList.remove("hq-host");}); return; }
+  if(!ISL.help){ document.querySelectorAll(".hq").forEach(function(b){b.remove();}); document.querySelectorAll(".hq-host").forEach(function(x){x.classList.remove("hq-host","hq-rel");}); return; }
   var ts=islTargets(), live=[];
   ts.forEach(function(t){
     var elm=t[0], key=t[1], hd=t[2], found=islHelp(key);
@@ -115,7 +115,8 @@ function islScan(){
     if(!b){
       b=document.createElement("button");
       b.type="button"; b.className="hq"+(hd?"":" abs");
-      if(!hd&&!elm.classList.contains("hq-host")) elm.classList.add("hq-host");
+      /* a corner ? needs a positioned host; a fixed or sticky host (a drawer, the top bar) already is */
+      if(!hd&&!elm.classList.contains("hq-host")){ elm.classList.add("hq-host"); if(getComputedStyle(elm).position==="static") elm.classList.add("hq-rel"); }
       host.appendChild(b);
     }
     b.setAttribute("data-key",key);
