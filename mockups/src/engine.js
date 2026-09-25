@@ -4676,10 +4676,10 @@ DLG_EXT.runexport=function(){
    Every cell in the composition view is a reference to a reusable object, so the registry page
    that owns that object is one click away and nothing is described twice. */
 function agentHealth(a){
-  if(tamperCount(a)) return ["critical","tamper",tamperCount(a)+" open incident"+(tamperCount(a)>1?"s":"")];
-  if(!a.enrolled) return ["q","not enrolled","no hook is installed, so its runs are recorded only"];
-  if(a.tier==="observe") return ["approval","observe","enrolled, and nothing is delivered or refused yet"];
-  return ["allowed","healthy","frames arriving, chain intact"];
+  if(tamperCount(a)) return ["critical","Tamper",plural(tamperCount(a),"open incident")];
+  if(!a.enrolled) return ["q","Not enrolled","Not monitored: no hook installed"];
+  if(a.tier==="observe") return ["approval","Observe","enrolled, and nothing is delivered or refused yet"];
+  return ["allowed","Healthy","frames arriving, chain intact"];
 }
 /* The steering that reaches one agent, or null when no preview prompt is set up for it. */
 function agentSteering(a){
@@ -4702,8 +4702,8 @@ function pAgents(){
   if(S.state==="denied") return deniedState("the agents in this workspace","agent.read on core-platform");
   if(S.state==="empty") return emptyState("No agent registered in "+w.name,
     "An agent's identity lives in oxagen. Its definition is a file in <span class=\"mono\">.oxagen/agents/</span> in the main repo. Registering one opens a Context PR, and nothing is saved until it merges.",
-    '<button class="btn primary" onclick="openDialog(\'wrap\')">Wrap Claude Code</button>'+
-    '<button class="btn" onclick="openDialog(\'register\')">Register an agent</button>');
+    '<button class="btn primary" onclick="openDialog(\'register\')">Register agent</button>'+
+    '<button class="btn" onclick="openDialog(\'wrap\')">Wrap Claude Code…</button>');
 
   var list=AGENTS.filter(function(a){return a.ws===w.slug;}), view=agentViewSet();
   var acts=function(a){
@@ -4721,18 +4721,18 @@ function pAgents(){
        '<td>'+agentCard(a)+'</td>'+
        '<td style="font-size:12px;max-width:26ch">'+h(a.desc)+'</td>'+
        '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(a.operator,22)+h(PEOPLE[a.operator].name)+'</span></td>'+
-       '<td>'+(M?plural((M.gates.length+M.prefix.length+M.volatile.length),"item")+'<div class="dim mono" style="font-size:10px">'+tokn(M.tok.total)+' tok'+(M.delivered?'':' · not delivered')+'</div>'
+       '<td>'+(M?plural((M.gates.length+M.prefix.length+M.volatile.length),"record")+'<div class="dim mono" style="font-size:10px">'+tokn(M.tok.total)+' tok'+(M.delivered?'':' · not delivered')+'</div>'
                :'<span class="dim">—</span>')+'</td>'+
        '<td>'+plural(beltTotal(a),"tool")+'<div class="dim" style="font-size:10px">'+(belts.length?plural(belts.length,"toolbelt"):'from role grants')+' · '+beltModeLabel(a.beltMode)+'</div></td>'+
        '<td class="mono" style="font-size:11.5px">'+h(a.host||"—")+'<div class="dim" style="font-size:10px;font-family:var(--font)">'+h(rt?rt.kind+" · "+a.tier:a.tier)+'</div></td>'+
        '<td class="mono dim" style="font-size:11px">'+h(a.principal||"prn_pending")+'</td>'+
        '<td><span class="b b-'+hl[0]+'"><span class="d"></span>'+h(hl[1])+'</span></td>'+
-       '<td class="num">'+a.runs30.toLocaleString()+'<div class="dim mono" style="font-size:10px">runs 30d</div></td>'+
+       '<td class="num">'+plural(a.runs30,"run")+'<div class="dim mono" style="font-size:10px">(30 days)</div></td>'+
        acts(a)+'</tr>';
     }).join("");
   } else {
     head='<th>Agent</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
-      '<th class="num">Tools</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Tokens 30d</th>'+
+      '<th class="num">Tools</th><th class="num">Runs (30 days)</th><th class="num">Spend (30 days)</th><th class="num">Tokens (30 days)</th>'+
       '<th>Mandates</th><th>Incidents</th><th></th>';
     rows=list.map(function(a){
       return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">'+
@@ -4757,8 +4757,8 @@ function pAgents(){
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Agents</h1>'+
    '<p>Every actor in this workspace and what it is made of.</p></div>'+
    '<div class="acts"><button class="btn" onclick="wzOpen(\'agent\')">New agent</button>'+
-   '<button class="btn" onclick="openDialog(\'register\')">Register an agent</button>'+
-   '<button class="btn primary" onclick="openDialog(\'wrap\')">Wrap Claude Code</button></div></div>'+
+   '<button class="btn" onclick="openDialog(\'wrap\')">Wrap Claude Code…</button>'+
+   '<button class="btn primary" onclick="openDialog(\'register\')">Register agent</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
    /* Every tile here is a count, so every tile derives from a record. The workspace's own
       agent and enrolment counts come from the workspace row; the mandate and incident counts
@@ -4766,9 +4766,10 @@ function pAgents(){
    (function(){
      var orgAgents=AGENTS.length?AGENTS:[], allAgents=WS.reduce(function(n,x){return n+(x.agents||0);},0);
      var withMandate=orgAgents.filter(function(x){return (x.mandates||[]).length;});
-     return '<div class="stat"><span class="k">Agents here</span><span class="v">'+w.agents+'</span><span class="s">'+allAgents+' across the organization · '+list.length+' listed below</span></div>'+
-     '<div class="stat"><span class="k">Enrolled</span><span class="v">'+(w.enrolled==null?w.agents:w.enrolled)+'</span><span class="s">'+(w.enrolled!=null&&w.enrolled<w.agents?(w.agents-w.enrolled)+' not yet enrolled':list.filter(function(x){return x.tier==="observe";}).length+' listed here on the observe tier, the rest on harness')+'</span></div>'+
-     '<div class="stat"><span class="k">Holding a mandate</span><span class="v">'+withMandate.length+'</span><span class="s">'+(withMandate.length?withMandate.map(function(x){return x.key+' · in '+(wsBySlug(x.ws)||{name:x.ws}).name;}).join(', '):'no agent holds one')+'</span></div>'+
+     var nEnrolled=list.filter(function(x){return x.enrolled;}).length;
+     return '<div class="stat"><span class="k">Agents</span><span class="v">'+list.length+'</span><span class="s">'+list.length+' in this workspace · '+allAgents+' in the organization</span></div>'+
+     '<div class="stat"><span class="k">Enrolled</span><span class="v">'+nEnrolled+'</span><span class="s">'+nEnrolled+' enrolled · '+(list.length-nEnrolled)+' not enrolled</span></div>'+
+     '<div class="stat"><span class="k">Holding a mandate</span><span class="v">'+withMandate.length+'</span><span class="s">'+(withMandate.length?withMandate.map(function(x){return x.key+(x.ws===w.slug?'':' in '+(wsBySlug(x.ws)||{name:x.ws}).name);}).join(', '):'no agent holds one')+'</span></div>'+
      fleetTamperStat(list);
    })()+'</div>'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Registered in '+h(w.name)+'</h3>'+
@@ -4777,7 +4778,7 @@ function pAgents(){
      : 'Each row is what this agent did and what it cost over the last 30 days.')+'</p></div>'+
    '<div class="sp">'+viewPick+'<span class="mono dim" style="font-size:11px">.oxagen/agents/ @ '+h(list[0]?list[0].commit:"")+'</span></div></div>'+
    '<div class="tw"><table><thead><tr>'+head+'</tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">An agent has one principal and runs on one runtime. Its steering, its toolbelts and '+
+   '<div class="panel-b"><div class="note">An agent has one principal and runs on one runtime. Its steering, its toolbelts, and '+
    'its tools are workspace objects it refers to, so changing one changes every agent that refers to it.</div></div></div>';
 }
 
@@ -4836,7 +4837,7 @@ var BELT=[
  {id:"open_context_pr@1",d:"Open a Context PR on the main repo from a proposal.",
   dec:"allow",rule:"grant:agent.repo.write #11",scope:"repo: a-intel/platform"},
  {id:"send_message@1",d:"Message another agent in this workspace, or a run.",
-  dec:"allow",rule:"agent tool default",scope:"@agent only — @all is not granted"},
+  dec:"allow",rule:"agent tool default",scope:"@agent only (no @all)"},
  {id:"claude_code__Bash@2.1",d:"Run a shell command in the host's working directory.",
   dec:"allow",rule:"grant:agent.repo.write #9 (harness tier)",
   scope:"deny: curl, ssh, aws, gh auth · cwd under a-intel/platform"},
@@ -4958,7 +4959,7 @@ function fleetTamperStat(list){
   return '<div class="stat"><span class="k">Tamper incidents</span>'+
    '<span class="v"'+(all.length?' style="color:var(--st-critical)"':'')+'>'+all.length+'</span>'+
    '<span class="s">'+(newest
-     ? h(String(newest.scope).split(" · ")[0])+' · '+h(newest.kind)+', '+h(String(newest.at).slice(0,10))+
+     ? h(String(newest.scope).split(" · ")[0])+' · '+keyLabel(newest.kind)+', '+h(String(newest.at).slice(0,10))+
        (open?' · '+open+' open':' · all resolved')
      : 'none in the retention window')+'</span></div>';
 }
@@ -5096,28 +5097,28 @@ function aIdentity(a,r){
     '<div class="panel-b"><dl class="kv">'+
     '<dt>Agent key</dt><dd class="mono">'+h(a.key)+'</dd>'+
     '<dt>Principal</dt><dd class="mono">'+h(a.principal||"prn_pending")+
-     '<span class="sub">minted at registration and never reused — a retired agent\'s runs keep their identity</span></dd>'+
+     '<span class="sub">minted at registration and never reused, so a retired agent\'s runs keep their identity</span></dd>'+
     '<dt>Kind</dt><dd>agent · workspace <span class="mono">'+h(w.slug)+'</span> required</dd>'+
     '<dt>Harness</dt><dd>'+h(a.harnessLabel)+' <span class="mono dim">'+h(a.harnessV||"—")+'</span></dd>'+
-    '<dt>Model tier</dt><dd>'+h(a.model)+' → <span class="mono">'+
+    '<dt>Model class</dt><dd>'+h(a.model)+' → <span class="mono">'+
      h(a.model==="light"?"z-ai/glm-flash-latest":"z-ai/glm-latest")+'</span></dd>'+
     '<dt>Operator</dt><dd>'+h(op.name)+
      '<span class="sub">accountable for every run · IAM field <span class="mono">initiating_principal</span></span></dd>'+
     '<dt>Lifecycle state</dt><dd><span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span>'+
-     '<span class="sub">registered → enrolled → active → retired. Retiring ends the principal and never deletes it, so old runs keep their identity.</span></dd>'+
+     '<span class="sub">registered → enrolled → retired, with suspended or unenrolled in between. Retiring ends the principal and keeps it, so old runs keep their identity.</span></dd>'+
     '<dt>First frame</dt><dd class="mono">'+h(a.firstFrame||"—")+'</dd>'+
     '</dl></div></div>'+
 
    '<div class="panel" style="border-color:color-mix(in srgb,var(--st-proven) 34%,var(--border))">'+
     '<div class="panel-h"><div style="flex:1;min-width:0"><h3>Credentials</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">The single property most of the threat model rests on.</p></div>'+
-    '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>none</span></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">What this agent holds</p></div>'+
+    '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>run token only</span></div>'+
     '<div class="panel-b" style="display:grid;gap:12px">'+
-    iamPairs([["API key","none"],["OAuth token","none"],["Cloud role","none"],["GitHub token","none"],
-              ["Run token","one, and it reaches oxagen only"]])+
+    iamPairs([["API key","Not held"],["OAuth token","Not held"],["Cloud role","Not held"],["GitHub token","Not held"],
+              ["Run token","Held · works only with oxagen"]])+
     '<p style="font-size:12.5px;margin:0">It holds one run token, and that token is good for talking to oxagen and '+
     'nothing else. Every secret a call needs is minted by the broker at dispatch, scoped to that one call, and never '+
-    'transmitted to the agent. A leaked run token cannot reach a provider.</p>'+
+    'sent to the agent. A leaked run token cannot reach a provider.</p>'+
     '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/tools/providers\')">See the connections that mint them</button>'+
     '</div></div></div>'+
 
@@ -5125,17 +5126,17 @@ function aIdentity(a,r){
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Run credential</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">Long-lived, purpose-locked, hashed at rest, shown to the operator once.</p></div></div>'+
     '<div class="panel-b"><dl class="kv">'+
-    '<dt>Key</dt><dd class="mono">'+h(a.cred||"—")+'<span class="sub">shown once at issue; stored as a hash</span></dd>'+
+    '<dt>Key</dt><dd class="mono">'+h(a.cred||"—")+'<span class="sub">shown once at issue and stored as a hash</span></dd>'+
     '<dt>Purpose lock</dt><dd class="mono">run_start, control_channel</dd>'+
     '<dt>Issued</dt><dd>'+h(a.issued||"—")+' to '+h(op.name)+'</dd>'+
     '<dt>Last used</dt><dd class="mono">'+h(a.enrolled?(a.lastUsed||"—"):"never")+'</dd>'+
     '<dt>Run tokens</dt><dd>'+(a.enrolled?(a.tokens||0)+' active · 15 minute TTL · refreshed on the control channel':'0 active')+
      '<span class="sub">Revoking the key or suspending the agent kills every run token at the next call. This is what makes a halt stick.</span></dd>'+
-    '<dt>Host device key</dt><dd class="mono">'+h(a.enrolled?(a.devKey||"—"):"— not enrolled —")+
+    '<dt>Host device key</dt><dd class="mono">'+h(a.enrolled?(a.devKey||"—"):"—")+
      '<span class="sub">'+(a.enrolled?'signs checkpoints from '+h(a.host||"its host")
-       :'checkpoints are unsigned until a host enrolls')+'</span></dd>'+
+       :'Not enrolled. Checkpoints are unsigned until a host enrolls.')+'</span></dd>'+
     '</dl>'+
-    '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'identity\',\''+a.key+'\')">Change identity</button>'+
+    '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'identity\',\''+a.key+'\')">Edit identity</button>'+
     '<button class="btn danger" onclick="openDialog(\'revokecred\',\''+a.key+'\')">Revoke credential</button></div>'+
     '</div></div>'+
 
@@ -5146,14 +5147,14 @@ function aIdentity(a,r){
      '<span class="sub">every run of this agent carries their name as <span class="mono">initiating_principal</span></span></dd>'+
     '<dt>Workspace</dt><dd>'+h(w.name)+' <span class="mono dim">'+h(w.slug)+'</span>'+
      '<span class="sub">the principal is scoped to it and cannot be used in another</span></dd>'+
-    '<dt>Runtime</dt><dd class="mono">'+h(a.host||"— not enrolled —")+
-     '<span class="sub">'+(a.enrolled?'its device key countersigns this agent\'s checkpoints':'nothing signs its checkpoints yet')+'</span></dd>'+
-    '<dt>Delegation</dt><dd>subagents narrow, never widen'+
+    '<dt>Runtime</dt><dd class="mono">'+h(a.host||"—")+
+     '<span class="sub">'+(a.enrolled?'its device key countersigns this agent\'s checkpoints':'Not enrolled. Nothing signs its checkpoints yet.')+'</span></dd>'+
+    '<dt>Delegation</dt><dd>subagents can only narrow access'+
      '<span class="sub">a subagent can use only what both this agent and the invoking person are granted</span></dd>'+
     '<dt>Replay</dt><dd class="mono">'+h(a.replay||"render")+
      '<span class="sub">what a reader can do with this agent\'s frames after the fact</span></dd>'+
     '<dt>Tamper incidents</dt><dd>'+(tamperCount(a)
-      ?'<span class="b b-critical"><span class="d"></span>'+tamperCount(a)+' · '+h(agentTamper(a)[0].kind)+'</span> '+
+      ?'<span class="b b-critical"><span class="d"></span>'+tamperCount(a)+' · '+keyLabel(agentTamper(a)[0].kind)+'</span> '+
        '<button class="btn sm ghost" onclick="S.tab.agent=\'activity\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/activity\')">Read them</button>'
       :'<span class="b b-allowed"><span class="d"></span>0</span>')+'</dd>'+
     '</dl>'+
@@ -5179,10 +5180,10 @@ function aOverview(a,r){
     '<div class="panel-b"><dl class="kv">'+
     part("Identity",'<span class="mono">'+h(a.principal||"prn_pending")+'</span>',
       'minted at registration and never reused',["Open identity",'S.tab.agent=\'identity\';go(\''+'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/identity\')'])+
-    part("Steering",M?plural((M.gates.length+M.prefix.length+M.volatile.length),"item")+' · <span class="mono">'+tokn(M.tok.total)+' tok</span>':'<span class="dim">no preview prompt is set up</span>',
+    part("Steering",M?plural((M.gates.length+M.prefix.length+M.volatile.length),"record")+' · <span class="mono">'+tokn(M.tok.total)+' tok</span>':'<span class="dim">no steering records reach this agent</span>',
       M?(M.delivered?'assembled from the workspace library and delivered at SessionStart and UserPromptSubmit'
                     :'assembled, and not delivered: no hook is installed on the observe tier')
-       :'steering is a workspace library; this agent holds a reference, never a copy',
+       :'Steering is a workspace library. This agent holds a reference to it.',
       ["Open steering",'S.tab.agent=\'steering\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/steering\')'])+
     part("Toolbelt",belts.length?belts.map(function(b){
         return '<button class="lnk" onclick="S.beltPick=\''+h(b.id)+'\';go(\'#/'+ORG.slug+'/'+S.ws+'/tools/toolbelts\')">'+h(b.name)+'</button>';
@@ -5194,9 +5195,9 @@ function aOverview(a,r){
       ["Open runtime",'S.tab.agent=\'runtime\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/runtime\')'])+
     part("Owner",h(op.name)+' <span class="mono dim">'+h(op.role)+'</span>',
       'accountable for every run this agent makes')+
-    part("Permissions",agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+
-      (a.mandates.length?' · <span class="b b-approval"><span class="d"></span>'+a.mandates.length+' mandate</span>':' · no mandate'),
-      'a toolbelt says what it can see; its roles and the policy say what it may call',
+    part("Permissions",plural(agentRolesOf(a.key).length,"role")+
+      (a.mandates.length?' · <span class="b b-approval"><span class="d"></span>'+plural(a.mandates.length,"mandate")+'</span>':' · no mandate'),
+      'A toolbelt says what it can see. Its roles and the policy say what it may call.',
       ["Open permissions",'S.tab.agent=\'permissions\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/permissions\')'])+
     '</dl></div></div>'+
 
@@ -5205,16 +5206,16 @@ function aOverview(a,r){
     '<button class="btn sm" style="margin-left:auto" onclick="S.tab.agent=\'activity\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/activity\')">Open activity</button></div>'+
     '<div class="panel-b" style="display:grid;gap:14px">'+
     '<div class="grid g2">'+
-     '<div class="stat"><span class="k">Runs</span><span class="v">'+a.runs30.toLocaleString()+'</span><span class="s">'+h(a.lastUsed?'last at '+a.lastUsed:'none recorded')+'</span></div>'+
+     '<div class="stat"><span class="k">Runs</span><span class="v">'+a.runs30.toLocaleString()+'</span><span class="s">'+h('in the last 30 days'+(a.lastUsed?' · last at '+a.lastUsed:''))+'</span></div>'+
      '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(n$(a.spend30)))+'</span><span class="s">'+basisChip((TIER_RANK[a.tier]||0)>=2?'gateway_observed':'client_attested')+'</span></div>'+
      '<div class="stat"><span class="k">Tokens</span><span class="v">'+tokn(tk.total)+'</span><span class="s">'+per(tk.cacheRate)+' cache read over input</span></div>'+
-     '<div class="stat"><span class="k">Tamper incidents</span><span class="v"'+(tamperCount(a)?' style="color:var(--st-critical)"':'')+'>'+tamperCount(a)+'</span><span class="s">'+h(hl[2])+'</span></div>'+
+     '<div class="stat"><span class="k">Tamper incidents</span><span class="v"'+(tamperCount(a)?' style="color:var(--st-critical)"':'')+'>'+(tamperCount(a)||a.enrolled?tamperCount(a):'—')+'</span><span class="s">'+h(hl[2])+'</span></div>'+
     '</div>'+
     '<div class="note">Every tool on the toolbelt is sent, and paid for, on every model call, whether or not it\'s used.</div></div></div></div>'+
 
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Definition in git</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">The definition is a file in your repository, and the file is the source of truth.</p></div>'+
-   '<button class="btn sm" style="margin-left:auto" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/definition\')">Open the file</button></div>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Definition</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">The definition file in git is the source of truth. Identity and credentials are managed by oxagen.</p></div>'+
+   '<button class="btn sm" style="margin-left:auto" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/definition\')">Open definition</button></div>'+
    '<div class="panel-b"><dl class="kv">'+
    '<dt>Path</dt><dd class="mono">.oxagen/agents/'+h(sl)+'.toml</dd>'+
    '<dt>Repo</dt><dd class="mono">'+h(w.main)+' @ '+h(w.branch)+'</dd>'+
@@ -5231,13 +5232,13 @@ function aOverview(a,r){
 function aSteering(a,r){
   var sl=defSlug(a), M=agentSteering(a);
   if(!M) return '<div class="panel"><div class="panel-h"><h3>No steering is assembled for this agent</h3></div>'+
-   '<div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">The workspace library has nothing scoped to it and '+
-   'no preview prompt is set up, so the assembler has nothing to rank. Writing a record on Steering is what changes that.</p>'+
+   '<div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">The workspace library has no record scoped to this agent, '+
+   'so there is nothing to rank. Add a record on Steering to change that.</p>'+
    '<div class="row" style="margin-top:12px"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/steering\')">Open the library</button></div></div></div>';
 
   var live=M.gates.concat(M.prefix).concat(M.volatile);
   var rows=live.map(function(it){
-    var where=it.kind==="policy"?"gate plane":it.force==="must"||it.force==="should"?"stable prefix":"volatile · rank "+(it.rank||"—");
+    var where=it.kind==="policy"?"gate notice":it.force==="must"||it.force==="should"?"stable prefix":"per-prompt selection · rank "+(it.rank||"—");
     return '<tr>'+
      '<td>'+stgItemLink(it)+'</td>'+
      '<td data-v="'+h(stgKindLabel(it))+'">'+stgKindChip(it)+'</td>'+
@@ -5250,19 +5251,19 @@ function aSteering(a,r){
 
   return '<div class="grid">'+
    (M.delivered?'':'<div class="warn"><b>Nothing below reaches this agent today.</b> '+h(a.name)+' is on the '+
-     '<span class="mono">observe</span> tier: no hook is installed, so oxagen has no injection point. This is what the '+
-     'assembler would deliver on the <span class="mono">harness</span> tier.</div>')+
+     '<span class="mono">observe</span> tier: no hook is installed, so oxagen has no injection point. This is what would '+
+     'be delivered on the <span class="mono">harness</span> tier.</div>')+
    '<div class="grid g2">'+
-    '<div class="panel pad">'+stgMeter("Stable prefix · SessionStart additional context",M.bytes,M.budget.sessionStartBytes,"bytes",
+    '<div class="panel pad">'+stgMeter("Stable prefix at SessionStart",M.bytes,M.budget.sessionStartBytes,"bytes",
       tokn(M.tok.prefix)+' tok: compile header '+M.budget.compileHeaderTok+', gate notices '+tokn(M.tok.gates)+
       ', must and should '+tokn(M.tok.prefix-M.tok.gates-M.budget.compileHeaderTok)+'.')+'</div>'+
-    '<div class="panel pad">'+stgMeter("Volatile selection · token budget",M.tok.volatile,M.budget.volatileTok,"tok",
-      plural(M.volatile.length,"item")+' fit for the prompt “'+h(M.prompt)+'”. '+plural(M.cut.length,"item")+' cut in all.')+'</div></div>'+
+    '<div class="panel pad">'+stgMeter("Per-prompt selection",M.tok.volatile,M.budget.volatileTok,"tok",
+      plural(M.volatile.length,"record")+' fit for the prompt “'+h(M.prompt)+'”. '+plural(M.cut.length,"record")+' cut in all.')+'</div></div>'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>What reaches this agent</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(live.length,"item")+' compiled from the workspace library at '+tokn(M.tok.total)+' tok.</p></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(live.length,"record")+' compiled from the workspace library at '+tokn(M.tok.total)+' tok.</p></div>'+
     '<div class="sp"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/steering/assignments\')">Change what is assigned</button>'+
     '<button class="btn sm ghost" onclick="S.pv.agent=\''+h(sl)+'\';S.pv.text=null;go(\'#/'+ORG.slug+'/'+S.ws+'/steering/compiler\')">Open in the compiler</button></div></div>'+
-    '<div class="tw"><table><thead><tr><th>Item</th><th>Kind</th><th>Force</th><th>Scope</th><th>Body</th>'+
+    '<div class="tw"><table><thead><tr><th>Record</th><th>Kind</th><th>Force</th><th>Scope</th><th>Body</th>'+
     '<th>Source</th><th>Where it lands</th><th class="num">Token cost</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
     '<div class="panel-b"><div class="note">A gate notice is never dropped for budget. Everything else competes: '+
     '<span class="mono">must</span> and <span class="mono">should</span> for the 16 KiB SessionStart cap, then '+
@@ -5288,22 +5289,20 @@ function aRuntime(a,r){
     '<div class="panel-b">'+tierLadder(a.tier)+'<dl class="kv" style="margin-top:14px">'+
     '<dt>Model calls</dt><dd>'+(TIER_RANK[a.tier]>=2?'routed through the loopback proxy on the host. Tokens are counted from the bytes that pass through it and the run token is the only credential the call carries. Spend is '+basisChip("gateway_observed")+'.':'not routed through oxagen. The harness calls its provider with its own key and reports usage. Spend is '+basisChip("client_attested")+'.')+'</dd>'+
     '<dt>Tool calls over MCP</dt><dd>'+(TIER_RANK[a.tier]>=2?'every provider the harness reaches over MCP is reached through the gateway and decided by oxagen.':a.tier==="harness"?'the providers registered with oxagen are routed through oxagen, which decides each call. Any other MCP tool the harness holds is not.':'recorded only')+'</dd>'+
-    '<dt>Harness-native tools</dt><dd>'+(a.tier==="contained"?'the four blocking hook events can refuse, and the sandbox refuses a write to the settings file, the hook entries or the hook binary':TIER_RANK[a.tier]>=1?'the four blocking hook events can refuse: client-attested and fail-open':'recorded only')+'</dd>'+
+    '<dt>Harness-native tools</dt><dd>'+(a.tier==="contained"?'the four blocking hook events can refuse, and the sandbox refuses a write to the settings file, the hook entries or the hook binary':TIER_RANK[a.tier]>=1?'the four blocking hook events can refuse. The result is reported by the harness, and a failed hook lets the call through (fail-open)':'recorded only')+'</dd>'+
     '<dt>Budgets</dt><dd>'+(TIER_RANK[a.tier]>=2?'enforced before the call: a run budget by the proxy, a shared budget by a reservation on the control plane':'a recorded number and a notice in steering, never a stop')+'</dd>'+
     '<dt>Steering</dt><dd>'+(TIER_RANK[a.tier]>=1?'delivered at SessionStart and UserPromptSubmit, and as files in the checkout':'not delivered: no hook is installed')+'</dd>'+
     '<dt>Credentials held by this agent</dt><dd><b style="color:var(--st-allowed)">none</b></dd>'+
     '</dl>'+
-    '<div class="note" style="margin-top:13px">The tier is computed per run from what was actually routed and rendered verbatim. '+
-    'No report can say a stronger word than the tier allows, and only <span class="mono">contained</span> earns the word enforced.</div></div></div>'+
+    '<div class="note" style="margin-top:13px">Only <span class="mono">contained</span> is fully enforced: all traffic must pass through oxagen.</div></div></div>'+
 
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Rollback</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Shown beside the installer from the first screen, and never hidden afterwards.</p></div></div>'+
+   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Unenroll this host from the CLI</h3></div></div>'+
     '<div class="panel-b">'+
     '<pre>oxagen agent unenroll --host '+h(a.host||"this")+' \\\n  --restore-settings</pre>'+
     '<div class="note" style="margin-top:12px">If hooks are stripped by hand instead, the next run records '+
-    '<span class="mono">hooks_removed</span> and the tier falls to <span class="mono">observe</span>. It is never upgraded after the fact.</div>'+
+    keyLabel("hooks_removed")+' and the tier falls to <span class="mono">observe</span>. It is never upgraded after the fact.</div>'+
     '<div class="row" style="margin-top:14px">'+
-    '<button class="btn" onclick="act(\'Smoke session queued. One turn, recorded like any other run.\')">Run a smoke session</button>'+
+    '<button class="btn" onclick="act(\'Test session queued. One turn, recorded like any other run.\')">Run a test session</button>'+
     '<button class="btn danger" onclick="openDialog(\'unenroll\',\''+a.key+'\')">Unenroll</button></div>'+
     '</div></div></div></div>';
 }
@@ -5313,14 +5312,14 @@ function aRuntime(a,r){
 function aRuntimeHost(a){
   var rt=agentRuntime(a), deg=rt&&rt.health!=="ok";
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Host</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">One click produced a signed installer with a one-time enrollment token embedded. Nothing was pasted.</p></div>'+
+   '</div>'+
    '<span class="b b-'+(deg?"approval":"allowed")+'" style="margin-left:auto"><span class="d"></span>'+h(rt?rt.health:"connected")+'</span>'+
    '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/runtimes/'+h((rt&&rt.id)||a.host||"")+'\')">Open the runtime</button></div>'+
    '<div class="panel-b"><dl class="kv">'+
    '<dt>Runtime</dt><dd class="mono">'+h((rt&&rt.name)||a.host||"—")+
     (rt?'<span class="sub">'+h(rt.kind+' · '+rt.os+' · started by '+rt.started)+'</span>':'')+'</dd>'+
    '<dt>Harness</dt><dd>'+h((rt&&rt.harness)||a.harnessLabel)+' <span class="mono dim">'+
-    h((rt&&rt.harnessV)||a.harnessV||"—")+'</span><span class="sub">the runtime is shared; every agent on it is seen through the same hooks</span></dd>'+
+    h((rt&&rt.harnessV)||a.harnessV||"—")+'</span><span class="sub">the runtime is shared. Every agent on it is seen through the same hooks.</span></dd>'+
    '<dt>Device key</dt><dd class="mono">'+h(a.devKey||"—")+'<span class="sub">signs checkpoints; oxagen countersigns at ingest</span></dd>'+
    '<dt>Collector</dt><dd class="mono">oxagend '+h((rt&&rt.collector)||a.collector||"1.6.2")+
     '<span class="sub">'+(rt&&rt.gaps?h(rt.gaps+' telemetry gap'+(rt.gaps>1?'s':'')+' in the last 24h')
@@ -5329,11 +5328,10 @@ function aRuntimeHost(a){
    '<dt>Hooks written</dt><dd class="mono" style="font-size:11.5px">'+
     h((rt&&rt.hooks)||"SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, Stop")+
     '<span class="sub" style="font-family:var(--font)">'+(rt&&rt.hookCount<5?'Fewer than five events are wired, so some calls are recorded rather than decided.':'Five run as command hooks. The first four can refuse.')+'</span></dd>'+
-   '<dt>Model proxy</dt><dd>'+((TIER_RANK[a.tier]||0)>=2?'loopback proxy on the host<span class="sub">every model call leaves through it; tokens are counted from the bytes that pass.</span>':'not routed<span class="sub">model traffic goes from the harness to its provider. Routing it is the gateway tier.</span>')+'</dd>'+
+   '<dt>Model proxy</dt><dd>'+((TIER_RANK[a.tier]||0)>=2?'loopback proxy on the host<span class="sub">every model call leaves through it. Tokens are counted from the bytes that pass.</span>':'not routed<span class="sub">model traffic goes from the harness to its provider. Routing it is the gateway tier.</span>')+'</dd>'+
    '<dt>oxagen MCP endpoint</dt><dd class="mono">mcp.oxagen.com/w/'+h(S.ws)+'<span class="sub">providers registered here are routed through oxagen, which decides each call</span></dd>'+
    '<dt>Settings</dt><dd>'+h((rt&&rt.settings)||"user settings")+'<span class="sub">an enterprise managed enrollment writes locked settings instead</span></dd>'+
-   '<dt>Tier earned</dt><dd>'+tierBadge(a.tier)+
-    '<span class="sub">Computed per run from what was actually routed. The UI cannot render a stronger word than the tier allows.</span></dd>'+
+   '<dt>Tier earned</dt><dd>'+tierBadge(a.tier)+'</dd>'+
    '<dt>First frame</dt><dd class="mono">'+h(a.firstFrame||"—")+'</dd>'+
    '<dt>Last checkpoint</dt><dd class="mono">'+h((rt&&rt.checkpoint)||("seq 41,208 · "+(a.lastUsed||"—")))+' · chain intact</dd>'+
    (rt&&rt.note?'<dt>Note</dt><dd>'+h(rt.note)+'</dd>':'')+
@@ -5365,7 +5363,7 @@ function aToolbelt(a,r){
      '<td>'+catBadge(toolMeta(x.n).cat)+'</td>'+
      '<td>'+gate(x.dec,x.note||x.rule)+'<span class="sub mono">'+h(x.rule)+'</span></td>'+
      '<td>'+hazard(x.risk,x.eff)+'</td>'+
-     '<td><span class="b b-q">'+h(x.eg)+'</span></td><td>'+finBadge(x.fin)+'</td>'+
+     '<td><span class="b b-q">'+keyLabel(x.eg)+'</span></td><td>'+finBadge(x.fin)+'</td>'+
      '<td class="dim mono" style="font-size:10.5px">'+h(x.dig)+'</td></tr>';
   }
   var rows=bv==="group"
@@ -5373,7 +5371,7 @@ function aToolbelt(a,r){
       var rs=bsel.filter(function(x){return toolMeta(x.n).cat===c;});
       return '<tr class="tgrp t-'+c+'"><td colspan="6"><span class="ti">'+catSvg(c)+'</span><b>'+h(TCAT[c].l)+
        '</b><span class="muted">'+h(TCAT[c].s)+'</span></td>'+
-       '<td class="dim" style="font-size:11px;white-space:nowrap">'+rs.length+' tool'+(rs.length>1?'s':'')+'</td></tr>'+
+       '<td class="dim" style="font-size:11px;white-space:nowrap">'+plural(rs.length,"tool")+'</td></tr>'+
        rs.map(row).join("");}).join("")
    : bsel.map(row).join("");
 
@@ -5508,7 +5506,7 @@ function permRoles(a){
     var ro=roleById(roleBase(x));
     return '<dt class="mono">'+h(x)+'</dt><dd class="mono" style="font-size:11.5px">'+
      (ro?h(ro.perms.join(" · ")):'—')+'<span class="sub">'+(ro?h(ro.desc):'not a registered role')+'</span></dd>';
-   }).join(""):'<dt>Roles</dt><dd class="dim">none held — it can reach nothing but its own run channel</dd>';
+   }).join(""):'<dt>Roles</dt><dd class="dim">None held. It can reach only its own run channel.</dd>';
 
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Roles</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">A subagent can use only what both its own grants and the invoking person\'s grants allow. Subagents can only narrow.</p></div>'+
@@ -5519,13 +5517,13 @@ function permRoles(a){
    '<dl class="kv">'+roleRows+
    '<dt>Resource scope</dt><dd class="mono" style="font-size:11.5px">side_effects: read, write · repositories: '+
     h([w.main].concat(w.linked||[]).join(", "))+' · egress: third_party · max_hops 2</dd>'+
-   '<dt>Spend ceiling</dt><dd>'+iamMoney(a.budget,"per run, checked at each hook boundary")+' · '+
+   '<dt>Spend ceiling</dt><dd>'+iamMoney(a.budget,"per run, checked at each checkpoint")+' · '+
     iamMoney(a.budgetDay||a.budget,"per day, on reported spend")+'</dd>'+
    '<dt>Can move money</dt><dd>'+(a.mandates.length
-     ?'<span class="b b-approval"><span class="d"></span>'+a.mandates.length+' mandate</span> — and only inside it'
-     :'<span class="b b-allowed"><span class="d"></span>no</span> — no mandate, so a financial call is denied before dispatch')+'</dd>'+
+     ?'<span class="b b-approval"><span class="d"></span>'+plural(a.mandates.length,"mandate")+'</span> Only within its terms.'
+     :'<span class="b b-allowed"><span class="d"></span>no</span> No mandate is held, so a financial call is denied before dispatch.')+'</dd>'+
    '</dl>'+
-   '<div class="note">Assigning a toolbelt grants nothing. It widens what the model is shown; every call on it is still '+
+   '<div class="note">Assigning a toolbelt grants nothing. It widens what the model is shown. Every call on it is still '+
    'decided against these roles, the policy on the tool, and the mandate ledger.</div>'+
    '</div></div>';
 }
@@ -5538,20 +5536,20 @@ function permBudgets(a){
   var runPct=Math.round(a.budgetUsed/money(a.budget)*100);
 
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Budgets</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Checked at each hook boundary against the spend the harness reports. A breach pauses the run at the next boundary: client-attested and fail-open. On the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers the proxy enforces the ceiling before the call.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Hard limit, checked at each checkpoint against reported spend. If the harness stops reporting, the run is not paused (fail-open). On the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers the proxy blocks the call before it is sent.</p></div>'+
    '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'budget\')">Set budget</button></div>'+
    '<div class="panel-b" style="display:grid;gap:14px">'+
-   '<div class="meter"><div class="lab">Per run · hard<b>'+usd(a.budget)+'</b></div>'+
+   '<div class="meter"><div class="lab">Per-run hard limit<b>'+usd(a.budget)+'</b></div>'+
     '<div class="bar"><i style="width:'+Math.min(100,runPct)+'%;background:'+
     (runPct>80?"var(--st-critical)":"var(--st-allowed)")+'"></i></div>'+
     '<div class="dim" style="font-size:11.5px">highest run this month '+usd(a.budgetUsed.toFixed(2))+
     ' · basis: price book 2026-09 at the provider\'s list rate</div></div>'+
-   '<div class="meter"><div class="lab">Per day · hard<b>'+usd(a.usedDay||"0.00")+' of '+usd(a.budgetDay||a.budget)+'</b></div>'+
+   '<div class="meter"><div class="lab">Per-day hard limit<b>'+usd(a.usedDay||"0.00")+' of '+usd(a.budgetDay||a.budget)+'</b></div>'+
     '<div class="bar"><i style="width:'+pct.toFixed(0)+'%;background:'+dayCol+'"></i></div>'+
     '<div class="dim" style="font-size:11.5px">resets 00:00 UTC · mode hard · currency USD</div></div>'+
    '<dl class="kv">'+
-   '<dt>Mode</dt><dd>hard: checked at each hook boundary on reported spend</dd>'+
-   '<dt>On a breach</dt><dd><span class="mono">pause</span> at the next boundary, a '+
+   '<dt>Mode</dt><dd>Hard limit, checked at each checkpoint against reported spend</dd>'+
+   '<dt>On a breach</dt><dd><span class="mono">pause</span> at the next checkpoint, a '+
     '<span class="mono">policy.decision</span> frame, and the operator notified</dd>'+
    '<dt>Delegation ceiling</dt><dd>max_hops 2 · a subagent inherits this ceiling and may only lower it</dd>'+
    '</dl></div></div>';
@@ -5565,19 +5563,20 @@ function permMandates(a){
    '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>cannot move money</span></div>'+
    '<div class="panel-b" style="display:grid;gap:13px">'+
    '<p style="font-size:13px;margin:0">A financial tool call from this agent is denied before dispatch. That is true whether '+
-   'the tool is on its toolbelt or not, and it is checked at step 5 of the call pipeline — before any credential is minted and '+
+   'the tool is on its toolbelt or not. It is checked before any credential is minted and '+
    'before anything is sent to a provider.</p>'+
    iamChain([
     ["Call",'<span class="mono">stripe__create_payment@5</span> · amount $1,204.18 USD'],
-    ["Financial class",'moves_funds, read from the tool version\'s declared <span class="mono">amount_path</span>'],
+    ["Financial class",keyLabel("moves_funds")+', read from the tool version\'s declared <span class="mono">amount_path</span>'],
     ["Mandate lookup",'none for <span class="mono">'+h(a.key)+'</span>'],
-    ["Decision",gate("deny")+' <span class="mono">no_mandate</span> · mandate ledger unchanged · no credential minted']])+
+    ["Decision",gate("deny")+' · no mandate · mandate ledger unchanged · no credential minted']])+
    '<div class="row"><button class="btn" onclick="openDialog(\'mandate\')">Request a mandate</button></div>'+
    '</div></div>';
 
+  var byStatus={}; mine.forEach(function(m){byStatus[m.status]=(byStatus[m.status]||0)+1;});
   return '<div class="panel"><div class="panel-h"><h3>Mandates held</h3>'+
-   '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>'+mine.length+' active</span></div><div class="tw"><table>'+
-   '<thead><tr><th>Mandate</th><th>Effect</th><th class="num">Per call</th><th class="num">Per period</th>'+
+   '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>'+Object.keys(byStatus).map(function(k){return byStatus[k]+' '+h(k);}).join(' · ')+'</span></div><div class="tw"><table>'+
+   '<thead><tr><th>Mandate</th><th>Effect</th><th class="num">Auto-approve limit</th><th class="num">Per period</th>'+
    '<th class="num">Remaining</th><th>Expires</th><th>Status</th></tr></thead><tbody>'+
    mine.map(function(m){return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+defSlug(a)+'/mandates/'+m.id+'\')">'+
     '<td class="mono">'+h(m.id)+'</td><td class="mono" style="font-size:11.5px">'+h(m.effect)+'</td>'+
@@ -5587,7 +5586,7 @@ function permMandates(a){
    '</tbody></table></div>'+
    '<div class="panel-b"><div class="note">A mandate is the only thing that lets this agent move money, and it is spent '+
    'against a ledger: every draw reserves, then settles or releases. Its tools appear on the toolbelt gated '+
-   '<span class="mono">mandate + approval</span>, never plain <span class="mono">allowed</span>.</div></div></div>';
+   '<span class="mono">mandate + approval</span> rather than <span class="mono">allowed</span>.</div></div></div>';
 }
 
 /* ══════════════════════════════ Activity ══════════════════════════════
@@ -5601,8 +5600,8 @@ function aActivity(a,r){
 function actRuns(a){
   var rr=RUNS.filter(function(x){return x.agent===a.key;});
   if(!rr.length) return '<div class="panel"><div class="panel-h"><h3>Runs</h3></div><div class="panel-b">'+
-   '<p class="muted" style="margin:0;font-size:12.5px">No run of this agent is in the player\'s window. It has '+
-   a.runs30.toLocaleString()+' in the last 30 days; every one of them is in the audit record.</p>'+
+   '<p class="muted" style="margin:0;font-size:12.5px">No recent run of this agent is loaded here. It has '+
+   plural(a.runs30,"run")+' in the last 30 days, and each one is in the audit record.</p>'+
    '<div class="row" style="margin-top:12px"><button class="btn sm ghost" onclick="go(\'#/'+ORG.slug+'/audit/events\')">Open the audit record</button></div>'+
    '</div></div>';
   return '<div class="panel"><div class="panel-h"><h3>Runs</h3>'+
@@ -5625,7 +5624,7 @@ function actAccounting(a){
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Token accounting</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">By class, measured on every model call.</p></div>'+
     '<span class="mono dim" style="margin-left:auto;font-size:11px">30 days</span></div>'+
-    '<div class="tw"><table data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens 30d</th>'+
+    '<div class="tw"><table data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens (30 days)</th>'+
     '<th class="num">Rate</th><th class="num">Cost</th></tr></thead><tbody>'+
     tok.map(function(x){return '<tr><td>'+h(x[0])+'</td><td class="num">'+x[1].toLocaleString()+'</td>'+
      '<td class="num">'+usd(x[2])+' / M</td><td class="num">'+usd(x[3])+'</td></tr>';}).join("")+
@@ -5637,11 +5636,11 @@ function actAccounting(a){
     'are paid on every call whether the tool is used or not.</div></div></div>'+
 
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Last 30 days</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Read from the run records, not from the agent row.</p></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">Read from the run records.</p></div>'+
     '<button class="btn sm" style="margin-left:auto" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/spend\')">Open on Spend</button></div>'+
     '<div class="panel-b" style="display:grid;gap:14px"><dl class="kv">'+
     '<dt>Runs</dt><dd><span class="num">'+a.runs30.toLocaleString()+'</span></dd>'+
-    '<dt>Spend</dt><dd>'+iamMoney(a.spend30,"model calls as the harness reported them + priced tool calls, reported by harness")+'</dd>'+
+    '<dt>Spend</dt><dd>'+iamMoney(a.spend30,"model calls as the harness reported them, plus priced tool calls")+'</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(a.ratio)+'<span class="sub">the share of spend on turns that produced a change</span></dd>'+
     '<dt>Tokens</dt><dd><span class="num">'+tokn(agentTok(a).total)+'</span> · '+per(agentTok(a).cacheRate)+' cached</dd>'+
     '</dl>'+
@@ -5665,8 +5664,8 @@ function actIncidents(a){
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Nothing has been detected on this agent in the retention window.</p></div>'+
    '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>clean · 90 days</span></div>'+
    '<div class="panel-b"><p style="font-size:12.5px;margin:0">Detectors that would raise one: '+
-   '<span class="mono">hooks_removed</span>, <span class="mono">chain_break</span>, '+
-   '<span class="mono">unknown_tool</span> bursts, <span class="mono">credential_probe</span>, '+
+   keyLabel("hooks_removed")+', '+keyLabel("chain_break")+', '+
+   keyLabel("unknown_tool")+' bursts, '+keyLabel("credential_probe")+', '+
     'a receipt modified after the fact, and a same-<span class="mono">seq</span> '+
    'frame arriving with a different hash. Each one fires the same commands policy does, and each is a security event '+
    'with who, why, and what it stopped.</p>'+
@@ -5677,7 +5676,7 @@ function actIncidents(a){
   var edge={critical:"var(--st-critical)",warning:"var(--st-approval)",info:"var(--border)"};
   return list.map(function(i){
    return '<div class="panel" style="border-color:color-mix(in srgb,'+(edge[i.sev]||"var(--border)")+' 34%,var(--border))">'+
-    '<div class="panel-h"><div style="flex:1;min-width:0"><h3 class="mono" style="font-size:14px">'+h(i.kind)+'</h3>'+
+    '<div class="panel-h"><div style="flex:1;min-width:0"><h3 class="mono" style="font-size:14px">'+keyLabel(i.kind)+'</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+h(i.at)+' · detected by '+h(i.by)+' · '+h(i.scope)+'</p></div>'+
     '<span class="b b-'+(tone[i.sev]||"q")+'" style="margin-left:auto"><span class="d"></span>'+h(i.sev)+'</span>'+
     '<span class="b b-'+(i.status==="open"?"critical":"allowed")+'"><span class="d"></span>'+h(i.status)+'</span></div>'+
@@ -5688,7 +5687,7 @@ function actIncidents(a){
                :'<dt>Owner</dt><dd>'+h(i.owner||"unassigned")+(i.due?' · due '+h(i.due):'')+'</dd>')+
     '<dt>Incident</dt><dd class="mono">'+h(i.id)+'</dd></dl>'+
     '<div class="row"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/audit/incidents\')">Open on Audit</button>'+
-    (i.runs?'<span class="dim" style="font-size:11.5px">'+i.runs+' run'+(i.runs>1?'s':'')+' affected</span>':'')+'</div>'+
+    (i.runs?'<span class="dim" style="font-size:11.5px">'+plural(i.runs,"run")+' affected</span>':'')+'</div>'+
     '</div></div>';}).join("")+
    '<div class="panel"><div class="panel-b"><div class="note">A tamper incident never raises the tier of the frames it '+
    'touched. The window it covers stays labeled as what was actually observed, which is why the count here and the count '+
@@ -12131,7 +12130,7 @@ DLG_EXT.rotatecred=function(key){
   var a=agent(key); if(!a)return noSuch("Agent");
   return {t:"Rotate the credential on "+a.key+"?",w:false,
    b:'<div class="note">A new key is minted and handed to the host at its next check-in. The old key stops working at the next call, and every live run token dies with it.</div>'+
-     '<div class="warn">A run in flight on this agent ends at its next call, not at a boundary. Its frames up to that point are kept.</div>',
+     '<div class="warn">A run in flight on this agent ends at its next call, without waiting for a checkpoint. Its frames up to that point are kept.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="closeDialog();act(\'Credential rotated on '+h(a.key)+'. The old key stops working at the next call and every live run token dies with it.\',\'gold\')">Rotate it</button>'};
 };
@@ -12139,14 +12138,14 @@ DLG_EXT.revokecred=function(key){
   var a=agent(key); if(!a)return noSuch("Agent");
   return {t:"Revoke the credential on "+a.key+"?",w:false,
    b:'<div class="note">Nothing is minted to replace it. '+h(a.key)+' cannot call anything until a new credential is issued, and every run token dies at the next call.</div>'+
-     '<div class="warn">Rotate is the reversible one. Revoke leaves the agent unable to run.</div>',
+     '<div class="warn">Revoke leaves the agent unable to run until a new credential is issued. To replace the key and keep running, rotate the credential instead.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
      '<button class="btn danger" onclick="closeDialog();act(\'Credential revoked on '+h(a.key)+'. Every run token dies at the next call.\')">Revoke it</button>'};
 };
 DLG_EXT.suspendagent=function(key){
   var a=agent(key); if(!a)return noSuch("Agent");
   return {t:"Suspend "+a.key+"?",w:false,
-   b:'<div class="note">Suspension is reversible and keeps the registration, the roles and the mandates. Every run token dies at the next call, even if the daemon is down, because oxagen refuses the call, not the agent’s host.</div>'+
+   b:'<div class="note">Suspension is reversible and keeps the registration, the roles and the mandates. Every run token dies at the next call, even if the daemon is down, because oxagen refuses the call itself.</div>'+
      '<div class="note" style="margin-top:10px">Retire ends the agent. You can undo a suspension.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn danger" onclick="closeDialog();act(\'Agent '+h(a.key)+' suspended. Every run token dies at the next call, even if the daemon is down.\')">Suspend it</button>'};
@@ -12255,7 +12254,7 @@ function identitySave(){
 }
 function identityDlg(){
   var a=S.dlg==="identity"?agent(S.dlgArg):null; if(!a) return {t:"Identity",w:false,b:"",f:""};
-  return {t:"Change identity",s:a.key,w:false,b:
+  return {t:"Edit identity",s:a.key,w:false,b:
    '<div class="field"><label>Principal</label><input value="prn_01K2M7A4E8 · kind agent" readonly aria-label="Principal"><div class="hint">The principal is the agent’s IAM identity. It is created at registration and never reused.</div></div>'+
    '<div class="field"><label>Acts on behalf of</label><select id="idOp" aria-label="Parent user">'+Object.keys(PEOPLE).map(function(k){return '<option value="'+k+'"'+(a.operator===k?' selected':'')+'>'+h(PEOPLE[k].name)+' · '+h(PEOPLE[k].role)+'</option>';}).join("")+'</select>'+
     '<div class="hint">The parent user sets the delegation ceiling: the agent can never do what this person cannot.</div></div>'+
@@ -12273,15 +12272,15 @@ function agentDelete(key){
   var i=-1;AGENTS.forEach(function(a,ix){if(a.key===key)i=ix;});
   if(i<0)return; var a=AGENTS[i]; AGENTS.splice(i,1); delete S.agentRoles[key];
   WS.forEach(function(w){if(w.slug===a.ws&&w.agents>0)w.agents--;});
-  closeDialog(); go('#/'+ORG.slug+'/'+a.ws+'/agents'); act(key+" retired. Credential revoked, definition archived by a context PR, every run and frame kept.");
+  closeDialog(); go('#/'+ORG.slug+'/'+a.ws+'/agents'); act(key+" retired. Its credential is revoked, a Context PR archives its definition, and every run and frame is kept.");
 }
 function agentDelDlg(){
   var a=S.dlg==="delagent"?agent(S.dlgArg):null; if(!a) return {t:"Retire agent",w:false,b:"",f:""};
   var live=RUNS.filter(function(r){return r.agent===a.key&&r.status==="live";}).length;
   return {t:"Retire agent",s:a.key,w:false,b:
    '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a Context PR archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
-   '<dl class="kv"><dt>Kept</dt><dd>every run, frame, receipt and score — the record is never deleted</dd><dt>Ends</dt><dd>'+agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+', '+a.mandates.length+' mandate'+(a.mandates.length===1?'':'s')+', the host enrollment</dd>'+
-   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span> — canceled at the next boundary and recorded</dd>':'')+'</dl>'+
+   '<dl class="kv"><dt>Kept</dt><dd>every run, frame, receipt, and score. The record is kept in full.</dd><dt>Ends</dt><dd>'+plural(agentRolesOf(a.key).length,"role")+', '+plural(a.mandates.length,"mandate")+', and the host enrollment</dd>'+
+   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+plural(live,"live run")+'</span>, canceled at the next checkpoint and recorded</dd>':'')+'</dl>'+
    '<label class="check" style="margin-top:12px"><input type="checkbox" id="delAgentOk" onchange="el(\'delAgentBtn\').disabled=!this.checked"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Re-registering creates a new principal with a provisional score.</span></span></label>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button id="delAgentBtn" class="btn danger" disabled onclick="agentDelete(\''+h(a.key)+'\')">Retire</button>'};
 }
@@ -16034,7 +16033,7 @@ document.addEventListener("click",function(e){
       var tier=wpick([["gateway",68],["harness",19],["contained",8],["observe",5]]), tierNative=(wpick([["harness",1]]),tier);
       var incidents=wpick([[0,94],[1,5],[2,1]]);
       var av=rnd()<0.62?{kind:"icon",icon:ICONS[(n*7+w.slug.length)%ICONS.length],tone:TONES[n%3]}:{kind:"initials",text:slug.split("-").map(function(s){return s.charAt(0).toUpperCase();}).join("").slice(0,3),font:FONTS[n%3],tone:TONES[(n+1)%3]};
-      var made={key:"a-intel."+x.pre+"."+slug,name:agentTitle(slug),harness:hn[0],harnessLabel:hn[1],ws:w.slug,operator:wpick(ops),status:"enrolled",
+      var made={key:"a-intel."+x.pre+"."+slug,name:agentTitle(slug),harness:hn[0],harnessLabel:hn[1],ws:w.slug,operator:wpick(ops),status:"registered",
         tier:tier,tierNative:tierNative,belt:(bw=ri(3,58)),beltMode:(rnd(),bw>FULL_BELT_LIMIT?"searchable":"full"),runs30:runs30,spend30:m2(spend),ratio:ratio,
         digest:"sha256:"+hex(16),commit:x.head,budget:m2(pick([0.4,0.6,0.8,1,1.5,2,3])),budgetUsed:Math.round(rf(0.05,0.98)*100)/100,
         desc:DESC[base]||("Runs "+title(base).toLowerCase()+" for "+w.name+". Opens a pull request or a proposal; never merges, never pays."),
@@ -16597,7 +16596,8 @@ S.tsel={}; S.dodEdit={}; S.tkDrafting={}; S.wo=null; S.ipz=null; S.wfz=null; S.d
     AGENTS.push({key:x.key,name:x.name,harness:x.harness,harnessLabel:x.harnessLabel,ws:"core-platform",operator:TK_ME,status:"enrolled",
       tier:x.tier,tierNative:x.tier,belt:belts[i],beltMode:"full",runs30:x.runs30,spend30:x.spend30,ratio:0.41,
       digest:"sha256:"+["4b1e","9a07","c2d5","e6f3"][i]+"0d7a1c5e93b2",commit:"a4c91e2",budget:"2.00",budgetUsed:0.28,
-      desc:x.desc,avatar:{kind:"icon",icon:x.icon,tone:x.tone},mandates:[],incidents:0,model:"complex",host:x.host});
+      desc:x.desc,avatar:{kind:"icon",icon:x.icon,tone:x.tone},mandates:[],incidents:0,model:"complex",host:x.host,
+      enrolled:true,principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCN"+["K","M","P","Q"][i],devKey:"ed25519:"+["5d31…a0c4","b812…6e27","0f9e…d153","c47a…29b8"][i]});
   });
   WS.forEach(function(w){if(w.slug==="core-platform")w.agents+=TK.agents.length;});
   ORG.agents=AGENTS.length;
