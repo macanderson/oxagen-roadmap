@@ -162,14 +162,16 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   ok(r.found, "the funding tab carries a Funding source panel");
   ok(/platform_minted/.test(r.text), "it names the minted source");
   ok(/sk-or-v1-a3f1/.test(r.text) && !/sk-or-v1-a3f1\w{8}/.test(r.text), "it shows a prefix, not a secret");
-  ok(/never returned/.test(r.text), "it says the secret is never returned");
+  // That the secret is never returned is in the Funding source help, not on the panel.
+  ok(!/never returned/.test(r.text), "the panel leaves the explanation to the component help");
   ok(/key_01K5RW8Q2N/.test(r.text), "it shows the provisioned id reconciliation joins on");
   ok(/Reconciliation/i.test(r.text), "it carries the reconciliation block");
   ok(/OpenRouter reports/.test(r.text) && /credit ledger/.test(r.text), "reconciliation names two independent sources");
   ok(/engine\.oxagen\.sh/.test(r.text), "it names the engine the key is spent through");
   await shot(page, "org-funding-source");
 
-  for (const [dlg, want] of [["mintkey", /provisioning/i], ["rotateorgkey", /Rotation/i], ["revokeorgkey", /stops for everyone/i]]) {
+  // Each dialog says what its action does; mintkey shows the request it writes.
+  for (const [dlg, want] of [["mintkey", /POST https:\/\/openrouter\.ai\/api\/v1\/keys/], ["rotateorgkey", /Rotation/i], ["revokeorgkey", /stops for everyone/i]]) {
     await page.evaluate(k => openDialog(k), dlg);
     await page.waitForTimeout(200);
     const b = await page.evaluate(() => document.querySelector("#layer .dlg")?.innerText.replace(/\s+/g, " ") || "");

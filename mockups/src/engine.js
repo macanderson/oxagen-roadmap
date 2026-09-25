@@ -1479,7 +1479,7 @@ function commitBody(){
     '<button class="btn sm ghost" type="button" onclick="cmRedraft()">Redraft</button></div></div>'+
    '<div class="field"><label>Description</label><textarea rows="4" aria-label="Description" oninput="cmSet(\'body\',this.value)">'+h(c.body)+'</textarea>'+
     '<div class="hint">Becomes the commit message'+(c.pr||(ex&&ex.pr)?' and the pull request body':'')+'.</div></div>'+
-   (d.risk.length?'<div class="callout" style="margin-bottom:14px">This change '+h(d.risk.join(" and "))+'. The checks will hold the merge for a code-owner review'+(d.risk.some(function(x){return /mandate/.test(x);})?' and an active mandate':'')+'.</div>':'')+
+   (d.risk.length?'<div class="callout" style="margin-bottom:14px">This change '+h(d.risk.join(" and "))+'. It merges only when someone other than the author approves'+(d.risk.some(function(x){return /mandate/.test(x);})?', and only under an active mandate':'')+'.</div>':'')+
    (c.prOnly
     ?'<div class="cm-sw"><span class="b b-approval" style="margin-top:2px"><span class="d"></span>PR</span><div class="tx"><b>Opens the pull request for <span class="mono">'+h(c.branch)+'</span></b>The commit is already on the branch.</div></div>'
     :ex&&ex.pr
@@ -8832,7 +8832,7 @@ SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"c
    setup:function(){ctxprSet("none");S.tab.steering="proposals";S.prpSel="prp_01K5RU4A";},
    act:["Open the pull request","openDialog('ctxpr','prp_01K5RU4A')"]},
   {say:"The checks run one at a time: the same rules as <span class=\"mono\">stella context validate</span>. Merge stays blocked until all of them pass, and the merge is the publication.",
-   note:"In team mode a code-owner merges. In regulated mode the merge also appends to the hash-chained promotions ledger.",
+   note:"In team mode an org Owner or Admin, or a workspace Owner, other than the author merges. Every merge appends to the hash-chained promotions ledger.",
    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
    setup:function(){S.tab.steering="prs";S.prpSel=null;if(S.ctxpr.st==="none"||S.ctxpr.st==="merged")ctxprRun();},
    act:["Merge the pull request","ctxprMerge()"]},
@@ -9354,7 +9354,7 @@ function fixDlg(){
        ["Schema","Lineage uniqueness","record_hash recomputation","Secret and PII scan","Conflict against active records","Constraint is require or forbid"]
        .map(function(c){return '<tr><td style="font-size:12px;padding:6px 10px">'+h(c)+'</td><td style="padding:6px 10px"><span class="b b-q">on push</span></td></tr>';}).join("")+
        '</tbody></table></div></div></div>',
-     f:'<span class="grow">Opens on <span class="mono">a-intel/platform</span> as '+h(x.pr)+' · team mode, a code-owner review is required.</span>'+
+     f:'<span class="grow">Opens on <span class="mono">a-intel/platform</span> as '+h(x.pr)+'.</span>'+
        '<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Branch '+h(x.branch)+' pushed and '+h(x.pr)+' opened with '+h(f.id)+' as supporting evidence.\')">Open the pull request</button>'};
   }
   return {t:"Fix for "+fndKindLc(f),w:true,s:x.title,
@@ -9470,7 +9470,7 @@ function dialog(){
      '<div class="field"><label for="nw-main">Main repository</label><select id="nw-main"><option>a-intel/warehouse</option><option>a-intel/data-platform</option></select>'+
      '<div class="hint">Required at creation.</div></div>'+
      '<div class="field"><label for="nw-branch">Production branch</label><select id="nw-branch"><option value="main">main (GitHub’s default, suggested)</option><option value="release">release</option><option value="production">production</option></select></div>'+
-     '<div class="field"><label for="nw-gov">Governance mode</label><select id="nw-gov"><option value="team">team: a code-owner review is required</option><option value="solo">solo: the author may merge</option><option value="regulated">regulated: a named approver and a ledger entry</option></select></div>'+
+     '<div class="field"><label for="nw-gov">Governance mode</label><select id="nw-gov"><option value="team">team</option><option value="solo">solo</option><option value="regulated">regulated</option></select></div>'+
      '<div class="field"><label for="nw-ret">Retention mode</label><select id="nw-ret"><option value="content_exact">Exact content: keep prompts and tool bodies in full</option><option value="digest_only">Digest only: recorded as a completeness gap</option></select></div>'+
      '',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsCreate()">Create</button>'},
@@ -10152,7 +10152,7 @@ function wsEditDlg(){
   return {t:"Edit workspace",s:w.slug,w:false,b:'<div class="field"><label>Name</label><input id="wsName" value="'+h(w.name)+'" aria-label="Name"></div>'+
    '<div class="field"><label>Main repository</label><input value="'+h(w.main)+'" readonly aria-label="Main repository"><div class="hint">Changing main is an org-owner action with approval.</div></div>'+
    '<div class="field"><label>Production branch</label><select id="wsBranch" aria-label="Production branch">'+["main","release","production"].map(function(x){return '<option'+(w.branch===x?' selected':'')+'>'+x+'</option>';}).join("")+'</select></div>'+
-   '<div class="field"><label for="wsGov">Governance mode</label><select id="wsGov" aria-label="Governance mode">'+WZ_MODES.map(function(m){return '<option value="'+m[0]+'"'+(wsGov(w)===m[0]?' selected':'')+'>'+m[0]+' · '+h(m[1])+'</option>';}).join("")+'</select>'+
+   '<div class="field"><label for="wsGov">Governance mode</label><select id="wsGov" aria-label="Governance mode">'+WZ_MODES.map(function(m){return '<option value="'+m[0]+'"'+(wsGov(w)===m[0]?' selected':'')+'>'+m[0]+'</option>';}).join("")+'</select>'+
     '<div class="hint">Written to <span class="mono">.oxagen/rules/governance.toml</span> through a pull request; it takes effect on merge.</div></div>'+
    '<div class="field"><label>Namespace</label><input value="'+h(w.ns||w.slug.split("-")[0])+'" disabled aria-label="Namespace"><div class="hint">Immutable. It is in every agent key here: <span class="mono">'+h(ORG.slug+"."+(w.ns||w.slug.split("-")[0]))+'.&lt;agent&gt;</span>.</div></div>'+
    '<div class="field"><label for="wsRet">Retention mode</label><select id="wsRet">'+[["content_exact","Full content (keeps prompts and tool bodies)"],["digest_only","Digests only (recorded as a completeness gap)"]].map(function(x){return '<option value="'+x[0]+'"'+((w.retention||"content_exact")===x[0]?' selected':'')+'>'+x[1]+'</option>';}).join("")+'</select>'+
@@ -11183,7 +11183,7 @@ function asstSheet(){
    '<dt>Receipt</dt><dd><a class="mono" href="#/'+ORG.slug+'/audit/receipts" onclick="openDialog(\'receipt\',\'rcp_01K5RTB4Q\')">rcp_01K5RTB4Q</a></dd>'+
    '<dt>Recorded as</dt><dd>one governed action, in the ledger and not billed</dd></dl></div>'+
    '<p style="margin:10px 0 0">Estimated saving from the frames it cites: <b>$188.40</b> USD over 30 days. '+
-   'A code-owner review is required in <span class="mono">team</span> mode, so it is yours to merge.</p></div></div>'+
+   'In <span class="mono">team</span> mode someone other than the author merges, so it is yours to merge.</p></div></div>'+
     '<div class="msg op"><div class="who">'+h(me().name)+'</div><div class="bub">Why did run_01K5RG6H1L4OIU9Y cost $5.08?</div></div>'+
     '<div class="msg"><div class="who">'+stellaName()+'</div><div class="bub">'+
     '<p style="margin:0 0 9px">Two thirds of its input tokens were tool result bodies: it re-read <span class="mono">CHANGELOG.md</span> on five of seven turns, and the cache missed after turn 3 because a steering publish changed the prefix mid-run.</p>'+
