@@ -29,23 +29,29 @@ function runRepo(R){
   var m=String(R.task||"").match(/^([\w.-]+\/[\w.-]+)#/);
   return m?m[1]:(R.ws==="finops"?"a-intel/billing":R.ws==="mobile"?"a-intel/mobile":"a-intel/platform");
 }
+function fileDirect(R){
+  var live=R.status==="live"||R.status==="parked"||R.status==="paused";
+  var t=null; TASKS.forEach(function(x){if(x.num===R.task)t=x;});
+  var w={id:"wo_"+R.id.slice(4),ws:R.ws,kind:"direct",title:R.taskTitle||R.task||"Run on "+(R.agent||"").split(".").pop(),
+    tasks:t?[t.id]:[],target:{kind:"agent",id:R.agent},by:R.op,sent:runDay(R),
+    status:live?"in progress":R.status==="halted"?"stopped":"closed",stage:1,returns:0,repos:[runRepo(R)],
+    digest:null,ref:R.task||null,runs:[{stage:1,run:R.id,state:live?"live":"sealed",pr:"",note:""}],claims:[]};
+  WORKORDERS.push(w); WO_BY_RUN[R.id]=w;
+  return w;
+}
+/* Files every run that has no work order yet. Runs arrive after load (the onboarding smoke session),
+   so Work and the run page call it rather than trusting the list built at start. */
+function fileRuns(){ RUNS.forEach(function(R){ if(!WO_BY_RUN[R.id]) fileDirect(R); }); }
 (function directWorkOrders(){
   WORKORDERS.forEach(function(w){
     if(!w.kind) w.kind="dispatched";
     (w.runs||[]).forEach(function(x){WO_BY_RUN[x.run]=w;});
   });
-  RUNS.forEach(function(R){
-    if(WO_BY_RUN[R.id]) return;
-    var live=R.status==="live"||R.status==="parked"||R.status==="paused";
-    var t=null; TASKS.forEach(function(x){if(x.num===R.task)t=x;});
-    var w={id:"wo_"+R.id.slice(4),ws:R.ws,kind:"direct",title:R.taskTitle||R.task||"Run on "+(R.agent||"").split(".").pop(),
-      tasks:t?[t.id]:[],target:{kind:"agent",id:R.agent},by:R.op,sent:runDay(R),
-      status:live?"in progress":R.status==="halted"?"stopped":"closed",stage:1,returns:0,repos:[runRepo(R)],
-      digest:null,ref:R.task||null,runs:[{stage:1,run:R.id,state:live?"live":"sealed",pr:"",note:""}],claims:[]};
-    WORKORDERS.push(w); WO_BY_RUN[R.id]=w;
-  });
+  fileRuns();
 })();
-function runParent(R){return R?WO_BY_RUN[R.id]||null:null;}
+/* A direct work order whose run a scenario took back out is not shown. */
+function woShown(w){ return w.kind!=="direct"||(w.runs||[]).some(function(x){return !!run(x.run);}); }
+function runParent(R){ if(!R) return null; if(!WO_BY_RUN[R.id]&&RUNS.indexOf(R)>=0) fileDirect(R); return WO_BY_RUN[R.id]||null; }
 function woRuns(w){return (w.runs||[]).map(function(x){return {x:x,R:run(x.run)};});}
 function woLive(w){return (w.runs||[]).some(function(x){return x.state==="live";});}
 function woSpend(w){var s=0;woRuns(w).forEach(function(o){if(o.R)s+=parseFloat(o.R.cost)||0;});return s;}
@@ -65,6 +71,10 @@ function pWork(r){
   if(S.state==="empty") return emptyState("No work in "+w.name+" yet",
     "Work arrives from a connected issue provider, from a finding a person picks up, or written here. A run an agent starts on its own is filed under a direct work order.",
     '<button class="btn primary" onclick="openDialog(\'intake\',\'providers\')">Connect an issue provider</button>');
+  fileRuns();
+  /* First run (W1): straight after onboarding the workspace holds one run, the smoke session, filed
+     under a direct work order. Work opens on it alone. S.firstRun is cleared to see the seeded workspace. */
+  var fr=obFirstRun(w); if(fr) t="orders";
   var counts={backlog:tkWaiting(),orders:woWaiting(),workflows:0,findings:findingsOpen().length};
   var tabs='<div class="tabs" role="tablist" aria-label="Work">'+WORK_TABS.map(function(x){
     return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="go(\''+workHash(x[0])+'\')">'+x[1]+
@@ -72,9 +82,10 @@ function pWork(r){
   var sel=Object.keys(S.tsel).filter(function(k){return S.tsel[k];});
   var acts=t==="backlog"?'<button class="btn" onclick="openDialog(\'intake\',\'providers\')">Intake</button>'+dispatchButton(sel)
     :t==="workflows"?'<button class="btn primary" onclick="wfzOpen()">New workflow</button>':'';
-  var body=t==="orders"?workOrdersTab():t==="workflows"?tkWfTab():t==="findings"?findingsTab():backlogTab();
+  var body=t==="orders"?workOrdersTab(fr):t==="workflows"?tkWfTab():t==="findings"?findingsTab():backlogTab();
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Work</h1>'+
-   '<p>What the agents work on, and what waits on you.</p></div><div class="acts">'+acts+'</div></div>'+tabs+body;
+   '<p>What the agents work on, and what waits on you.</p></div><div class="acts">'+acts+'</div></div>'+
+   obFirstBanners(w,fr)+(fr?obOfferCard(fr):'')+tabs+body;
 }
 
 /* ---- Backlog: every open work item ---- */
@@ -125,8 +136,8 @@ function wiLogo(t,size){
 }
 
 /* ---- Work orders: dispatched and direct ---- */
-function workOrdersTab(){
-  var all=wsWorkOrders().slice().sort(function(a,b){return (a.sent<b.sent?1:a.sent>b.sent?-1:0);});
+function workOrdersTab(fr){
+  var all=(fr?[runParent(fr)]:wsWorkOrders().filter(woShown)).slice().sort(function(a,b){return (a.sent<b.sent?1:a.sent>b.sent?-1:0);});
   var f=S.woFilter||"all";
   var rows=all.filter(function(w){return f==="all"||(f==="live"?woLive(w):w.kind===f);});
   var n={all:all.length,dispatched:all.filter(function(w){return w.kind==="dispatched";}).length,direct:all.filter(function(w){return w.kind==="direct";}).length,live:all.filter(woLive).length};
@@ -280,7 +291,7 @@ function woFrames(w){
    so the Compiler and the Decision trace can never disagree about the same inputs. */
 function resolveEnvelope(slug,brief,opt){
   opt=opt||{};
-  var M=assembleSteering(slug,brief||"",{repo:opt.repo}), a=M.agent, wslug=a.ws, sel=[], cut=[];
+  var M=assembleSteering(slug,brief||"",{repo:opt.repo,asOf:opt.asOf}), a=M.agent, wslug=a.ws, sel=[], cut=[];
   M.gates.forEach(function(g){sel.push(itemFrame(g,"session_start"));});
   M.prefix.forEach(function(it){sel.push(itemFrame(it,"session_start"));});
   /* The volatile selection is repacked here, because a registered document's sections compete in it
@@ -439,6 +450,12 @@ function openFrame(i){
   var R=run(S.runTabFor)||RUNS[0], L=runFrames(R);
   S.frame=Math.max(0,Math.min(+i||0,L.length-1)); S.frameRun=R.id; openDialog("frame");
 }
+/* Opens the frame with sequence number seq on the run in view (a scenario names frames by number). */
+function openFrameSeq(seq){
+  var R=run(S.runTabFor)||RUNS[0], L=runFrames(R);
+  for(var i=0;i<L.length;i++){ if(L[i].seq===seq) return openFrame(i); }
+  openFrame(0);
+}
 function openFrameIn(runId,i){
   S.dlg=null; S.frame=+i||0; S.frameRun=runId; S.pendingFrame={run:runId,i:+i||0};
   go(wsBase()+"/runs/"+runId);
@@ -474,7 +491,9 @@ function runSteers(R){
 function runEnvelope(R){
   var a=agent(R.agent), slug=a?defSlug(a):"release-manager", wo=runParent(R);
   var brief=wo&&wo.kind==="dispatched"?woSentPrompt(wo):(R.taskTitle||"");
-  return resolveEnvelope(slug,brief,{repo:runRepo(R),wo:wo,steers:runSteers(R)});
+  /* the bundle the run started on: a record merged later is not in what it received */
+  var m=(typeof STG_MANIFESTS!=="undefined"&&STG_MANIFESTS[R.id])||{};
+  return resolveEnvelope(slug,brief,{repo:runRepo(R),wo:wo,steers:runSteers(R),asOf:m.bundle||41});
 }
 /* The calls the agent chose, read off the transcript's tool entries and their policy decisions. */
 function runChoices(R){
