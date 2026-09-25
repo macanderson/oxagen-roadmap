@@ -366,7 +366,7 @@ function resolveEnvelope(slug,brief,opt){
     /* the source is the named belt that puts the tool on this agent; the searchable belt's meta-tools come from the definition */
     var bid=belts.filter(function(id){var b=beltCatalogById(id);return b&&b.tools.indexOf(m.id)>=0;})[0], b=bid?beltCatalogById(bid):null;
     var src=b?{kind:"toolbelt",id:b.id,version:"updated "+String(b.updated).slice(0,10),path:b.name}
-      :{kind:"agent",id:".oxagen/agents/"+defSlug(a)+".toml",version:a.commit||"main",path:"the searchable belt's meta-tools"};
+      :{kind:"agent",id:".oxagen/agents/"+defSlug(a)+".toml",version:a.commit||"main",path:"the searchable toolbelt's meta-tools"};
     var f=frameOf("capability",src,m.id+": "+m.d,{force:"info",point:"tools",tok:Math.max(60,Math.round(String(m.d).length*1.6)),enforced:m.dec});
     if(m.dec==="deny"){ f.reason="overridden_by_gate"; f.why=m.rule; cut.push(f); } else sel.push(f);});
   /* the work order the run belongs to, and the steers it received */
@@ -866,7 +866,7 @@ function envelopeHtml(E,keyPre){
       '<span class="sp mono dim" style="font-size:11px">'+F.length+' frame'+(F.length===1?'':'s')+(tk?' · '+tokn(tk)+' tok':'')+'</span></div>'+
       frameTable(F,{cap:ft?0:4,key:keyPre+"."+p[0]})+'</div>';}).join("");
   var meters='<div class="dt-meters">'+stgMeter("Session-start prefix",E.prefixTok,E.prefixCap,"tok","16 KiB in the signed bundle, header included")+
-    stgMeter("Volatile selection",E.volatileTok,E.volatileCap,"tok","picked for this brief under the workspace budget")+'</div>';
+    stgMeter("Per-prompt selection",E.volatileTok,E.volatileCap,"tok","picked for this brief under the workspace budget")+'</div>';
   return meters+typeStrip(E.sel,keyPre)+env;
 }
 function exclusionsHtml(E,keyPre){

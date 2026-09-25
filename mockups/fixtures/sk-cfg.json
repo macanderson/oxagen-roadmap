@@ -17,7 +17,7 @@
    "label": "a-intel/billing · .oxagen/skills/",
    "on": true,
    "n": 1,
-   "d": "A linked repo. Its skills resolve here because core-platform binds it."
+   "d": "A linked repo. Its skills resolve here because core-platform links it."
   },
   {
    "k": "linked2",
