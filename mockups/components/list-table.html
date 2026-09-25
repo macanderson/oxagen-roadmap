@@ -42,7 +42,7 @@
   <p class="dx-lead">Every list in the product gets the same controls: a search box, up to three filters, sortable columns, a rows-per-page select, and a pager. Pages write a plain table, and the engine's <code>listify()</code> adds the controls after each render, so no page writes its own and no list shows two search boxes. This is the table panel in the screenshot that started this reference: the Agents list.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.lt, .lp</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 889 to 915</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 896 to 922</span>
     <span><b>Used on</b> Agents, Work orders, Backlog, Tools, Spend budgets, Repositories, Runtimes, Audit, Organization</span>
   </div>
 </div>
@@ -222,13 +222,13 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 889 to 915</td><td>The rules that draw it</td></tr>
-      <tr><td><code>listify()</code> at <code>engine.js:13794</code></td><td>After every render, runs <code>ltTable()</code> on each table in the page and the dialog layer, and <code>ltCards()</code> on each card list.</td></tr>
-      <tr><td><code>ltTable(table, prefix)</code> at <code>engine.js:13694</code></td><td>Reads the table, picks filters, makes headers sortable, and inserts the bar and pager.</td></tr>
-      <tr><td><code>ltBar(st, opts, apply)</code> at <code>engine.js:13642</code></td><td>Writes the control bar: search, filters, an optional Sort, and Rows.</td></tr>
-      <tr><td><code>ltPager(st, total, onPage)</code> at <code>engine.js:13617</code></td><td>Writes the range and the page buttons, with ellipses past seven pages.</td></tr>
-      <tr><td><code>ltCards(cfg)</code> at <code>engine.js:13763</code></td><td>The same bar and pager for card lists, configured in <code>LT_CARDS</code>.</td></tr>
-      <tr><td><code>cardTables()</code> at <code>engine.js:13860</code></td><td>Turns tables into labelled cards in the phone shell.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 896 to 922</td><td>The rules that draw it</td></tr>
+      <tr><td><code>listify()</code> at <code>engine.js:13853</code></td><td>After every render, runs <code>ltTable()</code> on each table in the page and the dialog layer, and <code>ltCards()</code> on each card list.</td></tr>
+      <tr><td><code>ltTable(table, prefix)</code> at <code>engine.js:13753</code></td><td>Reads the table, picks filters, makes headers sortable, and inserts the bar and pager.</td></tr>
+      <tr><td><code>ltBar(st, opts, apply)</code> at <code>engine.js:13701</code></td><td>Writes the control bar: search, filters, an optional Sort, and Rows.</td></tr>
+      <tr><td><code>ltPager(st, total, onPage)</code> at <code>engine.js:13676</code></td><td>Writes the range and the page buttons, with ellipses past seven pages.</td></tr>
+      <tr><td><code>ltCards(cfg)</code> at <code>engine.js:13822</code></td><td>The same bar and pager for card lists, configured in <code>LT_CARDS</code>.</td></tr>
+      <tr><td><code>cardTables()</code> at <code>engine.js:13919</code></td><td>Turns tables into labelled cards in the phone shell.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -258,7 +258,7 @@
 ## Inputs
 
 1. mockups/components/list-table.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 889 to 915. The mockup renders it with listify() (engine.js:13794), ltTable(table, prefix) (engine.js:13694), ltBar(st, opts, apply) (engine.js:13642), ltPager(st, total, onPage) (engine.js:13617), ltCards(cfg) (engine.js:13763), cardTables() (engine.js:13860).
+2. The design source: mockups/src/engine.css lines 896 to 922. The mockup renders it with listify() (engine.js:13853), ltTable(table, prefix) (engine.js:13753), ltBar(st, opts, apply) (engine.js:13701), ltPager(st, total, onPage) (engine.js:13676), ltCards(cfg) (engine.js:13822), cardTables() (engine.js:13919).
 3. The build's implementation: find it by its root selector (.lt, .lp) or its name, and list every route that renders it.
 4. Where to see it in the design: Agents, Work orders, Backlog, Tools, Spend budgets, Repositories, Runtimes, Audit, Organization. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

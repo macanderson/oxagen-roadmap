@@ -9,7 +9,7 @@ export default {
   summary: "Every call parked for a person, one drawer, opened from any page.",
   lead: "The drawer lists every call parked for a decision across the organization: pending approvals and a paused agent waiting on an answer. Picking a row opens the full approval card in place, with approve and deny, so a decision never needs another page. One drawer exists at a time, and it opens from the topbar button on every page.",
   root: ".apd",
-  css: "lines 2065 to 2092, countdown 811 to 824",
+  css: "lines 2072 to 2099, countdown 818 to 831",
   usedOn: ["every page (topbar)"],
   stories: [
     {
@@ -193,13 +193,13 @@ export default {
     ["--dim", "Resolved countdown"],
   ],
   helpers: [
-    ["apdButton()", "engine.js:1627", "The topbar trigger, with the live count."],
-    ["apdToggle(v)", "engine.js:1633", "Opens or closes the drawer and clears the selection on close."],
-    ["apdRow(a)", "engine.js:1636", "One approval row, pending or resolved."],
-    ["apdInterjectionRow(x)", "engine.js:1648", "The paused-agent row, with its own Answer button."],
-    ["apdBody(a)", "engine.js:1654", "The list, or the selected approval's card when `S.apd.sel` is set."],
-    ["apdHtml()", "engine.js:1668", "The scrim and the panel, assembled from `apdBody()`."],
-    ["approvalCard(a)", "engine.js:1840", "The full card shown for a selected row, shared with the Run page."],
+    ["apdButton()", "engine.js:1685", "The topbar trigger, with the live count."],
+    ["apdToggle(v)", "engine.js:1691", "Opens or closes the drawer and clears the selection on close."],
+    ["apdRow(a)", "engine.js:1694", "One approval row, pending or resolved."],
+    ["apdInterjectionRow(x)", "engine.js:1706", "The paused-agent row, with its own Answer button."],
+    ["apdBody(a)", "engine.js:1712", "The list, or the selected approval's card when `S.apd.sel` is set."],
+    ["apdHtml()", "engine.js:1726", "The scrim and the panel, assembled from `apdBody()`."],
+    ["approvalCard(a)", "engine.js:1898", "The full card shown for a selected row, shared with the Run page."],
   ],
   sourceNotes: [
     "Escape closes the drawer through the document key handler at engine.js 1673, guarded on no dialog being open.",

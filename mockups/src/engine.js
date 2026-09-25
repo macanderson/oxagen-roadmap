@@ -27,7 +27,6 @@ var DLG_EXT={};   /* lazily built dialogs, registered beside their code; see dia
 var ORG=FIXTURES.ORG;
 var WS=FIXTURES.WS;
 var BRANCHES=FIXTURES.BRANCHES;
-var AV_SAMPLE_PHOTO=FIXTURES.AV_SAMPLE_PHOTO;
 var PEOPLE=FIXTURES.PEOPLE;
 var AGENTS=FIXTURES.AGENTS;
 var RUNS=FIXTURES.RUNS;
@@ -313,32 +312,52 @@ function run(id){
 }
 
 /* ===================== avatars ===================== */
-/* One record shape for people and agents, stored on the record itself:
-   {kind:"icon"|"initials"|"photo", icon:"rocket", text:"PN", font:"sans"|"serif"|"mono", tone:"solid"|"soft"|"line", src:"data:…"}
-   Tone is one of three from the house scale, each relative to the theme. There is no free colour and no gradient, so every avatar sits inside the palette
-   and none can fall outside it. Glyphs are Lucide (ISC), the set the product ships, one line weight, drawn in currentColor.
-   People render round, agents render as squircles, so the two never read alike at a glance. */
-var AV_TONES=[["solid","Solid"],["soft","Soft"],["line","Line"]];
+/* One record shape for people, agents, workspaces and organizations, stored on the record itself:
+   {kind:"icon"|"initials"|"photo", icon:"rocket", text:"PN", font:"sans"|"serif"|"mono", tone:"solid"|"soft"|"line"|"gold"|"gold-deep", url:"https://…"}
+   It mirrors the app's renderer and spec (apps/app/src/ui/avatar.tsx and avatar-spec.ts in macanderson/oxagen, #4280).
+   Tone is the only colour choice. Solid, soft and line are three relations to the theme. Gold and gold-deep are the brand gold
+   (#D4AF37) and its deep shade (#8A7223), the same in both themes. Each tone fixes its own glyph colour, so the five stay legible
+   on ink and on paper alike. No free colour and no gradient. Glyphs are Lucide (ISC), the set the product ships, one line weight,
+   drawn in currentColor. A monogram is up to six letters, upper-cased. A photo is an https link. A fixture's `src`, where present,
+   is the mockup's offline copy of the image at that link, so the page draws it without a network.
+   People render round. Agents, workspaces and organizations render as squircles. */
+var AV_TONES=[["solid","Solid"],["soft","Soft"],["line","Line"],["gold","Gold"],["gold-deep","Dark gold"]];
+var AV_MAX=6, AV_URL_MAX=512;
 var AV_ICON_ORDER=["rocket", "compass", "microscope", "stethoscope", "pencil-line", "receipt", "wrench", "flask-conical", "key-round", "package", "satellite", "bot", "bird", "bug", "sprout", "cog", "brain", "search", "radio-tower", "wand-sparkles", "brick-wall", "target", "folder-tree", "shield-check"];
 var AV_ICONS={"rocket":'<path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09"/><path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05"/>',"compass":'<circle cx="12" cy="12" r="10"/><path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z"/>',"microscope":'<path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/>',"stethoscope":'<path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/>',"pencil-line":'<path d="M13 21h8"/><path d="m15 5 4 4"/><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/>',"receipt":'<path d="M12 17V7"/><path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8"/><path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z"/>',"wrench":'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/>',"flask-conical":'<path d="M14 2v6a2 2 0 0 0 .245.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.755-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.453 15h11.094"/><path d="M8.5 2h7"/>',"key-round":'<path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/>',"package":'<path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/>',"satellite":'<path d="m13.5 6.5-3.148-3.148a1.205 1.205 0 0 0-1.704 0L6.352 5.648a1.205 1.205 0 0 0 0 1.704L9.5 10.5"/><path d="M16.5 7.5 19 5"/><path d="m17.5 10.5 3.148 3.148a1.205 1.205 0 0 1 0 1.704l-2.296 2.296a1.205 1.205 0 0 1-1.704 0L13.5 14.5"/><path d="M9 21a6 6 0 0 0-6-6"/><path d="M9.352 10.648a1.205 1.205 0 0 0 0 1.704l2.296 2.296a1.205 1.205 0 0 0 1.704 0l4.296-4.296a1.205 1.205 0 0 0 0-1.704l-2.296-2.296a1.205 1.205 0 0 0-1.704 0z"/>',"bot":'<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',"bird":'<path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 0 0 8-8V7a4 4 0 0 0-7.28-2.3L2 20"/><path d="m20 7 2 .5-2 .5"/><path d="M10 18v3"/><path d="M14 17.75V21"/><path d="M7 18a6 6 0 0 0 3.84-10.61"/>',"bug":'<path d="M12 20v-9"/><path d="M14 7a4 4 0 0 1 4 4v3a6 6 0 0 1-12 0v-3a4 4 0 0 1 4-4z"/><path d="M14.12 3.88 16 2"/><path d="M21 21a4 4 0 0 0-3.81-4"/><path d="M21 5a4 4 0 0 1-3.55 3.97"/><path d="M22 13h-4"/><path d="M3 21a4 4 0 0 1 3.81-4"/><path d="M3 5a4 4 0 0 0 3.55 3.97"/><path d="M6 13H2"/><path d="m8 2 1.88 1.88"/><path d="M9 7.13V6a3 3 0 1 1 6 0v1.13"/>',"sprout":'<path d="M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3"/><path d="M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4"/><path d="M5 21h14"/>',"cog":'<path d="M11 10.27 7 3.34"/><path d="m11 13.73-4 6.93"/><path d="M12 22v-2"/><path d="M12 2v2"/><path d="M14 12h8"/><path d="m17 20.66-1-1.73"/><path d="m17 3.34-1 1.73"/><path d="M2 12h2"/><path d="m20.66 17-1.73-1"/><path d="m20.66 7-1.73 1"/><path d="m3.34 17 1.73-1"/><path d="m3.34 7 1.73 1"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="12" r="8"/>',"brain":'<path d="M12 18V5"/><path d="M15 13a4.17 4.17 0 0 1-3-4 4.17 4.17 0 0 1-3 4"/><path d="M17.598 6.5A3 3 0 1 0 12 5a3 3 0 1 0-5.598 1.5"/><path d="M17.997 5.125a4 4 0 0 1 2.526 5.77"/><path d="M18 18a4 4 0 0 0 2-7.464"/><path d="M19.967 17.483A4 4 0 1 1 12 18a4 4 0 1 1-7.967-.517"/><path d="M6 18a4 4 0 0 1-2-7.464"/><path d="M6.003 5.125a4 4 0 0 0-2.526 5.77"/>',"search":'<path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/>',"radio-tower":'<path d="M4.9 16.1C1 12.2 1 5.8 4.9 1.9"/><path d="M7.8 4.7a6.14 6.14 0 0 0-.8 7.5"/><circle cx="12" cy="9" r="2"/><path d="M16.2 4.8c2 2 2.26 5.11.8 7.47"/><path d="M19.1 1.9a9.96 9.96 0 0 1 0 14.1"/><path d="M9.5 18h5"/><path d="m8 22 4-11 4 11"/>',"wand-sparkles":'<path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/>',"brick-wall":'<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 9v6"/><path d="M16 15v6"/><path d="M16 3v6"/><path d="M3 15h18"/><path d="M3 9h18"/><path d="M8 15v6"/><path d="M8 3v6"/>',"target":'<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',"folder-tree":'<path d="M20 10a1 1 0 0 0 1-1V6a1 1 0 0 0-1-1h-2.5a1 1 0 0 1-.8-.4l-.9-1.2A1 1 0 0 0 15 3h-2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z"/><path d="M20 21a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-2.9a1 1 0 0 1-.88-.55l-.42-.85a1 1 0 0 0-.92-.6H13a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1Z"/><path d="M3 5a2 2 0 0 0 2 2h3"/><path d="M3 3v13a2 2 0 0 0 2 2h3"/>',"git-branch":'<line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/>',"git-pull-request":'<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" x2="6" y1="9" y2="21"/>',"shield-check":'<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>'};
 function avSvg(name){var d=AV_ICONS[name]||AV_ICONS.bot;return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+d+'</svg>';}
 function avTone(t){for(var i=0;i<AV_TONES.length;i++){if(AV_TONES[i][0]===t)return t;}return "soft";}
-function avatarHtml(av,size,shape,extra){
-  size=size||28; av=av||{kind:"initials",text:"?",font:"sans",tone:"soft"};
-  var st="width:"+size+"px;height:"+size+"px;",cls="avx "+(shape||"person")+(extra?" "+extra:""),inner="";
-  if(av.kind==="photo"&&av.src){inner='<img src="'+h(av.src)+'" alt="">';}
-  else if(av.kind==="icon"){cls+=" ic tn-"+avTone(av.tone);inner=avSvg(av.icon);}
-  else{var t=String(av.text||"?").slice(0,3);cls+=" f-"+(av.font||"sans")+" tn-"+avTone(av.tone);
-    st+="font-size:"+Math.round(size*(t.length>=3?0.36:t.length===2?0.42:0.5))+"px;";inner=h(t);}
+function avIcon(n){return AV_ICON_ORDER.indexOf(n)>=0;}
+/* the letters a monogram keeps: trimmed, upper-cased, cut at six (the app's monogram()) */
+function monogram(t){return String(t||"").trim().toUpperCase().slice(0,AV_MAX);}
+/* two-letter initials from a name, first and last word (the app's initialsOf()) */
+function initialsOf(name){var w=String(name||"").trim().split(/\s+/).filter(Boolean);return ((w[0]||"").charAt(0)+(w.length>1?w[w.length-1].charAt(0):"")).toUpperCase();}
+/* a monogram's type size as a share of the tile: one letter fills half of it, six sit at a fifth */
+function avScale(n){return n<=1?0.5:n===2?0.42:n===3?0.36:n===4?0.28:n===5?0.23:0.19;}
+function avPhoto(av){var u=av&&(av.src||av.url)||"";return /^https:\/\//.test(u)||/^data:image\//.test(u)?u:"";}
+/* `letters` is what the tile shows when the record has no avatar, or a photo link that does not load: the initials, on soft */
+function avatarHtml(av,size,shape,extra,letters){
+  size=size||28;
+  var fb=monogram(letters)||"?",st="width:"+size+"px;height:"+size+"px;",cls="avx "+(shape||"person")+(extra?" "+extra:""),inner="",
+      u=av&&av.kind==="photo"?avPhoto(av):"";
+  if(u) return '<span class="'+cls+'" style="'+st+'" data-l="'+h(fb)+'" aria-hidden="true"><img src="'+h(u)+'" alt="" onerror="avImgFail(this)"></span>';
+  if(av&&av.kind==="icon"&&AV_ICONS[av.icon]){cls+=" ic tn-"+avTone(av.tone);inner=avSvg(av.icon);}
+  else{var own=av&&av.kind==="initials"?monogram(av.text):"",t=own||fb;
+    cls+=" f-"+(own?av.font||"sans":"sans")+" tn-"+(own?avTone(av.tone):"soft");
+    st+="font-size:"+Math.round(size*avScale(t.length))+"px;";inner=h(t);}
   return '<span class="'+cls+'" style="'+st+'" aria-hidden="true">'+inner+'</span>';
 }
-function personAv(key,size){var p=PEOPLE[key];return p?avatarHtml(p.avatar,size,"person"):"";}
-function agentAv(a,size){if(typeof a==="string")a=agent(a);return a?avatarHtml(a.avatar,size,"agent"):"";}
+/* a link that never loads falls back to the initials tile, as the app's image does on its error event */
+function avImgFail(img){var s=img.parentNode;if(!s)return;var t=s.getAttribute("data-l")||"?",z=parseFloat(s.style.width)||28;
+  s.classList.add("f-sans","tn-soft");s.style.fontSize=Math.round(z*avScale(t.length))+"px";s.textContent=t;}
+function personAv(key,size){var p=PEOPLE[key];return p?avatarHtml(p.avatar,size,"person","",initialsOf(p.name)):"";}
+function agentAv(a,size){if(typeof a==="string")a=agent(a);return a?avatarHtml(a.avatar,size,"agent","",initialsOf(a.name||a.key)):"";}
 function agentUrl(a){return "#/"+ORG.slug+"/"+a.ws+"/agents/"+a.key.split(".").pop();}
+/* the caption under the preview (the app's describe* strings) */
 function avDescribe(av){
   if(!av) return "no avatar";
-  if(av.kind==="photo") return av.src?"photo · "+Math.max(1,Math.round(av.src.length*0.75/1024))+" KB":"photo · none chosen yet";
-  return (av.kind==="icon"?"icon · "+(AV_ICONS[av.icon]?av.icon:"bot"):"initials · "+(av.font||"sans"))+" · "+avTone(av.tone)+" tone";
+  if(av.kind==="photo") return (av.src||av.url||"").trim()?"photo · by link":"photo · none chosen yet";
+  return (av.kind==="icon"?"icon · "+(avIcon(av.icon)?av.icon:"bot"):"initials · "+(av.font||"sans"))+" · "+avTone(av.tone)+" tone";
 }
 /* who is involved in a run: the agent that acted, carrying the operator's authority. The card's
    harness mark names the harness, so the second line gives the agent's name alone. */
@@ -508,99 +527,138 @@ function runOutputs(R){
    '</section>';
 }
 
-/* ===================== avatar builder ===================== */
-/* S.dlgArg is "agent:<key>", "person:<key>" or "new"; the draft lives on S.avDraft until Save. */
+/* ===================== avatar editor ===================== */
+/* One editor for the four records that carry an avatar: a person, an agent, a workspace and an organization. It mirrors
+   the app's AvatarEditorDialog (apps/app/src/ui/avatar-editor.tsx in macanderson/oxagen, #4280). The subject decides the
+   tile's shape, the title, the note, and the Remove hint. The kinds, the tones, the preview and the checks are the same for all four.
+   S.dlgArg is "person:<key>", "agent:<key>", "workspace:<slug>" or "org", or "new" and "wznew" for an agent not yet registered.
+   The draft lives on S.avDraft until Save, and a refusal on S.avErr until the next edit. */
 function avTarget(){var s=String(S.dlgArg||""),i=s.indexOf(":");return i<0?{kind:s}:{kind:s.slice(0,i),key:s.slice(i+1)};}
 function avDefault(text,icon){return icon?{kind:"icon",icon:icon,tone:"solid"}:{kind:"initials",text:text||"AG",font:"sans",tone:"solid"};}
 function avClone(av){return JSON.parse(JSON.stringify(av));}
 function newAgentAv(){return S.newAv||avDefault(null,"radio-tower");}
+/* the record behind a target: its subject, name, subtitle and stored avatar */
+function avRecord(t){
+  var p,a,w;
+  if(t.kind==="person"&&(p=PEOPLE[t.key])) return {s:"user",name:p.name,sub:p.email,cur:p.avatar||null};
+  if(t.kind==="agent"&&(a=agent(t.key))) return {s:"agent",name:a.name,sub:a.key,cur:a.avatar||null};
+  if(t.kind==="workspace"&&(w=wsBySlug(t.key))) return {s:"workspace",name:w.name,sub:w.slug,cur:w.avatar||null};
+  if(t.kind==="org") return {s:"organization",name:ORG.name,sub:ORG.slug,cur:ORG.avatar||null};
+  if(t.kind==="wznew"&&S.wz) return {s:"agent",name:wzAgentSlug(),sub:wzAgentKey(),cur:S.wz.av||null,base:wzAgentAv()};
+  return {s:"agent",name:"perf-watch",sub:"a-intel.core.perf-watch",cur:S.newAv||null,base:newAgentAv()};
+}
+var AV_SUBJECT={
+  user:{title:function(){return "Your avatar";},note:'Saved with <span class="mono">update_profile</span>, like any change to your account.',remove:"Use your default initials instead."},
+  agent:{note:"Part of the agent’s definition, so a change rides a pull request.",remove:"Use the agent’s default initials instead."},
+  workspace:{note:'Saved with <span class="mono">update_workspace_settings</span> on the workspace’s record.',remove:"Use the workspace’s default initials instead."},
+  organization:{note:'Saved with <span class="mono">update_org_settings</span> on the organization’s record.',remove:"Use the organization’s default initials instead."}
+};
+function avTitle(r){var s=AV_SUBJECT[r.s];return s.title?s.title():"Avatar for "+r.name;}
+var AV_REFUSAL={
+  noPhoto:"Paste an https link to a photo first, or switch to an icon or initials.",
+  noLetters:"Type at least one letter.",
+  invalid:"That avatar was refused. A photo link must be an https address under 512 characters."
+};
+/* The editor opens on what is stored, so the record's avatar is edited rather than started over. With nothing stored, the
+   draft is the name's initials on solid. */
+function avDraftFrom(cur,letters){
+  var d={kind:"initials",icon:"bot",text:letters,font:"sans",tone:"solid",url:"",src:""};
+  if(!cur) return d;
+  if(cur.kind==="icon"&&avIcon(cur.icon)){d.kind="icon";d.icon=cur.icon;d.tone=avTone(cur.tone);}
+  else if(cur.kind==="initials"&&monogram(cur.text)){d.text=monogram(cur.text);d.font=cur.font||"sans";d.tone=avTone(cur.tone);}
+  else if(cur.kind==="photo"){d.kind="photo";d.url=cur.url||"";d.src=cur.src||"";}
+  return d;
+}
 function openAvatar(target){
-  var i=target.indexOf(":"),kind=i<0?target:target.slice(0,i),key=i<0?null:target.slice(i+1),cur=null;
-  if(kind==="agent"&&agent(key))cur=agent(key).avatar;
-  else if(kind==="person"&&PEOPLE[key])cur=PEOPLE[key].avatar;
-  else if(kind==="new")cur=S.newAv;
-  else if(kind==="wznew")cur=S.wz&&S.wz.av;
-  var d=avClone(cur||(kind==="new"?newAgentAv():avDefault("?")));
-  d.tone=avTone(d.tone);
-  if(d.kind==="icon"&&!AV_ICONS[d.icon])d.icon="bot";
-  if(d.kind==="initials"&&!(d.text||"").trim())d.text=kind==="new"?"PW":"?";
-  if(d.kind!=="icon"&&d.kind!=="initials"&&d.kind!=="photo")d.kind="initials";
-  S.avDraft=d;
+  S.dlgArg=target;
+  var r=avRecord(avTarget());
+  S.avDraft=avDraftFrom(r.cur||r.base||null,initialsOf(r.name));
+  S.avErr=null;
   openDialog("avatar",target);
 }
+/* what the draft draws: a photo by its link, otherwise the monogram or glyph in its tone */
+function avDrawn(d){
+  if(d.kind==="photo") return {kind:"photo",url:d.url.trim(),src:d.src};
+  return d.kind==="icon"?{kind:"icon",icon:d.icon,tone:d.tone}:{kind:"initials",text:monogram(d.text)||"?",font:d.font,tone:d.tone};
+}
 function avSet(k,v){var d=S.avDraft;if(!d)return;
-  if(k==="kind"){d.kind=v;if(v==="icon"&&!AV_ICONS[d.icon])d.icon="bot";if(v==="initials"&&!(d.text||"").trim())d.text="AG";}
-  else if(k==="tone"){d.tone=avTone(v);}
-  else if(k==="icon"){if(AV_ICONS[v])d.icon=v;}
+  if(k==="tone")d.tone=avTone(v);
+  else if(k==="icon"){if(avIcon(v))d.icon=v;}
   else d[k]=v;
-  render();}
-function avType(k,v){var d=S.avDraft;if(!d)return;d[k]=v;avPatch();}
+  S.avErr=null;render();}
+/* typing patches the preview in place, so the field keeps its focus */
+function avType(k,v){var d=S.avDraft;if(!d)return;
+  d[k]=v; if(k==="url")d.src="";
+  if(S.avErr){S.avErr=null;var a=el("av-alert");if(a)a.remove();}
+  avPatch();}
 function avPatch(){var p=el("av-prev");if(p)p.innerHTML=avPrevInner();}
-function avClearSrc(){S.avDraft.src=null;render();}
-function avSample(){S.avDraft.kind="photo";S.avDraft.src=AV_SAMPLE_PHOTO;render();}
-function avFile(inp){
-  var f=inp.files&&inp.files[0]; if(!f)return;
-  if(f.size>512*1024){act("That image is "+Math.round(f.size/1024)+" KB. Photos are capped at 512 KB.");inp.value="";return;}
-  var rd=new FileReader(); rd.onload=function(){S.avDraft.kind="photo";S.avDraft.src=rd.result;render();}; rd.readAsDataURL(f);
-}
+function avShape(){return avRecord(avTarget()).s==="user"?"person":"agent";}
 function avPrevInner(){
-  var d=S.avDraft,shape=avTarget().kind==="person"?"person":"agent";
-  return avatarHtml(d,72,shape)+'<div class="sizes">'+avatarHtml(d,36,shape)+avatarHtml(d,24,shape)+avatarHtml(d,18,shape)+'</div><div class="cap">'+h(avDescribe(d))+'</div>';
+  var d=avDrawn(S.avDraft),shape=avShape(),l=initialsOf(avRecord(avTarget()).name);
+  return avatarHtml(d,72,shape,"",l)+'<div class="sizes">'+avatarHtml(d,36,shape,"",l)+avatarHtml(d,24,shape,"",l)+avatarHtml(d,18,shape,"",l)+'</div>'+
+   '<div class="cap">'+h(avDescribe(d))+'</div>';
 }
-function avSeg(items,cur,k){return '<div class="av-seg" role="group">'+items.map(function(x){return '<button type="button" class="'+(x[2]||"")+'" aria-pressed="'+(cur===x[0])+'" onclick="avSet(\''+k+'\',\''+x[0]+'\')">'+x[1]+'</button>';}).join("")+'</div>';}
-/* the three tones as live swatches: each is the draft itself in that tone, so what you pick is what you get */
-function avToneRow(d,shape){
-  return '<div class="av-tone" role="group" aria-label="Tone">'+AV_TONES.map(function(t){var s=avClone(d);s.tone=t[0];
-    return '<button type="button" aria-pressed="'+(avTone(d.tone)===t[0])+'" aria-label="'+t[1]+'" title="'+t[1]+'" onclick="avSet(\'tone\',\''+t[0]+'\')">'+avatarHtml(s,32,shape)+'</button>';}).join("")+'</div>';
+function avSeg(items,cur,k,label){return '<div class="av-seg" role="group" aria-label="'+label+'">'+items.map(function(x){return '<button type="button" class="'+(x[2]||"")+'" aria-pressed="'+(cur===x[0])+'" onclick="avSet(\''+k+'\',\''+x[0]+'\')">'+x[1]+'</button>';}).join("")+'</div>';}
+/* the five tones as live swatches: each is the draft itself in that tone, so what you pick is what you get */
+function avToneRow(d,shape,l){
+  return '<div class="av-tone" role="group" aria-label="Tone">'+AV_TONES.map(function(t){var s=avDrawn(d);s.tone=t[0];
+    return '<button type="button" aria-pressed="'+(avTone(d.tone)===t[0])+'" aria-label="'+t[1]+'" title="'+t[1]+'" onclick="avSet(\'tone\',\''+t[0]+'\')">'+avatarHtml(s,32,shape,"",l)+'</button>';}).join("")+'</div>';
 }
 function avatarBody(){
   var d=S.avDraft; if(!d) return '';
-  var t=avTarget(), forPerson=t.kind==="person", shape=forPerson?"person":"agent";
+  var r=avRecord(avTarget()), shape=avShape(), l=initialsOf(r.name);
   var out='<div class="avb"><div class="avb-prev" id="av-prev">'+avPrevInner()+'</div><div>';
-  out+='<div class="field"><label>Kind</label>'+avSeg([["icon","Icon"],["initials","Initials"],["photo","Photo"]],d.kind,"kind")+'</div>';
+  out+='<div class="field"><label>Kind</label>'+avSeg([["icon","Icon"],["initials","Initials"],["photo","Photo"]],d.kind,"kind","Kind")+'</div>';
   if(d.kind==="icon"){
-    out+='<div class="field"><label>Icon</label><div class="av-ico">'+AV_ICON_ORDER.map(function(n){return '<button type="button" aria-pressed="'+(d.icon===n)+'" aria-label="'+n+'" title="'+n+'" onclick="avSet(\'icon\',\''+n+'\')">'+avSvg(n)+'</button>';}).join("")+'</div>'+
-     '<div class="hint">Lucide glyphs, the set the product ships. One line weight, drawn in the tone\'s ink.</div></div>';
+    out+='<div class="field"><label>Icon</label><div class="av-ico" role="group" aria-label="Icon">'+AV_ICON_ORDER.map(function(n){return '<button type="button" aria-pressed="'+(d.icon===n)+'" aria-label="'+n+'" title="'+n+'" onclick="avSet(\'icon\',\''+n+'\')">'+avSvg(n)+'</button>';}).join("")+'</div>'+
+     '<div class="hint">Lucide glyphs, the set the product ships. One line weight, drawn in the tone’s ink.</div></div>';
   } else if(d.kind==="initials"){
-    out+='<div class="fields"><div class="field"><label for="av-txt">Letters</label><input id="av-txt" class="short" maxlength="3" value="'+h(d.text||"")+'" oninput="avType(\'text\',this.value.slice(0,3))" aria-label="Letters"><div class="hint">Up to three.</div></div>'+
-     '<div class="field"><label>Typeface</label>'+avSeg([["sans","Sans","f-sans"],["serif","Serif","f-serif"],["mono","Mono","f-mono"]],d.font||"sans","font")+'</div></div>';
+    out+='<div class="fields"><div class="field"><label for="av-txt">Letters</label><input id="av-txt" class="short f-'+h(d.font)+'" maxlength="'+AV_MAX+'" autocapitalize="characters" value="'+h(d.text)+'" oninput="avType(\'text\',this.value.slice(0,'+AV_MAX+'))"><div class="hint">Up to '+AV_MAX+'.</div></div>'+
+     '<div class="field"><label>Typeface</label>'+avSeg([["sans","Sans","f-sans"],["serif","Serif","f-serif"],["mono","Mono","f-mono"]],d.font,"font","Typeface")+'</div></div>';
   } else {
-    out+='<div class="field"><label>Photo</label><div class="av-drop">'+(d.src?'Replace the photo':'PNG, JPEG, WebP or SVG up to 512 KB')+
-     '<input type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onchange="avFile(this)" aria-label="Choose a photo">'+
-     '<div class="row" style="justify-content:center;margin-top:8px"><button type="button" class="btn sm" onclick="avSample()">Use the sample photo</button>'+(d.src?'<button type="button" class="btn sm ghost" onclick="avClearSrc()">Remove</button>':'')+'</div></div>'+
-     '<div class="hint">Stored content-addressed; the definition carries the digest, never the bytes.</div></div>';
+    out+='<div class="field"><label for="av-url">Photo</label><input id="av-url" type="url" inputmode="url" placeholder="https://" value="'+h(d.url)+'" oninput="avType(\'url\',this.value)">'+
+     '<div class="hint">An https link to a hosted image: PNG, JPEG, WebP, or SVG.</div></div>';
   }
   if(d.kind!=="photo"){
-    out+='<div class="field"><label>Tone</label>'+avToneRow(d,shape)+
-     '<div class="hint">Solid, soft or line. Three tones from the house scale, each fixing its own glyph color, so there is no combination that fails.</div></div>';
+    out+='<div class="field"><label>Tone</label>'+avToneRow(d,shape,l)+
+     '<div class="hint">Solid, soft, and line follow the theme. Gold and dark gold are the brand gold in two shades. Each tone fixes its own glyph colour, so there is no combination that fails.</div></div>';
   }
   out+='</div></div>';
-  out+='<div class="note" style="margin-top:6px">'+(forPerson?'Saved with <span class="mono">set_preferences</span> and recorded as a frame, like any change to your account.':
-   'Part of the definition: written as <span class="mono">avatar</span> in <span class="mono">.oxagen/agents/&lt;slug&gt;.toml</span>, so it rides a pull request and shows wherever the agent does.')+'</div>';
+  out+='<div class="note av-note">'+AV_SUBJECT[r.s].note+'</div>';
+  if(r.cur) out+='<div class="av-remove"><button type="button" class="btn sm" onclick="avRemove()">Remove avatar</button><div class="hint">'+h(AV_SUBJECT[r.s].remove)+'</div></div>';
+  if(S.avErr) out+='<div class="av-alert" id="av-alert" role="alert"><span class="gl" aria-hidden="true">⚠</span><span>'+h(AV_REFUSAL[S.avErr])+'</span></div>';
   return out;
 }
 function avatarDlg(){
   if(S.dlg!=="avatar"||!S.avDraft) return {t:"Avatar",w:false,b:"",f:""};
-  var t=avTarget(), title="Avatar", sub="";
-  if(t.kind==="agent"&&agent(t.key)){title="Avatar · "+agent(t.key).name;sub=t.key;}
-  else if(t.kind==="person"&&PEOPLE[t.key]){title="Your avatar";sub=PEOPLE[t.key].email;}
-  else if(t.kind==="new"){title="Avatar for the new agent";sub="a-intel.core.perf-watch";}
-  return {t:title,s:sub,w:false,b:avatarBody(),
-    f:'<button class="btn" onclick="avCancel()">Cancel</button><button class="btn primary" onclick="avSave()">'+(t.kind==="new"?"Use this avatar":"Save avatar")+'</button>'};
+  var r=avRecord(avTarget());
+  return {t:avTitle(r),s:r.sub,w:false,b:avatarBody(),
+    f:'<button class="btn" onclick="avCancel()">Cancel</button><button class="btn primary" onclick="avSave()">Save avatar</button>'};
 }
-function avCancel(){var t=avTarget();S.avDraft=null;if(t.kind==="wznew")openDialog("wz");else if(t.kind==="new")openDialog("register");else if(t.kind==="person")openDialog("account","profile");else closeDialog();}
+/* back to where the editor was opened from: the Account dialog, a registration, or the page */
+function avReturn(t){S.avDraft=null;S.avErr=null;
+  if(t.kind==="wznew")openDialog("wz");else if(t.kind==="new")openDialog("register");else if(t.kind==="person")openDialog("account","profile");else closeDialog();}
+function avCancel(){avReturn(avTarget());}
+/* the write: the stored avatar on the record, or null to clear it, and the receipt a governed write shows */
+function avWrite(t,v){
+  var r=avRecord(t),w,a,done=v?"saved":"removed";
+  if(t.kind==="person"&&PEOPLE[t.key]){PEOPLE[t.key].avatar=v;avReturn(t);act("Your avatar was "+done+". Recorded in the audit record.");}
+  else if(t.kind==="agent"&&(a=agent(t.key))){a.avatar=v;avReturn(t);act("Avatar "+(v?"updated on ":"removed from ")+a.key+". The definition change opens as a pull request.");}
+  else if(t.kind==="workspace"&&(w=wsBySlug(t.key))){w.avatar=v;avReturn(t);act("The avatar for "+w.name+" was "+done+". Recorded in the audit record.");}
+  else if(t.kind==="org"){ORG.avatar=v;avReturn(t);act("The avatar for "+r.name+" was "+done+". Recorded in the audit record.");}
+  else if(t.kind==="wznew"&&S.wz){S.wz.av=v;avReturn(t);}
+  else{S.newAv=v;avReturn(t);}
+}
 function avSave(){
   var t=avTarget(),d=S.avDraft; if(!d){closeDialog();return;}
-  if(d.kind==="photo"&&!d.src){act("Choose a photo first, or switch to an icon or initials.");return;}
-  if(d.kind==="initials"&&!(d.text||"").trim()){act("Type at least one letter.");return;}
-  if(d.kind==="icon"&&!AV_ICONS[d.icon]){act("Pick an icon first.");return;}
-  if(d.kind!=="photo")delete d.src;
-  S.avDraft=null;
-  if(t.kind==="agent"&&agent(t.key)){agent(t.key).avatar=d;closeDialog();act("Avatar updated on "+t.key+". The definition change opens as a pull request; the badge shows here now.");}
-  else if(t.kind==="person"&&PEOPLE[t.key]){PEOPLE[t.key].avatar=d;openDialog("account","profile");act("Avatar saved. set_preferences recorded as a frame.");}
-  else if(t.kind==="wznew"&&S.wz){S.wz.av=d;openDialog("wz");}
-  else{S.newAv=d;openDialog("register");}
+  var err=d.kind==="photo"&&!/^https:\/\//.test(d.url.trim())?"noPhoto":d.kind==="photo"&&d.url.trim().length>AV_URL_MAX?"invalid":
+    d.kind==="initials"&&!monogram(d.text)?"noLetters":null;
+  if(err){S.avErr=err;render();return;}
+  var v=avDrawn(d);
+  if(v.kind==="photo"&&!v.src)delete v.src;
+  avWrite(t,v);
 }
+function avRemove(){avWrite(avTarget(),null);}
 function per(n){return Math.round(n*100)+"%";}
 function ic0(n){return Math.round(n).toLocaleString("en-US");}
 // Every dollar figure goes through usd(): a dollar sign, thousands separators, two decimals (more when the
@@ -7307,7 +7365,7 @@ function fndCard(f,i,total,top,ofLabel){
   return '<article class="fnd"><div class="rank">'+(i+1)+'</div><div>'+
    '<div class="t"><b>'+h(f.kind)+'</b><span class="b b-q">'+h(f.level)+'</span>'+
    (e.confidence?'<span class="b b-'+(e.confidence==="high"?"allowed":"approval")+'">'+h(e.confidence)+' confidence</span>':'')+'</div>'+
-   '<div class="who">'+(p?avatarHtml(p.avatar,20,"person")+'<span>'+h(p.name)+'</span><span class="dim">·</span>':'')+
+   '<div class="who">'+(p?avatarHtml(p.avatar,20,"person","",initialsOf(p.name))+'<span>'+h(p.name)+'</span><span class="dim">·</span>':'')+
    '<span class="mono">'+h(who.agent||f.subject)+'</span></div>'+
    '<p class="why">'+h(f.why)+'</p>'+
    '<div class="meta">evidence '+h(f.frames)+' · '+h(f.window)+(e.trend?' · trend '+h(e.trend):'')+'</div></div>'+
@@ -7445,7 +7503,7 @@ function pOrganization(){
       '<td class="mono dim" style="font-size:11.5px">'+(w.linked.length?h(w.linked.join(", ")):"—")+'</td>'+
       '<td class="num">'+w.agents+'</td><td>'+h(w.owner)+'</td>'+
       '<td><span class="b b-q">'+h(wsGov(w))+'</span><div class="dim mono" style="font-size:11px">'+h(w.retention)+' · ns '+h(w.ns)+'</div></td>'+
-      '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><span class="vh">, </span><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><span class="vh">, </span><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
+      '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><span class="vh">, </span><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><span class="vh">, </span><button class="btn sm" onclick="openAvatar(\'workspace:'+w.slug+'\')">Edit avatar</button><span class="vh">, </span><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
   } else if(t==="costcenters"){
@@ -7479,7 +7537,8 @@ function pOrganization(){
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>'+h(ORG.name)+'</h1>'+
    '<p>People, roles, invitations, workspaces, cost centers, model funding and routes, and API keys.</p></div>'+
-   '<div class="acts"><button class="btn" onclick="openDialog(\'invite\')">Invite</button>'+
+   '<div class="acts"><button class="btn" onclick="openAvatar(\'org\')">Edit avatar</button>'+
+   '<button class="btn" onclick="openDialog(\'invite\')">Invite</button>'+
    '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button></div></div>'+tabs+body;
 }
 
@@ -9456,7 +9515,7 @@ function evidenceDlg(){
      e.method.map(function(m){return '<li class="on"><span class="h">'+h(m[0])+'</span><div style="font-size:12.5px;color:var(--body)">'+h(m[1])+'</div></li>';}).join("")+
      '</ul><div class="note" style="margin-top:4px">Counterfactual: '+h(e.counterfactual)+'. The saving is the difference, priced at what each call paid.</div></div>'+
      '<div><p class="eyebrow q">Who is involved</p><div class="grid" style="gap:10px">'+
-     '<div class="ev-who">'+avatarHtml(p.avatar,38,"person")+'<div style="min-width:0"><b style="font-size:13px">'+h(p.name)+'</b>'+
+     '<div class="ev-who">'+avatarHtml(p.avatar,38,"person","",initialsOf(p.name))+'<div style="min-width:0"><b style="font-size:13px">'+h(p.name)+'</b>'+
      '<div class="mono dim" style="font-size:11px">'+h(p.role)+' · operator on every run below</div>'+
      '<div style="font-size:12px;color:var(--muted);margin-top:5px">'+h(e.who.note)+'</div></div></div>'+
      (a?agentCard(a,{layout:"compact",onclick:"closeDialog()",sub:h(a.harnessLabel)+' \u00b7 toolbelt '+a.belt+' \u00b7 '+plural(a.runs30.toLocaleString(),"run")+' 30d \u00b7 '+usd(a.spend30)+' spend'}):
@@ -9569,7 +9628,7 @@ function dialog(){
    register:{t:"Register an agent",w:false,b:
      '<div class="field"><label for="dlgRegSlug">Agent name</label><input id="dlgRegSlug" value="perf-watch"><div class="hint">The agent key becomes <span class="mono">a-intel.core.perf-watch</span> and can\u2019t be changed later.</div></div>'+
      '<div class="field"><label>Avatar</label><div class="row" style="gap:12px;flex-wrap:nowrap">'+avatarHtml(newAgentAv(),44,"agent")+
-      '<div style="min-width:0;font-size:12.5px;color:var(--body)">'+h(avDescribe(newAgentAv()))+'<div class="hint" style="margin-top:2px">An icon, up to three letters, or a photo, in one of three house tones.</div></div>'+
+      '<div style="min-width:0;font-size:12.5px;color:var(--body)">'+h(avDescribe(newAgentAv()))+'<div class="hint" style="margin-top:2px">An icon, up to six letters, or a photo, in one of five tones.</div></div>'+
       '<button class="btn sm" style="margin-left:auto;flex:none" onclick="openAvatar(\'new\')">Design</button></div></div>'+
      '<div class="field"><label>Harness</label><select aria-label="Harness"><option disabled selected>Choose the harness</option><option value="claude-code">Claude Code</option><option value="codex">Codex</option><option value="cursor">Cursor</option><option value="stella">stella</option><option value="claude-agent-sdk">Claude Agent SDK</option><option value="custom">Other (SDK-wrapped)</option></select></div>'+
      '<div class="field"><label>Model class</label><select aria-label="Model class"><option>complex</option><option>light</option></select></div>'+
@@ -13103,7 +13162,7 @@ function wzAgent(){
        '<div class="hint">The agent key becomes <span class="mono wzKeyLive">'+h(wzAgentKey())+'</span> and never changes.</div></div>'+
        '<div class="field"><label>Avatar</label><div class="row" style="gap:12px;flex-wrap:nowrap">'+avatarHtml(wzAgentAv(),44,"agent")+
         '<div style="min-width:0;font-size:12.5px;color:var(--body)">'+h(avDescribe(wzAgentAv()))+
-        '<div class="hint" style="margin-top:2px">An icon, up to three letters, or a photo, in one of three house tones.</div></div>'+
+        '<div class="hint" style="margin-top:2px">An icon, up to six letters, or a photo, in one of five tones.</div></div>'+
         '<button class="btn sm" style="margin-left:auto;flex:none" onclick="openAvatar(\'wznew\')">Design</button></div></div>'+
        '<div class="fields">'+
        '<div class="field"><label for="wzHarness">Harness</label><select id="wzHarness" onchange="wzSet(\'harness\',this.value)" aria-label="Harness">'+

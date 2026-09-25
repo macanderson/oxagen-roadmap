@@ -42,7 +42,7 @@
   <p class="dx-lead">A switch flips one setting on or off: a kill switch, whether a commit opens a pull request, whether skills are on for a workspace. The knob's position and color repeat the state the label already names in words. A kill switch turning on stops real calls, so it never flips on one click: it opens a dialog that states the blast radius and asks for a reason before it takes effect.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.ks-sw</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 729 to 738, commit dialog 1013 to 1017, Skills 1620 to 1623</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 736 to 745, commit dialog 1020 to 1024, Skills 1627 to 1630</span>
     <span><b>Used on</b> Tools (Kill switches tab), Agents (definition editor, commit dialog), Steering (fleet steer, Library Skills)</span>
   </div>
 </div>
@@ -195,17 +195,17 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 729 to 738, commit dialog 1013 to 1017, Skills 1620 to 1623</td><td>The rules that draw it</td></tr>
-      <tr><td><code>switchCard(s)</code> at <code>engine.js:8274</code></td><td>The kill switch row on the Tools page, with its dynamic on and off label.</td></tr>
-      <tr><td><code>switchDialog()</code> at <code>engine.js:8408</code></td><td>The confirm dialog: blast radius, reason field, and the effect and reversibility copy.</td></tr>
-      <tr><td><code>doFlip(id)</code> at <code>engine.js:8428</code></td><td>Applies the flip after the confirm dialog's action button, and raises the persistent kill banner when a switch turns on.</td></tr>
-      <tr><td><code>cmSet(k, v)</code> at <code>engine.js:1395</code></td><td>Sets a field on the open commit, including the PR toggle's <code>pr</code> flag.</td></tr>
-      <tr><td><code>steerToggleInt()</code> at <code>engine.js:9162</code></td><td>Flips the fleet steer's Interrupt delivery mode.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 736 to 745, commit dialog 1020 to 1024, Skills 1627 to 1630</td><td>The rules that draw it</td></tr>
+      <tr><td><code>switchCard(s)</code> at <code>engine.js:8333</code></td><td>The kill switch row on the Tools page, with its dynamic on and off label.</td></tr>
+      <tr><td><code>switchDialog()</code> at <code>engine.js:8467</code></td><td>The confirm dialog: blast radius, reason field, and the effect and reversibility copy.</td></tr>
+      <tr><td><code>doFlip(id)</code> at <code>engine.js:8487</code></td><td>Applies the flip after the confirm dialog's action button, and raises the persistent kill banner when a switch turns on.</td></tr>
+      <tr><td><code>cmSet(k, v)</code> at <code>engine.js:1453</code></td><td>Sets a field on the open commit, including the PR toggle's <code>pr</code> flag.</td></tr>
+      <tr><td><code>steerToggleInt()</code> at <code>engine.js:9221</code></td><td>Flips the fleet steer's Interrupt delivery mode.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
     <li>The Skills preview switch appears inside <code>DLG_EXT.skenable</code> (engine.js 8701), whose dialog states outright: &quot;This is a governed action. It writes a file, opens a pull request, and puts your name on both.&quot;</li>
-    <li><code>--sk-on</code> (engine.css 1597) is the same green as <code>--st-allowed</code>, defined a second time under its own name for the Skills page.</li>
+    <li><code>--sk-on</code> (engine.css 1604) is the same green as <code>--st-allowed</code>, defined a second time under its own name for the Skills page.</li>
   </ul>
 </section>
 
@@ -215,7 +215,7 @@
   <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>The knob and label swap order between switches</h4><p>The commit dialog's PR toggle writes <code>&lt;i&gt;&lt;/i&gt;&lt;span class=&quot;lbl&quot;&gt;PR&lt;/span&gt;</code> (engine.js 1427), knob first. The fleet steer's Interrupt toggle writes <code>&lt;span class=&quot;lbl&quot;&gt;Interrupt&lt;/span&gt;&lt;i&gt;&lt;/i&gt;</code> (engine.js 9174), label first. <code>.ks-sw</code> sets no explicit order, so DOM order is visual order: one switch shows its knob on the left, the other on the right, for the same component.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>Three switch classes for three different jobs</h4><p><code>.ks-sw</code> (a governed block that always confirms), <code>.ks-sw.int</code> (an immediate, reversible toggle), and <code>.sx-sw</code> (a read-only preview of a future state) look almost identical but behave nothing alike. The visual similarity between a switch that asks for a reason and one that flips on a click risks a person treating a kill switch as casually as the PR toggle.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>A switch that cannot be switched</h4><p><code>.sx-sw</code> in the Skills dialog is <code>role=&quot;switch&quot;</code> and <code>aria-checked=&quot;true&quot;</code> forever. Its <code>onclick</code> shows a toast explaining that the pull request is the real control rather than changing state. It reads to a screen reader as an operable switch that never operates.</p></div>
-  <div class="dx-find"><h4><span class="b b-q">note</span>A second green token</h4><p><code>--sk-on</code> (engine.css 1597) duplicates <code>--st-allowed</code>'s color under a page-specific name, rather than the Skills page reusing the shared state token.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>A second green token</h4><p><code>--sk-on</code> (engine.css 1604) duplicates <code>--st-allowed</code>'s color under a page-specific name, rather than the Skills page reusing the shared state token.</p></div>
 </section>
 
 <section class="dx-sec">
@@ -229,7 +229,7 @@
 ## Inputs
 
 1. mockups/components/switch.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 729 to 738, commit dialog 1013 to 1017, Skills 1620 to 1623. The mockup renders it with switchCard(s) (engine.js:8274), switchDialog() (engine.js:8408), doFlip(id) (engine.js:8428), cmSet(k, v) (engine.js:1395), steerToggleInt() (engine.js:9162).
+2. The design source: mockups/src/engine.css lines 736 to 745, commit dialog 1020 to 1024, Skills 1627 to 1630. The mockup renders it with switchCard(s) (engine.js:8333), switchDialog() (engine.js:8467), doFlip(id) (engine.js:8487), cmSet(k, v) (engine.js:1453), steerToggleInt() (engine.js:9221).
 3. The build's implementation: find it by its root selector (.ks-sw) or its name, and list every route that renders it.
 4. Where to see it in the design: Tools (Kill switches tab), Agents (definition editor, commit dialog), Steering (fleet steer, Library Skills). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

@@ -7,7 +7,7 @@ export default {
   summary: "A bordered box that holds one subject under a shaded header.",
   lead: "A panel groups one subject on a page: a table, a list of keys and values, a chart, or a section of a form. Its header band names the subject and holds the actions that apply to it. Almost every page is a stack of panels under the page header.",
   root: ".panel",
-  css: "lines 147 to 152, 723 to 724, 2245 to 2246",
+  css: "lines 147 to 152, 730 to 731, 2252 to 2253",
   usedOn: ["Work", "Agents", "Run", "Spend", "Steering", "Tools", "Billing", "every dialog body"],
   stories: [
     {
@@ -130,8 +130,8 @@ export default {
     ["--muted", "Subtext"],
   ],
   helpers: [
-    ["panel(title, sub, btn, head, rows)", "engine.js:3157", "A local helper inside `tkFieldsTab()` for the Work fields tables. It is the only one."],
-    ["listify()", "engine.js:13794", "Adds the list controls to every table inside a panel after each render."],
+    ["panel(title, sub, btn, head, rows)", "engine.js:3215", "A local helper inside `tkFieldsTab()` for the Work fields tables. It is the only one."],
+    ["listify()", "engine.js:13853", "Adds the list controls to every table inside a panel after each render."],
   ],
   sourceNotes: [
     "Panels are written inline: 154 `class=\"panel\"` in engine.js and 25 in wedge.js.",

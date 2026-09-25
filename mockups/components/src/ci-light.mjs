@@ -8,7 +8,7 @@ export default {
   summary: "One dot for a set of checks, and how many of them have reported.",
   lead: "A CI light reports a pull request's checks as GitHub itself reports them: one dot and a done-of-total count, nothing more until someone opens the checks. It blinks blue while anything runs, turns a pulsing red the moment one job fails, and settles to a static green once every job has passed or a static grey while every job still waits.",
   root: ".ci",
-  css: "lines 2128 to 2138",
+  css: "lines 2135 to 2145",
   usedOn: ["Repositories (Changes table)", "Steering (Context PRs)"],
   stories: [
     {
@@ -82,7 +82,7 @@ export default {
   a11y: [
     "The dot is a non-text element with an `aria-label` naming its state, so a screen reader announces \"running\" or \"1 failed\" rather than nothing.",
     "State is never color alone: failed adds a ✕ mark, running adds motion, and the done-of-total count is always visible text beside the light.",
-    "The running blink and the failure pulse both stop under `prefers-reduced-motion: reduce` (engine.css 2138), leaving the light static but still correctly colored.",
+    "The running blink and the failure pulse both stop under `prefers-reduced-motion: reduce` (engine.css 2145), leaving the light static but still correctly colored.",
   ],
   phone: [
     "The light keeps its size and layout at 390px. Nothing about `.ci` has a phone-specific rule.",
@@ -97,13 +97,13 @@ export default {
     ["--mono", "The done/total count"],
   ],
   helpers: [
-    ["ciLight(c, label)", "engine.js:7082", "Picks the state from a counts object and writes the dot, title, and count. An optional label appends a `.dim` caption."],
-    ["ciCounts(list)", "engine.js:7072", "Tallies an array of per-check states into `{pass, fail, running, queued, total, done}`."],
-    ["ciFromSt(def, st)", "engine.js:7077", "Builds a plausible per-check state list from a change's overall status, for fixture data with no real per-check log."],
-    ["oxprCiLight(p)", "engine.js:7088", "The Repositories Changes table's own wrapper: counts a proposal's checks and calls `ciLight()`."],
+    ["ciLight(c, label)", "engine.js:7140", "Picks the state from a counts object and writes the dot, title, and count. An optional label appends a `.dim` caption."],
+    ["ciCounts(list)", "engine.js:7130", "Tallies an array of per-check states into `{pass, fail, running, queued, total, done}`."],
+    ["ciFromSt(def, st)", "engine.js:7135", "Builds a plausible per-check state list from a change's overall status, for fixture data with no real per-check log."],
+    ["oxprCiLight(p)", "engine.js:7146", "The Repositories Changes table's own wrapper: counts a proposal's checks and calls `ciLight()`."],
   ],
   sourceNotes: [
-    "The design rule, from the CSS comment at engine.css 2126 to 2127: blink blue while anything runs, a red ✕ the moment one job fails, pulsing while others still run, static green once every job has passed, static grey while everything queues.",
+    "The design rule, from the CSS comment at engine.css 2133 to 2134: blink blue while anything runs, a red ✕ the moment one job fails, pulsing while others still run, static green once every job has passed, static grey while everything queues.",
     "`--st-approval`, the token behind the running blink, is itself a blue (`#5B93D6` in dark, `#2E6BA8` in light), so the rule's \"blink blue\" and the token it uses agree.",
   ],
   findings: [

@@ -42,7 +42,7 @@
   <p class="dx-lead">An agent card is an agent's identity wherever it appears: a table row, a run's header, an approval, a mandate. One markup and one CSS family draw it in three layouts so an agent looks the same everywhere it shows up. The identity block is the only part allowed to give way. It ellipsises before anything else moves.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.agc</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 1309 to 1334 (agent card, its three layouts, and the rule comment above them), 1338 (a steer-list override), 2166 to 2167 (the harness mark inside the card)</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 1311 to 1341 (agent card, its three layouts, and the rule comment above them), 1345 (a steer-list override), 2173 to 2174 (the harness mark inside the card)</span>
     <span><b>Used on</b> Agents, Work, Run, Approvals, Spend, Tools, Steering</span>
   </div>
 </div>
@@ -166,9 +166,9 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 1309 to 1334 (agent card, its three layouts, and the rule comment above them), 1338 (a steer-list override), 2166 to 2167 (the harness mark inside the card)</td><td>The rules that draw it</td></tr>
-      <tr><td><code>hxIcon(harness, size, alone)</code> at <code>engine.js:14746</code></td><td>The harness mark, found by key or by label. <code>alone</code> adds <code>role=&quot;img&quot;</code> and an <code>aria-label</code> when no text beside the mark names the harness.</td></tr>
-      <tr><td><code>agentCard(a, o)</code> at <code>engine.js:9991</code></td><td>The one function that draws an agent identity. <code>o.layout</code> picks list, compact, or detail. 17 calls.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 1311 to 1341 (agent card, its three layouts, and the rule comment above them), 1345 (a steer-list override), 2173 to 2174 (the harness mark inside the card)</td><td>The rules that draw it</td></tr>
+      <tr><td><code>hxIcon(harness, size, alone)</code> at <code>engine.js:14805</code></td><td>The harness mark, found by key or by label. <code>alone</code> adds <code>role=&quot;img&quot;</code> and an <code>aria-label</code> when no text beside the mark names the harness.</td></tr>
+      <tr><td><code>agentCard(a, o)</code> at <code>engine.js:10050</code></td><td>The one function that draws an agent identity. <code>o.layout</code> picks list, compact, or detail. 17 calls.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -180,7 +180,7 @@
 <section class="dx-sec">
   <h2 id="findings">Findings</h2>
   
-  <div class="dx-find"><h4><span class="b b-q">note</span>The score slot has no emitter</h4><p><code>.agc&gt;.scs</code> and <code>.agc-detail .sc</code> reserve space and set type for a trust or a spend score beside the identity, and <code>.steer-list .check&gt;.scs</code> (engine.css 1335) repeats the reservation. <code>agentCard()</code> never fills any of them. Scores were part of the first version and were removed from rev1.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>The score slot has no emitter</h4><p><code>.agc&gt;.scs</code> and <code>.agc-detail .sc</code> reserve space and set type for a trust or a spend score beside the identity, and <code>.steer-list .check&gt;.scs</code> (engine.css 1342) repeats the reservation. <code>agentCard()</code> never fills any of them. Scores were part of the first version and were removed from rev1.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>One helper, seventeen call sites, no drift found</h4><p>Unlike <a href="stat-box.html">stat box</a> or <a href="panel.html">panel</a>, no hand-written copy of the agent card turned up in engine.js or wedge.js. Every identity on every sampled page goes through <code>agentCard()</code>.</p></div>
 </section>
 
@@ -195,7 +195,7 @@
 ## Inputs
 
 1. mockups/components/agent-card.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 1309 to 1334 (agent card, its three layouts, and the rule comment above them), 1338 (a steer-list override), 2166 to 2167 (the harness mark inside the card). The mockup renders it with hxIcon(harness, size, alone) (engine.js:14746), agentCard(a, o) (engine.js:9991).
+2. The design source: mockups/src/engine.css lines 1311 to 1341 (agent card, its three layouts, and the rule comment above them), 1345 (a steer-list override), 2173 to 2174 (the harness mark inside the card). The mockup renders it with hxIcon(harness, size, alone) (engine.js:14805), agentCard(a, o) (engine.js:10050).
 3. The build's implementation: find it by its root selector (.agc) or its name, and list every route that renders it.
 4. Where to see it in the design: Agents, Work, Run, Approvals, Spend, Tools, Steering. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

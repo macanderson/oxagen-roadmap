@@ -117,9 +117,9 @@ export default {
     ["--mono", "API name and version"],
   ],
   helpers: [
-    ["toolCell(id, o)", "engine.js:768", "The one component every tool display goes through. `o.sz` picks a size, `o.sub` appends a fact, `S.toolNames===\"api\"` swaps label and API name. 16 calls."],
-    ["toolMeta(id)", "engine.js:750", "Resolves a tool id to its label and category, from `TOOLMETA` or a verb-based guess for an id the table does not name."],
-    ["catSvg(c)", "engine.js:765", "The category's icon, from the shared `TCAT` map."],
+    ["toolCell(id, o)", "engine.js:826", "The one component every tool display goes through. `o.sz` picks a size, `o.sub` appends a fact, `S.toolNames===\"api\"` swaps label and API name. 16 calls."],
+    ["toolMeta(id)", "engine.js:808", "Resolves a tool id to its label and category, from `TOOLMETA` or a verb-based guess for an id the table does not name."],
+    ["catSvg(c)", "engine.js:823", "The category's icon, from the shared `TCAT` map."],
   ],
   sourceNotes: [
     "`TCAT` (engine.js 701 to 723) defines the ten categories a call can belong to: read-only, data query, record write, messaging, file mutation, code execution, source control, infrastructure, access, and financial control, each with its own icon and one-sentence description.",

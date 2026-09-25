@@ -4,7 +4,7 @@
   --fg:#FFFFFF; --body:#E4E4E7; --muted:#A1A1AA; --dim:#71717A;
   --gold:#D4AF37; --gold-bright:#F1CE65; --gold-deep:#8A7223; --accent-text:#D4AF37;
   --spot:22%;
-  --on-gold:#09090B;
+  --on-gold:#09090B; --on-gold-deep:#FFFFFF;
   --st-allowed:#57A97C; --st-approval:#5B93D6; --st-denied:#C66A4A;
   --st-proven:#3FA2A2; --st-failed:#C0453C; --st-critical:#D6455E; --st-observe:#A1A1AA;
   --k-rule:#9D8BE3;
@@ -489,15 +489,17 @@ tbody tr.click:hover .drill-lnk{border-bottom-style:solid}
 .dlg .tabs{margin:0;padding:0 18px}
 .dlg .tab{margin-bottom:-1px}
 .avat{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:var(--hl);border:1px solid var(--border);font-size:17px;font-weight:600;letter-spacing:.02em;color:var(--body);flex:none}
-/* avatars — people are round, agents are squircles; the kind (icon, initials, photo) and the tone live on the record.
-   Three tones, all from the house scale and nothing else: solid · soft · line. No free colour, no gradient.
-   Every tone is relative to the theme (solid = the foreground ink as a disc, soft = a lifted panel, line = a hairline), so the
-   three stay distinct on ink and on paper alike and the glyph always has full contrast against its ground. */
+/* Avatars (the app's ui/avatar.tsx). People are round. Agents, workspaces and organizations are squircles. The kind (icon,
+   initials, photo) and the tone live on the record. Five tones and no free colour or gradient. Solid, soft and line are relative
+   to the theme: the foreground ink as a disc, a lifted panel, a hairline. Gold and gold-deep are the brand gold in two shades,
+   the same in both themes. Each tone fixes its own glyph colour, so the glyph has full contrast on ink and on paper. */
 .avx{display:inline-grid;place-items:center;flex:none;overflow:hidden;box-sizing:border-box;vertical-align:middle;font-weight:600;line-height:1;letter-spacing:.02em;text-decoration:none;border:1px solid transparent}
 .avx svg{width:56%;height:56%}
 .avx.tn-solid{background:var(--fg);color:var(--ink);border-color:var(--fg)}
 .avx.tn-soft{background:var(--hl);color:var(--fg);border-color:var(--border)}
 .avx.tn-line{background:transparent;color:var(--fg);border-color:var(--rule)}
+.avx.tn-gold{background:var(--gold);color:var(--on-gold);border-color:var(--gold)}
+.avx.tn-gold-deep{background:var(--gold-deep);color:var(--on-gold-deep);border-color:var(--gold-deep)}
 .avx.person{border-radius:50%}
 .avx.agent{border-radius:27%}
 .avx img{width:100%;height:100%;object-fit:cover;display:block}
@@ -522,8 +524,8 @@ a.inv-i:hover *{text-decoration:none}
 .sumry .gen{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:11px;color:var(--dim);font-family:var(--mono);border-top:1px solid var(--border);padding-top:11px;margin-top:13px}
 .sumry .gen .grow{flex:1;min-width:0}
 .sumry .gen b{color:var(--muted);font-weight:600}
-/* avatar builder */
-.avb{display:grid;grid-template-columns:150px 1fr;gap:18px;align-items:start}
+/* avatar editor (the app's ui/avatar-editor.tsx), one for all four subjects */
+.avb{display:grid;grid-template-columns:150px 1fr;gap:16px;align-items:start}
 .avb-prev{display:flex;flex-direction:column;align-items:center;gap:12px;padding:18px 10px 14px;border:1px solid var(--border);border-radius:12px;background:var(--ink)}
 .avb-prev .sizes{display:flex;align-items:center;gap:8px}
 .avb-prev .cap{font-size:10.5px;color:var(--dim);font-family:var(--mono);text-align:center;line-height:1.4;word-break:break-word}
@@ -542,10 +544,15 @@ a.inv-i:hover *{text-decoration:none}
 .av-tone button{border:1px solid transparent;background:none;border-radius:11px;padding:3px;cursor:pointer;display:grid;place-items:center}
 .av-tone button:hover{border-color:var(--rule)}
 .av-tone button[aria-pressed="true"]{border-color:var(--fg)}
-.av-drop{border:1px dashed var(--rule);border-radius:10px;padding:14px;text-align:center;background:var(--ink);font-size:12.5px;color:var(--muted)}
-.av-drop input[type=file]{display:block;margin:8px auto 0;font-size:12px;width:auto;max-width:100%}
 .avb .field{margin-bottom:12px}
 .avb .field input.short{width:120px;font-size:15px;letter-spacing:.08em}
+.avb .field input.f-serif{font-family:Georgia,"Times New Roman",serif}
+.avb .field input.f-mono{font-family:var(--mono)}
+.av-note{margin-top:16px;font-size:12px;line-height:1.55}
+.av-remove{margin-top:16px}
+.av-remove .hint{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5}
+.av-alert{display:flex;align-items:flex-start;gap:8px;margin-top:16px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--st-failed) 40%,transparent);border-radius:8px;background:color-mix(in srgb,var(--st-failed) 10%,transparent);font-size:13px;color:var(--fg)}
+.av-alert .gl{color:var(--st-failed);flex:none;line-height:1.3}
 #layer.phone .avb{grid-template-columns:1fr}
 #viewport.phone .inv-i .tx b,#viewport.phone .inv-i .tx span{max-width:150px}
 .row2{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}

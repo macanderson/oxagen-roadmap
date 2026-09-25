@@ -208,8 +208,8 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 284 to 287, kind filter 221 to 223, selected button 144</td><td>The rules that draw it</td></tr>
-      <tr><td><code>namesToggle()</code> at <code>engine.js:829</code></td><td>Labels or API names for tools. The reference <code>.seg</code>.</td></tr>
-      <tr><td><code>catChips(counts, sel, pick, total)</code> at <code>engine.js:834</code></td><td>The tool category filter row, <code>.row.tcs</code>, with <code>aria-pressed</code>.</td></tr>
+      <tr><td><code>namesToggle()</code> at <code>engine.js:887</code></td><td>Labels or API names for tools. The reference <code>.seg</code>.</td></tr>
+      <tr><td><code>catChips(counts, sel, pick, total)</code> at <code>engine.js:892</code></td><td>The tool category filter row, <code>.row.tcs</code>, with <code>aria-pressed</code>.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -221,10 +221,10 @@
 <section class="dx-sec">
   <h2 id="findings">Findings</h2>
   
-  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Four idioms for one control</h4><p><code>.seg</code> with <code>aria-pressed</code> (five sites), <code>.btn.sm.sel</code> rows (seven sites), <code>span.chips[role=group]</code> (Backlog), and <code>.kf</code> with inline overrides (the Agents panel's Composition and Operations). <code>.chips</code> is also the bordered input box of a tag field (engine.css 917), so Backlog's view switch looks like a text input. Build <code>.seg</code> only.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Four idioms for one control</h4><p><code>.seg</code> with <code>aria-pressed</code> (five sites), <code>.btn.sm.sel</code> rows (seven sites), <code>span.chips[role=group]</code> (Backlog), and <code>.kf</code> with inline overrides (the Agents panel's Composition and Operations). <code>.chips</code> is also the bordered input box of a tag field (engine.css 924), so Backlog's view switch looks like a text input. Build <code>.seg</code> only.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>The kind filter row has lost its job</h4><p><code>.kf</code> was made for Steering's kind filters, which the fleet operations wedge removed. Its one remaining use is the Agents column pick, which is a <code>.seg</code>.</p></div>
   <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>No pressed state on the work order filter</h4><p><code>wedge.js</code> 181 marks the chosen filter with <code>.sel</code> and no <code>aria-pressed</code>, so a screen reader cannot tell which filter is on.</p></div>
-  <div class="dx-find"><h4><span class="b b-q">note</span>Two definitions of .chips</h4><p><code>.chips</code> is defined at engine.css 763 as a plain row and at 917 as an input box. The later one wins everywhere.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Two definitions of .chips</h4><p><code>.chips</code> is defined at engine.css 770 as a plain row and at 924 as an input box. The later one wins everywhere.</p></div>
 </section>
 
 <section class="dx-sec">
@@ -238,7 +238,7 @@
 ## Inputs
 
 1. mockups/components/segmented-control.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 284 to 287, kind filter 221 to 223, selected button 144. The mockup renders it with namesToggle() (engine.js:829), catChips(counts, sel, pick, total) (engine.js:834).
+2. The design source: mockups/src/engine.css lines 284 to 287, kind filter 221 to 223, selected button 144. The mockup renders it with namesToggle() (engine.js:887), catChips(counts, sel, pick, total) (engine.js:892).
 3. The build's implementation: find it by its root selector (.seg) or its name, and list every route that renders it.
 4. Where to see it in the design: Agents, Tools, agent Toolbelt, Organization deployment mode, import wizard, Work orders, Backlog. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

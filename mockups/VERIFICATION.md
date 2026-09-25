@@ -23,7 +23,8 @@
   or `trust score` outside two English idioms in v1 copy ("the only witness to its own arithmetic",
   "not proof that it was not").
 - `node tools/build-mockup-future.mjs --check` and `node tools/build-mockup-v2.mjs --check` still pass:
-  the future-state mockup and v2 are unchanged.
+  the future-state mockup and v2 are unchanged. (On September 25, `a48afde` deleted `mockups/v2`,
+  and #109 removed `tools/build-mockup-v2.mjs` and its step in `npm run check`.)
 - The approvals drawer: opens from the topbar button on every page, lists 17 waiting items
   (16 parked approvals and 1 interjection), selecting one renders the full approval card with its
   three actions, Escape closes it, and the countdowns keep ticking inside it. Screenshots

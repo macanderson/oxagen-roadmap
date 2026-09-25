@@ -8,7 +8,7 @@ export default {
   summary: "One figure with its label and one line of context.",
   lead: "A stat box shows one figure a person checks at a glance: a count, an amount, a rate. The label names the figure, the value states it, and the subline gives the one fact that makes it readable. Stat boxes sit in a row at the top of a page or a tab.",
   root: ".stat",
-  css: "lines 177 to 181, 764, 2087 to 2093, phone 679 to 680",
+  css: "lines 177 to 181, 771, 2094 to 2100, phone 686 to 687",
   usedOn: ["Work", "Run", "Agents", "Spend", "Runtimes", "Billing", "agent Overview"],
   stories: [
     {
@@ -112,7 +112,7 @@ export default {
     "The label and subline must clear 4.5:1 on `--panel`. The label's `--dim` does not today. See Findings.",
   ],
   phone: [
-    "Padding drops to 11px by 12px and the value to 17px, so an eleven-digit token total fits half the width (engine.css 676 to 680).",
+    "Padding drops to 11px by 12px and the value to 17px, so an eleven-digit token total fits half the width (engine.css 683 to 687).",
     "Stat boxes sit two to a row, and a clickable stat keeps a 44px minimum touch height.",
   ],
   tokens: [
@@ -125,9 +125,9 @@ export default {
     ["--st-approval, --st-failed, --st-allowed", "Value tone, with the state named beside it"],
   ],
   helpers: [
-    ["tile(k, v, s, col)", "engine.js:2490", "Writes one stat box. `col` sets the value's tone. About 15 calls."],
-    ["runStatRow(R)", "engine.js:2487", "The Run page's row of six, with a local tile of its own."],
-    ["basisChip(k)", "engine.js:637", "The spend basis chip in the subline."],
+    ["tile(k, v, s, col)", "engine.js:2548", "Writes one stat box. `col` sets the value's tone. About 15 calls."],
+    ["runStatRow(R)", "engine.js:2545", "The Run page's row of six, with a local tile of its own."],
+    ["basisChip(k)", "engine.js:695", "The spend basis chip in the subline."],
   ],
   sourceNotes: [
     "44 more stat boxes are written inline as strings (Spend, Runtimes, Billing, agent Overview, Memory, and the evidence and fix dialogs), and three local functions shadow `tile()`: `runStatRow` (2483), the import wizard (12152), and a pass or fail tile at 5798.",

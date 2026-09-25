@@ -10,7 +10,7 @@ export default {
   summary: "An action a person takes, with one gold primary per screen.",
   lead: "A button runs an action on the page it sits on: save, deny, open a dialog, close a pull request. The default button is neutral. One button per screen may be the gold primary, and it marks the action the screen exists for. Destructive actions are red, and icon buttons carry a label a screen reader can speak.",
   root: ".btn",
-  css: "lines 135 to 144, icon button 117 to 120, wand 1028 to 1031, solid danger 2121 to 2122, link 1775 to 1776, phone 665 to 666",
+  css: "lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673",
   usedOn: ["every page", "every dialog", "the approvals drawer"],
   stories: [
     {
@@ -141,7 +141,7 @@ export default {
   ],
   phone: [
     "Buttons grow to 40px tall at 14px, and `.sm` to 36px at 13px.",
-    "A dialog footer reverses its order, and each button takes half the width at 46px tall (engine.css 687 to 688).",
+    "A dialog footer reverses its order, and each button takes half the width at 46px tall (engine.css 694 to 695).",
     "Icon buttons keep 32px but sit in a 44px hit area in the thumb bar and headers.",
   ],
   tokens: [
@@ -154,8 +154,8 @@ export default {
     ["--accent-text", "Link button (see Findings)"],
   ],
   helpers: [
-    ["dialog()", "engine.js:9510", "Writes a dialog's footer buttons from `d.f`."],
-    ["act(msg, tone)", "engine.js:1978", "What most buttons call when they finish: a toast in the button's tone."],
+    ["dialog()", "engine.js:9569", "Writes a dialog's footer buttons from `d.f`."],
+    ["act(msg, tone)", "engine.js:2036", "What most buttons call when they finish: a toast in the button's tone."],
   ],
   sourceNotes: [
     "Buttons are written inline: about 173 `btn primary`, 226 `btn sm`, 60 `btn danger`, 5 `btn ghost`, and 18 wand buttons.",

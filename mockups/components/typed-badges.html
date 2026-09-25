@@ -214,14 +214,14 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 196 to 207 (kind), 264 to 265 (tool category), 266 to 270 (hazard), 271 to 276 (gate), wedge.js 234 to 236 and 2269 to 2276 (frame type)</td><td>The rules that draw it</td></tr>
-      <tr><td><code>kindBadge(k)</code> at <code>engine.js:1500</code></td><td>Kind badge with icon and word. 4 calls.</td></tr>
-      <tr><td><code>kindGlyph(k)</code> at <code>engine.js:1501</code></td><td>Icon-only kind glyph. 2 calls.</td></tr>
+      <tr><td><code>kindBadge(k)</code> at <code>engine.js:1558</code></td><td>Kind badge with icon and word. 4 calls.</td></tr>
+      <tr><td><code>kindGlyph(k)</code> at <code>engine.js:1559</code></td><td>Icon-only kind glyph. 2 calls.</td></tr>
       <tr><td><code>ftBadge(t)</code> at <code>wedge.js:235</code></td><td>Frame-type badge, word and CSS mark, no icon. 10 calls.</td></tr>
       <tr><td><code>typeStrip(list, ctx)</code> at <code>wedge.js:442</code></td><td>Counts by frame type as a strip. A <code>ctx</code> turns each entry into a filter button.</td></tr>
-      <tr><td><code>catBadge(c)</code> at <code>engine.js:766</code></td><td>Tool category badge with icon and word. 5 calls.</td></tr>
-      <tr><td><code>hazard(risk, effect)</code> at <code>engine.js:789</code></td><td>Risk mark plus an optional side-effect glyph. 15 calls.</td></tr>
-      <tr><td><code>gate(g, note)</code> at <code>engine.js:805</code></td><td>Gate badge, with the reasoning in its title.</td></tr>
-      <tr><td><code>toolGate(t)</code> at <code>engine.js:817</code></td><td>Decides which gate a tool sits behind today (a kill switch outranks a mandate outranks approval) and renders it with <code>gate()</code>. 5 calls.</td></tr>
+      <tr><td><code>catBadge(c)</code> at <code>engine.js:824</code></td><td>Tool category badge with icon and word. 5 calls.</td></tr>
+      <tr><td><code>hazard(risk, effect)</code> at <code>engine.js:847</code></td><td>Risk mark plus an optional side-effect glyph. 15 calls.</td></tr>
+      <tr><td><code>gate(g, note)</code> at <code>engine.js:863</code></td><td>Gate badge, with the reasoning in its title.</td></tr>
+      <tr><td><code>toolGate(t)</code> at <code>engine.js:875</code></td><td>Decides which gate a tool sits behind today (a kill switch outranks a mandate outranks approval) and renders it with <code>gate()</code>. 5 calls.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -236,7 +236,7 @@
   
   <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Frame type text fails contrast in light</h4><p><code>.ft</code> sets its own text color from <code>--fc</code>. Three of the eight frame types (<code>ft-capability</code>, <code>ft-delegation</code>, <code>ft-invocation</code>) resolve to <code>--fk-tool</code>, <code>--fk-gov</code>, and <code>--fk-op</code>, which fall below 3.3:1 on white. See <a href="../colors.html#kinds">Colors</a>.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>The seventh kind is unused machinery</h4><p><code>colors.html</code> hand-writes a <code>.kb.k-item</code> swatch for a steering item that is none of the six kinds, but <code>KINDS</code> has no <code>item</code> entry, so <code>kindBadge('item')</code> and <code>kindGlyph('item')</code> fall back to <code>KINDS.rule</code> and draw a rule icon labeled &quot;rule&quot; in the neutral hue. <code>.kb-src</code>, the caption meant to sit under that badge, has no emitter either.</p></div>
-  <div class="dx-find"><h4><span class="b b-q">note</span>Kind and frame-type tints differ by a point</h4><p>The kind badge's fill is a 12% mix (engine.css 198). The frame-type badge's fill is an 11% mix (engine.css 2271). Both use a 45% border. Two badges on the same grammar should share one recipe.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Kind and frame-type tints differ by a point</h4><p>The kind badge's fill is a 12% mix (engine.css 198). The frame-type badge's fill is an 11% mix (engine.css 2278). Both use a 45% border. Two badges on the same grammar should share one recipe.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>Frame type carries no icon</h4><p>Unlike the kind badge, <code>.ft</code> has no SVG. Its mark is a CSS <code>::before</code> square dot in <code>currentColor</code>, by design, so a frame-type badge is a word plus a mark, never an icon.</p></div>
 </section>
 
@@ -251,7 +251,7 @@
 ## Inputs
 
 1. mockups/components/typed-badges.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 196 to 207 (kind), 264 to 265 (tool category), 266 to 270 (hazard), 271 to 276 (gate), wedge.js 234 to 236 and 2269 to 2276 (frame type). The mockup renders it with kindBadge(k) (engine.js:1500), kindGlyph(k) (engine.js:1501), ftBadge(t) (wedge.js:235), typeStrip(list, ctx) (wedge.js:442), catBadge(c) (engine.js:766), hazard(risk, effect) (engine.js:789), gate(g, note) (engine.js:805), toolGate(t) (engine.js:817).
+2. The design source: mockups/src/engine.css lines 196 to 207 (kind), 264 to 265 (tool category), 266 to 270 (hazard), 271 to 276 (gate), wedge.js 234 to 236 and 2269 to 2276 (frame type). The mockup renders it with kindBadge(k) (engine.js:1558), kindGlyph(k) (engine.js:1559), ftBadge(t) (wedge.js:235), typeStrip(list, ctx) (wedge.js:442), catBadge(c) (engine.js:824), hazard(risk, effect) (engine.js:847), gate(g, note) (engine.js:863), toolGate(t) (engine.js:875).
 3. The build's implementation: find it by its root selector (.kb, .ft, .tcb, .hz, .gt) or its name, and list every route that renders it.
 4. Where to see it in the design: Steering, Run (Decision trace, Transcript), Tools, Agents (mandates). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

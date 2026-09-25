@@ -42,7 +42,7 @@
   <p class="dx-lead">A table lists records of one kind: agents, runs, tools, work items, budgets. Each row is one record and each column one field. Tables sit inside a panel and scroll sideways inside it, never the page. A row that opens its record is a keyboard button, and a missing value is a dash.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>table</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 234 to 245, 1334, 2174 to 2177, 2350, phone 696 to 708</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 234 to 245, 1341, 2181 to 2184, 2357, phone 703 to 715</span>
     <span><b>Used on</b> Work, Agents, Tools, Spend, Repositories, Organization, Audit</span>
   </div>
 </div>
@@ -274,10 +274,10 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 234 to 245, 1334, 2174 to 2177, 2350, phone 696 to 708</td><td>The rules that draw it</td></tr>
-      <tr><td><code>rowClick(on, label)</code> at <code>engine.js:6912</code></td><td>Makes a row a keyboard button. 17 calls.</td></tr>
-      <tr><td><code>cardTables()</code> at <code>engine.js:13860</code></td><td>Turns every single-header table into labelled cards on a phone.</td></tr>
-      <tr><td><code>keyLabel(k)</code> at <code>engine.js:635</code></td><td>Shows a stored key as its label with the key in a tooltip.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 234 to 245, 1341, 2181 to 2184, 2357, phone 703 to 715</td><td>The rules that draw it</td></tr>
+      <tr><td><code>rowClick(on, label)</code> at <code>engine.js:6970</code></td><td>Makes a row a keyboard button. 17 calls.</td></tr>
+      <tr><td><code>cardTables()</code> at <code>engine.js:13919</code></td><td>Turns every single-header table into labelled cards on a phone.</td></tr>
+      <tr><td><code>keyLabel(k)</code> at <code>engine.js:693</code></td><td>Shows a stored key as its label with the key in a tooltip.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -307,7 +307,7 @@
 ## Inputs
 
 1. mockups/components/table.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 234 to 245, 1334, 2174 to 2177, 2350, phone 696 to 708. The mockup renders it with rowClick(on, label) (engine.js:6912), cardTables() (engine.js:13860), keyLabel(k) (engine.js:635).
+2. The design source: mockups/src/engine.css lines 234 to 245, 1341, 2181 to 2184, 2357, phone 703 to 715. The mockup renders it with rowClick(on, label) (engine.js:6970), cardTables() (engine.js:13919), keyLabel(k) (engine.js:693).
 3. The build's implementation: find it by its root selector (table) or its name, and list every route that renders it.
 4. Where to see it in the design: Work, Agents, Tools, Spend, Repositories, Organization, Audit. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

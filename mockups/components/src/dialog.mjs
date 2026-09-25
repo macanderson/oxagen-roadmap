@@ -8,7 +8,7 @@ export default {
   summary: "A task or a decision that needs an answer before the page goes on.",
   lead: "A dialog opens over the page for one task: invite a person, set a budget, approve a schema, retire an agent. It has a header that names the task, a body that holds the fields or the facts, and a footer with Cancel and the one action. On a phone it rises from the bottom edge as a sheet.",
   root: ".dlg",
-  css: "lines 471 to 490, phone 682 to 694",
+  css: "lines 471 to 490, phone 689 to 701",
   usedOn: ["Work (Intake)", "Agents", "Spend (Set a budget)", "Organization (Invite a person)", "Tools", "Steering"],
   stories: [
     {
@@ -146,9 +146,9 @@ export default {
     ["--st-failed", "The danger action"],
   ],
   helpers: [
-    ["dialog()", "engine.js:9510", "Builds the scrim, shell, header, tabs, body, and footer from a `{t, s, w, tabs, b, f}` record. The shell markup is at 9662 to 9667."],
-    ["openDialog(kind, arg)", "engine.js:8265", "Opens a dialog by kind and remembers the dialog to return to."],
-    ["closeDialog()", "engine.js:8442", "Closes it, or returns to the dialog it was opened from."],
+    ["dialog()", "engine.js:9569", "Builds the scrim, shell, header, tabs, body, and footer from a `{t, s, w, tabs, b, f}` record. The shell markup is at 9662 to 9667."],
+    ["openDialog(kind, arg)", "engine.js:8324", "Opens a dialog by kind and remembers the dialog to return to."],
+    ["closeDialog()", "engine.js:8501", "Closes it, or returns to the dialog it was opened from."],
     ["DLG_EXT", "engine.js:23", "The registry of dialogs defined outside `dialog()`, such as `budgetedit` and `budgetdel`."],
   ],
   sourceNotes: [

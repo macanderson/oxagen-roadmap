@@ -7,7 +7,7 @@ export default {
   summary: "A label, a control, and a one-sentence hint, with the checkbox card and the small select.",
   lead: "A form field is a label above a control with an optional hint below it. The control is a text input, a select, or a textarea on the page ground. Two fields can sit side by side, a read-only field shows a value you cannot change here, and a checkbox card holds a choice with its consequence written out. Most fields live in dialogs.",
   root: ".field",
-  css: "lines 479 to 483, 562 to 569, check card 570 to 575, 1359 to 1361, 2242, 2259, small select 766 to 767, read-only 924, phone 670 to 672",
+  css: "lines 479 to 483, 569 to 576, check card 577 to 582, 1366 to 1368, 2249, 2266, small select 773 to 774, read-only 931, phone 677 to 679",
   usedOn: ["every dialog", "Set a budget", "Invite a person", "Retire agent", "the connection wizard", "Account"],
   stories: [
     {
@@ -129,11 +129,11 @@ export default {
     ["--rule", "Card hover border"],
   ],
   helpers: [
-    ["dialog()", "engine.js:9510", "Renders the fields a dialog body holds."],
+    ["dialog()", "engine.js:9569", "Renders the fields a dialog body holds."],
   ],
   sourceNotes: [
     "Fields are written inline, about 258 of them, mostly in dialogs. There are 11 checkbox cards.",
-    "The onboarding screens have their own invalid state, `.field input.ob-bad` (engine.css 1469). Nothing else in the engine draws an invalid field.",
+    "The onboarding screens have their own invalid state, `.field input.ob-bad` (engine.css 1476). Nothing else in the engine draws an invalid field.",
   ],
   findings: [
     { tag: "open", title: "Half the labels are not tied to their controls", body: "112 fields write `<label>Name</label><input aria-label=\"Name\">` and 109 use `for`. Clicking the bare label does not focus the input. Every label should use `for`." },

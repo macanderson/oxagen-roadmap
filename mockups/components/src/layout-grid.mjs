@@ -7,7 +7,7 @@ export default {
   summary: "The grids, splits, and rows that place panels and stat boxes on a page.",
   lead: "Pages are laid out with a handful of primitives: `.grid` with two, three, or four auto-fitting columns, `.split` and `.split23` for a main column beside a side column, and `.row` for an inline run of badges or buttons. They carry no color and no copy. They set the 14px gap every page uses.",
   root: ".grid",
-  css: "lines 153 to 167, 310 to 311, 548 to 549, phone 675",
+  css: "lines 153 to 167, 310 to 311, 555 to 556, phone 682",
   usedOn: ["Work", "Run", "Spend", "Agents", "agent Overview", "Billing", "every dialog"],
   stories: [
     {
@@ -120,7 +120,7 @@ export default {
     "A `.hr` is a `div`, which is decorative. Use a heading, not a divider, to start a new section.",
   ],
   phone: [
-    "`.g3` and `.g4` become two equal columns (engine.css 675). `.g2` falls to one column because two 320px columns do not fit.",
+    "`.g3` and `.g4` become two equal columns (engine.css 682). `.g2` falls to one column because two 320px columns do not fit.",
     "`.split` and `.split23` become one column below 1080px and in the phone shell, with the side column under the main one.",
     "`.row` wraps, so badges and buttons flow onto a second line instead of scrolling.",
   ],

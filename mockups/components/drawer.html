@@ -42,7 +42,7 @@
   <p class="dx-lead">The drawer lists every call parked for a decision across the organization: pending approvals and a paused agent waiting on an answer. Picking a row opens the full approval card in place, with approve and deny, so a decision never needs another page. One drawer exists at a time, and it opens from the topbar button on every page.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.apd</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 2065 to 2092, countdown 811 to 824</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 2072 to 2099, countdown 818 to 831</span>
     <span><b>Used on</b> every page (topbar)</span>
   </div>
 </div>
@@ -262,14 +262,14 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 2065 to 2092, countdown 811 to 824</td><td>The rules that draw it</td></tr>
-      <tr><td><code>apdButton()</code> at <code>engine.js:1627</code></td><td>The topbar trigger, with the live count.</td></tr>
-      <tr><td><code>apdToggle(v)</code> at <code>engine.js:1633</code></td><td>Opens or closes the drawer and clears the selection on close.</td></tr>
-      <tr><td><code>apdRow(a)</code> at <code>engine.js:1636</code></td><td>One approval row, pending or resolved.</td></tr>
-      <tr><td><code>apdInterjectionRow(x)</code> at <code>engine.js:1648</code></td><td>The paused-agent row, with its own Answer button.</td></tr>
-      <tr><td><code>apdBody(a)</code> at <code>engine.js:1654</code></td><td>The list, or the selected approval's card when <code>S.apd.sel</code> is set.</td></tr>
-      <tr><td><code>apdHtml()</code> at <code>engine.js:1668</code></td><td>The scrim and the panel, assembled from <code>apdBody()</code>.</td></tr>
-      <tr><td><code>approvalCard(a)</code> at <code>engine.js:1840</code></td><td>The full card shown for a selected row, shared with the Run page.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 2072 to 2099, countdown 818 to 831</td><td>The rules that draw it</td></tr>
+      <tr><td><code>apdButton()</code> at <code>engine.js:1685</code></td><td>The topbar trigger, with the live count.</td></tr>
+      <tr><td><code>apdToggle(v)</code> at <code>engine.js:1691</code></td><td>Opens or closes the drawer and clears the selection on close.</td></tr>
+      <tr><td><code>apdRow(a)</code> at <code>engine.js:1694</code></td><td>One approval row, pending or resolved.</td></tr>
+      <tr><td><code>apdInterjectionRow(x)</code> at <code>engine.js:1706</code></td><td>The paused-agent row, with its own Answer button.</td></tr>
+      <tr><td><code>apdBody(a)</code> at <code>engine.js:1712</code></td><td>The list, or the selected approval's card when <code>S.apd.sel</code> is set.</td></tr>
+      <tr><td><code>apdHtml()</code> at <code>engine.js:1726</code></td><td>The scrim and the panel, assembled from <code>apdBody()</code>.</td></tr>
+      <tr><td><code>approvalCard(a)</code> at <code>engine.js:1898</code></td><td>The full card shown for a selected row, shared with the Run page.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -298,7 +298,7 @@
 ## Inputs
 
 1. mockups/components/drawer.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 2065 to 2092, countdown 811 to 824. The mockup renders it with apdButton() (engine.js:1627), apdToggle(v) (engine.js:1633), apdRow(a) (engine.js:1636), apdInterjectionRow(x) (engine.js:1648), apdBody(a) (engine.js:1654), apdHtml() (engine.js:1668), approvalCard(a) (engine.js:1840).
+2. The design source: mockups/src/engine.css lines 2072 to 2099, countdown 818 to 831. The mockup renders it with apdButton() (engine.js:1685), apdToggle(v) (engine.js:1691), apdRow(a) (engine.js:1694), apdInterjectionRow(x) (engine.js:1706), apdBody(a) (engine.js:1712), apdHtml() (engine.js:1726), approvalCard(a) (engine.js:1898).
 3. The build's implementation: find it by its root selector (.apd) or its name, and list every route that renders it.
 4. Where to see it in the design: every page (topbar). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
