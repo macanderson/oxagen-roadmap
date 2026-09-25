@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // Walks the master mockup's routes in headless Chromium and fails on copy that reads wrong: an
-// `undefined` in a sentence, "1 turns", a number glued to its unit, a dollar figure with no
-// thousands separator, a retired term, a capitalized brand name, a storage tag, math notation,
-// British spelling, or an identifier the eyebrow style uppercased.
+// `undefined` in a sentence, a tile with no value, "1 turns", a number glued to its unit, a dollar
+// figure with no thousands separator, a retired term, a capitalized brand name, a storage tag, math
+// notation, British spelling, or an identifier the eyebrow style uppercased.
 //
 //   node tools/check-copy.mjs                 # every route, both workspaces, plus the drawer and dialogs
 //   node tools/check-copy.mjs --only tools    # routes whose hash contains "tools"
@@ -107,7 +107,7 @@ const errors = [];
 page.on("pageerror", (e) => errors.push(String(e.message || e)));
 page.on("dialog", (d) => d.dismiss());
 
-const hits = new Map([...RULES, ...PROSE_ONLY].map(([name]) => [name, []]));
+const hits = new Map([...RULES, ...PROSE_ONLY, ["empty tile"]].map(([name]) => [name, []]));
 // Code samples (<pre>, <code>) are excluded: a TOML key or an SDK class such as McpServer is the
 // language's word, not the page's, so the rules read only the prose around them.
 const visibleText = (hide = "pre, code") => {
@@ -118,11 +118,18 @@ const visibleText = (hide = "pre, code") => {
   off.remove();
   return t;
 };
+// A tile or a field with a caption and no value reads as a broken page, so each one is a finding.
+// An empty value renders "—" and a short reason instead (the copy review's rule 1.12).
+const emptyTiles = () =>
+  [...document.querySelectorAll(".stat")]
+    .filter((t) => t.offsetParent && !(t.querySelector(".v")?.innerText || "").trim())
+    .map((t) => `${(t.querySelector(".k")?.innerText || "?").trim()} ⏎ ${(t.querySelector(".s")?.innerText || "").trim()}`);
 // A route that rendered no heading would pass every rule by showing nothing, so it fails on its own.
 // An empty state inside a page still has the page's heading, so it passes.
 const rendered = () => !!document.querySelector("#app h1, #app h2");
 
 async function audit(label, text, prose) {
+  for (const tile of await page.evaluate(emptyTiles)) hits.get("empty tile").push([label, tile]);
   if (dump) writeFileSync(path.join(dump, label.replace(/[^a-z0-9._-]+/gi, "_").slice(0, 150) + ".txt"), text);
   for (const [name, re, t] of [...RULES.map((r) => [...r, text]), ...PROSE_ONLY.map((r) => [...r, prose])]) {
     const g = new RegExp(re.source, re.flags.includes("g") ? re.flags : re.flags + "g");
