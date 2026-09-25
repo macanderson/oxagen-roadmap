@@ -1,5 +1,6 @@
 // Button: an action a person takes, in the engine's variants.
 const WAND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>';
+const CHECK = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5"/></svg>';
 const BELL = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
 
 export default {
@@ -10,7 +11,7 @@ export default {
   summary: "An action a person takes, with one gold primary per screen.",
   lead: "A button runs an action on the page it sits on: save, deny, open a dialog, close a pull request. The default button is neutral. One button per screen may be the gold primary, and it marks the action the screen exists for. Destructive actions are red, and icon buttons carry a label a screen reader can speak.",
   root: ".btn",
-  css: "lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673",
+  css: "lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673, copied 2413 to 2421",
   usedOn: ["every page", "every dialog", "the approvals drawer"],
   stories: [
     {
@@ -45,6 +46,17 @@ export default {
         <button class="btn primary" disabled>Retire agent</button>
         <button class="btn danger" disabled>Retire agent</button>
         <span class="muted" style="font-size:12px">Tick the check to confirm.</span>`,
+    },
+    {
+      id: "copied",
+      name: "Copied",
+      note: "A copy that lands turns the label into a check and \"Copied\" for 1.6s.",
+      row: true,
+      html: `
+        <button class="btn">Copy prompt</button>
+        <button class="btn copied">${CHECK}Copied</button>
+        <button class="btn primary sm">Copy prompt</button>
+        <button class="btn primary sm copied">${CHECK}Copied</button>`,
     },
     {
       id: "dialog-footer",
@@ -96,6 +108,7 @@ export default {
     ["Ghost", "`.btn.ghost`", "No ground. For a secondary action that should recede, such as Details."],
     ["Selected", "`.btn.sel`", "`--hl` ground, `--rule` border, `--fg` 600. Used by filter rows."],
     ["Disabled", "`.btn:disabled`", "45% opacity and a not-allowed cursor."],
+    ["Copied", "`.btn.copied`", "`--st-allowed` text on an 8% ground of it, with a border at 40%. A 14px check pops in and draws its stroke in 0.3s. The label returns after 1.6s, and the button keeps its width."],
     ["Icon button", "`.iconbtn`", "32px square, an 8px radius, `--muted` icon. Pressed is gold. `.dot` is a 6px `--st-approval` marker and `.cnt` a count pill."],
     ["Assist", "`.btn.wand`", "A 30px square filled with `--fg` and a 16px wand icon in `--ink`."],
     ["Link button", "`.lnk`", "No box. `--accent-text`, underlined, in the surrounding type."],
@@ -124,6 +137,7 @@ export default {
       "**Destructive.** A reversible removal is `.danger`. An irreversible one asks for confirmation, names what ends and what is kept, and uses `.danger.solid` or a disabled `.danger` until the person ticks a check.",
       "**Assist.** The wand is the one assist action in a field. It is never gold, because gold is already spent on the step's primary action.",
       "**Loading.** A button that waits on the control plane keeps its label and is disabled until the answer arrives. The result arrives as a [toast](toast.html).",
+      "**Copy.** A copy button confirms on itself with `.copied` once the clipboard accepts the text, and a toast or status line says what went. A refused copy leaves the button as it was and says so in the toast.",
     ],
   },
   content: [
@@ -149,13 +163,15 @@ export default {
     ["--hl, --rule", "Hover and selected"],
     ["--gold, --gold-bright, --on-gold", "The one primary"],
     ["--st-failed", "Danger text, border, and solid fill"],
+    ["--st-allowed", "Copied text, ground, border, and check"],
     ["--muted", "Icon button icon"],
     ["--st-approval", "Icon button dot and count"],
     ["--accent-text", "Link button (see Findings)"],
   ],
   helpers: [
-    ["dialog()", "engine.js:9569", "Writes a dialog's footer buttons from `d.f`."],
-    ["act(msg, tone)", "engine.js:2036", "What most buttons call when they finish: a toast in the button's tone."],
+    ["dialog()", "engine.js:9352", "Writes a dialog's footer buttons from `d.f`."],
+    ["act(msg, tone)", "engine.js:2033", "What most buttons call when they finish: a toast in the button's tone."],
+    ["copiedState(btn)", "engine.js:2467", "Swaps a button to the copied state for 1.6s. `copyText()` calls it once the clipboard accepts."],
   ],
   sourceNotes: [
     "Buttons are written inline: about 173 `btn primary`, 226 `btn sm`, 60 `btn danger`, 5 `btn ghost`, and 18 wand buttons.",

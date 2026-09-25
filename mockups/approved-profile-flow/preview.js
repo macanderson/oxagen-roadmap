@@ -114,11 +114,27 @@ byId('edit-prompt').onclick = () => {
 };
 byId('first-prompt').oninput = () => { customPrompt = true; updatePrompt(); };
 byId('reset-prompt').onclick = () => { customPrompt = false; updatePrompt(); };
+// The copied state of engine.css's .btn.copied, drawn for .ap-btn in index.html: a check and "Copied" for 1.6s.
+const COPIED = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5"/></svg>Copied';
+let copiedTimer = null;
+const showCopied = (btn) => {
+  if (!btn.classList.contains('copied')) { btn.dataset.label = btn.innerHTML; btn.style.minWidth = `${btn.offsetWidth}px`; }
+  btn.innerHTML = COPIED;
+  btn.classList.add('copied');
+  clearTimeout(copiedTimer);
+  copiedTimer = setTimeout(() => {
+    btn.innerHTML = btn.dataset.label;
+    btn.classList.remove('copied');
+    btn.style.minWidth = '';
+    delete btn.dataset.label;
+  }, 1600);
+};
 byId('copy-prompt').onclick = async () => {
   const text = byId('first-prompt').value.trim();
   if (!text) { byId('copy-status').textContent = 'Enter a prompt before copying.'; return; }
   try {
     await navigator.clipboard.writeText(text);
+    showCopied(byId('copy-prompt'));
     byId('copy-status').textContent = 'Prompt copied. Send it through Stella. Registration is still waiting for its connection and run.';
   } catch {
     byId('first-prompt').focus();

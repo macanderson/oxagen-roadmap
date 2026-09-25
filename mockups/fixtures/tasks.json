@@ -1726,7 +1726,7 @@
    "desc": "Writes the docs a definition of done names, in the pull request it was handed.",
    "runs30": 22,
    "spend30": "19.75",
-   "tier": "harness",
+   "tier": "gateway",
    "host": "mbell-mbp-16"
   },
   {

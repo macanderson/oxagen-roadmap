@@ -20,7 +20,7 @@ Three things open a pull request here. The promoter opens one from a proposal it
 
 **Header, tabs and shell.** As `steering.md`, with Proposals selected (16). New source is plain on this view, so the gold is Merge pull request's.
 
-**The two views.** The group labelled "Proposals or pull requests", with **Pull requests** 6 pressed and the line "A proposal becomes a pull request. A merge publishes it." (`steering-proposals.md`).
+**The two views.** The group labelled "Proposals or pull requests", with **Pull requests** 6 pressed and no line beside it (`steering-proposals.md`).
 
 **Pull requests** panel.
 
@@ -85,7 +85,7 @@ record_hash  = "sha256:9a41c0e7bd238f45"
 
 Right column:
 
-- **Checks**, with "the same rules as stella context validate" beside the heading. Six rows, each the check's name with its result under it and its state at the right: "pass" (a dot and the word), a spinner while running, "queued", or "fail" with the reason.
+- **Checks**, with nothing beside the heading. That the checks run the same rules as `stella context validate` is in the component help (`mockups/help/steering-prs.md`, Checks). Six rows, each the check's name with its result under it and its state at the right: "pass" (a dot and the word), a spinner while running, "queued", or "fail" with the reason.
 
 | Check | Result when it passes |
 |---|---|
@@ -94,15 +94,15 @@ Right column:
 | record_hash recomputation | "recomputed over the canonical bytes · sha256:9a41c0e7bd238f45 matches the file" |
 | Secret and PII scan | "statement, rationale and evidence scanned · 0 findings" |
 | Conflict against active records | "59 published records checked · no require on CHANGELOG.md reads" |
-| constraint_effect ∈ {require, forbid} | "constraint_effect = forbid · grants nothing" |
+| Constraint is require or forbid | "constraint forbid · grants nothing" |
 
 - An import pull request with several records runs the same six, worded for the set: Schema "context-record/v0.1 valid · 9 files, 9 records, 9 lineages", Lineage uniqueness "no published record or open pull request holds any of these 9 lineages", record_hash recomputation "recomputed over the canonical bytes of 9 files · each matches its record_hash", and the constraint check "<c> of <n> carry a constraint, each require or forbid · grants nothing", or "no constraining kind · the field is absent, which is also a pass".
 - The merge bar, under the checks:
   - checks running: "Checks are running. Merge is blocked until all 6 report.";
-  - all passed: "6 checks passed. Governance team: Marcus Bell owns .oxagen/rules/.";
+  - all passed: "6 checks passed. Governance mode team.";
   - a check failed: "A check failed. Nothing merges and nothing is published. Change the file and open it again.";
   - then **Close pull request** (red outline; opens `closepr`) and **Merge pull request**, gold only once every check passed and disabled otherwise.
-- **Merge effects**, five numbered rows: "write a promotion_event with the approver, the pull request and the commit"; "re-index the record from the merged commit; a hash mismatch blocks delivery"; "bump the bundle v41 → v42 and re-sign it · 1,340 → 1,386 steering tokens a turn"; "emit steering_published to the audit log"; and a fifth row on delivery. An import's third row counts every record it carries ("1,340 → 1,495" for the nine records from CLAUDE.md). A person's pull request, from the wizard or the importer, adds the note "Nothing above happens on the way here. The record steers nothing while this pull request is open, which is the whole reason it is a pull request." The mockup's fifth row reads "deliver it on the next model call of every run in core-platform"; the record reaches a run when its host next fetches the bundle, at the run's next session start, as the W6 scenario says, and a build says so.
+- **Merge effects**, five numbered rows: "write a promotion_event with the approver, the pull request and the commit"; "re-index the record from the merged commit; a hash mismatch blocks delivery"; "bump the bundle v41 → v42 and re-sign it · 1,340 → 1,386 steering tokens a turn"; "emit steering_published to the audit log"; and a fifth row on delivery. An import's third row counts every record it carries ("1,340 → 1,495" for the nine records from CLAUDE.md). No note follows the rows; why nothing happens before the merge is in the component help (`mockups/help/steering-prs.md`, Merge effects). The mockup's fifth row reads "deliver it on the next model call of every run in core-platform"; the record reaches a run when its host next fetches the bundle, at the run's next session start, as the W6 scenario says, and a build says so.
 
 **After the merge.**
 
@@ -117,7 +117,7 @@ Right column:
 
 - "The pull request closes on GitHub and nothing is published. Oxagen posts this comment on it:"
 - The comment's preview: "Closed by Marcus Bell <marcus@a-intel.example>", a rule, then "Added via Oxagen" and the address of this view as the link, "https://app.oxagen.sh/a-intel/core-platform/steering/proposals/prs".
-- A note: "Closing is a governed action: it is recorded in Audit with your name, and the branch stays until someone deletes it." The shipped close, `dismiss_proposal`, deletes the branch, and so does the mockup's own close of a person's pull request ("the branch is gone"); a build's note says the branch is deleted.
+- No note. That closing is audited, and what happens to the branch, are in the dialog's component help (`mockups/help/steering-prs.md`, Close a pull request). The shipped close, `dismiss_proposal`, deletes the branch, and so does the mockup's own close of a person's pull request ("the branch is gone").
 - Footer: Cancel and **Close pull request** (red), which reports "Closed a-intel/platform#519 without merging. Comment posted: “Closed by Marcus Bell <marcus@a-intel.example>”, then Added via Oxagen https://app.oxagen.sh/a-intel/core-platform/steering/proposals/prs."
 
 ## Data sources
@@ -155,7 +155,7 @@ The mockup marks no field on this view with `data-future`, and the catalog gives
 - Merging publishes the record, writes the promotion event, re-indexes from the merged commit, bumps and re-signs the bundle, and audits `steering_published`. It reports "Merged a-intel/platform#519. promotion_event written, bundle v41 → v42 signed, steering_published audited."
 - While a pull request is open, its record steers nothing: it is not in Sources, not in the compiled bundle and not in the audit log, and the bundle version has not moved.
 - Merge follows the governance mode. Under `team` the author of a record is never its approver, so a person's own pull request waits for another Owner or Admin. The mockup lets Marcus Bell merge the pull request he opened and records him as author and approver; a build refuses that merge, as `merge_context_pr` does.
-- Closing an unmerged pull request publishes nothing and says so. The row then reads "closed", the Pull requests count and the Proposals tab count fall by one, and the detail offers neither Close nor Merge. The mockup keeps both counts and shows the running-checks merge bar after the promoter's pull request is closed; a build does neither. A merged pull request cannot be closed: "It is merged. Taking a published record back out of force is its own pull request."
+- Closing an unmerged pull request publishes nothing and says so. The row then reads "closed", the Pull requests count and the Proposals tab count fall by one, and the detail offers neither Close nor Merge. The detail's bar reads "Closed without merging. Nothing was published." A merged pull request cannot be closed: "It is merged. Taking a published record back out of force is its own pull request."
 - Several pull requests a person opened may be open at once, each with its own state, file and checks.
 
 ## States

@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/core-platform/runs/run_01K5RK7C2V8BNM3X/memory`. The same tab on `run_01K5RS7M2E8FJ3QW` (live, nothing written yet), `run_01K5RF2J7M3EDC5F` (sealed, no memories) and `run_01K4QJ9E4T6YUI1O` (sealed, self-grade deleted). In the app, `/{org}/{ws}/runs/{run}/memory` |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: D4 and D5 (a memory is a Steering source, and a SteeringFrame carries it), D8 (the Decision trace is the one explanation), D10 (no person is scored), D17 (future-only marks). `run.md` owns the header, the Summary, the stat row, the tab bar and the side column this tab shares. `steering-source.md` owns a memory's own page, and `steering-proposals.md` the proposal a memory becomes |
+| Spec | `docs/fleet-operations-wedge.md`: D4 and D5 (a memory is a Steering source, and a SteeringFrame carries it), D8 (the Decision trace is the one explanation), D15 (no person is scored), D17 (future-only marks). `run.md` owns the header, the Summary, the stat row, the tab bar and the side column this tab shares. `steering-source.md` owns a memory's own page, and `steering-proposals.md` the proposal a memory becomes |
 | Design | `mockups/src/engine.js` → `runMemories()`, `runMemoryTab()`, `memAsmCell()`, `memSaysList()`, `memFoldLine()`, `runSelfGrade()`, `sgAxis()`, `canResearch()`, `DLG_EXT.memory`, inside `pRun()`; built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
 | Storybook | `Oxagen / Runs / Memories`: Loaded and Loaded · mobile |
@@ -18,7 +18,7 @@ Say what one run left behind for the next one: each memory oxagen wrote from it 
 
 **Shared.** The run header, the Summary, the stat row, the tab bar with "Memories" selected, and the side column, as `run.md` specifies them. The tab reads "Memories" with the count of memories the run wrote, blank when it wrote none.
 
-**Lead note**, first: "**oxagen writes these after the seal.** Each lesson becomes a memory, or joins a memory that already says the same thing. At 3 sayings from 2 runs, a memory becomes a steering proposal that cites every saying."
+With component help on, each part carries a `?` that opens its section in `mockups/help/run-memories.md` (Memories from this run, Self-grade, and Memory for the dialog). The tab has no lead note. How the post-run review writes a memory, how a lesson joins one, and the fold into a steering proposal at 3 sayings from 2 runs are in the component help (Memories from this run).
 
 **Memories from this run** (`data-run-memories`). The heading, a count badge (3 on `run_01K5RK7C2V8BNM3X`), then a paged table (Rows 5, 10, 25, 50 or All, and "1–3 of 3"). The columns:
 
@@ -38,24 +38,26 @@ On `run_01K5RK7C2V8BNM3X` the three rows are:
 
 Each row opens the memory dialog. Two notes replace the table:
 
-- A run that has not sealed: "Nothing is written until the seal. This run is <status>. When its chain seals, oxagen reads it and writes what it learned here." (`run_01K5RS7M2E8FJ3QW` reads "live".)
-- A sealed run that wrote none: "This run wrote no memories. The post-run review read the sealed run and found nothing another run would need, and no operator steered it."
+- A run that has not sealed: "No memories yet. This run is <status>." (`run_01K5RS7M2E8FJ3QW` reads "live".)
+- A sealed run that wrote none: "This run wrote no memories."
+
+Why nothing is written before the seal is in the component help (Memories from this run).
 
 **Self-grade**, with the chip "research only". Four states:
 
-- Not sealed, or sealed with no grade: "Captured after the seal. This run is <status>. When its chain seals, oxagen asks the agent the four questions of rubric rfl_v3 in one out-of-band turn."
-- Deleted: "Deleted on 2025-12-29, 180 days after capture. The run’s frames, its seal and the memories it wrote are untouched." Only `run_01K4QJ9E4T6YUI1O` shows it.
-- Locked, for a reader without `research.read` (Marcus Bell): the title "Reading a self-grade takes research.read" and the line "An organization grant that no workspace role inherits. Marcus Bell does not hold it." Then Captured (2026-09-11 08:20:19), Rubric ("rfl_v3, four questions"), Model (`claude-haiku-4-5`), Cost ("2,690 tokens, $0.0137, billed as overhead") and Retention ("deleted 180 days after capture"). Then "Request access" (gold) and "How reflection works".
-- Readable, for a reader who holds `research.read` (`?as=priya`): one block per question of the rubric ("Did you do the thing that was asked?", "Did you verify it, or did you assert it?", "Did you stay inside the scope you were given?", "Was what it cost proportionate to what it produced?"). Each block has a "self" bar and a "the record" bar out of 5, the agent's answer in quotes, and "the record says: <fact>". A block where self exceeds the record by 2 or more carries "calibration gap". Then the note: "**Research only.** A self-grade never enters a context frame and has no promote action. It cannot become a memory, a proposal or steering, and its tokens never count as productive work." Then the same Captured, Rubric, Model, Cost and Retention list, with no buttons.
+- Not sealed, or sealed with no grade: "Not captured yet. This run is <status>."
+- Deleted: "Deleted on 2025-12-29, 180 days after capture." Only `run_01K4QJ9E4T6YUI1O` shows it.
+- Locked, for a reader without `research.read` (Marcus Bell): the title "Reading a self-grade takes research.read" and the line "Marcus Bell does not hold it." Then Captured (2026-09-11 08:20:19), Rubric ("rfl_v3, four questions"), Model (`claude-haiku-4-5`), Cost ("2,690 tokens, $0.0137, billed as overhead") and Retention ("deleted 180 days after capture"). Then "Request access" (gold) and "How reflection works".
+- Readable, for a reader who holds `research.read` (`?as=priya`): one block per question of the rubric ("Did you do the thing that was asked?", "Did you verify it, or did you assert it?", "Did you stay inside the scope you were given?", "Was what it cost proportionate to what it produced?"). Each block has a "self" bar and a "the record" bar out of 5, the agent's answer in quotes, and "the record says: <fact>". A block where self exceeds the record by 2 or more carries "calibration gap". No note follows. Then the same Captured, Rubric, Model, Cost and Retention list, with no buttons. When a self-grade is captured, what deletion leaves untouched, who holds `research.read`, and the research-only fence are in the component help (Self-grade).
 
 "How reflection works" goes to `#/a-intel/<ws>/steering/skills/reflect`, which the Sources tab rewrites to `?kind=skill`. The wedge deleted skill reflection (see Open conflict), so the link lands on the skills list and not on a reflection page.
 
 **Dialogs this tab opens.**
 
-- `memory` (`DLG_EXT.memory`), from a row. The title is the memory's body and the subtitle "A memory, recalled and never published". Class and force, Scope, Where it came from, Recalled, Cost and In force since. Then the memory's position in the assembler and the Sayings list. A run saying links to that run's Memories tab with its frame. An imported saying shows the file and line with "imported". Under the sayings, the fold line (`memFoldLine()`):
-  - Proposed: "Proposed as <id> when it reached 3 sayings from 2 runs. The proposal cites every saying above."
-  - Ready: "It has N sayings from R runs, which meets the setting. The promoter proposes it on its next pass."
-  - Otherwise: "It becomes a proposal at 3 sayings from 2 runs. It has N from R run(s)." A memory with an imported saying adds "An imported saying counts toward the sayings and never toward the runs, so an import alone never makes a proposal."
+- `memory` (`DLG_EXT.memory`), from a row. The title is the memory's body and the subtitle is the memory's id. Class and force, Scope, Where it came from, Recalled, Cost and In force since. Then the memory's position in the assembler, one line: "Superseded by <source>.", "Yields to <record>, a published must." or "Competes in the per-prompt selection at force <force>." What each position means is in the component help (Memory). Then the Sayings list. A run saying links to that run's Memories tab with its frame. An imported saying shows the file and line with "imported". Under the sayings, the fold line (`memFoldLine()`):
+  - Proposed: "Proposed as <id> when it reached 3 sayings from 2 runs."
+  - Ready: "It has N sayings from R runs, which meets the setting."
+  - Otherwise: "It becomes a proposal at 3 sayings from 2 runs. It has N from R run(s)." That the proposal cites every saying, that the promoter proposes on its next pass, and how an imported saying counts are in the component help (`mockups/help/steering-source.md`, Sayings).
   - When the memory came from a run, "The run that left it" and "Open <run>". The footer reads "Close", "Forget" (danger, opens `memforget`), and the gold "Open the proposal" when the memory was proposed, otherwise "Promote to a record", which opens the create wizard with the memory's body.
 - `memforget`: "Forget this memory?", what stops, the recall count, and "Keep it" and "Forget it".
 - `request-access` from the locked self-grade, and the run dialogs from the header (`run.md`).

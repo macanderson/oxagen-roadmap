@@ -1,0 +1,118 @@
+/* ============================== review island ==============================
+   Review chrome, not product UI (src/island.js). The island keeps one dark palette in both themes so
+   it never reads as part of the page under it. The ? buttons are blue on purpose: no product
+   control uses that fill. The spec dialog follows the page's theme. */
+.isl{--isl-bg:#09090B;--isl-panel:#111113;--isl-line:#2A2A2F;--isl-fg:#FAFAFA;--isl-body:#D4D4D8;--isl-muted:#A1A1AA;--isl-dim:#71717A;--isl-on:#2563EB;
+  position:fixed;right:16px;bottom:16px;z-index:400;font-family:var(--font);font-size:12.5px;color:var(--isl-body);-webkit-font-smoothing:antialiased}
+.has-mnav .isl:not([style*="top"]){bottom:84px}
+.isl-pill{display:flex;align-items:center;gap:8px;background:var(--isl-bg);border:1px solid var(--isl-line);border-radius:999px;padding:6px 12px 6px 8px;
+  color:var(--isl-fg);font:inherit;cursor:grab;touch-action:none;user-select:none;box-shadow:0 10px 30px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.03) inset;max-width:min(360px,calc(100vw - 32px))}
+.isl.dragging .isl-pill{cursor:grabbing}
+.isl-pill:focus-visible{outline:2px solid var(--isl-on);outline-offset:2px}
+.isl-grip{width:8px;height:14px;flex:none;background-image:radial-gradient(circle,var(--isl-dim) 1.1px,transparent 1.3px);background-size:4px 4.6px;opacity:.9}
+.isl-dot{width:8px;height:8px;border-radius:50%;background:var(--gold);flex:none;box-shadow:0 0 0 3px rgba(212,175,55,.18)}
+.isl-t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.isl-st{display:flex;gap:5px;font-family:var(--mono);font-size:10.5px;color:var(--isl-muted);white-space:nowrap}
+.isl-st span+span{color:#93C5FD}
+.isl-menu{position:absolute;bottom:calc(100% + 8px);right:0;width:min(348px,calc(100vw - 24px));background:var(--isl-bg);border:1px solid var(--isl-line);
+  border-radius:14px;box-shadow:0 18px 50px rgba(0,0,0,.55);display:flex;flex-direction:column;overflow:hidden;cursor:auto}
+.isl:not(.up) .isl-menu{bottom:auto;top:calc(100% + 8px)}
+.isl:not(.left) .isl-menu{right:auto;left:0}
+.isl-mh{display:flex;align-items:flex-start;gap:10px;padding:13px 14px 11px;border-bottom:1px solid var(--isl-line)}
+.isl-mh .grow{flex:1;min-width:0}
+.isl-eb{margin:0 0 3px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:600}
+.isl-mh h2{margin:0;font-size:15px;color:var(--isl-fg);font-weight:600;letter-spacing:-.01em}
+.isl-x,.ih-x{flex:none;width:26px;height:26px;border-radius:7px;border:1px solid var(--isl-line);background:transparent;color:var(--isl-muted);cursor:pointer;position:relative}
+.isl-x::before,.isl-x::after,.ih-x::before,.ih-x::after{content:"";position:absolute;left:50%;top:50%;width:11px;height:1.5px;background:currentColor;border-radius:1px}
+.isl-x::before,.ih-x::before{transform:translate(-50%,-50%) rotate(45deg)}
+.isl-x::after,.ih-x::after{transform:translate(-50%,-50%) rotate(-45deg)}
+.isl-x:hover{color:var(--isl-fg);border-color:var(--isl-dim)}
+.isl-mb{padding:12px 14px;overflow-y:auto;display:flex;flex-direction:column;gap:11px;min-height:0}
+.isl-route{display:flex;flex-direction:column;gap:4px}
+.isl-route code{font-family:var(--mono);font-size:11px;color:var(--isl-fg);background:var(--isl-panel);border:1px solid var(--isl-line);border-radius:7px;padding:6px 8px;overflow-wrap:anywhere;line-height:1.5}
+.isl-desc{margin:0;color:var(--isl-body);line-height:1.55;font-size:12.5px;display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.isl-desc.all{display:block;-webkit-line-clamp:unset}
+.isl-desc code{font-family:var(--mono);font-size:11px;color:var(--isl-fg)}
+.isl-desc a{color:var(--gold)}
+.isl-more{align-self:flex-start;margin-top:-6px;background:none;border:0;padding:0;color:var(--isl-muted);font:inherit;font-size:11.5px;cursor:pointer;text-decoration:underline;text-underline-offset:2px}
+.isl-spec{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;color:var(--isl-fg);font-weight:600;border:1px solid var(--isl-line);border-radius:8px;padding:6px 10px;background:var(--isl-panel)}
+.isl-spec::after{content:"\2197";color:var(--gold);font-weight:400}
+.isl-spec:hover{border-color:var(--isl-dim)}
+.isl-row{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap}
+.isl-lab{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--isl-dim);font-weight:600}
+.isl-seg{display:flex;gap:2px;background:var(--isl-panel);border:1px solid var(--isl-line);border-radius:8px;padding:2px;flex-wrap:wrap}
+.isl-seg button{background:transparent;border:0;border-radius:6px;padding:4px 8px;color:var(--isl-muted);font:inherit;font-size:11.5px;cursor:pointer}
+.isl-seg button:hover:not(:disabled){color:var(--isl-fg)}
+.isl-seg button[aria-pressed="true"]{background:var(--gold);color:#09090B;font-weight:600}
+.isl-seg button:disabled{opacity:.35;cursor:not-allowed}
+.isl-sw{width:34px;height:20px;border-radius:999px;border:1px solid var(--isl-line);background:var(--isl-panel);position:relative;cursor:pointer;padding:0;flex:none}
+.isl-sw i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--isl-muted);transition:left .15s,background .15s}
+.isl-sw[aria-checked="true"]{background:var(--isl-on);border-color:var(--isl-on)}
+.isl-sw[aria-checked="true"] i{left:16px;background:#FFFFFF}
+.isl-seg button:focus-visible,.isl-sw:focus-visible,.isl-spec:focus-visible,.isl-x:focus-visible,.isl-hide:focus-visible,.isl-dbg button:focus-visible{outline:2px solid var(--isl-on);outline-offset:2px}
+.isl-dbg{justify-content:flex-start}
+.isl-dbg button{background:var(--isl-panel);border:1px solid var(--isl-line);color:var(--isl-muted);border-radius:7px;padding:4px 9px;font:inherit;font-size:11.5px;cursor:pointer}
+.isl-mf{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--isl-line);color:var(--isl-dim);font-size:11.5px}
+.isl-hide{background:transparent;border:1px solid var(--isl-line);color:var(--isl-fg);border-radius:8px;padding:5px 12px;font:inherit;font-weight:600;cursor:pointer}
+.isl-hide:hover{border-color:var(--isl-dim)}
+@media (prefers-reduced-motion:reduce){.isl-sw i{transition:none}}
+
+/* ---- the ? on a page part ----
+   button.hq.hq outranks a page's own button rules (.reg-steps button, .panel-h .sp button), so the
+   reset below holds wherever a key lands. */
+button.hq.hq{all:unset;box-sizing:border-box;display:inline-grid;place-items:center;width:18px;height:18px;border-radius:50%;background:#2563EB;color:#FFFFFF;
+  font-family:var(--font);font-size:11.5px;font-weight:700;line-height:1;cursor:pointer;vertical-align:middle;margin-left:7px;flex:none;
+  box-shadow:0 0 0 2px var(--panel),0 1px 3px rgba(0,0,0,.35);position:relative;top:-1px;letter-spacing:0;text-transform:none}
+button.hq.hq::before{content:"?"}
+button.hq.hq:hover{background:#1D4ED8}
+button.hq.hq:focus-visible{outline:2px solid #93C5FD;outline-offset:2px}
+button.hq.hq.missing{background:#71717A;box-shadow:0 0 0 2px #DC2626}
+button.hq.hq.abs{position:absolute;top:-9px;right:-9px;margin:0;z-index:5}
+button.hq.hq.abs.in{top:6px;right:6px}
+.hq-rel{position:relative}
+.asst.hq-host>button.hq.hq.abs{top:18px;right:52px}
+.side.hq-host>button.hq.hq.abs{top:10px;right:10px}
+.mnav.hq-host>button.hq.hq.abs{top:-9px;right:10px}
+.top.hq-host>button.hq.hq.abs{top:auto;bottom:-9px;left:10px;right:auto}
+.eyebrow button.hq.hq{top:-1px}
+.phead h1 button.hq.hq,.dlg-h h2 button.hq.hq{width:20px;height:20px;font-size:12px}
+
+/* ---- the spec dialog ---- */
+.ih{border:1px solid var(--rule);border-radius:14px;background:var(--panel);color:var(--body);padding:0;width:min(720px,calc(100vw - 24px));max-height:min(84vh,860px);
+  box-shadow:var(--shadow);font-family:var(--font);font-size:13.5px;line-height:1.6}
+.ih[open]{display:flex;flex-direction:column}
+.ih::backdrop{background:rgba(0,0,0,.6);backdrop-filter:blur(2px)}
+.ih-h{display:flex;align-items:flex-start;gap:12px;padding:16px 20px 13px;border-bottom:1px solid var(--border)}
+.ih-h .grow{flex:1;min-width:0}
+.ih-eb{margin:0 0 4px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#2563EB;font-weight:600}
+:root[data-theme="dark"] .ih-eb{color:#60A5FA}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ih-eb{color:#60A5FA}}
+.ih-h h2{margin:0;font-size:18px;color:var(--fg)}
+.ih-x{border-color:var(--border);color:var(--muted)}
+.ih-x:hover{color:var(--fg)}
+.ih-b{padding:6px 20px 18px;overflow-y:auto;min-height:0}
+.ih-b h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:18px 0 6px;font-weight:600}
+.ih-b h4{font-size:13.5px;color:var(--fg);margin:14px 0 4px}
+.ih-b p{margin:0 0 9px}
+.ih-b ul,.ih-b ol{margin:0 0 10px;padding-left:20px}
+.ih-b li{margin:2px 0}
+.ih-b li>ul,.ih-b li>ol{margin:3px 0 4px}
+.ih-b b{color:var(--fg)}
+.ih-b code{font-family:var(--mono);font-size:12px;color:var(--fg);background:var(--hl);border-radius:4px;padding:1px 4px;overflow-wrap:anywhere}
+.ih-b pre{background:var(--void);border:1px solid var(--border);border-radius:8px;padding:10px 12px;overflow-x:auto;margin:0 0 10px}
+.ih-b pre code{background:none;padding:0;font-size:11.5px;overflow-wrap:normal;white-space:pre}
+.ih-b blockquote{margin:0 0 10px;padding:2px 0 2px 12px;border-left:2px solid #2563EB;color:var(--body)}
+.ih-b a{color:var(--accent-text);text-decoration:underline;text-underline-offset:2px}
+.ih-b hr{border:0;border-top:1px solid var(--border);margin:14px 0}
+.ih-tw{overflow-x:auto;margin:0 0 12px;border:1px solid var(--border);border-radius:9px}
+.ih-b table{border-collapse:collapse;width:100%;font-size:12.5px}
+.ih-b th{text-align:left;font-weight:600;color:var(--muted);background:var(--panel-h);padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+.ih-b td{padding:7px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+.ih-b tr:last-child td{border-bottom:0}
+.ih-f{display:flex;align-items:center;gap:10px;padding:11px 20px;border-top:1px solid var(--border);flex-wrap:wrap}
+.ih-f code.grow{flex:1;min-width:0;font-family:var(--mono);font-size:11px;color:var(--dim);overflow-wrap:anywhere}
+.ih-spec{font-weight:600;color:var(--accent-text)}
+.ih-spec::after{content:" \2197"}
+.ih-close{background:var(--hl);border:1px solid var(--border);color:var(--fg);border-radius:8px;padding:6px 13px;font:inherit;font-weight:600;cursor:pointer}
+.ih-close:focus-visible,.ih-x:focus-visible,.ih-spec:focus-visible{outline:2px solid #2563EB;outline-offset:2px}
+@media (max-width:560px){.ih{max-height:92vh}.ih-h,.ih-b,.ih-f{padding-left:15px;padding-right:15px}}

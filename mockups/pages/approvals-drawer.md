@@ -20,7 +20,7 @@ Put every decision that waits on a person in one place that opens from every pag
 
 **The drawer**: `aside#apdrawer`, `role=complementary`, aria-label "Approvals", sliding in from the right over a scrim. Closed, it is `inert` and `aria-hidden`.
 
-- Header: h3 "Approvals", the badge "17 waiting on you in all workspaces" (approval colour while anything waits), and the close button (×, aria-label "Close approvals").
+- Header: h2 "Approvals", the badge "17 waiting on you in all workspaces" (approval colour while anything waits), and the close button (×, aria-label "Close approvals").
 
 **The list**, the drawer's first view.
 
@@ -35,26 +35,26 @@ Put every decision that waits on a person in one place that opens from every pag
   - on the right, the countdown in m:ss, in warning ink under two minutes.
   - A row whose risk is critical, or whose side effect is irreversible, or which is tainted, carries the critical border.
 - Then the eyebrow "1 resolved today" and one row per approval resolved today, with its outcome ("approved", "denied", "expired") in place of the countdown. A resolved row opens its card too.
-- Under the lists, the note: "Approving allows this exact call once. When the approval expires, the call ends and the agent is told why."
-- With nothing waiting: "Nothing is waiting on you." and "A call parks here when policy returns approve. A denied call never parks. It ends at once and costs nothing."
+- Nothing sits under the lists. What approving allows and what expiry does are in the component help (`mockups/help/approvals-drawer.md`, Drawer).
+- With nothing waiting: "Nothing is waiting on you." What parks a call, and why a denied call never parks, is in the component help (Drawer).
 
 The demo record lists 1 question and 16 pending approvals from six workspaces (Core platform, FinOps, Data platform, Mobile, Growth and Security), and 1 resolved today.
 
 **The card**, the drawer's second view: "‹ All approvals" above the full approval card for the row picked. It is the same card a run's parked approval shows.
 
-- The head: the eyebrow "Approval required" (or "Approval approved", "Approval denied", "Approval expired"), the amount with its currency or the tool, the compact agent card, the tool and counterparty ("stripe__create_payment@4 → vendor:aws") with the task under it, and the badges: risk, `side_effect <value>`, "tainted", `egress <value>`, and the tier the approval recorded. On the right: "times out in" and the countdown (or "resolved" and a dash), "parked 09:31:08Z · timeout 10m", and "When it expires, the call ends and the agent is told why.".
+- The head: the eyebrow "Approval required" (or "Approval approved", "Approval denied", "Approval expired", "Approval canceled"), the amount with its currency or the tool, the compact agent card, the tool and counterparty ("stripe__create_payment@4 → vendor:aws") with the task under it, and the badges: risk, `side_effect <value>`, "tainted", `egress <value>`, and the tier the approval recorded. On the right: "times out in" and the countdown (or "resolved" and a dash), and "parked 09:31:08Z · timeout 10m". What expiry does is in the component help (`mockups/help/approvals-drawer.md`, Approval card).
 - The four-hop chain, numbered: 1 Operator (the name, the role in the workspace, the task), 2 Agent (the key, the harness mark and name, the tier, the run id), 3 Action (the tool's label and id, the amount and counterparty, risk, side effect and egress), 4 Rule ("4 rules required approval", the policy and the mandate, the rule that parked it).
 - Remaining authority, when a mandate backs the call: a bar of settled, reserved by this call, and remaining, "of $5,000.00 USD", with the legend "settled $1,284.60 (25.7%)", "reserved by this call $2,450.00 (49.0%)" and "remaining $1,265.40".
-- Two columns. Mandate (Mandate, a link to the agent's Delegation; Granted by; Purpose; Auto-approve limit; Valid to), or Grant when no mandate backs it (Operator; Policy, with when and by whom it was activated; Rule; Tier, with one line on what that tier means for this call). Then The call (Tool version, Input digest, Idempotency, "Amount" when an amount leads, Requested, and Run, a link to the run).
-- Taint, when tainted: "tainted · 1 source", the line "Arguments that derive from untrusted tool output. Taint on a write raises the decision to approval.", and each source: its frame (a link), the argument path and the tool and note.
+- Two columns. Mandate (Mandate, a link to the agent's Delegation; Granted by; Purpose; Auto-approve limit; Valid to), or Grant when no mandate backs it (Operator; Policy, with when and by whom it was activated; Rule; Tier, the value alone, with what each tier means for the call in the component help, Approval card). Then The call (Tool version, Input digest, Idempotency, "Amount" when an amount leads, Requested, and Run, a link to the run).
+- Taint, when tainted: "tainted · 1 source" and each source (what taint means is in the component help, Approval card): its frame (a link), the argument path and the tool and note.
 - "Rules that fired": one line per rule with its verdict ("approve", "allow", "constrain"), the rule id in mono and its text.
 - "Eligible approvers: …", naming the role and the people, and anyone a rule excludes.
-- The footer, pending: one line on what approving and denying do (approving mints a single-use token bound to this exact call digest; denying ends the call, releases any reservation back to the mandate, and the reason reaches the model), then "Open run", "Deny" or "Deny payment" (danger; opens `deny`) and "Approve" or "Approve $2,450.00 USD" (gold; opens `approve`). Resolved: the outcome badge, what happened (who, the token and its dispatch, or what was released and that nothing dispatched), "Open receipt" where a receipt exists, and "Open run".
+- The footer, pending: "Open run", "Deny" or "Deny payment" (danger; opens `deny`) and "Approve" or "Approve $2,450.00 USD" (gold; opens `approve`). Resolved: the outcome badge, what happened (who, the token and its dispatch, or what was released and that nothing dispatched), "Open receipt" where a receipt exists, and "Open run". What approving and denying do is in the component help (Approval card).
 
 **Dialogs the drawer opens:**
 
 - `approve`: "Approve this action", the call's badges and tool, "The exact call you are approving" (the tool version, the input digest and the idempotency key), a Reason field labelled "Reason (the agent is told it)", the note "Approving allows this exact call once.", and "Cancel" and "Approve this call" (gold).
-- `deny`: "Deny this action", a Reason field the model reads, a line that deny, approve and expiry are all frames and that a denial ends the call and costs nothing, and "Cancel" and "Deny with this reason" (danger).
+- `deny`: "Deny this action", a Reason field the model reads, the warning "A denial ends the call at no charge.", and "Cancel" and "Deny with this reason" (danger).
 - `receipt`: the receipt of a resolved approval, from "Open receipt".
 
 ## Data sources

@@ -141,12 +141,12 @@ export default {
   helpers: [
     ["kindBadge(k)", "engine.js:1558", "Kind badge with icon and word. 4 calls."],
     ["kindGlyph(k)", "engine.js:1559", "Icon-only kind glyph. 2 calls."],
-    ["ftBadge(t)", "wedge.js:235", "Frame-type badge, word and CSS mark, no icon. 10 calls."],
-    ["typeStrip(list, ctx)", "wedge.js:442", "Counts by frame type as a strip. A `ctx` turns each entry into a filter button."],
-    ["catBadge(c)", "engine.js:824", "Tool category badge with icon and word. 5 calls."],
-    ["hazard(risk, effect)", "engine.js:847", "Risk mark plus an optional side-effect glyph. 15 calls."],
-    ["gate(g, note)", "engine.js:863", "Gate badge, with the reasoning in its title."],
-    ["toolGate(t)", "engine.js:875", "Decides which gate a tool sits behind today (a kill switch outranks a mandate outranks approval) and renders it with `gate()`. 5 calls."],
+    ["ftBadge(t)", "wedge.js:278", "Frame-type badge, word and CSS mark, no icon. 10 calls."],
+    ["typeStrip(list, ctx)", "wedge.js:488", "Counts by frame type as a strip. A `ctx` turns each entry into a filter button."],
+    ["catBadge(c)", "engine.js:827", "Tool category badge with icon and word. 5 calls."],
+    ["hazard(risk, effect)", "engine.js:851", "Risk mark plus an optional side-effect glyph. 15 calls."],
+    ["gate(g, note)", "engine.js:866", "Gate badge, with the reasoning in its title."],
+    ["toolGate(t)", "engine.js:878", "Decides which gate a tool sits behind today (a kill switch outranks a mandate outranks approval) and renders it with `gate()`. 5 calls."],
   ],
   sourceNotes: [
     "The six context-record kinds and their icons live in `KINDS` (engine.js:707). `kindBadge()` falls back to `KINDS.rule` for any kind it does not recognize.",

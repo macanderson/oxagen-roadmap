@@ -280,12 +280,12 @@ monthly_usd = 400</textarea></div></div><p class="dx-why"><b><svg viewBox="0 0 1
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 949 to 980, ground 2130 to 2132, dialog and prose variants 1898 to 1907, phone 972</td><td>The rules that draw it</td></tr>
-      <tr><td><code>pAgentSource(r)</code> at <code>engine.js:1251</code></td><td>The agent Source page: the header, tabs, and the TOML editor.</td></tr>
-      <tr><td><code>edMount()</code> at <code>engine.js:1277</code></td><td>Wires the textarea's events and restores the selection after a render.</td></tr>
-      <tr><td><code>edPaint()</code> at <code>engine.js:1294</code></td><td>Repaints the highlighted layer, the gutter, the find marks, and the current line.</td></tr>
-      <tr><td><code>edKey(e)</code> at <code>engine.js:1325</code></td><td>Tab and Shift Tab indent, ⌘/ comments, ⌘F finds, ⌘S saves.</td></tr>
-      <tr><td><code>hlToml(src)</code> at <code>engine.js:1221</code></td><td>The TOML highlighter: one regex pass that writes token classes.</td></tr>
-      <tr><td><code>cedHtml(key, path, lang, opts)</code> at <code>engine.js:11589</code></td><td>The same editor for other languages, sized for a dialog with <code>small</code> or wrapped for prose.</td></tr>
+      <tr><td><code>pAgentSource(r)</code> at <code>engine.js:1253</code></td><td>The agent Source page: the header, tabs, and the TOML editor.</td></tr>
+      <tr><td><code>edMount()</code> at <code>engine.js:1279</code></td><td>Wires the textarea's events and restores the selection after a render.</td></tr>
+      <tr><td><code>edPaint()</code> at <code>engine.js:1296</code></td><td>Repaints the highlighted layer, the gutter, the find marks, and the current line.</td></tr>
+      <tr><td><code>edKey(e)</code> at <code>engine.js:1327</code></td><td>Tab and Shift Tab indent, ⌘/ comments, ⌘F finds, ⌘S saves.</td></tr>
+      <tr><td><code>hlToml(src)</code> at <code>engine.js:1223</code></td><td>The TOML highlighter: one regex pass that writes token classes.</td></tr>
+      <tr><td><code>cedHtml(key, path, lang, opts)</code> at <code>engine.js:11316</code></td><td>The same editor for other languages, sized for a dialog with <code>small</code> or wrapped for prose.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -314,7 +314,7 @@ monthly_usd = 400</textarea></div></div><p class="dx-why"><b><svg viewBox="0 0 1
 ## Inputs
 
 1. mockups/components/source-editor.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 949 to 980, ground 2130 to 2132, dialog and prose variants 1898 to 1907, phone 972. The mockup renders it with pAgentSource(r) (engine.js:1251), edMount() (engine.js:1277), edPaint() (engine.js:1294), edKey(e) (engine.js:1325), hlToml(src) (engine.js:1221), cedHtml(key, path, lang, opts) (engine.js:11589).
+2. The design source: mockups/src/engine.css lines 949 to 980, ground 2130 to 2132, dialog and prose variants 1898 to 1907, phone 972. The mockup renders it with pAgentSource(r) (engine.js:1253), edMount() (engine.js:1279), edPaint() (engine.js:1296), edKey(e) (engine.js:1327), hlToml(src) (engine.js:1223), cedHtml(key, path, lang, opts) (engine.js:11316).
 3. The build's implementation: find it by its root selector (.ed) or its name, and list every route that renders it.
 4. Where to see it in the design: agent Source, Steering source, skill source, the agent, tool, skill, and record wizards. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

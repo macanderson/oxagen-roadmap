@@ -18,24 +18,26 @@ Agents replaces the population half of the Fleet page (D3). Runs are listed unde
 
 ## What is on the page
 
-**Header.** Eyebrow: the workspace name (“Core platform”). h1 “Agents”. Subtext: “Every actor in this workspace and what it is made of.” Actions, in this order:
+With component help off, the page carries no explainer text. Each part's specification is in `mockups/help/agents.md`.
 
-- **Steer** opens the `steerfleet` dialog.
-- **New agent** opens the agent wizard (`wzOpen('agent')`), for an agent that does not exist yet.
+**Header.** Eyebrow: the workspace name (“Core platform”). h1 “Agents”. The header has no subtext. Its explanation is in the component help (`mockups/help/agents.md`, Page header). Actions, in this order:
+
+- **Steer agents…** opens the `steerfleet` dialog.
+- **Write a new agent…** opens the agent wizard (`wzOpen('agent')`), for an agent that does not exist yet.
 - **Register agent** (gold) leaves the page for the Register agent gate at `#/a-intel/core-platform/register/name` (`regStart()`), for an agent that already runs on a machine or in CI. Its steps are specified in `register-name.md`, `register-wrap.md` and `register-run.md`.
 
 **Tiles.** Four across, each one number over one caption. These are the tiles the Fleet page held, rewritten for the population.
 
 | Tile | Number | Caption | Opens |
 |---|---|---|---|
-| Live now | Live runs in this workspace, counted by `wsRunCounts()`: each run's own status, plus a workflow stage run that only its work order records. The same count Work uses | “6 parked on a person · 68 agents registered”. The parked clause appears only when a run is parked; the agent count is every agent registered in the workspace | Work › Work orders (`#/a-intel/core-platform/work/orders`) |
-| Waiting on you | Pending approvals whose run is in this workspace, or that name no run | “approvals in the drawer”, singular at one | The Approvals drawer |
-| Spend against budget | The workspace budget's used share, as a percent | “$95,603.33 of $122,000.00 · hard · monthly”: used, limit, mode and period. With no workspace budget the number is a dash and the caption is “no workspace budget set” | Spend › Budgets |
-| Delegations held | Active mandates held by agents in this workspace | The holders' slugs joined with commas (FinOps: “invoice-bot, cost-reporter, ledger-reconciler”), or “no agent here holds a mandate” | Nothing. Each holder's mandates are on its Permissions tab |
+| Live runs | Live runs in this workspace, counted by `wsRunCounts()`: each run's own status, plus a workflow stage run that only its work order records. The same count Work uses | “6 parked on a person · 68 agents registered”. The parked clause appears only when a run is parked; the agent count is every agent registered in the workspace | Work › Work orders (`#/a-intel/core-platform/work/orders`) |
+| Waiting on you | Pending approvals whose run is in this workspace, or that name no run, plus open questions from agents | “<N> approvals in the drawer”, singular at one, then “· 1 question from an agent” while a question is open | The Approvals drawer |
+| Spend against budget | The workspace budget's used share, as a percent | “$95,810.20 of $122,000.00 · hard · monthly”: used, limit, mode and period. With no workspace budget the number is a dash and the caption is “no workspace budget set” | Spend › Budgets |
+| Delegations held | Active mandates held by agents in this workspace | The holders' slugs joined with commas (FinOps: “invoice-bot, savings-planner, ledger-reconciler”), or “no agent here holds a mandate” | Nothing. Each holder's mandates are on its Permissions tab |
 
-On the demo record the tiles read 9, 7, 78% and 0.
+On the demo record the tiles read 9, 8, 79% and 0.
 
-**Registered in Core platform** panel. The heading names the workspace. The subtext follows the column set: “Each row names the reusable objects this agent holds a reference to.” on Composition, and “Each row is what this agent did and what it cost over the last 30 days.” on Operations. The panel header carries, on the right:
+**Registered in Core platform** panel. The heading names the workspace, so the panel carries the fixed help key `data-help="registered-agents"`. The panel has no subtext in either column set. What each set shows is in the component help (`mockups/help/agents.md`, Registered agents). The panel header carries, on the right:
 
 - **Columns**: a two-button group (`role=group`, `aria-label` “Columns”), **Composition** (the default) and **Operations**, each with `aria-pressed`. It writes `S.agentView` and re-renders. It is session state, not a route segment, so a link to the page always opens on Composition.
 - The mono line `.oxagen/agents/ @ a4c91e2`: the directory the definitions live in, at the commit of the listed agents.
@@ -72,23 +74,21 @@ Operations columns, in order:
 | Incidents | A count badge, or 0 |
 | (unlabelled) | The row actions |
 
-The mockup's Status reads `enrolled` for every agent, including the 60 that Composition's Health marks `not enrolled`, and those agents still carry a tier. A build shows the recorded status, so Status and Health agree.
+Status and Health agree. An agent with runs above the `observe` tier is `enrolled` on a host, and one at the `observe` tier reads `registered` and `not enrolled`, since an agent with no hook records at `observe`. A build shows the recorded status.
 
 **Row actions**, in both column sets: **Edit** (the agent's Source tab; the mockup opens the Overview instead), **Roles** (opens `assignrole` for that agent), **Retire** (danger; opens `delagent`). Clicking anywhere else on a row opens the agent's Overview.
 
 **List controls**, added by `listify()`: a search field (“Search this list”), sortable headers with `aria-sort`, facet selects derived from the columns in view (“Any health” and “Any runtime” on Composition, “Any tier” and “Any harness” on Operations), Rows (5, 10, 25, 50, All; 10 by default) and a pager (“1–10 of 68 (page 1 of 7)”). The Runtime facet lists each host and a bare dash for the agents with no host; a build words that option as no host. The Harness facet lists the harness labels, so it carries the fixture values the Harness data-source row flags.
 
-**Panel note**, verbatim: “An agent has one principal and runs on one runtime. Its steering, its toolbelts, and its tools are workspace objects it refers to, so changing one changes every agent that refers to it.”
-
 **Dialogs this page opens.**
 
-- `steerfleet`, titled “Steer the fleet”. A field labelled “Agents · 68 of 68 selected” with **All** and **None**, then one checkbox row per agent in the workspace, every one selected by default. A row shows the agent card with its run in flight (“run_01K5RS7M2E8FJ3QW · turn 7 · Cut 4.11.0 release notes”) and the run's status, or “no run in flight · reads this at its next model call” and an `idle` badge. The hint under the list: “Every agent in Core platform, selected by default. Steering the fleet is a grant you hold by role, not a default.” **Steering text** is a textarea filled with “Skip the mobile repo this cycle; 4.11.0 is platform only.” **Delivery** shows **At the boundary** (“Each agent finishes the turn it is on, then reads this before its next model call. Nothing in flight is cut. Idle agents read it at their next run.”) and an **Interrupt** switch (`role=switch`). Two hints follow: “Interrupt cuts the call in flight at the proxy on the gateway and contained tiers. On the harness tier a steer lands at the next checkpoint.” and “Recorded per run as a control.steer frame attributed to you.” A note closes the body: “oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.” The footer reads “68 agents · 12 in flight · at the boundary” with **Cancel** and **Steer** (gold). With Interrupt on, the mode reads “Interrupt now”, the footer ends “interrupt” and the send button is **Send & Interrupt** (danger). **Steer** is disabled with no agent selected, and an empty text is refused with “A steer needs text. It is what the agent reads.”
+- `steerfleet`, titled “Steer the fleet”. A field labelled “Agents · 68 of 68 selected” with **All** and **None**, then one checkbox row per agent in the workspace, every one selected by default. A row shows the agent card with its run in flight (“run_01K5RS7M2E8FJ3QW · turn 7 · Cut 4.11.0 release notes”) and the run's status, or “no run in flight · reads this at its next model call” and an `idle` badge. The hint under the list: “Every agent in Core platform, selected by default.” **Steering text** is a textarea filled with “Skip the mobile repo this cycle; 4.11.0 is platform only.” **Delivery** shows **At the boundary** (“Each agent finishes the turn it is on, then reads this before its next model call. Nothing in flight is cut. Idle agents read it at their next run.”) and an **Interrupt** switch (`role=switch`). No hint or note follows: how Interrupt lands on each tier, the `control.steer` frame each steer records, and that Oxagen never executes steering as an instruction are in the component help (`mockups/help/agents.md`, Steer the fleet). The footer reads “68 agents · 12 in flight · at the boundary” with **Cancel** and **Steer** (gold). With Interrupt on, the mode reads “Interrupt now”, the footer ends “interrupt” and the send button is **Send & Interrupt** (danger). **Steer** is disabled with no agent selected, and an empty text is refused with “A steer needs text.”
 - `deliveryreport` opens when the steer is sent. Title: the counts (“0 applied, 67 queued, 1 undelivered”). Subtitle: “Delivery report · 68 recipients · sent <time> · at the boundary”. Three stat boxes (Applied, Queued, Undelivered), the text as sent with its digest and token count, and a table: Agent and run · Status · Mode used · Time · Why. `applied` is the only success; `expired`, `cancelled` and `failed` count as undelivered. A recipient behind an armed kill switch, a muted agent, an agent that is not enrolled, and an `observe`-tier run are refused before anything is queued, each with its reason.
-- `wz`, the agent wizard, titled “Create an agent”, with five steps: Describe, Identity, Definition, Toolbelt, Pull request. It ends on a pull request that adds `.oxagen/agents/<slug>.toml`. Its spec is `docs/creation-spec.md`.
-- `assignrole`, titled “Assign a role”, for the row's agent: the agent-kind roles, each marked held where the agent holds it, and the line that effective permission stays the agent's roles intersected with its operator's grants.
+- `wz`, the agent wizard, titled “Create an agent”, with five steps: Describe, Identity, Definition, Toolbelt, Pull request. It ends on a pull request that adds `.oxagen/agents/<slug>.toml`. Its first step carries one note, “To wrap an agent that already runs, register it instead.”, where register opens the Register agent gate. Its spec is `docs/creation-spec.md`, and its component help is `mockups/help/agents.md`, Create an agent.
+- `assignrole`, titled “Assign a role”, for the row's agent: the agent-kind roles, each marked held where the agent holds it, a Repository select for a repository-scoped role, and a Why field. The dialog carries no note. That effective permission stays the agent's roles intersected with its operator's grants is in the component help (`mockups/help/agents.md`, Assign a role). The toast reads “<role> assigned to <key>. Effective at its next call.”
 - `delagent`, titled “Retire agent”: what is kept, what ends (roles, mandates, the host enrollment) and what is in flight, a confirmation checkbox, and **Retire agent** (danger).
 
-New agent is not Register agent. Register wraps an agent that already runs; New agent writes one that does not exist yet. Both end on a pull request, from opposite ends.
+Write a new agent… is not Register agent. Register wraps an agent that already runs; New agent writes one that does not exist yet. Both end on a pull request, from opposite ends.
 
 **Shell.** The sidebar holds the organization and workspace switchers, the Workspace nav (Work, Agents, Tools, Steering, Runtimes, Spend, Repositories), the Organization nav (Organization, Billing, Audit), and at its foot the Stella launcher, the line “278 agents in this organization” and the connection badge. Agents is lit and carries no count. The top bar holds the menu button, the breadcrumbs (Anderson Intelligence Corp. / Core platform / Agents), “Search or run an action” with ⌘K, notifications (`aria-label` “Notifications, 4 unread”), the Approvals button (`aria-label` “Approvals, 17 waiting on you across all workspaces”) that opens the drawer, and the account avatar.
 
@@ -98,7 +98,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. The mockup collection is
 
 | Element | Mockup collection | Target store or contract | Backing today in macanderson/oxagen | Status |
 |---|---|---|---|---|
-| Live now | `RUNS` and `WORKORDERS` via `wsRunCounts()` | The run index with each run's status, and each run's parent work order | `list_runs` (`run.list.ts:476`) records `live`, `sealed` or `halted` (`run.list.ts:52`). No run status is `parked`: a parked run is one a pending approval names (`list_approvals`, `agent.approval.list.ts:80`). No store holds a work order, so a stage run that only its work order records cannot be counted | 🟡 |
+| Live runs | `RUNS` and `WORKORDERS` via `wsRunCounts()` | The run index with each run's status, and each run's parent work order | `list_runs` (`run.list.ts:476`) records `live`, `sealed` or `halted` (`run.list.ts:52`). No run status is `parked`: a parked run is one a pending approval names (`list_approvals`, `agent.approval.list.ts:80`). No store holds a work order, so a stage run that only its work order records cannot be counted | 🟡 |
 | Agents registered | `AGENTS` | `list_agents` `totals.identities` | `agent.list.ts:175-178` | ✅ |
 | Waiting on you | `APPROVALS` with `S.ap` | `list_approvals`, pending | `agent.approval.list.ts:80` | ✅ |
 | Spend against budget | `SPEND.budgets`, scope `workspace · <ws>` | `get_spend_budget` for scope `workspace`: limit, spent, ratio, period | `billing.budget.get.ts:51`; scopes `org` and `workspace` (`billing.budget.get.ts:9`) | ✅ |
@@ -119,7 +119,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. The mockup collection is
 | Incidents | `tamperCount(a)` over `INCIDENTS` | `list_agents` `tamperIncidentsRecorded`; `list_incidents` | `agent.list.ts:126-130`; `tacho.incident.list.ts:66` | ✅ |
 | `.oxagen/agents/ @ <commit>` | `a.commit` | The commit of the definitions of record | `get_agent` `definition.commitSha`, one agent at a time (`agent.get.ts:75-89`); no list field | 🟡 |
 | Steer | `steerSend()` | `dispatch_command` `steer`, target `agent` or `workspace`, with a delivery mode; the per-recipient delivery report | `tacho.command.dispatch.ts:107`; modes `next_step`, `interrupt`, `turn_boundary` (`packages/tacho/src/wire.ts:566-570`); statuses (`wire.ts:536-546`). Wrapped runs only | ✅ |
-| New agent | `wzOpen('agent')` | `propose_agent` | `agent.propose.ts:276` | ✅ |
+| Write a new agent… | `wzOpen('agent')` | `propose_agent` | `agent.propose.ts:276` | ✅ |
 | Register agent | `regStart()` | `register_agent`, `create_tacho_enrollment` | `agent.register.ts:17`; `tacho.enrollment.create.ts:25` | ✅ |
 | Roles | `assignrole` over `S.agentRoles` | `assign_agent_role`, `list_agent_roles` | `agent.role.assign.ts:26`; `agent.role.list.ts:38` | ✅ |
 | Retire | `delagent` | `retire_agent`, then a pull request that removes the file | `agent.retire.ts:16`. It retires the identity and leaves the file; removing it is a separate `commit_agent_definition` (`agent.retire.ts:1-9`) | 🟡 |
@@ -133,12 +133,12 @@ The view carries no `data-future` mark, and the catalog gives it no future story
 
 ## Functionality
 
-- The tiles are rollups of records a build can read. Live now and the Work backlog read one count (`wsRunCounts()`), so the two pages cannot disagree about what is live. Waiting on you counts the same pending approvals the Approvals drawer lists for this workspace.
+- The tiles are rollups of records a build can read. Live runs and the Work backlog read one count (`wsRunCounts()`), so the two pages cannot disagree about what is live. Waiting on you counts the same pending approvals the Approvals drawer lists for this workspace.
 - Both column sets read the same agent records. Switching changes which columns render and never which agents are listed, and neither set shows a number the other contradicts.
 - Every Composition cell names a reusable object and states nothing the registry that owns it states. The row opens the agent, whose Overview links out to Tools, Steering or Runtimes.
 - Assigning a toolbelt is not a permission. The toolbelt says what an agent can reach; its roles, mandates and budgets say what it may do. A call has to pass both.
 - Steer sends one `steer` command per selected agent, addressed to its live runs, and one per idle agent for its next run. Oxagen records each as a `control.steer` frame and delivers the text as an `invocation` SteeringFrame whose provenance is the command id and the digest of the text. It never runs the text as an instruction.
-- New agent writes a pull request that adds `.oxagen/agents/<slug>.toml`; nothing is written to the database until the agent is registered after merge. Register agent mints the identity of an agent that already runs.
+- Write a new agent… writes a pull request that adds `.oxagen/agents/<slug>.toml`; nothing is written to the database until the agent is registered after merge. Register agent mints the identity of an agent that already runs.
 - Retiring an agent retires its principal and never deletes it, so its runs keep their identity. Removing the definition file is a pull request.
 - The Health cell, the Incidents column and the agent's Activity tab read the same incident record the Audit page reads.
 
@@ -153,7 +153,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More h
 ## Permissions
 
 - Read: `list_agents` admits org Owner, Admin and Member, and workspace Owner and Member (`agent.list.ts:159-162`). The mockup names the permission `agent.read`.
-- Writes, each a governed action recorded in Audit: Steer (`dispatch_command`: org Owner or Admin, workspace Owner or Member), New agent (`propose_agent`: org Owner or Admin), Register agent (`register_agent`: org Owner or Admin), Roles (`assign_agent_role`: org Owner or Admin, and never above the assigner's own grants), Retire (`retire_agent`: org Owner or Admin).
+- Writes, each a governed action recorded in Audit: Steer (`dispatch_command`: org Owner or Admin, workspace Owner or Member), Write a new agent… (`propose_agent`: org Owner or Admin), Register agent (`register_agent`: org Owner or Admin), Roles (`assign_agent_role`: org Owner or Admin, and never above the assigner's own grants), Retire (`retire_agent`: org Owner or Admin).
 
 ## Backend gaps this page depends on
 
@@ -162,7 +162,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More h
 - `beltSize` on `list_agents`, so the roster does not read one toolbelt per row.
 - A host kind (workstation, CI runner, hosted) on the host record.
 - Spend and tokens observed by gateway, rolled up per agent on `list_agents`, beside the figures reported by harness that it carries today.
-- Work orders, so Live now can count a stage run its work order records.
+- Work orders, so Live runs can count a stage run its work order records.
 
 ## Rules every build of this page must keep
 

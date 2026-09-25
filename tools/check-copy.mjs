@@ -150,14 +150,14 @@ async function audit(label, text, prose) {
 
 for (const hash of ROUTES) {
   await page.goto("about:blank");
-  await page.goto(`file://${FILE}?product=1${hash}`);
+  await page.goto(`file://${FILE}?product=1&island=0${hash}`);
   await page.waitForTimeout(250);
   if (!hash.startsWith("#/welcome") && !(await page.evaluate(rendered))) errors.push(`${hash}: rendered no heading`);
   await audit(hash, await page.evaluate(visibleText), await page.evaluate(visibleText, "pre, code, .mono"));
 }
 for (const [name, js] of OVERLAYS) {
   await page.goto("about:blank");
-  await page.goto(`file://${FILE}?product=1#/${ORG}/core-platform`);
+  await page.goto(`file://${FILE}?product=1&island=0#/${ORG}/core-platform`);
   await page.waitForTimeout(200);
   try { await page.evaluate(js); } catch (e) { errors.push(`${name}: ${e.message}`); continue; }
   await page.waitForTimeout(200);

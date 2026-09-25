@@ -18,7 +18,8 @@ export const PAGES = [
   // this change added or redesigned is designed loaded only; `future` marks a view with future-only
   // fields, which gets a second story with ?future=1 outlining them. `drawer` opens a global drawer.
   { id: "work-backlog",      title: "Backlog",                     group: "Work",         hash: `#/${ORG}/core-platform/work`,                             states: ["loaded"], future: true },
-  { id: "work-intake",       title: "Intake",                      group: "Work",         hash: `#/${ORG}/core-platform/work?intake=providers`,            states: ["loaded"] },
+  { id: "work-in-progress",  title: "In progress",                 group: "Work",         hash: `#/${ORG}/core-platform/work/in-progress`,                 states: ["loaded"], future: true },
+  { id: "work-intake",       title: "Intake",                     group: "Work",         hash: `#/${ORG}/core-platform/work?intake=providers`,            states: ["loaded"] },
   { id: "work-item",         title: "Work item",                   group: "Work",         hash: `#/${ORG}/core-platform/work/items/tsk_01K5RS482Q`,        states: ["loaded"], future: true },
   { id: "work-orders",       title: "Work orders",                 group: "Work",         hash: `#/${ORG}/core-platform/work/orders`,                      states: ["loaded"], future: true },
   { id: "work-order",        title: "Work order",                  group: "Work",         hash: `#/${ORG}/core-platform/work/orders/wo_01K5RS7M4N`,        states: ["loaded"], future: true },
@@ -103,9 +104,10 @@ export const STATE_WORD = { loaded: "loaded", empty: "empty", loading: "loading"
 
 // The URL of one view of the master file. `file` is the path or URL of missioncontrol.html.
 // `future` outlines every future-only field; `drawer` opens the Approvals or the Stella drawer.
-// The file opens as the product; `debug: true` adds ?debug=true, which brings back the mockup
-// chrome — the state bar, the scenario rail and the scenario nav item.
-export function mockupUrl(file, { product = true, debug = false, state = null, mobile = null, theme = null, future = false, drawer = null, hash = HOME } = {}) {
+// The file opens as the product with the review island over it; `island: false` leaves the island
+// out and `help: true` turns component help on. `debug: true` adds ?debug=true, which brings back
+// the rest of the mockup chrome: the scenario rail and the scenario nav item.
+export function mockupUrl(file, { product = true, debug = false, state = null, mobile = null, theme = null, future = false, drawer = null, island = true, help = false, hash = HOME } = {}) {
   const q = new URLSearchParams();
   if (debug) q.set("debug", "true");
   else if (product) q.set("product", "1");
@@ -114,6 +116,8 @@ export function mockupUrl(file, { product = true, debug = false, state = null, m
   if (theme) q.set("theme", theme);
   if (future) q.set("future", "1");
   if (drawer) q.set("drawer", drawer);
+  if (!island) q.set("island", "0");
+  if (help) q.set("help", "1");
   const qs = q.toString();
   return file + (qs ? "?" + qs : "") + (hash || "");
 }

@@ -22,18 +22,18 @@ The fleet operations wedge left this page's design alone. Its strings changed wh
 
 **Shell.** The workspace sidebar lists Work, Agents, Tools, Steering, Runtimes, Spend and Repositories, then Organization, Billing and Audit. Runtimes is lit, and its count, 2, is the runtimes whose health is not ok. The breadcrumb reads "Anderson Intelligence Corp. / Core platform / Runtimes". The top bar carries search with ⌘K, notifications, the approvals button (it opens the drawer in `approvals-drawer.md`) and the account avatar.
 
-**Header.** Eyebrow: the workspace name, "Core platform". H1 "Runtimes". Subtext "The hosts your agents run on, and the enforcement tier each one supports." One action, **Enroll a runtime** (gold). It opens Register agent at its first step, "Name the agent" (`#/a-intel/core-platform/register`, `register-name.md`).
+**Header.** Eyebrow: the workspace name, "Core platform". H1 "Runtimes", and no subtext. What the page is for is in the component help (`mockups/help/runtimes.md`, Header). One action, **Enroll a runtime** (gold). It opens Register agent at its first step, "Name the agent" (`#/a-intel/core-platform/register`, `register-name.md`).
 
 **Stat strip**, four tiles, each counted over the workspace's runtimes:
 
 | Tile | Value | Line under it |
 |---|---|---|
 | Runtimes | 5 | "1 not enrolled" |
-| Agents hosted | 7 | "Several agents can share one host" |
-| Highest tier | the `contained` tier badge | "Computed per run from routed traffic" |
+| Agents hosted | 67 | "On 4 hosts", the hosts that carry at least one agent |
+| Highest tier | the `contained` tier badge | "ci-runner-07", the host that holds it |
 | Health | "1 degraded" | "mbp-01 has telemetry gaps" while any enrolled host is not ok, else the value "Healthy" over "Every collector is reporting". The design counts only enrolled hosts, so the not-enrolled `ci-runner-08` stays out of this tile |
 
-Each caption states one fact, as the plain-noun rule asks: the Agents hosted line, the Health line, the Agents cell's "No agent assigned" and the Hooks cell's "Some calls are recorded without a decision".
+Each caption states one fact, as the plain-noun rule asks: the Agents hosted and Highest tier lines, the Health line, the Agents cell's "No agent assigned" and the Hooks cell's "Some calls are recorded without a decision".
 
 **Hosts** panel. Title "Hosts", with the runtime count as a badge (5).
 
@@ -50,19 +50,20 @@ Each caption states one fact, as the plain-noun rule asks: the Agents hosted lin
   - *Health*: healthy, degraded or not enrolled, each a dot and a word.
   - *Last checkpoint*: the sequence number and time ("seq 41,208 · 2026-09-11 09:12:44Z"), or a dash.
   - A row opens the runtime, `#/a-intel/core-platform/runtimes/<runtime>` (`runtime.md`).
-  - The demo holds five hosts: `mbell-mbp-16` (workstation, Claude Code, loopback proxy, `gateway`, 3 agents, healthy), `ci-runner-07` (CI runner, Stella, `contained`, 2 agents, healthy), `mbp-01` (workstation, Codex CLI, `gateway`, 1 agent, 2 telemetry gaps, degraded), `priya-mbp-14` (workstation, Other (SDK-wrapped), provider direct, `harness`, 4 of 5 hooks, healthy) and `ci-runner-08` (CI runner, Stella, not routed, `observe`, no agent, 0 of 5 hooks, not enrolled). The design lists `ci-runner-08` under Hosts with "Not enrolled" in its Agents cell, "Not installed" in its Collector cell, "No hooks installed" in its Hooks cell and "not enrolled" as its health.
-- **Note**: "The tier belongs to the host, not the agent. Two agents on one host get the same tier, and an agent moved to a host with a lower tier gets that lower tier. The tier is computed per run from what was actually routed and is never raised afterward."
+  - The demo holds five hosts: `mbell-mbp-16` (workstation, Claude Code, loopback proxy, `gateway`, 28 agents, healthy), `ci-runner-07` (CI runner, Stella, `contained`, 5 agents, healthy), `mbp-01` (workstation, Codex CLI, `gateway`, 23 agents, 2 telemetry gaps, degraded), `priya-mbp-14` (workstation, Other (SDK-wrapped), provider direct, `harness`, 11 agents, 4 of 5 hooks, healthy) and `ci-runner-08` (CI runner, Stella, not routed, `observe`, no agent, 0 of 5 hooks, not enrolled). The design lists `ci-runner-08` under Hosts with "Not enrolled" in its Agents cell, "Not installed" in its Collector cell, "No hooks installed" in its Hooks cell and "not enrolled" as its health.
+- The Agents cell names at most three agent keys, then "and <n> more", so a host with 28 agents keeps a row of normal height.
+- No note closes the panel. Why the tier belongs to the host is in the component help (`mockups/help/runtimes.md`, Hosts).
 
-**Tier ladder** panel. `tierLadder(null)`: an ordered list labelled "The tier ladder", with no rung marked current, because this page reads no run.
+**Tier ladder** panel. `tierLadder(null)`: an ordered list labelled "The tier ladder", with no rung marked current, because this page reads no run. It draws what the app draws (`apps/app/src/features/runtimes/parts.tsx:329-336`): each rung's name and what it needs.
 
-| Rung | What it needs and earns |
+| Rung | What it needs |
 |---|---|
 | `observe` | "Recorded only. No hook is installed and nothing is delivered." |
 | `harness` | "Hooks installed. Steering is delivered and four hook events can refuse a call. The harness reports spend, and a call goes ahead if its hook fails." |
 | `gateway` | "Model and MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it." |
 | `contained` | "The agent runs in an OS sandbox whose only network exit is the gateway." |
 
-Note: "Only contained is fully enforced: all traffic must pass through oxagen. On observe, nothing is delivered and nothing can be blocked. An agent with no runtime still has an identity and a toolbelt, but it receives no steering."
+No note sits under the ladder. What each rung may claim, and that only `contained` is fully enforced, are in the component help (`mockups/help/runtimes.md`, Tier ladder).
 
 **Dialogs and flows this page opens.** Enroll a runtime starts Register agent (`register-name.md`, `register-wrap.md`, `register-run.md`). It is a flow, and no dialog opens. The empty state's **Show CLI steps** opens `register`, the Register an agent dialog, which carries no CLI path. A build shows the installers that put the CLI on the host's path and the command to run, as the app does (`apps/app/src/features/runtimes/controls.tsx:97`). The error state opens `incident`, and the denied state `request-access`.
 
@@ -116,8 +117,8 @@ From `pRuntimes()`:
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
 - **empty**: the header stays, with its gold Enroll a runtime. The body is "No runtime is enrolled": "Until a host enrolls, an agent has an identity and a toolbelt but no hooks. Its runs are recorded at the observe tier." Actions: **Enroll a runtime** (gold) and **Show CLI steps** (opens `register`). The design draws the panel's Enroll a runtime in gold beside the header's, two gold actions on one screen. A build keeps one. The panel also renders whenever the workspace holds no runtime.
 - **loading**: the shell stays, and the page body, header included, is the skeleton: four tile blocks and a panel of seven rows.
-- **error**: the body, header included, is "Runtimes could not be loaded": "The control plane answered 503 collector_unreachable. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by oxagen." Actions: **Try again** (gold) and **Open an incident**, then "trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z".
-- **access denied**: the body, header included, is "You cannot see the runtimes of this workspace": "Your roles on Anderson Intelligence Corp. do not include runtime.read on core-platform. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it." Actions: **Request access** (gold, opens `request-access`) and **Back to Work** (`#/a-intel/core-platform/work`). Below: Signed in as "Marcus Bell · workspace.owner · core-platform", Needed "runtime.read on core-platform", Decided by "pol_v41 · deny wins over every allow".
+- **error**: the body, header included, is "Runtimes could not be loaded": "The control plane answered 503 collector_unreachable. Nothing was changed. Runs kept recording while this page was down." Actions: **Try again** (gold) and **Open an incident**, then "trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z".
+- **access denied**: the body, header included, is "You cannot see the runtimes of this workspace": "Your roles on Anderson Intelligence Corp. do not include runtime.read on core-platform. An organization owner can grant it." Actions: **Request access** (gold, opens `request-access`) and **Back to Work** (`#/a-intel/core-platform/work`). Below: Signed in as "Marcus Bell · workspace.owner · core-platform", Needed "runtime.read on core-platform", Decided by "pol_v41".
 
 ## Mobile
 

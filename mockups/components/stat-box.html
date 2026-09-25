@@ -199,9 +199,9 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 177 to 181, 771, 2094 to 2100, phone 686 to 687</td><td>The rules that draw it</td></tr>
-      <tr><td><code>tile(k, v, s, col)</code> at <code>engine.js:2548</code></td><td>Writes one stat box. <code>col</code> sets the value's tone. About 15 calls.</td></tr>
-      <tr><td><code>runStatRow(R)</code> at <code>engine.js:2545</code></td><td>The Run page's row of six, with a local tile of its own.</td></tr>
-      <tr><td><code>basisChip(k)</code> at <code>engine.js:695</code></td><td>The spend basis chip in the subline.</td></tr>
+      <tr><td><code>tile(k, v, s, col)</code> at <code>engine.js:2557</code></td><td>Writes one stat box. <code>col</code> sets the value's tone. About 15 calls.</td></tr>
+      <tr><td><code>runStatRow(R)</code> at <code>engine.js:2554</code></td><td>The Run page's row of six, with a local tile of its own.</td></tr>
+      <tr><td><code>basisChip(k)</code> at <code>engine.js:698</code></td><td>The spend basis chip in the subline.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -230,7 +230,7 @@
 ## Inputs
 
 1. mockups/components/stat-box.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 177 to 181, 771, 2094 to 2100, phone 686 to 687. The mockup renders it with tile(k, v, s, col) (engine.js:2548), runStatRow(R) (engine.js:2545), basisChip(k) (engine.js:695).
+2. The design source: mockups/src/engine.css lines 177 to 181, 771, 2094 to 2100, phone 686 to 687. The mockup renders it with tile(k, v, s, col) (engine.js:2557), runStatRow(R) (engine.js:2554), basisChip(k) (engine.js:698).
 3. The build's implementation: find it by its root selector (.stat) or its name, and list every route that renders it.
 4. Where to see it in the design: Work, Run, Agents, Spend, Runtimes, Billing, agent Overview. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

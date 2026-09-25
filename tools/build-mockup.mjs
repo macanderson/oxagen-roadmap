@@ -8,21 +8,28 @@
 //   node tools/build-mockup.mjs --out X    # write somewhere else (the Storybook static build does)
 //
 // What a URL pins is read at runtime by the engine (see BOOT at the top of engine.js):
-//   ?product=1          the product build: no state bar, no scenario rail, no onboarding demo
+//   ?product=1          the product build: no scenario rail, no onboarding demo
 //   ?state=loaded       loaded | empty | loading | error | denied
 //   ?mobile=1           the mobile shell (thumb bar, bottom sheets, card tables); 0 pins desktop
 //   ?theme=dark         dark | light
+//   ?phone=1            the 400px phone preview the review island's Mobile view switch opens
+//   ?help=1             component help on: a ? on every page part, opening its mockups/help spec
+//   ?island=0           no review island (Storybook frames and the copy check)
 //   #/a-intel/...       the page; a scenario is #/a-intel/<ws>/scenarios/<id>/<step>
 // so the product build, every page in every state in either shell, and every W flow are URLs of
 // this one file rather than copies of it. Storybook (npm run storybook) is the catalog of those URLs.
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
 import { monoFontFace } from "./lib/house-fonts.mjs";
+import { reviewData } from "./lib/review.mjs";
+import { PAGES, ALL } from "../mockups/catalog.mjs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
 export const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = path.join(root, "mockups/src");
 const FIX = path.join(root, "mockups/fixtures");
+const PAGES_DIR = path.join(root, "mockups/pages");
+const HELP_DIR = path.join(root, "mockups/help");
 export const OUT = path.join(root, "mockups/missioncontrol.html");
 
 export const TITLE = "Oxagen";
@@ -49,19 +56,30 @@ function once(haystack, needle, what) {
 
 // Another version (mockups/future_state_mockups) is the same build over its own src and fixtures.
 // The views the fleet operations wedge adds (docs/fleet-operations-wedge.md) live in their own file
-// beside the engine and load after it, in the same script. A version without the file builds as before.
-const EXTRA_JS = ["wedge.js", "boot.js"];
+// beside the engine and load after it, in the same script. The review island (island.js, its
+// island.css, and the REVIEW data from mockups/pages and mockups/help) loads before boot.js, which
+// renders first. A version without a file builds as before.
+const EXTRA_JS = ["wedge.js", "island.js", "boot.js"];
+
+// The island's data as one classic script: the catalog pages with their spec title and Job
+// paragraph, and every section of mockups/help/*.md rendered to HTML.
+export function reviewScript() {
+  const data = reviewData({ pages: PAGES, pagesDir: PAGES_DIR, helpDir: HELP_DIR, states: ALL });
+  return `/* generated from mockups/catalog.mjs, mockups/pages/*.md and mockups/help/*.md; do not edit */\nvar REVIEW=${JSON.stringify(data)};\n`;
+}
 
 export function buildMockup({ src = SRC, fix = FIX } = {}) {
-  const css = readFileSync(path.join(src, "engine.css"), "utf8");
+  const island = existsSync(path.join(src, "island.js"));
+  const css = readFileSync(path.join(src, "engine.css"), "utf8") +
+    (island && existsSync(path.join(src, "island.css")) ? "\n" + readFileSync(path.join(src, "island.css"), "utf8") : "");
   const shell = readFileSync(path.join(src, "shell.html"), "utf8").trim();
   const js = [readFileSync(path.join(src, "engine.js"), "utf8").trimEnd()]
     .concat(EXTRA_JS.filter(f => existsSync(path.join(src, f))).map(f => readFileSync(path.join(src, f), "utf8").trimEnd()))
     .join("\n\n");
   once(js, "var BOOT=(function(){", "BOOT block");
   once(js, "var PRODUCT=BOOT.product;", "PRODUCT line");
-  once(shell, '<div id="chrome">', "#chrome block");
-  const fx = fixturesScript(fix).replace(/<\/script/gi, "<\\/script");
+  if (!island) once(shell, '<div id="chrome">', "#chrome block");
+  const fx = (fixturesScript(fix) + (island ? reviewScript() : "")).replace(/<\/script/gi, "<\\/script");
   return `<!doctype html>
 <html lang="en">
 <head>

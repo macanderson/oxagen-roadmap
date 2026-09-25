@@ -18,14 +18,16 @@ The instructions in this file reach the agent as a `procedure` SteeringFrame, li
 
 ## What is on the page
 
-**Header.** The eyebrow reads “Agent · Source”, with Agent a link to the agent's Overview. The h1 is the path in mono: `.oxagen/agents/release-manager.toml`. Chips: the main repository (`a-intel/platform`), the branch at its commit (`main @ a4c91e2`, or the pending branch as a badge when a commit sits on a branch that has not merged), “source of truth”, and the agent key (`a-intel.core.release-manager`). Subtext: “The agent definition is this file. Saving opens a pull request against the main repo. Nothing is written to oxagen’s database.” Actions, in this order:
+With component help off, the page carries no explainer text. Each part's specification is in `mockups/help/agent-source.md` (Page header, Editor, Tab bar, and Commit this change).
+
+**Header.** The eyebrow reads “Agent · Source”, with Agent a link to the agent's Overview. The h1 is the path in mono: `.oxagen/agents/release-manager.toml`. Chips: the main repository (`a-intel/platform`), the branch at its commit (`main @ a4c91e2`, or the pending branch as a badge when a commit sits on a branch that has not merged), “source of truth”, and the agent key (`a-intel.core.release-manager`). The header has no subtext. That the file is the definition and that Save opens a pull request, never a database write, is in the component help (`mockups/help/agent-source.md`, Page header). Actions, in this order:
 
 - **Discard** returns the draft to the base. It is disabled while the draft is unchanged.
 - **Save** (gold) opens the commit dialog.
 
 **Tabs.** The agent's eight tabs (`agent.md`), with Definition selected. Each opens its tab. This page draws the tab bar without the counts the other tabs carry, which is a mockup defect: a build shows the same counts on every tab.
 
-**Editor.** One panel.
+**Editor.** One panel, carrying the help key `data-help="editor"`.
 
 - A bar: the path, a dot and a word for the draft's state (“unchanged” or “modified”, the dot filled when modified), and a find field (placeholder “Find  ⌘F”, `aria-label` “Find in file”) with its match count (the match in view and the total once one is selected).
 - A gutter of line numbers beside a textarea labelled with the path. The text is highlighted as TOML: keys, strings, numbers, booleans, table headers and comments. The demo file is 21 lines:
@@ -59,12 +61,12 @@ Keys: ⌘S saves (opens the commit dialog), Tab indents by two spaces, ⇧Tab ou
 
 **Commit dialog** (from Save), titled “Commit this change”, with an eyebrow line “.oxagen/agents/release-manager.toml · +1 −1 · from the source editor”: the path, the diff stat of the draft against the base, and where the change came from.
 
-- Repository and Base: `a-intel/platform` (“primary”) at `main @ a4c91e2`, with “The main repository linked to workspace Core platform. Every agent definition in this workspace lives here; it is not chosen per change.”
-- **Branch**: a select that opens on “+ New branch” and lists the repository's branches, each with its pull request where it has one. **New branch name** (“agent/release-manager/update-color”), with “Cut from main @ a4c91e2. Suggested by the same draft as the summary.”
+- Repository and Base: `a-intel/platform` (“primary”) at `main @ a4c91e2`, with no hint. Why the repository is fixed is in the component help (`mockups/help/agent-source.md`, Commit this change).
+- **Branch**: a select that opens on “+ New branch” and lists the repository's branches, each with its pull request where it has one. **New branch name** (“agent/release-manager/update-color”), with “Cut from main @ a4c91e2.”
 - **Summary**: a drafted one-line summary (“Update release-manager color”), badges for the change's kind and area (“cosmetic”, “harness”), the line naming the model that drafted it, and **Redraft**.
-- **Description**: the drafted body, with “Becomes the commit message and the pull request body. The draft is a starting point; what you commit is what you wrote.”
-- **Open a pull request**: a switch (`role=switch`), on by default, with “Against main, titled from the summary. Governance mode team asks the code owners of .oxagen/agents/ to review; merge is the change.” Off, it reads “Push the commit to the branch only. Nothing changes for the running agent until someone opens and merges a pull request; your coding agent can pick the branch up from the repo.” When the draft touches a sensitive field, a callout says the checks will hold the merge for a code-owner review.
-- **Diff against main**, with the count of lines changed, then the note: “The principal, roles, and toolbelt update when the pull request merges. Until then the running definition stays at a4c91e2 and its definition_digest doesn’t change.”
+- **Description**: the drafted body, with “Becomes the commit message and the pull request body.”
+- **Open a pull request**: a switch (`role=switch`), on by default, with “Against main, titled from the summary.” Off, it reads “Push the commit to the branch only.” With the commit already on the branch it reads “Opens the pull request for <branch>” over “The commit is already on the branch.”, and with a pull request already open it reads “<pr> already covers this branch” over “The commit lands on the branch and the pull request updates itself.” Who reviews, and what changes for the running agent when, is in the component help. When the draft touches a sensitive field, a callout names the risk and says it merges only when someone other than the author approves, and only under an active mandate when the change adds `irreversible`.
+- **Diff against main**, with the count of lines changed. No note follows it. When the principal, roles and toolbelt update is in the component help (`mockups/help/agent-source.md`, Commit this change).
 - The footer names what will be written (“New branch agent/release-manager/update-color on a-intel/platform”), then **Cancel** and the primary button: **Commit and open the pull request**, **Commit to the branch** (switch off, or a branch whose pull request is already open), or **Open the pull request** (the commit is already on the branch). It is disabled until the branch and the summary are filled.
 
 Committing records the pending branch; the header's branch chip then shows it until it merges.
@@ -83,7 +85,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 | Branches in the commit dialog | `BRANCHES` | `list_branches` | `repo.branch.list.ts:5` | ✅ |
 | Save: commit and pull request | `openCommit()`, `S.defPending` | `commit_agent_definition` | `agent.definition.commit.ts:46`. It commits to a branch that is never the default branch, opens or reuses the pull request, and refuses a file whose `schema` is not `agent-definition/v0.1` or whose `slug` is not the agent's (`agent.definition.commit.ts:1-24`) | ✅ |
 | Drafted summary and description, Redraft | the drafter in the commit dialog | A model-written draft of the commit message | No capability drafts a commit message. `summarize_agent_def` summarizes what an agent does (`agent.definition.summarize.ts:5`) | ❌ |
-| Governance mode note | `S.govMode` | The workspace's governance mode | Code owners review the pull request on the repository; the mode itself is a setting on Steering | 🟡 |
+| Governance mode (named in the component help, not in the dialog) | `S.govMode` | The workspace's governance mode | Code owners review the pull request on the repository; the mode itself is a setting on Steering | 🟡 |
 | The digest the running definition carries | `a.digest` | `definition_digest` | `get_agent` `definition.digest` (`agent.get.ts:75-89`) | ✅ |
 
 ## Future-only fields

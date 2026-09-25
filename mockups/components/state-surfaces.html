@@ -211,10 +211,10 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 366 to 375</td><td>The rules that draw it</td></tr>
-      <tr><td><code>skeleton()</code> at <code>engine.js:910</code></td><td>The loading state: four stat blocks and a panel of seven rows.</td></tr>
-      <tr><td><code>emptyState(t, p, acts)</code> at <code>engine.js:917</code></td><td>The empty state with a heading, text, and actions.</td></tr>
-      <tr><td><code>errorState(what, code)</code> at <code>engine.js:922</code></td><td>The error state with the control plane's code, Try again, and Open an incident.</td></tr>
-      <tr><td><code>deniedState(what, need)</code> at <code>engine.js:931</code></td><td>The denied state with the permission, Request access, and the facts.</td></tr>
+      <tr><td><code>skeleton()</code> at <code>engine.js:912</code></td><td>The loading state: four stat blocks and a panel of seven rows.</td></tr>
+      <tr><td><code>emptyState(t, p, acts)</code> at <code>engine.js:919</code></td><td>The empty state with a heading, text, and actions.</td></tr>
+      <tr><td><code>errorState(what, code)</code> at <code>engine.js:924</code></td><td>The error state with the control plane's code, Try again, and Open an incident.</td></tr>
+      <tr><td><code>deniedState(what, need)</code> at <code>engine.js:933</code></td><td>The denied state with the permission, Request access, and the facts.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -243,7 +243,7 @@
 ## Inputs
 
 1. mockups/components/state-surfaces.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 366 to 375. The mockup renders it with skeleton() (engine.js:910), emptyState(t, p, acts) (engine.js:917), errorState(what, code) (engine.js:922), deniedState(what, need) (engine.js:931).
+2. The design source: mockups/src/engine.css lines 366 to 375. The mockup renders it with skeleton() (engine.js:912), emptyState(t, p, acts) (engine.js:919), errorState(what, code) (engine.js:924), deniedState(what, need) (engine.js:933).
 3. The build's implementation: find it by its root selector (.state-wrap, .sk) or its name, and list every route that renders it.
 4. Where to see it in the design: Work, Run, Agents, an agent, Tools, Steering, Spend, Repositories, Runtimes, Organization, Billing, Audit. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

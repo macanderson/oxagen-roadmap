@@ -8,7 +8,7 @@
 | **Extends** | `tasks-spec.md` (providers, the task record, the definition of done, work orders, and workflows). §2 lists every line of it this spec changes. |
 | **Builds on** | ADR-043 (Oxagen governs agents, it does not run them), ADR-162 (a run resolves an issue when dispatch, PR link, and merge agree), ADR-101 (four first-class harnesses), ADR-113 (the product name, and "Dispatch" reserved), ADR-025 (verb-first capability names, no aliases) |
 | **Related** | `mission-control-spec.md` §6.7 (taint), §7.3 (delivery modes), §7.6 (messages between agents), `creation-spec.md` (every definition is a file), `dod-spec.md` |
-| **Pages** | None yet. The In flight tab (§8.7) and the Scope section of the work order screen (§7.2) need mockup pages and audit prompts before the build. |
+| **Pages** | `mockups/pages/work-in-progress.md` draws the first cut of the In progress tab (§8.7). The Scope section of the work order screen (§7.2) needs a mockup page and an audit prompt before the build. |
 
 ## 1. The situation
 
@@ -506,10 +506,13 @@ it wins, by the conditional update ADR-162 specifies for a dispatch. A later cla
 recorded. A pool grants nothing and steers no agent, so it is a row in Postgres rather than a file, as
 tasks-spec §6.6 reasons for field settings. On day 1 every agent in a pool is one you operate.
 
-### 8.7 The In flight tab
+### 8.7 The In progress tab
 
-A fifth tab on the Work page, beside Backlog, Work orders, Workflows, and Findings. One row per open work order,
-grouped by plan:
+The second tab on the Work page, after Backlog. A work item leaves the Backlog when a send puts it in a
+work order and appears here, one row per work item, until a person accepts it. The mockup
+(`mockups/pages/work-in-progress.md`) draws the work item, its labels, owner, work order, target, state,
+and items claimed. When the plan (§8) ships, each row also carries its work order’s columns below,
+and the rows group by plan:
 
 | Column | Shows |
 |---|---|
