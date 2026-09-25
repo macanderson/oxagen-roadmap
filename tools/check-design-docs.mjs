@@ -6,7 +6,7 @@
 //   - anything other than one h1, or Space Grotesk on an element that is not an h1 or a wordmark
 //   - a story whose template rendered nothing, or a missing audit prompt or copy button
 //   - a page that scrolls sideways at 390px
-//   - an em dash, an en dash used as a separator, or an exclamation point in visible prose
+//   - an em dash, an en dash used as a separator, a semicolon, or an exclamation point in visible prose
 //
 //   node tools/check-design-docs.mjs            # every page
 //   node tools/check-design-docs.mjs --only stat # pages whose path contains "stat"
@@ -62,7 +62,7 @@ for (const file of pages) {
       document.head.appendChild(off);
       const text = document.body.innerText;
       off.remove();
-      const dashes = [...text.matchAll(/.{0,30}(—|\s–\s|--\s|!(?=\s|$)).{0,30}/g)].map((m) => m[0]);
+      const dashes = [...text.matchAll(/.{0,30}(—|\s–\s|--\s|!(?=\s|$)|;\s).{0,30}/g)].map((m) => m[0]);
       return {
         h1, grotesk, monoFace, monaspace, emptyStories, dashes,
         hscroll: document.documentElement.scrollWidth > window.innerWidth + 1,
@@ -83,7 +83,7 @@ for (const file of pages) {
     if (!r.prompt) fail(file, `${tag}: no audit prompt with a copy button`);
     if (r.themed !== theme) fail(file, `${tag}: ?theme=${theme} did not apply`);
     if (!r.title || r.title.split(/\s+/).length > 4) fail(file, `${tag}: title "${r.title}" is not a two to four word name`);
-    for (const d of r.dashes) fail(file, `${tag}: dash or exclamation in prose: …${d}…`);
+    for (const d of r.dashes) fail(file, `${tag}: dash, semicolon, or exclamation in prose: …${d}…`);
     if (file.startsWith(COMP + path.sep) && width === 1440 && theme === "dark")
       for (const s of COMPONENT_SECTIONS) if (!r.sections.includes(s)) fail(file, `missing section #${s}`);
     await page.close();

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diff</title>
+<meta name="description" content="A line diff of one file, unified for narrow panels and split side by side for review.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Diff</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Code</p>
+  <h1>Diff</h1>
+  <p class="dx-lead">A diff shows what a change does to a file, line by line. The unified form stacks removed and added lines under two line-number columns and fits a narrow panel. The split form puts the base on the left and the draft on the right, so a change reads across. Both are set in Monaspace Neon, and a <code>+</code> or <code>−</code> mark carries each change before the tint does.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.diff</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 976 to 1005</span>
+    <span><b>Used on</b> Run transcript, Linked work, Record save dialog, Commit dialog, Agent source</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-unified">
+    <figcaption class="dx-story-h"><b>Unified</b><span><code>diffHtml(rows, 2)</code>: two lines of context, and a gap row for the lines it skips.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="unified" data-name="Unified">
+      <div class="diff"><div class="dl gap"><span></span><span></span><span>⋯</span></div><div class="dl"><span>3</span><span>3</span><span>  model = "claude-sonnet-5"</span></div><div class="dl"><span>4</span><span>4</span><span>  harness = "claude-code"</span></div><div class="dl del"><span>5</span><span></span><span>- budget.per_run_usd = 20</span></div><div class="dl add"><span></span><span>5</span><span>+ budget.per_run_usd = 25</span></div><div class="dl add"><span></span><span>6</span><span>+ budget.mode = "enforced"</span></div><div class="dl"><span>6</span><span>7</span><span>  [toolbelt]</span></div><div class="dl gap"><span></span><span></span><span>⋯</span></div></div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-stat">
+    <figcaption class="dx-story-h"><b>Change count</b><span><code>.dstat</code> sits in the header above a diff: additions, then deletions with a true minus.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="stat" data-name="Change count">
+      <p class="eyebrow q" style="margin:0"><span class="mono" style="text-transform:none;letter-spacing:0">.oxagen/agents/release-manager.toml</span> <span class="dstat"><b class="a">+2</b> <b class="d">−1</b></span></p>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-split">
+    <figcaption class="dx-story-h"><b>Split</b><span><code>diffSplitHtml(rows, 2, labels)</code>: base left, draft right. The missing half of a one-sided change is a hatch.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="split" data-name="Split">
+      <div class="diff two"><div class="dl2 hd"><span class="ln"></span><span class="tx">main</span><span class="ln"></span><span class="tx">your draft</span></div><div class="dl2 same"><span class="ln">3</span><span class="tx">  model = "claude-sonnet-5"</span><span class="ln">3</span><span class="tx">  model = "claude-sonnet-5"</span></div><div class="dl2"><span class="ln del">4</span><span class="tx del">  budget.per_run_usd = 20</span><span class="ln add">4</span><span class="tx add">  budget.per_run_usd = 25</span></div><div class="dl2"><span class="ln e"></span><span class="tx e"></span><span class="ln add">5</span><span class="tx add">  budget.mode = "enforced"</span></div><div class="dl2 same"><span class="ln">5</span><span class="tx">  [toolbelt]</span><span class="ln">6</span><span class="tx">  [toolbelt]</span></div><div class="dl2 gap"><span class="tx">⋯</span></div></div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-empty">
+    <figcaption class="dx-story-h"><b>No change</b><span>A draft that matches its base shows a sentence in place of an empty diff.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="empty" data-name="No change">
+      <div class="panel"><div class="panel-b dim">Nothing changed yet.</div></div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Frame</td><td><code>.diff</code></td><td><code>--void</code> ground, a 1px <code>--border</code>, a 9px radius, Monaspace Neon 11.5px on a 1.6 line. It scrolls past 280px tall.</td></tr>
+      <tr><td>Unified line</td><td><code>.dl</code></td><td>Three columns: base line number, draft line number, and the text with its <code>+</code>, <code>-</code>, or space mark.</td></tr>
+      <tr><td>Line numbers</td><td><code>.dl&gt;span:nth-child(-n+2)</code></td><td>34px each, right aligned, <code>--dim</code>, not selectable, with a <code>--border</code> rule.</td></tr>
+      <tr><td>Added line</td><td><code>.dl.add</code></td><td>A 14% <code>--st-allowed</code> tint with <code>--fg</code> text.</td></tr>
+      <tr><td>Removed line</td><td><code>.dl.del</code></td><td>A 14% <code>--st-denied</code> tint with <code>--fg</code> text.</td></tr>
+      <tr><td>Gap</td><td><code>.dl.gap</code></td><td>A centered <code>⋯</code> in <code>--dim</code> where unchanged lines are skipped.</td></tr>
+      <tr><td>Change count</td><td><code>.dstat .a</code>, <code>.dstat .d</code></td><td>Additions in <code>--st-allowed</code> and deletions in <code>--st-denied</code>, each with its sign.</td></tr>
+      <tr><td>Split frame</td><td><code>.diff.two</code></td><td>The same frame, capped at 320px.</td></tr>
+      <tr><td>Split line</td><td><code>.dl2</code>, <code>.ln</code>, <code>.tx</code></td><td>Four columns: base number, base text, draft number, draft text. A rule separates the halves.</td></tr>
+      <tr><td>Split header</td><td><code>.dl2.hd</code></td><td>Sticky labels for each side: 10px Geist capitals in <code>--muted</code> on <code>--panel</code>.</td></tr>
+      <tr><td>Hatch</td><td><code>.dl2 .e</code></td><td>A diagonal hatch for the empty half of a one-sided change.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>What a draft changes in a file under <code>.oxagen/</code>, before a person commits it.</li><li>What a run changed in the repository, in the transcript and the linked work panel.</li><li>Review in a wide dialog: the split form.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Two different sources compared for meaning: use a <a href="code-block.html">code pair</a>.</li><li>A field-level change to a record: use a <a href="key-value-list.html">key-value list</a> with before and after.</li><li>Editing the file: use the <a href="source-editor.html">source editor</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="diff" style="width:100%"><div class="dl" style="background:color-mix(in srgb,var(--st-denied) 14%,transparent)"><span>5</span><span></span><span>budget.per_run_usd = 20</span></div><div class="dl" style="background:color-mix(in srgb,var(--st-allowed) 14%,transparent)"><span></span><span>5</span><span>budget.per_run_usd = 25</span></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Tint only. In grayscale or print the two lines look the same.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="diff" style="width:100%"><div class="dl del"><span>5</span><span></span><span>- budget.per_run_usd = 20</span></div><div class="dl add"><span></span><span>5</span><span>+ budget.per_run_usd = 25</span></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>The mark and the line number columns carry the change. The tint is the third signal.</p></div>
+  </div>
+  <ul>
+    <li>Show two lines of context around each change and a gap row for the rest. Never print a whole unchanged file.</li>
+    <li>The split form belongs in a dialog wide enough for two 60-character columns. Narrow panels use the unified form.</li>
+    <li>Label the split header with the branch or the source on each side (&quot;main&quot;, &quot;your draft&quot;).</li>
+    <li>A draft with no change shows &quot;Nothing changed yet.&quot; in place of an empty frame.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li>The face is Monaspace Neon (<code>--mono</code>), with <code>calt</code> and <code>liga</code> on by default. The split header is the one part in Geist.</li>
+    <li>The change count reads <code>+2 −1</code>: a plus for additions and a true minus (−) for deletions, both as numerals.</li>
+    <li>Header labels are plain nouns in lowercase in the source (&quot;main&quot;, &quot;your draft&quot;). CSS sets the capitals.</li>
+    <li>A file path above a diff is inline mono and keeps its case inside a capital eyebrow.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>Each line starts with <code>+</code>, <code>-</code>, or a space, so a screen reader and a copy both carry the change without the tint.</li>
+    <li>Line numbers are <code>user-select:none</code>, so a copied hunk holds only the text.</li>
+    <li>The hatch on the empty half is decoration. The empty line number cell says nothing.</li>
+    <li>Line text is <code>--fg</code> on the tint, which clears 4.5:1 in both themes.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>In the phone dialog layer the split form collapses to two columns: the header hides, each side's lines follow each other, a line identical on both sides shows once, and the hatch goes away (engine.css 1001 to 1005).</li>
+    <li>The frame scrolls sideways inside itself. The page never does.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--mono</code></td><td>Face</td></tr>
+      <tr><td><code>--void</code></td><td>Frame ground</td></tr>
+      <tr><td><code>--border</code></td><td>Frame border and column rules</td></tr>
+      <tr><td><code>--dim</code></td><td>Line numbers and the gap mark</td></tr>
+      <tr><td><code>--fg</code></td><td>Changed line text</td></tr>
+      <tr><td><code>--st-allowed</code></td><td>Added tint and the addition count</td></tr>
+      <tr><td><code>--st-denied</code></td><td>Removed tint and the deletion count</td></tr>
+      <tr><td><code>--panel, --muted</code></td><td>Split header ground and label</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 976 to 1005</td><td>The rules that draw it</td></tr>
+      <tr><td><code>diffLines(a, b)</code> at <code>engine.js:1284</code></td><td>An LCS line diff of two strings into rows marked <code>+</code>, <code>-</code>, or space.</td></tr>
+      <tr><td><code>diffStat(rows)</code> at <code>engine.js:1293</code></td><td>Counts additions and deletions for <code>.dstat</code>.</td></tr>
+      <tr><td><code>diffHtml(rows, ctx)</code> at <code>engine.js:1294</code></td><td>The unified form with <code>ctx</code> lines of context. Transcript, linked work, and the record save dialog.</td></tr>
+      <tr><td><code>diffSplitHtml(rows, ctx, labels)</code> at <code>engine.js:1307</code></td><td>The split form. The commit dialog.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li><code>.dl2.same</code> marks a row identical on both sides, so the phone layout can drop the duplicate half.</li>
+    <li>Hosts: <code>.tx-diffwrap</code> in the transcript, <code>.lw-files</code> in linked work, and <code>.wz-pr</code> in the wizards.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-q">note</span>Hyphen for a removed line</h4><p><code>diffHtml()</code> marks a removed line with an ASCII <code>-</code>, while <code>.dstat</code> uses a true minus. The mark is inside code, where the hyphen is the diff format's own character, so both are correct for their place.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Line numbers on the deepest ground</h4><p>Line numbers are <code>--dim</code> on <code>--void</code>: 4.35:1 in dark and 2.33:1 in light. They are reference marks, so 3:1 applies in dark, and light falls below it.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's diff against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Diff audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the diff component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/diff.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 976 to 1005. The mockup renders it with diffLines(a, b) (engine.js:1284), diffStat(rows) (engine.js:1293), diffHtml(rows, ctx) (engine.js:1294), diffSplitHtml(rows, ctx, labels) (engine.js:1307).
+3. The build's implementation: find it by its root selector (.diff) or its name, and list every route that renders it.
+4. Where to see it in the design: Run transcript, Linked work, Record save dialog, Commit dialog, Agent source. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Face and size. The frame and every line compute to Monaspace Neon at 11.5px on a 1.6 line. The split header is Geist 10px capitals. Any other face is a FAIL.
+2. Marks. Every changed line carries `+` or `-` as its first character, and every context line a space. A diff that marks changes by tint alone is a FAIL.
+3. Tints. Added lines use a 14% `--st-allowed` tint and removed lines a 14% `--st-denied` tint, with `--fg` text. Any other hue, or gold, is a FAIL.
+4. Line numbers. Two 34px columns in the unified form, right aligned, `--dim`, excluded from selection. Copy a hunk and confirm the clipboard holds no line numbers.
+5. Context. Two lines of context around each change and one gap row for each skipped run. A full unchanged file printed is a FAIL.
+6. Split form. Base on the left and draft on the right on one row per line, a sticky labelled header, and a hatch on the empty half of a one-sided change. A flat fill in place of the hatch is a FAIL, because it reads as a highlight in light.
+7. Change count. `+N −M` with a true minus, additions first, in the allowed and denied tokens.
+8. No change. A draft equal to its base shows &quot;Nothing changed yet.&quot; and no empty frame.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: In the phone dialog layer the split form collapses to two columns: the header hides, each side's lines follow each other, a line identical on both sides shows once, and the hatch goes away (engine.css 1001 to 1005). The frame scrolls sideways inside itself. The page never does.
+13. Accessibility. Each line starts with `+`, `-`, or a space, so a screen reader and a copy both carry the change without the tint. Line numbers are `user-select:none`, so a copied hunk holds only the text. The hatch on the empty half is decoration. The empty line number cell says nothing. Line text is `--fg` on the tint, which clears 4.5:1 in both themes.
+14. One implementation. The build draws the diff from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Diff: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+</main>
+</div>
+</body>
+</html>

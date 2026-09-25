@@ -118,7 +118,7 @@
       <tr><td>Unit</td><td><code>.stat .v small</code></td><td>A unit or qualifier beside the figure: 12px, 500, <code>--muted</code>.</td></tr>
       <tr><td>Subline</td><td><code>.stat .s</code></td><td>One fact that makes the figure readable: 11.5px, <code>--muted</code>.</td></tr>
       <tr><td>Basis chip</td><td><code>.stat .s .basis</code></td><td>Where a spend figure came from, drawn by <code>basisChip()</code>: 10.5px Monaspace Neon.</td></tr>
-      <tr><td>Clickable</td><td><code>button.stat.click</code></td><td>The whole box is one button; hover lifts the border to <code>--rule</code>.</td></tr>
+      <tr><td>Clickable</td><td><code>button.stat.click</code></td><td>The whole box is one button. Hover lifts the border to <code>--rule</code>.</td></tr>
     </tbody>
   </table></div></div>
 </section>
@@ -162,7 +162,7 @@
     <li>The DOM order is label, value, subline, so a screen reader reads &quot;Runs, 1,340, last 30 days&quot;.</li>
     <li>A static stat box is not focusable. A clickable one is a real <code>button</code> with an <code>aria-label</code> that names where it goes.</li>
     <li>Color never carries the state alone. A toned value has its state in the label or the subline.</li>
-    <li>The label and subline must clear 4.5:1 on <code>--panel</code>. The label's <code>--dim</code> does not today; see Findings.</li>
+    <li>The label and subline must clear 4.5:1 on <code>--panel</code>. The label's <code>--dim</code> does not today. See Findings.</li>
   </ul>
 </section>
 
@@ -199,7 +199,7 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 177 to 181, 764, 2087 to 2093, phone 679 to 680</td><td>The rules that draw it</td></tr>
-      <tr><td><code>tile(k, v, s, col)</code> at <code>engine.js:7296</code></td><td>Writes one stat box; <code>col</code> sets the value's tone. About 15 calls.</td></tr>
+      <tr><td><code>tile(k, v, s, col)</code> at <code>engine.js:7296</code></td><td>Writes one stat box. <code>col</code> sets the value's tone. About 15 calls.</td></tr>
       <tr><td><code>runStatRow(R)</code> at <code>engine.js:2470</code></td><td>The Run page's row of six, with a local tile of its own.</td></tr>
       <tr><td><code>basisChip(k)</code> at <code>engine.js:631</code></td><td>The spend basis chip in the subline.</td></tr>
     </tbody>
@@ -250,7 +250,7 @@ Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and li
 10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
 11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
 12. Phone. At 390 by 844 with a touch pointer: Padding drops to 11px by 12px and the value to 17px, so an eleven-digit token total fits half the width (engine.css 676 to 680). Stat boxes sit two to a row, and a clickable stat keeps a 44px minimum touch height.
-13. Accessibility. The DOM order is label, value, subline, so a screen reader reads &quot;Runs, 1,340, last 30 days&quot;. A static stat box is not focusable. A clickable one is a real `button` with an `aria-label` that names where it goes. Color never carries the state alone. A toned value has its state in the label or the subline. The label and subline must clear 4.5:1 on `--panel`. The label's `--dim` does not today; see Findings.
+13. Accessibility. The DOM order is label, value, subline, so a screen reader reads &quot;Runs, 1,340, last 30 days&quot;. A static stat box is not focusable. A clickable one is a real `button` with an `aria-label` that names where it goes. Color never carries the state alone. A toned value has its state in the label or the subline. The label and subline must clear 4.5:1 on `--panel`. The label's `--dim` does not today. See Findings.
 14. One implementation. The build draws the stat box from one shared component. List every place that draws it by hand, with its file and line.
 
 ## Output

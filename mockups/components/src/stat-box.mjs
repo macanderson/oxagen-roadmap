@@ -73,7 +73,7 @@ export default {
     ["Unit", "`.stat .v small`", "A unit or qualifier beside the figure: 12px, 500, `--muted`."],
     ["Subline", "`.stat .s`", "One fact that makes the figure readable: 11.5px, `--muted`."],
     ["Basis chip", "`.stat .s .basis`", "Where a spend figure came from, drawn by `basisChip()`: 10.5px Monaspace Neon."],
-    ["Clickable", "`button.stat.click`", "The whole box is one button; hover lifts the border to `--rule`."],
+    ["Clickable", "`button.stat.click`", "The whole box is one button. Hover lifts the border to `--rule`."],
   ],
   usage: {
     when: [
@@ -109,7 +109,7 @@ export default {
     "The DOM order is label, value, subline, so a screen reader reads \"Runs, 1,340, last 30 days\".",
     "A static stat box is not focusable. A clickable one is a real `button` with an `aria-label` that names where it goes.",
     "Color never carries the state alone. A toned value has its state in the label or the subline.",
-    "The label and subline must clear 4.5:1 on `--panel`. The label's `--dim` does not today; see Findings.",
+    "The label and subline must clear 4.5:1 on `--panel`. The label's `--dim` does not today. See Findings.",
   ],
   phone: [
     "Padding drops to 11px by 12px and the value to 17px, so an eleven-digit token total fits half the width (engine.css 676 to 680).",
@@ -125,7 +125,7 @@ export default {
     ["--st-approval, --st-failed, --st-allowed", "Value tone, with the state named beside it"],
   ],
   helpers: [
-    ["tile(k, v, s, col)", "engine.js:7296", "Writes one stat box; `col` sets the value's tone. About 15 calls."],
+    ["tile(k, v, s, col)", "engine.js:7296", "Writes one stat box. `col` sets the value's tone. About 15 calls."],
     ["runStatRow(R)", "engine.js:2470", "The Run page's row of six, with a local tile of its own."],
     ["basisChip(k)", "engine.js:631", "The spend basis chip in the subline."],
   ],

@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Page header</title>
+<meta name="description" content="The eyebrow, the page title, one line of subtext, and the page's actions.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Page header</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Page structure</p>
+  <h1>Page header</h1>
+  <p class="dx-lead">Every page opens with a page header. The eyebrow names where the page sits, the h1 names the page or the record, the subtext says what the page holds, and the actions on the right are what you can do from here. It holds the only Space Grotesk on the page.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.phead</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 56 to 59, 127 to 132, phone 674</span>
+    <span><b>Used on</b> Work, Agents, Spend, Steering, Tools, Run, Repositories, Organization</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-default">
+    <figcaption class="dx-story-h"><b>Default</b><span>Workspace eyebrow, page title, subtext, and two actions with one gold.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="default" data-name="Default">
+      <div class="phead">
+        <div class="t">
+          <p class="eyebrow">Core platform</p>
+          <h1>Spend</h1>
+          <p>What the tokens bought, with the basis on every number.</p>
+        </div>
+        <div class="acts">
+          <button class="btn">Export report</button>
+          <button class="btn primary">Set a budget</button>
+        </div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-three-actions">
+    <figcaption class="dx-story-h"><b>Three actions</b><span>Neutral actions first, the one gold action last.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="three-actions" data-name="Three actions">
+      <div class="phead">
+        <div class="t">
+          <p class="eyebrow">Core platform</p>
+          <h1>Agents</h1>
+          <p>Every actor in this workspace and what it is made of.</p>
+        </div>
+        <div class="acts">
+          <button class="btn">Steer</button>
+          <button class="btn">New agent</button>
+          <button class="btn primary">Register agent</button>
+        </div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-no-actions">
+    <figcaption class="dx-story-h"><b>No actions</b><span>A read-only page drops the actions cluster.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="no-actions" data-name="No actions">
+      <div class="phead">
+        <div class="t">
+          <p class="eyebrow">a-intel</p>
+          <h1>Audit</h1>
+          <p>Every event the record holds for this organization.</p>
+        </div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-back-link">
+    <figcaption class="dx-story-h"><b>Record with a back link and badges</b><span>A record page links its parent in the eyebrow and sets its badges in a <code>.row</code> under the title.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="back-link" data-name="Record with a back link and badges">
+      <div class="phead">
+        <div class="t">
+          <p class="eyebrow"><a href="#/a-intel/core-platform/steering">Steering</a></p>
+          <h1>Do not re-read CHANGELOG.md more than once in a run</h1>
+          <div class="row" style="margin-top:8px"><span class="b b-allowed"><span class="d"></span>published</span><span class="b b-q mono">ctx.release.no-reread-changelog</span><span class="b b-q">v3</span></div>
+          <p style="margin-top:8px">Supported by 682 duplicate tool calls across 212 runs of the release manager.</p>
+        </div>
+        <div class="acts">
+          <button class="btn">Archive</button>
+          <button class="btn primary">Edit</button>
+        </div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-id-title">
+    <figcaption class="dx-story-h"><b>Identifier as the title</b><span>A file path or an id is set in mono at 18px with <code>h1.mono</code>.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="id-title" data-name="Identifier as the title">
+      <div class="phead">
+        <div class="t">
+          <p class="eyebrow"><a href="#/a-intel/core-platform/agents/release-manager">Agent</a></p>
+          <h1 class="mono" style="font-size:18px">.oxagen/agents/release-manager.toml</h1>
+          <div class="row" style="margin-top:8px"><span class="b b-q mono">main</span><span class="b b-q mono">main @ a4c91e2</span><span class="b b-q">source of truth</span></div>
+        </div>
+        <div class="acts"><button class="btn">Open in GitHub</button></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-long-title">
+    <figcaption class="dx-story-h"><b>Long title</b><span>A title over 90 characters drops to 20px, the display face's floor.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="long-title" data-name="Long title">
+      <div class="phead">
+        <div class="t">
+          <p class="eyebrow"><a href="#/a-intel/core-platform/steering">Steering</a></p>
+          <h1 style="font-size:20px">Before a release branch is cut, confirm that every pull request merged since the last tag has a changelog entry</h1>
+        </div>
+      </div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Container</td><td><code>.phead</code></td><td>A wrapping flex row with an 18px gap and 18px below it. The title block sits left and the actions right.</td></tr>
+      <tr><td>Title block</td><td><code>.phead .t</code></td><td>The eyebrow, the h1, any badge row, and the subtext. It may shrink (<code>min-width:0</code>) so a long title wraps.</td></tr>
+      <tr><td>Eyebrow</td><td><code>.eyebrow</code></td><td>12px Geist 600 at 0.14em, capitals by CSS, in <code>--accent-text</code>, with 10px below. It names the workspace, or links the parent record.</td></tr>
+      <tr><td>Quiet eyebrow</td><td><code>.eyebrow.q</code></td><td>The same label in <code>--muted</code>. Use it for any eyebrow after the first on a page.</td></tr>
+      <tr><td>Title</td><td><code>.phead h1</code></td><td>Space Grotesk 24px 700 at −0.015em, with 4px below. It is the page's only h1.</td></tr>
+      <tr><td>Id title</td><td><code>h1.mono</code></td><td>Monaspace Neon at 18px, set inline, for a path or an id.</td></tr>
+      <tr><td>Badge row</td><td><code>.phead .t .row</code></td><td>Badges under the title on a record page, 8px above.</td></tr>
+      <tr><td>Subtext</td><td><code>.phead p</code></td><td>13px <code>--muted</code>, at most 70 characters wide.</td></tr>
+      <tr><td>Actions</td><td><code>.phead .acts</code></td><td>A wrapping flex row pushed right (<code>margin-left:auto</code>) with an 8px gap.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>The top of every routed page and every record page.</li><li>The page's own actions: the ones that act on the whole page, such as Export report or Register agent.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A section inside the page: use an h2, or a <a href="panel.html">panel</a> header.</li><li>A dialog's title: use the <a href="dialog.html">dialog</a> header.</li><li>A figure: put the page's key figures in <a href="stat-box.html">stat boxes</a> under the header.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="phead" style="margin:0;width:100%"><div class="t"><p class="eyebrow"><a href="#">Steering</a> · Skill</p><h1>Release Notes Style</h1></div><div class="acts"><button class="btn primary">Edit</button><button class="btn primary">Publish</button></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A mid-dot in the eyebrow, a title in title case, and two gold actions.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="phead" style="margin:0;width:100%"><div class="t"><p class="eyebrow"><a href="#">Steering</a></p><h1>Release notes style</h1></div><div class="acts"><button class="btn">Edit</button><button class="btn primary">Publish</button></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>The eyebrow links the parent, the title is sentence case, and one action is gold.</p></div>
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="phead" style="margin:0;width:100%"><div class="t"><p class="eyebrow">Core platform</p><h1>Work</h1><p>This page is where the agents' work lives. It is ordered by the frames, not by kind, so you see what matters first.</p></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Subtext that explains the design. It is two sentences and a not contrast.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="phead" style="margin:0;width:100%"><div class="t"><p class="eyebrow">Core platform</p><h1>Work</h1><p>What the agents work on, and what waits on you.</p></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>One sentence that says what the page holds.</p></div>
+  </div>
+  <ul>
+    <li>A page has one page header and one h1. Tabs, stat boxes, and panels follow it.</li>
+    <li>The first eyebrow on a page is gold and counts as the page's identity. Every later eyebrow is <code>.eyebrow.q</code>.</li>
+    <li>The gold action, when there is one, sits last in the actions row.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Title</b>: the page name as a plain noun (&quot;Work&quot;, &quot;Agents&quot;, &quot;Spend&quot;), or the record's own name. Sentence case.</li>
+    <li><b>Eyebrow</b>: the workspace name, or a link to the parent record (&quot;Steering&quot;, &quot;Agent&quot;). One word or name, with no mid-dot and no second label.</li>
+    <li><b>Subtext</b>: one sentence that says what the page holds, with no design reasoning. Omit it on a record page that has badges and a lead.</li>
+    <li><b>Actions</b>: a verb and a noun in sentence case (&quot;Export report&quot;, &quot;Set a budget&quot;, &quot;Register agent&quot;). At most one gold.</li>
+    <li><b>Ids</b>: a path or an id in the title is set in mono and keeps its case.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The h1 is the page's only h1, and every other heading on the page sits below it in the outline.</li>
+    <li>The eyebrow is a paragraph, not a heading, so it does not break the outline.</li>
+    <li>A back link in the eyebrow is a real link with a destination. The actions are real buttons with visible text.</li>
+    <li>The eyebrow's <code>--accent-text</code> is 8.43:1 on <code>--panel</code> in dark and 4.65:1 on white in light.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>The h1 drops to 20px (engine.css 674).</li>
+    <li>The actions leave the right edge and take the full width under the title (engine.css 132). Buttons grow to 40px tall.</li>
+    <li>A long title wraps. It never truncates.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--font-display</code></td><td>The h1</td></tr>
+      <tr><td><code>--accent-text</code></td><td>The first eyebrow</td></tr>
+      <tr><td><code>--muted</code></td><td>The quiet eyebrow and the subtext</td></tr>
+      <tr><td><code>--fg</code></td><td>The title</td></tr>
+      <tr><td><code>--gold, --on-gold</code></td><td>The one primary action</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 56 to 59, 127 to 132, phone 674</td><td>The rules that draw it</td></tr>
+      <tr><td><code>srcHead(o, kindLabel, title, badges, lead, acts)</code> at <code>wedge.js:1017</code></td><td>The header of a Steering source: back link, title, badge row, lead, and actions. It drops a title over 90 characters to 20px.</td></tr>
+      <tr><td><code>pWork()</code> at <code>wedge.js:94</code></td><td>A plain page header, written inline, as most pages write theirs.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>No shared helper draws the page header. 18 page functions write <code>.phead</code> inline (14 in engine.js, 4 in wedge.js).</li>
+    <li>An id title's 18px and a long title's 20px are inline styles, not modifier classes.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Mid-dot in the eyebrow</h4><p>Record pages write the parent link and the kind in one eyebrow, such as &quot;Agent · Source&quot; (engine.js 1196) and &quot;Steering · Skill&quot; in <code>srcHead()</code>. The label rule allows no mid-dot. The kind belongs in the badge row.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Sizes by inline style</h4><p>The 18px id title and the 20px long title are inline <code>style</code> attributes on the h1. A <code>.phead h1.long</code> and <code>h1.mono</code> rule would let an audit find them.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Every eyebrow is gold</h4><p>Each page's first eyebrow is gold, which the brand allows as identity. Eyebrows inside panels and dialogs use <code>.eyebrow.q</code>, and an audit should find no second gold eyebrow on a page.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's page header against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Page header audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the page header component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/page-header.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 56 to 59, 127 to 132, phone 674. The mockup renders it with srcHead(o, kindLabel, title, badges, lead, acts) (wedge.js:1017), pWork() (wedge.js:94).
+3. The build's implementation: find it by its root selector (.phead) or its name, and list every route that renders it.
+4. Where to see it in the design: Work, Agents, Spend, Steering, Tools, Run, Repositories, Organization. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Structure. Every routed page opens with one page header: an eyebrow, one h1, optional subtext or badge row, and an actions cluster on the right. A page with no header, or a header below its tabs, is a FAIL.
+2. Title. The h1 is Space Grotesk at 24px and 700, and 20px on a phone. It is the only h1 on the page. A second h1, or a page title in Geist, is a FAIL.
+3. Eyebrow. 12px Geist 600 at 0.14em, capitals by CSS, `--accent-text` for the first on the page and `--muted` for any later one. It names the workspace or links the parent. A mid-dot or a second label in the eyebrow is a FAIL.
+4. Subtext. 13px `--muted`, at most 70 characters wide, and one sentence that says what the page holds. Design reasoning, a second sentence, or a not contrast is a FAIL.
+5. Actions. Right-aligned, wrapping, 8px apart, with at most one gold button and the gold one last. Labels are a verb and a noun in sentence case.
+6. Ids and long titles. A path or an id in the title is set in Monaspace Neon and keeps its case. A title over 90 characters renders at 20px. Space Grotesk below 20px is a FAIL.
+7. Back link. A record page's eyebrow links to its parent with a real `a href`, and the link works.
+8. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+9. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+10. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+11. Phone. At 390 by 844 with a touch pointer: The h1 drops to 20px (engine.css 674). The actions leave the right edge and take the full width under the title (engine.css 132). Buttons grow to 40px tall. A long title wraps. It never truncates.
+12. Accessibility. The h1 is the page's only h1, and every other heading on the page sits below it in the outline. The eyebrow is a paragraph, not a heading, so it does not break the outline. A back link in the eyebrow is a real link with a destination. The actions are real buttons with visible text. The eyebrow's `--accent-text` is 8.43:1 on `--panel` in dark and 4.65:1 on white in light.
+13. One implementation. The build draws the page header from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Page header: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+</main>
+</div>
+</body>
+</html>

@@ -84,7 +84,7 @@
       <p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>The same title in Geist at 13.5px and 600. This is what <code>engine.css</code> draws now.</p>
     </div>
   </div>
-  <div class="dx-note"><b>Scope.</b> The brand kit allows Space Grotesk on h1 to h3 for marketing pages, which use a larger scale. The app surface keeps it to h1. The oxagen product app and the brand kit still carry the h1 to h3 rule; see <a href="#findings">Findings</a>.</div>
+  <div class="dx-note"><b>Scope.</b> The brand kit allows Space Grotesk on h1 to h3 for marketing pages, which use a larger scale. The app surface keeps it to h1. The oxagen product app and the brand kit still carry the h1 to h3 rule. See <a href="#findings">Findings</a>.</div>
 </section>
 
 <section class="dx-sec">
@@ -153,7 +153,7 @@
       <tr><td>Count and timestamp</td><td><code>.tab .n</code>, <code>.li time</code></td><td>Monaspace Neon</td><td>10 to 10.5px</td><td>400</td><td>none</td><td><code>--dim</code></td></tr>
     </tbody>
   </table></div></div>
-  <div class="dx-note info"><b>Scale drift.</b> The brand kit's app scale is 30, 24, 20, and 16px for h1 to h4. The mockup runs denser at 24, 18, 15, and 13px. This page records what the mockup ships; the kit or the mockup changes when Mac picks one.</div>
+  <div class="dx-note info"><b>Scale drift.</b> The brand kit's app scale is 30, 24, 20, and 16px for h1 to h4. The mockup runs denser at 24, 18, 15, and 13px. This page records what the mockup ships. The kit or the mockup changes when Mac picks one.</div>
 </section>
 
 <section class="dx-sec">
@@ -205,7 +205,7 @@ budget.per_run_usd = 4.00</pre></div><div class="m"><b>Code block</b><code>pre</
   <ul>
     <li><b>Body</b> is 14px with a 1.55 line height. Paragraphs stop at 70 to 78 characters (<code>max-width:70ch</code> on page subtext, <code>78ch</code> on record statements).</li>
     <li><b>Secondary text</b> (subtext, stat sublines, notes) is 11.5 to 13px in <code>--muted</code>.</li>
-    <li><b>Controls</b>: buttons and tabs are 13px at 500; a small button is 12px. A gold primary button is 600.</li>
+    <li><b>Controls</b>: buttons and tabs are 13px at 500. A small button is 12px. A gold primary button is 600.</li>
     <li><b>Inputs</b> are 13px, and 16px in the phone shell so iOS does not zoom on focus. Touch targets there are 44px tall.</li>
     <li><b>The floor</b> is 10px, used only for mono counts and timestamps. Nothing a person must read to act is below 11px.</li>
   </ul>
@@ -298,14 +298,14 @@ budget.per_run_usd = 4.00</pre></div><div class="m"><b>Code block</b><code>pre</
   <p class="dx-sub">The marks are artwork, and the brand sets them in Space Grotesk.</p>
   <ul>
     <li>The oxagen lockup and the stella wordmark are SVG paths (<code>LOGO</code>, <code>stellaWordmark()</code>). They are drawn, so the type rule does not apply to them.</li>
-    <li>Three places set a name as text in the wordmark's face: <code>.stl-ask</code> ("Ask stella*" on the assistant launcher, 13.5px), <code>.stl-name</code> (the name in an assistant message, 12.5px), and <code>.ox-name</code> (oxagen on the launcher's second line, 11px). Mac chose this on 2026-09-21, and <code>tools/check-assistant.mjs</code> asserts it. It is the one open exception below 20px; see <a href="#findings">Findings</a>.</li>
+    <li>Three places set a name as text in the wordmark's face: <code>.stl-ask</code> ("Ask stella*" on the assistant launcher, 13.5px), <code>.stl-name</code> (the name in an assistant message, 12.5px), and <code>.ox-name</code> (oxagen on the launcher's second line, 11px). Mac chose this on 2026-09-21, and <code>tools/check-assistant.mjs</code> asserts it. It is the one open exception below 20px. See <a href="#findings">Findings</a>.</li>
   </ul>
 </section>
 
 <section class="dx-sec">
   <h2 id="findings">Findings</h2>
   <p class="dx-sub">What the 2026-09-25 font audit changed and what it left open.</p>
-  <div class="dx-find"><h4><span class="b b-allowed"><span class="d"></span>fixed</span>Space Grotesk on every h2 and h3</h4><p><code>engine.css:61</code> set <code>h1,h2,h3</code> in the display face, so every panel title (13.5px), card title (15px), section title (18px), and dialog title (16px) rendered in Space Grotesk. The rule is now <code>h1</code> only, in rev1 and in <code>future_state_mockups/</code>. <code>approved-profile-flow/</code> set its card h2 in the display face locally; that is Geist now.</p></div>
+  <div class="dx-find"><h4><span class="b b-allowed"><span class="d"></span>fixed</span>Space Grotesk on every h2 and h3</h4><p><code>engine.css:61</code> set <code>h1,h2,h3</code> in the display face, so every panel title (13.5px), card title (15px), section title (18px), and dialog title (16px) rendered in Space Grotesk. The rule is now <code>h1</code> only, in rev1 and in <code>future_state_mockups/</code>. <code>approved-profile-flow/</code> set its card h2 in the display face locally. That is Geist now.</p></div>
   <div class="dx-find"><h4><span class="b b-allowed"><span class="d"></span>fixed</span>Display face below 20px</h4><p>The record title dropped to 18px on a phone, and a record title over 90 characters dropped to 19px. Both stop at 20px now.</p></div>
   <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Text-set wordmarks</h4><p><code>.stl-ask</code>, <code>.stl-name</code>, and <code>.ox-name</code> set names in Space Grotesk at 11 to 13.5px. Moving them to Geist is a one-line change in <code>engine.css</code> plus the four assertions in <code>tools/check-assistant.mjs</code>. It waits on Mac, since the 2026-09-21 decision put them there.</p></div>
   <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>The brand kit and the product app say h1 to h3</h4><p>The <code>oxagen-branding</code> checklist and <code>oxagen/packages/ui/src/styles/globals.css:1022</code> still set h1 to h3 in Space Grotesk. The fix belongs in the brand kit first, then the vendored copies and the app.</p></div>

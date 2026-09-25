@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Layout grid</title>
+<meta name="description" content="The grids, splits, and rows that place panels and stat boxes on a page.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Layout grid</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Page structure</p>
+  <h1>Layout grid</h1>
+  <p class="dx-lead">Pages are laid out with a handful of primitives: <code>.grid</code> with two, three, or four auto-fitting columns, <code>.split</code> and <code>.split23</code> for a main column beside a side column, and <code>.row</code> for an inline run of badges or buttons. They carry no color and no copy. They set the 14px gap every page uses.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.grid</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 153 to 167, 310 to 311, 548 to 549, phone 675</span>
+    <span><b>Used on</b> Work, Run, Spend, Agents, agent Overview, Billing, every dialog</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-g4">
+    <figcaption class="dx-story-h"><b>Four columns</b><span><code>.grid.g4</code> fits columns of at least 175px. It holds the stat box row at the top of a page.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="g4" data-name="Four columns">
+      <div class="grid g4">
+        <div class="stat"><span class="k">Runs</span><span class="v">1,340</span><span class="s">last 30 days</span></div>
+        <div class="stat"><span class="k">Spend</span><span class="v">$402.11</span><span class="s">last 30 days</span></div>
+        <div class="stat"><span class="k">Cache hit</span><span class="v">62%</span><span class="s">of input tokens</span></div>
+        <div class="stat"><span class="k">Wasted</span><span class="v">$38.20</span><span class="s">9% of spend</span></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-g3">
+    <figcaption class="dx-story-h"><b>Three columns</b><span><code>.grid.g3</code> fits columns of at least 230px.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="g3" data-name="Three columns">
+      <div class="grid g3">
+        <div class="panel pad"><p class="eyebrow q">Operator</p><p style="margin:0">Marcus Bell</p></div>
+        <div class="panel pad"><p class="eyebrow q">Runtime</p><p class="mono" style="margin:0">mbell-mbp-16</p></div>
+        <div class="panel pad"><p class="eyebrow q">Tier</p><p class="mono" style="margin:0">gateway</p></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-g2">
+    <figcaption class="dx-story-h"><b>Two columns</b><span><code>.grid.g2</code> fits columns of at least 320px. The most used grid, with 34 sites.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="g2" data-name="Two columns">
+      <div class="grid g2">
+        <div class="panel"><div class="panel-h"><h3>Toolbelt</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">18 tools, 4 need approval.</p></div></div>
+        <div class="panel"><div class="panel-h"><h3>Steering</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">9 sources assigned.</p></div></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-split">
+    <figcaption class="dx-story-h"><b>Main and side</b><span><code>.split</code> gives the main column the room left after a 340px side column.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="split" data-name="Main and side">
+      <div class="split">
+        <div class="panel"><div class="panel-h"><h3>Transcript</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">48 entries.</p></div></div>
+        <div class="panel"><div class="panel-h"><h3>Repository</h3></div><div class="panel-b"><p class="mono" style="margin:0;font-size:12px">a-intel/platform</p></div></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-split23">
+    <figcaption class="dx-story-h"><b>Two thirds and one third</b><span><code>.split23</code> sets a 2 to 1 ratio: a table beside a chart.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="split23" data-name="Two thirds and one third">
+      <div class="split23">
+        <div class="panel"><div class="panel-h"><h3>Spend by agent</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">12 agents this month.</p></div></div>
+        <div class="panel"><div class="panel-h"><h3>Spend by area</h3></div><div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">6 areas.</p></div></div>
+      </div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-row">
+    <figcaption class="dx-story-h"><b>Row and divider</b><span><code>.row</code> is an inline flex row with a 9px gap. <code>.hr</code> is a 1px divider with 14px above and below.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="row" data-name="Row and divider">
+      <div class="panel pad">
+        <div class="row"><span class="b b-allowed"><span class="d"></span>live</span><span class="b b-q">direct</span><span class="b b-tier b-allowed">gateway</span><button class="btn sm">Open run</button></div>
+        <div class="hr"></div>
+        <div class="row2">
+          <div class="field" style="margin:0"><label>Owner</label><input value="Marcus Bell" aria-label="Owner"></div>
+          <div class="field" style="margin:0"><label>Runtime</label><input value="mbell-mbp-16" aria-label="Runtime"></div>
+        </div>
+      </div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Grid</td><td><code>.grid</code></td><td><code>display:grid</code> with a 14px gap. Every direct child may shrink (<code>min-width:0</code>), so a long id wraps instead of widening the column.</td></tr>
+      <tr><td>Two columns</td><td><code>.grid.g2</code></td><td><code>repeat(auto-fit, minmax(320px, 1fr))</code>.</td></tr>
+      <tr><td>Three columns</td><td><code>.grid.g3</code></td><td><code>repeat(auto-fit, minmax(230px, 1fr))</code>.</td></tr>
+      <tr><td>Four columns</td><td><code>.grid.g4</code></td><td><code>repeat(auto-fit, minmax(175px, 1fr))</code>.</td></tr>
+      <tr><td>Main and side</td><td><code>.split</code></td><td><code>minmax(0, 1fr) 340px</code> with a 14px gap, top aligned.</td></tr>
+      <tr><td>Two thirds</td><td><code>.split23</code></td><td><code>minmax(0, 2fr) minmax(0, 1fr)</code>, top aligned.</td></tr>
+      <tr><td>Row</td><td><code>.row</code></td><td>A wrapping flex row, centered, with a 9px gap.</td></tr>
+      <tr><td>Field pairs</td><td><code>.row2</code></td><td><code>repeat(auto-fit, minmax(230px, 1fr))</code> with a 12px gap, for fields side by side.</td></tr>
+      <tr><td>Divider</td><td><code>.hr</code></td><td>A 1px <code>--border</code> line with 14px above and below.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Placing panels, stat boxes, and cards on a page with the house 14px gap.</li><li>A main column with a fixed side column: the Run page's transcript and its Repository panel.</li><li>An inline run of badges, chips, or small buttons.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Tabular data: use a <a href="table.html">table</a>. A grid of cells is not a table.</li><li>Switching views: use <a href="tabs.html">tabs</a> or a <a href="segmented-control.html">segmented control</a>.</li><li>Spacing inside a component: each component sets its own padding.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="grid" style="grid-template-columns:repeat(4,1fr);gap:22px;width:100%"><div class="stat"><span class="k">Runs</span><span class="v">1,340</span></div><div class="stat"><span class="k">Spend</span><span class="v">$402.11</span></div><div class="stat"><span class="k">Cache hit</span><span class="v">62%</span></div><div class="stat"><span class="k">Wasted</span><span class="v">$38.20</span></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Fixed columns and a one-off gap. The row cannot reflow on a narrow screen and does not line up with the panels below.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="grid g4" style="width:100%"><div class="stat"><span class="k">Runs</span><span class="v">1,340</span></div><div class="stat"><span class="k">Spend</span><span class="v">$402.11</span></div><div class="stat"><span class="k">Cache hit</span><span class="v">62%</span></div><div class="stat"><span class="k">Wasted</span><span class="v">$38.20</span></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b><code>.grid.g4</code>: auto-fit columns and the 14px gap every page shares.</p></div>
+  </div>
+  <ul>
+    <li>Use the named grids. A page that sets its own <code>grid-template-columns</code> or gap drifts from the rest.</li>
+    <li>Put the column a person reads first first in the DOM. The grid never reorders children.</li>
+    <li>Space between stacked panels comes from a <code>.grid</code> wrapper or the panel's own margin, not from <code>br</code> or empty elements.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li>A layout primitive holds no copy of its own. Each child follows its own component's content rules.</li>
+    <li>Order children by reading priority: the figure or panel a person needs first comes first.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>Visual order is DOM order in every primitive, so keyboard and screen reader order match what you see.</li>
+    <li>In <code>.split</code>, the main column comes first in the DOM and the side column second, so a screen reader reaches the main content first.</li>
+    <li>A <code>.hr</code> is a <code>div</code>, which is decorative. Use a heading, not a divider, to start a new section.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li><code>.g3</code> and <code>.g4</code> become two equal columns (engine.css 675). <code>.g2</code> falls to one column because two 320px columns do not fit.</li>
+    <li><code>.split</code> and <code>.split23</code> become one column below 1080px and in the phone shell, with the side column under the main one.</li>
+    <li><code>.row</code> wraps, so badges and buttons flow onto a second line instead of scrolling.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--border</code></td><td>The <code>.hr</code> divider</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 153 to 167, 310 to 311, 548 to 549, phone 675</td><td>The rules that draw it</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>Pages write the primitives inline: <code>.grid.g2</code> 34 times, <code>.g4</code> 11, <code>.g3</code> 5, <code>.split</code> 5, <code>.split23</code> 3, <code>.row2</code> 4, <code>.row</code> 108, and <code>.hr</code> 16.</li>
+    <li><code>.recon-tiles .g3</code> (line 158) narrows the columns to 120px and the gap to 8px for the reconciliation tiles.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-q">note</span>Inline gaps</h4><p>A few grids override the gap inline, such as <code>class=&quot;grid&quot; style=&quot;gap:10px&quot;</code>. The house gap is 14px, and a tighter one should be a named modifier.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Fixed side column</h4><p><code>.split</code> fixes the side column at 340px from 1080px up. On a 1100px window the main column is left about 700px after the sidebar.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's layout grid against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Layout grid audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the layout grid component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/layout-grid.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 153 to 167, 310 to 311, 548 to 549, phone 675.
+3. The build's implementation: find it by its root selector (.grid) or its name, and list every route that renders it.
+4. Where to see it in the design: Work, Run, Spend, Agents, agent Overview, Billing, every dialog. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Gap. Every page-level grid of panels or stat boxes uses a 14px gap. List every other gap with its selector.
+2. Column rules. Two, three, and four column grids auto-fit with minimums of 320, 230, and 175px. A grid with fixed column counts that does not reflow is a FAIL.
+3. Main and side. The run page and other split layouts give the side column 340px (or one third in the two-thirds split), and the main column the rest. Both columns align to the top.
+4. Shrinking. A long id or path inside a grid child wraps or truncates inside its column and never widens the page. A grid child that overflows its column is a FAIL.
+5. Order. DOM order matches visual order in every grid and split. A layout that reorders children with `order` or `grid-area` so reading order differs from visual order is a FAIL.
+6. Phone. Three and four column grids become two columns, two column grids and splits become one, and the side column falls under the main one.
+7. Rows. Inline runs of badges and buttons wrap at a 9px gap and never scroll sideways.
+8. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+9. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+10. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+11. Phone. At 390 by 844 with a touch pointer: `.g3` and `.g4` become two equal columns (engine.css 675). `.g2` falls to one column because two 320px columns do not fit. `.split` and `.split23` become one column below 1080px and in the phone shell, with the side column under the main one. `.row` wraps, so badges and buttons flow onto a second line instead of scrolling.
+12. Accessibility. Visual order is DOM order in every primitive, so keyboard and screen reader order match what you see. In `.split`, the main column comes first in the DOM and the side column second, so a screen reader reaches the main content first. A `.hr` is a `div`, which is decorative. Use a heading, not a divider, to start a new section.
+13. One implementation. The build draws the layout grid from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Layout grid: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><span></span><span></span></nav>
+</main>
+</div>
+</body>
+</html>

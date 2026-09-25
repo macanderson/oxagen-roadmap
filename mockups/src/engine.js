@@ -10284,7 +10284,7 @@ function agentDelDlg(){
   return {t:"Deregister agent",s:a.key,w:false,b:
    '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a pull request archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
    '<dl class="kv"><dt>Kept</dt><dd>every run, frame and receipt. The record is never deleted</dd><dt>Ends</dt><dd>'+agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+', '+a.mandates.length+' mandate'+(a.mandates.length===1?'':'s')+', the host enrollment</dd>'+
-   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span>, cancelled at the next boundary and recorded</dd>':'')+'</dl>'+
+   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span>, canceled at the next boundary and recorded</dd>':'')+'</dl>'+
    '<label class="check" style="margin-top:12px"><input type="checkbox" id="delAgentOk" onchange="el(\'delAgentBtn\').disabled=!this.checked"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Re-registering creates a new principal.</span></span></label>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button id="delAgentBtn" class="btn danger" disabled onclick="agentDelete(\''+h(a.key)+'\')">Deregister</button>'};
 }
