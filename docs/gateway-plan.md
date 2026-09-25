@@ -5,7 +5,7 @@
 | **Status** | Plan v2, for review. Nothing in it is built. v1 planned a relay on each laptop. The maintainer chose the cloud gateway model on 2026-09-25, and v2 replaces v1. |
 | **Date** | 2026-09-25 |
 | **Owner** | Mac Anderson |
-| **Decision** | Every customer agent's model and MCP traffic routes through Oxagen's gateway. Oxagen holds the model keys and the MCP credentials. Oxagen hosts the gateway by default, and the largest customers can run it in their own network. Oxagen is the one place a team sets up steering, tools, skills, agent profiles, and memories. |
+| **Decision** | Every customer agent's model and MCP traffic routes through Oxagen's gateway. Oxagen holds the model keys and the MCP credentials. Oxagen hosts the gateway by default, and the largest customers can run it in their own network. Oxagen is the one place a team sets up steering, tools, skills, agent profiles, and memories. Agents on different runtimes message and start one another through Oxagen. |
 | **Tracks** | `oxagen` #3299 item 6 (MCP), and the ADR this plan asks for (below) |
 | **Source** | `macanderson/oxagen` at `main` `c0a40a9ce`: `packages/tacho/src/collector/model-proxy.ts`, `mcp-gateway.ts`, `packages/agent/src/runtime/materialize-tools.ts`, `packages/database/src/schema/mcp.ts`, `packages/iam/src/machine-key-scope.ts`, `packages/handlers/src/tacho.events.ingest.ts`. Kong's documentation, read 2026-09-25 |
 | **Supersedes in part** | ADR-094 (the gateway runs on the laptop, and prompt bodies never reach Oxagen), ADR-143 (the vendor key sits in a file on the laptop), ADR-122:19 (an agent's own identity cannot call an external tool) |
@@ -148,6 +148,34 @@ The vendor runs these tools, so no gateway sees them: claude.ai connectors in Cl
 
 The in-app agent is Oxagen's own and is not part of this. #4310 takes the workspace toolbelt and rules off it.
 
+## Agent messages and triggers
+
+An agent on one runtime can message an agent on another, or start one, through Oxagen. A Claude Code run on a laptop can ask a Codex run in CI a question, or hand work to a Stella agent. The gateway makes this possible: every agent already connects to it, whatever its runtime, so Oxagen is the one place that can address them all.
+
+### Messages
+
+`mission-control-spec.md` §7.6 and `work-in-flight-spec.md` §6 define the message. Neither is built. The gateway serves the capabilities to every agent as MCP tools on its Oxagen endpoint:
+
+- **`send_agent_message`** takes a recipient (a run id, a work order id, or an agent slug), a kind (`question`, `answer`, or `notice`), a body of at most 4,000 characters, an optional `in_reply_to`, a delivery mode, and an expiry.
+- **`list_agent_messages`** reads the thread.
+
+Delivery follows the recipient's route:
+
+- **Through the gateway.** The gateway adds the message to the recipient's next model request, right after the steering block. This works for any runtime whose model traffic the gateway carries: Claude Code, Codex, and Stella.
+- **Through the hook.** For a runtime whose model calls skip the gateway, Cursor today, the hook delivers the message at the next boundary it has.
+
+The existing rules hold. A message from an agent enters as quoted evidence with the sender named, never as an instruction, and a tool call built from it is marked as built from untrusted input. Each send is a governed action. Per-run inbound budgets, a rate limit per sender, duplicate suppression, expiry, and an operator mute bound it. Every status change is a frame on both runs, so "did the agent see it" points at the model request that carried it.
+
+### Triggers
+
+An agent can start a run of another agent on another runtime:
+
+- **`start_agent_run`** takes the target agent, a brief (ARP carries an operator-authored brief, ADR-157), the parent run, and an optional budget.
+- **The work order is the record.** A trigger creates a work order, the dispatch record `work-in-flight-spec.md` §9 defines, linked to the parent run. The child's spend rolls up to the parent and its lineage shows both.
+- **The child runs under its own mandate.** A trigger passes a brief, never the parent's authority. Starting another agent needs a grant naming the sender and the target. No agent holds it by default.
+- **Oxagen routes the start and runs no turn.** The work order goes to a runtime that can start the target agent: an enrolled host whose `tachod` advertises it can launch that agent headless, the contained launcher on a CI runner, or a customer-hosted runner. ADR-043 stands: Oxagen starts a process the customer chose, as the contained launcher does, and runs no turn itself.
+- **The answer comes back as a message.** When the child seals, Oxagen sends its outcome to the parent as an `answer`, with the child's run linked.
+
 ## The tier ladder
 
 The tiers keep their words (`tier-ladder-spec.md`). Two things change:
@@ -173,8 +201,9 @@ It keeps ADR-078 §4. There is still one tool builder, and it is the server's.
 4. **The MCP gateway.** The toolbelt endpoint per server, OAuth and credential custody, per-tool rules, approval, metering, and billing. Enrollment imports the harness's servers and writes the gateway's entries.
 5. **Pinning** for Claude Code, Codex, and Cursor. Stella follows once #6564 lands.
 6. **Delivery for the rest:** skills sync, the agent-file generator, per-prompt steering, and memory import and recall.
-7. **The customer-hosted gateway.** Packaging, the outbound control channel, and the customer's KMS.
-8. **The laptop relay** for stdio servers that must stay on the machine.
+7. **Agent messages and triggers.** `send_agent_message`, `list_agent_messages`, and `start_agent_run` on the gateway, delivery through the model request or the hook, and work orders routed to a runtime that can start the target agent.
+8. **The customer-hosted gateway.** Packaging, the outbound control channel, and the customer's KMS.
+9. **The laptop relay** for stdio servers that must stay on the machine.
 
 ## Definition of done
 
@@ -184,4 +213,6 @@ It keeps ADR-078 §4. There is still one tool builder, and it is the server's.
 - A run that lasts several days keeps working across token refreshes, and through a control plane outage.
 - A budget refuses the next call once the run's observed spend reaches it.
 - Skills, agent files, and context records published in Oxagen appear in each harness without a commit to the repository.
+- A Claude Code run on a laptop sends a question to a Codex run in CI, and the Codex run's record shows the model request that carried it.
+- An agent with the grant starts a run of another agent on another runtime, and the parent receives the child's outcome as a message.
 - A customer-hosted gateway serves the same run with keys only in the customer's KMS, and no prompt body reaches Oxagen.

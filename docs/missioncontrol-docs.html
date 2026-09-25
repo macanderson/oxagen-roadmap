@@ -11086,10 +11086,10 @@ required = true
 <header class="mast">
   <p class="eyebrow">Oxagen · Plan</p>
   <h1>The Oxagen gateway</h1>
-  <dl class="facts"><dt>Status</dt><dd>Plan v2, for review. Nothing in it is built. v1 planned a relay on each laptop. The maintainer chose the cloud gateway model on 2026-09-25, and v2 replaces v1.</dd><dt>Date</dt><dd>2026-09-25</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Decision</dt><dd>Every customer agent's model and MCP traffic routes through Oxagen's gateway. Oxagen holds the model keys and the MCP credentials. Oxagen hosts the gateway by default, and the largest customers can run it in their own network. Oxagen is the one place a team sets up steering, tools, skills, agent profiles, and memories.</dd><dt>Tracks</dt><dd><code>oxagen</code> #3299 item 6 (MCP), and the ADR this plan asks for (below)</dd><dt>Source</dt><dd><code>macanderson/oxagen</code> at <code>main</code> <code>c0a40a9ce</code>: <code>packages/tacho/src/collector/model-proxy.ts</code>, <code>mcp-gateway.ts</code>, <code>packages/agent/src/runtime/materialize-tools.ts</code>, <code>packages/database/src/schema/mcp.ts</code>, <code>packages/iam/src/machine-key-scope.ts</code>, <code>packages/handlers/src/tacho.events.ingest.ts</code>. Kong's documentation, read 2026-09-25</dd><dt>Supersedes in part</dt><dd>ADR-094 (the gateway runs on the laptop, and prompt bodies never reach Oxagen), ADR-143 (the vendor key sits in a file on the laptop), ADR-122:19 (an agent's own identity cannot call an external tool)</dd><dt>Related</dt><dd><code>tier-ladder-spec.md</code>, <code>oxagen</code> #4310 (the in-app agent leaves the toolbelt), <code>stella</code> #6564 (Stella's MCP scope)</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Plan v2, for review. Nothing in it is built. v1 planned a relay on each laptop. The maintainer chose the cloud gateway model on 2026-09-25, and v2 replaces v1.</dd><dt>Date</dt><dd>2026-09-25</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Decision</dt><dd>Every customer agent's model and MCP traffic routes through Oxagen's gateway. Oxagen holds the model keys and the MCP credentials. Oxagen hosts the gateway by default, and the largest customers can run it in their own network. Oxagen is the one place a team sets up steering, tools, skills, agent profiles, and memories. Agents on different runtimes message and start one another through Oxagen.</dd><dt>Tracks</dt><dd><code>oxagen</code> #3299 item 6 (MCP), and the ADR this plan asks for (below)</dd><dt>Source</dt><dd><code>macanderson/oxagen</code> at <code>main</code> <code>c0a40a9ce</code>: <code>packages/tacho/src/collector/model-proxy.ts</code>, <code>mcp-gateway.ts</code>, <code>packages/agent/src/runtime/materialize-tools.ts</code>, <code>packages/database/src/schema/mcp.ts</code>, <code>packages/iam/src/machine-key-scope.ts</code>, <code>packages/handlers/src/tacho.events.ingest.ts</code>. Kong's documentation, read 2026-09-25</dd><dt>Supersedes in part</dt><dd>ADR-094 (the gateway runs on the laptop, and prompt bodies never reach Oxagen), ADR-143 (the vendor key sits in a file on the laptop), ADR-122:19 (an agent's own identity cannot call an external tool)</dd><dt>Related</dt><dd><code>tier-ladder-spec.md</code>, <code>oxagen</code> #4310 (the in-app agent leaves the toolbelt), <code>stella</code> #6564 (Stella's MCP scope)</dd></dl>
 </header>
 <div class="grid">
-<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#gateway/the-problem">The problem</a></li><li><a href="#gateway/what-kong-does">What Kong does</a></li><li><a href="#gateway/where-oxagen-goes-past-it">Where Oxagen goes past it</a></li><li><a href="#gateway/architecture">Architecture</a></li><li><a href="#gateway/keys-and-the-kill-switch">Keys and the kill switch</a></li><li><a href="#gateway/mcp">MCP</a></li><li><a href="#gateway/delivery">Delivery</a></li><li><a href="#gateway/the-tier-ladder">The tier ladder</a></li><li><a href="#gateway/the-adr">The ADR</a></li><li><a href="#gateway/build-order">Build order</a></li><li><a href="#gateway/definition-of-done">Definition of done</a></li></ol></nav>
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#gateway/the-problem">The problem</a></li><li><a href="#gateway/what-kong-does">What Kong does</a></li><li><a href="#gateway/where-oxagen-goes-past-it">Where Oxagen goes past it</a></li><li><a href="#gateway/architecture">Architecture</a></li><li><a href="#gateway/keys-and-the-kill-switch">Keys and the kill switch</a></li><li><a href="#gateway/mcp">MCP</a></li><li><a href="#gateway/delivery">Delivery</a></li><li><a href="#gateway/agent-messages-and-triggers">Agent messages and triggers</a></li><li><a href="#gateway/the-tier-ladder">The tier ladder</a></li><li><a href="#gateway/the-adr">The ADR</a></li><li><a href="#gateway/build-order">Build order</a></li><li><a href="#gateway/definition-of-done">Definition of done</a></li></ol></nav>
 <main>
 <h2 id="gateway/the-problem">The problem</h2>
 <p>You set up a team's tools, rules, and budgets in Oxagen, and then your agents run without most of it. Oxagen delivers context records at session start and records what the hooks see. The rest stops at the authoring side:</p>
@@ -11275,6 +11275,29 @@ required = true
 </tbody>
 </table></div>
 <p>The in-app agent is Oxagen's own and is not part of this. #4310 takes the workspace toolbelt and rules off it.</p>
+<h2 id="gateway/agent-messages-and-triggers">Agent messages and triggers</h2>
+<p>An agent on one runtime can message an agent on another, or start one, through Oxagen. A Claude Code run on a laptop can ask a Codex run in CI a question, or hand work to a Stella agent. The gateway makes this possible: every agent already connects to it, whatever its runtime, so Oxagen is the one place that can address them all.</p>
+<h3 id="gateway/messages">Messages</h3>
+<p><code>mission-control-spec.md</code> §7.6 and <code>work-in-flight-spec.md</code> §6 define the message. Neither is built. The gateway serves the capabilities to every agent as MCP tools on its Oxagen endpoint:</p>
+<ul>
+<li><strong><code>send_agent_message</code></strong> takes a recipient (a run id, a work order id, or an agent slug), a kind (<code>question</code>, <code>answer</code>, or <code>notice</code>), a body of at most 4,000 characters, an optional <code>in_reply_to</code>, a delivery mode, and an expiry.</li>
+<li><strong><code>list_agent_messages</code></strong> reads the thread.</li>
+</ul>
+<p>Delivery follows the recipient's route:</p>
+<ul>
+<li><strong>Through the gateway.</strong> The gateway adds the message to the recipient's next model request, right after the steering block. This works for any runtime whose model traffic the gateway carries: Claude Code, Codex, and Stella.</li>
+<li><strong>Through the hook.</strong> For a runtime whose model calls skip the gateway, Cursor today, the hook delivers the message at the next boundary it has.</li>
+</ul>
+<p>The existing rules hold. A message from an agent enters as quoted evidence with the sender named, never as an instruction, and a tool call built from it is marked as built from untrusted input. Each send is a governed action. Per-run inbound budgets, a rate limit per sender, duplicate suppression, expiry, and an operator mute bound it. Every status change is a frame on both runs, so &quot;did the agent see it&quot; points at the model request that carried it.</p>
+<h3 id="gateway/triggers">Triggers</h3>
+<p>An agent can start a run of another agent on another runtime:</p>
+<ul>
+<li><strong><code>start_agent_run</code></strong> takes the target agent, a brief (ARP carries an operator-authored brief, ADR-157), the parent run, and an optional budget.</li>
+<li><strong>The work order is the record.</strong> A trigger creates a work order, the dispatch record <code>work-in-flight-spec.md</code> §9 defines, linked to the parent run. The child's spend rolls up to the parent and its lineage shows both.</li>
+<li><strong>The child runs under its own mandate.</strong> A trigger passes a brief, never the parent's authority. Starting another agent needs a grant naming the sender and the target. No agent holds it by default.</li>
+<li><strong>Oxagen routes the start and runs no turn.</strong> The work order goes to a runtime that can start the target agent: an enrolled host whose <code>tachod</code> advertises it can launch that agent headless, the contained launcher on a CI runner, or a customer-hosted runner. ADR-043 stands: Oxagen starts a process the customer chose, as the contained launcher does, and runs no turn itself.</li>
+<li><strong>The answer comes back as a message.</strong> When the child seals, Oxagen sends its outcome to the parent as an <code>answer</code>, with the child's run linked.</li>
+</ul>
 <h2 id="gateway/the-tier-ladder">The tier ladder</h2>
 <p>The tiers keep their words (<code>tier-ladder-spec.md</code>). Two things change:</p>
 <ul>
@@ -11297,6 +11320,7 @@ required = true
 <li><strong>The MCP gateway.</strong> The toolbelt endpoint per server, OAuth and credential custody, per-tool rules, approval, metering, and billing. Enrollment imports the harness's servers and writes the gateway's entries.</li>
 <li><strong>Pinning</strong> for Claude Code, Codex, and Cursor. Stella follows once #6564 lands.</li>
 <li><strong>Delivery for the rest:</strong> skills sync, the agent-file generator, per-prompt steering, and memory import and recall.</li>
+<li><strong>Agent messages and triggers.</strong> <code>send_agent_message</code>, <code>list_agent_messages</code>, and <code>start_agent_run</code> on the gateway, delivery through the model request or the hook, and work orders routed to a runtime that can start the target agent.</li>
 <li><strong>The customer-hosted gateway.</strong> Packaging, the outbound control channel, and the customer's KMS.</li>
 <li><strong>The laptop relay</strong> for stdio servers that must stay on the machine.</li>
 </ol>
@@ -11308,6 +11332,8 @@ required = true
 <li>A run that lasts several days keeps working across token refreshes, and through a control plane outage.</li>
 <li>A budget refuses the next call once the run's observed spend reaches it.</li>
 <li>Skills, agent files, and context records published in Oxagen appear in each harness without a commit to the repository.</li>
+<li>A Claude Code run on a laptop sends a question to a Codex run in CI, and the Codex run's record shows the model request that carried it.</li>
+<li>An agent with the grant starts a run of another agent on another runtime, and the parent receives the child's outcome as a message.</li>
 <li>A customer-hosted gateway serves the same run with keys only in the customer's KMS, and no prompt body reaches Oxagen.</li>
 </ul>
 
