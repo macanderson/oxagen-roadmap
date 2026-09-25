@@ -25,8 +25,8 @@ gate steps have loading and denied, and the first-run step an error.
 | `<page>.audit-prompt.md` | A prompt to paste into an agent session that audits the built page against `<page>.md`, check by check, and reports PASS/FAIL with evidence. |
 | `audit-prompt.md` | The whole-app prompt: shell, the approvals drawer, mobile shell, auth sequences, cross-cutting rules; it runs every per-page prompt. |
 
-Pages (63): work-backlog · work-intake · work-item · work-orders · work-order · work-workflows ·
-work-findings · run · run-transcript · run-cost · run-evidence · run-interjection · agents · agent ·
+Pages (64): work-backlog · work-intake · work-item · work-orders · work-order · work-workflows ·
+work-findings · run · run-transcript · run-cost · run-memories · run-evidence · run-interjection · agents · agent ·
 agent-identity · agent-steering · agent-toolbelt · agent-runtime · agent-permissions · agent-activity ·
 agent-source · tools · tools-toolbelts · tools-providers · tools-policy · tools-switches · steering ·
 steering-source · steering-source-skill · steering-assignments · steering-compiler · steering-proposals ·
@@ -39,7 +39,7 @@ installer.
 
 ## The unique views
 
-The first 44 pages are the unique views of the fleet operations wedge, one spec each.
+The first 45 pages are the unique views of the fleet operations wedge, one spec each.
 `docs/fleet-operations-wedge.md` is the design authority, `docs/fleet-operations-ia.md` lists the
 views with their routes, and `docs/fleet-operations-routes.md` says where every old route lands. What
 the wedge deleted, and which spec took each deleted spec's content, is in
@@ -50,8 +50,8 @@ the wedge deleted, and which spec took each deleted spec's content, is in
   dialog (providers, fields, people and the connection wizard). A run is a child execution record of
   its work order. The product spec of work items and work orders is `docs/tasks-spec.md`, written
   when Work was called Tasks, and `node tools/check-tasks.mjs` walks it.
-- **A run** has four tabs: the Decision trace (`run`), `run-transcript`, `run-cost` and
-  `run-evidence`. `run-interjection` is a run held for an answer.
+- **A run** has five tabs: the Decision trace (`run`), `run-transcript`, `run-cost`,
+  `run-memories` and `run-evidence`. `run-interjection` is a run held for an answer.
 - **Agents** is the population. `agent` is the Overview tab of one agent, and each other tab has its
   own spec. The mandate is Delegation on `agent-permissions`.
 - **Tools** has five tabs, each with its own spec: Tools, Toolbelts, Providers, Policy and Kill
@@ -60,7 +60,8 @@ the wedge deleted, and which spec took each deleted spec's content, is in
   `steering-source-skill` for a skill's bundle), `steering-assignments`, `steering-compiler` and
   `steering-proposals`, with `steering-prs` for its pull requests.
 - **Runtimes** is the host list, and `runtime` is one host.
-- **Spend** is Overview, Budgets and Optimization.
+- **Spend** is Overview, Budgets and Optimization. Cost centers span three specs: `organization`
+  has the Cost centers tab, `agent-identity` an agent's label, and `spend` the By cost center grouping.
 - **Repositories** is the linked repositories, Working copies, Changes and Configuration.
 - **The drawers.** `approvals-drawer` opens from the topbar on every page, `stella-drawer` from the
   foot of the sidebar. Neither is a page.
@@ -73,10 +74,13 @@ Tools › Policy, and `/steering/preview/<agent>` on the Compiler. The full tabl
 
 ## Creation
 
-The five creation wizards (agent, tool, skill, Steering record, and the `.oxagen/` directory itself)
-are dialogs rather than pages, so they have no `<page>.md`. Their spec is `docs/creation-spec.md`.
-Each ends on a pull request: the record wizard opens `steering-prs` with it selected, and the others
-list theirs on `repositories-changes`. The editing half is `steering-source` for a published record
+The six creation wizards (agent, tool, skill, Steering record, the Markdown import, and the `.oxagen/`
+directory itself) are dialogs rather than pages, so they have no `<page>.md`. Their spec is
+`docs/creation-spec.md`, except the Markdown import's, which is under Markdown import in `steering.md`.
+Each ends on a pull request: the record wizard and the Markdown import open `steering-prs` with the
+first one selected, and the others list theirs on `repositories-changes`. A memory the Markdown import
+accepts is the one write with no pull request. It steers at `may` or `info`, and an import that wrote
+only memories lands on Sources filtered to memory. The editing half is `steering-source` for a published record
 and `steering-source-skill` for a skill.
 
 ## What the design assumes

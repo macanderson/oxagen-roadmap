@@ -5,7 +5,7 @@
 | Route | `#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW`, the bare run path. Old routes that land here: in the app, `/{org}/{ws}/runs/{run}?tab=context`, `policy`, `frames`, `player` and `approvals` (308 to the bare path); in the mockup, `…/runs/{run}/player`, `policy`, `context`, `frames` and `approvals` (rewritten in place by `route()`, `RUN_TAB_ALIAS`) |
 | Scope | workspace |
 | Spec | `docs/fleet-operations-wedge.md`: D2 (a run is a child of one work order), D4, D5 and D6 (Steering Source and SteeringFrame, the eight frame types, provenance), D8 (the one explanation), D14 (no fork replay, no bisect, no player), D16 (drawers), D17 (future-only marks); the sections Runs (vocabulary), Frame types, Provenance, Exclusion reasons, Decision trace (Sections, Honesty rules, Shipped today) and Work (Rules 2 and 3). `docs/fleet-operations-ia.md` (Run). `docs/tasks-spec.md` §9.6 (the brief is the run's first prompt) |
-| Design | `mockups/src/engine.js` → `pRun()` (header, actions, layout), `runRig()`, `runWhere()`, `runSummary()`, `runStatRow()`, `runTabs()`, `pauseBanner()`, `runSide()`, `runOutputs()`, `runTimeline()`, `frameDetail()`; `mockups/src/wedge.js` → `decisionTrace()`, `runEnvelope()`, `resolveEnvelope()`, `envelopeHtml()`, `exclusionsHtml()`, `frameTable()`, `typeStrip()`, `srcCell()`, `runChoices()`, `runPlan()`, `planDiff()`, `runDoubts()`, `openFrame()`, `DLG_EXT.frame`; built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| Design | `mockups/src/engine.js` → `pRun()` (header, actions, layout), `runRig()`, `runWhere()`, `runSummary()`, `runStatRow()`, `runTabs()` (five tabs, `runTabKey()`), `pauseBanner()`, `runSide()`, `runOutputs()`, `runTimeline()`, `frameDetail()`; `mockups/src/wedge.js` → `decisionTrace()`, `runEnvelope()`, `resolveEnvelope()`, `envelopeHtml()`, `exclusionsHtml()`, `frameTable()`, `typeStrip()`, `srcCell()`, `runChoices()`, `runPlan()`, `planDiff()`, `runDoubts()`, `openFrame()`, `DLG_EXT.frame`; built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
 | Storybook | `Oxagen / Runs / Decision trace`: Loaded, Loaded · mobile, and Loaded · future-only fields marked |
 | Audit | `run.audit-prompt.md` |
@@ -14,11 +14,11 @@
 
 Say why a run did what it did, from the record alone. The Decision trace is the first tab of every run and the one explanation of it (D8). It lists the SteeringFrames the run received, what was resolved and not delivered, the calls the agent chose and the rule's answer to each, the frames it recorded, the plan versions and the doubts the agent reported where it reported them, and the evidence so far. It adds no inference, no score and no model-written account of why.
 
-A run is a child record of one work order (D2). The page names that work order in its header and its breadcrumb. The other three tabs are specified in `run-transcript.md`, `run-cost.md` and `run-evidence.md`. A run Oxagen holds for an answer renders a different page at the same route: `run-interjection.md`.
+A run is a child record of one work order (D2). The page names that work order in its header and its breadcrumb. The other four tabs are specified in `run-transcript.md`, `run-cost.md`, `run-memories.md` and `run-evidence.md`. A run Oxagen holds for an answer renders a different page at the same route: `run-interjection.md`.
 
 ## What is on the page
 
-The header, the Summary, the stat row, the tab bar and the side column are shared by all four tabs. This spec owns them. The other three tab specs refer here.
+The header, the Summary, the stat row, the tab bar and the side column are shared by all five tabs. This spec owns them. The other four tab specs refer here.
 
 **Shell.** The sidebar with Work lit. The breadcrumb reads Anderson Intelligence Corp. / Core platform / Work orders / `wo_01K5RS7M4N` / `run_01K5RS7M2E8FJ3QW`. Every crumb but the last is a link: the organization, Work (`#/a-intel/core-platform/work`), Work orders (`…/work/orders`) and the work order (`…/work/orders/wo_01K5RS7M4N`). The top bar holds search ("Search or run an action", ⌘K), notifications, the Approvals button (the shield with the organization-wide waiting count, 17 on the demo record; see `approvals-drawer.md`) and the account avatar.
 
@@ -59,7 +59,7 @@ The header, the Summary, the stat row, the tab bar and the side column are share
 | Wall clock | 13m 3s | "mostly waiting on a person", "mostly in the model", "mostly in tool calls" or "mostly in harness calls" |
 | Cache hit | 83% | "saved about $1.71" |
 
-**Tab bar** (`role=tablist`, aria-label "Run"): "Decision trace" (a dot, title "a call is parked for approval", while a call is parked), "Transcript" with the entry count (38), "Cost" with the cost ($4.13), and "Evidence" with "live" or "sealed". Each tab is a path segment. The Decision trace is the bare path.
+**Tab bar** (`role=tablist`, aria-label "Run"): "Decision trace" (a dot, title "a call is parked for approval", while a call is parked), "Transcript" with the entry count (38), "Cost" with the cost ($4.13), "Memories" with the count of memories the run wrote (blank on this live run, which has written none), and "Evidence" with "live" or "sealed". Each tab is a path segment. The Decision trace is the bare path.
 
 ### The Decision trace
 
@@ -176,7 +176,7 @@ Two panels, on every tab.
 | Stat row: tokens, cost and basis, cache hit, cache saving | `runMetrics()` | `get_run_cost` | `packages/oxagen/src/contracts/run.cost.ts:124` (tokens, `cacheHitRate`, `cacheSaving` per model); basis `packages/oxagen/src/contracts/spend.shared.ts:13-18` | ✅ |
 | Stat row: prompts, wall clock split | `runPrompts()`, `runMetrics()` | the transcript | counted in the app from `get_run_transcript` (`apps/app/src/features/run/metrics.ts`); "corrective" is the design's reading of any prompt after the first | 🟡 |
 | Stat row: wasted | `runWaste()` | none | not recorded (`apps/app/src/features/run/stats.tsx` renders it as not recorded) | ❌ |
-| Tab counts | `txEntries()`, `RUNS` | `get_run_transcript`, `get_run_cost`, `get_run` | `packages/oxagen/src/contracts/run.transcript.get.ts:397` | ✅ |
+| Tab counts | `txEntries()`, `RUNS`, `runMemories()` | `get_run_transcript`, `get_run_cost`, `get_run`; the memories a run wrote | `packages/oxagen/src/contracts/run.transcript.get.ts:397`. The Memories count has no contract: `list_memories` has no run filter (`run-memories.md`) | 🟡 |
 | Intro: frames, manifests, tier | `RUNS`, `runFrames()` | `get_run`; `steering.manifest` frames | `steering.manifest` is sealed at SessionStart by a host that advertises `steering_manifest`, `packages/tacho/src/wire.ts:190-200` | 🟡 |
 | 1 Envelope: frames by injection point, type, source, version, hash | `SOURCES`, `RECORDS`, `MEMORY`, `ONTOLOGY`, `GATES`, `SKILLS`, `TOOLBELTS`, `STEERING_MANIFESTS`; `resolveEnvelope()` over `assembleSteering()` | `steering.manifest` with frame types and provenance | manifest items carry id, kind, force, tokens, outcome and reason, with no type, scope, source version, hash, body or injection point: `packages/tacho/src/wire.ts:626-697`. Only `record` and `steer` candidates are produced (`packages/handlers/src/lib/tacho-steering.ts:210`, `packages/tacho/src/collector/steering-manifest.ts:38`) | 🟡 |
 | 1 Envelope: meters | `assembleSteering().tok`, `STEERING_PREVIEW.budget` | the manifest's budget and spend | `budget_tokens`, `spent_tokens` (`wire.ts:666-677`). The shipped prefix budget is 2,000 tokens (`packages/steering-assembler/src/assemble.ts:93-100`); no volatile selection is delivered | 🟡 |

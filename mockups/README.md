@@ -102,7 +102,7 @@ depended on proof: it is what the frames show bought nothing, so it stays with o
 
 - The Run page leads with the generated summary, then one row of stat boxes (Tokens, Prompts,
   Cost, Wasted, Wall clock, Cache hit), then the tabs (Transcript open by default, Issues, Governed
-  actions, Cost, Policy, Context, Chain and seal) in a two-thirds column; the right third holds one
+  actions, Cost, Policy, Context, Memories, Chain and seal) in a two-thirds column; the right third holds one
   Repository panel (branch, pull request, checks, diff and files), the outputs, and spend by area
   (initial prompt, follow-up prompts, context retrievals, tool definitions, tool calls by tool, model
   output). The Issues tab lists every issue the session touched with its status, relation and link. A prompt after the first is corrective, so prompts
@@ -118,6 +118,25 @@ depended on proof: it is what the frames show bought nothing, so it stays with o
   agent the sender operates in a work order: the merged definition of done, an editable prompt with
   `@` mentions of context records and agent profiles, and confirmed repositories. Workflows chain
   agents (fix, validate, document, review) and end with a person. `tools/check-tasks.mjs` walks it.
+- Markdown import (2026-09-24, `pages/steering.md`): **Import Markdown** on the Steering header,
+  in the Create chooser, and in ⌘K opens a three-step wizard (Files, Review, Publish). oxagen reads
+  CLAUDE.md, AGENTS.md, and any Markdown file into candidate lines. You accept each one as a record
+  or a memory. Records open one Context PR per source file, listed on `pages/steering-prs.md`.
+  Memories are written at publish, steer at `may` or `info`, and join a memory that already says
+  the same thing. An imported saying counts toward a memory's sayings and never toward its runs.
+- Run memories (2026-09-24, `pages/run-memories.md`): the Run page has five tabs, and Memories
+  lists every saying the run wrote, in frame order, and whether it started a memory or joined one.
+  At 3 sayings from 2 runs a memory becomes a steering proposal that cites every saying
+  (`prp_01K5RX1N`, `pages/steering-proposals.md`). A memory's own page lists its sayings and, once
+  proposed, opens the proposal (`pages/steering-source.md`).
+- Cost centers (2026-09-24, `pages/organization.md`, `pages/agent-identity.md`, `pages/spend.md`):
+  labels that spend is charged back to (ADR-142). Organization has a Cost centers tab with **Add a
+  cost center**, an agent names its own label on its Identity tab or inherits its workspace's, and
+  Spend groups the month by cost center with a chargeback statement export.
+- Notifications (2026-09-24, `pages/audit-prompt.md` check 6): the top bar's notifications button
+  opens the Notifications dialog. Selecting an unread item, by click, Enter, or Space, marks it
+  read, writes `notification_read` to Audit, and updates the unread count in the button's label,
+  the dot, and the dialog's footer. Mark all read clears the rest and closes the dialog.
 
 ## Data boundary
 

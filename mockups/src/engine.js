@@ -1677,13 +1677,25 @@ function notifsBody(){
      '<div class="mono dim" style="font-size:11px;margin-top:3px">'+h(n.kind)+'</div></div>'+
      '<time>'+h(n.t)+'</time></div>';}).join("")+'</div>';
 }
-/* Marks one notification read and keeps focus in the list: on the next unread item, else the dialog. */
+/* Marks one notification read, records who read it, and keeps focus in the dialog: on the next
+   unread item, else on its close button. */
 function notifRead(i){
-  if(!NOTIFS[i]||!NOTIFS[i].unread)return;
-  NOTIFS[i].unread=false;render();
-  var next=document.querySelector('.li[data-notif]');if(next)next.focus();
+  var n=NOTIFS[i];
+  if(!n||!n.unread)return;
+  n.unread=false;
+  auditEvent("notification_read",me().name,"Read “"+n.title+"”","info",n.kind);
+  render();
+  var next=document.querySelector('.li[data-notif]')||document.querySelector('.dlg .x');if(next)next.focus();
 }
-function markAllRead(){for(var i=0;i<NOTIFS.length;i++)NOTIFS[i].unread=false;closeDialog();act('All notifications marked read. Audit records who read each one.');}
+/* One audit event per notification, so the log answers who read each one, as the toast says. */
+function markAllRead(){
+  NOTIFS.forEach(function(n){
+    if(!n.unread)return;
+    n.unread=false;
+    auditEvent("notification_read",me().name,"Read “"+n.title+"”","info",n.kind);
+  });
+  closeDialog();act('All notifications marked read. Audit records who read each one.');
+}
 function userMenu(){
   return '<div class="menu"><div class="menu-hd"><b>Marcus Bell</b><span>marcus@a-intel.example</span></div>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'profile\')">Account</button>'+
@@ -2714,9 +2726,9 @@ function runMemoryTab(R){
   var L=runMemories(R), F=S.memFold, body;
   if(!R.sealed){
     body='<div class="panel-b"><div class="note">Nothing is written until the seal. This run is '+h(runStatus(R))+
-     '. When its chain seals, the reflector reads it and writes what it learned here.</div></div>';
+     '. When its chain seals, oxagen reads it and writes what it learned here.</div></div>';
   } else if(!L.length){
-    body='<div class="panel-b"><div class="note">This run wrote no memories. The reflector read the sealed run and found nothing another run would need, and no operator steered it.</div></div>';
+    body='<div class="panel-b"><div class="note">This run wrote no memories. oxagen read the sealed run and found nothing another run would need, and no operator steered it.</div></div>';
   } else {
     body='<div class="tw"><table><thead><tr><th>Memory</th><th>Frame</th><th>Fold</th><th>Class</th><th>In the assembler</th></tr></thead><tbody>'+
      L.map(function(o){
@@ -2730,7 +2742,7 @@ function runMemoryTab(R){
        '<td><span class="b b-q mono">'+h(m.cls)+'</span></td><td>'+memAsmCell(m,R.ws)+'</td></tr>';}).join("")+
      '</tbody></table></div>';
   }
-  return '<div class="note" style="margin-bottom:14px"><b>The reflector writes these after the seal.</b> '+
+  return '<div class="note" style="margin-bottom:14px"><b>oxagen writes these after the seal.</b> '+
     'Each lesson becomes a memory, or joins a memory that already says the same thing. '+
     'At '+F.sayings+' sayings from '+F.runs+' runs, a memory becomes a steering proposal that cites every saying.</div>'+
    '<div class="panel" style="margin-bottom:14px" data-run-memories="'+L.length+'"><div class="panel-h"><h3>Memories from this run</h3>'+
@@ -2754,7 +2766,7 @@ function runSelfGrade(R){
     '<dt>Cost</dt><dd>'+G.tokens.toLocaleString()+' tokens, $'+h(G.cost)+', billed as overhead</dd>'+
     '<dt>Retention</dt><dd>deleted '+h(SK_CFG.reflect.retain)+' after capture</dd></dl>':'';
   if(!R.sealed||!G){
-    b='<div class="note">Captured after the seal. This run is '+h(runStatus(R))+'. When its chain seals, Oxagen asks the agent the four questions of rubric <span class="mono">'+h(rub)+'</span> in one out-of-band turn.</div>';
+    b='<div class="note">Captured after the seal. This run is '+h(runStatus(R))+'. When its chain seals, oxagen asks the agent the four questions of rubric <span class="mono">'+h(rub)+'</span> in one out-of-band turn.</div>';
   } else if(G.deleted){
     b='<div class="note">Deleted on <span class="mono">'+h(G.deleted)+'</span>, '+h(SK_CFG.reflect.retain)+' after capture. The run’s frames, its seal and the memories it wrote are untouched.</div>';
   } else if(!canResearch()){
@@ -4259,6 +4271,7 @@ function aIdentity(a,r){
      h(a.model==="light"?"z-ai/glm-flash-latest":"z-ai/glm-latest")+'</span></dd>'+
     '<dt>Operator</dt><dd>'+h(op.name)+
      '<span class="sub">accountable for every run · IAM field <span class="mono">initiating_principal</span></span></dd>'+
+    '<dt>Cost center</dt><dd data-cc-cell>'+ccAgentCell(a)+'</dd>'+
     '<dt>Lifecycle state</dt><dd><span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span>'+
      '<span class="sub">registered → enrolled → retired, with suspended or unenrolled in between. Retiring ends the principal and keeps it, so old runs keep their identity.</span></dd>'+
     '<dt>First frame</dt><dd class="mono">'+h(a.firstFrame||"—")+'</dd>'+
@@ -6020,9 +6033,9 @@ function recprDetail(def){
    ? '<div class="panel-b" style="border-top:1px solid var(--border)"><b style="color:var(--st-proven)">Merged by '+h(me().name)+'</b>'+
      '<div class="dim" style="font-size:12px">'+h(st.mergedAt)+' · squashed into main as '+h(r.commit)+'</div>'+
      '<div class="row" style="margin-top:11px;gap:8px;flex-wrap:wrap">'+
-     (many?'<button class="btn primary" onclick="S.tab.steering=\'records\';S.prSel=null;render()">See them in Records</button>'
+     (many?'<button class="btn primary" onclick="S.prSel=null;stgTab(\'records\')">See them in Records</button>'
       :'<button class="btn primary" onclick="go(\''+crecUrl(r.id)+'\')">Open the record</button>'+
-       '<button class="btn" onclick="S.tab.steering=\'records\';S.prSel=null;render()">See it in Records</button>')+'</div></div>'
+       '<button class="btn" onclick="S.prSel=null;stgTab(\'records\')">See it in Records</button>')+'</div></div>'
    : '<div class="panel-b row" style="border-top:1px solid var(--border);gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:12.5px">'+
      (failed?'<b style="color:var(--st-failed)">A check failed.</b> <span class="muted">Nothing merges and nothing is published. Change the file and open it again.</span>'
       :passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
@@ -6391,7 +6404,8 @@ function memFoldLine(m){
   return 'It becomes a proposal at '+F.sayings+' sayings from '+F.runs+' runs. It has '+f.n+' from '+f.r+' run'+(f.r===1?'':'s')+'.'+
    (memSayings(m).some(function(x){return x.file;})?' An imported saying counts toward the sayings and never toward the runs, so an import alone never makes a proposal.':'');
 }
-function memOpenProposal(id){closeDialog();S.prpSel=id;go('#/'+ORG.slug+'/'+S.ws+'/steering/proposals');}
+/* go() to the address already showing fires no hashchange, so render here when that happens. */
+function memOpenProposal(id){closeDialog();S.prpSel=id;var to='#/'+ORG.slug+'/'+S.ws+'/steering/proposals';if(location.hash===to)render();else go(to);}
 function memAsmCell(m,wslug){
   return m.supersededBy?'<span class="b b-q">superseded</span><span class="sub">by '+stgItemLinkById(wslug,m.supersededBy)+'</span>'
     :m.yieldsTo?'<span class="b b-approval"><span class="d"></span>yields</span><span class="sub">to '+stgItemLinkById(wslug,m.yieldsTo)+', a published must</span>'
@@ -6417,7 +6431,7 @@ function stgMemoryTab(w){
      '<td class="num">'+tokn(m.token_cost)+' tok</td><td>'+st+'</td></tr>';}).join("");
   var agg='<div class="grid g4" style="margin-bottom:14px">'+
    '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s" data-mem-folded="'+G.folded+'">folded from '+G.folded+' sayings</span></div>'+
-   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s" data-mem-imports="'+G.imports+'">'+G.steers+' operator steers'+(G.imports?', ':' and ')+G.notes+' reflections'+(G.imports?', and '+G.imports+' imported line'+(G.imports===1?'':'s'):'')+'</span></div>'+
+   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s" data-mem-imports="'+G.imports+'">'+G.steers+' operator steers'+(G.imports?', ':' and ')+G.notes+' reflections'+(G.imports?', and '+G.imports+' imported saying'+(G.imports===1?'':'s'):'')+'</span></div>'+
    '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
    '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a rule is proposed as a record instead</span></div></div>';
   return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
@@ -6439,6 +6453,15 @@ function memPosition(m){
   if(m.yieldsTo)return "It yields to "+h(m.yieldsTo)+", a published must. Where the two disagree, the published record is what the agent reads.";
   return "It competes in the volatile selection at force "+h(m.force)+". A published record beats it wherever the two are about the same thing.";
 }
+/* The sayings and the fold line. The dialog and the memory's own page read this one list, so an
+   imported saying shows on both or on neither. */
+function memSaysList(m,inDlg){
+  return '<div class="mem-says" data-mem-says="'+memSayings(m).length+'">'+
+   memSayings(m).map(function(x){return '<div class="mem-say"><div class="q">“'+h(x.text)+'”</div>'+
+    '<div class="by"><span>'+h(x.by)+'</span> '+(x.file?'<span class="mono" data-mem-src>'+h(x.file)+':L'+x.line+'</span> <span>imported</span>'
+     :'<a class="mono" href="#/'+ORG.slug+'/'+S.ws+'/runs/'+h(x.run)+'/memory"'+(inDlg?' onclick="closeDialog()"':'')+'>'+h(x.run)+'</a> <span>frame '+x.frame+'</span>')+'</div></div>';}).join("")+
+   '</div><div class="note" style="margin-top:8px">'+memFoldLine(m)+'</div>';
+}
 DLG_EXT.memory=function(id){
   var m=memById(id); if(!m)return noSuch("Memory");
   var run=String(m.provenance||"").split(/\s*·\s*/)[0];
@@ -6450,11 +6473,7 @@ DLG_EXT.memory=function(id){
      '<dt>Cost</dt><dd>'+tokn(m.token_cost)+' tokens every time it is selected, so '+tokn(m.token_cost*m.recalls30)+' over those 30 days</dd>'+
      '<dt>In force since</dt><dd><span class="mono">'+h(m.valid_from)+'</span></dd></dl>'+
      '<div class="note" style="margin-top:12px">'+memPosition(m)+'</div>'+
-     '<div class="field" style="margin-top:12px"><label>Sayings</label><div class="mem-says" data-mem-says="'+memSayings(m).length+'">'+
-      memSayings(m).map(function(x){return '<div class="mem-say"><div class="q">“'+h(x.text)+'”</div>'+
-       '<div class="by"><span>'+h(x.by)+'</span> '+(x.file?'<span class="mono" data-mem-src>'+h(x.file)+':L'+x.line+'</span> <span>imported</span>'
-        :'<a class="mono" href="#/'+ORG.slug+'/'+S.ws+'/runs/'+h(x.run)+'/memory" onclick="closeDialog()">'+h(x.run)+'</a> <span>frame '+x.frame+'</span>')+'</div></div>';}).join("")+
-      '</div><div class="note" style="margin-top:8px">'+memFoldLine(m)+'</div></div>'+
+     '<div class="field" style="margin-top:12px"><label>Sayings</label>'+memSaysList(m,true)+'</div>'+
      (/^run_/.test(run)?'<div class="field" style="margin-top:12px"><label>The run that left it</label>'+
        '<button class="btn sm" onclick="closeDialog();go(\'#/'+ORG.slug+'/'+S.ws+'/runs/'+h(run)+'\')">Open '+h(run)+'</button></div>':''),
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
@@ -7364,7 +7383,7 @@ function pOrganization(){
 
   var tabs='<div class="tabs" role="tablist">'+
    [["people","People",MEMBERS.length],["roles","Roles",ROLES.length],["invitations","Invitations",INVITES.length],["workspaces","Workspaces",WS.length],
-    ["funding","Model funding and routes"],["plane","Data plane"],["keys","API keys"]]
+    ["costcenters","Cost centers",CC.centers.length],["funding","Model funding and routes"],["plane","Data plane"],["keys","API keys"]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="orgTab(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var body="";
@@ -7406,6 +7425,8 @@ function pOrganization(){
       '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><span class="vh">, </span><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><span class="vh">, </span><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
+  } else if(t==="costcenters"){
+    body=orgCostCenters();
   } else if(t==="funding"){
     body=orgKeyPanel()+'<div style="height:14px"></div>'+orgRoutesPanel();
   } else if(t==="plane"){
@@ -7434,9 +7455,192 @@ function pOrganization(){
      '<pre>$ oxagen login --org a-intel\n$ oxagen run list --workspace core-platform --since 24h\n$ oxagen run export run_01K5RS7M2E8FJ3QW --with-bodies --out ./run_01K5RS7M2E8FJ3QW.bundle\n$ oxagen agent status a-intel.finops.invoice-bot</pre></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>'+h(ORG.name)+'</h1>'+
-   '<p>People, roles, invitations, workspaces, model funding and routes, and API keys.</p></div>'+
+   '<p>People, roles, invitations, workspaces, cost centers, model funding and routes, and API keys.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'invite\')">Invite</button>'+
    '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button></div></div>'+tabs+body;
+}
+
+/* ---- Cost centers (ADR-142): the labels spend is charged back to. An agent's label wins over its
+   workspace's, and spend with neither is its own row on Spend. The calls mirror oxagen's
+   list_cost_centers, create_cost_center, set_cost_center, delete_cost_center and
+   export_cost_center_statement. Owners, admins and billing members write; everyone else reads. ---- */
+var CC=FIXTURES.COST_CENTERS;
+var CC_LABEL=/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+CC.deleted=[];
+function ccWriter(role){return /^org\.(owner|admin|billing)\b/.test(role||"");}
+function ccCanEdit(){return ccWriter(me().role);}
+function ccHolders(){return Object.keys(PEOPLE).filter(function(k){return ccWriter(PEOPLE[k].role);}).map(function(k){return PEOPLE[k].name;});}
+function ccHoldersText(){var n=ccHolders();return n.length>1?n.slice(0,-1).join(", ")+" and "+n[n.length-1]:n[0]||"nobody";}
+function ccDenied(what){act("Only an organization Owner, Admin or Billing member "+(what||"changes cost centers")+". "+ccHoldersText()+(ccHolders().length>1?" hold":" holds")+" that role.","denied");}
+function ccFind(label){for(var i=0;i<CC.centers.length;i++){if(CC.centers[i].label===label)return CC.centers[i];}return null;}
+/* The fleet is generated after this block loads, so the first reader does two things once:
+   charges the fixture's counted agents (the first n unnamed agents of a workspace, by key) to
+   their labels, and records the label each agent's month rolled up to. Spend groups by that record
+   through ccOf() in wedge.js. The rollup is frozen there, the way the product's is: a label changed
+   later moves new runs, never rolled-up ones. */
+function ccReady(){
+  if(CC.rolledBy) return;
+  (CC.assign||[]).forEach(function(x){
+    AGENTS.filter(function(a){return a.ws===x.ws&&!CC.agents[a.key];})
+     .sort(function(a,b){return a.key<b.key?-1:1;}).slice(0,x.n)
+     .forEach(function(a){CC.agents[a.key]=x.label;});
+  });
+  CC.rolledBy={};
+  SPEND.byAgent.forEach(function(r){var a=agent(r.k); CC.rolledBy[r.k]=a?ccLabelOf(a).label:null;});
+}
+function ccAgents(label){ccReady();return Object.keys(CC.agents).filter(function(k){return CC.agents[k]===label;}).length;}
+function ccWorkspaces(label){return Object.keys(CC.workspaces).filter(function(k){return CC.workspaces[k]===label;}).length;}
+/* Which label an agent's runs roll up to, and why: its own, its workspace's, or none. */
+function ccOfAgent(a){ccReady();return ccLabelOf(a);}
+function ccLabelOf(a){
+  if(CC.agents[a.key]) return {label:CC.agents[a.key],from:"agent"};
+  if(CC.workspaces[a.ws]) return {label:CC.workspaces[a.ws],from:"workspace"};
+  return {label:null,from:null};
+}
+function ccOptions(cur,none){
+  return '<option value=""'+(cur?'':' selected')+'>'+h(none)+'</option>'+
+   CC.centers.map(function(c){return '<option value="'+h(c.label)+'"'+(c.label===cur?' selected':'')+'>'+h(c.label)+(c.description?' · '+h(c.description):'')+'</option>';}).join("");
+}
+
+function orgCostCenters(){
+  var edit=ccCanEdit();
+  var lead='<p class="muted" style="margin:0 0 10px;font-size:12.5px">Spend is charged to the agent’s cost center, or to its workspace’s when the agent names none. Spend with neither is shown on Spend as its own row.</p>'+
+   (edit?'':'<div class="note" data-cc-readonly style="margin:0 0 10px">You can read this list. Changing it takes an organization Owner, Admin or Billing role, which '+h(ccHoldersText())+(ccHolders().length>1?' hold':' holds')+'.</div>');
+  var labels=CC.centers.length?'<div class="tw"><table data-cc-labels>'+
+    '<thead><tr><th>Label</th><th>Description</th><th class="num">Agents</th><th class="num">Workspaces</th><th>Added</th><th></th></tr></thead><tbody>'+
+    CC.centers.map(function(c){
+     return '<tr data-cost-center="'+h(c.label)+'"><td class="mono">'+h(c.label)+'</td>'+
+      '<td>'+(c.description?h(c.description):'<span class="dim">No description</span>')+'</td>'+
+      '<td class="num">'+ccAgents(c.label)+'</td><td class="num">'+ccWorkspaces(c.label)+'</td>'+
+      '<td class="mono dim" style="font-size:11px">'+h(c.createdAt)+' · '+h(PEOPLE[c.by]?PEOPLE[c.by].name:c.by)+'</td>'+
+      '<td class="rowacts"><button class="btn sm danger" onclick="'+(edit?'openDialog(\'ccdel\',\''+h(c.label)+'\')':'ccDenied()')+'">Delete</button></td></tr>';}).join("")+
+    '</tbody></table></div>'
+   :'<div class="panel-b"><p class="muted" data-cc-empty style="margin:0">This organization has no cost centers.</p></div>';
+  var wsTable='<div class="tw"><table data-cc-workspaces>'+
+   '<thead><tr><th>Workspace</th><th>Cost center</th><th class="num">Agents</th><th></th></tr></thead><tbody>'+
+   WS.map(function(w){var cur=CC.workspaces[w.slug]||null;
+    return '<tr data-cc-ws="'+h(w.slug)+'"><td><b>'+h(w.name)+'</b><div class="dim mono" style="font-size:11px">'+h(w.slug)+'</div></td>'+
+     '<td>'+(cur?'<span class="mono">'+h(cur)+'</span>':'<span class="dim">None</span>')+'</td>'+
+     '<td class="num">'+w.agents+'</td>'+
+     '<td class="rowacts"><button class="btn sm" onclick="'+(edit?'openDialog(\'ccws\',\''+h(w.slug)+'\')':'ccDenied()')+'">Change</button></td></tr>';}).join("")+
+   '</tbody></table></div>';
+  return '<div class="panel" data-cc-panel><div class="panel-h"><h3>Cost centers</h3>'+
+    '<div class="sp"><button class="btn sm" onclick="'+(edit?'openDialog(\'ccadd\')':'ccDenied()')+'">Add a cost center</button></div></div>'+
+    '<div class="panel-b" style="padding-bottom:0">'+lead+'</div>'+labels+'</div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Workspace cost centers</h3></div>'+wsTable+
+    '<div class="panel-b"><div class="note">An agent charged to its own label keeps it whatever its workspace names. Charge an agent from its Identity tab.</div></div></div>';
+}
+
+DLG_EXT.ccadd=function(){
+  return {t:"Add a cost center",w:false,
+   b:'<div class="field"><label for="cc-label">Label</label><input id="cc-label" placeholder="ENG-1001" maxlength="64" autocomplete="off">'+
+     '<div class="hint">Up to 64 letters, digits, dots, underscores or hyphens, such as ENG-1001.</div></div>'+
+    '<div class="field"><label for="cc-desc">Description</label><input id="cc-desc" maxlength="280" placeholder="Optional"></div>'+
+    '<div class="hint" id="cc-err" role="alert" style="color:var(--st-failed)" hidden></div>'+
+    '<div class="note">A label you deleted earlier comes back with its description. Nothing is charged to it until you charge a workspace or an agent.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ccAdd()">Add</button>'};
+};
+function ccAdd(){
+  if(!ccCanEdit()) return ccDenied();
+  var el=document.getElementById("cc-label"), d=document.getElementById("cc-desc"), err=document.getElementById("cc-err");
+  var label=(el.value||"").trim(), desc=(d.value||"").trim();
+  var fail=!CC_LABEL.test(label)?"A label is 1 to 64 letters, digits, dots, underscores or hyphens, and starts with a letter or digit.":
+   ccFind(label)?label+" is already on the list.":"";
+  if(fail){err.textContent=fail;err.hidden=false;el.setAttribute("aria-invalid","true");el.focus();return;}
+  var back=null;
+  CC.deleted=CC.deleted.filter(function(c){if(c.label===label){back=c;return false;}return true;});
+  var c=back||{id:"cc_01K5"+label.replace(/[^A-Za-z0-9]/g,"").toUpperCase().slice(0,6),label:label,description:desc||null,createdAt:"2026-09-11",by:SESSION_USER};
+  if(back&&desc) c.description=desc;
+  CC.centers.push(c);
+  auditEvent("cost_center_created",me().name,(back?"Restored ":"Added ")+label+" to the organization’s cost centers","info",c.id);
+  closeDialog();
+  act(back?"Restored "+label+". Nothing is charged to it until you charge a workspace or an agent.":"Added "+label+". Charge a workspace or an agent to it and their next runs roll up there.");
+}
+
+DLG_EXT.ccdel=function(label){
+  var c=ccFind(label); if(!c) return noSuch("Cost center");
+  var na=ccAgents(label), nw=ccWorkspaces(label);
+  return {t:"Delete "+label,w:false,
+   b:'<p style="font-size:13px;margin:0 0 10px">Runs already rolled up keep this label. New runs from an agent or workspace that names it fall back to the workspace’s cost center, or to none.</p>'+
+    '<div class="'+(na||nw?'warn':'note')+'" data-cc-del-count>'+(na||nw?
+      na+(na===1?' agent':' agents')+' and '+nw+(nw===1?' workspace name':' workspaces name')+' '+h(label)+' today.'
+      :'No agent or workspace names '+h(label)+', so no run changes where it rolls up.')+'</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="ccDelete(\''+h(label)+'\')">Delete</button>'};
+};
+function ccDelete(label){
+  if(!ccCanEdit()) return ccDenied();
+  var c=ccFind(label); if(!c) return;
+  var na=ccAgents(label);
+  CC.centers=CC.centers.filter(function(x){return x.label!==label;});
+  CC.deleted.push(c);
+  Object.keys(CC.agents).forEach(function(k){if(CC.agents[k]===label) delete CC.agents[k];});
+  Object.keys(CC.workspaces).forEach(function(k){if(CC.workspaces[k]===label) CC.workspaces[k]=null;});
+  auditEvent("cost_center_deleted",me().name,"Deleted "+label+" from the organization’s cost centers","info",c.id);
+  closeDialog();
+  act("Deleted "+label+". Runs already rolled up keep it."+(na?" "+na+(na===1?" agent falls":" agents fall")+" back to the workspace’s cost center, or to none.":""));
+}
+
+DLG_EXT.ccws=function(slug){
+  var w=null; WS.forEach(function(x){if(x.slug===slug)w=x;}); if(!w) return noSuch("Workspace");
+  return {t:"Cost center for "+w.name,w:false,
+   b:'<div class="field"><label for="cc-pick">Cost center</label><select id="cc-pick">'+ccOptions(CC.workspaces[slug]||null,"None")+'</select>'+
+     '<div class="hint">Runs rolled up after this change are charged to the new label.</div></div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ccSetWs(\''+h(slug)+'\')">Save</button>'};
+};
+function ccSetWs(slug){
+  if(!ccCanEdit()) return ccDenied();
+  var v=document.getElementById("cc-pick").value||null, w=null; WS.forEach(function(x){if(x.slug===slug)w=x;});
+  CC.workspaces[slug]=v;
+  auditEvent("cost_center_set",me().name,"Charged workspace "+slug+" to "+(v||"no cost center"),"info",slug);
+  closeDialog();
+  act(v?w.name+" is charged to "+v+". Runs rolled up after this change land there, except an agent’s that names its own label.":w.name+" names no cost center. Its agents’ runs roll up to their own labels, or to Spend’s ~none row.");
+}
+
+DLG_EXT.ccagent=function(key){
+  var a=agent(key); if(!a) return noSuch("Agent");
+  var body=CC.centers.length?
+    '<p style="font-size:13px;margin:0 0 10px">Runs rolled up after this change are charged to the label you choose. Runs already rolled up keep the label they had.</p>'+
+    '<div class="field"><label for="cc-pick">Cost center</label><select id="cc-pick">'+ccOptions(CC.agents[a.key]||null,"None (inherit the workspace’s)")+'</select>'+
+     '<div class="hint">Workspace '+h(a.ws)+' names '+(CC.workspaces[a.ws]?'<span class="mono">'+h(CC.workspaces[a.ws])+'</span>':'none')+'. An agent’s own label wins over it.</div></div>'
+   :'<p class="muted" style="font-size:13px;margin:0">This organization has no cost centers. Add one on the Organization page, then charge this agent to it here.</p>';
+  return {t:"Cost center for "+a.name,w:false,b:body,
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+(CC.centers.length?'<button class="btn primary" onclick="ccSetAgent(\''+h(a.key)+'\')">Save</button>':'')};
+};
+function ccSetAgent(key){
+  if(!ccCanEdit()) return ccDenied();
+  var a=agent(key), v=document.getElementById("cc-pick").value||null;
+  if(v) CC.agents[key]=v; else delete CC.agents[key];
+  var now=ccOfAgent(a);
+  auditEvent("cost_center_set",me().name,"Charged agent "+key+" to "+(v||"its workspace’s cost center"),"info",key);
+  closeDialog();
+  act(v?a.name+" is charged to "+v+". Runs rolled up after this change land there.":
+   a.name+" names no cost center of its own. Its runs roll up to "+(now.label?now.label+", its workspace’s":"Spend’s ~none row")+".");
+}
+function ccAgentCell(a){
+  var c=ccOfAgent(a), edit=ccCanEdit();
+  var val=c.label?'<span class="mono">'+h(c.label)+'</span>':'<span class="dim">None</span>';
+  var why=c.from==="agent"?"its own label, which wins over the workspace’s":
+   c.from==="workspace"?"inherited from workspace "+h(a.ws):"neither it nor its workspace names one, so its runs land on Spend’s ~none row";
+  return val+' <button class="btn sm" data-cc-agent onclick="'+(edit?'openDialog(\'ccagent\',\''+h(a.key)+'\')':'ccDenied()')+'">Change</button>'+
+   '<span class="sub" data-cc-from="'+(c.from||"none")+'">'+why+'</span>';
+}
+
+DLG_EXT.ccexport=function(){
+  if(!ccCanEdit()) return {t:"Export the chargeback statement",w:false,
+   b:'<div class="warn">Only an organization Owner, Admin or Billing member can export the chargeback statement.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  return {t:"Export the chargeback statement",s:"CSV · every workspace",w:false,
+   b:'<div class="field"><label for="cc-month">Month</label><select id="cc-month"><option value="2026-09">September 2026 (to date)</option><option value="2026-08">August 2026</option><option value="2026-07">July 2026</option></select></div>'+
+    '<div class="field"><label>Columns</label><div class="row" style="flex-wrap:wrap;gap:4px">'+
+     CC.columns.map(function(c){return '<span class="b b-q mono" style="font-size:11px">'+h(c)+'</span>';}).join("")+'</div></div>'+
+    '<div class="note">One line per cost center, one for <span class="mono">~none</span> (spend with no label), and the organization total they sum to. Each line lists the run ids behind it, and cost is in micros and in cents.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ccExport()">Export CSV</button>'};
+};
+function ccExport(){
+  var m=(document.getElementById("cc-month")||{}).value||"2026-09";
+  auditEvent("cost_center_statement_exported",me().name,"Exported the chargeback statement for "+m,"info","cost-centers-"+m+".csv");
+  closeDialog();
+  act("Exported cost-centers-"+m+".csv. In the product this downloads the file. A mockup writes nothing to disk.");
 }
 
 /* ---- Organization records (W10 · cio-console port). Identity, routes and workspace settings the tabs read.
@@ -11418,7 +11622,7 @@ function cedKey(e){
 }
 
 /* ---- the wizard shell ----
-   One dialog, five kinds. S.wz holds the draft; the step list is a function of the kind and, for a
+   One dialog, six kinds. S.wz holds the draft; the step list is a function of the kind and, for a
    tool, of the path the operator took at the recommendation. Every kind ends on the same step,
    because every kind ends the same way. */
 S.wz=null;
@@ -11448,7 +11652,7 @@ DLG_EXT.create=function(){
       '<span class="fp mono">'+c.file+'</span></span></button>';}).join("")+'</div>'+
     '<div class="note" style="margin-top:14px">Each one ends on a pull request against '+h(w.main)+
     '. The thing exists once someone merges it, and a reviewer can stop it there. '+
-    'A memory from the Markdown import is the exception: it is written when you accept it, and it steers at may or below.</div>',
+    'A memory from the Markdown import is the exception: it is written when you publish the import, and it steers at may or below.</div>',
   f:'<span class="grow mono dim" style="font-size:11px">'+h(w.name)+' · '+h(w.main)+'</span><button class="btn" onclick="closeDialog()">Close</button>'};
 };
 
@@ -11899,7 +12103,7 @@ function wzImport(){
       }).join("")+'</tbody></table></div>'+
      '<div class="imp-bar"><label for="impAsAll">Import every file as</label><select id="impAsAll" onchange="impFilesAs(this.value)">'+
       ["records","memories"].map(function(v){return '<option'+(z.asAll===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select></div></div>';
-    return {t:"Import Markdown", s:"Drop a directory or pick files, and Oxagen lists the Markdown it finds.",
+    return {t:"Import Markdown", s:"Drop a directory or pick files, and oxagen lists the Markdown it finds.",
      b:'<div class="wz-drop imp-drop" ondragover="impDrag(event,true)" ondragleave="impDrag(event,false)" ondrop="impDrop(event)">'+
         '<span class="ic">'+icon("dir")+'</span><span class="grow">Drop a directory or Markdown files here</span>'+
         '<button class="btn sm" onclick="this.nextElementSibling.click()">Choose a directory</button>'+
@@ -11912,7 +12116,7 @@ function wzImport(){
        (z.skipped.length?'<div class="field" style="margin-top:14px"><label>Skipped</label>'+impSkipList(z)+'</div>':'')+
        (inc.length?'<div class="note" style="margin-top:14px" data-imp-cost="'+impCost(tok)+'">stella reads '+inc.length+' '+(inc.length===1?'file':'files')+', about '+tok+' tokens. '+
          'That costs about '+usd(impCost(tok).toFixed(2))+' in usage credits, billed to '+h(ORG.name)+'. Nothing is sent until you choose Parse with stella.</div>'
-        :'<div class="note" style="margin-top:14px">Oxagen skips dependency and build directories, version control, anything that is not Markdown, and any file over '+MD_IMPORT.max_kb+' KB.</div>'),
+        :'<div class="note" style="margin-top:14px">oxagen skips dependency and build directories, version control, anything that is not Markdown, and any file over '+MD_IMPORT.max_kb+' KB.</div>'),
      f:wzNext("Parse with stella",inc.length>0&&!z.reading,"impParse();")};
   }
   if(z.step===2){
@@ -11995,7 +12199,7 @@ function wzImpPublish(){
     made++;
   });
   var nr=prs.reduce(function(s,d){return s+d.records.length;},0), files=impGroups(z.cands.filter(function(c){return c.st==="accept";})).length;
-  auditEvent("steering_imported",me().name,nr+" records in "+prs.length+" pull requests, "+made+" new memories and "+joined+" sayings from "+files+" Markdown files","info",
+  auditEvent("steering_imported",me().name,plural(nr,"record")+" in "+plural(prs.length,"pull request")+", "+plural(made,"new memory","new memories")+" and "+plural(joined,"saying")+" from "+plural(files,"Markdown file"),"info",
     "imp_01K5"+sha7(day+nowT()).toUpperCase());
   S.wz=null; S.dlg=null; S.dlgArg=null; S.prpSel=null;
   prs.forEach(recprRun);
