@@ -3,14 +3,11 @@
 // stories show. The static build gets it written in by `npm run build-storybook`.
 // tools/dev.mjs reuses mockupMiddleware to serve the same files on their own port.
 import { buildMockup } from "../tools/build-mockup.mjs";
-
-import { buildMockupV2 } from "../tools/build-mockup-v2.mjs";
 import { buildMockupFuture } from "../tools/build-mockup-future.mjs";
 
 const ROUTES = {
   "/missioncontrol.html": buildMockup,
   "/future_state_mockups/missioncontrol.html": buildMockupFuture,
-  "/v2/missioncontrol.html": buildMockupV2,
 };
 
 export function mockupMiddleware(req, res, next) {

@@ -16,8 +16,7 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `org.json` | `ORG` | the organization: slug, name, plan, data plane, attester key, region, governance mode |
 | `ws.json` | `WS` | the workspaces: slug, name, main repo and branch, linked repos, agent count, owner |
 | `branches.json` | `BRANCHES` | branches on the workspace's primary repo — what the commit dialog offers beside "+ New branch" |
-| `av-sample-photo.json` | `AV_SAMPLE_PHOTO` | a stylised sample portrait so the photo path renders without a network or an upload |
-| `people.json` | `PEOPLE` | the people, keyed by handle: name, role, email, two-factor, avatar |
+| `people.json` | `PEOPLE` | the people, keyed by handle: name, role, email, two-factor, avatar (a photo avatar carries its https `url` and, in `src`, an offline copy the page draws) |
 | `agents.json` | `AGENTS` | the seed agents with their identity (principal, harness, host, credential, budget) merged in |
 | `runs.json` | `RUNS` | the seed runs: the story runs the scenarios walk, with status, tier, basis, cost, task, summary and linked work. `outputs` is the `<RunOutputs>` spine (see below); `touched` is the older flat list and is kept only because `RUNGRAPH`, `frPath` and the generated fleet still read it. |
 | `approvals.json` | `APPROVALS` | the parked approvals the Approvals drawer and the Run page show, each row naming its run's work order; resolution state lives on S.ap at runtime |

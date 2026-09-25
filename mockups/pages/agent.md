@@ -20,7 +20,7 @@ This spec owns the agent header and the tab bar, which every tab shares, and the
 
 **Header.** Eyebrow “Agent”. The h1 is the agent card in its detail layout: the avatar, the agent key in mono (“a-intel.core.triage”) and the harness label (“Codex CLI”). Under it one row of badges: the lifecycle status as a dot and a word (“enrolled”), the tier as recorded (“gateway”), and “operator Marcus Bell”. Then the agent's description (“Labels incoming issues, reproduces where it can, and opens a proposal when it cannot.”). Actions, in this order, none of them gold:
 
-- **Edit avatar** opens the avatar editor for the agent (“Avatar · Triage”).
+- **Edit avatar** opens the avatar editor for the agent (“Avatar for Triage”).
 - **Rotate credential** opens `rotatecred`.
 - **Suspend** (danger) opens `suspendagent`.
 - **Deregister** (danger) opens `delagent`.
@@ -72,7 +72,17 @@ The Steering row still counts the rev1 assembler's items, while the Steering tab
 
 **Dialogs this page opens.**
 
-- The avatar editor, titled “Avatar · <name>”, with the agent key under it: kind (Icon, Initials or Photo), glyph and tone.
+- The avatar editor, titled “Avatar for <name>”, with the agent key under it. It is the one editor the app ships for a person, an agent, a workspace, and an organization (`apps/app/src/ui/avatar-editor.tsx`, macanderson/oxagen#4280). Account, the Organization header, and each workspace row open the same dialog, and only four things change with the record: the tile's shape (round for a person, a squircle for the other three), the title (“Your avatar” for a person), the note, and the Remove hint. This spec is the one those pages point to.
+  - **Preview**, on the left: the draft at 72, 36, 24, and 18 px, and a mono caption such as “icon · rocket · solid tone”, “initials · serif · gold tone”, “photo · by link”, or “photo · none chosen yet”.
+  - **Kind**: Icon, Initials, or Photo. Switching keeps what was set on the other kinds.
+  - **Icon**: the 24 Lucide glyphs the product ships, with the hint “Lucide glyphs, the set the product ships. One line weight, drawn in the tone’s ink.”
+  - **Initials**: Letters, up to 6, upper-cased on the tile and drawn in the chosen typeface (hint “Up to 6.”), and Typeface: Sans, Serif, or Mono. With nothing stored, the draft opens on the name's initials (first and last word) on Solid.
+  - **Photo**: an https link, with the placeholder “https://” and the hint “An https link to a hosted image: PNG, JPEG, WebP, or SVG.” There is no upload. A link that does not load draws the initials tile on Soft.
+  - **Tone**, for Icon and Initials: Solid, Soft, Line, Gold, and Dark gold, each swatch the draft itself in that tone. Gold is #D4AF37 with ink glyphs, and Dark gold is #8A7223 with white glyphs (`--on-gold-deep`, 4.66:1). Both are the same in either theme. Hint: “Solid, soft, and line follow the theme. Gold and dark gold are the brand gold in two shades. Each tone fixes its own glyph colour, so there is no combination that fails.”
+  - **Note**, one per record: “Part of the agent’s definition, so a change rides a pull request.” (agent), “Saved with `update_profile`, like any change to your account.” (person), “Saved with `update_workspace_settings` on the workspace’s record.” (workspace), “Saved with `update_org_settings` on the organization’s record.” (organization).
+  - **Remove avatar**, only when the record has one, with the hint “Use the agent’s default initials instead.” (or your, the workspace's, or the organization's). It clears the avatar at once.
+  - **Refusals** show in an alert in the dialog, not a toast, and clear on the next edit: “Paste an https link to a photo first, or switch to an icon or initials.”, “Type at least one letter.”, and, for a link over 512 characters, “That avatar was refused. A photo link must be an https address under 512 characters.” The app also shows a refusal for a denied or failed write, which the mockup does not simulate.
+  - **Cancel** and **Save avatar** (gold). Save closes the dialog and shows the receipt “Avatar updated on <key>. The definition change opens as a pull request.” The Register an agent dialog and the wizard open the same editor on the agent they are about to register, and Save returns to them.
 - `rotatecred`, titled “Rotate the credential on a-intel.core.triage?”. It says a new key is minted and handed to the host at its next check-in, that the old key stops working at the next call and every live run token dies with it, and warns that a run in flight ends at its next call. **Cancel** and **Rotate it** (gold).
 - `suspendagent`, titled “Suspend a-intel.core.triage?”. It says suspension is reversible and keeps the registration, the roles and the mandates, and that every run token dies at the next call because the refusal is on the server. **Cancel** and **Suspend it** (danger).
 - `delagent`, titled “Deregister agent” with the agent key: what is kept, what ends (the roles, the mandates and the host enrollment), what is in flight, the checkbox “I understand this cannot be undone”, **Cancel** and **Deregister** (danger).
@@ -88,7 +98,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 |---|---|---|---|---|
 | Agent card, description, status, operator | `AGENTS` | `get_agent` `identity` | `agent.get.ts:91-145`, identity at `:121-138`; status `unenrolled`, `enrolled`, `suspended`, `retired` (`agent.list.ts:34-48`) | ✅ |
 | Tier badge | `AGENTS` `tier` | `list_agents` `enforcementTier` | `agent.list.ts:78-83`. `get_agent` carries no tier | ✅ |
-| Edit avatar | `openAvatar()` | `update_agent_def` `avatarUrl` | `agent.definition.update.ts:12`, `:38` | ✅ |
+| Edit avatar | `openAvatar()` | `avatar` in `.oxagen/agents/<slug>.toml`, through a pull request | `agent.definition.update.ts:12`, `:38` takes `avatarUrl`, but it also requires `config` with a graph and adds an `agent_versions` row on every call. The app's editor has the agent subject and no write yet (macanderson/oxagen#4280, #3855) | 🟡 |
 | Rotate credential | `rotatecred` | `rotate_agent_credential` | `agent.credential.rotate.ts:14`. It returns the new key once to the caller; nothing hands it to the host at check-in | 🟡 |
 | Suspend | `suspendagent` | `suspend_agent` | `agent.suspend.ts:14`; a suspended principal anchors no governed run and its belt is empty (`agent.suspend.ts:1-9`) | ✅ |
 | Deregister | `delagent` | `retire_agent`, then a pull request removing the file | `agent.retire.ts:16`; the file is left in place (`agent.retire.ts:1-9`) | 🟡 |
