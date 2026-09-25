@@ -15,6 +15,8 @@ You are auditing the **Work orders** tab of Work in Oxagen (`/a-intel/core-platf
 3. The product specs: `docs/fleet-operations-wedge.md` (D1, D2, D3, D17; Work › Objects, Rules, Shipped today), `docs/fleet-operations-routes.md`, `docs/tasks-spec.md` §9.5, §9.6, §11, and `mockups/pages/onboarding-run.md` for the step that lands here.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/work/orders`.
 
+5. The work graph: `docs/work-graph-spec.md` §6.2, §7.
+
 ## Procedure
 
 Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
@@ -34,7 +36,8 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 13. **Rules.** One gold action at most. No heading or caption carries a comma, a mid-dot, or a not/never contrast. Money shows its basis. Chips and Spend are rollups of the rows. No person is ranked. A run never stands without its work order.
 14. **Accessibility.** Tabs use `role=tablist`/`tab` with `aria-selected`. The chips expose which one is chosen. Rows are keyboard operable. State is never colour alone.
 15. **Permissions.** `work.read` to see the tab. **Bind** is `bind_main_repository`, gated on the server and recorded in Audit. Verify with a role that lacks each.
-16. **Nothing extra.** List anything on the built page that is not in the spec. Each is a finding, and the reviewer decides whether it stays.
+16. **Queued, expired, and sends.** State includes `queued` with “waits on #N” under it and `expired`. A send to several targets is one row with “N work orders”, the targets’ marks, “one per target”, `partial` while its children’s states differ, and its children under it each marked “k of N in this send”. No rank, score or winner between siblings, and nothing typed on the send row that is not a rollup of its children.
+17. **Nothing extra.** List anything on the built page that is not in the spec. Each is a finding, and the reviewer decides whether it stays.
 
 ## Output
 

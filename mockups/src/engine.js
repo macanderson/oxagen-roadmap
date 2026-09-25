@@ -1677,13 +1677,25 @@ function notifsBody(){
      '<div class="mono dim" style="font-size:11px;margin-top:3px">'+h(n.kind)+'</div></div>'+
      '<time>'+h(n.t)+'</time></div>';}).join("")+'</div>';
 }
-/* Marks one notification read and keeps focus in the list: on the next unread item, else the dialog. */
+/* Marks one notification read, records who read it, and keeps focus in the dialog: on the next
+   unread item, else on its close button. */
 function notifRead(i){
-  if(!NOTIFS[i]||!NOTIFS[i].unread)return;
-  NOTIFS[i].unread=false;render();
-  var next=document.querySelector('.li[data-notif]');if(next)next.focus();
+  var n=NOTIFS[i];
+  if(!n||!n.unread)return;
+  n.unread=false;
+  auditEvent("notification_read",me().name,"Read “"+n.title+"”","info",n.kind);
+  render();
+  var next=document.querySelector('.li[data-notif]')||document.querySelector('.dlg .x');if(next)next.focus();
 }
-function markAllRead(){for(var i=0;i<NOTIFS.length;i++)NOTIFS[i].unread=false;closeDialog();act('All notifications marked read. Audit records who read each one.');}
+/* One audit event per notification, so the log answers who read each one, as the toast says. */
+function markAllRead(){
+  NOTIFS.forEach(function(n){
+    if(!n.unread)return;
+    n.unread=false;
+    auditEvent("notification_read",me().name,"Read “"+n.title+"”","info",n.kind);
+  });
+  closeDialog();act('All notifications marked read. Audit records who read each one.');
+}
 function userMenu(){
   return '<div class="menu"><div class="menu-hd"><b>Marcus Bell</b><span>marcus@a-intel.example</span></div>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'profile\')">Account</button>'+
@@ -2714,9 +2726,9 @@ function runMemoryTab(R){
   var L=runMemories(R), F=S.memFold, body;
   if(!R.sealed){
     body='<div class="panel-b"><div class="note">Nothing is written until the seal. This run is '+h(runStatus(R))+
-     '. When its chain seals, the reflector reads it and writes what it learned here.</div></div>';
+     '. When its chain seals, oxagen reads it and writes what it learned here.</div></div>';
   } else if(!L.length){
-    body='<div class="panel-b"><div class="note">This run wrote no memories. The reflector read the sealed run and found nothing another run would need, and no operator steered it.</div></div>';
+    body='<div class="panel-b"><div class="note">This run wrote no memories. oxagen read the sealed run and found nothing another run would need, and no operator steered it.</div></div>';
   } else {
     body='<div class="tw"><table><thead><tr><th>Memory</th><th>Frame</th><th>Fold</th><th>Class</th><th>In the assembler</th></tr></thead><tbody>'+
      L.map(function(o){
@@ -2730,7 +2742,7 @@ function runMemoryTab(R){
        '<td><span class="b b-q mono">'+h(m.cls)+'</span></td><td>'+memAsmCell(m,R.ws)+'</td></tr>';}).join("")+
      '</tbody></table></div>';
   }
-  return '<div class="note" style="margin-bottom:14px"><b>The reflector writes these after the seal.</b> '+
+  return '<div class="note" style="margin-bottom:14px"><b>oxagen writes these after the seal.</b> '+
     'Each lesson becomes a memory, or joins a memory that already says the same thing. '+
     'At '+F.sayings+' sayings from '+F.runs+' runs, a memory becomes a steering proposal that cites every saying.</div>'+
    '<div class="panel" style="margin-bottom:14px" data-run-memories="'+L.length+'"><div class="panel-h"><h3>Memories from this run</h3>'+
@@ -2754,7 +2766,7 @@ function runSelfGrade(R){
     '<dt>Cost</dt><dd>'+G.tokens.toLocaleString()+' tokens, $'+h(G.cost)+', billed as overhead</dd>'+
     '<dt>Retention</dt><dd>deleted '+h(SK_CFG.reflect.retain)+' after capture</dd></dl>':'';
   if(!R.sealed||!G){
-    b='<div class="note">Captured after the seal. This run is '+h(runStatus(R))+'. When its chain seals, Oxagen asks the agent the four questions of rubric <span class="mono">'+h(rub)+'</span> in one out-of-band turn.</div>';
+    b='<div class="note">Captured after the seal. This run is '+h(runStatus(R))+'. When its chain seals, oxagen asks the agent the four questions of rubric <span class="mono">'+h(rub)+'</span> in one out-of-band turn.</div>';
   } else if(G.deleted){
     b='<div class="note">Deleted on <span class="mono">'+h(G.deleted)+'</span>, '+h(SK_CFG.reflect.retain)+' after capture. The run’s frames, its seal and the memories it wrote are untouched.</div>';
   } else if(!canResearch()){
@@ -4259,6 +4271,7 @@ function aIdentity(a,r){
      h(a.model==="light"?"z-ai/glm-flash-latest":"z-ai/glm-latest")+'</span></dd>'+
     '<dt>Operator</dt><dd>'+h(op.name)+
      '<span class="sub">accountable for every run · IAM field <span class="mono">initiating_principal</span></span></dd>'+
+    '<dt>Cost center</dt><dd data-cc-cell>'+ccAgentCell(a)+'</dd>'+
     '<dt>Lifecycle state</dt><dd><span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span>'+
      '<span class="sub">registered → enrolled → retired, with suspended or unenrolled in between. Retiring ends the principal and keeps it, so old runs keep their identity.</span></dd>'+
     '<dt>First frame</dt><dd class="mono">'+h(a.firstFrame||"—")+'</dd>'+
@@ -6020,9 +6033,9 @@ function recprDetail(def){
    ? '<div class="panel-b" style="border-top:1px solid var(--border)"><b style="color:var(--st-proven)">Merged by '+h(me().name)+'</b>'+
      '<div class="dim" style="font-size:12px">'+h(st.mergedAt)+' · squashed into main as '+h(r.commit)+'</div>'+
      '<div class="row" style="margin-top:11px;gap:8px;flex-wrap:wrap">'+
-     (many?'<button class="btn primary" onclick="S.tab.steering=\'records\';S.prSel=null;render()">See them in Records</button>'
+     (many?'<button class="btn primary" onclick="S.prSel=null;stgTab(\'records\')">See them in Records</button>'
       :'<button class="btn primary" onclick="go(\''+crecUrl(r.id)+'\')">Open the record</button>'+
-       '<button class="btn" onclick="S.tab.steering=\'records\';S.prSel=null;render()">See it in Records</button>')+'</div></div>'
+       '<button class="btn" onclick="S.prSel=null;stgTab(\'records\')">See it in Records</button>')+'</div></div>'
    : '<div class="panel-b row" style="border-top:1px solid var(--border);gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:12.5px">'+
      (failed?'<b style="color:var(--st-failed)">A check failed.</b> <span class="muted">Nothing merges and nothing is published. Change the file and open it again.</span>'
       :passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
@@ -6391,7 +6404,8 @@ function memFoldLine(m){
   return 'It becomes a proposal at '+F.sayings+' sayings from '+F.runs+' runs. It has '+f.n+' from '+f.r+' run'+(f.r===1?'':'s')+'.'+
    (memSayings(m).some(function(x){return x.file;})?' An imported saying counts toward the sayings and never toward the runs, so an import alone never makes a proposal.':'');
 }
-function memOpenProposal(id){closeDialog();S.prpSel=id;go('#/'+ORG.slug+'/'+S.ws+'/steering/proposals');}
+/* go() to the address already showing fires no hashchange, so render here when that happens. */
+function memOpenProposal(id){closeDialog();S.prpSel=id;var to='#/'+ORG.slug+'/'+S.ws+'/steering/proposals';if(location.hash===to)render();else go(to);}
 function memAsmCell(m,wslug){
   return m.supersededBy?'<span class="b b-q">superseded</span><span class="sub">by '+stgItemLinkById(wslug,m.supersededBy)+'</span>'
     :m.yieldsTo?'<span class="b b-approval"><span class="d"></span>yields</span><span class="sub">to '+stgItemLinkById(wslug,m.yieldsTo)+', a published must</span>'
@@ -6417,7 +6431,7 @@ function stgMemoryTab(w){
      '<td class="num">'+tokn(m.token_cost)+' tok</td><td>'+st+'</td></tr>';}).join("");
   var agg='<div class="grid g4" style="margin-bottom:14px">'+
    '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s" data-mem-folded="'+G.folded+'">folded from '+G.folded+' sayings</span></div>'+
-   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s" data-mem-imports="'+G.imports+'">'+G.steers+' operator steers'+(G.imports?', ':' and ')+G.notes+' reflections'+(G.imports?', and '+G.imports+' imported line'+(G.imports===1?'':'s'):'')+'</span></div>'+
+   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s" data-mem-imports="'+G.imports+'">'+G.steers+' operator steers'+(G.imports?', ':' and ')+G.notes+' reflections'+(G.imports?', and '+G.imports+' imported saying'+(G.imports===1?'':'s'):'')+'</span></div>'+
    '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
    '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a rule is proposed as a record instead</span></div></div>';
   return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
@@ -6439,6 +6453,15 @@ function memPosition(m){
   if(m.yieldsTo)return "It yields to "+h(m.yieldsTo)+", a published must. Where the two disagree, the published record is what the agent reads.";
   return "It competes in the volatile selection at force "+h(m.force)+". A published record beats it wherever the two are about the same thing.";
 }
+/* The sayings and the fold line. The dialog and the memory's own page read this one list, so an
+   imported saying shows on both or on neither. */
+function memSaysList(m,inDlg){
+  return '<div class="mem-says" data-mem-says="'+memSayings(m).length+'">'+
+   memSayings(m).map(function(x){return '<div class="mem-say"><div class="q">“'+h(x.text)+'”</div>'+
+    '<div class="by"><span>'+h(x.by)+'</span> '+(x.file?'<span class="mono" data-mem-src>'+h(x.file)+':L'+x.line+'</span> <span>imported</span>'
+     :'<a class="mono" href="#/'+ORG.slug+'/'+S.ws+'/runs/'+h(x.run)+'/memory"'+(inDlg?' onclick="closeDialog()"':'')+'>'+h(x.run)+'</a> <span>frame '+x.frame+'</span>')+'</div></div>';}).join("")+
+   '</div><div class="note" style="margin-top:8px">'+memFoldLine(m)+'</div>';
+}
 DLG_EXT.memory=function(id){
   var m=memById(id); if(!m)return noSuch("Memory");
   var run=String(m.provenance||"").split(/\s*·\s*/)[0];
@@ -6450,11 +6473,7 @@ DLG_EXT.memory=function(id){
      '<dt>Cost</dt><dd>'+tokn(m.token_cost)+' tokens every time it is selected, so '+tokn(m.token_cost*m.recalls30)+' over those 30 days</dd>'+
      '<dt>In force since</dt><dd><span class="mono">'+h(m.valid_from)+'</span></dd></dl>'+
      '<div class="note" style="margin-top:12px">'+memPosition(m)+'</div>'+
-     '<div class="field" style="margin-top:12px"><label>Sayings</label><div class="mem-says" data-mem-says="'+memSayings(m).length+'">'+
-      memSayings(m).map(function(x){return '<div class="mem-say"><div class="q">“'+h(x.text)+'”</div>'+
-       '<div class="by"><span>'+h(x.by)+'</span> '+(x.file?'<span class="mono" data-mem-src>'+h(x.file)+':L'+x.line+'</span> <span>imported</span>'
-        :'<a class="mono" href="#/'+ORG.slug+'/'+S.ws+'/runs/'+h(x.run)+'/memory" onclick="closeDialog()">'+h(x.run)+'</a> <span>frame '+x.frame+'</span>')+'</div></div>';}).join("")+
-      '</div><div class="note" style="margin-top:8px">'+memFoldLine(m)+'</div></div>'+
+     '<div class="field" style="margin-top:12px"><label>Sayings</label>'+memSaysList(m,true)+'</div>'+
      (/^run_/.test(run)?'<div class="field" style="margin-top:12px"><label>The run that left it</label>'+
        '<button class="btn sm" onclick="closeDialog();go(\'#/'+ORG.slug+'/'+S.ws+'/runs/'+h(run)+'\')">Open '+h(run)+'</button></div>':''),
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
@@ -7364,7 +7383,7 @@ function pOrganization(){
 
   var tabs='<div class="tabs" role="tablist">'+
    [["people","People",MEMBERS.length],["roles","Roles",ROLES.length],["invitations","Invitations",INVITES.length],["workspaces","Workspaces",WS.length],
-    ["funding","Model funding and routes"],["plane","Data plane"],["keys","API keys"]]
+    ["costcenters","Cost centers",CC.centers.length],["funding","Model funding and routes"],["plane","Data plane"],["keys","API keys"]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="orgTab(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var body="";
@@ -7406,6 +7425,8 @@ function pOrganization(){
       '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><span class="vh">, </span><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><span class="vh">, </span><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
+  } else if(t==="costcenters"){
+    body=orgCostCenters();
   } else if(t==="funding"){
     body=orgKeyPanel()+'<div style="height:14px"></div>'+orgRoutesPanel();
   } else if(t==="plane"){
@@ -7434,9 +7455,192 @@ function pOrganization(){
      '<pre>$ oxagen login --org a-intel\n$ oxagen run list --workspace core-platform --since 24h\n$ oxagen run export run_01K5RS7M2E8FJ3QW --with-bodies --out ./run_01K5RS7M2E8FJ3QW.bundle\n$ oxagen agent status a-intel.finops.invoice-bot</pre></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>'+h(ORG.name)+'</h1>'+
-   '<p>People, roles, invitations, workspaces, model funding and routes, and API keys.</p></div>'+
+   '<p>People, roles, invitations, workspaces, cost centers, model funding and routes, and API keys.</p></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'invite\')">Invite</button>'+
    '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button></div></div>'+tabs+body;
+}
+
+/* ---- Cost centers (ADR-142): the labels spend is charged back to. An agent's label wins over its
+   workspace's, and spend with neither is its own row on Spend. The calls mirror oxagen's
+   list_cost_centers, create_cost_center, set_cost_center, delete_cost_center and
+   export_cost_center_statement. Owners, admins and billing members write; everyone else reads. ---- */
+var CC=FIXTURES.COST_CENTERS;
+var CC_LABEL=/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/;
+CC.deleted=[];
+function ccWriter(role){return /^org\.(owner|admin|billing)\b/.test(role||"");}
+function ccCanEdit(){return ccWriter(me().role);}
+function ccHolders(){return Object.keys(PEOPLE).filter(function(k){return ccWriter(PEOPLE[k].role);}).map(function(k){return PEOPLE[k].name;});}
+function ccHoldersText(){var n=ccHolders();return n.length>1?n.slice(0,-1).join(", ")+" and "+n[n.length-1]:n[0]||"nobody";}
+function ccDenied(what){act("Only an organization Owner, Admin or Billing member "+(what||"changes cost centers")+". "+ccHoldersText()+(ccHolders().length>1?" hold":" holds")+" that role.","denied");}
+function ccFind(label){for(var i=0;i<CC.centers.length;i++){if(CC.centers[i].label===label)return CC.centers[i];}return null;}
+/* The fleet is generated after this block loads, so the first reader does two things once:
+   charges the fixture's counted agents (the first n unnamed agents of a workspace, by key) to
+   their labels, and records the label each agent's month rolled up to. Spend groups by that record
+   through ccOf() in wedge.js. The rollup is frozen there, the way the product's is: a label changed
+   later moves new runs, never rolled-up ones. */
+function ccReady(){
+  if(CC.rolledBy) return;
+  (CC.assign||[]).forEach(function(x){
+    AGENTS.filter(function(a){return a.ws===x.ws&&!CC.agents[a.key];})
+     .sort(function(a,b){return a.key<b.key?-1:1;}).slice(0,x.n)
+     .forEach(function(a){CC.agents[a.key]=x.label;});
+  });
+  CC.rolledBy={};
+  SPEND.byAgent.forEach(function(r){var a=agent(r.k); CC.rolledBy[r.k]=a?ccLabelOf(a).label:null;});
+}
+function ccAgents(label){ccReady();return Object.keys(CC.agents).filter(function(k){return CC.agents[k]===label;}).length;}
+function ccWorkspaces(label){return Object.keys(CC.workspaces).filter(function(k){return CC.workspaces[k]===label;}).length;}
+/* Which label an agent's runs roll up to, and why: its own, its workspace's, or none. */
+function ccOfAgent(a){ccReady();return ccLabelOf(a);}
+function ccLabelOf(a){
+  if(CC.agents[a.key]) return {label:CC.agents[a.key],from:"agent"};
+  if(CC.workspaces[a.ws]) return {label:CC.workspaces[a.ws],from:"workspace"};
+  return {label:null,from:null};
+}
+function ccOptions(cur,none){
+  return '<option value=""'+(cur?'':' selected')+'>'+h(none)+'</option>'+
+   CC.centers.map(function(c){return '<option value="'+h(c.label)+'"'+(c.label===cur?' selected':'')+'>'+h(c.label)+(c.description?' · '+h(c.description):'')+'</option>';}).join("");
+}
+
+function orgCostCenters(){
+  var edit=ccCanEdit();
+  var lead='<p class="muted" style="margin:0 0 10px;font-size:12.5px">Spend is charged to the agent’s cost center, or to its workspace’s when the agent names none. Spend with neither is shown on Spend as its own row.</p>'+
+   (edit?'':'<div class="note" data-cc-readonly style="margin:0 0 10px">You can read this list. Changing it takes an organization Owner, Admin or Billing role, which '+h(ccHoldersText())+(ccHolders().length>1?' hold':' holds')+'.</div>');
+  var labels=CC.centers.length?'<div class="tw"><table data-cc-labels>'+
+    '<thead><tr><th>Label</th><th>Description</th><th class="num">Agents</th><th class="num">Workspaces</th><th>Added</th><th></th></tr></thead><tbody>'+
+    CC.centers.map(function(c){
+     return '<tr data-cost-center="'+h(c.label)+'"><td class="mono">'+h(c.label)+'</td>'+
+      '<td>'+(c.description?h(c.description):'<span class="dim">No description</span>')+'</td>'+
+      '<td class="num">'+ccAgents(c.label)+'</td><td class="num">'+ccWorkspaces(c.label)+'</td>'+
+      '<td class="mono dim" style="font-size:11px">'+h(c.createdAt)+' · '+h(PEOPLE[c.by]?PEOPLE[c.by].name:c.by)+'</td>'+
+      '<td class="rowacts"><button class="btn sm danger" onclick="'+(edit?'openDialog(\'ccdel\',\''+h(c.label)+'\')':'ccDenied()')+'">Delete</button></td></tr>';}).join("")+
+    '</tbody></table></div>'
+   :'<div class="panel-b"><p class="muted" data-cc-empty style="margin:0">This organization has no cost centers.</p></div>';
+  var wsTable='<div class="tw"><table data-cc-workspaces>'+
+   '<thead><tr><th>Workspace</th><th>Cost center</th><th class="num">Agents</th><th></th></tr></thead><tbody>'+
+   WS.map(function(w){var cur=CC.workspaces[w.slug]||null;
+    return '<tr data-cc-ws="'+h(w.slug)+'"><td><b>'+h(w.name)+'</b><div class="dim mono" style="font-size:11px">'+h(w.slug)+'</div></td>'+
+     '<td>'+(cur?'<span class="mono">'+h(cur)+'</span>':'<span class="dim">None</span>')+'</td>'+
+     '<td class="num">'+w.agents+'</td>'+
+     '<td class="rowacts"><button class="btn sm" onclick="'+(edit?'openDialog(\'ccws\',\''+h(w.slug)+'\')':'ccDenied()')+'">Change</button></td></tr>';}).join("")+
+   '</tbody></table></div>';
+  return '<div class="panel" data-cc-panel><div class="panel-h"><h3>Cost centers</h3>'+
+    '<div class="sp"><button class="btn sm" onclick="'+(edit?'openDialog(\'ccadd\')':'ccDenied()')+'">Add a cost center</button></div></div>'+
+    '<div class="panel-b" style="padding-bottom:0">'+lead+'</div>'+labels+'</div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Workspace cost centers</h3></div>'+wsTable+
+    '<div class="panel-b"><div class="note">An agent charged to its own label keeps it whatever its workspace names. Charge an agent from its Identity tab.</div></div></div>';
+}
+
+DLG_EXT.ccadd=function(){
+  return {t:"Add a cost center",w:false,
+   b:'<div class="field"><label for="cc-label">Label</label><input id="cc-label" placeholder="ENG-1001" maxlength="64" autocomplete="off">'+
+     '<div class="hint">Up to 64 letters, digits, dots, underscores or hyphens, such as ENG-1001.</div></div>'+
+    '<div class="field"><label for="cc-desc">Description</label><input id="cc-desc" maxlength="280" placeholder="Optional"></div>'+
+    '<div class="hint" id="cc-err" role="alert" style="color:var(--st-failed)" hidden></div>'+
+    '<div class="note">A label you deleted earlier comes back with its description. Nothing is charged to it until you charge a workspace or an agent.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ccAdd()">Add</button>'};
+};
+function ccAdd(){
+  if(!ccCanEdit()) return ccDenied();
+  var el=document.getElementById("cc-label"), d=document.getElementById("cc-desc"), err=document.getElementById("cc-err");
+  var label=(el.value||"").trim(), desc=(d.value||"").trim();
+  var fail=!CC_LABEL.test(label)?"A label is 1 to 64 letters, digits, dots, underscores or hyphens, and starts with a letter or digit.":
+   ccFind(label)?label+" is already on the list.":"";
+  if(fail){err.textContent=fail;err.hidden=false;el.setAttribute("aria-invalid","true");el.focus();return;}
+  var back=null;
+  CC.deleted=CC.deleted.filter(function(c){if(c.label===label){back=c;return false;}return true;});
+  var c=back||{id:"cc_01K5"+label.replace(/[^A-Za-z0-9]/g,"").toUpperCase().slice(0,6),label:label,description:desc||null,createdAt:"2026-09-11",by:SESSION_USER};
+  if(back&&desc) c.description=desc;
+  CC.centers.push(c);
+  auditEvent("cost_center_created",me().name,(back?"Restored ":"Added ")+label+" to the organization’s cost centers","info",c.id);
+  closeDialog();
+  act(back?"Restored "+label+". Nothing is charged to it until you charge a workspace or an agent.":"Added "+label+". Charge a workspace or an agent to it and their next runs roll up there.");
+}
+
+DLG_EXT.ccdel=function(label){
+  var c=ccFind(label); if(!c) return noSuch("Cost center");
+  var na=ccAgents(label), nw=ccWorkspaces(label);
+  return {t:"Delete "+label,w:false,
+   b:'<p style="font-size:13px;margin:0 0 10px">Runs already rolled up keep this label. New runs from an agent or workspace that names it fall back to the workspace’s cost center, or to none.</p>'+
+    '<div class="'+(na||nw?'warn':'note')+'" data-cc-del-count>'+(na||nw?
+      na+(na===1?' agent':' agents')+' and '+nw+(nw===1?' workspace name':' workspaces name')+' '+h(label)+' today.'
+      :'No agent or workspace names '+h(label)+', so no run changes where it rolls up.')+'</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="ccDelete(\''+h(label)+'\')">Delete</button>'};
+};
+function ccDelete(label){
+  if(!ccCanEdit()) return ccDenied();
+  var c=ccFind(label); if(!c) return;
+  var na=ccAgents(label);
+  CC.centers=CC.centers.filter(function(x){return x.label!==label;});
+  CC.deleted.push(c);
+  Object.keys(CC.agents).forEach(function(k){if(CC.agents[k]===label) delete CC.agents[k];});
+  Object.keys(CC.workspaces).forEach(function(k){if(CC.workspaces[k]===label) CC.workspaces[k]=null;});
+  auditEvent("cost_center_deleted",me().name,"Deleted "+label+" from the organization’s cost centers","info",c.id);
+  closeDialog();
+  act("Deleted "+label+". Runs already rolled up keep it."+(na?" "+na+(na===1?" agent falls":" agents fall")+" back to the workspace’s cost center, or to none.":""));
+}
+
+DLG_EXT.ccws=function(slug){
+  var w=null; WS.forEach(function(x){if(x.slug===slug)w=x;}); if(!w) return noSuch("Workspace");
+  return {t:"Cost center for "+w.name,w:false,
+   b:'<div class="field"><label for="cc-pick">Cost center</label><select id="cc-pick">'+ccOptions(CC.workspaces[slug]||null,"None")+'</select>'+
+     '<div class="hint">Runs rolled up after this change are charged to the new label.</div></div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ccSetWs(\''+h(slug)+'\')">Save</button>'};
+};
+function ccSetWs(slug){
+  if(!ccCanEdit()) return ccDenied();
+  var v=document.getElementById("cc-pick").value||null, w=null; WS.forEach(function(x){if(x.slug===slug)w=x;});
+  CC.workspaces[slug]=v;
+  auditEvent("cost_center_set",me().name,"Charged workspace "+slug+" to "+(v||"no cost center"),"info",slug);
+  closeDialog();
+  act(v?w.name+" is charged to "+v+". Runs rolled up after this change land there, except an agent’s that names its own label.":w.name+" names no cost center. Its agents’ runs roll up to their own labels, or to Spend’s ~none row.");
+}
+
+DLG_EXT.ccagent=function(key){
+  var a=agent(key); if(!a) return noSuch("Agent");
+  var body=CC.centers.length?
+    '<p style="font-size:13px;margin:0 0 10px">Runs rolled up after this change are charged to the label you choose. Runs already rolled up keep the label they had.</p>'+
+    '<div class="field"><label for="cc-pick">Cost center</label><select id="cc-pick">'+ccOptions(CC.agents[a.key]||null,"None (inherit the workspace’s)")+'</select>'+
+     '<div class="hint">Workspace '+h(a.ws)+' names '+(CC.workspaces[a.ws]?'<span class="mono">'+h(CC.workspaces[a.ws])+'</span>':'none')+'. An agent’s own label wins over it.</div></div>'
+   :'<p class="muted" style="font-size:13px;margin:0">This organization has no cost centers. Add one on the Organization page, then charge this agent to it here.</p>';
+  return {t:"Cost center for "+a.name,w:false,b:body,
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+(CC.centers.length?'<button class="btn primary" onclick="ccSetAgent(\''+h(a.key)+'\')">Save</button>':'')};
+};
+function ccSetAgent(key){
+  if(!ccCanEdit()) return ccDenied();
+  var a=agent(key), v=document.getElementById("cc-pick").value||null;
+  if(v) CC.agents[key]=v; else delete CC.agents[key];
+  var now=ccOfAgent(a);
+  auditEvent("cost_center_set",me().name,"Charged agent "+key+" to "+(v||"its workspace’s cost center"),"info",key);
+  closeDialog();
+  act(v?a.name+" is charged to "+v+". Runs rolled up after this change land there.":
+   a.name+" names no cost center of its own. Its runs roll up to "+(now.label?now.label+", its workspace’s":"Spend’s ~none row")+".");
+}
+function ccAgentCell(a){
+  var c=ccOfAgent(a), edit=ccCanEdit();
+  var val=c.label?'<span class="mono">'+h(c.label)+'</span>':'<span class="dim">None</span>';
+  var why=c.from==="agent"?"its own label, which wins over the workspace’s":
+   c.from==="workspace"?"inherited from workspace "+h(a.ws):"neither it nor its workspace names one, so its runs land on Spend’s ~none row";
+  return val+' <button class="btn sm" data-cc-agent onclick="'+(edit?'openDialog(\'ccagent\',\''+h(a.key)+'\')':'ccDenied()')+'">Change</button>'+
+   '<span class="sub" data-cc-from="'+(c.from||"none")+'">'+why+'</span>';
+}
+
+DLG_EXT.ccexport=function(){
+  if(!ccCanEdit()) return {t:"Export the chargeback statement",w:false,
+   b:'<div class="warn">Only an organization Owner, Admin or Billing member can export the chargeback statement.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  return {t:"Export the chargeback statement",s:"CSV · every workspace",w:false,
+   b:'<div class="field"><label for="cc-month">Month</label><select id="cc-month"><option value="2026-09">September 2026 (to date)</option><option value="2026-08">August 2026</option><option value="2026-07">July 2026</option></select></div>'+
+    '<div class="field"><label>Columns</label><div class="row" style="flex-wrap:wrap;gap:4px">'+
+     CC.columns.map(function(c){return '<span class="b b-q mono" style="font-size:11px">'+h(c)+'</span>';}).join("")+'</div></div>'+
+    '<div class="note">One line per cost center, one for <span class="mono">~none</span> (spend with no label), and the organization total they sum to. Each line lists the run ids behind it, and cost is in micros and in cents.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ccExport()">Export CSV</button>'};
+};
+function ccExport(){
+  var m=(document.getElementById("cc-month")||{}).value||"2026-09";
+  auditEvent("cost_center_statement_exported",me().name,"Exported the chargeback statement for "+m,"info","cost-centers-"+m+".csv");
+  closeDialog();
+  act("Exported cost-centers-"+m+".csv. In the product this downloads the file. A mockup writes nothing to disk.");
 }
 
 /* ---- Organization records (W10 · cio-console port). Identity, routes and workspace settings the tabs read.
@@ -11418,7 +11622,7 @@ function cedKey(e){
 }
 
 /* ---- the wizard shell ----
-   One dialog, five kinds. S.wz holds the draft; the step list is a function of the kind and, for a
+   One dialog, six kinds. S.wz holds the draft; the step list is a function of the kind and, for a
    tool, of the path the operator took at the recommendation. Every kind ends on the same step,
    because every kind ends the same way. */
 S.wz=null;
@@ -11448,7 +11652,7 @@ DLG_EXT.create=function(){
       '<span class="fp mono">'+c.file+'</span></span></button>';}).join("")+'</div>'+
     '<div class="note" style="margin-top:14px">Each one ends on a pull request against '+h(w.main)+
     '. The thing exists once someone merges it, and a reviewer can stop it there. '+
-    'A memory from the Markdown import is the exception: it is written when you accept it, and it steers at may or below.</div>',
+    'A memory from the Markdown import is the exception: it is written when you publish the import, and it steers at may or below.</div>',
   f:'<span class="grow mono dim" style="font-size:11px">'+h(w.name)+' · '+h(w.main)+'</span><button class="btn" onclick="closeDialog()">Close</button>'};
 };
 
@@ -11899,7 +12103,7 @@ function wzImport(){
       }).join("")+'</tbody></table></div>'+
      '<div class="imp-bar"><label for="impAsAll">Import every file as</label><select id="impAsAll" onchange="impFilesAs(this.value)">'+
       ["records","memories"].map(function(v){return '<option'+(z.asAll===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select></div></div>';
-    return {t:"Import Markdown", s:"Drop a directory or pick files, and Oxagen lists the Markdown it finds.",
+    return {t:"Import Markdown", s:"Drop a directory or pick files, and oxagen lists the Markdown it finds.",
      b:'<div class="wz-drop imp-drop" ondragover="impDrag(event,true)" ondragleave="impDrag(event,false)" ondrop="impDrop(event)">'+
         '<span class="ic">'+icon("dir")+'</span><span class="grow">Drop a directory or Markdown files here</span>'+
         '<button class="btn sm" onclick="this.nextElementSibling.click()">Choose a directory</button>'+
@@ -11912,7 +12116,7 @@ function wzImport(){
        (z.skipped.length?'<div class="field" style="margin-top:14px"><label>Skipped</label>'+impSkipList(z)+'</div>':'')+
        (inc.length?'<div class="note" style="margin-top:14px" data-imp-cost="'+impCost(tok)+'">stella reads '+inc.length+' '+(inc.length===1?'file':'files')+', about '+tok+' tokens. '+
          'That costs about '+usd(impCost(tok).toFixed(2))+' in usage credits, billed to '+h(ORG.name)+'. Nothing is sent until you choose Parse with stella.</div>'
-        :'<div class="note" style="margin-top:14px">Oxagen skips dependency and build directories, version control, anything that is not Markdown, and any file over '+MD_IMPORT.max_kb+' KB.</div>'),
+        :'<div class="note" style="margin-top:14px">oxagen skips dependency and build directories, version control, anything that is not Markdown, and any file over '+MD_IMPORT.max_kb+' KB.</div>'),
      f:wzNext("Parse with stella",inc.length>0&&!z.reading,"impParse();")};
   }
   if(z.step===2){
@@ -11995,7 +12199,7 @@ function wzImpPublish(){
     made++;
   });
   var nr=prs.reduce(function(s,d){return s+d.records.length;},0), files=impGroups(z.cands.filter(function(c){return c.st==="accept";})).length;
-  auditEvent("steering_imported",me().name,nr+" records in "+prs.length+" pull requests, "+made+" new memories and "+joined+" sayings from "+files+" Markdown files","info",
+  auditEvent("steering_imported",me().name,plural(nr,"record")+" in "+plural(prs.length,"pull request")+", "+plural(made,"new memory","new memories")+" and "+plural(joined,"saying")+" from "+plural(files,"Markdown file"),"info",
     "imp_01K5"+sha7(day+nowT()).toUpperCase());
   S.wz=null; S.dlg=null; S.dlgArg=null; S.prpSel=null;
   prs.forEach(recprRun);
@@ -14381,7 +14585,7 @@ seedApprovals();
    agent is enrolled on picks it up. */
 var TK=FIXTURES.TASKS;
 var TASKS=TK.tasks, IPROV=TK.providers, TSTATUS=TK.statuses, TRES=TK.resolutions, TLABELS=TK.labels,
-    TPEOPLE=TK.people, WORKORDERS=TK.workOrders, WORKFLOWS=TK.workflows;
+    TPEOPLE=TK.people, WORKORDERS=TK.workOrders, WORKFLOWS=TK.workflows, SENDS=TK.sends||[];
 var TK_ME="marcus";
 S.tsel={}; S.dodEdit={}; S.tkDrafting={}; S.wo=null; S.ipz=null; S.wfz=null; S.dsq="";
 
@@ -14527,16 +14731,257 @@ function stageChain(wf,opts){
       '<span class="ag">'+(a?hxIcon(a.harness,14)+agentAv(a,18)+'<b>'+h(a.name)+'</b>'+tierBadge(a.tier):'<span class="dim">no agent</span>')+'</span>'+
       (opts.sub?'<span class="sub">'+opts.sub(i,s)+'</span>':'<span class="sub">owns '+s.owns.map(tagChip).join(" ")+'</span>')+'</div>';
   });
-  st.push('<div class="stage you '+(opts.state?opts.state(wf.stages.length):"")+'"><span class="r"><i>'+(wf.stages.length+1)+'</i>Accept</span><span class="ag">'+personAv(TK_ME,18)+'<b>You</b></span><span class="sub">a person accepts every item</span></div>');
-  return '<div class="stages">'+st.join('<span class="stage-arrow" aria-hidden="true">→</span>')+'</div>';
+  var d=wfDepths(wf), cols=[];
+  st.forEach(function(card,i){var ns=stageNeeds(wf,i); if(ns.length>1)card=card.replace(/<\/div>$/,'<span class="sub dim">after '+h(ns.join(" and "))+'</span></div>'); (cols[d[i]]=cols[d[i]]||[]).push(card);});
+  cols.push(['<div class="stage you '+(opts.state?opts.state(wf.stages.length):"")+'"><span class="r"><i>'+(wf.stages.length+1)+'</i>Accept</span><span class="ag">'+personAv(TK_ME,18)+'<b>You</b></span><span class="sub">a person accepts every item</span></div>']);
+  var layered=cols.some(function(c){return c.length>1;});
+  return '<div class="stages'+(layered?' layered':'')+'">'+cols.map(function(c){return c.length>1?'<div class="stage-col">'+c.join("")+'</div>':c[0];}).join('<span class="stage-arrow" aria-hidden="true">→</span>')+'</div>';
 }
 function hxRow(wf){return '<span class="row" style="gap:4px;flex-wrap:nowrap">'+wf.stages.map(function(s){var a=agent(s.agent);return a?hxIcon(a.harness,14):"";}).join('<span class="dim" style="font-size:10px">›</span>')+'</span>';}
 
 /* ============================== the page ============================== */
 
 /* ---- tab: tasks ---- */
-function tkSelectable(t){return t.ready==="ready"&&(tStatus(t.status)||{}).cat==="open";}
+
+/* ============================== the work graph ==============================
+   Dependencies between tasks (docs/work-graph-spec.md). A task carries blockedBy, each entry a blocker id
+   and its source: provider, read from the tracker, or oxagen, added here by a person. Unblocked means every
+   blocker is accepted in Oxagen or closed as Done in the provider, and nothing else (spec §5.2). The
+   provider's blocked status category is a different thing and keeps its own column. */
+function tkBlockers(t){return (t.blockedBy||[]).map(function(b){var x=taskById(b.id);return x?{task:x,src:b.src,by:b.by,at:b.at}:null;}).filter(Boolean);}
+function tkBlocks(t){return TASKS.filter(function(x){return (x.blockedBy||[]).some(function(b){return b.id===t.id;});});}
+function tkDone(t){return t.ready==="accepted"||((tStatus(t.status)||{}).cat==="closed"&&t.resolution==="done");}
+function tkClosedNotDone(t){return (tStatus(t.status)||{}).cat==="closed"&&t.resolution!=="done";}
+function tkOpenBlockers(t){return tkBlockers(t).filter(function(b){return !tkDone(b.task);});}
+function tkGraphBlocked(t){return tkOpenBlockers(t).length>0;}
+function tkNum(t){return t.num.replace(/^a-intel\/platform/,"");}
+function tkQueuedWo(t){var w=t.queued?woById(t.queued):null;return w&&w.status==="queued"?w:null;}
+function tkDepBadge(x){
+  if(x.ready==="accepted")return stBadge({b:"b-allowed",l:"accepted"});
+  if((tStatus(x.status)||{}).cat==="closed"){var r=tRes(x.resolution);return stBadge({b:x.resolution==="done"?"b-allowed":"b-denied",l:"closed as "+(r?r.name:"Other")});}
+  if(x.ready==="sent")return stBadge({b:"b-proven",l:"in a work order"});
+  return stBadge({b:"b-q",l:"open"});
+}
+function tkBlockedByCell(t){
+  var bs=tkBlockers(t); if(!bs.length)return '<span class="dim">none</span>';
+  return '<div class="tk-deps">'+bs.map(function(b){var x=b.task;
+    return '<a class="tk-dep" href="'+taskUrl(x)+'" onclick="event.stopPropagation()" title="'+h(x.subject)+'"><span class="d '+(tkDone(x)?'ok':tkClosedNotDone(x)?'bad':'wait')+'"></span><span class="mono">'+h(tkNum(x))+'</span>'+
+      (tkClosedNotDone(x)?'<span class="dim">closed as '+h((tRes(x.resolution)||{name:"Other"}).name)+'</span>':'')+'</a>';}).join("")+'</div>';
+}
+/* The line under a ready badge: the graph's reason, or the queued work order that holds the task. */
+function tkReadySub(t){
+  var q=tkQueuedWo(t); if(q)return '<div class="dim" style="font-size:11px;margin-top:3px">queued in <span class="mono">'+h(q.id)+'</span></div>';
+  var ob=tkOpenBlockers(t); if(t.ready==="ready"&&ob.length)return '<div class="dim" style="font-size:11px;margin-top:3px">blocked by '+ob.map(function(b){return '<span class="mono">'+h(tkNum(b.task))+'</span>';}).join(", ")+'</div>';
+  return '';
+}
+/* A layer is the longest path from an unblocked task, counted in open blockers among the rows drawn. */
+function tkLayers(rows){
+  var inRows={}; rows.forEach(function(t){inRows[t.id]=true;});
+  var memo={};
+  function layer(t,seen){
+    if(memo[t.id]!=null)return memo[t.id]; if(seen[t.id])return 0; seen[t.id]=true;
+    var d=0; tkOpenBlockers(t).forEach(function(b){if(inRows[b.task.id])d=Math.max(d,layer(b.task,seen)+1);});
+    memo[t.id]=d; return d;
+  }
+  rows.forEach(function(t){layer(t,{});});
+  return memo;
+}
+/* The path of blockers from one task up to another, for the cycle refusal. */
+function tkPathUp(from,to){
+  var seen={};
+  function walk(t,path){
+    if(t.id===to.id)return path;
+    if(seen[t.id])return null; seen[t.id]=true;
+    var bs=tkBlockers(t);
+    for(var i=0;i<bs.length;i++){var r=walk(bs[i].task,path.concat([bs[i].task]));if(r)return r;}
+    return null;
+  }
+  return walk(from,[]);
+}
+var WG_W=214, WG_H=66, WG_GX=44, WG_GY=10;
+function tkGraph(rows){
+  var open=rows.filter(function(t){return (tStatus(t.status)||{}).cat!=="closed"&&t.ready!=="accepted";});
+  var L=tkLayers(open), cols=[], pos={};
+  open.forEach(function(t){var l=L[t.id]||0;(cols[l]=cols[l]||[]).push(t);});
+  cols.forEach(function(c,ci){c.forEach(function(t,ri){pos[t.id]={x:ci*(WG_W+WG_GX),y:ri*(WG_H+WG_GY)};});});
+  if(isPhone()){
+    return '<div class="panel-b">'+cols.map(function(c,ci){return '<h4 class="wg-layer">Layer '+ci+'</h4>'+c.map(function(t){return tkGraphCard(t,null);}).join("");}).join("")+'</div>';
+  }
+  var rowsMax=Math.max.apply(null,cols.map(function(c){return c.length;}).concat([1]));
+  var W=cols.length*(WG_W+WG_GX)-WG_GX, Hh=rowsMax*(WG_H+WG_GY)-WG_GY;
+  var edges=[];
+  open.forEach(function(t){tkOpenBlockers(t).forEach(function(b){var a=pos[b.task.id],z=pos[t.id]; if(!a||!z)return;
+    var x1=a.x+WG_W,y1=a.y+WG_H/2,x2=z.x,y2=z.y+WG_H/2,mx=(x1+x2)/2;
+    edges.push('<path d="M'+x1+' '+y1+' C'+mx+' '+y1+' '+mx+' '+y2+' '+x2+' '+y2+'"'+(S.tsel[t.id]?' class="sel"':'')+'/>');});});
+  return '<div class="panel-b"><div class="tw"><div class="wg" style="width:'+W+'px;height:'+Hh+'px">'+
+    '<svg class="wg-edges" width="'+W+'" height="'+Hh+'" aria-hidden="true">'+edges.join("")+'</svg>'+
+    open.map(function(t){return tkGraphCard(t,pos[t.id]);}).join("")+'</div></div>'+
+    '<div class="dim" style="font-size:11.5px;margin-top:8px">Unblocked tasks sit in layer 0. A line joins each blocker to the task it blocks.</div></div>';
+}
+function tkGraphCard(t,p){
+  var ok=tkSelectable(t), on=!!S.tsel[t.id];
+  return '<div class="wg-card'+(on?' sel':'')+'"'+(p?' style="left:'+p.x+'px;top:'+p.y+'px"':'')+' '+rowClick("go('"+taskUrl(t)+"')","Open "+t.num)+'>'+
+    '<input type="checkbox" aria-label="Select '+h(t.num)+'"'+(on?' checked':'')+(ok?'':' disabled title="'+h(tkWhyNot(t))+'"')+' onclick="event.stopPropagation()" onchange="tkToggle(\''+t.id+'\',this.checked)">'+
+    '<div class="wg-body"><span class="tk-t">'+ipLogo(t.kind,12)+'<span class="mono dim" style="font-size:11px">'+h(tkNum(t))+'</span></span><div class="wg-s">'+h(t.subject)+'</div>'+readyBadge(t)+'</div></div>';
+}
+function tkView(v){S.tkView=v;render();}
+/* The Dependencies panel of a task, and the dialog that adds one. */
+function tkDepsPanel(t){
+  var bs=tkBlockers(t), bl=tkBlocks(t);
+  function row(x,src){
+    var srcHtml=src&&src.src==="oxagen"
+      ?'<span class="dim" style="font-size:11px">added here by '+h((PEOPLE[src.by]||{}).name||src.by)+' on '+h(src.at)+'</span><button class="btn sm" onclick="tkUnlink(\''+t.id+'\',\''+x.id+'\',\''+(src.dir||"by")+'\')">Remove</button>'
+      :'<span class="dim" style="font-size:11px" title="Read from '+h(IP_KIND[x.kind].l)+'. Remove the link there.">'+ipLogo(x.kind,11)+' from '+h(IP_KIND[x.kind].l)+'</span>';
+    return '<div class="tk-dep-row"><a class="mono" href="'+taskUrl(x)+'" style="font-size:11.5px">'+ipLogo(x.kind,12)+' '+h(tkNum(x))+'</a><span class="grow" style="flex:1;min-width:140px;font-size:12.5px">'+h(x.subject)+'</span>'+tkDepBadge(x)+srcHtml+'</div>';
+  }
+  var body;
+  if(!bs.length&&!bl.length) body='<p class="muted" style="margin:0;font-size:12.5px">None. This task waits on nothing, and nothing waits on it.</p>';
+  else body='<h4 class="tk-dep-h">Blocked by</h4>'+(bs.length?bs.map(function(b){return row(b.task,b);}).join(""):'<p class="dim" style="margin:0 0 6px;font-size:12px">none</p>')+
+    '<h4 class="tk-dep-h">Blocks</h4>'+(bl.length?bl.map(function(x){var e=(x.blockedBy||[]).filter(function(b){return b.id===t.id;})[0]||{};return row(x,{src:e.src,by:e.by,at:e.at,dir:"blocks"});}).join(""):'<p class="dim" style="margin:0;font-size:12px">none</p>');
+  if(t.outsideLinks) body+='<p class="dim" style="margin:8px 0 0;font-size:12px">'+t.outsideLinks+' link to an issue outside the scope of this connection.</p>';
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Dependencies</h3><button class="btn sm" style="margin-left:auto" onclick="S.tkl=null;openDialog(\'tklink\',\''+t.id+'\')">Add a dependency</button></div><div class="panel-b">'+body+'</div></div>';
+}
+function tkUnlink(tid,xid,dir){
+  var blocked=dir==="blocks"?taskById(xid):taskById(tid), blocker=dir==="blocks"?tid:xid;
+  if(blocked)blocked.blockedBy=(blocked.blockedBy||[]).filter(function(b){return b.id!==blocker;});
+  act("Dependency removed. unlink_tasks recorded."); render();
+}
+function tklQ(v){var z=S.tkl; if(!z)return; z.q=v; z.pick=null; var el=document.getElementById("tklList"); if(el)el.innerHTML=tklList();}
+function tklPick(id){S.tkl.pick=id; render();}
+function tklDir(v){S.tkl.dir=v; S.tkl.pick=null; render();}
+function tklCands(t){
+  var q=(S.tkl.q||"").toLowerCase();
+  return wsTasks().filter(function(x){return x.id!==t.id&&(tStatus(x.status)||{}).cat!=="closed"&&x.ready!=="accepted"&&(!q||(x.num+" "+x.subject).toLowerCase().indexOf(q)>=0);}).slice(0,8);
+}
+function tklList(){
+  var t=taskById(S.dlgArg); if(!t)return "";
+  return tklCands(t).map(function(x){return '<button class="tkl-i'+(S.tkl.pick===x.id?' sel':'')+'" role="option" aria-selected="'+(S.tkl.pick===x.id)+'" onclick="tklPick(\''+x.id+'\')">'+ipLogo(x.kind,12)+'<span class="mono" style="font-size:11.5px">'+h(x.num)+'</span><span style="flex:1;min-width:0">'+h(x.subject)+'</span>'+readyBadge(x)+'</button>';}).join("")||'<p class="dim" style="margin:6px 0;font-size:12px">No open task matches.</p>';
+}
+DLG_EXT.tklink=function(id){
+  var t=taskById(id); if(!t)return noSuch("Task");
+  var z=S.tkl||(S.tkl={dir:"by",q:"",pick:null});
+  var pick=z.pick?taskById(z.pick):null, path=null, refused="";
+  if(pick){
+    path=z.dir==="by"?tkPathUp(pick,t):tkPathUp(t,pick);
+    if(path){var a=z.dir==="by"?t:pick, b=z.dir==="by"?pick:t, mid=path.slice(0,-1);
+      refused="Refused. "+tkNum(a)+" already blocks "+tkNum(b)+(mid.length?" through "+mid.map(tkNum).reverse().join(" and "):"")+".";}
+  }
+  var preview=pick?(refused?'<div class="note" style="border-color:var(--st-failed)">'+h(refused)+'</div>'
+    :'<div class="note">'+h(z.dir==="by"?tkNum(t)+" is blocked by "+tkNum(pick)+". "+tkNum(t)+" can be sent when "+tkNum(pick)+" is accepted, or closed as Done."
+      :tkNum(pick)+" is blocked by "+tkNum(t)+". "+tkNum(pick)+" can be sent when "+tkNum(t)+" is accepted, or closed as Done.")+'</div>'):'';
+  return {t:"Add a dependency",s:t.num+" · "+t.subject,w:false,
+   b:'<div class="field"><label>Direction</label><select aria-label="Direction" onchange="tklDir(this.value)"><option value="by"'+(z.dir==="by"?' selected':'')+'>'+h(tkNum(t))+' is blocked by</option><option value="blocks"'+(z.dir==="blocks"?' selected':'')+'>'+h(tkNum(t))+' blocks</option></select></div>'+
+     '<div class="field"><label>Task</label><input type="search" placeholder="Search open tasks" aria-label="Search open tasks" value="'+h(z.q)+'" oninput="tklQ(this.value)"></div>'+
+     '<div id="tklList" class="tkl-list" role="listbox" aria-label="Open tasks">'+tklList()+'</div>'+preview,
+   f:'<span class="dim" style="margin-right:auto;font-size:12px">needs <span class="mono">task.link</span></span><button class="btn" onclick="S.tkl=null;closeDialog()">Cancel</button><button class="btn primary"'+(pick&&!refused?'':' disabled')+' onclick="tkLinkAdd(\''+t.id+'\')">Add</button>'};
+};
+function tkLinkAdd(id){
+  var t=taskById(id), z=S.tkl, pick=z&&z.pick?taskById(z.pick):null; if(!t||!pick)return;
+  var blocked=z.dir==="by"?t:pick, blocker=z.dir==="by"?pick:t;
+  blocked.blockedBy=(blocked.blockedBy||[]).filter(function(b){return b.id!==blocker.id;});
+  blocked.blockedBy.push({id:blocker.id,src:"oxagen",by:TK_ME,at:"2026-09-11 11:40"});
+  S.tkl=null; S.dlg=null; S.dlgArg=null; act("Dependency added. link_tasks recorded.","gold"); render();
+}
+/* Work orders on the graph: what a queued one waits on, the order its tasks come in, and its send. */
+function woWaitsOn(w){
+  var inside={}; w.tasks.forEach(function(id){inside[id]=true;});
+  var out=[], seen={};
+  w.tasks.forEach(function(id){var t=taskById(id); if(!t)return; tkOpenBlockers(t).forEach(function(b){if(!inside[b.task.id]&&!seen[b.task.id]){seen[b.task.id]=true;out.push(b.task);}});});
+  return out;
+}
+function woWaitsOnText(w){var ts=woWaitsOn(w); return ts.length?ts.map(tkNum).join(" and "):"nothing";}
+function woWaitsOnHtml(w){var ts=woWaitsOn(w); return ts.length?ts.map(function(t){return '<span class="mono">'+h(tkNum(t))+'</span>';}).join(" and "):'<span class="dim">nothing</span>';}
+function woOrderPanel(w){
+  var tasks=w.tasks.map(taskById).filter(Boolean); if(!tasks.length)return "";
+  var L=tkLayers(tasks), inside={}; tasks.forEach(function(t){inside[t.id]=true;});
+  var sorted=tasks.slice().sort(function(a,b){return (L[a.id]||0)-(L[b.id]||0);});
+  var any=tasks.some(function(t){return tkBlockers(t).length;});
+  var body=!any&&tasks.length===1?'<p class="muted" style="margin:0;font-size:12.5px">No order among these tasks.</p>'
+    :'<ol class="tk-hist">'+sorted.map(function(t){
+      var ins=tkBlockers(t).filter(function(b){return inside[b.task.id];}), outs=tkOpenBlockers(t).filter(function(b){return !inside[b.task.id];});
+      return '<li><b>'+ipLogo(t.kind,12)+' <span class="mono" style="font-size:11.5px">'+h(tkNum(t))+'</span> '+h(t.subject)+'</b>'+
+        (ins.length?'<span class="dim">after '+ins.map(function(b){return h(tkNum(b.task));}).join(" and ")+'</span>':'')+
+        (w.status==="queued"&&outs.length?'<span class="dim">waits on '+outs.map(function(b){return h(tkNum(b.task));}).join(" and ")+', not in this work order</span>':'')+
+        (!ins.length&&!(w.status==="queued"&&outs.length)?'<span class="dim">first</span>':'')+'</li>';}).join("")+'</ol>';
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Order</h3></div><div class="panel-b">'+body+'</div></div>';
+}
+function woSend_(w){return w.send?SENDS.filter(function(x){return x.id===w.send;})[0]:null;}
+function woSendIndex(w){var sd=woSend_(w); if(!sd)return ""; return (sd.orders.indexOf(w.id)+1)+" of "+sd.orders.length;}
+function woSiblings(w){var sd=woSend_(w); return sd?sd.orders.map(woById).filter(Boolean):[w];}
+function woSendPanel(w){
+  var sd=woSend_(w); if(!sd)return "";
+  var trs=sd.orders.map(woById).filter(Boolean).map(function(x){
+    var items=woItems(x).length, r=x.runs.length?run(x.runs[x.runs.length-1].run):null;
+    return '<tr '+rowClick("go('"+woUrl(x)+"')","Open "+x.id)+(x.id===w.id?' aria-current="true"':'')+'><td>'+woTargetCell(x)+'</td><td>'+woBadge(x)+'</td><td class="num">'+woClaimed(x)+' / '+items+'</td>'+
+      '<td class="num">'+(r&&r.cost!=null?'$'+Number(r.cost).toFixed(2)+'<div class="dim" style="font-size:10.5px">'+h(r.basis||"")+'</div>':'<span class="dim">not recorded</span>')+'</td></tr>';}).join("");
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Send</h3><p class="muted" style="margin:2px 0 0;font-size:12px"><span class="mono">'+h(sd.id)+'</span>, one work order per target.</p></div></div>'+
+    '<div class="tw"><table data-lt="off"><thead><tr><th>Target</th><th>State</th><th class="num">Items claimed</th><th class="num">Cost</th></tr></thead><tbody>'+trs+'</tbody></table></div></div>';
+}
+function woSendState(orders){var st={}; orders.forEach(function(x){st[x.status]=1;}); var ks=Object.keys(st); return ks.length===1?ks[0]:"partial";}
+DLG_EXT.worelease=function(id){
+  var w=woById(id); if(!w)return noSuch("Work order"); var wait=woWaitsOnText(w);
+  return {t:"Send this work order now?",s:w.title,w:false,
+   b:'<p style="margin:0 0 10px;font-size:13px">'+h(wait)+' is still open. The agent reads its brief without the work '+h(wait)+' was meant to finish first.</p>'+
+     '<div class="note">The prompt gains one line: <span class="mono">Sent before '+h(wait)+' was done, by '+h(PEOPLE[TK_ME].name)+'.</span></div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it queued</button><button class="btn" onclick="woRelease(\''+id+'\')">Send now</button>'};
+};
+function woRelease(id){
+  var w=woById(id); if(!w||w.status!=="queued")return; var wait=woWaitsOnText(w);
+  w.prompt=woSentPrompt(w)+"\n\nSent before "+wait+" was done, by "+PEOPLE[TK_ME].name+".";
+  w.status="sent"; w.releasedBy=TK_ME; w.released="2026-09-11 11:41";
+  w.tasks.forEach(function(id){var t=taskById(id); if(t){t.ready="sent"; delete t.queued;}});
+  S.dlg=null; S.dlgArg=null; act("Sent to "+woTargetName(w.target)+". release_work_order recorded, with "+wait+" still open.","gold"); render();
+}
+DLG_EXT.wowithdraw=function(id){
+  var w=woById(id); if(!w)return noSuch("Work order");
+  return {t:"Withdraw this work order?",s:"Nothing has started. The tasks go back to ready.",w:false,
+   b:'<div class="note">Its certified definitions of done are unchanged. Withdrawing records <span class="mono">withdraw_work_order</span>.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it</button><button class="btn danger" onclick="woWithdraw(\''+id+'\')">Withdraw</button>'};
+};
+function woWithdraw(id){
+  var w=woById(id); if(!w)return;
+  w.status="stopped"; w.withdrawn="2026-09-11 11:41";
+  w.tasks.forEach(function(id){var t=taskById(id); if(t){t.ready="ready"; delete t.queued; if(t.wo===w.id)t.wo=null;}});
+  S.dlg=null; S.dlgArg=null; act("Withdrawn. The tasks are ready again."); render();
+}
+function woRetry(id){
+  var w=woById(id); if(!w)return;
+  S.dspIds=w.tasks.slice(); woOpen(w.target); if(S.wo){S.wo.retryOf=w.id; if(w.prompt){S.wo.prompt=w.prompt; S.wo.edited=true;}} render();
+}
+function woQueued(z){return !!(z&&z.tasks.some(function(id){var t=taskById(id);return t&&tkGraphBlocked(t);}));}
+function woBlockedLine(z){
+  var n=z.tasks.filter(function(id){var t=taskById(id);return t&&tkGraphBlocked(t);}).length; if(!n)return "";
+  return '<div class="note" style="margin-top:8px">'+n+' of '+z.tasks.length+' task'+(z.tasks.length>1?'s are':' is')+' blocked. Oxagen sends this work order when '+(n>1?'they are':'it is')+' unblocked, and expires it on '+h(z.expires||"2026-09-25")+' if '+(n>1?'they are':'it is')+' not.</div>';
+}
+function woExpiresField(z){
+  if(!woQueued(z))return "";
+  return '<div class="field" style="margin:10px 0 0;max-width:220px"><label>Expires</label><input type="date" value="'+h(z.expires||"2026-09-25")+'" min="2026-09-12" max="2026-12-10" aria-label="Expires" onchange="S.wo.expires=this.value"></div>'+
+    '<div class="hint">A queued work order that is still waiting on this date expires, and its tasks go back to ready.</div>';
+}
+/* Stages by layer: a stage runs after the stages it needs, and a stage that names none runs after the
+   stage before it in the file, so a v0.1 file reads the same. */
+function stageNeeds(wf,i){var s=wf.stages[i]; if(s.needs&&s.needs.length)return s.needs.slice(); return i?[wf.stages[i-1].role]:[];}
+function wfDepths(wf){
+  var idx={}; wf.stages.forEach(function(s,i){idx[s.role]=i;}); var d=[];
+  wf.stages.forEach(function(s,i){var ns=stageNeeds(wf,i).map(function(r){return idx[r];}).filter(function(x){return x!=null&&x<i;});
+    d[i]=ns.length?Math.max.apply(null,ns.map(function(j){return d[j];}))+1:0;});
+  return d;
+}
+function wfLayerText(wf){
+  var d=wfDepths(wf), cols=[]; wf.stages.forEach(function(s,i){(cols[d[i]]=cols[d[i]]||[]).push(s);});
+  return cols.map(function(c){return c.map(function(s){var a=agent(s.agent);return '<span class="tkp" style="margin:0 6px 3px 0">'+(a?hxIcon(a.harness,13):"")+'<span style="font-size:12px">'+h(s.role)+'</span></span>';}).join('<span class="dim" title="run beside each other">∥ </span>');}).join('<span class="dim">→ </span>');
+}
+function woActiveStages(w,wf){
+  var on=[]; wf.stages.forEach(function(s,i){var rs=w.runs.filter(function(x){return x.stage===i+1;}), lr=rs[rs.length-1]; if(lr&&lr.state==="live")on.push(i);});
+  return on.length?on:[Math.max(0,(w.stage||1)-1)];
+}
+function woStageWords(w,wf){
+  var on=woActiveStages(w,wf); if(on.length>1)return "stages "+on.map(function(i){return i+1;}).join(" and ")+" of "+wf.stages.length;
+  return "stage "+(on[0]+1)+" of "+wf.stages.length;
+}
+function tkSelectable(t){return t.ready==="ready"&&(tStatus(t.status)||{}).cat==="open"&&!tkQueuedWo(t);}
 function tkWhyNot(t){
+  var q=tkQueuedWo(t); if(q)return "Already queued in "+q.id+". Withdraw it to send elsewhere.";
   if(t.ready==="ready"&&(tStatus(t.status)||{}).cat==="blocked")return "Blocked upstream. It can be sent when it is open again.";
   return {drafting:"oxagen.assistant is still drafting its definition of done.",draft:"Its definition of done is a draft. Certify it first.",
     changed:"The work item changed after it was certified. Certify it again first.",sent:"Already in a work order.",accepted:"Accepted and done.",closed:"Closed upstream."}[t.ready]||"Not ready.";
@@ -14579,9 +15024,9 @@ function woTargetCell(w){
   if(w.target.kind==="workflow"){var wf=wfById(w.target.id);return wf?'<span class="tkp">'+hxRow(wf)+'<span>'+h(wf.name)+'</span></span>':h(w.target.id);}
   var a=agent(w.target.id); return a?'<span class="tkp">'+hxIcon(a.harness,14)+agentAv(a,20)+'<span>'+h(a.name)+'</span></span>':h(w.target.id);
 }
-var WO_ST={"sent":{b:"b-q",l:"sent"},"in progress":{b:"b-approval",l:"in progress"},"waiting on you":{b:"b-approval",l:"waiting on you"},
-  "returned":{b:"b-denied",l:"returned"},"stopped":{b:"b-failed",l:"stopped"},"accepted":{b:"b-allowed",l:"accepted"},"parked":{b:"b-denied",l:"parked for you"},
-  "closed":{b:"b-q",l:"closed"}};
+var WO_ST={"queued":{b:"b-q",l:"queued"},"sent":{b:"b-q",l:"sent"},"in progress":{b:"b-approval",l:"in progress"},"waiting on you":{b:"b-approval",l:"waiting on you"},
+  "returned":{b:"b-denied",l:"returned"},"stopped":{b:"b-failed",l:"stopped"},"expired":{b:"b-failed",l:"expired"},"accepted":{b:"b-allowed",l:"accepted"},"parked":{b:"b-denied",l:"parked for you"},
+  "closed":{b:"b-q",l:"closed"},"partial":{b:"b-approval",l:"partial"}};
 function woBadge(w){return stBadge(WO_ST[w.status]||WO_ST.sent);}
 function woClaimed(w){var n=0;(w.claims||[]).forEach(function(c){if(c)n++;});return n;}
 function woItems(w){return woItemsFor(w.tasks,w.extra||[]);}
@@ -14591,8 +15036,7 @@ function tkWfTab(){
   var trs=WORKFLOWS.map(function(wf){
     return '<tr '+rowClick("openDialog('wfview','"+wf.id+"')","Open "+wf.name)+'>'+
      '<td><b>'+h(wf.name)+'</b><div class="dim mono" style="font-size:11px">'+h(wf.file)+'</div></td>'+
-     '<td>'+wf.stages.map(function(s){var a=agent(s.agent);return '<span class="tkp" style="margin:0 6px 3px 0">'+(a?hxIcon(a.harness,13):"")+'<span style="font-size:12px">'+h(s.role)+'</span></span>';}).join('<span class="dim">→ </span>')+
-       '<span class="dim">→ </span><span style="font-size:12px">You</span></td>'+
+     '<td>'+wfLayerText(wf)+'<span class="dim">→ </span><span style="font-size:12px">You</span></td>'+
      '<td>'+(wf.state==="published"?'<span class="b b-allowed"><span class="d"></span>Published</span><div class="dim mono" style="font-size:11px">'+h(wf.commit)+'</div>'
        :'<span class="b b-approval"><span class="d"></span>In review</span><div class="dim mono" style="font-size:11px">'+h(wf.pr)+'</div>')+'</td>'+
      '<td class="num">'+wf.used+'</td></tr>';}).join("");
@@ -14780,7 +15224,7 @@ function pTask(r){
   var k=IP_KIND[t.kind]||{l:"Oxagen",unit:"work item"}, own=t.kind==="oxagen", edit=tkEditable(t), drafting=t.ready==="drafting"||S.tkDrafting[t.id];
   var prim=drafting?'<button class="btn primary"'+(S.tkDrafting[t.id]?' disabled':'')+' onclick="tkDraftNow(\''+t.id+'\')">Draft it now</button>'
     :t.ready==="draft"||t.ready==="changed"?'<button class="btn primary"'+(t.dod.length?'':' disabled')+' onclick="openDialog(\'certify\',\''+t.id+'\')">'+'Certify definition of done'+'</button>'
-    :t.ready==="ready"?(tkSelectable(t)?dispatchButton([t.id]):'<button class="btn" disabled title="'+h(tkWhyNot(t))+'">Send to an agent…</button>')
+    :t.ready==="ready"?(tkQueuedWo(t)?'<button class="btn primary" onclick="go(\''+woUrl(tkQueuedWo(t))+'\')">Open the work order</button>':tkSelectable(t)?dispatchButton([t.id]):'<button class="btn" disabled title="'+h(tkWhyNot(t))+'">Send to an agent…</button>')
     :t.wo?'<button class="btn primary" onclick="go(\''+woUrl(woById(t.wo)||{id:t.wo})+'\')">Open the work order</button>':'';
   var changedBanner=t.ready==="changed"?'<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
     '<div class="grow"><b>The description changed after certification</b>'+h(PEOPLE[(tPerson(t.updatedBy)||{}).to]?PEOPLE[tPerson(t.updatedBy).to].name:t.updatedBy)+' edited it in '+h(k.l)+' on '+h(t.updatedAt)+'. The certification from '+h(t.certifiedAt)+' no longer matches the work item, so it left ready.</div></div>'+
@@ -14803,10 +15247,12 @@ function pTask(r){
   if(t.dod.length) hist.push(["Definition of done drafted",t.createdAt,"oxagen.assistant"]);
   if(t.certifiedAt) hist.push(["Certified",t.certifiedAt,PEOPLE[t.certifiedBy].name]);
   if(t.ready==="changed") hist.push(["Changed in "+k.l,t.updatedAt,"No longer ready"]);
-  if(t.wo){var wo=woById(t.wo); if(wo)hist.push(["Sent in a work order",wo.sent,wo.id]); if(wo&&wo.accepted)hist.push(["Accepted",wo.accepted,PEOPLE[wo.by].name]);}
+  tkBlockers(t).forEach(function(b){if(b.src==="oxagen")hist.push(["Dependency added",b.at,(PEOPLE[b.by]||{}).name||b.by]);});
+  if(tkBlockers(t).length&&!tkGraphBlocked(t)) hist.push(["Unblocked",t.updatedAt,"every blocker is done"]);
+  if(t.wo){var wo=woById(t.wo); if(wo&&wo.status==="queued")hist.push(["Queued in a work order",wo.sent,wo.id]); else if(wo)hist.push(["Sent in a work order",wo.released||wo.sent,wo.id]); if(wo&&wo.accepted)hist.push(["Accepted",wo.accepted,PEOPLE[wo.by].name]);}
   var res=t.resolution?tRes(t.resolution):null;
   return '<div class="phead"><div class="t"><p class="eyebrow">'+wiLogo(t,13)+' '+h(t.num)+'</p><h1>'+h(t.subject)+'</h1>'+
-   '<p>'+(own?(t.finding?'Written in Oxagen from finding <span class="mono">'+h(t.finding)+'</span>':'Written in Oxagen'):'Imported from '+h(k.l))+'. Updated '+h(t.updatedAt)+'.</p></div>'+
+   '<p>'+(own?(t.finding?'Written in Oxagen from finding <span class="mono">'+h(t.finding)+'</span>':'Written in Oxagen'):'Imported from '+h(k.l))+'. Updated '+h(t.updatedAt)+'.'+(t.ready==="ready"&&tkGraphBlocked(t)?' Blocked by '+h(tkOpenBlockers(t).map(function(b){return tkNum(b.task);}).join(" and "))+'.':'')+'</p></div>'+
    '<div class="acts"><button class="btn" onclick="copyTaskPrompt(\''+t.id+'\')" title="Copy the work item and its work orders as text">Copy prompt</button>'+
    (own?(t.finding?'<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/work/findings?finding='+h(t.finding)+'\')">Open the finding</button>':'')
      :'<a class="btn" href="'+h(providerUrl(t))+'" target="_blank" rel="noopener">Open in '+h(k.l)+'</a>')+prim+'</div></div>'+
@@ -14815,6 +15261,7 @@ function pTask(r){
     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Description</h3></div><div class="panel-b"><p class="tk-body">'+h(t.body)+'</p></div></div>'+
     dodPanel+notes+
    '</div><div>'+
+    tkDepsPanel(t)+
     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Fields</h3>'+readyBadge(t)+'</div><div class="panel-b"><dl class="kv">'+
      '<dt>Work item id</dt><dd class="mono">'+h(t.id)+'</dd>'+
      '<dt>Number</dt><dd>'+(own?'<span class="mono">'+h(t.num)+'</span>':'<a class="mono" href="'+h(providerUrl(t))+'" target="_blank" rel="noopener">'+h(t.num)+'</a>')+'</dd>'+
@@ -14851,6 +15298,7 @@ function woClose(w){
   return m&&p?{m:m,on:!!p.writeback.close,nums:w.tasks.map(function(x){return (taskById(x)||{}).num;}).join(", ")}:null;
 }
 function woAccept(id){
+  (function(){var w0=woById(id);if(!w0)return;woSiblings(w0).forEach(function(x){if(x.id!==id&&x.status!=="accepted"&&x.status!=="stopped"){x.status="stopped";x.stoppedFor=id;}});})();
   var w=woById(id); if(!w)return;
   w.status="accepted"; w.accepted="2026-09-11 09:18";
   (w.claims||[]).forEach(function(c){if(c)c.ok=TK_ME;});
@@ -14861,6 +15309,8 @@ function woAccept(id){
 function woStop(id){var w=woById(id); if(!w)return; w.status="stopped"; closeDialog(); act("Stopped. The runtime is told at its next boundary; the work items go back to ready.");
   w.tasks.forEach(function(tid){var t=taskById(tid); if(t&&t.ready==="sent")t.ready="ready";});}
 DLG_EXT.woaccept=function(id){
+  var sibs=(function(){var w0=woById(id);return w0?woSiblings(w0).filter(function(x){return x.id!==id&&x.status!=="accepted"&&x.status!=="stopped";}):[];})();
+  var sibNote=sibs.length?'<div class="note" style="margin-top:8px">Accepting stops '+sibs.map(function(x){return '<span class="mono">'+h(x.id)+'</span>';}).join(" and ")+', which '+(sibs.length>1?'carry':'carries')+' the same work items.</div>':'';
   var w=woById(id); if(!w)return noSuch("Work order");
   var items=woItems(w);
   return {t:"Accept all items",s:w.title,w:false,
@@ -14868,7 +15318,7 @@ DLG_EXT.woaccept=function(id){
     '<div class="note" style="margin:12px 0">Accepting records <span class="mono">accept_work_order</span> with your name. It does not merge anything. The pull request '+h((w.runs[w.runs.length-1]||{}).pr||"")+' is merged by a person on GitHub.</div>'+
     (function(){var c=woClose(w); if(!c)return "";
       return '<div class="note">'+(c.on?'The '+h(c.m.l)+' connection closes each '+h(c.m.unit)+' as Done, the resolution for work a person accepted.'
-        :'The '+h(c.m.l)+' connection has close on accept off, so each '+h(c.m.unit)+' stays open there until somebody closes it. Turned on, it closes each one as Done.')+'</div>';})(),
+        :'The '+h(c.m.l)+' connection has close on accept off, so each '+h(c.m.unit)+' stays open there until somebody closes it. Turned on, it closes each one as Done.')+'</div>'+sibNote;})(),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="woAccept(\''+w.id+'\')">Accept all items</button>'};
 };
 DLG_EXT.wostop=function(id){
@@ -14894,7 +15344,12 @@ function pWorkOrder(r){
   var stState=function(i){
     if(w.status==="accepted")return "done";
     if(i===wf.stages.length)return canAccept?"on":"";
-    if(i<w.stage-1)return "done"; if(i===w.stage-1)return w.status==="stopped"?"":"on"; return "";
+    if(w.status==="queued"||w.status==="stopped"||w.status==="expired")return "";
+    var rs=w.runs.filter(function(x){return x.stage===i+1;}), lr=rs[rs.length-1];
+    if(lr&&lr.state==="live")return "on";
+    if(lr&&lr.state==="sealed"&&!lr.returned)return "done";
+    if(!w.runs.length&&i===w.stage-1)return "on";
+    return "";
   };
   var stSub=function(i,s){
     var rs=w.runs.filter(function(x){return x.stage===i+1;}), lr=rs[rs.length-1];
@@ -14912,13 +15367,17 @@ function pWorkOrder(r){
   var sp=woSpend(w), open=w.status!=="accepted"&&w.status!=="stopped"&&w.status!=="closed";
   return '<div class="phead"><div class="t"><p class="eyebrow"><span class="mono">'+h(w.id)+'</span> '+woKindBadge(w)+'</p><h1>'+h(w.title)+'</h1>'+
    (direct?'<p>Oxagen opened it on '+h(w.sent)+' for a run '+h((PEOPLE[w.by]||{}).name||w.by)+' started outside Oxagen'+(w.ref?', titled from its task reference <span class="mono">'+h(w.ref)+'</span>':'')+'.</p>'
-     :'<p>Sent by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' to '+h(tgt)+'.</p>')+'</div>'+
+     :w.status==="queued"?'<p>Queued by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' for '+h(tgt)+'. It is sent when '+h(woWaitsOnText(w))+' is done, or expires on '+h(w.expires||"")+'.'+woSubMore(w)+'</p>'
+     :'<p>Sent by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' to '+h(tgt)+'.'+woSubMore(w)+'</p>')+'</div>'+
    '<div class="acts">'+(direct?'':'<button class="btn" onclick="copyWoPrompt(\''+w.id+'\')" title="Copy the brief as sent with its references">Copy brief</button>')+
-   (open?'<button class="btn danger" onclick="openDialog(\'wostop\',\''+w.id+'\')">Stop the work order</button>':'')+
+   (w.status==="queued"?'<button class="btn" onclick="openDialog(\'worelease\',\''+w.id+'\')">Send now</button><button class="btn danger" onclick="openDialog(\'wowithdraw\',\''+w.id+'\')">Withdraw</button>'
+    :w.status==="sent"&&!w.started&&!w.runs.length?'<button class="btn danger" onclick="openDialog(\'wowithdraw\',\''+w.id+'\')">Withdraw</button>'
+    :(w.status==="stopped"||w.status==="expired")&&!direct?(w.retriedAs?'':'<button class="btn" onclick="woRetry(\''+w.id+'\')">Send again</button>')
+    :(open?'<button class="btn danger" onclick="openDialog(\'wostop\',\''+w.id+'\')">Stop the work order</button>':'')+
    (direct?'<button class="btn" disabled title="A direct work order has no definition of done until you attach it to a backlog item"'+fut("direct work orders")+'>Attach to a work item</button>'
-     :'<button class="btn'+(canAccept?' primary':'')+'"'+(canAccept?'':' disabled title="Every item must be claimed first"')+' onclick="openDialog(\'woaccept\',\''+w.id+'\')">Accept the work</button>')+'</div></div>'+
+     :w.status==="accepted"?'':'<button class="btn'+(canAccept?' primary':'')+'"'+(canAccept?'':' disabled title="Every item must be claimed first"')+' onclick="openDialog(\'woaccept\',\''+w.id+'\')">Accept the work</button>'))+'</div></div>'+
    '<div class="grid g4" style="margin-bottom:16px"'+fut("work orders")+'>'+
-    tile("State",'<span style="font-size:17px">'+woBadge(w)+'</span>',w.status==="waiting on you"?"every item is claimed":w.status==="accepted"?"on "+h(w.accepted):direct?"one run, started outside Oxagen":"stage "+w.stage+" of "+wf.stages.length)+
+    tile("State",'<span style="font-size:17px">'+woBadge(w)+'</span>',w.status==="queued"?"waits on "+h(woWaitsOnText(w)):w.status==="expired"?"expired on "+h(w.expires||""):w.status==="waiting on you"?"every item is claimed":w.status==="accepted"?"on "+h(w.accepted):direct?"one run, started outside Oxagen":woStageWords(w,wf))+
     tile("Items claimed",items.length?claimed+" / "+items.length:"none","by the agents, with evidence")+
     tile("Items accepted",items.length?accepted+" / "+items.length:"none","by a person")+
     tile("Spend",sp?usd(sp.toFixed(2)):"$0.00",w.cap?"of a "+usd(w.cap)+" cap \u00b7 the runs\u2019 own basis":"across its runs, each on its own basis")+'</div>'+
@@ -14933,6 +15392,7 @@ function pWorkOrder(r){
       return '<li><b>'+h(wf.stages[x.stage-1].role)+(x.returned?' returned the work':'')+'</b><span>'+runLink(x.run)+'</span><span class="dim">'+(x.note?h(x.note):'running')+'</span></li>';}).join("")+'</ol>'+
      '<div class="note" style="margin-top:10px">A handoff note reaches the next stage as quoted evidence. It is never an instruction to that agent.</div></div></div>'+
    '</div><div>'+
+    (direct?'':woOrderPanel(w)+woSendPanel(w))+
     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Work items</h3></div><div class="panel-b">'+(w.tasks.length?w.tasks.map(function(id){var t=taskById(id);return t?'<a class="tk-link" href="'+taskUrl(t)+'"><span class="tk-t">'+wiLogo(t,13)+'<span class="mono dim" style="font-size:11.5px">'+h(t.num)+'</span></span><span>'+h(t.subject)+'</span></a>':"";}).join("")
        :'<p class="muted" style="margin:0;font-size:12.5px">None attached'+(w.ref?'. The run names <span class="mono">'+h(w.ref)+'</span> as its task reference':'')+'.</p>')+'</div></div>'+
     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Repositories</h3></div><div class="panel-b">'+w.repos.map(function(n){return '<div class="row" style="margin-bottom:4px"><span class="row-ic">'+icon("repo")+'</span><span class="mono">'+h(n)+'</span></div>';}).join("")+
@@ -14944,6 +15404,7 @@ function pWorkOrder(r){
    '</div></div>';
 }
 function woSentPrompt(w){return w.prompt||woDraftPrompt(w.tasks,w.target,w.repos,[]);}
+function woSubMore(w){var s=""; if(w.send)s+=' '+woSendIndex(w)+' in send <span class="mono">'+h(w.send)+'</span>.'; if(w.retryOf)s+=' Retries <span class="mono">'+h(w.retryOf)+'</span>.'; if(w.retriedAs)s+=' Retried as <span class="mono">'+h(w.retriedAs)+'</span>.'; return s;}
 
 /* ============================== copy prompt ==============================
    The brief as text, for a harness Oxagen does not deliver to. A task names every work order that carries
@@ -15134,13 +15595,17 @@ function woSend(){
   var id="wo_01K6TF"+String(3+WORKORDERS.length)+"Q";
   var tasks=z.tasks.map(taskById).filter(Boolean);
   var agents=woAgentsOf(z.target);
-  WORKORDERS.unshift({id:id,ws:S.ws,title:tasks.length===1?tasks[0].subject:tasks.length+" work items: "+tasks.map(function(t){return t.num.replace(/^a-intel\/platform/,"");}).join(", "),
-    tasks:z.tasks.slice(),target:z.target,by:TK_ME,sent:"2026-09-11 09:17",status:"sent",stage:1,returns:0,repos:woRepoList(),
-    digest:"sha256:"+id.slice(-8).toLowerCase()+"e1a9c04d",prompt:z.prompt,extra:z.extra.slice(),runs:[],claims:[]});
-  tasks.forEach(function(t){t.ready="sent";t.wo=id;delete S.tsel[t.id];});
+  var queued=woQueued(z), w={id:id,ws:S.ws,kind:"dispatched",title:tasks.length===1?tasks[0].subject:tasks.length+" work items: "+tasks.map(function(t){return t.num.replace(/^a-intel\/platform/,"");}).join(", "),
+    tasks:z.tasks.slice(),target:z.target,by:TK_ME,sent:"2026-09-11 09:17",status:queued?"queued":"sent",stage:1,returns:0,repos:woRepoList(),cap:z.cap,
+    digest:"sha256:"+id.slice(-8).toLowerCase()+"e1a9c04d",prompt:z.prompt,extra:z.extra.slice(),runs:[],claims:[]};
+  if(queued)w.expires=z.expires||"2026-09-25";
+  if(z.retryOf){w.retryOf=z.retryOf; var old=woById(z.retryOf); if(old)old.retriedAs=id;}
+  WORKORDERS.unshift(w);
+  tasks.forEach(function(t){if(queued){t.queued=id;t.wo=id;}else{t.ready="sent";t.wo=id;}delete S.tsel[t.id];});
   S.wo=null; S.dlg=null; S.dspIds=[];
   go("#/"+ORG.slug+"/"+S.ws+"/work/orders/"+id);
-  act("Work order "+id+" sent to "+woTargetName(WORKORDERS[0].target)+". It starts when "+(agents[0]&&agents[0].host?agents[0].host:"the agent’s runtime")+" picks it up.","gold");
+  if(queued) act("Work order "+id+" queued for "+woTargetName(w.target)+". It is sent when "+woWaitsOnText(w)+" is done.","gold");
+  else act("Work order "+id+" sent to "+woTargetName(w.target)+". It starts when "+(agents[0]&&agents[0].host?agents[0].host:"the agent’s runtime")+" picks it up.","gold");
 }
 DLG_EXT.wo=function(){
   var z=S.wo; if(!z)return {t:"Work order",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
@@ -15155,8 +15620,8 @@ DLG_EXT.wo=function(){
   var nrep=woRepoList().length;
   var b=
    '<section class="wo-sec"><h4>Work items</h4><div class="wo-work items">'+z.tasks.map(function(id){var t=taskById(id);
-     return '<span class="chip">'+ipLogo(t.kind,12)+'<span class="mono">'+h(t.num)+'</span><span>'+h(t.subject)+'</span>'+(z.tasks.length>1?'<button aria-label="Remove '+h(t.num)+'" onclick="woDropTask(\''+t.id+'\')">×</button>':'')+'</span>';}).join("")+'</div>'+
-     '<div class="hint">Each work item is tagged to this work order, and each shows it on its own page.</div></section>'+
+     return '<span class="chip">'+ipLogo(t.kind,12)+'<span class="mono">'+h(t.num)+'</span><span>'+h(t.subject)+'</span>'+(tkGraphBlocked(t)?'<span class="dim" style="font-size:11px">blocked by '+h(tkOpenBlockers(t).map(function(b){return tkNum(b.task);}).join(", "))+'</span>':'')+(z.tasks.length>1?'<button aria-label="Remove '+h(t.num)+'" onclick="woDropTask(\''+t.id+'\')">×</button>':'')+'</span>';}).join("")+'</div>'+
+     '<div class="hint">Each work item is tagged to this work order, and each shows it on its own page.</div>'+woBlockedLine(z)+'</section>'+
    '<section class="wo-sec"><h4>Sent to</h4><div class="field" style="margin-bottom:10px"><select aria-label="Sent to" onchange="woSetTarget(this.value)">'+opts+'</select>'+
      '<div class="hint">Agents where you are the registered operator, and the published workflows made of them.</div></div>'+who+'</section>'+
    '<section class="wo-sec"><h4>Definition of done</h4><p class="hint" style="margin:0 0 8px">'+items.length+' items from '+z.tasks.length+' work item'+(z.tasks.length>1?'s':'')+'. Certified items are read-only here.</p>'+
@@ -15178,12 +15643,12 @@ DLG_EXT.wo=function(){
         '<span class="grow"><span class="n">'+h(r.n)+'</span><span class="d">'+(r.role==="main"?'main repo':'linked repo')+' · production branch '+h(r.branch)+(ok?'':' · outside '+h(first.name)+'’s toolbelt')+'</span></span></label>';}).join("")+
      '<label class="check" style="border-color:color-mix(in srgb,var(--gold) 40%,var(--border))"><input type="checkbox" id="woOk"'+(z.confirm?' checked':'')+(nrep?'':' disabled')+' onchange="woConfirm(this.checked)">'+
       '<span class="grow"><span class="n">I confirm the repositories</span><span class="d">'+h(agents.map(function(a){return a.name;}).join(", "))+' may push branches and open pull requests on '+(nrep===1?woRepoList()[0]:plural(nrep,"repository","repositories"))+'. Nothing is merged without a person.</span></span></label></section>'+
-   '<section class="wo-sec"><h4>Spend cap</h4><div class="field" style="margin:0;max-width:220px"><input value="'+h(z.cap)+'" aria-label="Spend cap in US dollars" inputmode="decimal" onchange="S.wo.cap=this.value"></div>'+
+   '<section class="wo-sec"><h4>Spend cap</h4><div class="field" style="margin:0;max-width:220px"><input value="'+h(z.cap)+'" aria-label="Spend cap in US dollars" inputmode="decimal" onchange="S.wo.cap=this.value"></div>'+woExpiresField(z)+
      '<div class="hint">USD for the whole work order, every stage and every return. Each run also stays inside its own agent’s budget of $'+h(first.budget||"2.00")+' per run.</div>'+(agents.some(function(a){return a.harness==="cursor";})?'<div class="warn" style="margin-top:8px"><b>Cursor is not metered.</b> Cursor\u2019s model calls do not pass through the Oxagen gateway, so the cap counts every stage but that one.</div>':'')+'</section>';
   return {t:"Work order",s:z.tasks.length+" work item"+(z.tasks.length>1?"s":"")+" to "+woTargetName(z.target),w:true,b:b,
    f:'<span class="grow mono dim" style="font-size:11px">needs <span style="color:var(--accent-text)">work_order.send</span> on '+h(S.ws)+'</span>'+
      '<button class="btn" onclick="S.wo=null;closeDialog()">Cancel</button>'+
-     '<button class="btn primary" id="woSend"'+(woCanSend()?'':' disabled')+' onclick="woSend()">Send to '+h(woTargetName(z.target))+'</button>'};
+     '<button class="btn primary" id="woSend"'+(woCanSend()?'':' disabled')+' onclick="woSend()">'+(woQueued(z)?'Queue until unblocked':'Send to '+h(woTargetName(z.target)))+'</button>'};
 };
 
 /* ============================== connecting an issue provider: the wizard ==============================
@@ -15567,10 +16032,13 @@ function pmapSave(id){var p=tPerson(id), v=(el("pmapSel")||{}).value||"";
 /* ============================== workflows ============================== */
 function wfToml(name,stages){
   var slug=String(name||"workflow").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-  var L=['# .oxagen/workflows/'+slug+'.toml','schema = "oxagen-workflow/v0.1"','name = "'+name+'"',''];
-  stages.forEach(function(s){
+  var v2=stages.some(function(s){return s.needs&&s.needs.length;});
+  var L=['# .oxagen/workflows/'+slug+'.toml','schema = "oxagen-workflow/'+(v2?'v0.2':'v0.1')+'"','name = "'+name+'"',''];
+  stages.forEach(function(s,i){
     L.push('[[stage]]'); L.push('role = "'+s.role+'"'); L.push('agent = "'+s.agent+'"'); L.push('owns = ['+s.owns.map(function(o){return '"'+o+'"';}).join(", ")+']');
-    L.push('on_fail = "'+(s.onFail==="stop"?"stop":"return")+'"'+(s.onFail!=="stop"?'\nreturn_to = '+s.onFail.split(":")[1]+'\nmax_returns = '+(s.maxReturns||1):''));
+    if(s.needs&&s.needs.length) L.push('needs = ['+s.needs.map(function(o){return '"'+o+'"';}).join(", ")+']');
+    var rt=s.onFail!=="stop"?(s.returnTo?'"'+s.returnTo+'"':s.onFail.split(":")[1]):null;
+    L.push('on_fail = "'+(s.onFail==="stop"?"stop":"return")+'"'+(s.onFail!=="stop"?'\nreturn_to = '+rt+'\nmax_returns = '+(s.maxReturns||1):''));
     L.push('');
   });
   L.push('[accept]'); L.push('by = "operator"   # the last stage is always a person');
@@ -15603,6 +16071,9 @@ function wfWand(){
   z.descAI=true; render(); act("oxagen.assistant drafted "+z.stages.length+" stages from your sentence. Read them before anybody reviews them.","gold");
 }
 function wfSet(i,k,v){var s=S.wfz.stages[i]; if(!s)return; if(k==="own"){var o=v.split(":");if(o[1]==="1"){if(s.owns.indexOf(o[0])<0)s.owns.push(o[0]);}else s.owns=s.owns.filter(function(x){return x!==o[0];});}
+  else if(k==="need"){var q=v.split(":"), prev=S.wfz.stages[i-1]; var cur=s.needs&&s.needs.length?s.needs.slice():(prev?[prev.role]:[]);
+    if(q[1]==="1"){if(cur.indexOf(q[0])<0)cur.push(q[0]);}else cur=cur.filter(function(x){return x!==q[0];});
+    if(!cur.length){s.needsEmpty=true;}else{s.needsEmpty=false;s.needs=cur;}}
   else if(k==="onFail"){s.onFail=v; if(v!=="stop"&&!s.maxReturns)s.maxReturns=1;} else s[k]=v; render();}
 function wfAddStage(){S.wfz.stages.push({role:"Review",agent:"a-intel.core.architect",owns:["review"],onFail:"stop"});render();}
 function wfDelStage(i){S.wfz.stages.splice(i,1);render();}
@@ -15618,6 +16089,7 @@ DLG_EXT.wfnew=function(){
       (a?hxIcon(a.harness,16):'')+
       '<span class="sp" style="margin-left:auto;display:flex;gap:4px"><button class="iconbtn" aria-label="Move stage '+(i+1)+' up" onclick="wfMove('+i+',-1)">↑</button><button class="iconbtn" aria-label="Move stage '+(i+1)+' down" onclick="wfMove('+i+',1)">↓</button>'+
       (z.stages.length>1?'<button class="iconbtn" aria-label="Remove stage '+(i+1)+'" onclick="wfDelStage('+i+')">×</button>':'')+'</span></div>'+
+      (i?'<div class="row" style="margin-top:8px"><span class="dim" style="font-size:12px">After</span>'+z.stages.slice(0,i).map(function(p,j){var on=s.needs&&s.needs.length?s.needs.indexOf(p.role)>=0:j===i-1;return '<label class="tgck"><input type="checkbox" aria-label="Stage '+(i+1)+' runs after '+h(p.role)+'"'+(on?' checked':'')+' onchange="wfSet('+i+',\'need\',\''+h(p.role)+':\'+(this.checked?1:0))">'+h(p.role)+'</label>';}).join("")+(s.needsEmpty?'<span class="dim" style="font-size:11.5px;color:var(--st-failed)">A stage runs after at least one other stage.</span>':'')+'</div>':'')+
       '<div class="row" style="margin-top:8px"><span class="dim" style="font-size:12px">Owns</span>'+DOD_TAGS.map(function(g){return '<label class="tgck"><input type="checkbox"'+(s.owns.indexOf(g)>=0?' checked':'')+' onchange="wfSet('+i+',\'own\',\''+g+':\'+(this.checked?1:0))">'+g+'</label>';}).join("")+
       '<span class="dim" style="font-size:12px;margin-left:8px">If it fails</span><select class="sel-sm" aria-label="If stage '+(i+1)+' fails" onchange="wfSet('+i+',\'onFail\',this.value)"><option value="stop"'+(s.onFail==="stop"?' selected':'')+'>stop and ask you</option>'+
       z.stages.slice(0,i).map(function(x,j){return '<option value="return:'+(j+1)+'"'+(s.onFail==="return:"+(j+1)?' selected':'')+'>send back to stage '+(j+1)+'</option>';}).join("")+'</select>'+

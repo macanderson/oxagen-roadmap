@@ -28,6 +28,7 @@ export const PAGES = [
   { id: "run-transcript",    title: "Transcript",                  group: "Runs",         hash: `#/${ORG}/core-platform/runs/run_01K5RS7M2E8FJ3QW/transcript`, states: ["loaded"] },
   { id: "run-cost",          title: "Cost",                        group: "Runs",         hash: `#/${ORG}/core-platform/runs/run_01K5RS7M2E8FJ3QW/cost`,    states: ["loaded"] },
   { id: "run-evidence",      title: "Evidence",                    group: "Runs",         hash: `#/${ORG}/core-platform/runs/run_01K5RS7M2E8FJ3QW/evidence`, states: ["loaded"], future: true },
+  { id: "run-memories",      title: "Memories",                    group: "Runs",         hash: `#/${ORG}/core-platform/runs/run_01K5RK7C2V8BNM3X/memory`, states: ["loaded"] },
   { id: "run-interjection",  title: "Held for an answer",          group: "Runs",         hash: `#/${ORG}/core-platform/runs/run_01K6QW3D5N7TYBA2`,        states: NO_EMPTY },
   { id: "agents",            title: "Agents",                      group: "Agents",       hash: `#/${ORG}/core-platform/agents`,                           states: ["loaded"] },
   { id: "agent",             title: "Overview",                    group: "Agents",       hash: `#/${ORG}/core-platform/agents/triage`,                    states: ALL },

@@ -15,6 +15,8 @@ You are auditing the **Backlog** tab of Work in Oxagen (`/a-intel/core-platform/
 3. The product specs: `docs/fleet-operations-wedge.md` (D1, D2, D3, D9, D16, D17; Work), `docs/fleet-operations-ia.md` (Work), `docs/tasks-spec.md` §6.2, §7, §8.6, §9, §14.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/work`.
 
+5. The work graph: `docs/work-graph-spec.md` §5, §6, §11.1.
+
 ## Procedure
 
 Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
@@ -44,7 +46,9 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 15. **Rules.** One gold action on the screen. No heading, panel title, table header or caption carries a comma, a mid-dot, or a not/never contrast, and subtext under a heading is one sentence. Tiles are rollups of the rows. No person is scored or ranked. Every tier shown is the recorded one, and nothing claims a repository limit is enforced beyond that tier. Nothing is labelled a task: the object is a work item. An unmapped account is never shown as a member. No harness is listed first by default.
 16. **Accessibility.** Tabs use `role=tablist`/`tab` with `aria-selected`. Rows are keyboard operable. Each checkbox has an `aria-label` naming its item. Marks have text alternatives. Dialogs are `role=dialog aria-modal` with a labelled close. State is never colour alone (dot and word). Focus is visible.
 17. **Permissions.** `work.read` to see the tab, and `work_order.send` gated on the server for the send. Verify with a role that lacks each.
-18. **Nothing extra.** List anything on the built page that is not in the spec (tiles, columns, buttons, copy). Each is a finding, and the reviewer decides whether it stays.
+18. **Blocked by and the graph.** The table carries a Blocked by column after Status, listing each blocker’s number as a link with its state dot, “none” with no blocker, and “closed as Won’t do” beside a blocker that closed without done. A `ready` item with an open blocker reads “blocked by #N” under its readiness badge and its checkbox is **enabled**; an item a queued work order holds reads “queued in wo_…” and is disabled with “Already queued in …”; an item whose provider status category is `blocked` is disabled with “Blocked upstream”. Verify the provider’s status and the graph’s reason are never one column or one word. Ready to send counts only unblocked ready rows. The **List** and **Graph** chips switch the body; Graph draws the open items by layer, unblocked in layer 0, edges from blocker to blocked in the rule colour and never gold, no node labelled a frame, and on a phone a list by layer with “Layer N” headings. Unblocked means every upstream item is accepted in Oxagen or closed as Done in the provider; a prerequisite closed as Won’t do still blocks.
+19. **Queued sends.** Selecting a blocked ready item and sending shows the blocked chip, the “N of M … blocked” line, **Expires** (default 14 days, at most 90), and the footer **Queue until unblocked**. Queueing records `send_work_order` with `when: unblocked` and the expiry, lands on the work order page in state `queued`, and Oxagen releases it in the transaction that unblocks its last item. Verify a queued work order reaches no runtime before release, in the DOM and on the server.
+20. **Nothing extra.** List anything on the built page that is not in the spec (tiles, columns, buttons, copy). Each is a finding, and the reviewer decides whether it stays.
 
 ## Output
 

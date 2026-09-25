@@ -100,7 +100,7 @@ function pWork(r){
 function woOf(t){return t.wo?woById(t.wo):null;}
 function backlogTab(){
   var rows=wsTasks();
-  var ready=rows.filter(function(t){return t.ready==="ready";}).length,
+  var ready=rows.filter(function(t){return t.ready==="ready"&&!tkGraphBlocked(t);}).length,
       drafts=rows.filter(function(t){return t.ready==="draft"||t.ready==="changed";}).length,
       inwo=rows.filter(function(t){return t.ready==="sent";}).length;
   var orders=wsWorkOrders(), live=orders.filter(woLive), toAccept=woWaiting();
@@ -119,12 +119,13 @@ function backlogTab(){
      '<td><span class="tk-t">'+wiLogo(t,14)+'<span class="mono dim" style="font-size:11.5px">'+h(t.num)+'</span></span><div class="tk-s">'+h(t.subject)+'</div></td>'+
      '<td>'+lblChips(t.labels)+'</td>'+
      '<td>'+tStatusBadge(t.status)+'</td>'+
+     '<td'+fut("dependencies")+'>'+tkBlockedByCell(t)+'</td>'+
      '<td>'+tkPerson(t.owner)+'</td>'+
-     '<td>'+readyBadge(t)+'</td>'+
+     '<td>'+readyBadge(t)+tkReadySub(t)+'</td>'+
      '<td'+fut("work orders")+'>'+(wo?'<a class="mono" style="font-size:11.5px" href="'+woUrl(wo)+'" onclick="event.stopPropagation()">'+h(wo.id)+'</a>'+(woLive(wo)?' <span class="b b-allowed"><span class="d"></span>live</span>':''):'<span class="dim">\u2014</span>')+'</td>'+
      '<td class="mono dim" style="font-size:11.5px">'+h(t.updatedAt)+'</td></tr>';}).join("");
   return '<div class="grid g4" style="margin-bottom:16px"'+fut("work items and work orders")+'>'+
-     tile("Ready to send",ready,"certified and open")+
+     tile("Ready to send",ready,"certified and unblocked")+
      tile("Waiting on you",drafts+toAccept,drafts+" to certify \u00b7 "+toAccept+" to accept",(drafts+toAccept)?"var(--st-approval)":null)+
      tile("In work orders",inwo,"sent to an agent or a workflow")+
      '<button class="stat click" onclick="go(\''+workHash("orders")+'\')" aria-label="Open the work orders with a live run"><span class="k">Live now</span><span class="v">'+live.length+'</span>'+
@@ -132,8 +133,9 @@ function backlogTab(){
    banner+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Backlog</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Only a ready work item can be selected and sent.</p></div>'+
-   '<div class="sp">'+(nsel?'<span class="b b-q">'+nsel+' selected</span><button class="btn sm" onclick="S.tsel={};render()">Clear</button>':'')+'</div></div>'+
-   '<div class="tw"><table><thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th>Labels</th><th>Status</th><th>Owner</th><th>Readiness</th><th>Work order</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
+   '<div class="sp">'+(nsel?'<span class="b b-q">'+nsel+' selected</span><button class="btn sm" onclick="S.tsel={};render()">Clear</button>':'')+
+     '<span class="chips" role="group" aria-label="View"'+fut("dependencies")+'><button class="btn sm'+(S.tkView!=="graph"?' sel':'')+'" aria-pressed="'+(S.tkView!=="graph")+'" onclick="tkView(\'list\')">List</button><button class="btn sm'+(S.tkView==="graph"?' sel':'')+'" aria-pressed="'+(S.tkView==="graph")+'" onclick="tkView(\'graph\')">Graph</button></span></div></div>'+
+   (S.tkView==="graph"?tkGraph(rows):'<div class="tw"><table><thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th>Labels</th><th>Status</th><th>Blocked by</th><th>Owner</th><th>Readiness</th><th>Work order</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>')+
    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">oxagen.assistant drafts a definition of done for every work item a provider imports or a finding opens. A person certifies it, and the item is ready from that moment. A ready item goes to an agent only inside a work order, and only to an agent you operate.</div></div></div>';
 }
 /* A work item written in Oxagen, or opened from a finding, carries the Oxagen mark where a provider item carries its provider's. */
@@ -149,17 +151,30 @@ function workOrdersTab(fr){
   var f=S.woFilter||"all";
   var rows=all.filter(function(w){return f==="all"||(f==="live"?woLive(w):w.kind===f);});
   var n={all:all.length,dispatched:all.filter(function(w){return w.kind==="dispatched";}).length,direct:all.filter(function(w){return w.kind==="direct";}).length,live:all.filter(woLive).length};
-  var trs=rows.map(function(w){
+  var seenSend={}, out=[];
+  rows.forEach(function(w){
+    if(!w.send){out.push(w);return;}
+    if(seenSend[w.send])return; seenSend[w.send]=true;
+    var sibs=woSiblings(w), sd=woSend_(w);
+    out.push({group:true,id:sd.id,title:w.title,tasks:w.tasks,orders:sibs,by:sd.by,sent:sd.sent,status:woSendState(sibs)});
+    sibs.forEach(function(x){out.push(x);});
+  });
+  var trs=out.map(function(w){
+    if(w.group) return '<tr class="wo-group"'+fut("sends")+'><td><b>'+h(w.title)+'</b><div class="dim" style="font-size:11px"><span class="mono">'+h(w.id)+'</span> · '+w.orders.length+' work orders</div></td>'+
+     '<td>'+w.tasks.map(function(id){var t=taskById(id);return t?'<span class="tk-t">'+wiLogo(t,12)+'<span class="mono" style="font-size:11.5px">'+h(t.num)+'</span></span>':"";}).join("<br>")+'</td>'+
+     '<td>'+w.orders.map(function(x){var a=agent(x.target.id);return a?hxIcon(a.harness,14):"";}).join(" ")+' <span class="dim">'+w.orders.length+' targets</span></td><td><span class="dim">one per target</span></td><td class="num"><span class="dim">\u2014</span></td>'+
+     '<td>'+stBadge(WO_ST[w.status]||WO_ST.partial)+'</td><td class="num"><span class="dim">\u2014</span></td>'+
+     '<td><span class="tkp">'+personAv(w.by,20)+'<span>'+h((PEOPLE[w.by]||{}).name||w.by)+'</span></span><div class="dim mono" style="font-size:11px">'+h(w.sent)+'</div></td></tr>';
     var items=woItems(w).length, rs=woRuns(w), lastR=rs.length?rs[rs.length-1]:null, sp=woSpend(w);
-    return '<tr '+rowClick("go('"+woUrl(w)+"')","Open "+w.id)+'>'+
-     '<td><b>'+h(w.title)+'</b><div class="row" style="gap:6px;margin-top:3px"><span class="dim mono" style="font-size:11px">'+h(w.id)+'</span>'+woKindBadge(w)+'</div></td>'+
+    return '<tr '+rowClick("go('"+woUrl(w)+"')","Open "+w.id)+(w.send?' class="click wo-child"':'')+'>'+
+     '<td><b>'+h(w.title)+'</b><div class="row" style="gap:6px;margin-top:3px"><span class="dim mono" style="font-size:11px">'+h(w.id)+'</span>'+woKindBadge(w)+'</div>'+(w.send?'<div class="dim" style="font-size:11px">'+woSendIndex(w)+' in this send</div>':'')+'</td>'+
      '<td>'+(w.tasks.length?w.tasks.map(function(id){var t=taskById(id);return t?'<span class="tk-t">'+wiLogo(t,12)+'<span class="mono" style="font-size:11.5px">'+h(t.num)+'</span></span>':"";}).join("<br>")
         :'<span class="dim mono" style="font-size:11px">'+h(w.ref||"none")+'</span>')+'</td>'+
      '<td>'+woTargetCell(w)+'</td>'+
      '<td>'+(lastR?'<span class="mono" style="font-size:11.5px">'+(lastR.R?'<a href="'+wsBase(w.ws)+'/runs/'+h(lastR.x.run)+'" onclick="event.stopPropagation()">'+h(lastR.x.run)+'</a>':h(lastR.x.run))+'</span>'+
         (lastR.x.state==="live"?' <span class="b b-allowed"><span class="d"></span>live</span>':'')+(rs.length>1?'<div class="dim" style="font-size:11px">'+rs.length+' runs</div>':''):'<span class="dim">none yet</span>')+'</td>'+
      '<td class="num">'+(items?woClaimed(w)+' / '+items:'<span class="dim">\u2014</span>')+'</td>'+
-     '<td>'+woBadge(w)+'</td>'+
+     '<td>'+woBadge(w)+(w.status==="queued"?'<div class="dim" style="font-size:11px;margin-top:3px">waits on '+woWaitsOnHtml(w)+'</div>':'')+'</td>'+
      '<td class="num">'+(sp?usd(sp.toFixed(2)):'<span class="dim">\u2014</span>')+'</td>'+
      '<td><span class="tkp">'+personAv(w.by,20)+'<span>'+h((PEOPLE[w.by]||{}).name||w.by)+'</span></span><div class="dim mono" style="font-size:11px">'+h(w.sent)+'</div></td></tr>';}).join("");
   var chips=[["all","All"],["dispatched","Dispatched"],["direct","Direct"],["live","Live"]].map(function(x){
@@ -942,7 +957,7 @@ DLG_EXT.newsrc=function(){
   return {t:"New source",s:"Every source changes by a pull request against "+w.main,w:true,
    b:'<div class="wz-pick" style="grid-template-columns:1fr">'+cards.map(function(c){
      return '<button class="wz-card" onclick="'+c[2]+'"><span class="tx"><b>'+h(c[0])+'</b><span class="d">'+h(c[1])+'</span></span><span class="b b-q">'+h(c[3])+'</span></button>';}).join("")+'</div>'+
-    '<div class="note" style="margin-top:12px">Memory is appended by an agent. It becomes a Steering record only through a proposal. Policy, mandates and toolbelts are managed in Tools and on the agent’s Permissions tab.</div>',
+    '<div class="note" style="margin-top:12px">An agent appends memory, and Import Markdown writes it from a file. A memory becomes a Steering record only through a proposal. Policy, mandates and toolbelts are managed in Tools and on the agent’s Permissions tab.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'};
 };
 DLG_EXT.srcreg=function(){
@@ -1046,19 +1061,23 @@ function pItemSource(o){
   var w=ws(), lab=(SRC_KIND[o.kind]||{l:o.kind}).l, m=o.g==="memory"?MEMORY.filter(function(x){return x.id===o.id;})[0]:null;
   var badges=srcStatus(o)+(o.force?forceBadge(o.force):'')+'<span class="b b-q">'+h(o.scope)+'</span><span class="b b-q mono">'+h(o.version)+'</span>'+
     (o.hash?'<span class="b b-q mono">'+h(shortHash(o.hash))+'</span>':'');
-  var lead=o.g==="memory"?'Appended by an agent’s run. It competes as context at force <span class="mono">'+h(o.force)+'</span> and never above <span class="mono">may</span>. It becomes a Steering record only through a proposal.'
+  var lead=o.g==="memory"?(/ · import by /.test(m.provenance||"")?'Imported from a Markdown file.':'Appended by an agent’s run.')+' It competes as context at force <span class="mono">'+h(o.force)+'</span> and never above <span class="mono">may</span>. It becomes a Steering record only through a proposal.'
     :o.g==="glossary"?'A term the way this workspace uses it. It changes by a pull request against '+h(w.main)+'.'
     :'Workspace settings. It reaches every agent in '+h(w.name)+' as a procedure at force <span class="mono">should</span>.';
   var acts=o.g==="memory"?'<button class="btn" onclick="openDialog(\'memforget\',\''+h(o.id)+'\')">Forget</button>'+
-      '<button class="btn primary" onclick="memPromote(\''+h(o.id)+'\')">Propose as a Steering record</button>'
+      /* A memory the fold already proposed has its proposal. A second one would argue the same record twice. */
+      (m.proposedAs?'<button class="btn primary" onclick="memOpenProposal(\''+h(m.proposedAs)+'\')">Open the proposal</button>'
+       :'<button class="btn primary" onclick="memPromote(\''+h(o.id)+'\')">Propose as a Steering record</button>')
     :o.g==="glossary"?'<button class="btn primary" onclick="openDialog(\'ontedit\',\''+h(o.id)+'\')">Propose a change</button>':'';
   var rec='<div class="panel"><div class="panel-h"><h3>Record</h3></div><div class="panel-b"><dl class="kv">'+
    '<dt>Kind</dt><dd>'+h(lab)+'</dd><dt>Where</dt><dd><span class="mono" style="font-size:12px">'+h(o.path)+'</span></dd>'+
    (m?'<dt>Recalled</dt><dd>'+h(m.recalls30)+' times in 30 days, last '+h(m.lastRecalled)+'</dd>':'')+
    (m&&m.yieldsTo?'<dt>Yields to</dt><dd><a class="mono" href="'+srcUrl("record",m.yieldsTo)+'">'+h(m.yieldsTo)+'</a>, a published <span class="mono">must</span>, and is excluded as <span class="mono">overridden_by_must</span></dd>':'')+
    '</dl></div></div>';
+  var says=m&&memSayings(m).length?'<div class="panel" style="margin-top:14px" data-mem-page-says><div class="panel-h"><h3>Sayings</h3>'+
+    '<span class="b b-q" style="margin-left:auto">'+memSayings(m).length+'</span></div><div class="panel-b">'+memSaysList(m,false)+'</div></div>':'';
   return srcHead(o,lab,o.title,badges,lead,acts)+
-   '<div class="crec-grid"><div>'+rec+'</div><div>'+srcFramesPanel(o)+srcReachPanel(o)+'</div></div>';
+   '<div class="crec-grid"><div>'+rec+says+'</div><div>'+srcFramesPanel(o)+srcReachPanel(o)+'</div></div>';
 }
 function pSkillWithheld(id){
   var o=srcRowOf("skill",id,S.ws), x=(SOURCES.withheld||[]).filter(function(y){return y.id===id;})[0];
@@ -1074,11 +1093,10 @@ function pSkillWithheld(id){
    row opens a side panel on the same page (D14). Findings live in Work. No person is scored or
    ranked: operator habits are written as rules the operator can adopt (D15). */
 var SPEND_BY=[["work","Work order"],["operator","Operator"],["agent","Agent"],["model","Model"],["tool","Tool"],["cost_center","Cost center"]];
-/* ADR-142: an agent's label, else its workspace's, else the reserved key ~none. */
-var CC_WS={"core-platform":"eng-platform","data-platform":"eng-data","mobile":"eng-mobile","infra":"eng-infra","support":"cx-support",
-  "growth":"gtm-growth","security":"sec-ops","finops":"fin-ops"};
-var CC_AGENT={"a-intel.core.docs-writer":"eng-docs"};
-function ccOf(k){ var a=agent(k); return CC_AGENT[k]||(a&&CC_WS[a.ws])||"~none"; }
+/* ADR-142: the label an agent's month rolled up to (its own, else its workspace's), else the reserved key
+   ~none. The labels come from cost-centers.json through ccReady() in engine.js, the same ones the
+   Organization page and an agent's Identity tab edit, so the three never disagree. */
+function ccOf(k){ ccReady(); return CC.rolledBy[k]||"~none"; }
 function spendHref2(by,key,view){
   var base="#/"+ORG.slug+"/"+S.ws+"/spend"+(view&&view!=="overview"?"/"+view:""), q=[];
   if(!view||view==="overview"){ if(by&&by!=="work") q.push("by="+by); if(key) q.push("key="+encodeURIComponent(key)); }
@@ -1122,7 +1140,7 @@ function spendRows(by){
     return {key:t.t,usd:+t.spend,cells:['<span class="mono" style="font-size:12px">'+h(t.t)+'</span><div class="dim" style="font-size:11px">'+h(t.s)+'</div>',
       '<td class="num">'+t.calls.toLocaleString()+'</td>','<td class="num">'+t.runs.toLocaleString()+'</td>','<td class="num">'+fmt$(t.perCall)+'</td>']};});
   if(by==="cost_center"){ var g={}; SPEND.byAgent.forEach(function(a){var c=ccOf(a.k); g[c]=g[c]||{usd:0,agents:0,ws:{}}; g[c].usd+=n$(a.spend); g[c].agents++; var x=agent(a.k); if(x) g[c].ws[x.ws]=1;});
-    return Object.keys(g).map(function(c){return {key:c,usd:g[c].usd,cells:['<span class="mono">'+h(c)+'</span>'+(c==="~none"?'<div class="dim" style="font-size:11px">no agent or workspace label</div>':''),
+    return Object.keys(g).map(function(c){return {key:c,usd:g[c].usd,cells:['<span class="mono">'+h(c)+'</span>'+(c==="~none"?'<div class="dim" style="font-size:11px">no agent or workspace label</div>':ccFind(c)?'':' <span class="b b-q">deleted</span>'),
       '<td class="num">'+g[c].agents+'</td>','<td>'+Object.keys(g[c].ws).map(function(x){return '<span class="mono" style="font-size:11.5px">'+h(x)+'</span>';}).join(", ")+'</td>']};}); }
   return WORKORDERS.map(function(w){var s=woSpend(w), items=woItems(w), ok=(w.claims||[]).filter(function(c){return c&&c.ok;}).length, who=PEOPLE[w.by]||{name:w.by};
     return {key:w.id,usd:s,cells:['<span class="mono" style="font-size:12px">'+h(w.id)+'</span><div style="font-size:12px">'+h(w.title)+'</div>',
@@ -1173,7 +1191,7 @@ function spendSide(by,key){
       (x.note?'<dt>Record</dt><dd>'+h(x.note)+'</dd>':''); }
   else if(by==="cost_center"){ var L=SPEND.byAgent.filter(function(a){return ccOf(a.k)===key;});
     kv='<dt>Agents</dt><dd>'+L.length+'</dd><dt>Spend</dt><dd>'+fmt$(row.usd)+'</dd><dt>Resolved from</dt><dd>'+(key==="~none"?'no label on the agent or its workspace':'the agent’s label, else its workspace’s')+'</dd>';
-    foot='<button class="btn sm" onclick="act(\'Statement for '+h(key)+' exported as CSV. Each line is rounded once, at the statement.\')">Export the statement</button>'; }
+    foot='<button class="btn sm" onclick="'+(ccCanEdit()?'openDialog(\'ccexport\')':'ccDenied(\'can export the chargeback statement\')')+'">Export the statement</button>'; }
   else { var w=woById(key), rs=w?(w.runs||[]):[];
     title=w?w.title:key;
     kv='<dt>Work order</dt><dd><a class="mono" href="'+woUrl(w)+'">'+h(w.id)+'</a> '+woKindBadge(w)+'</dd><dt>Sent by</dt><dd>'+h((PEOPLE[w.by]||{name:w.by}).name)+'</dd>'+
