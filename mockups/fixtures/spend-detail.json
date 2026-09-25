@@ -42,7 +42,7 @@
     988.06
    ],
    [
-    "(no tool call)",
+    "No tool (reasoning and replies)",
     3471.5
    ]
   ],
@@ -65,7 +65,7 @@
   "cache": 0.77,
   "wasted": 1318.4,
   "perRun": 5.58,
-  "trend": "-2% vs August",
+  "trend": "−2% vs August",
   "modelCalls": 22810,
   "toolCalls": 6904,
   "agents": [
@@ -96,7 +96,7 @@
     148.1
    ],
    [
-    "(no tool call)",
+    "No tool (reasoning and replies)",
     1542.56
    ]
   ],
@@ -150,7 +150,7 @@
     41.16
    ],
    [
-    "(no tool call)",
+    "No tool (reasoning and replies)",
     39.02
    ]
   ],
@@ -174,7 +174,7 @@
   "wasted": 61.2,
   "perRun": 2.27,
   "ratio": 0.71,
-  "trend": "-8% vs August",
+  "trend": "−8% vs August",
   "modelCalls": 6104,
   "toolCalls": 4212,
   "operators": [
@@ -201,7 +201,7 @@
     41.2
    ],
    [
-    "(no tool call)",
+    "No tool (reasoning and replies)",
     66.98
    ]
   ],
@@ -221,7 +221,7 @@
   "wasted": 204.6,
   "perRun": 2.89,
   "ratio": 0.48,
-  "trend": "-3% vs August",
+  "trend": "−3% vs August",
   "modelCalls": 3120,
   "toolCalls": 2214,
   "operators": [
@@ -248,7 +248,7 @@
     38.9
    ],
    [
-    "(no tool call)",
+    "No tool (reasoning and replies)",
     73.06
    ]
   ],
@@ -297,7 +297,7 @@
     30.1
    ],
    [
-    "(no tool call)",
+    "No tool (reasoning and replies)",
     22.41
    ]
   ],
@@ -356,7 +356,7 @@
   "wasted": 14.8,
   "perRun": 1.11,
   "ratio": 0.38,
-  "trend": "-1% vs August",
+  "trend": "−1% vs August",
   "modelCalls": 812,
   "toolCalls": 402,
   "operators": [
@@ -379,7 +379,7 @@
     11.7
    ],
    [
-    "(no tool call)",
+    "No tool (reasoning and replies)",
     6.05
    ]
   ],
@@ -446,7 +446,7 @@
   "resTok": 900,
   "rerun": 0.06,
   "retry": 0,
-  "trend": "-3% vs August",
+  "trend": "−3% vs August",
   "agents": [
    [
     "a-intel.core.stella-ci",
@@ -610,7 +610,7 @@
   "resTok": 300,
   "rerun": 0.01,
   "retry": 0,
-  "trend": "-1% vs August",
+  "trend": "−1% vs August",
   "agents": [
    [
     "a-intel.core.stella-ci",

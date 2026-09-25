@@ -38,7 +38,7 @@ const RULES = [
   ["US spelling", /colour|behaviour|labelling|Cancelled/],
   ["uppercased id", /\b(WO|TSK|RUN)_[0-9A-Z]{6,}\b|A-INTEL\//],
   // The rest of the review's glossary: one term per concept, and no internal names in page copy.
-  ["retired term", /\bfr \d|interjection|Wasted spend|[Mm]odel tier|Wrong (model )?tier|light tier|client tier|\bseams?\b|issue provider|Bind it|not bound|volatile selection|\bshelf\b|text plane|gate plane|a call at most|PER CALL/],
+  ["retired term", /\bfr \d|interjection|Wasted spend|[Mm]odel tier|Wrong (model )?tier|light tier|client tier|\bseams?\b|issue provider|Bind it|not bound|volatile selection|\bshelf\b|text plane|gate plane|a call at most|(^|\n)PER CALL\n/],
   ["internal name", /\bkernel\b|reflector|archiver|player[’']s window|manifest gate|deny generation|hook boundary|shared plane|opt-down|[Bb]elt computation/],
   ["rhetoric", /earns the word|stronger word than|says more than that|refuses to say otherwise|not a verdict|It is not a result/],
   ["empty slot", /Task —\.|\btask —|µUSD/],

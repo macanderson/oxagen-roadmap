@@ -192,7 +192,7 @@
   "method": [
    [
     "Measured",
-    "Every model call on a-intel.core.triage carried 9,140 tokens of tool definitions: 52 tools on the toolbelt."
+    "Every model call on a-intel.core.triage carried 9,140 tokens of tool definitions for the 52 tools on the toolbelt."
    ],
    [
     "Baseline",
@@ -391,7 +391,7 @@
   "confidence": "medium",
   "trend": "+4% over 30 days",
   "basis": "client_attested",
-  "signal": "model tier per step shape",
+  "signal": "model class per step shape",
   "measured": "14% of calls on claude-opus-5",
   "baseline": "0% expected for classification",
   "counterfactual": "retries stay on claude-haiku-4-5",
@@ -406,11 +406,11 @@
    ],
    [
     "Same output",
-    "On 188 of 191 escalated calls the label matched what the light tier had already produced on the same input elsewhere."
+    "On 188 of 191 escalated calls the label matched what the light model class had already produced on the same input elsewhere."
    ],
    [
     "Counterfactual",
-    "Re-price the escalated calls at the light tier. Medium confidence because 3 of 191 differed."
+    "Re-price the escalated calls at the light model class. Medium confidence because 3 of 191 differed."
    ]
   ],
   "who": {
@@ -460,7 +460,7 @@
    ],
    [
     "What they did",
-    "Those tail steps re-read the file just written, re-listed the directory, and asked the model whether it was done: 2.1 model calls per tail step."
+    "Those tail steps re-read the file just written, re-listed the directory, and asked the model whether it was done, at 2.1 model calls per tail step."
    ],
    [
     "Nothing kept",
@@ -507,7 +507,7 @@
   "confidence": "high",
   "trend": "flat",
   "basis": "client_attested",
-  "signal": "cache_write_5m with no cache_read inside the TTL",
+  "signal": "5-minute cache write with no cache read inside the TTL",
   "measured": "28 of 28 one-turn runs",
   "baseline": "0 expected",
   "counterfactual": "no cache write on one-turn runs",

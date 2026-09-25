@@ -154,7 +154,7 @@ Two panels, on every tab.
 **Dialogs this page opens:** `frame`, `pause`, `steer`, `cancelrun`, `runexport`, and `approve` or `deny` from a parked approval frame. The shared dialogs:
 
 - `pause`: "Pause this run", what a pause holds, the facts Run, Position and Recorded as, a Reason field the model reads on resume, the note "Pause is not cancel.", and "Cancel" and "Pause at the next boundary".
-- `steer`: "Steer this run", a "Steering text" field, Address ("this run", or every live run of this agent), "To steer every live run in the workspace at once, use Steer on the Agents page.", Delivery ("At the boundary" or "Interrupt"; "Interrupt cuts the call in flight at the proxy on the gateway and contained tiers. On the harness tier a steer lands at the next hook boundary."), "Recorded per run as a control.steer frame attributed to you.", and "Cancel" and "Steer".
+- `steer`: "Steer this run", a "Steering text" field, Address ("this run", or every live run of this agent), "To steer every live run in the workspace at once, use Steer on the Agents page.", Delivery ("At the boundary" or "Interrupt"; "Interrupt cuts the call in flight at the proxy on the gateway and contained tiers. On the harness tier a steer lands at the next checkpoint."), "Recorded per run as a control.steer frame attributed to you.", and "Cancel" and "Steer".
 - `cancelrun`: "Cancel this run?", three lines on what cancel does (the run token is revoked at once, killing the process is best effort, nothing is rolled back), and "Let it run" and "Cancel the run".
 - `runexport`: "Export this run", subtitle "segment, attestation, key ids and the verifier", Scope and Format selects, the facts Segment and Seal, and "Cancel" and "Build bundle".
 

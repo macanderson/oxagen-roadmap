@@ -16,7 +16,7 @@
   "allow": "vendor:aws, vendor:github",
   "deny": "*",
   "tools": "stripe__create_payment@*, aws_billing__purchase_savings_plan@2",
-  "approvalAbove": "100.00",
+  "approvalAbove": "250.00",
   "alwaysFor": "moves_funds",
   "approvers": "role:org.billing",
   "purpose": "monthly infrastructure invoices, PO-4471",
@@ -52,9 +52,10 @@
    {
     "when": "2026-09-01",
     "call": "stripe__create_payment@4",
-    "amount": "0.00",
+    "amount": "1,150.00",
     "state": "released",
-    "ext": "dispatch failed \u00b7 released",
+    "ext": "\u2014",
+    "why": "dispatch failed",
     "rcp": "rcp_01K4V7\u2026"
    }
   ]

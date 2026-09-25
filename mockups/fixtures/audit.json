@@ -29,7 +29,7 @@
   "who": "gateway",
   "what": "Stripe charge ch_3Qa8 with no receipt · $18.00 USD",
   "sev": "critical",
-  "ref": "exc_01K5RN2P"
+  "ref": "inc_01K5RN2P"
  },
  {
   "t": "07:38:12",

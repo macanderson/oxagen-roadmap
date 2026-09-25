@@ -106,12 +106,12 @@
    "A tool that a run calls without a grant is denied and recorded, so a narrowing that was too tight shows up as a policy.decision frame, not a silent failure."
   ],
   "action": "Narrow the grants",
-  "done": "Draft pull request opened with the 18 called tools granted. Review it and publish; the toolbelt recompiles on the next run."
+  "done": "Draft pull request opened with the 18 called tools granted. Review changes and publish. The toolbelt recompiles on the next run."
  },
- "Wrong tier": {
+ "Wrong model class": {
   "shape": "article",
   "title": "Why retries on this agent escalate to the flagship tier",
-  "why": "The harness routes each step by tier: light for classification-shaped work, complex for reasoning. When a light-tier call fails or times out, the retry takes the fallback route, and this agent's fallback is the workspace default, which is the complex tier. So every transient timeout on a 300-token label call is retried on claude-opus-5 at 15× the price, and 188 of 191 such retries produced the same label the light tier had already given on the same input.",
+  "why": "The harness routes each step by tier: light for classification-shaped work, complex for reasoning. When a light-tier call fails or times out, the retry takes the fallback route, and this agent's fallback is the workspace default, which is the complex tier. So every transient timeout on a 300-token label call is retried on claude-opus-5 at 15× the price, and 188 of 191 such retries produced the same label the light model class had already given on the same input.",
   "before": {
    "lang": "yaml",
    "code": "<span class=\"c\"># agents/triage/agent.yaml: as it stands</span>\n<span class=\"k\">model</span>:\n  <span class=\"k\">route</span>: <span class=\"s\">light</span>\n  <span class=\"c\"># fallback: inherited, workspace default is \"complex\"</span>"
@@ -126,7 +126,7 @@
    "The route each call took is on its frame as model, so the Spend page shows the fix taking effect the same day."
   ],
   "action": "Pin the fallback route",
-  "done": "Fallback pinned to the light tier for a-intel.core.triage. Recorded as a definition change; takes effect on the next run."
+  "done": "Fallback pinned to the light model class for a-intel.core.triage. Recorded as a definition change; takes effect on the next run."
  },
  "Unproductive tail": {
   "shape": "article",
