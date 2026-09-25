@@ -112,9 +112,9 @@ export default {
     ["--st-approval, --st-failed, --st-critical, --st-allowed", "Icon tones"],
   ],
   helpers: [
-    ["notifsBody()", "engine.js:1745", "Writes the notification list, one `.li` per entry, unread ones as buttons via `notifRead()`."],
-    ["notifIcon(tone)", "engine.js:1738", "The tone's icon: a check for allowed, a clock for approval, a confetti mark for gold, a triangle for anything else, including failed and critical."],
-    ["accountBody()", "engine.js:9912", "The Security tab's two `.lst` lists, with an inline-styled `.ic` instead of a tone class."],
+    ["notifsBody()", "engine.js:1741", "Writes the notification list, one `.li` per entry, unread ones as buttons via `notifRead()`."],
+    ["notifIcon(tone)", "engine.js:1734", "The tone's icon: a check for allowed, a clock for approval, a confetti mark for gold, a triangle for anything else, including failed and critical."],
+    ["accountBody()", "engine.js:9649", "The Security tab's two `.lst` lists, with an inline-styled `.ic` instead of a tone class."],
   ],
   sourceNotes: [
     "`.lst` and `.li` are defined twice in engine.css: once at lines 558 to 568, and again at 596 to 615. The second definition wins the cascade and is the one that actually renders, since it adds `:hover`, the five `.ic.t-*` tones, `.unread`, and `[role=button]`. The first definition draws nothing a person can see that the second does not already draw.",

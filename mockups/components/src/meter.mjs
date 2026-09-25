@@ -99,11 +99,11 @@ export default {
     ["--fg, --muted, --dim", "Figure, legend text, and sub line"],
   ],
   helpers: [
-    ["stgMeter(label, used, max, unit, sub)", "engine.js:6466", "Single-value meter with `role=\"img\"` and an aria-label stating the percent. Holds at 90%."],
-    ["tokBars(t, opts)", "engine.js:192", "One composition meter per prompt part, plus output and reasoning, each in its own hue."],
-    ["stack3(parts, total)", "engine.js:2665", "One `.stk` segment per part, sized by flex, each with a tooltip."],
-    ["stackLeg(parts)", "engine.js:2668", "The `.leg` row naming each part `stack3()` drew."],
-    ["mandateBar(m, showReserve)", "engine.js:1800", "The `.mbar` budget bar plus its own `.mlegend`, for a mandate card and the mandate page."],
+    ["stgMeter(label, used, max, unit, sub)", "engine.js:6323", "Single-value meter with `role=\"img\"` and an aria-label stating the percent. Holds at 90%."],
+    ["tokBars(t, opts)", "engine.js:196", "One composition meter per prompt part, plus output and reasoning, each in its own hue."],
+    ["stack3(parts, total)", "engine.js:2654", "One `.stk` segment per part, sized by flex, each with a tooltip."],
+    ["stackLeg(parts)", "engine.js:2657", "The `.leg` row naming each part `stack3()` drew."],
+    ["mandateBar(m, showReserve)", "engine.js:1796", "The `.mbar` budget bar plus its own `.mlegend`, for a mandate card and the mandate page."],
   ],
   sourceNotes: [
     "A third local meter, `crecMeter()` (engine.js:13304), draws a Steering record's rendered, cited, and violated counts with the same `.meter`, `.lab`, and `.bar` markup as `stgMeter()`, but takes its own arguments and sets no `role` or `aria-label`.",

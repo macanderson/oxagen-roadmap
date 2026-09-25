@@ -35,7 +35,7 @@ export default {
       html: `
         <div class="apd-scrim open" style="position:relative;inset:auto;background:none"></div>
         <aside id="apdrawer" class="apd open" role="complementary" aria-label="Approvals" style="position:relative;top:auto;bottom:auto;right:auto;width:100%;max-width:420px;border-left:1px solid var(--border);border-radius:12px;overflow:hidden">
-          <div class="apd-h"><h3>Approvals</h3><span class="b b-approval"><span class="d"></span>4 waiting on you in all workspaces</span>
+          <div class="apd-h"><h2>Approvals</h2><span class="b b-approval"><span class="d"></span>4 waiting on you in all workspaces</span>
             <button class="iconbtn" style="margin-left:auto" aria-label="Close approvals">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
             </button>
@@ -70,7 +70,6 @@ export default {
                 <span class="b b-allowed" style="flex:none"><span class="d"></span>approved</span>
               </button>
             </div>
-            <div class="note" style="margin-top:14px;font-size:11.5px">Approving allows this exact call once. When the approval expires, the call ends and the agent is told why.</div>
           </div>
         </aside>`,
     },
@@ -81,7 +80,7 @@ export default {
       canvas: "panel",
       html: `
         <aside id="apdrawer" class="apd open" role="complementary" aria-label="Approvals" style="position:relative;top:auto;bottom:auto;right:auto;width:100%;max-width:420px;border-left:1px solid var(--border);border-radius:12px;overflow:hidden">
-          <div class="apd-h"><h3>Approvals</h3><span class="b b-approval"><span class="d"></span>4 waiting on you in all workspaces</span>
+          <div class="apd-h"><h2>Approvals</h2><span class="b b-approval"><span class="d"></span>4 waiting on you in all workspaces</span>
             <button class="iconbtn" style="margin-left:auto" aria-label="Close approvals">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
             </button>
@@ -116,7 +115,7 @@ export default {
       canvas: "panel",
       html: `
         <aside id="apdrawer" class="apd open" role="complementary" aria-label="Approvals" style="position:relative;top:auto;bottom:auto;right:auto;width:100%;max-width:420px;border-left:1px solid var(--border);border-radius:12px;overflow:hidden">
-          <div class="apd-h"><h3>Approvals</h3><span class="b b-q"><span class="d"></span>0 waiting on you in all workspaces</span>
+          <div class="apd-h"><h2>Approvals</h2><span class="b b-q"><span class="d"></span>0 waiting on you in all workspaces</span>
             <button class="iconbtn" style="margin-left:auto" aria-label="Close approvals">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
             </button>
@@ -133,7 +132,7 @@ export default {
   anatomy: [
     ["Scrim", "`.apd-scrim`", "The fixed backdrop, `rgba(0,0,0,.42)`, that fades in with `.open` and closes the drawer on click."],
     ["Panel", "`.apd`", "A `--panel` box 680px wide (`min(680px, 100vw - 56px)`), pinned to the right edge, full height, with a 1px `--border` left edge. Phone drops it to full width."],
-    ["Header", "`.apd-h`", "The h3 title (14px), the total badge, and the close button, 14px by 16px padding, with a bottom border."],
+    ["Header", "`.apd-h`", "The h2 title (14px), the total badge, and the close button, 14px by 16px padding, with a bottom border."],
     ["Body", "`.apd-b`", "The rows, 14px by 16px padding. It scrolls on its own when the list is taller than the window."],
     ["List", "`.apd-list`", "An 8px grid of rows, one per section (waiting on you, resolved today)."],
     ["Row", "`.apd-row`", "A full-width button: a 26px icon tile (`.g`), the title block (`.tt`), and a clock or a resolved badge, in a `--panel` card with a 1px `--border`. Hover lifts the border to `--rule`."],
@@ -193,13 +192,13 @@ export default {
     ["--dim", "Resolved countdown"],
   ],
   helpers: [
-    ["apdButton()", "engine.js:1687", "The topbar trigger, with the live count."],
-    ["apdToggle(v)", "engine.js:1693", "Opens or closes the drawer and clears the selection on close."],
-    ["apdRow(a)", "engine.js:1696", "One approval row, pending or resolved."],
-    ["apdInterjectionRow(x)", "engine.js:1708", "The paused-agent row, with its own Answer button."],
-    ["apdBody(a)", "engine.js:1714", "The list, or the selected approval's card when `S.apd.sel` is set."],
-    ["apdHtml()", "engine.js:1728", "The scrim and the panel, assembled from `apdBody()`."],
-    ["approvalCard(a)", "engine.js:1902", "The full card shown for a selected row, shared with the Run page."],
+    ["apdButton()", "engine.js:1683", "The topbar trigger, with the live count."],
+    ["apdToggle(v)", "engine.js:1689", "Opens or closes the drawer and clears the selection on close."],
+    ["apdRow(a)", "engine.js:1692", "One approval row, pending or resolved."],
+    ["apdInterjectionRow(x)", "engine.js:1704", "The paused-agent row, with its own Answer button."],
+    ["apdBody(a)", "engine.js:1710", "The list, or the selected approval's card when `S.apd.sel` is set."],
+    ["apdHtml()", "engine.js:1724", "The scrim and the panel, assembled from `apdBody()`."],
+    ["approvalCard(a)", "engine.js:1896", "The full card shown for a selected row, shared with the Run page."],
   ],
   sourceNotes: [
     "Escape closes the drawer through the document key handler at engine.js 1673, guarded on no dialog being open.",

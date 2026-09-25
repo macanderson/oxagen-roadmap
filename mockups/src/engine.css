@@ -2099,7 +2099,7 @@ body.asst-resizing{cursor:ew-resize;user-select:none}
 .apd.open{translate:0 0;opacity:1;visibility:visible;transition:translate .34s cubic-bezier(.32,.72,0,1),opacity .18s ease,visibility 0s 0s}
 .apd.phone{width:100%;max-width:100%}
 .apd-h{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);flex:none}
-.apd-h h3{margin:0;font-size:14px}
+.apd-h h2,.apd-h h3{margin:0;font-size:14px}
 .apd-b{padding:14px 16px;overflow-y:auto;flex:1;min-height:0}
 .apd-list{display:grid;gap:8px}
 .apd-row{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;padding:10px 11px;border:1px solid var(--border);border-radius:10px;background:var(--panel);color:var(--fg);cursor:pointer;transition:border-color .15s}

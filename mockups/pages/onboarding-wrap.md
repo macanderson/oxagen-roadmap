@@ -16,13 +16,13 @@ Step 2 of 3 of the gate: wrap the first agent. This is the Register agent wrap s
 
 ## What is on the page
 
-**Header.** Eyebrow “Step 2 of 3”, h1 “Wrap an agent”, lead “The installer carries a one-time enrollment token for `a-intel.core.release-manager`, so nothing is copied or pasted.”
+**Header.** Eyebrow “Step 2 of 3”, h1 “Wrap an agent”, no lead. Why nothing is copied or pasted is in the component help (`mockups/help/onboarding-wrap.md`, Page header).
 Actions (card footer): **Cancel** · **Back** · caption “Nothing completes until a frame arrives.” · **I already installed it**. The gold action is **Download for <OS>** inside the Claude Code and Codex CLI panels. The SDK panel has no gold action.
 
 - Harness tabs (`role=tablist`, “How to wrap the agent”): **Claude Code** “one click · harness” · **Codex CLI** “one click · harness” · **SDK agent** “five lines · harness”. Claude Code is preselected (the onboarding record’s harness is `claude-code`).
 - The three panels are the ones in `register-wrap.md`, word for word, with the key `a-intel.core.release-manager` in the SDK code: Claude Code (h3 with “recommended”, the installer copy, the tier ladder This agent `harness` · Next rung `gateway` · Top rung `contained`, the tier sentence, the Download column with OS tabs macOS · Windows · Linux, **Download for macOS**, the `REG_PKG` package line, the token box with `oxe_1time_7QK4M2NV9XR3T8ZP` and “expires in 30 min · single use”, and `oxagen agent enroll --token …`); Codex CLI (the `~/.codex/config.toml` copy, “or observe” on the ladder, “profile: codex-cli”, `oxagen agent enroll --harness codex-cli`); SDK agent (the five-line copy, the “Agent credential” box, the install line, language tabs TypeScript · Python · Go, **Copy the five lines**, the code).
 
-**Shell.** No sidebar and no topbar, so this page has no approvals button and no approvals drawer. The gate shell (`regShell` in onboard mode): brandmark, `marcus@a-intel.example`, **Cancel**; the rail (`nav` labelled “Onboarding”) with step 1 Name the organization done (✓, a button back), step 2 Wrap an agent current, step 3 Start a run disabled; the caption “The operator console opens when an agent first connects to oxagen. That connection also tests the install.” The phone layout is the same card at full width.
+**Shell.** No sidebar and no topbar, so this page has no approvals button and no approvals drawer. The gate shell (`regShell` in onboard mode): brandmark, `marcus@a-intel.example`, **Cancel**; the rail (`nav` labelled “Onboarding”) with step 1 Name the organization done (✓, a button back), step 2 Wrap an agent current, step 3 Start a run disabled; no caption under the card. The phone layout is the same card at full width.
 
 ## Data sources
 
@@ -44,7 +44,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell), Claude Code tab and macOS selected.
 - **loading**: the shell and the rail stay. The card is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
-- **access denied**: “You cannot see onboarding”, then “Your roles on Anderson Intelligence Corp. do not include `org.create for marcus@a-intel.example`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Work**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “org.create for marcus@a-intel.example”, *Decided by* “pol_v41 · deny wins over every allow”.
+- **access denied**: “You cannot see onboarding”, then “Your roles on Anderson Intelligence Corp. do not include `org.create for marcus@a-intel.example`. An organization owner can grant it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Work**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “org.create for marcus@a-intel.example”, *Decided by* “pol_v41”.
 
 ## Mobile
 

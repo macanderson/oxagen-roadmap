@@ -179,7 +179,7 @@ to a runtime waits.
 
 The send menu and the work order dialog (`tasks-spec.md` §9.2, §9.3) accept a selection that includes
 blocked tasks. The dialog's Tasks section marks each blocked chip "blocked by #481", and section 1 gains one
-line: "2 of 3 tasks are blocked. Oxagen sends this work order when they are unblocked, and expires it on
+line: "2 of 3 work items are blocked. Oxagen sends this work order when they are unblocked, and expires it on
 <date> if they are not." The footer button reads **Queue until unblocked** instead of **Send to <target>**.
 The prompt, the repositories, the cap, and the confirmation are the same, because the brief is fixed at
 the send. A queued brief cannot change either.
@@ -434,8 +434,8 @@ Each change lands in an existing page spec of the Work pages. Nothing gains a ro
   `in a work order`, `accepted`, `closed as Done`, `closed as Won't do`), and the source: the provider's
   logo with "from GitHub", or "added here by Marcus Bell on 2026-09-11". An `oxagen` row has **Remove**.
   A `provider` row's title says "Read from GitHub. Remove the link there." In the header, **Add a
-  dependency** opens `tklink`. A task with no dependency shows "None. This task waits on nothing, and
-  nothing waits on it." The count of links to issues outside the connection's scope, when any.
+  dependency** opens `tklink`. A task with no dependency shows "None. This work item waits on nothing,
+  and nothing waits on it." The count of links to issues outside the connection's scope, when any.
 - **`tklink`** (§12.2).
 - **History** gains "Dependency added", "Dependency removed", "Unblocked", and "Queued in a work order".
 
@@ -483,7 +483,8 @@ Releasing toasts "Sent to Release manager. release_work_order recorded, with #48
 
 ### 12.4 `wowithdraw`
 
-Title "Withdraw this work order?", subtitle "Nothing has started. The tasks go back to ready." Footer
+Title "Withdraw this work order?", subtitle the title, and the body "Nothing has started. The work
+items go back to ready." Footer
 **Keep it**, **Withdraw** (red). From the start receipt on, the dialog is `wostop` of `tasks-spec.md`
 and the button reads **Stop it**.
 

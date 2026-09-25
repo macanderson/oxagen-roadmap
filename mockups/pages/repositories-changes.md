@@ -22,7 +22,7 @@ List every pull request Oxagen has open on this workspace's repositories, of eve
 
 ### The list
 
-**Open pull requests panel.** Heading "Open pull requests". The subtext says there are four kinds of file and one lifecycle, and that whoever opened a pull request (a person, the promoter, or the reconciler), the checks, the merge and the publication are the same. The shell's list tools sit above the rows: "Search this list", the filters "Any state", "Any kind" and "Any opened by", Rows, sortable headers and a pager over the six rows.
+**Open pull requests panel.** Heading "Open pull requests", and no subtext. The shell's list tools sit above the rows: "Search this list", the filters "Any state", "Any kind" and "Any opened by", Rows, sortable headers and a pager over the six rows. The one lifecycle every kind shares is in the component help (`mockups/help/repositories-changes.md`, Open pull requests).
 
 Columns, in order: Change · Kind · Pull request · Opened by · State · Checks · Opened.
 
@@ -42,15 +42,9 @@ Columns, in order: Change · Kind · Pull request · Opened by · State · Check
 - **Checks** is the CI light and "done / total". The light blinks blue while any check runs, shows a red ✕ the moment one fails (pulsing while others still run), stays green when every check passed, and grey while all are queued. Its title says "running", "N failed", "all passed" or "queued".
 - A row opens that pull request on click, Enter or Space (`role="button"`, `tabindex="0"`, `aria-label="Open <title>"`).
 
-A note closes the panel: "A change takes effect at its merge commit. While its pull request is open, it steers nothing: it is not in the compiled bundle or the record index, and the bundle version has not moved."
+No note closes the panel. That a change steers nothing until its merge commit is in the component help (`mockups/help/repositories-changes.md`, Open pull requests).
 
-**Automatic proposals panel.** Three openers, each with one line:
-
-- Promoter: "Groups records across runs by lineage and opens a proposal that cites those runs. There is no threshold. A person reads the cited runs and decides."
-- Reconciler: "Compares .oxagen/workspace.toml with the control plane’s live state and opens one pull request per difference. It does not edit live state to match the file."
-- Person: "Every creation wizard (agent, tool, skill, and record) ends here. None of them saves straight to the database."
-
-A note says drift is reported and never repaired in place, because a reconciler that silently edited either side would make the file a description of the past, and the pull request is the only place a person can say which of the two was right.
+No panel follows the list. What each opener does (the promoter, the reconciler and a person) is in the component help (`mockups/help/repositories-changes.md`, Open pull requests). The design drew it as an Automatic proposals panel that only taught what Opened by means.
 
 ### One pull request
 
@@ -70,13 +64,13 @@ Selecting a row replaces the list with the pull request. The panel's head holds 
 
 On a failure the note "<check> stopped the run." follows, with what the check asserted, then "The checks behind it stayed queued, merge is disabled, and nothing was published." For #522: `grants` failed ("The bundle adds github__merge_pull_request to its tool list. A skill cannot raise a tier or add a tool."), and `secret_pii_scan` and `load_cost` read "Did not run: grants stopped the run."
 
-- **What merge will do**, five numbered steps: "Squash the branch onto <base>, pinned to the commit the checks ran on." "Delete the head branch." "Re-index from the merged commit and bump the workspace bundle version." "Append the promotion event to the ledger, with the approver and the commit sha." "Write one audit event. The change is in force from that commit, not from now."
-- **Actions**: **Merge pull request** is gold only when every check has reported and none failed, and disabled otherwise. **Close pull request** is red and opens `closepr`. A line at the right reads "GitHub enforces team (code-owner review) governance." when merge is enabled, or "Merge stays disabled until every check reports." otherwise. Merging reports "Merged <pull request>. Squashed onto <base>, head branch deleted, bundle bumped, promotion event and audit event written."
-- A merged pull request shows, in place of the steps and actions, "Merged. The file is on main, the promotion event is on the ledger, and the workspace’s steering version is the ledger’s length." A closed one shows "Closed without merging. The comment on <pull request> names who closed it and links back here."
+- **What merge does** is not listed on the page. The five steps (squash onto the base pinned to the checked commit, delete the head branch, re-index and bump the bundle version, append the promotion event, write one audit event) are in the component help (`mockups/help/repositories-changes.md`, Pull request).
+- **Actions**: **Merge pull request** is gold only when every check has reported and none failed, and disabled otherwise. **Close pull request** is red and opens `closepr`. A line at the right reads "Governance mode team." when merge is enabled, or "Merge stays disabled until every check reports." otherwise. Merging reports "Merged <pull request>. Squashed onto <base>, head branch deleted, bundle bumped, promotion event and audit event written."
+- A merged pull request shows, in place of the actions, "Merged. The file is on main and the promotion event is on the ledger." A closed one shows "Closed without merging. The comment on <pull request> names who closed it and links back here."
 
 **Dialogs this page opens:** `closepr`, and the init wizard from the header (specified in `repositories.md`).
 
-- **`closepr`**, "Close <pull request>", subtitle "without merging". The lead: "The pull request closes on GitHub and nothing is published. oxagen posts this comment on it:". The comment, previewed as GitHub renders it: "Closed by Marcus Bell <marcus@a-intel.example>", a horizontal rule, then "Added via oxagen" and the full address of this pull request in Oxagen as the link text (`https://app.oxagen.sh/a-intel/core-platform/repositories/changes/<id>`). The note: "Closing is a governed action: it is recorded in Audit with your name, and the branch stays until someone deletes it." Footer: **Cancel**, **Close pull request** (red). Closing reports that the pull request closed without merging and quotes the comment posted.
+- **`closepr`**, "Close <pull request>", subtitle "without merging". The lead: "The pull request closes on GitHub and nothing is published. oxagen posts this comment on it:". The comment, previewed as GitHub renders it: "Closed by Marcus Bell <marcus@a-intel.example>", a horizontal rule, then "Added via oxagen" and the full address of this pull request in Oxagen as the link text (`https://app.oxagen.sh/a-intel/core-platform/repositories/changes/<id>`). No note; that closing is audited is in the dialog's component help (`mockups/help/steering-prs.md`). Footer: **Cancel**, **Close pull request** (red). Closing reports that the pull request closed without merging and quotes the comment posted.
 
 ## Data sources
 

@@ -16,13 +16,13 @@ The organization page opened on its API keys tab: keys minted for service princi
 
 ## What is on the page
 
-**Header**: eyebrow "Organization", h1 "<organization name>", subtext "People, roles, invitations, workspaces, cost centers, model funding and routes, and API keys." Breadcrumb: <organization> / Organization / **API keys**.
+**Header**: eyebrow "Organization", h1 "<organization name>", and no subtext. Breadcrumb: <organization> / Organization / **API keys**.
 Actions: **Invite** (opens `invite`), **Create a workspace** (gold; opens `newws`).
 
 **Tabs**: the eight Organization tabs, with **API keys** selected.
 
-- **API keys**: panel "API keys" with the caption "Each key is a service principal with its own grants" and **Create key** (opens `apikey`); Rows; columns Name (with the masked key beneath), Principal, Grants (one chip each), Created by, Last used, Actions 30d, Expires (a state badge Active, "Expires in N days" counted from the mock's current date, or "Never used", with the date beneath); per row **Rotate** (opens `rotatekey`), **Revoke** (opens `revokekey`); a note that a key is shown once, carries grants not roles, and revoking ends the principal's access at the next call.
-- **Surfaces this reaches**: one paragraph saying the API, MCP, the CLI and these screens share one set of actions, so a key can do the same everywhere; four example `oxagen` CLI lines.
+- **API keys**: panel "API keys" with no caption and **Create key** (opens `apikey`); Rows; columns Name (with the masked key beneath), Principal, Grants (one chip each), Created by, Last used, Actions 30d, Expires (a state badge Active, "Expires in N days" counted from the mock's current date, or "Never used", with the date beneath); per row **Rotate** (opens `rotatekey`), **Revoke** (opens `revokekey`). The panel has no note: that a key is shown once, carries grants rather than roles, and loses access at its next call once revoked is in the component help (API keys).
+- **Surfaces this reaches**: four example `oxagen` CLI lines. That the API, MCP, the CLI and these screens share one set of actions is in the component help (`mockups/help/organization-api-keys.md`, Surfaces this reaches).
 
 **Dialogs this page opens:** `apikey` (Name, Grants, Expires; the secret is shown once), `rotatekey` (a new secret, the old one valid for 24 hours), `revokekey`, plus `invite` and `newws` from the header.
 
@@ -49,8 +49,8 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
 - **empty**: same as Organization: "This organization has no workspaces". Action: **Create a workspace** (gold).
 - **loading**: the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
-- **error**: "Organization could not be loaded". The control plane answered `503 control_plane_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
-- **access denied**: "You cannot see this organization's settings". Your roles on the organization do not include `org.admin`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it. Actions: **Request access** (opens `request-access`), **Back to Work**. Below: *Signed in as* (name, role), *Needed* (the permission), *Decided by* (`pol_v41`, deny wins over every allow).
+- **error**: "Organization could not be loaded". The control plane answered `503 control_plane_unavailable`. Nothing was changed. Runs kept recording while this page was down. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
+- **access denied**: "You cannot see this organization's settings". Your roles on the organization do not include `org.admin`. An organization owner can grant it. Actions: **Request access** (opens `request-access`), **Back to Work**. Below: *Signed in as* (name, role), *Needed* (the permission), *Decided by* (`pol_v41`).
 
 ## Mobile
 

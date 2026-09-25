@@ -20,7 +20,7 @@ Show where this workspace's money bought nothing and what would change it. Four 
 
 **Header, tiles and tabs** as `spend.md`, with Optimization selected. The header's **Set a budget** stays the one gold action.
 
-**Parts.** A segmented control (`role="group"`, labelled "Optimization") with four buttons, the current one `aria-pressed`: Unproductive spend · Tokens and cache · Agents (162) · Operator habits (16). A button writes `?part=`. The counts are the rows of the Agents part and the cards of the Operator habits part.
+**Parts.** A segmented control (`role="group"`, labelled "Optimization") with four buttons, the current one `aria-pressed`: Unproductive spend · Tokens and cache · Recommendations (162) · Operator habits (16). A button writes `?part=`. The counts are the rows of the Agents part and the cards of the Operator habits part.
 
 ### Unproductive spend
 
@@ -37,26 +37,28 @@ Show where this workspace's money bought nothing and what would change it. Four 
 
 The six amounts sum to the Unproductive spend tile, $85,768.79. A run can show more than one cause.
 
-**Runs with unproductive spend.** One card per run, seven in the design. Each card: the run id (a link to the run), "<agent> · <operator> · <started>", "$<unproductive> unproductive of $<cost>", badges naming what the frames show (such as "chain break", "retry loop ×3", "context bloat +1,900 tok", "idle while parked", "halted turn 1"), a bar of the unproductive share, the work order's title and what bought nothing, "<frames> frames · <steps> steps · cache <N>% · <model>", **Open the run** and **Show the frames**. A note closes the panel. It says that unproductive spend means the frames show the tokens bought nothing, names the four patterns it covers (a repeated call, a cold prefix, a turn spent waiting, and a chain that broke), and says that work a person accepted is never counted.
+**Runs with unproductive spend.** One card per run, seven in the design. Each card: the run id (a link to the run), "<agent> · <operator> · <started>", "$<unproductive> unproductive of $<cost>", badges naming what the frames show (such as "chain break", "retry loop ×3", "context bloat +1,900 tok", "idle while parked", "halted turn 1"), a bar of the unproductive share, the work order's title and what bought nothing, "<frames> frames · <steps> steps · cache <N>% · <model>", **Open the run** and **Show the frames**. No note closes the panel. What counts as unproductive spend, and that accepted work never does, is in the component help (`mockups/help/spend-optimization.md`, Runs with unproductive spend).
 
 ### Tokens and cache
 
 **By token class**, with the month's total, "20,503,823,758", at the right. Columns: Class · Tokens · Share · Cost. Rows: `input_uncached`, `cache_read`, `cache_write`, `output` and `reasoning`, each with a tooltip saying what it counts. Beneath:
 
-- Cache hit rate: "80% · cache reads as a share of all input tokens, token-weighted"
-- Cache write cost share: "6% · high when a prefix is written and never read"
-- Effective input price: "$1.88 per million across every input class"
-- Unmapped classes: "0 · a class oxagen does not know is stored under its raw name and priced at zero, so the gap stays visible"
+- Cache hit rate: "80%"
+- Cache write cost share: "6%"
+- Effective input price: "$1.88 per million"
+- Unmapped classes: "0"
 
-**Prompt composition.** One meter per part, each "<tokens> · <share>": Conversation, Tool results, Context frames, Tool definitions, Steering, System, Output and Reasoning. The note says that Oxagen measures tool definitions, context frames and steering from the request it assembled, and that tool results and conversation are the rest of the input.
+Each figure's definition is in the component help (`mockups/help/spend-optimization.md`, By token class).
 
-**By harness**, with the badge "92% of tokens observed by the gateway". Columns: Harness · Agents · Tokens · Cache hit · Spend · Basis. Eight rows: Claude Code, stella, Claude Agent SDK, Codex CLI, LangGraph, Other (SDK-wrapped), OpenAI Agents SDK and Cursor. Basis reads Observed by gateway, Reported by harness, or both with each share, such as "Observed by gateway 60% · Reported by harness 40%" for Codex CLI. The note defines observed (the gateway's proxy counted the bytes) and self-reported (the harness's own telemetry), and says a class a harness does not report is marked absent, never zero.
+**Prompt composition.** One meter per part, each "<tokens> · <share>": Conversation, Tool results, Context frames, Tool definitions, Steering, System, Output and Reasoning. No note sits beneath. How Oxagen measures each part is in the component help (`mockups/help/spend-optimization.md`, Prompt composition).
+
+**By harness**, with the badge "92% of tokens observed by the gateway". Columns: Harness · Agents · Tokens · Cache hit · Spend · Basis. Eight rows: Claude Code, stella, Claude Agent SDK, Codex CLI, LangGraph, Other (SDK-wrapped), OpenAI Agents SDK and Cursor. Basis reads Observed by gateway, Reported by harness, or both with each share, such as "Observed by gateway 60% · Reported by harness 40%" for Codex CLI. No note sits beneath. The definitions of observed and self-reported, and the rule that a class a harness does not report is absent and never zero, are in the component help (`mockups/help/spend-optimization.md`, By harness).
 
 **By agent.** Columns: Agent · Runs · Tokens · Per run · Cache hit · Tool defs · Context · Tool results · Reasoning · Basis. The twelve agents of this workspace with the most tokens, ten to a page. Tool defs above 16% and Tool results above 30% print in the approval ink. A row opens the agent.
 
 ### Agents
 
-**Recommendations for agents**, with the subtext "162 across 68 agents in Core platform. Each names the signal it came from and the change that moves it." Columns: Agent · Recommendation (the title over one paragraph) · The record (the signal, in mono) · A month (money, or a dash) · and the action. Rows open ordered by money a month, largest first.
+**Recommendations for agents**, with the subtext "162 across 68 agents in Core platform." Why each names its signal and one change is in the component help (`mockups/help/spend-optimization.md`, Recommendations for agents). Columns: Agent · Recommendation (the title over one paragraph) · The record (the signal, in mono) · A month (money, or a dash) · and the action. Rows open ordered by money a month, largest first.
 
 Seven recommendations, each read from the agent's 30-day token rollup, each with its one action:
 
@@ -74,7 +76,7 @@ The record line names the numbers behind each one, for example "24% of every req
 
 ### Operator habits
 
-Heading "Operator habits", with the subtext "Read from the recorded turns and written as rules to adopt. Listed by name. The record shows what happened. It never grades the person."
+Heading "Operator habits", with no subtext. How a habit is read, and why the list is alphabetical and grades no one, is in the component help (`mockups/help/spend-optimization.md`, Operator habits).
 
 One card per habit, for each operator of an agent in this workspace, in alphabetical order of the name as shown: Anders Adichie, Ayesha Rahimi, Elin Nwosu, Hana Oyelaran, Marcus Bell, Mikael Larsen, Priya Natarajan, Sana Moreau, Sebastian Albrecht. Sixteen cards. Each card holds the person's name and the habit, the record line in mono, the rule set off as a quotation, and its actions.
 

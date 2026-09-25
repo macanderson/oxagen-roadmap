@@ -31,7 +31,7 @@ async function open(hash = "#/a-intel/core-platform") {
   const errs = [];
   page.on("pageerror", e => errs.push(String(e.message || e)));
   page.on("dialog", d => d.dismiss());
-  await page.goto(FILE + "?product=1&state=loaded&mobile=0" + hash.replace("#", "#"));
+  await page.goto(FILE + "?product=1&island=0&state=loaded&mobile=0" + hash.replace("#", "#"));
   await page.waitForTimeout(300);
   return { page, errs };
 }
@@ -271,16 +271,17 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
 }
 
 /* ---------------- the record page, per kind ---------------- */
-// Each kind's panel carries a heading only that branch emits. Comparing the panel text to itself
+// Each kind's panel carries a label only that branch emits. Comparing the panel text to itself
 // would pass while all six shared one treatment (the per-record numbers differ either way), so the
-// assertion names the phrase and the kind separately.
+// assertion names the phrase and the kind separately. What each kind can never do, and how it
+// reaches a run, is in the component help (mockups/help/steering-source.md), not on the panel.
 const KINDS = {
   rule:       ["ctx.release.notes-format",      "Where it sits"],
-  constraint: ["ctx.release.never-merge",       "Conflicts"],
-  procedure:  ["ctx.platform.release-order",    "The steps, in order"],
-  fact:       ["ctx.platform.changelog-once",   "The claim, and how it is checked"],
+  constraint: ["ctx.release.never-merge",       "Runs that crossed it"],
+  procedure:  ["ctx.platform.release-order",    "Steps"],
+  fact:       ["ctx.platform.changelog-once",   "Falsifiable by"],
   memory:     ["ctx.platform.safari-e2e-flake", "When it happened"],
-  preference: ["ctx.triage.short-labels",       "Soft, and recorded as soft"],
+  preference: ["ctx.triage.short-labels",       "Runs that departed from it"],
 };
 const seen = new Set();
 for (const [kind, [id, signature]] of Object.entries(KINDS)) {
@@ -313,7 +314,7 @@ for (const [kind, [id, signature]] of Object.entries(KINDS)) {
   }));
   ok(r.h1.length > 20, kind + ": the statement is the headline, got " + r.h1.slice(0, 40));
   ok(r.ced && r.gutter >= 1, kind + ": statement editor with a gutter");
-  ok(r.panel.length > 120, kind + ": a kind panel with content, " + r.panel.length + " chars");
+  ok(r.panel.length > 40, kind + ": a kind panel with content, " + r.panel.length + " chars");
   // .eyebrow uppercases, and innerText returns what is rendered, so the comparison is case-blind.
   const panel = r.panel.toLowerCase();
   const has = sig => panel.includes(sig.toLowerCase());
@@ -321,7 +322,7 @@ for (const [kind, [id, signature]] of Object.entries(KINDS)) {
   for (const [other, pair] of Object.entries(KINDS))
     if (other !== kind) ok(!has(pair[1]), kind + ": must not borrow " + other + "'s treatment (" + pair[1] + ")");
   seen.add(signature);
-  ok(has("Limits."), kind + ": says what the kind cannot do, under Limits");
+  ok(!has("Limits.") && !has("How it reaches a run"), kind + ": the panel carries no explainer; the kind's limits are in its component help");
   ok(r.wraps, kind + ": the statement editor wraps — prose that scrolls sideways cannot be read");
   ok(r.noSideScroll, kind + ": the statement editor has no horizontal scroll");
   ok(r.align && r.align.rows >= 1 && r.align.worst <= 1,
@@ -542,7 +543,7 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
 
   const ph = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const pe = []; ph.on("pageerror", (e) => pe.push(String(e.message || e)));
-  await ph.goto(FILE + "?product=1&state=loaded&mobile=1&theme=dark#/a-intel/core-platform/steering");
+  await ph.goto(FILE + "?product=1&island=0&state=loaded&mobile=1&theme=dark#/a-intel/core-platform/steering");
   await ph.waitForTimeout(300);
   await ph.evaluate(() => { wzOpen("import"); impSample(); impParse(); wzGo(2); });
   await ph.waitForTimeout(200);
@@ -561,7 +562,7 @@ for (const theme of ["light", "dark"]) {
   const page = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true });
   const errs = [];
   page.on("pageerror", e => errs.push(String(e.message || e)));
-  await page.goto(FILE + "?product=1&state=loaded&mobile=1&theme=" + theme + "#/a-intel/core-platform");
+  await page.goto(FILE + "?product=1&island=0&state=loaded&mobile=1&theme=" + theme + "#/a-intel/core-platform");
   await page.waitForTimeout(350);
   for (const kind of ["record", "tool", "skill", "agent"]) {
     await page.evaluate(k => { wzOpen(k); if (k === "record") { S.wz.desc = "one sentence"; wzGo(2); } }, kind);
@@ -829,7 +830,7 @@ for (const theme of ["light", "dark"]) {
   await page.evaluate(() => { S.tab.run = "cost"; render(); });
   await page.waitForTimeout(200);
   ok(/Generated estimate/.test(await panel()), "run fit: the panel says the reading is generated");
-  ok(/Read from this run only/.test(await panel()), "run fit: the panel cites what it read");
+  ok(/\d+ prompts? · \d+ turns? · /.test(await panel()), "run fit: the panel cites what it read");
   ok(/Move this agent to/.test(await panel()), "run fit: the model card offers the change");
   ok(/Set effort to/.test(await panel()), "run fit: the effort card offers the change");
 
@@ -839,7 +840,7 @@ for (const theme of ["light", "dark"]) {
   await page.waitForTimeout(150);
   const fd = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
   ok(/\.oxagen\/agents\//.test(fd), "run fit: the change is a pull request against the agent file, got " + fd.slice(0, 120));
-  ok(/sealed/.test(fd) || /this run/.test(fd), "run fit: the dialog says the sealed run keeps the model it ran on");
+  ok(/first run after this pull request merges/.test(fd), "run fit: the dialog says the change reaches the next run");
   await page.evaluate(() => fitPr("run_01K5RN8F3J2GHY6T:model"));
   await page.waitForTimeout(150);
   ok((await page.evaluate(() => OXPRS.length)) === before + 1, "run fit: the change opens exactly one pull request");
@@ -878,7 +879,7 @@ for (const theme of ["light", "dark"]) {
     return h ? h.closest(".panel").innerText : "";
   });
   ok(/did not capture the effort setting/.test(txt), "run fit: the panel says why the effort setting was not captured");
-  ok(/gateway and contained tiers/.test(txt), "run fit: the panel names the tiers where effort is captured");
+  ok(await page.evaluate(() => /gateway[\s\S]*contained/.test((REVIEW.help["run-cost/model-fit"] || {}).h || "")), "run fit: the component help names the tiers where effort is captured");
   ok(errs.length === 0, "run fit: no JavaScript error on a harness-tier run: " + errs.join(" | "));
   await page.close();
 }
@@ -986,7 +987,8 @@ for (const theme of ["light", "dark"]) {
   for (const row of ["Store", "In regulated mode", "Compiled from", "Who reads it", "What it writes"]) {
     ok(new RegExp(row).test(where), "policy: the storage panel states " + row);
   }
-  ok(/not a Steering record/.test(where), "policy: a version is distinguished from a Steering record");
+  // Why a version is not a Steering record is component help (mockups/help/tools-policy.md), not page copy.
+  ok(/Store\s+oxagen/.test(where), "policy: the storage panel names the store");
   ok(/\.oxagen\/policy\//.test(where), "policy: regulated mode names the file");
   ok(/policy\.decision/.test(where), "policy: the frame it writes is named");
 
@@ -1035,7 +1037,7 @@ for (const theme of ["light", "dark"]) {
   const rv = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
   ok(/Revoke mnd_7K2ETQ4/.test(rv), "mandate: the revoke dialog names this mandate, got " + rv.slice(0, 120));
   ok(/reserved/.test(rv) && /settled/.test(rv), "mandate: the revoke dialog says what is reserved and what settled");
-  ok(/ledger is kept, never deleted/i.test(rv), "mandate: the revoke dialog keeps the ledger");
+  ok(/stays on the ledger/i.test(rv), "mandate: the revoke dialog keeps the ledger");
   ok(errs.length === 0, "mandate: no JavaScript error: " + errs.join(" | "));
   await page.close();
 }
@@ -1090,13 +1092,11 @@ for (const theme of ["light", "dark"]) {
   ok(tabs.includes("Cost centers"), "organization: the Cost centers tab is present, got " + tabs.join(" ~ "));
   ok(tabs.length === 8, "organization: eight tabs, got " + tabs.length + ": " + tabs.join(" ~ "));
 
-  const sub = await page.evaluate(() => {
-    const ps = [...document.querySelectorAll(".phead .t p")];
-    return ps.length ? ps[ps.length - 1].textContent.trim() : "";
-  });
-  for (const word of ["People", "roles", "invitations", "workspaces", "API keys"]) {
-    ok(sub.includes(word), "organization: the subtext names " + word + ", got " + sub);
-  }
+  // The header is the eyebrow and the name. What the tabs hold is in the header's component help
+  // (mockups/help/organization.md, Page header), so no subtext sits under the h1.
+  const head = await page.evaluate(() =>
+    [...document.querySelectorAll(".phead .t > *")].map((x) => x.tagName + (x.classList.contains("eyebrow") ? ".eyebrow" : "")));
+  ok(head.join() === "P.eyebrow,H1", "organization: the header is the eyebrow and the h1 with no subtext, got " + head.join());
 
   // Task #24 cut the Model key and In-firewall routes panels and moved the key facts into
   // Funding source. The spec described the old shape for four commits.
@@ -1244,7 +1244,9 @@ for (const theme of ["light", "dark"]) {
   await page.evaluate(() => { closeDialog(); openDialog("repounlink", "a-intel/billing"); });
   await page.waitForTimeout(220);
   const ut = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
-  ok(/nothing is deleted/i.test(ut), "repositories: the confirm says the repository is untouched, got " + ut.slice(0, 160));
+  // What stays untouched (no delete, no branch moves, .oxagen/ stays) is in the Repository unlink help.
+  ok(/stop reaching this workspace/i.test(ut), "repositories: the confirm says what stops, got " + ut.slice(0, 160));
+  ok(!/nothing is deleted/i.test(ut), "repositories: the confirm leaves the explanation to the component help");
   const trip = await page.evaluate(() => {
     closeDialog(); repoUnlink("a-intel/billing");
     const off = { linked: ws().linked.indexOf("a-intel/billing") >= 0, role: repoByName("a-intel/billing").role };
@@ -1273,9 +1275,9 @@ for (const theme of ["light", "dark"]) {
   await page.evaluate((i) => { closeDialog(); openDialog("copyoff", i); }, cid);
   await page.waitForTimeout(220);
   const ct = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
-  ok(/workspace\.json/.test(ct), "copies: the confirm names the gitignored link file, got " + ct.slice(0, 160));
-  ok(/nothing on disk is deleted/i.test(ct), "copies: the confirm says the directory is left alone");
-  ok(/oxagen init/.test(ct), "copies: the confirm says how to link it back");
+  // The gitignored link file and how to link the directory back are in the Working copy disconnection help.
+  ok(/nothing on disk is deleted/i.test(ct), "copies: the confirm says the directory is left alone, got " + ct.slice(0, 160));
+  ok(!/oxagen init/.test(ct), "copies: the confirm leaves how to link it back to the component help");
   ok(!/pull request/i.test(ct), "copies: disconnecting is not a pull request, got " + ct.slice(0, 200));
   const n = await page.evaluate((i) => {
     const before = WORKCOPIES.length; closeDialog(); copyDisconnect(i);
@@ -1294,7 +1296,7 @@ for (const theme of ["light", "dark"]) {
 {
   const { page, errs } = await open("#/a-intel/core-platform/steering/records");
   const rid = await page.evaluate(() => RECORDS.filter((r) => r.status === "published")[0].id);
-  await page.goto(FILE + "?product=1&state=loaded&mobile=0#/a-intel/core-platform/steering/records/" + encodeURIComponent(rid));
+  await page.goto(FILE + "?product=1&island=0&state=loaded&mobile=0#/a-intel/core-platform/steering/records/" + encodeURIComponent(rid));
   await page.waitForTimeout(400);
   const acts = await page.evaluate(() =>
     [...document.querySelectorAll(".phead .acts button")].map((b) => b.textContent.trim()));
@@ -1305,8 +1307,9 @@ for (const theme of ["light", "dark"]) {
   await page.waitForTimeout(220);
   const at = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
   ok(/status = "archived"/.test(at), "records: the confirm names the field it sets, got " + at.slice(0, 200));
-  ok(/in force until/i.test(at), "records: the confirm says it steers runs until the merge");
-  ok(/nothing is deleted/i.test(at), "records: the confirm says the file and the lineage stay");
+  // That the record stays in force until the merge, and that nothing is deleted, is in the dialog's
+  // component help (mockups/help/steering-source.md, Archive a record).
+  ok(/Archiving opens a pull request/.test(at), "records: the confirm says archiving is a pull request, got " + at.slice(0, 200));
 
   const pr = await page.evaluate((i) => {
     const before = OXPRS.length; closeDialog(); crecArchive(i);
@@ -1360,13 +1363,14 @@ for (const theme of ["light", "dark"]) {
   ok(/Where it came from/.test(mt), "memory: the drill-down names the run that left it, got " + mt.slice(0, 160));
   ok(/times in 30 days/.test(mt), "memory: it says how often the memory is recalled");
   ok(/tokens every time it is selected/.test(mt), "memory: it says what a recall costs");
-  ok(/published record/i.test(mt), "memory: it says where the memory sits against a published record");
+  ok(/Competes in the per-prompt selection|Yields to|Superseded by/.test(mt), "memory: it says where the memory sits in the selection");
 
   await page.evaluate((i) => { closeDialog(); openDialog("memforget", i); }, mid);
   await page.waitForTimeout(250);
   const ft = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
-  ok(/every frame stays/.test(ft), "memory: forgetting leaves the runs alone, got " + ft.slice(0, 200));
-  ok(/Promote is the other answer/.test(ft), "memory: the confirm offers the other answer");
+  // What forgetting leaves alone (the runs, their frames, the hashes they carried) and the other
+  // answer, promotion, are in the dialog's component help (mockups/help/steering-source.md).
+  ok(/The assembler stops selecting it/.test(ft), "memory: the confirm says what forgetting does, got " + ft.slice(0, 200));
   const n = await page.evaluate((i) => {
     const before = MEMORY.length; closeDialog(); memForget(i);
     return { before, after: MEMORY.length, rows: document.querySelectorAll("table tbody tr.click").length };
@@ -1451,14 +1455,14 @@ for (const theme of ["light", "dark"]) {
 
   const pg = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   const e2 = []; pg.on("pageerror", e => e2.push(String(e.message || e)));
-  await pg.goto(FILE + "?product=1&state=loaded&mobile=0&as=priya" + RD1X);
+  await pg.goto(FILE + "?product=1&island=0&state=loaded&mobile=0&as=priya" + RD1X);
   await pg.waitForTimeout(300);
   const q = await pg.evaluate(() => ({ who: me().name, sg: document.querySelector("[data-sg]")?.dataset.sg,
     axes: document.querySelectorAll(".run-main .sx-rax").length,
     promote: [...document.querySelectorAll(".run-main button")].filter(b => /promote/i.test(b.textContent)).length }));
   ok(q.who === "Priya Natarajan" && q.sg === "read" && q.axes === 4, "run memories: ?as=priya reads the four axes, got " + JSON.stringify(q));
   ok(q.promote === 0, "run memories: nothing on the tab promotes a self-grade");
-  for (const [id, re, what] of [["run_01K5RS7M2E8FJ3QW", /Nothing is written until the seal[\s\S]*Captured after the seal/, "a live run writes nothing yet"],
+  for (const [id, re, what] of [["run_01K5RS7M2E8FJ3QW", /No memories yet[\s\S]*Not captured yet/, "a live run writes nothing yet"],
                                 ["run_01K4QJ9E4T6YUI1O", /Deleted on 2025-12-29/, "a self-grade past retention is deleted"],
                                 ["run_01K5RQ4B9C7XTN2P", /joined/, "a saying link lands on the run that said it"]]) {
     await pg.evaluate((h) => { location.hash = h; }, "#/a-intel/core-platform/runs/" + id + "/memory");
@@ -1480,7 +1484,7 @@ for (const theme of ["light", "dark"]) {
   const as = async (who, hash) => {
     const pg = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
     const errs = []; pg.on("pageerror", e => errs.push(String(e.message || e)));
-    await pg.goto(FILE + "?product=1&state=loaded&mobile=0" + (who ? "&as=" + who : "") + hash);
+    await pg.goto(FILE + "?product=1&island=0&state=loaded&mobile=0" + (who ? "&as=" + who : "") + hash);
     await pg.waitForTimeout(300);
     return { pg, errs };
   };
@@ -1587,7 +1591,7 @@ for (const theme of ["light", "dark"]) {
   const ph = await browser.newPage({ viewport: { width: 390, height: 844 } });
   const pe = []; ph.on("pageerror", e => pe.push(String(e.message || e)));
   for (const hash of ["#/a-intel", "#/a-intel/core-platform/spend?by=cost_center&key=ENG-1001"]) {
-    await ph.goto(FILE + "?product=1&state=loaded&mobile=1&theme=dark&as=dana" + hash);
+    await ph.goto(FILE + "?product=1&island=0&state=loaded&mobile=1&theme=dark&as=dana" + hash);
     await ph.waitForTimeout(300);
     if (hash === "#/a-intel") { await ph.evaluate(() => orgTab("costcenters")); await ph.waitForTimeout(150); }
     const over = await ph.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);

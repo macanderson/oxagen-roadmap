@@ -161,9 +161,9 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 1436 to 1437</td><td>The rules that draw it</td></tr>
-      <tr><td><code>tipAttr(s)</code> at <code>engine.js:2131</code></td><td>Writes the <code>data-tip</code> attribute and the four event handlers. 16 calls, across the run instruments, the calls panel, the token bars, the step stack, and the Spend charts.</td></tr>
-      <tr><td><code>rtTip(node, ev)</code> at <code>engine.js:2132</code></td><td>Creates <code>#rtip</code> once, sets its text from <code>data-tip</code>, and positions it above the target, flipping below when it would clip the top of the viewport.</td></tr>
-      <tr><td><code>rtTipHide()</code> at <code>engine.js:2142</code></td><td>Hides <code>#rtip</code> on mouseleave or blur.</td></tr>
+      <tr><td><code>tipAttr(s)</code> at <code>engine.js:2124</code></td><td>Writes the <code>data-tip</code> attribute and the four event handlers. 16 calls, across the run instruments, the calls panel, the token bars, the step stack, and the Spend charts.</td></tr>
+      <tr><td><code>rtTip(node, ev)</code> at <code>engine.js:2125</code></td><td>Creates <code>#rtip</code> once, sets its text from <code>data-tip</code>, and positions it above the target, flipping below when it would clip the top of the viewport.</td></tr>
+      <tr><td><code>rtTipHide()</code> at <code>engine.js:2135</code></td><td>Hides <code>#rtip</code> on mouseleave or blur.</td></tr>
     </tbody>
   </table></div></div>
 </section>
@@ -186,7 +186,7 @@
 ## Inputs
 
 1. mockups/components/tooltip.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 1436 to 1437. The mockup renders it with tipAttr(s) (engine.js:2131), rtTip(node, ev) (engine.js:2132), rtTipHide() (engine.js:2142).
+2. The design source: mockups/src/engine.css lines 1436 to 1437. The mockup renders it with tipAttr(s) (engine.js:2124), rtTip(node, ev) (engine.js:2125), rtTipHide() (engine.js:2135).
 3. The build's implementation: find it by its root selector (.rtip) or its name, and list every route that renders it.
 4. Where to see it in the design: Run (instruments, cost and step charts), Spend (basis and category charts). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

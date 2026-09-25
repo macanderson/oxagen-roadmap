@@ -25,7 +25,7 @@ node tools/check-mockup.mjs --shots out/    # a screenshot per view
 It opens `mockups/missioncontrol.html` in headless Chromium once per view in `mockups/catalog.mjs`
 (the Playwright Chromium that Homebrew's `playwright` already downloaded, from
 `~/Library/Caches/ms-playwright`). Per page view it asserts: no JavaScript error; `PRODUCT` is true
-and the `#chrome` bar, the scenario rail, the Scenarios nav item and every piece of onboarding-demo
+and the scenario rail, the Scenarios nav item and every piece of onboarding-demo
 copy are gone; `S.state` and `S.mobile` are pinned to what the URL says; the state's own markup is on
 screen (the skeleton, the empty / error / denied panel, or a loaded page with a heading and no state
 panel); a mobile shell page has the thumb bar and never scrolls sideways; a view with a `drawer`
@@ -37,6 +37,24 @@ scrim that closes it, list tables as cards, every input 16 px or larger. Per sce
 rendered, the step's act runs, Next closes any dialog the act opened and lands on the following
 step, and no page error fired; then phone mode has no horizontal overflow and both themes render.
 A scenario in the catalog with no `SCENARIOS` entry fails; nothing skips.
+
+It also asserts the review island: it is on every view with component help off, and on Tools it
+names the page, links the spec in a new tab, switches the state, component help and the phone
+view, and Hide removes it until a reload.
+
+## Component help
+
+```sh
+node tools/check-help.mjs                   # every catalog view, then the drawers and every dialog
+node tools/check-help.mjs --only agents     # one catalog page id
+node tools/check-help.mjs --dialogs --only mint   # the dialogs whose kind contains the word
+node tools/check-help.mjs --list            # every key it saw, and where
+```
+
+It opens every view with `?help=1` and fails on a `?` whose key no section of `mockups/help/*.md`
+answers. `mockups/help/README.md` is the format and the key rules. A section no view reached is
+listed as unreached, which is not a failure: a record page other than the catalog's, a tab the
+check does not open, or a dialog opened only from a flow.
 
 Run `build-mockup.mjs --check` on every edit to the sources; run `check-mockup.mjs` before you ship.
 

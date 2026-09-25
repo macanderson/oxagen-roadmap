@@ -16,13 +16,13 @@ Every work item that is in a work order right now, with where it went and how fa
 
 ## What is on the page
 
-**Header.** As `work-backlog.md`: eyebrow the workspace name, h1 “Work”, subtext “What the agents work on, and what waits on you.” The In progress tab has no header action.
+**Header.** As `work-backlog.md`: eyebrow the workspace name and h1 “Work”, with no subtext. The In progress tab has no header action.
 
 **Scope and stat cards.** As `work-backlog.md`: **All work** and **My work** over the Open, In progress, In review and Pending approvals cards. In progress and In review both open this tab, and together they count its rows.
 
 **Tabs**: Backlog `7` · In progress · Work orders `1` · Workflows · Findings `36`, with In progress selected. In progress carries no count, because the work orders waiting on you are counted on Work orders.
 
-**In progress panel.** Heading “In progress”, subtext “Work items sent to an agent or a workflow in a work order.” The shared list bar: a search field (“Search this list”), the Labels filter, the Owner filter, the State select (“Any state”), and Rows (5, 10, 25, 50, All). The Labels and Owner filters work as on the Backlog (`work-backlog.md`): each takes several values and draws them as the table does. Every column header sorts. A row click opens the work item (`work-item.md`).
+**In progress panel.** Heading “In progress”, with no subtext. The shared list bar: a search field (“Search this list”), the Labels filter, the Owner filter, the State select (“Any state”), and Rows (5, 10, 25, 50, All). The Labels and Owner filters work as on the Backlog (`work-backlog.md`): each takes several values and draws them as the table does. Every column header sorts. A row click opens the work item (`work-item.md`).
 
 Columns, in order:
 
@@ -41,7 +41,7 @@ The provider’s own status stays on the Backlog and the work item page. It is l
 
 The demo record holds 4 rows: #482 (`wo_01K5RS7M4N` to Release manager, in progress, live, 3 / 4), #647 (`wo_01K6TC5A` to Bug fixer, in progress, live, 0 / 3), #599 (`wo_01K6TA2M` to stella CI, waiting on you, 3 / 3) and #587 (`wo_01K6T9QX` to the Fix, validate, document, review workflow, in progress, live, 2 / 4). #647 is in a send with two targets: its row shows the work order the Backlog showed, and `wo_01K6TC5B` is on Work orders.
 
-**Note** under the table: “A work item stays here until you accept every item of its work order. It then returns to the Backlog as Accepted.”
+No note sits under the table. When an item leaves this tab, and why the provider’s status is left off, is in the component help (`mockups/help/work-in-progress.md`, In progress).
 
 **Dialogs and layers this page opens:** none. The Pending approvals card opens the Approvals drawer (`approvals-drawer.md`).
 
