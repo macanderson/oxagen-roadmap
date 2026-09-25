@@ -28,6 +28,7 @@ The agent header and the tab bar are as `agent.md` specifies, with Identity sele
 | Harness | “Codex CLI 1.4.0”. With no reported version the mockup prints a bare dash after the label (Claude Code on pr-reviewer); a build shows the harness alone | none |
 | Model tier | “light → z-ai/glm-flash-latest”: the tier and the model it routes to | none |
 | Operator | “Marcus Bell” | “accountable for every run · IAM field initiating_principal” |
+| Cost center | `ccAgentCell()`: the label this agent's runs roll up to, in mono (`ENG-1001` on Triage), or “None”, then **Change** (opens `ccagent`) | Why, on a line carrying `data-cc-from` (`agent`, `workspace` or `none`): “its own label, which wins over the workspace’s”, “inherited from workspace <slug>”, or “neither it nor its workspace names one, so its runs land on Spend’s ~none row” |
 | Lifecycle state | The status badge (“enrolled”) | “registered → enrolled → active → retired. Deregistering retires the principal and never deletes it, so old runs keep their identity.” |
 | First frame | “2026-04-18 09:51:33Z” | none |
 
@@ -64,6 +65,7 @@ There is no Replay row. D14 takes the replay grade out of the interface.
 
 - `identity`, titled “Change identity” with the agent key. **Principal** explains “The principal is the agent’s IAM identity. It is created at registration and never reused.” **Acts on behalf of** is a select of the organization's people, with “The parent user sets the delegation ceiling: the agent can never do what this person cannot.” **Roles held** lists the agent's roles as removable chips with **Assign role**, and “A role takes effect at the next run start, when the belt is recomputed.” A note: “Changing the parent user is a governed action with approval by the new parent. The old ceiling applies until they accept.” **Cancel** and **Request the change** (gold).
 - `revokecred`, titled “Revoke the credential on a-intel.core.triage?”. It says nothing is minted to replace it, that the agent cannot call anything until a new credential is issued, and that every run token dies at the next call, and warns “Rotate is the reversible one. Revoke leaves the agent unable to run.” **Keep it** and **Revoke it** (danger).
+- `ccagent`, titled “Cost center for <agent name>”. It says runs rolled up after the change are charged to the label you choose and runs already rolled up keep theirs. **Cost center** is a select of the organization's labels with “None (inherit the workspace’s)” first, and a hint naming the workspace's label: “Workspace core-platform names ENG-1001. An agent’s own label wins over it.” Footer: **Cancel**, **Save** (gold). With no labels in the organization, the dialog says to add one on the Organization page and offers no Save.
 - The header dialogs (`rotatecred`, `suspendagent`, `delagent` and the avatar editor) are specified in `agent.md`.
 
 ## Data sources
@@ -83,6 +85,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 | Host device key | `a.devKey` | `get_agent` `hosts[].deviceKeyFingerprint` | `agent.get.ts:53-73` | ✅ |
 | Accountable human, workspace, runtime | `PEOPLE`, `ws()`, `a.host` | `get_agent` `identity.operatorId` and `hosts`; the member's role | `agent.get.ts:130`, `:141` | ✅ |
 | Delegation | fixed text | The delegation ceiling: agent grants intersected with the human's | `assign_agent_role` rejects a role above the assigner's grants (`agent.role.assign.ts:26-30`); `get_agent_toolbelt` `basis.humanCeiling` (`agent.toolbelt.get.ts:130-134`) | ✅ |
+| Cost center | `FIXTURES.COST_CENTERS` (`agents`, `workspaces`) via `ccOfAgent()` | `get_agent` `identity.costCenter`, then the workspace's label; `set_cost_center` with `target: agent` | `agent.get.ts:135-136` returns the agent's own label, null when it inherits. The inherited label is on the workspace (`workspace.workspaces.cost_center`), and `set_cost_center` writes either (`cost_center.set.ts:38-47`, ADR-142) | ✅ |
 | Tamper incidents | `agentTamper(a)` | `list_incidents` for the agent | `tacho.incident.list.ts:66`; tamper kinds (`tacho.incident.list.ts:35-42`) | ✅ |
 | Change identity | `identity` | A governed change of the agent's operator, approved by the new operator; `assign_agent_role` for the roles | No capability changes an agent's operator. Roles: `agent.role.assign.ts:26` | ❌ |
 | Revoke credential | `revokecred` | Revoke the agent's credential | Refused by design: `revoke_api_key` refuses `agent_credential_v1`, because `rotate_agent_credential` and `retire_agent` revoke it paired with a fresh mint or with retirement (`packages/handlers/src/api.key.revoke.ts:37-40`) | ❌ |
@@ -102,6 +105,7 @@ The tab carries no `data-future` mark, and the catalog gives it no future story.
 - Rotating the key or suspending the agent ends every run token at the next call, which is what makes a halt stick. Revoking leaves the agent unable to run until a new credential is issued.
 - The delegation ceiling holds in both directions: an agent's effective permission is its own grants intersected with the invoking human's, and a subagent can only narrow it.
 - The Tamper incidents row reads the same incident record as the Activity tab and the Audit page.
+- The Cost center row resolves the label a run is charged to (ADR-142): the agent's own label, else its workspace's, else none. **Change** saves through `ccagent`, writes `cost_center_set` to Audit, and toasts the result. Runs rolled up after the change land on the new label, and runs already rolled up keep theirs. The organization's labels are managed on Organization › Cost centers (`organization.md`).
 
 ## States
 
@@ -119,7 +123,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More h
 ## Permissions
 
 - Read: `get_agent` and `list_incidents` admit org Owner, Admin and Member, and workspace Owner and Member. The mockup names the permission `agent.read`.
-- Writes, each a governed action recorded in Audit: Assign role inside Change identity (`assign_agent_role`: org Owner or Admin). Change identity and Revoke credential have no contract today.
+- Writes, each a governed action recorded in Audit: Assign role inside Change identity (`assign_agent_role`: org Owner or Admin). The cost center (`set_cost_center`: org Owner, Admin or Billing). For anyone else, **Change** on the Cost center row opens no dialog and shows a toast that names who holds the role (`ccDenied()`). Change identity and Revoke credential have no contract today.
 
 ## Backend gaps this page depends on
 

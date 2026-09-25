@@ -1087,7 +1087,8 @@ for (const theme of ["light", "dark"]) {
   const tabs = await page.evaluate(() =>
     [...document.querySelectorAll('[role="tab"]')].map((t) => t.textContent.replace(/\d+$/, "").trim()));
   ok(tabs.includes("Data plane"), "organization: the Data plane tab is present, got " + tabs.join(" ~ "));
-  ok(tabs.length === 7, "organization: seven tabs, got " + tabs.length + ": " + tabs.join(" ~ "));
+  ok(tabs.includes("Cost centers"), "organization: the Cost centers tab is present, got " + tabs.join(" ~ "));
+  ok(tabs.length === 8, "organization: eight tabs, got " + tabs.length + ": " + tabs.join(" ~ "));
 
   const sub = await page.evaluate(() => {
     const ps = [...document.querySelectorAll(".phead .t p")];
@@ -1468,6 +1469,185 @@ for (const theme of ["light", "dark"]) {
   /* The Reflection page under Steering › Skills left with the fleet operations wedge; the self-grade is read on the run. */
   ok(e2.length === 0, "run memories: no JavaScript error as priya: " + e2.join(" | "));
   await pg.close();
+}
+
+// Cost centers (ADR-142): the labels on Organization, the charge on an agent's Identity tab, and the
+// Cost center grouping on Spend. An organization Owner, Admin or Billing member writes. Marcus, a
+// workspace owner, reads, and every write he tries names who can. The grouping must sum to the month's
+// spend to the cent, which only holds if it is derived from the generated fleet rather than typed in,
+// and it must read the same labels the Organization page edits.
+{
+  const as = async (who, hash) => {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    const errs = []; pg.on("pageerror", e => errs.push(String(e.message || e)));
+    await pg.goto(FILE + "?product=1&state=loaded&mobile=0" + (who ? "&as=" + who : "") + hash);
+    await pg.waitForTimeout(300);
+    return { pg, errs };
+  };
+  const toast = pg => pg.evaluate(() => S.toast || "");
+  const rows = pg => pg.evaluate(() => [...document.querySelectorAll("tr[data-cost-center]")].map(t => t.dataset.costCenter));
+
+  const m = await as("", "#/a-intel");
+  await m.pg.evaluate(() => orgTab("costcenters")); await m.pg.waitForTimeout(150);
+  const r = await m.pg.evaluate(() => ({
+    tab: [...document.querySelectorAll(".tabs .tab")].map(b => b.textContent).find(t => /^Cost centers/.test(t)) || "",
+    ro: document.querySelector("[data-cc-readonly]")?.innerText || "",
+    ws: document.querySelectorAll("tr[data-cc-ws]").length, wsWant: WS.length,
+  }));
+  ok(r.tab === "Cost centers4", "cost centers: Organization has the tab with its count, got " + r.tab);
+  ok((await rows(m.pg)).join() === "ENG-1001,ENG-1040,FIN-2040,MKT-3300", "cost centers: the four labels list, got " + (await rows(m.pg)).join());
+  ok(/Owner, Admin or Billing/.test(r.ro) && /Dana Okafor/.test(r.ro), "cost centers: a reader is told who can change the list, got " + r.ro);
+  ok(r.ws === r.wsWant, "cost centers: every workspace has a row, got " + r.ws + " of " + r.wsWant);
+  await m.pg.evaluate(() => [...document.querySelectorAll("[data-cc-panel] button")].find(b => /Add a cost center/.test(b.textContent)).click());
+  ok(/^Only an organization Owner, Admin or Billing member/.test(await toast(m.pg)) && !(await dlg(m.pg)),
+    "cost centers: a reader's add is refused without a dialog, got " + (await toast(m.pg)));
+  await m.pg.evaluate(() => { location.hash = "#/a-intel/core-platform/spend?by=cost_center&key=ENG-1001"; }); await m.pg.waitForTimeout(250);
+  await m.pg.evaluate(() => [...document.querySelectorAll(".sp-side button")].find(b => b.textContent === "Export the statement").click());
+  ok(/can export the chargeback statement/.test(await toast(m.pg)), "cost centers: a reader's export is refused, got " + (await toast(m.pg)));
+  ok(m.errs.length === 0, "cost centers: no JavaScript error as marcus: " + m.errs.join(" | "));
+  await m.pg.close();
+
+  const d = await as("dana", "#/a-intel");
+  await d.pg.evaluate(() => orgTab("costcenters")); await d.pg.waitForTimeout(150);
+  const cells = await d.pg.evaluate(() => Object.fromEntries([...document.querySelectorAll("tr[data-cost-center]")].map(t =>
+    [t.dataset.costCenter, [...t.querySelectorAll("td.num")].map(c => +c.textContent).join("/")])));
+  ok(!(await d.pg.evaluate(() => document.querySelector("[data-cc-readonly]"))), "cost centers: a Billing member gets no read-only note");
+  ok(cells["ENG-1001"] === "19/1" && cells["ENG-1040"] === "3/0" && cells["FIN-2040"] === "0/1" && cells["MKT-3300"] === "0/0",
+    "cost centers: each label counts the agents and workspaces that name it, got " + JSON.stringify(cells));
+
+  for (const [label, re, what] of [["bad label", /A label is 1 to 64 letters/, "a label with a space is refused"],
+                                   ["ENG-1001", /ENG-1001 is already on the list/, "a duplicate label is refused"]]) {
+    await d.pg.evaluate(() => openDialog("ccadd")); await d.pg.waitForTimeout(80);
+    await type(d.pg, "#cc-label", label);
+    await d.pg.evaluate(() => ccAdd());
+    const e = await d.pg.evaluate(() => document.getElementById("cc-err")?.textContent || "");
+    ok(re.test(e), "cost centers: " + what + ", got " + e);
+    await d.pg.evaluate(() => closeDialog());
+  }
+  await d.pg.evaluate(() => openDialog("ccadd")); await d.pg.waitForTimeout(80);
+  await type(d.pg, "#cc-label", "OPS-5100"); await type(d.pg, "#cc-desc", "Operations");
+  await d.pg.evaluate(() => ccAdd()); await d.pg.waitForTimeout(80);
+  ok(/^Added OPS-5100\./.test(await toast(d.pg)), "cost centers: adding a label says so, got " + (await toast(d.pg)));
+  ok((await rows(d.pg)).includes("OPS-5100"), "cost centers: the new label lists");
+  ok(await d.pg.evaluate(() => AUDIT[0].ev === "cost_center_created" && /OPS-5100/.test(AUDIT[0].what)), "cost centers: adding a label writes cost_center_created");
+
+  await d.pg.evaluate(() => openDialog("ccdel", "ENG-1040")); await d.pg.waitForTimeout(80);
+  const dc = await d.pg.evaluate(() => document.querySelector("[data-cc-del-count]")?.textContent || "");
+  ok(dc === "3 agents and 0 workspaces name ENG-1040 today.", "cost centers: deleting names what still points at the label, got " + dc);
+  await d.pg.evaluate(() => [...document.querySelectorAll("#layer .dlg-f button")].find(b => b.textContent === "Delete").click());
+  await d.pg.waitForTimeout(80);
+  ok(/^Deleted ENG-1040\. Runs already rolled up keep it\. 3 agents fall back/.test(await toast(d.pg)), "cost centers: deleting says where the agents go, got " + (await toast(d.pg)));
+  ok(!(await rows(d.pg)).includes("ENG-1040") && await d.pg.evaluate(() => !Object.values(CC.agents).includes("ENG-1040")),
+    "cost centers: a deleted label leaves the list and every agent that named it");
+  ok(await d.pg.evaluate(() => AUDIT[0].ev === "cost_center_deleted"), "cost centers: deleting writes cost_center_deleted");
+
+  await d.pg.evaluate(() => openDialog("ccws", "growth")); await d.pg.waitForTimeout(80);
+  await d.pg.selectOption("#cc-pick", "MKT-3300");
+  await d.pg.evaluate(() => ccSetWs("growth")); await d.pg.waitForTimeout(80);
+  ok(/^Growth is charged to MKT-3300\./.test(await toast(d.pg)), "cost centers: charging a workspace says so, got " + (await toast(d.pg)));
+  ok(await d.pg.evaluate(() => document.querySelector('tr[data-cc-ws="growth"]').innerText.includes("MKT-3300")), "cost centers: the workspace row shows its new label");
+
+  await d.pg.evaluate(() => { location.hash = "#/a-intel/core-platform/spend/cost_center"; }); await d.pg.waitForTimeout(250);
+  const s = await d.pg.evaluate(() => {
+    const rs = [...document.querySelectorAll("#pg table tbody tr")];
+    const label = r => r.cells[0].querySelector(".mono")?.textContent || "";
+    return { hash: location.hash, heading: [...document.querySelectorAll("#pg .panel h3")].map(x => x.textContent).find(t => /^By /.test(t)),
+      labels: rs.map(label), deleted: rs.filter(r => /deleted/.test(r.cells[0].textContent)).map(label),
+      sum: Math.round(spendRows("cost_center").reduce((n, r) => n + r.usd, 0) * 100), want: Math.round(n$(SPEND.spend) * 100),
+      agents: rs.reduce((n, r) => n + +r.cells[1].textContent, 0), wantAgents: SPEND.byAgent.length };
+  });
+  ok(/\/spend\?by=cost_center$/.test(s.hash) && s.heading === "By cost center", "cost centers: the old route opens Spend grouped by cost center, got " + s.hash + " ~ " + s.heading);
+  ok(s.labels.includes("ENG-1001") && s.labels.includes("~none"), "cost centers: Spend groups by the fixture's labels and ~none, got " + s.labels.join());
+  ok(s.sum === s.want, "cost centers: the rows sum to the month's spend to the cent, got " + s.sum + " of " + s.want);
+  ok(s.agents === s.wantAgents, "cost centers: every agent lands in exactly one row, got " + s.agents + " of " + s.wantAgents);
+  ok(s.deleted.join() === "ENG-1040", "cost centers: a deleted label keeps the runs already rolled up, got " + s.deleted.join());
+  await d.pg.evaluate(() => { location.hash = "#/a-intel/core-platform/spend?by=agent&key=a-intel.core.triage"; }); await d.pg.waitForTimeout(250);
+  const side = await d.pg.evaluate(() => [...document.querySelectorAll(".sp-side dt")].find(t => t.textContent === "Cost center")?.nextElementSibling.textContent);
+  ok(side === "ENG-1001", "cost centers: an agent's side panel shows the label Organization set, got " + side);
+  await d.pg.evaluate(() => { location.hash = "#/a-intel/core-platform/spend?by=cost_center&key=ENG-1001"; }); await d.pg.waitForTimeout(250);
+  await d.pg.evaluate(() => [...document.querySelectorAll(".sp-side button")].find(b => b.textContent === "Export the statement").click());
+  await d.pg.waitForTimeout(80);
+  ok(/cost_micros/.test((await dlg(d.pg))?.body || ""), "cost centers: the export lists its columns");
+  await d.pg.evaluate(() => ccExport()); await d.pg.waitForTimeout(80);
+  ok(/^Exported cost-centers-2026-09\.csv\./.test(await toast(d.pg)) && await d.pg.evaluate(() => AUDIT[0].ev === "cost_center_statement_exported"),
+    "cost centers: exporting says so and writes cost_center_statement_exported, got " + (await toast(d.pg)));
+
+  for (const [ws, pick, from, re] of [["core-platform", "a-intel.core.stella-ci", "agent", /its own label, which wins over the workspace/],
+                                      ["data-platform", null, "workspace", /inherited from workspace data-platform/],
+                                      ["security", null, "none", /~none row/]]) {
+    const key = await d.pg.evaluate(([w, k]) => k || AGENTS.find(a => a.ws === w && !CC.agents[a.key]).key, [ws, pick]);
+    await d.pg.evaluate(([w, k]) => { location.hash = "#/a-intel/" + w + "/agents/" + k.split(".").pop() + "/identity"; }, [ws, key]);
+    await d.pg.waitForTimeout(250);
+    const c = await d.pg.evaluate(() => ({ from: document.querySelector("[data-cc-from]")?.dataset.ccFrom, text: document.querySelector("[data-cc-cell]")?.innerText || "" }));
+    ok(c.from === from && re.test(c.text), "cost centers: an agent's Identity tab says where its runs roll up (" + from + "), got " + JSON.stringify(c));
+  }
+  ok(d.errs.length === 0, "cost centers: no JavaScript error as dana: " + d.errs.join(" | "));
+  await d.pg.close();
+
+  const ph = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const pe = []; ph.on("pageerror", e => pe.push(String(e.message || e)));
+  for (const hash of ["#/a-intel", "#/a-intel/core-platform/spend?by=cost_center&key=ENG-1001"]) {
+    await ph.goto(FILE + "?product=1&state=loaded&mobile=1&theme=dark&as=dana" + hash);
+    await ph.waitForTimeout(300);
+    if (hash === "#/a-intel") { await ph.evaluate(() => orgTab("costcenters")); await ph.waitForTimeout(150); }
+    const over = await ph.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    ok(over <= 0, "cost centers: no sideways scroll on a phone in the dark theme at " + hash + ", got " + over + "px");
+  }
+  ok(pe.length === 0, "cost centers: no JavaScript error on a phone: " + pe.join(" | "));
+  await ph.close();
+}
+
+/* ---------------- notifications: selecting one marks it read ----------------
+   The bell's label, the dialog footer and the unread rows must all move together, one at a time. */
+{
+  const { page, errs } = await open("#/a-intel/core-platform");
+  const read = () => page.evaluate(() => ({
+    bell: document.querySelector('[aria-label^="Notifications,"]')?.getAttribute("aria-label") || "",
+    dot: !!document.querySelector('[aria-label^="Notifications,"] .dot'),
+    rows: document.querySelectorAll("#layer .li[data-notif]").length,
+    foot: document.querySelector("#layer .dlg-f .grow")?.textContent || "",
+    focus: document.activeElement?.hasAttribute("data-notif") || false,
+    all: [...document.querySelectorAll("#layer .dlg-f button")].find(b => /Mark all read/.test(b.textContent))?.disabled,
+  }));
+  await page.evaluate(() => openDialog("notifs")); await page.waitForTimeout(120);
+  const a = await read();
+  const n = a.rows;
+  ok(n >= 2, "notifications: the fixture opens with at least two unread, got " + n);
+  ok(a.bell === "Notifications, " + n + " unread" && a.dot, "notifications: the bell names the unread count and shows the dot, got " + a.bell);
+  ok(a.foot === n + " unread · select one to mark it read", "notifications: the footer names the count and how to mark one, got " + a.foot);
+  ok(await page.evaluate(() => [...document.querySelectorAll("#layer .li[data-notif]")].every(e => e.getAttribute("role") === "button" && /^Mark read: /.test(e.getAttribute("aria-label")))),
+    "notifications: every unread item is a button labelled Mark read");
+
+  await page.click("#layer .li[data-notif]"); await page.waitForTimeout(120);
+  const b = await read();
+  ok(b.rows === n - 1, "notifications: a click marks exactly one read, got " + b.rows + " of " + n);
+  ok(b.bell === "Notifications, " + (n - 1) + " unread", "notifications: the bell count drops with it, got " + b.bell);
+  ok(b.foot === (n - 1) + " unread · select one to mark it read", "notifications: the footer count drops with it, got " + b.foot);
+  ok(b.focus, "notifications: focus moves to the next unread item");
+  const ev1 = await page.evaluate(() => AUDIT[0] || {});
+  ok(ev1.ev === "notification_read" && /^Read “/.test(ev1.what), "notifications: marking one read records a notification_read audit event, got " + JSON.stringify(ev1));
+  ok(await page.evaluate(() => [...document.querySelectorAll("#layer .li:not(.unread)")].every(e => !e.hasAttribute("role"))),
+    "notifications: a read item is plain text, not a button");
+
+  await page.keyboard.press("Enter"); await page.waitForTimeout(120);
+  ok((await read()).rows === n - 2, "notifications: Enter on the focused item marks it read");
+
+  await page.evaluate(() => [...document.querySelectorAll("#layer .dlg-f button")].find(b => /Mark all read/.test(b.textContent)).click());
+  await page.waitForTimeout(150);
+  const said = await page.evaluate(() => S.toast || "");
+  ok(/^All notifications marked read\. Audit records who read each one\./.test(said), "notifications: Mark all read says Audit records it, got " + said);
+  const evAll = await page.evaluate(k => AUDIT.slice(0, k).filter(e => e.ev === "notification_read" && /^Read “/.test(e.what)).length, n - 2);
+  ok(evAll === n - 2, "notifications: Mark all read records one read event per item, got " + evAll + " of " + (n - 2));
+  const c = await read();
+  ok(c.bell === "Notifications, 0 unread" && !c.dot, "notifications: the bell reads 0 unread with no dot, got " + c.bell);
+  await page.evaluate(() => openDialog("notifs")); await page.waitForTimeout(120);
+  const d = await read();
+  ok(d.foot === "All read" && d.all === true && d.rows === 0, "notifications: the reopened dialog reads All read with Mark all read disabled, got " + JSON.stringify(d));
+  await page.evaluate(() => { closeDialog(); NOTIFS[0].unread = true; openDialog("notifs"); }); await page.waitForTimeout(120);
+  await page.click("#layer .li[data-notif]"); await page.waitForTimeout(120);
+  ok(await page.evaluate(() => document.activeElement?.matches(".dlg .x") || false), "notifications: marking the last unread one moves focus to the close button");
+  ok(errs.length === 0, "notifications: no JavaScript error: " + errs.join(" | "));
+  await page.close();
 }
 
 await browser.close();
