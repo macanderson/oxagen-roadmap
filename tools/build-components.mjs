@@ -281,6 +281,23 @@ function helperDrift(c) {
   return out;
 }
 
+// Every class in an example must be one the product draws: engine.css styles it, or engine.js or
+// wedge.js writes it into markup as a hook with no rule of its own. Anything else is invented markup.
+const CSS = readFileSync(path.join(root, "mockups/src/engine.css"), "utf8");
+const JS = ["engine.js", "wedge.js"].map((f) => readFileSync(path.join(root, "mockups/src", f), "utf8")).join("\n");
+// toolCell() and catChips() write the tool category as t-<category>, from TCAT_ORDER.
+const TCAT = (JS.match(/var TCAT_ORDER=\[([^\]]*)\]/) || ["", ""])[1].match(/[a-z]+/g) || [];
+const EMITTED = new Set(TCAT.map((t) => `t-${t}`));
+for (const m of JS.matchAll(/class=\\?"([^"\\']*)/g)) for (const k of m[1].split(/\s+/)) if (/^[a-z][\w-]*$/.test(k)) EMITTED.add(k);
+const esc2 = (k) => k.replace(/[-]/g, "\\-");
+function unknownClasses(c) {
+  const html = [...c.stories.map((s) => s.html), ...((c.usage && c.usage.examples) || []).map((e) => e.html)].join("\n");
+  const seen = new Set();
+  for (const m of html.matchAll(/class="([^"]*)"/g)) for (const k of m[1].split(/\s+/)) if (k) seen.add(k);
+  return [...seen].filter((k) => !EMITTED.has(k) && !new RegExp(`\\.${esc2(k)}(?![\\w-])`).test(CSS))
+    .map((k) => `${c.slug}: class "${k}" is neither styled by engine.css nor written by the engine`);
+}
+
 async function load() {
   const files = readdirSync(SRC).filter((f) => f.endsWith(".mjs") && !f.startsWith("_")).sort();
   const comps = [];
@@ -293,7 +310,7 @@ async function load() {
     if (!c.audit.checks || c.audit.checks.length < 5) throw new Error(`${f}: audit.checks needs at least five component checks`);
     comps.push(c);
   }
-  for (const c of comps) lineErrors.push(...helperDrift(c));
+  for (const c of comps) lineErrors.push(...helperDrift(c), ...unknownClasses(c));
   const cat = (await import(pathToFileURL(path.join(SRC, "_catalog.mjs")).href)).default;
   const order = cat.groups.map((g) => g.name);
   comps.sort((a, b) => order.indexOf(a.group) - order.indexOf(b.group) || (a.order ?? 50) - (b.order ?? 50) || a.name.localeCompare(b.name));
@@ -324,7 +341,7 @@ out.set(MANIFEST, JSON.stringify({
 
 if (lineErrors.length) {
   for (const e of lineErrors) console.log("drift " + e);
-  console.log(`${lineErrors.length} helper locations are stale; fix them in mockups/components/src`);
+  console.log(`${lineErrors.length} registry errors; fix them in mockups/components/src`);
   process.exit(1);
 }
 
