@@ -5743,7 +5743,7 @@ function prpDetail(p){
     '</div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Pull request</h3></div><div class="panel-b">'+
      '<dl class="kv" style="margin-bottom:13px"><dt>Target</dt><dd class="mono">a-intel/platform</dd><dt>Branch</dt><dd class="mono">context/'+h(p.lineage)+'</dd>'+
-     '<dt>File</dt><dd class="mono">.oxagen/rules/'+h(p.lineage)+'.toml</dd><dt>Governance</dt><dd>team · a code-owner review is required</dd></dl>'+action+'</div></div>'+
+     '<dt>File</dt><dd class="mono">.oxagen/rules/'+h(p.lineage)+'.toml</dd><dt>Governance</dt><dd>'+h(govGate(ws()))+'</dd></dl>'+action+'</div></div>'+
     '<div class="panel"><div class="panel-h"><h3>If it publishes</h3></div><div class="panel-b"><dl class="kv">'+
      '<dt>Reaches</dt><dd>every run in <b>core-platform</b> on a-intel/platform, from its next model call</dd>'+
      '<dt>As</dt><dd>compiled steering in bundle v'+(STEER_BUNDLE.v+(mine&&c.st==="merged"?0:1))+', <span class="mono">'+h(p.force)+'</span> in the stable prefix</dd>'+
@@ -5979,7 +5979,7 @@ function recprDetail(def){
    ? '<div class="panel-b" style="border-top:1px solid var(--border);font-size:12.5px"><b>Closed without merging.</b> <span class="muted">Nothing was published.</span></div>'
    : '<div class="panel-b row" style="border-top:1px solid var(--border);gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:12.5px">'+
      (failed?'<b style="color:var(--st-failed)">A check failed.</b> <span class="muted">Nothing merges and nothing is published. Change the file and open it again.</span>'
-      :passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
+      :passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance mode '+h(govLabel(ws()))+'.</span>'
              :'<b>Checks are running.</b> <span class="muted">Merge is blocked until all '+n+' report.</span>')+'</div>'+
      '<button class="btn danger" onclick="openDialog(\'closepr\',\'recpr|'+h(def.pr)+'\')">Close pull request</button>'+
      '<button class="btn'+(passed?' primary':'')+'" '+(passed?'':'disabled ')+'onclick="recprMerge(\''+h(def.pr)+'\')">Merge pull request</button></div>';
@@ -6060,7 +6060,7 @@ function ctxprTab(){
    : c.st==="closed"
    ? '<div class="panel-b" style="border-top:1px solid var(--border);font-size:12.5px"><b>Closed without merging.</b> <span class="muted">Nothing was published.</span></div>'
    : '<div class="panel-b row" style="border-top:1px solid var(--border);gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:12.5px">'+
-     (passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
+     (passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance mode '+h(govLabel(ws()))+'.</span>'
             :'<b>Checks are running.</b> <span class="muted">Merge is blocked until all '+n+' report.</span>')+'</div>'+
      '<button class="btn danger" onclick="openDialog(\'closepr\',\'ctxpr|'+h(CTXPR.pr)+'\')">Close pull request</button>'+
      '<button class="btn'+(passed?' primary':'')+'" '+(passed?'':'disabled ')+'onclick="ctxprMerge()">Merge pull request</button></div>';
@@ -6146,8 +6146,13 @@ function stgOpenCount(){
    PROPOSALS.filter(function(q){return q.id!==CTXPR.prp&&q.pr!=="—";}).length;
 }
 function wsGov(w){return (w&&w.governance)||"team";}
-var GOV_L={solo:"solo (author may merge)",team:"team (code-owner review)",regulated:"regulated (named approver)"};
-function govLabel(w){var m=wsGov(w);return GOV_L[m]||m;}
+/* The mode's name, and who the merge gate lets merge under it (context.steering.policy.ts). No shipped
+   gate runs a code-owner review, so no label here claims one. */
+var GOV_GATE={solo:"any workspace member merges, the author included",
+  team:"an org Owner or Admin, or a workspace Owner, other than the author merges",
+  regulated:"an org Owner or Admin other than the author merges, recorded as the accountable approver"};
+function govLabel(w){return wsGov(w);}
+function govGate(w){var m=wsGov(w);return m+(GOV_GATE[m]?": "+GOV_GATE[m]:"");}
 function govDesc(m){var x=WZ_MODES.filter(function(y){return y[0]===m;})[0];return x?x[1]:"";}
 function govChip(w){
   return '<button class="btn sm gov-chip" onclick="openDialog(\'govmode\',\''+h(w.slug)+'\')" title="Change the governance mode">Governance: '+h(govLabel(w))+'</button>';
@@ -6159,7 +6164,7 @@ function govSet(slug,mode){
 DLG_EXT.govmode=function(){
   var w=S.dlg==="govmode"?wsBySlug(S.dlgArg):null; if(!w) return {t:"Governance mode",w:false,b:"",f:""};
   var cur=S.govPick||wsGov(w);
-  return {t:"Governance mode · "+w.name,s:".oxagen/rules/governance.toml on "+w.main,w:false,
+  return {t:"Governance mode for "+w.name,s:".oxagen/rules/governance.toml on "+w.main,w:false,
    b:'<div class="wz-pick" style="grid-template-columns:1fr">'+WZ_MODES.map(function(m){var on=cur===m[0];
       return '<button class="wz-card'+(on?" on":"")+'" onclick="S.govPick=\''+m[0]+'\';render()"><span class="tx"><b>'+h(m[0])+(m[0]===wsGov(w)?' <span class="dim" style="font-weight:400">· now</span>':'')+'</b><span class="d">'+h(m[1])+'</span></span></button>';}).join("")+'</div>'+
     '<pre style="margin-top:12px">'+h(oxGovernanceToml(cur))+'</pre>',
@@ -6340,10 +6345,9 @@ function memFoldSub(m){
 }
 function memFoldLine(m){
   var f=memFoldOf(m), F=S.memFold;
-  if(f.st==="proposed") return 'Proposed as <span class="mono">'+h(m.proposedAs)+'</span> when it reached '+F.sayings+' sayings from '+F.runs+' runs. The proposal cites every saying above.';
-  if(f.st==="ready") return 'It has '+f.n+' sayings from '+f.r+' runs, which meets the setting. The promoter proposes it on its next pass.';
-  return 'It becomes a proposal at '+F.sayings+' sayings from '+F.runs+' runs. It has '+f.n+' from '+f.r+' run'+(f.r===1?'':'s')+'.'+
-   (memSayings(m).some(function(x){return x.file;})?' An imported saying counts toward the sayings and never toward the runs, so an import alone never makes a proposal.':'');
+  if(f.st==="proposed") return 'Proposed as <span class="mono">'+h(m.proposedAs)+'</span> when it reached '+F.sayings+' sayings from '+F.runs+' runs.';
+  if(f.st==="ready") return 'It has '+f.n+' sayings from '+f.r+' runs, which meets the setting.';
+  return 'It becomes a proposal at '+F.sayings+' sayings from '+F.runs+' runs. It has '+f.n+' from '+f.r+' run'+(f.r===1?'':'s')+'.';
 }
 /* go() to the address already showing fires no hashchange, so render here when that happens. */
 function memOpenProposal(id){closeDialog();S.prpSel=id;var to='#/'+ORG.slug+'/'+S.ws+'/steering/proposals';if(location.hash===to)render();else go(to);}
@@ -6469,14 +6473,14 @@ function ontForm(o,p){
    '<div class="field"><div class="lab-row"><label for="'+p+'-body">Definition</label>'+
    '<button class="btn wand" id="'+p+'WandBtn" onclick="ontWand(\''+p+'\')" title="Have the assistant write it" aria-label="Have the assistant write it">'+avSvg("wand-sparkles")+'</button></div>'+
    '<textarea id="'+p+'-body" rows="4" placeholder="The release train is the weekly cut of a-intel/platform from main to a release branch.">'+h(o.body||"")+'</textarea>'+
-   '<div class="wand-note on">Press the wand. <b>oxagen.assistant</b> rewrites what you wrote into the prose the file carries. Read it before anybody reviews it.</div></div>'+
+   '<div class="wand-note on">Press the wand to have <b>oxagen.assistant</b> write the definition’s prose.</div></div>'+
    '<div class="field"><label for="'+p+'-ent">About</label><input id="'+p+'-ent" value="'+h((o.entities||[]).join(", "))+'" placeholder="a-intel/platform, release/4.11">'+
    '<div class="hint">The repositories, branches or services this note is about, separated by commas.</div></div>';
 }
 function ontWand(p){
   var t=el(p+"-body"); if(!t)return;
   var raw=String(t.value||"").trim();
-  if(!raw)return act("Write the definition first. The assistant rewrites what you give it; it does not decide what the term means.");
+  if(!raw)return act("Write the definition first.");
   t.value=assistProse("ontology",raw);
   act(WAND_SAY.ontology,"gold");
 }
@@ -7068,7 +7072,7 @@ function oxprDetail(p){
       '<button class="btn'+(canMerge?' primary':'')+'"'+(canMerge?'':' disabled')+' onclick="oxprMerge(\''+h(p.id)+'\')">Merge pull request</button>'+
       '<button class="btn danger" onclick="openDialog(\'closepr\',\'oxpr|'+h(p.id)+'\')">Close pull request</button>'+
       '<span class="grow"></span><span class="dim" style="font-size:11.5px">'+
-      (canMerge?'GitHub enforces '+h(govLabel(ws()))+' governance.':'Merge stays disabled until every check reports.')+'</span></div>')+
+      (canMerge?'Governance mode '+h(govLabel(ws()))+'.':'Merge stays disabled until every check reports.')+'</span></div>')+
    '</div></div>';
 }
 
@@ -11490,7 +11494,7 @@ var CREATE={
    file:".oxagen/rules/&lt;lineage&gt;.toml",need:"steering.write"},
  import:{l:"Markdown import",d:"CLAUDE.md, AGENTS.md, and any Markdown file, read into records and memories.",i:"dir",
    file:"CLAUDE.md · AGENTS.md · any .md",need:"steering.write · memory.write"},
- init:{l:"Repository",d:"Adds the .oxagen/ tree to a repository that has none. The others need it first.",i:"repo",
+ init:{l:"Repository",d:"Adds the .oxagen/ tree to a repository that has none.",i:"repo",
    file:".oxagen/ &lt;in a repository&gt;",need:"repository.admin"}
 };
 
@@ -11566,11 +11570,11 @@ function wzDescSync(){
   var w=el("wzWandBtn"); if(w)w.disabled=false;
 }
 var WAND_SAY={
-  agent:"The assistant wrote the instructions from what you typed. Read them before anybody reviews them.",
-  tool:"The assistant wrote the description from what you typed. Read it before anybody reviews it.",
-  skill:"The assistant wrote the skill body from what you typed. Read it before anybody reviews it.",
-  record:"The assistant wrote the statement from what you typed. Read it before anybody reviews it.",
-  ontology:"The assistant wrote the definition from what you typed. Read it before anybody reviews it."
+  agent:"The assistant wrote the instructions from what you typed.",
+  tool:"The assistant wrote the description from what you typed.",
+  skill:"The assistant wrote the skill body from what you typed.",
+  record:"The assistant wrote the statement from what you typed.",
+  ontology:"The assistant wrote the definition from what you typed."
 };
 /* Deterministic on purpose: the same sentence in gives the same file out, so a headless check of
    this screen reads the same text every run. */
@@ -11587,7 +11591,7 @@ function assistProse(kind,raw){
 function wzWand(){
   var z=S.wz; if(!z)return;
   var raw=String(z.desc||"").trim();
-  if(!raw){ act("Write a line or two first. The assistant rewrites what you give it; it does not decide what you are building."); return; }
+  if(!raw){ act("Write a line or two first."); return; }
   if(z.descAI){ act("The assistant already wrote this one. Change it and run the wand again."); return; }
   z.desc=assistProse(z.kind,raw); z.descAI=true;
   render();
@@ -11598,7 +11602,7 @@ function wzDesc(placeholder,chips,hint){
   return '<div class="field"><div class="lab-row"><label for="wzDesc">In your own words</label>'+
    '<button class="btn wand" id="wzWandBtn" onclick="wzWand()" title="Have the assistant write it" aria-label="Have the assistant write it">'+avSvg("wand-sparkles")+'</button></div>'+
    '<textarea id="wzDesc" rows="4" placeholder="'+h(placeholder)+'" oninput="wzDescIn(this.value)" aria-label="Describe it">'+h(z.desc)+'</textarea>'+
-   '<div class="wand-note'+(raw&&!z.descAI?" on":"")+'" id="wzWandNote">Press the wand. <b>oxagen.assistant</b> rewrites what you wrote into the prose the file carries, and the next step opens when it has. Its turn is recorded, billed to oxagen, and never counted as one of your runs.</div>'+
+   '<div class="wand-note'+(raw&&!z.descAI?" on":"")+'" id="wzWandNote">Press the wand to have <b>oxagen.assistant</b> write the file’s prose. The next step opens when it has.</div>'+
    (hint?'<div class="hint">'+hint+'</div>':'')+'</div>'+
    (chips&&chips.length?'<div class="wz-chips">'+chips.map(function(c){
      return '<button class="btn sm" onclick="wzSetR(\'desc\',\''+h(c).replace(/'/g,"\\'")+'\')">'+h(c)+'</button>';}).join("")+'</div>':'');
@@ -11607,7 +11611,7 @@ function wzDesc(placeholder,chips,hint){
    it is free, and it is not one of the tenant's runs. */
 function wzDraftNote(what){
   return '<div class="wz-asst"><span class="ic">'+icon("mirror")+'</span><div><b>'+h(what)+'</b>'+
-   '<p>Drafted by <span class="mono">oxagen.assistant</span> from what you wrote. Its turn is recorded with frames and a receipt and billed to oxagen. It is not one of your runs, so it does not appear in Work or Spend. Every line below is yours to change before anybody reviews it.</p></div></div>';
+   '<p>Drafted by <span class="mono">oxagen.assistant</span> from what you wrote.</p></div></div>';
 }
 function wzFiles(rows){
   return '<div class="wz-files">'+rows.map(function(r){
@@ -12229,9 +12233,9 @@ function wzInitFiles(){
    ["mod",".gitignore","ignore .stella/private/ and the local .oxagen/workspace.json"]];
 }
 var WZ_MODES=[
- ["solo","The author may merge their own.","One person, or a repository nobody else reviews."],
- ["team","A code-owner review is required.","What a missing governance.toml means, and what most repositories want."],
- ["regulated","A named approver from a role must approve, and the promotion ledger is hash-chained.","Separation of duties: the author of a record may never be its approver."]
+ ["solo","Any workspace member merges, the author included."],
+ ["team","An org Owner or Admin, or a workspace Owner, other than the author merges."],
+ ["regulated","An org Owner or Admin other than the author merges, recorded as the accountable approver."]
 ];
 function wzInit(){
   var z=S.wz, r=wzInitRepo(), w=ws(), cands=wzInitCandidates();

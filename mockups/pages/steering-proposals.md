@@ -60,7 +60,7 @@ The mockup's third proposal reads "open Context PR" in its state badge; the prod
   - **Promoter evidence**: the rationale in prose. For `prp_01K5RU4A` it says the release manager read CHANGELOG.md with an identical input digest 682 times beyond the first read across 212 sealed runs, that every repeat returned the first read's response digest, and that a rule to cache the first read changes the behaviour without editing the brief.
   - **Supporting runs**, with the support line as its badge ("682 duplicate tool calls across 212 runs"). The shared list controls, with an Outcome filter. Columns, in order: Run (the run id, with the agent and the date under it), Frame ("seq 31"), Outcome (a dot and a word) and Record (the record id, with its kind and repeat count under it: "observation · repeat read ×3").
 - Right column:
-  - **Pull request**: Target ("a-intel/platform"), Branch ("context/ctx.release.no-reread-changelog"), File (".oxagen/rules/ctx.release.no-reread-changelog.toml") and Governance ("team · a code-owner review is required"). Under them the action:
+  - **Pull request**: Target ("a-intel/platform"), Branch ("context/ctx.release.no-reread-changelog"), File (".oxagen/rules/ctx.release.no-reread-changelog.toml") and Governance ("team: an org Owner or Admin, or a workspace Owner, other than the author merges", the gate for the mode in force). Under them the action:
     - **Open a pull request** (gold) while the proposal has none, which opens `ctxpr`;
     - **Open a-intel/platform#519** (plain) once it is open, or **Merged in a-intel/platform#519** once merged, which opens the Pull requests view;
     - for another proposal with a pull request, its number and checks in mono ("a-intel/platform#520 · 5 / 6 · conflict check running");

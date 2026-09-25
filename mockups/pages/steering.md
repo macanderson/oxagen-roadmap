@@ -28,7 +28,7 @@ This spec also owns the parts every Steering tab shares: the header with its gov
 - h1: "Steering".
 - No subtext. What the page is for is in its component help (`mockups/help/steering.md`, Header).
 - Actions, left to right:
-  - The governance chip, "Governance: team (code-owner review)", with the mode in mono. It opens `govmode`. It is never gold.
+  - The governance chip, "Governance: team": the mode's name and no review claim, because no shipped gate runs a code-owner review. It opens `govmode`. It is never gold.
   - The skills chip, "Skills settings", with the title "How skills resolve in this workspace, settings version skl_v7". It renders only in a workspace with skills on, and it opens `skcfg`. It is never gold.
   - **Import Markdown**, plain on every tab. It opens the Markdown import below.
   - **New source**. Gold on Sources, Assignments, Compiler and Proposals. Plain on the Pull requests view, where Merge pull request holds the gold. It opens `newsrc`.
@@ -88,8 +88,8 @@ The Core platform fixtures, by kind: 78 Steering records (62 published, 16 archi
 
 **`govmode`**, opened by the governance chip.
 
-- Title "Governance mode · Core platform", subtitle ".oxagen/rules/governance.toml on a-intel/platform".
-- Three cards in one column. `solo`: "The author may merge their own." `team`: "A code-owner review is required." `regulated`: "A named approver from a role must approve, and the promotion ledger is hash-chained." The mode in force carries "· now" after its name, and the picked card is highlighted. Who each mode suits, and separation of duties under `regulated`, are in the dialog's component help.
+- Title "Governance mode for Core platform", subtitle ".oxagen/rules/governance.toml on a-intel/platform".
+- Three cards in one column, each saying what the merge gate enforces (`context.steering.policy.ts`). `solo`: "Any workspace member merges, the author included." `team`: "An org Owner or Admin, or a workspace Owner, other than the author merges." `regulated`: "An org Owner or Admin other than the author merges, recorded as the accountable approver." The mode in force carries "· now" after its name, and the picked card is highlighted. Who each mode suits, and separation of duties under `regulated`, are in the dialog's component help.
 - Under the cards, the file the pick would write: two comment lines saying the file is read on the production branch when a pull request is opened and again when it is merged, and that a missing file means team; then `mode = "<mode>"` and `separation_of_duties = true` for `regulated`, `false` otherwise. A build writes the comment `draftGovernanceToml` writes (`packages/oxagen/src/contracts/context.steering.shared.ts:96`). The mockup's first comment line joins the path and the sentence with a colon.
 - No note. When the mode is read, and what a lowering needs, are in the dialog's component help (`mockups/help/steering.md`, Governance mode).
 - Footer: Cancel and **Open the pull request** (gold). Confirming reports "Pull request opened on a-intel/platform: .oxagen/rules/governance.toml sets mode = <mode>." Picking the mode in force reports "Governance mode is already team. Nothing to change."

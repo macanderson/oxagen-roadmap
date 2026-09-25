@@ -55,9 +55,9 @@ Why nothing is written before the seal is in the component help (Memories from t
 **Dialogs this tab opens.**
 
 - `memory` (`DLG_EXT.memory`), from a row. The title is the memory's body and the subtitle is the memory's id. Class and force, Scope, Where it came from, Recalled, Cost and In force since. Then the memory's position in the assembler, one line: "Superseded by <source>.", "Yields to <record>, a published must." or "Competes in the per-prompt selection at force <force>." What each position means is in the component help (Memory). Then the Sayings list. A run saying links to that run's Memories tab with its frame. An imported saying shows the file and line with "imported". Under the sayings, the fold line (`memFoldLine()`):
-  - Proposed: "Proposed as <id> when it reached 3 sayings from 2 runs. The proposal cites every saying above."
-  - Ready: "It has N sayings from R runs, which meets the setting. The promoter proposes it on its next pass."
-  - Otherwise: "It becomes a proposal at 3 sayings from 2 runs. It has N from R run(s)." A memory with an imported saying adds "An imported saying counts toward the sayings and never toward the runs, so an import alone never makes a proposal."
+  - Proposed: "Proposed as <id> when it reached 3 sayings from 2 runs."
+  - Ready: "It has N sayings from R runs, which meets the setting."
+  - Otherwise: "It becomes a proposal at 3 sayings from 2 runs. It has N from R run(s)." That the proposal cites every saying, that the promoter proposes on its next pass, and how an imported saying counts are in the component help (`mockups/help/steering-source.md`, Sayings).
   - When the memory came from a run, "The run that left it" and "Open <run>". The footer reads "Close", "Forget" (danger, opens `memforget`), and the gold "Open the proposal" when the memory was proposed, otherwise "Promote to a record", which opens the create wizard with the memory's body.
 - `memforget`: "Forget this memory?", what stops, the recall count, and "Keep it" and "Forget it".
 - `request-access` from the locked self-grade, and the run dialogs from the header (`run.md`).

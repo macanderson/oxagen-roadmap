@@ -182,7 +182,7 @@ One concern is one pull request, so the panel offers to open one only while the 
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
 | Target, Branch, File | fixed to `a-intel/platform`, derived from `p.lineage` | `get_context_pr` repository, branch, path | shipped |
-| Governance | fixed text "team · a code-owner review is required" | `get_context_pr` `governanceMode` | shipped |
+| Governance | `govGate(ws())` over `GOV_GATE` | `get_context_pr` `governanceMode` and the merge gate | shipped |
 | Action state | `S.ctxpr`, `PROPOSALS[].pr` and `checks` | Proposal `status` and `pr` | shipped |
 
 ### Logic
@@ -192,7 +192,7 @@ The action, in order:
 3. Another proposal with a pull request: its number and checks in mono ("a-intel/platform#520 · 5 / 6 · conflict check running").
 4. A candidate with no path in the design: a disabled **Open a pull request**.
 
-The mockup fixes Target and Governance. A build reads both from `get_context_pr`.
+The mockup fixes Target. Governance reads `govGate()`: the mode and who merges under it, "team: an org Owner or Admin, or a workspace Owner, other than the author merges", the same words the shipped app's pull request panel uses. It claims no code-owner review, which no shipped gate runs. A build reads both from `get_context_pr`.
 
 ### States
 Loaded only. While the header's New source is gold, case 1 puts a second gold on the screen. A build keeps one.

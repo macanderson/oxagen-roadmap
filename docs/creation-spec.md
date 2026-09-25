@@ -29,7 +29,9 @@ repository, under your review. What Oxagen governs is the call, not the source.
 **The drafting turn belongs to `oxagen.assistant`.** It is recorded with frames and a receipt like
 any turn, and it is billed to Oxagen, never to the tenant: it is not one of your runs and it never
 appears in Work or in Spend. Every line it drafts is the operator's to change before anybody
-reviews it, and the wizard says so on every drafting step.
+reviews it. The drafting card on screen names the drafter ("Drafted by oxagen.assistant from what
+you wrote"). The rest of this paragraph is in the wizards' component help
+(`mockups/help/steering.md`, Steering record wizard).
 
 **The Markdown import is the one exception.** It reads CLAUDE.md, AGENTS.md, and any Markdown file
 into records and memories. The records it accepts take the same road, one pull request per source
