@@ -67,13 +67,13 @@
  },
  {
   "id": "fnd_01K5RT8D",
-  "kind": "Wrong tier",
+  "kind": "Wrong model class",
   "level": "agent",
   "subject": "a-intel.core.triage",
   "save": "28.05",
   "window": "last 30 days",
   "why": "91% of this agent's steps are classification-shaped but 14% of its model calls went to a flagship model after a retry.",
-  "fix": "Pin the fallback route to the light tier.",
+  "fix": "Pin the fallback route to the light model class.",
   "frames": "1,340 runs"
  },
  {
@@ -94,7 +94,7 @@
   "subject": "Priya Natarajan",
   "save": "6.91",
   "window": "last 30 days",
-  "why": "cache_write_5m on the last turn of 28 one-turn runs; nothing read the prefix inside the TTL.",
+  "why": "A 5-minute cache write on the last turn of 28 one-turn runs. Nothing read the prefix inside the TTL.",
   "fix": "Stop writing cache for one-turn runs.",
   "frames": "28 runs"
  }

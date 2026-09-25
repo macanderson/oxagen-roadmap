@@ -83,7 +83,7 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
 7. The approvals drawer. The badge counts every pending approval across the organization plus an
    open interjection; it is present on every page including organization pages. Clicking opens a
    right-hand drawer titled "Approvals" with the count, a list under "N waiting on you" (an
-   interjection row with "Answer it", then approval rows: shield glyph, amount or tool version,
+   interjection row with "Answer", then approval rows: shield glyph, amount or tool version,
    agent, run title, workspace, the run's work order (direct or dispatched, with its id), risk and
    side-effect chips, a live countdown), then "N resolved
    today". Selecting a row shows the full approval card (four-hop chain, rules that fired, taint,

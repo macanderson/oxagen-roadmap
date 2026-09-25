@@ -17,12 +17,12 @@ Step 2 of 3 of the gate: wrap the first agent. This is the Register agent wrap s
 ## What is on the page
 
 **Header.** Eyebrow “Step 2 of 3”, h1 “Wrap an agent”, lead “The installer carries a one-time enrollment token for `a-intel.core.release-manager`, so nothing is copied or pasted.”
-Actions (card footer): **Cancel** · **Back** · caption “Nothing completes until a frame arrives.” · **I have already installed it — continue**. The gold action is **Download for <OS>** inside the Claude Code and Codex CLI panels. The SDK panel has no gold action.
+Actions (card footer): **Cancel** · **Back** · caption “Nothing completes until a frame arrives.” · **I already installed it**. The gold action is **Download for <OS>** inside the Claude Code and Codex CLI panels. The SDK panel has no gold action.
 
 - Harness tabs (`role=tablist`, “How to wrap the agent”): **Claude Code** “one click · harness” · **Codex CLI** “one click · harness” · **SDK agent** “five lines · harness”. Claude Code is preselected (the onboarding record’s harness is `claude-code`).
 - The three panels are the ones in `register-wrap.md`, word for word, with the key `a-intel.core.release-manager` in the SDK code: Claude Code (h3 with “recommended”, the installer copy, the tier ladder This agent `harness` · Next rung `gateway` · Top rung `contained`, the tier sentence, the Download column with OS tabs macOS · Windows · Linux, **Download for macOS**, the `REG_PKG` package line, the token box with `oxe_1time_7QK4M2NV9XR3T8ZP` and “expires in 30 min · single use”, and `oxagen agent enroll --token …`); Codex CLI (the `~/.codex/config.toml` copy, “or observe” on the ladder, “profile: codex-cli”, `oxagen agent enroll --harness codex-cli`); SDK agent (the five-line copy, the “Agent credential” box, the install line, language tabs TypeScript · Python · Go, **Copy the five lines**, the code).
 
-**Shell.** No sidebar and no topbar, so this page has no approvals button and no approvals drawer. The gate shell (`regShell` in onboard mode): brandmark, `marcus@a-intel.example`, **Cancel**; the rail (`nav` labelled “Onboarding”) with step 1 Name the organization done (✓, a button back), step 2 Wrap an agent current, step 3 Start a run disabled; the caption “The operator console does not open until an agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two.” The phone layout is the same card at full width.
+**Shell.** No sidebar and no topbar, so this page has no approvals button and no approvals drawer. The gate shell (`regShell` in onboard mode): brandmark, `marcus@a-intel.example`, **Cancel**; the rail (`nav` labelled “Onboarding”) with step 1 Name the organization done (✓, a button back), step 2 Wrap an agent current, step 3 Start a run disabled; the caption “The operator console opens when an agent first connects to oxagen. That connection also tests the install.” The phone layout is the same card at full width.
 
 ## Data sources
 
@@ -36,7 +36,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Identical to `register-wrap.md`. **Download for <OS>** records the harness, toasts “Signed installer for <OS> downloaded with the one-time token embedded.”, and moves to Start a run. **I have already installed it — continue** moves there without changing the harness.
+- Identical to `register-wrap.md`. **Download for <OS>** records the harness, toasts “Signed installer for <OS> downloaded with the one-time token embedded.”, and moves to Start a run. **I already installed it** moves there without changing the harness.
 - **Back** returns to Name the organization, not to an agent name step. Either Cancel (`obExit`) clears the onboarding state and goes to Work.
 - The tier ladder shows all four tiers as real: `harness` for this agent, `gateway` and `contained` as the next rungs, and `observe` as the fallback for a Codex CLI without an approval hook.
 

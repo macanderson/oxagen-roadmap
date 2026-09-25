@@ -16,7 +16,7 @@
   "lineage": "ctx.triage.reproduce-first",
   "kind": "rule",
   "force": "should",
-  "from": "reflector · run_01K5RH3G8K5PAS7D",
+  "from": "post-run review · run_01K5RH3G8K5PAS7D",
   "st": "Reproduce before labeling; if you cannot reproduce in two steps, open a proposal instead.",
   "support": "14 unsatisfied runs in 30 days",
   "state": "candidate",

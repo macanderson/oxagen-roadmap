@@ -131,8 +131,8 @@
    {
     "self": 1,
     "obs": 1,
-    "obsLab": "halted by the hooks_removed kill switch",
-    "say": "The kill switch stopped me after two reads. I did not label anything."
+    "obsLab": "stopped when oxagen detected its hooks were removed",
+    "say": "oxagen stopped me after two reads. I did not label anything."
    },
    {
     "self": 3,
@@ -230,7 +230,7 @@
    {
     "self": 5,
     "obs": 2,
-    "obsLab": "client tier: digests only",
+    "obsLab": "harness tier: digests only",
     "say": "Every edit follows the house style."
    },
    {

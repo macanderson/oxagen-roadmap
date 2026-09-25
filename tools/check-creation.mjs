@@ -1027,7 +1027,7 @@ for (const theme of ["light", "dark"]) {
   await page.waitForTimeout(250);
   const ed = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
   ok(/Edit mnd_7K2ETQ4/.test(ed), "mandate: the edit dialog names this mandate, got " + ed.slice(0, 120));
-  ok(/Per call/.test(ed) && /Approval above/.test(ed), "mandate: the edit dialog carries the ceilings");
+  ok(/Auto-approve limit per call/.test(ed) && /Monthly limit/.test(ed), "mandate: the edit dialog carries the auto-approve limit and the period limit");
   ok(!/auto-approval/i.test(ed), "mandate: the edit hint does not defer to auto-approval rules, which are cut");
 
   await page.evaluate(() => { closeDialog(); openDialog("mandaterevoke", "mnd_7K2ETQ4"); });

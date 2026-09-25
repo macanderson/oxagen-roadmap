@@ -30,7 +30,7 @@
   "digest": "sha256:7f2c0ab419de6c83",
   "tokens": 1120,
   "installs": 640,
-  "st": "How to refund a charge against a mandate: find the receipt, check the amount against the per-call ceiling, and park anything above it.",
+  "st": "How to refund a charge against a mandate: find the receipt, check the amount against the auto-approve limit, and park anything above it.",
   "match": [
    "refund",
    "stripe",
@@ -51,7 +51,7 @@
   "digest": "sha256:1a7fe4b309cd8265",
   "tokens": 1320,
   "installs": 2870,
-  "st": "Expand, backfill, contract, and never in one deploy. Names the four migrations that took production down in 2025.",
+  "st": "Expand, backfill, then contract, each in its own deploy. Names the four migrations that took production down in 2025.",
   "match": [
    "migration",
    "database",
