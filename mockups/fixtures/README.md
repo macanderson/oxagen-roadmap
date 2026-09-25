@@ -14,7 +14,7 @@ record must be derived the same way in the fixture, or two pages disagree.
 | File | Collection | What it is |
 |---|---|---|
 | `org.json` | `ORG` | the organization: slug, name, plan, data plane, attester key, region, governance mode |
-| `ws.json` | `WS` | the workspaces: slug, name, main repo and branch, linked repos, agent count, owner |
+| `ws.json` | `WS` | the workspaces: slug, name, main repo and branch, linked repos, agent count, owner, avatar (FinOps has a stored one, Core platform has none) |
 | `branches.json` | `BRANCHES` | branches on the workspace's primary repo — what the commit dialog offers beside "+ New branch" |
 | `people.json` | `PEOPLE` | the people, keyed by handle: name, role, email, two-factor, avatar (a photo avatar carries its https `url` and, in `src`, an offline copy the page draws) |
 | `agents.json` | `AGENTS` | the seed agents with their identity (principal, harness, host, credential, budget) merged in |
