@@ -135,7 +135,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <div class="site">
 <nav class="docs" aria-label="Documents">
   <a class="wordmark" href="#spec">o<span class="x">x</span>agen</a>
-  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and context records</a></li><li><a href="#tasks" data-doc="tasks">Tasks and work orders</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
+  <p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and context records</a></li><li><a href="#tasks" data-doc="tasks">Tasks and work orders</a></li><li><a href="#agent-capability" data-doc="agent-capability">In-app agent capability expansion</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
   <div class="foot">One file, every document. The markdown in <code>docs/</code> is the source; <code>tools/build-docs.py</code> writes this page.</div>
 </nav>
 <div>
@@ -10515,6 +10515,821 @@ sandbox before its connector is built.</li>
 <footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/tasks-spec.md</code></span></footer>
 </main>
 </div>
+</article><article id="agent-capability" class="doc" hidden>
+<header class="mast">
+  <p class="eyebrow">Oxagen · Roadmap specification</p>
+  <h1>In-app agent capability expansion</h1>
+  <dl class="facts"><dt>Status</dt><dd>Proposed roadmap — design and architecture review</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Oxagen product and platform</dd><dt>Audience</dt><dd>Engineering, engineering management, product, design, platform and security</dd><dt>Scope</dt><dd>The in-app agent's ability to understand, visualize, create, change and distribute work</dd><dt>Current baseline</dt><dd>Execution and tracing, agent memory, knowledge graph and ontology traversal, tool discovery and loading</dd></dl>
+</header>
+<div class="grid">
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#agent-capability/1-executive-summary">1. Executive summary</a></li><li><a href="#agent-capability/2-product-intent">2. Product intent</a></li><li><a href="#agent-capability/3-current-state-and-gap">3. Current state and gap</a></li><li><a href="#agent-capability/4-terminology-and-information-architecture">4. Terminology and information architecture</a></li><li><a href="#agent-capability/5-capability-model">5. Capability model</a></li><li><a href="#agent-capability/6-proposed-tool-families">6. Proposed tool families</a></li><li><a href="#agent-capability/7-charts-graphs-and-analysis-contract">7. Charts, graphs and analysis contract</a></li><li><a href="#agent-capability/8-artifact-model">8. Artifact model</a></li><li><a href="#agent-capability/9-consent-iam-and-side-effects">9. Consent, IAM and side effects</a></li><li><a href="#agent-capability/10-phased-roadmap">10. Phased roadmap</a></li><li><a href="#agent-capability/11-prioritized-vertical-slices">11. Prioritized vertical slices</a></li><li><a href="#agent-capability/12-technical-architecture-direction">12. Technical architecture direction</a></li><li><a href="#agent-capability/13-evaluation-and-success-metrics">13. Evaluation and success metrics</a></li><li><a href="#agent-capability/14-non-goals-and-open-decisions">14. Non-goals and open decisions</a></li><li><a href="#agent-capability/15-recommended-next-move">15. Recommended next move</a></li></ol></nav>
+<main>
+<h2 id="agent-capability/1-executive-summary">1. Executive summary</h2>
+<p>The in-app agent should become a permissioned work copilot for engineers and engineering managers.
+It should be able to answer questions about the workspace, explain the evidence behind an answer,
+render charts and relationship views, create durable artifacts, and take approved actions through the
+same product surfaces a person can use.</p>
+<p>The target is not a second chat surface with a larger prompt. It is an agent that can operate across
+the product's read, analysis, creation, action and distribution loops while preserving the product's
+existing identity, entitlement, consent, audit and provenance controls.</p>
+<p>The current tool set is a strong foundation for inspecting agent executions and the graph behind
+them, but it is not yet a general work interface. The largest product change is to move from a
+graph-centric assistant to an <strong>app-capable agent</strong> with four explicit abilities:</p>
+<ol>
+<li><strong>Understand</strong> — retrieve current workspace state and source evidence across connected systems.</li>
+<li><strong>Make sense</strong> — compare, summarize, calculate, visualize and explain uncertainty.</li>
+<li><strong>Make</strong> — produce charts, reports, documents, presentations, plans and other artifacts.</li>
+<li><strong>Act</strong> — create, edit, link, assign, approve, publish and distribute through governed mutations.</li>
+</ol>
+<p>The roadmap is intentionally phased. Read and provenance capabilities arrive before writes; a
+deterministic artifact layer arrives before high-stakes distribution; and every mutating capability
+is mediated by a preview, consent and audit contract.</p>
+<h2 id="agent-capability/2-product-intent">2. Product intent</h2>
+<h3 id="agent-capability/2-1-north-star-experience">2.1 North-star experience</h3>
+<p>An engineering manager can ask:</p>
+<blockquote>
+<p>“What is putting the Q4 platform plan at risk? Show me the evidence, chart throughput and aging,
+trace the dependencies, draft a leadership-ready brief, and prepare the three backlog changes you
+recommend. Do not apply anything until I approve the plan.”</p>
+</blockquote>
+<p>The agent should be able to:</p>
+<ul>
+<li>find the relevant projects, repositories, tasks, designs, decisions, incidents, people, metrics and
+prior agent work;</li>
+<li>distinguish source facts from derived analysis and recommendations;</li>
+<li>show the relationships and time windows used in its reasoning;</li>
+<li>render a chart, graph or table inline and preserve the underlying data and query;</li>
+<li>produce a reviewable artifact such as HTML, Markdown, PDF, a slide deck, CSV or JSON;</li>
+<li>stage changes as a named plan with a precise diff and affected objects;</li>
+<li>ask for consent only at the boundary that needs it;</li>
+<li>execute approved changes through the same IAM, entitlement, policy and audit gates as the app;</li>
+<li>cite source records and retain the artifact's provenance for later review.</li>
+</ul>
+<h3 id="agent-capability/2-2-primary-users-and-jobs">2.2 Primary users and jobs</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>User</th>
+<th>High-value jobs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Engineer</td>
+<td>Understand a service, trace an incident, explain a change, find related work, prepare a technical decision record, update a task or document with approval</td>
+</tr>
+<tr>
+<td>Engineering manager</td>
+<td>See delivery health, identify risks and bottlenecks, compare plans, prepare staff/leadership updates, rebalance backlog, assign or sequence work</td>
+</tr>
+<tr>
+<td>Product or technical leader</td>
+<td>Understand strategy execution, review investment and dependency risk, generate board or leadership material, distribute a decision-ready brief</td>
+</tr>
+<tr>
+<td>Platform or security operator</td>
+<td>Inspect agent activity, verify provenance, constrain tools, review proposed mutations, investigate denied or anomalous actions</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="agent-capability/3-current-state-and-gap">3. Current state and gap</h2>
+<h3 id="agent-capability/3-1-current-tool-categories">3.1 Current tool categories</h3>
+<p>The agent currently has access to the following categories:</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Current tools</th>
+<th>Current posture</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Execution &amp; tracing</td>
+<td><code>list_executions</code>, <code>get_execution_trace</code></td>
+<td>Read-only inspection of agent runs and span trees</td>
+</tr>
+<tr>
+<td>Agent Memory</td>
+<td><code>recall_memory</code>, <code>save_memory</code>, <code>cite_reference</code></td>
+<td>Semantic recall plus governed memory writes and citations</td>
+</tr>
+<tr>
+<td>Knowledge Graph &amp; Ontology</td>
+<td><code>get_ontology_neighbors</code>, <code>query_ontology</code></td>
+<td>Read-only graph traversal, limited to the current model</td>
+</tr>
+<tr>
+<td>Tool discovery</td>
+<td><code>search_tools</code>, <code>load_tools</code></td>
+<td>Discover and load additional tools subject to gates</td>
+</tr>
+</tbody>
+</table></div>
+<p>All current calls pass through IAM, entitlement and consent gates. That contract remains a
+non-negotiable foundation for the roadmap.</p>
+<h3 id="agent-capability/3-2-gaps-to-close">3.2 Gaps to close</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Gap</th>
+<th>User impact</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>No app-surface parity</td>
+<td>The agent cannot inspect or operate on many things a person can see or change in the app</td>
+</tr>
+<tr>
+<td>Graph is too narrow a mental model</td>
+<td>Users have to ask for ontology traversal instead of asking about work, evidence or outcomes</td>
+</tr>
+<tr>
+<td>No analysis runtime</td>
+<td>The agent can retrieve relationships but cannot reliably calculate, compare or model trends</td>
+</tr>
+<tr>
+<td>No first-class visual output</td>
+<td>Answers remain text-heavy when a chart, timeline, graph or matrix would be clearer</td>
+</tr>
+<tr>
+<td>No artifact lifecycle</td>
+<td>Useful analysis disappears in chat instead of becoming a durable, reviewable deliverable</td>
+</tr>
+<tr>
+<td>No governed action plan</td>
+<td>The agent cannot prepare and apply multi-object changes with a visible preview and approval boundary</td>
+</tr>
+<tr>
+<td>No distribution path</td>
+<td>Board, leadership and team outputs require manual copying and reformatting</td>
+</tr>
+<tr>
+<td>Weak source-to-output traceability</td>
+<td>Readers cannot easily tell which records support a number, claim or recommendation</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="agent-capability/4-terminology-and-information-architecture">4. Terminology and information architecture</h2>
+<h3 id="agent-capability/4-1-retire-ontology-as-the-user-facing-concept">4.1 Retire ontology as the user-facing concept</h3>
+<p>“Ontology” no longer describes the whole capability users need. It describes one implementation
+concern: the typed schema and relationship vocabulary that makes workspace data traversable. It
+should remain available to platform and governance teams, but it should stop being the primary product
+label for the agent's understanding of work.</p>
+<p>Use <strong>Workspace Context</strong> as the user-facing concept.</p>
+<p>Workspace Context is the evidence-backed understanding of a workspace, composed of:</p>
+<pre><code>Workspace Context
+├── Sources       documents, tasks, repositories, designs, events, metrics, runs
+├── Entities      people, teams, services, projects, initiatives, decisions, artifacts
+├── Relationships dependencies, ownership, sequence, impact, reference, contradiction
+├── Evidence      source spans, timestamps, snapshots, permissions, citations
+├── Measures      dimensions, metrics, time windows, aggregations and definitions
+├── Insights      derived findings, risks, themes, forecasts and recommendations
+└── Actions       governed plans and mutations against connected systems
+</code></pre>
+<p>The internal ontology is the schema layer inside Workspace Context. It supplies types, relationship
+semantics, identity resolution and traversal rules. It is not the only source of truth and it is not
+the user-facing answer.</p>
+<h3 id="agent-capability/4-2-proposed-product-language">4.2 Proposed product language</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Current term</th>
+<th>Proposed product term</th>
+<th style="text-align:right">Keep internally?</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Ontology</td>
+<td>Workspace Context</td>
+<td style="text-align:right">Yes, as schema layer</td>
+<td>Matches the user's job: understand work and evidence</td>
+</tr>
+<tr>
+<td>Ontology node</td>
+<td>Context entity</td>
+<td style="text-align:right">Yes</td>
+<td>A person should see “service” or “initiative,” not a generic node</td>
+</tr>
+<tr>
+<td>Ontology relationship</td>
+<td>Context relationship</td>
+<td style="text-align:right">Yes</td>
+<td>Makes graph output understandable outside platform teams</td>
+</tr>
+<tr>
+<td>Ontology query</td>
+<td>Context query</td>
+<td style="text-align:right">Alias during migration</td>
+<td>Keeps API compatibility while the mental model changes</td>
+</tr>
+<tr>
+<td>Graph traversal</td>
+<td>Explore relationships</td>
+<td style="text-align:right">Yes</td>
+<td>Describes the action rather than the storage model</td>
+</tr>
+<tr>
+<td>Citation</td>
+<td>Evidence link</td>
+<td style="text-align:right">Yes</td>
+<td>Connects claims to source records and spans</td>
+</tr>
+</tbody>
+</table></div>
+<p>Compatibility rule: existing ontology tool names may remain as stable API aliases for one migration
+cycle, but new tools, UI copy and artifacts should use Context terminology.</p>
+<h2 id="agent-capability/5-capability-model">5. Capability model</h2>
+<p>The agent's capability surface should be organized by what a person is trying to do, not by the
+backend subsystem that happens to implement it.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Capability plane</th>
+<th>What the agent can do</th>
+<th>Default risk</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Observe</td>
+<td>Read app surfaces, connected sources, execution records, memory, context and settings in scope</td>
+<td>Read</td>
+</tr>
+<tr>
+<td>Query</td>
+<td>Search, filter, join, aggregate, compare and retrieve source spans</td>
+<td>Read/compute</td>
+</tr>
+<tr>
+<td>Analyze</td>
+<td>Calculate metrics, detect trends, classify themes, map dependencies, identify risks and state assumptions</td>
+<td>Read/compute</td>
+</tr>
+<tr>
+<td>Visualize</td>
+<td>Render charts, graphs, timelines, matrices, tables and diagrams from a reproducible data spec</td>
+<td>Read/compute</td>
+</tr>
+<tr>
+<td>Create</td>
+<td>Produce artifacts, save drafts, create context records, create work plans and prepare exports</td>
+<td>Draft/write</td>
+</tr>
+<tr>
+<td>Change</td>
+<td>Edit, link, assign, update status, create tasks, modify records or invoke connected-system actions</td>
+<td>Mutating</td>
+</tr>
+<tr>
+<td>Govern</td>
+<td>Request approval, explain required consent, record decisions, cite sources and expose audit state</td>
+<td>Controlled write</td>
+</tr>
+<tr>
+<td>Distribute</td>
+<td>Export, publish, share or deliver an artifact to approved destinations</td>
+<td>High-impact write</td>
+</tr>
+</tbody>
+</table></div>
+<p>Every call should declare its plane, resource scope, side effect, data egress and approval requirement.</p>
+<h2 id="agent-capability/6-proposed-tool-families">6. Proposed tool families</h2>
+<p>Tool names below are illustrative contracts for the roadmap, not a commitment to a final RPC naming
+style. The key requirement is that a tool's schema makes scope, evidence, side effect and consent
+visible before execution.</p>
+<h3 id="agent-capability/6-1-app-parity-and-workspace-context">6.1 App parity and workspace context</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Candidate tools</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Workspace navigation</td>
+<td><code>list_app_surfaces</code>, <code>get_app_surface</code>, <code>get_surface_schema</code></td>
+<td>Discover what the app exposes and retrieve a normalized surface representation</td>
+</tr>
+<tr>
+<td>Source search</td>
+<td><code>search_workspace</code>, <code>search_source</code>, <code>get_source_record</code>, <code>get_source_span</code></td>
+<td>Find and inspect current records with permissions and provenance</td>
+</tr>
+<tr>
+<td>Context</td>
+<td><code>query_context</code>, <code>get_context_entity</code>, <code>explore_relationships</code>, <code>compare_context_snapshots</code></td>
+<td>Replace ontology-first traversal with evidence-backed workspace queries</td>
+</tr>
+<tr>
+<td>Work views</td>
+<td><code>list_work_items</code>, <code>get_work_item</code>, <code>get_project_health</code>, <code>get_dependency_map</code></td>
+<td>Make common engineering and management questions first-class</td>
+</tr>
+<tr>
+<td>Agent/app state</td>
+<td><code>get_agent</code>, <code>get_toolbelt</code>, <code>get_steering</code>, <code>get_runtime</code>, <code>get_policy_state</code></td>
+<td>Give the agent parity with the operational surfaces it helps users interpret</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agent-capability/6-2-analysis-and-visualization">6.2 Analysis and visualization</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Candidate tools</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Analysis</td>
+<td><code>run_analysis</code>, <code>aggregate_records</code>, <code>compare_periods</code>, <code>detect_trends</code>, <code>find_outliers</code></td>
+<td>Compute on a bounded, cited dataset with explicit assumptions</td>
+</tr>
+<tr>
+<td>Metrics</td>
+<td><code>define_metric</code>, <code>evaluate_metric</code>, <code>list_metric_definitions</code></td>
+<td>Reuse agreed definitions instead of inventing measures in prose</td>
+</tr>
+<tr>
+<td>Charts</td>
+<td><code>render_chart</code>, <code>render_table</code>, <code>render_timeline</code>, <code>render_matrix</code></td>
+<td>Produce deterministic inline and exportable visualizations</td>
+</tr>
+<tr>
+<td>Graphs</td>
+<td><code>render_relationship_graph</code>, <code>render_dependency_graph</code>, <code>render_ownership_map</code></td>
+<td>Turn Context relationships into inspectable visual views</td>
+</tr>
+<tr>
+<td>Explainability</td>
+<td><code>get_analysis_provenance</code>, <code>explain_claim</code>, <code>list_assumptions</code></td>
+<td>Show source records, query inputs, transformations and uncertainty</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agent-capability/6-3-artifacts">6.3 Artifacts</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Candidate tools</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Drafting</td>
+<td><code>create_artifact</code>, <code>update_artifact</code>, <code>append_artifact_section</code></td>
+<td>Build a durable artifact from cited content and reusable blocks</td>
+</tr>
+<tr>
+<td>Packaging</td>
+<td><code>render_artifact</code>, <code>export_artifact</code>, <code>package_artifact</code></td>
+<td>Render HTML, PDF, SVG, PNG, Markdown, CSV, JSON and presentation formats</td>
+</tr>
+<tr>
+<td>Review</td>
+<td><code>get_artifact</code>, <code>diff_artifact</code>, <code>validate_artifact</code>, <code>request_artifact_review</code></td>
+<td>Make outputs reviewable, reproducible and safe to distribute</td>
+</tr>
+<tr>
+<td>Templates</td>
+<td><code>list_artifact_templates</code>, <code>get_artifact_template</code>, <code>apply_artifact_template</code></td>
+<td>Standardize board, leadership, incident, planning and technical outputs</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agent-capability/6-4-governed-actions-and-distribution">6.4 Governed actions and distribution</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Family</th>
+<th>Candidate tools</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Plan</td>
+<td><code>draft_action_plan</code>, <code>preview_action_plan</code>, <code>diff_action_plan</code></td>
+<td>Stage one or more changes without applying them</td>
+</tr>
+<tr>
+<td>Mutate</td>
+<td><code>create_work_item</code>, <code>update_work_item</code>, <code>link_records</code>, <code>assign_work</code>, <code>update_context_record</code></td>
+<td>Apply approved changes through connected-system adapters</td>
+</tr>
+<tr>
+<td>Workflow</td>
+<td><code>start_workflow</code>, <code>pause_workflow</code>, <code>resume_workflow</code>, <code>request_human_decision</code></td>
+<td>Coordinate bounded multi-step work with explicit human stops</td>
+</tr>
+<tr>
+<td>Distribution</td>
+<td><code>export_to_destination</code>, <code>publish_artifact</code>, <code>share_artifact</code>, <code>schedule_delivery</code></td>
+<td>Send approved outputs to allowed repositories, drives, email, chat or presentation surfaces</td>
+</tr>
+<tr>
+<td>Audit</td>
+<td><code>get_action_receipt</code>, <code>get_artifact_receipt</code>, <code>revoke_action</code>, <code>list_pending_approvals</code></td>
+<td>Make effects, provenance and reversibility visible</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="agent-capability/7-charts-graphs-and-analysis-contract">7. Charts, graphs and analysis contract</h2>
+<p>Visualization is a product capability, not a formatting trick. A chart or graph must be backed by a
+reproducible specification and the dataset that produced it.</p>
+<h3 id="agent-capability/7-1-canonical-visualization-object">7.1 Canonical visualization object</h3>
+<p>Every visualization should carry:</p>
+<pre><code class="language-json">{
+  &quot;kind&quot;: &quot;line | bar | area | scatter | timeline | matrix | graph | table&quot;,
+  &quot;title&quot;: &quot;Lead time by month&quot;,
+  &quot;data&quot;: { &quot;query&quot;: &quot;...&quot;, &quot;snapshot&quot;: &quot;...&quot;, &quot;rows&quot;: [] },
+  &quot;encoding&quot;: { &quot;x&quot;: &quot;month&quot;, &quot;y&quot;: &quot;lead_time_days&quot;, &quot;color&quot;: &quot;team&quot; },
+  &quot;filters&quot;: [],
+  &quot;assumptions&quot;: [],
+  &quot;provenance&quot;: { &quot;sources&quot;: [], &quot;generatedAt&quot;: &quot;...&quot; },
+  &quot;accessibility&quot;: { &quot;alt&quot;: &quot;...&quot;, &quot;tableFallback&quot;: true }
+}
+</code></pre>
+<p>The runtime should render from a declarative spec to inline SVG/HTML for inspection and to PNG/PDF
+for distribution. It should also provide a table fallback and a text summary so the output remains
+useful to screen readers, exports and chat clients.</p>
+<h3 id="agent-capability/7-2-graph-requirements">7.2 Graph requirements</h3>
+<p>Graph views should support:</p>
+<ul>
+<li>a named relationship set and a bounded hop limit;</li>
+<li>filters by entity type, team, repository, project, time window and confidence;</li>
+<li>readable labels and edge semantics;</li>
+<li>clustering and “why is this connected?” explanations;</li>
+<li>selection of a node to retrieve supporting records;</li>
+<li>export as SVG/PNG and as a machine-readable graph JSON;</li>
+<li>a maximum node/edge budget with an explicit truncation notice.</li>
+</ul>
+<h3 id="agent-capability/7-3-analysis-safety">7.3 Analysis safety</h3>
+<p>The agent must not silently mix incompatible metrics or time windows. Analysis results should name:</p>
+<ul>
+<li>the source snapshot or live query;</li>
+<li>the metric definition and aggregation;</li>
+<li>filters and exclusions;</li>
+<li>missing or stale data;</li>
+<li>inferred relationships or classifications;</li>
+<li>confidence and known limitations.</li>
+</ul>
+<h2 id="agent-capability/8-artifact-model">8. Artifact model</h2>
+<p>An artifact is a durable output with a stable identity, content, source references, render recipe,
+permissions and lifecycle state. It is not merely the last assistant message saved to a file.</p>
+<h3 id="agent-capability/8-1-artifact-types">8.1 Artifact types</h3>
+<p>Day-one types:</p>
+<ul>
+<li>interactive HTML brief;</li>
+<li>Markdown or rich-text memo;</li>
+<li>chart, graph or dashboard bundle;</li>
+<li>PDF report;</li>
+<li>CSV or JSON data export;</li>
+<li>SVG or PNG visual export.</li>
+</ul>
+<p>Next types:</p>
+<ul>
+<li>leadership or board presentation (<code>.pptx</code> or a native slide artifact);</li>
+<li>engineering plan and decision record;</li>
+<li>incident review;</li>
+<li>roadmap or portfolio review;</li>
+<li>recurring report with a refreshable data binding.</li>
+</ul>
+<h3 id="agent-capability/8-2-artifact-lifecycle">8.2 Artifact lifecycle</h3>
+<pre><code>draft → rendered → reviewed → approved → distributed → superseded
+                     ↘ rejected / needs changes
+</code></pre>
+<p>Each state transition is recorded with the actor, time, content digest, source snapshot and decision.
+Artifacts should support version history, content diff, visual preview, source inspection and revoke
+or unpublish where the destination permits it.</p>
+<h3 id="agent-capability/8-3-artifact-quality-bar">8.3 Artifact quality bar</h3>
+<p>Before an artifact is marked ready for distribution, the agent must validate:</p>
+<ul>
+<li>all required sections and data are present;</li>
+<li>charts render without errors and have accessible fallbacks;</li>
+<li>claims have evidence links or are clearly labelled as recommendations;</li>
+<li>stale or permission-filtered data is called out;</li>
+<li>the intended audience, time window and owner are explicit;</li>
+<li>the requested format and destination are supported;</li>
+<li>no secret, private record or unapproved external recipient is included.</li>
+</ul>
+<h2 id="agent-capability/9-consent-iam-and-side-effects">9. Consent, IAM and side effects</h2>
+<p>The app-capable agent must inherit the app's controls; it must not create a parallel authorization
+system.</p>
+<h3 id="agent-capability/9-1-consent-classes">9.1 Consent classes</h3>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Examples</th>
+<th>Agent behavior</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C0 — read</td>
+<td>Search, inspect, summarize, calculate, render</td>
+<td>Execute within existing read grants; cite scope</td>
+</tr>
+<tr>
+<td>C1 — draft</td>
+<td>Create a private artifact, prepare a plan, generate a proposed diff</td>
+<td>Execute and save as draft; never publish or mutate external state</td>
+</tr>
+<tr>
+<td>C2 — reversible change</td>
+<td>Edit a task, link records, update a draft, save a context record</td>
+<td>Show the exact diff and affected resources; require approval unless the user has pre-authorized the operation</td>
+</tr>
+<tr>
+<td>C3 — consequential change</td>
+<td>Assign work, change status, start a workflow, publish or distribute</td>
+<td>Named approval, destination and receipt required</td>
+</tr>
+<tr>
+<td>C4 — high-impact</td>
+<td>Financial, access, deletion, production, broad external distribution</td>
+<td>Explicit confirmation immediately before execution, with policy and rollback details</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="agent-capability/9-2-action-plan-contract">9.2 Action plan contract</h3>
+<p>Every mutating request should produce an action plan before execution:</p>
+<pre><code>intent → affected resources → proposed diff → policy check → consent request
+      → execution → receipt → verification → optional rollback
+</code></pre>
+<p>If a tool call is refused, the agent reports the refusal reason accurately and names the missing
+grant, scope, consent or policy condition. It never implies that a refused action happened.</p>
+<h3 id="agent-capability/9-3-guardrails">9.3 Guardrails</h3>
+<ul>
+<li>Least privilege and resource-scoped grants remain the default.</li>
+<li>Toolbelt assignment is not permission; authorization is evaluated at call time.</li>
+<li>Mutations are idempotent and carry a request id.</li>
+<li>External writes require an execution receipt and the source/destination identity.</li>
+<li>Distribution defaults to draft or private until a human selects an audience.</li>
+<li>Destructive actions require a second confirmation or a pre-approved policy with an audit trail.</li>
+<li>Prompt injection and untrusted source content cannot grant authority or change consent requirements.</li>
+</ul>
+<h2 id="agent-capability/10-phased-roadmap">10. Phased roadmap</h2>
+<p>The phases are ordered by dependency and risk. Dates are intentionally omitted; scope and exit
+criteria are the commitment until capacity and integration sequencing are agreed.</p>
+<h3 id="agent-capability/phase-0-contract-and-foundation">Phase 0 — Contract and foundation</h3>
+<p><strong>Goal:</strong> establish the common contracts that every later capability uses.</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>capability taxonomy and tool annotation schema;</li>
+<li>Workspace Context vocabulary and ontology-to-context compatibility aliases;</li>
+<li>normalized resource identity and source provenance model;</li>
+<li>common <code>read / draft / mutate / distribute</code> consent classes;</li>
+<li>action-plan, receipt and artifact metadata schemas;</li>
+<li>tool registry support for scope, side effect, egress, idempotency and reversibility;</li>
+<li>evaluation fixtures for citations, refusals, stale data and permission filtering.</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>every new tool can declare its risk and provenance contract;</li>
+<li>an existing ontology query can be returned as a Context query with the same evidence;</li>
+<li>a denied call produces a machine-readable reason and a user-readable explanation;</li>
+<li>a draft artifact and a draft action plan have stable IDs and digests.</li>
+</ul>
+<h3 id="agent-capability/phase-1-read-parity-and-workspace-understanding">Phase 1 — Read parity and workspace understanding</h3>
+<p><strong>Goal:</strong> let the agent inspect the same read surfaces a user relies on to understand work.</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>app surface discovery and normalized retrieval;</li>
+<li>workspace search across tasks, repositories, docs, designs, decisions, incidents, metrics and runs;</li>
+<li>context entity resolution and relationship exploration;</li>
+<li>source-span retrieval and evidence citations;</li>
+<li>first-class work views: backlog, project health, dependencies, ownership and recent changes;</li>
+<li>freshness, permissions and partial-results indicators.</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>the agent can answer five representative engineering-management questions from current sources;</li>
+<li>every material claim links to source records or is labelled as an inference;</li>
+<li>responses remain correct when a source is stale, unavailable or permission-filtered;</li>
+<li>ontology terminology is not required in the user prompt or the default response.</li>
+</ul>
+<h3 id="agent-capability/phase-2-analysis-and-visual-intelligence">Phase 2 — Analysis and visual intelligence</h3>
+<p><strong>Goal:</strong> turn workspace data into trustworthy analysis and inspectable visuals.</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>bounded analysis runtime with reusable metric definitions;</li>
+<li>period-over-period comparison, trend, cohort and outlier analysis;</li>
+<li>declarative chart, table, timeline, matrix and relationship-graph rendering;</li>
+<li>inline rendering in chat and downloadable SVG/PNG/HTML;</li>
+<li>accessible table and text fallbacks;</li>
+<li>analysis provenance, assumptions and uncertainty panel.</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>a user can ask for throughput, aging, cycle time and dependency risk and inspect how each was calculated;</li>
+<li>charts re-render deterministically from the stored spec and snapshot;</li>
+<li>graphs explain selected nodes, edges and truncation;</li>
+<li>visual QA passes at desktop, mobile, print and dark/light themes.</li>
+</ul>
+<h3 id="agent-capability/phase-3-artifact-studio">Phase 3 — Artifact studio</h3>
+<p><strong>Goal:</strong> make analysis durable, reviewable and ready for an audience.</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>artifact creation, versioning, preview, diff and validation;</li>
+<li>Markdown, HTML, PDF, CSV, JSON, SVG and PNG outputs;</li>
+<li>templates for engineering review, staff update, leadership brief, board memo and incident review;</li>
+<li>source-linked sections and embedded visualizations;</li>
+<li>private artifact workspace with shareable review links;</li>
+<li>artifact review state and approval history.</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>a leadership brief can be generated from a prompt, reviewed section by section and regenerated without losing citations;</li>
+<li>an artifact can be opened outside the app as a self-contained HTML file;</li>
+<li>changes to sources or prompt are visible in a version diff;</li>
+<li>no artifact is marked distributable while required provenance or accessibility checks fail.</li>
+</ul>
+<h3 id="agent-capability/phase-4-governed-app-actions">Phase 4 — Governed app actions</h3>
+<p><strong>Goal:</strong> let the agent prepare and apply the changes a user can make in the app.</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>action-plan drafting and exact diffs;</li>
+<li>create/edit/link/assign/status operations for initial work-item and context-record surfaces;</li>
+<li>approval UI and conversational approval handoff;</li>
+<li>idempotent adapters and receipts;</li>
+<li>verification after mutation and rollback for supported reversible changes;</li>
+<li>pending approvals and action history in execution traces.</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>an agent can stage a multi-object backlog update without changing anything;</li>
+<li>approval applies only the reviewed plan, not a recomputed or broadened plan;</li>
+<li>every applied change is attributable to an agent, operator, grant, prompt, source snapshot and request ID;</li>
+<li>policy denial and partial failure leave an accurate, recoverable state.</li>
+</ul>
+<h3 id="agent-capability/phase-5-distribution-and-operating-loops">Phase 5 — Distribution and operating loops</h3>
+<p><strong>Goal:</strong> deliver approved work to the places teams already use.</p>
+<p><strong>Deliverables</strong></p>
+<ul>
+<li>export and publish to approved repositories, drives, docs, presentations, chat and email destinations;</li>
+<li>native or high-fidelity board and leadership presentation output;</li>
+<li>recurring refreshable artifacts with stale-data notices;</li>
+<li>audience selection, recipient preview and external-sharing controls;</li>
+<li>delivery receipts, revoke/unpublish where supported and distribution audit view;</li>
+<li>scheduled analysis and report workflows with human checkpoints.</li>
+</ul>
+<p><strong>Exit criteria</strong></p>
+<ul>
+<li>a board packet can be generated, reviewed, approved, distributed and traced end to end;</li>
+<li>recurring reports show what changed since the previous version;</li>
+<li>a distribution failure cannot be reported as success;</li>
+<li>recipient and data-scope checks run before every external delivery.</li>
+</ul>
+<h2 id="agent-capability/11-prioritized-vertical-slices">11. Prioritized vertical slices</h2>
+<p>The roadmap should be tested through complete user journeys rather than isolated tools.</p>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Slice</th>
+<th>User request</th>
+<th style="text-align:right">First release phase</th>
+<th>Demonstrates</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Delivery health brief</td>
+<td>“Explain why cycle time rose, chart it, and draft a staff update.”</td>
+<td style="text-align:right">2–3</td>
+<td>Context, metrics, charts, artifact provenance</td>
+</tr>
+<tr>
+<td>Dependency risk map</td>
+<td>“Show what blocks the platform launch and who owns each dependency.”</td>
+<td style="text-align:right">1–2</td>
+<td>Relationship graph, evidence, ownership and truncation explanations</td>
+</tr>
+<tr>
+<td>Backlog planning</td>
+<td>“Group this backlog by theme, recommend sequencing, and stage the updates.”</td>
+<td style="text-align:right">2–4</td>
+<td>Analysis, action plan, diff and approval</td>
+</tr>
+<tr>
+<td>Architecture decision</td>
+<td>“Compare these designs, cite the tradeoffs, and create a decision record.”</td>
+<td style="text-align:right">1–4</td>
+<td>Source retrieval, synthesis, artifact creation and governed write</td>
+</tr>
+<tr>
+<td>Board packet</td>
+<td>“Prepare the quarterly engineering packet with delivery, investment and risks.”</td>
+<td style="text-align:right">2–5</td>
+<td>Multiple visuals, templates, PDF/slides and controlled distribution</td>
+</tr>
+<tr>
+<td>Agent operations review</td>
+<td>“Show denied calls, spend, tool usage and policy drift this month.”</td>
+<td style="text-align:right">0–2</td>
+<td>Existing execution data plus app parity and analysis</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="agent-capability/12-technical-architecture-direction">12. Technical architecture direction</h2>
+<p>The agent should call a capability gateway that normalizes app and connected-system operations into
+one governed tool contract.</p>
+<pre><code>User prompt
+    ↓
+Agent planner ──→ Context/query layer ──→ analysis runtime ──→ visualization runtime
+    │                      │                         │                  │
+    │                      └──────── evidence/provenance ────────────────┘
+    ↓
+Artifact + action plan layer ──→ consent/policy gateway ──→ app/connectors
+    │                                  │                         │
+    └──────────── receipts, versions, traces, citations ◀────────┘
+</code></pre>
+<h3 id="agent-capability/12-1-required-platform-seams">12.1 Required platform seams</h3>
+<ul>
+<li><strong>Capability gateway:</strong> one place for IAM, entitlement, consent, scope, egress and audit evaluation;</li>
+<li><strong>Context service:</strong> source adapters, identity resolution, typed entities, relationship indexes and evidence spans;</li>
+<li><strong>Analysis runtime:</strong> bounded compute over snapshots or explicitly declared live queries;</li>
+<li><strong>Visualization runtime:</strong> deterministic declarative renderers and export formats;</li>
+<li><strong>Artifact service:</strong> versions, blobs, render jobs, templates, previews and review state;</li>
+<li><strong>Action service:</strong> plans, diffs, idempotent execution, receipts, verification and rollback;</li>
+<li><strong>Distribution adapters:</strong> destination-specific permissions, recipient checks and delivery receipts.</li>
+</ul>
+<h3 id="agent-capability/12-2-execution-integration">12.2 Execution integration</h3>
+<p>Every capability call should appear in the existing execution trace as a span with:</p>
+<ul>
+<li>tool and version;</li>
+<li>input scope and redacted arguments;</li>
+<li>source snapshot or live-query marker;</li>
+<li>policy and consent result;</li>
+<li>duration, tokens and child executions;</li>
+<li>artifact or action-plan IDs;</li>
+<li>output receipt and verification state.</li>
+</ul>
+<p>Memory remains separate from Workspace Context. Memory stores durable lessons or facts intentionally
+captured for future agent behavior; Context represents current workspace evidence and relationships.</p>
+<h2 id="agent-capability/13-evaluation-and-success-metrics">13. Evaluation and success metrics</h2>
+<h3 id="agent-capability/13-1-quality-metrics">13.1 Quality metrics</h3>
+<ul>
+<li>evidence coverage: percentage of material claims with valid source references;</li>
+<li>freshness accuracy: percentage of responses that correctly disclose stale or partial data;</li>
+<li>analysis reproducibility: same snapshot and spec produce the same result;</li>
+<li>visualization validity: charts and graphs render without data or accessibility errors;</li>
+<li>artifact acceptance: percentage of first drafts accepted with only minor edits;</li>
+<li>action fidelity: applied result matches the approved plan exactly;</li>
+<li>refusal accuracy: denied actions are never represented as completed;</li>
+<li>distribution integrity: successful deliveries have a verifiable receipt.</li>
+</ul>
+<h3 id="agent-capability/13-2-product-metrics">13.2 Product metrics</h3>
+<ul>
+<li>time from question to decision-ready artifact;</li>
+<li>weekly active engineering and management users;</li>
+<li>percentage of sessions that use a visual or artifact output;</li>
+<li>percentage of artifacts reused or refreshed;</li>
+<li>percentage of action plans approved without manual reconstruction;</li>
+<li>number of high-value questions answered without switching tools;</li>
+<li>rate of user corrections to source selection, metric definitions or relationship interpretation.</li>
+</ul>
+<h2 id="agent-capability/14-non-goals-and-open-decisions">14. Non-goals and open decisions</h2>
+<h3 id="agent-capability/non-goals-for-the-first-release">Non-goals for the first release</h3>
+<ul>
+<li>autonomous production changes without a human or explicit policy boundary;</li>
+<li>replacing source systems as the system of record;</li>
+<li>presenting inferred relationships as facts;</li>
+<li>making every app feature available through one giant undifferentiated tool;</li>
+<li>using a graph database as the product experience;</li>
+<li>generating board or leadership material without audience, provenance and review controls.</li>
+</ul>
+<h3 id="agent-capability/open-decisions">Open decisions</h3>
+<ol>
+<li>Which connected systems are the first read and write adapters: GitHub, Linear, Jira, docs, design and incident systems?</li>
+<li>Should analysis run on a warehouse/snapshot service, an isolated query runtime, or both?</li>
+<li>Which presentation target is first: PPTX, native Slides, HTML-to-PDF, or a combination?</li>
+<li>What artifact repository and retention policy should the product use?</li>
+<li>Which operations qualify for pre-authorized C2 execution, and which always require an immediate confirmation?</li>
+<li>Is “Workspace Context” the final user-facing name, or should the product test “Work Graph” and “Workspace Intelligence” alongside it?</li>
+<li>Which board and leadership templates should be designed first, and who owns their content standards?</li>
+</ol>
+<h2 id="agent-capability/15-recommended-next-move">15. Recommended next move</h2>
+<p>Approve Phase 0 and the first vertical slice, <strong>Delivery health brief</strong>. It exercises the complete
+future loop with low mutation risk: retrieve current work, calculate a defined metric, render a chart,
+create a cited HTML artifact, and leave distribution as an explicit later approval. In parallel,
+prototype the Context vocabulary as a compatibility layer over the current ontology tools so the
+product language can evolve without breaking existing agents or traces.</p>
+
+<footer class="colophon"><span>Oxagen · Roadmap specification</span><span>Source: <code>docs/in-app-agent-capability-expansion-spec.md</code></span></footer>
+</main>
+</div>
 </article><article id="portability" class="doc" hidden>
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
@@ -14611,7 +15426,7 @@ need a decision before W13 is written into the spec.</li>
 </div>
 <script>
 (function(){
-  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and context records', 'tasks': 'Tasks and work orders', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
+  var TITLES={'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and context records', 'tasks': 'Tasks and work orders', 'agent-capability': 'In-app agent capability expansion', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
   var first='spec';
   function show(){
     var h=location.hash.replace(/^#/,""), id=h.split("/")[0];

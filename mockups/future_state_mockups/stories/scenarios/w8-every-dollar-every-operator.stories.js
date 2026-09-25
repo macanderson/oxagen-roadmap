@@ -3,7 +3,7 @@
 import { view, argTypes } from "../_view.js";
 
 export default {
-  title: "Scenarios/W8 Every Dollar, Every Operator",
+  title: "Future state/Scenarios/W8 Every Dollar, Every Operator",
   argTypes,
   args: { shell: "desktop", theme: "system", product: false, hash: "#/a-intel/core-platform/scenarios/every-dollar-every-operator/1" },
   render: view,

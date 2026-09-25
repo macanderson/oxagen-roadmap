@@ -3,7 +3,7 @@
 import { view, argTypes } from "../_view.js";
 
 export default {
-  title: "Scenarios/W2 Stop It. Steer It.",
+  title: "Future state/Scenarios/W2 Stop It. Steer It.",
   argTypes,
   args: { shell: "desktop", theme: "system", product: false, hash: "#/a-intel/core-platform/scenarios/stop-it-steer-it/1" },
   render: view,

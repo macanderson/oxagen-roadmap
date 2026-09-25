@@ -60,6 +60,7 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `sk-after.json` | `SK_AFTER` | the frames each answer writes: link to core-platform, or create the workspace edge |
 | `sk-queries.json` | `SK_QUERIES` | canned `search_skills` answers: hits with scores, withheld skills, the reason for an empty result |
 | `sk-reflect.json` | `SK_REFLECT` | one quarantined reflection: the rubric axes, the self-grade against the record, the contradictions |
+| `self-grades.json` | `SELF_GRADES` | each sealed run's self-grade, keyed by run id: the four rubric answers against what the record observed; readable only with `research.read`, and a deleted entry past 180 days |
 | `sk-hist.json` | `SK_HIST` | the config's version history, each a pull request |
 | `sk-created.json` | `SK_CREATED` | when each workspace was created, with skills off |
 

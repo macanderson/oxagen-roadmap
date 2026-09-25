@@ -49,7 +49,7 @@
  },
  "reflect": {
   "on": true,
-  "sample": 0.2,
+  "sample": 1,
   "always": [
    "failing",
    "halted"

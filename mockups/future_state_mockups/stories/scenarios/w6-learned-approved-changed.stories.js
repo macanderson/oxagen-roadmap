@@ -3,7 +3,7 @@
 import { view, argTypes } from "../_view.js";
 
 export default {
-  title: "Scenarios/W6 It learned, you approved, it changed",
+  title: "Future state/Scenarios/W6 It learned, you approved, it changed",
   argTypes,
   args: { shell: "desktop", theme: "system", product: false, hash: "#/a-intel/core-platform/scenarios/learned-approved-changed/1" },
   render: view,

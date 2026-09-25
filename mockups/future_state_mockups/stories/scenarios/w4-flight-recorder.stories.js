@@ -3,7 +3,7 @@
 import { view, argTypes } from "../_view.js";
 
 export default {
-  title: "Scenarios/W4 Oxagen Flight Recorder",
+  title: "Future state/Scenarios/W4 Oxagen Flight Recorder",
   argTypes,
   args: { shell: "desktop", theme: "system", product: false, hash: "#/a-intel/core-platform/scenarios/flight-recorder/1" },
   render: view,

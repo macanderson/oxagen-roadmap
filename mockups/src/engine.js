@@ -14,7 +14,8 @@ var BOOT=(function(){var q=new URLSearchParams(location.search),b=window.BOOT||{
           theme:q.get("theme")||b.theme||null,
           debug:debug,
           product:!debug,
-          hash:q.get("hash")||b.hash||null};})();
+          hash:q.get("hash")||b.hash||null,
+          as:q.get("as")||b.as||null};})();
 var DEBUG=BOOT.debug;
 var PRODUCT=BOOT.product;
 var DLG_EXT={};   /* lazily built dialogs, registered beside their code; see dialog() */
@@ -109,8 +110,11 @@ function ws(){for(var i=0;i<WS.length;i++){if(WS[i].slug===S.ws)return WS[i];}re
 function wsBySlug(slug){for(var i=0;i<WS.length;i++){if(WS[i].slug===slug)return WS[i];}return null;}
 /* The signed-in person, in one place. The top bar, the account dialog and the denied panel
    must never name different people on the same screen. */
-var SESSION_USER="marcus";
+/* ?as=priya signs in as someone else in the fixtures, so a grant one person holds can be seen from both sides. */
+var SESSION_USER=BOOT.as&&PEOPLE[BOOT.as]?BOOT.as:"marcus";
 function me(){return PEOPLE[SESSION_USER]||PEOPLE.marcus;}
+/* research.read is an organization grant no workspace role inherits. It is what reads a self-grade. */
+function canResearch(){return (me().grants||[]).indexOf("research.read")>=0;}
 
 /* ── Rollups over the fixtures, so a header can never drift from the rows under it. ──
    Each of these replaced a hand-typed total that disagreed with its own table. */
@@ -969,7 +973,7 @@ function applyHashTab(){
   /* an agent tab is p[4], not p[3]: /:org/:ws/agents/:slug/:tab */
   if(p[2]==="agents"&&p.length>=5&&IAM_TAB_KEYS[p[4]]) S.tab.agent=p[4];
   /* a run tab is p[4] too: /:org/:ws/runs/:id/:tab */
-  if(p[2]==="runs"&&p.length>=5&&/^(transcript|issues|player|cost|policy|context|chain)$/.test(p[4])) S.tab.run=p[4];
+  if(p[2]==="runs"&&p.length>=5&&/^(transcript|issues|player|cost|policy|context|memory|chain)$/.test(p[4])) S.tab.run=p[4];
 }
 window.addEventListener("hashchange",function(){S.side=false;fpStop();applyHashTab();render();});
 
@@ -1690,13 +1694,21 @@ function notifIcon(tone){
   return sv+'<path d="M12 3 2 20h20L12 3z"/><path d="M12 10v4M12 17.5v.5"/></svg>';
 }
 function notifsBody(){
-  return '<div class="lst">'+NOTIFS.map(function(n){
-    return '<div class="li'+(n.unread?" unread":"")+'"><span class="ic t-'+n.tone+'">'+notifIcon(n.tone)+'</span>'+
+  return '<div class="lst">'+NOTIFS.map(function(n,i){
+    /* An unread item is a button: selecting it marks that one read. A read item is plain text. */
+    var btn=n.unread?' role="button" tabindex="0" data-notif="'+i+'" aria-label="Mark read: '+h(n.title)+'" onclick="notifRead('+i+')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();notifRead('+i+')}"':'';
+    return '<div class="li'+(n.unread?" unread":"")+'"'+btn+'><span class="ic t-'+n.tone+'">'+notifIcon(n.tone)+'</span>'+
      '<div class="bd2"><div class="t1">'+h(n.title)+'</div><div class="t2">'+h(n.body)+'</div>'+
      '<div class="mono dim" style="font-size:11px;margin-top:3px">'+h(n.kind)+'</div></div>'+
      '<time>'+h(n.t)+'</time></div>';}).join("")+'</div>';
 }
-function markAllRead(){for(var i=0;i<NOTIFS.length;i++)NOTIFS[i].unread=false;closeDialog();act('Marked read. Reading a notification is itself recorded, so the audit record shows who saw what.');}
+/* Marks one notification read and keeps focus in the list: on the next unread item, else the dialog. */
+function notifRead(i){
+  if(!NOTIFS[i]||!NOTIFS[i].unread)return;
+  NOTIFS[i].unread=false;render();
+  var next=document.querySelector('.li[data-notif]');if(next)next.focus();
+}
+function markAllRead(){for(var i=0;i<NOTIFS.length;i++)NOTIFS[i].unread=false;closeDialog();act('All notifications marked read. Audit records who read each one.');}
 function userMenu(){
   return '<div class="menu"><div class="menu-hd"><b>Marcus Bell</b><span>marcus@a-intel.example</span></div>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'profile\')">Account</button>'+
@@ -2162,6 +2174,8 @@ function pRun(r){
      '</tbody></table></div><div class="panel-b"><div class="note">Same call, same policy version, same answer. The decision cites <span class="mono">pol_v41</span>; a change to the policy produces a new version, never a different answer from the same one.</div></div></div>';
   } else if(t==="context"){
     bodyHtml=promptRow(R)+contextTab(R);
+  } else if(t==="memory"){
+    bodyHtml=runMemoryTab(R);
   } else {
     bodyHtml=chainTab(R);
   }
@@ -2874,8 +2888,79 @@ function runTabs(R,t){
   var ctxN=0;FRAMES.forEach(function(f){var m=/(\d+) context frames/.exec(f.sum);if(m)ctxN=Math.max(ctxN,+m[1]);});
   var tabs=[["transcript","Transcript",txEntries(R).length,""],["issues","Issues",runIssues(R).length,""],["player",gov?"Governed actions":"Player",gov||R.frames,parked?'<span class="st" title="a call is parked for approval"></span>':""],
    ["cost","Cost",usd(R.cost),""],["policy","Policy",gov,parked?'<span class="st" title="'+parked+' parked"></span>':""],
-   ["context","Context",ctxN||"",""],["chain","Chain and seal",R.sealed?"sealed":"live",""]];
+   ["context","Context",ctxN||"",""],["memory","Memories",runMemories(R).length||"",""],["chain","Chain and seal",R.sealed?"sealed":"live",""]];
   return '<div class="tabs" role="tablist">'+tabs.map(function(x,i){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" title="'+(i+1)+'" onclick="S.tab.run=\''+x[0]+'\';render()">'+x[1]+(x[2]!==""&&x[2]!=null?'<span class="n'+(x[0]==="cost"?" money":"")+'">'+h(String(x[2]))+'</span>':'')+x[3]+'</button>';}).join("")+'</div>';
+}
+/* ===================== Memories tab ===================== */
+/* What the run left behind. After the seal the reflector reads the run and writes each lesson as a
+   memory. A lesson that says what an existing memory already says joins it as one more saying, so
+   the tab shows both the memories this run started and the ones it joined. Beside them sits the
+   agent's self-grade, which is a different thing: its own rubric answers, fenced off for research. */
+function runMemories(R){
+  var out=[];
+  MEMORY.forEach(function(m){memSayings(m).forEach(function(x,k){if(x.run===R.id)out.push({m:m,k:k,x:x});});});
+  return out.sort(function(a,b){return a.x.frame-b.x.frame;});
+}
+function runMemoryTab(R){
+  var L=runMemories(R), F=S.memFold, body;
+  if(!R.sealed){
+    body='<div class="panel-b"><div class="note">Nothing is written until the seal. This run is '+h(runStatus(R))+
+     '. When its chain seals, the reflector reads it and writes what it learned here.</div></div>';
+  } else if(!L.length){
+    body='<div class="panel-b"><div class="note">This run wrote no memories. The reflector read the sealed run and found nothing another run would need, and no operator steered it.</div></div>';
+  } else {
+    body='<div class="tw"><table><thead><tr><th>Memory</th><th>Frame</th><th>Fold</th><th>Class</th><th>In the assembler</th></tr></thead><tbody>'+
+     L.map(function(o){
+      var m=o.m, n=memSayings(m).length;
+      var fold=o.k===0?'<span class="b b-allowed"><span class="d"></span>new</span><span class="sub">this run started it</span>'
+        :'<span class="b b-q">joined</span><span class="sub">saying '+(o.k+1)+' of '+n+'</span>';
+      if(m.proposedAs) fold+='<span class="sub">proposed as <span class="mono">'+h(m.proposedAs)+'</span></span>';
+      return '<tr '+rowClick("openDialog('memory','"+h(m.id)+"')","Open "+m.id)+'><td><b style="font-weight:500">'+h(m.body)+'</b>'+
+       '<span class="sub">“'+h(o.x.text)+'”</span><span class="sub mono">'+h(o.x.by)+'</span></td>'+
+       '<td class="mono num">'+o.x.frame+'</td><td>'+fold+'</td>'+
+       '<td><span class="b b-q mono">'+h(m.cls)+'</span></td><td>'+memAsmCell(m,R.ws)+'</td></tr>';}).join("")+
+     '</tbody></table></div>';
+  }
+  return '<div class="note" style="margin-bottom:14px"><b>The reflector writes these after the seal.</b> '+
+    'Each lesson becomes a memory, or joins a memory that already says the same thing. '+
+    'At '+F.sayings+' sayings from '+F.runs+' runs, a memory becomes a steering proposal that cites every saying.</div>'+
+   '<div class="panel" style="margin-bottom:14px" data-run-memories="'+L.length+'"><div class="panel-h"><h3>Memories from this run</h3>'+
+    (L.length?'<span class="b b-q" style="margin-left:auto">'+L.length+'</span>':'')+'</div>'+body+'</div>'+
+   runSelfGrade(R);
+}
+/* The self-grade: the agent's answers to the four rubric questions, set against what the record
+   observed. Reading it takes research.read. Nothing on this panel promotes it. */
+var SELF_GRADES=FIXTURES.SELF_GRADES;
+function sgAxis(q,a){
+  var gap=a.self-a.obs>=2;
+  return '<div class="sx-rax'+(gap?" gap":"")+'"><div class="rq">'+h(q)+(gap?'<span class="gp">calibration gap</span>':'')+'</div>'+
+   '<div class="rbar"><span class="rlab">self</span><span class="rtrack"><span class="rfill self" style="width:'+(a.self*20)+'%"></span></span><span class="rn">'+a.self+' / 5</span></div>'+
+   '<div class="rbar"><span class="rlab">the record</span><span class="rtrack"><span class="rfill obs" style="width:'+(a.obs*20)+'%"></span></span><span class="rn">'+a.obs+' / 5</span></div>'+
+   '<div class="rsay">“'+h(a.say)+'”</div><div class="note" style="margin-top:6px">the record says: '+h(a.obsLab)+'</div></div>';
+}
+function runSelfGrade(R){
+  var G=SELF_GRADES[R.id], rub=SK_REFLECT.rubric, b;
+  var meta=G&&!G.deleted?'<dl class="kv" style="margin-top:12px"><dt>Captured</dt><dd class="mono">'+h(G.when)+'</dd>'+
+    '<dt>Rubric</dt><dd><span class="mono">'+h(rub)+'</span>, four questions</dd><dt>Model</dt><dd class="mono">'+h(SK_REFLECT.model)+'</dd>'+
+    '<dt>Cost</dt><dd>'+G.tokens.toLocaleString()+' tokens, $'+h(G.cost)+', billed as overhead</dd>'+
+    '<dt>Retention</dt><dd>deleted '+h(SK_CFG.reflect.retain)+' after capture</dd></dl>':'';
+  if(!R.sealed||!G){
+    b='<div class="note">Captured after the seal. This run is '+h(runStatus(R))+'. When its chain seals, Oxagen asks the agent the four questions of rubric <span class="mono">'+h(rub)+'</span> in one out-of-band turn.</div>';
+  } else if(G.deleted){
+    b='<div class="note">Deleted on <span class="mono">'+h(G.deleted)+'</span>, '+h(SK_CFG.reflect.retain)+' after capture. The run’s frames, its seal and the memories it wrote are untouched.</div>';
+  } else if(!canResearch()){
+    b='<div class="sg-lock" data-sg="refused"><span class="ic" aria-hidden="true">'+icon("lock")+'</span><div>'+
+      '<div class="t">Reading a self-grade takes <span class="mono">research.read</span></div>'+
+      '<div class="s">An organization grant that no workspace role inherits. '+h(me().name)+' does not hold it.</div></div></div>'+meta+
+     '<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><button class="btn sm primary" onclick="openDialog(\'request-access\')">Request access</button>'+
+      '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+h(R.ws)+'/steering/skills/reflect\')">How reflection works</button></div>';
+  } else {
+    b='<div class="sx-rub" data-sg="read">'+SK_REFLECT.axes.map(function(ax,i){return sgAxis(ax.q,G.axes[i]);}).join("")+'</div>'+
+     '<div class="note" style="margin-top:12px"><b>Research only.</b> A self-grade never enters a context frame and has no promote action. '+
+      'It cannot become a memory, a proposal or steering, and its tokens never count as productive work.</div>'+meta;
+  }
+  return '<div class="panel"><div class="panel-h"><h3>Self-grade</h3><span class="sx-chip res" style="margin-left:auto">research only</span></div>'+
+   '<div class="panel-b">'+b+'</div></div>';
 }
 var TX_HUE={prompt:"op",text:"model",reasoning:"model",tool:"tool",usage:"gov",context:"ctx",seal:"gov"};
 function txKindChips(R,errN){
@@ -6443,11 +6528,17 @@ var PRP_SUPPORT=(function(){
      dups:((i*47)%209)<47?4:3, outcome:i%9===4?"reverted":i%4===1?"no change":"kept",
      agent:"a-intel.core.release-manager",rec:"rec_01K5"+gen(5000+i,12)});
   }
-  var b=[{run:"run_01K5RH3G8K5PAS7D",date:"2026-09-10",frame:52,outcome:"halted",agent:"a-intel.core.triage",rec:"rec_01K5"+gen(7000,12)}];
+  var b=[{run:"run_01K5RH3G8K5PAS7D",date:"2026-09-10",frame:9,outcome:"halted",agent:"a-intel.core.triage",rec:"rec_01K5"+gen(7000,12)}];
   for(var j=1;j<14;j++) b.push({run:"run_01K5"+gen(7100+j,12),date:day(1+j*2),frame:20+(j*29)%80,outcome:"halted",agent:"a-intel.core.triage",rec:"rec_01K5"+gen(7200+j,12)});
   var c=[["a-intel.core.stella-ci","2026-09-08",63],["a-intel.core.release-manager","2026-09-04",88],["a-intel.core.stella-ci","2026-08-29",41]].map(function(x,k){
     return {run:"run_01K5"+gen(8000+k,12),date:x[1],frame:x[2],outcome:"reverted",agent:x[0],rec:"fnd_01K5"+gen(8100+k,8)};});
-  return {"prp_01K5RU4A":a,"prp_01K5RU7B":b,"prp_01K5RU9C":c};
+  /* prp_01K5RX1N came from a fold, so its supporting runs are the memory's sayings, one row each.
+     The runs fixture carries no verdict field, so the outcome reads the summary's own words. */
+  var d=[];
+  FIXTURES.MEMORY.forEach(function(m){if(m.proposedAs!=="prp_01K5RX1N")return;
+    (m.sayings||[]).forEach(function(x){var r=run(x.run);
+      d.push({run:x.run,date:"2026-09-11",frame:x.frame,agent:r?r.agent:"",outcome:r&&/never passed|nothing merged/.test(r.summary)?"failed":"passed",rec:m.id});});});
+  return {"prp_01K5RU4A":a,"prp_01K5RU7B":b,"prp_01K5RU9C":c,"prp_01K5RX1N":d};
 })();
 /* What the promoter measured for each proposal, and how it argues for it. */
 var PRP_META={
@@ -6467,7 +6558,14 @@ var PRP_META={
   support:function(s){return s.runs+" data-layer drift findings";},
   rationale:function(s){return "Marcus Bell raised this from "+s.runs+" drift findings across "+plural(s.agents,"agent")+", each a migration renumbered after merge. "+
    "A person's proposal goes through the same six checks as the promoter's.";},
-  measure:function(s){return s.runs+" drift findings in 30 days";}}
+  measure:function(s){return s.runs+" drift findings in 30 days";}},
+ "prp_01K5RX1N":{confidence:0.71,tok:24,recKind:"memory · saying",
+  support:function(s){var o={};s.rows.forEach(function(r){o[r.run]=1;});return s.rows.length+" sayings from "+Object.keys(o).length+" runs";},
+  rationale:function(s){return "Three runs said the same thing in their own words, and the fold kept them as one memory, mem_01K5R0N2. "+
+   s.rows.map(function(r){var m=memById(r.rec),x=(m&&m.sayings||[]).filter(function(y){return y.run===r.run;})[0];
+     return r.agent.split(".").pop()+" wrote \u201c"+(x?x.text:"")+"\u201d in "+r.run+" at frame "+r.frame+".";}).join(" ")+
+   " The third saying reached the workspace setting of "+S.memFold.sayings+" sayings from "+S.memFold.runs+" runs. As a memory it competes at may. As a record it reaches every run in core-platform at should.";},
+  measure:function(s){return s.runs+" sayings from "+s.agents+" agents in one day";}}
 };
 function prpStats(id){
   var rows=PRP_SUPPORT[id]||[], m=PRP_META[id]||{}, ag={}, dups=0, kept=0;
@@ -6516,23 +6614,30 @@ function steerDigestOf(v){
   var seed=v+"|"+STEER_BUNDLE.rules.map(function(r){return r.id+":"+r.tok;}).join(",");
   return "sha256:"+sha7(seed)+sha7(seed+"#")+"c4";
 }
+/* A pull request carries one record, or, from the Markdown importer, every record accepted out of
+   one source file. Everything below reads the list, so the two never take separate paths. */
+function recprRecs(def){ return def.records||[def.record]; }
+function recprRules(def){ return def.rules||[def.rule]; }
 function prPublish(def,on){
-  var rec=def.record, i=RECORDS.indexOf(rec);
+  var recs=recprRecs(def), rules=recprRules(def), rec=recs[0], i=RECORDS.indexOf(rec);
   if(on===(i>=0)) return;
   /* Publishing compiles a new bundle version. Recorded requests keep the version they were sent with
-     (CTXB's steering band reads the one on seq 2), so nothing already recorded moves; the next model call reads it. */
+     (CTXB's steering band reads the one on seq 2), so nothing already recorded moves; the next model call reads it.
+     A pull request with several records is one merge, so it is one compile and one version. */
   if(on){
-    RECORDS.push(rec); STEER_BUNDLE.rules.push(def.rule); STEER_BUNDLE.v++; def.rule.since=STEER_BUNDLE.v;
+    recs.forEach(function(r){RECORDS.push(r);}); STEER_BUNDLE.v++;
+    rules.forEach(function(x){STEER_BUNDLE.rules.push(x); x.since=STEER_BUNDLE.v;});
     if(!STEER_BUNDLE.digest[STEER_BUNDLE.v]) STEER_BUNDLE.digest[STEER_BUNDLE.v]=steerDigestOf(STEER_BUNDLE.v);
-    auditEvent("steering_published",me().name,rec.id+" · "+def.pr+" merged as "+rec.commit+" · bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v,"info",def.evt);
+    auditEvent("steering_published",me().name,(recs.length>1?recs.length+" records from "+def.src:rec.id)+" · "+def.pr+" merged as "+rec.commit+" · bundle v"+(STEER_BUNDLE.v-1)+" → v"+STEER_BUNDLE.v,"info",def.evt);
   } else {
-    RECORDS.splice(i,1);
+    recs.forEach(function(r){var k=RECORDS.indexOf(r); if(k>=0) RECORDS.splice(k,1);});
     /* The record and its compiled rule go in together and come out together, so the version moves
        with the rule and not with the record. Splicing on a bare indexOf would pass -1 through and
        take the last rule in the bundle instead — a wrong rule removed and a version decremented
        for a compile that never happened. */
-    var ri=STEER_BUNDLE.rules.indexOf(def.rule);
-    if(ri>=0){ STEER_BUNDLE.rules.splice(ri,1); STEER_BUNDLE.v--; }
+    var out=0;
+    rules.forEach(function(x){var ri=STEER_BUNDLE.rules.indexOf(x); if(ri>=0){ STEER_BUNDLE.rules.splice(ri,1); out++; }});
+    if(out) STEER_BUNDLE.v--;
     for(var k=AUDIT.length-1;k>=0;k--){if(AUDIT[k].ref===def.evt)AUDIT.splice(k,1);}
   }
 }
@@ -6622,7 +6727,7 @@ function prpBadge(p){
 }
 function prpDetail(p){
   var s=prpStats(p.id), m=s.meta, mine=p.id===CTXPR.prp, c=S.ctxpr;
-  var vcls={kept:"allowed",reverted:"failed","no change":"q",halted:"denied"};
+  var vcls={kept:"allowed",reverted:"failed","no change":"q",halted:"denied",passed:"allowed",failed:"failed"};
   var rows=s.rows.map(function(r){
     return '<tr><td><span class="mono" style="font-size:12px">'+h(r.run)+'</span><div class="dim" style="font-size:11.5px">'+h(r.agent)+' · '+h(r.date)+'</div></td>'+
      '<td class="mono num" style="font-size:12px">seq '+r.frame+'</td>'+
@@ -6683,17 +6788,21 @@ function recprById(pr){for(var i=0;i<RECPRS.length;i++){if(RECPRS[i].pr===pr)ret
    RECPRS is newest first, so a higher index was opened earlier and wins the claim. Checking only
    RECORDS is not enough — two pull requests can both run their checks before either merges, and
    without this both reach `passed` and the second publishes a duplicate under a published id. */
-function lineageClaim(def){
-  var id=def.record.id;
-  if(RECORDS.some(function(r){return r.status==="published"&&r.id===id;})) return "published";
-  var mine=RECPRS.indexOf(def), claim=null;
+function lineageHit(def){
+  /* A pull request never collides with its own records, which are in RECORDS once it merges. */
+  var own=recprRecs(def), ids=own.map(function(r){return r.id;}), hit=null;
+  RECORDS.forEach(function(r){ if(!hit&&r.status==="published"&&own.indexOf(r)<0&&ids.indexOf(r.id)>=0) hit={claim:"published",id:r.id}; });
+  if(hit) return hit;
+  var mine=RECPRS.indexOf(def);
   RECPRS.forEach(function(d,j){
-    if(d===def||d.record.id!==id||j<=mine) return;
+    if(d===def||j<=mine) return;
     var st=recprSt(d).st;
-    if(st!=="merged"&&st!=="failed") claim=d.pr;
+    if(st==="merged"||st==="failed") return;
+    recprRecs(d).forEach(function(r){ if(ids.indexOf(r.id)>=0) hit={claim:d.pr,id:r.id}; });
   });
-  return claim;
+  return hit;
 }
+function lineageClaim(def){ var x=lineageHit(def); return x?x.claim:null; }
 function recprSt(def){ return def?(S.recprs[def.pr]||(S.recprs[def.pr]={st:"none",done:0,failed:null,timers:[],mergedAt:null})):null; }
 /* the one the tab is showing: what was selected, else the newest still open, else the newest */
 function recprCur(){
@@ -6755,6 +6864,42 @@ function recprDiscard(pr){
   render(); act("Closed "+def.pr+" without merging. Nothing was published and the branch is gone.");
 }
 
+/* The six checks. They close over this pull request, not over whichever one is selected, so several
+   can be open at once and each still reports on its own files. An import's pull request runs the
+   same six over every file it carries. */
+function recprChecks(def){
+  var recs=recprRecs(def), n=recs.length, one=n===1;
+  function own(r){return recs.indexOf(r)>=0;}
+  return [
+   {n:"Schema",ms:900,
+    test:function(){return recs.every(function(r){return !!tomlOf(recprFileText(def,r));});},
+    ok:"context-record/v0.1 valid · "+(one?"1 file, 1 record, 1 lineage":n+" files, "+n+" records, "+n+" lineages"),
+    bad:one?"the record file does not parse as TOML":"a record file does not parse as TOML"},
+   {n:"Lineage uniqueness",ms:700,
+    /* A real check, not a sentence, and it is re-run at merge because another pull request can
+       claim the lineage after this one went green. */
+    test:function(){return !lineageClaim(def);},
+    ok:function(){return one?"no published record holds "+def.record.id+"; this pull request is its only holder"
+      :"no published record or open pull request holds any of these "+n+" lineages";},
+    bad:function(){var x=lineageHit(def)||{};
+      return x.claim==="published"
+        ?x.id+" is already published. One lineage, one record — amend the published one instead of opening a second under its id."
+        :x.id+" is already claimed by "+x.claim+", which was opened first. Close one of them, or give this record a lineage of its own.";}},
+   {n:"record_hash recomputation",ms:600,
+    ok:function(){return one?"recomputed over the canonical bytes · "+def.hash.slice(0,20)+"… matches the file"
+      :"recomputed over the canonical bytes of "+n+" files · each matches its record_hash";}},
+   {n:"Secret and PII scan",ms:900,ok:"statement, rationale and evidence scanned · 0 findings"},
+   {n:"Conflict against active records",ms:1000,ok:function(){
+      return RECORDS.filter(function(r){return r.status==="published"&&!own(r);}).length+
+        " published records checked · no require or forbid on the same subject";}},
+   {n:"constraint_effect ∈ {require, forbid}",ms:500,ok:function(){
+      if(!one){var c=recs.filter(function(r){return r.ce;}).length;
+        return c?(c+" of "+n+" carry constraint_effect, each require or forbid · grants nothing"):"no constraining kind · the field is absent, which is also a pass";}
+      var e=def.record.ce;
+      return e?("constraint_effect = "+e+" · grants nothing"):"not a constraining kind · the field is absent, which is also a pass";}}
+  ];
+}
+
 /* The wizard's last step. Everything the PR needs is already in the draft; nothing new is stored. */
 function wzRecOpenPr(){
   var z=S.wz; if(!z) return;
@@ -6770,6 +6915,7 @@ function wzRecOpenPr(){
     author:"operator", by:CMD_OP, desc:String(z.desc||"").trim(), ws:w.slug, opened:nowT().slice(0,8),
     mergedAt:function(){return rec.pub+" "+nowT().slice(0,8)+" UTC";}
   };
+<<<<<<< HEAD
   /* The checks close over this pull request, not over whichever one is selected, so several can be
      open at once and each still reports on its own file. */
   def.checks=[
@@ -6796,6 +6942,9 @@ function wzRecOpenPr(){
       var e=def.record.ce;
       return e?("constraint "+e+" · grants nothing"):"not a constraining kind · the field is absent, which is also a pass";}}
   ];
+=======
+  def.checks=recprChecks(def);
+>>>>>>> main
   RECPRS.unshift(def);
   S.recprs[def.pr]={st:"none",done:0,failed:null,timers:[],mergedAt:null};
   S.wz=null; S.dlg=null; S.dlgArg=null; S.prpSel=null;
@@ -6809,8 +6958,8 @@ function wzRecOpenPr(){
    a quote or a backslash in it must not be able to produce a file that does not parse while the
    schema check says it does. tomlStr and tomlMulti are the same serialisers the agent definition
    editor writes with. */
-function recprFileText(def){
-  var r=def.record, multi=/\n/.test(r.st);
+function recprFileText(def,rec){
+  var r=rec||def.record, multi=/\n/.test(r.st);
   return '# .oxagen/rules/'+r.id+'.toml\n'+
    'schema = "context-record/v0.1"\n'+
    'lineage_id = '+tomlStr(r.id)+'\n'+
@@ -6820,15 +6969,29 @@ function recprFileText(def){
    '[steering]\nstrength = '+tomlStr(r.force)+'\n\n'+
    (r.ce?'[enforcement]\nconstraint_effect = '+tomlStr(r.ce)+'\nblocking = false\n\n'
         :'# no [enforcement] table: a '+r.kind+' constrains nothing\n\n')+
-   'record_hash = '+tomlStr(def.hash)+'\n';
+   'record_hash = '+tomlStr(r.hash||def.hash)+'\n';
 }
 function tomlOf(text){try{return tomlParse(text);}catch(e){return null;}}
 function recprFile(def){
   /* highlighted with the same grammar the source editor uses, so what is shown is what parses */
-  return '<pre>'+hlToml(recprFileText(def))+'</pre>';
+  return recprRecs(def).map(function(r,i){
+    return '<pre'+(i?' style="margin-top:10px"':'')+'>'+hlToml(recprFileText(def,r))+'</pre>';}).join("");
 }
+function recprTok(def){ return recprRecs(def).reduce(function(s,r){return s+r.tok;},0); }
 function recprBody(def){
   var r=def.record, w=ws();
+  if(def.src){
+    var recs=recprRecs(def);
+    return ['## Import '+recs.length+' '+(recs.length===1?'record':'records')+' from '+def.src, '',
+     'stella parsed `'+def.src+'` on '+r.pub+'. '+me().name+' accepted these in the Markdown importer.', '',
+     'One pull request per source file, so a reviewer reads a file’s rules together.', '',
+     '### Records']
+     .concat(recs.map(function(x){return '- `'+x.id+'` · '+x.kind+' · '+x.force+(x.ce?' · '+x.ce:'')+' · from `'+def.src+':L'+x.line+'`\n  '+x.st;}))
+     .concat(['', '### What it costs',
+      'Adds '+recprTok(def)+' steering tokens a turn to every turn in scope.', '',
+      '---',
+      'Opened by '+me().name+' · workspace `'+def.ws+'` · governance `team`']).join('\n');
+  }
   return ['## '+r.st, '',
    'Written by '+me().name+' in the record wizard on '+r.pub+'.', '',
    '### What this asks for',
@@ -6842,7 +7005,7 @@ function recprBody(def){
    'Opened by '+me().name+' · workspace `'+def.ws+'` · governance `team`'].join('\n');
 }
 function recprDetail(def){
-  var st=recprSt(def), r=def.record, n=def.checks.length, l=recprLabel(def);
+  var st=recprSt(def), r=def.record, n=def.checks.length, l=recprLabel(def), recs=recprRecs(def), many=recs.length>1, tok=recprTok(def);
   var merged=st.st==="merged", passed=st.st==="passed", failed=st.st==="failed", sb=stgBundle();
   var checks=def.checks.map(function(k,i){
     var s2=i<st.done?"pass":(failed&&i===st.failed)?"fail":(st.st==="checking"&&i===st.done)?"running":"queued";
@@ -6855,8 +7018,9 @@ function recprDetail(def){
    ? '<div class="panel-b" style="border-top:1px solid var(--border)"><b style="color:var(--st-proven)">Merged by '+h(me().name)+'</b>'+
      '<div class="dim" style="font-size:12px">'+h(st.mergedAt)+' · squashed into main as '+h(r.commit)+'</div>'+
      '<div class="row" style="margin-top:11px;gap:8px;flex-wrap:wrap">'+
-     '<button class="btn primary" onclick="go(\''+crecUrl(r.id)+'\')">Open the record</button>'+
-     '<button class="btn" onclick="S.tab.steering=\'records\';S.prSel=null;render()">See it in Records</button></div></div>'
+     (many?'<button class="btn primary" onclick="S.tab.steering=\'records\';S.prSel=null;render()">See them in Records</button>'
+      :'<button class="btn primary" onclick="go(\''+crecUrl(r.id)+'\')">Open the record</button>'+
+       '<button class="btn" onclick="S.tab.steering=\'records\';S.prSel=null;render()">See it in Records</button>')+'</div></div>'
    : '<div class="panel-b row" style="border-top:1px solid var(--border);gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:12.5px">'+
      (failed?'<b style="color:var(--st-failed)">A check failed.</b> <span class="muted">Nothing merges and nothing is published. Change the file and open it again.</span>'
       :passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
@@ -6866,7 +7030,7 @@ function recprDetail(def){
   var right=merged
    ? '<div class="panel" style="margin-bottom:14px" data-promo-bundle="'+sb.v+'"><div class="panel-h"><h3>promotion_event</h3>'+
      '</div><div class="panel-b"><dl class="kv code">'+
-     '<dt>record_id</dt><dd>'+h(def.promo)+'</dd><dt>lineage_id</dt><dd>'+h(r.id)+'</dd>'+
+     '<dt>record_id</dt><dd>'+h(def.promo)+'</dd><dt>lineage_id</dt><dd>'+h(many?recs.length+' lineages · '+recs.map(function(x){return x.id;}).join(', '):r.id)+'</dd>'+
      '<dt>from → to</dt><dd>authored → <b>published</b></dd>'+
      '<dt>author</dt><dd>'+h(me().name)+' · '+h(me().role)+'</dd>'+
      '<dt>approver</dt><dd>'+h(me().name)+' · '+h(me().role)+'</dd>'+
@@ -6874,7 +7038,7 @@ function recprDetail(def){
      '<dt>commit_sha</dt><dd>'+h(r.commit)+'</dd><dt>merged_at</dt><dd>'+h(st.mergedAt)+'</dd>'+
      '<dt>re-indexed</dt><dd>from the merged commit · '+h(def.hash.slice(0,20))+'… verified</dd>'+
      '<dt>bundle</dt><dd>v'+(sb.v-1)+' → <b>v'+sb.v+'</b> · '+h(sb.digest||"re-signed")+'</dd>'+
-     '<dt>tokens per turn</dt><dd>'+tokn(sb.tok-r.tok)+' → '+tokn(sb.tok)+'</dd>'+
+     '<dt>tokens per turn</dt><dd>'+tokn(sb.tok-tok)+' → '+tokn(sb.tok)+'</dd>'+
      '<dt>audit</dt><dd>steering_published · '+h(def.evt)+'</dd>'+
      '<dt>ledger</dt><dd>promotions.jsonl not written · regulated mode only; this workspace is team</dd></dl>'+
      '<div class="row" style="margin-top:13px;gap:8px;flex-wrap:wrap">'+
@@ -6882,14 +7046,14 @@ function recprDetail(def){
    : '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Merge effects</h3></div><div class="panel-b"><dl class="kv">'+
      '<dt>1</dt><dd>write a promotion_event with the author, the pull request and the commit</dd>'+
      '<dt>2</dt><dd>re-index the record from the merged commit; a hash mismatch blocks delivery</dd>'+
-     '<dt>3</dt><dd>bump the bundle v'+sb.v+' → v'+(sb.v+1)+' and re-sign it · '+tokn(sb.tok)+' → '+tokn(sb.tok+r.tok)+' steering tokens a turn</dd>'+
+     '<dt>3</dt><dd>bump the bundle v'+sb.v+' → v'+(sb.v+1)+' and re-sign it · '+tokn(sb.tok)+' → '+tokn(sb.tok+tok)+' steering tokens a turn</dd>'+
      '<dt>4</dt><dd>emit steering_published to the audit log</dd>'+
      '<dt>5</dt><dd>deliver it on the next model call of every run in '+h(ws().name)+'</dd></dl>'+
      '<div class="note" style="margin-top:12px">Nothing above happens on the way here. The record steers nothing while this pull request is open, which is the whole reason it is a pull request.</div></div></div>';
   return '<div class="split"><div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Context PR · <span class="mono">'+h(def.pr)+'</span></h3>'+
     '<span class="b b-'+l[0]+'" style="margin-left:auto" data-recpr-state="'+st.st+'"><span class="d"></span>'+h(l[1])+'</span></div><div class="panel-b">'+
-    '<p class="eyebrow q">Branch <span class="mono">'+h(def.branch)+'</span> · base main · '+h(def.base)+' · one concern per PR</p>'+
+    '<p class="eyebrow q">Branch <span class="mono">'+h(def.branch)+'</span> · base main · '+h(def.base)+' · '+(def.src?'one source file per PR':'one concern per PR')+'</p>'+
     recprFile(def)+'</div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Pull request body</h3>'+
     '<span class="b b-q" style="margin-left:auto">written by '+h(me().name)+'</span></div>'+
@@ -6906,7 +7070,8 @@ function prSelected(){ return (RECPRS.length&&S.prSel!=="ctxpr")?"recpr":"ctxpr"
 function prTable(){
   var rows=[], cur=recprCur();
   RECPRS.forEach(function(d){var lr=recprLabel(d);
-    rows.push([d.pr,d.pr,d.record.st,d.branch,me().name,ciLight(ciFromSt(d,recprSt(d)))+'<span class="b b-'+lr[0]+'"><span class="d"></span>'+h(lr[1])+'</span>',
+    var rs=recprRecs(d);
+    rows.push([d.pr,d.pr,rs.length>1?rs.length+' records from '+d.src:d.record.st,d.branch,me().name,ciLight(ciFromSt(d,recprSt(d)))+'<span class="b b-'+lr[0]+'"><span class="d"></span>'+h(lr[1])+'</span>',
       cur&&cur.pr===d.pr&&prSelected()==="recpr"]);});
   if(S.ctxpr.st!=="none"){var p=prpById(CTXPR.prp),lc=ctxprLabel();
     rows.push(["ctxpr",CTXPR.pr,p.st,CTXPR.branch,"the promoter",ciLight(ciFromSt(CTXPR,S.ctxpr))+'<span class="b b-'+lc[0]+'"><span class="d"></span>'+h(lc[1])+'</span>',
@@ -7285,32 +7450,74 @@ function stgMeter(label,used,max,unit,sub){
 /* Memory is aggregated, not collected: every run's notes and every operator steer are folded by
    lineage into one item per fact, the newest provenance kept, and the recall count is the sum over
    the runs that pulled it. The strip above the table says how much folded into how little. */
+/* ---- folding ----
+   A memory is one concept, and its sayings are the words runs used for it: "Remember to not use the
+   latest version of node" and "Use Node version 20 the latest version breaks main" are one memory
+   with two sayings. When a memory holds S.memFold.sayings sayings from S.memFold.runs distinct runs,
+   the promoter proposes it as a record and cites every saying as a supporting run. */
+S.memFold={sayings:3,runs:2};
+function memSayings(m){return m.sayings||[];}
+function memRunsOf(m){var o={};memSayings(m).forEach(function(x){o[x.run]=1;});return Object.keys(o);}
+function memFoldOf(m){
+  var n=memSayings(m).length, r=memRunsOf(m).length, F=S.memFold;
+  if(m.proposedAs) return {st:"proposed",n:n,r:r};
+  if(n>=F.sayings&&r>=F.runs) return {st:"ready",n:n,r:r};
+  return {st:"below",n:n,r:r,need:Math.max(F.sayings-n,0),needRuns:Math.max(F.runs-r,0)};
+}
+function memFoldSub(m){
+  var f=memFoldOf(m);
+  if(f.st==="proposed") return 'proposed as <span class="mono">'+h(m.proposedAs)+'</span>';
+  if(f.st==="ready") return 'the promoter proposes it on its next pass';
+  if(f.need) return 'needs '+f.need+' more saying'+(f.need>1?'s':'');
+  return 'needs a saying from another run';
+}
+function memFoldLine(m){
+  var f=memFoldOf(m), F=S.memFold;
+  if(f.st==="proposed") return 'Proposed as <span class="mono">'+h(m.proposedAs)+'</span> when it reached '+F.sayings+' sayings from '+F.runs+' runs. The proposal cites every saying above.';
+  if(f.st==="ready") return 'It has '+f.n+' sayings from '+f.r+' runs, which meets the setting. The promoter proposes it on its next pass.';
+  return 'It becomes a proposal at '+F.sayings+' sayings from '+F.runs+' runs. It has '+f.n+' from '+f.r+' run'+(f.r===1?'':'s')+'.';
+}
+function memOpenProposal(id){closeDialog();S.prpSel=id;go('#/'+ORG.slug+'/'+S.ws+'/steering/proposals');}
+function memAsmCell(m,wslug){
+  return m.supersededBy?'<span class="b b-q">superseded</span><span class="sub">by '+stgItemLinkById(wslug,m.supersededBy)+'</span>'
+    :m.yieldsTo?'<span class="b b-approval"><span class="d"></span>yields</span><span class="sub">to '+stgItemLinkById(wslug,m.yieldsTo)+', a published must</span>'
+    :'<span class="b b-allowed"><span class="d"></span>competes</span>';
+}
 function stgMemoryAgg(L){
-  var runs={}, steers=0, notes=0, recalls=0, cls={};
+  var runs={}, steers=0, notes=0, recalls=0, cls={}, folded=0;
   L.forEach(function(m){recalls+=m.recalls30||0; cls[m.cls]=(cls[m.cls]||0)+1;
     String(m.provenance||"").split(/\s*·\s*/).forEach(function(p){if(/^run_/.test(p))runs[p]=1;});
-    if(/operator steer/.test(m.provenance||""))steers++; else notes++;});
-  return {runs:Object.keys(runs).length,steers:steers,notes:notes,recalls:recalls,cls:cls,folded:Math.round(L.length*3.4)+steers};
+    memSayings(m).forEach(function(x){runs[x.run]=1; folded++; if(/operator steer/.test(x.by))steers++; else notes++;});});
+  return {runs:Object.keys(runs).length,steers:steers,notes:notes,recalls:recalls,cls:cls,folded:folded};
 }
 function stgMemoryTab(w){
   var L=stgMemory(w.slug), G=stgMemoryAgg(L);
+  var F=S.memFold;
   var rows=L.map(function(m){
-    var st=m.supersededBy?'<span class="b b-q">superseded</span><span class="sub">by '+stgItemLinkById(w.slug,m.supersededBy)+'</span>'
-      :m.yieldsTo?'<span class="b b-approval"><span class="d"></span>yields</span><span class="sub">to '+stgItemLinkById(w.slug,m.yieldsTo)+', a published must</span>'
-      :'<span class="b b-allowed"><span class="d"></span>competes</span>';
+    var st=memAsmCell(m,w.slug), n=memSayings(m).length;
     return '<tr '+rowClick("openDialog('memory','"+h(m.id)+"')","Open "+m.id)+'><td><b style="font-weight:500">'+h(m.body)+'</b><span class="sub mono">'+h(m.id)+' · '+h(m.provenance)+'</span></td>'+
+     '<td data-mem-fold="'+h(memFoldOf(m).st)+'"><span class="num">'+n+'</span> <span class="dim">of '+F.sayings+'</span><span class="sub">'+memFoldSub(m)+'</span></td>'+
      '<td><span class="b b-q mono">'+h(m.cls)+'</span></td><td>'+forceBadge(m.force)+'</td>'+
      '<td>'+h(m.scope)+(m.agent?'<span class="sub mono">'+h(m.agent)+'</span>':'')+'</td>'+
      '<td class="mono" style="font-size:11.5px">'+h(m.lastRecalled)+'<span class="sub">'+m.recalls30+' recalls in 30 days</span></td>'+
      '<td class="num">'+tokn(m.token_cost)+' tok</td><td>'+st+'</td></tr>';}).join("");
   var agg='<div class="grid g4" style="margin-bottom:14px">'+
+<<<<<<< HEAD
    '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s">folded from '+G.folded+' run notes and steers</span></div>'+
    '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s">'+G.steers+' operator steers and '+G.notes+' agent notes</span></div>'+
+=======
+   '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s" data-mem-folded="'+G.folded+'">folded from '+G.folded+' sayings</span></div>'+
+   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+'<small>runs</small></span><span class="s">'+G.steers+' operator steers and '+G.notes+' reflections</span></div>'+
+>>>>>>> main
    '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
    '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a rule is proposed as a record instead</span></div></div>';
   return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
    '<div class="panel"><div class="panel-h"><h3>Recalled memory</h3><span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Memory</th><th>Class</th><th>Force</th><th>Scope</th><th>Last recalled</th><th>Token cost</th><th>In the assembler</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+   '<div class="panel-b mem-fold" style="border-bottom:1px solid var(--border)"><label for="memFoldN">A memory becomes a proposal at</label>'+
+     '<select id="memFoldN" onchange="S.memFold.sayings=+this.value;render()">'+[2,3,4,5].map(function(v){return '<option'+(v===F.sayings?' selected':'')+'>'+v+'</option>';}).join("")+'</select>'+
+     '<label for="memFoldR">sayings from</label><select id="memFoldR" onchange="S.memFold.runs=+this.value;render()">'+[1,2,3].map(function(v){return '<option'+(v===F.runs?' selected':'')+'>'+v+'</option>';}).join("")+'</select>'+
+     '<span>runs.</span><span class="dim">A workspace setting. The promoter reads it on every pass.</span></div>'+
+   '<div class="tw"><table><thead><tr><th>Memory</th><th>Sayings</th><th>Class</th><th>Force</th><th>Scope</th><th>Last recalled</th><th>Token cost</th><th>In the assembler</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><div class="row"><button class="btn sm" onclick="S.pv.preset=\'merge-green\';S.pv.text=null;stgTab(\'compiler\')">See one yield in the compiler</button>'+
    '<span class="dim" style="font-size:12px">Recall used to reach only the in-app agent, capped at six items. It now goes through the same assembler as every other source.</span></div></div></div>';
 }
@@ -7334,11 +7541,16 @@ DLG_EXT.memory=function(id){
      '<dt>Cost</dt><dd>'+tokn(m.token_cost)+' tokens every time it is selected, so '+tokn(m.token_cost*m.recalls30)+' over those 30 days</dd>'+
      '<dt>In force since</dt><dd><span class="mono">'+h(m.valid_from)+'</span></dd></dl>'+
      '<div class="note" style="margin-top:12px">'+memPosition(m)+'</div>'+
+     '<div class="field" style="margin-top:12px"><label>Sayings</label><div class="mem-says" data-mem-says="'+memSayings(m).length+'">'+
+      memSayings(m).map(function(x){return '<div class="mem-say"><div class="q">“'+h(x.text)+'”</div>'+
+       '<div class="by"><span>'+h(x.by)+'</span> <a class="mono" href="#/'+ORG.slug+'/'+S.ws+'/runs/'+h(x.run)+'/memory" onclick="closeDialog()">'+h(x.run)+'</a> <span>frame '+x.frame+'</span></div></div>';}).join("")+
+      '</div><div class="note" style="margin-top:8px">'+memFoldLine(m)+'</div></div>'+
      (/^run_/.test(run)?'<div class="field" style="margin-top:12px"><label>The run that left it</label>'+
        '<button class="btn sm" onclick="closeDialog();go(\'#/'+ORG.slug+'/'+S.ws+'/runs/'+h(run)+'\')">Open '+h(run)+'</button></div>':''),
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn danger" onclick="openDialog(\'memforget\',\''+h(m.id)+'\')">Forget</button>'+
-     '<button class="btn primary" onclick="memPromote(\''+h(m.id)+'\')">Promote to a record</button>'};
+     (m.proposedAs?'<button class="btn primary" onclick="memOpenProposal(\''+h(m.proposedAs)+'\')">Open the proposal</button>'
+      :'<button class="btn primary" onclick="memPromote(\''+h(m.id)+'\')">Promote to a record</button>')};
 };
 DLG_EXT.memforget=function(id){
   var m=memById(id); if(!m)return noSuch("Memory");
@@ -10204,7 +10416,7 @@ function skLoop(w){
      '<div class="sx-skl">'+[
       ["Rewrite what the agent said","An interjection is a new frame beside the agent’s turn. The agent’s own output is never edited, and a replay shows both."],
       ["Answer on the operator’s behalf","No default answer, no remembered answer, no “last time you chose…”. On timeout the run continues with nothing, which is the conservative end."],
-      ["Feed a reflection back into the work","A self-grade cannot become steering, cannot become a Context PR, and cannot change a later run’s context. The Reflection tab states it in five lines and the file enforces it."],
+      ["Feed a self-grade back into the work","A self-grade cannot become steering, cannot become a Context PR, and cannot change a later run’s context. The Reflection tab states it in five lines and the file enforces it."],
       ["Hide that it happened","There is no silent interjection. A run that was asked something carries the question, the pause, the answer and the wait in its frames."]
      ].map(function(x){
       return '<div class="sx-row"><div class="sx-ki" style="color:var(--sk-held);border-color:color-mix(in srgb,var(--sk-held) 40%,transparent)">'+icon("lock")+'</div>'+
@@ -10219,9 +10431,9 @@ function skReflect(w){
    '<span class="mono">use = "research"</span> is the only value <span class="mono">'+h(SK_CFG.file)+'</span> accepts for reflection. '+
    'There is no setting that turns a self-grade into steering, because the thing a model says about its own work is evidence about the model, not about the work.</div>'+
    '<div class="sx-stats" style="margin-bottom:14px">'+
-    skStat("Sampled",skPct(SK_CFG.reflect.sample),"plus every failing and tampered run","res")+
-    skStat("Captured, 30 days",127,"out of 611 sealed runs","res")+
-    skStat("Cost","$1.79","0.09% of the month’s spend · billed as overhead, never as productive")+
+    (SK_CFG.reflect.sample>=1?skStat("Sampled","All","every sealed run","res"):skStat("Sampled",skPct(SK_CFG.reflect.sample),"plus every failing and tampered run","res"))+
+    skStat("Captured, 30 days",611,"out of 611 sealed runs","res")+
+    skStat("Cost","$8.61","0.43% of the month’s spend · billed as overhead, never as productive")+
     skStat("Calibration gap","2 of 4","axes where the agent scored itself above the record","held")+
    '</div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Injected turn</h3>'+
@@ -10257,7 +10469,7 @@ function skReflect(w){
      'These are not preferences on this screen; they are the reason the feature was allowed to exist.</p>'+
     '<ol>'+
      '<li><b>It never enters a context frame.</b> No later run of this agent, or any agent, can cite it. It is not a context record.</li>'+
-     '<li><b>It cannot be promoted.</b> There is no path from a reflection to a proposal, to a Context PR, or to steering. The promote action does not exist for this kind.</li>'+
+     '<li><b>It cannot be promoted.</b> There is no path from a self-grade to a memory, a proposal, a Context PR, or steering. The promote action does not exist for this kind. The lessons the reflector writes are memories instead, and a memory reaches a proposal only by folding, with every saying cited.</li>'+
      '<li><b>It does not price the work.</b> Its tokens are billed as overhead on the Spend page and excluded from the productive ratio, so a run cannot look better by grading itself.</li>'+
      '<li><b>It is not evidence about a person.</b> It carries the agent, the run and the rubric. Reading it is <span class="mono">research.read</span>, an organization grant that '+h(PEOPLE.priya.name)+' holds and no workspace role inherits.</li>'+
      '<li><b>It expires.</b> '+h(SK_CFG.reflect.retain)+' from capture, then deleted. Nothing about it outlives its retention clock.</li>'+
@@ -10267,8 +10479,9 @@ function skReflect(w){
      '<span class="sx-chip res">consent: organization · recorded by '+h(PEOPLE.priya.name)+' on 2026-09-02</span>'+
      '<span class="sx-chip res">retain '+h(SK_CFG.reflect.retain)+'</span>'+
      '<span class="grow"></span>'+
-     '<button class="btn sm" onclick="act(\'Reflection capture turned off for core-platform. 127 captured reflections remain under their retention clock.\')">Turn capture off</button>'+
-     '<button class="btn sm" onclick="act(\'Export requires research.read. Priya Natarajan holds it; you do not.\',\'denied\')">Export for research</button>'+
+     '<button class="btn sm" onclick="act(\'Reflection capture turned off for core-platform. 611 captured reflections remain under their retention clock.\')">Turn capture off</button>'+
+     (canResearch()?'<button class="btn sm" onclick="act(\'Exported 611 self-grades for research. The export is itself an audit event.\')">Export for research</button>'
+      :'<button class="btn sm" onclick="act(\'Export requires research.read. '+h(PEOPLE.priya.name)+' holds it and you do not.\',\'denied\')">Export for research</button>')+
     '</div>'+
    '</div>';
 }
@@ -11319,8 +11532,8 @@ function dialog(){
   var kki=(typeof S.dlgArg==="number"&&APIKEYS[S.dlgArg])?S.dlgArg:0, kk=APIKEYS[kki];
   var D={
    notifs:{t:"Notifications",w:false,b:notifsBody(),
-     f:'<div class="grow"><span class="mono">list_notifications</span> · '+notifUnread()+' unread · every kind here maps to a frame kind or an audit event, never to something invented for a bell.</div>'+
-       '<button class="btn" onclick="markAllRead()">Mark all read</button>'},
+     f:'<div class="grow">'+(notifUnread()?notifUnread()+' unread · select one to mark it read':'All read')+'</div>'+
+       '<button class="btn" onclick="markAllRead()"'+(notifUnread()?'':' disabled')+'>Mark all read</button>'},
    approve:{t:"Approve this action",w:false,b:approveBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="resolveApproval(S.dlgArg,\'approved\')">Approve and mint the token</button>'},
    deny:{t:"Deny this action",w:false,b:denyBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="resolveApproval(S.dlgArg,\'denied\')">Deny with this reason</button>'},
    account:{t:"Account",w:false,tabs:accountTabs(),b:accountBody(),f:S.dlgArg==="onboarding"?'<span class="grow">Demo chrome, not product UI — nothing on these screens writes anything.</span><button class="btn" onclick="closeDialog()">Close</button>':'<span class="grow">Changes here run as <span class="mono">set_preferences</span> — a governed action, audited like any other.</span>'+
@@ -13059,21 +13272,62 @@ function asstMount(){
   var sig=S.asstEngine+"|"+ORG.slug+"|"+orgKeyState();
   if(host.getAttribute("data-sig")!==sig){
     host.setAttribute("data-sig",sig);
-    host.innerHTML=asstSheet();
+    host.innerHTML=asstSheet()+asstGrip();
   }
   host.className="asst"+(isPhone()?" phone":"")+(S.asst?" open":"");
+  asstApplyW(host);
   host.setAttribute("aria-hidden",S.asst?"false":"true");
   /* inert keeps the closed panel out of the tab order even mid-transition */
   if(S.asst)host.removeAttribute("inert"); else host.setAttribute("inert","");
 }
+/* "oxagen" set as the house wordmark sets it: Space Grotesk, lowercase, the x in gold. */
+function oxName(){ return '<span class="ox-name">o<span class="x">x</span>agen</span>'; }
+/* Line 1 names the agent, line 2 says whose it is. A down engine or a missing key adds a red dot on
+   the mark and a third line, so the launcher never reads ready when it is not. */
 function asstLaunch(){
-  var st=S.asstEngine==="down"?'<span class="down">engine down</span>'
-    :orgKeyState()==="none"?'<span class="down">no model key</span>'
-    :'<span>'+h(ASST_MODEL)+' · ready</span>';
+  var bad=S.asstEngine==="down"?"engine down":orgKeyState()==="none"?"no model key":"";
   return '<button class="asst-launch" onclick="asstToggle()" aria-controls="asst" aria-expanded="'+(S.asst?"true":"false")+'">'+
-   '<span class="asst-g">'+stellaMark()+'</span>'+
-   '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b>'+st+'</span>'+
+   '<span class="asst-g'+(bad?" bad":"")+'">'+stellaMark()+'</span>'+
+   '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b>'+
+   '<span class="sub">'+oxName()+'’s in-app AI assistant</span>'+
+   (bad?'<span class="down">'+bad+'</span>':'')+'</span>'+
    '<span class="cv"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></span></button>';
+}
+/* The drawer widens from its right edge and never narrows past where it opened (430px). It always
+   leaves 56px of the page in view. The width is a per-viewer convenience, so it lives in this
+   browser only; a phone keeps the drawer full width and shows no edge. */
+var ASST_MIN=430, ASST_W_KEY="mc.asstW";
+S.asstW=(function(){try{var v=parseInt(localStorage.getItem(ASST_W_KEY),10);return v>=ASST_MIN?v:ASST_MIN;}catch(e){return ASST_MIN;}})();
+function asstMaxW(host){var l=host?parseFloat(getComputedStyle(host).left)||0:0;return Math.max(ASST_MIN,Math.floor(window.innerWidth-l-56));}
+function asstGrip(){
+  return '<div class="asst-grip" role="separator" aria-orientation="vertical" aria-label="Resize the assistant" tabindex="0" '+
+   'aria-valuemin="'+ASST_MIN+'" onpointerdown="asstGripStart(event)" onkeydown="asstGripKey(event)" title="Drag to widen"></div>';
+}
+function asstApplyW(host){
+  host=host||el("asst"); if(!host)return;
+  var w=Math.min(Math.max(ASST_MIN,S.asstW),asstMaxW(host));
+  host.style.setProperty("--asst-w",w+"px");
+  var g=host.querySelector(".asst-grip");
+  if(g){g.setAttribute("aria-valuenow",w);g.setAttribute("aria-valuemax",asstMaxW(host));}
+}
+function asstSetW(w,save){
+  var host=el("asst"); S.asstW=Math.min(Math.max(ASST_MIN,Math.round(w)),asstMaxW(host)); asstApplyW(host);
+  if(save){try{localStorage.setItem(ASST_W_KEY,String(S.asstW));}catch(e){}}
+}
+function asstGripStart(e){
+  var host=el("asst"); if(!host||isPhone())return;
+  e.preventDefault(); host.classList.add("resizing"); document.body.classList.add("asst-resizing");
+  var left=host.getBoundingClientRect().left;
+  function mv(ev){asstSetW(ev.clientX-left,false);}
+  function up(){window.removeEventListener("pointermove",mv);window.removeEventListener("pointerup",up);
+    host.classList.remove("resizing");document.body.classList.remove("asst-resizing");asstSetW(S.asstW,true);}
+  window.addEventListener("pointermove",mv); window.addEventListener("pointerup",up);
+}
+function asstGripKey(e){
+  var host=el("asst"), step=e.shiftKey?64:16, w=S.asstW;
+  if(e.key==="ArrowRight")w+=step; else if(e.key==="ArrowLeft")w-=step;
+  else if(e.key==="Home")w=ASST_MIN; else if(e.key==="End")w=asstMaxW(host); else return;
+  e.preventDefault(); asstSetW(w,true);
 }
 function asstStateBlock(title,body,acts,foot){
   return '<div class="asst-b"><div class="state-wrap" style="padding:30px 6px">'+
@@ -15193,7 +15447,7 @@ DLG_EXT.more=function(){
      (PRODUCT?'':t("scenarios","Scenarios","guided walkthroughs",'go(\''+base+'/scenarios\')'))+
      '</div><div class="hr"></div><div class="mgrid">'+
      '<button class="mtile" onclick="closeDialog();asstToggle(true)"><span class="ic">'+stellaMark()+'</span>'+
-      '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b><span>ask about a run, or change something</span></span></button>'+
+      '<span class="tx"><b class="stl-ask">Ask '+stellaName()+'</b><span>'+oxName()+'’s in-app AI assistant</span></span></button>'+
      t("search","Search","or run an action",'openDialog(\'cmd\')')+
      t("bell","Notifications",notifUnread()+" unread",'openDialog(\'notifs\')',notifUnread(),true)+
      t("user","Account",me().name,'openDialog(\'account\',\'profile\')')+

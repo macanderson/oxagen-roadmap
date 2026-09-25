@@ -3,7 +3,7 @@
 import { view, argTypes } from "../_view.js";
 
 export default {
-  title: "Scenarios/W14 Done Means Done",
+  title: "Future state/Scenarios/W14 Done Means Done",
   argTypes,
   args: { shell: "desktop", theme: "system", product: false, hash: "#/a-intel/core-platform/scenarios/done-means-done/1" },
   render: view,
