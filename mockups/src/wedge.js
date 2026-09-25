@@ -53,7 +53,15 @@ function fileRuns(){ RUNS.forEach(function(R){ if(!WO_BY_RUN[R.id]) fileDirect(R
 function woShown(w){ return w.kind!=="direct"||(w.runs||[]).some(function(x){return !!run(x.run);}); }
 function runParent(R){ if(!R) return null; if(!WO_BY_RUN[R.id]&&RUNS.indexOf(R)>=0) fileDirect(R); return WO_BY_RUN[R.id]||null; }
 function woRuns(w){return (w.runs||[]).map(function(x){return {x:x,R:run(x.run)};});}
-function woLive(w){return (w.runs||[]).some(function(x){return x.state==="live";});}
+/* A work order is live when one of its runs is live now, read off the run itself where the run is in view. */
+function woLive(w){return (w.runs||[]).some(function(x){var R=run(x.run);return R?runStatus(R)==="live":x.state==="live";});}
+/* Live and parked runs in a workspace: one count for every tile that shows them. */
+function wsRunCounts(wslug){
+  var L=RUNS.filter(function(r){return r.ws===wslug;});
+  /* a workflow stage's run that only its work order records counts too, so Work and Agents agree */
+  var only=0; WORKORDERS.forEach(function(w){ if(w.ws!==wslug) return; (w.runs||[]).forEach(function(x){ if(!run(x.run)&&x.state==="live") only++; }); });
+  return {live:L.filter(function(r){return runStatus(r)==="live";}).length+only,parked:L.filter(function(r){return runStatus(r)==="parked";}).length};
+}
 function woSpend(w){var s=0;woRuns(w).forEach(function(o){if(o.R)s+=parseFloat(o.R.cost)||0;});return s;}
 function woKindBadge(w){
   return w.kind==="direct"
@@ -96,7 +104,7 @@ function backlogTab(){
       drafts=rows.filter(function(t){return t.ready==="draft"||t.ready==="changed";}).length,
       inwo=rows.filter(function(t){return t.ready==="sent";}).length;
   var orders=wsWorkOrders(), live=orders.filter(woLive), toAccept=woWaiting();
-  var parked=APPROVALS.filter(function(a){return a.ws===S.ws&&apState(a.id).status==="pending";}).length;
+  var parked=wsRunCounts(S.ws).parked;
   var changed=rows.filter(function(t){return t.ready==="changed";});
   var nsel=Object.keys(S.tsel).length;
   var banner=changed.length?'<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
@@ -1241,8 +1249,7 @@ function pSpend(){
    agent. An agent's Steering tab shows the frames it receives, Permissions carries every mandate as
    Delegation (D11), and Activity lists the work orders it worked. */
 function agentsTiles(w,list){
-  var live=RUNS.filter(function(r){return r.ws===w.slug&&runStatus(r)==="live";});
-  var parked=RUNS.filter(function(r){return r.ws===w.slug&&runStatus(r)==="parked";});
+  var rc=wsRunCounts(w.slug), live={length:rc.live}, parked={length:rc.parked};
   var wait=APPROVALS.filter(function(x){var r=run(x.run);return apState(x.id).status==="pending"&&(!r||r.ws===w.slug);});
   var b=SPEND.budgets.filter(function(x){return x.scope==="workspace · "+w.slug;})[0], used=b?n$(b.used)/n$(b.limit):null;
   var held=MANDATES.filter(function(m){var a=agent(m.agent);return m.status==="active"&&a&&a.ws===w.slug;});
