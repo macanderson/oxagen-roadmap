@@ -26,7 +26,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
    - Tabs: Events (N), Incidents (N open), Receipts (N), Exports (N), Keys, Retention.
    - Events: Actor and Range selects, the search field, the Result and Severity filters, CSV; When, Event, Actor, What, Result, Severity, Reference; the note.
    - Incidents: the critical banner with Open the incident while one is open; Open an incident; Severity, What happened, Opened, Detected by, State; Open per row; the kinds `mandate.exception`, `taint_raised`, `receipt_modified`, `chain_break`, `hooks_removed`, `credential_probe` and no other.
-   - Receipts: the search input, Search, the example chips, clear; Receipt, When, Agent and operator, Tool version, Decision, Amount, External effect, Tier; the empty-search state with Clear the search; the "N of N receipts shown" footer.
+   - Receipts: the search input, Search, the example chips, clear; Receipt, When, Agent and operator (the agent key led by its harness mark), Tool version, Decision, Amount, External effect, Tier; the empty-search state with Clear the search; the "N of N receipts shown" footer.
    - Exports: the callout; one card per export with its badge, Verify bundle, Download and the seven facts; Verifier; Outbound events with Dead-letter view and Delivery.
    - Keys: Rotate KEK; Key, Algorithm, Gen, Valid from, Valid to, State, What it covers; Rotate on the active KEK; the re-wrap bar.
    - Retention: Edit policy; Body retention, Hot window, Replay of a compacted run, Workspace opt-down, Storage price (the Billing figure, included for 13 months, then $0.10 per GB-month); Archive tiers with Tier, Where, What it holds, Retention, Held today; Redaction.
