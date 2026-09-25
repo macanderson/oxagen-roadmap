@@ -250,13 +250,14 @@ var SRC_KIND={
  stage:{l:"Workflow stage",home:"Work"},
  steer:{l:"Operator steer",home:"Run"}};
 var REC_TYPE={rule:"constraint",constraint:"constraint",procedure:"procedure",fact:"context",preference:"context",memory:"context"};
+/* What each point is and how it reaches the model is in the Envelope help (mockups/help/run.md). */
 var POINTS=[
- ["session_start","Session start","the stable prefix, delivered in the signed bundle"],
- ["prompt","Prompt","the brief the run started with"],
- ["prompt_submit","Prompt submit","the per-prompt selection, picked for this prompt"],
- ["model_request","Model request","added at the gateway, between turns"],
- ["files","Checkout files","synced into the checkout, loaded by the harness"],
- ["tools","Tool list","the tool definitions the toolbelt shows the model"]];
+ ["session_start","Session start"],
+ ["prompt","Prompt"],
+ ["prompt_submit","Prompt submit"],
+ ["model_request","Model request"],
+ ["files","Checkout files"],
+ ["tools","Tool list"]];
 var POINT_LABEL={}; POINTS.forEach(function(p){POINT_LABEL[p[0]]=p[1];});
 /* A harness's own tools (Bash in Claude Code, a shell in Codex CLI) are not frames: Oxagen did not put them there. */
 var HARNESS_TOOL_RE=/^(claude_code|codex_cli|codex|cursor|stella)__/;
@@ -860,11 +861,11 @@ function envelopeHtml(E,keyPre){
   var env=POINTS.map(function(p){
     var F=pickT(E.byPoint[p[0]]); if(!F.length) return "";
     var tk=F.reduce(function(s,f){return s+(f.tok||0);},0);
-    return '<div class="dt-point"><div class="dt-point-h"><b>'+h(p[1])+'</b><span class="dim">'+h(p[2])+'</span>'+
+    return '<div class="dt-point"><div class="dt-point-h"><b>'+h(p[1])+'</b>'+
       '<span class="sp mono dim" style="font-size:11px">'+F.length+' frame'+(F.length===1?'':'s')+(tk?' · '+tokn(tk)+' tok':'')+'</span></div>'+
       frameTable(F,{cap:ft?0:4,key:keyPre+"."+p[0]})+'</div>';}).join("");
-  var meters='<div class="dt-meters">'+stgMeter("Session-start prefix",E.prefixTok,E.prefixCap,"tok","16 KiB in the signed bundle, header included")+
-    stgMeter("Per-prompt selection",E.volatileTok,E.volatileCap,"tok","picked for this brief under the workspace budget")+'</div>';
+  var meters='<div class="dt-meters">'+stgMeter("Session-start prefix",E.prefixTok,E.prefixCap,"tok")+
+    stgMeter("Per-prompt selection",E.volatileTok,E.volatileCap,"tok")+'</div>';
   return meters+typeStrip(E.sel,keyPre)+env;
 }
 function exclusionsHtml(E,keyPre){
