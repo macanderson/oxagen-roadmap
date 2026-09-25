@@ -31,15 +31,15 @@ The agent header and the tab bar are as `agent.md` specifies, with Steering sele
 | Injection point | Caption | Demo tally |
 |---|---|---|
 | Session start | “the stable prefix, delivered in the signed bundle” | “14 frames · 1,064 tok” |
-| Prompt submit | “the volatile selection, picked for this prompt” | “8 frames · 419 tok” |
+| Prompt submit | “the per-prompt selection, picked for this prompt” | “8 frames · 419 tok” |
 | Checkout files | “synced into the checkout, loaded by the harness” | “9 frames · 9,140 tok” |
-| Tool list | “the tool definitions the belt shows the model” | “13 frames · 979 tok” |
+| Tool list | “the tool definitions the toolbelt shows the model” | “13 frames · 977 tok” |
 
   Prompt and Model request do not appear: the standing brief is not a work order's send and carries no steer.
 - Each injection point is a table, Type · SteeringFrame · Source · Force · Tokens. Type is the type badge. SteeringFrame is the body, with “enforced by <gate>” under a gate-backed frame that is not a capability (“enforced by gate.never-merge”). Source is the source kind (“Product vision”, “ADR”, “Steering record”, “Policy”, “Skill”, “Memory”, “Glossary term”, “Agent definition”, “Toolbelt”), the source id as a link to where it is managed, and the source version with the frame's hash (“a4c91e2 · #bdec8418”). A toolbelt's version is the date it last changed (`tb_context_graph`, “updated 2026-08-30”). Force is `must`, `should`, `may` or `info`. Tokens is the frame's cost, or a dash for a descriptor that costs nothing (a skill entrypoint). Rows sort by type, then force, then id. A table shows four rows and **Show all N**, which turns into **Show the first 4**.
 - Two fixture defects show in this section. Three Steering records render with no version (`ctx.release.platform-only`, `ctx.release.semver`, `ctx.release.milestone-4-11`), and frames with different bodies share a hash (`#3f0b8c1d` on both `ctx.release.never-merge` and `gate.never-merge`, `#c02fa77e` on both `ctx.mobile.no-codegen` and `gate.mobile-codegen` in section 2, and a skill's description line and its `SKILL.md` both carry the skill's digest). Every frame carries its source version, and its hash is over its own body (D6).
 
-**2 · Excluded.** The sentence: “23 resolved for this agent and not delivered, each with its reason.” One table, Type · SteeringFrame · Source · Reason · Tokens, with the injection point under each body. Reason is a mono badge from the closed vocabulary, with the numbers that decided it under it:
+**2 · Excluded.** The sentence: “24 resolved for this agent and not delivered, each with its reason.” One table, Type · SteeringFrame · Source · Reason · Tokens, with the injection point under each body. Reason is a mono badge from the closed vocabulary, with the numbers that decided it under it:
 
 | Reason | Demo count | What the line under it says |
 |---|---|---|
@@ -51,9 +51,9 @@ The agent header and the tab bar are as `agent.md` specifies, with Steering sele
 | `superseded` | 1 | “replaced by ctx.platform.safari-e2e-flake, published 2026-09-02” |
 | `unapproved_digest` | 1 | “Its digest changed on 2026-09-09 after Priya Natarajan approved 1.3.2. Nobody has approved the new one.” |
 
-A withheld skill's body reads “Withheld before ranking. The agent is told the count and the reason, never the name.” The withheld mobile skill's scope line says “This run works in a-intel/platform” on a tab that resolves no run; a build says this agent, as the other scope lines do. The table shows six rows and **Show all 23**. With nothing excluded: “Nothing was excluded.” With a type picked and none of it excluded: “Nothing of this type was excluded.”
+A withheld skill's body reads “Withheld before ranking. The agent is told the count and the reason, never the name.” The withheld mobile skill's scope line says “This run works in a-intel/platform” on a tab that resolves no run; a build says this agent, as the other scope lines do. The table shows six rows and **Show all 24**. With nothing excluded: “Nothing was excluded.” With a type picked and none of it excluded: “Nothing of this type was excluded.”
 
-**3 · Sources.** The sentence: “26 sources reach this agent, each managed where it lives.” One table, Source · Emits here · Frames · Managed in, one row per source. Source is the kind, the id as a link and the version. Emits here is the type badges the source emits for this agent. Frames is the count of its frames in section 1, and the counts sum to 44. Managed in is Steering, Tools or Agents. A toolbelt is one row (five belts, 13 capability frames among them), and a skill whose description line and files both arrive is one row. List controls: “All · Managed in” and “All · Emits here” facets, the second offering one type per option, Rows (5, 10, 25, 50, All) and a pager (“1–10 of 26”).
+**3 · Sources.** The sentence: “26 sources reach this agent, each managed where it lives.” One table, Source · Emits here · Frames · Managed in, one row per source. Source is the kind, the id as a link and the version. Emits here is the type badges the source emits for this agent. Frames is the count of its frames in section 1, and the counts sum to 44. Managed in is Steering, Tools or Agents. A toolbelt is one row (five toolbelts, 13 capability frames among them), and a skill whose description line and files both arrive is one row. List controls: “Any managed in” and “Any emits here” facets, the second offering one type per option, Rows (5, 10, 25, 50, All) and a pager (“1–10 of 26”).
 
 The tab opens no dialog. Every link leaves for the page that manages the source, or for the Compiler.
 
@@ -70,9 +70,9 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 | Source, version and frame hash | `srcCell()`, `frameOf()` | `source.kind`, `source.id`, `source.version`, `hash` | None on a frame. A Steering record's own fields ship: version, checksum, commit, path (`list_records` at `context.records.list.ts:16`, `get_record` at `context.records.get.ts:126`) | ❌ |
 | Force and tokens | `it.force`, `it.tok` | `force`, `token_cost` | On `steering.manifest` items (`wire.ts:643-654`) | 🟡 |
 | Session-start prefix meter | `E.prefixTok`, `E.prefixCap` | The prefix cap and what the prefix spends | The assembler's budget is 2,000 tokens, sized to the smallest harness limit (`packages/steering-assembler/src/assemble.ts:100`); the manifest records `budget_tokens` and `spent_tokens` (`wire.ts:666-677`). The design's cap is 16 KiB, 4,096 tokens | 🟡 |
-| Volatile selection meter and Prompt submit frames | `E.volatileTok`, `E.volatileCap` | A volatile selection ranked for the brief at prompt submit | The shipped assembler builds the session-start prefix only; `may` and `info` items are cut as `tier` (`assemble.ts:59-60`) | ❌ |
+| Volatile selection meter and Prompt submit frames | `E.volatileTok`, `E.volatileCap` | A per-prompt selection ranked for the brief at prompt submit | The shipped assembler builds the session-start prefix only; `may` and `info` items are cut as `tier` (`assemble.ts:59-60`) | ❌ |
 | Checkout files frames | `M.skills`, `SOURCES.bundles` | Skill bundles synced into the checkout | Skill sync and bundles are future-only on Sources | ❌ |
-| Tool list frames | `beltOf()` | One `capability` frame per tool the belt shows | The belt ships (`get_agent_toolbelt`, `agent.toolbelt.get.ts:94`); capability frames do not | ❌ |
+| Tool list frames | `beltOf()` | One `capability` frame per tool the toolbelt shows | The toolbelt ships (`get_agent_toolbelt`, `agent.toolbelt.get.ts:94`); capability frames do not | ❌ |
 | Exclusions with reason `tier`, `over_budget`, `superseded` | `mapCut()`, `XR` | Exclusion reasons | Recorded on `steering.manifest` as `tier`, `budget` and `superseded` (`wire.ts:641`) | 🟡 |
 | Other exclusion reasons | `XR` | The closed vocabulary of the wedge spec | `out_of_scope` and `unapproved_digest` for skills only, in `preview_skill_search` (`skill.search.preview.ts:13`). The rest are not recorded | ❌ |
 | Sources table | `resolveEnvelope().sel` grouped by source | The sources that reach the agent, with what each emits | Steering records ship through `list_records`; ADRs and the product vision need `.oxagen/sources.toml`, which does not exist; memory ships through `list_memories` (`agent.memory.list.ts:24`); policy gates ship on Tools › Policy; no read joins them per agent | 🟡 |
@@ -93,13 +93,13 @@ The section 1 mark covers everything inside it: the standing brief, **Open in th
 ## Functionality
 
 - One resolver builds this tab, the Compiler and the Decision trace (`resolveEnvelope()`), so the same agent, brief and sources give the same frames and the same exclusions in all three.
-- The tab resolves the standing brief. A work order's brief changes the volatile selection, so a run's envelope can differ from this one in Prompt submit, and it adds the Prompt frames of the work order's send and any Model request steer.
-- Frames arrive in type order, then force, then id. Force decides between the prefix and the volatile selection; type says what the frame is for.
+- The tab resolves the standing brief. A work order's brief changes the per-prompt selection, so a run's envelope can differ from this one in Prompt submit, and it adds the Prompt frames of the work order's send and any Model request steer.
+- Frames arrive in type order, then force, then id. Force decides between the prefix and the per-prompt selection; type says what the frame is for.
 - A frame whose hash does not match its source version is excluded as `steering_drift` and raises an incident.
 - An exclusion is deterministic. It names a reason from the closed vocabulary and the numbers that decided it.
 - Nothing is authored here. A source row links to the page that manages the source, where its versions and every frame it emits are listed. A frame row links to its source at the version it names.
 - A skill reaches the agent twice: its description line competes at Prompt submit as a `procedure`, and its files arrive in Checkout files. Both frames name the same source, so the Sources table lists the skill once.
-- The type strip filters this agent's frames. The mockup keeps the pick when another agent's Steering tab opens (`S.ftype.ag` in `dtType()` is not per agent); a build resets it with the agent, as the belt search does.
+- The type strip filters this agent's frames. The mockup keeps the pick when another agent's Steering tab opens (`S.ftype.ag` in `dtType()` is not per agent); a build resets it with the agent, as the toolbelt search does.
 - A delegation frame appears for each active mandate the agent holds, in Session start (see `agent-permissions.md`). A harness's own tools, such as Bash in Claude Code, are not frames.
 
 ## States
@@ -120,8 +120,8 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More h
 - A capability that resolves an agent's envelope for a brief without starting a run (#3879).
 - Frame types and per-frame provenance (source kind, id, version, hash, injection point) on `steering.manifest`.
 - `.oxagen/sources.toml` and the vision and ADR source kinds (an ADR beside ADR-093).
-- A volatile selection at prompt submit, and the exclusion reasons past `tier`, `budget` and `superseded`.
-- Capability frames for the belt and for skill entrypoints, and skill bundles synced into the checkout.
+- A per-prompt selection at prompt submit, and the exclusion reasons past `tier`, `budget` and `superseded`.
+- Capability frames for the toolbelt and for skill entrypoints, and skill bundles synced into the checkout.
 - A standing brief per agent, or a rule for which brief the tab resolves.
 - The prefix cap: the design reads 16 KiB (4,096 tokens), and the shipped assembler caps the prefix at 2,000 tokens to fit the smallest harness limit. One of them changes, by an ADR.
 

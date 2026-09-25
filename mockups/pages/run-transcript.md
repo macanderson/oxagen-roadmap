@@ -47,13 +47,13 @@ There is no playback transport: no play, no pause, no step, no speed and no posi
 
 A `TodoWrite` call is a tool row ("6 items · plan version 1", output "Todos updated"). The Decision trace reads the same calls as plan versions.
 
-A parked call carries a line under it saying the call is held at the gateway for up to ten minutes and the model sees a wait with a reason, not a failure. The mockup's line ends "Approve or deny from the card under Governed actions."; that tab no longer exists, and a build names the Approvals drawer and the frame. The recall row's second chip reads "open the Context tab" in the mockup and opens the Decision trace; a build labels it by where it goes.
+A parked call carries a line under it saying the call is held at the gateway for up to ten minutes and the model sees a wait with a reason, not a failure. The mockup's line ends "Approve or deny it from the card under Governed actions."; that tab no longer exists, and a build names the Approvals drawer and the frame. The recall row's second chip reads "open the Context tab" in the mockup and opens the Decision trace; a build labels it by where it goes.
 
-**Under the feed**, the note: "The transcript is what the agent showed its operator. The gateway’s own frames sit behind the ⚖ chips. Thinking is the text a provider returned, labelled as that. Oxagen has no access to a model’s hidden reasoning."
+**Under the feed**, the note: "The transcript is what the agent showed its operator. Select ⚖ to see what the gateway recorded."
 
-**Empty results.** "no failed calls in this run." under the errors filter, "nothing matches this search." under a query, and "nothing to show with these filters." when the chips hide every row.
+**Empty results.** "No failed calls in this run." under the errors filter, "Nothing matches this search." under a query, and "Nothing to show with these filters." when the chips hide every row.
 
-**A compacted run** shows, above the tools row: "**Compacted.** This transcript is rendered from the archive segment; the frames left the graph after the hot window and nothing was recomputed."
+**A compacted run** shows, above the tools row: "**Compacted.** This transcript is read from the archive. Its frames were moved out of the live record, and nothing was recomputed."
 
 **Dialogs this tab opens:** `frame` (every "fr N" chip and every ⚖ chip), and the run dialogs from the header (`run.md`).
 

@@ -30,10 +30,10 @@ Agents replaces the population half of the Fleet page (D3). Runs are listed unde
 |---|---|---|---|
 | Live now | Live runs in this workspace, counted by `wsRunCounts()`: each run's own status, plus a workflow stage run that only its work order records. The same count Work uses | “6 parked on a person · 68 agents registered”. The parked clause appears only when a run is parked; the agent count is every agent registered in the workspace | Work › Work orders (`#/a-intel/core-platform/work/orders`) |
 | Waiting on you | Pending approvals whose run is in this workspace, or that name no run | “approvals in the drawer”, singular at one | The Approvals drawer |
-| Spend against budget | The workspace budget's used share, as a percent | “$14,213.78 of $18,000.00 · hard · monthly”: used, limit, mode and period. With no workspace budget the number is a dash and the caption is “no workspace budget set” | Spend › Budgets |
+| Spend against budget | The workspace budget's used share, as a percent | “$95,603.33 of $122,000.00 · hard · monthly”: used, limit, mode and period. With no workspace budget the number is a dash and the caption is “no workspace budget set” | Spend › Budgets |
 | Delegations held | Active mandates held by agents in this workspace | The holders' slugs joined with commas (FinOps: “invoice-bot, cost-reporter, ledger-reconciler”), or “no agent here holds a mandate” | Nothing. Each holder's mandates are on its Permissions tab |
 
-On the demo record the tiles read 7, 7, 79% and 0.
+On the demo record the tiles read 9, 7, 78% and 0.
 
 **Registered in Core platform** panel. The heading names the workspace. The subtext follows the column set: “Each row names the reusable objects this agent holds a reference to.” on Composition, and “Each row is what this agent did and what it cost over the last 30 days.” on Operations. The panel header carries, on the right:
 
@@ -47,12 +47,12 @@ Composition columns, in order:
 | Agent | The agent card: avatar, agent key (mono), harness label |
 | Purpose | The agent's description |
 | Owner | The operator's avatar and name |
-| Steering | “N items” over “N tok”, with “ · not delivered” appended when the agent earns no hook. A dash when the agent has no standing brief to resolve |
-| Toolbelt | “N belts” over “N tools · full” or “N tools · searchable” |
+| Steering | “N records” over “N tok”, with “ · not delivered” appended when the agent earns no hook. A dash when the agent has no standing brief to resolve |
+| Toolbelt | “N tools” over “N toolbelts · All tools sent” or “N toolbelts · Searchable”, with “from role grants” in place of the toolbelt count when the agent carries no named toolbelt |
 | Runtime | The host id (mono) over the host's kind and the tier, such as “workstation · gateway”. With no host enrolled: a dash over the tier alone |
 | Principal | `prn_…`, or `prn_pending` |
 | Health | One badge, from `agentHealth()` in this order: `tamper` while a tamper incident against the agent is open, `not enrolled` when no host is enrolled, `observe` on the observe tier, `healthy` otherwise. The mockup counts resolved incidents as open, and `agentTamper()` matches an incident's scope by prefix, so `backlog-groomer-us` and `schema-guard-eu` take on the incidents of `backlog-groomer` and `schema-guard`. Five of the seven `tamper` badges in Core platform rest on resolved incidents (Triage, release-manager, stella-ci, schema-guard, schema-guard-eu). A build counts the open incidents recorded against the agent itself |
-| Activity | Runs in 30 days over “runs 30d” |
+| Activity | Runs in 30 days (“212 runs”) over “(30 days)” |
 | (unlabelled) | The row actions |
 
 Operations columns, in order:
@@ -64,25 +64,25 @@ Operations columns, in order:
 | Operator | Avatar and name |
 | Status | The lifecycle status badge |
 | Tier | One word from the ladder: `observe`, `harness`, `gateway` or `contained` |
-| Belt | The tool count over `full` or `searchable` |
-| Runs 30d | Count |
-| Spend 30d | USD |
-| Tokens 30d | Total tokens over “N% cached” |
+| Tools | The tool count over “All tools sent” (`full`) or “Searchable” (`searchable`) |
+| Runs (30 days) | Count |
+| Spend (30 days) | USD |
+| Tokens (30 days) | Total tokens over “N% cached” |
 | Mandates | A count badge, or a dash |
 | Incidents | A count badge, or 0 |
 | (unlabelled) | The row actions |
 
 The mockup's Status reads `enrolled` for every agent, including the 60 that Composition's Health marks `not enrolled`, and those agents still carry a tier. A build shows the recorded status, so Status and Health agree.
 
-**Row actions**, in both column sets: **Edit** (the agent's Source tab; the mockup opens the Overview instead), **Roles** (opens `assignrole` for that agent), **Deregister** (danger; opens `delagent`). Clicking anywhere else on a row opens the agent's Overview.
+**Row actions**, in both column sets: **Edit** (the agent's Source tab; the mockup opens the Overview instead), **Roles** (opens `assignrole` for that agent), **Retire** (danger; opens `delagent`). Clicking anywhere else on a row opens the agent's Overview.
 
-**List controls**, added by `listify()`: a search field (“Search this list”), sortable headers with `aria-sort`, facet selects derived from the columns in view (“All · Health” and “All · Runtime” on Composition, “All · Tier” and “All · Harness” on Operations), Rows (5, 10, 25, 50, All; 10 by default) and a pager (“1–10 of 68”). The Runtime facet lists each host and a bare dash for the agents with no host; a build words that option as no host. The Harness facet lists the harness labels, so it carries the fixture values the Harness data-source row flags.
+**List controls**, added by `listify()`: a search field (“Search this list”), sortable headers with `aria-sort`, facet selects derived from the columns in view (“Any health” and “Any runtime” on Composition, “Any tier” and “Any harness” on Operations), Rows (5, 10, 25, 50, All; 10 by default) and a pager (“1–10 of 68 (page 1 of 7)”). The Runtime facet lists each host and a bare dash for the agents with no host; a build words that option as no host. The Harness facet lists the harness labels, so it carries the fixture values the Harness data-source row flags.
 
-**Panel note**, verbatim: “An agent has one principal and runs on one runtime. Its steering, its toolbelts and its tools are workspace objects it refers to, so changing one changes every agent that refers to it.”
+**Panel note**, verbatim: “An agent has one principal and runs on one runtime. Its steering, its toolbelts, and its tools are workspace objects it refers to, so changing one changes every agent that refers to it.”
 
 **Dialogs this page opens.**
 
-- `steerfleet`, titled “Steer the fleet”. A field labelled “Agents · 68 of 68 selected” with **All** and **None**, then one checkbox row per agent in the workspace, every one selected by default. A row shows the agent card with its run in flight (“run_01K5RS7M2E8FJ3QW · turn 7 · Cut 4.11.0 release notes”) and the run's status, or “no run in flight · reads this at its next model call” and an `idle` badge. The hint under the list: “Every agent in Core platform, selected by default. Steering the fleet is a grant you hold by role, not a default.” **Steering text** is a textarea filled with “Skip the mobile repo this cycle; 4.11.0 is platform only.” **Delivery** shows **At the boundary** (“Each agent finishes the turn it is on, then reads this before its next model call. Nothing in flight is cut. Idle agents read it at their next run.”) and an **Interrupt** switch (`role=switch`). Two hints follow: “Interrupt cuts the call in flight at the proxy on the gateway and contained tiers. On the harness tier a steer lands at the next checkpoint.” and “Recorded per run as a control.steer frame attributed to you.” A note closes the body: “Oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.” The footer reads “68 agents · 12 in flight · at the boundary” with **Cancel** and **Steer** (gold). With Interrupt on, the mode reads “Interrupt now”, the footer ends “interrupt” and the send button is **Send & Interrupt** (danger). **Steer** is disabled with no agent selected, and an empty text is refused with “A steer needs text. It is what the agent reads.”
+- `steerfleet`, titled “Steer the fleet”. A field labelled “Agents · 68 of 68 selected” with **All** and **None**, then one checkbox row per agent in the workspace, every one selected by default. A row shows the agent card with its run in flight (“run_01K5RS7M2E8FJ3QW · turn 7 · Cut 4.11.0 release notes”) and the run's status, or “no run in flight · reads this at its next model call” and an `idle` badge. The hint under the list: “Every agent in Core platform, selected by default. Steering the fleet is a grant you hold by role, not a default.” **Steering text** is a textarea filled with “Skip the mobile repo this cycle; 4.11.0 is platform only.” **Delivery** shows **At the boundary** (“Each agent finishes the turn it is on, then reads this before its next model call. Nothing in flight is cut. Idle agents read it at their next run.”) and an **Interrupt** switch (`role=switch`). Two hints follow: “Interrupt cuts the call in flight at the proxy on the gateway and contained tiers. On the harness tier a steer lands at the next checkpoint.” and “Recorded per run as a control.steer frame attributed to you.” A note closes the body: “oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.” The footer reads “68 agents · 12 in flight · at the boundary” with **Cancel** and **Steer** (gold). With Interrupt on, the mode reads “Interrupt now”, the footer ends “interrupt” and the send button is **Send & Interrupt** (danger). **Steer** is disabled with no agent selected, and an empty text is refused with “A steer needs text. It is what the agent reads.”
 - `deliveryreport` opens when the steer is sent. Title: the counts (“0 applied, 67 queued, 1 undelivered”). Subtitle: “Delivery report · 68 recipients · sent <time> · at the boundary”. Three stat boxes (Applied, Queued, Undelivered), the text as sent with its digest and token count, and a table: Agent and run · Status · Mode used · Time · Why. `applied` is the only success; `expired`, `cancelled` and `failed` count as undelivered. A recipient behind an armed kill switch, a muted agent, an agent that is not enrolled, and an `observe`-tier run are refused before anything is queued, each with its reason.
 - `wz`, the agent wizard, titled “Create an agent”, with five steps: Describe, Identity, Definition, Toolbelt, Pull request. It ends on a pull request that adds `.oxagen/agents/<slug>.toml`. Its spec is `docs/creation-spec.md`.
 - `assignrole`, titled “Assign a role”, for the row's agent: the agent-kind roles, each marked held where the agent holds it, and the line that effective permission stays the agent's roles intersected with its operator's grants.
@@ -90,7 +90,7 @@ The mockup's Status reads `enrolled` for every agent, including the 60 that Comp
 
 New agent is not Register agent. Register wraps an agent that already runs; New agent writes one that does not exist yet. Both end on a pull request, from opposite ends.
 
-**Shell.** The sidebar holds the organization and workspace switchers, the Workspace nav (Work, Agents, Tools, Steering, Runtimes, Spend, Repositories), the Organization nav (Organization, Billing, Audit), and at its foot the Stella launcher, the line “278 agents · shared plane” and the connection badge. Agents is lit and carries no count. The top bar holds the menu button, the breadcrumbs (Anderson Intelligence Corp. / Core platform / Agents), “Search or run an action” with ⌘K, notifications (`aria-label` “Notifications, 4 unread”), the Approvals button (`aria-label` “Approvals, 17 waiting”) that opens the drawer, and the account avatar.
+**Shell.** The sidebar holds the organization and workspace switchers, the Workspace nav (Work, Agents, Tools, Steering, Runtimes, Spend, Repositories), the Organization nav (Organization, Billing, Audit), and at its foot the Stella launcher, the line “278 agents in this organization” and the connection badge. Agents is lit and carries no count. The top bar holds the menu button, the breadcrumbs (Anderson Intelligence Corp. / Core platform / Agents), “Search or run an action” with ⌘K, notifications (`aria-label` “Notifications, 4 unread”), the Approvals button (`aria-label` “Approvals, 17 waiting on you across all workspaces”) that opens the drawer, and the account avatar.
 
 ## Data sources
 
@@ -108,13 +108,13 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. The mockup collection is
 | Status | `AGENTS` `status` | `list_agents` `status`: `unenrolled`, `enrolled`, `suspended`, `retired` | `agent.list.ts:34-48`, `:75` | ✅ |
 | Tier | `AGENTS` `tier` | `list_agents` `enforcementTier`, the tier the agent's latest root wrapped session recorded | `agent.list.ts:52-58`, `:78-83` | ✅ |
 | Steering column | `STG_PREVIEW` via `agentSteering()` | The agent's envelope for its standing brief: SteeringFrames and tokens | No capability resolves an envelope without a run (#3879). `get_steering_deliveries` reports included and cut counts per recent run (`context.steering.deliveries.ts:6`) | ❌ |
-| Toolbelt column, belts | `TOOLBELTS`, `TOOLBELT_ASSIGN` via `beltsOfAgent()` | A stored toolbelt and its assignments | No toolbelt table exists. The belt is computed per agent | ❌ |
-| Toolbelt column and Belt, tool count and presentation | `belt`, `beltMode`, `beltTotal()` | `get_agent_toolbelt` `tools` and `presentation.mode` | `agent.toolbelt.get.ts:94-158`. `list_agents` leaves `beltSize` null (`agent.list.ts:84-85`), so a row needs one belt read per agent | 🟡 |
+| Toolbelt column, toolbelts | `TOOLBELTS`, `TOOLBELT_ASSIGN` via `beltsOfAgent()` | A stored toolbelt and its assignments | No toolbelt table exists. The toolbelt is computed per agent | ❌ |
+| Toolbelt and Tools columns, tool count and presentation | `belt`, `beltMode`, `beltTotal()` | `get_agent_toolbelt` `tools` and `presentation.mode` | `agent.toolbelt.get.ts:94-158`. `list_agents` leaves `beltSize` null (`agent.list.ts:84-85`), so a row needs one toolbelt read per agent | 🟡 |
 | Runtime column | `RUNTIMES` via `agentRuntime()` | `list_agents` `host`, `hosts`; `list_tacho_hosts` | `agent.list.ts:133-136`; `tacho.host.list.ts:6`. A host records its platform, OS and harnesses but no kind such as workstation or CI runner (`packages/oxagen/src/tacho/schemas.ts:50-124`) | 🟡 |
 | Health | `agentHealth()` over `INCIDENTS`, `enrolled` and `tier` | Derived from `status`, `enforcementTier` and `tamperIncidents` (open tamper incidents) | `agent.list.ts:122-125` | ✅ |
-| Activity, Runs 30d | `runs30` | `list_agents` `runs30d` | `agent.list.ts:86-87` | ✅ |
-| Spend 30d | `spend30` | `list_agents` `spend30d`; `get_spend` grouped by agent | `agent.list.ts:88-94` sums wrapped sessions, `client_attested` only; gateway-observed spend is in `get_spend` (`spend.get.ts:34`) | 🟡 |
-| Tokens 30d and cached share | `agentTok(a)` | `list_agents` `tokens30d` (`total`, `cacheReadRate`) | `agent.list.ts:95-116`, wrapped sessions only | 🟡 |
+| Activity, Runs (30 days) | `runs30` | `list_agents` `runs30d` | `agent.list.ts:86-87` | ✅ |
+| Spend (30 days) | `spend30` | `list_agents` `spend30d`; `get_spend` grouped by agent | `agent.list.ts:88-94` sums wrapped sessions, `client_attested` only; spend observed by gateway is in `get_spend` (`spend.get.ts:34`) | 🟡 |
+| Tokens (30 days) and cached share | `agentTok(a)` | `list_agents` `tokens30d` (`total`, `cacheReadRate`) | `agent.list.ts:95-116`, wrapped sessions only | 🟡 |
 | Mandates | `a.mandates` | `list_agents` `mandates` | `agent.list.ts:117-121` | ✅ |
 | Incidents | `tamperCount(a)` over `INCIDENTS` | `list_agents` `tamperIncidentsRecorded`; `list_incidents` | `agent.list.ts:126-130`; `tacho.incident.list.ts:66` | ✅ |
 | `.oxagen/agents/ @ <commit>` | `a.commit` | The commit of the definitions of record | `get_agent` `definition.commitSha`, one agent at a time (`agent.get.ts:75-89`); no list field | 🟡 |
@@ -129,16 +129,16 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. The mockup collection is
 The view carries no `data-future` mark, and the catalog gives it no future story. Two fields the platform cannot back today are therefore unmarked in the design:
 
 - **Steering** (Composition). A per-agent count of SteeringFrames needs a capability that resolves an envelope without a run (#3879). A build renders the cell as not recorded until that contract ships.
-- **Toolbelt**, the “N belts” line (Composition). Named, stored toolbelts do not exist; the belt is computed per agent. A build shows the computed tool count from `get_agent_toolbelt` and renders the belt count as not recorded.
+- **Toolbelt**, the “N toolbelts” line (Composition). Named, stored toolbelts do not exist; the toolbelt is computed per agent. A build shows the computed tool count from `get_agent_toolbelt` and renders the toolbelt count as not recorded.
 
 ## Functionality
 
 - The tiles are rollups of records a build can read. Live now and the Work backlog read one count (`wsRunCounts()`), so the two pages cannot disagree about what is live. Waiting on you counts the same pending approvals the Approvals drawer lists for this workspace.
 - Both column sets read the same agent records. Switching changes which columns render and never which agents are listed, and neither set shows a number the other contradicts.
 - Every Composition cell names a reusable object and states nothing the registry that owns it states. The row opens the agent, whose Overview links out to Tools, Steering or Runtimes.
-- Assigning a toolbelt is not a permission. The belt says what an agent can reach; its roles, mandates and budgets say what it may do. A call has to pass both.
+- Assigning a toolbelt is not a permission. The toolbelt says what an agent can reach; its roles, mandates and budgets say what it may do. A call has to pass both.
 - Steer sends one `steer` command per selected agent, addressed to its live runs, and one per idle agent for its next run. Oxagen records each as a `control.steer` frame and delivers the text as an `invocation` SteeringFrame whose provenance is the command id and the digest of the text. It never runs the text as an instruction.
-- New agent writes a pull request that adds `.oxagen/agents/<slug>.toml`; nothing is written to Postgres until the agent is registered after merge. Register agent mints the identity of an agent that already runs.
+- New agent writes a pull request that adds `.oxagen/agents/<slug>.toml`; nothing is written to the database until the agent is registered after merge. Register agent mints the identity of an agent that already runs.
 - Deregister retires the principal and never deletes it, so its runs keep their identity. Removing the definition file is a pull request.
 - The Health cell, the Incidents column and the agent's Activity tab read the same incident record the Audit page reads.
 
@@ -158,10 +158,10 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More h
 ## Backend gaps this page depends on
 
 - An envelope per agent without a run (#3879), for the Steering column.
-- Stored toolbelts with assignments to agents, for the belt count.
-- `beltSize` on `list_agents`, so the roster does not read one belt per row.
+- Stored toolbelts with assignments to agents, for the toolbelt count.
+- `beltSize` on `list_agents`, so the roster does not read one toolbelt per row.
 - A host kind (workstation, CI runner, hosted) on the host record.
-- Gateway-observed spend and tokens rolled up per agent on `list_agents`, beside the client-attested figures it carries today.
+- Spend and tokens observed by gateway, rolled up per agent on `list_agents`, beside the figures reported by harness that it carries today.
 - Work orders, so Live now can count a stage run its work order records.
 
 ## Rules every build of this page must keep

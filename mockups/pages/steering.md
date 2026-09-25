@@ -12,7 +12,7 @@
 
 ## Job
 
-Steering answers one question for an operator: what do the agents know, and what are they told. This view is the one list of every Steering Source in the workspace: the durable material a person or an agent wrote that can steer an agent. Each row says what the source emits (its frame types), its scope, its version and hash, its status, how many agents its scope reaches, and where it is managed. A kind filter replaces the Library shelves.
+Steering answers one question for an operator: what do the agents know, and what are they told. This view is the one list of every Steering Source in the workspace: the durable material a person or an agent wrote that can steer an agent. Each row says what the source emits (its frame types), its scope, its version and hash, its status, how many agents its scope reaches, and where it is managed. A kind filter replaces the Library sections.
 
 The list holds sources and never frames. A SteeringFrame is what the assembler resolves from a source for one run at one injection point, and it appears on the source's own page, in the Compiler, on an agent's Steering tab and in a run's Decision trace. A row here links to the source, and the source's page lists the SteeringFrames it emits (D4).
 
@@ -28,7 +28,7 @@ This spec also owns the parts every Steering tab shares: the header with its gov
 - h1: "Steering".
 - Subtext: "Every source that can steer an agent here, and the frames it emits."
 - Actions, left to right:
-  - The governance chip, "Governance: team", with the mode in mono. It opens `govmode`. It is never gold.
+  - The governance chip, "Governance: team (code-owner review)", with the mode in mono. It opens `govmode`. It is never gold.
   - The skills chip, "Skills: skl_v7", with the configuration version in mono and the title "How skills resolve in this workspace". It renders only in a workspace with skills on, and it opens `skcfg`. It is never gold.
   - **Import Markdown**, plain on every tab. It opens the Markdown import below.
   - **New source**. Gold on Sources, Assignments, Compiler and Proposals. Plain on the Pull requests view, where Merge pull request holds the gold. It opens `newsrc`.
@@ -49,7 +49,7 @@ Picking a chip writes `?kind=<kind>` into the address, and All clears it. A kind
 - Heading: "All sources", or the picked kind's label ("Steering records", "Documents", "Skills", "Agent definitions", "Instructions", "Glossary", "Memory", "Policy", "Mandates" or "Toolbelts").
 - Caption: "186 sources, 22 emitting nothing. Agents counts the agents in Core platform each source can reach by its scope." The count is singular for one source ("1 source."), and the emitting-nothing clause appears only when a listed source emits nothing.
 - The type strip, right of the heading: one frame-type badge per type the listed sources emit, with the total beside it. On All in Core platform: `goal` 1, `invariant` 1, `constraint` 47, `procedure` 81, `context` 34 and `capability` 19. Each badge carries the type's description as its title.
-- The shared list controls: "Search this list", up to three filters for columns whose values are a short list (on All sources: Scope and Managed in; on Steering records: Status, Scope and Emits), Rows (5, 10, 25, 50, All; 10 by default), a pager ("1–10 of 186") and sortable column headers.
+- The shared list controls: "Search this list", up to three filters for columns whose values are a short list (on All sources: Scope, Managed in and Emits; on Steering records: Status, Scope and Emits), Rows (5, 10, 25, 50, All; 10 by default), a pager ("1–10 of 186") and sortable column headers.
 
 Columns, in order:
 
@@ -78,7 +78,7 @@ A row opens the same address as its id link: the source's page for the kinds man
 | `memory` | Memory | `context`, at `may` or `info` | `/steering/sources/memory/<id>` (`steering-source.md`) |
 | `policy` | Policy | `constraint`, one gate notice per gate | Where its gate is edited |
 | `mandate` | Mandate | `delegation`, one per active mandate. An expired mandate emits nothing | `/agents/<slug>/permissions?delegation=<mandate>` |
-| `toolbelt` | Toolbelt | `capability`, one per tool on the belt | `/tools/toolbelts` |
+| `toolbelt` | Toolbelt | `capability`, one per tool on the toolbelt | `/tools/toolbelts` |
 
 The Core platform fixtures, by kind: 78 Steering records (62 published, 16 archived); five documents (VISION registered, ADR-014, ADR-021 and ADR-033 accepted, ADR-008 superseded by ADR-014); ten skills (six approved, `a-intel.invoice-reconciliation` out of scope, `oxagen.pdf-extract` unapproved, `a-intel.changelog-bot` and `a-intel.mobile-release-notes` withheld); 68 agent definitions; four glossary terms; seven memories (six recorded, `mem_01K5QX7C` yields), one of them, `mem_01K5R0N2`, proposed as `prp_01K5RX1N` once it reached three sayings from three runs; six policy sources; eight toolbelts. FinOps adds the workspace instructions `ins.finops.additional` and four mandates, one of them expired.
 
@@ -90,7 +90,7 @@ The Core platform fixtures, by kind: 78 Steering records (62 published, 16 archi
 
 - Title "Governance mode · Core platform", subtitle ".oxagen/rules/governance.toml on a-intel/platform".
 - Three cards in one column. `solo`: "The author may merge their own. One person, or a repository nobody else reviews." `team`: "A code-owner review is required. What a missing governance.toml means, and what most repositories want." `regulated`: "A named approver from a role must approve, and the promotion ledger is hash-chained. Separation of duties: the author of a record may never be its approver." The mode in force carries "· now" after its name, and the picked card is highlighted.
-- Under the cards, the file the pick would write: two comment lines saying the file is read on the production branch when a pull request is opened and again when it is merged, and that a missing file means team; then `mode = "<mode>"` and `separation_of_duties = true` for `regulated`, `false` otherwise. A build writes the comment `draftGovernanceToml` writes (`packages/oxagen/src/contracts/context.steering.shared.ts:96`). The mockup's first comment line joins the path and the sentence with a dash, which the build does not copy.
+- Under the cards, the file the pick would write: two comment lines saying the file is read on the production branch when a pull request is opened and again when it is merged, and that a missing file means team; then `mode = "<mode>"` and `separation_of_duties = true` for `regulated`, `false` otherwise. A build writes the comment `draftGovernanceToml` writes (`packages/oxagen/src/contracts/context.steering.shared.ts:96`). The mockup's first comment line joins the path and the sentence with a colon.
 - A note: "The mode is read off the file when a pull request is opened and again when it is merged, so raising it takes effect on everything already in flight. Lowering it is an org-owner action with approval, recorded as a security event."
 - Footer: Cancel and **Open the pull request** (gold). Confirming reports "Pull request opened on a-intel/platform: .oxagen/rules/governance.toml sets mode = <mode>. It takes effect on merge for everything already in flight; nothing else in Oxagen writes that file." Picking the mode in force reports "Governance mode is already team; nothing to change."
 
@@ -107,7 +107,7 @@ The Core platform fixtures, by kind: 78 Steering records (62 published, 16 archi
 - Four cards, each with its action word:
   - Steering record, "A rule, constraint, procedure, fact or preference in .oxagen/rules/. It publishes when its pull request merges." **Write one** opens the record wizard ("New Steering record").
   - Document, "Name a document, such as docs/VISION.md or an ADR, in .oxagen/sources.toml, and say which sections emit which frame types." **Register one** opens `srcreg`.
-  - Skill, "A folder under .oxagen/skills/ with skill.toml, SKILL.md, references and optional entrypoints. Oxagen describes an entrypoint and never runs it." **Add one** opens the skill wizard ("Add a skill").
+  - Skill, "A folder under .oxagen/skills/ with skill.toml, SKILL.md, references and optional entrypoints. oxagen describes an entrypoint and never runs it." **Add one** opens the skill wizard ("Add a skill").
   - Glossary term, "One term the way this workspace uses it, in .oxagen/ontology/." **Define one** opens `ontnew` ("Define a glossary term").
 - A note: "An agent appends memory, and Import Markdown writes it from a file. A memory becomes a Steering record only through a proposal. Policy, mandates and toolbelts are managed in Tools and on the agent’s Permissions tab."
 - Footer: Cancel. Each wizard ends on a pull request against the main repository. `docs/creation-spec.md` specifies the wizards.
@@ -115,7 +115,7 @@ The Core platform fixtures, by kind: 78 Steering records (62 published, 16 archi
 **`srcreg`**, opened by Register one.
 
 - Title "Register a document", subtitle ".oxagen/sources.toml on a-intel/platform".
-- Lead: "A document emits frames only from the sections this file names. Oxagen reads the declared structure and never asks a model what a document means."
+- Lead: "A document emits frames only from the sections this file names. oxagen reads the declared structure and never asks a model what a document means."
 - The registration as TOML: a `[[source]]` with `id = "ADR-034"`, `kind = "adr"` and its path, and two `[[source.section]]` tables: Decision emits `procedure` at `should`, and Invariants emits `invariant` with `enforced_by = "gate.never-merge"`.
 - A note: "Last changed by a-intel/platform#431, merged 2026-09-02. An invariant needs a section the ADR declares as its invariants, and a superseded ADR emits nothing."
 - Footer: Cancel and **Open the pull request** (gold), which reports "Pull request opened on a-intel/platform to register ADR-034. It emits nothing until that merges."
@@ -170,7 +170,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. The mockup collection is
 | Memory rows | `MEMORY` | `:AgentMemory` in Neo4j | `list_memories` returns the body (`lesson`), class, kind, citation count and creation time (`agent.memory.list.ts:25`, `agent.memory.model.ts:98`). No force, scope, run, hash or yield (#3904) | 🟡 |
 | Policy rows (gate notices) | `GATES`, `gateHome()` | One notice per gate that reaches the workspace | The gates ship (`list_kill_switches`, `kill_switch.list.ts:29`; `list_mandates`, `mandate.list.ts:29`; decision rules in workspace settings). No capability produces a gate notice (#3880) | ❌ |
 | Mandate rows | `MANDATES` | The mandate ledger | `list_mandates` (`mandate.list.ts:29`) | ✅ |
-| Toolbelt rows | `TOOLBELTS`, `TOOLBELT_ASSIGN` | Named belts and their assignments | None. A belt exists only as the computed per-agent list of `get_agent_toolbelt` (`agent.toolbelt.get.ts:95`) | ❌ |
+| Toolbelt rows | `TOOLBELTS`, `TOOLBELT_ASSIGN` | Named toolbelts and their assignments | None. A toolbelt exists only as the computed per-agent list of `get_agent_toolbelt` (`agent.toolbelt.get.ts:95`) | ❌ |
 | Emits column and type strip | derived per kind in `steeringSources` | Frame types on each SteeringFrame | `steering.manifest` items carry id, kind, force, tokens, outcome and reason, and no type (`packages/tacho/src/wire.ts:626-697`) | ❌ |
 | Version and hash | per kind in `steeringSources` | The source version and the source's hash | A record's commit and checksum ship through `list_records`. A skill's version and digest ship through `get_skill_config`. The other kinds carry none | 🟡 |
 | Agents (reach) | `reachOf()` over `AGENTS` | The source's scope against the agent registry | The agents ship (`list_agents`, `agent.list.ts:142`). A workspace or repository record's reach resolves from its sharing scope. Agent, org and named-agent scopes do not exist in the contracts | 🟡 |
@@ -207,7 +207,7 @@ These fields are future-only in `macanderson/oxagen` and carry no mark in the mo
 - Every source changes by a pull request against the main repository, or by its own governed write (a memory an agent appends, a mandate granted on Agent › Permissions). New source offers the four kinds a person writes here. Memory has no card: it becomes a Steering record only through a proposal. The Markdown import is the one exception to the pull request rule. Its records open pull requests like any other, and the memories it accepts are written when it publishes, at `may` or `info`, with no pull request.
 - Changing the governance mode writes `.oxagen/rules/governance.toml` through `set_governance_mode`, never a settings row. The chip reads the file.
 - The skills chip reads the published configuration. Changing it is a pull request through `update_skill_config`.
-- Old addresses land here: `/steering/library` on All, each Library shelf on its kind, and every `/skills` address on `?kind=skill`.
+- Old addresses land here: `/steering/library` on All, each Library section on its kind, and every `/skills` address on `?kind=skill`.
 
 ## States
 

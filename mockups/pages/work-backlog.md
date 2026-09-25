@@ -14,11 +14,11 @@
 
 Every open work item in the workspace, whether it is ready, and where it went. The Backlog is the one place work leaves Oxagen for an agent: you select ready work items and send them, in a work order, to an agent you operate or to a published workflow of such agents. Work opens on this tab, and the workspace root lands here.
 
-A work item arrives from a connected issue provider, from a finding a person picked up, or from a person writing it in Oxagen. It is ready when a person certifies its definition of done. The Intake dialog (`work-intake.md`) connects the providers.
+A work item arrives from a connected issue tracker, from a finding a person picked up, or from a person writing it in Oxagen. It is ready when a person certifies its definition of done. The Intake dialog (`work-intake.md`) connects the issue trackers.
 
 ## What is on the page
 
-**Header.** Eyebrow: the workspace name (“Core platform”). h1 “Work”. Subtext “What the agents work on, and what waits on you.” On the Backlog tab the actions are **Intake** (plain; opens the Intake dialog on Providers) and **Create work order and send to agent** (gold, with the agents icon and a ▾). The gold button is disabled with the title “Select one or more ready work items” until a work item is selected. It opens the send menu.
+**Header.** Eyebrow: the workspace name (“Core platform”). h1 “Work”. Subtext “What the agents work on, and what waits on you.” On the Backlog tab the actions are **Intake** (plain; opens the Intake dialog on Trackers) and **Create work order and send to agent** (gold, with the agents icon and a ▾). The gold button is disabled with the title “Select one or more ready work items” until a work item is selected. It opens the send menu.
 
 **Tabs** (`role=tablist`, `aria-label` “Work”), each a path segment: Backlog `7` · Work orders `1` · Workflows · Findings `36`. Backlog counts the definitions of done waiting on a person (drafts and changed certifications). Work orders counts the work orders waiting on you to accept. Findings counts the open findings nobody has picked up. Workflows carries no count. A tab with nothing waiting shows no number. Backlog is selected.
 
@@ -28,30 +28,30 @@ A work item arrives from a connected issue provider, from a finding a person pic
 |---|---|---|
 | Ready to send | 3 | “certified and unblocked”. A ready work item the graph blocks is not counted |
 | Waiting on you | 8, in the approval colour while above zero | “7 to certify · 1 to accept” |
-| In work orders | 3 | “sent to an agent or a workflow” |
-| Live now | 7 | “work orders with a live run · 6 parked on a person”. The parked clause appears only while a run is parked |
+| In work orders | 4 | “sent to an agent or a workflow” |
+| Live now | 8 | “work orders with a live run · 6 parked on a person”. The parked clause appears only while a run is parked |
 
 Live now is a button (`aria-label` “Open the work orders with a live run”) that opens the Work orders tab.
 
 **Changed banner**, while a certified work item changed upstream: the `changed` badge, “1 work item changed after certification”, “a-intel/platform#590 was edited upstream on 2026-09-10 17:44. It left ready until somebody certifies its definition of done again.”, and **Review it**, which opens that work item.
 
-**Backlog panel.** Heading “Backlog”, subtext “Only a ready work item can be selected and sent.” While a selection exists, the panel header carries the badge “N selected” and **Clear**. The shared list bar: a search field (“Search this list”), facet selects for Status, Work order and Owner (“All · Status”, “All · Work order”, “All · Owner”), and Rows (5, 10, 25, 50, All). Every column header sorts. The pager reads “1–10 of 16”.
+**Backlog panel.** Heading “Backlog”, subtext “Only a ready work item can be selected and sent.” While a selection exists, the panel header carries the badge “N selected” and **Clear**. The shared list bar: a search field (“Search this list”), facet selects for Status, Labels and Blocked by (“Any status”, “Any labels”, “Any blocked by”), and Rows (5, 10, 25, 50, All). Every column header sorts. The pager reads “1–10 of 19 (page 1 of 2)”.
 
 Columns, in order:
 
 | Column | Content |
 |---|---|
 | select | A checkbox, `aria-label` “Select <number>”. The header cell is the visually hidden word “Select” |
-| Work item | The provider’s logo as an SVG (or the Oxagen mark, titled “Written in Oxagen”, for an item written in Oxagen), the number in mono, and the subject under it |
+| Work item | The provider’s logo as an SVG (or the Oxagen mark, titled “Written in oxagen”, for an item written in Oxagen), the number in mono, and the subject under it |
 | Labels | Colour chips in the colours the Intake dialog sets |
 | Status | Dot and word: Open, In review, Blocked, Closed |
 | Blocked by | Each blocker’s number in mono as a link with its state dot (open, done, or closed without done), “none” with no blocker, and “closed as Won’t do” beside a blocker that closed without done. The provider’s Blocked status stays in the Status column, and the two are never folded into one. Outlined as future-only |
 | Owner | The mapped member with avatar. An account that is not mapped reads as its provider handle with the provider’s logo and a `not mapped`, `bot` or `requester` badge |
-| Readiness | `drafting`, `draft`, `changed`, `ready`, `in a work order`, `accepted`, `closed`. A `ready` item with an open blocker reads “blocked by #612, #618” under the badge, and one held by a queued work order reads “queued in wo_01K6TB2X” |
+| Readiness | Drafting, Needs certification, Changed since certified, Ready, In a work order, Accepted and Closed, for `drafting`, `draft`, `changed`, `ready`, `in a work order`, `accepted` and `closed`. A `ready` item with an open blocker reads “blocked by #612, #618” under the badge, and one held by a queued work order reads “queued in wo_01K6TB2X” |
 | Work order | The work order’s id as a link, with `live` beside it while one of its runs is live, or a dash. Outlined as future-only |
 | Updated | The provider’s update time, in mono |
 
-The demo record holds 16 rows: #482 (`in a work order`, under `wo_01K5RS7M4N`, live), WI-14 (written in Oxagen from finding `fnd_01K5RT2A`, `draft`), #612, PLAT-231 and #618 (`ready`), #633, PLAT-240, #621 and #604 (`draft`), PLAT-244 (`drafting`), #590 (`changed`), PLAT-219 (`draft`, Blocked), #599 and #587 (`in a work order`), #571 (`accepted`) and PLAT-201 (`closed`).
+The demo record holds 19 rows: #482 (`in a work order`, under `wo_01K5RS7M4N`, live), WI-14 (written in Oxagen from finding `fnd_01K5RT2A`, `draft`), #612, PLAT-231 and #618 (`ready`), #647 (`in a work order`, under `wo_01K6TC5A`, live), #640 (`ready`, blocked by #612 and #618), #644 (`ready`, queued in `wo_01K6TB2X`), #633, PLAT-240, #621 and #604 (`draft`), PLAT-244 (`drafting`), #590 (`changed`), PLAT-219 (`draft`, Blocked), #599 and #587 (`in a work order`), #571 (`accepted`) and PLAT-201 (`closed`).
 
 **List and Graph.** Two chips in the panel header (`aria-pressed`) switch the body. Graph draws the open work items by layer (`docs/work-graph-spec.md` §3): one column per layer, unblocked items in layer 0, each item a card with its logo, number, subject, readiness badge and a checkbox under the same rule as the list. A line joins each blocker to the item it blocks, in the rule colour, and the lines into a selected item in the approval colour. Gold appears nowhere in the drawing and no node is called a frame. A card opens the item. Under the drawing: “Unblocked tasks sit in layer 0. A line joins each blocker to the task it blocks.” On a phone the Graph is a list by layer with a “Layer N” heading between the groups. The demo record draws #640 in layer 1 after #612 and #618, and #644 in layer 1 after #633. Outlined as future-only.
 
@@ -76,7 +76,7 @@ A selected row is tinted (`aria-selected`). A row click opens the work item (`wo
 
 **Create work order and send to agent** opens a menu under the button (`role=menu`, `aria-label` “Send to”). Header “Send 2 work items to”, sub “agents where you are the registered operator”. A search field (“Search agents and workflows”) narrows both groups.
 
-- **Agents you operate**: every agent in the workspace whose operator is the signed-in person. Each row (`role=menuitem`) shows the harness mark as an SVG, the avatar, the name, “<harness> · <host>” (“no host” when none) and the tier badge. The seven agents the demo seeds come first (Bug fixer, Validator, Documenter, Architect, Stella CI, Release manager, Triage), then the rest by name. Twelve are listed, then “16 more. Type to narrow.” With no match: “No agent you operate matches.”
+- **Agents you operate**: every agent in the workspace whose operator is the signed-in person. Each row (`role=menuitem`) shows the harness mark as an SVG, the avatar, the name, “<harness> · <host>” (“no host” when none) and the tier badge. The seven agents the demo seeds come first (Bug fixer, Validator, Documenter, Architect, stella CI, Release manager, Triage), then the rest by name. Twelve are listed, then “16 more. Type to narrow.” With no match: “No agent you operate matches.”
 - **Workflows**: every published workflow, each with its stages’ harness marks in order and “4 stages then you”. A workflow still in a pull request is not listed. With no match: “No published workflow matches.”
 - An agent somebody else operates is never listed (the demo’s Docs writer, operated by Priya Natarajan). Picking a row opens the work order dialog.
 - The design adds a checkbox on each row and **Continue** under the lists, so a send can name several targets and make one work order per target (`docs/work-graph-spec.md` §7). The mockup does not draw the checkboxes; its fixture carries a finished two-target send instead (`work-orders.md`).

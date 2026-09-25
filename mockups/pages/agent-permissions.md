@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/finops/agents/invoice-bot/permissions`, and `…/permissions?delegation=mnd_7K2ETQ4` to open the Delegation section on one mandate. Old routes that land here: `…/agents/<agent>/budgets` and `…/agents/<agent>/mandates` in place; the mockup's `#/:org/:ws/agents/<agent>/mandates/<mandate>` becomes `…/permissions?delegation=<mandate>` in place; the app's `/{org}/{ws}/mandates/{mandate}` answers a lookup 308 to `/{org}/{ws}/agents/{agent}/permissions?delegation={mandate}`, and `routes.mandate` retires. The mandate page is cut |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: D11 (a mandate is a Steering Source that emits delegation frames, managed on this tab; there is no mandate page), D5 and the Frame types row for `delegation` (never cut; the gate plane also enforces it), the Emissions row for Mandate, D17, and the Cuts row for the Mandate page. `docs/fleet-operations-ia.md` (Agents) and `docs/fleet-operations-routes.md` (Agents, Tools). ADR-059 in `macanderson/oxagen` for mandates, consequence roles and the ledger. The agent header and the tab bar are specified in `agent.md` |
+| Spec | `docs/fleet-operations-wedge.md`: D11 (a mandate is a Steering Source that emits delegation frames, managed on this tab; there is no mandate page), D5 and the Frame types row for `delegation` (never cut; the gate also enforces it), the Emissions row for Mandate, D17, and the Cuts row for the Mandate page. `docs/fleet-operations-ia.md` (Agents) and `docs/fleet-operations-routes.md` (Agents, Tools). ADR-059 in `macanderson/oxagen` for mandates, consequence roles and the ledger. The agent header and the tab bar are specified in `agent.md` |
 | Design | `mockups/src/wedge.js` → `aPermissions()`, `permDelegation()` and `mandateFrame()`; `mockups/src/engine.js` → `permRoles()`, `permBudgets()`, `permMandates()` (the no-mandate panel), `iamWire()`, `iamMoney()`, `iamChain()`, `receiptLink()`, and the dialogs `assignrole`, `budget`, `mandateedit`, `mandaterevoke`, `receipt` and `mandate`; built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
 | Storybook | `Oxagen / Agents / Permissions`: Loaded, Loaded · mobile, and Loaded · future-only fields marked |
@@ -12,29 +12,29 @@
 
 ## Job
 
-What the agent may do, as three kinds of limit on its principal: the roles it holds, the budgets it runs under, and the authority a person delegated to it. Delegation lists every mandate the agent holds with its limits, its position, its ledger and the delegation frame it emits. It replaces the mandate page. The tab never lists tools: the belt says what the model is shown, and this tab says whether a call on it survives.
+What the agent may do, as three kinds of limit on its principal: the roles it holds, the budgets it runs under, and the authority a person delegated to it. Delegation lists every mandate the agent holds with its limits, its position, its ledger and the delegation frame it emits. It replaces the mandate page. The tab never lists tools: the toolbelt says what the model is shown, and this tab says whether a call on it survives.
 
 ## What is on the page
 
 The agent header and the tab bar are as `agent.md` specifies, with Permissions selected and its count (1) equal to the mandates the agent holds. The body is Roles and Budgets side by side, then Delegation across the width.
 
-**Roles.** Subtext: “Effective permission is its own grants ∩ the invoking human's grants. Subagents can only narrow.” **Assign a role** in the header opens `assignrole`. A wire joins each held role and the operator with ∩ into the belt: `agent.finance.pay` ∩ `agent.graph.read` ∩ “Dana Okafor” (`org.billing · finops`) = “8 tool versions”, “the belt its model is shown”. Rows:
+**Roles.** Subtext: “A subagent can use only what both its own grants and the invoking person's grants allow. Subagents can only narrow.” **Assign a role** in the header opens `assignrole`. A wire joins each held role and the operator with “and” into the toolbelt: `agent.finance.pay` and `agent.graph.read` and “Dana Okafor” (`org.billing · finops`) = “8 tool versions”, “the toolbelt its model is shown”. Rows:
 
 | Row | Value | Sub-line |
 |---|---|---|
 | Each held role (`agent.finance.pay`, `agent.graph.read`) | The role's permission ids, joined with mid-dots (“mandate.draw · invoice.read”) | The role's description (“draw on a mandate; nothing without one”) |
 | Resource scope | “side_effects: read, write · repositories: a-intel/finops-agents · egress: third_party · max_hops 2” | none |
-| Spend ceiling | “$1.00 USD” over “per run, checked at each hook boundary”, then “$15.00 USD” over “per day, on reported spend” | none |
+| Spend ceiling | “$5.00 USD” over “per run, checked at each checkpoint”, then “$15.00 USD” over “per day, on reported spend” | none |
 | Can move money | A badge “1 mandate”, followed by a clause that it may move money only inside it; with no mandate, a badge “no” and a clause that a financial call is denied before dispatch | none |
 
-With no role held, the one row reads “Roles” with “none held” and a clause that the agent can reach nothing but its own run channel. A note closes the panel: “Assigning a toolbelt grants nothing. It widens what the model is shown; every call on it is still decided against these roles, the policy on the tool, and the mandate ledger.”
+With no role held, the one row reads “Roles” with “None held. It can reach only its own run channel.” A note closes the panel: “Assigning a toolbelt grants nothing. It widens what the model is shown. Every call on it is still decided against these roles, the policy on the tool, and the mandate ledger.”
 
-**Budgets.** Subtext: “Checked at each hook boundary against the spend the harness reports. A breach pauses the run at the next boundary: client-attested and fail-open. On the gateway and contained tiers the proxy enforces the ceiling before the call.” **Set budget** in the header opens `budget`. Two meters:
+**Budgets.** Subtext: “Hard limit, checked at each checkpoint against reported spend. If the harness stops reporting, the run is not paused (fail-open). On the gateway and contained tiers the proxy blocks the call before it is sent.” **Set budget** in the header opens `budget`. Two meters:
 
-- “Per run · hard”, “$1.00”, with a bar of the month's highest run against the ceiling and the caption “highest run this month $0.18 · basis: price book 2026-09 at the provider's list rate”.
-- “Per day · hard”, “$1.10 of $15.00”, with a bar and the caption “resets 00:00 UTC · mode hard · currency USD”.
+- “Per-run hard limit”, “$5.00”, with a bar of the month's highest run against the ceiling and the caption “highest run this month $3.28 · basis: price book 2026-09 at the provider's list rate”.
+- “Per-day hard limit”, “$1.10 of $15.00”, with a bar and the caption “resets 00:00 UTC · mode hard · currency USD”.
 
-Rows: Mode (“hard: checked at each hook boundary on reported spend”), On a breach (“pause at the next boundary, a policy.decision frame, and the operator notified”) and Delegation ceiling (“max_hops 2 · a subagent inherits this ceiling and may only lower it”).
+Rows: Mode (“Hard limit, checked at each checkpoint against reported spend”), On a breach (“pause at the next checkpoint, a policy.decision frame, and the operator notified”) and Delegation ceiling (“max_hops 2 · a subagent inherits this ceiling and may only lower it”).
 
 **Delegation.** Subtext: “Authority a person delegated to this agent. Each active mandate reaches it as a delegation frame, and the gate enforces the same limits on every call.” The header badge counts the active mandates (“1 active”). One block per mandate the agent holds, active or ended, newest first. The demo holds `mnd_7K2ETQ4` (active) and `mnd_5T2HVX` (expired).
 
@@ -49,8 +49,8 @@ Each block's header: the mandate id (mono), its status as a dot and a word (“a
 | Position | “$1,284.60 settled, $2,450.00 reserved, $1,265.40 left”, over a bar of settled and reserved against the period limit |
 | Tools | `stripe__create_payment@*, aws_billing__purchase_savings_plan@2` |
 | Counterparties | “allow vendor:aws, vendor:github, deny *” |
-| Approval | “above $100.00, always for moves_funds, by role:org.billing” |
-| SteeringFrame | The `delegation` type badge, the frame id `delegation:mnd_7K2ETQ4@5e271e68457e`, and its body: “monthly infrastructure invoices, PO-4471: up to $250.00 USD a call and $5,000.00 a month, stripe__create_payment@*, aws_billing__purchase_savings_plan@2, until 2026-12-31. Above $100.00 a person approves.” |
+| Approval | “above $250.00, always for moves_funds, by role:org.billing” |
+| SteeringFrame | The `delegation` type badge, the frame id `delegation:mnd_7K2ETQ4@11559f20a6b0`, and its body: “monthly infrastructure invoices, PO-4471: up to $250.00 USD a call and $5,000.00 a month, stripe__create_payment@*, aws_billing__purchase_savings_plan@2, until 2026-12-31. Above $250.00 a person approves.” |
 
 The mockup draws the SteeringFrame row on the expired `mnd_5T2HVX` too. An ended mandate emits no frame, so a build leaves that row out of an ended block.
 
@@ -65,9 +65,9 @@ The ledger. The block the address names with `?delegation=<id>` is highlighted a
 
 State is a dot and a word: settled, reserved or released. A receipt id opens the `receipt` dialog. Three of the fixture's draws ($2,450.00 reserved, $884.60 and $400.00 settled) exceed the mandate's $250.00 per-call limit, which the gate refuses before dispatch; the demo ledger needs draws inside the limit.
 
-A note closes the section: “A mandate is the only thing that lets this agent move money. Every draw reserves, then settles or releases. Its tools appear on the belt gated mandate + approval, never plain allowed.”
+A note closes the section: “A mandate is the only thing that lets this agent move money. Every draw reserves, then settles or releases. Its tools appear on the toolbelt gated mandate + approval, never plain allowed.”
 
-**No mandate.** An agent that holds no mandate shows one panel in place of Delegation: “No mandate”, subtext “Nothing in a grant, a role, or a toolbelt can substitute for one.”, the badge “cannot move money”, a paragraph that a financial call from the agent is denied before dispatch, whether or not the tool is on its belt, and before any credential is minted. Then a four-step chain: Call (“stripe__create_payment@5 · amount $1,204.18 USD”), Financial class (“moves_funds, read from the tool version's declared amount_path”), Mandate lookup (“none for a-intel.core.triage”), Decision (“denied no_mandate · mandate ledger unchanged · no credential minted”). **Request a mandate** opens `mandate`. The demo shows it on `#/a-intel/core-platform/agents/triage/permissions`.
+**No mandate.** An agent that holds no mandate shows one panel in place of Delegation: “No mandate”, subtext “Nothing in a grant, a role, or a toolbelt can substitute for one.”, the badge “cannot move money”, a paragraph that a financial call from the agent is denied before dispatch, whether or not the tool is on its toolbelt, and before any credential is minted. Then a four-step chain: Call (“stripe__create_payment@5 · amount $1,204.18 USD”), Financial class (“Moves funds, read from the tool version's declared amount_path”), Mandate lookup (“none for a-intel.core.triage”), Decision (“Blocked · no mandate · mandate ledger unchanged · no credential minted”). **Request a mandate** opens `mandate`. The demo shows it on `#/a-intel/core-platform/agents/triage/permissions`.
 
 **Dialogs this tab opens.**
 
@@ -76,7 +76,7 @@ A note closes the section: “A mandate is the only thing that lets this agent m
 - `mandateedit`, “Edit mnd_7K2ETQ4” with the agent key: “Auto-approve limit per call (USD)” (“A call above this parks for a person, and no rule elsewhere can release it.”), the per-period limit (“Monthly limit (USD)”), Valid to, and the note that lowering a limit below what is already reserved applies from the next call and that raising one needs the second approver. **Cancel** and **Save**.
 - `mandaterevoke`, “Revoke mnd_7K2ETQ4?”: what the agent can no longer do, what is reserved and released at the next boundary, what already settled and stays on the ledger, and “The ledger is kept, never deleted. A revoked mandate still answers for every draw it made.” **Cancel** and **Revoke it**. The mockup offers Change limits and Revoke on an ended mandate too; `update_mandate_limits` acts on an active mandate and `revoke_mandate` refuses one that has ended, so a build offers both on active mandates only.
 - `receipt`, “Receipt <id>”: the tool, time and agent, the decision and tier, the amount, then Who (Operator, Agent, “Run · turn · step”, and the work order it served, which the build labels Work order where the mockup says Task) and What (tool version, schema digest, input digest, the amount read from its path, the counterparty).
-- `mandate`, from Request a mandate. The mockup titles it “Grant a mandate”: Agent, Effect (commits_spend, moves_funds, changes_entitlement), Per call (USD), Per period (USD), Period, Calls per day, Counterparties allowed, Tools, Approval above (USD), Purpose, Valid from and Valid to (“Mandates expire. There is no unbounded option.”), **Cancel** and **Grant the mandate**. From this tab it carries this agent and files a request (`request_mandate`) that a holder of the consequence's role grants. The mockup pre-fills `a-intel.finops.invoice-bot` from every agent and grants directly, which is a defect.
+- `mandate`, from Request a mandate. The mockup titles it “Grant a mandate”: Agent, Effect (commits_spend, moves_funds, changes_entitlement), Auto-approve limit per call (USD), Per period (USD), Period, Calls per day, Counterparties allowed, Tools, the hint “A call that moves funds always needs approval, whatever the limit.”, Purpose, Valid from and Valid to (“Mandates expire. There is no unbounded option.”), **Cancel** and **Grant the mandate**. From this tab it carries this agent and files a request (`request_mandate`) that a holder of the consequence's role grants. The mockup pre-fills `a-intel.finops.invoice-bot` from every agent and grants directly, which is a defect.
 
 ## Data sources
 
@@ -85,13 +85,13 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 | Element | Mockup collection | Target store or contract | Backing today in macanderson/oxagen | Status |
 |---|---|---|---|---|
 | Roles held, their permissions and descriptions | `S.agentRoles` via `agentRolesOf()`, `ROLES` | `list_agent_roles`; `get_agent_role` grants | `agent.role.list.ts:38`; `agent.role.get.ts:19` | ✅ |
-| The wire's operator and belt | `PEOPLE[a.operator]`, `beltTotal()` | The delegation ceiling; `get_agent_toolbelt` | `agent.toolbelt.get.ts:130-135`, `:155` | ✅ |
+| The wire's operator and toolbelt | `PEOPLE[a.operator]`, `beltTotal()` | The delegation ceiling; `get_agent_toolbelt` | `agent.toolbelt.get.ts:130-135`, `:155` | ✅ |
 | Resource scope | fixed text | The scope a role's grants reach | Not a field on any read | ❌ |
 | Spend ceiling, per run and per day | `a.budget`, `a.budgetDay` | The definition's `budget` table: `per_run_micros`, `per_day_micros` | Parsed from the definition (`packages/oxagen/src/agent-definition-source.ts:19-31`) and signed into the host bundle as `session_limit_usd` and `daily_limit_usd` (`packages/handlers/src/lib/tacho-mandate.ts:191-212`; ADR-160 for the day) | 🟡 |
 | Can move money | `a.mandates` | Active mandates | `list_mandates` (`mandate.list.ts:28`); `list_agents` `mandates` (`agent.list.ts:117-121`) | ✅ |
 | Per run meter: highest run this month | `a.budgetUsed` | The agent's dearest run this month | Run cost is on `list_runs` rows (`run.list.ts:476`); no per-agent maximum is read | 🟡 |
 | Per day meter: spent today | `a.usedDay` | The agent's spend today | `get_spend` grouped by agent over a day range (`spend.get.ts:34`) | 🟡 |
-| Mode and On a breach | fixed text | The bundle budget's mode and what a breach does | `deriveBundleBudget` signs `enforced` or `observed` (`tacho-mandate.ts:178-212`). A pause at the next boundary and the operator notice are not recorded as described | 🟡 |
+| Mode and On a breach | fixed text | The bundle budget's mode and what a breach does | `deriveBundleBudget` signs `enforced` or `observed` (`tacho-mandate.ts:178-212`). A pause at the next checkpoint and the operator notice are not recorded as described | 🟡 |
 | Delegation ceiling `max_hops` | fixed text | A subagent hop limit | No such field | ❌ |
 | Set budget | `budget` dialog | A per-agent ceiling | `set_spend_budget` takes scope `org` or `workspace` only (`billing.budget.set.ts:55`, `billing.budget.get.ts:9`). A per-agent ceiling is written in the definition file (`commit_agent_definition`) | 🟡 |
 | Mandates: id, status, purpose, window, effect | `MANDATES` | `list_mandates`, `get_mandate`: `id`, `status`, `purpose`, `validFrom`, `validTo`, `consequenceTags` | `mandates/schemas.ts:630-655`; table `tools.mandates` (`packages/database/src/schema/tools.ts:30-99`). The starter tag is `moves_money`; the mockup's `moves_funds` and `commits_spend` are custom tags | ✅ |
@@ -155,7 +155,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More h
 - A frame (a recorded event) and a SteeringFrame (a resolved input) never share a name on screen. The SteeringFrame row is labelled as one.
 - A Steering Source and a SteeringFrame are never shown as each other. The mandate is the source; its delegation frame is shown beside it, labelled SteeringFrame, with the mandate at its grant version as its source.
 - No person is scored or ranked. The granter and the approvers are named, never graded.
-- Every enforcement claim states the tier. “Enforced” only for calls routed through Oxagen: on `harness` a budget breach is client-attested and fail-open, and the proxy enforces the ceiling before the call on `gateway` and `contained`.
+- Every enforcement claim states the tier. “Enforced” only for calls routed through Oxagen: on `harness` a budget breach is reported by the harness and fail-open, and the proxy enforces the ceiling before the call on `gateway` and `contained`.
 - Headers are rollups of the rows beneath them: the Delegation badge counts the active blocks, the Position equals the ledger's settled and reserved rows against the period limit, and the tab count equals the mandates held.
 - Every number that is money shows its currency, and the Position, the bar and the ledger are one record, never typed twice.
 - Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing. A quoted string above that breaks this rule is a mockup defect to fix, not copy to reproduce.

@@ -10459,7 +10459,7 @@ var RETENTION_TIERS=[
  ["Ledger","Database","runs, attempts, seals, attestation, counts, cost, tier, gaps","forever","412k runs"],
  ["Frames","Database","frame rows with digests, cost, policy decisions","hot window · 13 months","2.6M frames"],
  ["Bodies and segments","Object storage, write-once","encrypted bodies; per-seal archive segment, Merkle root, attestation","7 years",retainedGbText()],
- ["Control-plane audit","Database","admin actions, IAM changes, repo bindings, plane changes, key rotations","7 years","118k events"]
+ ["Control-plane audit","Database","admin actions, IAM changes, repository links, plane changes, key rotations","7 years","118k events"]
 ];
 
 /* ---- small renderers shared by the audit tabs ---- */
@@ -10512,7 +10512,7 @@ function auditEvents(){
     ["Denied",String(den),"denials are recorded and cost nothing"],
     ["By a service principal",String(svc),"Terraform, CI, exports, and the audit archive"],
     ["By an agent",String(AUDIT.filter(function(e){return auditActorKind(e.who)==="agent";}).length),"each one a governed action with a receipt"]])+
-   '<div class="panel"><div class="panel-h"><h3>Control-plane events</h3><span class="muted" style="font-size:12.5px">admin actions, IAM changes, repo bindings, plane changes, key rotations</span>'+
+   '<div class="panel"><div class="panel-h"><h3>Control-plane events</h3><span class="muted" style="font-size:12.5px">admin actions, IAM changes, repository links, plane changes, key rotations</span>'+
    '<div class="sp">'+
    '<select class="sel-sm" aria-label="Actor" onchange="act(\'Filtering is a mockup here. The API takes actor_kind.\')"><option>All actors</option><option>Humans</option><option>Agents</option><option>Services</option></select>'+
    '<select class="sel-sm" aria-label="Range" onchange="act(\'Range is a mockup here. The API takes since and until.\')"><option>Last 48 hours</option><option>Last 7 days</option><option>Last 30 days</option></select>'+

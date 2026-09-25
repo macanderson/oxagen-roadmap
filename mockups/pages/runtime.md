@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/core-platform/runtimes/mbell-mbp-16`, the pattern `#/…/runtimes/<runtime>`. Unchanged by the fleet operations wedge. In the app the segment is the enrollment's public id (`tch_…`), because the enrollment is the row the record holds, and an id the list does not hold is a 404 (`apps/app/src/features/runtimes/runtime.tsx:1-6`) |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: Unchanged (Runtimes keeps its design) and D17. `docs/fleet-operations-ia.md`: Runtimes and Repositories. `docs/mission-control-spec.md` §7.1 (the seams and the tier each earns). ADR-095 (the tier ladder) in `macanderson/oxagen`. `runtimes.md` is the list this host belongs to |
+| Spec | `docs/fleet-operations-wedge.md`: Unchanged (Runtimes keeps its design) and D17. `docs/fleet-operations-ia.md`: Runtimes and Repositories. `docs/mission-control-spec.md` §7.1 (the tiers). ADR-095 (the tier ladder) in `macanderson/oxagen`. `runtimes.md` is the list this host belongs to |
 | Design | `mockups/src/engine.js` → `pRuntimes(r)`, which renders `rtDetail(rt)` when the route names a runtime, with `rtAgents()`, `rtHealth()`, `rtWs()`, `agentCard()`, `tierBadge()` and `DLG_EXT.unenroll`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded, loading, error, access denied (no empty state) |
 | Storybook | `Oxagen / Runtimes / Runtime`: Loaded, Loading, Error and Access denied, and the same four as mobile stories. The catalog gives this view no `future` flag, so it has no future-only story |
@@ -12,7 +12,7 @@
 
 ## Job
 
-One host: what it is, the seam its hooks form, the tier that seam earns, the agents that run through it, and how to take it back out. Every agent on a host is seen through the same hooks. An agent's identity, its steering and its toolbelt are its own, and only the seam is shared.
+One host: what it is, the hooks it runs, the tier those hooks earn, the agents that run through it, and how to take it back out. Every agent on a host runs through the same hooks. An agent's identity, its steering and its toolbelt are its own, and only the hooks and their tier are shared.
 
 The fleet operations wedge left this page's design alone. `runtime` is now a unique view with its own spec, split out of `runtimes.md`.
 
@@ -27,38 +27,38 @@ The fleet operations wedge left this page's design alone. `runtime` is now a uni
 | Key | Value on `mbell-mbp-16` |
 |---|---|
 | Workspace | Core platform |
-| Owner | `mbell` |
+| Owner | Marcus Bell |
 | Harness | Claude Code 2.1.4 |
 | Collector | oxagend 1.6.2, over "0 telemetry gaps in the last 24h" |
-| Hook binary | "oxagen-hook 1.6.2 · fails closed against its cached bundle" |
-| Hooks written | `SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, Stop`, over "Five run as command hooks. The first four can refuse." A host with fewer reads "Fewer than five events are wired, so some calls are recorded rather than decided." |
-| Model surface | loopback proxy, over "every model call leaves through it; tokens are counted from the bytes that pass". Below the `gateway` tier: "model traffic goes from the harness to its provider; routing it is the gateway tier" |
+| Hook binary | "oxagen-hook 1.6.2", over "Refuses a call if it cannot reach oxagen and has no cached policy" |
+| Hooks installed | `SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, Stop`, over "Five run as command hooks. The first four can refuse a call." A host with fewer reads "Fewer than five events are wired, so some calls are recorded without a decision." |
+| Model surface | loopback proxy, over "Every model call goes through it, and tokens are counted from the traffic." Below the `gateway` tier: "Model calls go from the harness straight to its provider. Routing them through oxagen is the gateway tier." |
 | Settings | user settings (managed settings, locked, on `ci-runner-07`) |
-| Tier earned | the `gateway` badge, over "computed per run from what was actually routed" |
+| Tier | the `gateway` badge, over "Computed per run from routed traffic" |
 | Last checkpoint | "seq 41,208 · 2026-09-11 09:12:44Z · chain intact" |
-| Note | only where the host has one. `ci-runner-07`: "The only runtime here under an OS sandbox whose sole egress is the gateway, which is what earns the contained tier." |
+| Note | only where the host has one. `ci-runner-07`: "The only runtime here in an OS sandbox whose only network exit is the gateway. That is what makes it contained." |
 
-The Model surface line joins two facts with a semicolon, which the plain-noun rule bars in a caption. A build keeps both facts and gives each its own sentence.
+At `gateway` and above, the Model surface line still joins two facts in one sentence, which the plain-noun rule bars in a caption. A build keeps both facts and gives each its own sentence.
 
 **Agents on this host** panel. Title "Agents on this host", with the agent count as a badge (3). List controls: "Search this list", **Rows** and the pager (the table has too few rows for a filter). Columns in order: Agent · Operator · Tier · Principal · Runs 30d.
 
 - *Agent*: the agent card, with its avatar, its key and its harness ("a-intel.core.release-manager" over "Claude Code").
-- *Operator*: the operator accountable for the agent. The design prints the person's key (`marcus`), and a build prints the name, Marcus Bell.
+- *Operator*: the operator accountable for the agent, by name (Marcus Bell).
 - *Tier*: the agent's tier badge.
 - *Principal*: the principal id in mono (`prn_01JQ8W3F2M6XKD7A9RZT4BVCNE`), or a dash.
 - *Runs 30d*: runs in the last 30 days.
 - A row opens the agent. The design binds the click to the row alone, with no keyboard access. A build makes each row reachable and operable by keyboard.
 - The demo host carries three agents: `a-intel.core.release-manager` (Claude Code, `gateway`, 212 runs), `a-intel.core.bug-fixer` (Claude Code, `gateway`, 46) and `a-intel.core.documenter` (Cursor, `harness`, 22). The documenter row contradicts the panel note and the host's single harness: a Cursor agent at `harness` on a Claude Code host that earns `gateway`. A build shows each harness the host carries and the tier the record holds for each.
-- A host with no agent reads "This host is enrolled and no agent is assigned to it. It records nothing until one runs here."
-- Note: "Every agent here is seen through the same hooks and earns the same tier. An agent’s identity, its steering and its toolbelt are its own; only the seam is shared."
+- An enrolled host with no agent reads "No agent is assigned to this host. It records nothing until one runs here."
+- Note: "Every agent here runs through the same hooks and gets the same tier. Each agent keeps its own identity, steering, and toolbelt."
 
-**Rollback** panel. Title "Rollback". The command in a code block: `oxagen agent unenroll --host mbell-mbp-16 \` and `--restore-settings` on the next line. Note: "If hooks are stripped by hand instead, the next run records hooks_removed and the tier falls to observe. It is never upgraded after the fact." Actions: **Run a smoke session** ("Smoke session queued on mbell-mbp-16. One turn, recorded like any other run.") and **Unenroll** (danger, opens `unenroll`). The design's command does not match the shipped CLI (see Data sources).
+**Unenroll this host from the CLI** panel. Title "Unenroll this host from the CLI". The command in a code block: `oxagen agent unenroll --host mbell-mbp-16 \` and `--restore-settings` on the next line. Note: "If someone removes the hooks by hand instead, the next run records Hooks removed and the tier drops to observe. The tier is never raised afterward." Actions: **Run a test session** ("Test session queued on mbell-mbp-16. One turn, recorded like any other run.") and **Unenroll** (danger, opens `unenroll`). The design's command does not match the shipped CLI (see Data sources).
 
-**A host that is not enrolled.** On `ci-runner-08` the design still prints "This host is enrolled and no agent is assigned to it.", a hook binary with no version that "fails closed against its cached bundle", "chain intact" beside a checkpoint it does not have, and an Unenroll action. A build describes a host that never enrolled as not enrolled in every line, and offers no Unenroll.
+**A host that is not enrolled.** On `ci-runner-08` the design reads not enrolled in every line: the Collector is "—" over "Not installed. This host is not enrolled.", no Hook binary row renders, Hooks installed is "None" over "Runs here are recorded only.", the Last checkpoint is "—" over "No run has been recorded here", and the agents panel reads "This host is not enrolled, so no agent runs here yet." In place of the CLI panel, "Enroll this host" reads "Run the installer on the host itself. Enrolling installs the hooks and the collector." and offers no Unenroll. Its **Enroll a runtime** is gold beside the header's, two gold actions on one screen. A build keeps one.
 
 **Dialogs this page opens.**
 
-- `unenroll`, "Unenroll mbell-mbp-16?". Note: "Calls routed through Oxagen are refused from this host from now on. The hooks on the host are removed at its next check-in, so a host that is offline keeps them until it returns." Warning: "Checkpoints from this host are unsigned after this, and the chain records the gap." Footer: **Keep it enrolled** and **Unenroll it** (danger: "Host revoked. Calls routed through Oxagen are refused from now on. The hooks on the host are removed at its next check-in."). No gold.
+- `unenroll`, "Unenroll mbell-mbp-16?". Note: "Calls routed through oxagen are refused from this host from now on. The hooks on the host are removed at its next check-in, so a host that is offline keeps them until it returns." Warning: "Checkpoints from this host are unsigned after this, and the chain records the gap." Footer: **Keep it enrolled** and **Unenroll it** (danger: "Host revoked. Calls routed through oxagen are refused from now on. The hooks on the host are removed at its next check-in."). No gold.
 - Enroll a runtime starts Register agent (`register-name.md`). The error state opens `incident`, and the denied state `request-access`.
 
 ## Data sources
@@ -75,18 +75,18 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Backing checked against 
 | Harness | `RUNTIMES[].harness`, `.harnessV` | every harness with its version | The harnesses reported (`schemas.ts:66`), with Claude Code's version at enrollment only (`schemas.ts:105`). Gap #3919 | 🟡 |
 | Collector and hook binary version | `RUNTIMES[].collector` | the collector's report | `wrapper_version` (`tacho.ts:197`) | ✅ |
 | Telemetry gaps in the last 24 hours | `RUNTIMES[].gaps` | the collector's heartbeat | None, #3818 | ❌ |
-| Hooks written | `RUNTIMES[].hooks`, `.hookCount` | the settings file, read back at check-in | `hooks_ok` for Claude Code's settings file (`tacho.ts:244`). The five command hooks Tacho writes are `COMMAND_HOOK_EVENTS` (`packages/tacho/src/host/settings-writer.ts:12-18`). No list is read back per host, #3818 | 🟡 |
+| Hooks installed | `RUNTIMES[].hooks`, `.hookCount` | the settings file, read back at check-in | `hooks_ok` for Claude Code's settings file (`tacho.ts:244`). The five command hooks Tacho writes are `COMMAND_HOOK_EVENTS` (`packages/tacho/src/host/settings-writer.ts:12-18`). No list is read back per host, #3818 | 🟡 |
 | Model surface | `RUNTIMES[].model` | where model traffic goes | `modelBaseUrls` (`schemas.ts:81-104`), read by the app as loopback, mixed or direct (`apps/app/src/data/contracts/runtimes.ts:24-34`) | 🟡 |
 | Settings | `RUNTIMES[].settings` | user or managed settings, and whether they are locked | `managed` (`schemas.ts:107`) and the settings digests on the enrollment (`tacho.ts:207-213`) | 🟡 |
 | Health | `rtHealth()` | healthy or degraded from the gaps, not enrolled from the enrollment | Not enrolled from `status`, `revokedAt` and `expiresAt` (`apps/app/src/features/runtimes/parts.tsx:188`, `:224`). Healthy or degraded waits on #3818 | 🟡 |
-| Tier earned | `RUNTIMES[].tier` | the tier each run earned, rolled up per host | Per run `enforcement_tier` (`tacho.ts:509`), and per harness on the enrollment, `gateway` or `harness` (`schemas.ts:67-80`). No rollup per host, #3817 | 🟡 |
+| Tier | `RUNTIMES[].tier` | the tier each run earned, rolled up per host | Per run `enforcement_tier` (`tacho.ts:509`), and per harness on the enrollment, `gateway` or `harness` (`schemas.ts:67-80`). No rollup per host, #3817 | 🟡 |
 | Last checkpoint | `RUNTIMES[].checkpoint` | the chain's last checkpoint per host | Checkpoints are per session (`tacho.ts:875-905`), #3817 | ❌ |
 | Note | `RUNTIMES[].note` | none | No field holds a note on a host | ❌ |
 | Agents on this host | `rtAgents()` over `AGENTS[].host` | the host row joined to its agents | The enrollment's agent key joined to `list_agents`: slug, name, harness, operator, principal and runs in 30 days (`apps/app/src/data/contracts/runtimes.ts:91-101`). One enrollment names one agent | 🟡 |
 | An agent's tier | `AGENTS[].tier` | the tier its runs earned | Per run only (`tacho.ts:509`) | 🟡 |
 | Unenroll | `DLG_EXT.unenroll` | `runtime.unenroll`, every agent on the host | `revoke_tacho_enrollment` revokes one enrollment: its key is retired and every session on it is denied at its next boundary (`packages/oxagen/src/contracts/tacho.enrollment.revoke.ts:1-46`). The app binds Unenroll to it (`apps/app/src/features/runtimes/actions.ts:1-28`) | 🟡 one enrollment |
-| The rollback command | static | the CLI | `oxagen agent unenroll [agent] [--host <tch_id>] [--reason <text>]`. With no agent it removes this machine's hooks and service, revokes its enrollment and deletes its host key (`apps/cli/src/commands/agent.ts:14`, `apps/cli/src/program.ts:1472-1490`). The CLI has no `--restore-settings` flag, and `--host` takes an enrollment id | 🟡 |
-| Run a smoke session | toast | a smoke session started from the console | None, #3819 (`apps/app/src/features/runtimes/controls.tsx:1-13`) | ❌ |
+| The unenroll command | static | the CLI | `oxagen agent unenroll [agent] [--host <tch_id>] [--reason <text>]`. With no agent it removes this machine's hooks and service, revokes its enrollment and deletes its host key (`apps/cli/src/commands/agent.ts:14`, `apps/cli/src/program.ts:1472-1490`). The CLI has no `--restore-settings` flag, and `--host` takes an enrollment id | 🟡 |
+| Run a test session | toast | a test session started from the console | None, #3819 (`apps/app/src/features/runtimes/controls.tsx:1-13`) | ❌ |
 
 ## Future-only fields
 
@@ -94,17 +94,17 @@ The renderer puts no `data-future` mark on this page, and the catalog gives it n
 
 - The kind and what starts the collector (#3816).
 - The telemetry gap count, and healthy or degraded (#3818).
-- The hooks written as a list and a count, beyond Claude Code's read-back (#3818).
+- The hooks installed as a list and a count, beyond Claude Code's read-back (#3818).
 - Every harness version but Claude Code's at enrollment (#3919).
 - The tier earned per host and the last checkpoint per host (#3817).
 - The note.
-- Run a smoke session (#3819), which a build offers as a stub that says what it would do.
+- Run a test session (#3819), which a build offers as a stub that says what it would do.
 
 ## Functionality
 
-- Every agent on a host is seen through the same hooks. The tier is a property of the seam, computed per run from what was actually routed, and never upgraded after the fact.
-- The hooks line reads from the count: five command hooks, of which the first four can refuse, or fewer, so some calls are recorded rather than decided.
-- The model surface line reads from the tier: at `gateway` and above every model call leaves through the loopback proxy and tokens are counted from the bytes that pass. Below it, model traffic goes from the harness to its provider.
+- Every agent on a host runs through the same hooks. The tier belongs to the host, is computed per run from what was actually routed, and is never upgraded after the fact.
+- The hooks line reads from the count: five command hooks, of which the first four can refuse a call, or fewer, so some calls are recorded without a decision.
+- The model surface line reads from the tier: at `gateway` and above every model call goes through the loopback proxy and tokens are counted from the traffic. Below it, model calls go from the harness straight to its provider.
 - Unenrolling revokes the host. Calls routed through Oxagen are refused from then on, the hooks are removed at the host's next check-in, and checkpoints from the host are unsigned afterwards, a gap the chain records. Hooks stripped by hand instead make the next run record `hooks_removed`, and the tier falls to `observe`.
 - An agent row opens the agent. Its identity, steering and toolbelt stay on the agent's own pages.
 - A runtime id the list does not hold has no page. The app answers 404.
@@ -115,17 +115,17 @@ From `pRuntimes()`. The design gives this page no empty state: the host exists o
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
 - **loading**: the shell stays, and the page body, header included, is the skeleton: four tile blocks and a panel of seven rows.
-- **error**: "Runtimes could not be loaded", with `503 collector_unreachable`, "Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.", **Try again** (gold), **Open an incident** and "trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z".
+- **error**: "Runtimes could not be loaded", with `503 collector_unreachable`, "Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by oxagen.", **Try again** (gold), **Open an incident** and "trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z".
 - **access denied**: "You cannot see the runtimes of this workspace", naming `runtime.read on core-platform`, with **Request access** (gold) and **Back to Work**, then Signed in as "Marcus Bell · workspace.owner · core-platform", Needed "runtime.read on core-platform" and Decided by "pol_v41 · deny wins over every allow".
 
 ## Mobile
 
-At 390 × 844 the top bar collapses to the hamburger, the host name in mono as the current crumb, search, notifications, the approvals button and the avatar. The thumb bar holds Work, Agents, Tools, Spend and More, and More is the lit slot, because Runtimes lives in its sheet. The host's key-value list stacks, the agents table becomes a stack of cards led by the agent card, and the rollback command scrolls inside its block. The unenroll dialog rises from the bottom edge as a sheet with full-width buttons. Touch targets are at least 44 px, inputs are 16 px, and the page never scrolls sideways.
+At 390 × 844 the top bar collapses to the hamburger, the host name in mono as the current crumb, search, notifications, the approvals button and the avatar. The thumb bar holds Work, Agents, Tools, Spend and More, and More is the lit slot, because Runtimes lives in its sheet. The host's key-value list stacks, the agents table becomes a stack of cards led by the agent card, and the unenroll command scrolls inside its block. The unenroll dialog rises from the bottom edge as a sheet with full-width buttons. Touch targets are at least 44 px, inputs are 16 px, and the page never scrolls sideways.
 
 ## Permissions
 
 - Read: `runtime.read` (today `list_tacho_hosts`: an org Owner or Admin, or a workspace Owner, Member or Viewer).
-- Writes, each a governed action recorded in Audit: `runtime.unenroll` (today `revoke_tacho_enrollment`, org Owner or Admin, `packages/oxagen/src/contracts/tacho.enrollment.revoke.ts:29-32`). Running a smoke session needs `agent.run`.
+- Writes, each a governed action recorded in Audit: `runtime.unenroll` (today `revoke_tacho_enrollment`, org Owner or Admin, `packages/oxagen/src/contracts/tacho.enrollment.revoke.ts:29-32`). Running a test session needs `agent.run`.
 
 ## Backend gaps this page depends on
 
@@ -133,8 +133,8 @@ At 390 × 844 the top bar collapses to the hamburger, the host name in mono as t
 - #3817: the tier rolled up per host, and the last checkpoint per host.
 - #3818: the 24-hour gap count, and the hooks read back at check-in for every harness.
 - #3919: a version for every harness on the host.
-- #3819: starting a smoke session on a host from the console.
-- A rollback command that matches the CLI, which takes an enrollment id and has no `--restore-settings`.
+- #3819: starting a test session on a host from the console.
+- An unenroll command that matches the CLI, which takes an enrollment id and has no `--restore-settings`.
 
 ## Rules every build of this page must keep
 
