@@ -898,10 +898,9 @@ function catChips(counts,sel,pick,total){
   return '<div class="row tcs">'+out+'</div>';
 }
 function toolCatsBody(){
-  return '<p class="muted" style="font-size:12.5px;margin-bottom:12px">A category says what a tool <b>acts on</b>. It is orthogonal to the hazard (how bad a wrong call is) and to the gate (what this toolbelt decided). Ordered from least to most consequential.</p>'+
-   '<div class="tleg">'+TCAT_ORDER.map(function(c){var d=TCAT[c];
+  return '<div class="tleg">'+TCAT_ORDER.map(function(c){var d=TCAT[c];
     return '<div class="c t-'+c+'"><div class="ti">'+catSvg(c)+'</div><div style="min-width:0"><div class="l">'+h(d.l)+'</div><div class="s">'+h(d.s)+'</div><div class="eg">'+h(d.eg)+'</div></div></div>';}).join("")+'</div>'+
-   '<div class="hr"></div><p class="eyebrow q">The two axes that carry a decision</p>'+
+   '<div class="hr"></div><p class="eyebrow q">Hazard and gate</p>'+
    '<div class="axes">'+
    '<div><span class="k">Risk</span>'+hazard("low")+hazard("medium")+hazard("high")+hazard("critical")+'</div>'+
    '<div><span class="k">Side effect</span><span class="hz he-read">'+effSvg("read")+'<span>read</span></span><span class="hz he-write">'+effSvg("write")+'<span>write</span></span><span class="hz he-irreversible">'+effSvg("irreversible")+'<span>irreversible</span></span></div>'+
@@ -4886,30 +4885,24 @@ function pTools(){
        '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(SEP):'<span class="dim">—</span>')+'</td>'+
        '<td class="num">'+agentsWithTool(x.n+"@"+x.v).length+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("");
     body='<div class="grid">'+
-     (props.length?'<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>'+props.length+' awaiting approval</span>'+
+     (props.length?'<div class="banner" data-help="schema-approvals"><span class="b b-approval" style="flex:none"><span class="d"></span>'+props.length+' awaiting approval</span>'+
       '<div class="grow"><b>'+plural(props.length,"tool")+(function(){var ss={};props.forEach(function(t){ss[t.s]=1;});var k=Object.keys(ss);
         /* name the providers only while the list stays short enough to read */
         return k.length>3?'':' from '+k.map(function(n){var sv=serverById(n);return h(sv?sv.system:n);}).join(k.length>2?', ':' and ');})()+
-        (props.length>1?' have':' has')+' no declared output schema.</b> '+
-      'oxagen inferred one from real outputs and filed it for approval. Until approved, outputs are only checked for size and type.</div>'+
+        (props.length>1?' have':' has')+' no declared output schema.</b></div>'+
       '<button class="btn" onclick="openDialog(\'schema\')">Review</button></div>':'')+
-     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tools</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">Every tool version from every provider. Permissions apply per version, so a new version from a provider isn’t added to any toolbelt automatically.</p></div>'+
+     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tools</h3></div>'+
      '<div class="sp">'+namesToggle()+'<span class="b b-q">'+tsel.length+' of '+verCount().toLocaleString()+' shown</span>'+
      '<button class="btn sm" onclick="openDialog(\'import\')">Add provider</button></div></div>'+
      '<div class="panel-b" style="border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+
      '<div style="flex:1;min-width:0">'+catChips(rcount,rc,"S.regCat='%s';render()",TOOLS.length)+'</div>'+
      '<button class="btn sm ghost" onclick="openDialog(\'toolcats\')">What the categories mean</button></div>'+
      '<div class="tw"><table><thead><tr><th>Tool version</th><th>Provider</th><th>Category</th><th>Hazard</th><th>Gate</th><th>Egress</th><th>Financial</th><th>Schema origin</th><th>Digest</th>'+
-     '<th>Toolbelts</th><th class="num">Agents</th><th class="num">Calls 30d</th></tr></thead><tbody>'+trows+'</tbody></table></div>'+
-     '<div class="panel-b"><div class="note">The gate checks the tool version’s kill switch first, then its provider’s kill switch, then '+h(activePolicy().replace("pol_v","policy v"))+'. '+
-     'A toolbelt decides which agents can see a tool. The gate decides whether a call goes through. Select a provider on any row '+
-     'to see what it imported and how oxagen connects to it.</div></div></div>'+
+     '<th>Toolbelts</th><th class="num">Agents</th><th class="num">Calls 30d</th></tr></thead><tbody>'+trows+'</tbody></table></div></div>'+
      '</div>';
   } else if(t==="toolbelts"){
     body='<div class="grid">'+
-     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Toolbelts</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">A toolbelt is a named set of tool versions assigned to agents. It decides which tools a model can see. It grants no permission.</p></div>'+
+     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Toolbelts</h3></div>'+
      '<div class="sp"><span class="b b-q">'+plural(TOOLBELTS.length,"toolbelt")+' · '+plural(beltToolCount(),"tool version")+'</span>'+
      '<button class="btn sm primary" onclick="openDialog(\'beltnew\')">New toolbelt</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Toolbelt</th><th>Owner</th><th class="num">Tools</th><th>Providers</th>'+
@@ -4928,12 +4921,8 @@ function pTools(){
                             :'<span class="b b-allowed"><span class="d"></span>All reachable</span>')+
         '<span class="sub">'+h(avail.why)+'</span></td>'+
        '<td class="muted mono" style="font-size:11px">'+h(b.updated)+'</td></tr>';}).join("")+
-     '</tbody></table></div>'+
-     '<div class="panel-b"><div class="note">Assigning a toolbelt grants no permission. Every call from it is still checked against the agent’s roles, '+
-     'the policy on the tool version, the kill switches, and the agent’s mandates. If Availability shows <b>Unavailable</b>, agents can see a tool '+
-     'they can’t call today.</div></div></div>'+
-     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Delivery</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">One toolbelt can reach many agents, so review a change to it before you save.</p></div></div>'+
+     '</tbody></table></div></div>'+
+     '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Delivery</h3></div></div>'+
      '<div class="tw"><table><thead><tr><th>Agent</th><th>Toolbelts</th><th class="num">Tool versions</th><th>Providers</th><th>Tier</th></tr></thead><tbody>'+
      Object.keys(TOOLBELT_ASSIGN).map(function(k){
       var a=agentByKey(k), bs=beltsOfAgent(k), seen={}, pv=[];
@@ -4948,7 +4937,7 @@ function pTools(){
   } else if(t==="providers"){
     body='<div class="grid">'+
      '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Providers</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(srvCount(),"provider")+' hold '+verCount().toLocaleString()+' tool versions. A provider is the system the tools belong to. The transport is how oxagen reaches it.</p></div>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(srvCount(),"provider")+' hold '+verCount().toLocaleString()+' tool versions.</p></div>'+
      '<div class="sp"><button class="btn sm primary" onclick="openDialog(\'import\')">Add provider</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Provider</th><th>Transport</th><th class="num">Tools</th><th>Toolbelts</th><th>Agents</th><th>Health</th><th>Connection</th><th>Authorization</th><th>Last import</th><th></th></tr></thead><tbody>'+
      PROVIDERS.map(function(sv){
@@ -4972,16 +4961,13 @@ function pTools(){
          :'<button class="btn sm primary" onclick="openDialog(\'oauth\',\''+sv.id+'\')">'+(c?"Reconnect":"Connect")+'</button>'):'')+
        '<button class="btn sm danger" onclick="openDialog(\'serverdel\',\''+sv.id+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div>'+
-     '<div class="panel-b"><div class="note">MCP is one transport among several. A provider reached over <span class="mono">http</span>, '+
-     '<span class="mono">native</span>, or a harness <span class="mono">local</span> hook is imported, versioned, and checked the same way.</div></div>'+
      (function(){var ex=CONNECTIONS.filter(function(c){return c.authState==="expired"||c.status==="review due";});
        return ex.length?'<div class="panel-b"><div class="warn"><b>'+ex.length+' connection'+(ex.length>1?'s need':' needs')+' attention.</b> '+
         ex.map(function(c){return h(c.name)+(c.authState==="expired"?' has an expired token. Calls through it are blocked until it is reconnected':' was due for review '+h(c.next));}).join('. ')+'.</div></div>':'';})()+
      '</div>'+
      grantsLog()+'</div>';
   } else if(t==="policy"){
-    body='<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Policy versions</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">Every version of the policy that decides tool calls.</p></div>'+
+    body='<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Policy versions</h3></div>'+
      '<div class="sp">'+
      '<button class="btn sm" onclick="openDialog(\'policynew\')">Draft new version</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Version</th><th>State</th><th>Author</th><th>When</th><th class="num">Rules</th><th>Tests</th><th>What changed</th><th></th></tr></thead><tbody>'+
@@ -4996,25 +4982,25 @@ function pTools(){
          '<button class="btn sm primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button><span class="vh">, </span>'+
          '<button class="btn sm danger" onclick="openDialog(\'policydiscard\',\''+p.v+'\')">Discard</button>':
         '<button class="btn sm" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')+'</td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b"><div class="note">A version is activated by a governed action with approval, and in regulated mode it is a pull request instead. A draft is the only version you can edit or discard: once a version has decided anything it is kept, because every decision cites the version that made it.</div></div></div>'+
+     '</tbody></table></div></div>'+
      '<div class="hr"></div>'+
      '<div class="panel"><div class="panel-h"><h3>Where a version lives</h3></div>'+
      '<div class="panel-b"><dl class="kv">'+
-      '<dt>Store</dt><dd>One stored version holding the rules, the tests and the version string. A policy version is not a Steering record and never reaches a model.</dd>'+
-      '<dt>In regulated mode</dt><dd>The rules are a file in <span class="mono">.oxagen/policy/</span> in the main repo, and a change is a pull request. oxagen’s database holds the compiled copy the gateway reads.</dd>'+
-      '<dt>Compiled from</dt><dd>The rules you write here, plus the enforcement grants on each agent and the role grants on each operator. A rule can read those, so you do not restate a grant as a rule.</dd>'+
-      '<dt>Who reads it</dt><dd>The gateway, on every tool call, before the call leaves. No model is in the decision path, so the same call and the same version always decide the same way.</dd>'+
-      '<dt>What it writes</dt><dd>One <span class="mono">policy.decision</span> frame per call, naming the version and the rules that fired. The Decision trace reads the decision back without re-running it.</dd>'+
+      '<dt>Store</dt><dd>oxagen, one stored version with its rules and tests</dd>'+
+      '<dt>In regulated mode</dt><dd><span class="mono">.oxagen/policy/</span> in '+h(w.main)+', changed by pull request</dd>'+
+      '<dt>Compiled from</dt><dd>The rules on this page, the enforcement grants on each agent, and the role grants on each operator</dd>'+
+      '<dt>Who reads it</dt><dd>The gateway, on every tool call</dd>'+
+      '<dt>What it writes</dt><dd>One <span class="mono">policy.decision</span> frame per call</dd>'+
      '</dl></div></div>'+
      '<div class="hr"></div>'+
-     '<p class="eyebrow q">Conditions a rule may test</p>'+
+     '<p class="eyebrow q" data-help="conditions">Conditions a rule may test</p>'+
      '<div class="row">'+["tool version","risk","side effect","egress","financial class","amount by path","counterparty","repository","path prefix","recipient domain","taint and its sources","time window","rate","sequence","operator role","enforcement tier","budget position","mandate position"]
       .map(function(c){return '<span class="b b-q" style="font-size:10.5px">'+h(c)+'</span>';}).join(SEP)+'</div>'+
-     '<div class="hr"></div><p class="eyebrow q">Sequence rule</p>'+
-     '<p class="muted" style="margin:0 0 8px;font-size:12.5px">A rule names the call it governs, then the condition that lets it through. This one denies a payment unless the same run already priced it.</p>'+
+     '<div class="hr"></div><p class="eyebrow q" data-help="sequence-rule">Sequence rule</p>'+
+     '<p class="muted" style="margin:0 0 8px;font-size:12.5px">This rule denies a payment unless the same run already priced it.</p>'+
      '<pre><span class="c">// a payment requires a prior quote call in the same run</span>\n'+
      '<span class="k">forbid</span> (principal, action == Action::<span class="s">"stripe__create_payment"</span>, resource)\n'+
-     '<span class="k">unless</span> { context.run.has_prior_call(<span class="s">"stripe__list_prices"</span>) };</pre></div></div>';
+     '<span class="k">unless</span> { context.run.has_prior_call(<span class="s">"stripe__list_prices"</span>) };</pre>';
   } else if(t==="switches"){
     var cls=SWITCHES.filter(function(s){return s.cls;}), rest=SWITCHES.filter(function(s){return !s.cls;});
     body='<div class="ks-stack">'+
@@ -5023,8 +5009,7 @@ function pTools(){
       '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'switchnew\')">Create a switch</button></p>'+
       '<div class="grid g2">'+rest.map(switchCard).join("")+'</div></div></div>';
   }
-  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Tools</h1>'+
-   '<p>The registry is the only source of tools an agent can see.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Tools</h1></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'import\')">Add provider</button>'+
    /* One gold action per screen. Toolbelts, Providers and Policy each carry their own primary, so
       on those tabs the header yields the gold and New tool reads as a plain action. */
@@ -5044,7 +5029,7 @@ var GRANTS=[
  {id:"cg_01K5RS8",tool:"github__list_pull_requests@3",agent:"a-intel.core.release-manager",run:"run_01K5RS7M2E8FJ3QW",seq:6,conn:"con_01K2A7",scope:"repos [a-intel/platform]",ttl:"5m",at:"2026-09-11 09:14:09Z",state:"expired"},
  {id:"cg_01K5RS4",tool:"linear__get_issue@2",agent:"a-intel.core.triage",run:"run_01K5RP2D6H4KLM8V",seq:4,conn:"con_01K2A8",scope:"issue:read",ttl:"2m",at:"2026-09-11 08:57:31Z",state:"expired"},
  {id:null,tool:"stripe__create_payment@4",agent:"a-intel.finops.invoice-bot",run:"run_01K5RN8F3J2GHY6T",conn:"con_01K2A9",scope:"payment_intents:write · amount ≤ $2,450.00",ttl:"10m",at:"2026-09-11 08:40:19Z",state:"not issued",
-  note:"Waiting on approval apr_01K5RN9T4. A credential is issued only after someone approves."},
+  note:"Waiting on approval apr_01K5RN9T4."},
  {id:"cg_01K4X7T1",rcp:"rcp_01K4X8M2E",conn:"con_01K2A9",scope:"payment_intents:write · customer cus_aintel only",ttl:"10m",state:"settled"}];
 function grantsLog(){
   var total=CONNECTIONS.reduce(function(s,c){return s+c.grants30;},0);
@@ -5060,10 +5045,9 @@ function grantsLog(){
      '<td class="mono" style="font-size:11px;min-width:22ch">'+h(g.scope)+(g.note?'<div class="dim" style="font-size:10.5px">'+h(g.note)+'</div>':'')+(g.rcp?'<div style="font-size:10.5px">receipt '+receiptLink(g.rcp)+'</div>':'')+'</td>'+
      '<td class="mono">'+h(g.ttl)+'</td><td>'+st+'</td></tr>';}).join("");
   return '<div class="panel" style="margin-top:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Credential grants log</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(total.toLocaleString(),"grant")+' in 30 days across '+CONNECTIONS.length+' connections. Each one is recorded on its call’s frames and receipt.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(total.toLocaleString(),"grant")+' in 30 days across '+CONNECTIONS.length+' connections.</p></div>'+
    '<span class="b b-q grants-shown">'+GRANTS.length+' most recent shown</span></div>'+
-   '<div class="tw"><table data-lt="1"><thead><tr><th>Grant</th><th>Tool version</th><th>Agent and run</th><th>Connection</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">TTL defaults to the call’s expected duration plus a margin, never more than one hour. The agent sees the result and never the credential.</p></div></div>';
+   '<div class="tw"><table data-lt="1"><thead><tr><th>Grant</th><th>Tool version</th><th>Agent and run</th><th>Connection</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 /* ---------- Providers, connections, mandates and policy versions: open, edit, remove ----------
    Every row on the Tools page that names a record opens it here. The dialogs write to the
@@ -5096,16 +5080,16 @@ function oauthKind(c){return c&&(c.kind==="oauth"||c.kind==="github_app");}
 DLG_EXT.oauth=function(id){
   var sv=serverById(id); if(!sv) return noSuch("Provider");
   var c=connByServer(sv.id), back=c&&c.authState==="expired";
-  return {t:(back?"Reconnect ":"Connect ")+sv.system,s:"OAuth. You authorize it and oxagen holds the token.",w:false,
-   b:(back?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Calls through this connection are blocked until you authorize it again. Nothing else about the connection changes.</div>':'')+
+  return {t:(back?"Reconnect ":"Connect ")+sv.system,s:"OAuth",w:false,
+   b:(back?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Calls through this connection are blocked until you authorize it again.</div>':'')+
     '<div class="field"><label for="oa-client">Client id</label><input id="oa-client" value="'+h(c&&c.client||"")+'" placeholder="Issued by '+h(sv.system)+'" autocomplete="off"></div>'+
     '<div class="field"><label for="oa-secret">Client secret</label><input id="oa-secret" type="password" placeholder="'+(c&&c.client?"Leave empty to keep the current one":"Issued by "+sv.system)+'" autocomplete="off"></div>'+
     '<div class="field"><label for="oa-url">Authorization URL</label><input id="oa-url" value="'+h(c&&c.authUrl||"")+'" placeholder="https://'+h(sv.name)+'.com/oauth/authorize"></div>'+
     '<div class="field"><label for="oa-scopes">Scopes</label><input id="oa-scopes" value="'+h(c&&c.scopes||"")+'" placeholder="read, write">'+
-    '<div class="hint">Ask for the narrowest set the tools need. oxagen narrows the scopes again on each call.</div></div>'+
+    '<div class="hint">Ask for the narrowest set the tools need.</div></div>'+
     '<div class="field"><label>Redirect URL</label><div class="mono" style="font-size:12px">'+h(ASST_ENGINE_URL.replace(/^https?:\/\//,"https://"))+'/oauth/callback</div>'+
     '<div class="hint">Register this with '+h(sv.system)+' before you authorize.</div></div>'+
-    '<div class="note">Authorizing opens '+h(sv.system)+' in a new tab. When it redirects back, oxagen exchanges the code, encrypts the token with the organization key, and records who authorized it. The token never appears on a screen and is never sent to an agent.</div>',
+    '<div class="note">Authorizing opens '+h(sv.system)+' in a new tab.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn primary" onclick="oauthAuthorize(\''+sv.id+'\')">Authorize with '+h(sv.system)+'</button>'};
 };
@@ -5124,13 +5108,13 @@ function oauthAuthorize(id){
   c.client=client; c.authUrl=url; if(scopes) c.scopes=scopes;
   c.authState="connected"; c.tokenExp="2026-12-20 09:00 UTC";
   closeDialog(); render();
-  act(sv.system+" authorized as "+c.owner+". The token is encrypted under the organization key and expires "+c.tokenExp+".","gold");
+  act(sv.system+" authorized as "+c.owner+". The token expires "+c.tokenExp+".","gold");
 }
 function oauthRefresh(cid){
   var c=connById(cid); if(!c) return;
   c.authState="connected"; c.tokenExp="2026-12-20 09:00 UTC";
   closeDialog(); render();
-  act("Refreshed with the provider. The new token expires "+c.tokenExp+". Credentials already issued keep their own expiry.");
+  act("Refreshed with the provider. The new token expires "+c.tokenExp+".");
 }
 function oauthDisconnect(cid){
   var c=connById(cid); if(!c) return;
@@ -5142,7 +5126,7 @@ function serverReimport(id){
   var sv=serverById(id); if(!sv) return;
   sv.imported="2026-09-11 09:14 UTC";
   closeDialog(); render();
-  act("Re-imported "+sv.system+". New versions appear as new rows. No toolbelt gains a tool on its own.");
+  act("Re-imported "+sv.system+". New versions appear as new rows.");
 }
 function noSuch(what){return {t:what,w:false,b:'<div class="note">That record is no longer here.</div>',
   f:'<button class="btn" onclick="closeDialog()">Close</button>'};}
@@ -5173,13 +5157,12 @@ DLG_EXT.server=function(id){
      : '<div class="note">This provider holds no credential, so there is nothing to authorize.</div>';
   var pbelt=providerBelts(sv.id), pag=providerAgents(sv.id);
   return {t:sv.system,s:sv.transport+" · "+sv.wire+" · "+sv.url,w:true,
-   b:(sv.health==="ok"?'':'<div class="warn"><b>This provider is degraded.</b> Calls to it are retried once and then blocked. The run records each one on its frames.</div>')+
+   b:(sv.health==="ok"?'':'<div class="warn"><b>This provider is degraded.</b> Calls to it are retried once and then blocked.</div>')+
     (c&&c.authState==="expired"?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Reconnect to bring the '+plural(tv.length,"tool")+' below back into reach.</div>':'')+
     (props.length?'<div class="warn"><b>'+props.length+' schema'+(props.length>1?'s are':' is')+' awaiting approval.</b> '+
       'Until an admin approves, outputs are validated only for size and type.</div>':'')+
     '<dl class="kv"><dt>System</dt><dd>'+h(sv.desc)+'</dd>'+
-    '<dt>Transport</dt><dd class="mono">'+h(sv.transport)+' · '+h(sv.wire)+
-     '<span class="sub">How oxagen reaches it. The registry, the policy, and the receipts work the same for every transport.</span></dd>'+
+    '<dt>Transport</dt><dd class="mono">'+h(sv.transport)+' · '+h(sv.wire)+'</dd>'+
     '<dt>Registry name</dt><dd class="mono">'+h(sv.name)+'</dd>'+
     '<dt>Schemas</dt><dd>'+h(sv.schemas)+'</dd>'+
     '<dt>Tool versions</dt><dd>'+sv.versions+' across '+plural(sv.tools,"tool")+'</dd>'+
@@ -5210,7 +5193,7 @@ DLG_EXT.belt=function(id){
   var keys=agentsOfBelt(b.id), av=beltAvailability(b);
   return {t:b.name,s:b.desc,w:true,
    b:(av.blocked?'<div class="warn"><b>'+av.blocked+' of the '+b.tools.length+' tool versions on this toolbelt cannot be called today.</b> '+
-      h(av.why)+'. Agents with this toolbelt can still see them, and each call is blocked when it is sent.</div>':'')+
+      h(av.why)+'.</div>':'')+
     (b.note?'<div class="note" style="margin-bottom:14px">'+h(b.note)+'</div>':'')+
     '<dl class="kv"><dt>Owner</dt><dd>'+h(b.owner)+'<span class="sub">Last changed '+h(b.updated)+' by '+h(PEOPLE[b.by]?PEOPLE[b.by].name:b.by)+'</span></dd>'+
     '<dt>Providers</dt><dd>'+beltProviders(b).map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join(SEP)+'</dd>'+
@@ -5227,28 +5210,24 @@ DLG_EXT.belt=function(id){
       return '<tr class="click" onclick="openDialog(\'tool\',\''+h(tid)+'\')"><td>'+toolCell(tid,{sz:"sm"})+'</td>'+
        '<td class="mono" style="font-size:11px">'+h(t.s)+'</td><td>'+hazard(t.risk,t.eff)+'</td>'+
        '<td>'+toolGate(t)+'</td><td class="num">'+t.calls30.toLocaleString()+'</td></tr>';}).join("")+
-    '</tbody></table></div>'+
-    '<div class="note" style="margin-top:12px">Assigning this toolbelt grants no permission. It adds to what the model can see. Every call from it '+
-    'is still checked against the agent’s roles, the policy on the tool version, the kill switches, and the agent’s mandates.</div>',
+    '</tbody></table></div>',
    f:'<button class="btn danger" onclick="act(\'A toolbelt cannot be removed while an agent carries it. Unassign it first.\')">Remove</button>'+
     '<span class="grow"></span>'+
     '<button class="btn" onclick="act(\'Assignment is edited on the agent. Open its Toolbelt tab to add or remove this toolbelt.\')">Assign to an agent</button>'+
     '<button class="btn primary" onclick="act(\'A change to this toolbelt reaches '+keys.length+' agent'+(keys.length===1?'':'s')+' at their next session.\')">Edit tools</button>'};
 };
 DLG_EXT.beltnew=function(){
-  return {t:"New toolbelt",s:"A named set of tool versions that many agents can carry.",w:false,
+  return {t:"New toolbelt",w:false,
    b:'<div class="field"><label for="tb-name">Name</label><input id="tb-name" placeholder="Release control"></div>'+
     '<div class="field"><label for="tb-desc">What it is for</label><input id="tb-desc" placeholder="Land and publish: merge a pull request, cut a release, delete the merged branch."></div>'+
     '<div class="field"><label for="tb-owner">Owner</label><select id="tb-owner">'+
-     ["platform","finops","security"].map(function(o){return '<option>'+o+'</option>';}).join("")+'</select></div>'+
-    '<div class="note">A toolbelt is a job, not a category. Name it after the work an agent does with it, so a reviewer can tell '+
-    'from the name alone whether an agent should carry it.</div>',
+     ["platform","finops","security"].map(function(o){return '<option>'+o+'</option>';}).join("")+'</select></div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
-    '<button class="btn primary" onclick="closeDialog();act(\'Toolbelt created. It reaches no agent until one is assigned it.\')">Create</button>'};
+    '<button class="btn primary" onclick="closeDialog();act(\'Toolbelt created. No agent carries it yet.\')">Create</button>'};
 };
 DLG_EXT.serveredit=function(id){
   var s=serverById(id); if(!s) return noSuch("Provider");
-  return {t:"Edit "+s.system,s:"The endpoint and the credential it is reached with.",w:false,
+  return {t:"Edit "+s.system,w:false,
    b:'<div class="field"><label for="sv-url">Endpoint</label><input id="sv-url" value="'+h(s.url)+'"></div>'+
     '<div class="field"><label for="sv-tr">Transport</label><select id="sv-tr">'+
      ["mcp","http","graphql","sdk","cli","native","local","rpc"].map(function(t){return '<option'+(t===s.transport?' selected':'')+'>'+t+'</option>';}).join("")+'</select></div>'+
@@ -5256,8 +5235,7 @@ DLG_EXT.serveredit=function(id){
      ["streamable-http","https","stdio","in-process","hook"].map(function(t){return '<option'+(t===s.wire?' selected':'')+'>'+t+'</option>';}).join("")+'</select></div>'+
     '<div class="field"><label for="sv-conn">Connection</label><select id="sv-conn">'+
      ['none'].concat(CONNECTIONS.map(function(c){return c.name;})).map(function(n){return '<option'+(n===s.conn?' selected':'')+'>'+h(n)+'</option>';}).join("")+
-     (CONNECTIONS.map(function(c){return c.name;}).indexOf(s.conn)<0&&s.conn!=="none"?'<option selected>'+h(s.conn)+'</option>':'')+'</select></div>'+
-    '<div class="note">Changing the endpoint does not re-import. Tool versions already on a toolbelt keep their digest until a re-import brings a new one.</div>',
+     (CONNECTIONS.map(function(c){return c.name;}).indexOf(s.conn)<0&&s.conn!=="none"?'<option selected>'+h(s.conn)+'</option>':'')+'</select></div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="serverSave(\''+s.id+'\')">Save</button>'};
 };
 function serverSave(id){
@@ -5274,8 +5252,7 @@ DLG_EXT.serverdel=function(id){
   var tv=serverTools(s.id), belts=providerBelts(s.id).length;
   return {t:"Remove "+s.name+"?",w:false,
    b:'<div class="warn"><b>'+s.versions+' tool versions leave the registry.</b> '+
-     (belts?belts+(belts>1?' toolbelts lose a tool and the calls they cover':' toolbelt loses a tool and the calls it covers')+' are denied as <span class="mono">unknown_tool</span> from the next call boundary.':'No toolbelt reaches it, so nothing in flight is denied.')+'</div>'+
-    '<div class="note">The registry rows are kept, so a run that already called this server still cites the version it called. Re-importing the same endpoint restores it.</div>',
+     (belts?belts+(belts>1?' toolbelts lose a tool and the calls they cover':' toolbelt loses a tool and the calls it covers')+' are denied as <span class="mono">unknown_tool</span> from the next call boundary.':'No toolbelt reaches it, so nothing in flight is denied.')+'</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn danger" onclick="serverDelete(\''+s.id+'\')">Remove it</button>'};
 };
@@ -5291,8 +5268,8 @@ DLG_EXT.conn=function(id){
   var g=GRANTS.filter(function(x){return x.conn===c.id;});
   return {t:c.name,s:c.id+" · "+c.kind,w:true,
    b:(due?'<div class="warn"><b>The review date passed on '+h(c.next)+'.</b> It has issued '+plural(c.grants30.toLocaleString(),"grant")+' since. '+
-      'Marking it reviewed sets the next date 90 days out and is recorded with your name on it.</div>':'')+
-    '<dl class="kv"><dt>Owner</dt><dd>'+h(c.owner)+(fin?' · a finance role, required on a financial connection':'')+'</dd>'+
+      'Marking it reviewed sets the next date 90 days out.</div>':'')+
+    '<dl class="kv"><dt>Owner</dt><dd>'+h(c.owner)+(fin?' · finance role':'')+'</dd>'+
     '<dt>Providers</dt><dd class="mono">'+h(c.servers)+'</dd>'+
     '<dt>Downscope</dt><dd class="mono">'+h(c.downscope)+'</dd>'+
     '<dt>Issued per call</dt><dd>'+h(brokerMints(c.downscope))+'</dd>'+
@@ -5302,8 +5279,7 @@ DLG_EXT.conn=function(id){
      '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+
      g.map(function(x){return '<tr><td class="mono" style="font-size:11.5px">'+h(x.tool||"—")+'</td>'+
       '<td class="mono" style="font-size:11px">'+h(x.scope)+'</td><td class="mono">'+h(x.ttl)+'</td><td>'+h(x.state)+'</td></tr>';}).join("")+
-     '</tbody></table></div>':'')+
-    '<div class="note">No agent holds this credential. The secret was enveloped under the organization key at save and cannot be read back.</div>',
+     '</tbody></table></div>':''),
    f:'<button class="btn danger" onclick="openDialog(\'connrevoke\',\''+c.id+'\')">Revoke</button>'+
     '<span class="grow"></span>'+
     (due?'<button class="btn" onclick="connReviewed(\''+c.id+'\')">Mark reviewed</button>':'')+
@@ -5313,19 +5289,18 @@ DLG_EXT.connedit=function(id){
   var c=connById(id); if(!c) return noSuch("Connection");
   var owners=["Marcus Bell","Priya Natarajan","Dana Okafor"];
   if(owners.indexOf(c.owner)<0) owners.unshift(c.owner);
-  return {t:"Edit "+c.name,s:"The secret itself is never readable. Replace it to rotate.",w:false,
+  return {t:"Edit "+c.name,w:false,
    b:'<div class="field"><label for="cn-name">Name</label><input id="cn-name" value="'+h(c.name)+'"></div>'+
     '<div class="field"><label for="cn-owner">Owner (a person)</label><select id="cn-owner">'+
      owners.map(function(o){return '<option'+(o===c.owner?' selected':'')+'>'+h(o)+'</option>';}).join("")+'</select></div>'+
     '<div class="field"><label for="cn-next">Next review</label><input id="cn-next" type="date" value="'+h(c.next)+'"></div>'+
-    '<div class="field"><label for="cn-secret">Replace the secret</label><input id="cn-secret" type="password" placeholder="Leave empty to keep the current one" autocomplete="off">'+
-    '<div class="hint">A replacement is tested against the provider before it is saved. Credentials already issued keep their expiry.</div></div>',
+    '<div class="field"><label for="cn-secret">Replace the secret</label><input id="cn-secret" type="password" placeholder="Leave empty to keep the current one" autocomplete="off"></div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="connSave(\''+c.id+'\')">Save</button>'};
 };
 function connSave(id){
   var c=connById(id); if(!c) return;
   var n=el("cn-name"), o=el("cn-owner"), d=el("cn-next"), sec=el("cn-secret");
-  if(n){ var v=n.value.trim(); if(!v){act("A connection needs a name people will read in the audit record.");return;} c.name=v; }
+  if(n){ var v=n.value.trim(); if(!v){act("A connection needs a name.");return;} c.name=v; }
   if(o) c.owner=o.value;
   if(d&&d.value) c.next=d.value;
   if(c.status==="review due"&&d&&d.value>"2026-09-11") c.status="active";
@@ -5343,7 +5318,7 @@ DLG_EXT.connrevoke=function(id){
   return {t:"Revoke "+c.name+"?",w:false,
    b:'<div class="warn"><b>Every credential it issued stops working at its next use.</b> It issued '+plural(c.grants30,"grant")+' in 30 days. '+
      'Calls to <span class="mono">'+h(c.servers)+'</span> are blocked until another connection covers them.</div>'+
-    (c.status.indexOf("financial")>-1?'<div class="note">This connection is financial. Revoking it leaves its mandates in place with nothing to draw on. Reserved amounts are released at the next checkpoint.</div>':''),
+    (c.status.indexOf("financial")>-1?'<div class="note">This connection is financial. Revoking it leaves its mandates in place with nothing to draw on.</div>':''),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn danger" onclick="connRevoke(\''+c.id+'\')">Revoke it</button>'};
 };
@@ -5393,12 +5368,11 @@ function mandateRevoke(id){
 DLG_EXT.policyver=function(v){
   var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
   if(!p) return noSuch("Policy version");
-  return {t:p.v,s:p.state==="active"?"The version every decision cites today":"Superseded, and kept because decisions cite it",w:false,
+  return {t:p.v,w:false,
    b:'<dl class="kv"><dt>State</dt><dd>'+h(p.state)+'</dd><dt>Author</dt><dd>'+h(p.by)+'</dd>'+
-    '<dt>Activated</dt><dd class="mono">'+h(p.at)+'</dd><dt>Rules</dt><dd>'+p.rules+'</dd>'+
+    '<dt>'+(p.state==="draft"?"Drafted":"Activated")+'</dt><dd class="mono">'+h(p.at)+'</dd><dt>Rules</dt><dd>'+p.rules+'</dd>'+
     '<dt>Tests</dt><dd>'+h(p.tests)+'</dd><dt>What changed</dt><dd>'+h(p.note)+'</dd>'+
-    '<dt>Stored in</dt><dd>oxagen, as one version. In regulated mode the rules are a file in <span class="mono">.oxagen/policy/</span> and this version is the compiled copy.</dd></dl>'+
-    '<div class="note">The gateway evaluates these rules on every tool call, with no model in the decision path. Every <span class="mono">policy.decision</span> frame names the version that made it, so a replay reads the same either way.</div>',
+    '<dt>Stored in</dt><dd>oxagen</dd></dl>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
     (p.state==="active"?'<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft new version</button>':
      p.state==="draft"?'<button class="btn" onclick="openDialog(\'policyedit\',\''+p.v+'\')">Edit</button>'+
@@ -5415,8 +5389,7 @@ DLG_EXT.policynew=function(base){
      opts.map(function(x){return '<option value="'+h(x.v)+'"'+(x.v===from.v?" selected":"")+'>'+h(x.v)+' ('+h(x.state)+', '+plural(x.rules,"rule")+')</option>';}).join("")+
      '</select><div class="hint">The draft opens as a copy of this version’s rules.</div></div>'+
      '<div class="field"><label for="pn-note">What changes</label><input id="pn-note" placeholder="Raises any egress call to approval">'+
-     '<div class="hint">One sentence. The version list and every restore dialog show it.</div></div>'+
-     '<div class="note">Its rules compile and its tests run. It decides no call until it is activated.</div>',
+     '<div class="hint">One sentence.</div></div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="policyDraft()">Create the draft</button>'};
 };
@@ -5429,30 +5402,29 @@ function policyDraft(){
   var v=policyNextV();
   POLICIES.unshift({v:v,state:"draft",by:PEOPLE.marcus.name,at:"2026-09-11 09:20",
    rules:from?from.rules:0,tests:"not run yet",note:note,from:base});
-  closeDialog(); render(); act("Drafted "+v+" from "+base+". It decides nothing until an approver activates it.","gold");
+  closeDialog(); render(); act("Drafted "+v+" from "+base+".","gold");
 }
 DLG_EXT.policyedit=function(v){
   var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
   if(!p) return noSuch("Policy version");
   if(p.state!=="draft") return {t:h(p.v)+" cannot be edited",w:false,
-   b:'<div class="note">'+h(p.v)+' is '+h(p.state)+'. Every decision it made cites it, so its rules are fixed. Draft a new version from it instead.</div>',
+   b:'<div class="note">'+h(p.v)+' is '+h(p.state)+', so its rules are fixed. Draft a new version from it instead.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft new version</button>'};
-  return {t:"Edit "+p.v,s:"A draft, so it is the one version you can change",w:true,
+  return {t:"Edit "+p.v,w:true,
    b:'<div class="field"><label for="pe-note">What changes</label><input id="pe-note" value="'+h(p.note)+'"></div>'+
      '<div class="field"><label>Rules</label>'+
      '<pre><span class="c">// '+h(p.note)+'</span>\n'+
      '<span class="k">permit</span> (principal, action, resource)\n<span class="k">when</span> { context.tool.side_effect == <span class="s">"irreversible"</span> }\n'+
      '<span class="k">advice</span> <span class="s">"require_approval"</span>;</pre>'+
-     '<div class="hint">'+p.rules+' rules in this draft. Editing the source is a pull request against the policy record.</div></div>'+
+     '<div class="hint">'+p.rules+' rules in this draft.</div></div>'+
      '<div class="field"><label>Tests that ship with it</label>'+
      '<div class="tw"><table class="narrow"><tbody>'+
      [["github__create_release@2 must require approval","pass"],
       ["github__get_file_contents@2 must be allowed","pass"],
       ["stripe__create_payment@4 with no mandate must be denied","pass"]]
       .map(function(r){return '<tr><td style="font-size:12px">'+h(r[0])+'</td><td><span class="b b-allowed"><span class="d"></span>'+r[1]+'</span></td></tr>';}).join("")+
-     '</tbody></table></div></div>'+
-     '<div class="note">Activation is a governed action with approval. In regulated mode it is a pull request instead.</div>',
+     '</tbody></table></div></div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn danger" onclick="openDialog(\'policydiscard\',\''+p.v+'\')">Discard</button>'+
      '<button class="btn primary" onclick="policySaveDraft(\''+p.v+'\')">Save the draft</button>'};
@@ -5463,18 +5435,17 @@ function policySaveDraft(v){
   var note=el("pe-note")?el("pe-note").value.trim():p.note;
   if(!note) return act("Say what the version changes before you save it.");
   p.note=note; p.tests="44 / 44 pass";
-  closeDialog(); render(); act(v+" saved. Activating it is a governed action with approval.");
+  closeDialog(); render(); act(v+" saved.");
 }
 DLG_EXT.policydiscard=function(v){
   var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
   if(!p) return noSuch("Policy version");
   if(p.state!=="draft") return {t:h(p.v)+" cannot be discarded",w:false,
-   b:'<div class="note">'+h(p.v)+' is '+h(p.state)+'. Every decision it made cites it, so it is kept. Supersede it with a new version instead.</div>',
+   b:'<div class="note">'+h(p.v)+' is '+h(p.state)+', so it is kept. Supersede it with a new version instead.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft new version</button>'};
   return {t:"Discard "+p.v+"?",w:false,
-   b:'<div class="warn"><b>'+h(p.note)+'</b> goes with it.</div>'+
-     '<div class="note">A draft has decided nothing, so nothing cites it and the row is removed outright. The active version is untouched.</div>',
+   b:'<div class="warn"><b>'+h(p.note)+'</b> goes with it.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
      '<button class="btn danger" onclick="policyDiscard(\''+p.v+'\')">Discard</button>'};
 };
@@ -5489,8 +5460,7 @@ DLG_EXT.policyrestore=function(v){
   if(!p) return noSuch("Policy version");
   var act0=POLICIES.filter(function(x){return x.state==="active";})[0];
   return {t:"Restore "+p.v+"?",w:false,
-   b:'<div class="note">A restore does not move the pointer back. It copies '+h(p.v)+'’s rules into a new version above '+
-     h(act0?act0.v:"the active one")+', which activates by a governed action with approval. The record keeps both.</div>'+
+   b:'<div class="note">This copies '+h(p.v)+'’s rules into a new draft above '+h(act0?act0.v:"the active version")+'.</div>'+
     '<div class="warn"><b>'+h(p.note)+'</b> is undone by this. Read what it changed before you approve it.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn primary" onclick="policyRestore(\''+p.v+'\')">Draft the restore</button>'};
@@ -5501,18 +5471,18 @@ function policyRestore(v){
   var n=parseInt(String(POLICIES[0].v).replace(/\D/g,""),10)+1;
   POLICIES.unshift({v:"pol_v"+n,state:"draft",by:PEOPLE.marcus.name,at:"2026-09-11 09:20Z",rules:p.rules,
    tests:p.tests,note:"restores "+p.v});
-  closeDialog(); render(); act("Drafted pol_v"+n+" from "+v+". It decides nothing until an approver activates it.","gold");
+  closeDialog(); render(); act("Drafted pol_v"+n+" from "+v+".","gold");
 }
 DLG_EXT.policyactivate=function(v){
   var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
   if(!p) return noSuch("Policy version");
   var cur=POLICIES.filter(function(x){return x.state==="active";})[0];
   return {t:"Activate "+p.v+"?",w:false,
-   b:'<div class="note">'+(cur?h(cur.v)+' is superseded and kept, because every decision it made cites it. ':'')+
+   b:'<div class="note">'+(cur?h(cur.v)+' is superseded. ':'')+
      'From the next tool call, every policy decision names '+h(p.v)+'.</div>'+
     '<dl class="kv"><dt>Rules</dt><dd>'+p.rules+'</dd><dt>Tests</dt><dd>'+h(p.tests)+'</dd>'+
     '<dt>What changes</dt><dd>'+h(p.note)+'</dd></dl>'+
-    '<div class="warn"><b>This is a governed action.</b> It records your name, and in regulated mode it is a pull request instead of a button.</div>',
+    '<div class="warn"><b>This is a governed action.</b> It records your name.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn primary" onclick="policyActivate(\''+p.v+'\')">Activate it</button>'};
 };
@@ -5543,28 +5513,27 @@ DLG_EXT.import=function(arg){
   var picked=impPicked();
   var steps='<div class="row imp-steps" style="gap:8px;margin-bottom:14px;font-size:12px">'+[[1,"Connect"],[2,"Review tools/list"],[3,"Classify and import"]].map(function(x){
     return '<span class="b '+(x[0]===step?"b-approval":x[0]<step?"b-allowed":"b-q")+'"'+(x[0]===step?' aria-current="step"':'')+'>'+(x[0]<step?"✓":x[0])+' · '+x[1]+'</span>';}).join('<span class="dim">→</span>')+'</div>';
-  if(step===1) return {t:"Import tools from a provider",s:"The registry is the only source of tools an agent can see. Nothing reaches a toolbelt until it is here.",w:false,
+  if(step===1) return {t:"Import tools from a provider",w:false,
    b:steps+'<div class="field"><label for="imp-url">Endpoint URL</label><input id="imp-url" value="https://mcp.confluence.a-intel.internal/mcp"></div>'+
     '<div class="field"><label for="imp-tr">Transport</label><select id="imp-tr"><option>streamable-http</option><option>sse</option><option>stdio</option></select></div>'+
     '<div class="field"><label for="imp-conn">Connection</label><select id="imp-conn"><option>Create one after import</option>'+CONNECTIONS.map(function(c){return '<option>'+h(c.id+' · '+c.name)+'</option>';}).join("")+'</select></div>'+
-    '<div class="note">oxagen calls <span class="mono">tools/list</span>, versions every tool it finds, and stores both schemas. Where a provider declares no <span class="mono">outputSchema</span>, the gateway records observed outputs and files a registry proposal for an admin to approve.</div>',
+    '<div class="note">Connecting calls <span class="mono">tools/list</span> on this endpoint.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="S.dlgArg=2;render()">Connect</button>'};
   if(step===2) return {t:"Review tools/list",s:plural(IMPORT_TOOLS.length,"tool")+" returned by mcp.confluence.a-intel.internal · protocol 2025-06-18",w:true,
    b:steps+IMPORT_TOOLS.map(function(t){
      return '<label class="check imp-tool" style="margin-bottom:8px"><input type="checkbox"'+(S.impPick[t.n]?' checked':'')+' onchange="S.impPick[\''+t.n+'\']=this.checked;render()">'+
       '<div class="grow">'+toolCell("confluence__"+t.n+"@1",{sz:"sm"})+'<div class="dim" style="font-size:11.5px;margin-top:3px">'+h(t.d)+'</div></div>'+
       '<div class="row" style="flex:none;gap:5px">'+hazard(t.risk,t.eff)+(t.out?'<span class="b b-allowed">outputSchema</span>':'<span class="b b-approval">no outputSchema</span>')+'</div></label>';}).join("")+
-     '<div class="warn" style="margin-top:6px"><b>'+(IMPORT_TOOLS.length-IMPORT_TOOLS.filter(function(t){return t.pick;}).length)+' are unchecked by default.</b> <span class="mono">delete_page</span> and <span class="mono">export_space</span> are irreversible or bulk egress and declare no output schema. '+
-     'Importing them grants nothing, but they would land denied by workspace policy until someone decides otherwise.</div>',
+     '<div class="warn" style="margin-top:6px"><b>'+(IMPORT_TOOLS.length-IMPORT_TOOLS.filter(function(t){return t.pick;}).length)+' are unchecked by default.</b> <span class="mono">delete_page</span> and <span class="mono">export_space</span> are irreversible or bulk egress and declare no output schema.</div>',
    f:'<span class="grow imp-count">'+picked.length+' of '+IMPORT_TOOLS.length+' selected</span><button class="btn" onclick="S.dlgArg=1;render()">Back</button>'+
     '<button class="btn primary" onclick="S.dlgArg=3;render()"'+(picked.length?'':' disabled')+'>Classify</button>'};
   var n0=verCount();
-  return {t:"Classify and import",s:"Risk, side effect, egress and financial class are what policy decides on.",w:true,
+  return {t:"Classify and import",w:true,
    b:steps+'<div class="tw"><table data-lt="1"><thead><tr><th>Tool version</th><th>Hazard</th><th>Egress</th><th>Financial</th><th>Output schema</th></tr></thead><tbody>'+
     picked.map(function(t){return '<tr class="imp-row"><td>'+toolCell("confluence__"+t.n+"@1",{sz:"sm"})+'</td><td>'+hazard(t.risk,t.eff)+'</td>'+
      '<td><span class="b b-q">internal</span></td><td>'+finBadge("none")+'</td><td>'+(t.out?'<span class="b b-allowed">declared</span>':'<span class="b b-approval">observed</span>')+'</td></tr>';}).join("")+
     '</tbody></table></div>'+
-    '<div class="note" style="margin-top:14px"><b>What import does not do.</b> It grants nothing. These '+plural(picked.length,"version")+' take the registry from '+n0.toLocaleString()+' to '+(n0+picked.length).toLocaleString()+' tool versions and sit there, callable by nobody, until a role grant puts them on a toolbelt.</div>',
+    '<div class="note" style="margin-top:14px">These '+plural(picked.length,"version")+' take the registry from '+n0.toLocaleString()+' to '+(n0+picked.length).toLocaleString()+' tool versions.</div>',
    f:'<span class="grow">Credential kind <span class="mono">api_key</span> · downscoping <span class="mono">none available</span></span><button class="btn" onclick="S.dlgArg=2;render()">Back</button>'+
     '<button class="btn primary" onclick="closeDialog();act(\'Imported '+picked.length+' tool versions from confluence. They are in the registry and on no toolbelt.\')">Import '+plural(picked.length,"tool")+'</button>'};
 };
@@ -8275,13 +8244,13 @@ function switchCard(s){
   var on=S.switches[s.id], m=S.flipMeta[s.id]||{};
   var by=m.by||s.by, at=m.at||s.at, why=m.why||s.why;
   var bc=on?"color-mix(in srgb,var(--st-denied) 45%,var(--border))":s.headline?"color-mix(in srgb,var(--gold) 30%,var(--border))":"var(--border)";
-  return '<div class="panel" style="border-color:'+bc+'"><div class="panel-h"><div class="ks-grow"><h3>'+h(ksName(s))+'</h3>'+
+  return '<div class="panel" data-help="'+(s.cls?"class-switch":"scoped-switch")+'" style="border-color:'+bc+'"><div class="panel-h"><div class="ks-grow"><h3>'+h(ksName(s))+'</h3>'+
    '<p>'+h(s.lvl)+' · '+h(s.scope)+'</p></div>'+
    '<button class="ks-sw'+(on?" on":"")+'" role="switch" aria-checked="'+(on?"true":"false")+'" aria-label="'+(on?"Clear":"Flip")+' the switch on '+h(ksName(s))+'" '+
    'onclick="openDialog(\'switch\',\''+s.id+'\')"><i></i><span class="lbl">'+(on?"On (calls blocked)":"Off (calls allowed)")+'</span></button></div>'+
    '<div class="panel-b"><dl class="kv"><dt>Blast radius</dt><dd>'+h(s.stops)+'</dd>'+
    (on&&by?'<dt>Flipped by</dt><dd>'+h(by)+'<span class="ks-sub">'+h(at)+'</span></dd><dt>Reason</dt><dd>'+h(why)+'</dd>':'')+
-   '<dt>Takes effect</dt><dd>On the next tool call. Running agents that keep calling lose their run token.</dd></dl>'+
+   '<dt>Takes effect</dt><dd>On the next tool call</dd></dl>'+
    (s.made?'<div class="row" style="margin-top:12px"><button class="btn sm" onclick="openDialog(\'switchedit\',\''+s.id+'\')">Edit</button>'+
      '<button class="btn sm danger" onclick="openDialog(\'switchdel\',\''+s.id+'\')">Remove</button></div>':'')+
    '</div></div>';
@@ -8331,9 +8300,9 @@ function ksFields(kind,target,why){
    opts.map(function(o){return '<option value="'+h(o.v)+'"'+(o.v===target?" selected":"")+'>'+h(o.lab)+'</option>';}).join("")+
    '</select></div>'+
    '<div class="ks-banner info"><span class="b b-q" style="flex:none">blast radius</span>'+
-   '<div class="g"><b>'+h(ksBlast(kind,target))+'</b>A new switch starts off (calls allowed). Turning it on blocks every affected call from the next tool call.</div></div>'+
+   '<div class="g"><b>'+h(ksBlast(kind,target))+'</b>A new switch starts off (calls allowed).</div></div>'+
    '<div class="field" style="margin-top:14px"><label for="ks-why">Why it exists</label>'+
-   '<input id="ks-why" value="'+h(why||"")+'" placeholder="Held ready for an incident on this host"><div class="hint">One sentence. It stays on the card until someone turns the switch on.</div></div>';
+   '<input id="ks-why" value="'+h(why||"")+'" placeholder="Held ready for an incident on this host"><div class="hint">One sentence.</div></div>';
 }
 function ksRefresh(){
   var host=el("ks-fields"); if(!host) return;
@@ -8341,8 +8310,7 @@ function ksRefresh(){
 }
 DLG_EXT.switchnew=function(){
   return {t:"Create a kill switch",s:"An agent, the device it runs on, or everything one operator answers for",w:false,
-   b:'<div id="ks-fields">'+ksFields("Agent","","")+'</div>'+
-     '<div class="note">The organization, workspace and class switches ship with the workspace and cannot be removed. One you create here can be edited, and removed while it is off.</div>',
+   b:'<div id="ks-fields">'+ksFields("Agent","","")+'</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="ksCreate()">Create it</button>'};
 };
@@ -8358,7 +8326,7 @@ function ksCreate(){
    by:null,at:null,why:null,stops:ksBlast(kind,target),made:true,note:why});
   S.switches[id]=false;
   S.tab.tools="switches";
-  closeDialog(); render(); act("Created a switch on "+target+". It stays off until you turn it on.","gold");
+  closeDialog(); render(); act("Created a switch on "+target+".","gold");
 }
 DLG_EXT.switchedit=function(id){
   var sw=switchById(id);
@@ -8386,15 +8354,14 @@ DLG_EXT.switchdel=function(id){
   var sw=switchById(id);
   if(!sw) return noSuch("Kill switch");
   if(!sw.made) return {t:h(ksName(sw))+" cannot be removed",w:false,
-   b:'<div class="note">'+h(ksName(sw))+' ships with the workspace. A switch has to be ready when an incident starts, so the organization, workspace, and class switches are permanent. Turn it off instead of removing it.</div>',
+   b:'<div class="note">'+h(ksName(sw))+' ships with the workspace and cannot be removed. Turn it off instead.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   if(S.switches[id]) return {t:"Clear it before you remove it",w:false,
-   b:'<div class="warn"><b>The switch on '+h(ksName(sw))+' is on right now.</b> Removing it would let every blocked call through with no record of who allowed it.</div>'+
-     '<div class="note">Clear the switch first. Clearing it records your name and your reason. Removing it afterward records nothing, because by then it blocks nothing.</div>',
+   b:'<div class="warn"><b>The switch on '+h(ksName(sw))+' is on right now.</b> Removing it would let every blocked call through with no record of who allowed it.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="openDialog(\'switch\',\''+id+'\')">Clear it</button>'};
   return {t:"Remove the switch on "+sw.target+"?",w:false,
-   b:'<div class="note">It is off, so it blocks nothing and no run changes. The switch leaves this page, and you can create it again.</div>',
+   b:'<div class="note">It is off, so it blocks nothing and no run changes.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
      '<button class="btn danger" onclick="ksRemove(\''+id+'\')">Remove</button>'};
 };
@@ -8412,16 +8379,14 @@ function switchDialog(){
    b:'<p class="muted" style="margin:0 0 14px;font-size:12.5px">'+h(s.lvl)+' · '+h(s.scope)+'</p>'+
     '<div class="ks-banner '+(on?"crit":"info")+'"><span class="b '+(on?"b-critical":"b-allowed")+'" style="flex:none"><span class="d"></span>'+(on?"blast radius":"restores")+'</span>'+
     '<div class="g"><b>'+h(s.stops)+'</b>'+(on
-     ?'Every affected call is blocked from the next tool call. Runs in flight keep running. Their next call that changes anything is blocked, and the record names this switch and your reason.'
-     :'Blocked calls are allowed again from the next tool call. Nothing blocked while the switch was on is retried.')+'</div></div>'+
-    (on&&s.cls?'<div class="note deny" style="margin-bottom:14px"><b>This is a class switch.</b> It names no provider or agent. It matches each tool version by the class it declares. '+
-     'A tool imported tomorrow that declares the same class is blocked as soon as it enters the registry.</div>':'')+
+     ?'Every affected call is blocked from the next tool call.'
+     :'Blocked calls are allowed again from the next tool call.')+'</div></div>'+
     '<div class="field"><label for="killwhy">Reason (recorded on every blocked call and read by the model)</label>'+
     '<textarea id="killwhy" rows="2">'+(on?"Suspected compromise of the Stripe restricted key. Hold every money movement until the rotation is confirmed.":"Rotation confirmed at 15:02 UTC. The security owner signed off.")+'</textarea></div>'+
     '<dl class="kv"><dt>Takes effect</dt><dd>Next tool call · kill-switch generation '+S.denyGen+' → '+(S.denyGen+1)+'</dd>'+
     '<dt>Backstop</dt><dd>Running agents that keep calling lose their run token.</dd>'+
     '<dt>Recorded as</dt><dd>A security event, and a policy decision on every affected run</dd></dl>',
-   f:'<span class="grow">'+(on?"You can clear this switch at any time. Nothing is destroyed.":"")+'</span>'+
+   f:'<span class="grow"></span>'+
     '<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn '+(on?"danger":"primary")+'" onclick="doFlip(\''+s.id+'\')">'+(on?"Block calls now":"Allow calls again")+'</button>'};
 }
@@ -8430,10 +8395,10 @@ function doFlip(id){
   var on=!S.switches[id];
   var why=el("killwhy")?el("killwhy").value:"";
   S.switches[id]=on; S.denyGen+=1;
-  if(on) S.flipMeta[id]={by:"Marcus Bell",at:"just now · this mockup",why:why};
+  if(on) S.flipMeta[id]={by:"Marcus Bell",at:"2026-09-11 09:16 UTC",why:why};
   var wide=(s.cls||s.lvl==="Organization")?" across the organization":s.lvl==="Workspace"?" in "+s.target:"";
-  S.killBanner=on?'<div class="ks-banner crit"><span class="b b-critical" style="flex:none"><span class="d"></span>Switch on</span>'+
-   '<div class="g"><b>'+h(ksName(s))+' is blocked'+wide+'.</b>'+h(s.stops)+'. Every affected call is blocked from the next tool call. The record names this switch and the reason. '+
+  S.killBanner=on?'<div class="ks-banner crit" data-help="tools/flip-banner"><span class="b b-critical" style="flex:none"><span class="d"></span>Switch on</span>'+
+   '<div class="g"><b>'+h(ksName(s))+' is blocked'+wide+'.</b>'+h(s.stops)+'. Every affected call is blocked from the next tool call. '+
    'Kill-switch generation is now '+S.denyGen+'.</div>'+
    '<button class="btn sm" onclick="openDialog(\'switch\',\''+id+'\')">Clear it</button></div>':null;
   S.tab.tools="switches";
@@ -9591,10 +9556,9 @@ function dialog(){
      '<div class="note">Until the GitHub App links the main repo the workspace is provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsCreate()">Create</button>'},
    schema:schemaDlg(),
-   toolcats:{t:"Tool categories",w:true,b:toolCatsBody(),f:'<span class="grow" style="font-size:12.5px;color:var(--muted)">Category is a registry attribute, not a policy: a rule may reference it, but only risk, side effect, financial effect and egress carry a decision by themselves.</span><button class="btn" onclick="closeDialog()">Close</button>'},
+   toolcats:{t:"Tool categories",w:true,b:toolCatsBody(),f:'<span class="grow"></span><button class="btn" onclick="closeDialog()">Close</button>'},
    tool:toolDlg(),
    connection:{t:"Add a connection",w:false,
-    s:"The customer’s credential to a provider. It is tested before it is saved, and it is never readable afterwards.",
     b:'<div class="fields">'+
      '<div class="field"><label for="c-name">Name</label><input id="c-name" value="Datadog API key · platform" autofocus></div>'+
      '<div class="field"><label for="c-kind">Kind</label><select id="c-kind"><option>oauth</option><option selected>api_key</option><option>cloud_role</option><option>github_app</option></select></div>'+
@@ -9602,12 +9566,12 @@ function dialog(){
      '<div class="field"><label for="c-owner">Owner</label><select id="c-owner"><option>Marcus Bell · ws.owner</option><option>Priya Natarajan · org.owner</option><option>Dana Okafor · org.billing</option></select></div>'+
      '<div class="field"><label for="c-review">Review date</label><input id="c-review" type="date" value="2026-12-31"></div>'+
      '<div class="field"><label for="c-secret">Secret</label><input id="c-secret" type="password" value="dd_api_0000000000000000" autocomplete="off">'+
-     '<div class="hint">Enveloped under the organization’s key. Every read is audited. There is no way to read it back.</div></div>'+
+     '<div class="hint">It cannot be read back after you save it.</div></div>'+
      '<label class="check"><input type="checkbox"><div class="grow"><div class="n">two_person</div>'+
      '<div class="d">Required for any connection whose tools carry a financial effect.</div></div></label>',
     f:'<span class="grow">Downscoping for this provider: <span class="mono">restricted key</span>.</span>'+
      '<button class="btn" onclick="closeDialog()">Cancel</button>'+
-     '<button class="btn primary" onclick="closeDialog();act(\'Tested against the provider, then saved. No agent can read it.\')">Test and save</button>'},
+     '<button class="btn primary" onclick="closeDialog();act(\'Tested against the provider, then saved.\')">Test and save</button>'},
    funding:{t:"Change funding source",w:true,b:
      '<div class="wz-opts">'+ORG_KEY_SOURCES.map(function(x){
        return '<div class="wz-opt'+(ORG_KEY.source===x[0]?" on":"")+'"><span class="wz-opt-h"><b class="mono">'+h(x[0])+'</b>'+
@@ -9703,15 +9667,14 @@ function schemaDlg(){
   var t=list[0];
   return {t:"Approve an observed output schema",w:true,
    b:'<p class="eyebrow q"><span class="mono">'+h(t.n)+'@'+h(t.v)+'</span> · the slack provider declares no output schema for this tool</p>'+
-     '<div class="note" style="margin-bottom:14px"><b>What has been happening until now.</b> The gateway recorded this tool’s outputs and validated them only for size and type. '+
-     'Every run that used it says so in its completeness record. Approving the inferred schema turns strict validation on from the next call.</div>'+
+     '<div class="note" style="margin-bottom:14px">Approving the inferred schema turns strict validation on from the next call.</div>'+
      '<dl class="kv"><dt>Observations</dt><dd><span class="num">'+t.calls30.toLocaleString()+'</span> responses over 30 days, from '+plural(agentsWithTool(t.n+"@"+t.v).length,"agent")+'</dd>'+
      '<dt>Inferred from</dt><dd>the intersection of every observation · 0 outliers discarded</dd>'+
      '<dt>Digest on approval</dt><dd class="mono">sha256:'+t.n.length.toString(16)+'c4f9…7b02</dd></dl>'+
      codePair([{lab:"Inferred output schema",sp:"what approval enforces",code:OBSERVED_SCHEMAS[t.n]||"{}"},
                {lab:"One recorded response",sp:"for comparison",code:OBSERVED_SAMPLES[t.n]||"{}"}],"cpair-t")+
      (list.length>1?'<p class="muted" style="font-size:12px;margin:12px 0 0">'+(list.length-1)+' more waiting after this one.</p>':''),
-   f:'<span style="margin-right:auto;font-size:12px;color:var(--muted);max-width:46ch">Approving is a governed action: <span class="mono">approve_tool_schema</span>. It is audited, and it bumps the tool version’s schema digest, which every future frame records.</span>'+
+   f:'<span class="grow"></span>'+
      '<button class="btn" onclick="closeDialog()">Not yet</button><button class="btn primary" onclick="approveSchema(\''+t.n+'\')">Approve schema</button>'};
 }
 function toolDlg(){
@@ -9739,16 +9702,13 @@ function toolDlg(){
      '<p class="muted" style="font-size:12px;margin:0 0 14px">'+h(TCAT[toolMeta(t.n).cat].s)+'</p>'+
      '<dl class="kv"><dt>Schema digest</dt><dd class="mono">'+h(toolDigest(t))+'</dd>'+
      '<dt>Schema origin</dt><dd class="mono">'+h(toolOrigin(t))+'</dd>'+
-     '<dt>Credential</dt><dd class="mono">'+h(t.cred)+'<span class="sub">The agent never sees it.</span></dd>'+
+     '<dt>Credential</dt><dd class="mono">'+h(t.cred)+'</dd>'+
      '<dt>Price</dt><dd><span class="num">'+usd(t.price)+'</span> <span class="dim">USD</span><span class="sub">per call, from the price book</span></dd>'+
      (fin?'<dt>amount_path</dt><dd class="mono">'+h(t.amount)+'</dd><dt>currency_path</dt><dd class="mono">'+h(t.currency)+'</dd>'+
           '<dt>counterparty_path</dt><dd class="mono">'+h(t.party)+'</dd><dt>idempotency</dt><dd class="mono">'+h(t.idem)+'</dd>':'')+'</dl>'+
-     (fin?'<div class="warn" style="margin-top:14px"><b>Financial tool.</b> The amount is read from the call by <span class="mono">'+h(t.amount)+'</span>, never from prose. '+
-          'A call without a mandate is denied before dispatch; one over its mandate is denied or routed to approval by the mandate’s own rule.</div>':'')+
-     '<p class="eyebrow q" style="margin:14px 0 8px">Input schema</p><pre>'+schema+'</pre>'+
-     '<p class="muted" style="font-size:12px;margin:12px 0 0">Validation is strict in both directions: no additional properties, formats enforced, size caps. '+
-     'A failure is <span class="mono">schema_violation</span> and the call is denied. The canonical input digest is computed here and is the call’s identity for idempotency, approval binding, and the receipt.</p>',
-   f:'<span style="margin-right:auto;font-size:12.5px;color:var(--muted)">On <b class="num">'+beltsWithTool(t.n+"@"+t.v).length+'</b> toolbelts ·<b class="num">'+t.calls30.toLocaleString()+'</b> calls in 30 days</span>'+
+     (fin?'<div class="warn" style="margin-top:14px"><b>Financial tool.</b> A call without a mandate is denied before dispatch.</div>':'')+
+     '<p class="eyebrow q" style="margin:14px 0 8px">Input schema</p><pre>'+schema+'</pre>',
+   f:'<span style="margin-right:auto;font-size:12.5px;color:var(--muted)">On <b class="num">'+beltsWithTool(t.n+"@"+t.v).length+'</b> '+(beltsWithTool(t.n+"@"+t.v).length===1?'toolbelt':'toolbelts')+' · <b class="num">'+t.calls30.toLocaleString()+'</b> calls in 30 days</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'};
 }
 
@@ -12685,12 +12645,10 @@ function wzTool(){
   var z=S.wz,w=ws();
   if(z.step===1){
     var ok=wzDescOk();
-    return {t:"Create a tool", s:"Describe the capability, not the implementation.",
+    return {t:"Create a tool", s:"Describe what the tool does.",
      b:wzDesc("Refund a Stripe charge when support asks for one, never above the amount on the original payment.",
        ["Process refunds against Stripe charges","Post a release note to the ops channel in Slack",
-        "Read rows out of the Snowflake warehouse","Retire a feature flag in our own admin API"],
-       "oxagen matches this against every provider it can already reach before it offers to write a line of code. Importing is nearly always the cheaper answer: an imported tool arrives with a schema, a publisher and a credential story.")+
-      '<div class="note">A tool is not permission. Whatever you create here lands in the registry callable by nobody until a role puts it on a toolbelt.</div>',
+        "Read rows out of the Snowflake warehouse","Retire a feature flag in our own admin API"]),
      f:wzNext("Match it",ok)};
   }
   if(z.step===2){
@@ -12710,10 +12668,10 @@ function wzTool(){
         '<span><i>Credential</i><span class="mono">'+h(s.cred)+'</span></span><span><i>Downscope</i><span class="mono">'+h(s.downscope)+'</span></span></span>'+
        '</button>';})():
       '<div class="wz-opt off"><span class="wz-opt-h"><b>Import a provider</b><span class="b b-q">nothing matched</span></span>'+
-      '<span class="d">No provider in the catalogue answers this description. That is the case where writing one is the right answer.</span></div>';
+      '<span class="d">No provider in the catalogue answers this description.</span></div>';
     var build='<button class="wz-opt'+(z.path==="build"?" on":"")+'" onclick="wzSetR(\'path\',\'build\')" aria-pressed="'+(z.path==="build")+'">'+
      '<span class="wz-opt-h"><b>Build it</b>'+(rec==="build"?'<span class="b b-allowed">recommended</span>':'')+'</span>'+
-     '<span class="d">oxagen drafts the manifest and a handler in TypeScript, Python, Go or Rust. The code is yours, in your repository; oxagen governs the call that reaches it and the receipt that leaves.</span>'+
+     '<span class="d">oxagen drafts the manifest and a handler in TypeScript, Python, Go or Rust.</span>'+
      '<span class="wz-opt-kv"><span><i>You own</i>the endpoint, the credential, the deploy</span>'+
       '<span><i>oxagen owns</i>the schema, the gate, the receipt</span>'+
       '<span><i>First call</i>after the pull request merges and a role grants it</span></span></button>';
@@ -12722,24 +12680,23 @@ function wzTool(){
        '<div class="wz-opts">'+imp+build+'</div>'+
        (ms.length>1?'<div class="note" style="margin-top:12px"><b>Also matched: </b>'+ms.slice(1).map(function(m){
          return '<button class="lnk" onclick="wzSetR(\'srv\',\''+h(m.s.id)+'\')">'+h(m.s.name)+'</button>';}).join(", ")+
-         '. Picking one of these changes which provider the import walks.</div>':''),
+         '.</div>':''),
      f:wzNext(z.path==="import"?"Review its tools":"Draft the manifest",true,"wzSet('srv',"+(top?"'"+(z.srv||top.s.id)+"'":"null")+");")};
   }
   if(z.path==="import"){
     var s2=mcpSrv(z.srv)||(mcpMatch(z.desc)[0]||{s:MCP_CATALOG[0]}).s;
-    return {t:"Import "+s2.name, s:"The importer calls tools/list, versions everything it finds, and stores both schemas.",
+    return {t:"Import "+s2.name, s:s2.publisher,
      b:'<div class="wz-sum"><dl class="kv">'+
         '<dt>Provider</dt><dd><span class="mono">'+h(s2.url)+'</span></dd>'+
         '<dt>Publisher</dt><dd>'+h(s2.publisher)+(s2.verified?' <span class="b b-proven">verified</span>':' <span class="b b-approval">unverified</span>')+'</dd>'+
         '<dt>Transport</dt><dd><span class="mono">'+h(s2.transport)+'</span></dd>'+
         '<dt>Credential</dt><dd><span class="mono">'+h(s2.cred)+'</span> · downscoped '+h(s2.downscope)+'</dd>'+
-        '<dt>Tools</dt><dd>'+s2.tools.length+' in its catalogue entry; the importer reads the live list</dd>'+
+        '<dt>Tools</dt><dd>'+s2.tools.length+' in its catalogue entry</dd>'+
        '</dl></div>'+
        '<div class="wz-opt-tools" style="margin-top:12px">'+s2.tools.map(function(t){
          return '<span class="wz-mt">'+toolCell(s2.id+"__"+t.n+"@1",{sz:"sm"})+hazard(t.risk,t.eff)+
           (t.fin!=="none"?finBadge(t.fin):'')+'</span>';}).join("")+'</div>'+
-       (s2.fin?'<div class="warn" style="margin-top:12px"><b>This provider moves money.</b> Its financial tools are denied by construction until a named human owner with a finance role holds the connection and every agent that may call them holds a mandate. Importing changes none of that.</div>':'')+
-       '<div class="note" style="margin-top:12px">Import grants nothing. These versions land in the registry and sit there, callable by nobody, until a role grant puts them on a toolbelt.</div>',
+       (s2.fin?'<div class="warn" style="margin-top:12px"><b>This provider moves money.</b> Its financial tools are denied by construction until a named human owner with a finance role holds the connection and every agent that may call them holds a mandate.</div>':''),
      f:'<button class="btn primary" onclick="S.wz=null;openDialog(\'import\',1)">Open the importer</button>'};
   }
   if(z.step===3){
@@ -12748,7 +12705,7 @@ function wzTool(){
     var cl=doc&&doc.classification?doc.classification:{};
     var fx=Array.isArray(cl.side_effects)?cl.side_effects:[];
     var eff=fx.indexOf("irreversible")>=0?"irreversible":fx.indexOf("write")>=0?"write":"read";
-    return {t:"The manifest", s:"This file is the tool. Every chip below is read out of it, not out of a form.",
+    return {t:"The manifest", s:".oxagen/tools/"+wzToolName()+".toml",
      b:wzDraftNote("A registry entry, drafted from your description.")+
       '<div class="wz-derived">'+(doc
         ?catBadge(cl.category||"read")+hazard(cl.risk||"low",eff)+
@@ -12756,20 +12713,18 @@ function wzTool(){
          '<span class="b b-q mono">'+h(doc.name||"")+'@'+h(String(doc.version||1))+'</span>'
         :'<span class="b b-denied">the file does not parse, so the chips stay empty until it does</span>')+'</div>'+
       cedHtml(key,".oxagen/tools/"+wzToolName()+".toml","toml",{small:true,
-        bar:'<button class="btn sm" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Revert</button>'})+
-      '<div class="note" style="margin-top:12px">Declare the worst case, not the common case. The gate a call gets is computed from these four fields and nothing else. An audit flags a tool classified <span class="mono">read</span> that writes.</div>',
+        bar:'<button class="btn sm" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Revert</button>'}),
      f:wzNext("Show me the code",!!doc)};
   }
   if(z.step===4){
     var lang=z.lang||"ts";
-    return {t:"The code", s:"A starting point in four languages. You own it; oxagen governs the call that reaches it.",
+    return {t:"The code", s:"TypeScript, Python, Go or Rust",
      b:'<div class="wz-langs" role="tablist">'+WZ_LANGS.map(function(L){
         return '<button class="tab" role="tab" aria-selected="'+(lang===L[0])+'" onclick="wzSetR(\'lang\',\''+L[0]+'\')">'+h(L[1])+'</button>';}).join("")+'</div>'+
       '<div class="sx-cfg"><div class="sx-cfg-h">'+h(wzToolCodeFile(lang))+'<span class="grow"></span>'+h((CED_LANG[lang]||{}).label||"")+'</div>'+
       '<pre>'+hlCode(wzToolCode(lang),lang)+'</pre></div>'+
       '<div class="sx-cfg" style="margin-top:12px"><div class="sx-cfg-h">schema/'+h(wzToolName())+'.input.json<span class="grow"></span>JSON Schema</div>'+
-      '<pre>'+hlJson(wzToolSchema())+'</pre></div>'+
-      '<div class="note" style="margin-top:12px">Three things every one of these does, in every language: it reads the grant off the call rather than a key out of the environment, it passes the request id as the idempotency key, and it declares its annotations so a provider that lies about being read-only is a diff somebody can see.</div>',
+      '<pre>'+hlJson(wzToolSchema())+'</pre></div>',
      f:wzNext("Open the pull request",true)};
   }
   var hz2=wzToolHaz(),n2=wzToolName();
@@ -12789,7 +12744,7 @@ function wzTool(){
      ["Secret and PII scan","the manifest, both schemas and the handler are scanned · a literal key in any of them fails the check"]],
     "Open the pull request",
     w.main+"#524 opened. "+n2+"@1 exists when it merges, and it is on no toolbelt until a role grant puts it there.");
-  return {t:pr.t, s:"A tool version is a file, like everything else here.", b:pr.b,
+  return {t:pr.t, s:w.name+" · "+w.main, b:pr.b,
    f:'<button class="btn primary" onclick="wzOpenPr(\''+pr.msg.replace(/'/g,"\\'")+'\')">'+h(pr.btn)+'</button>'};
 }
 function wzToolCodeFile(lang){

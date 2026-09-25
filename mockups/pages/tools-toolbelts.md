@@ -22,7 +22,7 @@ This tab is unchanged by the fleet operations wedge except for that rule. The fr
 
 **Header and tab bar** as in `tools.md`, with Toolbelts selected. New tool is plain on this tab, because New toolbelt carries the gold.
 
-**Toolbelts panel.** Title "Toolbelts". Caption: "A toolbelt is a named set of tool versions assigned to agents. It decides which tools a model can see. It grants no permission." The panel header carries the badge "9 toolbelts · 22 tool versions" (the toolbelts, and the distinct tool versions across them) and **New toolbelt** (gold, opens `beltnew`).
+**Toolbelts panel.** Title "Toolbelts", with no caption: what a toolbelt is and why it grants nothing is in the component help (`mockups/help/tools-toolbelts.md`, Toolbelts). The panel header carries the badge "9 toolbelts · 22 tool versions" (the toolbelts, and the distinct tool versions across them) and **New toolbelt** (gold, opens `beltnew`).
 
 - **List controls** (`ltTable()`): "Search this list", the filters "Any owner", "Any availability" and "Any agents assigned", **Rows** (10 by default) and the pager.
 - **Table**, columns in order: Toolbelt · Owner · Tools · Providers · Agents assigned · Gates on its tools · Availability · Updated.
@@ -35,11 +35,11 @@ This tab is unchanged by the fleet operations wedge except for that rule. The fr
   - *Availability*: "All reachable" (allowed colour) or "Unavailable" (critical colour), over the reason: "Every tool version is in the registry and no kill switch covers it.", "Some calls wait for a mandate or an approval.", "N stopped by a kill switch", "N not in the registry", or the last two joined.
   - *Updated*: when the toolbelt last changed.
   - A row opens `belt`. It is keyboard reachable, with `role="button"` and the label "Open <toolbelt name>".
-- **Note**: "Assigning a toolbelt grants no permission. Every call from it is still checked against the agent’s roles, the policy on the tool version, the kill switches, and the agent’s mandates. If Availability shows Unavailable, agents can see a tool they can’t call today."
+- No note under the table. What a call from a toolbelt is still checked against, and what Unavailable means for the agents that carry it, are in the component help.
 
 The demo catalogue holds nine toolbelts: Repository reader, Repository contributor, Release control, Context graph, Workstation, Issue tracker, Messaging, Payments and Cloud cost. Messaging reads "Unavailable" over "1 stopped by a kill switch", because the Slack provider switch is on and blocking `slack__post_message@2`.
 
-**Delivery panel.** Title "Delivery". Caption: "One toolbelt can reach many agents, so review a change to it before you save." List controls with the filters "Any tier", "Any toolbelts" and "Any providers". Columns in order: Agent · Toolbelts · Tool versions · Providers · Tier.
+**Delivery panel.** Title "Delivery", with no caption (the component help says why to read it before a change). List controls with the filters "Any tier", "Any toolbelts" and "Any providers". Columns in order: Agent · Toolbelts · Tool versions · Providers · Tier.
 
 - *Agent*: the agent key in mono (`a-intel.core.release-manager`) over the agent's description.
 - *Toolbelts*: one badge per toolbelt the agent carries.
@@ -51,13 +51,13 @@ The demo catalogue holds nine toolbelts: Repository reader, Repository contribut
 **Dialogs this tab opens.**
 
 - `belt` (wide). Title: the toolbelt's name. Subtitle: what it is for.
-  - A warning when a version on the toolbelt cannot be called today: "1 of the 2 tool versions on this toolbelt cannot be called today. 1 stopped by a kill switch. Agents with this toolbelt can still see them, and each call is blocked when it is sent."
+  - A warning when a version on the toolbelt cannot be called today: "1 of the 2 tool versions on this toolbelt cannot be called today. 1 stopped by a kill switch."
   - The toolbelt's own note, where it has one. Release control: "Every tool here is irreversible or denied. A grant reaching this toolbelt still meets the policy at the call." Workstation: "Harness-native. Delivered only to an agent on the harness tier or above, because nothing below it installs a hook." Payments: "Assigning this toolbelt authorizes nothing. A financial call is denied before dispatch unless the agent holds a mandate covering it."
   - Owner (the team, with "Last changed <time> by <person>"), Providers (badges), Agents assigned (one button per agent, each opening that agent's Toolbelt tab, or, for a toolbelt nobody carries, "Unassigned. No agent carries it yet."), and Gates on its tools.
   - "Tool versions on this toolbelt": Tool version · Provider · Hazard · Gate · Calls 30d. A row opens `tool` (`tools.md`). A version missing from the registry spans the row and says "Not in the registry. A call by this name fails as an unknown tool."
-  - Closing note: "Assigning this toolbelt grants no permission. It adds to what the model can see. Every call from it is still checked against the agent’s roles, the policy on the tool version, the kill switches, and the agent’s mandates."
+  - No closing note. Why assigning a toolbelt grants nothing is in the component help (`mockups/help/tools-toolbelts.md`, Toolbelt).
   - Footer: **Remove** (danger: "A toolbelt cannot be removed while an agent carries it. Unassign it first."), **Assign to an agent** ("Assignment is edited on the agent. Open its Toolbelt tab to add or remove this toolbelt."), **Edit tools** (gold: "A change to this toolbelt reaches 3 agents at their next session.", counting the agents that carry it).
-- `beltnew`, "New toolbelt", subtitle "A named set of tool versions that many agents can carry." Fields: Name (placeholder "Release control"), What it is for, Owner (platform, finops, security). Note: "A toolbelt is a job, not a category. Name it after the work an agent does with it, so a reviewer can tell from the name alone whether an agent should carry it." Footer: Cancel, **Create** (gold: "Toolbelt created. It reaches no agent until one is assigned it.").
+- `beltnew`, "New toolbelt", no subtitle. Fields: Name (placeholder "Release control"), What it is for, Owner (platform, finops, security). No note: the naming advice is in the component help (`mockups/help/tools-toolbelts.md`, New toolbelt). Footer: Cancel, **Create** (gold: "Toolbelt created. No agent carries it yet.").
 - `tool`, from a row of the toolbelt dialog (`tools.md`).
 
 ## Data sources
