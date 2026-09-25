@@ -353,3 +353,99 @@ A denied page names the permission it needs, so the next step is a request, not 
 
 ### States
 Loaded only.
+
+## Loading skeleton {#shell/loading-state}
+
+The loading skeleton holds a page's shape while its first read is in flight: four tile blocks over one panel of seven rows.
+
+### Purpose
+It tells you the page is on its way and where its parts will land, so nothing jumps when the data arrives. There is nothing to do on it.
+
+### Rationale
+Every list and record page draws the same skeleton, so a slow read looks the same everywhere. It carries no copy: a spinner line such as "Loading agents" would say what the shape already says. A page that owns a busy control (a gate step's primary button) shows that control's own busy state instead.
+
+### Data sources
+| Field | Mockup source | Target store | Status |
+|---|---|---|---|
+| The shape | `skeleton()` in `engine.js` | none: the app draws it before the first response | shipped |
+
+### Logic
+1. A page renderer returns `skeleton()` when `S.state` is `loading`, before it reads any collection.
+2. The four `.sk.b` blocks stand for the tile row, and the panel's seven `.sk.r` rows for the first table.
+3. `?state=loading` pins it. The review island's State switch sets it on any page that has the state.
+
+### States
+It is the loading state. On a phone the four blocks stack two across and the panel runs full width.
+
+## Empty panel {#shell/empty-state}
+
+The empty panel stands in for a list that has nothing in it: an icon, a heading, one sentence, and the action that fills the list.
+
+### Purpose
+It says the list is empty on purpose, not broken, and puts the one action that starts it in reach, such as **Add provider** on Tools or **Enroll a runtime** on Runtimes.
+
+### Rationale
+A table with only its header row reads as a failed read. A named empty state with its first action keeps you on the page. Each page writes its own heading and sentence, because only the page knows what an empty list of its records means.
+
+### Data sources
+| Field | Mockup source | Target store | Status |
+|---|---|---|---|
+| Heading, sentence, actions | the caller of `emptyState(t, p, acts)` | the list read returning zero rows | shipped |
+
+### Logic
+1. A page renderer returns `emptyState()` when `S.state` is `empty`, or when its collection is empty in the loaded state.
+2. The heading names what is missing ("No runtimes enrolled"). The sentence says what fills it. The actions are the page's own.
+3. The panel draws no table and no tiles.
+
+### States
+It is the empty state. On a phone the actions stack full width.
+
+## Error panel {#shell/error-state}
+
+The error panel replaces a page whose read failed: "<page> could not be loaded", the error the control plane returned, and two ways forward.
+
+### Purpose
+It tells you the read failed, that nothing changed, and that your fleet kept working. You try again, or open an incident if the failure persists.
+
+### Rationale
+A failed page read is the control plane's problem, not the fleet's. Frames are written by the collector on each host, not by Oxagen, so runs keep recording while a page is down, and the panel says so to stop a person from pausing agents over a dashboard error. It names the exact code (`503 iam_principals_unavailable`, `502 stripe_unreachable`) so the incident starts from a fact.
+
+### Data sources
+| Field | Mockup source | Target store | Status |
+|---|---|---|---|
+| What failed, code | the caller of `errorState(what, code)` | the failing read's error response | partial: the codes are the mockup's |
+| Trace line | fixed `trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z` | the request's trace id, region and time | future-only |
+
+### Logic
+1. A page renderer returns `errorState()` when `S.state` is `error`.
+2. **Try again** re-renders the page (`render()`). A build retries the read.
+3. **Open an incident** opens the `incident` dialog with the page and code filled in.
+4. The trace line under the actions is mono and dim. A build prints the real trace id.
+
+### States
+It is the error state. On a phone the actions stack full width and the trace line wraps.
+
+## Access denied panel {#shell/denied-state}
+
+The access denied panel replaces a page you lack the role for: "You cannot see <page>", the permission you are missing, and who can grant it.
+
+### Purpose
+It names the exact permission the page needs, so you can ask for it, and it takes you back to Work if you cannot wait.
+
+### Rationale
+A denial that says only "Forbidden" sends a person to support. This one names the permission (`agent.read on core-platform`) and the policy version that decided (`pol_v41`), so an owner can grant the right thing. The grant is a governed action and lands in the audit record with your name on it. In the policy engine a deny wins over every allow, which is why Decided by names one policy version and not a list of roles.
+
+### Data sources
+| Field | Mockup source | Target store | Status |
+|---|---|---|---|
+| What, needed permission | the caller of `deniedState(what, need)` | the authorization error's required permission | partial |
+| Signed in as | `me().name`, `me().role` | the session | shipped |
+| Decided by | fixed `pol_v41` | the policy version on the decision | partial |
+
+### Logic
+1. A page renderer returns `deniedState()` when `S.state` is `denied`.
+2. **Request access** opens `request-access`. **Back to Work** goes to the workspace's Work page.
+3. The key-value block lists Signed in as, Needed and Decided by.
+
+### States
+It is the denied state. On a phone the actions stack full width and the key-value block runs full width.

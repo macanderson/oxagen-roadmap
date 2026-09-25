@@ -911,37 +911,37 @@ function toolCatsBody(){
 /* -------- the five states -------- */
 function skeleton(){
   var r="";for(var i=0;i<7;i++)r+='<div class="sk r" style="margin-bottom:8px"></div>';
-  return '<div class="grid g4" style="margin-bottom:16px">'+
+  return '<div class="grid g4" style="margin-bottom:16px" data-help="shell/loading-state">'+
     '<div class="sk b"></div><div class="sk b"></div><div class="sk b"></div><div class="sk b"></div></div>'+
     '<div class="panel"><div class="panel-h"><div class="sk t" style="width:180px"></div></div>'+
     '<div class="panel-b">'+r+'</div></div>';
 }
 function emptyState(t,p,acts){
-  return '<div class="state-wrap"><div class="ico" aria-hidden="true">'+
+  return '<div class="state-wrap" data-help="shell/empty-state"><div class="ico" aria-hidden="true">'+
    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/></svg></div>'+
    '<h2>'+h(t)+'</h2><p>'+p+'</p><div class="acts">'+(acts||'')+'</div></div>';
 }
 function errorState(what,code){
-  return '<div class="state-wrap"><div class="ico" style="color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 40%,transparent)" aria-hidden="true">'+
+  return '<div class="state-wrap" data-help="shell/error-state"><div class="ico" style="color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 40%,transparent)" aria-hidden="true">'+
    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>'+
    '<h2>'+h(what)+' could not be loaded</h2>'+
-   '<p>The control plane answered <code>'+h(code)+'</code>. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by oxagen.</p>'+
+   '<p>The control plane answered <code>'+h(code)+'</code>. Nothing was changed. Runs kept recording while this page was down.</p>'+
    '<div class="acts"><button class="btn primary" onclick="render()">Try again</button>'+
    '<button class="btn" onclick="openDialog(\'incident\')">Open an incident</button></div>'+
    '<p class="mono dim" style="margin-top:16px;font-size:11.5px">trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z</p></div>';
 }
 function deniedState(what,need){
-  return '<div class="state-wrap"><div class="ico" style="color:var(--st-denied);border-color:color-mix(in srgb,var(--st-denied) 40%,transparent)" aria-hidden="true">'+
+  return '<div class="state-wrap" data-help="shell/denied-state"><div class="ico" style="color:var(--st-denied);border-color:color-mix(in srgb,var(--st-denied) 40%,transparent)" aria-hidden="true">'+
    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>'+
    '<h2>You cannot see '+h(what)+'</h2>'+
    '<p>Your roles on <b>'+h(ORG.name)+'</b> do not include <code>'+h(need)+'</code>. '+
-   'An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.</p>'+
+   'An organization owner can grant it.</p>'+
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'request-access\')">Request access</button>'+
    '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/work\')">Back to Work</button></div>'+
    '<div class="kv" style="margin-top:20px;text-align:left;max-width:420px">'+
    '<dt>Signed in as</dt><dd>'+h(me().name)+' · <span class="mono">'+h(me().role)+'</span></dd>'+
    '<dt>Needed</dt><dd><span class="mono">'+h(need)+'</span></dd>'+
-   '<dt>Decided by</dt><dd><span class="mono">pol_v41</span> · deny wins over every allow</dd></div></div>';
+   '<dt>Decided by</dt><dd><span class="mono">pol_v41</span></dd></div></div>';
 }
 
 /* -------- routing -------- */

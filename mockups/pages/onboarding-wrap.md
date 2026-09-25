@@ -44,7 +44,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell), Claude Code tab and macOS selected.
 - **loading**: the shell and the rail stay. The card is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
-- **access denied**: “You cannot see onboarding”, then “Your roles on Anderson Intelligence Corp. do not include `org.create for marcus@a-intel.example`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Work**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “org.create for marcus@a-intel.example”, *Decided by* “pol_v41 · deny wins over every allow”.
+- **access denied**: “You cannot see onboarding”, then “Your roles on Anderson Intelligence Corp. do not include `org.create for marcus@a-intel.example`. An organization owner can grant it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Work**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “org.create for marcus@a-intel.example”, *Decided by* “pol_v41”.
 
 ## Mobile
 

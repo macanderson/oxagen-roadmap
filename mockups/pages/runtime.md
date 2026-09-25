@@ -115,8 +115,8 @@ From `pRuntimes()`. The design gives this page no empty state: the host exists o
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
 - **loading**: the shell stays, and the page body, header included, is the skeleton: four tile blocks and a panel of seven rows.
-- **error**: "Runtimes could not be loaded", with `503 collector_unreachable`, "Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by oxagen.", **Try again** (gold), **Open an incident** and "trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z".
-- **access denied**: "You cannot see the runtimes of this workspace", naming `runtime.read on core-platform`, with **Request access** (gold) and **Back to Work**, then Signed in as "Marcus Bell · workspace.owner · core-platform", Needed "runtime.read on core-platform" and Decided by "pol_v41 · deny wins over every allow".
+- **error**: "Runtimes could not be loaded", with `503 collector_unreachable`, "Nothing was changed. Runs kept recording while this page was down.", **Try again** (gold), **Open an incident** and "trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z".
+- **access denied**: "You cannot see the runtimes of this workspace", naming `runtime.read on core-platform`, with **Request access** (gold) and **Back to Work**, then Signed in as "Marcus Bell · workspace.owner · core-platform", Needed "runtime.read on core-platform" and Decided by "pol_v41".
 
 ## Mobile
 
