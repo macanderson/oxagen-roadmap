@@ -18,7 +18,7 @@ Say what one run cost and where the money went: the model and effort it ran on a
 
 **Shared.** The run header, the Summary, the stat row, the tab bar with "Cost" selected, and the side column, as `run.md` specifies them.
 
-**Model fit**, first. Heading "Model fit" and the badge "generated · not the record". Two cards.
+**Model fit**, first. Heading "Model fit" and the badge "generated · not the record", the same badge as the Summary and the same open conflict with the label rule (`run.md`). The reading is computed from the record, not written by a model. Two cards.
 
 - The model card. A fit reading: the title "Model fit" and one line ("Opus 5 matches this shape of work. Nothing in the record argues for moving it either way."). An over or under reading: the title "Wrong model tier", its badge, what the record showed and what the run would have cost a rung down or up, and "Move this agent to <model>".
 - The effort card. A reading: the title "Wrong effort setting", its badge, the line ("This run took 2 prompts to land on effort medium. At high the model thinks before it acts, which is cheaper than being told again.") and "Set effort to high". A fit reading states the effort and why it fits. Where the effort was not read, the title "Effort setting" and the reason it was not captured, with no action.
@@ -51,7 +51,7 @@ Each column and bar segment shows its figures on hover and on focus.
 
 **Spend by token class** beside **Prompt composition**.
 
-- Spend by token class: "768,981 tokens", then Class · Tokens · Cost · Share over `input_uncached`, `cache_read`, `cache_write_5m`, `output` and `reasoning`, and a total row (768,981, $4.13, 100.0%). A class with no tokens shows "—" for its cost. The rollup records a sixth class, `cache_write_1h`, which a build lists after `cache_write_5m`. The note: "Input is a third of the money and priced at the effective rate across its classes, a cache read at a tenth of an uncached token; output and reasoning are priced at the flagship list rate."
+- Spend by token class: "768,981 tokens", then Class · Tokens · Cost · Share over `input_uncached`, `cache_read`, `cache_write_5m`, `output` and `reasoning`, and a total row (768,981, $4.13, 100.0%). A class with no tokens shows a dash for its cost. The rollup records a sixth class, `cache_write_1h`, which a build lists after `cache_write_5m`. The note: "Input is a third of the money and priced at the effective rate across its classes, a cache read at a tenth of an uncached token; output and reasoning are priced at the flagship list rate."
 - Prompt composition: "33,285 tok", then meters for Conversation, Context frames, Tool definitions, Steering and System, then Effective input price ("$1.88 per million across all input classes"), Cache write cost share, Basis ("gateway_observed · counted by the proxy from the bytes that passed through it") and Productive ratio ("71% · 29 of 41 steps advanced the task").
 
 **Dialogs this tab opens:** `fitchange` from the Model fit cards, `evidence` from a diamond or a Pinned badge (the finding's evidence, specified in `work-findings.md`), and the run dialogs from the header (`run.md`).

@@ -49,6 +49,7 @@ A skill whose manifest declares no references and no entrypoints shows the headi
   - `context`, `info`, Checkout files, 420 tok, "references/format.md: The house format: …", `context:a-intel.release-notes-from-prs@f931e83914a8`;
   - `context`, `info`, Checkout files, 180 tok, "references/labels.md: Labels that decide a section: …", `context:a-intel.release-notes-from-prs@bd867dc84a48`;
   - `capability`, `info`, Checkout files, "descriptor" in place of a token cost, "group-prs { since: string, repo: string } → { features: PR[], breaking: PR[], fixes: PR[] }. Groups merged pull requests by label into Features, Breaking and Fixes.", `capability:a-intel.release-notes-from-prs@9c41e07ab2d5`.
+  - The Compiler also shows a fifth frame for this skill: its description line, a `procedure` at `info` in Prompt submit. This page does not list it, and the wedge spec's Emissions table does not name it. The design has to settle whether it is a frame; until it does, a build keeps this page and the envelope in agreement (`steering-compiler.md`).
 - **Agents it reaches.** "68 in Core platform by its scope, workspace." The first five agents, each with a Compiler link, and "63 more on Assignments".
 
 **A withheld skill.** `a-intel.changelog-bot` renders a smaller page with no editor and no bundle.

@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/core-platform/spend/optimization`, with `?part=waste\|tokens\|agents\|habits`. Wasted spend is the default and the hash leaves `part` out. Old routes rewritten here in place (`fleet-operations-routes.md`, Spend): `/spend/waste` to the bare path, `/spend/tokens` to `?part=tokens`, and `/spend/coaching` to `?part=agents`. Findings moved to Work: `/spend/findings` lands on `/work/findings` |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: D9 (findings are work), D10 (three views), D15 (no person scored or ranked; habits as rules to adopt), and the Cuts rows for the Spend tabs and for operator scores and severity ranking. `docs/fleet-operations-ia.md`, Spend (Optimization). `docs/fleet-operations-routes.md`, Spend. In `macanderson/oxagen`: the operator review in `docs/VISION.md`. `docs/mission-control-spec.md` §12.6 (token classes and prompt composition) and §12.8 (where to optimize) |
+| Spec | `docs/fleet-operations-wedge.md`: D9 (findings are work), D10 (three views), D15 (no person scored or ranked, and habits as rules to adopt), and the Cuts rows for the Spend tabs and for operator scores and severity ranking. `docs/fleet-operations-ia.md`, Spend (Optimization). `docs/fleet-operations-routes.md`, Spend. In `macanderson/oxagen`: the operator review in `docs/VISION.md`. `docs/mission-control-spec.md` §12.6 (token classes and prompt composition) and §12.8 (where to optimize) |
 | Design | `mockups/src/wedge.js`: `spendOptimization()`, `operatorHabits()`, `spendPartGo()`, inside `pSpend()`. `mockups/src/engine.js`: `spendWaste()`, `spendTokens()`, `tokBars()`, `coachAgent()`, `coachOperator()`, `operatorPrompts()`, `wsTok()`, `agentTok()`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
 | Storybook | `Oxagen / Spend / Optimization`: Loaded, Loaded · mobile |
@@ -108,7 +108,20 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 
 ## Future-only fields
 
-The view carries no `data-future` mark, and the catalog gives it no future story. Most of it is future-only all the same. A build prints each of these as not recorded until its contract ships, and names what it will show: the six causes of By cause; each run's amount, title and steps in Runs with waste; Show the frames; the Cost column and the three figures beneath By token class; Prompt composition; By harness; the Tool defs, Context and Tool results columns of By agent; Recommendations for agents; Operator habits; and the two counts on the parts. The one waste cause that ships, a cache written and never read, appears in By cause with its runs.
+The view carries no `data-future` mark, and the catalog gives it no future story. Most of it is future-only all the same. A build prints each of these as not recorded until its contract ships, and names what it will show:
+
+- the six causes of By cause
+- each run's amount, title and steps in Runs with waste
+- Show the frames
+- the Cost column and the three figures beneath By token class
+- Prompt composition
+- By harness
+- the Tool defs, Context and Tool results columns of By agent
+- Recommendations for agents
+- Operator habits
+- the two counts on the parts
+
+The one waste cause that ships, a cache written and never read, appears in By cause with its runs.
 
 ## Functionality
 
@@ -129,7 +142,7 @@ The thumb bar holds Work (8), Agents, Tools, Spend and More (3), with Spend lit.
 
 ## Permissions
 
-- Read: `spend.read`. Shipped: `get_spend` and `list_waste` allow org Owner, Admin, Billing and Member, and workspace Owner and Member.
+- Read: `spend.read` (`apps/app/src/data/read.ts:94-97`). Shipped: `get_spend` and `list_waste` allow org Owner, Admin, Billing and Member, and workspace Owner and Member.
 - Each action lands on the page that owns the change and needs that page's permission: the toolbelt grant, steering, the compiler, the agent's Source page, the record wizard.
 - Sharing a rule with a person is a governed action and lands in Audit.
 

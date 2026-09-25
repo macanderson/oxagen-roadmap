@@ -120,7 +120,7 @@ The route `#/a-intel/finops/steering/sources/instruction/ins.finops.additional`.
 - **Record** panel: Kind ("Workspace instructions") and Where ("workspace settings").
 - Right column: **Frames it emits** (one `procedure` frame at `should`, Session start, 19 tok) and **Agents it reaches** (21 in FinOps).
 
-### Kinds managed elsewhere, and an id nothing holds
+### Other kinds and unknown ids
 
 A policy source, a mandate, a toolbelt and an agent definition are managed on Tools, on the agent's Permissions tab and on the agent's Source tab. Their Sources rows link there, and this page is not their page. An id this workspace does not hold renders "No source here", "Nothing in Core platform is named <id>. It may have been archived, or it belongs to another workspace." and **Back to Sources**. The mockup renders its first record instead for a record lineage nothing holds; a build answers that address with "No source here" too.
 
@@ -159,8 +159,8 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 
 | Element | Mockup collection | Target store or contract | Backing today in `macanderson/oxagen` | Status |
 |---|---|---|---|---|
-| A record's statement, kind, force, effect, scope, status, commit and path | `RECORDS` via `stgRecord()` | `.oxagen/rules/<lineage>.toml` on the main repository, indexed in `agent.context_records` | `get_record` (`packages/oxagen/src/contracts/context.records.get.ts:127`), whose record is `publishedRecordSchema` (`context.steering.shared.ts:250-280`). It reads the file first and says whether the file or the registry answered (`context.records.get.ts:28`) | ✅ |
-| Published by (the commit and its author) | `RECORDS[].commit`, `pub` | The commit that published the file | `get_record` `provenance` (`context.records.get.ts:36-49`) | ✅ |
+| A record's statement, kind, force, effect, scope, status, commit and path | `RECORDS` via `stgRecord()` | `.oxagen/rules/<lineage>.toml` on the main repository, indexed in `agent.context_records` | `get_record` (`packages/oxagen/src/contracts/context.records.get.ts:127`), whose record is `publishedRecordSchema` (`context.steering.shared.ts:250-280`). It reads the file first and says whether the file or the registry answered (`context.records.get.ts:25`, `:79`) | ✅ |
+| Published by (the commit and its author) | `RECORDS[].commit`, `pub` | The commit that published the file | `get_record` `provenance` (`context.records.get.ts:36-49`, `:80`) | ✅ |
 | Effect: rendered and cited | `RECORDS[].effect` via `crecNum()` | Distinct runs that rendered and cited the lineage | `get_record` `effect` (`context.records.get.ts:55-64`), counted from `context_use` and `context_use_feedback` appends (`packages/handlers/src/context.steering.store.ts:645`). Null when the workspace records no context use, which renders "not recorded", never 0 | ✅ |
 | Effect: violated, and the third meter | `RECORDS[].effect` | A rollup of runs that went against the record | None (#3868) | ❌ |
 | Bundle share ("214 tok in the bundle", "v41 · 214 of 1,340 tokens") | `STEER_BUNDLE`, `stgBundle()`, `crecBundleRow()` | The compiled bundle's row for the record | Each `steering.manifest` item carries its tokens (`packages/tacho/src/wire.ts:643-654`) and a merge reports the steering version (`context.pr.merge.ts:14`), but no read returns one record's row in the bundle in force | 🟡 |

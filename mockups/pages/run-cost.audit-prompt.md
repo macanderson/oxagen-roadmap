@@ -37,7 +37,7 @@ Work through every check. For each, record PASS, FAIL or N/A (with why). Cite ev
 16. **Mobile.** At 390 × 844 with a touch pointer: the instruments stack to one column; the panels stack; the waterfall chart scrolls inside its panel and the page never scrolls sideways; the tables become labelled cards; `fitchange` is a bottom sheet; hit areas are at least 44 px.
 17. **Accessibility.** The chart has `role=img` and a label naming the total; each bar and column shows its figures on focus as well as hover; state is never colour alone (a turn carrying a finding has a badge, not only a red bar); the tab works by keyboard end to end.
 18. **Permissions.** Reading requires `get_run_cost` and `get_run_turns`, checked server-side. `commit_agent_definition` is gated server-side; verify with a role that lacks it.
-19. **Rules.** No person is scored or ranked. The Model fit reading is labelled generated and argues for a pull request; it is never a verdict. No heading or label carries a comma, a mid-dot, or a not/never contrast. No gold action on the tab itself; `fitchange`'s "Open the pull request" is the one gold while it is open.
+19. **Rules.** No person is scored or ranked. The Model fit reading is labelled generated and argues for a pull request; it is never a verdict. No heading or label carries a comma, a mid-dot, or a not/never contrast. The badge "generated · not the record" is the one conflict the spec names as open: record it as a note, not a fail. No gold action on the tab itself; `fitchange`'s "Open the pull request" is the one gold while it is open.
 20. **Nothing extra.** List anything on the built tab that is not in the spec. Each is a finding.
 
 ## Output

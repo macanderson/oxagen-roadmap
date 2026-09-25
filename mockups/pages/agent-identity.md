@@ -1,10 +1,10 @@
-# Agent, Identity
+# Agent › Identity
 
 | | |
 |---|---|
 | Route | `#/a-intel/core-platform/agents/triage/identity` |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: D14 (no replay grade) and D17. `docs/fleet-operations-ia.md` (Agents: “Identity: principal, credentials and the run credential”). The agent header and the tab bar are specified in `agent.md` |
+| Spec | `docs/fleet-operations-wedge.md`: D14 (no replay grade) and D17. `docs/fleet-operations-ia.md` (Agents, the Identity row: “Principal, credentials and the run credential”). The agent header and the tab bar are specified in `agent.md` |
 | Design | `mockups/src/engine.js` → `aIdentity()` inside `pAgent()`, with `iamPairs()`, `tamperCount()`, `agentTamper()` and the dialogs `identity` (`identityDlg()`) and `revokecred`; built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
 | Storybook | `Oxagen / Agents / Identity`: Loaded, Loading, Error, Access denied, and each of them · mobile |
@@ -23,9 +23,9 @@ The agent header and the tab bar are as `agent.md` specifies, with Identity sele
 | Row | Value | Sub-line |
 |---|---|---|
 | Agent key | `a-intel.core.triage` | none |
-| Principal | `prn_01JQ8W3F2M6XKD7A9RZT4BVCNG` | “minted at registration and never reused”, then a clause about retired agents' runs keeping their identity |
+| Principal | `prn_01JQ8W3F2M6XKD7A9RZT4BVCNG` | “minted at registration and never reused. A retired agent's runs keep their identity” |
 | Kind | “agent · workspace core-platform required” | none |
-| Harness | “Codex CLI 1.4.0” | none |
+| Harness | “Codex CLI 1.4.0”. With no reported version the mockup prints a bare dash after the label (Claude Code on pr-reviewer); a build shows the harness alone | none |
 | Model tier | “light → z-ai/glm-flash-latest”: the tier and the model it routes to | none |
 | Operator | “Marcus Bell” | “accountable for every run · IAM field initiating_principal” |
 | Lifecycle state | The status badge (“enrolled”) | “registered → enrolled → active → retired. Deregistering retires the principal and never deletes it, so old runs keep their identity.” |
@@ -39,7 +39,7 @@ The agent header and the tab bar are as `agent.md` specifies, with Identity sele
 |---|---|---|
 | Key | “oxa_live_trag…c4e0” | “shown once at issue; stored as a hash” |
 | Purpose lock | `run_start, control_channel` | none |
-| Issued | “2026-07-21 15:08 to Marcus Bell” | none |
+| Issued | “2026-07-21 15:08 to Marcus Bell”. With no credential issued the mockup prints a bare dash where the date belongs (on pr-reviewer); a build says none is issued | none |
 | Last used | “2026-09-11 14:19:02”, or “never” for an agent that is not enrolled | none |
 | Run tokens | “2 active · 15 minute TTL · refreshed on the control channel”, or “0 active” | “Revoking the key or suspending the agent kills every run token at the next call. This is what makes a halt stick.” |
 | Host device key | “ed25519:9c4a…e17b” | “signs checkpoints from mbp-01”, or for an agent with no host “checkpoints are unsigned until a host enrolls” |
@@ -54,12 +54,11 @@ Actions under the rows: **Change identity** (opens `identity`) and **Revoke cred
 | Workspace | “Core platform core-platform” | “the principal is scoped to it and cannot be used in another” |
 | Runtime | `mbp-01` | “its device key countersigns this agent's checkpoints”, or “nothing signs its checkpoints yet” |
 | Delegation | “subagents narrow, never widen” | “a subagent's effective permission is this agent's grants ∩ the invoking human's grants” |
-| Replay | “render” | “what a reader can do with this agent's frames after the fact” |
-| Tamper incidents | A badge “1 · hooks_removed” with **Read them** (opens Activity), or a badge “0” | none |
+| Tamper incidents | A badge “1 · hooks_removed” with **Read them** (opens Activity), or a badge “0”. The mockup draws the badge critical although Triage's incident is resolved; a build colours it by the open count | none |
 
 **Open its permissions** under the rows opens the Permissions tab.
 
-The Replay row shows a replay grade, which D14 takes out of the interface. It is a mockup defect: a build leaves the row out.
+There is no Replay row. D14 takes the replay grade out of the interface.
 
 **Dialogs this tab opens.**
 
@@ -84,7 +83,6 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 | Host device key | `a.devKey` | `get_agent` `hosts[].deviceKeyFingerprint` | `agent.get.ts:53-73` | ✅ |
 | Accountable human, workspace, runtime | `PEOPLE`, `ws()`, `a.host` | `get_agent` `identity.operatorId` and `hosts`; the member's role | `agent.get.ts:130`, `:141` | ✅ |
 | Delegation | fixed text | The delegation ceiling: agent grants intersected with the human's | `assign_agent_role` rejects a role above the assigner's grants (`agent.role.assign.ts:26-30`); `get_agent_toolbelt` `basis.humanCeiling` (`agent.toolbelt.get.ts:130-134`) | ✅ |
-| Replay | `a.replay` | None. D14 removes replay grades from the interface | none | ❌ (cut) |
 | Tamper incidents | `agentTamper(a)` | `list_incidents` for the agent | `tacho.incident.list.ts:66`; tamper kinds (`tacho.incident.list.ts:35-42`) | ✅ |
 | Change identity | `identity` | A governed change of the agent's operator, approved by the new operator; `assign_agent_role` for the roles | No capability changes an agent's operator. Roles: `agent.role.assign.ts:26` | ❌ |
 | Revoke credential | `revokecred` | Revoke the agent's credential | Refused by design: `revoke_api_key` refuses `agent_credential_v1`, because `rotate_agent_credential` and `retire_agent` revoke it paired with a fresh mint or with retirement (`packages/handlers/src/api.key.revoke.ts:37-40`) | ❌ |
@@ -96,7 +94,6 @@ The tab carries no `data-future` mark, and the catalog gives it no future story.
 - **Run token**, **Purpose lock** and **Run tokens**: the run-token exchange is not served.
 - **Change identity**: no capability changes an agent's operator.
 - **Revoke credential**: the backend refuses an unpaired revoke. The design keeps Rotate credential (header) and Deregister for this; a standalone revoke needs a maintainer decision before it can ship.
-- **Replay**: cut by D14. A build leaves the row out.
 
 ## Functionality
 

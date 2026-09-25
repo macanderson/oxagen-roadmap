@@ -20,7 +20,7 @@ Say what this workspace's month cost and where the money went. One table groups 
 
 **Shell.** The sidebar lists Work (8), Agents, Tools (29), Steering (9), Runtimes (2), Spend and Repositories (5), then Organization, Billing and Audit (3). Spend is lit and carries no count, because nothing on it waits on a person. The foot holds the Stella launcher and the connection badge. The top bar holds the breadcrumbs (Anderson Intelligence Corp. / Core platform / Spend), ⌘K search, notifications, the Approvals button with its count, and the account avatar.
 
-**Header.** Eyebrow the workspace name ("Core platform"), h1 "Spend", subtext "What the tokens bought, with the basis on every number." Actions: **Export report** (opens `spendexport`) and **Set a budget** (gold; opens `budget`, specified in `spend-budgets.md`).
+**Header.** Eyebrow the workspace name ("Core platform"), h1 "Spend", subtext "What the tokens bought, with the basis on every number." Actions: **Export report** (opens `spendexport`) and **Set a budget** (gold, opens `budget`, specified in `spend-budgets.md`).
 
 **Tiles**, four in a row, each one number and one line beneath it:
 
@@ -39,7 +39,7 @@ The Wasted tile opens Optimization. Its share is computed from the Wasted and Sp
 
 **Group by.** A segmented control (`role="group"`, labelled "Group by") with the caption "Group by" and six buttons, the current one `aria-pressed`: Work order · Operator · Agent · Model · Tool · Cost center. A button writes `?by=` and closes any open side panel.
 
-**The table.** Heading "By <grouping>" ("By work order", "By operator", "By agent", "By model", "By tool", "By cost center") and the subtext "Select a row to open it here. There is no drill page." The shell's list tools sit above the rows: the search field "Search this list", up to three filters, each on a column of two to eight short values (By work order gets "All · Kind"; By model gets "All · Provider key"), Rows (5, 10, 25, 50, All; 10 by default), sortable column headers, and a pager ("1–10 of 1166"). Rows open ordered by spend, largest first.
+**The table.** Heading "By <grouping>" ("By work order", "By operator", "By agent", "By model", "By tool", "By cost center") and the subtext "Select a row to open it here. There is no drill page." The shell's list tools sit above the rows: the search field "Search this list", up to three filters, each on a column of two to eight short values (such as "All · Kind" on By work order and "All · Provider key" on By model), Rows (5, 10, 25, 50 or All, with 10 by default), sortable column headers, and a pager that counts the rows (1,166 work orders, ten to a page). Rows open ordered by spend, largest first.
 
 Columns, in order:
 
@@ -48,13 +48,13 @@ Columns, in order:
 | Work order | Work order (the id in mono over the title) · Kind (`direct` or `dispatched`) · Sent by · Runs · Items accepted ("N of M", or a dash) · Per accepted item (a dash when none was accepted) · Spend |
 | Operator | Operator (the name over the role, such as `workspace.owner · core-platform`) · Agents · Runs · Tokens · Cache hit · Budget position (a bar, red above 80%, over "N% of $X") · Spend · Share |
 | Agent | Agent (the agent card) · Runs · Tokens per run · Cache hit · Trend (a badge, such as "-4%" or "+5%") · Spend · Share |
-| Model | Model (the id in mono; each of Oxagen's own routes adds "Oxagen’s own work · <provider>") · Provider key · Model calls · Cache hit (a dash where the route reports no cache) · Spend · Share |
+| Model | Model (the id in mono, and each of Oxagen's own routes adds "Oxagen’s own work · <provider>") · Provider key · Model calls · Cache hit (a dash where the route reports no cache) · Spend · Share |
 | Tool | Tool (the name in mono over its kind, such as `harness`, `jira` or `stripe`) · Calls · Runs · Per call · Spend · Share |
-| Cost center | Cost center (the label in mono; `~none` adds "no agent or workspace label") · Agents · Workspaces · Spend · Share |
+| Cost center | Cost center (the label in mono, and `~none` adds "no agent or workspace label") · Agents · Workspaces · Spend · Share |
 
 Two groupings end on a note. By work order: "1,166 work orders in view, most of them direct: a run started from an operator’s own terminal. The rest of the month’s runs roll up the same way." By cost center: "A run with no label is charged to ~none, so the centers sum to the month (ADR-142)."
 
-Selecting a row writes `&key=`, marks the row (`aria-selected`) and opens the side panel. Selecting the open row again closes it. While a panel is open, the table narrows to the name column, Spend and Share, and the panel takes the right column (340 px).
+Selecting a row writes `&key=`, marks the row (`aria-selected`) and opens the side panel. Selecting the open row again closes it. While a panel is open, the table narrows to the name column, Spend and, on every grouping but By work order, Share. The panel takes the right column (340 px).
 
 **The side panel** is an `aside` labelled with its title, with **Close** at its top right (`aria-label="Close"`). One per grouping:
 
@@ -107,24 +107,35 @@ The view carries these `data-future` marks. `?future=1` outlines them.
 | Each `direct` badge in Kind | direct work orders | Nothing: no run is filed under a work order |
 | Bounded tasks on the operator panel | work orders | not recorded |
 
-The design leaves these fields unmarked, although no contract carries them today. A build prints each as not recorded until its contract ships: the September by day chart (the store holds the days, and no contract answers them); the Observed by the gateway tile; Agents and Budget position on By operator; Trend on By agent; Provider key on By model; the tool's kind and its Record; Agents and Workspaces on By cost center; Agents, Budget and Bounded tasks on the operator panel; the trend, Tool definitions and the recommendation count on the agent panel; and the whole work order side panel.
+The design leaves these fields unmarked, although no contract carries them today. A build prints each as not recorded until its contract ships:
+
+- the September by day chart (the store holds the days, and no contract answers them)
+- the Observed by the gateway tile
+- Agents and Budget position on By operator
+- Trend on By agent
+- Provider key on By model
+- the tool's kind and its Record
+- Agents and Workspaces on By cost center
+- Agents, Budget and Bounded tasks on the operator panel
+- the trend, Tool definitions and the recommendation count on the agent panel
+- the whole work order side panel
 
 ## Functionality
 
 - **One page, no drill.** The grouping and the key live in the query (`?by=`, `&key=`), so a side panel is a URL. `/spend/<kind>/<key>` rewrites to it in place. Changing the grouping closes the panel.
 - **The month.** Every figure covers the calendar month to date in UTC, as `get_spend` reads it (`apps/app/src/features/spend/view.ts:100-104`). Every figure reads this workspace's runs. The one organization-wide read is the cost-center statement (ADR-142).
-- **Partitions.** The Spend tile is the month's total and equals the Total row of By model. By operator, By agent and By cost center each partition the same month: every run lands in exactly one row at its full cost and basis, `~none` included, so each grouping's rows sum to the tile. By work order partitions it too once every run carries `work_order_id`; until then it lists the work orders in view. By tool does not partition: a tool's spend is the tokens of the turn that called it plus the turn that read its result, so a turn counts toward every tool it called.
+- **Partitions.** The Spend tile is the month's total and equals the Total row of By model. By operator, By agent and By cost center each partition the same month: every run lands in exactly one row at its full cost and basis, `~none` included, so each grouping's rows sum to the tile. By work order partitions it too once every run carries `work_order_id`. Until then it lists the work orders in view. By tool does not partition: a tool's spend is the tokens of the turn that called it plus the turn that read its result, so a turn counts toward every tool it called.
 - **Share** is the row's spend over the month's spend on the Spend tile, on the basis beside each figure. By work order has no Share column.
 - **Attribution.** Every run has exactly one operator. A run that arrived without one is charged to the agent's owning operator and flagged, never dropped and never spread (§12.7). A run's spend belongs to its parent work order (wedge, Work rule 4). A run with no parent from Oxagen is filed under a direct work order, titled from its task reference or first prompt.
 - **Cost centers** (ADR-142). A run is charged to its agent's label if the label is live, else to its workspace's, else to `~none`. A run keeps the cost center its first rollup resolved, so a statement for a closed month stays where finance booked it. **Export the statement** downloads the organization's month as CSV: one line per center and one for `~none`, each with its run count, unpriced runs, cost in micros and cents, basis and run ids, and a total line. Micros reconcile, and cents are rounded once per line, half to even.
-- **The operator panel** is the operator review's record for one person. It shows spend cut by the person who started the run, and outcome per dollar for bounded tasks: items accepted from the work orders the person dispatched, and spend per accepted item. It links to the person's prompt habits on Optimization. It carries no score, no rank, no severity and no verdict.
+- **The operator panel** is the operator review's record for one person. It shows spend cut by the person who started the run, and outcome per dollar for bounded tasks: items accepted from the work orders the person dispatched, and spend per accepted item. It links to the person's prompt habits on Optimization. It carries no score, no rank, no severity and no verdict. The review also splits the person's spend by agent and by workspace. The design's panel shows the totals, and the split waits on a read that carries it.
 - **The agent panel** counts the recommendations Optimization lists for the agent and links to them.
 - **Money.** Every amount carries its basis (`gateway_observed`, `client_attested`, both, or `estimated`) as the record states it. Amounts are integer micros on the wire and are rounded once, at display or at a statement line. A figure no frame priced prints "not recorded", never a zero.
 - **Actions.** **Set a budget** opens `budget`. **Export report** opens `spendexport` and exports the month's statement as CSV. **Export the statement** needs org Owner, Admin or Billing. Neither export changes anything.
 
 ## States
 
-Loaded only. This change designs the loaded state. The build uses the shell's standard loading, error, empty and denied panels until they are designed. The renderer's standard panels read: empty "No spend to report yet", "Rollups are rebuilt from frames. With no model call recorded there is nothing to roll up, and nothing billable.", with **Open Work**; error "Spend could not be loaded" with `504 rollup_rebuild_in_progress`, **Try again**, **Open an incident** and the trace line; denied "You cannot see this workspace’s spend", naming `spend.read on core-platform`, with **Request access** and **Back to Work**.
+Loaded only. This change designs the loaded state. The build uses the shell's standard loading, error, empty and denied panels until they are designed. The renderer's standard panels read as follows. Empty: "No spend to report yet", "Rollups are rebuilt from frames. With no model call recorded there is nothing to roll up, and nothing billable.", with **Open Work**. Error: "Spend could not be loaded" with `504 rollup_rebuild_in_progress`, **Try again**, **Open an incident** and the trace line. Denied: "You cannot see this workspace’s spend", naming `spend.read on core-platform`, with **Request access** and **Back to Work**.
 
 ## Mobile
 
@@ -134,7 +145,7 @@ The header actions sit under the subtext, and the four tiles form a two by two g
 
 ## Permissions
 
-- Read: `spend.read`, the permission the denied panel names. Shipped roles: `get_spend`, `get_spend_drill` and `list_waste` allow org Owner, Admin, Billing and Member, and workspace Owner and Member.
+- Read: `spend.read`, the permission the denied panel names, as the app names it too (`apps/app/src/data/read.ts:94-97`). Shipped roles: `get_spend`, `get_spend_drill` and `list_waste` allow org Owner, Admin, Billing and Member, and workspace Owner and Member.
 - Export report: `export_statement`, the same roles as the reads.
 - Export the statement: `export_cost_center_statement`, org Owner, Admin or Billing (`packages/oxagen/src/contracts/spend.cost_center_statement.export.ts:61-64`).
 - Set a budget: `set_spend_budget`, org Owner, Admin or Billing, and workspace Owner or Admin (see `spend-budgets.md`).

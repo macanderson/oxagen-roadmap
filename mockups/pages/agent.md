@@ -1,11 +1,11 @@
-# Agent, Overview
+# Agent › Overview
 
 | | |
 |---|---|
 | Route | `#/a-intel/core-platform/agents/triage` (`…/triage/overview` is the same tab). A tab id that matches nothing falls back to Overview |
 | Scope | workspace |
 | Spec | `docs/fleet-operations-wedge.md`: D3, D14 (no replay grade), D17, and the Cuts row for the Definition in git tab. `docs/fleet-operations-ia.md` (Agents: “Overview: composition, current work, tokens and recommendations”) and `docs/fleet-operations-routes.md` (Agents). Token classes: `docs/mission-control-spec.md` §12.6 |
-| Design | `mockups/src/engine.js` → `pAgent()` (the header, the tab bar and the states), `IAM_TABS`, `IAM_TAB_ALIAS`, the agent branch of `route()`, `aOverview()`, `coachStrip()`, `coachAgent()`, `agentHealth()`, `agentTok()` and `agentSteering()`, and the dialogs `rotatecred`, `suspendagent` and `delagent`; built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| Design | `mockups/src/engine.js` → `pAgent()` (the header, the tab bar and the states), `IAM_TABS`, `IAM_TAB_ALIAS`, the agent branch of `route()`, `aOverview()`, `coachStrip()`, `coachItems()`, `coachAgent()`, `agentHealth()`, `agentTok()` and `agentSteering()`, and the dialogs `rotatecred`, `suspendagent` and `delagent`; built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · empty · loading · error · access denied |
 | Storybook | `Oxagen / Agents / Overview`: Loaded, Empty, Loading, Error, Access denied, and each of them · mobile |
 | Audit | `agent.audit-prompt.md` |
@@ -44,29 +44,31 @@ Older addresses still land on the tab that absorbed them: `…/enrollment` on Ru
 - **Per model call**: “2,586 tok in the mean request”.
 - **Basis**: “observed by the gateway proxy from the bytes that passed through it”, or on a client-attested agent “self-reported by the harness · absent classes are marked, never zero”.
 
-**Coaching.** The badge reads “2 from the token record”. At most three items, ordered by the money at stake. Each item is a badge with its title, a signal line in mono, “$<amount> a month at stake”, and one action. On the demo record:
+**Optimization.** The badge reads “2 from the token record”. At most three items, ordered by the money at stake. Each item is a badge with its title, a signal line in mono, “$<amount> a month at stake”, and one action. On the demo record:
 
 | Item | Signal | At stake | Action |
 |---|---|---|---|
 | Stop writing cache for one-turn runs | “7,814,133 cache write tokens · a write with no later read inside the TTL” | $31.44 a month | **Edit the definition** (the Source tab) |
 | Narrow the belt | “34% of every request is tool definitions · 11 of 52 tools never called in 30 days” | $24.87 a month | **Edit the grant** (the Toolbelt tab) |
 
-The other items the rules can raise are Keep the prefix stable (**Open steering**), Page the tool results (**Propose a record**), Lower the context budget (**Open the compiler**), Route classification-shaped work to a light model (**Edit the definition**) and Stop the retry storms (**Open incidents**). With none: “Nothing to change. Every share is inside the workspace norm and the cache holds.” The foot of the panel links “All coaching for this workspace →” to Spend › Optimization.
+The other items the rules can raise are Keep the prefix stable (**Open steering**), Page the tool results (**Propose a record**), Lower the context budget (**Open the compiler**), Route classification-shaped work to a light model (**Edit the definition**) and Stop the retry storms (**Open incidents**). With none: “Nothing to change. Every share is inside the workspace norm and the cache holds.” The foot of the panel links “Optimization for this workspace →” to Spend › Optimization (`#/a-intel/core-platform/spend/optimization`). The items are the same ones Spend › Optimization lists for this agent.
 
 **Composition.** Subtext: “One principal, and a reference to every other object it uses.” The badge is the agent's health (`tamper`, `not enrolled`, `observe` or `healthy`, as on the roster). Six rows, each with a sub-line; every row but Owner has an **Open** button to the tab that owns it:
 
 | Row | Value | Sub-line |
 |---|---|---|
 | Identity | `prn_01JQ8W3F2M6XKD7A9RZT4BVCNG` | “minted at registration and never reused” |
-| Steering | “14 items · 1,163 tok” | “assembled from the workspace library and delivered at SessionStart and UserPromptSubmit”. On the observe tier: “assembled, and not delivered: no hook is installed on the observe tier”. With no standing brief the value is “no preview prompt is set up” |
+| Steering | “14 items · 1,162 tok” | “assembled from the workspace's Steering Sources and delivered at SessionStart and UserPromptSubmit”. On the observe tier: “assembled, and not delivered: no hook is installed on the observe tier”. With no standing brief the value is “no preview prompt is set up”, over a two-sentence sub-line with a “never” contrast (“steering comes from the workspace's sources. This agent holds a reference, never a copy”), which is a copy defect; a build states one fact |
 | Toolbelt | Each assigned belt as a link into Tools › Toolbelts (Repository reader, Repository contributor, Release control, Context graph, Workstation, Issue tracker, Messaging, Cloud cost) | “52 tool versions in all, sent as a searchable belt” |
 | Runtime | The host (`mbp-01`) and the tier badge | “workstation · Codex CLI 1.4.0 · macOS 15.5 · arm64”, or “no host is enrolled” |
 | Owner | “Marcus Bell workspace.owner · core-platform” | “accountable for every run this agent makes” |
 | Permissions | “1 role · no mandate”, or the role count with a mandate badge | “a toolbelt says what it can see; its roles and the policy say what it may call” |
 
-**Last 30 days.** Subtext: “This agent's own rollup, the same one the Agents table reads.” **Open activity** in the header opens the Activity tab. Four stats: Runs (“1,340”, “last at 2026-09-11 14:19:02”), Spend (“$402.11” over its basis, `gateway_observed`), Tokens (“124,910,766” over “83% cache read over input”) and Tamper incidents (“1”, in the critical colour when not zero, over the health reason). A note closes the panel: “Every tool definition on the belt is paid for as input on every call, whether the tool is used or not, which is why the belt width and the token bill are read together.”
+The Steering row still counts the rev1 assembler's items, while the Steering tab counts SteeringFrames: 14 items here against 45 SteeringFrames there for Triage. A build shows the Steering tab's count of SteeringFrames and their tokens.
 
-**Definition in git.** Subtext: “Identity is in Postgres; the definition is a file, and the file is the source of truth.” **Open the file** in the header opens the Source tab. Rows: Path (`.oxagen/agents/triage.toml`), Repo (`a-intel/platform @ main`), Commit (`a4c91e2`), `definition_digest` (`sha256:73ad0e15f8c9b224`), and Generated beside it (`.claude/agents/triage.md`, with the sub-line “A pull request that edits a generated file without regenerating it fails the checks.”).
+**Last 30 days.** Subtext: “This agent's own rollup, the same one the Agents table reads.” **Open activity** in the header opens the Activity tab. Four stats: Runs (“1,340”, “last at 2026-09-11 14:19:02”), Spend (“$402.11” over its basis, `gateway_observed`), Tokens (“124,910,766” over “83% cache read over input”) and Tamper incidents (“1”, in the critical colour when not zero, over the health reason). The mockup's reason reads “1 open incident” although Triage's only incident is resolved; a build counts every recorded incident and says how many are open. A note closes the panel: “Every tool definition on the belt is paid for as input on every call, whether the tool is used or not, which is why the belt width and the token bill are read together.”
+
+**Definition in git.** Subtext: “Identity is in Postgres; the definition is a file, and the file is the source of truth.” **Open the file** in the header opens the Source tab (the mockup goes through the old `/definition` address, which lands there). Rows: Path (`.oxagen/agents/triage.toml`), Repo (`a-intel/platform @ main`), Commit (`a4c91e2`), `definition_digest` (`sha256:73ad0e15f8c9b224`), and Generated beside it (`.claude/agents/triage.md`, with the sub-line “A pull request that edits a generated file without regenerating it fails the checks.”).
 
 **Dialogs this page opens.**
 
@@ -74,7 +76,7 @@ The other items the rules can raise are Keep the prefix stable (**Open steering*
 - `rotatecred`, titled “Rotate the credential on a-intel.core.triage?”. It says a new key is minted and handed to the host at its next check-in, that the old key stops working at the next call and every live run token dies with it, and warns that a run in flight ends at its next call. **Cancel** and **Rotate it** (gold).
 - `suspendagent`, titled “Suspend a-intel.core.triage?”. It says suspension is reversible and keeps the registration, the roles and the mandates, and that every run token dies at the next call because the refusal is on the server. **Cancel** and **Suspend it** (danger).
 - `delagent`, titled “Deregister agent” with the agent key: what is kept, what ends (the roles, the mandates and the host enrollment), what is in flight, the checkbox “I understand this cannot be undone”, **Cancel** and **Deregister** (danger).
-- The Coaching actions open the Source tab, the Toolbelt tab, Steering, the Compiler, the Steering record wizard or the Activity tab.
+- The Optimization actions open the Source tab, the Toolbelt tab, Steering, the Compiler, the Steering record wizard or the Activity tab. The mockup's Edit the definition and Open incidents go through the old `/definition` and `/incidents` addresses, which land on Source and Activity; a build links the canonical paths.
 
 **Shell.** As on Agents, with Agents lit and the breadcrumb Anderson Intelligence Corp. / Core platform / Agents / triage.
 
@@ -94,8 +96,8 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 | 30-day total, spend and basis | `agentTok(a)`, `spend30` | `get_spend` grouped by agent: `tokens` by class and `cost` with its basis | `spend.get.ts:34`; token classes `input_uncached`, `cache_read`, `cache_write_5m`, `cache_write_1h`, `output`, `reasoning` (`spend.shared.ts:107-116`); basis (`spend.shared.ts:13-18`) | ✅ |
 | Output and Reasoning bars | `agentTok(a)` | The same token classes | `spend.shared.ts:107-116` | ✅ |
 | Conversation, Tool results, Context frames, Tool definitions, Steering and System bars | `agentTok(a).parts` | Measured prompt composition (§12.6) | `cost.run_totals` has `tool_definition_tokens`, `context_frame_tokens` and `steering_tokens`, null until a recorder measures them (`packages/database/src/schema/cost.ts:320-323`). Conversation, tool results and system have no column | ❌ |
-| Cache hit rate, per run, per model call | `agentTok(a)` | Cache read over input; tokens over `runs` and over `calls` | `get_spend` row `runs`, `calls` (`spend.shared.ts:151-160`); `list_agents` `tokens30d.cacheReadRate` (`agent.list.ts:95-116`) | ✅ |
-| Coaching | `coachAgent()` over `agentTok(a)` | Recommendations for this agent, derived at read time from the token record | No recommendation contract. The findings job ships four kinds, one of them the cache-write finding the first item mirrors (`finding.shared.ts:15-20`, `list_findings` at `finding.list.ts:23`) | ❌ |
+| Cache hit rate, per run, per model call | `agentTok(a)` | Cache read over input; tokens over `runs` and over `calls` | `get_spend` row `runs`, `calls` (`spend.shared.ts:150-160`); `list_agents` `tokens30d.cacheReadRate` (`agent.list.ts:95-116`) | ✅ |
+| Optimization | `coachItems("agents", key)` over `coachAgent()` and `agentTok(a)` | Recommendations for this agent, derived at read time from the token record | No recommendation contract. The findings job ships four kinds, one of them the cache-write finding the first item mirrors (`finding.shared.ts:15-20`, `list_findings` at `finding.list.ts:23`) | ❌ |
 | Composition, Identity | `a.principal` | `get_agent` `identity.principalId` | `agent.get.ts:121-138` | ✅ |
 | Composition, Steering | `agentSteering(a)` | The agent's envelope for its standing brief | No capability resolves an envelope without a run (#3879) | ❌ |
 | Composition, Toolbelt | `beltsOfAgent()`, `beltTotal()`, `beltPresentation()` | Stored toolbelts; `get_agent_toolbelt` for the count and the presentation | No toolbelt table; `agent.toolbelt.get.ts:147-155` | 🟡 |
@@ -113,7 +115,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 The Overview carries no `data-future` mark, and the catalog gives `agent` no future story. These fields have no contract today and are unmarked in the design. A build renders each as not recorded until its contract ships:
 
 - The six input composition bars (Conversation, Tool results, Context frames, Tool definitions, Steering, System).
-- Coaching.
+- Optimization.
 - The Composition Steering row.
 - The named toolbelts in the Composition Toolbelt row (the tool count and presentation ship).
 - The host kind in the Composition Runtime row.
@@ -124,7 +126,7 @@ The Overview carries no `data-future` mark, and the catalog gives `agent` no fut
 - Identity is stable and everything else is a reference. The principal does not move when the belt, the model or the machine changes, which is why a run from a year ago and a run from this morning are the same actor.
 - Every Composition row names a reusable object, states nothing the registry that owns it states, and opens the tab or the registry that owns it.
 - The 30-day token use total equals the sum of its eight bars, and it is the same figure the roster's Tokens 30d column and the Last 30 days panel show.
-- Coaching is derived from the token rollup at read time and never stored as a model's text. Each item names what to change and what it is worth, and its action opens the place the change is made.
+- Optimization items are derived from the token rollup at read time and never stored as a model's text. Each item names what to change and what it is worth, and its action opens the place the change is made.
 - Rotate credential and Suspend each end every live run token at the next call. Suspend is reversible; Deregister retires the principal and never deletes it.
 
 ## States
@@ -139,7 +141,7 @@ The empty, loading, error and denied states belong to the whole agent page. `age
 
 ## Mobile
 
-The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The top bar shows the current crumb (the agent's slug). The header actions wrap under the description. The tab strip scrolls in its own row and keeps the selected tab in view. The Overview panels stack in one column, the token bars keep their labels and values, each Coaching item wraps within the panel, and the Composition rows put the Open button under each value. Every dialog rises from the bottom edge as a sheet. Touch targets are at least 44 px and nothing scrolls sideways.
+The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The top bar shows the current crumb (the agent's slug). The header actions wrap under the description. The tab strip scrolls in its own row and keeps the selected tab in view. The Overview panels stack in one column, the token bars keep their labels and values, each Optimization item wraps within the panel, and the Composition rows put the Open button under each value. Every dialog rises from the bottom edge as a sheet. Touch targets are at least 44 px and nothing scrolls sideways.
 
 ## Permissions
 
@@ -149,7 +151,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More h
 ## Backend gaps this page depends on
 
 - Measured prompt composition written to `cost.run_totals` and rolled up per agent, for the six input bars.
-- A recommendation read for one agent, derived from the token record, for Coaching.
+- A recommendation read for one agent, derived from the token record, for Optimization.
 - An envelope per agent without a run (#3879), for the Steering row.
 - Stored toolbelts with assignments, for the named belts.
 - A host kind on the host record.
@@ -160,7 +162,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More h
 
 - A frame (a recorded event) and a SteeringFrame (a resolved input) never share a name on screen.
 - A Steering Source and a SteeringFrame are never shown as each other. The Steering row counts what reaches the agent and links to the Steering tab, which shows the frames and their sources apart.
-- No person is scored or ranked. Owner names who is accountable and carries no figure about them. Coaching recommends a change to the agent, never a grade.
+- No person is scored or ranked. Owner names who is accountable and carries no figure about them. Optimization recommends a change to the agent, never a grade.
 - Every enforcement claim states the tier. “Enforced” only for calls routed through Oxagen.
 - Headers are rollups of the rows beneath them: the token total is the sum of its bars, and the tab counts are the records the tabs list.
 - Every badge that describes trust (tier, health, cost basis) shows the recorded value and nothing stronger. There is no replay grade on the page (D14).

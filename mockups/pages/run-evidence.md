@@ -27,21 +27,21 @@ The tab's panels, in this order. A panel with nothing to show is absent.
 **Definition of done**, when the run's work order carries items. Marked future-only. Heading "Definition of done" and one sentence: "From `wo_01K5RS7M4N`. A claim is the agent’s word. An acceptance is a person’s." (the work order id is a link). A table Item · State · Evidence:
 
 - State is a dot and a word: "accepted", "claimed" or "open".
-- Evidence is what the agent cited for its claim, or "—".
+- Evidence is what the agent cited for its claim, or a dash.
 - On the demo run: "Every pull request merged into a-intel/platform since v4.10.3 appears once, linked" claimed ("release/4.11.0-notes.md lists 27 entries; compare v4.10.3...main counts 27"); "Breaking changes come before Fixes, each with its migration note" claimed; "The draft is on a release branch and main is untouched" claimed; "The GitHub release is a draft, and a person publishes it" open.
 
 A direct work order has no items, and the panel is absent.
 
 **Approvals**, when an approval names this run. Heading "Approvals". One small card per approval, pending or resolved:
 
-- The shield glyph, the amount or the tool (`github__create_release@2`), "<agent> · <run title>", and the countdown (`9:13`, warning ink under two minutes), or "—" once resolved.
+- The shield glyph, the amount or the tool (`github__create_release@2`), "<agent> · <run title>", and the countdown (`9:13`, warning ink under two minutes), or a dash once resolved.
 - The badges: risk (`high`), side effect (`irreversible`), "tainted" where it is, and the tier the approval recorded.
 - "Tool <tool>" when an amount leads, "To <counterparty>" (`a-intel/platform`), and "Times out in 10m, then the call ends" while pending.
 - Pending: "Approve" (gold; opens `approve`), "Deny" (danger; opens `deny`) and "Details" (`aria-expanded`), which reads "Hide details" when open. Resolved: the outcome as a badge with who resolved it ("approved by Marcus Bell").
 
 "Details" is meant to expand the full approval card in place, the card the Approvals drawer shows (`approvals-drawer.md`). In the mockup it changes its label and expands nothing; a build expands the full card.
 
-**Issues.** Heading "Issues" and the badge "4 in this session". The list controls: a Status filter, "Rows" (5, 10, 25, 50, All) and the pager ("1–4 of 4"). A table Issue · Status · Relation · Edge · an unlabelled link column:
+**Issues.** Heading "Issues" and the badge "4 in this session". The list controls: a Status filter, "Rows" (5, 10, 25, 50, All) and the pager (the rows shown out of the total, then the page numbers). A table Issue · Status · Relation · Edge · an unlabelled link column:
 
 - Issue: the reference in mono and the title under it.
 - Status: "open", "closed", "in progress" or "blocked", as a dot and a word.
@@ -128,6 +128,7 @@ Loaded only. This change designs the loaded state. The build uses the shell's st
 
 - Work items, work orders, their definition-of-done items, claims and acceptances, and a `work_order_id` on the run (wedge Open decision 5).
 - The approval row's amount, risk, side effect, taint, counterparty, tier and approvers on `list_approvals` (#3848).
+- The single-use approval token a resolution mints, bound to the call digest, the agent, the run and an expiry. The v2 design contract names it (`packages/oxagen/src/contracts/v2/resolve-approval.ts:111-121`), and no handler returns it. The shipped `resolve_approval` returns the decision and the mandate settlement.
 - Issue relations beyond a pull request's closing issues, and edges with their provenance.
 
 ## Rules every build of this page must keep

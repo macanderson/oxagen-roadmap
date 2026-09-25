@@ -49,9 +49,9 @@ Composition columns, in order:
 | Owner | The operator's avatar and name |
 | Steering | “N items” over “N tok”, with “ · not delivered” appended when the agent earns no hook. A dash when the agent has no standing brief to resolve |
 | Toolbelt | “N belts” over “N tools · full” or “N tools · searchable” |
-| Runtime | The host id (mono) over “kind · tier”, such as “workstation · gateway”. With no host enrolled: a dash over the tier alone |
+| Runtime | The host id (mono) over the host's kind and the tier, such as “workstation · gateway”. With no host enrolled: a dash over the tier alone |
 | Principal | `prn_…`, or `prn_pending` |
-| Health | One badge, from `agentHealth()` in this order: `tamper` when a tamper incident is recorded against the agent, `not enrolled` when no host is enrolled, `observe` on the observe tier, `healthy` otherwise |
+| Health | One badge, from `agentHealth()` in this order: `tamper` while a tamper incident against the agent is open, `not enrolled` when no host is enrolled, `observe` on the observe tier, `healthy` otherwise. The mockup also counts resolved incidents, so Triage reads `tamper` with its only incident resolved; a build counts open ones |
 | Activity | Runs in 30 days over “runs 30d” |
 | (unlabelled) | The row actions |
 
@@ -72,9 +72,11 @@ Operations columns, in order:
 | Incidents | A count badge, or 0 |
 | (unlabelled) | The row actions |
 
-**Row actions**, in both column sets: **Edit** (the agent page), **Roles** (opens `assignrole` for that agent), **Deregister** (danger; opens `delagent`). Clicking anywhere else on a row opens the agent's Overview.
+The mockup's Status reads `enrolled` for every agent, including the 63 that Composition's Health marks `not enrolled`, and those agents still carry a tier. A build shows the recorded status, so Status and Health agree.
 
-**List controls**, added by `listify()`: a search field (“Search this list”), sortable headers with `aria-sort`, facet selects derived from the columns in view (“All · Health” and “All · Steering” on Composition, “All · Tier” on Operations), Rows (5, 10, 25, 50, All; 10 by default) and a pager (“1–10 of 68”).
+**Row actions**, in both column sets: **Edit** (the agent's Source tab; the mockup opens the Overview instead), **Roles** (opens `assignrole` for that agent), **Deregister** (danger; opens `delagent`). Clicking anywhere else on a row opens the agent's Overview.
+
+**List controls**, added by `listify()`: a search field (“Search this list”), sortable headers with `aria-sort`, facet selects derived from the columns in view (“All · Health” and “All · Runtime” on Composition, “All · Tier” and “All · Harness” on Operations), Rows (5, 10, 25, 50, All; 10 by default) and a pager (“1–10 of 68”). The Runtime facet lists each host and a bare dash for the agents with no host; a build words that option as no host. The Harness facet lists the harness labels, so it carries the fixture values the Harness data-source row flags.
 
 **Panel note**, verbatim: “An agent has one principal and runs on one runtime. Its steering, its toolbelts and its tools are workspace objects it refers to, so changing one changes every agent that refers to it.”
 
@@ -150,7 +152,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More h
 
 ## Permissions
 
-- Read: `list_agents` admits org Owner, Admin and Member, and workspace Owner and Member (`agent.list.ts:160-165`). The mockup names the permission `agent.read`.
+- Read: `list_agents` admits org Owner, Admin and Member, and workspace Owner and Member (`agent.list.ts:159-162`). The mockup names the permission `agent.read`.
 - Writes, each a governed action recorded in Audit: Steer (`dispatch_command`: org Owner or Admin, workspace Owner or Member), New agent (`propose_agent`: org Owner or Admin), Register agent (`register_agent`: org Owner or Admin), Roles (`assign_agent_role`: org Owner or Admin, and never above the assigner's own grants), Deregister (`retire_agent`: org Owner or Admin).
 
 ## Backend gaps this page depends on

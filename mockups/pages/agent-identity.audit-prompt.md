@@ -1,4 +1,4 @@
-# Audit prompt: Agent, Identity
+# Audit prompt: Agent › Identity
 
 Copy everything below the line into a fresh agent session. Fill the two placeholders. The agent
 audits the built page against this design and reports a verdict per check. It does not fix anything
