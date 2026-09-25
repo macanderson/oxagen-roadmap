@@ -42,7 +42,7 @@
   <p class="dx-lead">A CI light reports a pull request's checks as GitHub itself reports them: one dot and a done-of-total count, nothing more until someone opens the checks. It blinks blue while anything runs, turns a pulsing red the moment one job fails, and settles to a static green once every job has passed or a static grey while every job still waits.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.ci</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 2128 to 2138</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 2135 to 2145</span>
     <span><b>Used on</b> Repositories (Changes table), Steering (Context PRs)</span>
   </div>
 </div>
@@ -136,7 +136,7 @@
   <ul>
     <li>The dot is a non-text element with an <code>aria-label</code> naming its state, so a screen reader announces &quot;running&quot; or &quot;1 failed&quot; rather than nothing.</li>
     <li>State is never color alone: failed adds a ✕ mark, running adds motion, and the done-of-total count is always visible text beside the light.</li>
-    <li>The running blink and the failure pulse both stop under <code>prefers-reduced-motion: reduce</code> (engine.css 2138), leaving the light static but still correctly colored.</li>
+    <li>The running blink and the failure pulse both stop under <code>prefers-reduced-motion: reduce</code> (engine.css 2145), leaving the light static but still correctly colored.</li>
   </ul>
 </section>
 
@@ -171,15 +171,15 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 2128 to 2138</td><td>The rules that draw it</td></tr>
-      <tr><td><code>ciLight(c, label)</code> at <code>engine.js:7086</code></td><td>Picks the state from a counts object and writes the dot, title, and count. An optional label appends a <code>.dim</code> caption.</td></tr>
-      <tr><td><code>ciCounts(list)</code> at <code>engine.js:7076</code></td><td>Tallies an array of per-check states into <code>{pass, fail, running, queued, total, done}</code>.</td></tr>
-      <tr><td><code>ciFromSt(def, st)</code> at <code>engine.js:7081</code></td><td>Builds a plausible per-check state list from a change's overall status, for fixture data with no real per-check log.</td></tr>
-      <tr><td><code>oxprCiLight(p)</code> at <code>engine.js:7092</code></td><td>The Repositories Changes table's own wrapper: counts a proposal's checks and calls <code>ciLight()</code>.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 2135 to 2145</td><td>The rules that draw it</td></tr>
+      <tr><td><code>ciLight(c, label)</code> at <code>engine.js:7144</code></td><td>Picks the state from a counts object and writes the dot, title, and count. An optional label appends a <code>.dim</code> caption.</td></tr>
+      <tr><td><code>ciCounts(list)</code> at <code>engine.js:7134</code></td><td>Tallies an array of per-check states into <code>{pass, fail, running, queued, total, done}</code>.</td></tr>
+      <tr><td><code>ciFromSt(def, st)</code> at <code>engine.js:7139</code></td><td>Builds a plausible per-check state list from a change's overall status, for fixture data with no real per-check log.</td></tr>
+      <tr><td><code>oxprCiLight(p)</code> at <code>engine.js:7150</code></td><td>The Repositories Changes table's own wrapper: counts a proposal's checks and calls <code>ciLight()</code>.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
-    <li>The design rule, from the CSS comment at engine.css 2126 to 2127: blink blue while anything runs, a red ✕ the moment one job fails, pulsing while others still run, static green once every job has passed, static grey while everything queues.</li>
+    <li>The design rule, from the CSS comment at engine.css 2133 to 2134: blink blue while anything runs, a red ✕ the moment one job fails, pulsing while others still run, static green once every job has passed, static grey while everything queues.</li>
     <li><code>--st-approval</code>, the token behind the running blink, is itself a blue (<code>#5B93D6</code> in dark, <code>#2E6BA8</code> in light), so the rule's &quot;blink blue&quot; and the token it uses agree.</li>
   </ul>
 </section>
@@ -201,7 +201,7 @@
 ## Inputs
 
 1. mockups/components/ci-light.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 2128 to 2138. The mockup renders it with ciLight(c, label) (engine.js:7086), ciCounts(list) (engine.js:7076), ciFromSt(def, st) (engine.js:7081), oxprCiLight(p) (engine.js:7092).
+2. The design source: mockups/src/engine.css lines 2135 to 2145. The mockup renders it with ciLight(c, label) (engine.js:7144), ciCounts(list) (engine.js:7134), ciFromSt(def, st) (engine.js:7139), oxprCiLight(p) (engine.js:7150).
 3. The build's implementation: find it by its root selector (.ci) or its name, and list every route that renders it.
 4. Where to see it in the design: Repositories (Changes table), Steering (Context PRs). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -220,7 +220,7 @@ Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and li
 9. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
 10. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
 11. Phone. At 390 by 844 with a touch pointer: The light keeps its size and layout at 390px. Nothing about `.ci` has a phone-specific rule. Inside a phone card table, the light sits in its own labelled cell the same way any other cell does.
-12. Accessibility. The dot is a non-text element with an `aria-label` naming its state, so a screen reader announces &quot;running&quot; or &quot;1 failed&quot; rather than nothing. State is never color alone: failed adds a ✕ mark, running adds motion, and the done-of-total count is always visible text beside the light. The running blink and the failure pulse both stop under `prefers-reduced-motion: reduce` (engine.css 2138), leaving the light static but still correctly colored.
+12. Accessibility. The dot is a non-text element with an `aria-label` naming its state, so a screen reader announces &quot;running&quot; or &quot;1 failed&quot; rather than nothing. State is never color alone: failed adds a ✕ mark, running adds motion, and the done-of-total count is always visible text beside the light. The running blink and the failure pulse both stop under `prefers-reduced-motion: reduce` (engine.css 2145), leaving the light static but still correctly colored.
 13. One implementation. The build draws the ci light from one shared component. List every place that draws it by hand, with its file and line.
 
 ## Output

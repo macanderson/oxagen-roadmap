@@ -42,7 +42,7 @@
   <p class="dx-lead">A toast reports what an action did: what was written, what changed, what a decision meant. It appears at the bottom of the screen, states one fact in past tense, and removes itself after 4.2 seconds. Toasts stack, newest at the bottom, so more than one event in quick succession is never lost.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>#toast</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 881 to 885, phone 636</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 888 to 892, phone 643</span>
     <span><b>Used on</b> every page</span>
   </div>
 </div>
@@ -142,7 +142,7 @@
   
   <ul>
     <li>The stack caps each row at 368px wide instead of <code>min(560px, 92vw)</code>.</li>
-    <li>When the phone thumb bar is showing, the stack's bottom offset increases so a toast never sits under it (engine.css 636).</li>
+    <li>When the phone thumb bar is showing, the stack's bottom offset increases so a toast never sits under it (engine.css 643).</li>
   </ul>
 </section>
 
@@ -172,9 +172,9 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 881 to 885, phone 636</td><td>The rules that draw it</td></tr>
-      <tr><td><code>toast(msg, tone)</code> at <code>engine.js:1982</code></td><td>Appends one row to <code>#toast</code> and removes it after 4.2 seconds. 17 calls.</td></tr>
-      <tr><td><code>act(msg, tone)</code> at <code>engine.js:1981</code></td><td>Records the message on state and calls <code>toast()</code>. Over 200 calls. The usual way a change reports itself.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 888 to 892, phone 643</td><td>The rules that draw it</td></tr>
+      <tr><td><code>toast(msg, tone)</code> at <code>engine.js:2040</code></td><td>Appends one row to <code>#toast</code> and removes it after 4.2 seconds. 17 calls.</td></tr>
+      <tr><td><code>act(msg, tone)</code> at <code>engine.js:2039</code></td><td>Records the message on state and calls <code>toast()</code>. Over 200 calls. The usual way a change reports itself.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -200,7 +200,7 @@
 ## Inputs
 
 1. mockups/components/toast.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 881 to 885, phone 636. The mockup renders it with toast(msg, tone) (engine.js:1982), act(msg, tone) (engine.js:1981).
+2. The design source: mockups/src/engine.css lines 888 to 892, phone 643. The mockup renders it with toast(msg, tone) (engine.js:2040), act(msg, tone) (engine.js:2039).
 3. The build's implementation: find it by its root selector (#toast) or its name, and list every route that renders it.
 4. Where to see it in the design: every page. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -219,7 +219,7 @@ Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and li
 9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
 10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
 11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
-12. Phone. At 390 by 844 with a touch pointer: The stack caps each row at 368px wide instead of `min(560px, 92vw)`. When the phone thumb bar is showing, the stack's bottom offset increases so a toast never sits under it (engine.css 636).
+12. Phone. At 390 by 844 with a touch pointer: The stack caps each row at 368px wide instead of `min(560px, 92vw)`. When the phone thumb bar is showing, the stack's bottom offset increases so a toast never sits under it (engine.css 643).
 13. Accessibility. The stack is `role=&quot;status&quot;` with `aria-live=&quot;polite&quot;`, so an assistive technology announces each row as it is appended, in the page shell (`mockups/missioncontrol.html`), not in a template `toast()` writes. Color is not the only signal: the tone dot pairs with the sentence's own words (&quot;Denied&quot;, &quot;expired&quot;, &quot;approved&quot;), so the tone never carries the outcome alone. A toast never receives focus and never traps it. It reports. It does not ask.
 14. One implementation. The build draws the toast from one shared component. List every place that draws it by hand, with its file and line.
 

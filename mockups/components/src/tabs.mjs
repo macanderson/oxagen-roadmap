@@ -7,7 +7,7 @@ export default {
   summary: "The views of one page or record, with one open and a count beside each.",
   lead: "Tabs split one page or one record into views that share its header: a run's Decision trace, Transcript, Cost, Memories, and Evidence, or Work's Backlog, Work orders, Workflows, and Findings. Each tab is a route, so a tab can be linked and the back button returns to it. A count beside a tab says how many rows the view holds.",
   root: ".tabs",
-  css: "lines 227 to 231, 1432 to 1434, 1590, dialog 489 to 490, phone 667 to 669",
+  css: "lines 227 to 231, 1439 to 1441, 1597, dialog 489 to 490, phone 674 to 676",
   usedOn: ["Work", "Run", "Agent", "Agent source", "Tools", "Steering", "Spend", "Repositories", "Organization", "Audit", "Account dialog"],
   stories: [
     {
@@ -123,9 +123,9 @@ export default {
     ["--st-approval, --st-allowed, --st-failed", "State dot"],
   ],
   helpers: [
-    ["runTabs(R, t)", "engine.js:2731", "The Run page's five tabs, with the state dot and the Cost figure."],
-    ["tabN(n, title, style)", "engine.js:620", "A count with its hidden space and title. Renders nothing for zero."],
-    ["dialog()", "engine.js:9514", "Renders `d.tabs` into a strip between a dialog's header and body."],
+    ["runTabs(R, t)", "engine.js:2789", "The Run page's five tabs, with the state dot and the Cost figure."],
+    ["tabN(n, title, style)", "engine.js:678", "A count with its hidden space and title. Renders nothing for zero."],
+    ["dialog()", "engine.js:9573", "Renders `d.tabs` into a strip between a dialog's header and body."],
   ],
   sourceNotes: [
     "Pages write the strip inline: Work (`WORK_TABS` in `wedge.js`), Tools (engine.js 4831), agent, Steering, Spend, Repositories, Organization, and Audit. There are 15 `role=\"tab\"` sites.",

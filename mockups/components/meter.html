@@ -42,7 +42,7 @@
   <p class="dx-lead">A meter answers one question: how much of what's allowed is used. A budget, a token cap, a cache rate. A stacked meter answers a related one: what is a total made of. Both draw a thin bar and both name their figures in words beside it, so the bar is never the only place the number lives.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.bar, .meter, .stk</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 318 to 322 (bar and meter), 765 (bar hold), 1395 to 1398 (stacked ratio), 1376 to 1379 (legend), 2057 to 2060 (meter, defined a second time)</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 318 to 322 (bar and meter), 772 (bar hold), 1402 to 1405 (stacked ratio), 1383 to 1386 (legend), 2064 to 2067 (meter, defined a second time)</span>
     <span><b>Used on</b> Run (Decision trace, Tokens, Instruments), Spend, Agents (30-day token use, mandates), Steering (record page)</span>
   </div>
 </div>
@@ -93,7 +93,7 @@
       <tr><td>Bar</td><td><code>.bar</code></td><td>The track: 7px tall, <code>--hl</code> ground with a 1px <code>--border</code>, corners rounded and clipped.</td></tr>
       <tr><td>Fill</td><td><code>.bar i</code></td><td>The filled portion, <code>--st-allowed</code> by default, its width set by an inline percent.</td></tr>
       <tr><td>Hold fill</td><td><code>.bar i.hold</code></td><td>The fill in <code>--st-approval</code>, applied once the value reaches 90% used.</td></tr>
-      <tr><td>Meter</td><td><code>.meter</code></td><td>The label-and-bar unit, a grid with a 5px gap. Defined twice (engine.css 321 and 2057). The later definition wins.</td></tr>
+      <tr><td>Meter</td><td><code>.meter</code></td><td>The label-and-bar unit, a grid with a 5px gap. Defined twice (engine.css 321 and 2064). The later definition wins.</td></tr>
       <tr><td>Meter label</td><td><code>.meter .lab</code></td><td>The name and the figure on one line, the figure pushed to the far side.</td></tr>
       <tr><td>Meter's own bar</td><td><code>.meter .bar</code></td><td>A 6px track from the second <code>.meter .bar</code> rule, thinner than a bare <code>.bar</code>.</td></tr>
       <tr><td>Stacked ratio</td><td><code>.stk</code></td><td>Several fills in one 8px track, 2px gaps, the first and last corners rounded, with an optional reference tick (<code>.stk .ref</code>).</td></tr>
@@ -174,17 +174,17 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 318 to 322 (bar and meter), 765 (bar hold), 1395 to 1398 (stacked ratio), 1376 to 1379 (legend), 2057 to 2060 (meter, defined a second time)</td><td>The rules that draw it</td></tr>
-      <tr><td><code>stgMeter(label, used, max, unit, sub)</code> at <code>engine.js:6393</code></td><td>Single-value meter with <code>role=&quot;img&quot;</code> and an aria-label stating the percent. Holds at 90%.</td></tr>
-      <tr><td><code>tokBars(t, opts)</code> at <code>engine.js:193</code></td><td>One composition meter per prompt part, plus output and reasoning, each in its own hue.</td></tr>
-      <tr><td><code>stack3(parts, total)</code> at <code>engine.js:2592</code></td><td>One <code>.stk</code> segment per part, sized by flex, each with a tooltip.</td></tr>
-      <tr><td><code>stackLeg(parts)</code> at <code>engine.js:2595</code></td><td>The <code>.leg</code> row naming each part <code>stack3()</code> drew.</td></tr>
-      <tr><td><code>mandateBar(m, showReserve)</code> at <code>engine.js:1741</code></td><td>The <code>.mbar</code> budget bar plus its own <code>.mlegend</code>, for a mandate card and the mandate page.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 318 to 322 (bar and meter), 772 (bar hold), 1402 to 1405 (stacked ratio), 1383 to 1386 (legend), 2064 to 2067 (meter, defined a second time)</td><td>The rules that draw it</td></tr>
+      <tr><td><code>stgMeter(label, used, max, unit, sub)</code> at <code>engine.js:6451</code></td><td>Single-value meter with <code>role=&quot;img&quot;</code> and an aria-label stating the percent. Holds at 90%.</td></tr>
+      <tr><td><code>tokBars(t, opts)</code> at <code>engine.js:192</code></td><td>One composition meter per prompt part, plus output and reasoning, each in its own hue.</td></tr>
+      <tr><td><code>stack3(parts, total)</code> at <code>engine.js:2650</code></td><td>One <code>.stk</code> segment per part, sized by flex, each with a tooltip.</td></tr>
+      <tr><td><code>stackLeg(parts)</code> at <code>engine.js:2653</code></td><td>The <code>.leg</code> row naming each part <code>stack3()</code> drew.</td></tr>
+      <tr><td><code>mandateBar(m, showReserve)</code> at <code>engine.js:1799</code></td><td>The <code>.mbar</code> budget bar plus its own <code>.mlegend</code>, for a mandate card and the mandate page.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
     <li>A third local meter, <code>crecMeter()</code> (engine.js:13304), draws a Steering record's rendered, cited, and violated counts with the same <code>.meter</code>, <code>.lab</code>, and <code>.bar</code> markup as <code>stgMeter()</code>, but takes its own arguments and sets no <code>role</code> or <code>aria-label</code>.</li>
-    <li><code>.fb</code> and <code>.pr-bar</code> are declared beside <code>.mbar</code> in the CSS (engine.css 1548 to 1559) as page-bound variants. <code>.fb</code> is live on Run. <code>.pr-bar</code> renders nowhere. See Findings.</li>
+    <li><code>.fb</code> and <code>.pr-bar</code> are declared beside <code>.mbar</code> in the CSS (engine.css 1555 to 1566) as page-bound variants. <code>.fb</code> is live on Run. <code>.pr-bar</code> renders nowhere. See Findings.</li>
   </ul>
 </section>
 
@@ -192,7 +192,7 @@
   <h2 id="findings">Findings</h2>
   
   <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Composition meters carry no ARIA percent</h4><p><code>tokBars()</code>'s <code>.bar</code> has neither <code>role=&quot;img&quot;</code> nor an <code>aria-label</code>, unlike <code>stgMeter()</code>'s. A screen reader gets the part's name and figure but never the percent the fill visually conveys.</p></div>
-  <div class="dx-find"><h4><span class="b b-q">note</span>`.pr-bar` has no emitter</h4><p>Declared at engine.css 1555 to 1559 with its own label, track, and value columns. Nothing in engine.js or wedge.js renders one.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>`.pr-bar` has no emitter</h4><p>Declared at engine.css 1562 to 1566 with its own label, track, and value columns. Nothing in engine.js or wedge.js renders one.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>A third meter shadows `stgMeter()`</h4><p><code>crecMeter()</code> (engine.js 13304) draws the same <code>.meter</code> markup with its own signature and no ARIA attributes, for the Steering record page alone.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>`.meter .lab` is defined twice</h4><p>Once at engine.css 321 (<code>margin-left:auto</code> pushes the figure right) and again at 2057 (<code>justify-content:space-between</code>). The two render alike, but a component with two rules for the same part should have one.</p></div>
 </section>
@@ -208,7 +208,7 @@
 ## Inputs
 
 1. mockups/components/meter.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 318 to 322 (bar and meter), 765 (bar hold), 1395 to 1398 (stacked ratio), 1376 to 1379 (legend), 2057 to 2060 (meter, defined a second time). The mockup renders it with stgMeter(label, used, max, unit, sub) (engine.js:6393), tokBars(t, opts) (engine.js:193), stack3(parts, total) (engine.js:2592), stackLeg(parts) (engine.js:2595), mandateBar(m, showReserve) (engine.js:1741).
+2. The design source: mockups/src/engine.css lines 318 to 322 (bar and meter), 772 (bar hold), 1402 to 1405 (stacked ratio), 1383 to 1386 (legend), 2064 to 2067 (meter, defined a second time). The mockup renders it with stgMeter(label, used, max, unit, sub) (engine.js:6451), tokBars(t, opts) (engine.js:192), stack3(parts, total) (engine.js:2650), stackLeg(parts) (engine.js:2653), mandateBar(m, showReserve) (engine.js:1799).
 3. The build's implementation: find it by its root selector (.bar, .meter, .stk) or its name, and list every route that renders it.
 4. Where to see it in the design: Run (Decision trace, Tokens, Instruments), Spend, Agents (30-day token use, mandates), Steering (record page). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

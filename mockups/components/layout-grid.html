@@ -42,7 +42,7 @@
   <p class="dx-lead">Pages are laid out with a handful of primitives: <code>.grid</code> with two, three, or four auto-fitting columns, <code>.split</code> and <code>.split23</code> for a main column beside a side column, and <code>.row</code> for an inline run of badges or buttons. They carry no color and no copy. They set the 14px gap every page uses.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.grid</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 153 to 167, 310 to 311, 548 to 549, phone 675</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 153 to 167, 310 to 311, 555 to 556, phone 682</span>
     <span><b>Used on</b> Work, Run, Spend, Agents, agent Overview, Billing, every dialog</span>
   </div>
 </div>
@@ -179,7 +179,7 @@
   <h2 id="phone">Phone</h2>
   
   <ul>
-    <li><code>.g3</code> and <code>.g4</code> become two equal columns (engine.css 675). <code>.g2</code> falls to one column because two 320px columns do not fit.</li>
+    <li><code>.g3</code> and <code>.g4</code> become two equal columns (engine.css 682). <code>.g2</code> falls to one column because two 320px columns do not fit.</li>
     <li><code>.split</code> and <code>.split23</code> become one column below 1080px and in the phone shell, with the side column under the main one.</li>
     <li><code>.row</code> wraps, so badges and buttons flow onto a second line instead of scrolling.</li>
   </ul>
@@ -202,7 +202,7 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 153 to 167, 310 to 311, 548 to 549, phone 675</td><td>The rules that draw it</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 153 to 167, 310 to 311, 555 to 556, phone 682</td><td>The rules that draw it</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -229,7 +229,7 @@
 ## Inputs
 
 1. mockups/components/layout-grid.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 153 to 167, 310 to 311, 548 to 549, phone 675.
+2. The design source: mockups/src/engine.css lines 153 to 167, 310 to 311, 555 to 556, phone 682.
 3. The build's implementation: find it by its root selector (.grid) or its name, and list every route that renders it.
 4. Where to see it in the design: Work, Run, Spend, Agents, agent Overview, Billing, every dialog. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -247,7 +247,7 @@ Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and li
 8. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
 9. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
 10. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
-11. Phone. At 390 by 844 with a touch pointer: `.g3` and `.g4` become two equal columns (engine.css 675). `.g2` falls to one column because two 320px columns do not fit. `.split` and `.split23` become one column below 1080px and in the phone shell, with the side column under the main one. `.row` wraps, so badges and buttons flow onto a second line instead of scrolling.
+11. Phone. At 390 by 844 with a touch pointer: `.g3` and `.g4` become two equal columns (engine.css 682). `.g2` falls to one column because two 320px columns do not fit. `.split` and `.split23` become one column below 1080px and in the phone shell, with the side column under the main one. `.row` wraps, so badges and buttons flow onto a second line instead of scrolling.
 12. Accessibility. Visual order is DOM order in every primitive, so keyboard and screen reader order match what you see. In `.split`, the main column comes first in the DOM and the side column second, so a screen reader reaches the main content first. A `.hr` is a `div`, which is decorative. Use a heading, not a divider, to start a new section.
 13. One implementation. The build draws the layout grid from one shared component. List every place that draws it by hand, with its file and line.
 

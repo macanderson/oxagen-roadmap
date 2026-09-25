@@ -7,7 +7,7 @@ export default {
   summary: "A table in a panel with search, filters, sortable columns, a rows select, and a pager.",
   lead: "Every list in the product gets the same controls: a search box, up to three filters, sortable columns, a rows-per-page select, and a pager. Pages write a plain table, and the engine's `listify()` adds the controls after each render, so no page writes its own and no list shows two search boxes. This is the table panel in the screenshot that started this reference: the Agents list.",
   root: ".lt, .lp",
-  css: "lines 889 to 915",
+  css: "lines 896 to 922",
   usedOn: ["Agents", "Work orders", "Backlog", "Tools", "Spend budgets", "Repositories", "Runtimes", "Audit", "Organization"],
   stories: [
     {
@@ -151,12 +151,12 @@ export default {
     ["--fg", "Sorted header text"],
   ],
   helpers: [
-    ["listify()", "engine.js:13793", "After every render, runs `ltTable()` on each table in the page and the dialog layer, and `ltCards()` on each card list."],
-    ["ltTable(table, prefix)", "engine.js:13693", "Reads the table, picks filters, makes headers sortable, and inserts the bar and pager."],
-    ["ltBar(st, opts, apply)", "engine.js:13641", "Writes the control bar: search, filters, an optional Sort, and Rows."],
-    ["ltPager(st, total, onPage)", "engine.js:13616", "Writes the range and the page buttons, with ellipses past seven pages."],
-    ["ltCards(cfg)", "engine.js:13762", "The same bar and pager for card lists, configured in `LT_CARDS`."],
-    ["cardTables()", "engine.js:13859", "Turns tables into labelled cards in the phone shell."],
+    ["listify()", "engine.js:13852", "After every render, runs `ltTable()` on each table in the page and the dialog layer, and `ltCards()` on each card list."],
+    ["ltTable(table, prefix)", "engine.js:13752", "Reads the table, picks filters, makes headers sortable, and inserts the bar and pager."],
+    ["ltBar(st, opts, apply)", "engine.js:13700", "Writes the control bar: search, filters, an optional Sort, and Rows."],
+    ["ltPager(st, total, onPage)", "engine.js:13675", "Writes the range and the page buttons, with ellipses past seven pages."],
+    ["ltCards(cfg)", "engine.js:13821", "The same bar and pager for card lists, configured in `LT_CARDS`."],
+    ["cardTables()", "engine.js:13918", "Turns tables into labelled cards in the phone shell."],
   ],
   sourceNotes: [
     "`LT_PER` (engine.js 13583) holds the row choices, and `LT_FACET` (13585) the column names that sort first as filters.",

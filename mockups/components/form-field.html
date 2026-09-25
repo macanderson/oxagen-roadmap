@@ -42,7 +42,7 @@
   <p class="dx-lead">A form field is a label above a control with an optional hint below it. The control is a text input, a select, or a textarea on the page ground. Two fields can sit side by side, a read-only field shows a value you cannot change here, and a checkbox card holds a choice with its consequence written out. Most fields live in dialogs.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.field</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 479 to 483, 562 to 569, check card 570 to 575, 1359 to 1361, 2242, 2259, small select 766 to 767, read-only 924, phone 670 to 672</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 479 to 483, 569 to 576, check card 577 to 582, 1366 to 1368, 2249, 2266, small select 773 to 774, read-only 931, phone 677 to 679</span>
     <span><b>Used on</b> every dialog, Set a budget, Invite a person, Retire agent, the connection wizard, Account</span>
   </div>
 </div>
@@ -197,13 +197,13 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 479 to 483, 562 to 569, check card 570 to 575, 1359 to 1361, 2242, 2259, small select 766 to 767, read-only 924, phone 670 to 672</td><td>The rules that draw it</td></tr>
-      <tr><td><code>dialog()</code> at <code>engine.js:9514</code></td><td>Renders the fields a dialog body holds.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 479 to 483, 569 to 576, check card 577 to 582, 1366 to 1368, 2249, 2266, small select 773 to 774, read-only 931, phone 677 to 679</td><td>The rules that draw it</td></tr>
+      <tr><td><code>dialog()</code> at <code>engine.js:9573</code></td><td>Renders the fields a dialog body holds.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
     <li>Fields are written inline, about 258 of them, mostly in dialogs. There are 11 checkbox cards.</li>
-    <li>The onboarding screens have their own invalid state, <code>.field input.ob-bad</code> (engine.css 1469). Nothing else in the engine draws an invalid field.</li>
+    <li>The onboarding screens have their own invalid state, <code>.field input.ob-bad</code> (engine.css 1476). Nothing else in the engine draws an invalid field.</li>
   </ul>
 </section>
 
@@ -227,7 +227,7 @@
 ## Inputs
 
 1. mockups/components/form-field.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 479 to 483, 562 to 569, check card 570 to 575, 1359 to 1361, 2242, 2259, small select 766 to 767, read-only 924, phone 670 to 672. The mockup renders it with dialog() (engine.js:9514).
+2. The design source: mockups/src/engine.css lines 479 to 483, 569 to 576, check card 577 to 582, 1366 to 1368, 2249, 2266, small select 773 to 774, read-only 931, phone 677 to 679. The mockup renders it with dialog() (engine.js:9573).
 3. The build's implementation: find it by its root selector (.field) or its name, and list every route that renders it.
 4. Where to see it in the design: every dialog, Set a budget, Invite a person, Retire agent, the connection wizard, Account. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

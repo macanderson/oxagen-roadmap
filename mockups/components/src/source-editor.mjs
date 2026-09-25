@@ -40,7 +40,7 @@ export default {
   summary: "A file editor with line numbers, syntax color, find, and a status bar, set in Monaspace Neon.",
   lead: "The source editor edits a file that lives in the repository: an agent definition, a Steering source, a skill. Saving opens a pull request, so the editor shows whether the file is modified and never writes on its own. It is a real textarea laid over a painted copy of the same text, and both layers share one font, size, line height, and padding so each glyph sits on its colored twin. The face is Monaspace Neon, with texture healing and ligatures on.",
   root: ".ed",
-  css: "lines 942 to 973, ground 2123 to 2125, dialog and prose variants 1891 to 1900, phone 965",
+  css: "lines 949 to 980, ground 2130 to 2132, dialog and prose variants 1898 to 1907, phone 972",
   usedOn: ["agent Source", "Steering source", "skill source", "the agent, tool, skill, and record wizards"],
   stories: [
     {
@@ -132,7 +132,7 @@ export default {
     "Syntax color is decoration. Nothing in the file depends on color to be understood.",
   ],
   phone: [
-    "The key hints hide (engine.css 965). The rest of the status bar wraps.",
+    "The key hints hide (engine.css 972). The rest of the status bar wraps.",
     "The editor keeps horizontal scrolling for long lines. The page itself does not scroll sideways.",
     "The textarea is 16px in the phone shell, like every input, so the painted layer must match it there.",
   ],
@@ -149,12 +149,12 @@ export default {
     ["--gold", "Find marks and the find input's focus"],
   ],
   helpers: [
-    ["pAgentSource(r)", "engine.js:1193", "The agent Source page: the header, tabs, and the TOML editor."],
-    ["edMount()", "engine.js:1220", "Wires the textarea's events and restores the selection after a render."],
-    ["edPaint()", "engine.js:1237", "Repaints the highlighted layer, the gutter, the find marks, and the current line."],
-    ["edKey(e)", "engine.js:1268", "Tab and Shift Tab indent, ⌘/ comments, ⌘F finds, ⌘S saves."],
-    ["hlToml(src)", "engine.js:1163", "The TOML highlighter: one regex pass that writes token classes."],
-    ["cedHtml(key, path, lang, opts)", "engine.js:11529", "The same editor for other languages, sized for a dialog with `small` or wrapped for prose."],
+    ["pAgentSource(r)", "engine.js:1251", "The agent Source page: the header, tabs, and the TOML editor."],
+    ["edMount()", "engine.js:1278", "Wires the textarea's events and restores the selection after a render."],
+    ["edPaint()", "engine.js:1295", "Repaints the highlighted layer, the gutter, the find marks, and the current line."],
+    ["edKey(e)", "engine.js:1326", "Tab and Shift Tab indent, ⌘/ comments, ⌘F finds, ⌘S saves."],
+    ["hlToml(src)", "engine.js:1221", "The TOML highlighter: one regex pass that writes token classes."],
+    ["cedHtml(key, path, lang, opts)", "engine.js:11588", "The same editor for other languages, sized for a dialog with `small` or wrapped for prose."],
   ],
   sourceNotes: [
     "`CED_LANG` (engine.js 11405) lists the languages the shared editor highlights: TOML, Markdown, JSON, TypeScript, Python, and Go.",

@@ -139,14 +139,14 @@ export default {
     ["--ink", "The critical risk mark's exclamation stroke, for contrast against its own fill"],
   ],
   helpers: [
-    ["kindBadge(k)", "engine.js:1501", "Kind badge with icon and word. 4 calls."],
-    ["kindGlyph(k)", "engine.js:1502", "Icon-only kind glyph. 2 calls."],
+    ["kindBadge(k)", "engine.js:1559", "Kind badge with icon and word. 4 calls."],
+    ["kindGlyph(k)", "engine.js:1560", "Icon-only kind glyph. 2 calls."],
     ["ftBadge(t)", "wedge.js:237", "Frame-type badge, word and CSS mark, no icon. 10 calls."],
     ["typeStrip(list, ctx)", "wedge.js:446", "Counts by frame type as a strip. A `ctx` turns each entry into a filter button."],
-    ["catBadge(c)", "engine.js:766", "Tool category badge with icon and word. 5 calls."],
-    ["hazard(risk, effect)", "engine.js:789", "Risk mark plus an optional side-effect glyph. 15 calls."],
-    ["gate(g, note)", "engine.js:805", "Gate badge, with the reasoning in its title."],
-    ["toolGate(t)", "engine.js:817", "Decides which gate a tool sits behind today (a kill switch outranks a mandate outranks approval) and renders it with `gate()`. 5 calls."],
+    ["catBadge(c)", "engine.js:824", "Tool category badge with icon and word. 5 calls."],
+    ["hazard(risk, effect)", "engine.js:847", "Risk mark plus an optional side-effect glyph. 15 calls."],
+    ["gate(g, note)", "engine.js:863", "Gate badge, with the reasoning in its title."],
+    ["toolGate(t)", "engine.js:875", "Decides which gate a tool sits behind today (a kill switch outranks a mandate outranks approval) and renders it with `gate()`. 5 calls."],
   ],
   sourceNotes: [
     "The six context-record kinds and their icons live in `KINDS` (engine.js:707). `kindBadge()` falls back to `KINDS.rule` for any kind it does not recognize.",
@@ -156,7 +156,7 @@ export default {
   findings: [
     { tag: "open", title: "Frame type text fails contrast in light", body: "`.ft` sets its own text color from `--fc`. Three of the eight frame types (`ft-capability`, `ft-delegation`, `ft-invocation`) resolve to `--fk-tool`, `--fk-gov`, and `--fk-op`, which fall below 3.3:1 on white. See [Colors](../colors.html#kinds)." },
     { tag: "note", title: "The seventh kind is unused machinery", body: "`colors.html` hand-writes a `.kb.k-item` swatch for a steering item that is none of the six kinds, but `KINDS` has no `item` entry, so `kindBadge('item')` and `kindGlyph('item')` fall back to `KINDS.rule` and draw a rule icon labeled \"rule\" in the neutral hue. `.kb-src`, the caption meant to sit under that badge, has no emitter either." },
-    { tag: "note", title: "Kind and frame-type tints differ by a point", body: "The kind badge's fill is a 12% mix (engine.css 198). The frame-type badge's fill is an 11% mix (engine.css 2271). Both use a 45% border. Two badges on the same grammar should share one recipe." },
+    { tag: "note", title: "Kind and frame-type tints differ by a point", body: "The kind badge's fill is a 12% mix (engine.css 198). The frame-type badge's fill is an 11% mix (engine.css 2278). Both use a 45% border. Two badges on the same grammar should share one recipe." },
     { tag: "note", title: "Frame type carries no icon", body: "Unlike the kind badge, `.ft` has no SVG. Its mark is a CSS `::before` square dot in `currentColor`, by design, so a frame-type badge is a word plus a mark, never an icon." },
   ],
   audit: {

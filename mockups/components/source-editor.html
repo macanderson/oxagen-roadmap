@@ -42,7 +42,7 @@
   <p class="dx-lead">The source editor edits a file that lives in the repository: an agent definition, a Steering source, a skill. Saving opens a pull request, so the editor shows whether the file is modified and never writes on its own. It is a real textarea laid over a painted copy of the same text, and both layers share one font, size, line height, and padding so each glyph sits on its colored twin. The face is Monaspace Neon, with texture healing and ligatures on.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.ed</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 942 to 973, ground 2123 to 2125, dialog and prose variants 1891 to 1900, phone 965</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 949 to 980, ground 2130 to 2132, dialog and prose variants 1898 to 1907, phone 972</span>
     <span><b>Used on</b> agent Source, Steering source, skill source, the agent, tool, skill, and record wizards</span>
   </div>
 </div>
@@ -247,7 +247,7 @@ monthly_usd = 400</textarea></div></div><p class="dx-why"><b><svg viewBox="0 0 1
   <h2 id="phone">Phone</h2>
   
   <ul>
-    <li>The key hints hide (engine.css 965). The rest of the status bar wraps.</li>
+    <li>The key hints hide (engine.css 972). The rest of the status bar wraps.</li>
     <li>The editor keeps horizontal scrolling for long lines. The page itself does not scroll sideways.</li>
     <li>The textarea is 16px in the phone shell, like every input, so the painted layer must match it there.</li>
   </ul>
@@ -279,13 +279,13 @@ monthly_usd = 400</textarea></div></div><p class="dx-why"><b><svg viewBox="0 0 1
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 942 to 973, ground 2123 to 2125, dialog and prose variants 1891 to 1900, phone 965</td><td>The rules that draw it</td></tr>
-      <tr><td><code>pAgentSource(r)</code> at <code>engine.js:1193</code></td><td>The agent Source page: the header, tabs, and the TOML editor.</td></tr>
-      <tr><td><code>edMount()</code> at <code>engine.js:1220</code></td><td>Wires the textarea's events and restores the selection after a render.</td></tr>
-      <tr><td><code>edPaint()</code> at <code>engine.js:1237</code></td><td>Repaints the highlighted layer, the gutter, the find marks, and the current line.</td></tr>
-      <tr><td><code>edKey(e)</code> at <code>engine.js:1268</code></td><td>Tab and Shift Tab indent, ⌘/ comments, ⌘F finds, ⌘S saves.</td></tr>
-      <tr><td><code>hlToml(src)</code> at <code>engine.js:1163</code></td><td>The TOML highlighter: one regex pass that writes token classes.</td></tr>
-      <tr><td><code>cedHtml(key, path, lang, opts)</code> at <code>engine.js:11529</code></td><td>The same editor for other languages, sized for a dialog with <code>small</code> or wrapped for prose.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 949 to 980, ground 2130 to 2132, dialog and prose variants 1898 to 1907, phone 972</td><td>The rules that draw it</td></tr>
+      <tr><td><code>pAgentSource(r)</code> at <code>engine.js:1251</code></td><td>The agent Source page: the header, tabs, and the TOML editor.</td></tr>
+      <tr><td><code>edMount()</code> at <code>engine.js:1278</code></td><td>Wires the textarea's events and restores the selection after a render.</td></tr>
+      <tr><td><code>edPaint()</code> at <code>engine.js:1295</code></td><td>Repaints the highlighted layer, the gutter, the find marks, and the current line.</td></tr>
+      <tr><td><code>edKey(e)</code> at <code>engine.js:1326</code></td><td>Tab and Shift Tab indent, ⌘/ comments, ⌘F finds, ⌘S saves.</td></tr>
+      <tr><td><code>hlToml(src)</code> at <code>engine.js:1221</code></td><td>The TOML highlighter: one regex pass that writes token classes.</td></tr>
+      <tr><td><code>cedHtml(key, path, lang, opts)</code> at <code>engine.js:11588</code></td><td>The same editor for other languages, sized for a dialog with <code>small</code> or wrapped for prose.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -314,7 +314,7 @@ monthly_usd = 400</textarea></div></div><p class="dx-why"><b><svg viewBox="0 0 1
 ## Inputs
 
 1. mockups/components/source-editor.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 942 to 973, ground 2123 to 2125, dialog and prose variants 1891 to 1900, phone 965. The mockup renders it with pAgentSource(r) (engine.js:1193), edMount() (engine.js:1220), edPaint() (engine.js:1237), edKey(e) (engine.js:1268), hlToml(src) (engine.js:1163), cedHtml(key, path, lang, opts) (engine.js:11529).
+2. The design source: mockups/src/engine.css lines 949 to 980, ground 2130 to 2132, dialog and prose variants 1898 to 1907, phone 972. The mockup renders it with pAgentSource(r) (engine.js:1251), edMount() (engine.js:1278), edPaint() (engine.js:1295), edKey(e) (engine.js:1326), hlToml(src) (engine.js:1221), cedHtml(key, path, lang, opts) (engine.js:11588).
 3. The build's implementation: find it by its root selector (.ed) or its name, and list every route that renders it.
 4. Where to see it in the design: agent Source, Steering source, skill source, the agent, tool, skill, and record wizards. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -333,7 +333,7 @@ Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and li
 9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
 10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
 11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
-12. Phone. At 390 by 844 with a touch pointer: The key hints hide (engine.css 965). The rest of the status bar wraps. The editor keeps horizontal scrolling for long lines. The page itself does not scroll sideways. The textarea is 16px in the phone shell, like every input, so the painted layer must match it there.
+12. Phone. At 390 by 844 with a touch pointer: The key hints hide (engine.css 972). The rest of the status bar wraps. The editor keeps horizontal scrolling for long lines. The page itself does not scroll sideways. The textarea is 16px in the phone shell, like every input, so the painted layer must match it there.
 13. Accessibility. The textarea is the one focusable element and carries an `aria-label` equal to the path. The gutter, marks, and painted layer are `aria-hidden`. Tab inserts two spaces, so Escape then Tab must leave the editor. The status bar's hints should name that way out. See Findings. The caret is `--fg`, and a selection is `--st-approval` at 32%, which reads in both themes. Syntax color is decoration. Nothing in the file depends on color to be understood.
 14. One implementation. The build draws the source editor from one shared component. List every place that draws it by hand, with its file and line.
 

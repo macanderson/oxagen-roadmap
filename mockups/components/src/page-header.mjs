@@ -7,7 +7,7 @@ export default {
   summary: "The eyebrow, the page title, one line of subtext, and the page's actions.",
   lead: "Every page opens with a page header. The eyebrow names where the page sits, the h1 names the page or the record, the subtext says what the page holds, and the actions on the right are what you can do from here. It holds the only Space Grotesk on the page.",
   root: ".phead",
-  css: "lines 56 to 59, 127 to 132, phone 674",
+  css: "lines 56 to 59, 127 to 132, phone 681",
   usedOn: ["Work", "Agents", "Spend", "Steering", "Tools", "Run", "Repositories", "Organization"],
   stories: [
     {
@@ -150,7 +150,7 @@ export default {
     "The eyebrow's `--accent-text` is 8.43:1 on `--panel` in dark and 4.65:1 on white in light.",
   ],
   phone: [
-    "The h1 drops to 20px (engine.css 674).",
+    "The h1 drops to 20px (engine.css 681).",
     "The actions leave the right edge and take the full width under the title (engine.css 132). Buttons grow to 40px tall.",
     "A long title wraps. It never truncates.",
   ],

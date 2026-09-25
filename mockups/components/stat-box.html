@@ -42,7 +42,7 @@
   <p class="dx-lead">A stat box shows one figure a person checks at a glance: a count, an amount, a rate. The label names the figure, the value states it, and the subline gives the one fact that makes it readable. Stat boxes sit in a row at the top of a page or a tab.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.stat</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 177 to 181, 764, 2087 to 2093, phone 679 to 680</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 177 to 181, 771, 2094 to 2100, phone 686 to 687</span>
     <span><b>Used on</b> Work, Run, Agents, Spend, Runtimes, Billing, agent Overview</span>
   </div>
 </div>
@@ -170,7 +170,7 @@
   <h2 id="phone">Phone</h2>
   
   <ul>
-    <li>Padding drops to 11px by 12px and the value to 17px, so an eleven-digit token total fits half the width (engine.css 676 to 680).</li>
+    <li>Padding drops to 11px by 12px and the value to 17px, so an eleven-digit token total fits half the width (engine.css 683 to 687).</li>
     <li>Stat boxes sit two to a row, and a clickable stat keeps a 44px minimum touch height.</li>
   </ul>
 </section>
@@ -198,10 +198,10 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 177 to 181, 764, 2087 to 2093, phone 679 to 680</td><td>The rules that draw it</td></tr>
-      <tr><td><code>tile(k, v, s, col)</code> at <code>engine.js:2493</code></td><td>Writes one stat box. <code>col</code> sets the value's tone. About 15 calls.</td></tr>
-      <tr><td><code>runStatRow(R)</code> at <code>engine.js:2490</code></td><td>The Run page's row of six, with a local tile of its own.</td></tr>
-      <tr><td><code>basisChip(k)</code> at <code>engine.js:637</code></td><td>The spend basis chip in the subline.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 177 to 181, 771, 2094 to 2100, phone 686 to 687</td><td>The rules that draw it</td></tr>
+      <tr><td><code>tile(k, v, s, col)</code> at <code>engine.js:2551</code></td><td>Writes one stat box. <code>col</code> sets the value's tone. About 15 calls.</td></tr>
+      <tr><td><code>runStatRow(R)</code> at <code>engine.js:2548</code></td><td>The Run page's row of six, with a local tile of its own.</td></tr>
+      <tr><td><code>basisChip(k)</code> at <code>engine.js:695</code></td><td>The spend basis chip in the subline.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -230,7 +230,7 @@
 ## Inputs
 
 1. mockups/components/stat-box.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 177 to 181, 764, 2087 to 2093, phone 679 to 680. The mockup renders it with tile(k, v, s, col) (engine.js:2493), runStatRow(R) (engine.js:2490), basisChip(k) (engine.js:637).
+2. The design source: mockups/src/engine.css lines 177 to 181, 771, 2094 to 2100, phone 686 to 687. The mockup renders it with tile(k, v, s, col) (engine.js:2551), runStatRow(R) (engine.js:2548), basisChip(k) (engine.js:695).
 3. The build's implementation: find it by its root selector (.stat) or its name, and list every route that renders it.
 4. Where to see it in the design: Work, Run, Agents, Spend, Runtimes, Billing, agent Overview. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -249,7 +249,7 @@ Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and li
 9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
 10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
 11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
-12. Phone. At 390 by 844 with a touch pointer: Padding drops to 11px by 12px and the value to 17px, so an eleven-digit token total fits half the width (engine.css 676 to 680). Stat boxes sit two to a row, and a clickable stat keeps a 44px minimum touch height.
+12. Phone. At 390 by 844 with a touch pointer: Padding drops to 11px by 12px and the value to 17px, so an eleven-digit token total fits half the width (engine.css 683 to 687). Stat boxes sit two to a row, and a clickable stat keeps a 44px minimum touch height.
 13. Accessibility. The DOM order is label, value, subline, so a screen reader reads &quot;Runs, 1,340, last 30 days&quot;. A static stat box is not focusable. A clickable one is a real `button` with an `aria-label` that names where it goes. Color never carries the state alone. A toned value has its state in the label or the subline. The label and subline must clear 4.5:1 on `--panel`. The label's `--dim` does not today. See Findings.
 14. One implementation. The build draws the stat box from one shared component. List every place that draws it by hand, with its file and line.
 

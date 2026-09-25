@@ -8,7 +8,7 @@ export default {
   summary: "Source, payloads, and commands in Monaspace Neon, with a labelled readout and a side-by-side pair.",
   lead: "A code block shows text a person reads character by character: a tool call's input, a TOML file, a command, a JSON payload. It is set in Monaspace Neon (`--mono`) on the deepest ground. Inline code marks one identifier inside a sentence. A readout labels a slab of what the model read, and a code pair sets two sources side by side.",
   root: "pre, code",
-  css: "lines 300 to 304, 359 to 363, 390, 461 to 467, 1532 to 1533",
+  css: "lines 300 to 304, 359 to 363, 390, 461 to 467, 1539 to 1540",
   usedOn: ["Run frame detail", "Run transcript", "Tools schema dialog", "Fix dialog", "Steering sources", "Organization API keys"],
   stories: [
     {
@@ -132,10 +132,10 @@ tamper      = <span class="bad">"chain_break at frame 188"</span></pre>`,
     ["--st-allowed, --st-approval, --st-denied, --st-failed", "String, number, denied, and failure tones"],
   ],
   helpers: [
-    ["frJson(o, ind)", "engine.js:3370", "Writes a JSON value with `.k` keys and `.s` strings."],
-    ["frPre(o)", "engine.js:3379", "Wraps `frJson()` in a wrapping `pre` for the frame detail."],
-    ["readout(title, right, inner)", "engine.js:3736", "The labelled slab of what the model read. Two calls, both in frame detail."],
-    ["codePair(panes, cls)", "engine.js:1339", "Two labelled panes. Used by the fix dialog and the schema dialog."],
+    ["frJson(o, ind)", "engine.js:3428", "Writes a JSON value with `.k` keys and `.s` strings."],
+    ["frPre(o)", "engine.js:3437", "Wraps `frJson()` in a wrapping `pre` for the frame detail."],
+    ["readout(title, right, inner)", "engine.js:3794", "The labelled slab of what the model read. Two calls, both in frame detail."],
+    ["codePair(panes, cls)", "engine.js:1397", "Two labelled panes. Used by the fix dialog and the schema dialog."],
   ],
   sourceNotes: [
     "The engine writes 44 more `pre` blocks and four `code` spans inline as strings.",

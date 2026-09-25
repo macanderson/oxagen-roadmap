@@ -8,7 +8,7 @@ export default {
   summary: "A line diff of one file, unified for narrow panels and split side by side for review.",
   lead: "A diff shows what a change does to a file, line by line. The unified form stacks removed and added lines under two line-number columns and fits a narrow panel. The split form puts the base on the left and the draft on the right, so a change reads across. Both are set in Monaspace Neon, and a `+` or `−` mark carries each change before the tint does.",
   root: ".diff",
-  css: "lines 976 to 1005",
+  css: "lines 983 to 1012",
   usedOn: ["Run transcript", "Linked work", "Record save dialog", "Commit dialog", "Agent source"],
   stories: [
     {
@@ -90,7 +90,7 @@ export default {
     "Line text is `--fg` on the tint, which clears 4.5:1 in both themes.",
   ],
   phone: [
-    "In the phone dialog layer the split form collapses to two columns: the header hides, each side's lines follow each other, a line identical on both sides shows once, and the hatch goes away (engine.css 1001 to 1005).",
+    "In the phone dialog layer the split form collapses to two columns: the header hides, each side's lines follow each other, a line identical on both sides shows once, and the hatch goes away (engine.css 1008 to 1012).",
     "The frame scrolls sideways inside itself. The page never does.",
   ],
   tokens: [
@@ -104,10 +104,10 @@ export default {
     ["--panel, --muted", "Split header ground and label"],
   ],
   helpers: [
-    ["diffLines(a, b)", "engine.js:1291", "An LCS line diff of two strings into rows marked `+`, `-`, or space."],
-    ["diffStat(rows)", "engine.js:1300", "Counts additions and deletions for `.dstat`."],
-    ["diffHtml(rows, ctx)", "engine.js:1301", "The unified form with `ctx` lines of context. Transcript, linked work, and the record save dialog."],
-    ["diffSplitHtml(rows, ctx, labels)", "engine.js:1314", "The split form. The commit dialog."],
+    ["diffLines(a, b)", "engine.js:1349", "An LCS line diff of two strings into rows marked `+`, `-`, or space."],
+    ["diffStat(rows)", "engine.js:1358", "Counts additions and deletions for `.dstat`."],
+    ["diffHtml(rows, ctx)", "engine.js:1359", "The unified form with `ctx` lines of context. Transcript, linked work, and the record save dialog."],
+    ["diffSplitHtml(rows, ctx, labels)", "engine.js:1372", "The split form. The commit dialog."],
   ],
   sourceNotes: [
     "`.dl2.same` marks a row identical on both sides, so the phone layout can drop the duplicate half.",

@@ -8,7 +8,7 @@ export default {
   summary: "One row in a bordered list: an icon, two lines of text, and a timestamp.",
   lead: "A list item is a compact record inside a `.lst`: a notification, a security method, an active session. It leads with a tone icon, carries a title and one line of detail, and ends in a timestamp or an action. An unread item is a button that marks itself read. A read item is plain text.",
   root: ".lst",
-  css: "lines 551 to 561, 589 to 608",
+  css: "lines 558 to 568, 596 to 615",
   usedOn: ["Notifications", "Account (Security tab)"],
   stories: [
     {
@@ -112,17 +112,17 @@ export default {
     ["--st-approval, --st-failed, --st-critical, --st-allowed", "Icon tones"],
   ],
   helpers: [
-    ["notifsBody()", "engine.js:1686", "Writes the notification list, one `.li` per entry, unread ones as buttons via `notifRead()`."],
-    ["notifIcon(tone)", "engine.js:1679", "The tone's icon: a check for allowed, a clock for approval, a confetti mark for gold, a triangle for anything else, including failed and critical."],
-    ["accountBody()", "engine.js:9838", "The Security tab's two `.lst` lists, with an inline-styled `.ic` instead of a tone class."],
+    ["notifsBody()", "engine.js:1744", "Writes the notification list, one `.li` per entry, unread ones as buttons via `notifRead()`."],
+    ["notifIcon(tone)", "engine.js:1737", "The tone's icon: a check for allowed, a clock for approval, a confetti mark for gold, a triangle for anything else, including failed and critical."],
+    ["accountBody()", "engine.js:9897", "The Security tab's two `.lst` lists, with an inline-styled `.ic` instead of a tone class."],
   ],
   sourceNotes: [
-    "`.lst` and `.li` are defined twice in engine.css: once at lines 551 to 561, and again at 589 to 608. The second definition wins the cascade and is the one that actually renders, since it adds `:hover`, the five `.ic.t-*` tones, `.unread`, and `[role=button]`. The first definition draws nothing a person can see that the second does not already draw.",
+    "`.lst` and `.li` are defined twice in engine.css: once at lines 558 to 568, and again at 596 to 615. The second definition wins the cascade and is the one that actually renders, since it adds `:hover`, the five `.ic.t-*` tones, `.unread`, and `[role=button]`. The first definition draws nothing a person can see that the second does not already draw.",
     "notifIcon()'s default branch (the triangle) fires for both `failed` and `critical` tones, so the two states share one icon shape and differ only by their tint color.",
   ],
   findings: [
-    { tag: "open", title: "Rules defined twice", body: "`.lst` and `.li` (engine.css 551 to 561 and again 589 to 608) are two full definitions of the same classes. The second wins by cascade order, which is also called out on the components index. A build should carry one definition, not rely on source order to pick the right one." },
-    { tag: "open", title: "Gold as an unread marker", body: "`.li.unread` (engine.css 605) tints the row and its dot with `--gold`. Unread is a state, not an identity or the one action on the screen, and a busy notification list can carry several unread rows at once, which is more than one gold mark on a screen." },
+    { tag: "open", title: "Rules defined twice", body: "`.lst` and `.li` (engine.css 558 to 568 and again 596 to 615) are two full definitions of the same classes. The second wins by cascade order, which is also called out on the components index. A build should carry one definition, not rely on source order to pick the right one." },
+    { tag: "open", title: "Gold as an unread marker", body: "`.li.unread` (engine.css 612) tints the row and its dot with `--gold`. Unread is a state, not an identity or the one action on the screen, and a busy notification list can carry several unread rows at once, which is more than one gold mark on a screen." },
     { tag: "note", title: "A second icon-tone idiom", body: "`accountBody()`'s Security tab (engine.js 9850 to 9853) sets each icon's background and color with an inline `style=\"background:…;color:…\"` instead of one of the five `.ic.t-*` classes the second `.li` definition already provides. An audit that greps for `.ic.t-` misses these rows entirely." },
   ],
   audit: {

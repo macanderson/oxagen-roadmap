@@ -8,7 +8,7 @@ export default {
   summary: "The one way an agent identity is drawn: an avatar, its key, and a second line, in one of three layouts.",
   lead: "An agent card is an agent's identity wherever it appears: a table row, a run's header, an approval, a mandate. One markup and one CSS family draw it in three layouts so an agent looks the same everywhere it shows up. The identity block is the only part allowed to give way. It ellipsises before anything else moves.",
   root: ".agc",
-  css: "lines 1301 to 1331 (agent card, its three layouts, and the rule comment above them), 1335 (a steer-list override)",
+  css: "lines 1308 to 1338 (agent card, its three layouts, and the rule comment above them), 1342 (a steer-list override)",
   usedOn: ["Agents", "Work", "Run", "Approvals", "Spend", "Tools", "Steering"],
   stories: [
     {
@@ -87,14 +87,14 @@ export default {
     ["--dim", "List and compact layouts' second line"],
   ],
   helpers: [
-    ["agentCard(a, o)", "engine.js:9991", "The one function that draws an agent identity. `o.layout` picks list, compact, or detail. 17 calls."],
+    ["agentCard(a, o)", "engine.js:10050", "The one function that draws an agent identity. `o.layout` picks list, compact, or detail. 17 calls."],
   ],
   sourceNotes: [
     "`o.sub` overrides the second line outright, so a caller can put a run's turn number or a mandate's toolbelt count there instead of the harness. Several call sites do.",
     "`o.link` overrides the default per layout, and `o.onclick` lets a card inside an already-clickable row stop its own click from double-firing.",
   ],
   findings: [
-    { tag: "note", title: "The score slot has no emitter", body: "`.agc>.scs` and `.agc-detail .sc` reserve space and set type for a trust or a spend score beside the identity, and `.steer-list .check>.scs` (engine.css 1335) repeats the reservation. `agentCard()` never fills any of them. Scores were part of the first version and were removed from rev1." },
+    { tag: "note", title: "The score slot has no emitter", body: "`.agc>.scs` and `.agc-detail .sc` reserve space and set type for a trust or a spend score beside the identity, and `.steer-list .check>.scs` (engine.css 1342) repeats the reservation. `agentCard()` never fills any of them. Scores were part of the first version and were removed from rev1." },
     { tag: "note", title: "One helper, seventeen call sites, no drift found", body: "Unlike [stat box](stat-box.html) or [panel](panel.html), no hand-written copy of the agent card turned up in engine.js or wedge.js. Every identity on every sampled page goes through `agentCard()`." },
   ],
   audit: {
