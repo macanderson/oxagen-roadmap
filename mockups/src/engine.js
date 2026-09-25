@@ -4746,7 +4746,7 @@ var BELT=[
  {id:"open_context_pr@1",d:"Open a Context PR on the main repo from a proposal.",
   dec:"allow",rule:"grant:agent.repo.write #11",scope:"repo: a-intel/platform"},
  {id:"send_message@1",d:"Message another agent in this workspace, or a run.",
-  dec:"allow",rule:"agent tool default",scope:"@agent only — @all is not granted"},
+  dec:"allow",rule:"agent tool default",scope:"@agent only (no @all)"},
  {id:"claude_code__Bash@2.1",d:"Run a shell command in the host's working directory.",
   dec:"allow",rule:"grant:agent.repo.write #9 (harness tier)",
   scope:"deny: curl, ssh, aws, gh auth · cwd under a-intel/platform"},
@@ -5141,13 +5141,13 @@ function aOverview(a,r){
 function aSteering(a,r){
   var sl=defSlug(a), M=agentSteering(a);
   if(!M) return '<div class="panel"><div class="panel-h"><h3>No steering is assembled for this agent</h3></div>'+
-   '<div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">The workspace library has nothing scoped to it and '+
-   'no preview prompt is set up, so the assembler has nothing to rank. Writing a record on Steering is what changes that.</p>'+
+   '<div class="panel-b"><p class="muted" style="margin:0;font-size:12.5px">The workspace library has no record scoped to this agent, '+
+   'so there is nothing to rank. Add a record on Steering to change that.</p>'+
    '<div class="row" style="margin-top:12px"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/steering\')">Open the library</button></div></div></div>';
 
   var live=M.gates.concat(M.prefix).concat(M.volatile);
   var rows=live.map(function(it){
-    var where=it.kind==="policy"?"gate plane":it.force==="must"||it.force==="should"?"stable prefix":"volatile · rank "+(it.rank||"—");
+    var where=it.kind==="policy"?"gate notice":it.force==="must"||it.force==="should"?"stable prefix":"per-prompt selection · rank "+(it.rank||"—");
     return '<tr>'+
      '<td>'+stgItemLink(it)+'</td>'+
      '<td data-v="'+h(stgKindLabel(it))+'">'+stgKindChip(it)+'</td>'+
@@ -5160,19 +5160,19 @@ function aSteering(a,r){
 
   return '<div class="grid">'+
    (M.delivered?'':'<div class="warn"><b>Nothing below reaches this agent today.</b> '+h(a.name)+' is on the '+
-     '<span class="mono">observe</span> tier: no hook is installed, so oxagen has no injection point. This is what the '+
-     'assembler would deliver on the <span class="mono">harness</span> tier.</div>')+
+     '<span class="mono">observe</span> tier: no hook is installed, so oxagen has no injection point. This is what would '+
+     'be delivered on the <span class="mono">harness</span> tier.</div>')+
    '<div class="grid g2">'+
-    '<div class="panel pad">'+stgMeter("Stable prefix · SessionStart additional context",M.bytes,M.budget.sessionStartBytes,"bytes",
+    '<div class="panel pad">'+stgMeter("Stable prefix at SessionStart",M.bytes,M.budget.sessionStartBytes,"bytes",
       tokn(M.tok.prefix)+' tok: compile header '+M.budget.compileHeaderTok+', gate notices '+tokn(M.tok.gates)+
       ', must and should '+tokn(M.tok.prefix-M.tok.gates-M.budget.compileHeaderTok)+'.')+'</div>'+
-    '<div class="panel pad">'+stgMeter("Volatile selection · token budget",M.tok.volatile,M.budget.volatileTok,"tok",
-      plural(M.volatile.length,"item")+' fit for the prompt “'+h(M.prompt)+'”. '+plural(M.cut.length,"item")+' cut in all.')+'</div></div>'+
+    '<div class="panel pad">'+stgMeter("Per-prompt selection",M.tok.volatile,M.budget.volatileTok,"tok",
+      plural(M.volatile.length,"record")+' fit for the prompt “'+h(M.prompt)+'”. '+plural(M.cut.length,"record")+' cut in all.')+'</div></div>'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>What reaches this agent</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(live.length,"item")+' compiled from the workspace library at '+tokn(M.tok.total)+' tok.</p></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(live.length,"record")+' compiled from the workspace library at '+tokn(M.tok.total)+' tok.</p></div>'+
     '<div class="sp"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/steering/assignments\')">Change what is assigned</button>'+
     '<button class="btn sm ghost" onclick="S.pv.agent=\''+h(sl)+'\';S.pv.text=null;go(\'#/'+ORG.slug+'/'+S.ws+'/steering/compiler\')">Open in the compiler</button></div></div>'+
-    '<div class="tw"><table><thead><tr><th>Item</th><th>Kind</th><th>Force</th><th>Scope</th><th>Body</th>'+
+    '<div class="tw"><table><thead><tr><th>Record</th><th>Kind</th><th>Force</th><th>Scope</th><th>Body</th>'+
     '<th>Source</th><th>Where it lands</th><th class="num">Token cost</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
     '<div class="panel-b"><div class="note">A gate notice is never dropped for budget. Everything else competes: '+
     '<span class="mono">must</span> and <span class="mono">should</span> for the 16 KiB SessionStart cap, then '+
@@ -5272,7 +5272,7 @@ function aToolbelt(a,r){
      '<td>'+catBadge(toolMeta(x.n).cat)+'</td>'+
      '<td>'+gate(x.dec,x.note||x.rule)+'<span class="sub mono">'+h(x.rule)+'</span></td>'+
      '<td>'+hazard(x.risk,x.eff)+'</td>'+
-     '<td><span class="b b-q">'+h(x.eg)+'</span></td><td>'+finBadge(x.fin)+'</td>'+
+     '<td><span class="b b-q">'+keyLabel(x.eg)+'</span></td><td>'+finBadge(x.fin)+'</td>'+
      '<td class="dim mono" style="font-size:10.5px">'+h(x.dig)+'</td></tr>';
   }
   var rows=bv==="group"
@@ -5280,7 +5280,7 @@ function aToolbelt(a,r){
       var rs=bsel.filter(function(x){return toolMeta(x.n).cat===c;});
       return '<tr class="tgrp t-'+c+'"><td colspan="6"><span class="ti">'+catSvg(c)+'</span><b>'+h(TCAT[c].l)+
        '</b><span class="muted">'+h(TCAT[c].s)+'</span></td>'+
-       '<td class="dim" style="font-size:11px;white-space:nowrap">'+rs.length+' tool'+(rs.length>1?'s':'')+'</td></tr>'+
+       '<td class="dim" style="font-size:11px;white-space:nowrap">'+plural(rs.length,"tool")+'</td></tr>'+
        rs.map(row).join("");}).join("")
    : bsel.map(row).join("");
 
@@ -5415,7 +5415,7 @@ function permRoles(a){
     var ro=roleById(roleBase(x));
     return '<dt class="mono">'+h(x)+'</dt><dd class="mono" style="font-size:11.5px">'+
      (ro?h(ro.perms.join(" · ")):'—')+'<span class="sub">'+(ro?h(ro.desc):'not a registered role')+'</span></dd>';
-   }).join(""):'<dt>Roles</dt><dd class="dim">none held — it can reach nothing but its own run channel</dd>';
+   }).join(""):'<dt>Roles</dt><dd class="dim">None held. It can reach only its own run channel.</dd>';
 
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Roles</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">A subagent can use only what both its own grants and the invoking person\'s grants allow. Subagents can only narrow.</p></div>'+
@@ -5426,13 +5426,13 @@ function permRoles(a){
    '<dl class="kv">'+roleRows+
    '<dt>Resource scope</dt><dd class="mono" style="font-size:11.5px">side_effects: read, write · repositories: '+
     h([w.main].concat(w.linked||[]).join(", "))+' · egress: third_party · max_hops 2</dd>'+
-   '<dt>Spend ceiling</dt><dd>'+iamMoney(a.budget,"per run, checked at each hook boundary")+' · '+
+   '<dt>Spend ceiling</dt><dd>'+iamMoney(a.budget,"per run, checked at each checkpoint")+' · '+
     iamMoney(a.budgetDay||a.budget,"per day, on reported spend")+'</dd>'+
    '<dt>Can move money</dt><dd>'+(a.mandates.length
-     ?'<span class="b b-approval"><span class="d"></span>'+a.mandates.length+' mandate</span> — and only inside it'
-     :'<span class="b b-allowed"><span class="d"></span>no</span> — no mandate, so a financial call is denied before dispatch')+'</dd>'+
+     ?'<span class="b b-approval"><span class="d"></span>'+plural(a.mandates.length,"mandate")+'</span> Only within its terms.'
+     :'<span class="b b-allowed"><span class="d"></span>no</span> No mandate is held, so a financial call is denied before dispatch.')+'</dd>'+
    '</dl>'+
-   '<div class="note">Assigning a toolbelt grants nothing. It widens what the model is shown; every call on it is still '+
+   '<div class="note">Assigning a toolbelt grants nothing. It widens what the model is shown. Every call on it is still '+
    'decided against these roles, the policy on the tool, and the mandate ledger.</div>'+
    '</div></div>';
 }
@@ -5445,20 +5445,20 @@ function permBudgets(a){
   var runPct=Math.round(a.budgetUsed/money(a.budget)*100);
 
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Budgets</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Checked at each hook boundary against the spend the harness reports. A breach pauses the run at the next boundary: client-attested and fail-open. On the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers the proxy enforces the ceiling before the call.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Hard limit, checked at each checkpoint against reported spend. If the harness stops reporting, the run is not paused (fail-open). On the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers the proxy blocks the call before it is sent.</p></div>'+
    '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'budget\')">Set budget</button></div>'+
    '<div class="panel-b" style="display:grid;gap:14px">'+
-   '<div class="meter"><div class="lab">Per run · hard<b>'+usd(a.budget)+'</b></div>'+
+   '<div class="meter"><div class="lab">Per-run hard limit<b>'+usd(a.budget)+'</b></div>'+
     '<div class="bar"><i style="width:'+Math.min(100,runPct)+'%;background:'+
     (runPct>80?"var(--st-critical)":"var(--st-allowed)")+'"></i></div>'+
     '<div class="dim" style="font-size:11.5px">highest run this month '+usd(a.budgetUsed.toFixed(2))+
     ' · basis: price book 2026-09 at the provider\'s list rate</div></div>'+
-   '<div class="meter"><div class="lab">Per day · hard<b>'+usd(a.usedDay||"0.00")+' of '+usd(a.budgetDay||a.budget)+'</b></div>'+
+   '<div class="meter"><div class="lab">Per-day hard limit<b>'+usd(a.usedDay||"0.00")+' of '+usd(a.budgetDay||a.budget)+'</b></div>'+
     '<div class="bar"><i style="width:'+pct.toFixed(0)+'%;background:'+dayCol+'"></i></div>'+
     '<div class="dim" style="font-size:11.5px">resets 00:00 UTC · mode hard · currency USD</div></div>'+
    '<dl class="kv">'+
-   '<dt>Mode</dt><dd>hard: checked at each hook boundary on reported spend</dd>'+
-   '<dt>On a breach</dt><dd><span class="mono">pause</span> at the next boundary, a '+
+   '<dt>Mode</dt><dd>Hard limit, checked at each checkpoint against reported spend</dd>'+
+   '<dt>On a breach</dt><dd><span class="mono">pause</span> at the next checkpoint, a '+
     '<span class="mono">policy.decision</span> frame, and the operator notified</dd>'+
    '<dt>Delegation ceiling</dt><dd>max_hops 2 · a subagent inherits this ceiling and may only lower it</dd>'+
    '</dl></div></div>';
@@ -5472,19 +5472,20 @@ function permMandates(a){
    '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>cannot move money</span></div>'+
    '<div class="panel-b" style="display:grid;gap:13px">'+
    '<p style="font-size:13px;margin:0">A financial tool call from this agent is denied before dispatch. That is true whether '+
-   'the tool is on its toolbelt or not, and it is checked at step 5 of the call pipeline — before any credential is minted and '+
+   'the tool is on its toolbelt or not. It is checked before any credential is minted and '+
    'before anything is sent to a provider.</p>'+
    iamChain([
     ["Call",'<span class="mono">stripe__create_payment@5</span> · amount $1,204.18 USD'],
-    ["Financial class",'moves_funds, read from the tool version\'s declared <span class="mono">amount_path</span>'],
+    ["Financial class",keyLabel("moves_funds")+', read from the tool version\'s declared <span class="mono">amount_path</span>'],
     ["Mandate lookup",'none for <span class="mono">'+h(a.key)+'</span>'],
-    ["Decision",gate("deny")+' <span class="mono">no_mandate</span> · mandate ledger unchanged · no credential minted']])+
+    ["Decision",gate("deny")+' · no mandate · mandate ledger unchanged · no credential minted']])+
    '<div class="row"><button class="btn" onclick="openDialog(\'mandate\')">Request a mandate</button></div>'+
    '</div></div>';
 
+  var byStatus={}; mine.forEach(function(m){byStatus[m.status]=(byStatus[m.status]||0)+1;});
   return '<div class="panel"><div class="panel-h"><h3>Mandates held</h3>'+
-   '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>'+mine.length+' active</span></div><div class="tw"><table>'+
-   '<thead><tr><th>Mandate</th><th>Effect</th><th class="num">Per call</th><th class="num">Per period</th>'+
+   '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>'+Object.keys(byStatus).map(function(k){return byStatus[k]+' '+h(k);}).join(' · ')+'</span></div><div class="tw"><table>'+
+   '<thead><tr><th>Mandate</th><th>Effect</th><th class="num">Auto-approve limit</th><th class="num">Per period</th>'+
    '<th class="num">Remaining</th><th>Expires</th><th>Status</th></tr></thead><tbody>'+
    mine.map(function(m){return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+defSlug(a)+'/mandates/'+m.id+'\')">'+
     '<td class="mono">'+h(m.id)+'</td><td class="mono" style="font-size:11.5px">'+h(m.effect)+'</td>'+
@@ -5494,7 +5495,7 @@ function permMandates(a){
    '</tbody></table></div>'+
    '<div class="panel-b"><div class="note">A mandate is the only thing that lets this agent move money, and it is spent '+
    'against a ledger: every draw reserves, then settles or releases. Its tools appear on the toolbelt gated '+
-   '<span class="mono">mandate + approval</span>, never plain <span class="mono">allowed</span>.</div></div></div>';
+   '<span class="mono">mandate + approval</span> rather than <span class="mono">allowed</span>.</div></div></div>';
 }
 
 /* ══════════════════════════════ Activity ══════════════════════════════
@@ -5508,8 +5509,8 @@ function aActivity(a,r){
 function actRuns(a){
   var rr=RUNS.filter(function(x){return x.agent===a.key;});
   if(!rr.length) return '<div class="panel"><div class="panel-h"><h3>Runs</h3></div><div class="panel-b">'+
-   '<p class="muted" style="margin:0;font-size:12.5px">No run of this agent is in the player\'s window. It has '+
-   a.runs30.toLocaleString()+' in the last 30 days; every one of them is in the audit record.</p>'+
+   '<p class="muted" style="margin:0;font-size:12.5px">No recent run of this agent is loaded here. It has '+
+   plural(a.runs30,"run")+' in the last 30 days, and each one is in the audit record.</p>'+
    '<div class="row" style="margin-top:12px"><button class="btn sm ghost" onclick="go(\'#/'+ORG.slug+'/audit/events\')">Open the audit record</button></div>'+
    '</div></div>';
   return '<div class="panel"><div class="panel-h"><h3>Runs</h3>'+
@@ -5532,7 +5533,7 @@ function actAccounting(a){
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Token accounting</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">By class, measured on every model call.</p></div>'+
     '<span class="mono dim" style="margin-left:auto;font-size:11px">30 days</span></div>'+
-    '<div class="tw"><table data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens 30d</th>'+
+    '<div class="tw"><table data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens (30 days)</th>'+
     '<th class="num">Rate</th><th class="num">Cost</th></tr></thead><tbody>'+
     tok.map(function(x){return '<tr><td>'+h(x[0])+'</td><td class="num">'+x[1].toLocaleString()+'</td>'+
      '<td class="num">'+usd(x[2])+' / M</td><td class="num">'+usd(x[3])+'</td></tr>';}).join("")+
@@ -5544,11 +5545,11 @@ function actAccounting(a){
     'are paid on every call whether the tool is used or not.</div></div></div>'+
 
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Last 30 days</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Read from the run records, not from the agent row.</p></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">Read from the run records.</p></div>'+
     '<button class="btn sm" style="margin-left:auto" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/spend\')">Open on Spend</button></div>'+
     '<div class="panel-b" style="display:grid;gap:14px"><dl class="kv">'+
     '<dt>Runs</dt><dd><span class="num">'+a.runs30.toLocaleString()+'</span></dd>'+
-    '<dt>Spend</dt><dd>'+iamMoney(a.spend30,"model calls as the harness reported them + priced tool calls, reported by harness")+'</dd>'+
+    '<dt>Spend</dt><dd>'+iamMoney(a.spend30,"model calls as the harness reported them, plus priced tool calls")+'</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(a.ratio)+'<span class="sub">the share of spend on turns that produced a change</span></dd>'+
     '<dt>Tokens</dt><dd><span class="num">'+tokn(agentTok(a).total)+'</span> · '+per(agentTok(a).cacheRate)+' cached</dd>'+
     '</dl>'+
@@ -5572,8 +5573,8 @@ function actIncidents(a){
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Nothing has been detected on this agent in the retention window.</p></div>'+
    '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>clean · 90 days</span></div>'+
    '<div class="panel-b"><p style="font-size:12.5px;margin:0">Detectors that would raise one: '+
-   '<span class="mono">hooks_removed</span>, <span class="mono">chain_break</span>, '+
-   '<span class="mono">unknown_tool</span> bursts, <span class="mono">credential_probe</span>, '+
+   keyLabel("hooks_removed")+', '+keyLabel("chain_break")+', '+
+   keyLabel("unknown_tool")+' bursts, '+keyLabel("credential_probe")+', '+
     'a receipt modified after the fact, and a same-<span class="mono">seq</span> '+
    'frame arriving with a different hash. Each one fires the same commands policy does, and each is a security event '+
    'with who, why, and what it stopped.</p>'+
@@ -5584,7 +5585,7 @@ function actIncidents(a){
   var edge={critical:"var(--st-critical)",warning:"var(--st-approval)",info:"var(--border)"};
   return list.map(function(i){
    return '<div class="panel" style="border-color:color-mix(in srgb,'+(edge[i.sev]||"var(--border)")+' 34%,var(--border))">'+
-    '<div class="panel-h"><div style="flex:1;min-width:0"><h3 class="mono" style="font-size:14px">'+h(i.kind)+'</h3>'+
+    '<div class="panel-h"><div style="flex:1;min-width:0"><h3 class="mono" style="font-size:14px">'+keyLabel(i.kind)+'</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+h(i.at)+' · detected by '+h(i.by)+' · '+h(i.scope)+'</p></div>'+
     '<span class="b b-'+(tone[i.sev]||"q")+'" style="margin-left:auto"><span class="d"></span>'+h(i.sev)+'</span>'+
     '<span class="b b-'+(i.status==="open"?"critical":"allowed")+'"><span class="d"></span>'+h(i.status)+'</span></div>'+
@@ -5595,7 +5596,7 @@ function actIncidents(a){
                :'<dt>Owner</dt><dd>'+h(i.owner||"unassigned")+(i.due?' · due '+h(i.due):'')+'</dd>')+
     '<dt>Incident</dt><dd class="mono">'+h(i.id)+'</dd></dl>'+
     '<div class="row"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/audit/incidents\')">Open on Audit</button>'+
-    (i.runs?'<span class="dim" style="font-size:11.5px">'+i.runs+' run'+(i.runs>1?'s':'')+' affected</span>':'')+'</div>'+
+    (i.runs?'<span class="dim" style="font-size:11.5px">'+plural(i.runs,"run")+' affected</span>':'')+'</div>'+
     '</div></div>';}).join("")+
    '<div class="panel"><div class="panel-b"><div class="note">A tamper incident never raises the tier of the frames it '+
    'touched. The window it covers stays labeled as what was actually observed, which is why the count here and the count '+
