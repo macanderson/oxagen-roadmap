@@ -42,7 +42,7 @@ At `gateway` and above, the Model surface line still joins two facts in one sent
 
 **Agents on this host** panel. Title "Agents on this host", with the agent count as a badge (3). List controls: "Search this list", **Rows** and the pager (the table has too few rows for a filter). Columns in order: Agent · Operator · Tier · Principal · Runs 30d.
 
-- *Agent*: the agent card, with its avatar, its key and its harness ("a-intel.core.release-manager" over "Claude Code").
+- *Agent*: the agent card, with its harness mark, its avatar, its key and its harness ("a-intel.core.release-manager" over "Claude Code").
 - *Operator*: the operator accountable for the agent, by name (Marcus Bell).
 - *Tier*: the agent's tier badge.
 - *Principal*: the principal id in mono (`prn_01JQ8W3F2M6XKD7A9RZT4BVCNE`), or a dash.

@@ -219,9 +219,9 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 471 to 490, phone 689 to 701</td><td>The rules that draw it</td></tr>
-      <tr><td><code>dialog()</code> at <code>engine.js:9573</code></td><td>Builds the scrim, shell, header, tabs, body, and footer from a <code>{t, s, w, tabs, b, f}</code> record. The shell markup is at 9662 to 9667.</td></tr>
-      <tr><td><code>openDialog(kind, arg)</code> at <code>engine.js:8328</code></td><td>Opens a dialog by kind and remembers the dialog to return to.</td></tr>
-      <tr><td><code>closeDialog()</code> at <code>engine.js:8505</code></td><td>Closes it, or returns to the dialog it was opened from.</td></tr>
+      <tr><td><code>dialog()</code> at <code>engine.js:9574</code></td><td>Builds the scrim, shell, header, tabs, body, and footer from a <code>{t, s, w, tabs, b, f}</code> record. The shell markup is at 9662 to 9667.</td></tr>
+      <tr><td><code>openDialog(kind, arg)</code> at <code>engine.js:8329</code></td><td>Opens a dialog by kind and remembers the dialog to return to.</td></tr>
+      <tr><td><code>closeDialog()</code> at <code>engine.js:8506</code></td><td>Closes it, or returns to the dialog it was opened from.</td></tr>
       <tr><td><code>DLG_EXT</code> at <code>engine.js:23</code></td><td>The registry of dialogs defined outside <code>dialog()</code>, such as <code>budgetedit</code> and <code>budgetdel</code>.</td></tr>
     </tbody>
   </table></div></div>
@@ -252,7 +252,7 @@
 ## Inputs
 
 1. mockups/components/dialog.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 471 to 490, phone 689 to 701. The mockup renders it with dialog() (engine.js:9573), openDialog(kind, arg) (engine.js:8328), closeDialog() (engine.js:8505), DLG_EXT (engine.js:23).
+2. The design source: mockups/src/engine.css lines 471 to 490, phone 689 to 701. The mockup renders it with dialog() (engine.js:9574), openDialog(kind, arg) (engine.js:8329), closeDialog() (engine.js:8506), DLG_EXT (engine.js:23).
 3. The build's implementation: find it by its root selector (.dlg) or its name, and list every route that renders it.
 4. Where to see it in the design: Work (Intake), Agents, Spend (Set a budget), Organization (Invite a person), Tools, Steering. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

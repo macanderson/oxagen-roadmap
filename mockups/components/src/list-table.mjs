@@ -151,12 +151,12 @@ export default {
     ["--fg", "Sorted header text"],
   ],
   helpers: [
-    ["listify()", "engine.js:13852", "After every render, runs `ltTable()` on each table in the page and the dialog layer, and `ltCards()` on each card list."],
-    ["ltTable(table, prefix)", "engine.js:13752", "Reads the table, picks filters, makes headers sortable, and inserts the bar and pager."],
-    ["ltBar(st, opts, apply)", "engine.js:13700", "Writes the control bar: search, filters, an optional Sort, and Rows."],
-    ["ltPager(st, total, onPage)", "engine.js:13675", "Writes the range and the page buttons, with ellipses past seven pages."],
-    ["ltCards(cfg)", "engine.js:13821", "The same bar and pager for card lists, configured in `LT_CARDS`."],
-    ["cardTables()", "engine.js:13918", "Turns tables into labelled cards in the phone shell."],
+    ["listify()", "engine.js:13858", "After every render, runs `ltTable()` on each table in the page and the dialog layer, and `ltCards()` on each card list."],
+    ["ltTable(table, prefix)", "engine.js:13758", "Reads the table, picks filters, makes headers sortable, and inserts the bar and pager."],
+    ["ltBar(st, opts, apply)", "engine.js:13706", "Writes the control bar: search, filters, an optional Sort, and Rows."],
+    ["ltPager(st, total, onPage)", "engine.js:13681", "Writes the range and the page buttons, with ellipses past seven pages."],
+    ["ltCards(cfg)", "engine.js:13827", "The same bar and pager for card lists, configured in `LT_CARDS`."],
+    ["cardTables()", "engine.js:13924", "Turns tables into labelled cards in the phone shell."],
   ],
   sourceNotes: [
     "`LT_PER` (engine.js 13583) holds the row choices, and `LT_FACET` (13585) the column names that sort first as filters.",

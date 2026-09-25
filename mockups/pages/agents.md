@@ -44,7 +44,7 @@ Composition columns, in order:
 
 | Column | Cell |
 |---|---|
-| Agent | The agent card: avatar, agent key (mono), harness label |
+| Agent | The agent card: harness mark, avatar, agent key (mono), harness label |
 | Purpose | The agent's description |
 | Owner | The operator's avatar and name |
 | Steering | “N records” over “N tok”, with “ · not delivered” appended when the agent earns no hook. A dash when the agent has no standing brief to resolve |
@@ -59,7 +59,7 @@ Operations columns, in order:
 
 | Column | Cell |
 |---|---|
-| Agent | The agent card with the description beneath |
+| Agent | The agent card (harness mark, avatar, key) with the description beneath |
 | Harness | The harness label over its slug (mono) |
 | Operator | Avatar and name |
 | Status | The lifecycle status badge |
@@ -104,7 +104,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. The mockup collection is
 | Spend against budget | `SPEND.budgets`, scope `workspace · <ws>` | `get_spend_budget` for scope `workspace`: limit, spent, ratio, period | `billing.budget.get.ts:51`; scopes `org` and `workspace` (`billing.budget.get.ts:9`) | ✅ |
 | Delegations held | `MANDATES` (active, agent in this workspace) | `list_mandates` with status `active`; `list_agents` `mandates` per row and `totals.holdingMandate`, `totals.mandateHolders` | `mandate.list.ts:28`; `agent.list.ts:117-121` and `:187-193`; table `tools.mandates` (`packages/database/src/schema/tools.ts:30`) | ✅ |
 | Agent card, purpose, owner, principal | `AGENTS` (`mockups/fixtures/agents.json`) | `list_agents` `slug`, `name`, `agentKey`, `description`, `principalId`, `operatorName` | `agent.list.ts:61-74` | ✅ |
-| Harness | `AGENTS` `harness`, `harnessLabel` | `list_agents` `harness` | Enum `stella`, `claude-code`, `codex`, `cursor`, `claude-agent-sdk`, `custom` (`agent.list.ts:24-31`). The mockup's `codex-cli`, `langgraph` and `openai-agents` are not values of it | 🟡 |
+| Harness | `AGENTS` `harness`, `harnessLabel` | `list_agents` `harness` | Enum `stella`, `claude-code`, `codex`, `cursor`, `claude-agent-sdk`, `custom` (`agent.list.ts:24-31`). The mockup's `codex-cli`, `langgraph` and `openai-agents-sdk` are not values of it | 🟡 |
 | Status | `AGENTS` `status` | `list_agents` `status`: `unenrolled`, `enrolled`, `suspended`, `retired` | `agent.list.ts:34-48`, `:75` | ✅ |
 | Tier | `AGENTS` `tier` | `list_agents` `enforcementTier`, the tier the agent's latest root wrapped session recorded | `agent.list.ts:52-58`, `:78-83` | ✅ |
 | Steering column | `STG_PREVIEW` via `agentSteering()` | The agent's envelope for its standing brief: SteeringFrames and tokens | No capability resolves an envelope without a run (#3879). `get_steering_deliveries` reports included and cut counts per recent run (`context.steering.deliveries.ts:6`) | ❌ |

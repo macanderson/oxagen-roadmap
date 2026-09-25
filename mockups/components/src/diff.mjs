@@ -104,10 +104,10 @@ export default {
     ["--panel, --muted", "Split header ground and label"],
   ],
   helpers: [
-    ["diffLines(a, b)", "engine.js:1349", "An LCS line diff of two strings into rows marked `+`, `-`, or space."],
-    ["diffStat(rows)", "engine.js:1358", "Counts additions and deletions for `.dstat`."],
-    ["diffHtml(rows, ctx)", "engine.js:1359", "The unified form with `ctx` lines of context. Transcript, linked work, and the record save dialog."],
-    ["diffSplitHtml(rows, ctx, labels)", "engine.js:1372", "The split form. The commit dialog."],
+    ["diffLines(a, b)", "engine.js:1350", "An LCS line diff of two strings into rows marked `+`, `-`, or space."],
+    ["diffStat(rows)", "engine.js:1359", "Counts additions and deletions for `.dstat`."],
+    ["diffHtml(rows, ctx)", "engine.js:1360", "The unified form with `ctx` lines of context. Transcript, linked work, and the record save dialog."],
+    ["diffSplitHtml(rows, ctx, labels)", "engine.js:1373", "The split form. The commit dialog."],
   ],
   sourceNotes: [
     "`.dl2.same` marks a row identical on both sides, so the phone layout can drop the duplicate half.",

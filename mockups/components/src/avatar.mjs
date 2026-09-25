@@ -137,7 +137,7 @@ export default {
     ["personAv(key, size)", "engine.js:354", "Looks up a person by key and renders them round. 12 calls."],
     ["agentAv(a, size)", "engine.js:355", "Takes an agent object or key and renders it as a squircle. 7 calls."],
     ["initialsOf(name)", "engine.js:334", "The first and last word's initials, upper-cased: the fallback letters and the editor's first draft."],
-    ["openAvatar(target)", "engine.js:572", "Opens the one avatar editor for `person:<key>`, `agent:<key>`, `workspace:<slug>`, or `org`."],
+    ["openAvatar(target)", "engine.js:573", "Opens the one avatar editor for `person:<key>`, `agent:<key>`, `workspace:<slug>`, or `org`."],
   ],
   sourceNotes: [
     "Rule, in the CSS comment at engine.css 494 to 497: people are round, and agents, workspaces, and organizations are squircles. Five tones: solid, soft, and line from the theme, and gold and dark gold from the brand. No free color, no gradient.",
