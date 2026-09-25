@@ -76,7 +76,10 @@ function islTargets(){
   function headOf(x){return x.querySelector(":scope > .panel-h h3, :scope > .panel-h h2, :scope > .t > h1, :scope > .dlg-h h2, :scope > .dlg-h .grow > h2, :scope > h1, :scope > h2, :scope > h3");}
   var app=el("app"), layer=el("layer");
   /* an explicit key wins everywhere, including inside dialogs and drawers */
-  document.querySelectorAll("#app [data-help], #layer [data-help], #apdrawer [data-help], #asst [data-help]").forEach(function(x){add(x,ownKey(x.getAttribute("data-help")),headOf(x));});
+  /* a closed drawer is still in the DOM, inert: its parts get no ? until it opens */
+  document.querySelectorAll("#app [data-help], #layer [data-help], #asst.open [data-help]").forEach(function(x){
+    var dr=x.closest("#apdrawer"); if(dr&&!dr.classList.contains("open")) return;
+    add(x,ownKey(x.getAttribute("data-help")),headOf(x));});
   /* the shell */
   var side=document.querySelector("#app .side"); if(side) add(side,"shell/sidebar",null);
   var top=document.querySelector("#app .top"); if(top) add(top,"shell/top-bar",null);
