@@ -15,6 +15,8 @@ You are auditing the **Workflows** tab of Work in Oxagen (`/a-intel/core-platfor
 3. The product specs: `docs/fleet-operations-wedge.md` (Vocabulary › Work, Steering › Emissions, Work › Shipped today), `docs/tasks-spec.md` §10, §12, §14, §17.2, and `docs/creation-spec.md`.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/work/workflows`.
 
+5. The work graph: `docs/work-graph-spec.md` §8.
+
 ## Procedure
 
 Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
@@ -35,7 +37,8 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 14. **Rules.** One gold action. No heading or caption carries a comma, a mid-dot, or a not/never contrast, and every string reads in plain grammar. A workflow grants nothing. Every stage agent is one you operate and shows its recorded tier. Every harness shows its own mark, and none is the default.
 15. **Accessibility.** Tabs use `role=tablist`/`tab` with `aria-selected`. Every stage control is labelled with its stage number. Dialogs are `role=dialog aria-modal` with a labelled close. State is never colour alone.
 16. **Permissions.** `work.read` to see the tab, and `context.propose` gated on the server for the pull request. Verify with a role that lacks each.
-17. **Nothing extra.** List anything on the built page that is not in the spec. Each is a finding, and the reviewer decides whether it stays.
+17. **Stages that run beside each other.** The Stages column joins parallel stages with ∥ and the layers with arrows. `wfview` draws the chain by layer, reads “after <role> and <role>” on a fan-in card, and shows `schema = "oxagen-workflow/v0.2"` with `needs` on each stage that names one; a v0.1 file with no `needs` renders the same chain as before. The builder’s **After** checkboxes exist on every stage after the first, default to the previous stage, refuse an empty set inline, and “return to” lists only upstream stages.
+18. **Nothing extra.** List anything on the built page that is not in the spec. Each is a finding, and the reviewer decides whether it stays.
 
 ## Output
 

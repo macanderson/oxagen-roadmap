@@ -15,6 +15,8 @@ You are auditing the **Work order** page of Oxagen (`/a-intel/core-platform/work
 3. The product specs: `docs/fleet-operations-wedge.md` (D2, D4 to D6, D17; Steering › Emissions; Work), `docs/tasks-spec.md` §9.5, §9.6, §10.3, §11, §14.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`.
 
+5. The work graph: `docs/work-graph-spec.md` §6, §7, §8.2, §11.3, §12.3, §12.4.
+
 ## Procedure
 
 Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
@@ -40,7 +42,10 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 19. **Rules.** No verdict vocabulary. No heading or caption carries a comma, a mid-dot, or a not/never contrast. Money shows its basis. A claim is never shown as accepted. The page never claims more enforcement than a stage agent’s tier gives. The object is a work item, never a task, in every string a person reads, a work order’s title included.
 20. **Accessibility.** Dialogs are `role=dialog aria-modal` with a labelled close. Run links and rows are keyboard operable. State is never colour alone.
 21. **Permissions.** `work_order.read` to see the page, and `work_order.accept` gated on the server for accept and stop. Verify with a role that lacks each.
-22. **Nothing extra.** List anything on the built page that is not in the spec. Each is a finding, and the reviewer decides whether it stays.
+22. **Queued, released, withdrawn, expired.** A `queued` work order shows the queued subtext with its blocker and expiry, **Send now** (plain, never gold) and **Withdraw** (red), every stage “waiting”, and the Order panel naming the blockers outside it. `worelease` quotes the line the brief gains and records `release_work_order` with the blockers still open. `wowithdraw` applies only before the start receipt, records `withdraw_work_order`, and returns the items to ready; from the receipt on the button is **Stop the work order**. An expired work order shows “expired on <date>” and **Send again**, which opens the dialog pre-filled and records `retry_of`; cost stays on the old record. The state reads `in progress` only after `record_work_order_start`; a released work order with no receipt reads `sent`.
+23. **Stages by layer.** Stages that need the same stage sit in one column, the arrows come from the stages each needs, and a card reads “after <role> and <role>” when it needs more than one. Two ready stages start as two runs with two holds against the one cap. A fan-in stage’s Handoffs list a note from each stage it needed. A parked or stopped stage holds everything downstream while a parallel stage already running finishes and hands off.
+24. **Send with several work orders.** The header reads “k of N in send snd_…”, the Send panel lists each sibling with target, state, items claimed and cost with basis, in send order and with no rank, and `woaccept` names the siblings accepting will stop.
+25. **Nothing extra.** List anything on the built page that is not in the spec. Each is a finding, and the reviewer decides whether it stays.
 
 ## Output
 

@@ -4,8 +4,8 @@
 |---|---|
 | Route | `#/a-intel/core-platform/work/orders/<order>` (app `/{org}/{ws}/work/orders/{order}`). A dispatched work order: `wo_01K5RS7M4N`. A direct work order: `wo_01K5RQ4B9C7XTN2P`. Old route that lands here: the mockup’s `#/:org/:ws/tasks/work-orders/<order>`, rewritten in place |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: D2 (a run is a child of exactly one work order; a run started outside Oxagen is filed under a direct work order), D4 to D6 (a SteeringFrame is not its source; eight frame types; provenance and hash on every frame), D17; Vocabulary › Work (Work order, Dispatched work order, Direct work order, Workflow, Stage) and › Steering (SteeringFrame, Provenance); Steering › Emissions (a work order, when sent, emits `invocation`, `goal` and `constraint` frames); Work › Objects, Rules and Shipped today. `docs/fleet-operations-ia.md` › Work, detail views. `docs/tasks-spec.md` §9.5 (what sending records), §9.6 (delivery), §10.3 (running a workflow), §11 (completing work) |
-| Design | `mockups/src/engine.js` → `pWorkOrder()`, `stageChain()`, `woItemsFor()`, `woOwner()`, `woClose()`, `woAccept()`, `woStop()`, `woSentPrompt()`, `woPromptText()`, `copyWoPrompt()`, `runLink()`, `DLG_EXT.woaccept`, `DLG_EXT.wostop`; `mockups/src/wedge.js` → `woKindBadge()`, `woRunsPanel()`, `woFramesPanel()`, `woFrames()`, `frameOf()`, `fileDirect()`, `woSpend()`; data `mockups/fixtures/tasks.json` (`workOrders`, `workflows`) and the runs in `mockups/fixtures/runs.json`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| Spec | `docs/work-graph-spec.md` §6 (queued sends), §7 (sends and targets), §8.2 (stages that run beside each other), §11.3, §12.3, §12.4; `docs/fleet-operations-wedge.md`: D2 (a run is a child of exactly one work order; a run started outside Oxagen is filed under a direct work order), D4 to D6 (a SteeringFrame is not its source; eight frame types; provenance and hash on every frame), D17; Vocabulary › Work (Work order, Dispatched work order, Direct work order, Workflow, Stage) and › Steering (SteeringFrame, Provenance); Steering › Emissions (a work order, when sent, emits `invocation`, `goal` and `constraint` frames); Work › Objects, Rules and Shipped today. `docs/fleet-operations-ia.md` › Work, detail views. `docs/tasks-spec.md` §9.5 (what sending records), §9.6 (delivery), §10.3 (running a workflow), §11 (completing work) |
+| Design | `mockups/src/engine.js` → `pWorkOrder()`, `wfDepths()`, `stageNeeds()`, `woActiveStages()`, `woStageWords()`, `woWaitsOn()`, `woOrderPanel()`, `woSendPanel()`, `woSubMore()`, `woRelease()`, `woWithdraw()`, `woRetry()`, `DLG_EXT.worelease`, `DLG_EXT.wowithdraw`, `stageChain()`, `woItemsFor()`, `woOwner()`, `woClose()`, `woAccept()`, `woStop()`, `woSentPrompt()`, `woPromptText()`, `copyWoPrompt()`, `runLink()`, `DLG_EXT.woaccept`, `DLG_EXT.wostop`; `mockups/src/wedge.js` → `woKindBadge()`, `woRunsPanel()`, `woFramesPanel()`, `woFrames()`, `frameOf()`, `fileDirect()`, `woSpend()`; data `mockups/fixtures/tasks.json` (`workOrders`, `workflows`) and the runs in `mockups/fixtures/runs.json`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
 | Storybook | `Oxagen / Work / Work order`: Loaded, Loaded · mobile, Loaded · future-only fields marked (on `wo_01K5RS7M4N`) |
 | Audit | `work-order.audit-prompt.md` |
@@ -21,6 +21,7 @@ A work order comes in two kinds. A **dispatched** work order is one a person sen
 **Header.** Eyebrow: the id in mono and the kind badge, `dispatched` (title “A person sent it from Work”) or `direct` (title “Oxagen opened it for a run started outside Oxagen”). h1: the title (“Cut 4.11.0 release notes”). Subtext:
 
 - dispatched: “Sent by Marcus Bell on 2026-09-11 09:13 to Release manager.” (to a workflow: “… to the Fix, validate, document, review workflow.”)
+- dispatched and `queued`: “Queued by Marcus Bell on 2026-09-11 11:05 for Release manager. It is sent when #633 is done, or expires on 2026-09-25.” A work order of a send adds “1 of 2 in send snd_01K6TC59.” A retry adds “Retries wo_…”, and its original “Retried as wo_…”.
 - direct: “Oxagen opened it on 2026-09-11 09:02 for a run Marcus Bell started outside Oxagen, titled from its task reference `a-intel/platform#482`.”
 
 Actions:
@@ -28,18 +29,21 @@ Actions:
 | Kind | Actions |
 |---|---|
 | dispatched | **Copy brief** (plain; title “Copy the brief as sent with its references”), **Stop the work order** (red; while the work order is neither accepted, stopped nor closed), **Accept the work** (gold when every item is claimed and the work order is open; otherwise plain and disabled, titled “Every item must be claimed first”) |
+| dispatched, `queued` | **Copy brief**, **Send now** (plain; opens `worelease`), **Withdraw** (red; opens `wowithdraw`) |
+| dispatched, `sent` with no start receipt | **Copy brief**, **Withdraw** (red) |
+| dispatched, `stopped` or `expired` | **Copy brief**, **Send again** (plain; opens the work order dialog with the same items, target, brief and repositories, and records `retry_of`) |
 | direct | **Stop the work order** (red; while its run is live, parked or paused), **Attach to a work item** (plain and disabled, titled “A direct work order has no definition of done until you attach it to a backlog item”; outlined as future-only) |
 
 **Tiles**, four across, outlined as future-only:
 
 | Tile | Value and caption |
 |---|---|
-| State | The state badge, and “stage 1 of 1”, “every item is claimed” (waiting on you), “on 2026-09-08 16:40” (accepted), or “one run, started outside Oxagen” (direct) |
+| State | The state badge, and “stage 1 of 1”, “stages 2 and 3 of 4” when two stages run beside each other, “waits on #633” while queued, “expired on 2026-09-25” after, “every item is claimed” (waiting on you), “on 2026-09-08 16:40” (accepted), or “one run, started outside Oxagen” (direct) |
 | Items claimed | “3 / 4” or “none”, “by the agents, with evidence” |
 | Items accepted | “0 / 4” or “none”, “by a person” |
 | Spend | “$4.13”, “of a $10.00 cap · the runs’ own basis”, or without a cap “across its runs, each on its own basis” |
 
-**Stages.** The chain: one card per stage, then a dashed last card, **Accept**, by You, “a person accepts every item”. Each stage card shows its step number and role, the agent’s harness mark, avatar, name and tier badge, and the stage’s latest run (`live` or `sealed` and the run id as a link, and “2 runs” when the stage ran more than once) or “waiting”. A finished stage is marked done, the current stage is outlined in gold, and the Accept card is outlined while the work waits on you. A work order sent to one agent, and every direct one, has one stage, “Work”, then Accept. Arrows join the cards. A direct work order holds nothing to accept until a person attaches it to a backlog item: the mockup still draws its Accept card, by You, and a build draws that card only once the work order holds items.
+**Stages.** The chain: one card per stage, then a dashed last card, **Accept**, by You, “a person accepts every item”. Each stage card shows its step number and role, the agent’s harness mark, avatar, name and tier badge, and the stage’s latest run (`live` or `sealed` and the run id as a link, and “2 runs” when the stage ran more than once) or “waiting”. A finished stage is marked done, the current stage is outlined in gold, and the Accept card is outlined while the work waits on you. A work order sent to one agent, and every direct one, has one stage, “Work”, then Accept. Arrows join the cards. A direct work order holds nothing to accept until a person attaches it to a backlog item: the mockup still draws its Accept card, by You, and a build draws that card only once the work order holds items. Stages that run beside each other sit in one column, the arrows come from the stages they need, and a card reads “after Validate and Document” when it needs more than one stage. A queued work order draws every stage “waiting”. On `wo_01K6T9QX`, Validate and Document share a column after Fix, and Review follows both.
 
 Then two columns, the main column two thirds wide.
 
@@ -47,10 +51,12 @@ Then two columns, the main column two thirds wide.
 
 - **Runs**: “1 run. Each is a child record of this work order.” Columns: Run (the id as a link and the run’s title under it) · Stage (the role, with “returned” beside a stage run that returned the work) · Agent (avatar and agent key) · Status (dot and word) · Tier · Cost (USD, the basis under it) · Started. A row opens the run. With none: “No run yet. The runtime starts the first one with `oxagen work start wo_01K6TF1169Q`.”
 - **Definition of done**: “4 items from 1 work item.” Columns: Item (the text and its tag chip) · Work item (the numbers it came from, “#482”, or “work order” for an item the send added) · Stage (the role that owns it) · State (`open`, `claimed`, `accepted`, as a dot and a word) · Evidence (what the claim cited, then the agent’s name and the run in mono). The table does not page. On a direct work order: “None. A direct work order has no definition of done until you attach it to a backlog item.”
-- **Handoffs**: every stage run in order, as “<role>” or “<role> returned the work”, its run id, and its note (“Returned: the backwards pair still passes. Item 2 is not met.”), or “running” while that run is live. Note: “A handoff note reaches the next stage as quoted evidence. It is never an instruction to that agent.” A direct work order has one run and no handoff. The mockup still draws the panel there, with the run and “running” even once the run is sealed, and a build leaves the panel out.
+- **Handoffs**: every stage run in order, as “<role>” or “<role> returned the work”, its run id, and its note (“Returned: the backwards pair still passes. Item 2 is not met.”), or “running” while that run is live. Note: “A handoff note reaches the next stage as quoted evidence. It is never an instruction to that agent.” A direct work order has one run and no handoff. The mockup still draws the panel there, with the run and “running” even once the run is sealed, and a build leaves the panel out. A stage that needed two stages shows the note from each, with its stage and run.
 
 **Side column**
 
+- **Order** (dispatched only): the work order’s items in the order the graph implies, each with its blockers inside this work order (“after #481”) and, while queued, the blockers outside it (“waits on #633, not in this work order”). One item with no dependency reads “No order among these tasks.” Outlined as future-only.
+- **Send**, only for a work order of a send with several: “snd_01K6TC59, one work order per target.” and a table with the columns Target (harness mark and name) · State · Items claimed · Cost (with its basis, or “not recorded”), in send order, the current work order marked `aria-current`, and no rank. Outlined as future-only.
 - **Work items**: each work item’s logo, number and subject, linking to the item. On a direct work order with none: “None attached. The run names `a-intel/infra#1767` as its task reference.”
 - **Repositories**: each repository the work order may change, the note “Branches and pull requests only. The production branch is never pushed.”, and “Pull request `a-intel/platform#524`” when one exists. A direct work order confirmed no repositories: the mockup shows the repository its run’s task reference names, with the same note, and a build shows the checkouts the run recorded (`get_run_work`) without the note, because no work order set that limit.
 - **Brief**: the digest in the header in mono (`sha256:5d0e81c27a4b9f36`), the brief as sent in a monospace block, and “As sent. A sent brief cannot change.” On a direct work order: “None. The operator started the run from their own terminal, and its first prompt is on the run.”
@@ -61,6 +67,9 @@ Then two columns, the main column two thirds wide.
 ### Dialogs
 
 - **`woaccept`**: “Accept the work”, subtitle the title. “You accept 3 items the agents claimed, with the evidence each one cited.” Note: “Accepting records `accept_work_order` with your name. It does not merge anything. The pull request a-intel/platform#523 is merged by a person on GitHub.” Note, by the connection’s close switch: on, “The GitHub connection closes each issue as Done, the resolution for work a person accepted.”; off, “The GitHub connection has close on accept off, so each issue stays open there until somebody closes it. Turned on, it closes each one as Done.” Footer **Cancel**, **Accept every item** (gold). Accepting marks every item `accepted`, the work order `accepted`, and each work item `accepted`, and toasts in gold “Accepted. accept_work_order recorded. a-intel/platform#599 stays open in GitHub, because close on accept is off for that connection.”
+- **`worelease`**: “Send this work order now?”, subtitle the title. “#633 is still open. The agent reads its brief without the work #633 was meant to finish first.” Then the note “The prompt gains one line: `Sent before #633 was done, by Marcus Bell.`” Footer **Keep it queued**, **Send now** (plain, never gold). Releasing sets the state `sent`, moves each item to `in a work order`, and toasts “Sent to Release manager. release_work_order recorded, with #633 still open.”
+- **`wowithdraw`**: “Withdraw this work order?”, “Nothing has started. The tasks go back to ready.”, and the note that certified definitions of done are unchanged and withdrawing records `withdraw_work_order`. Footer **Keep it**, **Withdraw** (red). Withdrawing sets the state `stopped` and toasts “Withdrawn. The tasks are ready again.” From the start receipt on, the button and dialog are **Stop the work order** and `wostop`.
+- **`woaccept`** on a work order of a send with several adds one note: “Accepting stops wo_01K6TC5B, which carries the same work items.” Accepting stops those siblings at their next boundary.
 - **`wostop`**: “Stop this work order?”, “The live run gets a cancel at its next boundary, and no later stage starts.”, and the note “Branches and pull requests stay where they are. The work items go back to ready, and their certified definitions of done are unchanged.” Footer **Keep it running**, **Stop it** (red). Stopping toasts “Stopped. The runtime is told at its next boundary; the work items go back to ready.”
 
 **Shell.** The sidebar with Work lit and its count. Breadcrumbs “Anderson Intelligence Corp. / Core platform / Work orders / wo_01K5RS7M4N”, the last in mono. ⌘K, notifications, the Approvals button with the organization’s count, and the avatar.
@@ -92,6 +101,12 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | Accept the work, and the close write-back | `woAccept()`, `woClose()` | `accept_work_order`; the provider close write-back | none | ❌ |
 | Copy brief | `woPromptText()` | `get_work_order` | none | ❌ |
 | Attach to a work item | none | attaching a direct work order to a backlog item | none | ❌ |
+| Queued state, expiry, release, and withdraw | `WORKORDERS[].status`, `.expires`, `woWaitsOn()` | `tasks.work_orders` `queued`, `expired`, `expires_at`, `released_at`; `release_work_order`, `withdraw_work_order` (`work-graph-spec.md` §6, §10) | none | ❌ |
+| The start receipt | `WORKORDERS[].started` | `tasks.work_orders` `started_at`; `record_work_order_start` (§6.2) | none. The runtime reports no work order | ❌ |
+| The send and its siblings | `SENDS`, `WORKORDERS[].send` | `tasks.sends`; `get_send` (§7) | none | ❌ |
+| Retry | `WORKORDERS[].retryOf`, `.retriedAs` | `tasks.work_orders` `retry_of` (§7.4) | none | ❌ |
+| `needs` and the layers of the stage chain | `WORKFLOWS[].stages[].needs`, `wfDepths()` | `tasks.work_order_stages` `needs` and the stage state (§8, §9) | none | ❌ |
+| The order of the items | `woOrderPanel()` over `TASKS[].blockedBy` | `get_work_graph` for one work order (§10) | none | ❌ |
 
 ## Future-only fields
 
@@ -118,6 +133,12 @@ The mockup marks nothing else, but every work order field here is future-only: t
 - A direct work order holds one run. It shows no brief and no definition of done, because it has neither, until a person attaches it to a backlog item.
 - `node tools/check-tasks.mjs` walks flows 5 (a sent work order opens here with nothing claimed), 7 (a claimed work order is accepted) and 8 (the copied brief names its work items) on this page.
 
+- A work order is `in progress` only from its start receipt (`docs/work-graph-spec.md` §6.2). **Withdraw** applies before it and **Stop the work order** after it, and no toast says nothing started for a work order that has one.
+- **Send now** is a person’s decision, recorded with the blockers still open, and never gold.
+- Stages that need the same stage start together as separate runs under one cap, and the page draws them in one column (§8.2).
+- **Send again** creates a retry that names the original. Cost stays on the old record.
+- `node tools/check-tasks.mjs` walks flows 10 (a queued work order), 12 (stages beside each other) and 14 (a send with two work orders) on this page.
+
 ## States
 
 Loaded only. This change designs the loaded state. The build uses the shell’s standard loading, error, empty and denied panels until they are designed.
@@ -133,7 +154,7 @@ The thumb bar holds Work (lit, with its count), Agents, Tools, Spend and More. M
 The design names these, from `tasks-spec.md` §14. Neither exists in `packages/iam` today.
 
 - Read: `work_order.read`
-- Writes, each a governed action recorded in Audit: `work_order.accept` (accept or stop). The cancel a stop sends is `dispatch_command`, which ships and needs its own grant.
+- Writes, each a governed action recorded in Audit: `work_order.accept` (accept or stop). `work_order.send` covers send now, withdraw and send again. The cancel a stop sends is `dispatch_command`, which ships and needs its own grant.
 
 ## Backend gaps this page depends on
 
@@ -160,3 +181,5 @@ The design names these, from `tasks-spec.md` §14. Neither exists in `packages/i
 - The brief is shown as sent, with its digest, and cannot be edited here.
 - Every number that is money shows its basis.
 - A direct work order claims no brief, no definition of done and no repository limit it does not have.
+- Siblings of a send sit side by side with no rank, no score, and no winner.
+- The page never draws a chain the file did not name. Stages that ran beside each other show as such.
