@@ -67,7 +67,8 @@ button.hq.hq::before{content:"?"}
 button.hq.hq:hover{background:#1D4ED8}
 button.hq.hq:focus-visible{outline:2px solid #93C5FD;outline-offset:2px}
 button.hq.hq.missing{background:#71717A;box-shadow:0 0 0 2px #DC2626}
-button.hq.hq.abs{position:absolute;top:6px;right:6px;margin:0;z-index:5}
+button.hq.hq.abs{position:absolute;top:-9px;right:-9px;margin:0;z-index:5}
+button.hq.hq.abs.in{top:6px;right:6px}
 .hq-rel{position:relative}
 .asst.hq-host>button.hq.hq.abs{top:18px;right:52px}
 .side.hq-host>button.hq.hq.abs{top:10px;right:10px}

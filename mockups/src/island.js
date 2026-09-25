@@ -42,14 +42,16 @@ function islPageId(r,under){
   return null;
 }
 /* A tab of a page shares its header and tab bar with the page it belongs to, so a key that is not
-   written for the tab falls back to the family's first page. */
-function islFamily(id){
-  if(!id) return null;
-  var m=/^(agent|run|tools|steering|spend|repositories|organization|work|register|onboarding)(-|$)/.exec(id);
-  if(!m) return id==="runtime"?"runtimes":id;
-  return ({agent:"agent",run:"run",tools:"tools",steering:"steering",spend:"spend",repositories:"repositories",
-    organization:"organization",work:"work-backlog",register:"register-name",onboarding:"onboarding-organization"})[m[1]];
-}
+   written for the tab falls back to the family's first tab. Only tabs fall back: a record page (a
+   work item, a work order, a source, a runtime) has parts of its own, and a miss there must show. */
+var ISL_FAMILY={"agent-identity":"agent","agent-steering":"agent","agent-toolbelt":"agent","agent-runtime":"agent",
+  "agent-permissions":"agent","agent-activity":"agent","run-transcript":"run","run-cost":"run","run-evidence":"run",
+  "run-memories":"run","tools-toolbelts":"tools","tools-providers":"tools","tools-policy":"tools","tools-switches":"tools",
+  "steering-assignments":"steering","steering-compiler":"steering","steering-proposals":"steering","steering-prs":"steering",
+  "spend-budgets":"spend","spend-optimization":"spend","repositories-copies":"repositories","repositories-changes":"repositories",
+  "repositories-config":"repositories","organization-api-keys":"organization","organization-roles":"organization",
+  "work-orders":"work-backlog","work-workflows":"work-backlog","work-findings":"work-backlog"};
+function islFamily(id){return ISL_FAMILY[id]||null;}
 function islSlug(s){return String(s||"").toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");}
 function islHelp(key){
   var H=REVIEW.help;
@@ -120,6 +122,8 @@ function islScan(){
       b.type="button"; b.className="hq"+(hd?"":" abs");
       /* a corner ? needs a positioned host; a fixed or sticky host (a drawer, the top bar) already is */
       if(!hd&&!elm.classList.contains("hq-host")){ elm.classList.add("hq-host"); if(getComputedStyle(elm).position==="static") elm.classList.add("hq-rel"); }
+      /* a corner ? straddles the host's corner, clear of the host's own buttons, unless the host clips */
+      if(!hd) b.classList.toggle("in",getComputedStyle(elm).overflow!=="visible");
       host.appendChild(b);
     }
     b.setAttribute("data-key",key);

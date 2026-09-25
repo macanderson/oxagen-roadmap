@@ -56,8 +56,11 @@ const notOpened = [];
 const errors = [];
 const note = (map, k, where) => { if (!map.has(k)) map.set(k, []); map.get(k).push(where); };
 
-async function collect(page, where) {
-  const found = await page.evaluate(() => [...document.querySelectorAll(".hq")].map((b) => [b.dataset.key, b.dataset.spec || null]));
+// On an overlay, only the ? buttons inside it count: the page under it is checked on its own.
+async function collect(page, where, overlay = false) {
+  const found = await page.evaluate((ov) => [...document.querySelectorAll(".hq")]
+    .filter((b) => !ov || b.closest("#layer, #apdrawer, #asst"))
+    .map((b) => [b.dataset.key, b.dataset.spec || null]), overlay);
   for (const [k, spec] of found) { note(seen, k, where); if (spec) reached.add(spec); else note(missing, k, where); }
   return found.length;
 }
@@ -105,7 +108,7 @@ if (doDialogs && (!only || !PAGES.some((p) => p.id === only))) {
     await page.waitForTimeout(120);
     const shown = await page.evaluate((k) => (k ? S.dlg === k && !!document.querySelector("#layer .scrim, #layer [role=dialog]") : true), kind || null);
     if (!shown) { notOpened.push(name); continue; }
-    await collect(page, name);
+    await collect(page, name, true);
   }
   await page.close();
 }
