@@ -522,13 +522,12 @@ function runOutputs(R){
     if(g.items.length>3)body+='<li class="ro-n ro-fold"><span class="ro-tick" aria-hidden="true"></span>'+
       '<button class="ro-link" onclick="roMore(\''+key+'\')">fold these back</button></li>';
   });
-  return '<section class="ro" aria-label="What this run produced">'+
+  return '<section class="ro" aria-label="What this run produced" data-help="outputs">'+
    '<div class="ro-h"><p class="eyebrow q" style="margin:0">Outputs</p>'+
     '<span class="ro-tally">'+h(tally)+'</span>'+
     (reads?'<button class="ro-link" onclick="roToggleReads()">'+(S.ro.reads?"Hide reads":"Show reads")+'</button>':'')+
    '</div>'+
    '<ol class="ro-spine'+(live?" ro-live":"")+'">'+body+'</ol>'+
-   '<p class="ro-foot">In frame order.</p>'+
    '</section>';
 }
 
@@ -2062,7 +2061,7 @@ function pRun(r){
   if(S.state==="error") return errorState("This run","502 frame_store_unreachable");
   if(S.state==="denied") return deniedState("this run","run.read on core-platform");
   if(S.state==="empty") return emptyState("This run has no frames yet",
-    "Oxagen minted a run token and the agent has not made its first model call. Nothing is wrong; a run with no frames has cost nothing and is not billable.",
+    "Oxagen minted a run token and the agent has not made its first model call.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/work/orders\')">Back to work orders</button>');
   /* a frame another page linked to opens once the run is on screen */
   if(S.pendingFrame&&S.pendingFrame.run===R.id){ S.frame=S.pendingFrame.i; S.pendingFrame=null; S.dlg="frame"; }
@@ -2340,7 +2339,7 @@ function runFit(R){
      family, so it reads the shape of the work instead: prompts, failed calls, turns, and steps. */
   /* A move is suggested only where the record shows a saving (down a rung) or measured rework, meaning
      follow-up prompts that cost money (up a rung). Anything else fits, and the page says so. */
-  var small=R.turn<=3||m.steps<=12;
+  var small=R.turn<=3||(R.steps!=null&&R.steps<=12);
   var lower=rung.rank>0?MODEL_LADDER[rung.rank-1]:null, upper=rung.rank<MODEL_LADDER.length-1?MODEL_LADDER[rung.rank+1]:null;
   var save=lower?Math.max(0,(parseFloat(R.cost)||0)-(m.tokIn*PRICE.inEff+m.tokOut*lower.out)):0;
   if(!redone&&small&&lower&&save>=0.005){
@@ -2366,7 +2365,7 @@ function runFit(R){
      say:"This agent sent no effort setting, so the model used its own default."};
   } else if(!eff.seen){
     fit.effort={verdict:"unseen",title:"Effort not captured",
-     say:"oxagen did not capture the effort setting for this run: "+eff.why+". It is captured at the gateway and contained tiers."};
+     say:"oxagen did not capture the effort setting for this run: "+eff.why+"."};
   } else {
     var er=EFFORT_LADDER.indexOf(eff.v);
     if(!redone&&er>0&&m.reasoning>0.2*m.tokOut){
@@ -2514,9 +2513,7 @@ function runFitPanel(R){
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Model fit</h3>'+
    '<span class="b b-q" style="margin-left:auto;font-size:10.5px">Generated estimate</span></div>'+
    card(f.model,"model")+card(f.effort,"effort")+
-   '<div class="panel-b"><div class="note">Read from this run only: '+h(f.read)+
-   '. Nothing changes until the change to '+
-   (a?'<span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>':'the agent definition')+' merges.</div></div></div>';
+   '<div class="panel-b"><div class="note">'+h(f.read)+'</div></div></div>';
 }
 DLG_EXT.fitchange=function(arg){
   var parts=String(arg||"").split(":"), R=run(parts[0]); if(!R)return noSuch("Run");
@@ -2529,7 +2526,7 @@ DLG_EXT.fitchange=function(arg){
     '<dt>Today</dt><dd class="mono">'+(parts[1]==="effort"?h(f.eff.v||(f.eff.gw?"model default":"not captured")):h(R.model))+'</dd>'+
     '<dt>Proposed</dt><dd class="mono">'+h(x.suggest)+'</dd>'+
     '<dt>Effect per run</dt><dd>'+(x.delta<0?usd(Math.abs(x.delta).toFixed(2))+' less':usd(Math.abs(x.delta).toFixed(2))+' more')+'</dd></dl>'+
-    '<div class="note" style="margin-top:14px">Runs the agent has already sealed keep the settings they ran with. This changes the next run.</div>',
+    '<div class="note" style="margin-top:14px">The first run after this pull request merges uses the change.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn primary" onclick="fitPr(\''+h(R.id)+':'+h(parts[1])+'\')">Open the pull request</button>'};
 };
@@ -2548,7 +2545,7 @@ function fitPr(arg){
     ["budget_fit","pass","The agent's daily budget covers the new price at its 30-day run count."]]};
   OXPRS.unshift(p);
   closeDialog(); render();
-  act("Opened "+p.pr+". The first run after it merges uses the change. Sealed runs keep the settings they ran with.","gold");
+  act("Opened "+p.pr+".","gold");
 }
 function runStatRow(R){
   var m=runMetrics(R), w=runWaste(R), p=w.prompts, s=m.series;
@@ -2588,8 +2585,7 @@ function issuesTab(R){
      '<td>'+edgeChip({edge:x.edge,fr:x.fr!=null?[x.fr]:null,conf:x.edge==="inferred"?0.7:null})+'</td>'+
      '<td>'+(u?'<a href="'+h(u)+'" target="_blank" rel="noopener">View ↗</a>':'<span class="dim">no link</span>')+'</td></tr>';}).join("");
   return '<div class="panel"><div class="panel-h"><h3>Issues</h3><span class="b b-q" style="margin-left:auto">'+L.length+' in this session</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Issue</th><th>Status</th><th>Relation</th><th>Edge</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" class="dim">No issue is linked to this session.</td></tr>')+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">A session can touch more than one issue: the task it was started for, and any it read, referenced or closed on the way. The relation says which, the edge says how oxagen knows, and the status is read from the tracker when the page loads.</div></div></div>';
+   '<div class="tw"><table><thead><tr><th>Issue</th><th>Status</th><th>Relation</th><th>Edge</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" class="dim">No issue is linked to this session.</td></tr>')+'</tbody></table></div>'+'</div>';
 }
 /* Spend by area: the run's cost split across what the tokens were spent on. Input is a third of the
    money and splits by the tokens each area put into the window; output is the rest. Tool calls are
@@ -2619,8 +2615,7 @@ function runSpendByArea(R){
   var top=A.tools.slice(0,8).map(function(t){return '<div class="rs-file"><span class="mono" title="'+h(t.id)+'">'+h(toolParts(t.id).n)+'</span><span class="mono dim">'+plural(t.calls,"call")+' · <b style="color:var(--fg)">'+fmt$(t.usd)+'</b></span></div>';}).join("");
   return '<div class="panel"><div class="panel-h"><h3>Spend by area</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+usd(R.cost)+' · '+basisChip(R.basis)+'</span></div>'+
    '<div class="panel-b" style="display:grid;gap:9px">'+bars+'</div>'+
-   (A.tools.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="eyebrow q" style="margin:0 0 4px">Most expensive tools</p><div class="rs-files" style="margin:0;border:0">'+top+'</div>'+'</div>':'')+
-   ('<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Input is about a third of the cost, split by the tokens each area added to the context window. Output is the rest. Tool calls are split again by how long each tool ran. A follow-up prompt re-sends the whole window, so it costs more than its own words.</div></div>')+'</div>';
+   (A.tools.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="eyebrow q" style="margin:0 0 4px">Most expensive tools</p><div class="rs-files" style="margin:0;border:0">'+top+'</div>'+'</div>':'')+'</div>';
 }
 function runSide(R){
   var g=runGraphOf(R), m=runMetrics(R), outs=R.outputs||[];
@@ -2696,7 +2691,7 @@ function runInstruments(R){
       (n===stepMx?'<span class="lab">'+n+'</span>':'')+'<i class="fk-tool" style="height:'+Math.max(2,Math.round(th))+'%"></i><i class="fk-model" style="height:'+Math.max(2,Math.round(mh))+'%"></i></button>';}).join("");
   var t4=instTile("Turns and steps",(FRAMES.length<R.frames?FRAMES.length+' of '+plural(R.frames,"frame"):plural(R.frames,"frame"))+' shown',
     R.turn+' <small>'+(R.turn===1?"turn":"turns")+'</small><span class="sep"> · </span>'+R.steps+' <small>'+(R.steps===1?"step":"steps")+'</small><span class="sep"> · </span>'+R.frames+' <small>'+(R.frames===1?"frame":"frames")+'</small>',
-    'A step is one model call or one tool call. A frame is one recorded event.',
+    '',
     '<div class="cols">'+stepCols+'<span class="base"></span></div><div class="ax"><span>turn 1</span><span>turn '+s.n+'</span></div>'+
     stackLeg([["model calls",m.modelN,"fk-model",m.modelN],["tool calls",m.calls.length,"fk-tool",m.calls.length]]),
     '<b>'+m.fan.toFixed(1)+'</b> tools per batch · <b>'+(m.calls.length/Math.max(1,m.modelN)).toFixed(2)+'</b> tool calls per model call');
@@ -2723,7 +2718,7 @@ function runInstruments(R){
     stackLeg([["advanced",s.adv,"fk-model",s.adv],["did not",s.idle,"neu",s.idle]]),
     s.idle?'<b>'+plural(s.idle,"step")+'</b> did not advance the task: '+plural(Math.ceil(s.idle*0.55),"retry","retries")+', '+plural(Math.floor(s.idle*0.3),"re-read")+', '+plural(Math.max(0,s.idle-Math.ceil(s.idle*0.55)-Math.floor(s.idle*0.3)),"wait")+'.':'Every step advanced the task.');
 
-  return '<div class="inst-grid">'+t1+t2+t3+t4+t5+t6+'</div>';
+  return '<div class="inst-grid" data-help="instruments">'+t1+t2+t3+t4+t5+t6+'</div>';
 }
 
 /* ---- the prompt: what the operator wrote, and what reached the model ---- */
@@ -2743,8 +2738,7 @@ function callsPanel(R){
    '<span class="mono dim" style="font-size:11px;margin-left:auto">'+plural(m.calls.length,"call")+' · '+plural(m.batches.length,"batch","batches")+' · '+plural(m.families.length,"family","families")+'</span></div>'+
    '<div class="cc">'+
     '<div class="cc-c wide"><p class="eyebrow q">Calls by family</p>'+
-     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Family</th><th class="num">Calls</th><th></th><th class="num">Share</th><th class="num">Wall clock</th><th class="num">Failed</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-     '<p class="muted" style="font-size:11.5px;margin:9px 0 0">A family groups tools by what they act on. It says nothing about risk or policy.</p></div>'+
+     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Family</th><th class="num">Calls</th><th></th><th class="num">Share</th><th class="num">Wall clock</th><th class="num">Failed</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+'</div>'+
     '<div class="cc-c"><p class="eyebrow q">Tools per batch</p>'+
      '<div class="hist">'+hrows+'</div>'+
      '<dl class="kv" style="margin-top:12px"><dt>Batches</dt><dd>'+m.batches.length+' · <b>'+m.par+'</b> ran more than one tool</dd>'+
@@ -2754,11 +2748,9 @@ function callsPanel(R){
      '<div class="spec"><div class="sv">'+m.used+'<small> of '+m.started+' used</small></div>'+
       '<div class="stk"><i class="fk-model" style="flex:'+m.used+'"'+tipAttr(m.used+" prefetched reads the model went on to ask for")+'></i><i style="flex:'+Math.max(0,m.discarded)+';background:var(--rule)"'+tipAttr(m.discarded+" discarded unread")+'></i></div>'+
       stackLeg([["used",m.used,"fk-model",m.used],["discarded",m.discarded,"neu",m.discarded]])+'</div>'+
-     '<dl class="kv" style="margin-top:12px"><dt>Eligible</dt><dd>'+plural(m.eligible,"read-only call")+' · writes are never prefetched</dd>'+
+     '<dl class="kv" style="margin-top:12px"><dt>Eligible</dt><dd>'+plural(m.eligible,"read-only call")+'</dd>'+
      '<dt>Hit rate</dt><dd>'+pct(m.used,Math.max(1,m.started))+'</dd>'+
-     '<dt>Time saved by prefetch</dt><dd><b>'+msDur(m.savedMs)+'</b></dd>'+
-     '<dt>Billed</dt><dd>Discarded reads are recorded and billed.</dd></dl>'+
-     '<div class="note" style="margin-top:11px">The harness starts reads it expects the model to ask for before the step is final. Only read-only tools are prefetched, and policy checks a prefetched call the same way as any other.</div></div>'+
+     '<dt>Time saved by prefetch</dt><dd><b>'+msDur(m.savedMs)+'</b></dd></dl></div>'+
    '</div></div>';
 }
 
@@ -2782,7 +2774,7 @@ function runTimeline(R){
   var el=Math.round(t1-t0),elapsed=el>=60?Math.floor(el/60)+"m "+(el%60)+"s":el+" s";
   return '<div class="panel rt"><div class="panel-h"><h3>Timeline</h3><span class="mono dim" style="font-size:11px">'+(fr.length<R.frames?fr.length+' of '+plural(R.frames,"frame"):plural(R.frames,"frame"))+' shown</span><div class="rt-leg">'+leg+'</div></div>'+
    '<div class="panel-b"><div class="rt-turns">'+turns+'</div><div class="rt-track">'+bands+ticks+'<div class="rt-axis"><span>'+h(fr[0].t.slice(0,8))+'</span><span>+'+elapsed+' · '+h(fr[fr.length-1].t.slice(0,8))+(R.status==="live"?' · live':'')+'</span></div></div><div class="rt-marks">'+marks+'</div>'+
-   '<div class="rt-foot"><span class="grow">Every tick is a frame, and the taller ones need a person. Click one to open it, or hover for the record.</span>'+
+   '<div class="rt-foot"><span class="grow"></span>'+
    '<span>'+bounds.length+' turn'+(bounds.length===1?'':'s')+' in view</span></div></div></div>';
 }
 /* The Run page's tab for this run. Tabs that no longer exist land on Cost. */
@@ -2812,10 +2804,9 @@ function runMemories(R){
 function runMemoryTab(R){
   var L=runMemories(R), F=S.memFold, body;
   if(!R.sealed){
-    body='<div class="panel-b"><div class="note">Nothing is written until the seal. This run is '+h(runStatus(R))+
-     '. When its chain seals, the post-run review reads it and writes what it learned here.</div></div>';
+    body='<div class="panel-b"><div class="note">No memories yet. This run is '+h(runStatus(R))+'.</div></div>';
   } else if(!L.length){
-    body='<div class="panel-b"><div class="note">This run wrote no memories. The post-run review read the sealed run and found nothing another run would need, and no operator steered it.</div></div>';
+    body='<div class="panel-b"><div class="note">This run wrote no memories.</div></div>';
   } else {
     body='<div class="tw"><table><thead><tr><th>Memory</th><th>Frame</th><th>Fold</th><th>Class</th><th>In the assembler</th></tr></thead><tbody>'+
      L.map(function(o){
@@ -2829,10 +2820,7 @@ function runMemoryTab(R){
        '<td><span class="b b-q mono">'+h(m.cls)+'</span></td><td>'+memAsmCell(m,R.ws)+'</td></tr>';}).join("")+
      '</tbody></table></div>';
   }
-  return '<div class="note" style="margin-bottom:14px"><b>The post-run review writes these after the seal.</b> '+
-    'Each lesson becomes a memory, or joins a memory that already says the same thing. '+
-    'At '+F.sayings+' sayings from '+F.runs+' runs, a memory becomes a steering proposal that cites every saying.</div>'+
-   '<div class="panel" style="margin-bottom:14px" data-run-memories="'+L.length+'"><div class="panel-h"><h3>Memories from this run</h3>'+
+  return '<div class="panel" style="margin-bottom:14px" data-run-memories="'+L.length+'"><div class="panel-h"><h3>Memories from this run</h3>'+
     (L.length?'<span class="b b-q" style="margin-left:auto">'+L.length+'</span>':'')+'</div>'+body+'</div>'+
    runSelfGrade(R);
 }
@@ -2853,19 +2841,17 @@ function runSelfGrade(R){
     '<dt>Cost</dt><dd>'+G.tokens.toLocaleString()+' tokens, $'+h(G.cost)+', billed as overhead</dd>'+
     '<dt>Retention</dt><dd>deleted '+h(SK_CFG.reflect.retain)+' after capture</dd></dl>':'';
   if(!R.sealed||!G){
-    b='<div class="note">Captured after the seal. This run is '+h(runStatus(R))+'. When its chain seals, oxagen asks the agent the four questions of rubric <span class="mono">'+h(rub)+'</span> in one out-of-band turn.</div>';
+    b='<div class="note">Not captured yet. This run is '+h(runStatus(R))+'.</div>';
   } else if(G.deleted){
-    b='<div class="note">Deleted on <span class="mono">'+h(G.deleted)+'</span>, '+h(SK_CFG.reflect.retain)+' after capture. The run’s frames, its seal and the memories it wrote are untouched.</div>';
+    b='<div class="note">Deleted on <span class="mono">'+h(G.deleted)+'</span>, '+h(SK_CFG.reflect.retain)+' after capture.</div>';
   } else if(!canResearch()){
     b='<div class="sg-lock" data-sg="refused"><span class="ic" aria-hidden="true">'+icon("lock")+'</span><div>'+
       '<div class="t">Reading a self-grade takes <span class="mono">research.read</span></div>'+
-      '<div class="s">An organization grant that no workspace role inherits. '+h(me().name)+' does not hold it.</div></div></div>'+meta+
+      '<div class="s">'+h(me().name)+' does not hold it.</div></div></div>'+meta+
      '<div class="row" style="margin-top:12px;gap:8px;flex-wrap:wrap"><button class="btn sm primary" onclick="openDialog(\'request-access\')">Request access</button>'+
       '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+h(R.ws)+'/steering/skills/reflect\')">How reflection works</button></div>';
   } else {
-    b='<div class="sx-rub" data-sg="read">'+SK_REFLECT.axes.map(function(ax,i){return sgAxis(ax.q,G.axes[i]);}).join("")+'</div>'+
-     '<div class="note" style="margin-top:12px"><b>Research only.</b> A self-grade never enters a context frame and has no promote action. '+
-      'It cannot become a memory, a proposal or steering, and its tokens never count as productive work.</div>'+meta;
+    b='<div class="sx-rub" data-sg="read">'+SK_REFLECT.axes.map(function(ax,i){return sgAxis(ax.q,G.axes[i]);}).join("")+'</div>'+meta;
   }
   return '<div class="panel"><div class="panel-h"><h3>Self-grade</h3><span class="sx-chip res" style="margin-left:auto">research only</span></div>'+
    '<div class="panel-b">'+b+'</div></div>';
@@ -3018,7 +3004,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
       if(hidden>0)inner+='<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⋯ '+plural(hidden,"more line","more lines")+'</button>';
       else if(open&&L.length>budget)inner+='<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⏶ collapse</button>';
     }
-    if(e.parked)inner+='<div class="tx-sub" style="margin-left:20px">Held at the gateway for up to 10 minutes. The model sees a wait with a reason. Approve or deny it from the card under Governed actions.</div>';
+    if(e.parked)inner+='<div class="tx-sub" style="margin-left:20px">Held at the gateway for up to 10 minutes.</div>';
     inner+='</div>';
   } else if(e.kind==="complete"){
     inner='<div><span style="color:var(--st-allowed);font-weight:600">'+txHi(e.title,q)+'</span>'+(body?' <span class="dim">'+txHi(body,q)+'</span>':'')+'</div>';
@@ -3037,7 +3023,7 @@ function transcriptTab(R,compacted){
   var total=txCostTotal(R),cum=0,html="";
   rows.forEach(function(e,i){if(e.kind==="usage"&&e.meta)cum+=e.meta.cost||0;html+=txRow(R,e,i,cum,rows,answerIdx);});
   var synth=!TRANSCRIPTS[R.id];
-  var tools='<div class="tx-tools">'+
+  var tools='<div class="tx-tools" data-help="transcript-filters">'+
    '<input type="search" value="'+h(S.tx.q)+'" placeholder="Search the transcript…" aria-label="search the transcript" oninput="txQ(this.value)">'+
    (S.tx.q.trim()?'<span class="dim mono" style="font-size:10.5px">'+rows.length+' of '+plural(all.length,"entry","entries")+'</span>':'')+
    txKindChips(R,errN)+
@@ -3049,9 +3035,8 @@ function transcriptTab(R,compacted){
    '<span class="tx-burn"><span>burn</span><span class="bar"><i id="txbar"></i></span><b id="txburn">'+txMoney2(0)+'</b><span>of '+txMoney2(total)+'</span></span></div>';
   var feed='<div class="tx-feed" id="txfeed" data-n="'+rows.length+'" data-paced="'+paced+'">'+(rows.length?html:'<div class="tx-empty">'+(S.tx.errs?'No failed calls in this run.':S.tx.q?'Nothing matches this search.':'Nothing to show with these filters.')+'</div>')+'</div>';
   setTimeout(txStart,0);
-  return (compacted?'<div class="warn" style="margin-bottom:12px"><b>Compacted.</b> This transcript is read from the archive. Its frames were moved out of the live record, and nothing was recomputed.</div>':'')+
-   '<div class="txs">'+tools+'<div class="tx-frame">'+runbar+feed+'</div>'+
-   '<p class="note" style="margin-top:12px">The transcript is what the agent showed its operator. Select \u2696 to see what the gateway recorded.</p><p hidden> each tool call with the output it read, and what every model step cost. The gateway\'s own frames sit behind the ⚖ chips; the transcript never replaces them.</p></div>';
+  return (compacted?'<div class="warn" style="margin-bottom:12px"><b>Compacted.</b> This transcript is read from the archive.</div>':'')+
+   '<div class="txs">'+tools+'<div class="tx-frame" data-help="transcript">'+runbar+feed+'</div></div>';
 }
 /* ---- playback ---- */
 function txStart(){
@@ -3100,19 +3085,16 @@ function storyMs(){return STORY_NOW+(Date.now()-STORY_T0);}
 function nowT(){return new Date(storyMs()).toISOString().slice(11,23);}
 function pauseBody(){
   var R=run(S.dlgArg)||RUNS[0];
-  return '<p class="muted" style="font-size:12.5px;margin-bottom:12px">Takes effect at the next boundary: the model call or tool call now in flight completes, and nothing new is dispatched. '+
-   'The run keeps its token and its budget reservation; pending approvals keep their clocks.</p>'+
-   '<dl class="kv" style="margin-bottom:12px"><dt>Run</dt><dd class="mono">'+h(R.id)+'</dd><dt>Position</dt><dd>turn '+R.turn+' · step '+R.steps+' · frame '+R.frames+'</dd>'+
+  return '<dl class="kv" style="margin-bottom:12px"><dt>Run</dt><dd class="mono">'+h(R.id)+'</dd><dt>Position</dt><dd>turn '+R.turn+' · step '+R.steps+' · frame '+R.frames+'</dd>'+
    '<dt>Recorded as</dt><dd><span class="mono">control.pause</span> frame · operator authority</dd></dl>'+
    '<div class="field"><label>Reason for the agent</label>'+
-   '<textarea id="pause-reason" rows="2" aria-label="Reason">Holding while finance confirms PO-4471 line 3.</textarea></div>'+
-   '<div class="note">Pause is not cancel. Nothing is revoked, and the run resumes exactly where it stopped; the gap is visible in the chain and the receipts.</div>';
+   '<textarea id="pause-reason" rows="2" aria-label="Reason">Holding while finance confirms PO-4471 line 3.</textarea></div>';
 }
 function pauseRun(id){
   var R=run(id)||RUNS[0], ta=el("pause-reason"), reason=ta?ta.value.trim():"";
   closeDialog();
   S.runCtl[R.id]={status:"pausing",by:"Marcus Bell",at:nowT(),reason:reason,turn:R.turn,step:R.steps};
-  toast("Pause queued for "+R.id+". It takes effect at the next boundary.","approval"); render();
+  toast("Pause queued for "+R.id+".","approval"); render();
   setTimeout(function(){
     var c=S.runCtl[R.id]; if(!c||c.status!=="pausing")return;
     c.status="paused"; c.at=nowT();
@@ -3130,15 +3112,14 @@ function resumeRun(id){
     FRAMES.push({seq:FRAMES.length,kind:"control.resume",tier:"harness",cost:null,t:at,by:c2.by,reason:c2.reason,dig:"sha256:"+(FRAMES.length*104729).toString(16)+"c7…",
       sum:c2.by+" · resumed after "+c2.at+" → "+at+" · reason delivered as a control frame"});
     delete S.runCtl[R.id];
-    toast(R.id+" is live again. The resume is recorded, and the agent was told your reason.","allowed"); render();
+    toast(R.id+" is live again. The agent was told your reason.","allowed"); render();
   },1200);
 }
 function pauseBanner(R){
   var c=S.runCtl[R.id]; if(!c||c.status==="resuming")return "";
   var paused=c.status==="paused";
-  return '<div class="pause-banner" role="status"><span class="g">❙❙</span><div class="grow"><b>'+(paused?'Paused':'Pausing')+'</b> at turn '+c.turn+' · step '+c.step+
-   (paused?' · by '+h(c.by)+' at '+h(c.at):' · takes effect at the next checkpoint')+(c.reason?' · <span class="q">“'+h(c.reason)+'”</span>':'')+
-   '<div class="dim" style="font-size:11.5px;margin-top:2px">The run token and budget reservation are held. Pending approvals keep counting down. Nothing new starts.</div></div>'+
+  return '<div class="pause-banner" role="status" data-help="pause-banner"><span class="g">❙❙</span><div class="grow"><b>'+(paused?'Paused':'Pausing')+'</b> at turn '+c.turn+' · step '+c.step+
+   (paused?' · by '+h(c.by)+' at '+h(c.at):' · takes effect at the next checkpoint')+(c.reason?' · <span class="q">“'+h(c.reason)+'”</span>':'')+'</div>'+
    (paused?'<button class="btn sm" onclick="resumeRun(\''+R.id+'\')">▶ Resume run</button>':'')+
    '<button class="btn sm ghost" onclick="openFrame(FRAMES.length-1)">Open the pause frame</button></div>';
 }
@@ -3227,10 +3208,10 @@ function linkedWork(R){
   var files=g.files.length?'<div class="panel lw-files" style="margin-bottom:16px"><div class="panel-h"><h3>Files changed</h3><span class="dsum"><b class="a" style="color:var(--st-allowed)">+'+dm.add+'</b> <b class="d" style="color:var(--st-denied)">\u2212'+dm.del+'</b><span class="dbar" aria-hidden="true"><i class="a" style="flex:'+dm.add+'"></i><i class="d" style="flex:'+dm.del+'"></i></span>\u00b7 '+plural(g.files.length,"file")+' \u00b7 as the harness reported them</span></div><div class="panel-b" style="padding-top:2px">'+
    g.files.map(function(f){var rows=txDiffRows(f.before,f.after),st=diffStat(rows);return '<details><summary><span class="p">'+h(f.path)+'</span>'+(f.note?'<span class="dim" style="font-size:11px;flex:none">'+h(f.note)+'</span>':'')+'<span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span></summary>'+diffHtml(rows,3)+'</details>';}).join("")+'</div></div>':'';
   return '<section aria-label="Linked work">'+
-   '<div class="lw-note"><p class="eyebrow q" style="margin:0">Linked work</p>'+
-    '<span><span class="edge observed">observed</span> written by oxagen from a tool call routed through it</span>'+
-    '<span><span class="edge stated">stated</span> carried by the task</span>'+
-    '<span><span class="edge inferred">inferred</span> a light model read the frames and proposed it, scored and cited. '+inf+' of '+(g.repos.length+g.artifacts.length)+'</span></div>'+
+   '<div class="lw-note" data-help="linked-work"><p class="eyebrow q" style="margin:0">Linked work</p>'+
+    '<span><span class="edge observed" title="Written by Oxagen from a tool call routed through it">observed</span> '+obs+'</span>'+
+    '<span><span class="edge stated" title="Carried by the task">stated</span> '+(g.repos.length+g.artifacts.length-obs-inf)+'</span>'+
+    '<span><span class="edge inferred" title="Proposed by a light model that read the frames">inferred</span> '+inf+'</span></div>'+
    '<div class="lw">'+panel("Repositories",repos,"No repository was touched.")+panel("Pull requests and artifacts",arts,"Nothing produced yet.")+'</div>'+files+'</section>';
 }
 
@@ -3466,9 +3447,8 @@ function fdContext(f,R){
    frSec("Context frames served",'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Frame</th><th>Kind</th><th>Evidence</th><th class="num">Tokens</th><th>Use</th></tr></thead><tbody>'+
     c.rows.map(function(x){return '<tr><td class="mono" style="font-size:11px">'+h(x.node)+'</td><td class="mono">'+h(x.kind)+'</td><td>'+h(x.label)+(x.dig?'<div class="dim mono" style="font-size:10.5px">'+h(x.dig)+'</div>':'')+'</td>'+
      '<td class="num">'+tokn(x.tok)+'</td><td>'+(x.cited!=null?frameBtn(x.cited,"cited at frame "+x.cited):x.cited===null?'<span class="b b-q">never cited</span>':'<span class="dim">served</span>')+'</td></tr>';}).join("")+
-    '<tr><td colspan="3"><b>total</b></td><td class="num"><b>'+tokn(sum)+'</b></td><td></td></tr></tbody></table></div>',"identified by provider, frame id and content digest")+
-   '<div class="row" style="margin-top:12px"><button class="btn sm" onclick="runTab(\'trace\')">Open the steering.manifest frame</button></div>'+
-   '<div class="note" style="margin-top:12px">After the seal the post-run review writes one <span class="mono">context_use_feedback</span> record per frame served here, marking it cited, rendered or ignored. A low citation rate on a large budget is the context bloat finding.</div>';
+    '<tr><td colspan="3"><b>total</b></td><td class="num"><b>'+tokn(sum)+'</b></td><td></td></tr></tbody></table></div>')+
+   '<div class="row" style="margin-top:12px"><button class="btn sm" onclick="runTab(\'trace\')">Open the steering.manifest frame</button></div>';
 }
 function fdRequest(f,R){
   var L=frList(R),i,nextR=null,prevReq=-1,steer=null;
@@ -3520,7 +3500,7 @@ function fdResponse(f,R){
   return frKv([["Stop reason",'<b style="color:var(--fg)">'+h(f.stop||(/stop_reason (\w+)/.exec(f.sum)||[])[1]||"—")+'</b>'],
     ["Latency",(f.ms?tokn(f.ms)+" ms total · "+tokn(f.ttft)+" ms to first token":"640 ms to first token · total 7.37 s")+" · 0 retries"],
     ["Provider request",'<span class="mono">'+h(req)+'</span>'],["Concrete model",'<span class="mono">'+h(R.model)+'</span>']])+
-   frSec("Usage by token class",body,f.u?"input at the published effective price, split by class; output at list":"as the provider reported it")+
+   frSec("Usage by token class",body,f.u?null:"as the provider reported it")+
    frSec("Cost record",frPre({usage:{input:u.inU,cache_read:u.cr,cache_write_5m:u.cw,output:u.out,reasoning:u.rsn},cost_micros:Math.round(c*1e6),currency:"USD",cost_basis:R.basis,provider_request_id:req}))+
    frSec("Derived",frKv([["Cache hit rate",'<b style="color:var(--fg)">'+per(hit)+'</b> · '+tokn(u.cr)+' of '+tokn(tin)+' input tokens'],
     ["Effective input price",tin?usd((c/3/tin*1e6).toFixed(2))+" per million input tokens, all classes":"—"],
@@ -3538,7 +3518,7 @@ function fdToolReq(f,R){
     ["Taint sources",A&&A.tainted?'<span style="color:var(--st-denied)">'+h((A.taint||[]).map(function(x){return x.path+" from frame "+x.frame;}).join(", "))+'</span>':"none · no argument was copied from a prior tool output"],
     A?["Hazard",riskBadge(A.risk)+' '+effBadge(A.side)+' <span class="dim">egress '+h(keyText(A.egress).toLowerCase())+'</span>']:null])+
    frSec("Validated input",readout("canonical input","exactly what the gateway will dispatch",frPre(input)))+
-   '<div class="note" style="margin-top:12px">Nothing has been dispatched yet. The next frame'+(nx?' ('+frameBtn(nx.seq,"frame "+nx.seq)+')':'')+' is the policy decision on whether it runs. The same call under the same policy version always gets the same answer, and no model is involved.</div>';
+   '<div class="note" style="margin-top:12px">Nothing has been dispatched yet. The next frame'+(nx?' ('+frameBtn(nx.seq,"frame "+nx.seq)+')':'')+' is the policy decision on whether it runs.</div>';
 }
 function fdToolCall(f,R){
   var c=frCallOf(f,R),io=frIO(f,R); if(!c)return null;
@@ -3550,8 +3530,7 @@ function fdToolCall(f,R){
     ["Declared price","none · the tool costs the run nothing beyond the tokens it returns"]])+
    frSec("Validated output",readout("output",io.red.length?io.red.length+" field redacted before write":"no redactions",frPre(io.output)))+
    (io.red.length?frSec("Redactions",'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Path</th><th>Reason</th><th>Digest of what was removed</th></tr></thead><tbody>'+
-     io.red.map(function(r){return '<tr><td class="mono">'+h(r.path)+'</td><td class="mono">'+h(r.reason)+'</td><td class="mono dim">'+h(r.digest)+'</td></tr>';}).join("")+'</tbody></table></div>'+
-     '<div class="note" style="margin-top:10px">Redaction ran before the bytes were written. The digest lets an auditor confirm what was removed without recovering it.</div>'):'');
+     io.red.map(function(r){return '<tr><td class="mono">'+h(r.path)+'</td><td class="mono">'+h(r.reason)+'</td><td class="mono dim">'+h(r.digest)+'</td></tr>';}).join("")+'</tbody></table></div>'):'');
 }
 function fdPolicy(f,R){
   var A=f.apr?APPROVALS.filter(function(a){return a.id===f.apr;})[0]:null;
@@ -3564,7 +3543,7 @@ function fdPolicy(f,R){
    frSec("Conditions evaluated",'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Condition</th><th>Value</th><th>Result</th></tr></thead><tbody>'+
     conds.map(function(x){var v=x[2],cls=/^(pass|held|allow)$/.test(v)?"b-allowed":v==="approve"?"b-approval":v==="constrain"?"b-q":"b-denied";
      return '<tr><td class="mono" style="font-size:11.5px">'+h(x[0])+'</td><td style="font-size:12px">'+h(x[1])+'</td><td><span class="b '+cls+'"><span class="d"></span>'+h(v)+'</span></td></tr>';}).join("")+
-    '</tbody></table></div>',"derived from the call and the record only")+
+    '</tbody></table></div>')+
    frSec("Decision",frPre({outcome:approve?"approve":"allow",policy_version:A?A.policy:"pol_v41",rules_fired:[rule],delegation_ceiling:"held: the narrower of agent and operator",
      taint:{marked:!!(A&&A.tainted),sources:A&&A.taint?A.taint.map(function(x){return x.path;}):[]},kill_switches:"none armed for this tool",enforcement_tier:R.tier}));
 }
@@ -3576,18 +3555,17 @@ function fdApproval(f,R){
     ["Rule",h(A.rule)],A.amount?["Amount",usd(A.amount)+" "+h(A.currency)+" · "+h(A.counterparty)]:null,["Approvers",h(A.approvers)],["Waited",h(A.waited)+" of "+h(A.timeout)]]);
   if(A.waited==="canceled")return '<div class="note"><b>Canceled.</b> The run halted before anyone answered. The call was never sent.</div>'+facts;
   if(A.waited==="expired")return '<div class="warn"><b>Expired.</b> Nobody answered within '+h(tmin(A.timeout))+'. The call was not sent, and the agent was told the request timed out.</div>'+facts;
-  if(ap.status!=="pending")return '<div class="note">Resolved: <b>'+h(ap.status)+'</b>'+(ap.by&&ap.by!=="—"?' by '+h(ap.by):'')+'. The decision is a frame of its own.</div>'+facts;
-  return '<div class="warn"><b>Parked.</b> The call is held for up to '+h(tmin(A.timeout))+'. The agent is told to wait, and why. '+
-   'Approving allows this exact call once.</div>'+facts+
+  if(ap.status!=="pending")return '<div class="note">Resolved: <b>'+h(ap.status)+'</b>'+(ap.by&&ap.by!=="—"?' by '+h(ap.by):'')+'.</div>'+facts;
+  return '<div class="warn"><b>Parked.</b> The call is held for up to '+h(tmin(A.timeout))+'. Approving allows this exact call once.</div>'+facts+
    '<div class="row" style="margin-top:13px"><button class="btn" onclick="openDialog(\'approve\',\''+A.id+'\')">Approve'+(A.amount?' '+usd(A.amount)+' '+h(A.currency):'')+'</button>'+
    '<button class="btn danger" onclick="openDialog(\'deny\',\''+A.id+'\')">Deny'+(A.amount?' payment':'')+'</button></div>';
 }
 function fdRecord(f,R){
   var r=f.rec||{id:"rec_"+frHex(R.id+f.seq,8).toUpperCase(),text:f.sum,sources:[]};
-  return frKv([["Record id",'<b class="mono" style="color:var(--fg)">'+h(r.id)+'</b>'],["Lineage",'<span class="mono">lin_'+frHex(R.agent,6)+'</span> · a correction is a new record on this lineage'],
+  return frKv([["Record id",'<b class="mono" style="color:var(--fg)">'+h(r.id)+'</b>'],["Lineage",'<span class="mono">lin_'+frHex(R.agent,6)+'</span>'],
     ["Kind","note"],["Record hash",'<span class="mono">'+frDig(r.id)+'</span>'],["Sharing scope","workspace · "+h(R.ws)],["Retention","7 years from the seal"]])+
    frSec("Body",'<div class="callout">'+h(r.text)+'</div>')+
-   frSec("Provenance",r.sources.length?'<div class="row" style="gap:8px">'+r.sources.map(function(s){return frameBtn(s,"frame "+s+" · tool_call");}).join("")+'</div>':'<span class="dim">no tool result cited</span>',"each record links to the frame it came from");
+   frSec("Provenance",r.sources.length?'<div class="row" style="gap:8px">'+r.sources.map(function(s){return frameBtn(s,"frame "+s+" · tool_call");}).join("")+'</div>':'<span class="dim">no tool result cited</span>');
 }
 function fdCheckpoint(f,R){
   /* Walk by position, not seq: an authored list can carry sparse seqs, so L[seq] is not this frame. */
@@ -3595,8 +3573,7 @@ function fdCheckpoint(f,R){
   if(f.from==null)for(var i=(at<0?L.length:at)-1;i>=0;i--)if(L[i].kind==="checkpoint"){from=L[i].seq+1;break;}
   return frKv([["Covers","frames "+from+"–"+f.seq+" · every 20 frames or 60 seconds, whichever comes first"],["Producer","host device key · ed25519"],
     ["Producer signature",'<span class="mono">ed25519:'+frHex(R.id+"cp"+f.seq,14)+'…</span>'],["Countersigned by oxagen",'<span style="color:var(--st-allowed)">yes, at ingest</span>'],
-    ["Chain head",'<span class="mono">'+h(f.head||frDig(R.id+f.seq+"head"))+'</span>']])+
-   '<div class="note" style="margin-top:12px">A checkpoint pins the chain mid-run so a crash or a network drop cannot cost the frames already recorded. Here oxagen attests that it received the frames and that the chain is intact. It does not attest that a body reported by the harness is true.</div>';
+    ["Chain head",'<span class="mono">'+h(f.head||frDig(R.id+f.seq+"head"))+'</span>']]);
 }
 function fdError(f,R){
   var e=f.err||{code:"error",source:"gateway",outcome:R.status};
@@ -3607,15 +3584,13 @@ function fdError(f,R){
 function fdTurn(f,R){
   var s=runSeries(R),t=f.turn||1,L=frList(R),fs=L.filter(function(x){return x.turn===t;}),start=f.kind==="turn_start";
   return frKv([["Turn",t+" of "+s.n],["Frames",fs.length?fs.length+" · seq "+fs[0].seq+"–"+fs[fs.length-1].seq:"—"],["Steps",s.steps[t-1]+" · "+s.model[t-1]+" model calls, "+s.tool[t-1]+" tool calls"],
-    ["Turn spend",usd(s.cost[t-1].toFixed(2))],["Cache hit rate",per(s.cache[t-1])]])+
-   '<div class="note" style="margin-top:12px">'+(start?'A turn runs from one prompt, schedule or resumed context until the agent stops. ':'')+'Turns are derived from these frames and stored in the rollups. The Cost tab charts them.</div>';
+    ["Turn spend",usd(s.cost[t-1].toFixed(2))],["Cache hit rate",per(s.cache[t-1])]]);
 }
 function fdAgent(f,R){
   var a=agent(R.agent);
   if(f.kind==="agent_start")return frKv([["Run",'<b class="mono" style="color:var(--fg)">'+h(R.id)+'</b>'],["Agent",(a?hxIcon(a.harness,13)+' ':'')+'<span class="mono">'+h(R.agent)+'</span>'+(a?' · '+h(a.harnessLabel):'')],
     ["Operator",h(PEOPLE[R.op]?PEOPLE[R.op].name:R.op)+" · initiating principal"],["Workspace",h(R.ws)],["Task",R.task&&R.task!=="—"?h(R.task)+" · "+h(R.taskTitle):h(R.taskTitle)+' <span class="dim">· no linked task</span>'],
-    ["Policy version","pol_v41"],["Enforcement tier",tierBadge(R.tier)]])+
-   '<div class="note" style="margin-top:12px">Everything above is built by oxagen, never by the agent. It cannot name its own operator or choose its own tier.</div>';
+    ["Policy version","pol_v41"],["Enforcement tier",tierBadge(R.tier)]]);
   return frKv([["Outcome",'<b style="color:var(--fg)">'+h(R.status)+'</b>'],["Turns",R.turn],["Steps",R.steps],["Frames",R.frames+" · seq 0–"+(R.frames-1)],
     ["Total spend",usd(R.cost)+" USD · "+h(R.basis)],["Sealed",R.sealed?h(R.sealed)+" · the seal envelope follows as seq "+R.frames:"not sealed"]])+
    '<div class="row" style="margin-top:12px"><button class="btn sm" onclick="runTab(\'evidence\')">Chain and seal</button></div>';
@@ -3624,7 +3599,7 @@ function fdToken(f,R){
   var c=frCallOf(f,R),vendor=c?toolParts(c.id).n.split("__")[0]:"github";
   return frKv([["Credential grant",'<span class="mono">'+h(f.grant||"cg_01K5RS8")+'</span>'],["Connection",h(vendor)+" · brokered by the gateway"],
     ["Minted",c?'a token scoped to <span class="mono">'+h(c.id)+'</span> and this call id':'installation token limited to <span class="mono">a-intel/platform</span>'],
-    ["TTL","5 minutes, bound to call id"],["Seen by the agent",'<b style="color:var(--st-allowed)">never</b>. The agent holds one run token, which works only for calls to oxagen.']]);
+    ["TTL","5 minutes, bound to call id"],["Seen by the agent",'<b style="color:var(--st-allowed)">never</b>']]);
 }
 var FD_KIND={"context.assembled":fdContext,"model.request":fdRequest,"model.response":fdResponse,tool_requested:fdToolReq,tool_call:fdToolCall,
   policy_decision:fdPolicy,approval_request:fdApproval,"record.appended":fdRecord,checkpoint:fdCheckpoint,error:fdError,
@@ -3638,7 +3613,6 @@ function frameDetail(f){
      '<p class="eyebrow q">'+(paused?'Took effect at the checkpoint after frame '+(f.seq-1)+' · attributed to the operator':'Delivered at the next checkpoint · the agent is told your reason')+'</p>'+
      '<p style="margin:0;color:var(--fg)">'+h(f.reason||"—")+'</p>'+
      '<div class="kv" style="margin-top:12px"><dt>Issuer</dt><dd>'+h(f.by||"Marcus Bell")+' · <span class="mono">'+(paused?'run.pause':'run.resume')+'</span></dd>'+
-     '<dt>While paused</dt><dd>'+(paused?'The run token and budget reservation are held. Pending approvals keep counting down. Nothing new starts.':'The pause frame and this one are both in the chain, so the gap shows in the receipts.')+'</dd>'+
      '<dt>Digest</dt><dd class="mono">'+h(f.dig||"sha256:pending")+'</dd></div></div></div>';
   }
   if(f.kind==="control.steer"){
@@ -3649,11 +3623,10 @@ function frameDetail(f){
      '<p style="margin:0;color:var(--fg)">“'+h(quote)+'”</p>'+
      '<div class="kv" style="margin-top:12px"><dt>Issuer</dt><dd>'+h(String(f.sum).split(" · ")[0])+' · operator authority</dd>'+
      '<dt>Injected into</dt><dd>'+(carried?frameBtn(carried.seq,"model.request · frame "+carried.seq)+', immediately after the cached system block':'the next model request')+'</dd>'+
-     '<dt>Digest</dt><dd class="mono">'+h(f.dig||frDig(R.id+f.seq+"steer"))+'</dd></div>'+
-     '<div class="note" style="margin-top:12px">Steering is evidence, quoted and cited. oxagen never runs it as an instruction. Whether the harness treats it as one is up to the harness.</div></div></div>';
+     '<dt>Digest</dt><dd class="mono">'+h(f.dig||frDig(R.id+f.seq+"steer"))+'</dd></div></div></div>';
   }
   var body=FD_KIND[f.kind]?FD_KIND[f.kind](f,R):null;
-  var digestOnly=R.grade==="digest"?'<div class="note" style="margin-bottom:12px">Reported by harness at the '+h(R.tier)+' tier, with replay grade <b>digest</b>: the producer sent digests, not bodies. What follows is the envelope oxagen countersigned. The content is as the harness reported it.</div>':'';
+  var digestOnly=R.grade==="digest"?'<div class="note" style="margin-bottom:12px">Reported by harness at the '+h(R.tier)+' tier, with replay grade <b>digest</b>. The producer sent digests, not bodies.</div>':'';
   return digestOnly+(body!=null?body:
    '<dl class="kv"><dt>Frame hash</dt><dd class="mono">sha256:'+(7331+f.seq*977).toString(16)+'e9c4a1b07f2d</dd>'+
    '<dt>Previous hash</dt><dd class="mono">sha256:'+(7331+(f.seq-1)*977).toString(16)+'e9c4a1b07f2d</dd>'+
@@ -3889,21 +3862,18 @@ function costTab(R){
     '<div class="sp" style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+
      (finds.length?'<span class="b b-denied"><span class="d"></span>'+plural(finds.length,"finding")+'</span>':'')+
      '<span class="b b-q">'+plural(s.n,"turn")+' · '+usd(R.cost)+' · '+keyLabel(R.basis)+'</span></div></div>'+
-    '<div class="panel-b"><div style="overflow-x:auto">'+wfChart(R,s,tf,finds)+'</div>'+legend+
-    '<p class="muted" style="font-size:11.5px;margin:10px 0 0">Bar height is the turn’s cost on the left scale. The dashed line is the running total, which reaches '+usd(R.cost)+'. '+
-     (finds.length?'Diamonds are Spend findings that name this run, pinned to the turn their pattern points at. ':'')+'Select a mark to open it.</p></div>'+
+    '<div class="panel-b"><div style="overflow-x:auto">'+wfChart(R,s,tf,finds)+'</div>'+legend+'</div>'+
     '<div class="tw"><table class="wf-table" data-lt="off"><thead><tr><th>Turn</th><th class="num">Steps</th><th class="num">Frames</th><th class="num">Cache hit</th><th class="num">Cost</th><th class="num">Running total</th><th>Pinned</th></tr></thead>'+
      '<tbody>'+rows+foot+'</tbody></table></div>'+
     (tf.counted?'':'<div class="panel-b" style="font-size:11.5px"><span class="dim">This run’s frames do not record their turn, so frames per turn are estimated from steps.</span></div>')+'</div>'+
    '<div class="grid g2"><div class="panel"><div class="panel-h"><h3>Spend by token class</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.tokTotal)+' tokens</span></div>'+
-    '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">Cost</th><th class="num">Share</th></tr></thead><tbody>'+clsRows+'</tbody></table></div>'+
-    '<div class="panel-b"><div class="note">Input is about a third of the cost. It is priced at the effective rate across its classes, and a cache read costs a tenth of an uncached token. Output and reasoning are priced at the list rate for the '+(light?'light':'complex')+' model class.</div></div></div>'+
+    '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">Cost</th><th class="num">Share</th></tr></thead><tbody>'+clsRows+'</tbody></table></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Prompt composition</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.perCall)+' tokens per request, on average</span></div><div class="panel-b" style="display:grid;gap:11px">'+
     comp.map(function(x){return '<div class="meter"><div class="lab">'+x[0]+'<b>'+tokn(x[1])+' tok</b></div><div class="bar"><i style="width:'+Math.round(x[1]/Math.max(1,m.perCall)*100)+'%;background:'+x[2]+'"></i></div></div>';}).join("")+
     '<div class="hr"></div><dl class="kv">'+
     '<dt>Effective input price</dt><dd>$1.88 per million across all input classes</dd>'+
     '<dt>Cache write cost share</dt><dd>'+(m.cacheWrite?pct(m.cacheWrite,m.tokIn):'0.0%, nothing written this run')+'</dd>'+
-    '<dt>Basis</dt><dd>'+basisChip(R.basis)+(R.basis==="gateway_observed"?' · counted by the proxy from the bytes that passed through it':' · the harness\u2019s own telemetry; absent classes are marked, never zero')+'</dd>'+
+    '<dt>Basis</dt><dd>'+basisChip(R.basis)+'</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(R.ratio)+' · '+s.adv+' of '+R.steps+' steps advanced the task</dd></dl></div></div></div>';
 }
 
@@ -3917,10 +3887,9 @@ function chainTab(R){
     '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>no gaps</span></div><div class="panel-b">'+
     '<dl class="kv"><dt>Frames</dt><dd class="num">'+R.frames+' · dense seq 0 … '+(R.frames-1)+(sealed?' · the seal is envelope '+R.frames:'')+'</dd>'+
     '<dt>Rule</dt><dd class="mono" style="font-size:11.5px">hash = SHA256(prev_hash ‖ canonical(envelope))</dd>'+
-    '<dt>Telemetry gap frames</dt><dd>0. A gap is recorded, never repaired.</dd>'+
-    '<dt>Checkpoints</dt><dd>'+cpN+' · every 20 frames · signed by the host device key, countersigned by oxagen at ingest</dd>'+
-    '<dt>Completeness gaps</dt><dd>'+(R.grade==="full"?"None. The replay grade is full.":R.grade==="partial"?"Some frames are missing bodies, so the replay grade is lowered.":R.grade==="digest"?"Bodies were not sent, only digests.":"None. Frames are in the archive segment.")+'</dd></dl>'+
-    '<div class="note" style="margin-top:13px">Frames from a wrapped agent are reported by harness: signed by the producer and countersigned at ingest. oxagen attests that it received them and that the chain is intact. It does not attest that their content is true. Frames oxagen writes itself, such as a decision on a routed call or a witness result, are attested by oxagen.</div></div></div>'+
+    '<dt>Telemetry gap frames</dt><dd>0</dd>'+
+    '<dt>Checkpoints</dt><dd>'+cpN+' · every 20 frames</dd>'+
+    '<dt>Completeness gaps</dt><dd>'+(R.grade==="full"?"None. The replay grade is full.":R.grade==="partial"?"Some frames are missing bodies, so the replay grade is lowered.":R.grade==="digest"?"Bodies were not sent, only digests.":"None. Frames are in the archive segment.")+'</dd></dl></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Seal and attestation</h3>'+(sealed?'<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>sealed</span>':'')+'</div>'+
     '<div class="panel-b">'+(sealed?'<dl class="kv">'+
     '<dt>Merkle root</dt><dd class="mono" style="word-break:break-all">'+root+'</dd>'+
@@ -3928,13 +3897,13 @@ function chainTab(R){
     '<dt>Archive segment</dt><dd class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</dd>'+
     '<dt>Signature</dt><dd class="mono">ed25519 · '+h(ORG.attester)+'</dd>'+
     '<dt>Signs over</dt><dd class="mono" style="font-size:11.5px">run_id, attempt_id, frame_count, merkle_root, archive_segment_digest, enforcement_tier, completeness_gaps</dd>'+
-    '<dt>Enforcement tier</dt><dd>'+tierBadge(R.tier)+' · computed from what was routed, not from what the adapter supports</dd>'+
+    '<dt>Enforcement tier</dt><dd>'+tierBadge(R.tier)+'</dd>'+
     '<dt>Verify offline</dt><dd><button class="btn sm" onclick="openDialog(\'runexport\')">Export the bundle</button></dd></dl>':
-    '<p class="muted">The seal is computed at run end, for every terminal outcome. Until then the chain is verifiable frame by frame but there is no Merkle root and no attestation.</p>')+
+    '<p class="muted">Not sealed yet. The run is still recording.</p>')+
     '</div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Checkpoints</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+cps.length+' of '+cpN+'</span></div>'+
     (cps.length?'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Frame</th><th class="num">Covers</th><th>Chain head</th><th>Signature</th></tr></thead><tbody>'+cpRows+'</tbody></table></div>':
-     '<div class="panel-b muted" style="font-size:12.5px">No checkpoint frame is shown. The recorder writes one every 20 frames.</div>')+'</div>'+
+     '<div class="panel-b muted" style="font-size:12.5px">No checkpoint frame is shown.</div>')+'</div>'+
    '</div>';
 }
 
@@ -3942,11 +3911,10 @@ function chainTab(R){
    interface (docs/fleet-operations-wedge.md, D14); the chain and the seal stay under Evidence. ---- */
 DLG_EXT.runexport=function(){
   var R=run(S.frameRun)||RUNS[0],sealed=R.status!=="live"&&R.status!=="parked";
-  return {t:"Export this run",s:"The segment, attestation, key IDs and verifier.",w:false,
+  return {t:"Export this run",w:false,
    b:'<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>run '+h(R.id)+' · '+plural(R.frames,"frame")+(sealed?' and the seal':'')+'</option>'+(R.task&&R.task!=="—"?'<option>task '+h(R.task)+' · every run</option>':'')+'<option>agent '+h(R.agent)+' · all runs</option></select></div>'+
     '<div class="field"><label>Format</label><select aria-label="Format"><option>Signed bundle (segment + verifier)</option><option>Frames as NDJSON</option><option>Receipts as CSV</option></select></div>'+
-    frKv([["Segment",'<span class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</span> · '+R.frames+' frame envelopes'],["Seal",sealed?"included · verifies offline":"not yet. The run is open, so the bundle carries checkpoints only"]])+
-    '<div class="callout" style="margin-top:12px">Runs as <span class="mono">export_data</span>, a governed action with third-party egress. Bodies for erased subjects are not in the bundle. Their digests are, so the chain still verifies.</div>',
+    frKv([["Segment",'<span class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</span> · '+R.frames+' frame envelopes'],["Seal",sealed?"included · verifies offline":"not yet. The run is open, so the bundle carries checkpoints only"]]),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="queueExport()">Build bundle</button>'};
 };
 
@@ -6539,9 +6507,9 @@ function stgMemoryTab(w){
    forgot one either: a fact an agent got wrong kept being recalled with no way to stop it. ---- */
 function memById(id){for(var i=0;i<MEMORY.length;i++){if(MEMORY[i].id===id)return MEMORY[i];}return null;}
 function memPosition(m){
-  if(m.supersededBy)return "Superseded by "+h(m.supersededBy)+". It is kept for the runs that carried it and is never selected again.";
-  if(m.yieldsTo)return "It yields to "+h(m.yieldsTo)+", a published must. Where the two disagree, the published record is what the agent reads.";
-  return "It competes in the per-prompt selection at force "+h(m.force)+". A published record beats it wherever the two are about the same thing.";
+  if(m.supersededBy)return "Superseded by "+h(m.supersededBy)+".";
+  if(m.yieldsTo)return "Yields to "+h(m.yieldsTo)+", a published must.";
+  return "Competes in the per-prompt selection at force "+h(m.force)+".";
 }
 /* The sayings and the fold line. The dialog and the memory's own page read this one list, so an
    imported saying shows on both or on neither. */
@@ -6555,7 +6523,7 @@ function memSaysList(m,inDlg){
 DLG_EXT.memory=function(id){
   var m=memById(id); if(!m)return noSuch("Memory");
   var run=String(m.provenance||"").split(/\s*·\s*/)[0];
-  return {t:m.body,s:"A memory, recalled and never published",w:false,
+  return {t:m.body,s:m.id,w:false,
    b:'<dl class="kv"><dt>Class</dt><dd><span class="b b-q mono">'+h(m.cls)+'</span> at '+forceBadge(m.force)+'</dd>'+
      '<dt>Scope</dt><dd>'+h(m.scope)+(m.agent?' · <span class="mono">'+h(m.agent)+'</span>':'')+'</dd>'+
      '<dt>Where it came from</dt><dd><span class="mono" style="font-size:11.5px">'+h(m.provenance)+'</span></dd>'+
@@ -8632,25 +8600,21 @@ function skRunPage(){
       h(PEOPLE[SKRUN.op].name)+' · harness tier · <span class="mono">'+h(SKRUN.remote)+'@'+h(SKRUN.sha)+'</span></p></div>'+
     '<div class="acts">'+(ans?'<span class="live"><span class="p"></span>live</span>':'<span class="b b-approval"><span class="d"></span>paused · waiting on a person</span>')+'</div></div>'+
    (ans?
-    '<div class="note" style="margin:12px 0"><b>Answered.</b> '+
+    '<div class="note" style="margin:12px 0" data-help="loop-state"><b>Answered.</b> '+
      (ans==="link"?'<span class="mono">a-intel/edge-proxy</span> is a linked repo of <b>core-platform</b>, the run resolved '+h(SK_CFG.ver)+', and one skill is loaded.'
-                  :'The workspace <b>edge</b> exists, <span class="mono">a-intel/edge-proxy</span> is its main repo, and <b>skills are off in it</b>, as in every new workspace. The run carries none, and the agent was told so in one line.')+
+                  :'The workspace <b>edge</b> exists, <span class="mono">a-intel/edge-proxy</span> is its main repo, and <b>skills are off in it</b>. The run carries none, and the agent was told so.')+
      ' <button class="btn sm" onclick="skReset()">Ask again</button></div>'
     :
-    '<div class="note" style="margin:12px 0;border-color:color-mix(in srgb,var(--gold) 42%,transparent);background:color-mix(in srgb,var(--gold) 7%,var(--panel))">'+
-     '<b>The loop is stopped.</b> Not failed, not queued, not continuing on a default. The harness is holding at the boundary before its first model call, '+
-     'the clock on this run is not running, and nothing has been charged since 09:14:02Z.</div>')+
+    '<div class="note" style="margin:12px 0;border-color:color-mix(in srgb,var(--gold) 42%,transparent);background:color-mix(in srgb,var(--gold) 7%,var(--panel))" data-help="loop-state">'+
+     '<b>The loop is stopped.</b> The harness is holding before its first model call. Nothing has been charged since 09:14:02Z.</div>')+
    '<div class="sx-tript">'+
-    '<div class="sx-pane"><div class="sx-pane-h"><span class="eb">What the agent shows '+h(PEOPLE[SKRUN.op].name.split(" ")[0])+'</span><span class="who">harness</span></div>'+
+    '<div class="sx-pane" data-help="agent-view"><div class="sx-pane-h"><span class="eb">What the agent shows '+h(PEOPLE[SKRUN.op].name.split(" ")[0])+'</span><span class="who">harness</span></div>'+
      '<div class="sx-pane-b">'+skTrAgent(ans)+'</div></div>'+
-    '<div class="sx-pane hot"><div class="sx-pane-h"><span class="eb">What oxagen put to a person</span><span class="who">oxagen</span></div>'+
+    '<div class="sx-pane hot" data-help="operator-question"><div class="sx-pane-h"><span class="eb">What oxagen put to a person</span><span class="who">oxagen</span></div>'+
      '<div class="sx-pane-b">'+skTrOperator(ans)+'</div></div>'+
-    '<div class="sx-pane"><div class="sx-pane-h"><span class="eb">What was written down</span><span class="who">frames</span></div>'+
+    '<div class="sx-pane" data-help="frames"><div class="sx-pane-h"><span class="eb">What was written down</span><span class="who">frames</span></div>'+
      '<div class="sx-pane-b"><div class="sx-fr">'+(ans?SK_AFTER[ans]:SK_FRAMES).map(skFrameRow).join("")+'</div>'+
-      '<div class="note" style="margin-top:9px">'+(ans?
-        'Nothing here is reconstructed. The pause, the question, the wait and the answer are frames in the same chain as the work.':
-        'The three greyed frames have not happened. A run that is waiting is a run that has written down that it is waiting.')+
-      '</div></div></div>'+
+      '</div></div>'+
    '</div>'+
    (ans?skAfterPanel(ans):'');
 }
@@ -8679,9 +8643,7 @@ function skTrAgent(ans){
          '<p style="color:var(--muted);font-size:12px">I will say so in the pull request, because a reviewer should know this was done without the release-notes procedure.</p>')+
      '</div>';
   }
-  return out+'</div>'+
-   '<div class="note" style="margin-top:9px">The question reaches '+h(PEOPLE[SKRUN.op].name.split(" ")[0])+' <b>where they already are</b>: '+
-   'in the agent’s own surface. There is no second inbox to check, and the agent is not the author of the question.</div>';
+  return out+'</div>';
 }
 function skPick(k,n,d){
   var on=SKS.picked===k;
@@ -8691,13 +8653,11 @@ function skPick(k,n,d){
 function skTrOperator(ans){
   if(ans) return '<div class="sx-tr"><div class="sx-msg gw"><div class="mh"><b>Answered</b>'+skBadge("allowed","closed")+'<span class="tm">09:17:38Z</span></div>'+
    '<p>'+h(PEOPLE[SKRUN.op].name)+' chose <b>'+(ans==="link"?"link to core-platform":"create the workspace edge")+'</b>. '+
-   'Receipt <span class="mono">'+(ans==="link"?"rcp_01K6QW44":"rcp_01K6QW45")+'</span>, waited 3m 36s.</p>'+
-   '<p style="font-size:12px;color:var(--muted)">Linking a repository is a governed action, so this answer went through the same path as approving a payment: '+
-   'a rule, a grant, a receipt, and a name that stays on it.</p></div></div>';
+   'Receipt <span class="mono">'+(ans==="link"?"rcp_01K6QW44":"rcp_01K6QW45")+'</span>, waited 3m 36s.</p></div></div>';
   return '<div class="sx-tr">'+
    '<div class="sx-msg gw"><div class="mh"><b>control.interject</b><span class="sx-chip held">the loop is held</span><span class="tm">09:14:02Z</span></div>'+
     '<p><span class="mono">repo.unknown</span>: <span class="mono">'+h(SKRUN.remote)+'</span> resolves to no workspace in <span class="mono">'+h(ORG.slug)+'</span>.</p>'+
-    '<p><span class="mono">skills.enabled = true</span> and <span class="mono">unbound_repo = ask</span>, so oxagen put it to a person instead of resolving nothing quietly.</p>'+
+    '<p><span class="mono">skills.enabled = true</span> · <span class="mono">unbound_repo = ask</span></p>'+
    '</div>'+
    '<div class="sx-paths">'+
     '<div class="sx-path'+(SKS.picked==="link"?" on":"")+'"><h3>'+icon("git")+'Link</h3>'+
@@ -8719,21 +8679,16 @@ function skTrOperator(ans){
       skDl("same","This run continues either way, with or without a procedure")+
      '</div></div>'+
    '</div>'+
-   '<div class="note" style="margin-top:10px">Notice what the second path does: a brand new workspace comes up with skills <b>off</b>, '+
-    'in the middle of a run that was asking for skills. The default applies every time a workspace is made.</div>'+
    '<div class="sx-held" style="margin-top:10px;border-style:solid;border-color:var(--border);background:var(--ink)">'+
     '<div class="nm" style="text-decoration:none;color:var(--fg)">If nobody answers</div>'+
-    '<div class="why">At 30 minutes this times out to <span class="mono">deny</span>. The run continues with no skills and the agent is told why, '+
-    'because the safe end of an unanswered question is fewer skills, not more.</div></div>'+
+    '<div class="why">At 30 minutes this times out to <span class="mono">deny</span>. The run continues with no skills, and the agent is told why.</div></div>'+
    '</div>';
 }
 function skDl(k,t){return '<div class="sx-li"><span class="s '+k+'">'+(k==="add"?"+":k==="rem"?"−":"·")+'</span><span>'+t+'</span></div>';}
 function skAfterPanel(ans){
   if(ans==="link") return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Skill loaded</h3>'+
-    '<span class="sp mono dim" style="font-size:11px">1,840 tokens · $0.0055 · priced on the Spend page as context, not as output</span></div>'+
-   '<div class="panel-b">'+skRow(skillOf("a-intel.release-notes-from-prs"))+
-    '<div class="note" style="margin-top:10px">The model call that follows cites it in the system position. The sealed record of this run '+
-    'keeps the same digest, so “what procedure was it following” has an answer a year from now.</div></div></div>';
+    '<span class="sp mono dim" style="font-size:11px">1,840 tokens · $0.0055</span></div>'+
+   '<div class="panel-b">'+skRow(skillOf("a-intel.release-notes-from-prs"))+'</div></div>';
   return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Workspace created</h3>'+
     '<span class="sp">'+skBadge("q","skills off")+'</span></div><div class="panel-b">'+
    '<div class="sx-cfg"><div class="sx-cfg-h">a-intel/edge-proxy · .oxagen/workspace.toml <span class="grow"></span>committed by oxagen, 09:17:39Z</div><pre>'+
@@ -8745,8 +8700,6 @@ function skAfterPanel(ans){
    '<span class="c"># No [skills] block. An absent block reads as false, and a workspace is</span>\n'+
    '<span class="c"># created without one every time. Turning it on is a-intel/edge-proxy#2.</span>'+
    '</pre></div>'+
-   '<div class="note" style="margin-top:10px">This is the same file <b>core-platform</b> had on 2026-07-30. '+
-   'It took a pull request and a named person to change it then, and it takes one now.</div>'+
    '<div class="row" style="gap:7px;margin-top:11px">'+
     '<button class="btn" onclick="S.tab.skills=\'versions\';go(\'#/'+ORG.slug+'/core-platform/steering/skills/versions\')">See how core-platform did it</button>'+
    '</div></div></div>';
@@ -8757,7 +8710,7 @@ function skAnswer(){
   render();
   act(SKS.answered==="link"
     ? "Answered. a-intel/edge-proxy is linked to core-platform; the run resolved skl_v7 and loaded one skill."
-    : "Answered. Workspace edge created with skills off, the default for every workspace.",
+    : "Answered. Workspace edge created with skills off.",
     SKS.answered==="link"?"":"gold");
 }
 function skReset(){
@@ -8809,9 +8762,7 @@ DLG_EXT.skill=function(arg){
       (s.citedAfter!=null?'<dt>Cited rate</dt><dd>'+skPct(s.citedBefore)+' of loads cited before this version → <b>'+skPct(s.citedAfter)+'</b> after · measured over '+plural(s.runs,"run")+' from the token record</dd>':'')+
      '</dl>'+
      (s.why?'<div class="note" style="border-color:color-mix(in srgb,var(--sk-held) 45%,transparent)"><b>Held: </b>'+s.why+'</div>':'')+
-     '<div class="sx-cfg"><div class="sx-cfg-h">'+h(s.path)+'</div><pre>'+skBody(s)+'</pre></div>'+
-     '<div class="note" style="margin-top:9px">This is the whole of it. A skill has no code to run and no credential to hold. '+
-      'It is prose an agent reads, and every action it describes still goes through the toolbelt and the policy that governs it.</div>',
+     '<div class="sx-cfg"><div class="sx-cfg-h">'+h(s.path)+'</div><pre>'+skBody(s)+'</pre></div>',
    f:'<span class="grow mono dim" style="font-size:11px">'+h(s.srcLabel)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn danger" onclick="openDialog(\'skretire\',\''+h(s.id)+'\')">Retire</button>'+
@@ -8849,12 +8800,11 @@ DLG_EXT.skretire=function(id){
   var inTree=skInTree(s);
   return {t:"Retire "+s.id+"?",w:false,
    b:'<div class="note">'+(inTree
-     ?'A skill is a file, so retiring it is a pull request that removes <span class="mono">'+h(s.path)+'</span> on '+h(s.srcLabel)+'.'
-     :'This one is installed, not written here. Retiring it is a pull request that takes its install line out of <span class="mono">.oxagen/workspace.toml</span>, and leaves it published where it came from.')+
-    ' A search still returns it until that merges.</div>'+
+     ?'This opens a pull request that removes <span class="mono">'+h(s.path)+'</span> on '+h(s.srcLabel)+'.'
+     :'This opens a pull request that removes its install line from <span class="mono">.oxagen/workspace.toml</span>.')+'</div>'+
     '<div class="warn">'+((s.cited&&s.runs)
-     ?s.cited+' of '+plural(s.runs,"run")+' cited it. Each keeps the digest it recorded, and nothing rewrites what those runs were steered by.'
-     :'No run has ever cited it, so no run changes.')+'</div>',
+     ?s.cited+' of '+plural(s.runs,"run")+' cited it. Each keeps the digest it recorded.'
+     :'No run has ever cited it.')+'</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
     '<button class="btn danger" onclick="skRetire(\''+h(s.id)+'\')">Open the pull request</button>'};
 };
@@ -8863,7 +8813,7 @@ function skRetire(id){
   s.retiring=true;
   var p=skPr(s);
   closeDialog(); render();
-  act("Opened "+p.pr+" to retire "+s.id+". A search still returns it until that merges.","gold");
+  act("Opened "+p.pr+" to retire "+s.id+".","gold");
 }
 
 function skBody(s){
@@ -9244,9 +9194,7 @@ function steerModeField(){
     '<div class="d">'+(on?"Every selected agent with a run in flight stops where it stands. The in-flight tool call is canceled and recorded, the turn is cut, and this steer is the first thing it reads. Idle agents read it at their next run.":
      "Each agent finishes the turn it is on, then reads this before its next model call. Nothing in flight is cut. Idle agents read it at their next run.")+'</div></div>'+
     '<button class="ks-sw int'+(on?" on":"")+'" role="switch" aria-checked="'+(on?"true":"false")+'" aria-label="Interrupt" onclick="steerToggleInt()"><span class="lbl">Interrupt</span><i></i></button></div>'+
-   '<div class="hint">Interrupt cuts the call in flight at the proxy on the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers. On the <span class="mono">harness</span> tier a steer lands at the next checkpoint.</div>'+
-   '<div class="hint">Recorded per run as a <span class="mono">control.steer</span> frame attributed to you'+
-    (on?', preceded by a <span class="mono">control.interrupt</span> frame that names the canceled call':'')+'.</div></div>';
+   '</div>';
 }
 function steerFleetBody(){
   var list=fleetAgents(), n=steerCount();
@@ -9340,15 +9288,15 @@ function steerShowCarrier(id){
 function steerSend(fleet){
   steerKeep();
   var text=String(S.steerText==null?STEER_DEFAULT:S.steerText).trim(), mode=S.steerInt?"interrupt":"boundary";
-  if(!text){ var ta=el("steer-text"); if(ta) ta.focus(); toast("A steer needs text. It is what the agent reads.","denied"); return; }
+  if(!text){ var ta=el("steer-text"); if(ta) ta.focus(); toast("A steer needs text.","denied"); return; }
   if(!fleet){
     var R=run(S.dlgArg)||run(S.frameRun)||RUNS[0], rs=runStatus(R);
     var f=steerWrite(R,text,mode);
     S.tab.run="trace"; S.frame=f.seq;
     closeDialog();
     act(rs==="paused"||rs==="pausing"
-      ?"Steer queued at seq "+f.seq+". "+R.id+" is paused and reaches no boundary; the first model call after resume carries it."
-      :"Steer queued at seq "+f.seq+". It is applied at "+R.id+"’s next model call, and that frame is recorded beside it.");
+      ?"Steer queued at seq "+f.seq+". "+R.id+" is paused, so it waits for the resume."
+      :"Steer queued at seq "+f.seq+" on "+R.id+".");
     return;
   }
   var rep={at:nowT(),ms:Date.now(),text:text,mode:mode,dig:steerDigest(text),tokens:steerTok(text),ws:ws().slug,to:[]};
@@ -9602,14 +9550,12 @@ function dialog(){
      f:'<button class="btn" onclick="closeDialog()">Close</button>'},
    avatar:avatarDlg(),
    pause:{t:"Pause this run",w:false,b:pauseBody(),
-     f:'<span class="grow" style="font-size:12.5px;color:var(--muted)">Recorded as a <span class="mono">control.pause</span> frame under <span class="mono">run.pause</span>.</span>'+
-       '<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="pauseRun(S.dlgArg)">Pause at the next boundary</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="pauseRun(S.dlgArg)">Pause at the next boundary</button>'},
    steer:{t:"Steer this run",w:false,b:
      steerTextField("Skip the mobile repo this cycle; 4.11.0 is platform only.")+
      '<div class="field"><label>Address</label><select aria-label="Address"><option>this run</option><option>@a-intel.core.release-manager (every live run of this agent)</option></select>'+
      '<div class="hint">To steer every live run in the workspace at once, use Steer on the Agents page.</div></div>'+
-     steerModeField()+
-     '<div class="note">oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.</div>',
+     steerModeField(),
      f:steerFoot(false)},
    steerfleet:{t:"Steer the fleet",w:false,b:steerFleetBody(),f:steerFoot(true)},
    mandate:{t:"Grant a mandate",w:true,b:mandateBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Mandate granted. It is active from its start date and expires on its end date; every draw is a receipt.\')">Grant the mandate</button>'},
@@ -10243,11 +10189,9 @@ DLG_EXT.unenroll=function(key){
 };
 DLG_EXT.cancelrun=function(){
   return {t:"Cancel this run?",w:false,
-   b:'<div class="note">Cancel is not a pause. The run token is revoked at once, and killing the process is best effort: a host that is offline stops when it next checks in.</div>'+
-     '<div class="warn">Work already written to a working copy stays written. Nothing is rolled back, and the run seals where it stopped.</div>'+
-     '<div class="note" style="margin-top:10px">Pause stops it at the next boundary and can be resumed. Cancel cannot.</div>',
+   b:'<div class="warn">Nothing is rolled back. The run seals where it stopped.</div>',
    f:'<button class="btn" onclick="closeDialog()">Let it run</button>'+
-     '<button class="btn danger" onclick="closeDialog();act(\'Cancel issued. Run token revoked; process kill is best effort and recorded.\')">Cancel the run</button>'};
+     '<button class="btn danger" onclick="closeDialog();act(\'Cancel issued. Run token revoked.\')">Cancel the run</button>'};
 };
 
 /* ---- budgets: one form for the create and the edit, so the two can never drift ---- */
