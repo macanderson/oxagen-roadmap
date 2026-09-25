@@ -135,7 +135,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <div class="site">
 <nav class="docs" aria-label="Documents">
   <a class="wordmark" href="#wedge">o<span class="x">x</span>agen</a>
-  <p>Fleet operations</p><ol><li><a href="#wedge" data-doc="wedge">Fleet operations wedge</a></li><li><a href="#ia" data-doc="ia">Fleet operations information architecture</a></li><li><a href="#routes" data-doc="routes">Fleet operations routes</a></li><li><a href="#collapse" data-doc="collapse">Fleet operations deletion list</a></li></ol><p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and context records</a></li><li><a href="#tasks" data-doc="tasks">Tasks and work orders</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
+  <p>Fleet operations</p><ol><li><a href="#wedge" data-doc="wedge">Fleet operations wedge</a></li><li><a href="#ia" data-doc="ia">Fleet operations information architecture</a></li><li><a href="#routes" data-doc="routes">Fleet operations routes</a></li><li><a href="#collapse" data-doc="collapse">Fleet operations deletion list</a></li></ol><p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and Steering records</a></li><li><a href="#tasks" data-doc="tasks">Tasks and work orders</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
   <div class="foot">One file, every document. The markdown in <code>docs/</code> is the source; <code>tools/build-docs.py</code> writes this page.</div>
 </nav>
 <div>
@@ -175,7 +175,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 </tr>
 <tr>
 <td>D4</td>
-<td>A Steering Source and a SteeringFrame are two objects and never collapse into one. A source is durable material a person or an agent wrote. A frame is what Oxagen resolved from a source for one run at one injection point.</td>
+<td>A Steering Source and a SteeringFrame are two objects and never collapse into one. A source is durable material a person or an agent wrote. A SteeringFrame is what Oxagen resolved from a source for one run at one injection point.</td>
 </tr>
 <tr>
 <td>D5</td>
@@ -379,8 +379,8 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 </tr>
 <tr>
 <td>Injection point</td>
-<td>Where a frame enters: session start, the prompt, prompt submit, tool results, checkout files or the model request (ADR-093 §4)</td>
-<td>unchanged</td>
+<td>Where a SteeringFrame enters: session start, the prompt (the brief that starts the run), prompt submit, MCP tool results, checkout files, the tool list (the belt's tools, as <code>capability</code> frames) or the model request. ADR-093 §4 names five of them, and the wedge adds the prompt and the tool list</td>
+<td>ADR-093's five, plus two</td>
 </tr>
 <tr>
 <td>Provenance</td>
@@ -11151,11 +11151,11 @@ pnpm --filter @oxagen/desktop dev          # tauri dev over Vite on :1420
 </article><article id="creation" class="doc" hidden>
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
-  <h1>Creating things in Oxagen: agents, tools, skills and context records</h1>
-  <dl class="facts"><dt>Status</dt><dd>Spec v1, for build — rev 1 scope</dd><dt>Date</dt><dd>2026-09-15</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/engine.js</code> → <code>DLG_EXT.create</code>, <code>DLG_EXT.wz</code>, <code>wzTool</code>, <code>wzSkill</code>, <code>wzAgent</code>, <code>wzRecord</code>, <code>pRecord</code>, <code>pSkillSource</code>; rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs, it does not run); <code>mission-control-spec.md</code> §10 (context and steering), §14 (Mission Control); <code>w13-in-the-loop-scenario.md</code></dd><dt>Related</dt><dd><code>pages/record.md</code>, <code>pages/skill-source.md</code>, <code>pages/tools.md</code>, <code>pages/agents.md</code>, <code>pages/skills.md</code>, <code>pages/steering.md</code></dd></dl>
+  <h1>Creating things in Oxagen: agents, tools, skills and Steering records</h1>
+  <dl class="facts"><dt>Status</dt><dd>Spec v1, for build, rev 1 scope. Amended 2026-09-24 by the fleet operations wedge (<code>fleet-operations-wedge.md</code>): a context record is a Steering record, skills are a kind on Steering › Sources, and the editing pages are the Steering source pages</dd><dt>Date</dt><dd>2026-09-15</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/engine.js</code> → <code>DLG_EXT.create</code>, <code>DLG_EXT.wz</code>, <code>wzTool</code>, <code>wzSkill</code>, <code>wzAgent</code>, <code>wzRecord</code>, <code>pRecord</code>, <code>pSkillSource</code>; rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs, it does not run); <code>mission-control-spec.md</code> §10 (context and steering), §14 (Mission Control); <code>w13-in-the-loop-scenario.md</code></dd><dt>Related</dt><dd><code>pages/steering-source.md</code>, <code>pages/steering-source-skill.md</code>, <code>pages/tools.md</code>, <code>pages/agents.md</code>, <code>pages/steering.md</code>, <code>pages/steering-prs.md</code>, <code>pages/repositories-changes.md</code></dd></dl>
 </header>
 <div class="grid">
-<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#creation/1-one-shape-four-things">1. One shape, four things</a></li><li><a href="#creation/2-the-wizard-shell">2. The wizard shell</a></li><li><a href="#creation/3-a-tool">3. A tool</a></li><li><a href="#creation/4-a-skill">4. A skill</a></li><li><a href="#creation/5-a-context-record">5. A context record</a></li><li><a href="#creation/6-what-this-feature-must-never-do">6. What this feature must never do</a></li></ol></nav>
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#creation/1-one-shape-four-things">1. One shape, four things</a></li><li><a href="#creation/2-the-wizard-shell">2. The wizard shell</a></li><li><a href="#creation/3-a-tool">3. A tool</a></li><li><a href="#creation/4-a-skill">4. A skill</a></li><li><a href="#creation/5-a-steering-record">5. A Steering record</a></li><li><a href="#creation/6-what-this-feature-must-never-do">6. What this feature must never do</a></li></ol></nav>
 <main>
 <h2 id="creation/1-one-shape-four-things">1. One shape, four things</h2>
 <p>There are four things an operator creates in Oxagen — an agent, a tool, a skill and a context
@@ -11173,7 +11173,7 @@ reviewed. It is also what lets the tool wizard offer to generate Rust: the code 
 repository, under your review. What Oxagen governs is the call, not the source.</p>
 <p><strong>The drafting turn belongs to <code>oxagen.assistant</code>.</strong> It is recorded with frames and a receipt like
 any turn, and it is billed to Oxagen, never to the tenant: it is not one of your runs and it never
-appears in Fleet or in Spend. Every line it drafts is the operator's to change before anybody
+appears in Work or in Spend. Every line it drafts is the operator's to change before anybody
 reviews it, and the wizard says so on every drafting step.</p>
 <h3 id="creation/entry-points">Entry points</h3>
 <p><code>Create</code> in ⌘K opens the chooser (<code>DLG_EXT.create</code>), and each page carries its own:</p>
@@ -11197,19 +11197,20 @@ reviews it, and the wizard says so on every drafting step.</p>
 <td><code>wzOpen(&quot;tool&quot;)</code></td>
 </tr>
 <tr>
-<td>Steering · Skills</td>
-<td><strong>Add a skill</strong></td>
-<td><code>wzOpen(&quot;skill&quot;)</code></td>
+<td>Steering › Sources</td>
+<td><strong>New source</strong>, then <strong>Write one</strong> on the Steering record card</td>
+<td><code>DLG_EXT.newsrc</code>, then <code>wzOpen(&quot;record&quot;)</code></td>
 </tr>
 <tr>
-<td>Steering (every other tab)</td>
-<td><strong>Write a context record</strong></td>
-<td><code>wzOpen(&quot;record&quot;)</code></td>
+<td>Steering › Sources</td>
+<td><strong>New source</strong>, then <strong>Add one</strong> on the Skill card</td>
+<td><code>DLG_EXT.newsrc</code>, then <code>wzOpen(&quot;skill&quot;)</code></td>
 </tr>
 </tbody>
 </table></div>
-<p>Skills is a tab of Steering, not a page of its own. Steering is the hub for everything that steers
-an agent: Records, Skills, Memory, Ontology, Policy, Proposals, Preview (<code>mockups/pages/steering.md</code>).</p>
+<p>Skills are a kind of Steering Source, not a page of their own. Sources lists every kind in one list
+with a kind filter (<code>mockups/pages/steering.md</code>). The New source chooser also registers a document
+and defines a glossary term, which are dialogs of their own and not wizards of this spec.</p>
 <p><strong>New agent</strong> is not <strong>Register an agent</strong>. Register wraps an agent that already runs on a machine
 or in CI; New agent writes one that does not exist yet. Both end on a pull request; they start from
 opposite ends.</p>
@@ -11269,15 +11270,15 @@ paid for on every turn it is loaded into, by every agent that loads it.</li>
 recomputed at merge, grants (a skill cannot raise a tier or add a tool), secret scan, and the load
 cost against the workspace's search budget.</li>
 </ol>
-<p><strong>Changing a skill</strong> is <code>pages/skill-source.md</code>: the same editor over <code>SKILL.md</code>, reached from the
-catalog row's <strong>Edit</strong> and from the skill dialog, ending on the same kind of pull request with the
+<p><strong>Changing a skill</strong> is <code>pages/steering-source-skill.md</code>: the same editor over <code>SKILL.md</code>, reached from
+the skill's row on Steering › Sources and from the skill dialog, ending on the same kind of pull request with the
 patch version bumped.</p>
 <p><strong>Where it ends.</strong> The pull request is listed on Repositories · Changes with kind <code>skill</code>. After the
 merge the skill is in the catalog on Steering · Skills, and <strong>sync</strong> materializes its files into
 each enrolled checkout. The Delivered by sync panel shows each repository’s state. The harness loads
 the file by its own progressive disclosure. Only the description line competes in the assembler, and
-Steering · Preview shows it competing.</p>
-<h2 id="creation/5-a-context-record">5. A context record</h2>
+Steering › Compiler shows it competing.</p>
+<h2 id="creation/5-a-steering-record">5. A Steering record</h2>
 <p>The kind is not a label. It decides how the statement is delivered, what the checks assert about it,
 and how a run is allowed to use it — so the wizard makes you pick one before it will let you write
 the sentence, and it shows what each kind can never do.</p>
@@ -11296,13 +11297,13 @@ and the only place that is catchable is on the pull request, before either reach
 <li><strong>Pull request</strong> — merge is the publication, and the record is in force from the merge commit, not
 from when it was written.</li>
 </ol>
-<p><strong>Reading and changing one</strong> is <code>pages/record.md</code>: the statement as the headline, a per-kind panel,
+<p><strong>Reading and changing one</strong> is <code>pages/steering-source.md</code>: the statement as the headline, a per-kind panel,
 and the statement in the same editor.</p>
-<p><strong>Where it ends.</strong> The wizard closes on Steering · Proposals, on the Context PRs view
+<p><strong>Where it ends.</strong> The wizard closes on Steering › Proposals, on the Pull requests view
 (<code>#/:org/:ws/steering/proposals/prs</code>), with the new pull request selected. After the merge the record
 is on Steering · Records with its force, scope, token cost, and compilation chip: “compiles to text”,
 or “compiles to text and a gate” when it carries an enforcement grant. A record written in the wizard
-carries no grant. Steering · Preview shows where the record lands for an agent and a prompt: the
+carries no grant. Steering › Compiler shows where the record lands for an agent and a prompt: the
 stable prefix for <code>must</code> and <code>should</code>, the volatile selection for <code>may</code> and <code>info</code>.</p>
 <h2 id="creation/6-what-this-feature-must-never-do">6. What this feature must never do</h2>
 <ul>
@@ -11321,7 +11322,7 @@ version lands in the registry callable by nobody until a role grant puts it on a
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
   <h1>Tasks and work orders</h1>
-  <dl class="facts"><dt>Status</dt><dd>Spec v1, for design review. No code is written against it yet.</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/engine.js</code> (the Tasks section: <code>pTasks</code>, <code>pTask</code>, <code>pWorkOrder</code>, <code>DLG_EXT.ipwz</code>, <code>DLG_EXT.wo</code>, <code>DLG_EXT.certify</code>, <code>DLG_EXT.wfnew</code>), <code>mockups/fixtures/tasks.json</code>, rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs agents, it does not run them), ADR-096 (the launcher may contain the process), ADR-101 (four first-class harnesses), ADR-157 (ARP carries an operator-authored brief), ADR-053 (the assistant), ADR-052 (the governed action is the billable unit)</dd><dt>Related</dt><dd><code>creation-spec.md</code> (every definition is a file, and a wizard ends on a pull request), <code>dod-spec.md</code> (the run dod, a different object), <code>mission-control-spec.md</code> §1 (the operator), §7.6 (agent messages are quoted evidence), §11.2 (connectors)</dd><dt>Pages</dt><dd><code>mockups/pages/tasks.md</code>, <code>tasks-providers.md</code>, <code>task.md</code>, <code>work-order.md</code>, each with its audit prompt</dd><dt>Check</dt><dd><code>node tools/check-tasks.mjs</code> walks every flow below in the built mockup</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Spec v1, for design review. No code is written against it yet. The fleet operations wedge renamed Tasks to Work and moved Providers, Fields and People into the Intake dialog (<code>fleet-operations-wedge.md</code>). This spec keeps the words it was written in: a task is a work item, and the Tasks page is Work.</dd><dt>Date</dt><dd>2026-09-24</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/wedge.js</code> (<code>pWork</code>, <code>backlogTab</code>, <code>findingsTab</code>, <code>DLG_EXT.intake</code>) and <code>mockups/src/engine.js</code> (<code>pTask</code>, <code>pWorkOrder</code>, <code>DLG_EXT.ipwz</code>, <code>DLG_EXT.wo</code>, <code>DLG_EXT.certify</code>, <code>DLG_EXT.wfnew</code>), <code>mockups/fixtures/tasks.json</code>, rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs agents, it does not run them), ADR-096 (the launcher may contain the process), ADR-101 (four first-class harnesses), ADR-157 (ARP carries an operator-authored brief), ADR-053 (the assistant), ADR-052 (the governed action is the billable unit)</dd><dt>Related</dt><dd><code>creation-spec.md</code> (every definition is a file, and a wizard ends on a pull request), <code>dod-spec.md</code> (the run dod, a different object), <code>mission-control-spec.md</code> §1 (the operator), §7.6 (agent messages are quoted evidence), §11.2 (connectors)</dd><dt>Pages</dt><dd><code>mockups/pages/work-backlog.md</code>, <code>work-intake.md</code>, <code>work-item.md</code>, <code>work-orders.md</code>, <code>work-order.md</code>, <code>work-workflows.md</code>, <code>work-findings.md</code>, each with its audit prompt</dd><dt>Check</dt><dd><code>node tools/check-tasks.mjs</code> walks every flow below in the built mockup</dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#tasks/1-the-situation">1. The situation</a></li><li><a href="#tasks/2-scope">2. Scope</a></li><li><a href="#tasks/3-the-flow">3. The flow</a></li><li><a href="#tasks/4-vocabulary">4. Vocabulary</a></li><li><a href="#tasks/5-connecting-a-provider">5. Connecting a provider</a></li><li><a href="#tasks/6-the-task-record">6. The task record</a></li><li><a href="#tasks/7-people">7. People</a></li><li><a href="#tasks/8-the-definition-of-done">8. The definition of done</a></li><li><a href="#tasks/9-sending-work">9. Sending work</a></li><li><a href="#tasks/10-workflows">10. Workflows</a></li><li><a href="#tasks/11-completing-work">11. Completing work</a></li><li><a href="#tasks/12-capabilities">12. Capabilities</a></li><li><a href="#tasks/13-storage">13. Storage</a></li><li><a href="#tasks/14-permissions">14. Permissions</a></li><li><a href="#tasks/15-pages-and-audits">15. Pages and audits</a></li><li><a href="#tasks/16-what-exists-today">16. What exists today</a></li><li><a href="#tasks/17-decisions-this-needs">17. Decisions this needs</a></li><li><a href="#tasks/18-open-questions">18. Open questions</a></li><li><a href="#tasks/19-definition-of-done-for-the-build">19. Definition of done for the build</a></li></ol></nav>
@@ -16719,7 +16720,7 @@ renders first and when it is empty make sure it does not consume alot of vspace.
 <header class="mast">
   <p class="eyebrow">Oxagen · Scenario</p>
   <h1>W13: in the loop</h1>
-  <dl class="facts"><dt>Status</dt><dd>In the master. In the spec since 2026-09-18: <code>mission-control-spec.md</code> §10.6 (skills are steering, and they are files) and §10.7 (the Steering hub)</dd><dt>Amended 2026-09-18</dt><dd>Skills now lives under Steering. It is the second of the hub's seven tabs (Records, Skills, Memory, Ontology, Policy, Proposals, Preview) and has no top-level navigation entry of its own. Every route below moved from <code>…/skills…</code> to <code>…/steering/skills…</code>, and an old link is rewritten in place. The five views (Catalog, Search, In the loop, Reflection, Versions) are views inside the Skills tab. Approved by the maintainer on 2026-09-18 with the steering, graph and gateway review (<code>reviews/2026-09-18-steering-graph-gateway-review.md</code>)</dd><dt>Mockup</dt><dd><code>mockups/missioncontrol.html#/a-intel/core-platform/scenarios/in-the-loop/1</code>, and the W13 story in Storybook</dd><dt>Owner</dt><dd>Mac Anderson</dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>In the master. In the spec since 2026-09-18: <code>mission-control-spec.md</code> §10.6 (skills are steering, and they are files) and §10.7 (the Steering hub)</dd><dt>Amended 2026-09-18</dt><dd>Skills now lives under Steering. It is the second of the hub's seven tabs (Records, Skills, Memory, Ontology, Policy, Proposals, Preview) and has no top-level navigation entry of its own. Every route below moved from <code>…/skills…</code> to <code>…/steering/skills…</code>, and an old link is rewritten in place. The five views (Catalog, Search, In the loop, Reflection, Versions) are views inside the Skills tab. Approved by the maintainer on 2026-09-18 with the steering, graph and gateway review (<code>reviews/2026-09-18-steering-graph-gateway-review.md</code>)</dd><dt>Retired</dt><dd>2026-09-24, by the fleet operations wedge (<code>fleet-operations-collapse.md</code>). The skills console this scenario walked is cut: skills are a kind on Steering › Sources and the search is the Compiler. The interjection it ended on stays, on the run (<code>mockups/pages/run-interjection.md</code>) and in the Approvals drawer. What follows is the record of the scenario as it was</dd><dt>Mockup</dt><dd>The scenario is gone from the master. The interjection is <code>mockups/missioncontrol.html#/a-intel/core-platform/runs/run_01K6QW3D5N7TYBA2</code></dd><dt>Owner</dt><dd>Mac Anderson</dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#w13/the-three-things-this-scenario-proves">The three things this scenario proves</a></li><li><a href="#w13/where-this-sits-against-the-spec">Where this sits against the spec</a></li><li><a href="#w13/the-walk-six-beats">The walk — six beats</a></li><li><a href="#w13/cut-downs">Cut-downs</a></li><li><a href="#w13/what-is-mocked">What is mocked</a></li><li><a href="#w13/in-the-master">In the master</a></li><li><a href="#w13/known-gaps">Known gaps</a></li></ol></nav>
@@ -16997,7 +16998,7 @@ need a decision before W13 is written into the spec.</li>
 </div>
 <script>
 (function(){
-  var TITLES={'wedge': 'Fleet operations wedge', 'ia': 'Fleet operations information architecture', 'routes': 'Fleet operations routes', 'collapse': 'Fleet operations deletion list', 'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and context records', 'tasks': 'Tasks and work orders', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
+  var TITLES={'wedge': 'Fleet operations wedge', 'ia': 'Fleet operations information architecture', 'routes': 'Fleet operations routes', 'collapse': 'Fleet operations deletion list', 'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and Steering records', 'tasks': 'Tasks and work orders', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
   var first='wedge';
   function show(){
     var h=location.hash.replace(/^#/,""), id=h.split("/")[0];

@@ -1,61 +1,65 @@
-# Audit prompt: Spend
+# Audit prompt: Spend overview
 
 Copy everything below the line into a fresh agent session. Fill the two placeholders. The agent
-audits the built page against this design and reports a verdict per check; it does not fix anything
+audits the built page against this design and reports a verdict per check. It does not fix anything
 unless told to in a second turn.
 
 ---
 
-You are auditing the **Spend** page of Oxagen (`#/a-intel/core-platform/spend[/<tab>[/<drill>]]`) for conformance to its design. Be exact and adversarial: the design is the spec, and "close enough" is a fail. Do not summarise what you see; compare it.
+You are auditing the **Spend overview** of Oxagen (`#/a-intel/core-platform/spend`, with `?by=` and `&key=`) for conformance to its design. Be exact and adversarial: the design is the spec, and "close enough" is a fail. Do not summarise what you see. Compare it.
 
 ## Inputs
 
-1. The page spec: `pages/spend.md` (read it first, in full).
-2. The design, rendered: the `spend` stories in Storybook (`npm run storybook`), one per state (loaded, empty, loading, error, access denied), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright. The other tabs and the drills are reachable from the loaded story.
-3. The product spec for context: `docs/mission-control-spec.md` §12.6 (token classes), §12.7 (attribution), §12.8 (findings), §14 (Mission Control), Appendix A (target tables), Appendix E (contracts), Appendix F (the pages that survive); the data mapping in `docs/implementation-plan.md` §3.
-4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/spend[/<tab>[/<drill>]]`.
+1. The page spec: `mockups/pages/spend.md`. Read it first, in full.
+2. The design, rendered: the `Oxagen / Spend / Overview` stories in Storybook (`npm run storybook`): Loaded, Loaded · mobile, and Loaded · future-only fields marked. Or open `mockups/missioncontrol.html?product=1&state=loaded&mobile=<0|1>#/a-intel/core-platform/spend` in a browser or with Playwright, and add `&future=1` to outline the future-only fields. The side panels are `#/a-intel/core-platform/spend?by=operator&key=marcus`, `?by=agent&key=a-intel.core.triage`, `?by=model&key=claude-opus-5`, `?by=tool&key=claude_code__Bash`, `?by=cost_center&key=eng-platform` and `?by=work&key=wo_01K5RS7M4N`.
+3. The design authority: `docs/fleet-operations-wedge.md` (D10, D15, Work rule 4, Cuts, Open decision 5), `docs/fleet-operations-ia.md` (Spend), `docs/fleet-operations-routes.md` (Spend). In `macanderson/oxagen`: the operator review in `docs/VISION.md`, and ADR-142.
+4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/spend`.
 
 ## Procedure
 
-Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
+Work through every check. For each, record PASS, FAIL or N/A (with why). Cite evidence: a file and line in the build, a screenshot path, or a DOM selector and its text.
 
-1. **Route and shell.** The build serves the route; the sidebar (Fleet, Agents, Tools, Steering, Runtimes, Repositories, Spend; Organization, Billing, Audit), breadcrumbs, ⌘K search, notifications and account are present and match the spec's shell; the breadcrumb ends on this page; the document title names the page. The top bar has an **Approvals** button left of the avatar whose count is pending approvals plus open interjections across the organization; it opens the right-hand drawer (`#apdrawer`, `role=complementary`, labelled "Approvals") listing them; picking one shows the full approval card with Approve and Deny; Escape closes it. There is no assistant button in the top bar.
-2. **Header.** Eyebrow "<workspace name>", h1 "Spend", subtext "What the tokens bought, with the basis on every number." Actions present, in order, with the same labels: Export report, Set a budget. Exactly one gold (primary) action on the screen.
-3. **Summary tiles.** Four tiles on every tab, hidden on a drill: Spend, Tokens, Observed by the gateway, Wasted. Each shows one number and one basis line as the spec gives them (Spend carries `gateway_observed` + `client_attested` and USD; Wasted is in the critical colour).
-4. **Sections, tabs and tables.** For each item below, the build has it, with the same tab labels (and live counts where the design shows them), the same panel headings, and every table column named in the spec, in that order. Missing or renamed columns are FAILs; extra columns are noted.
-   - Tabs: Findings (N), Tokens, Coaching (N), By operator, By agent, By model, By tool, Wasted spend (N), Budgets (N).
-   - Findings: the hero (Savings identified, the strip and legend, the four facts), the filters (Level, Confidence, Sort, Rows), the ranked cards with rank, kind, level, confidence, operator and agent, the finding, the evidence line, the amount and share, Evidence and Fix.
-   - Tokens: By token class (Class, Tokens, Share, Cost; the five classes; Cache hit rate, Cache write cost share, Effective input price, Unmapped classes); Prompt composition (Conversation, Tool results, Context frames, Tool definitions, Steering, System, Output, Reasoning); By harness (Harness, Agents, Tokens, Cache hit, Spend, Basis); By agent (Agent, Runs, Tokens, Per run, Cache hit, Tool defs, Context, Tool results, Reasoning, Basis).
-   - Coaching: the four tiles (Agent coaching, Operator coaching, Signals read, Memories aggregated), the two sub-tabs with counts, the pager, one panel per agent or operator, and cards with a severity title, money a month, the signal line, the paragraph, the one action and Send to the operator. The seven agent signals and six operator signals are those the spec names, including "Get to one prompt per session".
-   - By operator: Operator, Role, Agents, Runs, Spend, Tokens, Cache hit, Potential savings, Budget position; a row drills.
-   - By agent: Agent, Runs, Spend, Tokens, Per run, Cache hit, Potential savings, Trend.
-   - By model: Models and keys (Model, Provider key, Model calls, Spend, Cache hit rate, Basis, with a Total row) and its Model routes button.
-   - By tool: Cumulative spend, Average per call, Average per run; Tool, Server, Calls, Runs, Cumulative, Share, Avg per call, Avg per run, Potential savings, What the frames say.
-   - Wasted spend: tiles Wasted, Share of spend, Runs with waste, Largest cause; By cause with the six causes (cache misses, corrective prompts, retry loops, context bloat, idle while parked, halted early); Runs with waste with Open the run and Show the frames.
-   - Budgets: Scope, Period, Limit, Used, Mode, Position; Set a budget.
-   - Drill: crumb bar, header, Open the agent (agent only), Export this view, the Potential savings hero, the stat tiles for the kind, Spend by day, the agent history panels where history exists, the cross-cuts, Findings.
-5. **Actions and dialogs.** Every button in the spec exists, opens what the spec says (`spendexport`, `budget`, `evidence`, `fix`, `incident`, `request-access`, the coaching actions and Send to the operator), and each write is a governed action: it passes IAM, produces an audit event, and shows a receipt or reference. A stub must say what the product would do; a control that silently does nothing is a FAIL.
-6. **Data sources.** For each row of the spec's data-source table, find the adapter or query in the build that feeds it. ✅ rows must be wired to the named store; 🟡 rows must be wired for the fields that exist and render `NotBacked` (an honest "not recorded yet", never a zero) for the rest; ❌ rows must render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
-7. **States.** Force each state and compare copy and controls with the design file:
-   - **empty** (`state=empty`): "No spend to report yet". Rollups are derived indexes rebuilt from frames; no model call, nothing to roll up, nothing billable. Action: Back to Fleet.
-   - **loading** (`state=loading`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
-   - **error** (`state=error`): "Spend could not be loaded", `504 rollup_rebuild_in_progress`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: Try again, Open an incident; a trace id, region and timestamp line.
-   - **access denied** (`state=denied`): "You cannot see this workspace's spend"; the roles the signed-in person holds do not include `spend.read on core-platform`; an owner can grant it and the grant is a governed action in the audit record. Actions: Request access, Back to Fleet. Below: Signed in as, Needed, Decided by.
-   Loading must not flash zeros. Error must name the code and offer Try again and Open an incident. Denied must name the missing permission and offer Request access.
-8. **Trust language.** Every tier, attestation and cost basis on the page shows the recorded value. The ladder is `observe`, `harness`, `gateway`, `contained`; each renders only as recorded (most agents `gateway` with `gateway_observed`, docs-writer `harness` and `client_attested`, Stella CI `contained`). A self-reported figure is labelled `client_attested` and is never rendered as observed; an absent class is marked absent, never zero. Money always carries its basis. Nothing on the page says proven, verdict, score or definition of done.
-9. **Figures reconcile.** Recompute and compare: the Spend tile equals the Total row of Models and keys; the Tokens tile equals the sum of By token class and the sum of By harness; each operator's Tokens equals the sum over its agents; Coaching money a month is derived from the same rollup the Tokens tab prints; the Findings hero total equals the sum of the cards; a drill's Potential savings equals the sum of its findings. A figure typed by hand is a FAIL.
-10. **Headings and labels.** No heading on the built page carries a comma, a mid-dot or a not/never contrast; subtext under a heading is one sentence or nothing. Labels match the spec verbatim.
-11. **Mobile.** At 390 × 844 with a touch pointer: the five-slot thumb bar is present with Fleet/Agents/Tools/Spend/More, counts only where something waits on a person; More opens a bottom sheet; the approvals drawer opens full-width; every dialog is a bottom sheet with full-width footer buttons; every list table renders as labelled cards; the page never scrolls sideways; every tap target is at least 44 px; inputs are 16 px. Compare against the mobile story (`mobile=1`).
-12. **Accessibility.** Tabs use `role=tablist/tab` with `aria-selected`; dialogs are `role=dialog aria-modal` with a labelled close; the drawer is `role=complementary` and inert when closed; icon buttons have `aria-label`; the sparklines and share strips are `role=img` with a label; state is never colour alone (dot and word); focus is visible; the page is operable by keyboard end to end.
-13. **Permissions.** Read requires `spend.read`; each write (`budget.set`, `spend.export`, `incident.open`, a coaching note) is gated server-side, not only hidden in the UI. Verify with a role that lacks the permission.
-14. **Nothing extra.** List anything on the built page that is not in the spec (tiles, tabs, columns, buttons, copy). Each is a finding; the reviewer decides whether it stays.
+1. **Route and shell.** The build serves `/spend`, and the grouping and the key are query values (`?by=`, `&key=`), so a side panel is a URL a person can share. Spend is lit in the sidebar and carries no count. The breadcrumb ends on Spend. The Approvals button and its drawer are present. The document title names the page.
+2. **Old routes.** Each lands on its canonical form with a 308 and never a 404: `/spend/operator`, `/spend/agent`, `/spend/model`, `/spend/tool` to `?by=` the same kind; `/spend/task` to `?by=work`; `/spend/cost_center` to `?by=cost_center`; `/spend/pricing` to `?by=model`; `/spend/<operator|agent|tool>/<key>` to `?by=<kind>&key=<key>`. `/spend/tokens`, `/spend/coaching` and `/spend/waste` land on `/spend/optimization`; `/spend/findings` and `/spend?finding=<id>` land on `/work/findings` with the finding's dialog. No drill page renders anywhere.
+3. **Header.** Eyebrow the workspace name, h1 "Spend", subtext "What the tokens bought, with the basis on every number." Actions in order: Export report, Set a budget. Set a budget is the one gold action on the screen.
+4. **Tiles.** Four tiles, in order: Spend (with its basis, `gateway_observed` + `client_attested`, and USD), Tokens (with "served from cache"), Observed by the gateway ("of tokens counted by the proxy"), Wasted (in the critical ink, with its share of spend). The Wasted tile opens Optimization. A tile whose figure no contract answers prints "not recorded", never a zero.
+5. **Tabs.** Overview · Budgets (N) · Optimization, each a path segment. Changing the tab drops `by` and `key`.
+6. **September by day.** The panel heading names the month, the caption is one sentence, and the right side shows the month to date. The bars are one image with a label naming the range, and each bar's tooltip names its day and amount. If no contract answers the month by day, the build prints the chart as not recorded rather than drawing seeded bars.
+7. **Group by.** A group of six buttons with `aria-pressed`: Work order, Operator, Agent, Model, Tool, Cost center. A button writes `?by=` and closes an open panel.
+8. **The table.** Heading "By <grouping>", subtext "Select a row to open it here. There is no drill page." Search, filters, Rows and a pager above the rows. Rows open ordered by spend, largest first. Every column the spec names, in order, per grouping:
+   - Work order: Work order · Kind · Sent by · Runs · Items accepted · Per accepted item · Spend (no Share).
+   - Operator: Operator · Agents · Runs · Tokens · Cache hit · Budget position · Spend · Share.
+   - Agent: Agent · Runs · Tokens per run · Cache hit · Trend · Spend · Share.
+   - Model: Model · Provider key · Model calls · Cache hit · Spend · Share.
+   - Tool: Tool · Calls · Runs · Per call · Spend · Share.
+   - Cost center: Cost center · Agents · Workspaces · Spend · Share. The `~none` row is present and says it has no label.
+   Missing or renamed columns are FAILs. Extra columns are noted.
+9. **Selecting a row.** A row writes `&key=`, carries `aria-selected`, and opens the side panel. Selecting it again, or **Close**, removes the key. With a panel open, the table narrows to the name, Spend and Share.
+10. **Side panels.** Each carries the fields the spec lists, in order, and its action:
+    - Operator: Role, Agents, Runs, Spend, Budget, Bounded tasks; the caption that it reports the record; **Open the habits** to `/spend/optimization?part=habits`.
+    - Agent: the agent card, Runs, Spend with the change on last month, Tokens per run, Cache hit, Tool definitions, Cost center; the recommendation count; **Open the agent** and **Recommendations** to `?part=agents`.
+    - Model: Model calls, Spend, Cache hit, Provider key; **Model routes** to Organization.
+    - Tool: Kind, Calls, Per call, Per run, Record.
+    - Cost center: Agents, Spend, Resolved from; **Export the statement**.
+    - Work order: Work order (link and kind badge), Sent by, Runs (one link each), Spend against the cap; **Open the work order**.
+11. **The operator review.** The operator panel shows the person's spend and, for bounded tasks, items accepted and spend per accepted item. Search the build for any score, rank number, percentile, severity, grade or verdict attached to a person anywhere on the page. One is a FAIL.
+12. **Figures reconcile.** Recompute and compare: the Spend tile equals the Total row of By model; the rows of By operator, By agent and By cost center each sum to the Spend tile, `~none` included; Share is the row over the Spend tile. By tool may exceed the month because a turn counts toward every tool it called, and the page must not present its rows as a partition. A figure typed by hand is a FAIL.
+13. **Cost centers (ADR-142).** A run is charged to its agent's label, else its workspace's, else `~none`. **Export the statement** downloads the organization's month as CSV, one line per center and one for `~none`, with the total; it is refused to anyone but org Owner, Admin or Billing.
+14. **Dialogs.** Export report opens `spendexport` with Timeframe, Include, the delivery note, Cancel and Generate report. Set a budget opens `budget` (audited in `spend-budgets.audit-prompt.md`). A stub must say what the product would do; a control that silently does nothing is a FAIL.
+15. **Data sources.** For each row of the spec's data-source table, find the adapter or query that feeds it. ✅ rows are wired to the named contract. 🟡 rows are wired for the fields that ship and print "not recorded" for the rest. ❌ rows print "not recorded" with the gap named. A fixture reaching production is a FAIL. Check these in particular: the Observed by the gateway tile, the By work order grouping, Agents and Budget position on By operator, Trend, Provider key, the tool's kind, the cost center's Agents and Workspaces, and the work order panel.
+16. **Future-only fields.** With the future story or `?future=1` open, the By work order panel, each `direct` badge and the operator panel's Bounded tasks are outlined. In the build each renders as not recorded until its contract ships. List every field the build renders from a fixture.
+17. **States.** The design has the loaded state only. Confirm the build uses the shell's standard loading, error, empty and denied panels: no zeros while loading; the error panel names its code and offers Try again and Open an incident; the denied panel names `spend.read` and offers Request access.
+18. **Mobile.** At 390 × 844 with a touch pointer: the thumb bar holds Work, Agents, Tools, Spend and More, with Spend lit; More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The tiles form a two by two grid, the table becomes labelled cards, and dialogs are bottom sheets. With a key open, the side panel follows the table and is reachable. Nothing scrolls sideways. Touch targets are at least 44 px and inputs 16 px.
+19. **Accessibility.** Tabs use `role=tablist` and `role=tab` with `aria-selected`. The Group by buttons carry `aria-pressed`. The side panel is an `aside` with a label, and Close has an accessible name. The day chart is `role=img` with a label. State is never colour alone. The page is operable by keyboard end to end.
+20. **Rules.** Check each rule in the spec's last section: frames and SteeringFrames never share a name; no source shown as a frame; every figure reads the record; no person scored or ranked; every money figure states its basis and every enforcement claim its tier; headers are rollups; plain-noun headings with one-sentence subtext; exactly one gold action; future-only fields render as not recorded; every figure reads the same scope, this workspace.
+21. **Nothing extra.** List anything on the built page that is not in the spec. Each is a finding. The reviewer decides whether it stays.
 
 ## Output
 
 Return a single markdown report:
 
 ```
-# Spend: audit {{DATE}}
+# Spend overview: audit {{DATE}}
 Verdict: PASS | FAIL (n fails, m notes)
 
 | # | Check | Result | Evidence | Fix |
@@ -64,13 +68,13 @@ Verdict: PASS | FAIL (n fails, m notes)
 | … | | | | |
 
 ## Fails, most severe first
-1. <what is wrong>, <where>, <what the design shows>, <the smallest change that fixes it>
+1. <what is wrong>. <where>. <what the design shows>. <the smallest change that fixes it>
 
 ## Not in the spec
 - …
 
-## Data sources not backed (expected NotBacked, and whether the build renders it honestly)
+## Data sources not backed (expected not recorded, and whether the build renders it honestly)
 - …
 ```
 
-Rules: never mark PASS on an assumption; open the file or the DOM. Quote the design's copy verbatim when a label differs. If the build cannot be started or the route is missing, stop and report that as the single FAIL.
+Rules: never mark PASS on an assumption. Open the file or the DOM. Quote the design's copy verbatim when a label differs. If the build cannot be started or the route is missing, stop and report that as the single FAIL.

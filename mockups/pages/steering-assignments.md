@@ -1,83 +1,129 @@
-# Steering · Assignments
+# Steering › Assignments
 
 | | |
 |---|---|
-| Route | `#/a-intel/core-platform/steering/assignments` |
+| Route | `#/a-intel/core-platform/steering/assignments`. Old route: `/steering/deliveries`, resolved in place to `/steering/assignments` (`docs/fleet-operations-routes.md`, Steering). The mockup rewrites `#/:org/:ws/steering/deliveries` in place |
 | Scope | workspace |
-| Spec | the steering and gateway plan, Phase 2 (story sheet decisions 1, 4, 5, and 9); §12.6 token classes; `steering.md` is the hub this tab belongs to |
-| Design | `mockups/src/engine.js` → `stgAssignTab()` with `stgAgents()`, `assembleSteering()`, `stgItems()`, and `agentCard()`, inside `pSteering()` and `stgHub()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
-| States | loaded · empty · loading · error · access denied |
-| Storybook | `Oxagen / … / steering-assignments`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Spec | `docs/fleet-operations-wedge.md`: D4 (a source and a frame are two objects), D5 (eight frame types), D11 (mandates), D12 (skills), D13 (memory and glossary terms); the Steering sections Emissions and Shipped today; the vocabulary row Assignment. `docs/fleet-operations-ia.md` (Steering, Assignments). ADR-093 in `macanderson/oxagen` |
+| Design | `mockups/src/wedge.js`: `stgAssignmentsTab`, `steeringSources`, `reachOf`, `typeCounts`, `typeCountStrip`, inside `pSteering`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| States | loaded |
+| Storybook | `Oxagen / Steering / Assignments`: Loaded, Loaded · mobile, and Loaded · future-only fields marked |
 | Audit | `steering-assignments.audit-prompt.md` |
 
 ## Job
 
-Which agent receives what. The Library says what is written down; this tab says where it lands. Every row is one agent, run through the same assembler the Compiler shows, so the two tabs can never disagree.
+Which Steering Sources reach which agents. Nobody assigns a source to an agent by picking it: a source reaches an agent when its scope matches, the organization, the workspace, the repository the agent works in, the agent itself, or a list of named agents. This tab makes that rule visible twice, once per scope and once per agent, with the SteeringFrame types each can emit.
 
-Nobody assigns a record to an agent by picking it. An item reaches an agent when its scope matches the run, and it is delivered when a hook is installed on the agent's runtime. This tab is where that rule is visible.
+The counts here are eligibility before budget. The Compiler (`steering-compiler.md`) shows what the assembler selects for one agent and one brief, and every agent row links to it.
 
 ## What is on the page
 
-**Hub header and tabs.** As specified in `steering.md`, with Assignments selected. The shelf row does not render here. The gold action stays in the page header.
+**Header, tabs and shell.** As `steering.md`, with Assignments selected. The kind filter does not render on this tab. New source keeps the gold in the header; the body holds no gold.
 
-- A lead note, verbatim: “Nobody assigns a record to an agent. An item reaches an agent when its scope matches the run, and it is delivered when a hook is installed on the runtime. An agent on the `observe` tier is still assembled for, and receives nothing.”
-- **What each agent receives** panel, badged with the agent count, with **Open the library** in its header. Columns: **Agent** (the agent chip, its harness underneath, linking to the agent page) · **Repository** · **Delivery** (the tier badge, with “hooks deliver it” or “no hook: assembled, not delivered”) · **Gates** · **Stable prefix** (item count, with its token cost) · **Volatile** (item count, with its token cost) · **Cut** · **Skills** · **Per run** (the total token cost) · a row action, **Open the compiler**, which sets the Compiler to that agent and opens it.
-- Each row is one assembly, for the prompt that agent is usually given (`STG_PREVIEW.prompts`). A panel note says so: change the prompt and the volatile selection changes with it; the gates and the stable prefix do not.
-- **Scope** panel, badged with the item count. Columns: **Scope** · **Items** · **Reaches**. One row per scope that has items, in order: `org` (“Every workspace in the organization.”), `workspace` (“Every agent in this workspace.”), `repository` (“Only an agent whose run works in that repository.”), `agent` (“Only the agent named on the item.”).
-- A closing note, verbatim: “A repository record may narrow what a workspace record allows. It may never widen it, and the checks enforce that before a merge.”
+**By scope** panel.
 
-**Dialogs this page opens:** `govmode`, `wz (record wizard)`.
+- Heading "By scope". Caption: "Frames each scope can emit, and the agents in Core platform it reaches. A narrower scope narrows a wider one and never widens it."
+- A table with no list controls. Columns, in order: Scope, Sources, Frames by type and Agents.
+- Rows, in this order: Organization, then Workspace, then one row per repository in name order, then One agent each, then Named agents. A scope with no emitting source has no row.
 
-**Shell.** As `steering.md`: sidebar with Steering lit and Runtimes between Steering and Repositories, top bar with breadcrumbs, ⌘K search-or-run, notifications, the **Approvals** button that opens the drawer `#apdrawer`, and the account avatar. The top bar has no assistant button.
+| Scope | Sources | Frames by type | Agents |
+|---|---|---|---|
+| Organization | 7 | `constraint` 5, `context` 2 | 68 |
+| Workspace Core platform | 53 | `constraint` 25, `procedure` 8, `context` 23, `capability` 1 | 68 |
+| Repository `a-intel/billing` | 1 | `procedure` 1 | 0 |
+| Repository `a-intel/mobile` | 2 | `constraint` 2 | 0 |
+| Repository `a-intel/platform` | 17 | `goal` 1, `invariant` 1, `constraint` 11, `procedure` 4, `context` 4 | 68 |
+| One agent each, with "agent definitions, agent-scoped records and memory, mandates" under it | 74 | `constraint` 2, `procedure` 68, `context` 4 | 68 |
+| Named agents, with "toolbelt assignments and kill switches that name agents" under it | 10 | `constraint` 2, `capability` 21 | 4 |
+
+- Sources counts the emitting sources in the scope. The column sums to 164: the 185 sources on Sources less the 21 that emit nothing.
+- Frames by type sums what those sources emit, one badge per type with its count.
+- Agents counts the agents in the workspace that at least one source in the scope reaches.
+
+**By agent** panel.
+
+- Heading "By agent". Caption: "What each agent is eligible for before budget. The Compiler shows what one brief selects."
+- The shared list controls: "Search this list", a Tier filter ("All · Tier", then contained, gateway and harness in Core platform), Rows (5, 10, 25, 50, All; 10 by default) and a pager ("1–10 of 68").
+- Columns, in order:
+  - **Agent**: the agent chip, its avatar and key in mono (`a-intel.core.release-manager`).
+  - **Tier**: the tier badge. An agent on `observe` adds "assembled, not delivered" under it (Data platform has three: `a-intel.data.dbt-runner` among them).
+  - **Sources**: the emitting sources whose scope reaches the agent.
+  - **Frames by type**: what those sources emit, one badge per type with its count.
+  - **Resolve**: a **Compiler** link to `/steering/compiler/<slug>`.
+- The first rows in Core platform:
+
+| Agent | Tier | Sources | Frames by type |
+|---|---|---|---|
+| `a-intel.core.release-manager` | gateway | 88 | `goal` 1, `invariant` 1, `constraint` 43, `procedure` 13, `context` 31, `capability` 19 |
+| `a-intel.core.stella-ci` | contained | 83 | `goal` 1, `invariant` 1, `constraint` 41, `procedure` 13, `context` 29, `capability` 16 |
+| `a-intel.core.triage` | gateway | 88 | `goal` 1, `invariant` 1, `constraint` 42, `procedure` 13, `context` 30, `capability` 22 |
+| `a-intel.core.docs-writer` | harness | 84 | `goal` 1, `invariant` 1, `constraint` 42, `procedure` 13, `context` 30, `capability` 14 |
+| `a-intel.core.pr-reviewer` | gateway | 78 | `goal` 1, `invariant` 1, `constraint` 41, `procedure` 13, `context` 29, `capability` 1 |
+
+**Dialogs.** The header's `govmode`, `skcfg` and `newsrc`, as `steering.md` specifies. The tab opens none of its own.
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). The *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js`.
+Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidence that anything ships.
 
-| Element | Mockup collection | Target store | Backing today (repo) | Status |
+| Element | Mockup collection | Target store or contract | Backing today in `macanderson/oxagen` | Status |
 |---|---|---|---|---|
-| The agents assembled for | `STG_PREVIEW.agents` via `stgAgents()`, joined to `AGENTS` | `agent.agents` joined to the run's repository | `agent.agents`; the repository comes from the run | 🟡 |
-| The assembly per agent | `assembleSteering(slug, prompt)` over `stgItems()` | the assembler, called at SessionStart and UserPromptSubmit | the assembler exists behind one port after Phase 1 | 🟡 |
-| Delivery | `AGENTS[].tier` and the hook state on its runtime | `frame.steering.manifest` per run | the collector writes the manifest; the tier is computed per run | 🟡 |
-| Scope counts | `stgItems(ws)[].scope` | `SteeringItem.scope` in the registry | scope exists on records; the other four sources gain it in Phase 1 | 🟡 |
+| The sources and their scopes | `steeringSources()` over `RECORDS`, `SOURCES`, `SKILLS`, `MEMORY`, `ONTOLOGY`, `GATES`, `MANDATES`, `TOOLBELTS` | Every Steering Source's scope, in one read | A Steering record's sharing scope is `workspace` or `repository` (`packages/oxagen/src/contracts/context.steering.shared.ts:37`). A mandate names its agent (`list_mandates`, `mandate.list.ts:29`). An agent definition is its agent's (`list_agent_defs`, `agent.definition.list.ts:6`). The organization, agent and named-agent scopes of the other kinds have no store (#3830) | 🟡 |
+| Sources per scope and per agent | `reachOf()`, `stgAssignmentsTab()` | A count over the same read | Derivable for records, mandates and agent definitions only | 🟡 |
+| Frames by type | `typeCounts()` | Frame types on SteeringFrames | `steering.manifest` items carry no type (`packages/tacho/src/wire.ts:626-697`) | ❌ |
+| Agents reached per scope | `reachOf()` over `AGENTS` | The agent registry against each scope | `list_agents` (`agent.list.ts:142`). A repository scope needs the repository each agent works in, which the registry does not carry | 🟡 |
+| The agents | `AGENTS` in the workspace | The agent registry | `list_agents` returns each agent's key, harness and status (`agent.list.ts:58-75`) | ✅ |
+| Tier | `AGENTS[].tier` | The tier the agent's latest session recorded | `list_agents` `enforcementTier` (`agent.list.ts:83`) | ✅ |
+| "assembled, not delivered" | `AGENTS[].tier === "observe"` | What the assembler resolved against what a hook delivered | An `observe` run has no hook, so no `steering.manifest` frame is sealed for it. Nothing records an assembly that was not delivered | 🟡 |
+| Resolve, the Compiler link | a route | The Compiler for one agent | No capability runs the assembler without delivering (#3879) | ❌ |
+| What was delivered, per run | none on this tab | `steering.manifest` frames | `get_steering_deliveries` reports, per recent run, the records a manifest included and cut and the records left undelivered (`context.steering.deliveries.ts:7`). It answers what was delivered, not what a scope makes eligible, and the tab does not render it | ✅ |
+
+## Future-only fields
+
+| Mark | Reason | What a build shows today |
+|---|---|---|
+| Every Frames by type cell, in both tables | `frame types` | "not recorded" in the cell, never a type list derived from a source's kind |
+
+These are future-only in `macanderson/oxagen` and carry no mark in the mockup: the Sources counts for any scope beyond records, mandates and agent definitions, the organization, agent and named-agent scopes, and the Compiler the Resolve link opens. A build renders each as not recorded until its contract ships. The Compiler the Resolve link opens is future-only as a whole (`steering-compiler.md`).
 
 ## Functionality
 
-- A row's numbers come from one call to `assembleSteering`, the same function the Compiler renders in full. A number that differs between the two tabs is a defect.
-- **Open the compiler** sets `S.pv.agent` and routes to `#/:org/:ws/steering/compiler/<slug>`, so the row and the compiled view are one link apart.
-- **Open the library** routes to the Library's All shelf.
-- An agent on the `observe` tier is assembled for and receives nothing. The Delivery cell says which of the two happened; no cell says an agent was steered when no hook is installed.
-- The tab count in the strip is the number of agents in this workspace set up for steering.
+- Assignment is by scope. No control on the tab attaches a source to an agent, and none is added: a source reaches an agent because the organization, the workspace, the repository, the agent or a named list matches.
+- A narrower scope may narrow a wider one and never widen it. The assembler excludes a repository source that tries, as `widens_workspace_scope`.
+- The numbers are eligibility before budget, read from the same list Sources shows. By scope's Sources column sums to the emitting sources on Sources.
+- An agent on `observe` has no hook, so it is assembled for and receives nothing; its row says so under the tier.
+- Compiler opens `/steering/compiler/<slug>` with that agent selected, so a row and its resolved envelope are one link apart.
+- The tab is not an agent registry. It carries no spend, run count, incident count or status for an agent.
 
 ## States
 
-- **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: the hub header, the governance chip, and the five tabs stay. The body is “No agent receives steering here”: “Steering reaches an agent through a hook on its runtime. No agent in this workspace is enrolled, so nothing is delivered.” Action: **Open Agents**.
-- **loading**: the shell stays; the page body, hub header included, is replaced by the skeleton.
-- **error**: “Steering could not be loaded”. “The control plane answered `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the trace line.
-- **access denied**: “You cannot see this workspace’s steering”, naming `steering.read on core-platform`, with **Request access**, **Back to Fleet**, *Signed in as*, *Needed*, and *Decided by*.
+Loaded only. This change designs the loaded state. The build uses the shell's standard loading, error, empty and denied panels until they are designed.
 
 ## Mobile
 
-The five tabs are one scrolling strip with the selected tab in view. Both tables become stacks of cards, each cell labelled with its column header; the page never scrolls sideways; touch targets are ≥ 44 px; inputs are 16 px. **More** is the lit thumb-bar slot.
+The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The four tabs are one strip that scrolls sideways with Assignments in view. Both tables become stacks of cards: a By scope card leads with the scope and labels Sources, Frames by type and Agents; a By agent card leads with the agent chip and labels Tier, Sources, Frames by type and Resolve. The type badges wrap inside a card. The page never scrolls sideways; touch targets are at least 44 px and inputs are 16 px.
 
 ## Permissions
 
-- Read: `steering.read`
-- No write on this tab. Opening an agent needs `agent.read`; the compiler needs `steering.read`.
+- Read: the Steering read, `steering.read on core-platform` in the mockup's denied panel. `list_agents` allows an organization Owner, Admin or Member and a workspace Owner or Member. `get_steering_deliveries` allows an organization Owner, Admin or Compliance and a workspace Owner, Admin, Member, Viewer or Compliance.
+- No write on this tab. Opening an agent needs the agent read; the Compiler needs the Steering read.
 
 ## Backend gaps this page depends on
 
-- `SteeringItem.scope` on all five sources, not records alone (Phase 1)
-- The assembler behind one port, so the tab and the run agree item for item (Phase 1)
-- Hook state per runtime, read at assembly time rather than inferred from the tier
+- One read of every source kind with its scope (#3830).
+- Frame types on SteeringFrames (wedge spec, Shipped today).
+- The repository each agent works in, so a repository scope resolves to agents.
+- Organization, agent and named-agent scopes on the source kinds that carry them in the design.
+- The Compiler capability, which the Resolve link opens (#3879).
 
 ## Rules every build of this page must keep
 
-- Status vocabulary. Hook tier: delivered, recorded, client-attested, fail-open. Never "enforced".
-- A row says what was assembled and what was delivered, and never conflates the two.
-- Every explanation is a chain of links to items, frames, records and commits, not a summary.
-- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast.
-- Exactly one gold action per screen.
-- A not-loaded state replaces the page body, never the shell.
-- This tab is not an agent registry. It carries no agent metric that does not come from the assembly.
+- A Steering Source and a SteeringFrame are never shown as each other. This tab counts sources and the frame types they can emit; it lists no frame.
+- A frame (a recorded event) and a SteeringFrame (a resolved input) never share a name on screen.
+- A row says what is eligible, and never that an agent was steered. An `observe` agent is assembled for and receives nothing, and the row says so.
+- Every enforcement claim states the tier. "Enforced" only for calls routed through Oxagen.
+- Headers are rollups of the rows beneath them: the Sources, Frames by type and Agents figures read the same list as Sources.
+- No person is scored or ranked, and no agent is either.
+- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing; the mockup's two-sentence captions under By scope and By agent are design defects, not patterns to copy.
+- Exactly one gold action per screen: the header's New source. Nothing in the body is gold.
+- A future-only field is marked in the design and renders as not recorded in a build until its contract ships.

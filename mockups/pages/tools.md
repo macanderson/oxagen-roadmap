@@ -2,145 +2,170 @@
 
 | | |
 |---|---|
-| Route | `#/a-intel/core-platform/tools[/<tab>]` |
+| Route | `#/a-intel/core-platform/tools`. `#/…/tools/tools` and `#/…/tools/registry` land here in place, and so does any tab id `pTools()` does not serve (`fleet-operations-routes.md`, Tools) |
 | Scope | workspace |
-| Spec | §14 Mission Control; Appendix F page 4; `docs/agent-ontology-ia.md` for the provider, toolbelt and transport vocabulary |
-| Design | `mockups/src/engine.js` → `pTools()`, with `beltCatalogById`, `beltsOfAgent`, `agentsOfBelt`, `beltsWithTool`, `beltProviders`, `beltToolCount`, `beltGates`, `beltGateCell`, `beltAvailability`, `providerBelts`, `providerAgents`, `AGENT_BELTS`, and `toolGateKind`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
-| States | loaded · empty · loading · error · access denied |
-| Storybook | `Oxagen / … / tools`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Spec | `docs/fleet-operations-wedge.md`: Unchanged (the five Tools tabs keep their design), Navigation, D17, and the Emissions rows for a policy and a toolbelt. `docs/fleet-operations-ia.md`: Workspace navigation (the Tools count) and Tools. `docs/fleet-operations-routes.md`: Tools. `docs/mission-control-spec.md` §6.4 (the registry) and §6.9 (classification). `docs/creation-spec.md` for the New tool wizard |
+| Design | `mockups/src/engine.js` → `pTools()`: the header, the tab bar and the Tools tab (`t==="tools"`), with `toolCell()`, `catBadge()`, `catChips()`, `namesToggle()`, `hazard()`, `toolGate()`, `toolGateKind()`, `originBadge()`, `finBadge()`, `beltsWithTool()`, `agentsWithTool()`, `proposals()`, `verCount()`, `toolDlg()`, `schemaDlg()`, `toolCatsBody()` and `DLG_EXT.import`. The list controls come from `ltTable()`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| States | loaded, empty, loading, error, access denied |
+| Storybook | `Oxagen / Tools / Tools`: Loaded, Empty, Loading, Error and Access denied, and the same five as mobile stories (`Loaded · mobile` and so on). The catalog gives this view no `future` flag, so it has no future-only story |
 | Audit | `tools.audit-prompt.md` |
 
 ## Job
 
-Every tool version imported, the provider each came from with the transport it is reached over, the toolbelts that put a tool in front of an agent, policy versions with their tests, and kill switches. A tool is identified by `name@schema-version` everywhere, and a provider is where you authorize, re-import and remove it.
+Every tool version the workspace registry holds: the provider it came from, how it is classified, the gate it meets today, and the toolbelts that put it in front of agents. The registry is the only source of tools an agent can see.
 
-The chain the page has to make obvious, in the order a person reads it, is `Provider → Tool → Toolbelt → Agent`. A provider is the system the tools belong to; the transport is how Oxagen reaches it, and `mcp` is one of eight values a transport may take. A toolbelt is the reusable set of tool versions that many agents are assigned, and it decides what a model is shown rather than what it may call.
+This spec covers the header and tab bar that all five Tools tabs share, and the Tools tab. Each other tab has its own spec: `tools-toolbelts.md`, `tools-providers.md`, `tools-policy.md` and `tools-switches.md`.
 
-Policy and kill switches stay on Tools because both decide a tool call, which is this page's domain; Steering's own gate tab was renamed **Gates** so the two Policy surfaces are not confused.
+A tool version is named `name@version` everywhere: the registry, an approval, a kill switch and a `tool_requested` frame. The page reads the chain Provider → Tool → Toolbelt → Agent. A tool is called a tool, a toolbelt a toolbelt and a provider a provider. MCP keeps its name only where it is the mechanism: a provider's transport, and the importer that reads `tools/list`. `capability` appears only as the frame type a belt's tool emits, in mono (`tools-toolbelts.md`).
 
-The vocabulary is fixed: tool, not capability; toolbelt, not toolset; provider, not MCP server. MCP keeps its name where it is the mechanism, which is a provider's transport and the importer that reads `tools/list`.
+The fleet operations wedge left this tab's design alone. Two things around it moved: Tools › Policy now owns every gate (`tools-policy.md`), and the mandates ledger moved to each agent's Delegation section (`/tools/mandates` lands on Agents).
 
 ## What is on the page
 
-**Header**: eyebrow is the workspace name (“Core platform”), h1 “Tools”, subtext “The registry is the only source of tools an agent can see.”
-Actions: **Import a provider** (opens `import`: pull `tools/list`, version every tool, store both schemas; three steps Connect → Review tools/list → Classify and import) · **New tool** (opens the tool wizard; gold on Tools and Kill switches, plain where the tab carries its own primary) · **Flip a kill switch** (danger; opens `switch`). A tool belongs to a provider, so every route into a provider passes through the Providers tab, a Provider cell on the Tools tab, or a Providers cell on the Toolbelts tab.
+**Shell.** The workspace sidebar lists Work (8), Agents, Tools (29), Steering (9), Runtimes (2), Spend and Repositories (5), then Organization, Billing and Audit (3). Tools is lit. Its count is the observed output schemas waiting for approval (`proposals().length`), the one thing on this page that waits on a person. The foot carries the Stella launcher, "278 agents · shared plane" and the connection badge. The top bar carries the breadcrumb "Anderson Intelligence Corp. / Core platform / Tools", **Search or run an action** with ⌘K, notifications, the approvals button (17 waiting; it opens the drawer in `approvals-drawer.md`) and the account avatar.
 
-- **Tabs** (`/tools/<tab>`): Tools (N versions, or “N to approve” in approval colour when an observed schema waits) · Toolbelts (N) · Providers (N) · Policy (N) · Kill switches (N on). A tab id that is no longer served falls back to Tools, so an old link never renders an empty page. `#/:org/:ws/tools/servers` is kept as an alias of `#/:org/:ws/tools/providers`.
+**Header** (every Tools tab). Eyebrow: the workspace name, "Core platform" (the eyebrow style sets it in capitals). H1 "Tools". Subtext "The registry is the only source of tools an agent can see." Actions, in order:
 
-### Tools tab
+- **Import a provider** (plain) opens `import`.
+- **New tool** opens the tool creation wizard (`wzOpen('tool')`). It is gold on the Tools and Kill switches tabs. On Toolbelts, Providers and Policy it is plain, because those tabs carry their own gold.
+- **Flip a kill switch** (danger) opens `switch` on the class switch "every moves_funds tool".
 
-- Banner “N awaiting approval: N output schemas were observed, not declared…”, naming the providers that declare no `outputSchema`; **Review** opens `schema`.
-- **Tools** panel. Caption: “Every version imported from every provider. RBAC reaches the version, so a provider shipping a new one does not widen a toolbelt.” Panel header carries the Labels / API names toggle, the badge “N of N shown”, and **Import a provider** (opens `import`).
-- Category chips with counts sit on their own row across the ten categories, with **What the categories mean** beside them, which opens `toolcats`.
-- Table: Tool version · Provider · Category · Hazard · Gate today · Egress · Financial · Schema origin · Digest · Toolbelts · Agents · Calls 30d. The Toolbelts cell lists every belt that carries the version, or a dash when no belt does, and Agents counts the agents those belts reach. Both are derived: `beltsWithTool` and `agentsWithTool` read the assignment record, so removing a tool from a belt changes the row. A row opens `tool`; the Provider cell is a button that opens that provider's drill-down.
-- The note: “The gate shown is today's: the version's own kill switch, then its provider's, then `pol_v41`. A toolbelt decides which agents are shown the tool; the gate decides whether the call survives. Open a provider on any row to see what it imported and the connection it is reached with.”
+After a switch is flipped, a banner sits between the header and the tab bar on every tab. `tools-switches.md` specifies it.
 
-### Toolbelts tab
+**Tab bar.** `role="tablist"`; each tab is a button with `aria-selected`, and each is a path segment, `#/…/tools/<tab>`:
 
-- **Toolbelts** panel. Caption: “A toolbelt is a named set of tool versions assigned to agents. It decides what a model is shown, and nothing else.” Panel header carries the badge “N belts · N tool versions” and **New toolbelt**, the tab's primary action, which opens `beltnew`.
-- Table: Toolbelt · Owner · Tools · Providers · Agents assigned · Gates on its tools · Availability today · Updated. The Toolbelt cell is the name over what the belt is for. The Owner cell is the owning team over the person who last changed it. Providers is derived from the registry entry behind each tool version. Agents assigned reads “unassigned” when no agent carries the belt. Gates on its tools counts the belt's versions by gate: allowed, approval, mandate, killed. Availability today reads “all reachable” or “N unavailable”, over the reason: a version behind a kill switch, a version not in the registry, or both. A row opens `belt`.
-- The note: assigning a belt is not a permission, and every call on it still meets the agent's roles, the policy on the tool version, the kill switches, and the mandate ledger. A belt with a red availability has a tool its agents can see and cannot call today.
-- **Assignments** panel. Caption: “The same belt reaches many agents, which is what makes a change to it worth reviewing.” Table: Agent · Toolbelts · Tool versions · Providers · Tier. A row opens that agent's Toolbelt tab.
-- **Toolbelt drill-down** (`belt`, wide): a warning when a version on the belt cannot be called today, naming how many of how many and why; the belt's own note where it has one; then Owner (with the date and person of the last change) · Providers · Agents assigned (each a button into that agent's Toolbelt tab) · Gates on its tools. **Tool versions on this belt** lists Tool version · Provider · Hazard · Gate today · Calls 30d, and a version that is not in the registry says a call by that name is `unknown_tool`. A closing note repeats that assignment grants nothing. Footer: **Remove** (refused while an agent carries the belt) · **Assign to an agent** (assignment is edited on the agent) · **Edit tools**, which reports how many agents the change reaches at their next session.
-- **New toolbelt** (`beltnew`): Name · What it is for · Owner (platform, finops, security), over the note that a belt is a job rather than a category, so a reviewer can tell from the name alone whether an agent should carry it.
+| Tab | Count | What the count is |
+|---|---|---|
+| Tools | "29 to approve" in the approval colour | Observed output schemas waiting. With none waiting, the registry's version count, 703 |
+| Toolbelts | 9 | Belts in the catalogue |
+| Providers | 19 | Providers in the roster |
+| Policy | 9 | Policy versions |
+| Kill switches | 2 | Switches denying now |
 
-### Providers tab
+`pTools()` reads the tab from the path. A tab id it does not serve falls back to Tools, and `servers` (the Providers tab's name before rev1) lands on Providers.
 
-- **Providers** panel. Caption: “N providers hold N tool versions. A provider is the system the tools belong to; the transport is how Oxagen reaches it.” **Add a provider** is the tab's primary action and opens `import`.
-- Table: Provider · Transport · Tools · Toolbelts · Agents · Health · Connection · Authorization · Last import. The Provider cell is the system name over what it is. The Transport cell is the transport badge over the wire and the endpoint in mono. Toolbelts lists the belts that reach the provider, Agents counts the agents those belts put in front of it. The Authorization cell is a badge over the token expiry: connected, token expired, key held, role assumed, not connected, or “none needed” for a provider reached in-process or over a harness hook. A row opens `server` and carries **Open** · **Connect** or **Reconnect**, when the provider takes a credential · **Remove**. The Connection cell opens `conn`.
-- The note: MCP is one transport among several, a provider reached over `http`, `native` or a harness `local` hook is imported, versioned and decided the same way, and the transport is a property of the row rather than the name of the collection.
-- A warning under the table counts the connections with an expired token or a passed review date and is derived from the rows.
-- **Credential grants log**: Grant · Tool version · Agent and run · Connection · Scope · TTL · State.
-- **Provider drill-down** (`server`, wide): title is the system, subtitle is transport · wire · endpoint. Warnings for a degraded provider, an expired token, and schemas awaiting approval; then System · Transport (with the line that the registry, the policy and the receipts are the same whichever it is) · Registry name · Schemas · Tool versions · Toolbelts · Agents reached · Last import; then **Authorization** and **Tools imported from <provider>**. Authorization shows the connection, its id and kind, the badge, the scopes granted, the owner with the review dates, what the broker mints for that downscope, and grants in 30 days, with **Reconfigure OAuth** or **Reconnect**, **Refresh the token**, **Edit the connection**, **Disconnect** and **Revoke**. A provider with no connection offers **Connect with OAuth** and **Add a key or a role instead**; a provider that holds no credential says it is reached over its transport with no credential to hold and there is nothing to authorize. The tools table lists only that provider's versions (Tool version · Hazard · Gate today · Agents · Calls 30d) and each row opens `tool`. Footer: **Remove** · **Re-import tools** · **Edit**.
-- **Edit provider** (`serveredit`): Endpoint · Transport (`mcp`, `http`, `graphql`, `sdk`, `cli`, `native`, `local`, `rpc`) · Wire (`streamable-http`, `https`, `stdio`, `in-process`, `hook`) · Connection, over the note that changing the endpoint does not re-import and a version already on a belt keeps its digest until a re-import brings a new one.
-- **OAuth** (`oauth`, from a provider row or its drill-down): Client id · Client secret · Authorization URL · Scopes · the read-only Redirect URL to register with the provider, over the note that authorizing opens the provider, Oxagen exchanges the code, envelopes the token under the organization key, and records who authorized it. **Authorize with <provider>** refuses without a client id and an authorization URL; on success the connection reads connected with its new expiry, and a provider that had no connection gets one. **Refresh the token** re-authorizes in place and leaves grants already minted on their own TTL. **Disconnect** keeps the connection and denies every call through it until it is authorized again.
+**Tools tab.**
 
-### Policy tab
+- **Banner**, shown while observed schemas wait: the badge "29 awaiting approval", then "29 output schemas were observed, not declared." in bold, then "The slack, github, linear, stripe, snowflake, jira, datadog, pagerduty, salesforce, kubernetes, sentry, hubspot, notion, zendesk servers declare no outputSchema for these tools. The gateway recorded the outputs, inferred a schema, and filed it as a registry proposal. Until an admin approves, outputs are validated only for size and type, and every run that used them says so in its completeness record." The list names each provider that has a waiting schema. **Review** opens `schema`. The design's word "servers" here breaks the vocabulary rule below, and a build says providers.
+- **Tools** panel. Caption: "Every version imported from every provider. RBAC reaches the version, so a provider shipping a new one does not widen a toolbelt." The panel header carries the **Labels** / **API names** toggle (`aria-pressed`), the badge "703 of 703 shown" (the versions in the chosen category, of the registry's total) and **Import a provider** (plain, opens `import`).
+- **Category chips**, on their own row: "All 703", then one chip per category that holds a version, least to most consequential: Read-only 383, Data query 10, Record write 252, Messaging & authoring 15, File mutation 11, Code execution 10, Source control 15, Infrastructure 2, Access & identity 2, Financial control 3. Each chip carries `aria-pressed` and the category's meaning as its title. **What the categories mean** (ghost) opens `toolcats`.
+- **List controls**, the ones every list in the product carries (`ltTable()`): the search field "Search this list", the filters "All · Schema origin", "All · Egress" and "All · Financial", **Rows** (5, 10, 25, 50 or All; 10 by default), sortable column headers, and the pager (`1–10 of 703`).
+- **Table**, columns in order: Tool version · Provider · Category · Hazard · Gate today · Egress · Financial · Schema origin · Digest · Toolbelts · Agents · Calls 30d.
+  - *Tool version*: the category icon, the label ("Create pull request") over the API name (`github__create_pull_request@3`). The toggle swaps the two lines.
+  - *Provider*: a button with the provider's registry name (`github`). It opens `server` (`tools-providers.md`).
+  - *Category*: the category badge ("SOURCE CONTROL").
+  - *Hazard*: the risk mark and word (low, medium, high, critical; the filled triangle is kept for critical) and the side-effect glyph and word (read, write, irreversible).
+  - *Gate today*: allowed, needs approval, mandate + approval, or kill switch. The tooltip names the rule or the switch.
+  - *Egress*: `internal`, `none` or `third_party`.
+  - *Financial*: `moves_funds` or `commits_spend` in the critical colour, or "none".
+  - *Schema origin*: declared, imported, observed (a dot, in the approval colour) or observed, approved.
+  - *Digest*: `sha256:` and six hex characters, or `sha256:pending` while the schema is observed.
+  - *Toolbelts*: one badge per belt that carries the version, or a dash.
+  - *Agents*: how many agents those belts reach.
+  - *Calls 30d*: calls in the last 30 days.
+  - Each row carries a left rule in its risk colour and opens `tool`.
+- **Note**: "The gate shown is today’s: the version’s own kill switch, then its provider’s, then pol_v41. A toolbelt decides which agents are shown the tool; the gate decides whether the call survives. Open a provider on any row to see what it imported and the connection it is reached with."
 
-- **Policy versions** (the header carries **Draft a version**, which opens `policynew`): Version · State · Author · When · Rules · Tests · What changed. The Tests badge reads as a pass only when the tests have run; a fresh draft says “not run yet”. A row carries **Open** (`policyver`) and then, by state, **Draft a change** (`policynew`, based on that version) when it is active, **Edit** (`policyedit`) · **Activate** (`policyactivate`) · **Discard** (`policydiscard`) when it is a draft, **Restore** (`policyrestore`, which drafts a new version above the active one) when it is superseded. A draft is the only version that edits or deletes: `policyedit` and `policydiscard` opened on an active or superseded version refuse and offer **Draft a change** instead, because every decision cites the version that made it. Below the table, a note saying activation is a governed action with approval and what a draft may do. The panel header carries the store name, `tools.policy_versions`, in place of a language badge. Then **Where a version lives** (rows Store · In regulated mode · Compiled from · Who reads it · What it writes), **Conditions a rule may test**, and the “Sequence rule” example with a plain sentence above it saying what the rule denies and what lets it through.
+**Dialogs this tab opens.**
 
-### Kill switches tab
-
-- “Class switches” (every `moves_funds` tool, every irreversible tool, every tool with egress: third_party), carrying the deny generation badge, and “Scoped switches”, whose header carries **Create a switch** (`switchnew`). Each switch: allowing / denying toggle, Blast radius · Takes effect · Flipped by · Reason. Flipping bumps `deny_generation` so every live run token is re-checked at the next call.
-  - The organization switch, the workspace switch and the three class switches ship with the workspace and are on the page the day it exists. They cannot be edited or removed: something has to stay flippable when an incident starts.
-  - `switchnew` creates a switch over one of the three identities an incident names: an **Agent**, an **Enrolled device** (the host an agent runs on, offered with its device key), or an **Operator’s agents**. The target list and the blast radius recompute as the scope changes, counted off the agent list rather than written down. A new switch is created allowing, and a second switch on a target something already covers is refused.
-  - A switch you created carries **Edit** (`switchedit`) and **Remove** (`switchdel`) on its card. `switchdel` on a denying switch refuses and offers to clear it first, because clearing records who allowed the traffic and removing does not.
-
-
-**Dialogs this page opens:** `import`, `wz` (tool wizard: describe → recommendation → manifest or import → code in four languages → pull request), `connection`, `tool`, `toolcats`, `schema` (approve observed), `belt` · `beltnew`, `server` · `serveredit` · `serverdel`, `oauth`, `conn` · `connedit` · `connrevoke`, `policynew` · `policyedit` · `policyver` · `policyactivate` · `policydiscard` · `policyrestore`, `switch` · `switchnew` · `switchedit` · `switchdel`, `request-access` (from denied), `incident` (from error).
-
-Every creation wizard is `DLG_EXT.wz`; its spec is `docs/creation-spec.md`.
-
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet · Agents · Tools · Steering · Runtimes · Repositories · Spend; Organization nav: Organization · Billing · Audit; foot: the assistant launcher, agent count · data plane, connection badge). The page once called Agent IAM is **Agents**, Runtimes is a page of its own, and Steering carries five tabs (Library, Assignments, Gates, Proposals, Compiler). Top bar: hamburger, breadcrumbs, ⌘K search-or-run, notifications with unread dot, the approvals button (left of the avatar, count of everything waiting on you across the organization; opens the drawer described in `fleet.md`), account avatar → user menu. No assistant button in the top bar.
+- `import`, in three steps. The step is the dialog's argument, so opening it always starts at Connect. A strip heads each step: "1 · Connect → 2 · Review tools/list → 3 · Classify and import", a done step marked ✓.
+  1. "Import tools from a provider", subtitle "The registry is the only source of tools an agent can see. Nothing reaches a belt until it is here." Fields: Endpoint URL (`https://mcp.confluence.a-intel.internal/mcp`), Transport (streamable-http, sse, stdio), Connection ("Create one after import", or one of the 16 connections by id and name). Note: "Oxagen calls tools/list, versions every tool it finds, and stores both schemas. Where a provider declares no outputSchema, the gateway records observed outputs and files a registry proposal for an admin to approve." Footer: Cancel, **Connect** (gold).
+  2. "Review tools/list", subtitle "8 tools returned by mcp.confluence.a-intel.internal · protocol 2025-06-18". One checkbox per tool, with the tool cell, its description, its hazard, and an "outputSchema" or "no outputSchema" badge. Warning: "2 are unchecked by default. delete_page and export_space are irreversible or bulk egress and declare no output schema. Importing them grants nothing, but they would land denied by workspace policy until someone decides otherwise." Footer: "6 of 8 selected", Back, **Classify** (gold; disabled with nothing selected).
+  3. "Classify and import", subtitle "Risk, side effect, egress and financial class are what policy decides on." Table: Tool version · Hazard · Egress · Financial · Output schema. Note: "What import does not do. It grants nothing. These 6 versions take the registry from 703 to 709 tool versions and sit there, callable by nobody, until a role grant puts them on a belt." Footer: "Credential kind api_key · downscoping none available", Back, **Import 6 tools** (gold). The toast reads "Imported 6 tool versions from confluence. They are in the registry and on no belt."
+- `schema`, "Approve an observed output schema" (wide). An eyebrow names the version and the provider ("slack__list_channels@1 · the slack server declares no outputSchema for this tool"; the design fixes the words "the slack server" whatever the provider, and a build names the version's own provider). A note, "What has been happening until now.", says outputs were validated only for size and type and that approving turns strict validation on from the next call. Then Observations ("341 responses over 30 days, from 0 agents"), Inferred from ("the intersection of every observation · 0 outliers discarded") and Digest on approval, the inferred schema beside one recorded response, and "28 more waiting after this one." Footer: "Approving is a governed action: approve_tool_schema. It is audited, and it bumps the tool version’s schema digest, which every future frame records." **Not yet** and **Approve schema** (gold). With nothing left to review it reads "Every observed schema is approved", "Nothing to review.", and **Done**.
+- `toolcats`, "Tool categories" (wide): the ten categories in order, each with its meaning and three example tools; then "The two axes that carry a decision": Risk (low, medium, high, critical), Side effect (read, write, irreversible) and Gate (allowed, needs approval, mandate + approval, denied, kill switch), with "dashed = a person still stands in the way". Footer: "Category is a registry attribute, not a policy: a rule may reference it, but only risk, side effect, financial effect and egress carry a decision by themselves." and **Close**.
+- `tool` (wide). Title: the API name. The tool cell, large, with "provider <id>". A row of the category badge, the hazard, the gate, "egress <class>" and the financial badge, then the category's meaning. Schema digest, Schema origin, Credential (`github_app → installation token`, "The agent never sees it."), Price ("$0.00 USD", "per call, from the price book"). A financial tool adds `amount_path`, `currency_path`, `counterparty_path` and `idempotency`, and the warning "Financial tool. The amount is read from the call by $.amount, never from prose. A call without a mandate is denied before dispatch; one over its mandate is denied or routed to approval by the mandate’s own rule." Then "Input schema" as JSON, and a note that validation is strict both ways and a failure is `schema_violation`. The footer counts the belts and the 30-day calls, then **Close**. No gold.
+- `switch`, from Flip a kill switch (`tools-switches.md`).
+- `wz`, the tool creation wizard: Describe, Recommendation, Manifest, Code, Pull request (`docs/creation-spec.md`).
+- `server`, from a Provider cell (`tools-providers.md`).
+- `connection` (from the empty state), `request-access` (from denied) and `incident` (from error).
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
+Legend: ✅ shipped · 🟡 partial · ❌ future-only. Backing checked against `macanderson/oxagen` `main` at `bf14d158a` (2026-09-24). The mockup collection names a file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or a constant in `mockups/src/engine.js`; `volume()` grows the fixtures to the organization's size. A fixture is not evidence that anything ships.
 
-| Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
+| Element | Mockup collection | Target store or contract | Backing today in macanderson/oxagen | Status |
 |---|---|---|---|---|
-| Providers | `PROVIDERS` (`FIXTURES.SERVERS`, with `system`, `transport`, `wire`) | `tools.tool_providers` | `mcp.mcp_servers`, `mcp.registries` | 🟡 transport and system name to add |
-| Tool versions + classification | `TOOLS` | `tools.tool_versions` | `agent.tools`/`tool_versions`, `mcp.tool_snapshots` | 🟡 risk/side-effect/consequence tags to verify |
-| Toolbelts | `TOOLBELTS` (`FIXTURES.TOOLBELTS.belts`) | `tools.toolbelts` | none | ❌ |
-| Toolbelt assignments | `TOOLBELT_ASSIGN` (`FIXTURES.TOOLBELTS.assign`), read by `AGENT_BELTS` | `tools.toolbelt_assignments` | none | ❌ |
-| Connections, grants, OAuth state | `CONNECTIONS` (`authState`, `scopes`, `tokenExp`, `client`, `authUrl`) | `tools.connections` | `ingestion.source_connections`, `mcp.credentials` | 🟡 token lifecycle to verify |
-| Policy versions | `POLICIES` | `tools.policy_versions`, one row per version holding the rules and the tests; in regulated mode the rules are a file in `.oxagen/policy/` and the row is the compiled copy | none | ❌ (G2) |
-| Kill switches | `SWITCHES`, `S.switches`, `S.denyGen` | `control.commands` + `deny_generation` | `iam.emergency_denies`, `authorization_deny_generations` | 🟡 |
-| Observed schemas | `OBSERVED_SCHEMAS` | `schema_origin=observed_proposed` | none | ❌ |
+| Tool versions: identity, provider, digest, schema origin, calls 30d | `TOOLS` (`FIXTURES.TOOLS`) | `tools.tool_versions` (spec Appendix A.5); `list_tool_versions` | `list_tool_versions` returns name, version, `serverId`, `schemaOrigin`, `schemaDigest`, `gate` and `calls30d` (`packages/oxagen/src/contracts/tool.version.list.ts:17-45`, `:47-82`). Calls come from ClickHouse `tool_invocations` and are null when it does not answer (`:42-43`). Rows live in `agent.tools` and `agent.tool_versions` (`packages/database/src/schema/agent.ts:1229`, `:1274`) | ✅ |
+| Hazard | `TOOLS[].risk`, `.eff` | the version's classification | `riskGrade` and `classification.sideEffect` (`packages/oxagen/src/contracts/tool.classification.ts:37-41`, `:47-52`). The classification is null until an admin classifies the version (`tool.version.list.ts:34-35`) | 🟡 |
+| Egress | `TOOLS[].eg` | the version's classification | `classification.egress` is `local`, `org_tenant` or `third_party` (`tool.classification.ts:42-46`), null until classified. The design's `internal` and `none` are not values | 🟡 |
+| Financial | `TOOLS[].fin` | consequence tags (spec §6.9) | Consequence tags from the starter set `moves_money`, `destroys_data` and others (`tool.classification.ts:20-27`), stored in `consequence_tags` (`agent.ts:1327`). `moves_funds` and `commits_spend` are not tags | 🟡 |
+| Category and its chips | `TCAT`, `toolMeta()` | a registry attribute | None. The app shows consequence tags in its place (`apps/app/src/features/tools/registry.tsx:11-13`), gap #3921 (`apps/app/src/features/tools/gaps.ts:16-17`) | ❌ |
+| Gate today | `toolGate()`, `toolGateKind()` over `SWITCHES` | the gate each version meets | `gate.kind` names a kill switch only: `open`, `killed_version`, `killed_server` or `killed_class` (`tool.version.list.ts:9-15`). Approval and mandate outcomes are not on the row | 🟡 |
+| Observed schemas: origin `observed` and `observed, approved`, `sha256:pending`, the banner, Review, `schema`, the "to approve" tab count, the sidebar count | `OBSERVED_SCHEMAS`, `TOOLS[].proposal`, `S.approved` | `schema_origin` `observed_proposed` and `observed_approved` (spec Appendix A.5) | `schemaOrigin` is `declared` or `imported` (`tool.version.list.ts:37`). `agent.tool_versions` has no output schema column (`agent.ts:1274-1340`), and no capability named `approve_tool_schema` exists. Gap #3921 | ❌ |
+| Toolbelts and Agents cells | `TOOLBELTS`, `TOOLBELT_ASSIGN` through `beltsWithTool()` and `agentsWithTool()` | `tools.toolbelts`, `tools.toolbelt_assignments` | None (`registry.tsx:14`), gap #3852 (`gaps.ts:8-9`) | ❌ |
+| Tab counts | `proposals()`, `verCount()`, `TOOLBELTS`, `PROVIDERS`, `POLICIES`, `switchesOn()` | each tab's own read | Providers counts the `list_mcp_servers` roster and Kill switches counts switches on; Tools counts one cursor page and marks it a floor, because the read carries no total; Toolbelts and Policy carry no count (`apps/app/src/features/tools/tabs.tsx:1-11`) | 🟡 |
+| Import a provider | `IMPORT_TOOLS` | `register_mcp_server`, `import_tools` | `import_tools` versions a registered MCP server's pinned tools and stamps its last import (`packages/oxagen/src/contracts/tool.import.ts:76-136`); `register_mcp_server` (`packages/oxagen/src/contracts/agent.mcp.register.ts:4-31`). Transports are `streamable-http`, `sse` and `stdio` only (`packages/database/src/schema/mcp.ts:191-194`) | 🟡 |
+| Tool dialog | `toolDlg()` over `TOOLS` | the version with its input and output schemas, price and credential scope | Version facts come from `list_tool_versions`. `agent.tool_versions` stores the input schema (`agent.ts:1283`) and the measures (`agent.ts:1331`); the app reaches the input schema through an agent's belt (`packages/oxagen/src/contracts/agent.toolbelt.get.ts:48-83`). No price, output schema or credential scope is stored on a version | 🟡 |
+| New tool | `DLG_EXT.wz` | the creation wizard (`docs/creation-spec.md`) | None, gap #3924 (`gaps.ts:22-23`) | ❌ |
+| Flip a kill switch | `switchDialog()` | `set_kill_switch` | `packages/oxagen/src/contracts/kill_switch.set.ts:54-96` (`tools-switches.md`) | ✅ |
+
+The app build also offers reclassification in the tool dialog through `set_tool_classification` (`packages/oxagen/src/contracts/tool.classification.set.ts:8-45`; `apps/app/src/features/tools/tool-dialog.tsx:1-10`). The design draws no control for it.
+
+## Future-only fields
+
+The renderer puts no `data-future` mark on this view, and the catalog gives it no future-only story. These fields have no contract today all the same. A build renders each as not recorded, with its gap issue as `data-gap` (the pattern of `apps/app/src/features/tools/gaps.ts`), and never as a zero or an empty table:
+
+- The Category column and the category chips (#3921). The build shows the consequence tags the classification records.
+- Every observed-schema element: the banner, Review and `schema`, the origins `observed` and `observed, approved`, `sha256:pending`, "29 to approve" and the sidebar count (#3921). The Tools tab count is the registry's.
+- The Toolbelts and Agents columns (#3852).
+- The New tool wizard (#3924).
+- In the tool dialog: the price and the credential line.
 
 ## Functionality
 
-- Tool identity is `name@schema-version` everywhere (registry, approval, kill switch, `tool_requested` frame). The cell shows the human label over the mono API name; a toggle swaps them.
-- A provider is identified by the system it is, never by its transport. Changing a provider's transport changes one column and nothing else about its tools, its policy or its receipts.
-- `#/:org/:ws/tools/servers` still resolves. `pTools()` rewrites the tab id to `providers`, so every link written before the rename lands on the Providers tab.
-- A toolbelt is the only edge from the registry to an agent: what a model is shown is the union of the belts assigned to it and nothing else. Assigning a belt is not a permission, and the principal and the policy still decide every call.
-- A belt's availability is derived, never typed: `beltGates` counts each version by the gate it meets today, and `beltAvailability` reads a version behind a kill switch or missing from the registry as unavailable.
-- Every belt and agent count is derived the same way. `beltsWithTool` and `agentsWithTool` give a tool version its Toolbelts and Agents cells, `providerBelts` and `providerAgents` give a provider its own, and the tools fixture carries no count of either. A figure that survives removing a tool from a belt is a defect.
-- Category is a registry attribute, never a policy: only risk, side effect, financial effect, and egress carry a decision by themselves.
-- Until an observed output schema is approved, outputs are validated only for size and type and every run that used them says so in its completeness record.
-- Policy is deterministic, versioned, and tested; activation is a governed action with approval.
-- A policy version is a record in Postgres, not a context record, and it never reaches a model. The gateway evaluates it on every tool call before the call leaves, with no model in the decision path, and writes one `policy.decision` frame naming the version and the rules that fired.
-- A version compiles from the rules on this page plus the enforcement grants on each agent and the role grants on each operator, so a grant is never restated as a rule.
-- The page names no policy language. Where rule source is shown, a plain sentence above it says what the rule denies and what lets it through.
-- A kill switch flip is recorded with who, when, and why (`S.flipMeta`) and shows its blast radius before confirming.
-- A connection is authorized by a person, never by an agent. The token is exchanged by Oxagen, enveloped under the organization key, and never returned to a screen; the broker downscopes it again for each call.
-- An expired token denies every call through its connection until somebody reconnects, and the provider row, the drill-down and the warning under the table all say so from the same record.
+- A tool version is `name@version` in every place it appears. The Labels / API names toggle swaps the human label and the API name on every tool cell of the page.
+- Category is a registry attribute and decides nothing. Only risk, side effect, financial effect and egress carry a decision by themselves.
+- Gate today is today's gate, in the order `toolGateKind()` applies it: a switch on the version or on its provider (kill switch), then a financial class (mandate + approval), then an irreversible side effect (needs approval), else allowed. Flipping or clearing a switch changes the column on the next render.
+- The Toolbelts and Agents cells are derived from the belt catalogue and the assignment record (`beltsWithTool()`, `agentsWithTool()`). Removing a tool from a belt changes the row. The fixture carries no count of either.
+- A chip filters the table, and the badge counts the rows the filter leaves. The chip counts are counts of the registry's rows.
+- Until an observed output schema is approved, its outputs are validated only for size and type, and every run that used it says so in its completeness record. Approving a schema moves its row to "observed, approved", gives it a digest, and takes one from every waiting count on the page and in the sidebar.
+- Importing grants nothing. An imported version sits in the registry, callable by nobody, until it is on a belt and a grant reaches it.
+- Every write on this tab is a governed action recorded in Audit.
 
 ## States
 
-- **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: “No provider is registered”. “Until a provider is imported, no agent in this workspace has a toolbelt, and every call by name is `unknown_tool`. Importing a provider pulls its tool list, versions each tool, and stores both schemas.” Actions: **Import a provider** (gold), **Add a connection**. The wizard reaches the same importer, from a description rather than a URL.
-- **loading**: the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
-- **error**: “Tools could not be loaded”. “The control plane answered `503 tool_registry_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the line “trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z”.
-- **access denied**: “You cannot see the tool registry”. “Your roles on Anderson Intelligence Corp. do not include `tools.read on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (opens `request-access`), **Back to Fleet**. Below: *Signed in as* (Marcus Bell · workspace.owner · core-platform), *Needed* (`tools.read on core-platform`), *Decided by* (`pol_v41` · deny wins over every allow).
+`pTools()` branches on the state before it draws the header, so every state but loaded replaces the whole page body, header and tab bar included. The shell stays. Every Tools tab shows the same four panels.
+
+- **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
+- **empty**: "No provider is registered". "Until a provider is imported, no agent in this workspace has a toolbelt, and every call by name is unknown_tool. Importing a provider pulls its tool list, versions each tool, and stores both schemas." Actions: **Import a provider** (gold, opens `import`) and **Add a connection** (opens `connection`).
+- **loading**: the skeleton, four tile blocks and a panel of seven rows.
+- **error**: "Tools could not be loaded". "The control plane answered 503 tool_registry_unavailable. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen." Actions: **Try again** (gold) and **Open an incident** (opens `incident`). Then "trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z".
+- **access denied**: "You cannot see the tool registry". "Your roles on Anderson Intelligence Corp. do not include tools.read on core-platform. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it." Actions: **Request access** (gold, opens `request-access`) and **Back to Work** (`#/a-intel/core-platform/work`). Below: Signed in as "Marcus Bell · workspace.owner · core-platform", Needed "tools.read on core-platform", Decided by "pol_v41 · deny wins over every allow".
 
 ## Mobile
 
-Top bar collapses to hamburger · current crumb · search glyph · notifications · approvals · avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting plus an interjection), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering, Runtimes, Repositories, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The five tabs scroll in their own row; the provider and toolbelt drill-downs rise as sheets and their tables stack as cards. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are ≥ 44 px; inputs are 16 px; nothing else scrolls sideways.
+At 390 × 844 the top bar collapses to the hamburger, the current crumb ("Tools"), search, notifications, the approvals button and the avatar. The thumb bar holds Work (8), Agents, Tools, Spend and More (3, the open critical incidents). Tools is the lit slot. More is a bottom sheet with Steering, Runtimes, Repositories, Organization, Billing, Audit, Ask Stella, Search, Notifications, Account, Switch organization and Switch workspace.
+
+The header actions wrap onto two rows. The tab bar scrolls in its own row. The category chips wrap, one to a line. Every list table becomes a stack of cards, each cell labelled with its column header. Every dialog rises from the bottom edge as a sheet. Touch targets are at least 44 px, inputs are 16 px, and the page never scrolls sideways.
 
 ## Permissions
 
-- Read: `tools.read`
-- Writes (each a governed action recorded in Audit): `tools.import`, `tools.provider.edit`, `tools.provider.remove`, `tools.schema.approve`, `toolbelt.create`, `toolbelt.edit`, `toolbelt.assign`, `connection.add`, `connection.authorize`, `connection.edit`, `connection.review`, `connection.revoke`, `policy.draft / policy.edit / policy.discard / policy.activate`, `switch.create / switch.edit / switch.remove / switch.flip`
+The design names these permissions. The capability that binds each today is in parentheses.
+
+- Read: `tools.read` (`list_tool_versions` admits an org Owner or Admin and a workspace Owner, Member or Viewer: `tool.version.list.ts:66-70`).
+- Writes, each a governed action recorded in Audit: `tools.import` (`register_mcp_server` and `import_tools`, org Owner or Admin), `tools.schema.approve` (no capability), `tools.create` (the wizard; the design's wizard names `tools.admin`; no capability), `switch.flip` (`set_kill_switch`, org Owner or Admin).
 
 ## Backend gaps this page depends on
 
-- G2 policy versions with tests
-- toolbelts and their assignments: a belt exists today only as a computed per-agent list, so nothing stores the named set or who carries it
-- provider identity separate from transport: the store holds MCP servers, and a provider reached over `http`, `sdk` or a harness hook has nowhere to live
-- the OAuth token lifecycle: client registration, code exchange, refresh, and the audit record of who authorized
-- observed-schema proposals
+- #3921: a tool's category as a registry attribute, and output schemas observed rather than declared, with a store, an approval capability and a waiting count.
+- #3852: toolbelts and who carries them, for the Toolbelts and Agents columns.
+- #3924: the tool creation wizard.
+- #3917: providers stored apart from their MCP transport, so a Provider cell can name a provider reached over `http` or a harness hook.
+- Approval and mandate outcomes on `list_tool_versions`' `gate`, and a price per call on the version.
+- #3820 (request access from a denied page) and #3847 (an incident from a failed page).
 
 ## Rules every build of this page must keep
 
-- No heading, tab, panel, column, button or note calls a provider an MCP server. Transport is a column; MCP is one of its values.
-- Every badge that describes trust (enforcement tier, hazard, gate, schema origin, authorization) shows the recorded value and nothing stronger.
-- Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice.
-- A toolbelt row names the providers behind it and the agents assigned it, and both are derived from the belt's tool versions and the assignment record.
-- Every explanation is a chain of links to frames, records, and commits, not a summary.
-- Exactly one gold action per screen (New tool in the header; a tab that holds its own primary takes the gold from the header, which is New toolbelt on Toolbelts, Add a provider on Providers, and Create rule on Policy). Gold is identity; it never encodes state. State reads as a dot and a word, so it survives greyscale.
-- No heading carries a comma, a mid-dot, or a not/never contrast; subtext under a heading is one sentence or nothing.
-- A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do; nothing silently does nothing.
-- Every record this page creates can be opened, edited and removed from the row that names it. A destructive action says what stops working before it asks, and what is kept for replay.
-- No panel repeats a dialog the page already opens, and no panel states a rule the rows beside it already show.
+- No heading, tab, panel, column, button or note calls a provider an MCP server or a server. Transport is a column on Providers, and `mcp` is one of its values.
+- A tool is named `name@version` everywhere, and the toggle is the only thing that changes how it reads.
+- Every badge that describes trust (hazard, gate, schema origin) shows the recorded value and nothing stronger. An observed schema reads observed until a person approves it.
+- Every enforcement claim states the tier. A gate is enforced for calls routed through Oxagen. On the `harness` tier the hook refuses a call, client-attested and fail-open. On `observe` nothing refuses.
+- Headers are rollups of the rows beneath them: the "N of N shown" badge, the chip counts, the tab counts and the sidebar count are counted from the rows and never typed.
+- A Steering Source and a SteeringFrame are never shown as each other. A tool on a belt emits a `capability` SteeringFrame, and this tab shows the tool.
+- No person is scored or ranked.
+- Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
+- Exactly one gold action per screen: New tool on this tab.
+- A future-only field is marked in the design and renders as not recorded in a build until its contract ships.
+- A not-loaded state replaces the page body and keeps the shell. A stub control says what the product would do. Nothing silently does nothing.
 - A count in navigation appears only where something waits on a person.
