@@ -125,11 +125,11 @@ export default {
     ["--border", "Commit dialog wrapper border"],
   ],
   helpers: [
-    ["switchCard(s)", "engine.js:8332", "The kill switch row on the Tools page, with its dynamic on and off label."],
-    ["switchDialog()", "engine.js:8466", "The confirm dialog: blast radius, reason field, and the effect and reversibility copy."],
-    ["doFlip(id)", "engine.js:8486", "Applies the flip after the confirm dialog's action button, and raises the persistent kill banner when a switch turns on."],
-    ["cmSet(k, v)", "engine.js:1452", "Sets a field on the open commit, including the PR toggle's `pr` flag."],
-    ["steerToggleInt()", "engine.js:9220", "Flips the fleet steer's Interrupt delivery mode."],
+    ["switchCard(s)", "engine.js:8333", "The kill switch row on the Tools page, with its dynamic on and off label."],
+    ["switchDialog()", "engine.js:8467", "The confirm dialog: blast radius, reason field, and the effect and reversibility copy."],
+    ["doFlip(id)", "engine.js:8487", "Applies the flip after the confirm dialog's action button, and raises the persistent kill banner when a switch turns on."],
+    ["cmSet(k, v)", "engine.js:1453", "Sets a field on the open commit, including the PR toggle's `pr` flag."],
+    ["steerToggleInt()", "engine.js:9221", "Flips the fleet steer's Interrupt delivery mode."],
   ],
   sourceNotes: [
     "The Skills preview switch appears inside `DLG_EXT.skenable` (engine.js 8701), whose dialog states outright: \"This is a governed action. It writes a file, opens a pull request, and puts your name on both.\"",

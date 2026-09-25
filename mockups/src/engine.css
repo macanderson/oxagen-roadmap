@@ -515,6 +515,9 @@ a.inv-i:hover *{text-decoration:none}
 .inv-i .tx b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .inv-i .tx span{font-size:10.5px;color:var(--dim);font-family:var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .inv-arrow{color:var(--dim);font-size:11.5px;font-family:var(--mono)}
+/* On a desktop the operator's role line truncates before the operator drops to a second row. */
+#viewport:not(.phone) .inv{flex-wrap:nowrap}
+.inv>.agc,.inv-arrow{flex:none}
 .sumry{border:1px solid var(--border);border-radius:12px;background:var(--panel);padding:16px 18px;margin-bottom:16px}
 .sumry .lede{font-size:15px;line-height:1.55;color:var(--fg);margin:12px 0 10px;max-width:78ch}
 .sumry .touched{display:flex;gap:6px;flex-wrap:wrap;margin:0}
@@ -2166,6 +2169,11 @@ a.b.lk:hover *,button.b.lk:hover *{text-decoration:none}
 .ipl svg{display:block}
 .hx{display:inline-flex;align-items:center;justify-content:center;flex:none;vertical-align:-3px}
 .hx svg{width:100%;height:100%;display:block}
+/* The harness mark sits 6px from the avatar it leads, and 5px from a harness name it leads. */
+.agc>.hx{margin-right:-4px}
+.agc-detail .agid .sub .hx{vertical-align:-3px}
+.hxn{display:inline-flex;align-items:flex-start;gap:5px;min-width:0}
+.hxn>.hx{vertical-align:0;margin-top:.15em}
 .tkp{display:inline-flex;align-items:center;gap:7px;min-width:0;vertical-align:middle}
 .tk-t{display:inline-flex;align-items:center;gap:6px}
 .tk-s{font-weight:500;color:var(--fg);margin-top:2px;overflow-wrap:anywhere}

@@ -136,8 +136,8 @@ export default {
     ["--dim", "Count"],
   ],
   helpers: [
-    ["namesToggle()", "engine.js:886", "Labels or API names for tools. The reference `.seg`."],
-    ["catChips(counts, sel, pick, total)", "engine.js:891", "The tool category filter row, `.row.tcs`, with `aria-pressed`."],
+    ["namesToggle()", "engine.js:887", "Labels or API names for tools. The reference `.seg`."],
+    ["catChips(counts, sel, pick, total)", "engine.js:892", "The tool category filter row, `.row.tcs`, with `aria-pressed`."],
   ],
   sourceNotes: [
     "`.seg` is written inline at four more sites: toolbelt presentation (engine.js 4561), toolbelt layout (4607), deployment mode (7799), and the import wizard (12096). The Agents column pick is `.kf` (3961).",

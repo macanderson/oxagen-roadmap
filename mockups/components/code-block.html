@@ -205,10 +205,10 @@ tamper      = <span class="bad">"chain_break at frame 188"</span></pre>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 300 to 304, 359 to 363, 390, 461 to 467, 1539 to 1540</td><td>The rules that draw it</td></tr>
-      <tr><td><code>frJson(o, ind)</code> at <code>engine.js:3424</code></td><td>Writes a JSON value with <code>.k</code> keys and <code>.s</code> strings.</td></tr>
-      <tr><td><code>frPre(o)</code> at <code>engine.js:3433</code></td><td>Wraps <code>frJson()</code> in a wrapping <code>pre</code> for the frame detail.</td></tr>
-      <tr><td><code>readout(title, right, inner)</code> at <code>engine.js:3789</code></td><td>The labelled slab of what the model read. Two calls, both in frame detail.</td></tr>
-      <tr><td><code>codePair(panes, cls)</code> at <code>engine.js:1395</code></td><td>Two labelled panes. Used by the fix dialog and the schema dialog.</td></tr>
+      <tr><td><code>frJson(o, ind)</code> at <code>engine.js:3425</code></td><td>Writes a JSON value with <code>.k</code> keys and <code>.s</code> strings.</td></tr>
+      <tr><td><code>frPre(o)</code> at <code>engine.js:3434</code></td><td>Wraps <code>frJson()</code> in a wrapping <code>pre</code> for the frame detail.</td></tr>
+      <tr><td><code>readout(title, right, inner)</code> at <code>engine.js:3790</code></td><td>The labelled slab of what the model read. Two calls, both in frame detail.</td></tr>
+      <tr><td><code>codePair(panes, cls)</code> at <code>engine.js:1396</code></td><td>Two labelled panes. Used by the fix dialog and the schema dialog.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -236,7 +236,7 @@ tamper      = <span class="bad">"chain_break at frame 188"</span></pre>
 ## Inputs
 
 1. mockups/components/code-block.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 300 to 304, 359 to 363, 390, 461 to 467, 1539 to 1540. The mockup renders it with frJson(o, ind) (engine.js:3424), frPre(o) (engine.js:3433), readout(title, right, inner) (engine.js:3789), codePair(panes, cls) (engine.js:1395).
+2. The design source: mockups/src/engine.css lines 300 to 304, 359 to 363, 390, 461 to 467, 1539 to 1540. The mockup renders it with frJson(o, ind) (engine.js:3425), frPre(o) (engine.js:3434), readout(title, right, inner) (engine.js:3790), codePair(panes, cls) (engine.js:1396).
 3. The build's implementation: find it by its root selector (pre, code) or its name, and list every route that renders it.
 4. Where to see it in the design: Run frame detail, Run transcript, Tools schema dialog, Fix dialog, Steering sources, Organization API keys. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

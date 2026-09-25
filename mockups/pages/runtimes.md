@@ -41,7 +41,7 @@ Each caption states one fact, as the plain-noun rule asks: the Agents hosted lin
 - **Table**, columns in order: Runtime · Kind · Harness · Model surface · Tier · Agents · Collector · Hooks · Health · Last checkpoint.
   - *Runtime*: the host name over its operating system in mono ("mbell-mbp-16" over "macOS 15.6 · arm64").
   - *Kind*: a badge, "workstation" or "CI runner" in the demo (a hosted container reads "hosted").
-  - *Harness*: the harness with its version in mono ("Claude Code 2.1.4", "Codex CLI 1.4.0", "stella 0.9.2", "Other (SDK-wrapped) 0.4.0").
+  - *Harness*: the harness mark and name, with its version in mono ("Claude Code 2.1.4", "Codex CLI 1.4.0", "stella 0.9.2", "Other (SDK-wrapped) 0.4.0").
   - *Model surface*: "loopback proxy", "provider direct" or "not routed".
   - *Tier*: the tier badge.
   - *Agents*: how many agents the host carries over their keys in mono, or "0" over "No agent assigned" on an enrolled host and over "Not enrolled" on one that is not.

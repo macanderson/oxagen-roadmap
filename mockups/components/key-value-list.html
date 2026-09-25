@@ -210,8 +210,8 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 307 to 309, 557, 2123</td><td>The rules that draw it</td></tr>
-      <tr><td><code>frKv(rows)</code> at <code>engine.js:3422</code></td><td>Writes a <code>dl.kv</code> from an array of <code>[label, value]</code> pairs, dropping any falsy row. About 15 calls, mostly frame detail.</td></tr>
-      <tr><td><code>kvl(pairs, cls)</code> at <code>engine.js:9889</code></td><td>The same shape again: a <code>dl.kv</code> from pairs, with an optional extra class. 7 calls, all in the account dialog.</td></tr>
+      <tr><td><code>frKv(rows)</code> at <code>engine.js:3423</code></td><td>Writes a <code>dl.kv</code> from an array of <code>[label, value]</code> pairs, dropping any falsy row. About 15 calls, mostly frame detail.</td></tr>
+      <tr><td><code>kvl(pairs, cls)</code> at <code>engine.js:9890</code></td><td>The same shape again: a <code>dl.kv</code> from pairs, with an optional extra class. 7 calls, all in the account dialog.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -239,7 +239,7 @@
 ## Inputs
 
 1. mockups/components/key-value-list.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 307 to 309, 557, 2123. The mockup renders it with frKv(rows) (engine.js:3422), kvl(pairs, cls) (engine.js:9889).
+2. The design source: mockups/src/engine.css lines 307 to 309, 557, 2123. The mockup renders it with frKv(rows) (engine.js:3423), kvl(pairs, cls) (engine.js:9890).
 3. The build's implementation: find it by its root selector (.kv) or its name, and list every route that renders it.
 4. Where to see it in the design: Approvals (approval card), Agents (Identity tab), Organization (API keys), Run (Chain tab, frame detail), Spend, Billing. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
