@@ -528,7 +528,7 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
   await page.evaluate((h) => { location.hash = h; }, "#/a-intel/core-platform/steering/memory");
   await page.waitForTimeout(250);
   const shelf = await page.evaluate(() => ({ text: document.querySelector("#pg").innerText, imports: document.querySelector("[data-mem-imports]")?.dataset.memImports }));
-  ok(/CLAUDE\.md:L32/.test(shelf.text) && Number(shelf.imports) >= 2, "import: the shelf shows the file and counts imported lines, got " + shelf.imports);
+  ok(/CLAUDE\.md:L32/.test(shelf.text) && Number(shelf.imports) >= 2, "import: the shelf shows the file and counts imported sayings, got " + shelf.imports);
   await page.evaluate(() => openDialog("memory", "mem_01K5R0N2"));
   await page.waitForTimeout(150);
   ok(await page.evaluate(() => [...document.querySelectorAll("#layer [data-mem-src]")].some((x) => x.textContent === "apps/api/CLAUDE.md:L3")), "import: the memory shows the imported saying's source");
@@ -1624,6 +1624,8 @@ for (const theme of ["light", "dark"]) {
   ok(b.bell === "Notifications, " + (n - 1) + " unread", "notifications: the bell count drops with it, got " + b.bell);
   ok(b.foot === (n - 1) + " unread · select one to mark it read", "notifications: the footer count drops with it, got " + b.foot);
   ok(b.focus, "notifications: focus moves to the next unread item");
+  const ev1 = await page.evaluate(() => AUDIT[0] || {});
+  ok(ev1.ev === "notification_read" && /^Read “/.test(ev1.what), "notifications: marking one read records a notification_read audit event, got " + JSON.stringify(ev1));
   ok(await page.evaluate(() => [...document.querySelectorAll("#layer .li:not(.unread)")].every(e => !e.hasAttribute("role"))),
     "notifications: a read item is plain text, not a button");
 
@@ -1634,11 +1636,16 @@ for (const theme of ["light", "dark"]) {
   await page.waitForTimeout(150);
   const said = await page.evaluate(() => S.toast || "");
   ok(/^All notifications marked read\. Audit records who read each one\./.test(said), "notifications: Mark all read says Audit records it, got " + said);
+  const evAll = await page.evaluate(k => AUDIT.slice(0, k).filter(e => e.ev === "notification_read" && /^Read “/.test(e.what)).length, n - 2);
+  ok(evAll === n - 2, "notifications: Mark all read records one read event per item, got " + evAll + " of " + (n - 2));
   const c = await read();
   ok(c.bell === "Notifications, 0 unread" && !c.dot, "notifications: the bell reads 0 unread with no dot, got " + c.bell);
   await page.evaluate(() => openDialog("notifs")); await page.waitForTimeout(120);
   const d = await read();
   ok(d.foot === "All read" && d.all === true && d.rows === 0, "notifications: the reopened dialog reads All read with Mark all read disabled, got " + JSON.stringify(d));
+  await page.evaluate(() => { closeDialog(); NOTIFS[0].unread = true; openDialog("notifs"); }); await page.waitForTimeout(120);
+  await page.click("#layer .li[data-notif]"); await page.waitForTimeout(120);
+  ok(await page.evaluate(() => document.activeElement?.matches(".dlg .x") || false), "notifications: marking the last unread one moves focus to the close button");
   ok(errs.length === 0, "notifications: no JavaScript error: " + errs.join(" | "));
   await page.close();
 }

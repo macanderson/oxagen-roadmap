@@ -4006,13 +4006,25 @@ function notifsBody(){
      '<div class="mono dim" style="font-size:11px;margin-top:3px">'+h(n.kind)+'</div></div>'+
      '<time>'+h(n.t)+'</time></div>';}).join("")+'</div>';
 }
-/* Marks one notification read and keeps focus in the list: on the next unread item, else the dialog. */
+/* Marks one notification read, records who read it, and keeps focus in the dialog: on the next
+   unread item, else on its close button. */
 function notifRead(i){
-  if(!NOTIFS[i]||!NOTIFS[i].unread)return;
-  NOTIFS[i].unread=false;render();
-  var next=document.querySelector('.li[data-notif]');if(next)next.focus();
+  var n=NOTIFS[i];
+  if(!n||!n.unread)return;
+  n.unread=false;
+  auditEvent("notification_read",me().name,"Read “"+n.title+"”","info",n.kind);
+  render();
+  var next=document.querySelector('.li[data-notif]')||document.querySelector('.dlg .x');if(next)next.focus();
 }
-function markAllRead(){for(var i=0;i<NOTIFS.length;i++)NOTIFS[i].unread=false;closeDialog();act('All notifications marked read. Audit records who read each one.');}
+/* One audit event per notification, so the log answers who read each one, as the toast says. */
+function markAllRead(){
+  NOTIFS.forEach(function(n){
+    if(!n.unread)return;
+    n.unread=false;
+    auditEvent("notification_read",me().name,"Read “"+n.title+"”","info",n.kind);
+  });
+  closeDialog();act('All notifications marked read. Audit records who read each one.');
+}
 function userMenu(){
   return '<div class="menu"><div class="menu-hd"><b>Marcus Bell</b><span>marcus@a-intel.example</span></div>'+
    '<button class="menu-i" onclick="openDialog(\'account\',\'profile\')">Account</button>'+
@@ -5213,9 +5225,9 @@ function runMemoryTab(R){
   var L=runMemories(R), F=S.memFold, body;
   if(!R.sealed){
     body='<div class="panel-b"><div class="note">Nothing is written until the seal. This run is '+h(runStatus(R))+
-     '. When its chain seals, the reflector reads it and writes what it learned here.</div></div>';
+     '. When its chain seals, oxagen reads it and writes what it learned here.</div></div>';
   } else if(!L.length){
-    body='<div class="panel-b"><div class="note">This run wrote no memories. The reflector read the sealed run and found nothing another run would need, and no operator steered it.</div></div>';
+    body='<div class="panel-b"><div class="note">This run wrote no memories. oxagen read the sealed run and found nothing another run would need, and no operator steered it.</div></div>';
   } else {
     body='<div class="tw"><table><thead><tr><th>Memory</th><th>Frame</th><th>Fold</th><th>Class</th><th>In the assembler</th></tr></thead><tbody>'+
      L.map(function(o){
@@ -5229,7 +5241,7 @@ function runMemoryTab(R){
        '<td><span class="b b-q mono">'+h(m.cls)+'</span></td><td>'+memAsmCell(m,R.ws)+'</td></tr>';}).join("")+
      '</tbody></table></div>';
   }
-  return '<div class="note" style="margin-bottom:14px"><b>The reflector writes these after the seal.</b> '+
+  return '<div class="note" style="margin-bottom:14px"><b>oxagen writes these after the seal.</b> '+
     'Each lesson becomes a memory, or joins a memory that already says the same thing. '+
     'At '+F.sayings+' sayings from '+F.runs+' runs, a memory becomes a steering proposal that cites every saying.</div>'+
    '<div class="panel" style="margin-bottom:14px" data-run-memories="'+L.length+'"><div class="panel-h"><h3>Memories from this run</h3>'+
@@ -5253,7 +5265,7 @@ function runSelfGrade(R){
     '<dt>Cost</dt><dd>'+G.tokens.toLocaleString()+' tokens, $'+h(G.cost)+', billed as overhead</dd>'+
     '<dt>Retention</dt><dd>deleted '+h(SK_CFG.reflect.retain)+' after capture</dd></dl>':'';
   if(!R.sealed||!G){
-    b='<div class="note">Captured after the seal. This run is '+h(runStatus(R))+'. When its chain seals, Oxagen asks the agent the four questions of rubric <span class="mono">'+h(rub)+'</span> in one out-of-band turn.</div>';
+    b='<div class="note">Captured after the seal. This run is '+h(runStatus(R))+'. When its chain seals, oxagen asks the agent the four questions of rubric <span class="mono">'+h(rub)+'</span> in one out-of-band turn.</div>';
   } else if(G.deleted){
     b='<div class="note">Deleted on <span class="mono">'+h(G.deleted)+'</span>, '+h(SK_CFG.reflect.retain)+' after capture. The run’s frames, its seal and the memories it wrote are untouched.</div>';
   } else if(!canResearch()){
@@ -9788,7 +9800,7 @@ function stgMemoryTab(w){
      '<td class="num">'+tokn(m.token_cost)+' tok</td><td>'+st+'</td></tr>';}).join("");
   var agg='<div class="grid g4" style="margin-bottom:14px">'+
    '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s" data-mem-folded="'+G.folded+'">folded from '+G.folded+' sayings</span></div>'+
-   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s" data-mem-imports="'+G.imports+'">'+G.steers+' operator steers'+(G.imports?', ':' and ')+G.notes+' reflections'+(G.imports?', and '+G.imports+' imported line'+(G.imports===1?'':'s'):'')+'</span></div>'+
+   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s" data-mem-imports="'+G.imports+'">'+G.steers+' operator steers'+(G.imports?', ':' and ')+G.notes+' reflections'+(G.imports?', and '+G.imports+' imported saying'+(G.imports===1?'':'s'):'')+'</span></div>'+
    '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
    '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a rule is proposed as a record instead</span></div></div>';
   return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
@@ -16167,7 +16179,7 @@ function cedKey(e){
 }
 
 /* ---- the wizard shell ----
-   One dialog, five kinds. S.wz holds the draft; the step list is a function of the kind and, for a
+   One dialog, six kinds. S.wz holds the draft; the step list is a function of the kind and, for a
    tool, of the path the operator took at the recommendation. Every kind ends on the same step,
    because every kind ends the same way. */
 S.wz=null;
@@ -16197,7 +16209,7 @@ DLG_EXT.create=function(){
       '<span class="fp mono">'+c.file+'</span></span></button>';}).join("")+'</div>'+
     '<div class="note" style="margin-top:14px">Each one ends on a pull request against '+h(w.main)+
     '. The thing exists once someone merges it, and a reviewer can stop it there. '+
-    'A memory from the Markdown import is the exception: it is written when you accept it, and it steers at may or below.</div>',
+    'A memory from the Markdown import is the exception: it is written when you publish the import, and it steers at may or below.</div>',
   f:'<span class="grow mono dim" style="font-size:11px">'+h(w.name)+' · '+h(w.main)+'</span><button class="btn" onclick="closeDialog()">Close</button>'};
 };
 
@@ -16648,7 +16660,7 @@ function wzImport(){
       }).join("")+'</tbody></table></div>'+
      '<div class="imp-bar"><label for="impAsAll">Import every file as</label><select id="impAsAll" onchange="impFilesAs(this.value)">'+
       ["records","memories"].map(function(v){return '<option'+(z.asAll===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select></div></div>';
-    return {t:"Import Markdown", s:"Drop a directory or pick files, and Oxagen lists the Markdown it finds.",
+    return {t:"Import Markdown", s:"Drop a directory or pick files, and oxagen lists the Markdown it finds.",
      b:'<div class="wz-drop imp-drop" ondragover="impDrag(event,true)" ondragleave="impDrag(event,false)" ondrop="impDrop(event)">'+
         '<span class="ic">'+icon("dir")+'</span><span class="grow">Drop a directory or Markdown files here</span>'+
         '<button class="btn sm" onclick="this.nextElementSibling.click()">Choose a directory</button>'+
@@ -16661,7 +16673,7 @@ function wzImport(){
        (z.skipped.length?'<div class="field" style="margin-top:14px"><label>Skipped</label>'+impSkipList(z)+'</div>':'')+
        (inc.length?'<div class="note" style="margin-top:14px" data-imp-cost="'+impCost(tok)+'">stella reads '+inc.length+' '+(inc.length===1?'file':'files')+', about '+tok+' tokens. '+
          'That costs about '+usd(impCost(tok).toFixed(2))+' in usage credits, billed to '+h(ORG.name)+'. Nothing is sent until you choose Parse with stella.</div>'
-        :'<div class="note" style="margin-top:14px">Oxagen skips dependency and build directories, version control, anything that is not Markdown, and any file over '+MD_IMPORT.max_kb+' KB.</div>'),
+        :'<div class="note" style="margin-top:14px">oxagen skips dependency and build directories, version control, anything that is not Markdown, and any file over '+MD_IMPORT.max_kb+' KB.</div>'),
      f:wzNext("Parse with stella",inc.length>0&&!z.reading,"impParse();")};
   }
   if(z.step===2){
