@@ -60,7 +60,10 @@ export function markdown(md) {
       break;
     }
     const tag = ordered ? "ol" : "ul";
-    return { html: `<${tag}>${items.map((it) => `<li>${inline(it.text)}${it.sub}</li>`).join("")}</${tag}>`, end: j };
+    // A list a table interrupts goes on from its own number.
+    const n = ordered ? parseInt(L[start].trim(), 10) : 1;
+    const at = ordered && n > 1 ? ` start="${n}"` : "";
+    return { html: `<${tag}${at}>${items.map((it) => `<li>${inline(it.text)}${it.sub}</li>`).join("")}</${tag}>`, end: j };
   }
   while (i < L.length) {
     const l = L[i];
