@@ -26,7 +26,7 @@ agent ──> local gateway ──> cloud gateway ──> model provider, MCP se
                               meters, and records
 ```
 
-ADR-187 records what each gateway does, the operator commands, the live run view, the work record, and the proposals still open. This plan covers the screen, commands per harness, waste, harness setup, context record delivery, and the build order.
+ADR-187 records what each gateway does, the operator commands, the live run view, the work record, and the proposals still open. This plan covers the screen, commands per harness, waste, harness setup, steering record delivery, and the build order.
 
 ## Sensitive-data screen
 
@@ -79,7 +79,7 @@ The headline figure is cost per verified outcome.
 
 ## Harness setup
 
-Enrollment points each harness's model calls and MCP servers at the local gateway. It edits the user's config directly and restores it on `unenroll`. It changes a repository's config through a pull request, as a context record lands, which also reaches cloud sessions that clone the repository.
+Enrollment points each harness's model calls and MCP servers at the local gateway. It edits the user's config directly and restores it on `unenroll`. It changes a repository's config through a pull request, as a steering record lands, which also reaches cloud sessions that clone the repository.
 
 | Harness | Model calls | MCP servers | Pinning on a managed device |
 |---|---|---|---|
@@ -92,9 +92,9 @@ Enrollment points each harness's model calls and MCP servers at the local gatewa
 
 Tools a vendor runs never pass either gateway: claude.ai connectors, Codex apps and hosted web search, Cursor Cloud Agents and its built-in browser and search, and Claude Desktop's remote connectors. On a managed device Oxagen turns them off (proposal 8). Elsewhere the record marks them as unrouted.
 
-## Context record delivery
+## Steering record delivery
 
-Context records keep their name. Their kinds include skills, business rules, code rules, style preferences, facts, and memories, alongside the kinds in use today.
+Each steering record is a Markdown file with frontmatter under `.oxagen/steering/` (ADR-187). A steering record's kinds include skills, business rules, code rules, style preferences, facts, and memories, alongside the kinds in use today.
 
 | Kind | How it reaches the agent |
 |---|---|
@@ -102,7 +102,7 @@ Context records keep their name. Their kinds include skills, business rules, cod
 | Skills | A pull request puts each skill in the directory each harness reads, such as `.claude/skills/` |
 | Memories | Stored in Oxagen. The cloud gateway adds the recalled ones to each turn |
 
-Two kinds move in the code: memories live in Neo4j as `AgentMemory` today, and skills live in `.oxagen/skills/`, both separate from context records.
+Two kinds move in the code: memories live in Neo4j as `AgentMemory` today, and skills live in `.oxagen/skills/`, both separate from the other records.
 
 ## Proposed build order
 
@@ -112,7 +112,7 @@ Two kinds move in the code: memories live in Neo4j as `AgentMemory` today, and s
 4. The signed record and the SOC 2 evidence export.
 5. The MCP entry point and toolbelt, enrollment's import, and pinning.
 6. The sensitive-data screen, once its detection design is chosen.
-7. Skills and memories as context record kinds, and their delivery.
+7. Skills and memories as steering record kinds, and their delivery.
 8. Verification of done, spend by outcome, and waste reason codes.
 9. Agent messages and triggers, HTTP egress, and the customer-hosted cloud gateway.
 

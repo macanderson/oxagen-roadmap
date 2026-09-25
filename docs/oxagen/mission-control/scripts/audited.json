@@ -160,7 +160,7 @@
       ],
       "milestone": "M0",
       "confidence": "medium",
-      "note": "Proposal's cost.fx_rates is nonsense. Appendix F sends `workbench/agents/new` to the Agents page, and \"register\" is its first §14 action. Important timing detail from §6.2: the call itself only opens a Context PR against the main repo (wrk.repositories is read to find it), nothing is written to Postgres until merge, when the principal, its roles and its toolbelt are created and definition_digest/definition_commit_sha are stamped. Milestone medium for exactly that reason: identity creation is M0 IAM and agents must exist for M1's \"gateway wraps Stella and Claude Code\", but the Context PR delivery path depends on the GitHub App machinery that §17 lists under M3."
+      "note": "Proposal's cost.fx_rates is nonsense. Appendix F sends `workbench/agents/new` to the Agents page, and \"register\" is its first §14 action. Important timing detail from §6.2: the call itself only opens a Steering PR against the main repo (wrk.repositories is read to find it), nothing is written to Postgres until merge, when the principal, its roles and its toolbelt are created and definition_digest/definition_commit_sha are stamped. Milestone medium for exactly that reason: identity creation is M0 IAM and agents must exist for M1's \"gateway wraps Stella and Claude Code\", but the Steering PR delivery path depends on the GitHub App machinery that §17 lists under M3."
     },
     {
       "tool": "update_agent",
@@ -174,7 +174,7 @@
       ],
       "milestone": "M0",
       "confidence": "medium",
-      "note": "Same shape and the same M0/M3 tension as register_agent: a Context PR changing `.oxagen/agents/<slug>.toml`, with identity and belt updated on merge (definition_digest, definition_commit_sha, status). The mockup's agent source editor plus commit dialog on the Agents page is this tool's surface."
+      "note": "Same shape and the same M0/M3 tension as register_agent: a Steering PR changing `.oxagen/agents/<slug>.toml`, with identity and belt updated on merge (definition_digest, definition_commit_sha, status). The mockup's agent source editor plus commit dialog on the Agents page is this tool's surface."
     },
     {
       "tool": "retire_agent",
@@ -187,7 +187,7 @@
       ],
       "milestone": "M0",
       "confidence": "medium",
-      "note": "§6.2: \"The principal is retired, never deleted, so its runs keep their identity\": status='retired', assignments dropped, credentials revoked (the table the proposal missed). Same Context-PR dependency on M3 as the other two definition tools."
+      "note": "§6.2: \"The principal is retired, never deleted, so its runs keep their identity\": status='retired', assignments dropped, credentials revoked (the table the proposal missed). Same Steering-PR dependency on M3 as the other two definition tools."
     },
     {
       "tool": "get_agent",
@@ -709,7 +709,7 @@
       "tables": [],
       "milestone": "M3",
       "confidence": "high",
-      "note": "Empty is the real answer: §9 stores records as :Record nodes in the organization's Neo4j database and §4.2 puts \"context records and their lineage\" in Neo4j, never Postgres. Appendix A has no context schema. Its primary caller is a harness hitting the provider's context/append endpoint; Steering is where the appended records are read back. M3 delivers \"the records endpoint\"."
+      "note": "Empty is the real answer: §9 stores records as :Record nodes in the organization's Neo4j database and §4.2 puts \"steering records and their lineage\" in Neo4j, never Postgres. Appendix A has no context schema. Its primary caller is a harness hitting the provider's context/append endpoint; Steering is where the appended records are read back. M3 delivers \"the records endpoint\"."
     },
     {
       "tool": "get_record",
@@ -733,7 +733,7 @@
       "tables": [],
       "milestone": "M3",
       "confidence": "medium",
-      "note": "Appendix E: \"new record on the lineage\": a graph write, so no Postgres table. Medium because retirement of a *published* record is §10.3.5, a Context PR that sets status=\"archived\" in place, and that path runs through open_context_pr's git side rather than this tool. Steering's \"retire\" action is the surface either way."
+      "note": "Appendix E: \"new record on the lineage\": a graph write, so no Postgres table. Medium because retirement of a *published* record is §10.3.5, a Steering PR that sets status=\"archived\" in place, and that path runs through open_steering_pr's git side rather than this tool. Steering's \"retire\" action is the surface either way."
     },
     {
       "tool": "recall_context",
@@ -752,12 +752,12 @@
       "note": "Graph write (a record_proposal node, §9.2). M3 delivers \"the promoter\"; the Steering page's Proposals tab is its surface."
     },
     {
-      "tool": "open_context_pr",
+      "tool": "open_steering_pr",
       "screens": ["Steering"],
       "tables": ["wrk.repositories", "wrk.workspaces", "audit.audit_events"],
       "milestone": "M3",
       "confidence": "medium",
-      "note": "The only Context-and-steering tool with a real Postgres footprint. It reads wrk.repositories to find the GitHub App installation and target, the main repo for workspace-scoped records, the linked repo for repository-scoped ones (§10.1, §10.3.1). The other two are the merge side of the same lifecycle rather than the open call: §10.3.4 says merge triggers \"a bundle version bump for the workspace\" (wrk.workspaces.bundle_version) and a `steering_published` audit event, flag if the matrix wants those attributed to the webhook handler instead. M3 delivers \"Context PRs through the GitHub App\"."
+      "note": "The only Context-and-steering tool with a real Postgres footprint. It reads wrk.repositories to find the GitHub App installation and target, the main repo for workspace-scoped records, the linked repo for repository-scoped ones (§10.1, §10.3.1). The other two are the merge side of the same lifecycle rather than the open call: §10.3.4 says merge triggers \"a bundle version bump for the workspace\" (wrk.workspaces.bundle_version) and a `steering_published` audit event, flag if the matrix wants those attributed to the webhook handler instead. M3 delivers \"Steering PRs through the GitHub App\"."
     },
     {
       "tool": "list_proposals",
@@ -952,21 +952,21 @@
         "field": "milestone",
         "from": "M0",
         "to": "M3",
-        "why": "§6.2 is unconditional: \"Creating or changing an agent in Mission Control (register_agent, update_agent) does not write Postgres first. It opens a Context PR on the main repo… Merge creates or updates the principal, the roles the definition asks for, and the toolbelt.\" §17 dates Context-PR delivery to M3 (\"Context PRs through the GitHub App\"); M0 delivers only \"IAM\" and M0/M1 have the App installation for repo binding, not PR authoring. The tool as specified cannot execute before M3. The row's own note names this dependency and still assigns M0."
+        "why": "§6.2 is unconditional: \"Creating or changing an agent in Mission Control (register_agent, update_agent) does not write Postgres first. It opens a Steering PR on the main repo… Merge creates or updates the principal, the roles the definition asks for, and the toolbelt.\" §17 dates Steering-PR delivery to M3 (\"Steering PRs through the GitHub App\"); M0 delivers only \"IAM\" and M0/M1 have the App installation for repo binding, not PR authoring. The tool as specified cannot execute before M3. The row's own note names this dependency and still assigns M0."
       },
       {
         "tool": "update_agent",
         "field": "milestone",
         "from": "M0",
         "to": "M3",
-        "why": "Same §6.2 mechanism (\"a Context PR changing the definition; identity and belt update on merge\", Appendix E) and the same §17 M3 dependency on Context PRs through the GitHub App."
+        "why": "Same §6.2 mechanism (\"a Steering PR changing the definition; identity and belt update on merge\", Appendix E) and the same §17 M3 dependency on Steering PRs through the GitHub App."
       },
       {
         "tool": "retire_agent",
         "field": "milestone",
         "from": "M0",
         "to": "M3",
-        "why": "Appendix E: \"a Context PR removing the file; principal retired, never deleted\". §6.2: \"Deleting an agent is a PR that removes the file.\" Same M3 dependency as its two siblings."
+        "why": "Appendix E: \"a Steering PR removing the file; principal retired, never deleted\". §6.2: \"Deleting an agent is a PR that removes the file.\" Same M3 dependency as its two siblings."
       },
       {
         "tool": "respond_to_invite",
@@ -991,6 +991,6 @@
       "Honesty flags on rows graded high that the spec does not support. rotate_api_key: \"keeps the old credential valid for a grace window (so likely two rows)\" appears nowhere; §15's rotation-with-validity-windows language is about bundle and attestation keys, not API keys; iam.credentials has no grace column. ingest_frames: the note itself says \"medium confidence on that last one\" about audit.archive_segments while the row is graded high (the claim is in fact correct per §13.3, \"The archive segment is written at seal time\", but a hedged table inside a high row is a grading error). set_policy and ask_assistant repeat that pattern with wrk.workspaces and org.organizations. list_approvals and resolve_approval are graded high while naming a screen §14 says does not exist. set_member_role is high on iam.principal_role_assignments, which is inferred: the spec gives only org.org_users.role and wrk.workspace_users.role for membership, and §6.3's roles are the tool-grant roles.",
       "Worth recording on the credit side, because it constrains how much of the above is the matrix's fault rather than the spec's: across 96 rows there is not one invented table name: every entry is among the 37, which is a real improvement over the proposal (cost.fx_rates on register_agent, control.event_subscriptions on both subscription tools, audit.legal_holds on update_workspace, tools.policy_versions on update_org and on the ontology tools were all keyword collisions, and all were removed with the reasoning shown). All ten screens have tools. Several milestone errors were overturned correctly against the spec: link_repository M4→M0 (M0's acceptance test is verbatim \"A second repo can be linked and unlinked\"), list_runs M0→M1, get_run M2→M1 and export_run M0→M1 (M1 delivers render replay and \"An exported run can be verified offline\"), get_spend and list_findings M0→M2, export_statement M5→M2 (M2 acceptance: \"An operator's statement sums exactly to their agents' runs\"), export_data and erase_data M0→M5, set_kill_switch M0→M2 (§17 M2 \"Kill switches\"), set_funding_source M4→M1, set_model_route to Organization per §4.5 rule 2, and export_run's grade NEW→INHERIT (Appendix E: absorbs \"export_data (run part)\")."
     ],
-    "verdict": "Strong work with a small number of hard errors and one systemic weakness. Table hygiene is excellent: zero invented names across 96 rows, and roughly a dozen of the proposal's keyword-collision tables were correctly overturned with the section that settles each. Milestone reasoning is mostly better than the matrix it audits, and the overturns (link_repository to M0, the M1 run tools, the M2 spend tools, the M5 audit tools) are defensible from §17's acceptance tests. Seven corrections stand: three tools name \"Approvals\" as a screen when §14 states in its first paragraph that Approvals is not a page, and does so in rows graded high that quote that very sentence in their own notes; the three agent-definition tools sit at M0 when §6.2 makes them Context-PR-first and §17 dates Context PRs to M3, a dependency each note identifies and then ignores; and respond_to_invite borrows Appendix E's reserved \"headless\" marking, which belongs to ingest_frames and fetch_commands alone. The systemic weakness is not the assignments' fault and should be read as a spec finding: M6 has no tool because none exists, five §14 primary actions and the assurance suite have no tool at all, five of the ten pages are delivered by no milestone, eight table names in the prose violate A.0's own \"a table not here does not exist\", and Appendix E's count of new tools is off by two with the wrong families named. Checked: all 96 table lists against the 37; all screen values against the 10 and against each screen's §14 job and primary actions; every milestone against §17's Delivers and Accepted-when columns and §17.1's phases; both coverage directions; and the \"high\" confidence rows against the sections cited."
+    "verdict": "Strong work with a small number of hard errors and one systemic weakness. Table hygiene is excellent: zero invented names across 96 rows, and roughly a dozen of the proposal's keyword-collision tables were correctly overturned with the section that settles each. Milestone reasoning is mostly better than the matrix it audits, and the overturns (link_repository to M0, the M1 run tools, the M2 spend tools, the M5 audit tools) are defensible from §17's acceptance tests. Seven corrections stand: three tools name \"Approvals\" as a screen when §14 states in its first paragraph that Approvals is not a page, and does so in rows graded high that quote that very sentence in their own notes; the three agent-definition tools sit at M0 when §6.2 makes them Steering-PR-first and §17 dates Steering PRs to M3, a dependency each note identifies and then ignores; and respond_to_invite borrows Appendix E's reserved \"headless\" marking, which belongs to ingest_frames and fetch_commands alone. The systemic weakness is not the assignments' fault and should be read as a spec finding: M6 has no tool because none exists, five §14 primary actions and the assurance suite have no tool at all, five of the ten pages are delivered by no milestone, eight table names in the prose violate A.0's own \"a table not here does not exist\", and Appendix E's count of new tools is off by two with the wrong families named. Checked: all 96 table lists against the 37; all screen values against the 10 and against each screen's §14 job and primary actions; every milestone against §17's Delivers and Accepted-when columns and §17.1's phases; both coverage directions; and the \"high\" confidence rows against the sections cited."
   }
 }

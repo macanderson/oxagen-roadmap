@@ -40,7 +40,7 @@ Work through every check. For each, record PASS, FAIL or N/A (with why). Cite ev
 14. **Accessibility.** Tabs use `role=tablist` and `role=tab` with `aria-selected`. Clickable rows are reachable by keyboard and named. Dialogs are `role=dialog` with `aria-modal` and a labelled close. State is never colour alone. The page is operable by keyboard end to end.
 15. **Permissions.** Read requires `repository.read`. `link_repository`, `unlink_repository` and `set_production_branch` are refused server-side to anyone but org Owner or Admin or workspace Owner; `open_init_pr` to anyone but org Owner or Admin. Verify with a role that lacks them. Moving main is not offered.
 16. **Rules.** Check each rule in the spec's last section: frames and SteeringFrames never share a name; a published record is a source, never a frame; every fact is read, not cached as current; no person scored or ranked; nothing claims enforcement and nothing in `.oxagen/` grants authority; the tab counts are rollups; plain-noun headings with one-sentence subtext; one gold action; future-only fields render as not recorded; the permission table names the writes.
-17. **Vocabulary.** The page says pull request, never Context PR, and Steering record, never context record. Search the build's strings for both old terms.
+17. **Vocabulary.** The page says pull request and Steering record. Search the build's strings for any older name for either.
 18. **Nothing extra.** List anything on the built page that is not in the spec. The app's production branch control in the repository dialog is not in the design: note it for the reviewer.
 
 ## Output

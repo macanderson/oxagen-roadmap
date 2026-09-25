@@ -85,7 +85,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | Evidence: the signal and its baseline, the trend, each run’s task reference, its cost and what was wasted, the method, who is involved | `EVIDENCE[]` | `get_finding_evidence` | none. A cited run carries its measured and counterfactual money, not the run’s cost or task reference | ❌ |
 | Fix, the help article: why, before and after, steps | `FIX[kind]` | help content by finding kind | The finding’s one-sentence `fix` ships (`finding.shared.ts:46`). No article | ❌ |
 | Fix, the action that records the change | the article’s action | `record_finding_fix` | `packages/oxagen/src/contracts/finding.fix.record.ts:16-34` (org Owner or Admin; on the agent surface it waits for a person’s approval) | ✅ |
-| Fix, the pull request | `FIX[kind].shape` `pr` | a proposal from the finding, then `open_context_pr` | `open_context_pr` opens a pull request for a proposal (`packages/oxagen/src/contracts/context.pr.open.ts:96`). Nothing turns a finding into a proposal. The app’s Fix dialog drafts one through the create flow (`apps/app/src/features/spend/fix-dialog.tsx:1-4`) | 🟡 |
+| Fix, the pull request | `FIX[kind].shape` `pr` | a proposal from the finding, then `open_steering_pr` | `open_steering_pr` opens a pull request for a proposal (`packages/oxagen/src/contracts/steering.pr.open.ts:96`). Nothing turns a finding into a proposal. The app’s Fix dialog drafts one through the create flow (`apps/app/src/features/spend/fix-dialog.tsx:1-4`) | 🟡 |
 | Dismiss | none | `dismiss_finding` | `packages/oxagen/src/contracts/finding.dismiss.ts:12-29`. The design draws no Dismiss control | ✅ |
 
 ## Future-only fields
@@ -119,7 +119,7 @@ The thumb bar holds Work (lit, with its count), Agents, Tools, Spend and More. M
 ## Permissions
 
 - Read: `work.read` for the tab, as the design names it (not in `packages/iam` today). `list_findings` and `get_finding_evidence` allow org Owner, Admin, Billing and Member, and workspace Owner and Member (`finding.list.ts:35-39`, `finding.evidence.get.ts:27-31`).
-- Writes, each a governed action recorded in Audit: `record_finding_fix` (org Owner or Admin, `finding.fix.record.ts:30`), `open_context_pr` for a pull request, and **Create work item**, which no contract or permission carries yet.
+- Writes, each a governed action recorded in Audit: `record_finding_fix` (org Owner or Admin, `finding.fix.record.ts:30`), `open_steering_pr` for a pull request, and **Create work item**, which no contract or permission carries yet.
 
 ## Backend gaps this page depends on
 
@@ -128,7 +128,7 @@ The thumb bar holds Work (lit, with its count), Agents, Tools, Spend and More. M
 - A trend per finding, and the signal and baseline the evidence dialog shows
 - The operator on a finding’s runs beside its subject
 - Each cited run’s cost, task reference and cause of waste in `get_finding_evidence`
-- A proposal from a finding, so **Fix** can open its pull request through `open_context_pr`
+- A proposal from a finding, so **Fix** can open its pull request through `open_steering_pr`
 - Help articles per finding kind
 
 ## Rules every build of this page must keep

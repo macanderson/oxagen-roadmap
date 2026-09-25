@@ -9,7 +9,7 @@ export default {
   lead: "A CI light reports a pull request's checks as GitHub itself reports them: one dot and a done-of-total count, nothing more until someone opens the checks. It blinks blue while anything runs, turns a pulsing red the moment one job fails, and settles to a static green once every job has passed or a static grey while every job still waits.",
   root: ".ci",
   css: "lines 2135 to 2145",
-  usedOn: ["Repositories (Changes table)", "Steering (Context PRs)"],
+  usedOn: ["Repositories (Changes table)", "Steering (Steering PRs)"],
   stories: [
     {
       id: "states",
@@ -57,7 +57,7 @@ export default {
   ],
   usage: {
     when: [
-      "A pull request or a proposed change with a set of automated checks: the Repositories Changes table, a Context PR.",
+      "A pull request or a proposed change with a set of automated checks: the Repositories Changes table, a Steering PR.",
       "Any place that needs one glance at whether checks are done, passing, or blocked, without opening the list.",
     ],
     not: [

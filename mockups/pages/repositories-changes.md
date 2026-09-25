@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/core-platform/repositories/changes`. The path is unchanged (`fleet-operations-routes.md`, Runtimes and Repositories). One pull request is `/{org}/{ws}/repositories/changes/<id>` in the app, the address the close comment links to (`apps/app/src/features/repositories/view.ts:19-42`). In the mockup a selected change is held in page state and the hash stays `/changes` |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: Unchanged, D7 (Steering record, never context record) and the vocabulary (pull request, never Context PR). `docs/fleet-operations-ia.md`: Workspace navigation (the Repositories count is the open pull requests Oxagen opened) and Runtimes and Repositories (Changes lists Steering record pull requests under that name). `docs/mission-control-spec.md` §10.2 and §10.3 (the pull request lifecycle and its checks) |
+| Spec | `docs/fleet-operations-wedge.md`: Unchanged, D7 (Steering record is the only name) and the vocabulary (pull request, never Steering PR). `docs/fleet-operations-ia.md`: Workspace navigation (the Repositories count is the open pull requests Oxagen opened) and Runtimes and Repositories (Changes lists Steering record pull requests under that name). `docs/mission-control-spec.md` §10.2 and §10.3 (the pull request lifecycle and its checks) |
 | Design | `mockups/src/engine.js`: `chgTab()`, `selectedOxpr()`, `oxprDetail()`, `oxprCanMerge()`, `oxprMerge()`, `ciCounts()`, `ciLight()`, `oxprCiLight()`, `oxprUrl()`, `closeComment()`, `prClose()`, `DLG_EXT.closepr`, `wzFiles()`, `wzChecks()`, `OXPR_KIND`, `PR_STATE`, inside `pRepos()`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded, empty, loading, error, access denied |
 | Storybook | `Oxagen / Repositories / Changes`: Loaded, Empty, Loading, Error, Access denied, and each state · mobile |
@@ -84,7 +84,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 
 | Element | Mockup collection | Target store or contract | Backing today in macanderson/oxagen | Status |
 |---|---|---|---|---|
-| Steering record pull requests: the row, state, checks, files, merge | `OXPRS` (kind `record`) | `list_proposals`, `get_context_pr`, `merge_context_pr` | The six checks run in the order the table gives (`packages/oxagen/src/contracts/context.steering.shared.ts:106-114`). Merge is refused until every check passed and unless the merger fits the governance mode, is pinned to the checked commit, and appends the promotion event to the hash-chained ledger (`packages/handlers/src/context.pr.merge.ts:1-15`). The app's Changes lists this kind (`apps/app/src/features/repositories/actions.ts:412-425`) | ✅ |
+| Steering record pull requests: the row, state, checks, files, merge | `OXPRS` (kind `record`) | `list_proposals`, `get_steering_pr`, `merge_steering_pr` | The six checks run in the order the table gives (`packages/oxagen/src/contracts/context.steering.shared.ts:106-114`). Merge is refused until every check passed and unless the merger fits the governance mode, is pinned to the checked commit, and appends the promotion event to the hash-chained ledger (`packages/handlers/src/steering.pr.merge.ts:1-15`). The app's Changes lists this kind (`apps/app/src/features/repositories/actions.ts:412-425`) | ✅ |
 | Close | `DLG_EXT.closepr`, `prClose()` | `dismiss_proposal` | Closes the pull request, deletes its branch and publishes nothing. The previewed comment is recorded as the reason and is not posted on GitHub (`apps/app/src/features/repositories/actions.ts:524-543`; `apps/app/messages/repositories.json`, `closepr.notPosted` and `closepr.note`) | 🟡 |
 | Oxagen init pull requests | `OXPRS` (kind `bootstrap`) | `open_init_pr`, and a list of them | `open_init_pr` opens one after checking it before the push, and a person merges it on GitHub (`packages/oxagen/src/contracts/repository.init_pr.open.ts:1-35`). Changes does not list it (`apps/app/src/features/repositories/changes.tsx:136-139`) | 🟡 |
 | Skill pull requests | `OXPRS` (kind `skill`) | `propose_skill`, and a list of them | `propose_skill` opens one after six checks run before the push, and a failed check writes nothing (`packages/oxagen/src/contracts/skill.propose.ts:1-21`). Not listed, and nothing merges it through Oxagen | 🟡 |
@@ -123,15 +123,15 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 
 ## Permissions
 
-- Read: `repository.read`. Shipped: `list_proposals` and `get_context_pr` allow org Owner and Admin, and workspace Owner, Member and Viewer.
-- Merge: `merge_context_pr`, org Owner or Admin, or workspace Owner or Member, and then only a merger the governance mode allows. Under `team` that is an org Owner or Admin, or a workspace Owner, other than the author. Under `regulated` it is an org Owner or Admin other than the author. Under `solo` it is any workspace member.
+- Read: `repository.read`. Shipped: `list_proposals` and `get_steering_pr` allow org Owner and Admin, and workspace Owner, Member and Viewer.
+- Merge: `merge_steering_pr`, org Owner or Admin, or workspace Owner or Member, and then only a merger the governance mode allows. Under `team` that is an org Owner or Admin, or a workspace Owner, other than the author. Under `regulated` it is an org Owner or Admin other than the author. Under `solo` it is any workspace member.
 - Close: `dismiss_proposal`, org Owner or Admin, or workspace Owner.
 - Opening a pull request belongs to the page that drafts it: the record, skill, agent and init wizards.
 
 ## Backend gaps this page depends on
 
 - One list of every pull request Oxagen opened, of every kind, with state and checks.
-- Merging skill, agent and init pull requests through Oxagen, to match `merge_context_pr`.
+- Merging skill, agent and init pull requests through Oxagen, to match `merge_steering_pr`.
 - Tool manifests under `.oxagen/tools/` and their pull requests.
 - The reconciler and the drift record it reads.
 - Posting the close comment on GitHub.
@@ -148,4 +148,4 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 - Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
 - Exactly one gold action per screen: **Merge pull request** when it can merge, the header's **Add .oxagen/** otherwise.
 - A future-only field is marked in the design and renders as not recorded in a build until its contract ships.
-- The words are pull request and Steering record. Context PR and context record appear nowhere on screen.
+- The words are pull request and Steering record. No older name for either appears on screen.

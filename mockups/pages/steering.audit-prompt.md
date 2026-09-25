@@ -46,9 +46,9 @@ Work through every check. For each, record PASS, FAIL or N/A (with why). Cite ev
     - Exactly one gold action: New source. Neither chip is gold.
     - No copy says a Steering record or a gate notice is enforced without the tier and the words "routed through Oxagen".
     - No person is scored or ranked.
-    - The product vocabulary holds: Steering record (never "context record"), pull request (never "Context PR"), SteeringFrame for a resolved input and frame for a recorded event.
+    - The product vocabulary holds: Steering record and pull request, with no older name for either, SteeringFrame for a resolved input and frame for a recorded event.
 17. **Accessibility.** Tabs use `role=tablist` and `role=tab` with `aria-selected`; the kind chips are a group with `aria-pressed`; state is never colour alone (a dot and a word); focus is visible; the view is operable by keyboard end to end.
-18. **Permissions.** Reads are refused server-side without the Steering read. Each write (`set_governance_mode`, `propose_record`, `open_context_pr`, `propose_skill`, `update_skill_config`) is gated server-side, not only hidden. The Markdown import's footer names `steering.write · memory.write`, and the build checks both server-side before it writes. The mockup has no refused state for the import, so record what the build shows as a note. Verify with a role that lacks it.
+18. **Permissions.** Reads are refused server-side without the Steering read. Each write (`set_governance_mode`, `propose_record`, `open_steering_pr`, `propose_skill`, `update_skill_config`) is gated server-side, not only hidden. The Markdown import's footer names `steering.write · memory.write`, and the build checks both server-side before it writes. The mockup has no refused state for the import, so record what the build shows as a note. Verify with a role that lacks it.
 19. **Markdown import entry points.** Import Markdown sits in the Steering header on every tab, before New source, and in the ⌘K group Create. Both open the same wizard, and neither is gold.
 20. **Markdown import wizard.** Walk it with the sample directory.
     - The rail reads Files, Review, Publish. The footer names `steering.write · memory.write` on the workspace slug, with Cancel on step 1 and Back after it.

@@ -24,11 +24,11 @@
   "body": "No approver resolved apr_01K5YQ9T2B within 10 minutes. $184.20 USD to vendor:aws was never dispatched; mandate mnd_4471 released the reservation."
  },
  {
-  "kind": "context_pr.opened",
+  "kind": "steering_pr.opened",
   "tone": "gold",
   "unread": false,
   "t": "13:02",
-  "title": "Context PR opened \u00b7 a-intel/platform#519",
+  "title": "Steering PR opened \u00b7 a-intel/platform#519",
   "body": "The promoter proposed a rule on lineage ctx.release.no-reread-changelog: \u201cDo not re-read CHANGELOG.md more than once in a run; cache the first read.\u201d Supported by 682 duplicate tool calls across 212 runs of a-intel.core.release-manager."
  },
  {

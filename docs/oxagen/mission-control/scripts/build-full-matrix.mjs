@@ -95,7 +95,7 @@ const MILESTONE_HINT = [
   [/reconcil|statement|archive|compaction|hold|erasure|retention/, "M5"],
   [/witness|proof|proven|airlock|tamper/, "M6"],
   [/ontology|graph|connector|embedding|repo|issue|entity|source/, "M4"],
-  [/record|reflector|promoter|context pr|steering/, "M3"],
+  [/record|reflector|promoter|steering pr|steering/, "M3"],
   [/gateway|frame|run token|attestation|halt|replay|model route|funding/, "M1"],
   [/org|workspace|member|role|api key|tenan|iam|registry/, "M0"],
 ];

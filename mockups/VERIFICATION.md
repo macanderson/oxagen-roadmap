@@ -13,7 +13,7 @@
   five tabs, Steering with its five tabs and its Library shelves, and Runtimes with one host.
 - `node tools/check-creation.mjs`: 459 passed. `node tools/check-api.mjs`: 60 passed.
   `node tools/check-assistant.mjs`: 49 checks passed. `node tools/check-record-e2e.mjs`: 121
-  passed, which writes a context record, merges its pull request, and finds it on the Records
+  passed, which writes a steering record, merges its pull request, and finds it on the Records
   shelf. `node tools/check-refresh.mjs`: 13 passed. The whole chain is `npm run check`, and it
   exits 0.
 - The route smoke this file reported over 41 unnamed routes is not in the repository, so

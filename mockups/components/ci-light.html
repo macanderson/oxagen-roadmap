@@ -43,7 +43,7 @@
   <div class="dx-meta">
     <span><b>Root</b> <code>.ci</code></span>
     <span><b>CSS</b> <code>engine.css</code> lines 2135 to 2145</span>
-    <span><b>Used on</b> Repositories (Changes table), Steering (Context PRs)</span>
+    <span><b>Used on</b> Repositories (Changes table), Steering (Steering PRs)</span>
   </div>
 </div>
 
@@ -106,7 +106,7 @@
   <h2 id="usage">Usage</h2>
   
   <div class="dx-g2">
-    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A pull request or a proposed change with a set of automated checks: the Repositories Changes table, a Context PR.</li><li>Any place that needs one glance at whether checks are done, passing, or blocked, without opening the list.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A pull request or a proposed change with a set of automated checks: the Repositories Changes table, a Steering PR.</li><li>Any place that needs one glance at whether checks are done, passing, or blocked, without opening the list.</li></ul></div>
     <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A single pass or fail with no in-between: use a <a href="badge.html">badge</a>.</li><li>The checks themselves, once opened: list each one with its own name and result in a table.</li></ul></div>
   </div>
   <div class="dx-dd">
@@ -203,7 +203,7 @@
 1. mockups/components/ci-light.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
 2. The design source: mockups/src/engine.css lines 2135 to 2145. The mockup renders it with ciLight(c, label) (engine.js:7140), ciCounts(list) (engine.js:7130), ciFromSt(def, st) (engine.js:7135), oxprCiLight(p) (engine.js:7146).
 3. The build's implementation: find it by its root selector (.ci) or its name, and list every route that renders it.
-4. Where to see it in the design: Repositories (Changes table), Steering (Context PRs). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+4. Where to see it in the design: Repositories (Changes table), Steering (Steering PRs). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
 ## Procedure
 

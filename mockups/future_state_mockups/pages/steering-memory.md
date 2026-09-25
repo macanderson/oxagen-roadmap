@@ -20,7 +20,7 @@ What an agent's own runs left behind, and how it competes. Memory is recalled, n
 
 **The seven tabs, in this order:** Records (N published) · Skills (N in scope) · Memory (N) · Ontology (N) · Policy (N gates) · Proposals (N candidates plus open pull requests) · Preview. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. The hash is read on load and on `hashchange`; a tab changed by code writes the hash back with `replaceState`, so every view is a link. The bare route `#/:org/:ws/steering` is Records.
 
-Header action: **Write a context record** (gold; opens the record wizard: describe, kind, statement, checks, pull request).
+Header action: **Write a steering record** (gold; opens the record wizard: describe, kind, statement, checks, pull request).
 
 - A lead note states the precedence rule in its own words: **A published must beats recalled memory.** Memory competes only in the volatile selection, as `may` or `info`. To make a memory binding, promote it: a proposal, a pull request, a merge.
 - **Recalled memory** table: Memory (the body, with its id and provenance: run, frame, and whether a steer or a reflection wrote it) · Class (`RULE`, `FACT`, `EPISODE`, `PREFERENCE`) · Force · Scope (workspace, or agent with the agent's slug) · Last recalled (with recalls in 30 days) · Token cost · In the assembler.

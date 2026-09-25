@@ -21,12 +21,12 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 
 1. **Route and shell.** The build serves the route. Steering is lit in the sidebar. There is no Skills nav entry. The breadcrumb ends on Steering.
 2. **Hub header and tabs.** h1 “Steering”. Seven tabs in this order: Records, Skills, Memory, Ontology, Policy, Proposals, Preview. This tab is selected. Each tab is a URL segment, and reloading the URL lands on the same tab.
-3. **One gold action.** Exactly one gold action at a time: the header's, or Open the Context PR, or Merge pull request.
+3. **One gold action.** Exactly one gold action at a time: the header's, or Open the Steering PR, or Merge pull request.
 4. **Sections and tables.** The build has each item below with the same headings and every column named, in that order.
-   - The Candidates and Context PRs control, with counts, each a URL.
+   - The Candidates and Steering PRs control, with counts, each a URL.
    - Candidates: record cards with source, support, id, state, Review.
-   - Context PRs: Pull request · Branch · Opened by · State; the selected PR with its file, body, Checks, and What merge will do or the promotion_event; Merge pull request; Close without merging on an operator's PR.
-5. **Actions.** Review opens the proposal. Open the Context PR opens `ctxpr`. Merge is blocked until every check reports, re-runs every predicate, and publishes exactly once. Close without merging leaves nothing behind.
+   - Steering PRs: Pull request · Branch · Opened by · State; the selected PR with its file, body, Checks, and What merge will do or the promotion_event; Merge pull request; Close without merging on an operator's PR.
+5. **Actions.** Review opens the proposal. Open the Steering PR opens `ctxpr`. Merge is blocked until every check reports, re-runs every predicate, and publishes exactly once. Close without merging leaves nothing behind.
 6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows are wired to the named store; 🟡 rows are wired for the fields that exist and render `NotBacked` for the rest; ❌ rows render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
 7. **States.** Force each state and compare copy and controls with the design:
    - **empty** (`state=empty`): the hub header and tabs stay; the body is “No proposals yet”.

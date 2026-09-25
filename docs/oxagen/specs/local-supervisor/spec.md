@@ -135,7 +135,7 @@ to §23E, and it is what this spec ports.
 ### 2.1 A word collides, and the collision matters
 
 Oxagen already uses "steering" for authored governance documents: the proposal,
-the Context PR, the six checks, the freshness signal, and the published record
+the Steering PR, the six checks, the freshness signal, and the published record
 (ADR-061, ADR-091, ADR-097). The pack uses "steering" for a live directive
 delivered into a running turn.
 

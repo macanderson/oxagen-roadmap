@@ -34,7 +34,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 |---|---|---|---|---|
 | The file | `defBase(slug)` / `defSrc(slug)` from `agentTomlSeed` | `.oxagen/agents/<slug>.toml` at `definition_path`, `definition_digest`, `commit_sha` | DB-backed `agent.definition.*` | 🟡 |
 | Branches | `BRANCHES` | git branches on `wrk.repositories` main repo | `ingestion.repository_bindings` (+heads) | 🟡 |
-| Commit / PR | `S.defPending` | Context PR lifecycle (spec §10.3) | `agent.context_promotions` | 🟡 |
+| Commit / PR | `S.defPending` | Steering PR lifecycle (spec §10.3) | `agent.steering_promotions` | 🟡 |
 
 ## Functionality
 

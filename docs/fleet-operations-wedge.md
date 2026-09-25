@@ -27,7 +27,7 @@ This spec is the design authority for the change. `fleet-operations-ia.md` lays 
 | D4 | A Steering Source and a SteeringFrame are two objects and never collapse into one. A source is durable material a person or an agent wrote. A SteeringFrame is what Oxagen resolved from a source for one run at one injection point. |
 | D5 | Every piece of runtime input an agent receives through Oxagen is a SteeringFrame of one of eight types: goal, invariant, constraint, delegation, procedure, context, invocation and capability. |
 | D6 | Every frame carries its source, the source version and a hash. A frame whose hash no longer matches its source version is excluded as `steering_drift`. |
-| D7 | Context record is renamed Steering record in product language. Files, schemas and tables keep `context` in their names. |
+| D7 | Steering record is the only name for a record, in product language and in files, schemas, tables, and capabilities (amended 2026-09-25 by ADR-187 in `macanderson/oxagen`). |
 | D8 | The Decision trace is the one explanation of a run. It reads the record and adds nothing to it. |
 | D9 | Findings are work. They move from Spend to Work, and a finding becomes a work item when a person picks it up. |
 | D10 | Spend has three views: Overview, Budgets and Optimization. It has no drill pages. |
@@ -75,7 +75,7 @@ Terms are written the way the product writes them. A term in `mono` is a value i
 | Term | Meaning | Replaces |
 |---|---|---|
 | Steering Source | Durable material that can steer an agent: a Steering record, a skill, an ADR, the product vision, an agent definition, the workspace instructions, a glossary term, a memory, a policy, a mandate or a toolbelt. Versioned, and changed only by a pull request or by its own governed write | Library item, artifact |
-| Steering record | A published rule, constraint, procedure, fact, preference or memory in `.oxagen/rules/` | Context record |
+| Steering record | A published rule, constraint, procedure, fact, preference, skill, or memory, one Markdown file per record in `.oxagen/steering/` | The record's former name |
 | SteeringFrame | One resolved piece of runtime input for one run at one injection point: its type, its body or descriptor, its force, its token cost and its provenance. Fixed once recorded | SteeringItem (ADR-093), context frame |
 | Frame type | One of eight: `goal`, `invariant`, `constraint`, `delegation`, `procedure`, `context`, `invocation`, `capability` | kind, for this purpose |
 | Envelope | Every SteeringFrame one run received, grouped by injection point | the compiled bundle, the window |
@@ -221,7 +221,7 @@ Each exclusion names the numbers that decided it: the budget, what was already s
 - `steering.manifest` is a recorded frame kind. Its items carry id, kind, force, tokens, outcome (`included` or `cut`) and reason (`tier`, `budget` or `superseded`). They carry no scope, hash, provenance or body (`packages/tacho/src/wire.ts:626-697`).
 - The assembler (`packages/steering-assembler/src/assemble.ts`) ranks candidates of kind `record`, `steer`, `skill`, `memory`, `ontology`, `policy` and `instruction`, but only `record` and `steer` are produced. Its budget is 2,000 tokens.
 - A Steering record's source fields ship through `list_records` and `get_record`: lineage, kind, force, constraint effect, sharing scope, statement, status, version, checksum, commit, path, published time, versions and the pull request.
-- Proposals and Context PRs ship through `list_proposals`, `get_context_pr`, `open_context_pr` and `merge_context_pr`.
+- Proposals and Steering PRs ship through `list_proposals`, `get_steering_pr`, `open_steering_pr` and `merge_steering_pr`.
 - No capability runs the assembler without delivering (#3879), so the Compiler is future-only.
 - Frame types, provenance per frame, the vision and ADR source kinds, `.oxagen/sources.toml`, delegation frames, capability frames and work order frames are future-only.
 

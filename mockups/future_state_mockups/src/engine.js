@@ -381,7 +381,7 @@ function avatarBody(){
   }
   out+='</div></div>';
   out+='<div class="note" style="margin-top:6px">'+(forPerson?'Saved with <span class="mono">set_preferences</span> and recorded as a frame, like any change to your account.':
-   'Part of the definition: written as <span class="mono">avatar</span> in <span class="mono">.oxagen/agents/&lt;slug&gt;.toml</span>, so it rides a Context PR and shows wherever the agent does.')+'</div>';
+   'Part of the definition: written as <span class="mono">avatar</span> in <span class="mono">.oxagen/agents/&lt;slug&gt;.toml</span>, so it rides a Steering PR and shows wherever the agent does.')+'</div>';
   return out;
 }
 function avatarDlg(){
@@ -401,7 +401,7 @@ function avSave(){
   if(d.kind==="icon"&&!AV_ICONS[d.icon]){act("Pick an icon first.");return;}
   if(d.kind!=="photo")delete d.src;
   S.avDraft=null;
-  if(t.kind==="agent"&&agent(t.key)){agent(t.key).avatar=d;closeDialog();act("Avatar updated on "+t.key+". The definition change opens as a Context PR; the badge shows here now.");}
+  if(t.kind==="agent"&&agent(t.key)){agent(t.key).avatar=d;closeDialog();act("Avatar updated on "+t.key+". The definition change opens as a Steering PR; the badge shows here now.");}
   else if(t.kind==="person"&&PEOPLE[t.key]){PEOPLE[t.key].avatar=d;openDialog("account","profile");act("Avatar saved. set_preferences recorded as a frame.");}
   else if(t.kind==="wznew"&&S.wz){S.wz.av=d;openDialog("wz");}
   else{S.newAv=d;openDialog("register");}
@@ -567,7 +567,7 @@ var TOOLMETA={
  github__delete_branch:["Delete branch","vcs"], github__create_issue_comment:["Create issue comment","record"],
  github__get_commit:["Get commit","read"], claude_code__Edit:["Edit file","file"],
  claude_code__WebFetch:["Fetch a web page","read"], expand_graph:["Expand the graph","read"],
- append_record:["Append record","record"], open_context_pr:["Open a Context PR","vcs"],
+ append_record:["Append record","record"], open_steering_pr:["Open a Steering PR","vcs"],
  send_message:["Send message","message"], search_tools:["Search the belt","read"],
  load_tools:["Load tool definitions","read"], okta__deactivate_user:["Deactivate user","access"]
 };
@@ -758,7 +758,7 @@ function route(){
 function go(hash){location.hash=hash;}
 function applyHashTab(){
   var p=location.hash.replace(/^#\/?/,"").split("/");
-  /* a Steering tab is p[3]; Context PRs is a view inside Proposals; Preview carries its agent */
+  /* a Steering tab is p[3]; Steering PRs is a view inside Proposals; Preview carries its agent */
   if(p[2]==="steering"){
     if(!p[3]) S.tab.steering="records";   /* the bare route is the first tab, whatever was open last */
     else if(p[3]==="proposals"&&p[4]==="prs") S.tab.steering="prs";
@@ -969,7 +969,7 @@ function defForm(a){
    '<dt>At commit</dt><dd class="mono">'+h(a.commit)+(dirty?' · <span style="color:var(--st-approval)">draft '+sha7(defSrc(slug))+'</span>':'')+'</dd>'+
    '<dt>Generated beside it</dt><dd class="mono">.claude/agents/'+h(slug)+'.md</dd></dl></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Changing this agent</h3></div><div class="panel-b">'+
-   '<ul class="chain"><li class="on"><span class="h">1 · Edit here or in the repo</span><div>Either opens a Context PR. Nothing is written to Postgres first.</div></li>'+
+   '<ul class="chain"><li class="on"><span class="h">1 · Edit here or in the repo</span><div>Either opens a Steering PR. Nothing is written to Postgres first.</div></li>'+
    '<li class="on"><span class="h">2 · Checks</span><div>Schema, tools that exist in the registry, no <span class="mono">irreversible</span> without a mandate, and a secret and PII scan on the instructions.</div></li>'+
    '<li class="on"><span class="h">3 · Review</span><div>Governance mode <span class="mono">team</span>: a code-owner review is required.</div></li>'+
    '<li class="on"><span class="h">4 · Merge is the change</span><div>The principal, roles, and toolbelt update. Open your coding agent in the repo and it is there.</div></li></ul>'+
@@ -1302,7 +1302,7 @@ function icon(n){
    cons:'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M9 12h6"/>'};
   return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(p[n]||'')+'</svg>';
 }
-/* The six record kinds of context-record/v0.1. Icon + hue per kind; the statement is always the headline. */
+/* The six record kinds of steering-record/v0.1. Icon + hue per kind; the statement is always the headline. */
 var KINDS={
  rule:{l:"rule",d:"A directive that steers behaviour",i:'<path d="M4 12h14M13 7l5 5-5 5"/>'},
  constraint:{l:"constraint",d:"A hard boundary: require or forbid",i:'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M9 12h6"/>'},
@@ -3305,7 +3305,7 @@ function frameDetail(f){
 /* One request, accounted to the token. CTXW, CTXB, CTXF and CTXX are run_01K5RS7M2E8FJ3QW's first
    model.request (seq 2), the one run whose retrieval is authored in full. The parts sum to the total,
    and the steering band is the bundle version that request recorded (v41). Recorded frames are
-   immutable: a Context PR merged later compiles a new version that reaches the run's next model call. At v41:
+   immutable: a Steering PR merged later compiles a new version that reaches the run's next model call. At v41:
    210 + 1,340 + 2,118 + 11,204 + 496 = 15,368 = cache_read 12,000 + new 3,368.
    Every other run's window is read from its own frames by runContext(R). */
 var CTX_RUN="run_01K5RS7M2E8FJ3QW";
@@ -4425,7 +4425,7 @@ function pAgents(){
   if(S.state==="error") return errorState("Identities","503 iam_principals_unavailable");
   if(S.state==="denied") return deniedState("the identities in this workspace","agent.read on core-platform");
   if(S.state==="empty") return emptyState("No identities registered in "+w.name,
-    "An agent's identity lives in Postgres; its definition is a file in <span class=\"mono\">.oxagen/agents/</span> in the main repo. Registering one opens a Context PR — nothing is written to Postgres first.",
+    "An agent's identity lives in Postgres; its definition is a file in <span class=\"mono\">.oxagen/agents/</span> in the main repo. Registering one opens a Steering PR — nothing is written to Postgres first.",
     '<button class="btn primary" onclick="openDialog(\'wrap\')">Wrap Claude Code</button>'+
     '<button class="btn" onclick="openDialog(\'register\')">Register an agent</button>');
 
@@ -4522,11 +4522,11 @@ var BELT=[
   scope:"labels: Service, Release, Ticket, Commit · max_hops 2"},
  {id:"expand_graph@1",d:"Typed traversal from a node to its neighbours.",
   dec:"allow",rule:"grant:agent.graph.read",scope:"max_hops 2"},
- {id:"recall_context@2",d:"Retrieve published context records for this turn's goal.",
+ {id:"recall_context@2",d:"Retrieve published steering records for this turn's goal.",
   dec:"allow",rule:"grant:agent.graph.read",pinned:true,scope:"scope: workspace + repository"},
- {id:"append_record@2",d:"Append a context record to a lineage.",
+ {id:"append_record@2",d:"Append a steering record to a lineage.",
   dec:"allow",rule:"agent tool default",scope:"kinds: finding, convention"},
- {id:"open_context_pr@1",d:"Open a Context PR on the main repo from a proposal.",
+ {id:"open_steering_pr@1",d:"Open a Steering PR on the main repo from a proposal.",
   dec:"allow",rule:"grant:agent.repo.write #11",scope:"repo: a-intel/platform"},
  {id:"send_message@1",d:"Message another agent in this workspace, or a run.",
   dec:"allow",rule:"agent tool default",scope:"@agent only — @all is not granted"},
@@ -4537,7 +4537,7 @@ var BELT=[
   scope:"deny: curl, ssh, aws, gh auth · cwd under a-intel/platform"},
  {id:"claude_code__Edit@2.1",d:"Replace an exact string in a file on the host.",
   dec:"allow",rule:"grant:agent.repo.write #9 (harness tier)",
-  scope:"paths under the checkout · .oxagen/ needs a Context PR"},
+  scope:"paths under the checkout · .oxagen/ needs a Steering PR"},
  {id:"claude_code__WebFetch@2.1",d:"Fetch a URL and return its text.",
   dec:"require_approval",rule:"pol_v41 rule rg_0022 (egress:third_party)",
   scope:"a domain outside the allow list is approval-gated"},
@@ -4558,14 +4558,14 @@ var AGENT_BELTS={
  "a-intel.core.release-manager":["github__create_pull_request@3","github__create_issue_comment@2",
   "github__merge_pull_request@4","github__create_release@2","github__list_pull_requests@2",
   "github__get_commit@1","github__get_file_contents@2","github__delete_branch@1","linear__get_issue@2",
-  "search_graph@1","expand_graph@1","recall_context@2","open_context_pr@1","claude_code__Bash@2.1","verify@1"],
+  "search_graph@1","expand_graph@1","recall_context@2","open_steering_pr@1","claude_code__Bash@2.1","verify@1"],
  "a-intel.core.stella-ci":["github__get_file_contents@2","github__get_commit@1","github__list_pull_requests@2",
   "github__create_issue_comment@2","search_graph@1","recall_context@2","append_record@2",
   "claude_code__Bash@2.1","send_message@1","verify@1"],
  "a-intel.core.triage":["github__create_issue_comment@2","github__get_file_contents@2","github__get_commit@1",
   "github__list_pull_requests@2","github__create_pull_request@3","github__merge_pull_request@4",
   "github__delete_branch@1","linear__get_issue@2","linear__update_issue@3","slack__post_message@2",
-  "search_graph@1","expand_graph@1","recall_context@2","append_record@2","open_context_pr@1",
+  "search_graph@1","expand_graph@1","recall_context@2","append_record@2","open_steering_pr@1",
   "send_message@1","claude_code__Bash@2.1","claude_code__Edit@2.1","claude_code__WebFetch@2.1",
   "aws_billing__get_cost_and_usage@1"],
  "a-intel.finops.invoice-bot":["stripe__create_payment@5","aws_billing__get_cost_and_usage@1",
@@ -4943,7 +4943,7 @@ function aToolbelt(a,r){
    '<span class="dim mono">)</span>'+
    '<button class="btn sm" onclick="S.beltRan=true;render()">Run</button></div>'+
    '<div class="row" style="gap:6px"><span class="muted" style="font-size:11.5px">Try:</span>'+
-   ["pull request","context record","stripe payment","delete repository","graph"].map(function(x){
+   ["pull request","steering record","stripe payment","delete repository","graph"].map(function(x){
     return '<button class="btn sm" onclick="S.beltQuery=\''+x+'\';S.beltRan=true;render()">'+x+'</button>';}).join("")+'</div>'+
    results+'</div></div>'+
 
@@ -5343,7 +5343,7 @@ function pTools(){
       return '<tr><td class="mono">'+h(p.v)+'</td><td><span class="b b-'+(sm[p.state]||"approval")+'"><span class="d"></span>'+h(p.state)+'</span></td>'+
        '<td>'+h(p.by)+'</td><td class="mono dim" style="font-size:11px">'+h(p.at)+'</td><td class="num">'+p.rules+'</td>'+
        '<td><span class="b b-allowed">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td></tr>';}).join("")+
-     '</tbody></table></div><div class="panel-b"><div class="note">A version is activated by a governed action with approval; in regulated mode it is a Context PR instead. The superseded version is kept, never deleted, because every decision cites the version that made it.</div></div></div>'+
+     '</tbody></table></div><div class="panel-b"><div class="note">A version is activated by a governed action with approval; in regulated mode it is a Steering PR instead. The superseded version is kept, never deleted, because every decision cites the version that made it.</div></div></div>'+
      '</div>'+
      '<div class="panel"><div class="panel-h"><h3>Conditions available to policy</h3></div><div class="panel-b">'+
      '<p class="muted" style="font-size:12px;margin-bottom:11px">All derived from the call and the record. None from prose.</p>'+
@@ -5465,7 +5465,7 @@ DLG_EXT.import=function(arg){
 /* One concern carried from proposal to publication, all of it derived:
    - PRP_SUPPORT holds the supporting-run rows behind each proposal; every count a proposal shows
      (runs, agents, duplicate calls, the baseline proof rate) is computed from those rows.
-   - CTXPR is the Context PR for prp_01K5RU4A. Its six checks run one at a time; merging publishes
+   - CTXPR is the Steering PR for prp_01K5RU4A. Its six checks run one at a time; merging publishes
      CTXPR.record: RECORDS gains it, STEER_BUNDLE gains its rule and bumps its version, and the
      steering band in CTXB and the window total in CTXW grow by the record's tokens, so the context
      tab still sums. Every transition goes through ctxprSet, which makes each state exact to land on
@@ -5536,7 +5536,7 @@ var PRP_META={
  "prp_01K5RU7B":{confidence:0.64,tok:38,recKind:"reflection · unsatisfied",
   support:function(s){return s.runs+" unsatisfied runs in 30 days";},
   rationale:function(s){return "The reflector marked "+s.runs+" triage runs unsatisfied in thirty days. In each, the agent labelled an issue it had not reproduced and a person relabelled it. "+
-   "Support is one agent so far; a person decides whether that is enough to open a Context PR.";},
+   "Support is one agent so far; a person decides whether that is enough to open a Steering PR.";},
   measure:function(s){return "relabels by a person on "+s.runs+" of "+s.runs+" runs";}},
  "prp_01K5RU9C":{person:true,confidence:null,tok:29,recKind:"finding · data-layer drift",
   support:function(s){return s.runs+" data-layer drift findings";},
@@ -5554,11 +5554,11 @@ function prpStats(id){
 }
 function prpById(id){for(var i=0;i<PROPOSALS.length;i++){if(PROPOSALS[i].id===id)return PROPOSALS[i];}return null;}
 
-/* The Context PR for prp_01K5RU4A, and the record it publishes. */
+/* The Steering PR for prp_01K5RU4A, and the record it publishes. */
 var CTXPR={prp:"prp_01K5RU4A", pr:"a-intel/platform#519", branch:"context/ctx.release.no-reread-changelog",
  base:"a4c91e2", head:"7d2e91a", promo:"rec_01K5RW2P7QH4", evt:"evt_01K5RW2Q8", hash:"sha256:9a41c0e7bd238f45",
  checks:[
-  {n:"Schema",ms:900,ok:"context-record/v0.1 valid · 1 file, 1 record, 1 lineage"},
+  {n:"Schema",ms:900,ok:"steering-record/v0.1 valid · 1 file, 1 record, 1 lineage"},
   {n:"Lineage uniqueness",ms:700,ok:"no published record holds ctx.release.no-reread-changelog; this proposal is its only holder"},
   {n:"record_hash recomputation",ms:600,ok:"recomputed over the canonical bytes · sha256:9a41c0e7bd238f45 matches the file"},
   {n:"Secret and PII scan",ms:900,ok:"statement, rationale and evidence scanned · 0 findings"},
@@ -5576,8 +5576,8 @@ S.ctxpr={st:"passed",done:CTXPR.checks.length,timers:[],mergedAt:null};
 S.prpSel=null;
 S.oxprSel=null;   /* the selected row on Repositories › Changes */
 
-/* ---- the Context PR lifecycle, shared by the promoter's and the operator's ----
-   Two things open a Context PR: the promoter, out of runs it aggregated into a proposal, and a
+/* ---- the Steering PR lifecycle, shared by the promoter's and the operator's ----
+   Two things open a Steering PR: the promoter, out of runs it aggregated into a proposal, and a
    person, out of the record wizard. They differ in what they can show for themselves — the
    promoter cites runs and a confidence, a person cites themselves — and they are identical in
    everything that decides whether the record publishes: the same six checks, the same merge, the
@@ -5668,7 +5668,7 @@ function ctxprCheckOk(c){return typeof c.ok==="function"?c.ok():c.ok;}
 DLG_EXT.ctxpr=function(arg){
   var p=prpById(arg||CTXPR.prp)||prpById(CTXPR.prp), s=prpStats(p.id), open=p.id===CTXPR.prp&&S.ctxpr.st!=="none";
   var mine=p.id===CTXPR.prp;
-  return {t:"Open a Context PR",s:p.lineage+" · "+p.id,w:true,b:
+  return {t:"Open a Steering PR",s:p.lineage+" · "+p.id,w:true,b:
    (open?'<div class="callout" style="margin-bottom:14px"><span class="mono">'+h(CTXPR.pr)+'</span> is already open for this concern. One concern, one pull request.</div>':'')+
    '<div class="field"><label>Concern</label><input value="'+h(p.st)+'" aria-label="Concern"><div class="hint">One concern per pull request.</div></div>'+
    '<div class="field"><label>Kind</label><select aria-label="Kind"><option>'+h(p.kind)+' — as the promoter proposed it</option><option>rule — a directive that steers behaviour</option><option>constraint — a hard boundary, require or forbid</option><option>procedure — steps, in order</option><option>fact — a checkable claim</option><option>memory — a durable recollection</option><option>preference — soft, often unfalsifiable</option></select></div>'+
@@ -5682,7 +5682,7 @@ DLG_EXT.ctxpr=function(arg){
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     (open?'<button class="btn primary" onclick="ctxprOpen()">Go to '+h(CTXPR.pr)+'</button>':
      mine?'<button class="btn primary" onclick="ctxprOpen()">Open the pull request</button>':
-     '<button class="btn primary" onclick="closeDialog();act(\'Branch context/'+h(p.lineage)+' pushed and a Context PR opened on a-intel/platform.\')">Open the pull request</button>')};
+     '<button class="btn primary" onclick="closeDialog();act(\'Branch context/'+h(p.lineage)+' pushed and a Steering PR opened on a-intel/platform.\')">Open the pull request</button>')};
 };
 
 /* ---- proposal detail ---- */
@@ -5690,9 +5690,9 @@ function prpBadge(p){
   if(p.id!==CTXPR.prp) return '<span class="b b-'+(p.state==="candidate"?"q":"approval")+'"><span class="d"></span>'+h(p.state)+'</span>'+
     (p.checks==="—"?'':'<span class="b b-'+(p.checks.indexOf("6 / 6")===0?"allowed":"approval")+'">'+h(p.checks)+'</span>');
   var c=S.ctxpr, l=ctxprLabel();
-  if(c.st==="none") return '<span class="b b-approval"><span class="d"></span>ready for a Context PR</span>';
+  if(c.st==="none") return '<span class="b b-approval"><span class="d"></span>ready for a Steering PR</span>';
   if(c.st==="merged") return '<span class="b b-proven"><span class="d"></span>published</span>';
-  return '<span class="b b-approval"><span class="d"></span>open Context PR</span><span class="b b-'+l[0]+'">'+h(l[1])+'</span>';
+  return '<span class="b b-approval"><span class="d"></span>open Steering PR</span><span class="b b-'+l[0]+'">'+h(l[1])+'</span>';
 }
 function prpDetail(p){
   var s=prpStats(p.id), m=s.meta, mine=p.id===CTXPR.prp, c=S.ctxpr;
@@ -5713,9 +5713,9 @@ function prpDetail(p){
   var canOpen=mine&&c.st==="none"&&s.met;
   var action=mine&&c.st!=="none"
    ? '<button class="btn" onclick="S.prpSel=null;S.tab.steering=\'prs\';render()">'+(c.st==="merged"?"Merged in ":"Open ")+h(CTXPR.pr)+'</button>'
-   : canOpen ? '<button class="btn primary" onclick="openDialog(\'ctxpr\',\''+h(p.id)+'\')">Open a Context PR</button>'
+   : canOpen ? '<button class="btn primary" onclick="openDialog(\'ctxpr\',\''+h(p.id)+'\')">Open a Steering PR</button>'
    : !mine&&p.pr!=="—" ? '<span class="mono" style="font-size:12px">'+h(p.pr)+' · '+h(p.checks)+'</span>'
-   : '<button class="btn" disabled>Open a Context PR</button>';
+   : '<button class="btn" disabled>Open a Steering PR</button>';
   return '<div class="row" style="margin-bottom:12px;gap:10px;flex-wrap:wrap"><button class="btn sm" onclick="S.prpSel=null;render()">All proposals</button>'+
     '<span class="mono" style="font-size:12.5px">'+h(p.lineage)+'</span><span class="sp" style="margin-left:auto;display:flex;gap:6px;flex-wrap:wrap">'+prpBadge(p)+'</span></div>'+
    '<div class="grid g3" style="margin-bottom:14px" data-prp-tiles>'+tiles+'</div>'+
@@ -5726,7 +5726,7 @@ function prpDetail(p){
     '<div class="panel"><div class="panel-h"><h3>Supporting runs</h3><span class="b b-q" style="margin-left:auto" data-prp-support>'+h(m.support(s))+'</span></div>'+
      '<div class="tw"><table><thead><tr><th>Run</th><th>Frame</th><th>Verdict</th><th>Record</th></tr></thead><tbody data-prp-rows="'+s.runs+'">'+rows+'</tbody></table></div>'+
     '</div></div>'+
-   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Context PR</h3></div><div class="panel-b">'+
+   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Steering PR</h3></div><div class="panel-b">'+
      '<dl class="kv" style="margin-bottom:13px"><dt>Target</dt><dd class="mono">a-intel/platform</dd><dt>Branch</dt><dd class="mono">context/'+h(p.lineage)+'</dd>'+
      '<dt>File</dt><dd class="mono">.oxagen/rules/'+h(p.lineage)+'.toml</dd><dt>Governance</dt><dd>team · a code-owner review is required</dd></dl>'+action+'</div></div>'+
     '<div class="panel"><div class="panel-h"><h3>If it publishes</h3></div><div class="panel-b"><dl class="kv">'+
@@ -5737,9 +5737,9 @@ function prpDetail(p){
      '<dt>Read back as</dt><dd>every run that renders it cites the record in its context frame, so the Run page shows where it landed</dd></dl></div></div></div></div>';
 }
 
-/* ---- the Context PR, as a state machine ---- */
+/* ---- the Steering PR, as a state machine ---- */
 
-/* ---- the operator's Context PRs ----
+/* ---- the operator's Steering PRs ----
    The wizard's last step opens a real one. It is the same object the promoter's lifecycle runs on,
    with one difference that is not cosmetic: a promoter's pull request argues from runs it
    aggregated, and a person's argues from the person. So the checks, the merge, the promotion event
@@ -5849,7 +5849,7 @@ function wzRecOpenPr(){
   def.checks=[
    {n:"Schema",ms:900,
     test:function(){return !!tomlOf(recprFileText(def));},
-    ok:"context-record/v0.1 valid · 1 file, 1 record, 1 lineage",
+    ok:"steering-record/v0.1 valid · 1 file, 1 record, 1 lineage",
     bad:"the record file does not parse as TOML"},
    {n:"Lineage uniqueness",ms:700,
     /* A real check, not a sentence, and it is re-run at merge because another pull request can
@@ -5886,7 +5886,7 @@ function wzRecOpenPr(){
 function recprFileText(def){
   var r=def.record, multi=/\n/.test(r.st);
   return '# .oxagen/rules/'+r.id+'.toml\n'+
-   'schema = "context-record/v0.1"\n'+
+   'schema = "steering-record/v0.1"\n'+
    'lineage_id = '+tomlStr(r.id)+'\n'+
    'kind = '+tomlStr(r.kind)+'\n'+
    'sharing_scope = '+tomlStr(r.scope)+'\n'+
@@ -5961,7 +5961,7 @@ function recprDetail(def){
      '<dt>5</dt><dd>deliver it on the next model call of every run in '+h(ws().name)+'</dd></dl>'+
      '<div class="note" style="margin-top:12px">Nothing above happens on the way here. The record steers nothing while this pull request is open, which is the whole reason it is a pull request.</div></div></div>';
   return '<div class="split"><div>'+
-   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Context PR · <span class="mono">'+h(def.pr)+'</span></h3>'+
+   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Steering PR · <span class="mono">'+h(def.pr)+'</span></h3>'+
     '<span class="b b-'+l[0]+'" style="margin-left:auto" data-recpr-state="'+st.st+'"><span class="d"></span>'+h(l[1])+'</span></div><div class="panel-b">'+
     '<p class="eyebrow q">Branch <span class="mono">'+h(def.branch)+'</span> · base main · '+h(def.base)+' · one concern per PR</p>'+
     recprFile(def)+'</div></div>'+
@@ -5987,7 +5987,7 @@ function prTable(){
       prSelected()==="ctxpr"]);}
   PROPOSALS.forEach(function(q){ if(q.id!==CTXPR.prp&&q.pr!=="—")
     rows.push([null,q.pr,q.st,"context/"+q.lineage,"the promoter",'<span class="b b-approval"><span class="d"></span>'+h(q.checks)+'</span>',false]);});
-  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Open and recent Context PRs</h3>'+
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Open and recent Steering PRs</h3>'+
    '<span class="b b-q" style="margin-left:auto">governance: team · code-owner review required</span></div>'+
    '<div class="tw"><table data-lt="off"><thead><tr><th>Pull request</th><th>Branch</th><th>Opened by</th><th>State</th></tr></thead><tbody>'+
    rows.map(function(x){
@@ -6002,8 +6002,8 @@ function ctxprTab(){
   if(prSelected()==="recpr") return table+recprDetail(recprCur());
   var c=S.ctxpr, n=CTXPR.checks.length, l=ctxprLabel(), merged=c.st==="merged", passed=c.st==="passed"||merged;
   var p=prpById(CTXPR.prp), s=prpStats(CTXPR.prp), sb=stgBundle();
-  if(c.st==="none") return table+'<div class="panel"><div class="panel-b"><p style="margin:0 0 12px;font-size:13px">'+h(CTXPR.prp)+' is ready and has no Context PR yet. It steers nothing until one merges.</p>'+
-   '<button class="btn primary" onclick="openDialog(\'ctxpr\',\''+CTXPR.prp+'\')">Open a Context PR</button>'+
+  if(c.st==="none") return table+'<div class="panel"><div class="panel-b"><p style="margin:0 0 12px;font-size:13px">'+h(CTXPR.prp)+' is ready and has no Steering PR yet. It steers nothing until one merges.</p>'+
+   '<button class="btn primary" onclick="openDialog(\'ctxpr\',\''+CTXPR.prp+'\')">Open a Steering PR</button>'+
    '<div class="note" style="margin-top:12px">A pull request here is opened by the promoter, out of runs. <button class="lnk" onclick="wzOpen(\'record\')">Writing one yourself</button> opens the same kind of pull request, argued from you rather than from runs.</div></div></div>';
 
   var checks=CTXPR.checks.map(function(k,i){
@@ -6047,11 +6047,11 @@ function ctxprTab(){
      '<dt>4</dt><dd>emit steering_published to the audit log</dd>'+
      '<dt>5</dt><dd>deliver it on the next model call of every run in core-platform</dd></dl></div></div>';
   return table+'<div class="split"><div>'+
-   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Context PR · <span class="mono">'+h(CTXPR.pr)+'</span></h3>'+
+   '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Steering PR · <span class="mono">'+h(CTXPR.pr)+'</span></h3>'+
     '<span class="b b-'+l[0]+'" style="margin-left:auto" data-ctxpr-state="'+c.st+'"><span class="d"></span>'+h(l[1])+'</span></div><div class="panel-b">'+
     '<p class="eyebrow q">Branch <span class="mono">'+h(CTXPR.branch)+'</span> · base main · '+h(CTXPR.base)+' · one concern per PR</p>'+
     '<pre><span class="c"># .oxagen/rules/'+h(CTXPR.record.id)+'.toml</span>\n'+
-    '<span class="k">schema</span>       = <span class="s">"context-record/v0.1"</span>\n'+
+    '<span class="k">schema</span>       = <span class="s">"steering-record/v0.1"</span>\n'+
     '<span class="k">lineage_id</span>   = <span class="s">"'+h(CTXPR.record.id)+'"</span>\n'+
     '<span class="k">kind</span>         = <span class="s">"'+h(CTXPR.record.kind)+'"</span>\n'+
     '<span class="k">sharing_scope</span>= <span class="s">"workspace"</span>\n'+
@@ -6081,7 +6081,7 @@ function ctxprTab(){
    A tab is a URL segment: #/:org/:ws/steering/<tab>. The hash is read on hashchange and at boot
    (applyHashTab), the way a run tab is; render() writes the hash back with replaceState so a tab
    changed by code (a merge landing on the pull requests view) is still a URL somebody can share.
-   Context PRs is a view inside Proposals (/steering/proposals/prs), still S.tab.steering="prs". */
+   Steering PRs is a view inside Proposals (/steering/proposals/prs), still S.tab.steering="prs". */
 var MEMORY=FIXTURES.MEMORY, ONTOLOGY=FIXTURES.ONTOLOGY, GATES=FIXTURES.GATES, SKILL_SYNC=FIXTURES.SKILL_SYNC,
     STG_PREVIEW=FIXTURES.STEERING_PREVIEW, STG_MANIFESTS=FIXTURES.STEERING_MANIFESTS;
 var STG_TABS=[["records","Records"],["skills","Skills"],["memory","Memory"],["ontology","Ontology"],
@@ -6429,7 +6429,7 @@ function pSteering(){
   if(S.state==="error") return errorState("Steering","503 record_index_unavailable");
   if(S.state==="denied") return deniedState("this workspace’s steering","steering.read on "+w.slug);
   var on=t==="prs"?"proposals":t;
-  var write='<button class="btn primary" onclick="wzOpen(\'record\')">Write a context record</button>';
+  var write='<button class="btn primary" onclick="wzOpen(\'record\')">Write a steering record</button>';
   if(S.state==="empty"){
     var E={
      records:["Nothing steers this workspace yet","Published records live in <span class=\"mono\">.oxagen/rules/</span> on "+h(w.main)+". A record becomes published by being merged, never by being saved here.",write],
@@ -6447,7 +6447,7 @@ function pSteering(){
   var body="";
   if(t==="records"){
     /* The panel is headed "Published records" and the tab badge counts published, so the
-       list and its kind chips count published too. Archiving is a Context PR that sets status = "archived". */
+       list and its kind chips count published too. Archiving is a Steering PR that sets status = "archived". */
     var rk=S.recKind||"", kc={};
     /* Newest first. The list had no order at all, so a record you merged a moment ago landed
        wherever the fixture happened to put it, which on a workspace with sixty published records
@@ -6497,12 +6497,12 @@ function pSteering(){
     var openPRs=stgOpenCount();
     var seg='<div class="kf stg-seg" role="group" aria-label="Proposals or pull requests">'+
      '<button class="btn sm" aria-pressed="'+(t==="proposals")+'" onclick="stgTab(\'proposals\')">Candidates <span class="dim">'+PROPOSALS.length+'</span></button>'+
-     '<button class="btn sm" aria-pressed="'+(t==="prs")+'" onclick="stgTab(\'prs\')">Context PRs <span class="dim">'+openPRs+'</span></button>'+
+     '<button class="btn sm" aria-pressed="'+(t==="prs")+'" onclick="stgTab(\'prs\')">Steering PRs <span class="dim">'+openPRs+'</span></button>'+
      '<span class="dim" style="font-size:12px;margin-left:6px;align-self:center">a record becomes a proposal, a proposal becomes a pull request, a merge publishes it</span></div>';
     if(t==="proposals"){
       var sel=S.prpSel&&prpById(S.prpSel);
       body=seg+(sel?prpDetail(sel):'<div class="panel"><div class="panel-h"><h3>Proposals: candidates that steer nothing</h3>'+
-       '<button class="btn sm" style="margin-left:auto" onclick="wzOpen(\'record\')">Write a context record</button></div>'+
+       '<button class="btn sm" style="margin-left:auto" onclick="wzOpen(\'record\')">Write a steering record</button></div>'+
        '<div class="recs">'+
        PROPOSALS.map(function(p){
         var s=prpStats(p.id);
@@ -6512,7 +6512,7 @@ function pSteering(){
        '</div></div>');
     } else body=seg+ctxprTab();
   }
-  return stgHub(on,body,'<button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'record\')">Write a context record</button>');
+  return stgHub(on,body,'<button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'record\')">Write a steering record</button>');
 }
 
 
@@ -6526,7 +6526,7 @@ function pSteering(){
 
 var OXPR_KIND={
  bootstrap:{l:"Oxagen init", d:"the .oxagen/ tree itself",        i:"repo"},
- record:   {l:"context record", d:".oxagen/rules/<lineage>.toml", i:"steering"},
+ record:   {l:"steering record", d:".oxagen/rules/<lineage>.toml", i:"steering"},
  skill:    {l:"skill",       d:".oxagen/skills/<name>/SKILL.md",  i:"skills"},
  agent:    {l:"agent",       d:".oxagen/agents/<slug>.toml",      i:"agents"},
  tool:     {l:"tool",        d:".oxagen/tools/<name>.toml",       i:"tools"},
@@ -7431,7 +7431,7 @@ function orgLatestSeen(){var best=null;MEMBERS.forEach(function(m){if(!best||m.l
    and Spend reads them back through orgRoutesOffSpend(), so its month total and By model table carry
    every tier Funding counts. */
 var ORG_ROUTES=[
- {tier:"complex",use:"reflection, promotion rationale, Context PR bodies, run names and summaries",
+ {tier:"complex",use:"reflection, promotion rationale, Steering PR bodies, run names and summaries",
   provider:"OpenRouter",route:"z-ai/glm-latest",resolves:"GLM 5.3 · 1.3M context",fallback:"z-ai/glm-4.7",spendModel:"z-ai/glm-latest (Oxagen)",
   fw:{endpoint:"https://models.a-intel.internal/v1",dialect:"Anthropic Messages-compatible",served:"llama-4-405b-instruct (self-served)"}},
  {tier:"light",use:"classification, labeling, entity and property naming, redaction hints, approval summaries, reranking",
@@ -7522,7 +7522,7 @@ var PLANE_MODES=[
  ["dedicated","Dedicated","Your own Postgres cluster and object-storage bucket. Identity, IAM, billing and the price book stay on the shared plane."],
  ["firewall","Behind the firewall","The same containers, as a signed bundle you run. Outbound only, and optional. Fully air-gapped is supported, not degraded."]];
 var FW_OUTBOUND=[
- ["GitHub Enterprise Server · github.a-intel.internal","repo binding, Context PRs, checks, code graph","in use","allowed"],
+ ["GitHub Enterprise Server · github.a-intel.internal","repo binding, Steering PRs, checks, code graph","in use","allowed"],
  ["Model providers","none — every tier resolves inside the network","not used","q"],
  ["Voyage AI","none — embeddings served in-firewall","not used","q"],
  ["Signed usage report · meter.oxagen.com","licence metering: run counts and retained GB, no content","weekly","allowed"],
@@ -8157,7 +8157,7 @@ function skGate(w){
       '<li>Adds one tool to every agent’s belt in this workspace: <span class="mono">search_skills</span>. Not a list of skills — a door.</li>'+
       '<li>Lets the harness load a skill file into the agent’s context, at a token cost this page prices to the cent.</li>'+
       '<li>Starts a <span class="mono">skills.searched</span> and a <span class="mono">skills.loaded</span> frame on every run that uses one, so a sealed run says exactly what procedure it was carrying.</li>'+
-      '<li>Makes <span class="mono">.oxagen/skills.toml</span> a governed file. Changing it is a Context PR, not a settings screen.</li>'+
+      '<li>Makes <span class="mono">.oxagen/skills.toml</span> a governed file. Changing it is a Steering PR, not a settings screen.</li>'+
      '</ul></div>'+
      '<div class="gcol"><h4>'+icon("ask")+'What it does not do</h4><ul>'+
       '<li>It grants no tool. A skill that describes a deploy still cannot deploy; the governed action underneath it decides that.</li>'+
@@ -8431,7 +8431,7 @@ function skLoop(w){
      '<div class="sx-skl">'+[
       ["Rewrite what the agent said","An interjection is a new frame beside the agent’s turn. The agent’s own output is never edited, and a replay shows both."],
       ["Answer on the operator’s behalf","No default answer, no remembered answer, no “last time you chose…”. On timeout the run continues with nothing, which is the conservative end."],
-      ["Feed a reflection back into the work","A self-grade cannot become steering, cannot become a Context PR, and cannot change a later run’s context. The Reflection tab states it in five lines and the file enforces it."],
+      ["Feed a reflection back into the work","A self-grade cannot become steering, cannot become a Steering PR, and cannot change a later run’s context. The Reflection tab states it in five lines and the file enforces it."],
       ["Hide that it happened","There is no silent interjection. A run that was asked something carries the question, the pause, the answer and the wait in its frames."]
      ].map(function(x){
       return '<div class="sx-row"><div class="sx-ki" style="color:var(--sk-held);border-color:color-mix(in srgb,var(--sk-held) 40%,transparent)">'+icon("lock")+'</div>'+
@@ -8483,8 +8483,8 @@ function skReflect(w){
     '<p style="margin-bottom:8px;font-size:12.8px">A captured reflection is written to a store that five rules fence off. '+
      'These are not preferences on this screen; they are the reason the feature was allowed to exist.</p>'+
     '<ol>'+
-     '<li><b>It never enters a context frame.</b> No later run of this agent, or any agent, can cite it. It is not a context record.</li>'+
-     '<li><b>It cannot be promoted.</b> There is no path from a reflection to a proposal, to a Context PR, or to steering. The promote action does not exist for this kind.</li>'+
+     '<li><b>It never enters a context frame.</b> No later run of this agent, or any agent, can cite it. It is not a steering record.</li>'+
+     '<li><b>It cannot be promoted.</b> There is no path from a reflection to a proposal, to a Steering PR, or to steering. The promote action does not exist for this kind.</li>'+
      '<li><b>It does not price the work.</b> Its tokens are billed as overhead on the Spend page and excluded from the productive ratio, so a run cannot look better by grading itself.</li>'+
      '<li><b>It is not evidence about a person.</b> It carries the agent, the run and the rubric. Reading it is <span class="mono">research.read</span>, an organization grant that '+h(PEOPLE.priya.name)+' holds and no workspace role inherits.</li>'+
      '<li><b>It expires.</b> '+h(SK_CFG.reflect.retain)+' from capture, then deleted. Nothing about it outlives its retention clock.</li>'+
@@ -8675,7 +8675,7 @@ DLG_EXT.skenable=function(){
      'the next run each agent starts picks this up.</div></div>'+
     '<div class="note">Every agent in '+h(w.name)+' gains <span class="mono">search_skills</span> and nothing else. '+
      'No tool is granted, no tier changes, no budget moves.</div>',
-   f:'<span class="grow mono dim" style="font-size:11px">opens a Context PR against '+h(w.main)+'</span>'+
+   f:'<span class="grow mono dim" style="font-size:11px">opens a Steering PR against '+h(w.main)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="skEnable()">Open the pull request</button>'};
 };
@@ -8840,11 +8840,11 @@ SCENARIOS["sixty-seconds-to-governed"]={title:"Sixty seconds to governed", ws:"c
    setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}S.reg.tab="cc";},
    act:["Show the SDK tab","S.reg.tab='sdk';render()"]},
   {say:"Oxagen stays locked until the first frame arrives. The installer's smoke session sends it, so the install test and the unlock are one event.",
-   note:"Nothing is written before that frame: no agent, no run, no Context PR. When it lands, Oxagen unlocks here and the scenario stays on this step.",
+   note:"Nothing is written before that frame: no agent, no run, no Steering PR. When it lands, Oxagen unlocks here and the scenario stays on this step.",
    route:function(o){return {page:"welcome",step:"run",org:o,ws:"core-platform"};},
    setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}}},
-  {say:"The installer read the git remote, so binding the main repo is one click: the GitHub App, Context PRs, checks and the code graph.",
-   note:"Skip for now and the workspace stays provisional for "+OB_PROVISIONAL_DAYS+" days. Runs record and spend counts; steering, context records and agent definitions stay off.",
+  {say:"The installer read the git remote, so binding the main repo is one click: the GitHub App, Steering PRs, checks and the code graph.",
+   note:"Skip for now and the workspace stays provisional for "+OB_PROVISIONAL_DAYS+" days. Runs record and spend counts; steering, steering records and agent definitions stay off.",
    route:function(o){return {page:"welcome",step:"run",org:o,ws:"core-platform"};},
    setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}S.reg.repo=null;obScnUnprov();},
    act:["Bind the main repo","obBind()"]},
@@ -8930,14 +8930,14 @@ SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"c
    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
    setup:function(){ctxprSet("none");S.tab.steering="records";S.recKind="";S.prpSel=null;}},
   {say:"The promoter noticed release runs re-reading CHANGELOG.md and proposed a rule. Every count on this page comes from the supporting runs listed under it.",
-   note:"A proposal steers nothing until a person opens a Context PR from it and someone merges that.",
+   note:"A proposal steers nothing until a person opens a Steering PR from it and someone merges that.",
    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
    setup:function(){ctxprSet("none");S.tab.steering="proposals";S.prpSel="prp_01K5RU4A";}},
-  {say:"Open the Context PR. Oxagen pushes one branch with one record file and opens the pull request on the repository your team already reviews.",
+  {say:"Open the Steering PR. Oxagen pushes one branch with one record file and opens the pull request on the repository your team already reviews.",
    note:"One concern per pull request. The checks refuse a second record on the same branch.",
    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
    setup:function(){ctxprSet("none");S.tab.steering="proposals";S.prpSel="prp_01K5RU4A";},
-   act:["Open the Context PR","openDialog('ctxpr','prp_01K5RU4A')"]},
+   act:["Open the Steering PR","openDialog('ctxpr','prp_01K5RU4A')"]},
   {say:"The checks run one at a time: the same rules as <span class=\"mono\">stella context validate</span>. Merge stays blocked until all of them pass, and the merge is the publication.",
    note:"In team mode a code-owner merges. In regulated mode the merge also appends to the hash-chained promotions ledger.",
    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
@@ -9358,7 +9358,7 @@ function steerSend(fleet){
   openDialog("deliveryreport");
 }
 /* A mute is a steering record: the agent's owner chose a channel other than steering for it. */
-var STEER_MUTES=[{agent:"a-intel.core.docs-writer",by:"Priya Natarajan",at:"2026-09-09",why:"the operator guide changes only through Context PRs"}];
+var STEER_MUTES=[{agent:"a-intel.core.docs-writer",by:"Priya Natarajan",at:"2026-09-09",why:"the operator guide changes only through Steering PRs"}];
 /* Each recipient's row, read live: a run's row follows its control.steer frame, an idle agent's follows the clock. */
 function steerRows(rep){
   var exp=steerClockAdd(rep.at,STEER_TTL), late=Date.now()-rep.ms>STEER_TTL;
@@ -9526,10 +9526,10 @@ function fixDlg(){
   if(!f||!x) return {t:"Fix",w:true,b:'<p class="muted" style="margin:0">No finding selected.</p>',f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var evLink='<a href="#" onclick="event.preventDefault();openDialog(\'evidence\',\''+h(f.id)+'\')">'+h(f.frames)+'</a>';
   if(x.shape==="pr"){
-    return {t:"Fix · Open a Context PR",w:true,s:f.kind+" on "+f.subject+" · "+usd(f.save)+" at stake",
+    return {t:"Fix · Open a Steering PR",w:true,s:f.kind+" on "+f.subject+" · "+usd(f.save)+" at stake",
      b:'<p class="eyebrow q">Branch <span class="mono">'+h(x.branch)+'</span> · one concern per PR · the agent reads this on its next run</p>'+
        '<pre><span class="c"># .oxagen/rules/'+h(x.lineage)+'.toml</span>\n'+
-       '<span class="k">schema</span>       = <span class="s">"context-record/v0.1"</span>\n'+
+       '<span class="k">schema</span>       = <span class="s">"steering-record/v0.1"</span>\n'+
        '<span class="k">lineage_id</span>   = <span class="s">"'+h(x.lineage)+'"</span>\n'+
        '<span class="k">kind</span>         = <span class="s">"'+h(x.kind)+'"</span>\n'+
        '<span class="k">sharing_scope</span>= <span class="s">"workspace"</span>\n'+
@@ -9537,7 +9537,7 @@ function fixDlg(){
        '[<span class="k">steering</span>]\n<span class="k">strength</span> = <span class="s">"should"</span>\n\n'+
        '[<span class="k">enforcement</span>]\n<span class="k">constraint_effect</span> = <span class="s">"'+h(x.effect)+'"</span>\n<span class="k">blocking</span> = <span class="s">false</span>\n\n'+
        '[<span class="k">evidence</span>]\n<span class="k">finding</span> = <span class="s">"'+h(f.id)+'"</span>\n<span class="k">runs</span>    = <span class="s">"'+h(f.frames)+'"</span>\n<span class="k">saving</span>  = <span class="s">"'+h(f.save)+' USD / '+h(f.window)+'"</span></pre>'+
-       '<div class="grid g2" style="margin-top:14px"><div><p class="eyebrow q">Why a Context PR</p><p style="margin:0;font-size:12.5px;color:var(--body)">'+
+       '<div class="grid g2" style="margin-top:14px"><div><p class="eyebrow q">Why a Steering PR</p><p style="margin:0;font-size:12.5px;color:var(--body)">'+
        'The waste is in how the agent behaves, not in its code: the brief says to confirm the changelog, so it re-reads the file. A steering record changes the behaviour without a deploy; it is reviewed like code, published on merge and delivered at the steering position of the next run. '+
        'Supporting evidence: '+evLink+'.</p></div>'+
        '<div><p class="eyebrow q">Checks that will run</p><div class="tw"><table class="narrow"><tbody>'+
@@ -9601,7 +9601,7 @@ function dialog(){
      f:steerFoot(false)},
    steerfleet:{t:"Steer the fleet",w:false,b:steerFleetBody(),f:steerFoot(true)},
    mandate:{t:"Grant a mandate",w:true,b:mandateBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Mandate granted. It is active from its start date and expires on its end date; every draw is a receipt.\')">Grant the mandate</button>'},
-   ctxpr:{t:"Open a Context PR",w:true,b:
+   ctxpr:{t:"Open a Steering PR",w:true,b:
      '<div class="field"><label>Concern</label><input value="Do not re-read CHANGELOG.md more than once in a run" aria-label="Concern"><div class="hint">One concern per pull request.</div></div>'+
      '<div class="field"><label>Kind</label><select aria-label="Kind"><option>rule — a directive that steers behaviour</option><option>constraint — a hard boundary, require or forbid</option><option>procedure — steps, in order</option><option>fact — a checkable claim</option><option>memory — a durable recollection</option><option>preference — soft, often unfalsifiable</option></select></div>'+
      '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace — opens on a-intel/platform</option><option>repository — opens on the linked repo itself</option></select>'+
@@ -9629,8 +9629,8 @@ function dialog(){
       '<button class="btn sm" style="margin-left:auto;flex:none" onclick="openAvatar(\'new\')">Design</button></div></div>'+
      '<div class="field"><label>Harness</label><select aria-label="Harness"><option>claude-code</option><option>stella</option><option>codex-cli</option><option>claude-agent-sdk</option><option>custom</option></select></div>'+
      '<div class="field"><label>Model tier</label><select aria-label="Model tier"><option>complex</option><option>light</option></select></div>'+
-     '<div class="note">This does not write Postgres. It opens a Context PR that adds <span class="mono">.oxagen/agents/perf-watch.toml</span> and the generated harness file beside it; merge creates the principal, the roles the definition asks for, and the toolbelt.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'a-intel/platform#522 opened. The agent exists when it merges.\')">Open the Context PR</button>'},
+     '<div class="note">This does not write Postgres. It opens a Steering PR that adds <span class="mono">.oxagen/agents/perf-watch.toml</span> and the generated harness file beside it; merge creates the principal, the roles the definition asks for, and the toolbelt.</div>',
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'a-intel/platform#522 opened. The agent exists when it merges.\')">Open the Steering PR</button>'},
    "request-access":{t:"Request access",w:false,b:
      '<div class="field"><label>Role requested</label><input value="workspace.read on core-platform" aria-label="Role"></div>'+
      '<div class="field"><label>Why</label><textarea rows="3" aria-label="Reason">Closing the September books; I need to see the runs behind the finance lines.</textarea></div>'+
@@ -9654,7 +9654,7 @@ function dialog(){
      '<tr><td style="font-size:12px">github__get_file_contents@2 must be allowed</td><td><span class="b b-allowed"><span class="d"></span>pass</span></td></tr>'+
      '<tr><td style="font-size:12px">stripe__create_payment@4 with no mandate must be denied</td><td><span class="b b-allowed"><span class="d"></span>pass</span></td></tr>'+
      '</tbody></table></div></div>'+
-     '<div class="note">Activation is a governed action with approval. In regulated mode it is a Context PR instead.</div>',
+     '<div class="note">Activation is a governed action with approval. In regulated mode it is a Steering PR instead.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'pol_v42 saved as a draft. Activating it is a governed action with approval.\')">Save draft</button>'},
    spendexport:{t:"Export a spend report",w:false,b:
      '<div class="field"><label>Timeframe</label><select aria-label="Timeframe" id="spendexport-range">'+
@@ -9999,7 +9999,7 @@ var CMDS=[
    ["Ask what an agent cost this month","!asstToggle(true)"],["Mint a model key for this organization","!openDialog('mintkey')"]]},
  {g:"Create \u2014 each one ends on a pull request",i:[
    ["Create anything","!openDialog('create')"],["New agent","!wzOpen('agent')"],["New tool","!wzOpen('tool')"],
-   ["Add a skill","!wzOpen('skill')"],["Write a context record","!wzOpen('record')"]]},
+   ["Add a skill","!wzOpen('skill')"],["Write a steering record","!wzOpen('record')"]]},
  {g:"Runs",i:[["run_01K5RS7M2E8FJ3QW · release-manager · live","#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW"],
    ["run_01K5RQ4B9C7XTN2P · stella-ci · flipped","#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P"],
    ["run_01K4QJ9E4T6YUI1O · stella-ci · compacted","#/a-intel/core-platform/runs/run_01K4QJ9E4T6YUI1O"]]},
@@ -10492,13 +10492,13 @@ function agentDelete(key){
   var i=-1;AGENTS.forEach(function(a,ix){if(a.key===key)i=ix;});
   if(i<0)return; var a=AGENTS[i]; AGENTS.splice(i,1); delete S.agentRoles[key];
   WS.forEach(function(w){if(w.slug===a.ws&&w.agents>0)w.agents--;});
-  closeDialog(); go('#/'+ORG.slug+'/'+a.ws+'/agents'); act(key+" deregistered. Credential revoked, definition archived by Context PR, every run and frame kept.");
+  closeDialog(); go('#/'+ORG.slug+'/'+a.ws+'/agents'); act(key+" deregistered. Credential revoked, definition archived by Steering PR, every run and frame kept.");
 }
 function agentDelDlg(){
   var a=S.dlg==="delagent"?agent(S.dlgArg):null; if(!a) return {t:"Deregister agent",w:false,b:"",f:""};
   var live=RUNS.filter(function(r){return r.agent===a.key&&r.status==="live";}).length;
   return {t:"Deregister agent",s:a.key,w:false,b:
-   '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a Context PR archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
+   '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a Steering PR archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
    '<dl class="kv"><dt>Kept</dt><dd>every run, frame, receipt and score — the record is never deleted</dd><dt>Ends</dt><dd>'+agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+', '+a.mandates.length+' mandate'+(a.mandates.length===1?'':'s')+', the host enrollment</dd>'+
    (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span> — cancelled at the next boundary and recorded</dd>':'')+'</dl>'+
    '<label class="check" style="margin-top:12px"><input type="checkbox" id="delAgentOk" onchange="el(\'delAgentBtn\').disabled=!this.checked"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Re-registering creates a new principal with a provisional score.</span></span></label>',
@@ -10577,7 +10577,7 @@ function obUnlock(){
   if(!agent(key)){
     AGENTS.push({key:key,name:regSlug().replace(/-/g," ").replace(/^./,function(c){return c.toUpperCase();}),harness:r.harness,harnessLabel:REG_HARNESS[r.harness]||r.harness,
       ws:w.slug,operator:"marcus",status:"enrolled",tier:"harness",tierNative:"harness",belt:0,beltMode:"full",runs30:1,spend30:"0.02",proven30:"0.00",ratio:0,
-      digest:"sha256:0b7e41c9d2a6f3e8",commit:"pending",budget:"2.00",budgetUsed:0.02,desc:"Registered from Fleet. The smoke session opened the Context PR that adds its definition.",
+      digest:"sha256:0b7e41c9d2a6f3e8",commit:"pending",budget:"2.00",budgetUsed:0.02,desc:"Registered from Fleet. The smoke session opened the Steering PR that adds its definition.",
       mandates:[],incidents:0,model:r.tier,
       principal:"prn_01K5RV"+("0"+S.regN).slice(-2)+"M6XKD7A9RZT4BVCNQ",harnessV:"just installed",host:"this-mac",
       enrolled:true,budgetDay:"20.00",usedDay:"0.02",replay:"fork",cred:"oxa_live_"+regSlug().slice(0,4)+"…0001",
@@ -10648,7 +10648,7 @@ function regName(){
     '<div class="hint">Picks the installer on the next step. It can be changed there.</div></div>'+
    '<div class="field"><label>Model tier</label><select aria-label="Model tier" onchange="S.reg.tier=this.value">'+opts(["complex","light"],r.tier)+'</select>'+
     '<div class="hint">The harness calls the model with its own key. The tier is recorded on every frame.</div></div></div>'+
-   '<div class="note">Continue mints a one-time enrollment token for <span class="mono regKeyLive">'+h(key)+'</span>. Nothing is written to Postgres and no PR is opened until the first frame arrives; the smoke session then opens the Context PR that adds the definition file.</div>'+
+   '<div class="note">Continue mints a one-time enrollment token for <span class="mono regKeyLive">'+h(key)+'</span>. Nothing is written to Postgres and no PR is opened until the first frame arrives; the smoke session then opens the Steering PR that adds the definition file.</div>'+
    '</div></div>'+
    '<div class="reg-foot">'+regCancelBtn()+'<div class="sp"><button class="btn primary" onclick="regNav(\'wrap\')">Continue</button></div></div>';
 }
@@ -10826,7 +10826,7 @@ function obGo(step){
 }
 function obExit(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);if(!PRODUCT)act('Onboarding demo closed. Nothing was written.');}
 function obSignedIn(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Signed in as '+PEOPLE.marcus.name+'. The session is recorded like any other governed action.');}
-function obBind(){if(S.reg)S.reg.repo="bound";delete ws().provisional;render();act('GitHub App installed on '+ws().main+'. Main repo bound — Context PRs, checks and the code graph are on.');}
+function obBind(){if(S.reg)S.reg.repo="bound";delete ws().provisional;render();act('GitHub App installed on '+ws().main+'. Main repo bound — Steering PRs, checks and the code graph are on.');}
 function obSkip(){
   var w=ws(); if(S.reg)S.reg.repo="skipped";
   if(!w.provisional){w.provisional={since:obDate(0),until:obDate(OB_PROVISIONAL_DAYS)}; if(S.obScn)S.obScn.prov.push(w.slug);}
@@ -10846,7 +10846,7 @@ function obFirstRun(w){
 function obFleetBanners(w,fr){
   var out="";
   if(w.provisional) out+='<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none">provisional</span>'+
-   '<div class="grow"><b>'+h(w.name)+' is provisional until '+h(w.provisional.until)+'.</b>Runs record and spend counts. Steering, context records and agent definitions stay off until a main repo is bound, because there is nowhere to publish them to.</div>'+
+   '<div class="grow"><b>'+h(w.name)+' is provisional until '+h(w.provisional.until)+'.</b>Runs record and spend counts. Steering, steering records and agent definitions stay off until a main repo is bound, because there is nowhere to publish them to.</div>'+
    '<button class="btn sm" onclick="obBind()">Bind '+h(w.main)+'</button></div>';
   if(fr) out+='<div class="banner" style="margin-bottom:14px"><span class="b b-q" style="flex:none">first run</span>'+
    '<div class="grow"><b>One run so far.</b>This workspace has recorded the installer’s smoke session, <span class="mono">'+h(fr.id)+'</span> from <span class="mono">'+h(fr.agent)+'</span>, and nothing else. The tiles below read off that run.</div>'+
@@ -11115,16 +11115,16 @@ function obRepoPanel(){
   var r=S.reg, w=ws();
   if(r.repo==="bound") return '<div class="reg-card ob-repo"><div class="ch"><span class="reg-ok"><span class="dot"></span>bound</span><h3>Main repo</h3></div><div class="cb">'+
    '<div class="row" style="margin-bottom:10px"><span class="b b-q mono">'+h(w.main)+'</span><span class="b b-q">production branch: '+h(w.branch)+'</span><span class="b b-allowed"><span class="d"></span>GitHub App installed</span></div>'+
-   '<p class="muted" style="font-size:12.5px;margin:0">Steering, context records and agent definitions will live in <span class="mono">'+h(w.main)+'</span> under <span class="mono">.oxagen/</span>, published through Context PRs.</p></div></div>';
+   '<p class="muted" style="font-size:12.5px;margin:0">Steering, steering records and agent definitions will live in <span class="mono">'+h(w.main)+'</span> under <span class="mono">.oxagen/</span>, published through Steering PRs.</p></div></div>';
   if(r.repo==="skipped") return '<div class="reg-card ob-repo"><div class="ch"><span class="b b-denied">provisional</span><h3>No main repo bound</h3></div><div class="cb">'+
-   '<p class="muted" style="font-size:12.5px;margin:0 0 10px"><b>'+h(w.slug)+' is provisional until '+h(w.provisional?w.provisional.until:obDate(OB_PROVISIONAL_DAYS))+'</b> ('+OB_PROVISIONAL_DAYS+' days). Runs record and spend counts. Steering, context records, and agent definitions stay off until a main repo is bound.</p>'+
+   '<p class="muted" style="font-size:12.5px;margin:0 0 10px"><b>'+h(w.slug)+' is provisional until '+h(w.provisional?w.provisional.until:obDate(OB_PROVISIONAL_DAYS))+'</b> ('+OB_PROVISIONAL_DAYS+' days). Runs record and spend counts. Steering, steering records, and agent definitions stay off until a main repo is bound.</p>'+
    '<button class="btn sm" onclick="obBind()">Bind '+h(w.main)+' now</button></div></div>';
   return '<div class="reg-card ob-repo"><div class="ch"><h3>Repository detected</h3><span class="sp">reported by the installer</span></div><div class="cb">'+
    '<div class="row" style="margin-bottom:6px"><span class="b b-q mono">git@github.com:'+h(w.main)+'.git</span></div>'+
    '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Read from the git remote of <span class="mono">~/src/platform</span>, the directory the installer ran in. Production branch <span class="mono">'+h(w.branch)+'</span>.</p>'+
    '<button class="btn'+(r.first?"":" primary")+'" onclick="obBind()">'+OB_ICON.github+'<span>Bind '+h(w.main)+' as the main repo</span></button>'+
-   '<p class="muted" style="font-size:12.5px;margin:12px 0 0">One click installs the GitHub App on <span class="mono">'+h(w.main)+'</span>: repo binding, Context PRs, checks, merge handling and the code graph.</p>'+
-   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> — '+h(w.slug)+' stays <b>provisional for '+OB_PROVISIONAL_DAYS+' days</b>. Runs record and spend counts, but steering, context records and agent definitions stay off until a main repo is bound.</p></div></div>';
+   '<p class="muted" style="font-size:12.5px;margin:12px 0 0">One click installs the GitHub App on <span class="mono">'+h(w.main)+'</span>: repo binding, Steering PRs, checks, merge handling and the code graph.</p>'+
+   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> — '+h(w.slug)+' stays <b>provisional for '+OB_PROVISIONAL_DAYS+' days</b>. Runs record and spend counts, but steering, steering records and agent definitions stay off until a main repo is bound.</p></div></div>';
 }
 function pWelcome(r){
   var step=r.step||"signup";
@@ -11260,7 +11260,7 @@ DLG_EXT.rotateorgkey=function(){
 DLG_EXT.revokeorgkey=function(){
   return {t:"Revoke this key", s:ORG_KEY.provisionedId+" · "+ORG_KEY.label, w:false,
    b:'<div class="warn"><b>The in-app agent stops for everyone in '+h(ORG.name)+'.</b> Revocation ends the key at the provider at the next call. Nothing else changes: no run, no receipt and no record depends on it, and the month’s spend stays on the provider’s report.</div>'+
-     '<div class="note" style="margin-top:12px">Oxagen’s own work — reflection, promotion rationale, Context PR bodies, run names — routes on the tiers above and is unaffected.</div>',
+     '<div class="note" style="margin-top:12px">Oxagen’s own work — reflection, promotion rationale, Steering PR bodies, run names — routes on the tiers above and is unaffected.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn danger" onclick="ORG_KEY.source=\'none\';ORG_KEY.provisionedId=null;closeDialog();act(\'Revoked at the provider. The in-app agent is unavailable in '+h(ORG.name)+' until a key is minted.\')">Revoke</button>'};
 };
@@ -11346,8 +11346,8 @@ function asstSheet(){
    '<div class="msg op"><div class="who">'+h(me().name)+'</div><div class="bub">Triage is burning money on tool definitions. Narrow its belt to what it actually used in the last 30 days, and tell me what you changed.</div></div>'+
    '<div class="msg"><div class="who">Assistant <span class="b b-q" style="font-size:9.5px">run_01K5RT9X4M2 · Oxagen’s, not yours</span></div><div class="bub">'+
    '<p style="margin:0 0 10px">I read the finding and the belt. 34 of the 52 tools on <span class="mono">a-intel.core.triage</span> were never called in 1,340 runs. '+
-   'Narrowing the belt is a change to the agent definition, so it is a Context PR, not a write to Postgres. I opened one.</p>'+
-   '<div class="act-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_context_pr</code></div>'+
+   'Narrowing the belt is a change to the agent definition, so it is a Steering PR, not a write to Postgres. I opened one.</p>'+
+   '<div class="act-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_steering_pr</code></div>'+
    '<dl class="kv" style="font-size:11.5px"><dt>Pull request</dt><dd><a href="#">a-intel/platform#521</a></dd>'+
    '<dt>File</dt><dd class="mono" style="font-size:11px">.oxagen/agents/triage.toml</dd>'+
    '<dt>Change</dt><dd>tools narrowed 52 → 18</dd>'+
@@ -11370,7 +11370,7 @@ function asstSheet(){
 }
 
 /* ============================== Creating things ==============================
-   Four things an operator creates in Oxagen — an agent, a tool, a skill, a context record — and
+   Four things an operator creates in Oxagen — an agent, a tool, a skill, a steering record — and
    one shape for all four, because all four are the same kind of object: a file in a repository.
 
      describe it → Oxagen drafts → you read the file → a pull request → it exists on merge
@@ -11385,7 +11385,7 @@ function asstSheet(){
    Oxagen, never to the tenant: it is not one of your runs and it never appears in Fleet.
 
    Namespaces here: ced* the code editor, wz* the wizard, mcp* the server catalogue, skr* the skill
-   registry, crec* the context-record page. */
+   registry, crec* the steering-record page. */
 
 var MCP_CATALOG=FIXTURES.MCP_CATALOG;
 var SKILL_REGISTRY=FIXTURES.SKILL_REGISTRY;
@@ -11663,7 +11663,7 @@ var CREATE={
    file:".oxagen/tools/&lt;name&gt;.toml",need:"tools.admin"},
  skill:{l:"Skill",d:"Procedure written down: a file, a version and a digest.",i:"skills",
    file:".oxagen/skills/&lt;name&gt;/SKILL.md",need:"skills.admin"},
- record:{l:"Context record",d:"One statement that steers every agent it reaches.",i:"steering",
+ record:{l:"Steering record",d:"One statement that steers every agent it reaches.",i:"steering",
    file:".oxagen/rules/&lt;lineage&gt;.toml",need:"steering.write"},
  init:{l:"Oxagen directory",d:"The .oxagen/ tree in a repository that has none. The one the other four need first.",i:"repo",
    file:".oxagen/ &lt;in a repository&gt;",need:"repository.admin"}
@@ -12637,7 +12637,7 @@ function wzAgent(){
    f:'<button class="btn primary" onclick="wzOpenPr(\''+pr3.msg.replace(/'/g,"\\'")+'\')">'+h(pr3.btn)+'</button>'};
 }
 
-/* ============================== a context record ==============================
+/* ============================== a steering record ==============================
    Six kinds, and the kind is not decoration: it decides how the statement is delivered, what the
    checks assert about it, and how a run is allowed to use it. So the wizard makes you pick one
    before it will let you write the sentence, and it shows what each kind can never do. */
@@ -12685,7 +12685,7 @@ function wzRecord(){
   var z=S.wz,w=ws();
   if(z.step===1){
     var ok=!!String(z.desc).trim();
-    return {t:"Write a context record", s:"One concern per record, and one record per pull request.",
+    return {t:"Write a steering record", s:"One concern per record, and one record per pull request.",
      b:wzDesc("Do not re-read CHANGELOG.md more than once in a run; cache the first read.",
        ["Do not re-read CHANGELOG.md more than once in a run",
         "The release manager opens the release pull request; a person merges it",
@@ -12735,7 +12735,7 @@ function wzRecord(){
     var others=RECORDS.filter(function(x){return x.status==="published";}).length;
     return {t:"What the checks will assert", s:"Six of them, on the pull request, before anybody can merge it.",
      b:wzChecks([
-       ["Schema","<span class=\"mono\">context-record/v0.1</span> valid \u00b7 1 file, 1 record, 1 lineage"],
+       ["Schema","<span class=\"mono\">steering-record/v0.1</span> valid \u00b7 1 file, 1 record, 1 lineage"],
        ["Lineage uniqueness",(function(){var id=wzRecLineage();
          return RECORDS.some(function(r){return r.status==="published"&&r.id===id;})
           ?'<span style="color:var(--st-failed)"><b>'+h(id)+' is already published.</b></span> This check will fail and nothing will merge \u2014 amend the published record instead of opening a second under its id.'
@@ -12751,7 +12751,7 @@ function wzRecord(){
   var pr4=wzPrStep("Open the pull request",
     "Merge is the publication. Nothing steers until then, and the record is in force from the merge commit \u2014 not from when you wrote it.",
     [["add",".oxagen/rules/"+wzRecLineage()+".toml","the record"]],
-    [["Schema","<span class=\"mono\">context-record/v0.1</span>"],["Lineage",h(wzRecLineage())+" is free"],
+    [["Schema","<span class=\"mono\">steering-record/v0.1</span>"],["Lineage",h(wzRecLineage())+" is free"],
      ["Hash","recomputed at merge"],["Secrets","statement, rationale and evidence"],
      ["Conflicts","against every published record"],["Effect",wzRecCe()?h(z.ce):"none \u00b7 this kind constrains nothing"]],
     "Open the pull request",
@@ -12870,7 +12870,7 @@ function crecSave(rec){
     title:"Propose a change to this record",
     lead:"A published record is changed the way it was published: a branch, a pull request, the same six checks, and a merge. Nothing here edits what is in force.",
     branch:"context/"+rec.id+".amend",
-    checks:[["Schema","<span class=\"mono\">context-record/v0.1</span> still valid after the edit"],
+    checks:[["Schema","<span class=\"mono\">steering-record/v0.1</span> still valid after the edit"],
       ["Lineage","<span class=\"mono\">"+h(rec.id)+"</span> keeps its lineage \u2014 an amended record is the same record, not a new one"],
       ["record_hash recomputation","recomputed over the new bytes \u00b7 the old hash stays on every run that carried it"],
       ["Secret and PII scan","the new statement is scanned"],
@@ -12933,7 +12933,7 @@ function pRecord(r){
       '<dt>File</dt><dd><span class="mono">.oxagen/rules/'+h(rec.id)+'.toml</span> on '+h(w.main)+'</dd>'+
       '<dt>Published by</dt><dd><span class="mono">'+h(rec.commit||"\u2014")+'</span> on '+h(rec.pub||"\u2014")+'</dd>'+
       '<dt>Effect</dt><dd>'+h(rec.effect||"never rendered")+'</dd>'+
-      '<dt>Schema</dt><dd><span class="mono">context-record/v0.1</span></dd>'+
+      '<dt>Schema</dt><dd><span class="mono">steering-record/v0.1</span></dd>'+
       '</dl></div></div>'+
     '</div>'+
     '<div>'+crecPanel(rec)+
@@ -13542,7 +13542,7 @@ document.addEventListener("click",function(e){
     "aws-billing":["get_forecast","list_budgets","update_budget","get_reservation_coverage","list_savings_plans","get_anomalies","get_rightsizing","tag_resource"],
     slack:["get_channel","list_users","get_user","send_dm","update_message","delete_message","add_reaction","pin_message","create_channel","archive_channel","set_topic","search_messages"],
     snowflake:["list_tables","describe_table","list_schemas","get_query_history","cancel_query","create_stage"],
-    oxagen:["expand_entity","recall_context","get_run","list_runs","read_frame","list_frames","propose_record","open_context_pr","get_agent","list_agents","get_policy","list_receipts","get_receipt","export_bundle","verify_bundle","get_budget","set_preferences","list_mandates","draw_mandate","get_witness","run_witness","search_tools","describe_tool","request_approval","check_approval","score_candidates","compose_context","summarize_run","reflect_run","promote_finding","list_findings","get_spend","list_switches","read_switch","enqueue_export"],
+    oxagen:["expand_entity","recall_context","get_run","list_runs","read_frame","list_frames","propose_record","open_steering_pr","get_agent","list_agents","get_policy","list_receipts","get_receipt","export_bundle","verify_bundle","get_budget","set_preferences","list_mandates","draw_mandate","get_witness","run_witness","search_tools","describe_tool","request_approval","check_approval","score_candidates","compose_context","summarize_run","reflect_run","promote_finding","list_findings","get_spend","list_switches","read_switch","enqueue_export"],
     harness:["Read","Edit","Write","Glob","Grep","WebFetch","WebSearch","Agent","NotebookEdit","apply_patch","shell","update_plan","view_image","exec","file_write","file_read","git_commit","git_diff"],
     jira:["create_issue","get_issue","search_issues","update_issue","transition_issue","add_comment","list_boards","get_sprint","list_sprints","assign_issue","link_issues","add_attachment","list_projects","get_project","create_version","list_components","add_watcher","get_changelog","list_filters","run_filter","bulk_update","delete_issue","create_epic","list_epics","get_worklog","add_worklog"],
     datadog:["list_monitors","get_monitor","mute_monitor","unmute_monitor","create_monitor","query_metrics","search_logs","list_incidents","get_incident","create_incident","list_dashboards","get_dashboard","list_slos","get_slo","list_services","get_service","post_event"],
@@ -13645,12 +13645,12 @@ document.addEventListener("click",function(e){
       RECORDS.push(row); recN++;
     }
   });
-  PROPOSALS.push({id:"prp_01K5RV1D",lineage:"ctx.support.reply-in-customers-language",kind:"rule",force:"should",from:"findings job · fnd_01K5RU9Q",st:"Draft the first reply in the language the ticket was written in.",support:"212 tickets re-routed for language in 30 days",state:"open Context PR",pr:"a-intel/support-console#188",checks:"6 / 6 pass"},
+  PROPOSALS.push({id:"prp_01K5RV1D",lineage:"ctx.support.reply-in-customers-language",kind:"rule",force:"should",from:"findings job · fnd_01K5RU9Q",st:"Draft the first reply in the language the ticket was written in.",support:"212 tickets re-routed for language in 30 days",state:"open Steering PR",pr:"a-intel/support-console#188",checks:"6 / 6 pass"},
     {id:"prp_01K5RV3F",lineage:"ctx.infra.plan-before-apply",kind:"procedure",force:"must",from:"reflector · run_01K5R"+ulid(11),st:"Post the plan and wait for a review comment before any apply call.",support:"3 halted runs, 1 incident",state:"candidate",pr:"—",checks:"—"},
-    {id:"prp_01K5RV6H",lineage:"ctx.data.backfill-partitions",kind:"procedure",force:"should",from:PEOPLE[WSX["data-platform"].owner].name,st:"Backfill in day-sized partitions and verify row counts after each.",support:"2 quality-gate failures traced to whole-table backfills",state:"open Context PR",pr:"a-intel/data-platform#341",checks:"5 / 5 pass"},
+    {id:"prp_01K5RV6H",lineage:"ctx.data.backfill-partitions",kind:"procedure",force:"should",from:PEOPLE[WSX["data-platform"].owner].name,st:"Backfill in day-sized partitions and verify row counts after each.",support:"2 quality-gate failures traced to whole-table backfills",state:"open Steering PR",pr:"a-intel/data-platform#341",checks:"5 / 5 pass"},
     {id:"prp_01K5RV8K",lineage:"ctx.sec.never-rotate-own-credential",kind:"constraint",force:"must",from:PEOPLE[WSX.security.owner].name,st:"No agent may rotate a credential it holds.",support:"policy review 2026-09",state:"merged",pr:"a-intel/security-tools#77",checks:"7 / 7 pass"},
     {id:"prp_01K5RW0M",lineage:"ctx.growth.brief-as-table",kind:"preference",force:"may",from:"reflector · 14 runs",st:"Campaign briefs are a table of channel, audience, budget and owner.",support:"9 briefs rewritten by hand",state:"candidate",pr:"—",checks:"—"},
-    {id:"prp_01K5RW2P",lineage:"ctx.mobile.release-branch",kind:"fact",force:"info",from:"reflector · run_01K5R"+ulid(11),st:"The production branch of a-intel/mobile is release, not main.",support:"4 runs targeted main",state:"open Context PR",pr:"a-intel/mobile#96",checks:"4 / 4 pass"});
+    {id:"prp_01K5RW2P",lineage:"ctx.mobile.release-branch",kind:"fact",force:"info",from:"reflector · run_01K5R"+ulid(11),st:"The production branch of a-intel/mobile is release, not main.",support:"4 runs targeted main",state:"open Steering PR",pr:"a-intel/mobile#96",checks:"4 / 4 pass"});
 
   /* ---------- runs ---------- */
   var TASKS={
@@ -13746,7 +13746,7 @@ document.addEventListener("click",function(e){
   var EV=[["approval.requested",10,"agent"],["approval.resolved",9,"human"],["run.proven",11,"agent"],["dod.settled",13,"agent"],["dod.signed",2,"human"],["run.sealed",14,"agent"],["run.halted",4,"agent"],["tool_call.denied",6,"agent"],
     ["budget.breached",2,"agent"],["agent.registered",3,"human"],["agent.deregistered",1,"human"],["role.assigned",3,"human"],["role.revoked",1,"human"],["api_key.created",1,"human"],["api_key.revoked",1,"human"],
     ["invitation.sent",2,"human"],["invitation.accepted",2,"human"],["connection.reviewed",2,"human"],["credential.granted",8,"service"],["export.created",2,"human"],["export.downloaded",1,"human"],
-    ["steering_published",3,"human"],["context_pr.opened",3,"service"],["kill_switch.flipped",1,"human"],["kill_switch.cleared",1,"human"],
+    ["steering_published",3,"human"],["steering_pr.opened",3,"service"],["kill_switch.flipped",1,"human"],["kill_switch.cleared",1,"human"],
     ["schema.proposed",2,"service"],["schema.approved",1,"human"],["session.signed_in",6,"human"],["preferences.set",2,"human"]];
   var evW=EV.map(function(e){return [e,e[1]];});
   var humans=Object.keys(PEOPLE).map(function(k){return PEOPLE[k].name;}), svcs=["svc_terraform","svc_ci","svc_finops_export","archiver","verifier","gateway","policy engine"];
@@ -13775,7 +13775,7 @@ document.addEventListener("click",function(e){
       case "export.created": return "exp_01K5R"+ulid(4)+" · "+pick(["receipt export","evidence bundle"])+" · "+pick(allWs);
       case "export.downloaded": return "exp_01K5R"+ulid(4)+" · signature verified";
       case "steering_published": return pick(RECORDS).id+" · "+pick(REPOS).n+"#"+ri(300,1900)+" merged";
-      case "context_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+ri(3,40)+" runs in support";
+      case "steering_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+ri(3,40)+" runs in support";
       case "kill_switch.flipped": return pick(["tool version "+t.n+"@"+t.v,"agent "+r.agent,"tool server kubernetes"])+" · "+pick(["schema regression","runaway retries","operator request"]);
       case "kill_switch.cleared": return "tool server kubernetes · schema approved";
       case "dod.settled": return r.id+" · "+pick(["HELD","HELD","HELD","BROKEN · CHECK_FAILED","PENDING · HUMAN_PENDING","BROKEN · ATTEMPTS_EXHAUSTED"])+" · dodc_01K"+ulid(6);
@@ -13859,7 +13859,7 @@ document.addEventListener("click",function(e){
     {kind:"run.proven",tone:"allowed",unread:false,t:"15:30",title:"Run proven · "+genRuns[3].id,body:"Witness flipped on "+genRuns[3].task+". Oracle test_flip, disclosure grain L0."},
     {kind:"budget.breached",tone:"failed",unread:false,t:"14:52",title:"Hard budget reached · "+fin[0].key,body:"$1.50 per run reached at turn 5. The run was paused at the next hook boundary."},
     {kind:"repository.indexed",tone:"allowed",unread:false,t:"14:20",title:"Code graph current · a-intel/data-platform",body:"Push "+hex(7)+" to main indexed in 58 s. 41 files re-parsed, 190 symbols versioned."},
-    {kind:"context_pr.opened",tone:"gold",unread:false,t:"11:48",title:"Context PR opened · a-intel/support-console#188",body:"The promoter proposed a rule on lineage ctx.support.reply-in-customers-language, supported by 212 tickets."});
+    {kind:"steering_pr.opened",tone:"gold",unread:false,t:"11:48",title:"Steering PR opened · a-intel/support-console#188",body:"The promoter proposed a rule on lineage ctx.support.reply-in-customers-language, supported by 212 tickets."});
 
   /* ---------- spend, billing, the numbers every page quotes ---------- */
   var spendTot=0,provenTot=0,runsTot=0; AGENTS.forEach(function(a){spendTot+=num$(a.spend30);provenTot+=num$(a.proven30);runsTot+=a.runs30;});

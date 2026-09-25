@@ -160,7 +160,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. The mockup collection is
 
 | Element | Mockup collection | Target store or contract | Backing today in `macanderson/oxagen` | Status |
 |---|---|---|---|---|
-| Steering record rows | `RECORDS`, `STEER_BUNDLE.rules`, read by `steeringSources` | `.oxagen/rules/*.toml` on the main repository, indexed in `agent.context_records` | `list_records` (`packages/oxagen/src/contracts/context.records.list.ts:17`) returns lineage, title, kind, force, constraint effect, sharing scope, statement, status, version, checksum, commit, path and publish time (`context.steering.shared.ts:250-280`). Status `active` reads published and `retired` reads archived | ✅ |
+| Steering record rows | `RECORDS`, `STEER_BUNDLE.rules`, read by `steeringSources` | `.oxagen/rules/*.toml` on the main repository, indexed in `agent.steering_records` | `list_records` (`packages/oxagen/src/contracts/steering.records.list.ts:17`) returns lineage, title, kind, force, constraint effect, sharing scope, statement, status, version, checksum, commit, path and publish time (`context.steering.shared.ts:250-280`). Status `active` reads published and `retired` reads archived | ✅ |
 | A record's `org` or `agent` scope | `RECORDS[].scope` | `sharing_scope` | The sharing scope is `repository` or `workspace` only (`context.steering.shared.ts:37`) | ❌ |
 | Document rows (vision, ADR) | `SOURCES.documents`, `SOURCES.registration` | `.oxagen/sources.toml` and the documents it names | Nothing reads or writes the file | ❌ |
 | Skill rows | `SKILLS`, `SOURCES.bundles`, `SOURCES.withheld` | `.oxagen/skills.toml` pins, and the resolution at a config version | `get_skill_config` returns the pins, each id, version and digest (`skill.config.get.ts:6`, `packages/oxagen/src/skills.ts:14`). `preview_skill_search` returns each candidate's description and token cost and the withheld ones with `out_of_scope` or `unapproved_digest` (`skill.search.preview.ts:14`). References and entrypoints have no store | 🟡 |
@@ -222,7 +222,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, and More is the lit slo
 - Read: the mockup's denied panel names `steering.read on core-platform`, the label the app uses for the Steering reads (`apps/app/src/data/read.ts:114`). In `macanderson/oxagen`, `list_records` and `list_proposals` allow an organization Owner or Admin and a workspace Owner, Member or Viewer; `get_skill_config` allows an organization Owner, Admin or Member and a workspace Owner or Member.
 - Writes, each a governed action recorded in Audit:
   - Changing the governance mode: `set_governance_mode`, an organization Owner or Admin, or a workspace Owner or Admin. An agent that calls it waits for approval.
-  - A Steering record: `propose_record` and `open_context_pr`, an organization Owner or Admin, or a workspace Owner or Member.
+  - A Steering record: `propose_record` and `open_steering_pr`, an organization Owner or Admin, or a workspace Owner or Member.
   - A skill: `propose_skill`, an organization Owner or Admin.
   - The skills configuration: `update_skill_config`, an organization Owner or Admin.
   - The Markdown import: its footer names `steering.write · memory.write`. The build checks both server-side before it writes. The mockup checks neither before the wizard opens and has no refused state.

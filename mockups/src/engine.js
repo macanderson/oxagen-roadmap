@@ -797,7 +797,7 @@ var TOOLMETA={
  github__delete_branch:["Delete branch","vcs"], github__create_issue_comment:["Create issue comment","record"],
  github__get_commit:["Get commit","read"], claude_code__Edit:["Edit file","file"],
  claude_code__WebFetch:["Fetch a web page","read"], expand_graph:["Expand the graph","read"],
- append_record:["Append record","record"], open_context_pr:["Open a pull request","vcs"],
+ append_record:["Append record","record"], open_steering_pr:["Open a pull request","vcs"],
  send_message:["Send message","message"], search_tools:["Search the toolbelt","read"],
  load_tools:["Load tool definitions","read"], okta__deactivate_user:["Deactivate user","access"]
 };
@@ -1545,7 +1545,7 @@ function icon(n){
    cons:'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M9 12h6"/>'};
   return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(p[n]||'')+'</svg>';
 }
-/* The six record kinds of context-record/v0.1. Icon + hue per kind; the statement is always the headline. */
+/* The six record kinds of steering-record/v0.1. Icon + hue per kind; the statement is always the headline. */
 var KINDS={
  rule:{l:"rule",d:"A directive that steers behavior",i:'<path d="M4 12h14M13 7l5 5-5 5"/>'},
  constraint:{l:"constraint",d:"A hard boundary: require or forbid",i:'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M9 12h6"/>'},
@@ -4092,7 +4092,7 @@ var BELT=[
   dec:"allow",rule:"grant:agent.graph.read",pinned:true,scope:"scope: workspace + repository"},
  {id:"append_record@2",d:"Append a Steering record to a lineage.",
   dec:"allow",rule:"agent tool default",scope:"kinds: finding, convention"},
- {id:"open_context_pr@1",d:"Open a pull request on the main repo from a proposal.",
+ {id:"open_steering_pr@1",d:"Open a pull request on the main repo from a proposal.",
   dec:"allow",rule:"grant:agent.repo.write #11",scope:"repo: a-intel/platform"},
  {id:"send_message@1",d:"Message another agent in this workspace, or a run.",
   dec:"allow",rule:"agent tool default",scope:"@agent only (no @all)"},
@@ -5704,7 +5704,7 @@ function prpById(id){for(var i=0;i<PROPOSALS.length;i++){if(PROPOSALS[i].id===id
 var CTXPR={prp:"prp_01K5RU4A", pr:"a-intel/platform#519", branch:"context/ctx.release.no-reread-changelog",
  base:"a4c91e2", head:"7d2e91a", promo:"rec_01K5RW2P7QH4", evt:"evt_01K5RW2Q8", hash:"sha256:9a41c0e7bd238f45",
  checks:[
-  {n:"Schema",ms:900,ok:"context-record/v0.1 valid · 1 file, 1 record, 1 lineage"},
+  {n:"Schema",ms:900,ok:"steering-record/v0.1 valid · 1 file, 1 record, 1 lineage"},
   {n:"Lineage uniqueness",ms:700,ok:"no published record holds ctx.release.no-reread-changelog; this proposal is its only holder"},
   {n:"record_hash recomputation",ms:600,ok:"recomputed over the canonical bytes · sha256:9a41c0e7bd238f45 matches the file"},
   {n:"Secret and PII scan",ms:900,ok:"statement, rationale and evidence scanned · 0 findings"},
@@ -5996,7 +5996,7 @@ function recprChecks(def){
   return [
    {n:"Schema",ms:900,
     test:function(){return recs.every(function(r){return !!tomlOf(recprFileText(def,r));});},
-    ok:"context-record/v0.1 valid · "+(one?"1 file, 1 record, 1 lineage":n+" files, "+n+" records, "+n+" lineages"),
+    ok:"steering-record/v0.1 valid · "+(one?"1 file, 1 record, 1 lineage":n+" files, "+n+" records, "+n+" lineages"),
     bad:one?"the record file does not parse as TOML":"a record file does not parse as TOML"},
    {n:"Lineage uniqueness",ms:700,
     /* A real check, not a sentence, and it is re-run at merge because another pull request can
@@ -6055,7 +6055,7 @@ function wzRecOpenPr(){
 function recprFileText(def,rec){
   var r=rec||def.record, multi=/\n/.test(r.st);
   return '# .oxagen/rules/'+r.id+'.toml\n'+
-   'schema = "context-record/v0.1"\n'+
+   'schema = "steering-record/v0.1"\n'+
    'lineage_id = '+tomlStr(r.id)+'\n'+
    'kind = '+tomlStr(r.kind)+'\n'+
    'sharing_scope = '+tomlStr(r.scope)+'\n'+
@@ -6237,7 +6237,7 @@ function ctxprTab(){
     '<span class="b b-'+l[0]+'" style="margin-left:auto" data-ctxpr-state="'+c.st+'"><span class="d"></span>'+h(l[1])+'</span></div><div class="panel-b">'+
     '<p class="eyebrow q">Branch <span class="mono">'+h(CTXPR.branch)+'</span> · base main · '+h(CTXPR.base)+' · one concern per PR</p>'+
     '<pre><span class="c"># .oxagen/rules/'+h(CTXPR.record.id)+'.toml</span>\n'+
-    '<span class="k">schema</span>       = <span class="s">"context-record/v0.1"</span>\n'+
+    '<span class="k">schema</span>       = <span class="s">"steering-record/v0.1"</span>\n'+
     '<span class="k">lineage_id</span>   = <span class="s">"'+h(CTXPR.record.id)+'"</span>\n'+
     '<span class="k">kind</span>         = <span class="s">"'+h(CTXPR.record.kind)+'"</span>\n'+
     '<span class="k">sharing_scope</span>= <span class="s">"workspace"</span>\n'+
@@ -9532,7 +9532,7 @@ function fixDlg(){
     return {t:"Fix · Open a pull request",w:true,s:f.kind+" on "+f.subject+" · "+usd(f.save)+" at stake",
      b:'<p class="eyebrow q">Branch <span class="mono">'+h(x.branch)+'</span> · one concern per PR · the agent reads this on its next run</p>'+
        '<pre><span class="c"># .oxagen/rules/'+h(x.lineage)+'.toml</span>\n'+
-       '<span class="k">schema</span>       = <span class="s">"context-record/v0.1"</span>\n'+
+       '<span class="k">schema</span>       = <span class="s">"steering-record/v0.1"</span>\n'+
        '<span class="k">lineage_id</span>   = <span class="s">"'+h(x.lineage)+'"</span>\n'+
        '<span class="k">kind</span>         = <span class="s">"'+h(x.kind)+'"</span>\n'+
        '<span class="k">sharing_scope</span>= <span class="s">"workspace"</span>\n'+
@@ -11415,7 +11415,7 @@ function asstSheet(){
    '<div class="msg"><div class="who">'+stellaName()+' <span class="b b-q" style="font-size:9.5px"><span class="id">run_01K5RT9X4M2</span> · oxagen’s run</span></div><div class="bub">'+
    '<p style="margin:0 0 10px">I read the finding and the toolbelt. 34 of the 52 tools on <span class="mono">a-intel.core.triage</span> were never called in 1,340 runs. '+
    'Narrowing the toolbelt is a change to the agent definition, so it is a pull request, not a database write. I opened one.</p>'+
-   '<div class="act-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_context_pr</code></div>'+
+   '<div class="act-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_steering_pr</code></div>'+
    '<dl class="kv" style="font-size:11.5px"><dt>Pull request</dt><dd><a href="#">a-intel/platform#521</a></dd>'+
    '<dt>File</dt><dd class="mono" style="font-size:11px">.oxagen/agents/triage.toml</dd>'+
    '<dt>Change</dt><dd>tools narrowed 52 → 18</dd>'+
@@ -11452,7 +11452,7 @@ function asstSheet(){
    Oxagen, never to the tenant: it is not one of your runs and it never appears in Work.
 
    Namespaces here: ced* the code editor, wz* the wizard, mcp* the server catalogue, skr* the skill
-   registry, crec* the context-record page. */
+   registry, crec* the steering-record page. */
 
 var MCP_CATALOG=FIXTURES.MCP_CATALOG;
 var SKILL_REGISTRY=FIXTURES.SKILL_REGISTRY;
@@ -13324,7 +13324,7 @@ function wzRecord(){
     var others=RECORDS.filter(function(x){return x.status==="published";}).length;
     return {t:"What the checks will assert", s:"Six of them, on the pull request, before anybody can merge it.",
      b:wzChecks([
-       ["Schema","<span class=\"mono\">context-record/v0.1</span> valid \u00b7 1 file, 1 record, 1 lineage"],
+       ["Schema","<span class=\"mono\">steering-record/v0.1</span> valid \u00b7 1 file, 1 record, 1 lineage"],
        ["Lineage uniqueness",(function(){var id=wzRecLineage();
          return RECORDS.some(function(r){return r.status==="published"&&r.id===id;})
           ?'<span style="color:var(--st-failed)"><b>'+h(id)+' is already published.</b></span> This check will fail and nothing will merge. Amend the published record instead of opening a second one under its id.'
@@ -13340,7 +13340,7 @@ function wzRecord(){
   var pr4=wzPrStep("Open the pull request",
     "Merging publishes it. Nothing steers until then, and the record is in force from the merge commit, not from when you wrote it.",
     [["add",".oxagen/rules/"+wzRecLineage()+".toml","the record"]],
-    [["Schema","<span class=\"mono\">context-record/v0.1</span>"],["Lineage",h(wzRecLineage())+" is free"],
+    [["Schema","<span class=\"mono\">steering-record/v0.1</span>"],["Lineage",h(wzRecLineage())+" is free"],
      ["Hash","recomputed at merge"],["Secrets","statement, rationale and evidence"],
      ["Conflicts","against every published record"],["Effect",wzRecCe()?h(z.ce):"none \u00b7 this kind constrains nothing"]],
     "Open the pull request",
@@ -13460,7 +13460,7 @@ function crecSave(rec){
     title:"Propose a change to this record",
     lead:"A published record is changed the way it was published: a branch, a pull request, the same six checks, and a merge. Nothing here edits what is in force.",
     branch:"context/"+rec.id+".amend",
-    checks:[["Schema","<span class=\"mono\">context-record/v0.1</span> still valid after the edit"],
+    checks:[["Schema","<span class=\"mono\">steering-record/v0.1</span> still valid after the edit"],
       ["Lineage","<span class=\"mono\">"+h(rec.id)+"</span> keeps its lineage. An amended record is the same record at a new version."],
       ["record_hash recomputation","recomputed over the new bytes \u00b7 the old hash stays on every run that carried it"],
       ["Secret and PII scan","the new statement is scanned"],
@@ -13502,7 +13502,7 @@ function crecPr(rec){
    opened:"just now",state:"checks_running",
    trigger:"An operator archived "+rec.id+".",
    files:[["mod",".oxagen/rules/"+rec.id+".toml",'status = "archived"']],
-   checks:[["schema","pass","context-record/v0.1 still valid with the new status."],
+   checks:[["schema","pass","steering-record/v0.1 still valid with the new status."],
     ["lineage","pass",h(rec.id)+" keeps its lineage. An archived record is the same record, out of force."],
     ["dependent_records","pass","No published record in "+h(w.name)+" cites this one as the reason it narrows."],
     ["bundle_recompilation","pass","The bundle loses "+(crecBundleRow(rec)?crecBundleRow(rec).tok+" tokens":"nothing, because it was not compiled")+" at v"+(STEER_BUNDLE.v+1)+"."]]};
@@ -13568,7 +13568,7 @@ function pRecord(r){
       '<dt>File</dt><dd><span class="mono">.oxagen/rules/'+h(rec.id)+'.toml</span> on '+h(w.main)+'</dd>'+
       '<dt>Published by</dt><dd><span class="mono">'+h(rec.commit||"\u2014")+'</span> on '+h(rec.pub||"\u2014")+'</dd>'+
       '<dt>Effect</dt><dd>'+h(rec.effect||"never rendered")+'</dd>'+
-      '<dt>Schema</dt><dd><span class="mono">context-record/v0.1</span></dd>'+
+      '<dt>Schema</dt><dd><span class="mono">steering-record/v0.1</span></dd>'+
       '</dl></div></div>'+
     '</div>'+
     '<div>'+crecPanel(rec)+srcFramesPanel(srcRowOf("record",rec.id,w.slug))+srcReachPanel(srcRowOf("record",rec.id,w.slug))+
@@ -14222,7 +14222,7 @@ document.addEventListener("click",function(e){
     "aws-billing":["get_forecast","list_budgets","update_budget","get_reservation_coverage","list_savings_plans","get_anomalies","get_rightsizing","tag_resource"],
     slack:["get_channel","list_users","get_user","send_dm","update_message","delete_message","add_reaction","pin_message","create_channel","archive_channel","set_topic","search_messages"],
     snowflake:["list_tables","describe_table","list_schemas","get_query_history","cancel_query","create_stage"],
-    oxagen:["expand_entity","recall_context","get_run","list_runs","read_frame","list_frames","propose_record","open_context_pr","get_agent","list_agents","get_policy","list_receipts","get_receipt","export_bundle","verify_bundle","get_budget","set_preferences","list_mandates","draw_mandate","search_tools","describe_tool","request_approval","check_approval","score_candidates","compose_context","summarize_run","reflect_run","promote_finding","list_findings","get_spend","list_switches","read_switch","enqueue_export"],
+    oxagen:["expand_entity","recall_context","get_run","list_runs","read_frame","list_frames","propose_record","open_steering_pr","get_agent","list_agents","get_policy","list_receipts","get_receipt","export_bundle","verify_bundle","get_budget","set_preferences","list_mandates","draw_mandate","search_tools","describe_tool","request_approval","check_approval","score_candidates","compose_context","summarize_run","reflect_run","promote_finding","list_findings","get_spend","list_switches","read_switch","enqueue_export"],
     harness:["Read","Edit","Write","Glob","Grep","WebFetch","WebSearch","Agent","NotebookEdit","apply_patch","shell","update_plan","view_image","exec","file_write","file_read","git_commit","git_diff"],
     jira:["create_issue","get_issue","search_issues","update_issue","transition_issue","add_comment","list_boards","get_sprint","list_sprints","assign_issue","link_issues","add_attachment","list_projects","get_project","create_version","list_components","add_watcher","get_changelog","list_filters","run_filter","bulk_update","delete_issue","create_epic","list_epics","get_worklog","add_worklog"],
     datadog:["list_monitors","get_monitor","mute_monitor","unmute_monitor","create_monitor","query_metrics","search_logs","list_incidents","get_incident","create_incident","list_dashboards","get_dashboard","list_slos","get_slo","list_services","get_service","post_event"],
@@ -14445,7 +14445,7 @@ document.addEventListener("click",function(e){
   var EV=[["approval.requested",10,"agent"],["approval.resolved",9,"human"],["run.sealed",26,"agent"],["run.halted",4,"agent"],["tool_call.denied",6,"agent"],
     ["budget.breached",2,"agent"],["agent.registered",3,"human"],["agent.retired",1,"human"],["role.assigned",3,"human"],["role.revoked",1,"human"],["api_key.created",1,"human"],["api_key.revoked",1,"human"],
     ["invitation.sent",2,"human"],["invitation.accepted",2,"human"],["connection.reviewed",2,"human"],["credential.granted",8,"service"],["export.created",2,"human"],["export.downloaded",1,"human"],
-    ["steering_published",3,"human"],["context_pr.opened",3,"service"],["kill_switch.flipped",1,"human"],["kill_switch.cleared",1,"human"],
+    ["steering_published",3,"human"],["steering_pr.opened",3,"service"],["kill_switch.flipped",1,"human"],["kill_switch.cleared",1,"human"],
     ["schema.proposed",2,"service"],["schema.approved",1,"human"],["session.signed_in",6,"human"],["preferences.set",2,"human"]];
   var evW=EV.map(function(e){return [e,e[1]];});
   var humans=Object.keys(PEOPLE).map(function(k){return PEOPLE[k].name;}), svcs=["svc_terraform","svc_ci","svc_finops_export","svc_archive","verifier","gateway","policy engine"];
@@ -14473,7 +14473,7 @@ document.addEventListener("click",function(e){
       case "export.created": return "exp_01K5R"+ulid(4)+" · "+pick(["receipt export","evidence bundle"])+" · "+pick(allWs);
       case "export.downloaded": return "exp_01K5R"+ulid(4)+" · signature verified";
       case "steering_published": return pick(RECORDS).id+" · "+pick(REPOS).n+"#"+ri(300,1900)+" merged";
-      case "context_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+plural(ri(3,40),"run")+" in support";
+      case "steering_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+plural(ri(3,40),"run")+" in support";
       case "kill_switch.flipped": return pick(["tool version "+t.n+"@"+t.v,"agent "+r.agent,"provider kubernetes"])+" · "+pick(["schema regression","runaway retries","operator request"]);
       case "kill_switch.cleared": return "provider kubernetes · schema approved";
       case "schema.proposed": return t.n+"@"+t.v+" · output schema observed, not declared";
@@ -14555,7 +14555,7 @@ document.addEventListener("click",function(e){
     {kind:"run.sealed",tone:"allowed",unread:false,t:"15:30",title:"Run sealed · "+genRuns[3].id,body:genRuns[3].task+" sealed: "+plural(genRuns[3].frames,"frame")+", "+usd(genRuns[3].cost)+" "+keyText(genRuns[3].basis).toLowerCase()+"."},
     {kind:"budget.breached",tone:"failed",unread:false,t:"14:52",title:"Hard budget reached · "+fin[0].key,body:usd(fin[0].budget)+" per run reached at turn 5. The run was paused at the next checkpoint."},
     {kind:"repository.indexed",tone:"allowed",unread:false,t:"14:20",title:"Code graph current · a-intel/data-platform",body:"Push "+hex(7)+" to main indexed in 58 s. 41 files re-parsed, 190 symbols versioned."},
-    {kind:"context_pr.opened",tone:"gold",unread:false,t:"11:48",title:"Pull request opened · a-intel/support-console#188",body:"The promoter proposed a rule on lineage ctx.support.reply-in-customers-language, supported by 212 tickets."});
+    {kind:"steering_pr.opened",tone:"gold",unread:false,t:"11:48",title:"Pull request opened · a-intel/support-console#188",body:"The promoter proposed a rule on lineage ctx.support.reply-in-customers-language, supported by 212 tickets."});
 
   /* ---------- spend, billing, the numbers every page quotes ---------- */
   var spendTot=0,runsTot=0,ratioW=0; AGENTS.forEach(function(a){spendTot+=num$(a.spend30);runsTot+=a.runs30;ratioW+=num$(a.spend30)*(a.ratio||0);});

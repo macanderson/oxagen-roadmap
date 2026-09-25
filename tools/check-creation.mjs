@@ -236,7 +236,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   await page.close();
 }
 
-/* ---------------- context record ---------------- */
+/* ---------------- steering record ---------------- */
 {
   const { page, errs } = await open();
   await page.evaluate(() => wzOpen("record"));
@@ -1315,7 +1315,7 @@ for (const theme of ["light", "dark"]) {
   }, rid);
   await page.waitForTimeout(400);
   ok(pr.after === pr.before + 1, "records: archiving opens one pull request, got " + pr.before + " -> " + pr.after);
-  ok(pr.kind === "record", "records: it is a context record pull request, got " + pr.kind);
+  ok(pr.kind === "record", "records: it is a steering record pull request, got " + pr.kind);
   ok(/^\.oxagen\/rules\//.test(pr.file), "records: it edits the record file, got " + pr.file);
   ok(/archived/.test(pr.note), "records: the change is the status, got " + pr.note);
   ok(/\.archive$/.test(pr.pend || ""), "records: the page shows the branch while it is open, got " + pr.pend);
