@@ -50,7 +50,7 @@ Oxagen's gateway governs agents, not API consumers. Each call carries an agent's
 
 ### Control plane
 
-This is the existing Oxagen API and app. It holds the mandate for each agent: access, budget and rules, and equipment (toolbelt, skills, steering, profile, memories). It also holds the key vault, mints run tokens, ingests the record, and computes the tier. It never carries a model or MCP call.
+This is the existing Oxagen API and app. It holds the mandate for each agent: access, budget and rules, and equipment (toolbelt, skills, steering, profile, memories). It also holds the key vault, signs each gateway's authority to mint run tokens, ingests the record, and computes the tier. It never carries a model or MCP call.
 
 ### Data plane
 
@@ -84,9 +84,13 @@ Both run the same code. A customer moves from one to the other by pointing its e
 ## Keys and the kill switch
 
 1. **Oxagen holds the vendor keys.** A team adds its Anthropic and OpenAI organization keys to Oxagen once. Enrollment removes any vendor key from the harness's config, and `credentials.json` on the laptop goes away.
-2. **The harness holds a run token.** The control plane mints an `oxrt_` token for one agent, one host, and one run. It lasts at most 15 minutes, as ADR-143's token does today. `tachod` refreshes it through the harness's key helper.
-3. **The gateway swaps the token for the key.** It verifies the token, checks the mandate and the run's state, and forwards the call with the organization's key.
-4. **Kill means no new token and no open call.** Pause, cancel, or kill stops minting for that run, revokes its live tokens at the gateway, and aborts its calls in flight. The harness's next call fails, and it has no other key to try.
+2. **The harness holds a run token.** The gateway mints an `oxrt_` token for one agent, one host, and one run. A token is short-lived, and a run is not: `tachod` fetches a fresh one for as long as the run may continue. Claude Code re-runs its key helper every five minutes and on any 401 (ADR-143 §2), so a run that lasts days picks up hundreds of tokens without noticing. Codex has no key helper and reads a fixed value, so it gets a run-scoped token that lives as long as the run.
+3. **The gateway swaps the token for the key.** It verifies the token, checks the mandate and the run's state on every call, and forwards the call with the organization's key.
+4. **Kill means no open call and no next call.** Pause, cancel, or kill marks the run at the gateway, aborts its calls in flight, and refuses its next call, whatever the token's expiry. It also stops minting for the run. The harness has no other key to try.
+
+The kill never waits for a token to expire. The token's short life only limits how long a stolen token stays useful.
+
+**Long runs.** The gateway mints tokens, not the API, so a run that lasts days keeps working while the control plane is unreachable. The gateway keeps serving from its cached configuration, as a Kong data plane does, and applies a command as soon as it arrives. A customer-hosted gateway mints its own tokens.
 
 This holds against the agent and against every process the agent starts. It holds against the machine's owner for the organization's keys. It does not hold against a key the owner brings from elsewhere. Two controls close that gap: the vendor's own organization settings, which stop members creating personal API keys, and the `contained` tier, whose sandbox reaches only the gateway.
 
@@ -164,7 +168,7 @@ It keeps ADR-078 §4. There is still one tool builder, and it is the server's.
 ## Build order
 
 1. **The ADR** above, and the retention default for bodies the gateway carries.
-2. **Agent identity and tokens.** An agent principal per enrolled agent, grants for external tools, run tokens minted by the control plane, and revocation.
+2. **Agent identity and tokens.** An agent principal per enrolled agent, grants for external tools, run tokens minted by the gateway and refreshed for the life of the run, and a kill checked on every call.
 3. **The model gateway, Oxagen-hosted.** Port the proxy's routes, metering, budgets, allowlist, and interrupt. Add the per-organization key vault. Enrollment points each harness's base URL at the gateway and removes the local key.
 4. **The MCP gateway.** The toolbelt endpoint per server, OAuth and credential custody, per-tool rules, approval, metering, and billing. Enrollment imports the harness's servers and writes the gateway's entries.
 5. **Pinning** for Claude Code, Codex, and Cursor. Stella follows once #6564 lands.
@@ -176,7 +180,8 @@ It keeps ADR-078 §4. There is still one tool builder, and it is the server's.
 
 - A Claude Code, Codex, or Cursor run on an enrolled host makes every model call and every toolbelt call through the gateway. Its record says so, and its tier is `gateway`.
 - No vendor key or MCP credential is on the enrolled machine.
-- Killing a run aborts its model call in flight and refuses its next one.
+- Killing a run aborts its model call in flight and refuses its next one, whatever its token's expiry.
+- A run that lasts several days keeps working across token refreshes, and through a control plane outage.
 - A budget refuses the next call once the run's observed spend reaches it.
 - Skills, agent files, and context records published in Oxagen appear in each harness without a commit to the repository.
 - A customer-hosted gateway serves the same run with keys only in the customer's KMS, and no prompt body reaches Oxagen.
