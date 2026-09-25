@@ -1838,6 +1838,35 @@ button.wz-opt:hover{border-color:var(--rule)}
 .wz-sum{border:1px solid var(--border);border-radius:11px;background:var(--hl);padding:13px 15px}
 .wz-drop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px dashed var(--rule);border-radius:11px;padding:12px 14px;background:var(--void)}
 .wz-drop input[type=file]{flex:1;min-width:180px;font-size:12px;color:var(--muted);background:none;border:0;padding:0}
+.wz-drop input[type=file][hidden]{display:none}
+/* Markdown import: the drop zone lights while a drag is over it, and each candidate is a card whose
+   left edge says whether it is accepted. A rejected card dims so the accepted ones read first. */
+.imp-drop .ic{display:inline-flex;color:var(--muted)}
+.imp-drop.over{border-color:var(--gold);background:var(--hl)}
+.imp-files tr.off td{color:var(--dim)}
+.imp-files select,.imp-bar select,.imp-ctl select{width:auto;max-width:100%;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--fg);outline:none;transition:border-color .12s}
+.imp-files select:focus,.imp-bar select:focus,.imp-ctl select:focus{border-color:var(--gold)}
+.imp-files input[type=checkbox]{width:16px;height:16px;min-height:0;padding:0;accent-color:var(--gold)}
+.imp-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0 8px}
+.imp-bar label{font-size:12px;color:var(--muted)}
+.imp-n{margin-left:auto;font-size:12px;color:var(--muted)}
+.imp-tiles{margin-bottom:4px}
+.imp-g{margin-top:16px}
+.imp-gh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:12.5px}
+.imp-gh .mono{color:var(--fg);font-weight:600}
+.imp-gh .dim{margin-right:auto}
+.imp-c{border:1px solid var(--border);border-left:3px solid var(--rule);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--panel)}
+.imp-c[data-imp-st=accept]{border-left-color:var(--st-allowed)}
+.imp-c[data-imp-st=reject]{opacity:.6}
+.imp-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.imp-src{font-size:11.5px;color:var(--muted)}
+.imp-t{margin:6px 0 4px;color:var(--body);white-space:pre-line}
+.imp-t mark{background:color-mix(in srgb,var(--gold) 28%,transparent);color:inherit;border-radius:3px;padding:0 2px}
+.imp-why{font-size:12px;color:var(--muted);margin:0}
+.imp-note{font-size:12px;color:var(--body);margin:6px 0 0}
+.imp-ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.imp-act{display:inline-flex;gap:6px;margin-left:auto}
+.imp-act .btn[aria-pressed="true"]{background:var(--hl);border-color:var(--rule);color:var(--fg)}
 .sx-row.wz-on{border-color:var(--gold);box-shadow:inset 2px 0 0 var(--gold)}
 
 /* the six kinds, as six cards that say what each one can never do */
@@ -1911,6 +1940,13 @@ button.wz-opt:hover{border-color:var(--rule)}
 #layer.phone .wz-file .d,#viewport.phone .wz-file .d{grid-column:2}
 #layer.phone .wz-opt-tools .wz-mt{gap:5px}
 #layer.phone .wz-drop{flex-direction:column;align-items:stretch}
+#layer.phone .imp-tiles{grid-template-columns:1fr 1fr}
+#layer.phone .imp-ctl select,#layer.phone .imp-bar select,#layer.phone .imp-files select{font-size:16px;min-height:44px}
+#layer.phone .imp-files input[type=checkbox]{width:22px;height:22px;min-height:0}
+#layer.phone .imp-ctl .btn,#layer.phone .imp-bar .btn,#layer.phone .imp-gh .btn{min-height:44px}
+#layer.phone .imp-act{margin-left:0;width:100%}
+#layer.phone .imp-act .btn{flex:1}
+#layer.phone .imp-n{margin-left:0;width:100%}
 #layer.phone .wz-langs{overflow-x:auto}
 
 /* ---------- the in-app agent: a flyout from the sidebar ----------
@@ -9694,7 +9730,9 @@ function stgMeter(label,used,max,unit,sub){
    the promoter proposes it as a record and cites every saying as a supporting run. */
 S.memFold={sayings:3,runs:2};
 function memSayings(m){return m.sayings||[];}
-function memRunsOf(m){var o={};memSayings(m).forEach(function(x){o[x.run]=1;});return Object.keys(o);}
+/* A saying imported from a Markdown file carries file and line and no run. It counts as a saying and
+   never as a run, so an imported memory alone never folds into a proposal. */
+function memRunsOf(m){var o={};memSayings(m).forEach(function(x){if(x.run)o[x.run]=1;});return Object.keys(o);}
 function memFoldOf(m){
   var n=memSayings(m).length, r=memRunsOf(m).length, F=S.memFold;
   if(m.proposedAs) return {st:"proposed",n:n,r:r};
@@ -9706,13 +9744,14 @@ function memFoldSub(m){
   if(f.st==="proposed") return 'proposed as <span class="mono">'+h(m.proposedAs)+'</span>';
   if(f.st==="ready") return 'the promoter proposes it on its next pass';
   if(f.need) return 'needs '+f.need+' more saying'+(f.need>1?'s':'');
-  return 'needs a saying from another run';
+  return f.r?'needs a saying from another run':'needs a saying from a run';
 }
 function memFoldLine(m){
   var f=memFoldOf(m), F=S.memFold;
   if(f.st==="proposed") return 'Proposed as <span class="mono">'+h(m.proposedAs)+'</span> when it reached '+F.sayings+' sayings from '+F.runs+' runs. The proposal cites every saying above.';
   if(f.st==="ready") return 'It has '+f.n+' sayings from '+f.r+' runs, which meets the setting. The promoter proposes it on its next pass.';
-  return 'It becomes a proposal at '+F.sayings+' sayings from '+F.runs+' runs. It has '+f.n+' from '+f.r+' run'+(f.r===1?'':'s')+'.';
+  return 'It becomes a proposal at '+F.sayings+' sayings from '+F.runs+' runs. It has '+f.n+' from '+f.r+' run'+(f.r===1?'':'s')+'.'+
+   (memSayings(m).some(function(x){return x.file;})?' An imported saying counts toward the sayings and never toward the runs, so an import alone never makes a proposal.':'');
 }
 function memOpenProposal(id){closeDialog();S.prpSel=id;go('#/'+ORG.slug+'/'+S.ws+'/steering/proposals');}
 function memAsmCell(m,wslug){
@@ -9721,11 +9760,11 @@ function memAsmCell(m,wslug){
     :'<span class="b b-allowed"><span class="d"></span>competes</span>';
 }
 function stgMemoryAgg(L){
-  var runs={}, steers=0, notes=0, recalls=0, cls={}, folded=0;
+  var runs={}, steers=0, notes=0, imports=0, recalls=0, cls={}, folded=0;
   L.forEach(function(m){recalls+=m.recalls30||0; cls[m.cls]=(cls[m.cls]||0)+1;
     String(m.provenance||"").split(/\s*·\s*/).forEach(function(p){if(/^run_/.test(p))runs[p]=1;});
-    memSayings(m).forEach(function(x){runs[x.run]=1; folded++; if(/operator steer/.test(x.by))steers++; else notes++;});});
-  return {runs:Object.keys(runs).length,steers:steers,notes:notes,recalls:recalls,cls:cls,folded:folded};
+    memSayings(m).forEach(function(x){folded++; if(x.file){imports++;return;} runs[x.run]=1; if(/operator steer/.test(x.by))steers++; else notes++;});});
+  return {runs:Object.keys(runs).length,steers:steers,notes:notes,imports:imports,recalls:recalls,cls:cls,folded:folded};
 }
 function stgMemoryTab(w){
   var L=stgMemory(w.slug), G=stgMemoryAgg(L);
@@ -9740,7 +9779,7 @@ function stgMemoryTab(w){
      '<td class="num">'+tokn(m.token_cost)+' tok</td><td>'+st+'</td></tr>';}).join("");
   var agg='<div class="grid g4" style="margin-bottom:14px">'+
    '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s" data-mem-folded="'+G.folded+'">folded from '+G.folded+' sayings</span></div>'+
-   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s">'+G.steers+' operator steers and '+G.notes+' reflections</span></div>'+
+   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s" data-mem-imports="'+G.imports+'">'+G.steers+' operator steers'+(G.imports?', ':' and ')+G.notes+' reflections'+(G.imports?', and '+G.imports+' imported line'+(G.imports===1?'':'s'):'')+'</span></div>'+
    '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
    '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a rule is proposed as a record instead</span></div></div>';
   return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
@@ -9769,13 +9808,14 @@ DLG_EXT.memory=function(id){
    b:'<dl class="kv"><dt>Class</dt><dd><span class="b b-q mono">'+h(m.cls)+'</span> at '+forceBadge(m.force)+'</dd>'+
      '<dt>Scope</dt><dd>'+h(m.scope)+(m.agent?' · <span class="mono">'+h(m.agent)+'</span>':'')+'</dd>'+
      '<dt>Where it came from</dt><dd><span class="mono" style="font-size:11.5px">'+h(m.provenance)+'</span></dd>'+
-     '<dt>Recalled</dt><dd>'+m.recalls30+' times in 30 days, last on '+h(m.lastRecalled)+'</dd>'+
+     '<dt>Recalled</dt><dd>'+(m.recalls30?m.recalls30+' times in 30 days, last on '+h(m.lastRecalled):'Not recalled yet')+'</dd>'+
      '<dt>Cost</dt><dd>'+tokn(m.token_cost)+' tokens every time it is selected, so '+tokn(m.token_cost*m.recalls30)+' over those 30 days</dd>'+
      '<dt>In force since</dt><dd><span class="mono">'+h(m.valid_from)+'</span></dd></dl>'+
      '<div class="note" style="margin-top:12px">'+memPosition(m)+'</div>'+
      '<div class="field" style="margin-top:12px"><label>Sayings</label><div class="mem-says" data-mem-says="'+memSayings(m).length+'">'+
       memSayings(m).map(function(x){return '<div class="mem-say"><div class="q">“'+h(x.text)+'”</div>'+
-       '<div class="by"><span>'+h(x.by)+'</span> <a class="mono" href="#/'+ORG.slug+'/'+S.ws+'/runs/'+h(x.run)+'/memory" onclick="closeDialog()">'+h(x.run)+'</a> <span>frame '+x.frame+'</span></div></div>';}).join("")+
+       '<div class="by"><span>'+h(x.by)+'</span> '+(x.file?'<span class="mono" data-mem-src>'+h(x.file)+':L'+x.line+'</span> <span>imported</span>'
+        :'<a class="mono" href="#/'+ORG.slug+'/'+S.ws+'/runs/'+h(x.run)+'/memory" onclick="closeDialog()">'+h(x.run)+'</a> <span>frame '+x.frame+'</span>')+'</div></div>';}).join("")+
       '</div><div class="note" style="margin-top:8px">'+memFoldLine(m)+'</div></div>'+
      (/^run_/.test(run)?'<div class="field" style="margin-top:12px"><label>The run that left it</label>'+
        '<button class="btn sm" onclick="closeDialog();go(\'#/'+ORG.slug+'/'+S.ws+'/runs/'+h(run)+'\')">Open '+h(run)+'</button></div>':''),
@@ -10235,11 +10275,12 @@ function pSteering(){
   if(S.state==="denied") return deniedState("this workspace’s steering","steering.read on "+w.slug);
   var on=t==="prs"?"proposals":t;
   var write='<button class="btn primary" onclick="wzOpen(\'record\')">Write a context record</button>';
+  var mdImport='<button class="btn" onclick="wzOpen(\'import\')">Import Markdown</button>';
   if(S.state==="empty"){
     /* The library's empty state is the shelf's, so the reason names the thing that is missing. */
     var E={
-     library:["Nothing steers this workspace yet","Published records live in <span class=\"mono\">.oxagen/rules/</span> on "+h(w.main)+". A record becomes published by being merged, never by being saved here.",write],
-     memory:["Nothing has been recalled yet","Memory is what an agent’s own runs leave behind. No run in this workspace has written one, so nothing competes from here.",""],
+     library:["Nothing steers this workspace yet","Published records live in <span class=\"mono\">.oxagen/rules/</span> on "+h(w.main)+". A record becomes published by being merged, never by being saved here.",mdImport+write],
+     memory:["Nothing has been recalled yet","Memory is what an agent’s own runs leave behind. No run in this workspace has written one. You can import sayings from a CLAUDE.md or AGENTS.md.",mdImport],
      ontology:["No ontology notes yet","A note defines one entity or one term the way this workspace uses it. Notes are files under <span class=\"mono\">.oxagen/ontology/</span> on "+h(w.main)+", published by a merge.",write],
      assignments:["No agent receives steering here","Steering reaches an agent through a hook on its runtime. No agent in this workspace is enrolled, so nothing is delivered.",'<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/agents\')">Open Agents</button>'],
      gates:["No gate applies to this workspace yet","No decision rule, mandate or kill switch reaches an agent here, so no gate notice enters steering. Gates are written on Tools and on a mandate’s own page.",'<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/tools/policy\')">Open the policy tab</button>'],
@@ -10272,7 +10313,8 @@ function pSteering(){
     if(t==="proposals"){
       var sel=S.prpSel&&prpById(S.prpSel);
       body=seg+(sel?prpDetail(sel):'<div class="panel"><div class="panel-h"><h3>Proposals</h3>'+
-       '<button class="btn sm" style="margin-left:auto" onclick="wzOpen(\'record\')">Write a context record</button></div>'+
+       '<button class="btn sm" style="margin-left:auto" onclick="wzOpen(\'import\')">Import Markdown</button>'+
+       '<button class="btn sm" onclick="wzOpen(\'record\')">Write a context record</button></div>'+
        '<div class="recs">'+
        PROPOSALS.map(function(p){
         var s=prpStats(p.id);
@@ -10282,7 +10324,8 @@ function pSteering(){
        '</div></div>');
     } else body=seg+ctxprTab();
   }
-  return stgHub(on,body,'<button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'record\')">Write a context record</button>');
+  return stgHub(on,body,'<button class="btn" onclick="wzOpen(\'import\')">Import Markdown</button>'+
+    '<button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'record\')">Write a context record</button>');
 }
 
 
@@ -14161,9 +14204,10 @@ var CMDS=[
  {g:"The assistant \u2014 it acts through these same actions",i:[
    ["Open the assistant","!asstToggle(true)"],["Ask why a run came back tampered","!asstToggle(true)"],
    ["Ask what an agent cost this month","!asstToggle(true)"],["Mint a model key for this organization","!openDialog('mintkey')"]]},
- {g:"Create \u2014 each one ends on a pull request",i:[
+ {g:"Create",i:[
    ["Create anything","!openDialog('create')"],["New agent","!wzOpen('agent')"],["New tool","!wzOpen('tool')"],
-   ["Add a skill","!wzOpen('skill')"],["Write a context record","!wzOpen('record')"]]},
+   ["Add a skill","!wzOpen('skill')"],["Write a context record","!wzOpen('record')"],
+   ["Import Markdown","!wzOpen('import')"]]},
  {g:"Runs",i:[["run_01K5RS7M2E8FJ3QW · release-manager · live","#/a-intel/core-platform/runs/run_01K5RS7M2E8FJ3QW"],
     ["run_01K5RQ4B9C7XTN2P · stella-ci · sealed","#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P"],
    ["run_01K4QJ9E4T6YUI1O · stella-ci · compacted","#/a-intel/core-platform/runs/run_01K4QJ9E4T6YUI1O"]]},
@@ -15915,20 +15959,23 @@ var CREATE={
    file:".oxagen/skills/&lt;name&gt;/SKILL.md",need:"skills.admin"},
  record:{l:"Context record",d:"One statement that steers every agent it reaches.",i:"steering",
    file:".oxagen/rules/&lt;lineage&gt;.toml",need:"steering.write"},
- init:{l:"Repository",d:"Adds the .oxagen/ tree to a repository that has none. The other four need it first.",i:"repo",
+ import:{l:"Markdown import",d:"CLAUDE.md, AGENTS.md, and any Markdown file, read into records and memories.",i:"dir",
+   file:"CLAUDE.md · AGENTS.md · any .md",need:"steering.write · memory.write"},
+ init:{l:"Repository",d:"Adds the .oxagen/ tree to a repository that has none. The others need it first.",i:"repo",
    file:".oxagen/ &lt;in a repository&gt;",need:"repository.admin"}
 };
 
 DLG_EXT.create=function(){
  var w=ws();
- return {t:"Create", s:"Five things, one shape: you describe it, oxagen drafts the file, you read it, and a pull request publishes it.", w:true,
+ return {t:"Create", s:"You describe it, oxagen drafts the file, you read it, and a pull request publishes it.", w:true,
   b:'<div class="wz-pick">'+Object.keys(CREATE).map(function(k){var c=CREATE[k];
      return '<button class="wz-card" onclick="wzOpen(\''+k+'\')">'+
       '<span class="ic">'+icon(c.i)+'</span>'+
       '<span class="tx"><b>'+h(c.l)+'</b><span class="d">'+h(c.d)+'</span>'+
       '<span class="fp mono">'+c.file+'</span></span></button>';}).join("")+'</div>'+
-    '<div class="note" style="margin-top:14px">None of these writes a row. Each one ends on a pull request against '+h(w.main)+
-    '. The thing exists once someone merges it, and a reviewer can stop it there.</div>',
+    '<div class="note" style="margin-top:14px">Each one ends on a pull request against '+h(w.main)+
+    '. The thing exists once someone merges it, and a reviewer can stop it there. '+
+    'A memory from the Markdown import is the exception: it is written when you accept it, and it steers at may or below.</div>',
   f:'<span class="grow mono dim" style="font-size:11px">'+h(w.name)+' · '+h(w.main)+'</span><button class="btn" onclick="closeDialog()">Close</button>'};
 };
 
@@ -15939,7 +15986,8 @@ function wzNew(kind){
     /* skill */ q:"", pick:null, file:null,
     /* agent */ slug:"", harness:"claude-code", tier:"complex", av:null, belt:{},
     /* record */ rkind:null, force:"should", ce:"forbid", scope:"workspace",
-    /* init */ repoName:null, role:"linked", branch:null, mode:"team"};
+    /* init */ repoName:null, role:"linked", branch:null, mode:"team",
+    /* import */ files:null, skipped:[], cands:null, candsAs:null, asAll:"records", spent:0, reading:0, root:null};
 }
 /* `seed` is what the operator was looking at when they asked. Without it, a row's own action
    opens a wizard on whatever the candidate list happens to put first, so clicking Add Oxagen on
@@ -15956,6 +16004,7 @@ function wzSteps(){
   if(z.kind==="tool") return z.path==="import"?["Describe","Recommendation","Import"]:["Describe","Recommendation","Manifest","Code","Pull request"];
   if(z.kind==="skill") return ["Source", z.path==="registry"?"Find it":z.path==="upload"?"Upload":"Describe it","Review","Pull request"];
   if(z.kind==="agent") return ["Describe","Identity","Definition","Toolbelt","Pull request"];
+  if(z.kind==="import") return ["Files","Review","Publish"];
   if(z.kind==="init") return ["Repository","Branch & governance","Permissions","Review","Pull request"];
   return ["Describe","Kind","Statement","Checks","Pull request"];
 }
@@ -16065,10 +16114,432 @@ function wzPrStep(title,lead,files,checks,btn,msg,base){
 }
 function wzOpenPr(msg){ var z=S.wz; S.wz=null; closeDialog(); act(msg,"gold"); }
 
+/* ---- importing Markdown --------------------------------------------------------------------
+   A repository's CLAUDE.md, AGENTS.md and runbooks already say how agents should work there. The
+   importer lists those files, and stella splits them into candidates: one per bullet, one per
+   numbered list, and one per paragraph that carries an instruction word. Each candidate keeps the
+   file and line it came from and the word that decided its kind, so every inference can be checked
+   against the source. Nothing is written until the operator accepts it. Accepted records open one
+   context pull request per source file, so a reviewer reads a file's rules together. Accepted
+   memories are written at once: a memory steers at may or below, and it becomes a record only
+   through a proposal that runs earn. */
+var MD_IMPORT=FIXTURES.MD_IMPORT;
+var IMP_SKIP_DIR={node_modules:"a dependency directory",vendor:"a dependency directory",".git":"version control",dist:"build output",build:"build output"};
+/* The first rule that matches decides. A prohibition comes before "must" because "must not" is
+   both, and the prohibition is the stronger reading. */
+var IMP_RULES=[
+ {re:/\b(never|do not|don['’]t|must not)\b/i,kind:"constraint",force:"must",ce:"forbid",why:"reads as a constraint that forbids"},
+ {re:/\b(must|required?)\b/i,kind:"constraint",force:"must",ce:"require",why:"reads as a constraint that requires"},
+ {re:/\balways\b/i,kind:"rule",force:"must",why:"reads as a rule at must"},
+ {re:/\bshould\b/i,kind:"rule",force:"should",why:"reads as a rule at should"},
+ {re:/\b(prefer|rather)\b/i,kind:"preference",force:"may",why:"reads as a preference"},
+ {re:/\b(remember|last time|incident)\b/i,kind:"memory",force:"info",why:"recalls something that happened, so a memory"}
+];
+var IMP_VERBS={use:1,keep:1,run:1,write:1,add:1,put:1,open:1,name:1,read:1,check:1,call:1,set:1,update:1,leave:1,ask:1,avoid:1};
+var IMP_CLS={preference:"PREFERENCE",rule:"RULE",constraint:"RULE",procedure:"RULE",memory:"EPISODE",fact:"FACT"};
+function impForces(k){ return k==="preference"?["may","info"]:k==="memory"||k==="fact"?["info"]:["must","should","may","info"]; }
+/* A memory never holds must or should. It keeps may, or info when that is what the line asked for. */
+function impMemForce(c){ return c.kind==="memory"||c.kind==="fact"||c.force==="info"?"info":"may"; }
+
+/* A render rebuilds the dialog, and the browser puts a rebuilt scroll box back at the top. The
+   review list is long, so every control on it keeps the reader where they were. */
+function impRender(){
+  var b=document.querySelector("#layer .dlg-b"), y=b?b.scrollTop:0;
+  render();
+  var n=document.querySelector("#layer .dlg-b"); if(n) n.scrollTop=y;
+}
+function impFile(path,lines,as){
+  var chars=lines.join("\n").length;
+  return {path:path,lines:lines,kb:Math.max(0.1,Math.round(chars/102.4)/10),tok:Math.round(chars/3.6),on:true,as:as||"records"};
+}
+/* Where a file is skipped, and why. A dependency or build directory is named once, by its own
+   path, instead of once per file inside it. */
+function impSkipOf(path,kb){
+  var seg=path.split("/");
+  for(var i=0;i<seg.length-1;i++) if(IMP_SKIP_DIR[seg[i]]) return {path:seg.slice(0,i+1).join("/")+"/",why:IMP_SKIP_DIR[seg[i]]};
+  if(!/\.(md|markdown)$/i.test(path)) return {path:path,why:"not Markdown"};
+  if(kb>MD_IMPORT.max_kb) return {path:path,kb:kb,why:"over the "+MD_IMPORT.max_kb+" KB limit"};
+  return null;
+}
+function impSkip(s){
+  var z=S.wz; if(!z) return;
+  if(!z.skipped.some(function(x){return x.path===s.path;})) z.skipped.push(s);
+}
+function impBusy(d){
+  var z=S.wz; if(!z) return;
+  z.reading=Math.max(0,z.reading+d);
+  if(!z.reading) impRender();
+}
+function impTake(path,file){
+  var z=S.wz; if(!z) return;
+  var kb=Math.round(file.size/102.4)/10, s=impSkipOf(path,kb);
+  if(s){ impSkip(s); return; }
+  z.reading++;
+  file.text().then(function(t){
+    if(S.wz!==z) return;
+    z.files=(z.files||[]).filter(function(f){return f.path!==path;});
+    z.files.push(impFile(path,t.split(/\r?\n/),z.asAll));
+    z.cands=null;
+  },function(){ if(S.wz===z) impSkip({path:path,why:"could not be read"}); })
+  .then(function(){ if(S.wz===z) impBusy(-1); });
+}
+/* A dropped directory arrives as an entry tree. readEntries hands back one batch at a time, so it
+   is called until it returns nothing, and a skipped directory is never opened at all. */
+function impWalk(entry,prefix,top){
+  var z=S.wz; if(!z) return;
+  var path=prefix+entry.name;
+  if(entry.isFile){
+    z.reading++;
+    entry.file(function(f){ if(S.wz!==z) return; impTake(path,f); impBusy(-1); },
+      function(){ if(S.wz!==z) return; impSkip({path:path,why:"could not be read"}); impBusy(-1); });
+    return;
+  }
+  if(IMP_SKIP_DIR[entry.name]){ impSkip({path:path+"/",why:IMP_SKIP_DIR[entry.name]}); return; }
+  var rd=entry.createReader(), inner=top?"":path+"/";
+  z.reading++;
+  (function more(){
+    rd.readEntries(function(list){
+      if(S.wz!==z) return;
+      if(!list.length){ impBusy(-1); return; }
+      list.forEach(function(e){ impWalk(e,inner,false); });
+      more();
+    },function(){ if(S.wz===z) impBusy(-1); });
+  })();
+}
+function impDrag(ev,on){ ev.preventDefault(); ev.currentTarget.classList.toggle("over",on); }
+function impDrop(ev){
+  ev.preventDefault(); ev.currentTarget.classList.remove("over");
+  var z=S.wz; if(!z||!ev.dataTransfer) return;
+  var items=ev.dataTransfer.items, ents=[];
+  if(items) for(var i=0;i<items.length;i++){ var e=items[i].webkitGetAsEntry&&items[i].webkitGetAsEntry(); if(e) ents.push(e); }
+  if(ents.length===1&&ents[0].isDirectory){ z.root=ents[0].name; impWalk(ents[0],"",true); }
+  else if(ents.length) ents.forEach(function(e){ impWalk(e,"",false); });
+  else [].slice.call(ev.dataTransfer.files||[]).forEach(function(f){ impTake(f.name,f); });
+  impRender();
+}
+/* A directory picker names each file from the picked directory down. The first segment is that
+   directory, so it becomes the root and the paths start below it. */
+function impPick(inp){
+  var z=S.wz; if(!z||!inp.files) return;
+  [].slice.call(inp.files).forEach(function(f){
+    var p=f.webkitRelativePath||f.name, i=p.indexOf("/");
+    if(f.webkitRelativePath&&i>0){ if(!z.root) z.root=p.slice(0,i); p=p.slice(i+1); }
+    impTake(p,f);
+  });
+  inp.value="";
+  impRender();
+}
+function impSample(){
+  var z=S.wz; if(!z) return;
+  z.root=MD_IMPORT.root; z.cands=null;
+  z.files=MD_IMPORT.files.map(function(f){return impFile(f.path,f.lines.slice(),z.asAll);});
+  z.skipped=MD_IMPORT.skipped.map(function(s){return {path:s.path,why:s.why,kb:s.kb};});
+  impRender();
+}
+function impFileOn(i,on){ var z=S.wz; if(z&&z.files[i]){ z.files[i].on=on; impRender(); } }
+function impFileAs(i,v){ var z=S.wz; if(z&&z.files[i]) z.files[i].as=v; }
+function impFilesAs(v){ var z=S.wz; if(!z) return; z.asAll=v; z.files.forEach(function(f){f.as=v;}); impRender(); }
+function impIncluded(z){ return (z.files||[]).filter(function(f){return f.on;}); }
+function impCost(tok){ return Math.max(0.01,Math.ceil(tok/1000*MD_IMPORT.usd_per_ktok*100)/100); }
+
+/* stella's reading of one line or block. A paragraph with no instruction word is prose about the
+   repository, so it is left out. A bullet always says something, so a bullet with no instruction
+   word is kept as a fact. */
+function impInfer(text,bullet){
+  for(var i=0;i<IMP_RULES.length;i++){
+    var r=IMP_RULES[i], m=r.re.exec(text);
+    if(m) return {kind:r.kind,force:r.force,ce:r.ce||null,at:m.index,len:m[0].length,why:"“"+m[0].toLowerCase()+"” "+r.why};
+  }
+  if(!bullet) return null;
+  var v=/^[A-Za-z]+/.exec(text), w=v&&v[0].toLowerCase();
+  if(w&&IMP_VERBS[w]) return {kind:"rule",force:"should",ce:null,at:0,len:v[0].length,why:"it opens on “"+w+"”, an instruction, so a rule at should"};
+  return {kind:"fact",force:"info",ce:null,at:-1,len:0,why:"no instruction in it, so a fact"};
+}
+function impParseFile(f,fi){
+  var out=[], fence=false, para=null, proc=null;
+  function add(line,end,text,inf){
+    if(!inf) return;
+    out.push({fi:fi,file:f.path,line:line,end:end,text:text,kind:inf.kind,force:inf.force,ce:inf.ce,
+      at:inf.at,len:inf.len,why:inf.why,inf:{kind:inf.kind,force:inf.force}});
+  }
+  function endPara(){ if(para){ add(para.line,para.end,para.text,impInfer(para.text,false)); para=null; } }
+  function endProc(){ if(proc){ add(proc.line,proc.end,proc.items.join("\n"),
+    {kind:"procedure",force:"should",ce:null,at:-1,len:0,why:"numbered steps, so a procedure"}); proc=null; } }
+  f.lines.forEach(function(raw,i){
+    var n=i+1, t=raw.trim();
+    if(/^(```|~~~)/.test(t)){ endPara(); endProc(); fence=!fence; return; }
+    if(fence) return;
+    if(!t||/^#{1,6}\s/.test(t)){ endPara(); endProc(); return; }
+    if(/^\d+[.)]\s+/.test(t)){ endPara(); if(!proc) proc={line:n,end:n,items:[]}; proc.items.push(t); proc.end=n; return; }
+    endProc();
+    var b=/^[-*+]\s+(.*)$/.exec(t);
+    if(b){ endPara(); add(n,n,b[1],impInfer(b[1],true)); return; }
+    if(para){ para.text+=" "+t; para.end=n; } else para={line:n,end:n,text:t};
+  });
+  endPara(); endProc();
+  return out;
+}
+function impJac(a,b){
+  var A={},B={},n=0,u=0,k;
+  wzWords(a).forEach(function(x){A[x]=1;}); wzWords(b).forEach(function(x){B[x]=1;});
+  for(k in A){ u++; if(B[k]) n++; }
+  for(k in B) if(!A[k]) u++;
+  return u?n/u:0;
+}
+/* Word overlap decides a duplicate. A line close to a published record, or to a line an earlier
+   file already said, starts rejected, and the note names what it repeats. A line close to a
+   memory joins that memory as a saying instead of starting a second one. Parsing again keeps the
+   decisions already made on any line whose text did not change. */
+function impParse(){
+  var z=S.wz; if(!z) return;
+  var prev={}, pub=RECORDS.filter(function(r){return r.status==="published";}), mems=stgMemory(z.ws), all=[], tok=0;
+  (z.cands||[]).forEach(function(c){ prev[c.file+":"+c.line]=c; });
+  (z.files||[]).forEach(function(f,fi){
+    if(!f.on) return;
+    tok+=f.tok;
+    impParseFile(f,fi).forEach(function(c){
+      c.id="imp"+all.length; c.target=f.as==="memories"?"memory":"record"; c.st=null; c.dup=null; c.fold=null;
+      var best=null;
+      pub.forEach(function(r){ var j=impJac(c.text,r.st); if(j>=0.5&&(!best||j>best.j)) best={as:"record",id:r.id,j:j}; });
+      if(!best) all.forEach(function(p){ if(p.dup) return; var j=impJac(c.text,p.text); if(j>=0.6&&(!best||j>best.j)) best={as:"file",file:p.file,line:p.line,j:j}; });
+      if(best){ c.dup=best; c.st="reject"; }
+      else mems.forEach(function(m){ var j=impJac(c.text,m.body); if(j>=0.5&&(!c.fold||j>c.fold.j)) c.fold={id:m.id,j:j}; });
+      if(c.fold) c.target="memory";
+      var o=prev[c.file+":"+c.line];
+      if(o&&o.text===c.text){ c.st=o.st; c.target=o.target; c.kind=o.kind; c.force=o.force; c.ce=o.ce; }
+      all.push(c);
+    });
+  });
+  z.cands=all; z.spent=impCost(tok);
+}
+function impCand(id){ var z=S.wz; return z&&z.cands?z.cands.filter(function(c){return c.id===id;})[0]:null; }
+function impSt(id,v){ var c=impCand(id); if(!c) return; c.st=c.st===v?null:v; impRender(); }
+function impTarget(id,v){ var c=impCand(id); if(!c) return; c.target=v; impRender(); }
+function impKind(id,v){
+  var c=impCand(id); if(!c) return;
+  c.kind=v; var fs=impForces(v); if(fs.indexOf(c.force)<0) c.force=fs[0];
+  c.ce=v==="constraint"?(c.ce||"forbid"):null;
+  impRender();
+}
+function impForce(id,v){ var c=impCand(id); if(c){ c.force=v; impRender(); } }
+function impCe(id,v){ var c=impCand(id); if(c) c.ce=v; }
+/* Accept all leaves a duplicate rejected. Accepting one on purpose is still one click on its row. */
+function impAll(v,fi){
+  var z=S.wz; if(!z||!z.cands) return;
+  z.cands.forEach(function(c){ if(fi!=null&&c.fi!==fi) return; if(v==="accept"&&c.dup) return; c.st=v; });
+  impRender();
+}
+/* The batch override sets every candidate. Choosing each file's choice again puts back what the
+   Files step said, with a line that joins a memory still going to that memory. */
+function impCandsAs(v){
+  var z=S.wz; if(!z||!z.cands) return;
+  z.candsAs=v||null;
+  z.cands.forEach(function(c){
+    c.target=v?(v==="memories"?"memory":"record"):(c.fold||z.files[c.fi].as==="memories"?"memory":"record");
+  });
+  impRender();
+}
+function impCounts(z){
+  var C=z.cands||[], n={acc:0,rej:0,und:0,dup:0,rec:0,mem:0};
+  C.forEach(function(c){ n[c.st==="accept"?"acc":c.st==="reject"?"rej":"und"]++; if(c.dup) n.dup++; n[c.target==="memory"?"mem":"rec"]++; });
+  return n;
+}
+function impAccepted(z,target){ return (z.cands||[]).filter(function(c){return c.st==="accept"&&c.target===target;}); }
+function impGroups(list){
+  var by={}, order=[];
+  list.forEach(function(c){ if(!by[c.file]){ by[c.file]={file:c.file,fi:c.fi,cands:[]}; order.push(c.file); } by[c.file].cands.push(c); });
+  return order.map(function(f){return by[f];});
+}
+function impSlug(file){ return file.toLowerCase().replace(/\.(md|markdown)$/,"").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"file"; }
+function impWordsOf(c){ return wzWords(c.text.replace(/^\d+[.)]\s*/gm,"")); }
+/* Lineages follow the record wizard's shape. A lineage already held by a published record, an open
+   pull request or an earlier line in this import gets a numeric suffix, so the lineage check on
+   each pull request has nothing to fail on. */
+function impLineages(z){
+  var taken={}, out={}, pre="ctx."+ws().slug.split("-")[0]+".";
+  RECORDS.forEach(function(r){ taken[r.id]=1; });
+  RECPRS.forEach(function(d){ recprRecs(d).forEach(function(r){ taken[r.id]=1; }); });
+  impAccepted(z,"record").forEach(function(c){
+    var base=pre+(impWordsOf(c).slice(0,4).join("-")||"imported").slice(0,48), id=base, k=2;
+    while(taken[id]) id=base+"-"+(k++);
+    taken[id]=1; out[c.id]=id;
+  });
+  return out;
+}
+function impSrc(c){ return c.file+":L"+c.line+(c.end>c.line?"-"+c.end:""); }
+function impMemLink(id){ return stgItemLinkById(S.wz.ws,id); }
+
+function impRow(c){
+  var t=c.text, mem=c.target==="memory", id=h(c.id);
+  var txt=c.at>=0?h(t.slice(0,c.at))+'<mark>'+h(t.substr(c.at,c.len))+'</mark>'+h(t.slice(c.at+c.len)):h(t);
+  var pct=function(j){return Math.round(j*100)+"% word overlap";};
+  var notes=[];
+  if(c.dup) notes.push(c.dup.as==="record"
+    ?'Already published as '+impMemLink(c.dup.id)+' ('+pct(c.dup.j)+').'
+    :'Repeats <span class="mono">'+h(c.dup.file)+':L'+c.dup.line+'</span> ('+pct(c.dup.j)+').');
+  if(c.fold) notes.push(mem
+    ?'Joins '+impMemLink(c.fold.id)+' as a saying ('+pct(c.fold.j)+'). An imported saying never counts as a run.'
+    :'Close to memory '+impMemLink(c.fold.id)+' ('+pct(c.fold.j)+'). As a record it stands alone.');
+  if(mem&&(c.force==="must"||c.force==="should")) notes.push('A memory caps at may. Keep it a record to hold it at '+h(c.force)+'.');
+  var changed=c.kind!==c.inf.kind?' You set it to '+h(c.kind)+'.':'';
+  return '<div class="imp-c" data-imp-id="'+id+'" data-imp-st="'+(c.st||"open")+'" data-imp-as="'+c.target+'">'+
+    '<div class="imp-top">'+kindBadge(c.kind)+'<span class="imp-src mono">'+h(impSrc(c))+'</span></div>'+
+    '<p class="imp-t">'+txt+'</p>'+
+    '<p class="imp-why">'+h(c.why)+changed+'</p>'+
+    (notes.length?'<p class="imp-note">'+notes.join(' ')+'</p>':'')+
+    '<div class="imp-ctl">'+
+     '<span class="seg" role="group" aria-label="Import as">'+
+      '<button class="btn sm" aria-pressed="'+!mem+'" onclick="impTarget(\''+id+'\',\'record\')">Record</button>'+
+      '<button class="btn sm" aria-pressed="'+mem+'" onclick="impTarget(\''+id+'\',\'memory\')">Memory</button></span>'+
+     '<select aria-label="Kind" onchange="impKind(\''+id+'\',this.value)">'+Object.keys(KINDS).map(function(k){
+       return '<option value="'+k+'"'+(c.kind===k?' selected':'')+'>'+h(KINDS[k].l)+'</option>';}).join("")+'</select>'+
+     (mem?forceBadge(impMemForce(c))
+      :'<select aria-label="Force" onchange="impForce(\''+id+'\',this.value)">'+impForces(c.kind).map(function(f){
+        return '<option'+(c.force===f?' selected':'')+'>'+f+'</option>';}).join("")+'</select>')+
+     (!mem&&c.kind==="constraint"?'<select aria-label="Constraint effect" onchange="impCe(\''+id+'\',this.value)">'+["forbid","require"].map(function(e){
+        return '<option'+(c.ce===e?' selected':'')+'>'+e+'</option>';}).join("")+'</select>':'')+
+     '<span class="imp-act">'+
+      '<button class="btn sm" aria-pressed="'+(c.st==="accept")+'" onclick="impSt(\''+id+'\',\'accept\')">Accept</button>'+
+      '<button class="btn sm" aria-pressed="'+(c.st==="reject")+'" onclick="impSt(\''+id+'\',\'reject\')">Reject</button></span>'+
+    '</div></div>';
+}
+function impSkipList(z){
+  var by={}, order=[];
+  z.skipped.forEach(function(s){ if(!by[s.why]){ by[s.why]=[]; order.push(s.why); } by[s.why].push(s); });
+  return wzChecks(order.map(function(w){ var L=by[w];
+    return [L.slice(0,3).map(function(s){return s.path+(s.kb?" ("+s.kb+" KB)":"");}).join(", ")+(L.length>3?" and "+(L.length-3)+" more":""),h(w)]; }));
+}
+
+function wzImport(){
+  var z=S.wz, w=ws();
+  if(z.step===1){
+    var F=z.files||[], inc=impIncluded(z), tok=inc.reduce(function(s,f){return s+f.tok;},0);
+    var table=!F.length?'':
+     '<div class="field" style="margin-top:14px"><label>Found'+(z.root?' in <span class="mono">'+h(z.root)+'</span>':'')+'</label>'+
+     '<div class="tw"><table class="narrow imp-files" data-lt="off"><thead><tr><th aria-label="Include"></th><th>File</th>'+
+      '<th class="num">Lines</th><th class="num">KB</th><th class="num">Tokens</th><th>Import as</th></tr></thead><tbody>'+
+      F.map(function(f,i){
+       return '<tr'+(f.on?'':' class="off"')+'><td><input type="checkbox" aria-label="Include '+h(f.path)+'"'+(f.on?' checked':'')+' onchange="impFileOn('+i+',this.checked)"></td>'+
+        '<td class="mono">'+h(f.path)+'</td><td class="num">'+f.lines.length+'</td><td class="num">'+f.kb+'</td><td class="num">'+f.tok+'</td>'+
+        '<td><select aria-label="Import '+h(f.path)+' as" onchange="impFileAs('+i+',this.value)">'+
+         ["records","memories"].map(function(v){return '<option'+(f.as===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select></td></tr>';
+      }).join("")+'</tbody></table></div>'+
+     '<div class="imp-bar"><label for="impAsAll">Import every file as</label><select id="impAsAll" onchange="impFilesAs(this.value)">'+
+      ["records","memories"].map(function(v){return '<option'+(z.asAll===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select></div></div>';
+    return {t:"Import Markdown", s:"Drop a directory or pick files, and Oxagen lists the Markdown it finds.",
+     b:'<div class="wz-drop imp-drop" ondragover="impDrag(event,true)" ondragleave="impDrag(event,false)" ondrop="impDrop(event)">'+
+        '<span class="ic">'+icon("dir")+'</span><span class="grow">Drop a directory or Markdown files here</span>'+
+        '<button class="btn sm" onclick="this.nextElementSibling.click()">Choose a directory</button>'+
+        '<input type="file" webkitdirectory multiple hidden aria-label="Choose a directory" onchange="impPick(this)">'+
+        '<button class="btn sm" onclick="this.nextElementSibling.click()">Choose files</button>'+
+        '<input type="file" accept=".md,.markdown,text/markdown" multiple hidden aria-label="Choose files" onchange="impPick(this)">'+
+        '<button class="btn sm" onclick="impSample()">Use the sample directory</button></div>'+
+       (z.reading?'<p class="dim" role="status" style="margin-top:10px">Reading '+z.reading+' more…</p>':'')+
+       table+
+       (z.skipped.length?'<div class="field" style="margin-top:14px"><label>Skipped</label>'+impSkipList(z)+'</div>':'')+
+       (inc.length?'<div class="note" style="margin-top:14px" data-imp-cost="'+impCost(tok)+'">stella reads '+inc.length+' '+(inc.length===1?'file':'files')+', about '+tok+' tokens. '+
+         'That costs about '+usd(impCost(tok).toFixed(2))+' in usage credits, billed to '+h(ORG.name)+'. Nothing is sent until you choose Parse with stella.</div>'
+        :'<div class="note" style="margin-top:14px">Oxagen skips dependency and build directories, version control, anything that is not Markdown, and any file over '+MD_IMPORT.max_kb+' KB.</div>'),
+     f:wzNext("Parse with stella",inc.length>0&&!z.reading,"impParse();")};
+  }
+  if(z.step===2){
+    var C=z.cands||[], n=impCounts(z), G=impGroups(C);
+    var tile=function(k,v,s){return '<div class="stat"><span class="k">'+k+'</span><span class="v">'+v+'</span><span class="s">'+s+'</span></div>';};
+    return {t:"Review candidates", s:"Accept or reject each line, or a whole file at once.",
+     b:'<div class="grid g4 imp-tiles">'+
+        tile("Files",G.length,"parsed by stella")+
+        tile("Candidates",C.length,n.rec+" as records, "+n.mem+" as memories")+
+        tile("Duplicates",n.dup,"start rejected")+
+        tile("Parse cost",usd((z.spent||0).toFixed(2)),"usage credits")+'</div>'+
+       '<div class="imp-bar">'+
+        '<button class="btn sm" onclick="impAll(\'accept\')">Accept all</button>'+
+        '<button class="btn sm" onclick="impAll(\'reject\')">Reject all</button>'+
+        '<label for="impCandsAs">Import everything as</label><select id="impCandsAs" onchange="impCandsAs(this.value)">'+
+         '<option value=""'+(z.candsAs?'':' selected')+'>each file’s choice</option>'+
+         ["records","memories"].map(function(v){return '<option'+(z.candsAs===v?' selected':'')+'>'+v+'</option>';}).join("")+'</select>'+
+        '<span class="imp-n" data-imp-counts="'+n.acc+'/'+n.rej+'/'+n.und+'">'+n.acc+' accepted, '+n.rej+' rejected, '+n.und+' undecided</span></div>'+
+       (n.dup?'<p class="hint">Accept all leaves the '+n.dup+' duplicates rejected. Accept one on its row to import it anyway.</p>':'')+
+       G.map(function(g){
+         return '<div class="imp-g"><div class="imp-gh"><span class="mono">'+h(g.file)+'</span>'+
+          '<span class="dim">'+g.cands.length+' '+(g.cands.length===1?'candidate':'candidates')+'</span>'+
+          '<button class="btn sm" onclick="impAll(\'accept\','+g.fi+')">Accept file</button>'+
+          '<button class="btn sm" onclick="impAll(\'reject\','+g.fi+')">Reject file</button></div>'+
+          g.cands.map(impRow).join("")+'</div>';
+       }).join("")+
+       '<div class="note">An undecided line is left out. The Markdown files themselves stay as they are.</div>',
+     f:wzNext("Review what publishes",n.acc>0)};
+  }
+  var ids=impLineages(z), recs=impAccepted(z,"record"), mems=impAccepted(z,"memory"), groups=impGroups(recs);
+  var np=groups.length, nm=mems.length;
+  var btn=np&&nm?"Open "+np+" pull "+(np===1?"request":"requests")+" and write "+nm+" "+(nm===1?"memory":"memories")
+    :np?"Open "+np+" pull "+(np===1?"request":"requests"):"Write "+nm+" "+(nm===1?"memory":"memories");
+  return {t:"Publish", s:"Records open one pull request per source file, and memories are written now.",
+   b:(np?'<p style="margin-bottom:14px">Each pull request runs the same six checks as a record you write by hand. A record steers nothing until its pull request merges.</p>'+
+      groups.map(function(g){
+       return '<div class="wz-pr" data-imp-pr="'+h(g.file)+'"><div class="wz-pr-h"><span class="b b-q mono">'+h(w.main)+'</span>'+
+        '<span class="dim">←</span><span class="b b-approval mono">context/import-'+h(impSlug(g.file))+'</span></div>'+
+        wzFiles(g.cands.map(function(c){return ["add",".oxagen/rules/"+ids[c.id]+".toml",'<span class="mono">'+h(impSrc(c))+'</span>'];}))+'</div>';
+      }).join('<div style="height:10px"></div>'):'')+
+     (nm?'<div class="field" style="margin-top:14px"><label>Memories</label>'+
+       wzFiles(mems.map(function(c){ var f=impMemForce(c);
+         return c.fold?["mod",c.fold.id,'a saying from <span class="mono">'+h(impSrc(c))+'</span>']
+          :["add","mem.import."+(impWordsOf(c).slice(0,4).join("-")||"line"),IMP_CLS[c.kind].toLowerCase()+' at '+f+' from <span class="mono">'+h(impSrc(c))+'</span>'];}))+
+       '<div class="hint">Written when you publish, with no pull request. A memory becomes a record only through a proposal that runs earn, and an imported saying never counts as a run.</div></div>':''),
+   f:'<button class="btn primary" onclick="wzImpPublish()">'+h(btn)+'</button>'};
+}
+
+function wzImpPublish(){
+  var z=S.wz; if(!z) return;
+  var w=ws(), day=new Date(storyMs()).toISOString().slice(0,10), ids=impLineages(z), prs=[], made=0, joined=0;
+  impGroups(impAccepted(z,"record")).forEach(function(g){
+    var recs=g.cands.map(function(c){
+      return {id:ids[c.id],kind:c.kind,force:c.force,ce:c.kind==="constraint"?c.ce:null,scope:"workspace",status:"published",isNew:true,
+        tok:stgTokOf(c.text),st:c.text,effect:"rendered 0 · cited 0 · violated 0",commit:null,pub:day,src:g.file,line:c.line};
+    });
+    var head=sha7(g.file+recs.map(function(r){return r.id;}).join(","));
+    recs.forEach(function(r){ r.commit=head; });
+    var rules=recs.map(function(r){return {id:r.id,tok:r.tok,isNew:true};});
+    var def={pr:w.main+"#"+prNextNumber(), branch:"context/import-"+impSlug(g.file), base:CTXPR.base, head:head,
+      record:recs[0], records:recs, rule:rules[0], rules:rules, src:g.file,
+      promo:"rec_01K5"+sha7(head).toUpperCase(), evt:"evt_01K5"+sha7(g.file+head).toUpperCase(),
+      hash:"sha256:"+sha7(head)+sha7(g.file)+"a1",
+      author:"operator", by:CMD_OP, desc:"Imported from "+g.file, ws:w.slug, opened:nowT().slice(0,8),
+      mergedAt:function(){return day+" "+nowT().slice(0,8)+" UTC";}};
+    def.checks=recprChecks(def);
+    RECPRS.unshift(def);
+    S.recprs[def.pr]={st:"none",done:0,failed:null,timers:[],mergedAt:null};
+    prs.push(def);
+  });
+  impAccepted(z,"memory").forEach(function(c){
+    var say={run:null,frame:null,file:c.file,line:c.line,by:CMD_OP+" · import",text:c.text};
+    var m=c.fold&&MEMORY.filter(function(x){return x.id===c.fold.id;})[0];
+    if(m){ m.sayings=(m.sayings||[]).concat([say]); joined++; return; }
+    var slug=impWordsOf(c).slice(0,4).join("-")||"line", id="mem_01K5"+sha7(c.file+":"+c.line+c.text).toUpperCase().slice(0,4);
+    MEMORY.unshift({id:id,lineage:"mem.import."+slug,kind:"memory",cls:IMP_CLS[c.kind],force:impMemForce(c),scope:"workspace",ws:w.slug,
+      body:c.text,token_cost:stgTokOf(c.text),about:impWordsOf(c).slice(0,5),
+      provenance:impSrc(c)+" · import by "+me().name,hash:"sha256:"+sha7(c.text)+sha7(id)+"m1",
+      valid_from:day,lastRecalled:"never",recalls30:0,sayings:[say]});
+    made++;
+  });
+  var nr=prs.reduce(function(s,d){return s+d.records.length;},0), files=impGroups(z.cands.filter(function(c){return c.st==="accept";})).length;
+  auditEvent("steering_imported",me().name,nr+" records in "+prs.length+" pull requests, "+made+" new memories and "+joined+" sayings from "+files+" Markdown files","info",
+    "imp_01K5"+sha7(day+nowT()).toUpperCase());
+  S.wz=null; S.dlg=null; S.dlgArg=null; S.prpSel=null;
+  prs.forEach(recprRun);
+  var parts=[];
+  if(prs.length) parts.push("Opened "+prs.length+" pull "+(prs.length===1?"request":"requests")+" for "+nr+" "+(nr===1?"record":"records")+".");
+  if(made) parts.push("Wrote "+made+" "+(made===1?"memory":"memories")+".");
+  if(joined) parts.push("Added "+joined+" "+(joined===1?"saying":"sayings")+" to existing memories.");
+  if(prs.length) parts.push("The records steer nothing until their pull requests merge.");
+  if(prs.length){ S.tab.steering="prs"; S.prSel=prs[0].pr; if(route().page!=="steering") go(stgHash("prs",w.slug)); else render(); }
+  else { S.libKind="memory"; S.tab.steering="library"; if(route().page!=="steering") go(stgHash("library",w.slug)); else render(); }
+  act(parts.join(" "),"gold");
+}
+
 DLG_EXT.wz=function(){
   var z=S.wz; if(!z) return {t:"Create",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var c=CREATE[z.kind], part=
-    z.kind==="tool"?wzTool():z.kind==="skill"?wzSkill():z.kind==="agent"?wzAgent():z.kind==="init"?wzInit():wzRecord();
+    z.kind==="import"?wzImport():z.kind==="tool"?wzTool():z.kind==="skill"?wzSkill():z.kind==="agent"?wzAgent():z.kind==="init"?wzInit():wzRecord();
   return {t:part.t||("Create a "+c.l.toLowerCase()), s:part.s||c.d, w:true,
    b:wzRail()+part.b,
    f:'<span class="grow mono dim" style="font-size:11px">needs <span style="color:var(--accent-text)">'+h(c.need)+'</span> on '+h(ws().slug)+'</span>'+

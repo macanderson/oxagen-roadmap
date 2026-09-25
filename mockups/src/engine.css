@@ -1825,6 +1825,35 @@ button.wz-opt:hover{border-color:var(--rule)}
 .wz-sum{border:1px solid var(--border);border-radius:11px;background:var(--hl);padding:13px 15px}
 .wz-drop{display:flex;align-items:center;gap:10px;flex-wrap:wrap;border:1px dashed var(--rule);border-radius:11px;padding:12px 14px;background:var(--void)}
 .wz-drop input[type=file]{flex:1;min-width:180px;font-size:12px;color:var(--muted);background:none;border:0;padding:0}
+.wz-drop input[type=file][hidden]{display:none}
+/* Markdown import: the drop zone lights while a drag is over it, and each candidate is a card whose
+   left edge says whether it is accepted. A rejected card dims so the accepted ones read first. */
+.imp-drop .ic{display:inline-flex;color:var(--muted)}
+.imp-drop.over{border-color:var(--gold);background:var(--hl)}
+.imp-files tr.off td{color:var(--dim)}
+.imp-files select,.imp-bar select,.imp-ctl select{width:auto;max-width:100%;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:5px 8px;font-size:12px;color:var(--fg);outline:none;transition:border-color .12s}
+.imp-files select:focus,.imp-bar select:focus,.imp-ctl select:focus{border-color:var(--gold)}
+.imp-files input[type=checkbox]{width:16px;height:16px;min-height:0;padding:0;accent-color:var(--gold)}
+.imp-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0 8px}
+.imp-bar label{font-size:12px;color:var(--muted)}
+.imp-n{margin-left:auto;font-size:12px;color:var(--muted)}
+.imp-tiles{margin-bottom:4px}
+.imp-g{margin-top:16px}
+.imp-gh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;font-size:12.5px}
+.imp-gh .mono{color:var(--fg);font-weight:600}
+.imp-gh .dim{margin-right:auto}
+.imp-c{border:1px solid var(--border);border-left:3px solid var(--rule);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:var(--panel)}
+.imp-c[data-imp-st=accept]{border-left-color:var(--st-allowed)}
+.imp-c[data-imp-st=reject]{opacity:.6}
+.imp-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.imp-src{font-size:11.5px;color:var(--muted)}
+.imp-t{margin:6px 0 4px;color:var(--body);white-space:pre-line}
+.imp-t mark{background:color-mix(in srgb,var(--gold) 28%,transparent);color:inherit;border-radius:3px;padding:0 2px}
+.imp-why{font-size:12px;color:var(--muted);margin:0}
+.imp-note{font-size:12px;color:var(--body);margin:6px 0 0}
+.imp-ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.imp-act{display:inline-flex;gap:6px;margin-left:auto}
+.imp-act .btn[aria-pressed="true"]{background:var(--hl);border-color:var(--rule);color:var(--fg)}
 .sx-row.wz-on{border-color:var(--gold);box-shadow:inset 2px 0 0 var(--gold)}
 
 /* the six kinds, as six cards that say what each one can never do */
@@ -1898,6 +1927,13 @@ button.wz-opt:hover{border-color:var(--rule)}
 #layer.phone .wz-file .d,#viewport.phone .wz-file .d{grid-column:2}
 #layer.phone .wz-opt-tools .wz-mt{gap:5px}
 #layer.phone .wz-drop{flex-direction:column;align-items:stretch}
+#layer.phone .imp-tiles{grid-template-columns:1fr 1fr}
+#layer.phone .imp-ctl select,#layer.phone .imp-bar select,#layer.phone .imp-files select{font-size:16px;min-height:44px}
+#layer.phone .imp-files input[type=checkbox]{width:22px;height:22px;min-height:0}
+#layer.phone .imp-ctl .btn,#layer.phone .imp-bar .btn,#layer.phone .imp-gh .btn{min-height:44px}
+#layer.phone .imp-act{margin-left:0;width:100%}
+#layer.phone .imp-act .btn{flex:1}
+#layer.phone .imp-n{margin-left:0;width:100%}
 #layer.phone .wz-langs{overflow-x:auto}
 
 /* ---------- the in-app agent: a flyout from the sidebar ----------
