@@ -34,7 +34,7 @@ CATALOG = [
         ("spec", "mission-control-spec.md", "Specification"),
         ("dod", "dod-spec.md", "Specification"),
         ("tiers", "tier-ladder-spec.md", "Specification"),
-        ("mcp-gateway", "mcp-gateway-plan.md", "Plan"),
+        ("gateway", "gateway-plan.md", "Plan"),
         ("witness", "witness-spec.md", "Specification"),
         ("desktop", "desktop-spec.md", "Specification"),
         ("creation", "creation-spec.md", "Specification"),

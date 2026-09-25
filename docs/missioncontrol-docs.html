@@ -136,7 +136,7 @@ main hr+h2{border-top:0;padding-top:0;margin-top:0}
 <div class="site">
 <nav class="docs" aria-label="Documents">
   <a class="wordmark" href="#wedge">o<span class="x">x</span>agen</a>
-  <p>Fleet operations</p><ol><li><a href="#wedge" data-doc="wedge">Fleet operations wedge</a></li><li><a href="#ia" data-doc="ia">Fleet operations information architecture</a></li><li><a href="#routes" data-doc="routes">Fleet operations routes</a></li><li><a href="#collapse" data-doc="collapse">Fleet operations deletion list</a></li></ol><p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#tiers" data-doc="tiers">The enforcement tier ladder</a></li><li><a href="#mcp-gateway" data-doc="mcp-gateway">MCP traffic through the gateway</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and Steering records</a></li><li><a href="#tasks" data-doc="tasks">Tasks and work orders</a></li><li><a href="#work-in-flight" data-doc="work-in-flight">Work in flight</a></li><li><a href="#agent-capability" data-doc="agent-capability">In-app agent capability expansion</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
+  <p>Fleet operations</p><ol><li><a href="#wedge" data-doc="wedge">Fleet operations wedge</a></li><li><a href="#ia" data-doc="ia">Fleet operations information architecture</a></li><li><a href="#routes" data-doc="routes">Fleet operations routes</a></li><li><a href="#collapse" data-doc="collapse">Fleet operations deletion list</a></li></ol><p>Specifications</p><ol><li><a href="#spec" data-doc="spec">Oxagen Mission Control: Product and Technical Specification</a></li><li><a href="#dod" data-doc="dod">Oxagen DoD: the definition of done for agent runs</a></li><li><a href="#tiers" data-doc="tiers">The enforcement tier ladder</a></li><li><a href="#gateway" data-doc="gateway">The Oxagen gateway</a></li><li><a href="#witness" data-doc="witness">Oxagen Witness: outcome verification</a></li><li><a href="#desktop" data-doc="desktop">Oxagen Desktop: product specification, rev 1</a></li><li><a href="#creation" data-doc="creation">Creating things in Oxagen: agents, tools, skills and Steering records</a></li><li><a href="#tasks" data-doc="tasks">Tasks and work orders</a></li><li><a href="#work-in-flight" data-doc="work-in-flight">Work in flight</a></li><li><a href="#agent-capability" data-doc="agent-capability">In-app agent capability expansion</a></li><li><a href="#portability" data-doc="portability">The Agent Portability Atlas</a></li><li><a href="#execution-portability" data-doc="execution-portability">Agent Run Protocol (ARP)</a></li></ol><p>Plans and decisions</p><ol><li><a href="#plan" data-doc="plan">Oxagen Mission Control app: implementation plan</a></li><li><a href="#scope" data-doc="scope">Oxagen Mission Control: the scope review, and what it changed</a></li><li><a href="#scaleback" data-doc="scaleback">Scale back Mission Control: the mockup prompt</a></li></ol><p>The mockups</p><ol><li><a href="#prompts" data-doc="prompts">Oxagen Mission Control: mockup prompts, one per demo flow</a></li><li><a href="#consolidation" data-doc="consolidation">Consolidating W1–W11 into one design</a></li><li><a href="#feedback" data-doc="feedback">Feedback on the mockups</a></li><li><a href="#videos" data-doc="videos">Videos of the mockups, narrated</a></li><li><a href="#w13" data-doc="w13">W13: in the loop</a></li></ol>
   <div class="foot">One file, every document. The markdown in <code>docs/</code> is the source; <code>tools/build-docs.py</code> writes this page.</div>
 </nav>
 <div>
@@ -10756,7 +10756,7 @@ Begin with Phase 1. Write the fixtures before the code.
 </tbody>
 </table></div>
 <p>The proxy speaks Anthropic Messages, OpenAI Responses, and OpenAI Chat Completions, streamed or not. A websocket upgrade gets <code>426</code>, and Codex falls back to HTTP. The proxy ties each call to a session by, in order: the <code>x-oxagen-session</code> header (read and removed), the harness's own session header, the session id inside Anthropic <code>metadata.user_id</code>, a Responses <code>prompt_cache_key</code> that names a known session, and the one live session of that harness. A call that matches none is sealed on the daemon's own chain and marked <code>unattributed</code> (<code>model-proxy.ts:73-83</code>).</p>
-<p>The MCP aggregator that re-serves a wrapped harness's MCP servers through loopback (ADR-094 part 3) is not on <code>main</code> (<code>oxagen</code> #3299, open). Today a wrapped harness reaches <code>gateway</code> through model traffic only, and Claude Desktop through its Oxagen MCP calls only. <code>mcp-gateway-plan.md</code> plans the route for Claude Code, Codex, Cursor, and Stella, and lists the MCP surfaces that can never route.</p>
+<p>The MCP aggregator that re-serves a wrapped harness's MCP servers through loopback (ADR-094 part 3) is not on <code>main</code> (<code>oxagen</code> #3299, open). Today a wrapped harness reaches <code>gateway</code> through model traffic only, and Claude Desktop through its Oxagen MCP calls only. <code>gateway-plan.md</code> moves the gateway to a service Oxagen or the customer runs, with Oxagen holding the keys, and routes MCP for Claude Code, Codex, Cursor, and Stella through it.</p>
 <h3 id="tiers/metering">Metering</h3>
 <p>The proxy seals one <code>llm_call</code> frame per call with <code>fidelity: proxy</code> and <code>oxagen.metering: observed</code>. The frame carries request and response digests, usage, latency, status, <code>oxagen.credential_basis</code>, and <code>oxagen.run_token_id</code> when the call was brokered (<code>model-proxy.ts:29-44</code>, <code>wire.ts:123-132</code>). Once a session has one observed call, the control plane drops the harness's self-reported calls from its counts (<code>ingest:280-296</code>), and the session's <code>cost_basis</code> is written <code>observed</code> (<code>ingest:1849-1851</code>). Pages label it &quot;Observed by gateway&quot;.</p>
 <h3 id="tiers/budgets">Budgets</h3>
@@ -11082,235 +11082,233 @@ required = true
 <footer class="colophon"><span>Oxagen · Specification</span><span>Source: <code>docs/tier-ladder-spec.md</code></span></footer>
 </main>
 </div>
-</article><article id="mcp-gateway" class="doc" hidden>
+</article><article id="gateway" class="doc" hidden>
 <header class="mast">
   <p class="eyebrow">Oxagen · Plan</p>
-  <h1>MCP traffic through the gateway</h1>
-  <dl class="facts"><dt>Status</dt><dd>Plan v1, for review. Nothing in it is built.</dd><dt>Date</dt><dd>2026-09-25</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Tracks</dt><dd><code>oxagen</code> #3299 item 6, &quot;Build the MCP aggregator: re-serve the harness's existing MCP servers through the loopback proxy. Where a vendor offers managed settings, pin them.&quot;</dd><dt>Source</dt><dd><code>macanderson/oxagen</code> at <code>main</code> <code>4a21610ef</code>: <code>packages/tacho/src/collector/mcp-gateway.ts</code>, <code>host/mcp-config-writer.ts</code>, <code>host/cursor-writer.ts</code>, <code>contained/bridge.ts</code>, <code>contained/configuration.ts</code>, <code>packages/handlers/src/tacho.events.ingest.ts</code>. <code>macanderson/stella</code>: <code>crates/stella-cli/src/agent.rs</code>, <code>crates/stella-mcp/</code>. Vendor documentation read on 2026-09-25, linked where used</dd><dt>Builds on</dt><dd>ADR-094 part 3 (the MCP aggregator), ADR-095 (the ladder), ADR-078 §3 (a second MCP server never touches Oxagen), ADR-143 (credential custody), ADR-152 (the contained bridge)</dd><dt>Related</dt><dd><code>tier-ladder-spec.md</code> (the <code>gateway</code> tier and its conflicts), <code>oxagen</code> <code>docs/reference/harness-matrix.md</code></dd></dl>
+  <h1>The Oxagen gateway</h1>
+  <dl class="facts"><dt>Status</dt><dd>Plan v2, for review. Nothing in it is built. v1 planned a relay on each laptop. The maintainer chose the cloud gateway model on 2026-09-25, and v2 replaces v1.</dd><dt>Date</dt><dd>2026-09-25</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Decision</dt><dd>Every customer agent's model and MCP traffic routes through Oxagen's gateway. Oxagen holds the model keys and the MCP credentials. Oxagen hosts the gateway by default, and the largest customers can run it in their own network. Oxagen is the one place a team sets up steering, tools, skills, agent profiles, and memories.</dd><dt>Tracks</dt><dd><code>oxagen</code> #3299 item 6 (MCP), and the ADR this plan asks for (below)</dd><dt>Source</dt><dd><code>macanderson/oxagen</code> at <code>main</code> <code>c0a40a9ce</code>: <code>packages/tacho/src/collector/model-proxy.ts</code>, <code>mcp-gateway.ts</code>, <code>packages/agent/src/runtime/materialize-tools.ts</code>, <code>packages/database/src/schema/mcp.ts</code>, <code>packages/iam/src/machine-key-scope.ts</code>, <code>packages/handlers/src/tacho.events.ingest.ts</code>. Kong's documentation, read 2026-09-25</dd><dt>Supersedes in part</dt><dd>ADR-094 (the gateway runs on the laptop, and prompt bodies never reach Oxagen), ADR-143 (the vendor key sits in a file on the laptop), ADR-122:19 (an agent's own identity cannot call an external tool)</dd><dt>Related</dt><dd><code>tier-ladder-spec.md</code>, <code>oxagen</code> #4310 (the in-app agent leaves the toolbelt), <code>stella</code> #6564 (Stella's MCP scope)</dd></dl>
 </header>
 <div class="grid">
-<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#mcp-gateway/the-gap">The gap</a></li><li><a href="#mcp-gateway/what-routing-adds">What routing adds</a></li><li><a href="#mcp-gateway/decisions">Decisions</a></li><li><a href="#mcp-gateway/harnesses">Harnesses</a></li><li><a href="#mcp-gateway/unroutable-surfaces">Unroutable surfaces</a></li><li><a href="#mcp-gateway/build-order">Build order</a></li><li><a href="#mcp-gateway/definition-of-done">Definition of done</a></li></ol></nav>
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#gateway/the-problem">The problem</a></li><li><a href="#gateway/what-kong-does">What Kong does</a></li><li><a href="#gateway/where-oxagen-goes-past-it">Where Oxagen goes past it</a></li><li><a href="#gateway/architecture">Architecture</a></li><li><a href="#gateway/keys-and-the-kill-switch">Keys and the kill switch</a></li><li><a href="#gateway/mcp">MCP</a></li><li><a href="#gateway/delivery">Delivery</a></li><li><a href="#gateway/the-tier-ladder">The tier ladder</a></li><li><a href="#gateway/the-adr">The ADR</a></li><li><a href="#gateway/build-order">Build order</a></li><li><a href="#gateway/definition-of-done">Definition of done</a></li></ol></nav>
 <main>
-<h2 id="mcp-gateway/the-gap">The gap</h2>
-<p>You enroll Claude Code, Codex, Cursor, or Stella, and each MCP tool call the agent makes goes straight from the harness to the MCP server. The <code>PreToolUse</code> hook sees the call as <code>mcp__&lt;server&gt;__&lt;tool&gt;</code>, records it, and can refuse it. That evidence is client-attested. No wrapped run earns <code>gateway</code> through MCP today.</p>
-<p>The one MCP gateway Oxagen has serves a different job. Enrollment registers it in Claude Desktop only (<code>CONNECTED_HARNESSES</code>, <code>wire.ts:343</code>). It relays calls to Oxagen's own remote MCP server (<code>apps/mcp</code>) and serves Oxagen's own read-only tools (<code>gatewayMayInvoke</code>, <code>packages/iam/src/machine-key-scope.ts:144-151</code>). It cannot front a third-party server, and it spawns nothing.</p>
-<p>The contained bridge serves <code>/mcp</code> too (<code>contained/bridge.ts:118-128</code>), and nothing inside the container points at it (<code>contained/configuration.ts</code> writes only the model base URL).</p>
-<h2 id="mcp-gateway/what-routing-adds">What routing adds</h2>
-<p>Routing a call through a daemon Oxagen runs adds four things over the hook:</p>
-<ol>
-<li><strong>An observed record.</strong> The gateway seals the request and the result as it saw them. The hook path does not write tool result bodies yet.</li>
-<li><strong>A refusal outside the harness.</strong> A pinned harness cannot reach the server except through the gateway, so the harness cannot skip the check.</li>
-<li><strong>A tier.</strong> Routed MCP calls earn <code>gateway</code>, scoped to those calls. Cursor has no model route, so MCP is its only road to <code>gateway</code>.</li>
-<li><strong>Credential custody, later.</strong> The gateway can hold an upstream server's credential so the harness never sees it (phase 6).</li>
-</ol>
-<h2 id="mcp-gateway/decisions">Decisions</h2>
-<h3 id="mcp-gateway/one-route-per-server">One route per server</h3>
-<p>The daemon serves one loopback route for each MCP server the harness had, and the harness config keeps the original server name. A single endpoint that merges every server would rename the tools. That breaks every per-server rule the harnesses key on: Claude Code's <code>mcp__github__.*</code> matchers and permission rules, Codex's <code>enabled_tools</code> and <code>tools.&lt;tool&gt;.approval_mode</code>, Cursor's <code>Mcp(server:tool)</code> rules, and Stella's tool policy and per-server caps (<code>stella-mcp/src/lib.rs:47-53</code>). The MCP tools specification also says an aggregating proxy should prefix tool names and should not rely on <code>serverInfo.name</code> (<a href="https://modelcontextprotocol.io/specification/2026-07-28/server/tools">tools</a>). One route per server avoids both.</p>
-<ul>
-<li><strong>An HTTP server.</strong> Enrollment rewrites its <code>url</code> to <code>http://127.0.0.1:&lt;port&gt;/mcp/relay/&lt;server&gt;</code>. The daemon forwards each request to the original URL with the original headers.</li>
-<li><strong>A stdio server.</strong> Enrollment replaces its command with a relay, <code>tacho mcp-relay --server &lt;name&gt; -- &lt;original command and args&gt;</code>. The harness spawns the relay with the same working directory and environment it would have given the server. The relay spawns the original server as its child and passes each JSON-RPC message through the daemon for the check and the seal. The server's environment and lifetime stay what the harness gave it, and the daemon stays the one place that decides.</li>
-</ul>
-<p>The relay and the HTTP route speak both the 2025-06-18 and 2026-07-28 protocol revisions. The newer revision's <code>Mcp-Method</code> and <code>Mcp-Name</code> headers let the daemon route and log a call without parsing the body (<a href="https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http">streamable HTTP</a>).</p>
-<h3 id="mcp-gateway/a-third-road-to-gateway-at-ingest">A third road to <code>gateway</code> at ingest</h3>
-<p>Today <code>enforcementTierOf</code> promotes a session to <code>gateway</code> on two kinds of evidence (<code>ingest:810-841</code>): a model call the loopback proxy sealed, or an MCP call the control plane served itself. A relayed call to a third-party server fits neither. The control plane never serves it, because the call goes from the machine to the server.</p>
-<p>The relayed call is daemon-sealed, like a model call. So ingest gains a third road that mirrors <code>modelRouted</code>: the verified chain holds a <code>tool_call</code> frame with <code>source: collector</code>, <code>fidelity: proxy</code>, and <code>tool_source: mcp</code>. A record posted through the local OTLP endpoint cannot carry that source and fidelity. ADR-095 already licenses the road (&quot;model and MCP requests seen by the gateway for that run give <code>gateway</code>&quot;). This is the first thing to build, because without it routing MCP earns no tier.</p>
-<h3 id="mcp-gateway/one-record-per-call">One record per call</h3>
-<p><code>PreToolUse</code> still fires for every <code>mcp__*</code> call after routing. The hook stays: it refuses before the call starts, and it is the only check on built-in tools. So each routed call arrives twice, once from the hook and once from the relay.</p>
-<p>Ingest keeps both and counts the call once, the way metering already treats a model call (<code>ingest:280-296</code>). The relay frame carries the input digest the hook also records. Ingest links the two on the session, the tool name, and the input digest, and the observed frame replaces the self-reported one in every count. This answers the Cursor writer's objection (<code>cursor-writer.ts:42-54</code>: &quot;would record the same call twice… and put one harness on two tiers&quot;). A run earns one tier, the highest its record supports, and each call shows how it was seen.</p>
-<h3 id="mcp-gateway/user-scope-only">User scope only</h3>
-<p>Enrollment rewrites user-scope config only. A project file (<code>.mcp.json</code>, <code>.codex/config.toml</code>, <code>.cursor/mcp.json</code>, <code>.stella/mcp.toml</code>) belongs to the repository. Oxagen does not write into it, because the change would land in the customer's commits. A project-scope server stays hook-checked at <code>harness</code> strength on a laptop. On a managed device, the pin below either blocks it or lets an admin add it to the relayed set.</p>
-<h3 id="mcp-gateway/restore-exactly">Restore exactly</h3>
-<p>Each writer uses displace-and-restore, as <code>host/mcp-config-writer.ts</code> already does for Claude Desktop. <code>unenroll</code> leaves every file byte-identical to before <code>enroll</code> ran (#3299 definition of done). The health report gains <code>mcp_servers.ours</code>, the MCP counterpart of <code>model_base_urls.ours</code> (<code>wire.ts:1006-1019</code>), so an operator sees a server someone pointed back at its upstream.</p>
-<h3 id="mcp-gateway/failure-behavior">Failure behavior</h3>
-<p>The relay follows the model proxy's rule (<code>model-proxy.ts:46-64</code>):</p>
-<ul>
-<li><strong>A fault of Oxagen's never stops a call.</strong> An unreachable control plane leaves the cached bundle deciding.</li>
-<li><strong>An operator decision always stops one.</strong> A rule deny, a paused or cancelled session, and a suspended or revoked host all refuse, with the refusal sealed as a <code>policy_decision</code>.</li>
-<li><strong>The daemon is down.</strong> The relay refuses <code>tools/call</code> with a JSON-RPC error that names the daemon. An HTTP route gets a refused connection. Neither falls through to the upstream.</li>
-</ul>
-<h3 id="mcp-gateway/credentials">Credentials</h3>
-<p>Phases 1 to 5 pass upstream credentials through unchanged: headers on an HTTP route, the environment on a stdio relay. The daemon neither stores nor logs them. OAuth tokens are bound to the upstream's URL (RFC 8707), so a rewritten <code>url</code> breaks an OAuth server until the daemon runs discovery and holds the token itself. Phase 6 builds that. Until then enrollment leaves an OAuth server unrewritten and hook-checked, and says so in <code>tacho status</code>.</p>
-<p>The credential-custody spec (<code>docs/specs/credential-custody/spec.md:29,39</code>) already says the gateway holds third-party credentials such as Slack and Stripe. The code does not. Phase 6 makes that sentence true, and until then the spec needs a correction.</p>
-<h2 id="mcp-gateway/harnesses">Harnesses</h2>
+<h2 id="gateway/the-problem">The problem</h2>
+<p>You set up a team's tools, rules, and budgets in Oxagen, and then your agents run without most of it. Oxagen delivers context records at session start and records what the hooks see. The rest stops at the authoring side:</p>
 <div class="tw"><table>
 <thead>
 <tr>
-<th>Harness</th>
-<th>Where servers live</th>
-<th>What enrollment rewrites</th>
-<th>How an admin pins it</th>
-<th>Local veto</th>
-<th>Result</th>
+<th></th>
+<th>Claude Code, Codex, Cursor, Stella CLI</th>
+<th>Claude Desktop</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Claude Code</td>
-<td><code>~/.claude.json</code> (user and local scope), <code>.mcp.json</code>, plugins, claude.ai connectors</td>
-<td>User and local scope in <code>~/.claude.json</code></td>
-<td><code>managed-mcp.json</code>, exclusive</td>
-<td><code>PreToolUse</code> on <code>mcp__*</code></td>
-<td>Possible for local servers. Connectors never route</td>
+<td>Context records</td>
+<td><code>must</code> and <code>should</code> records at session start. <code>may</code> and <code>info</code> are cut</td>
+<td>Pull only, through read-only tools</td>
 </tr>
 <tr>
-<td>Codex</td>
-<td><code>~/.codex/config.toml</code>, <code>.codex/config.toml</code>, plugins, apps</td>
-<td><code>[mcp_servers.*]</code> in <code>~/.codex/config.toml</code></td>
-<td><code>requirements.toml</code> <code>[mcp_servers.&lt;id&gt;]</code> identities</td>
-<td><code>PreToolUse</code> on <code>mcp__*</code></td>
-<td>Possible for local servers. Apps never route</td>
+<td>Toolbelt</td>
+<td>No. The workspace's registered MCP servers reach only Oxagen's in-app agent</td>
+<td>No</td>
 </tr>
 <tr>
-<td>Cursor</td>
-<td><code>~/.cursor/mcp.json</code>, <code>.cursor/mcp.json</code>, plugins, extensions, team servers</td>
-<td><code>~/.cursor/mcp.json</code></td>
-<td>Cursor's team dashboard only</td>
-<td><code>beforeMCPExecution</code></td>
-<td>Possible for local servers. Cloud Agents never route. The pin is the customer's to set</td>
+<td>Skills</td>
+<td>No. <code>.oxagen/skills/</code> is written and never delivered</td>
+<td>No</td>
 </tr>
 <tr>
-<td>Stella</td>
-<td><code>.stella/mcp.toml</code> in each workspace, plugins</td>
-<td>Nothing</td>
-<td>Nothing</td>
-<td><code>PreToolUse</code> on <code>mcp__*</code></td>
-<td>Not possible today. Needs a Stella change</td>
+<td>Agent profile</td>
+<td>Budget, containment, and tool rules go into the signed bundle. <code>instructions</code> do not reach the agent</td>
+<td>No</td>
+</tr>
+<tr>
+<td>Memories</td>
+<td>No. Tacho records memory file paths, never their content</td>
+<td>Pull only</td>
+</tr>
+<tr>
+<td>Model keys</td>
+<td>In <code>credentials.json</code> on the laptop for Claude Code and Codex, readable by the machine's owner</td>
+<td>n/a</td>
 </tr>
 </tbody>
 </table></div>
-<h3 id="mcp-gateway/claude-code">Claude Code</h3>
-<p>Possible for the servers you configure locally.</p>
+<p>The kill switch has the same gap. Today's gateway runs on the laptop. The machine's owner can unset the base URL, read the key from custody, and call the vendor directly. So a paused or cancelled run can keep going.</p>
+<h2 id="gateway/what-kong-does">What Kong does</h2>
+<p>Kong Gateway puts the AI MCP Proxy plugin between an MCP client and the upstream servers. The plugin applies OAuth, per-tool access lists (Kong Gateway 3.13 and later, with an audit log), and rate limits, and it logs each JSON-RPC call with its payload (<a href="https://developer.konghq.com/mcp/">MCP gateway</a>, <a href="https://developer.konghq.com/plugins/ai-mcp-proxy/">AI MCP Proxy</a>). Kong runs the control plane as a service (Konnect). The data plane that carries traffic runs in one of two places:</p>
 <ul>
-<li><strong>Rewrite.</strong> User and local scope in <code>~/.claude.json</code>: stdio commands become relays and URLs become loopback routes (<a href="https://code.claude.com/docs/en/mcp">MCP</a>).</li>
-<li><strong>Pin.</strong> On a managed device, Oxagen writes <code>managed-mcp.json</code> (<code>/Library/Application Support/ClaudeCode/</code>, <code>/etc/claude-code/</code>, or <code>C:\Program Files\ClaudeCode\</code>) with the relayed servers and sets <code>allowManagedMcpServersOnly: true</code>. The allowlist entries match the relay by exact <code>serverCommand</code> or by <code>serverUrl</code>. Oxagen never uses <code>serverName</code>, which the docs say &quot;is not a security control&quot; (<a href="https://code.claude.com/docs/en/managed-mcp">managed MCP</a>).</li>
-<li><strong>What the pin costs.</strong> It drops plugin servers and <code>--mcp-config</code> servers. A run that passes <code>--mcp-config</code> exits at startup, and <code>--strict-mcp-config</code> exits everywhere, which breaks Agent SDK and <code>-p</code> callers that bring their own servers. It suppresses claude.ai connectors unless the admin sets <code>allowAllClaudeAiMcps</code>. Enrollment states all of this before it writes the file.</li>
-<li><strong>Local veto.</strong> <code>PreToolUse</code> already matches <code>mcp__*</code>. From v2.1.274 the hook input carries <code>mcp_server.source</code> (<a href="https://code.claude.com/docs/en/hooks">hooks</a>), so an enforce-mode rule can refuse calls from sources the relay does not cover.</li>
-<li><strong>Never routes.</strong>
+<li><strong>Kong-hosted.</strong> With Dedicated Cloud Gateways, Kong manages both planes (<a href="https://konghq.com/blog/product-releases/dedicated-cloud-gateways">announcement</a>).</li>
+<li><strong>Customer-hosted.</strong> In hybrid mode, the customer runs the data plane, and it pulls its configuration from the control plane. A data plane node caches that configuration and keeps proxying while the control plane is down (<a href="https://developer.konghq.com/gateway/hybrid-mode/">hybrid mode</a>).</li>
+</ul>
+<p>Oxagen takes the same shape: a control plane Oxagen runs, and a data plane Oxagen or the customer runs.</p>
+<h2 id="gateway/where-oxagen-goes-past-it">Where Oxagen goes past it</h2>
+<p>Oxagen's gateway governs agents, not API consumers. Each call carries an agent's identity, a run, and the mandate the team set for that agent:</p>
 <ul>
-<li>claude.ai connectors. The desktop app's local and SSH sessions receive them in-process as <code>sdk</code> servers that &quot;no MCP setting or <code>managed-mcp.json</code> reaches&quot;. In cloud and self-hosted sessions, &quot;Anthropic calls connector tools from its own infrastructure&quot; (<a href="https://code.claude.com/docs/en/self-hosted-environments-deploy">self-hosted</a>). The Microsoft 365, Gmail, and Google Calendar connectors also reject local OAuth.</li>
-<li>In-process <code>type: &quot;sdk&quot;</code> servers from the Agent SDK. They skip every managed check.</li>
-<li>Built-in tools: <code>WebSearch</code> (runs on Anthropic's backend), <code>WebFetch</code>, Claude in Chrome, and the <code>ide</code> server. They are not MCP traffic.</li>
+<li><strong>Spend and budgets.</strong> The gateway meters every model call from the bytes it saw and prices it. It refuses the next call when the run's or the agent's day budget runs out, and it reserves an in-flight call's ceiling so parallel calls cannot overrun. The proxy on the laptop already does this (<code>model-proxy.ts</code>). The gateway moves it to where the owner cannot remove it.</li>
+<li><strong>A kill switch the agent cannot route around.</strong> Oxagen holds the only key the agent's harness can use. A paused, cancelled, or killed run gets no new token, and the gateway cuts its calls in flight.</li>
+<li><strong>One place to set up the agent.</strong> The same mandate supplies steering, tools, skills, profile, memories, and budget.</li>
+<li><strong>A record per run.</strong> Each call lands on the run's hash-chained record, and the control plane computes the run's tier from it.</li>
 </ul>
-</li>
-</ul>
-<h3 id="mcp-gateway/codex">Codex</h3>
-<p>Possible for the servers you configure locally.</p>
+<h2 id="gateway/architecture">Architecture</h2>
+<h3 id="gateway/control-plane">Control plane</h3>
+<p>This is the existing Oxagen API and app. It holds the mandate for each agent: access, budget and rules, and equipment (toolbelt, skills, steering, profile, memories). It also holds the key vault, mints run tokens, ingests the record, and computes the tier. It never carries a model or MCP call.</p>
+<h3 id="gateway/data-plane">Data plane</h3>
+<p>The gateway is one service with two listeners:</p>
 <ul>
-<li><strong>Rewrite.</strong> <code>[mcp_servers.&lt;name&gt;]</code> in <code>~/.codex/config.toml</code> (<a href="https://learn.chatgpt.com/docs/extend/mcp">MCP</a>). Codex supports stdio and streamable HTTP, with no SSE.</li>
-<li><strong>Pin.</strong> <code>requirements.toml</code>, from <code>/etc/codex/requirements.toml</code>, the MDM key <code>com.openai.codex:requirements_toml_base64</code>, or the cloud bundle (<a href="https://learn.chatgpt.com/docs/enterprise/managed-configuration">managed configuration</a>). Each relayed server gets an <code>[mcp_servers.&lt;id&gt;]</code> entry with the structured <code>executable</code> plus <code>args[]</code> identity. The string <code>identity.command</code> form ignores arguments, so it cannot tell the relay for one server from the relay for another. Oxagen also pins <code>features.apps = false</code>, because the docs do not say whether the allowlist governs the hosted apps server.</li>
-<li><strong>Sandbox.</strong> MCP servers run outside Codex's sandbox, and its network proxy &quot;does not filter … MCP server connections&quot;, so the relay's loopback route is reachable. <code>allow_local_binding = false</code>, the default, keeps sandboxed shell commands off the relay's port (<a href="https://learn.chatgpt.com/docs/permissions">permissions</a>).</li>
-<li><strong>Local veto.</strong> <code>PreToolUse</code> matches <code>mcp__server__tool</code> (<a href="https://learn.chatgpt.com/docs/hooks">hooks</a>). Oxagen's mandate code names MCP tools only for Claude Code and Cursor (<code>tacho-mandate.ts:57-58</code>), and phase 4 adds Codex.</li>
-<li><strong>Never routes.</strong>
-<ul>
-<li>Apps and connectors. Codex registers a hosted <code>codex_apps</code> server at <code>chatgpt_base_url</code>, and connectors &quot;use their own service-side connections&quot;.</li>
-<li>Hosted <code>WebSearch</code>. No hook fires for it.</li>
+<li><strong>Model.</strong> It speaks Anthropic Messages, OpenAI Responses, and OpenAI Chat Completions, streamed or not. The routing, metering, budget, model allowlist, and interrupt logic in <code>packages/tacho/src/collector/model-proxy.ts</code> move here.</li>
+<li><strong>MCP.</strong> Streamable HTTP. It serves the agent's toolbelt, one endpoint per server (below).</li>
 </ul>
-</li>
-<li><strong>Unknown.</strong> <code>experimental_environment = &quot;remote&quot;</code> starts a stdio server through a remote executor. The docs do not say how identity matching treats it. The phase 4 rig tests it.</li>
-</ul>
-<h3 id="mcp-gateway/cursor">Cursor</h3>
-<p>Possible for the servers you configure locally. The pin is a setting only the customer's Cursor admin can change.</p>
-<ul>
-<li><strong>Rewrite.</strong> <code>~/.cursor/mcp.json</code>, and the second location when <code>CURSOR_CONFIG_DIR</code> or <code>XDG_CONFIG_HOME</code> moves the config directory, as the hooks writer already handles (<a href="https://cursor.com/docs/mcp">MCP</a>). This lifts the refusal in <code>cursor-writer.ts:42-54</code>, once the one-record rule above is built.</li>
-<li><strong>Pin.</strong> Cursor has no local managed MCP file. Its Enterprise MCP Allowlist lives under Team Settings &gt; MCP Configuration in Cursor's dashboard, and matches full command strings and full URLs with <code>*</code> wildcards (<a href="https://cursor.com/docs/enterprise/model-and-integration-management">model and integration management</a>). Oxagen cannot write it. The admin guide gives the two patterns to allow (<code>tacho mcp-relay *</code> and <code>http://127.0.0.1:&lt;port&gt;/mcp/relay/*</code>) and says to leave &quot;User MCP extensions&quot; off.</li>
-<li><strong>Local veto.</strong> <code>beforeMCPExecution</code> receives the server's <code>url</code> or <code>command</code> and can deny (<a href="https://cursor.com/docs/hooks">hooks</a>). Oxagen registers it in the enterprise <code>hooks.json</code> (<code>/Library/Application Support/Cursor/hooks.json</code>, <code>/etc/cursor/hooks.json</code>, or <code>C:\ProgramData\Cursor\hooks.json</code>) with <code>failClosed: true</code>, and it refuses any MCP call whose command or URL is not a relay. The event fails open on a crash or timeout unless <code>failClosed</code> is set.</li>
-<li><strong>Never routes.</strong>
-<ul>
-<li>Cloud Agents. Team MCP servers run in Cursor's cloud, and MCP hooks are deferred there.</li>
-<li>Browser, which is an MCP server running in-process as an extension, and the built-in Web search and Fetch tools.</li>
-<li>Servers an extension registers through <code>vscode.cursor.mcp.registerServer()</code>. No file holds them, and the docs do not say whether the allowlist covers them.</li>
-</ul>
-</li>
-<li><strong>Unknown.</strong> Under the admin network mode &quot;Deny all&quot;, stdio servers run sandboxed, and the docs do not say whether that sandbox allows loopback. If it does not, the relay cannot reach the daemon. The phase 4 rig tests it.</li>
-<li><strong>Budgets stay off.</strong> Cursor's model calls still go to Cursor's servers, so a routed Cursor run is <code>gateway</code> for its MCP calls only, with no budget.</li>
-</ul>
-<h3 id="mcp-gateway/stella">Stella</h3>
-<p>Not possible today. Stella reads MCP servers only from <code>&lt;workspace&gt;/.stella/mcp.toml</code> and from plugin <code>mcp.toml</code> files (<code>stella-cli/src/agent.rs:801</code>, <code>plugin_cmd/package.rs:112-118</code>). It has no user-scope or managed-scope server list: <code>[mcp.servers]</code> in <code>stella.toml</code> is parsed and ignored at every scope (<code>settings/toml_config.rs:18-20</code>). Routing Stella would mean editing a file in every repository, which this plan rules out. It would still miss untrusted checkouts, where Stella loads nothing from the workspace file (<code>agent.rs:817-823</code>).</p>
-<p>Stella is Oxagen's own harness, so this limit is Oxagen's to remove. The Stella change:</p>
-<ol>
-<li>Read <code>[mcp.servers]</code> at user and managed scope, with the workspace file merged on top by name.</li>
-<li>Add a managed allowlist of server identities (command and arguments, or URL), matching the Codex and Claude Code shape.</li>
-<li>Let a managed scope forbid workspace and plugin servers.</li>
-</ol>
-<p>With that in place, Stella gets the same writer and pin as the others. Two Stella details the relay must handle: a stdio child gets only its <code>env</code> table plus <code>PATH</code> (<code>stella-mcp/src/stdio.rs:244-262</code>), so the relay replaces the command and cannot be injected through the environment. Stella also replays <code>Mcp-Session-Id</code> per transport (<code>stella-mcp/src/http.rs:1-8</code>), so the HTTP route keeps one session per server.</p>
-<p><strong>Stella in-app runs</strong> (<code>arun_</code>) are a separate case. The engine runs on <code>stella-serve</code> with a <code>remote</code> tool surface, and every tool call returns to Oxagen's kernel (ADR-053). External MCP for those runs executes server-side under <code>mcp.&lt;server&gt;.&lt;tool&gt;</code> identities (ADR-122). No local relay is involved, and none is needed.</p>
-<h2 id="mcp-gateway/unroutable-surfaces">Unroutable surfaces</h2>
-<p>These calls never pass a local gateway, whatever Oxagen builds. The matrix names each one.</p>
+<p>The gateway pulls a signed configuration for each workspace from the control plane and caches it, as the host bundle works today. It streams operator commands (pause, cancel, kill, steer) from the control plane and applies them to calls in flight.</p>
+<h3 id="gateway/deployment">Deployment</h3>
 <div class="tw"><table>
 <thead>
 <tr>
-<th>Harness</th>
-<th>Surface</th>
-<th>Why</th>
+<th></th>
+<th>Oxagen-hosted (default)</th>
+<th>Customer-hosted</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Claude Code</td>
-<td>claude.ai connectors</td>
-<td>The desktop app runs them in-process, and cloud sessions call them from Anthropic's infrastructure</td>
+<td>Who runs the gateway</td>
+<td>Oxagen, in regions it chooses</td>
+<td>The customer, in its own network, from the same image</td>
 </tr>
 <tr>
-<td>Claude Code</td>
-<td>Agent SDK <code>type: &quot;sdk&quot;</code> servers</td>
-<td>In-process, outside every managed control</td>
+<td>Where keys and MCP credentials live</td>
+<td>Oxagen's vault, one KMS key per organization</td>
+<td>The customer's KMS or vault. They never reach Oxagen</td>
 </tr>
 <tr>
-<td>Claude Code</td>
-<td><code>WebSearch</code>, <code>WebFetch</code>, Chrome, <code>ide</code></td>
-<td>Built-in tools. <code>WebSearch</code> runs on Anthropic's backend</td>
+<td>Where prompt and tool bodies go</td>
+<td>Through Oxagen's gateway, retained under the workspace's retention policy</td>
+<td>They stay in the customer's network. Only digests, usage, and frames reach Oxagen</td>
 </tr>
 <tr>
-<td>Codex</td>
-<td>Apps and connectors</td>
-<td>A hosted server with service-side connections</td>
-</tr>
-<tr>
-<td>Codex</td>
-<td>Hosted <code>WebSearch</code></td>
-<td>No hook fires</td>
-</tr>
-<tr>
-<td>Cursor</td>
-<td>Cloud Agents</td>
-<td>Team MCP servers run in Cursor's cloud</td>
-</tr>
-<tr>
-<td>Cursor</td>
-<td>Browser, Web search, Fetch</td>
-<td>Built-in, or in-process</td>
-</tr>
-<tr>
-<td>Claude Desktop</td>
-<td>Remote connectors</td>
-<td>Anthropic's cloud calls them (<a href="https://support.claude.com/en/articles/11175166">support</a>)</td>
+<td>How it reaches the control plane</td>
+<td>Inside Oxagen</td>
+<td>Outbound only, over mutual TLS. The gateway dials the control plane, and nothing dials in</td>
 </tr>
 </tbody>
 </table></div>
-<p>For a managed device, Oxagen's answer to a surface it cannot route is to turn it off: <code>disableClaudeAiConnectors</code> for Claude Code and <code>features.apps = false</code> for Codex. On a laptop those calls stay hook-checked, and the record shows them as not routed.</p>
-<h2 id="mcp-gateway/build-order">Build order</h2>
-<p>Each phase ships on its own and leaves the matrix true.</p>
-<ol>
-<li><strong>Ingest.</strong> The third road to <code>gateway</code>, the <code>tool_call</code> frame shape (<code>source: collector</code>, <code>fidelity: proxy</code>, <code>tool_source: mcp</code>, <code>oxagen.mcp_server</code>, input and output digests), and the one-record rule. Tests prove a hook-only MCP call stays <code>harness</code>, and a relayed one earns <code>gateway</code> and counts once.</li>
-<li><strong>Relay.</strong> <code>tacho mcp-relay</code> for stdio and <code>/mcp/relay/&lt;server&gt;</code> for HTTP in <code>tachod</code>. Each <code>tools/call</code> is checked against the bundle's <code>mcp__server__tool</code> rules, sealed, and refused on operator state. The daemon-down path refuses.</li>
-<li><strong>Writers.</strong> Claude Code, Codex, and Cursor user-scope rewrites with displace-and-restore, <code>mcp_servers.ours</code> in the health report, and the Cursor writer's refusal lifted. OAuth servers are left alone and listed in <code>tacho status</code>.</li>
-<li><strong>Pins.</strong> <code>managed-mcp.json</code> for Claude Code, <code>requirements.toml</code> for Codex, the Cursor admin guide and enterprise <code>beforeMCPExecution</code>, and Codex MCP naming in <code>tacho-mandate.ts</code>. This phase needs a rig (<code>needs:rig</code>) for the two unknowns: the Codex remote environment and Cursor's &quot;Deny all&quot; loopback.</li>
-<li><strong>Contained.</strong> The bridge serves the relay routes, and <code>contained/configuration.ts</code> writes each server's relay into the container's harness config. The <code>contained</code> CI job proves an MCP call inside the container reaches its upstream only through the bridge.</li>
-<li><strong>Credentials and OAuth.</strong> The daemon holds upstream credentials and runs OAuth for relayed HTTP servers. The credential-custody spec's claim becomes true.</li>
-</ol>
-<p>A separate Stella track runs beside phases 1 to 3: the managed MCP scope in <code>macanderson/stella</code> (#6564), then a Stella writer.</p>
-<h2 id="mcp-gateway/definition-of-done">Definition of done</h2>
+<p>Both run the same code. A customer moves from one to the other by pointing its enrollment at a new gateway URL and moving its keys.</p>
+<h3 id="gateway/the-laptop">The laptop</h3>
+<p><code>tachod</code> stays, with a narrower job:</p>
 <ul>
-<li>A Claude Code, Codex, or Cursor run whose MCP call went through a relay reads <code>gateway</code> at ingest, and the call is counted once.</li>
-<li>A hook-only MCP call leaves the run on <code>harness</code>.</li>
-<li><code>unenroll</code> leaves every MCP config byte-identical to before <code>enroll</code>.</li>
-<li>With the daemon stopped, a relayed call is refused, never forwarded.</li>
-<li>On a pinned Claude Code or Codex host, a server added outside the relay does not load.</li>
-<li>Inside a contained run, an MCP call reaches its upstream only through the bridge.</li>
-<li>The harness matrix on the website and in <code>docs/reference/harness-matrix.md</code> changes in the same pull request as each phase that changes a cell.</li>
+<li>The hooks stay. They veto the harness's built-in tools (Bash, Edit, Write), deliver steering at session start, and record events. The gateway never sees those tools.</li>
+<li><code>tachod</code> fetches run tokens for the harness (<code>apiKeyHelper</code> for Claude Code) and holds no vendor key.</li>
+<li>It syncs skills and agent files from the control plane (below).</li>
+<li>It relays a stdio MCP server that must run on the laptop (below).</li>
+</ul>
+<h2 id="gateway/keys-and-the-kill-switch">Keys and the kill switch</h2>
+<ol>
+<li><strong>Oxagen holds the vendor keys.</strong> A team adds its Anthropic and OpenAI organization keys to Oxagen once. Enrollment removes any vendor key from the harness's config, and <code>credentials.json</code> on the laptop goes away.</li>
+<li><strong>The harness holds a run token.</strong> The control plane mints an <code>oxrt_</code> token for one agent, one host, and one run. It lasts at most 15 minutes, as ADR-143's token does today. <code>tachod</code> refreshes it through the harness's key helper.</li>
+<li><strong>The gateway swaps the token for the key.</strong> It verifies the token, checks the mandate and the run's state, and forwards the call with the organization's key.</li>
+<li><strong>Kill means no new token and no open call.</strong> Pause, cancel, or kill stops minting for that run, revokes its live tokens at the gateway, and aborts its calls in flight. The harness's next call fails, and it has no other key to try.</li>
+</ol>
+<p>This holds against the agent and against every process the agent starts. It holds against the machine's owner for the organization's keys. It does not hold against a key the owner brings from elsewhere. Two controls close that gap: the vendor's own organization settings, which stop members creating personal API keys, and the <code>contained</code> tier, whose sandbox reaches only the gateway.</p>
+<p><strong>Subscription logins are out.</strong> Oxagen cannot hold a Claude Pro or Max login or a ChatGPT sign-in. A run on one stays <code>harness_held</code> (ADR-143), and the kill switch does not bind it. Enrollment says so, and the run's record shows it.</p>
+<p><strong>Keys at rest.</strong> Today one platform variable, <code>AUTH_TOKEN_ENCRYPTION_KEY</code>, encrypts every workspace's MCP credentials (<code>packages/plugins/src/credentials/kms.ts:4-5</code>). Custody of model keys needs one KMS key per organization, and the customer's own KMS on a customer-hosted plane.</p>
+<h2 id="gateway/mcp">MCP</h2>
+<h3 id="gateway/the-toolbelt">The toolbelt</h3>
+<p>The workspace already registers MCP servers in <code>mcp.mcp_servers</code>, with encrypted credentials and published tool schemas (<code>packages/database/src/schema/mcp.ts:131-204</code>). The gateway serves them.</p>
+<ul>
+<li><strong>One endpoint per server, under its own name.</strong> The gateway serves <code>https://&lt;gateway&gt;/mcp/&lt;agent&gt;/&lt;server&gt;</code>. Enrollment writes each one into the harness's config under the server's registered name. Tool names stay <code>mcp__&lt;server&gt;__&lt;tool&gt;</code>, so each harness's per-server hook matchers, permission rules, and allowlists keep working.</li>
+<li><strong>One tool builder.</strong> The gateway builds each agent's list with the server-side <code>materializeTools</code>, so no second copy of the builder exists (ADR-078 §4 holds).</li>
+<li><strong>Credentials stay in Oxagen.</strong> The gateway connects upstream with the workspace's stored credential and runs OAuth itself. The harness never sees the credential.</li>
+<li><strong>Per-tool rules.</strong> Allow, deny, or approval, plus input narrowing, apply to each call before it goes upstream.</li>
+<li><strong>Approval.</strong> A call that needs a person is parked. The gateway returns a result that names the pending approval. The person decides in Oxagen, and the agent's retry goes through.</li>
+<li><strong>Metering and billing.</strong> Each call is metered and billed as one governed action (ADR-165), as the in-app path does today.</li>
+</ul>
+<h3 id="gateway/importing-what-the-harness-has">Importing what the harness has</h3>
+<p>Enrollment reads the MCP servers already configured in the harness at user scope. It proposes each one into the workspace toolbelt, moves its credential into custody, and replaces the entry with the gateway's. It uses displace-and-restore, so <code>unenroll</code> puts every file back byte for byte.</p>
+<h3 id="gateway/pinning">Pinning</h3>
+<p>On a managed device the harness reaches MCP servers through the gateway only:</p>
+<ul>
+<li><strong>Claude Code:</strong> <code>managed-mcp.json</code> holds the gateway entries, with <code>allowManagedMcpServersOnly: true</code>. The allowlist matches by <code>serverUrl</code> (<a href="https://code.claude.com/docs/en/managed-mcp">managed MCP</a>).</li>
+<li><strong>Codex:</strong> <code>requirements.toml</code> holds an <code>[mcp_servers.&lt;id&gt;]</code> entry per server, with a <code>url</code> identity, and <code>features.apps = false</code> (<a href="https://learn.chatgpt.com/docs/enterprise/managed-configuration">managed configuration</a>).</li>
+<li><strong>Cursor:</strong> the Enterprise MCP Allowlist in Cursor's team settings allows the gateway's URLs only. Oxagen cannot write it. The admin guide gives the pattern (<a href="https://cursor.com/docs/enterprise/model-and-integration-management">model and integration management</a>).</li>
+<li><strong>Stella:</strong> needs a user-scope and managed-scope server list first (<code>stella</code> #6564).</li>
+<li><strong>Claude Desktop:</strong> its enterprise policy is an on/off switch for local servers. Oxagen's entry is the one it writes today.</li>
+</ul>
+<h3 id="gateway/laptop-only-servers">Laptop-only servers</h3>
+<p>A stdio server that reads the developer's files or a local database cannot run in a cloud gateway. Two ways to carry it:</p>
+<ul>
+<li><strong>In a customer-hosted gateway,</strong> when the server needs the customer's network but not the laptop.</li>
+<li><strong>Through <code>tachod</code>,</strong> which relays it and checks each call against the signed bundle. The daemon seals the call, and the record marks it as seen on the host, not by the gateway.</li>
+</ul>
+<h3 id="gateway/vendor-run-tools">Vendor-run tools</h3>
+<p>The vendor runs these tools, so no gateway sees them: claude.ai connectors in Claude Code, Codex apps and hosted web search, Cursor Cloud Agents, Claude Desktop's remote connectors, and the built-in web search and fetch tools. On a managed device Oxagen turns them off (<code>disableClaudeAiConnectors</code>, <code>features.apps = false</code>). Elsewhere the hooks see what they can, and the record marks the rest as unrouted.</p>
+<h2 id="gateway/delivery">Delivery</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>What</th>
+<th>How it reaches the agent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Context records</td>
+<td>Session start, as today. The gateway adds the per-prompt selection (#3296): it sees every model call, so it can add the <code>may</code> and <code>info</code> records that fit each turn</td>
+</tr>
+<tr>
+<td>Style preferences</td>
+<td>A context record of kind <code>preference</code>, delivered the same way, with its own place in the app</td>
+</tr>
+<tr>
+<td>Skills</td>
+<td><code>tachod</code> syncs published skills into each harness's user-scope skills directory (ADR-093 §6). No file is written into the repository</td>
+</tr>
+<tr>
+<td>Agent profiles</td>
+<td><code>tachod</code> writes the per-harness agent files from each agent definition (ADR-101:82-84). The definition's <code>instructions</code> go out at session start</td>
+</tr>
+<tr>
+<td>Memories</td>
+<td><code>tachod</code> reads each harness's memory files, under the workspace's retention policy, and imports them into the agent's memory store. Recall goes out at session start and per prompt through the gateway</td>
+</tr>
+</tbody>
+</table></div>
+<p>The in-app agent is Oxagen's own and is not part of this. #4310 takes the workspace toolbelt and rules off it.</p>
+<h2 id="gateway/the-tier-ladder">The tier ladder</h2>
+<p>The tiers keep their words (<code>tier-ladder-spec.md</code>). Two things change:</p>
+<ul>
+<li><strong>A new source for <code>gateway</code>.</strong> A call the gateway carried is on the control plane's own record, which is stronger evidence than a frame the host sealed. Ingest promotes a run to <code>gateway</code> from either source.</li>
+<li><strong>A new fact on the run.</strong> The run records who held the key: Oxagen, the customer's KMS, or the harness. &quot;Enforced&quot; for the kill switch is allowed only when Oxagen or the customer's KMS held it, scoped to &quot;for calls made with the organization's keys&quot;.</li>
+</ul>
+<h2 id="gateway/the-adr">The ADR</h2>
+<p>One ADR in <code>oxagen</code> records the decision. It supersedes in part:</p>
+<ul>
+<li><strong>ADR-094:</strong> a gateway Oxagen hosts carries prompt bodies, under the workspace's retention policy. The laptop proxy stays only for the stdio relay.</li>
+<li><strong>ADR-143:</strong> vendor keys move from the laptop to Oxagen's vault or the customer's KMS.</li>
+<li><strong>ADR-122:19:</strong> an agent's own identity can hold a grant for an external tool, so the toolbelt works without a person on the call.</li>
+</ul>
+<p>It keeps ADR-078 §4. There is still one tool builder, and it is the server's.</p>
+<h2 id="gateway/build-order">Build order</h2>
+<ol>
+<li><strong>The ADR</strong> above, and the retention default for bodies the gateway carries.</li>
+<li><strong>Agent identity and tokens.</strong> An agent principal per enrolled agent, grants for external tools, run tokens minted by the control plane, and revocation.</li>
+<li><strong>The model gateway, Oxagen-hosted.</strong> Port the proxy's routes, metering, budgets, allowlist, and interrupt. Add the per-organization key vault. Enrollment points each harness's base URL at the gateway and removes the local key.</li>
+<li><strong>The MCP gateway.</strong> The toolbelt endpoint per server, OAuth and credential custody, per-tool rules, approval, metering, and billing. Enrollment imports the harness's servers and writes the gateway's entries.</li>
+<li><strong>Pinning</strong> for Claude Code, Codex, and Cursor. Stella follows once #6564 lands.</li>
+<li><strong>Delivery for the rest:</strong> skills sync, the agent-file generator, per-prompt steering, and memory import and recall.</li>
+<li><strong>The customer-hosted gateway.</strong> Packaging, the outbound control channel, and the customer's KMS.</li>
+<li><strong>The laptop relay</strong> for stdio servers that must stay on the machine.</li>
+</ol>
+<h2 id="gateway/definition-of-done">Definition of done</h2>
+<ul>
+<li>A Claude Code, Codex, or Cursor run on an enrolled host makes every model call and every toolbelt call through the gateway. Its record says so, and its tier is <code>gateway</code>.</li>
+<li>No vendor key or MCP credential is on the enrolled machine.</li>
+<li>Killing a run aborts its model call in flight and refuses its next one.</li>
+<li>A budget refuses the next call once the run's observed spend reaches it.</li>
+<li>Skills, agent files, and context records published in Oxagen appear in each harness without a commit to the repository.</li>
+<li>A customer-hosted gateway serves the same run with keys only in the customer's KMS, and no prompt body reaches Oxagen.</li>
 </ul>
 
-<footer class="colophon"><span>Oxagen · Plan</span><span>Source: <code>docs/mcp-gateway-plan.md</code></span></footer>
+<footer class="colophon"><span>Oxagen · Plan</span><span>Source: <code>docs/gateway-plan.md</code></span></footer>
 </main>
 </div>
 </article><article id="witness" class="doc" hidden>
@@ -19808,7 +19806,7 @@ need a decision before W13 is written into the spec.</li>
 </div>
 <script>
 (function(){
-  var TITLES={'wedge': 'Fleet operations wedge', 'ia': 'Fleet operations information architecture', 'routes': 'Fleet operations routes', 'collapse': 'Fleet operations deletion list', 'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'tiers': 'The enforcement tier ladder', 'mcp-gateway': 'MCP traffic through the gateway', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and Steering records', 'tasks': 'Tasks and work orders', 'work-in-flight': 'Work in flight', 'agent-capability': 'In-app agent capability expansion', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
+  var TITLES={'wedge': 'Fleet operations wedge', 'ia': 'Fleet operations information architecture', 'routes': 'Fleet operations routes', 'collapse': 'Fleet operations deletion list', 'spec': 'Oxagen Mission Control: Product and Technical Specification', 'dod': 'Oxagen DoD: the definition of done for agent runs', 'tiers': 'The enforcement tier ladder', 'gateway': 'The Oxagen gateway', 'witness': 'Oxagen Witness: outcome verification', 'desktop': 'Oxagen Desktop: product specification, rev 1', 'creation': 'Creating things in Oxagen: agents, tools, skills and Steering records', 'tasks': 'Tasks and work orders', 'work-in-flight': 'Work in flight', 'agent-capability': 'In-app agent capability expansion', 'portability': 'The Agent Portability Atlas', 'execution-portability': 'Agent Run Protocol (ARP)', 'plan': 'Oxagen Mission Control app: implementation plan', 'scope': 'Oxagen Mission Control: the scope review, and what it changed', 'scaleback': 'Scale back Mission Control: the mockup prompt', 'prompts': 'Oxagen Mission Control: mockup prompts, one per demo flow', 'consolidation': 'Consolidating W1–W11 into one design', 'feedback': 'Feedback on the mockups', 'videos': 'Videos of the mockups, narrated', 'w13': 'W13: in the loop'};
   var first='wedge';
   function show(){
     var h=location.hash.replace(/^#/,""), id=h.split("/")[0];
