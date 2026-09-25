@@ -101,6 +101,8 @@ const OVERLAYS = [
 
 const browser = await launchChromium(root);
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+// The page is a 2 MB file; on a loaded machine its load event can take longer than Playwright's 30 s.
+page.setDefaultNavigationTimeout(120000);
 const errors = [];
 page.on("pageerror", (e) => errors.push(String(e.message || e)));
 page.on("dialog", (d) => d.dismiss());
@@ -126,7 +128,7 @@ async function audit(label, text, prose) {
     const g = new RegExp(re.source, re.flags.includes("g") ? re.flags : re.flags + "g");
     for (const m of t.matchAll(g)) {
       const at = m.index;
-      hits.get(name).push(`${label}  …${t.slice(Math.max(0, at - 50), at + 50).replace(/\n/g, " ⏎ ")}…`);
+      hits.get(name).push([label, t.slice(Math.max(0, at - 50), at + 50).replace(/\n/g, " ⏎ ")]);
     }
   }
 }
@@ -149,11 +151,14 @@ for (const [name, js] of OVERLAYS) {
 await browser.close();
 
 let total = 0;
+// The same text on many routes (the sidebar, a shared panel) is one finding, shown with its first route.
 for (const [name, list] of hits) {
-  const uniq = [...new Set(list)];
-  total += uniq.length;
-  console.log(`${name}: ${uniq.length}`);
-  for (const line of uniq.slice(0, args.includes("--all") ? Infinity : 25)) console.log("  " + line);
+  const seen = new Map();
+  for (const [label, snip] of list) if (!seen.has(snip)) seen.set(snip, [label, 0]); else seen.get(snip)[1]++;
+  total += seen.size;
+  console.log(`${name}: ${seen.size}`);
+  for (const [snip, [label, more]] of [...seen].slice(0, args.includes("--all") ? Infinity : 25))
+    console.log(`  ${label}${more ? ` (+${more} more)` : ""}  …${snip}…`);
 }
 for (const e of [...new Set(errors)]) console.log("PAGE ERROR " + e);
 console.log(`\n${ROUTES.length} routes, ${OVERLAYS.length} overlays, ${total} findings, ${errors.length} page errors`);
