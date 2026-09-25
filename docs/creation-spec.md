@@ -124,7 +124,7 @@ the skill's row on Steering › Sources and from the skill dialog, ending on the
 patch version bumped.
 
 **Where it ends.** The pull request is listed on Repositories · Changes with kind `skill`. After the
-merge the skill is in the catalog on Steering · Skills, and **sync** materializes its files into
+merge the skill is on Steering › Sources at `?kind=skill`, and **sync** materializes its files into
 each enrolled checkout. The Delivered by sync panel shows each repository’s state. The harness loads
 the file by its own progressive disclosure. Only the description line competes in the assembler, and
 Steering › Compiler shows it competing.
@@ -133,19 +133,21 @@ Steering › Compiler shows it competing.
 
 The kind is not a label. It decides how the statement is delivered, what the checks assert about it,
 and how a run is allowed to use it — so the wizard makes you pick one before it will let you write
-the sentence, and it shows what each kind can never do.
+the sentence. What each kind can never do is in the wizard's component help
+(`mockups/help/steering.md`, Steering record wizard), not on the cards.
 
 1. **Describe** — the concern. Say the thing itself, not the reason for it: the reason belongs in the
    rationale on the pull request, where a reviewer reads it once, not in the bundle, where every
    agent pays for it on every turn.
-2. **Kind** — six cards, each with what it is for, what it can never do, and how it reaches a run.
+2. **Kind** — six cards, each with the kind's description and what it is for.
 3. **Statement** — the source editor over the statement, plus force, scope and, for the two
    constraining kinds, the constraint effect. Force is filtered by kind: a preference cannot be
    `must`, and a fact or a memory is `info`. A live preview shows the record card as it will read,
    and the step prices the bundle recompile.
 4. **Checks** — the six, spelled out for this record. The fifth one earns the others: two people can
    each write a sensible record, six weeks apart, that together say a call must happen and must not,
-   and the only place that is catchable is on the pull request, before either reaches a run.
+   and the only place that is catchable is on the pull request, before either reaches a run. The step
+   lists the checks; this reasoning is in its component help.
 5. **Pull request** — merge is the publication, and the record is in force from the merge commit, not
    from when it was written.
 
@@ -154,9 +156,9 @@ and the statement in the same editor.
 
 **Where it ends.** The wizard closes on Steering › Proposals, on the Pull requests view
 (`#/:org/:ws/steering/proposals/prs`), with the new pull request selected. After the merge the record
-is on Steering · Records with its force, scope, token cost, and compilation chip: “compiles to text”,
-or “compiles to text and a gate” when it carries an enforcement grant. A record written in the wizard
-carries no grant. Steering › Compiler shows where the record lands for an agent and a prompt: the
+is on Steering › Sources at `?kind=record`, and its page shows its force, scope and token cost. A
+constraint's panel says whether it carries an enforcement grant, which compiles it to a gate as well
+as to text. A record written in the wizard carries no grant. Steering › Compiler shows where the record lands for an agent and a prompt: the
 stable prefix for `must` and `should`, the volatile selection for `may` and `info`.
 
 ## 6. What this feature must never do

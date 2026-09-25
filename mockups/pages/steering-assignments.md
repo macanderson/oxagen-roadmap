@@ -22,7 +22,7 @@ The counts here are eligibility before budget. The Compiler (`steering-compiler.
 
 **By scope** panel.
 
-- Heading "By scope". Caption: "Frames each scope can emit, and the agents in Core platform it reaches. A narrower scope narrows a wider one and never widens it."
+- Heading "By scope", with no caption. What the panel counts, and the rule that a narrower scope never widens a wider one, are in its component help (`mockups/help/steering-assignments.md`, By scope).
 - A table with no list controls. Columns, in order: Scope, Sources, Frames by type and Agents.
 - Rows, in this order: Organization, then Workspace, then one row per repository in name order, then One agent each, then Named agents. A scope with no emitting source has no row.
 
@@ -42,7 +42,7 @@ The counts here are eligibility before budget. The Compiler (`steering-compiler.
 
 **By agent** panel.
 
-- Heading "By agent". Caption: "What each agent is eligible for before budget. The Compiler shows what one brief selects."
+- Heading "By agent", with no caption. That the panel shows eligibility before budget, and the Compiler what one brief selects, is in its component help (`mockups/help/steering-assignments.md`, By agent).
 - The shared list controls: "Search this list", a Tier filter ("All · Tier", then contained, gateway and harness in Core platform), Rows (5, 10, 25, 50, All; 10 by default) and a pager ("1–10 of 68").
 - Columns, in order:
   - **Agent**: the agent chip, its avatar and key in mono (`a-intel.core.release-manager`).
@@ -124,6 +124,6 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 - Every enforcement claim states the tier. "Enforced" only for calls routed through Oxagen.
 - Headers are rollups of the rows beneath them: the Sources, Frames by type and Agents figures read the same list as Sources.
 - No person is scored or ranked, and no agent is either.
-- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing; the mockup's two-sentence captions under By scope and By agent are design defects, not patterns to copy.
+- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing. By scope and By agent carry no caption.
 - Exactly one gold action per screen: the header's New source. Nothing in the body is gold.
 - A future-only field is marked in the design and renders as not recorded in a build until its contract ships.

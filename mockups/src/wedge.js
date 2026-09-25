@@ -804,7 +804,7 @@ function scopeCell(o){
 function stgSourcesTab(w){
   var all=steeringSources(w.slug), k=S.srcKind||"", L=k?all.filter(function(o){return o.g===k;}):all, A=wsAgentsOf(w.slug);
   var cnt={}; all.forEach(function(o){cnt[o.g]=(cnt[o.g]||0)+1;});
-  var chips='<div class="kf stg-seg" role="group" aria-label="Source kind">'+SRC_FILTERS.filter(function(x){return !x[0]||cnt[x[0]];}).map(function(x){
+  var chips='<div class="kf stg-seg" role="group" aria-label="Source kind" data-help="kind-filter">'+SRC_FILTERS.filter(function(x){return !x[0]||cnt[x[0]];}).map(function(x){
     return '<button class="btn sm" aria-pressed="'+(k===x[0])+'" onclick="srcKindPick(\''+x[0]+'\')">'+h(x[1])+' <span class="dim">'+(x[0]?cnt[x[0]]:all.length)+'</span></button>';}).join("")+'</div>';
   var em={}, silent=0; L.forEach(function(o){ if(!o.emitN) silent++; Object.keys(o.emits).forEach(function(t){em[t]=(em[t]||0)+o.emits[t];}); });
   var strip='<div class="ft-strip" style="margin:0">'+FT.map(function(x){return em[x.id]?'<span class="ft-n">'+ftBadge(x.id)+'<b>'+em[x.id]+'</b></span>':'';}).join("")+'</div>';
@@ -820,9 +820,9 @@ function stgSourcesTab(w){
      '<td class="num">'+(o.emitN?n.toLocaleString():'<span class="dim">0</span>')+'</td>'+
      '<td style="font-size:12px">'+(o.home==="Steering"?'<span class="dim">Steering</span>':'<a href="'+o.href+'" onclick="event.stopPropagation()">'+h(o.home)+'</a>')+'</td></tr>';}).join("");
   return chips+
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+h(k?SRC_FILTERS.filter(function(x){return x[0]===k;})[0][1]:"All sources")+'</h3>'+
+   '<div class="panel" data-help="source-list"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+h(k?SRC_FILTERS.filter(function(x){return x[0]===k;})[0][1]:"All sources")+'</h3>'+
      '<p class="muted" style="margin:2px 0 0;font-size:12px">'+L.length+' source'+(L.length===1?'':'s')+(silent?', '+silent+' emitting nothing':'')+
-     '. Agents counts the agents in '+h(w.name)+' each source can reach by its scope.</p></div><div'+fut("frame types")+'>'+strip+'</div></div>'+
+     '.</p></div><div'+fut("frame types")+'>'+strip+'</div></div>'+
    '<div class="tw"><table><thead><tr><th>Source</th><th'+fut("frame types")+'>Emits</th><th>Scope</th><th>Version</th><th>Status</th><th class="num">Agents</th><th>Managed in</th></tr></thead><tbody>'+
    rows+'</tbody></table></div></div>';
 }
@@ -852,11 +852,9 @@ function stgAssignmentsTab(w){
     return '<tr><td>'+agentCard(a,{layout:"list",sub:"",sz:22})+'</td><td>'+tierBadge(a.tier)+(obs?'<div class="dim" style="font-size:11px">assembled, not delivered</div>':'')+'</td>'+
      '<td class="num">'+mine.length+'</td><td'+fut("frame types")+'>'+typeCountStrip(typeCounts(mine))+'</td>'+
      '<td><a href="#/'+ORG.slug+'/'+w.slug+'/steering/compiler/'+encodeURIComponent(slug)+'">Compiler</a></td></tr>';}).join("");
-  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>By scope</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Frames each scope can emit, and the agents in '+h(w.name)+' it reaches. A narrower scope narrows a wider one and never widens it.</p></div></div>'+
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>By scope</h3></div></div>'+
     '<div class="tw"><table data-lt="off"><thead><tr><th>Scope</th><th class="num">Sources</th><th>Frames by type</th><th class="num">Agents</th></tr></thead><tbody>'+byScope+'</tbody></table></div></div>'+
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>By agent</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">What each agent is eligible for before budget. The Compiler shows what one brief selects.</p></div></div>'+
+   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>By agent</h3></div></div>'+
     '<div class="tw"><table><thead><tr><th>Agent</th><th>Tier</th><th class="num">Sources</th><th>Frames by type</th><th>Resolve</th></tr></thead><tbody>'+agRows+'</tbody></table></div></div>';
 }
 
@@ -884,9 +882,9 @@ function pvAgent(slug){ S.pv.agent=slug; var A=stgAgent(slug); if(S.pv.text==nul
 function pvInput(v){ S.pv.text=v; var o=el("pvOut"); if(o){ o.innerHTML=compilerOut(); listify(); if(isPhone()) cardTables(); } }
 function compilerOut(){
   var E=resolveEnvelope(S.pv.agent,pvPrompt(),{});
-  return '<div class="dt"><section class="dt-sec"'+fut("frame types and per-frame provenance")+'><div class="dt-h"><span class="dt-n">1</span><div style="min-width:0;flex:1"><h3>Envelope</h3>'+
+  return '<div class="dt"><section class="dt-sec" data-help="envelope"'+fut("frame types and per-frame provenance")+'><div class="dt-h"><span class="dt-n">1</span><div style="min-width:0;flex:1"><h3>Envelope</h3>'+
      '<p>'+ftLead(E.sel,"cmp","SteeringFrames")+' for <span class="mono">'+h(E.slug)+'</span> in <span class="mono">'+h(E.repo)+'</span>.</p></div></div>'+envelopeHtml(E,"cmp")+'</section>'+
-   '<section class="dt-sec"'+fut("a capability that resolves without delivering (#3879)")+'><div class="dt-h"><span class="dt-n">2</span><div style="min-width:0;flex:1"><h3>Exclusions</h3>'+
+   '<section class="dt-sec" data-help="exclusions"'+fut("a capability that resolves without delivering (#3879)")+'><div class="dt-h"><span class="dt-n">2</span><div style="min-width:0;flex:1"><h3>Exclusions</h3>'+
      '<p>'+ftLead(E.cut,"cmp","resolved")+' and not delivered, each with its reason.</p></div></div>'+exclusionsHtml(E,"cmp")+'</section></div>';
 }
 function stgCompilerTab(w){
@@ -895,12 +893,11 @@ function stgCompilerTab(w){
   var cur=agentBySlug(S.pv.agent);
   if(!cur||cur.ws!==w.slug){ S.pv.agent=L[0].slug; S.pv.text=null; S.pv.preset=L[0].prompt||null; }
   var A=stgAgent(S.pv.agent), chips=STG_PREVIEW.prompts.filter(function(p){return (p.ws||"core-platform")===w.slug;});
-  return '<div class="panel pad" style="margin-bottom:14px"><div class="stg-pv">'+
+  return '<div class="panel pad" style="margin-bottom:14px" data-help="inputs"><div class="stg-pv">'+
    '<div class="field" style="margin:0"><label for="pvSel">Agent</label><select id="pvSel" onchange="pvAgent(this.value)">'+L.map(function(x){
      return '<option value="'+h(x.slug)+'"'+(x.slug===S.pv.agent?' selected':'')+'>'+h(x.a.name)+' · '+h(x.a.harnessLabel)+'</option>';}).join("")+'</select>'+
     '<div class="hint">Tier: '+tierBadge(A.a.tier)+' · Repository: <span class="mono">'+h(A.repo)+'</span></div></div>'+
-   '<div class="field" style="margin:0"><label for="pvText">Brief</label><textarea id="pvText" rows="2" oninput="pvInput(this.value)" placeholder="What a work order would send">'+h(pvPrompt())+'</textarea>'+
-    '<div class="hint">Sends nothing. Nothing here reaches an agent.</div></div></div>'+
+   '<div class="field" style="margin:0"><label for="pvText">Brief</label><textarea id="pvText" rows="2" oninput="pvInput(this.value)" placeholder="What a work order would send">'+h(pvPrompt())+'</textarea></div></div>'+
    (chips.length?'<div class="kf" role="group" aria-label="Pick a brief" style="padding:10px 0 0;border:0">'+chips.map(function(p){
      return '<button class="btn sm" aria-pressed="'+(S.pv.text==null&&S.pv.preset===p.id)+'" onclick="pvPreset(\''+p.id+'\')">'+h(p.text)+'</button>';}).join("")+'</div>':'')+'</div>'+
    '<div id="pvOut">'+compilerOut()+'</div>';
@@ -909,15 +906,13 @@ function stgCompilerTab(w){
 /* ---- Proposals and their pull requests ---- */
 function stgProposalsTab(w,t){
   var openPRs=stgOpenCount();
-  var seg='<div class="kf stg-seg" role="group" aria-label="Proposals or pull requests">'+
+  var seg='<div class="kf stg-seg" role="group" aria-label="Proposals or pull requests" data-help="steering-proposals/view-switch">'+
    '<button class="btn sm" aria-pressed="'+(t==="proposals")+'" onclick="stgTab(\'proposals\')">Proposals <span class="dim">'+PROPOSALS.length+'</span></button>'+
-   '<button class="btn sm" aria-pressed="'+(t==="prs")+'" onclick="stgTab(\'prs\')">Pull requests <span class="dim">'+openPRs+'</span></button>'+
-   '<span class="dim" style="font-size:12px;margin-left:6px;align-self:center">A proposal becomes a pull request. A merge publishes it.</span></div>';
+   '<button class="btn sm" aria-pressed="'+(t==="prs")+'" onclick="stgTab(\'prs\')">Pull requests <span class="dim">'+openPRs+'</span></button></div>';
   if(t==="prs") return seg+ctxprTab();
   var sel=S.prpSel&&prpById(S.prpSel);
   if(sel) return seg+prpDetail(sel);
-  return seg+'<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Proposals</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Candidates from memory, findings, steers and people. A proposal steers nothing until its pull request merges.</p></div></div>'+
+  return seg+'<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Proposals</h3></div></div>'+
    '<div class="recs">'+PROPOSALS.map(function(p){
      var s=prpStats(p.id);
      return recordCard({kind:p.kind,force:p.force,st:p.st,scope:"workspace",id:p.lineage},{
@@ -947,31 +942,29 @@ function pSteering(){
       "A source becomes one by being merged into "+h(w.main)+", or recorded by a governed write. Nothing saved here is a source until then.",newSourceBtn(true))
     :t==="assignments"?stgAssignmentsTab(w):t==="compiler"?stgCompilerTab(w):t==="sources"?stgSourcesTab(w):stgProposalsTab(w,t);
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Steering</h1>'+
-   '<p>Every source that can steer an agent here, and the frames it emits.</p></div>'+
+   '</div>'+
    '<div class="acts">'+govChip(w)+(SK_ON[w.slug]?'<button class="btn sm gov-chip" onclick="openDialog(\'skcfg\')" title="How skills resolve in this workspace, settings version '+h(SK_CFG.ver)+'">Skills settings</button>':'')+
     '<button class="btn" onclick="wzOpen(\'import\')">Import Markdown</button>'+newSourceBtn(t!=="prs")+'</div></div>'+tabs+body;
 }
 DLG_EXT.newsrc=function(){
   var w=ws();
   var cards=[
-   ["Steering record","A rule, constraint, procedure, fact or preference in .oxagen/rules/. It publishes when its pull request merges.","closeDialog();wzOpen('record')","Write one"],
+   ["Steering record","A rule, constraint, procedure, fact or preference in .oxagen/rules/.","closeDialog();wzOpen('record')","Write one"],
    ["Document","Name a document, such as docs/VISION.md or an ADR, in .oxagen/sources.toml, and say which sections emit which frame types.","openDialog('srcreg')","Register one"],
-   ["Skill","A folder under .oxagen/skills/ with skill.toml, SKILL.md, references and optional entrypoints. oxagen describes an entrypoint and never runs it.","closeDialog();wzOpen('skill')","Add one"],
+   ["Skill","A folder under .oxagen/skills/ with skill.toml, SKILL.md, references and optional entrypoints.","closeDialog();wzOpen('skill')","Add one"],
    ["Glossary term","One term the way this workspace uses it, in .oxagen/ontology/.","openDialog('ontnew')","Define one"]];
   return {t:"New source",s:"Every source changes by a pull request against "+w.main,w:true,
    b:'<div class="wz-pick" style="grid-template-columns:1fr">'+cards.map(function(c){
-     return '<button class="wz-card" onclick="'+c[2]+'"><span class="tx"><b>'+h(c[0])+'</b><span class="d">'+h(c[1])+'</span></span><span class="b b-q">'+h(c[3])+'</span></button>';}).join("")+'</div>'+
-    '<div class="note" style="margin-top:12px">An agent appends memory, and Import Markdown writes it from a file. A memory becomes a Steering record only through a proposal. Policy, mandates and toolbelts are managed in Tools and on the agent’s Permissions tab.</div>',
+     return '<button class="wz-card" onclick="'+c[2]+'"><span class="tx"><b>'+h(c[0])+'</b><span class="d">'+h(c[1])+'</span></span><span class="b b-q">'+h(c[3])+'</span></button>';}).join("")+'</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'};
 };
 DLG_EXT.srcreg=function(){
   var R=SOURCES.registration||{};
   var toml='[[source]]\nid = "ADR-034"\nkind = "adr"\npath = "docs/adr/ADR-034-release-freeze.md"\n\n  [[source.section]]\n  heading = "Decision"\n  emits = "procedure"\n  force = "should"\n\n  [[source.section]]\n  heading = "Invariants"\n  emits = "invariant"\n  enforced_by = "gate.never-merge"';
   return {t:"Register a document",s:R.path+" on "+R.repo,w:true,
-   b:'<p style="margin:0 0 10px">A document emits frames only from the sections this file names. oxagen reads the declared structure and never asks a model what a document means.</p>'+
-    '<pre'+fut(".oxagen/sources.toml")+'>'+h(toml)+'</pre>'+
-    '<div class="note" style="margin-top:10px">Last changed by <span class="mono">'+h(R.pr||"")+'</span>, merged '+h(R.merged||"")+'. An invariant needs a section the ADR declares as its invariants, and a superseded ADR emits nothing.</div>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Pull request opened on \'+ws().main+\' to register ADR-034. It emits nothing until that merges.\',\'gold\')">Open the pull request</button>'};
+   b:'<pre'+fut(".oxagen/sources.toml")+'>'+h(toml)+'</pre>'+
+    '<div class="note" style="margin-top:10px">Last changed by <span class="mono">'+h(R.pr||"")+'</span>, merged '+h(R.merged||"")+'.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Pull request opened on \'+ws().main+\' to register ADR-034.\',\'gold\')">Open the pull request</button>'};
 };
 
 /* ---- one source ----
@@ -1001,8 +994,8 @@ function srcFramesOf(o){
 }
 function srcFramesPanel(o){
   var L=srcFramesOf(o);
-  return '<div class="panel" style="margin-bottom:14px"'+fut("frame types and per-frame provenance")+'><div class="panel-h"><div style="flex:1;min-width:0"><h3>Frames it emits</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+(L.length?L.length+' at this version. The same source at the same version always emits these frames, with these hashes.':'None. '+h(o&&o.why?o.why:'It emits nothing at this version.'))+'</p></div></div>'+
+  return '<div class="panel" style="margin-bottom:14px" data-help="steering-source/frames-it-emits"'+fut("frame types and per-frame provenance")+'><div class="panel-h"><div style="flex:1;min-width:0"><h3>Frames it emits</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+(L.length?L.length+' at this version.':'None. '+h(o&&o.why?o.why:'It emits nothing at this version.'))+'</p></div></div>'+
    (L.length?'<ul class="sf-list">'+L.map(function(f){
      return '<li><div class="sf-h">'+ftBadge(f.type)+forceBadge(f.force)+'<span class="dim">'+h(POINT_LABEL[f.point]||f.point)+'</span>'+
        (f.tok?'<span class="sp mono dim">'+tokn(f.tok)+' tok</span>':'<span class="sp mono dim">descriptor</span>')+'</div>'+
@@ -1011,7 +1004,7 @@ function srcFramesPanel(o){
 }
 function srcReachPanel(o){
   var A=o?wsAgentsOf(S.ws).filter(o.reach):[], first=A.slice(0,5);
-  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Agents it reaches</h3>'+
+  return '<div class="panel" style="margin-bottom:14px" data-help="steering-source/agents-it-reaches"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Agents it reaches</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+(o&&o.emitN?A.length+' in '+h(ws().name)+' by its scope, '+h(o.scope)+'.':'None while it emits nothing.')+'</p></div></div>'+
    (o&&o.emitN&&first.length?'<div class="panel-b" style="display:grid;gap:8px">'+first.map(function(a){
      return '<div class="row" style="justify-content:space-between;gap:8px">'+agentCard(a,{layout:"list",sub:"",sz:22,link:true})+
@@ -1041,8 +1034,7 @@ function pSource(r){
 function pDocSource(o){
   var w=ws(), d=docsFor(w.slug).filter(function(x){return x.id===o.id;})[0], R=SOURCES.registration||{};
   var sup=d.status==="superseded";
-  var secs='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Sections</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">What <span class="mono">'+h(R.path)+'</span> says each section emits. A section it does not name emits nothing.</p></div></div>'+
+  var secs='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Sections</h3></div></div>'+
    '<div class="tw"><table data-lt="off"><thead><tr><th>Section</th><th>Emits</th><th>Force</th><th>Text</th></tr></thead><tbody>'+
    d.sections.map(function(x){return '<tr><td><b style="font-weight:500">'+h(x.h)+'</b></td><td>'+(x.emits&&!sup?ftBadge(x.emits):'<span class="dim">nothing</span>')+
      (x.enforcedBy?'<div class="dim" style="font-size:11px;margin-top:3px">enforced by '+h(x.enforcedBy)+'</div>':'')+'</td>'+
@@ -1057,17 +1049,15 @@ function pDocSource(o){
    '</dl></div></div>';
   var badges=srcStatus(o)+'<span class="b b-q mono">'+h(d.id)+'</span><span class="b b-q mono">@'+h(d.commit)+'</span><span class="b b-q">repository <span class="mono">'+h(d.repo)+'</span></span>';
   return '<div'+fut("vision and ADR sources")+'>'+srcHead(o,SRC_KIND[d.kind].l,d.title,badges,
-    sup?'Superseded by '+h(d.supersededBy)+', so it emits nothing. Runs that received its frames before still name them.':'An '+(d.kind==="adr"?'accepted ADR':'registered document')+' emits frames only from the sections the registration names.',
-    '<button class="btn" onclick="act(\'Opened '+h(d.path)+' on '+h(d.repo)+'. A change is a pull request.\')">Open the file</button>')+
+    sup?'Superseded by '+h(d.supersededBy)+'.':'',
+    '<button class="btn" onclick="act(\'Opened '+h(d.path)+' on '+h(d.repo)+'.\')">Open the file</button>')+
    '<div class="crec-grid"><div>'+secs+hist+'</div><div>'+srcFramesPanel(o)+srcReachPanel(o)+'</div></div></div>';
 }
 function pItemSource(o){
   var w=ws(), lab=(SRC_KIND[o.kind]||{l:o.kind}).l, m=o.g==="memory"?MEMORY.filter(function(x){return x.id===o.id;})[0]:null;
   var badges=srcStatus(o)+(o.force?forceBadge(o.force):'')+'<span class="b b-q">'+h(o.scope)+'</span><span class="b b-q mono">'+h(o.version)+'</span>'+
     (o.hash?'<span class="b b-q mono">'+h(shortHash(o.hash))+'</span>':'');
-  var lead=o.g==="memory"?(/ · import by /.test(m.provenance||"")?'Imported from a Markdown file.':'Appended by an agent’s run.')+' It competes as context at force <span class="mono">'+h(o.force)+'</span> and never above <span class="mono">may</span>. It becomes a Steering record only through a proposal.'
-    :o.g==="glossary"?'A term the way this workspace uses it. It changes by a pull request against '+h(w.main)+'.'
-    :'Workspace settings. It reaches every agent in '+h(w.name)+' as a procedure at force <span class="mono">should</span>.';
+  var lead='';
   var acts=o.g==="memory"?'<button class="btn" onclick="openDialog(\'memforget\',\''+h(o.id)+'\')">Forget</button>'+
       /* A memory the fold already proposed has its proposal. A second one would argue the same record twice. */
       (m.proposedAs?'<button class="btn primary" onclick="memOpenProposal(\''+h(m.proposedAs)+'\')">Open the proposal</button>'
@@ -1087,8 +1077,8 @@ function pSkillWithheld(id){
   var o=srcRowOf("skill",id,S.ws), x=(SOURCES.withheld||[]).filter(function(y){return y.id===id;})[0];
   if(!o||!x) return emptyState("No skill here","Nothing in this workspace is named "+h(id)+".",'<button class="btn" onclick="go(\''+stgHash("sources")+'\')">Back to Sources</button>');
   return srcHead(o,"Skill",id,srcStatus(o)+'<span class="b b-q mono">@'+h(x.ver)+'</span><span class="b b-q mono">'+h(x.reason)+'</span>',
-    h(x.why)+' A withheld skill emits nothing. The agent is told how many skills were withheld and why, never which.',
-    x.reason==="unapproved_digest"?'<button class="btn primary" onclick="act(\'Approval requested for '+h(id)+'@'+h(x.ver)+'. It stays withheld until a person approves its digest.\',\'gold\')">Request approval</button>':'')+
+    h(x.why),
+    x.reason==="unapproved_digest"?'<button class="btn primary" onclick="act(\'Approval requested for '+h(id)+'@'+h(x.ver)+'.\',\'gold\')">Request approval</button>':'')+
    '<div class="crec-grid"><div>'+srcFramesPanel(o)+'</div><div>'+srcReachPanel(o)+'</div></div>';
 }
 

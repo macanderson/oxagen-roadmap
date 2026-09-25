@@ -23,7 +23,7 @@ It runs the same resolver that builds an agent's Steering tab and a run's Decisi
 **Controls** panel.
 
 - **Agent**: a select labelled "Agent", with one option per agent in the workspace. Each option reads "<name> · <harness>": "Release manager · Claude Code", "stella CI · stella", "Triage · Codex CLI", "Docs writer · Other (SDK-wrapped)", "PR reviewer · Claude Code" and the rest, so an agent named in the address is always in the list. Under the select, the line "Tier: <badge> · Repository: a-intel/platform". Changing the agent writes `/steering/compiler/<slug>` into the address.
-- **Brief**: a two-line text area labelled "Brief", with the placeholder "What a work order would send". Under it: "Sends nothing. Nothing here reaches an agent."
+- **Brief**: a two-line text area labelled "Brief", with the placeholder "What a work order would send", and no hint under it. That the Compiler sends nothing is in the component help (`mockups/help/steering-compiler.md`, Inputs).
 - Six brief chips in a group labelled "Pick a brief", with `aria-pressed` on the one in use: "Cut the 4.11.0 release notes", "CI is green, merge the release pull request", "Label the flaky checkout e2e test on Safari", "Plan the ledger entries migration for billing", "Tighten the CLI reference style guide" and "Pay the September AWS invoice". Each agent has a standing brief (Release manager's is the first), and choosing an agent selects it while the text area is untouched.
 
 **1 Envelope.** A numbered section, headed "Envelope".
@@ -63,7 +63,7 @@ It runs the same resolver that builds an agent's Steering tab and a run's Decisi
 |---|---|---|
 | `below_relevance_floor` | 7 | "relevance 0 for this brief" |
 | `out_of_scope` | 8 | "scoped to a-intel/mobile; this agent works in a-intel/platform", "scoped to a-intel/billing; this agent works in a-intel/platform", "scoped to the agent docs-writer", "applies to triage, docs-writer", "no agent holds the tool it gates", or a withheld skill's scope |
-| `over_budget` | 3 | "rank 5 of 11 · needs 231 tok, 141 left" |
+| `over_budget` | 4 | "rank 5 of 11 · needs 231 tok, 141 left" |
 | `overridden_by_gate` | 2 | the rule that denies the tool: "definition deny_tools: github__merge_pull_request@*" |
 | `overridden_by_must` | 1 | "a published must beats recalled memory: ctx.release.never-merge" |
 | `superseded` | 1 | "replaced by ctx.platform.safari-e2e-flake, published 2026-09-02" |
@@ -118,7 +118,7 @@ The Exclusions section as a whole carries no mark in the mockup and is future-on
 - Typing in Brief re-resolves on every keystroke and keeps the caret. A chip sets the brief. Changing the agent writes its address and, while the text area is untouched, selects that agent's standing brief.
 - Every Source cell links to the source at the version it names: a Steering record, a document, a memory, a glossary term or the instructions to its page, a skill to its skill page, an agent definition to the agent's Source tab, a policy source to Tools › Policy (a kill switch's notice to Tools › Kill switches, where its switch is flipped), a mandate to the agent's Delegation and a toolbelt to Tools › Toolbelts. The mockup sends every policy source to Tools › Policy and every mandate to Agents; a build links each to where the Sources row's Managed in column points.
 - The Prompt and Model request points stay empty here: a brief becomes an `invocation` frame only when a work order sends it, and a steer only when an operator sends one. A run's Decision trace shows both.
-- A skill appears in two places in the envelope: its description line competes at Prompt submit as a `procedure`, and its files arrive in Checkout files. The wedge spec's Emissions table names only the frames from the files, and the skill's own page lists only those. The design has to settle whether the description line is a frame; until it does, a build keeps the envelope and the skill's page in agreement. The mockup's Source link on a description-line frame carries a `skill:` prefix and lands on "No skill here"; a build links it to the skill's page.
+- A skill appears in two places in the envelope: its description line competes at Prompt submit as a `procedure`, and its files arrive in Checkout files. The wedge spec's Emissions table names only the frames from the files, and the skill's own page lists only those. The design has to settle whether the description line is a frame; until it does, a build keeps the envelope and the skill's page in agreement. The Source link on a description-line frame opens the skill's page (`srcOfItem` strips the `skill:` prefix).
 
 ## States
 

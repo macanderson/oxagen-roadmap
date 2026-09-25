@@ -10,35 +10,35 @@
    "label": "a-intel/platform · .oxagen/skills/",
    "on": true,
    "n": 3,
-   "d": "The workspace's own main repo. Versioned with the code that the skills are about."
+   "d": "The workspace's main repository."
   },
   {
    "k": "linked",
    "label": "a-intel/billing · .oxagen/skills/",
    "on": true,
    "n": 1,
-   "d": "A linked repo. Its skills resolve here because core-platform links it."
+   "d": "A linked repository."
   },
   {
    "k": "linked2",
    "label": "a-intel/mobile · .oxagen/skills/",
    "on": false,
    "n": 0,
-   "d": "Linked, but skills are not drawn from it. Nothing in this repo reaches an agent."
+   "d": "Linked. Not a skill source."
   },
   {
    "k": "registry",
    "label": "a-intel org registry",
    "on": true,
    "n": 3,
-   "d": "Published across the organization. Scope on the skill still decides which workspaces see it."
+   "d": "Published across the organization."
   },
   {
    "k": "market",
    "label": "oxagen marketplace",
    "on": true,
    "n": 1,
-   "d": "Third-party. Every version is held until a person approves its digest."
+   "d": "Third-party. Every version waits for a person to approve its digest."
   }
  ],
  "search": {

@@ -25,7 +25,7 @@ Oxagen resolves a skill and never runs it (ADR-043, ADR-090). An entrypoint is d
 - Eyebrow "Steering · Skill", where Steering links back to Sources filtered to skills (`?kind=skill`).
 - h1: the skill's id in mono, "a-intel.release-notes-from-prs".
 - Badges, in order: the status ("approved" with a dot), the source ("a-intel/platform"; a linked repository, the organization registry or "marketplace" for others), the version ("@2.1.0"), the digest prefix ("sha256:4b1e90c7ad3…"), the resolution decision ("allowed") and the load cost ("1,840 tok to load").
-- Lead: "A bundle: instructions, references and optional entrypoints. Oxagen describes an entrypoint to the agent as a capability and never runs it. The harness runs it, under the policy on the call."
+- No lead. What a bundle holds, and who runs an entrypoint, are in the component help (`mockups/help/steering-source-skill.md`, Header).
 - Actions: **Discard** (disabled until the file changes, and it returns the editor to the merged bytes) and **Propose a change** (gold; opens `srcpr`).
 
 **Left column.**
@@ -44,7 +44,7 @@ A skill whose manifest declares no references and no entrypoints shows the headi
 
 **Right column.**
 
-- **Frames it emits.** Caption "4 at this version. The same source at the same version always emits these frames, with these hashes." Four items, each with its type badge, force, injection point, tokens, body and frame id:
+- **Frames it emits.** Caption "4 at this version." Four items, each with its type badge, force, injection point, tokens, body and frame id:
   - `procedure`, `info`, Checkout files, 1,840 tok, "SKILL.md: Groups merged pull requests into Features, Fixes and Breaking, and writes the draft to a release branch. Never publishes.", `procedure:a-intel.release-notes-from-prs@4b1e90c7ad38`;
   - `context`, `info`, Checkout files, 420 tok, "references/format.md: The house format: …", `context:a-intel.release-notes-from-prs@f931e83914a8`;
   - `context`, `info`, Checkout files, 180 tok, "references/labels.md: Labels that decide a section: …", `context:a-intel.release-notes-from-prs@bd867dc84a48`;
@@ -56,8 +56,8 @@ A skill whose manifest declares no references and no entrypoints shows the headi
 
 - Eyebrow "Steering · Skill", h1 the id.
 - Badges: "withheld" (a dot, in the denied hue), "@1.4.0" and the reason in mono, `unapproved_digest`.
-- Lead: the reason in words, then the rule: "Its digest changed on 2026-09-09 after Priya Natarajan approved 1.3.2. Nobody has approved the new one. A withheld skill emits nothing. The agent is told how many skills were withheld and why, never which."
-- Action: **Request approval** (gold), which reports "Approval requested for a-intel.changelog-bot@1.4.0. It stays withheld until a person approves its digest."
+- Lead: the reason in words: "Its digest changed on 2026-09-09 after Priya Natarajan approved 1.3.2. Nobody has approved the new one." What a withheld skill tells the agent is in the component help.
+- Action: **Request approval** (gold), which reports "Approval requested for a-intel.changelog-bot@1.4.0."
 - **Frames it emits** reads "None." with "withheld as unapproved_digest", and **Agents it reaches** reads "None while it emits nothing."
 
 `a-intel.mobile-release-notes` is withheld as `out_of_scope` and offers no action. Its lead gives the scope, "Scoped to a-intel/mobile.", then a sentence written for a run ("This run works in a-intel/platform."), which a source page does not have; a build states the scope against the workspace's repositories instead.
@@ -68,10 +68,10 @@ A skill whose manifest declares no references and no entrypoints shows the headi
 
 **`srcpr`**, "Propose a change to this skill", subtitle ".oxagen/skills/release-notes-from-prs/SKILL.md".
 
-- Lead: "A skill is a file with a digest, and the digest is what a run records when it loads it. Changing the words changes the digest, so this goes through a pull request like everything else."
+- No lead. The primary action names what it does.
 - The change: the main repository and the branch ("a-intel/platform ← skills/release-notes-from-prs-2.1.1"), the added and removed line counts, and the line diff, or "Nothing changed yet."
-- "What the checks will assert", six rows: Frontmatter ("name still matches the directory"), Version ("2.1.0 → 2.1.1 · a changed body with an unchanged version fails"), Digest ("recomputed at merge · every run that loaded 2.1.0 keeps naming that digest, not this one"), Grants ("the file still names no authority it does not have"), Secret and PII scan ("the body and every example are scanned") and Load cost ("the new body is inside this workspace’s 6,000-token search budget").
-- Footer: Cancel and **Open the pull request** (gold; disabled while nothing changed). Opening reports "a-intel/platform#529 opened. a-intel.release-notes-from-prs becomes 2.1.1 when it merges; runs in flight keep 2.1.0."
+- "What the checks will assert", six rows: Frontmatter ("name still matches the directory"), Version ("2.1.0 → 2.1.1 · a changed body with an unchanged version fails"), Digest ("recomputed at merge"), Grants ("the file still names no authority it does not have"), Secret and PII scan ("the body and every example are scanned") and Load cost ("the new body is inside this workspace’s 6,000-token search budget").
+- Footer: Cancel and **Open the pull request** (gold; disabled while nothing changed). Opening reports "a-intel/platform#529 opened. a-intel.release-notes-from-prs becomes 2.1.1 when it merges."
 
 ## Data sources
 
@@ -123,7 +123,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 
 ## Permissions
 
-- Read: the mockup's denied panel names `skills.admin on core-platform`. In `macanderson/oxagen`, `get_skill_config` and `preview_skill_search` allow an organization Owner, Admin or Member and a workspace Owner or Member.
+- Read: the mockup's denied panel names `steering.read on core-platform`, because `pSource` answers the loading, error and denied states before it hands a skill to `pSkillSource`. In `macanderson/oxagen`, `get_skill_config` and `preview_skill_search` allow an organization Owner, Admin or Member and a workspace Owner or Member.
 - Write: Propose a change is `propose_skill`, an organization Owner or Admin; no workspace role reaches it on its own (`skill.propose.ts:202-205`). Approving a digest is `update_skill_config`, an organization Owner or Admin. Each is a governed action recorded in Audit.
 
 ## Backend gaps this page depends on
@@ -145,7 +145,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 - A withheld skill's name never reaches an agent.
 - No person is scored or ranked.
 - Headers are rollups of the rows beneath them: the Frames it emits count is its items, and the Bundle's token figures are the ones the frames carry.
-- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing; the mockup's three-sentence lead and two-sentence Frames it emits caption are design defects, not patterns to copy.
+- Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing. The skill page has no lead, and the Frames it emits caption is one sentence.
 - Exactly one gold action per screen: Propose a change, or Request approval on a withheld skill.
 - A future-only field is marked in the design and renders as not recorded in a build until its contract ships.
 - Nothing on this page writes a row. Every change ends on a pull request.
