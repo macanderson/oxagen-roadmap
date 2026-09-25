@@ -36,8 +36,8 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- **Accept invitation** (`obSignedIn`) signs in and lands on Work with the toast “Signed in as Marcus Bell. The session is recorded like any other governed action.”
-- **Decline** toasts “Invitation declined. The inviter is told; nothing else changes.”
+- **Accept invitation** (`obSignedIn`) signs in and lands on Work with the toast “Signed in as Marcus Bell.”
+- **Decline** toasts “Invitation declined. The inviter is told.”
 - Not you? goes to Log in so the invited address can sign in.
 
 ## States
