@@ -60,6 +60,7 @@ export const PAGES = [
   { id: "skills-off",        title: "Steering · Library · Skills · off (the default)", group: "Workspace", hash: `#/${ORG}/finops/steering/skills`,        states: ["loaded"] },
   { id: "skill-source",      title: "Skill source",                group: "Workspace",    hash: `#/${ORG}/core-platform/steering/skills/a-intel.release-notes-from-prs/source`, states: NO_EMPTY },
   { id: "run-interjection",  title: "Run · interjection",          group: "Workspace",    hash: `#/${ORG}/core-platform/runs/run_01K6QW3D5N7TYBA2`,        states: NO_EMPTY },
+  { id: "run-memories",      title: "Run memories",                group: "Workspace",    hash: `#/${ORG}/core-platform/runs/run_01K5RD1X8N7BVF3G/memory`, states: NO_EMPTY },
   // organization scope (pages 8–10)
   { id: "organization",      title: "Organization",                group: "Organization", hash: `#/${ORG}`,                                                states: ALL },
   { id: "organization-api-keys", title: "Organization · API keys", group: "Organization", hash: `#/${ORG}/api-keys`,                                       states: ALL },

@@ -19,7 +19,21 @@
   "hash": "sha256:5e1a09c2d47b8f30",
   "valid_from": "2026-09-03",
   "lastRecalled": "2026-09-11 09:14",
-  "recalls30": 41
+  "recalls30": 41,
+  "sayings": [
+   {
+    "run": "run_01K5RG6H1L4OIU9Y",
+    "frame": 44,
+    "by": "marcus · operator steer",
+    "text": "Release notes in plain past tense, one line per change, no marketing adjectives."
+   },
+   {
+    "run": "run_01K5RK7C2V8BNM3X",
+    "frame": 31,
+    "by": "release-manager · reflection",
+    "text": "Marcus cut the adjectives from the 4.10.3 notes again. Keep each change to one plain line."
+   }
+  ]
  },
  {
   "id": "mem_01K5QX7C",
@@ -42,7 +56,15 @@
   "hash": "sha256:c81f7720ae93b415",
   "valid_from": "2026-08-14",
   "lastRecalled": "2026-09-11 09:14",
-  "recalls30": 212
+  "recalls30": 212,
+  "sayings": [
+   {
+    "run": "run_01K5R52Q3X9YAB9E",
+    "frame": 88,
+    "by": "release-manager · reflection",
+    "text": "Merged the green 4.10.1 release pull request to save time, and nobody objected."
+   }
+  ]
  },
  {
   "id": "mem_01K5QY1D",
@@ -66,7 +88,21 @@
   "hash": "sha256:0b64e1d95a2c7f18",
   "valid_from": "2026-08-19",
   "lastRecalled": "2026-09-02 16:40",
-  "recalls30": 6
+  "recalls30": 6,
+  "sayings": [
+   {
+    "run": "run_01K5R94P1V8WXZ7D",
+    "frame": 61,
+    "by": "stella-ci · reflection",
+    "text": "The checkout e2e suite failed twice on Safari and passed on retry with no code change."
+   },
+   {
+    "run": "run_01K5RD1X8N7BVF3G",
+    "frame": 19,
+    "by": "stella-ci · reflection",
+    "text": "Safari checkout e2e failed once, then passed on retry. Nothing in the diff touched checkout."
+   }
+  ]
  },
  {
   "id": "mem_01K5QY9F",
@@ -85,11 +121,25 @@
    "reproduce",
    "flaky"
   ],
-  "provenance": "run_01K5RH3G8K5PAS7D · frame 52 · reflection",
+  "provenance": "run_01K5RH3G8K5PAS7D · frame 9 · reflection",
   "hash": "sha256:9d2e44b07c1fa683",
   "valid_from": "2026-09-10",
   "lastRecalled": "2026-09-11 08:52",
-  "recalls30": 14
+  "recalls30": 14,
+  "sayings": [
+   {
+    "run": "run_01K5RH3G8K5PAS7D",
+    "frame": 9,
+    "by": "triage · reflection",
+    "text": "I labelled issues before reproducing them, and a person relabelled 14 of them in August."
+   },
+   {
+    "run": "run_01K5RP2D6H4KLM8V",
+    "frame": 12,
+    "by": "triage · reflection",
+    "text": "Reproduced the restart twice before labelling it. The labels a person changed in August were all made before a reproduction."
+   }
+  ]
  },
  {
   "id": "mem_01K5QZ3H",
@@ -111,7 +161,15 @@
   "hash": "sha256:71a3c05e8bd29f46",
   "valid_from": "2026-08-27",
   "lastRecalled": "2026-09-10 17:05",
-  "recalls30": 19
+  "recalls30": 19,
+  "sayings": [
+   {
+    "run": "run_01K5RK7C2V8BNM3X",
+    "frame": 37,
+    "by": "marcus · operator steer",
+    "text": "Database migrations on a-intel/platform run in the Tuesday 02:00 UTC window. A release that needs one waits for it."
+   }
+  ]
  },
  {
   "id": "mem_01K5QZ8K",
@@ -135,6 +193,63 @@
   "hash": "sha256:e40b92f1637dca05",
   "valid_from": "2026-09-05",
   "lastRecalled": "2026-09-09 11:31",
-  "recalls30": 9
+  "recalls30": 9,
+  "sayings": [
+   {
+    "run": "run_01K5RE9P4Q2WSX6C",
+    "frame": 12,
+    "by": "priya · operator steer",
+    "text": "The CLI reference uses the imperative: run, set, open. Never 'you can'."
+   },
+   {
+    "run": "run_01K5RM1A5Z9QWE4R",
+    "frame": 27,
+    "by": "docs-writer · reflection",
+    "text": "Wrote both worked examples as commands to run. The reference says run, set and open, and never says you can."
+   }
+  ]
+ },
+ {
+  "id": "mem_01K5R0N2",
+  "lineage": "mem.platform.node-20",
+  "kind": "memory",
+  "cls": "RULE",
+  "force": "may",
+  "scope": "workspace",
+  "body": "Build and test on Node 20. The latest Node release breaks main.",
+  "token_cost": 18,
+  "about": [
+   "node",
+   "version",
+   "runtime",
+   "build",
+   "ci"
+  ],
+  "provenance": "run_01K5RD1X8N7BVF3G · frame 23 · reflection",
+  "hash": "sha256:4c0e91b27da3f568",
+  "valid_from": "2026-09-11",
+  "lastRecalled": "2026-09-11 09:02",
+  "recalls30": 5,
+  "proposedAs": "prp_01K5RX1N",
+  "sayings": [
+   {
+    "run": "run_01K5RD1X8N7BVF3G",
+    "frame": 23,
+    "by": "stella-ci · reflection",
+    "text": "Remember to not use the latest version of node"
+   },
+   {
+    "run": "run_01K5RK7C2V8BNM3X",
+    "frame": 58,
+    "by": "release-manager · reflection",
+    "text": "Pinned Node 20 for the backport. The build on the latest Node image failed on main."
+   },
+   {
+    "run": "run_01K5RQ4B9C7XTN2P",
+    "frame": 37,
+    "by": "stella-ci · reflection",
+    "text": "Use Node version 20 the latest version breaks main"
+   }
+  ]
  }
 ]
