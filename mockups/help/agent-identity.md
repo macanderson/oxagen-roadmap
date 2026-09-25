@@ -47,7 +47,7 @@ The panel answers the question most of the threat model rests on: can a leaked a
 ### Rationale
 The agent holds no provider credential. Its run token is good for talking to Oxagen and nothing else. Every secret a call needs is minted by the broker at dispatch, scoped to that one call, and never sent to the agent. A leaked run token cannot reach a provider. A GitHub installation token stays in the host's Git proxy (ADR-151).
 
-The panel states this as data rather than prose. The pairs read "Not held" or "Held", and the header badge "run token only" is a rollup of those rows. An explanatory paragraph and the sub-line "works only with oxagen" used to sit on the page. They moved here, and the button that pointed back to them was renamed from "See the connections that mint them" to "Open providers".
+The panel states this as data rather than prose. The pairs read "Not held" or "Held · works only with oxagen", and the header badge "run token only" is a rollup of those rows. The shipped app draws the same five pairs. An explanatory paragraph used to sit under them. It moved here, and the button that pointed back to it was renamed from "See the connections that mint them" to "Open providers".
 
 ### Data sources
 | Field | Mockup source | Target store | Status |
@@ -59,7 +59,7 @@ The panel states this as data rather than prose. The pairs read "Not held" or "H
 ### Logic
 - The badge reads "run token only" when every provider row reads "Not held", and at no other time. A build computes it from the rows.
 - The pairs render through `iamPairs()`, a flat label and value list with no "and" and no "=". It is not an intersection.
-- The run token row reads "Held" on every agent in the mockup. The run-token exchange is not served today, so a build renders that row as not recorded until it ships.
+- The run token row reads "Held · works only with oxagen" on every agent in the mockup. The app words the same value "one, and it reaches Oxagen only". The run-token exchange is not served today, so a build renders that row as not recorded until it ships.
 - **Open providers** routes to `#/<org>/<ws>/tools/providers`.
 
 ### States
@@ -105,7 +105,7 @@ The panel answers "who vouches for this agent, and has anything gone wrong". A p
 ### Rationale
 Every run of this agent carries the accountable human's name as `initiating_principal`. The principal is scoped to one workspace and cannot be used in another. When the agent is enrolled, its host's device key countersigns its checkpoints. With no host, nothing signs them.
 
-The Delegation row used to read "subagents narrow, never widen", which is a rule and not a value. A subagent may do only what both this agent and the invoking person are granted. The row now shows the recorded ceiling, `max_hops 2`, the same value Permissions › Budgets shows. The ceiling holds in both directions: an agent's effective permission is its own grants intersected with the invoking human's, and a subagent can only narrow it.
+The Delegation row reads "subagents narrow, never widen", as the shipped app draws it. A subagent may do only what both this agent and the invoking person are granted. That sub-line used to sit under the row and moved here. The ceiling holds in both directions: an agent's effective permission is its own grants intersected with the invoking human's, and a subagent can only narrow it. The hop limit, `max_hops 2`, is on Permissions › Budgets.
 
 ### Data sources
 | Field | Mockup source | Target store | Status |
@@ -113,7 +113,7 @@ The Delegation row used to read "subagents narrow, never widen", which is a rule
 | Accountable human and role | `PEOPLE[a.operator]` | `get_agent` `identity.operatorId`, and the member's role | live |
 | Workspace | `ws()` | The principal's workspace scope | live |
 | Runtime | `a.host` | `get_agent` `hosts` | live |
-| Delegation ceiling | fixed `max_hops 2` | `assign_agent_role` refuses a role above the assigner's grants, and `get_agent_toolbelt` `basis.humanCeiling` | live |
+| Delegation | fixed text | `assign_agent_role` refuses a role above the assigner's grants, and `get_agent_toolbelt` `basis.humanCeiling` | live |
 | Tamper incidents | `agentTamper(a)` over `INCIDENTS` | `list_incidents` for the agent | live |
 
 ### Logic

@@ -1463,15 +1463,14 @@ function commitBody(){
   var against=pend&&c.branch===pend.branch&&!c.prOnly?pend.branch:w.branch;
   return '<p class="eyebrow q"><span class="mono" style="text-transform:none;letter-spacing:0">.oxagen/agents/'+h(c.slug)+'.toml</span> · <span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span> · '+(c.prOnly?'already on the branch, no pull request yet':'from the '+(c.from==="editor"?"source editor":"form"))+'</p>'+
    '<div class="cm-repo"><span class="k">Repository</span><span class="v">'+h(w.main)+'<span class="b b-q" style="gap:4px">'+lock+' primary</span></span>'+
-   '<span class="k">Base</span><span class="v">'+h(w.branch)+' @ '+h(a.commit)+'</span>'+
-   '<span class="hint">The main repository linked to workspace '+h(w.name)+'. Every agent definition in this workspace lives here; it is not chosen per change.</span></div>'+
+   '<span class="k">Base</span><span class="v">'+h(w.branch)+' @ '+h(a.commit)+'</span></div>'+
    '<div class="fields"><div class="field"><label>Branch</label><select aria-label="Branch" onchange="cmSet(\'branch\',this.value);render()">'+
     '<option value="__new"'+(c.branch==="__new"?' selected':'')+'>+ New branch</option>'+
     (pend?'<option value="'+h(pend.branch)+'"'+(c.branch===pend.branch?' selected':'')+'>'+h(pend.branch)+' · this agent’s open change</option>':'')+
     BRANCHES.filter(function(b){return !pend||b.name!==pend.branch;}).map(function(b){return '<option value="'+h(b.name)+'"'+(c.branch===b.name?' selected':'')+'>'+h(b.name)+(b.pr?' · '+h(b.pr):'')+'</option>';}).join("")+
     '</select></div>'+
     (c.branch==="__new"
-     ?'<div class="field"><label>New branch name</label><input class="mono" value="'+h(c.newName)+'" aria-label="New branch name" oninput="cmSet(\'newName\',this.value)"><div class="hint">Cut from '+h(w.branch)+' @ '+h(a.commit)+'. Suggested by the same draft as the summary.</div></div>'
+     ?'<div class="field"><label>New branch name</label><input class="mono" value="'+h(c.newName)+'" aria-label="New branch name" oninput="cmSet(\'newName\',this.value)"><div class="hint">Cut from '+h(w.branch)+' @ '+h(a.commit)+'.</div></div>'
      :'<div class="field"><label>Branch head</label><div class="hint" style="margin-top:9px">'+(ex?h(String(ex.ahead))+' commit'+(ex.ahead===1?'':'s')+' ahead of '+h(w.branch)+' · '+h(PEOPLE[ex.by]?PEOPLE[ex.by].name:ex.by)+' · '+h(ex.when)+(ex.pr?'<br><span class="mono">'+h(ex.pr)+'</span> is open for it; this commit joins that pull request.':'<br>No pull request yet.'):'Your open change for this agent.')+'</div></div>')+
    '</div>'+
    '<div class="field"><label>Summary</label><input value="'+h(c.title)+'" aria-label="Summary" oninput="cmSet(\'title\',this.value)">'+
@@ -1479,19 +1478,18 @@ function commitBody(){
     '<span>Drafted by <span class="mono">'+h(d.model)+'</span> · light model class · '+d.tokens+' tokens · $'+d.cost+' · '+d.ms+' ms</span>'+
     '<button class="btn sm ghost" type="button" onclick="cmRedraft()">Redraft</button></div></div>'+
    '<div class="field"><label>Description</label><textarea rows="4" aria-label="Description" oninput="cmSet(\'body\',this.value)">'+h(c.body)+'</textarea>'+
-    '<div class="hint">Becomes the commit message'+(c.pr||(ex&&ex.pr)?' and the pull request body':'')+'. The draft is a starting point; what you commit is what you wrote.</div></div>'+
+    '<div class="hint">Becomes the commit message'+(c.pr||(ex&&ex.pr)?' and the pull request body':'')+'.</div></div>'+
    (d.risk.length?'<div class="callout" style="margin-bottom:14px">This change '+h(d.risk.join(" and "))+'. The checks will hold the merge for a code-owner review'+(d.risk.some(function(x){return /mandate/.test(x);})?' and an active mandate':'')+'.</div>':'')+
    (c.prOnly
-    ?'<div class="cm-sw"><span class="b b-approval" style="margin-top:2px"><span class="d"></span>PR</span><div class="tx"><b>Opens the pull request for <span class="mono">'+h(c.branch)+'</span></b>The commit is already on the branch. This asks the code owners of <span class="mono">.oxagen/agents/</span> to review it against '+h(w.branch)+'.</div></div>'
+    ?'<div class="cm-sw"><span class="b b-approval" style="margin-top:2px"><span class="d"></span>PR</span><div class="tx"><b>Opens the pull request for <span class="mono">'+h(c.branch)+'</span></b>The commit is already on the branch.</div></div>'
     :ex&&ex.pr
-    ?'<div class="cm-sw"><span class="b b-approval" style="margin-top:2px"><span class="d"></span>PR open</span><div class="tx"><b>'+h(ex.pr)+' already covers this branch</b>The commit lands on the branch and the pull request updates itself; no second one is opened.</div></div>'
+    ?'<div class="cm-sw"><span class="b b-approval" style="margin-top:2px"><span class="d"></span>PR open</span><div class="tx"><b>'+h(ex.pr)+' already covers this branch</b>The commit lands on the branch and the pull request updates itself.</div></div>'
     :'<div class="cm-sw"><button type="button" class="ks-sw int'+(c.pr?' on':'')+'" role="switch" aria-checked="'+(c.pr?'true':'false')+'" aria-label="Open a pull request" onclick="cmSet(\'pr\',!S.cm.pr);render()"><i></i><span class="lbl">PR</span></button>'+
      '<div class="tx"><b>Open a pull request</b>'+(c.pr
-      ?'Against '+h(w.branch)+', titled from the summary. Governance mode <span class="mono">team</span> asks the code owners of <span class="mono">.oxagen/agents/</span> to review; merge is the change.'
-      :'Push the commit to the branch only. Nothing changes for the running agent until someone opens and merges a pull request; your coding agent can pick the branch up from the repo.')+'</div></div>')+
+      ?'Against '+h(w.branch)+', titled from the summary.'
+      :'Push the commit to the branch only.')+'</div></div>')+
    '<details class="cm-diff"'+(c.prOnly?' open':'')+'><summary>Diff against '+h(against)+' · '+rows.filter(function(r){return r.t!==" ";}).length+' line'+(st.add+st.del===1?'':'s')+' changed</summary>'+
-   diffSplitHtml(rows,2,[against,"your draft"])+'</details>'+
-   '<div class="note">The principal, roles, and toolbelt update when the pull request merges. Until then the running definition stays at <span class="mono">'+h(a.commit)+'</span> and its <span class="mono">definition_digest</span> doesn\u2019t change.</div>';
+   diffSplitHtml(rows,2,[against,"your draft"])+'</details>';
 }
 function commitFoot(){
   if(S.dlg!=="commit"||!S.cm)return '';
@@ -4230,6 +4228,11 @@ function iamPairs(pairs){
   return '<div class="iamw">'+pairs.map(function(p){
     return '<span class="t">'+h(p[0])+'<i>'+h(p[1])+'</i></span>';}).join("")+'</div>';
 }
+function iamChain(steps,label){
+  return '<ul class="iamc"'+(label?' aria-label="'+h(label)+'"':'')+'>'+steps.map(function(s,i){
+   return '<li><span class="n">'+(i+1)+'</span><div style="min-width:0"><span class="l">'+h(s[0])+
+    '</span><div class="v">'+s[1]+'</div></div></li>';}).join("")+'</ul>';
+}
 function activePolicy(){
   for(var i=0;i<POLICIES.length;i++){if(POLICIES[i].state==="active")return POLICIES[i].v;}
   return "pol_v41";
@@ -4317,7 +4320,7 @@ function aIdentity(a,r){
     '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>run token only</span></div>'+
     '<div class="panel-b" style="display:grid;gap:12px">'+
     iamPairs([["API key","Not held"],["OAuth token","Not held"],["Cloud role","Not held"],["GitHub token","Not held"],
-              ["Run token","Held"]])+
+              ["Run token","Held · works only with oxagen"]])+
     '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/tools/providers\')">Open providers</button>'+
     '</div></div></div>'+
 
@@ -4342,7 +4345,7 @@ function aIdentity(a,r){
     '<dt>Accountable human</dt><dd>'+h(op.name)+' · <span class="mono">'+h(op.role)+'</span></dd>'+
     '<dt>Workspace</dt><dd>'+h(w.name)+' <span class="mono dim">'+h(w.slug)+'</span></dd>'+
     '<dt>Runtime</dt><dd class="mono">'+h(a.host||(a.enrolled?"a host outside this workspace":"not enrolled"))+'</dd>'+
-    '<dt>Delegation ceiling</dt><dd class="mono">max_hops 2</dd>'+
+    '<dt>Delegation</dt><dd>subagents narrow, never widen</dd>'+
     '<dt>Tamper incidents</dt><dd>'+(tamperCount(a)
       ?'<span class="b b-critical"><span class="d"></span>'+tamperCount(a)+' · '+keyLabel(agentTamper(a)[0].kind)+'</span> '+
        '<button class="btn sm ghost" onclick="S.tab.agent=\'activity\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/activity\')">Read them</button>'
@@ -4660,7 +4663,13 @@ function permMandates(a){
   if(!mine.length) return '<div class="panel" data-help="delegation" style="border-color:color-mix(in srgb,var(--st-proven) 30%,var(--border))">'+
    '<div class="panel-h"><div style="flex:1;min-width:0"><h3>No mandate</h3></div>'+
    '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>cannot move money</span></div>'+
-   '<div class="panel-b">'+
+   '<div class="panel-b" style="display:grid;gap:13px">'+
+   iamChain([
+    ["Call","a tool call whose version declares a financial class"],
+    ["Financial class","read from the tool version’s declared consequence tags"],
+    ["Mandate lookup",'none for <span class="mono">'+h(a.key)+'</span>'],
+    ["Decision",gate("deny")+' · <span class="mono">no_mandate</span> · mandate ledger unchanged · no credential minted']],
+    "How a financial call from this agent is decided")+
    '<div class="row"><button class="btn" onclick="openDialog(\'mandate\')">Request a mandate</button></div>'+
    '</div></div>';
 
