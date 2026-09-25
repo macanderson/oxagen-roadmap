@@ -9149,7 +9149,7 @@ function recprChecks(def){
       :"no published record or open pull request holds any of these "+n+" lineages";},
     bad:function(){var x=lineageHit(def)||{};
       return x.claim==="published"
-        ?x.id+" is already published. One lineage, one record — amend the published one instead of opening a second under its id."
+        ?x.id+" is already published. A lineage holds one record, so amend the published one instead of opening a second under its id."
         :x.id+" is already claimed by "+x.claim+", which was opened first. Close one of them, or give this record a lineage of its own.";}},
    {n:"record_hash recomputation",ms:600,
     ok:function(){return one?"recomputed over the canonical bytes · "+def.hash.slice(0,20)+"… matches the file"
@@ -9158,11 +9158,11 @@ function recprChecks(def){
    {n:"Conflict against active records",ms:1000,ok:function(){
       return RECORDS.filter(function(r){return r.status==="published"&&!own(r);}).length+
         " published records checked · no require or forbid on the same subject";}},
-   {n:"constraint_effect ∈ {require, forbid}",ms:500,ok:function(){
+   {n:"Constraint is require or forbid",ms:500,ok:function(){
       if(!one){var c=recs.filter(function(r){return r.ce;}).length;
-        return c?(c+" of "+n+" carry constraint_effect, each require or forbid · grants nothing"):"no constraining kind · the field is absent, which is also a pass";}
+        return c?(c+" of "+n+" carry a constraint, each require or forbid · grants nothing"):"no constraining kind · the field is absent, which is also a pass";}
       var e=def.record.ce;
-      return e?("constraint_effect = "+e+" · grants nothing"):"not a constraining kind · the field is absent, which is also a pass";}}
+      return e?("constraint "+e+" · grants nothing"):"not a constraining kind · the field is absent, which is also a pass";}}
   ];
 }
 
@@ -9181,36 +9181,7 @@ function wzRecOpenPr(){
     author:"operator", by:CMD_OP, desc:String(z.desc||"").trim(), ws:w.slug, opened:nowT().slice(0,8),
     mergedAt:function(){return rec.pub+" "+nowT().slice(0,8)+" UTC";}
   };
-<<<<<<< HEAD
-  /* The checks close over this pull request, not over whichever one is selected, so several can be
-     open at once and each still reports on its own file. */
-  def.checks=[
-   {n:"Schema",ms:900,
-    test:function(){return !!tomlOf(recprFileText(def));},
-    ok:"context-record/v0.1 valid · 1 file, 1 record, 1 lineage",
-    bad:"the record file does not parse as TOML"},
-   {n:"Lineage uniqueness",ms:700,
-    /* A real check, not a sentence, and it is re-run at merge because another pull request can
-       claim the lineage after this one went green. */
-    test:function(){return !lineageClaim(def);},
-    ok:function(){return "no published record holds "+def.record.id+"; this pull request is its only holder";},
-    bad:function(){var c=lineageClaim(def);
-      return c==="published"
-        ?def.record.id+" is already published. One lineage, one record — amend the published one instead of opening a second under its id."
-        :def.record.id+" is already claimed by "+c+", which was opened first. Close one of them, or give this record a lineage of its own.";}},
-   {n:"record_hash recomputation",ms:600,
-    ok:function(){return "recomputed over the canonical bytes · "+def.hash.slice(0,20)+"… matches the file";}},
-   {n:"Secret and PII scan",ms:900,ok:"statement, rationale and evidence scanned · 0 findings"},
-   {n:"Conflict against active records",ms:1000,ok:function(){
-      return RECORDS.filter(function(r){return r.status==="published"&&r.id!==def.record.id;}).length+
-        " published records checked · no require or forbid on the same subject";}},
-   {n:"Constraint is require or forbid",ms:500,ok:function(){
-      var e=def.record.ce;
-      return e?("constraint "+e+" · grants nothing"):"not a constraining kind · the field is absent, which is also a pass";}}
-  ];
-=======
   def.checks=recprChecks(def);
->>>>>>> main
   RECPRS.unshift(def);
   S.recprs[def.pr]={st:"none",done:0,failed:null,timers:[],mergedAt:null};
   S.wz=null; S.dlg=null; S.dlgArg=null; S.prpSel=null;
@@ -9768,13 +9739,8 @@ function stgMemoryTab(w){
      '<td class="mono" style="font-size:11.5px">'+h(m.lastRecalled)+'<span class="sub">'+m.recalls30+' recalls in 30 days</span></td>'+
      '<td class="num">'+tokn(m.token_cost)+' tok</td><td>'+st+'</td></tr>';}).join("");
   var agg='<div class="grid g4" style="margin-bottom:14px">'+
-<<<<<<< HEAD
-   '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s">folded from '+G.folded+' run notes and steers</span></div>'+
-   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s">'+G.steers+' operator steers and '+G.notes+' agent notes</span></div>'+
-=======
    '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s" data-mem-folded="'+G.folded+'">folded from '+G.folded+' sayings</span></div>'+
-   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+'<small>runs</small></span><span class="s">'+G.steers+' operator steers and '+G.notes+' reflections</span></div>'+
->>>>>>> main
+   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s">'+G.steers+' operator steers and '+G.notes+' reflections</span></div>'+
    '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
    '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a rule is proposed as a record instead</span></div></div>';
   return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
