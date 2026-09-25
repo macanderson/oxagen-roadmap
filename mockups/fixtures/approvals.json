@@ -131,7 +131,7 @@
    {
     "id": "tools.belt.bash",
     "v": "allow",
-    "text": "bash__run@1 is on the triage belt for local, non-network commands."
+    "text": "bash__run@1 is on the triage toolbelt for local, non-network commands."
    }
   ]
  }

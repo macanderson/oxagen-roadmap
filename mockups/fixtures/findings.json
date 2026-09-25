@@ -28,7 +28,7 @@
   "subject": "a-intel.core.triage",
   "save": "188.40",
   "window": "last 30 days",
-  "why": "tool_definition_tokens averages 9,140 per model call, 3.9× the workspace median; 34 of the 52 tools on the belt were not called once in 1,340 runs.",
+  "why": "tool_definition_tokens averages 9,140 per model call, 3.9× the workspace median; 34 of the 52 tools on the toolbelt were not called once in 1,340 runs.",
   "fix": "Narrow the grants to the 18 tools actually used.",
   "frames": "1,340 runs · 11,902 model calls"
  },

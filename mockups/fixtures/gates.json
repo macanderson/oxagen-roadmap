@@ -81,7 +81,7 @@
   "force": "must",
   "scope": "org",
   "applies": "agents that hold a slack tool: triage, docs-writer",
-  "body": "Every tool on the slack server is halted by a kill switch. Do not retry. Say so and continue without it.",
+  "body": "Every tool on the slack provider is halted by a kill switch. Do not retry. Say so and continue without it.",
   "token_cost": 27,
   "outcome": "killed",
   "edit": "tools/switches",

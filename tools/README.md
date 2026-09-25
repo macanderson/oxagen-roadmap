@@ -150,6 +150,26 @@ merge, leaving a new bundle version without a digest, unescaping nothing on the 
 writing a bare newline before the closing fence — and catches all thirteen. The escaping one is
 worth seeing fail: with it removed, `Path:\deploy\q` comes back as `Path:deployq`.
 
+## The copy guard
+
+```sh
+node tools/check-copy.mjs                 # every route in both workspaces, the drawer, and the dialogs
+node tools/check-copy.mjs --only tools    # routes and overlays whose name contains "tools"
+node tools/check-copy.mjs --dump out/     # also write each route's visible text to out/
+node tools/check-copy.mjs --all           # list every finding, not the first 25 per rule
+```
+
+This opens every route the copy review names (issue #87) and reads the text a person sees. Each
+rule is one regular expression from the review's acceptance list or glossary: `undefined` in a
+sentence, "1 turns", a number glued to its unit, a retired term, an internal name, a capitalized
+brand, a hyphen standing in for a minus sign, and the rest. It also fails a tile with a caption and
+no value, and a raw key such as `gateway_observed` in prose. The same key in monospace passes, so the
+raw-key rule reads the page with `.mono` hidden.
+
+Code samples in `<pre>` and `<code>` are skipped. A TOML key or an SDK class name belongs to its
+language, and the rules read only the prose around it. The same text on many routes, such as the
+sidebar, counts as one finding and names the first route it appeared on.
+
 ## Writing a scenario
 
 `SCENARIOS["id"]={title:"…", ws:"…", blurb:"…", steps:[…]}` in `mockups/src/engine.js`, and a row in

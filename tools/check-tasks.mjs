@@ -64,7 +64,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok((await page.locator(".ipl svg").count()) >= 3, "providers: every provider shows its logo as an SVG");
   await page.click("#layer .dlg-f >> text=Connect an issue provider");
   let d = await dlgText(page);
-  ok(/Provider Authorize Scope Fields People Review/.test(d.replace(/[0-9]/g, "").replace(/\s+/g, " ")) || (await page.locator(".wz-st").count()) === 6, "wizard: six steps");
+  ok(/Tracker Authorize Scope Fields People Review/.test(d.replace(/[0-9]/g, "").replace(/\s+/g, " ")) || (await page.locator(".wz-st").count()) === 6, "wizard: six steps");
   ok((await page.locator(".ipz-card").count()) === 6, "wizard: six providers to choose from");
   ok(/Issue trackers/.test(d) && /Help desks/.test(d) && /ServiceNow/.test(d) && /Salesforce/.test(d) && /Zendesk/.test(d), "wizard: offers the help desks beside the trackers");
   ok(await footBtn(page, "Next").isDisabled(), "wizard: Next waits for a choice");
@@ -182,9 +182,9 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
 {
   const { page, errs } = await open(H + "/items/tsk_01K6SC1Y5M");
   const t = await text(page);
-  ok(/The description changed after certification/.test(t), "changed: says why it left ready");
+  ok(/The description changed after certification/.test(t), "changed: says why it is no longer ready");
   ok(/Certified against/.test(t) && /Now/.test(t), "changed: shows both versions");
-  ok(/Certify again/.test(t), "changed: offers to certify again");
+  ok(/Changed since certified/.test(t) && /Certify definition of done/.test(t), "changed: offers to certify again");
   await done(page, errs, "changed");
 }
 
@@ -257,7 +257,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/role = "Validate"/.test(b) && /max_returns = 2/.test(b), "builder: the file carries the stages and the return bound");
   ok(/by = "operator"/.test(b), "builder: the file ends with the operator");
   await footBtn(w.page, "Open pull request").click();
-  ok(/pull request open/.test(await text(w.page)), "builder: a workflow exists as a pull request until it merges");
+  ok(/In review/.test(await text(w.page)), "builder: a workflow exists as a pull request until it merges");
   await done(w.page, [...errs, ...w.errs], "workflow");
 }
 
@@ -266,13 +266,13 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   const { page, errs } = await open(INTAKE + "fields");
   const t = await dlgText(page);
   ok(/P0/.test(t) && /P3/.test(t) && /New Feature/.test(t) && /Documentation/.test(t) && /Chore/.test(t), "fields: the default labels ship");
-  ok((await page.locator("td b", { hasText: /^Done$/ }).count()) >= 1 && /Won't do/.test(t) && /Duplicate/.test(t) && /Cancelled/.test(t) && /Other/.test(t), "fields: the default resolutions ship");
+  ok((await page.locator("td b", { hasText: /^Done$/ }).count()) >= 1 && /Won't do/.test(t) && /Duplicate/.test(t) && /Canceled/.test(t) && /Other/.test(t), "fields: the default resolutions ship");
   ok(!/Won't fix|\bFixed\b/.test(t.replace(/Done, Fixed|Won't Do, Won't Fix/g, "")), "fields: no resolution is named Fixed or Won't fix");
   ok(/Open/.test(t) && /Blocked/.test(t) && /Closed/.test(t), "fields: the three status categories");
   await page.click("#layer .dlg >> text=New Feature >> nth=0");
   const d = await dlgText(page);
   ok(/A label will carry definition-of-done items/.test(d), "label: says labels will carry definition-of-done items");
-  await page.click('button[aria-label="Colour #9D8BE3"]');
+  await page.click('button[aria-label="Color #9D8BE3"]');
   await footBtn(page, "Save label").click();
   ok(/#9D8BE3/.test(await dlgText(page)), "label: the colour is saved, back in Intake");
   await page.locator("#layer td b", { hasText: /^Won't do$/ }).click();
@@ -286,8 +286,8 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   const w = await open(H + "/orders/wo_01K6TA2M");
   ok(!(await w.page.locator(".phead button", { hasText: "Accept the work" }).isDisabled()), "accept: enabled when every item is claimed");
   await w.page.click(".phead >> text=Accept the work");
-  await footBtn(w.page, "Accept every item").click();
-  ok(/3 \/ 3/.test(await text(w.page)) && /accepted/.test(await text(w.page)), "accept: every item accepted");
+  await footBtn(w.page, "Accept all items").click();
+  ok(/3 \/ 3/.test(await text(w.page)) && /accepted/i.test(await text(w.page)), "accept: every item accepted");
   await done(w.page, [...errs, ...w.errs], "accept");
 }
 

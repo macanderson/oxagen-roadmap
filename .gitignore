@@ -21,3 +21,4 @@ site/tsconfig.tsbuildinfo
 # Oxagen: this machine's link to a workspace; never committed.
 .oxagen/workspace.json
 .stella/private/
+verifications/

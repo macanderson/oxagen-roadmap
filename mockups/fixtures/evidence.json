@@ -188,11 +188,11 @@
   "signal": "tool_definition_tokens per model call",
   "measured": "9,140",
   "baseline": "2,340 (workspace median)",
-  "counterfactual": "18-tool belt · 3,160 tok per call",
+  "counterfactual": "18-tool toolbelt · 3,160 tok per call",
   "method": [
    [
     "Measured",
-    "Every model call on a-intel.core.triage carried 9,140 tokens of tool definitions: 52 tools on the belt."
+    "Every model call on a-intel.core.triage carried 9,140 tokens of tool definitions: 52 tools on the toolbelt."
    ],
    [
     "Baseline",
@@ -210,7 +210,7 @@
   "who": {
    "agent": "a-intel.core.triage",
    "operator": "marcus",
-   "note": "Marcus wrapped the agent with the full github, linear and slack servers granted. The wrap granted every tool each server exposes."
+   "note": "Marcus registered the agent with the full github, linear, and slack providers granted. The registration granted every tool each provider exposes."
   },
   "runs": [
    [

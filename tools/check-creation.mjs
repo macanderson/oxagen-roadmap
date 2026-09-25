@@ -222,7 +222,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   ok(/\[instructions\]/.test(d.body), "agent definition has instructions");
   await primary(page); await page.waitForTimeout(200);
   d = await dlg(page);
-  ok(/Nothing on this belt parks|Nothing picked/.test(d.body), "agent belt: says what parks");
+  ok(/Nothing on this toolbelt parks|Nothing picked/.test(d.body), "agent belt: says what parks");
   await page.evaluate(() => { document.querySelectorAll("#layer .imp-tool input")[2].click(); });
   await page.waitForTimeout(200);
   d = await dlg(page);
@@ -601,7 +601,7 @@ for (const theme of ["light", "dark"]) {
   const dtxt = () => page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
   const rows = () => page.evaluate(() => [...document.querySelectorAll("table tbody tr")].map((r) => r.innerText).join("|"));
 
-  ok(/Draft a version/.test(await page.evaluate(() => document.body.innerText)), "policy: the panel header drafts a version");
+  ok(/Draft new version/.test(await page.evaluate(() => document.body.innerText)), "policy: the panel header drafts a version");
   ok(/Discard/.test(await rows()), "policy: the draft row carries Discard");
 
   await page.evaluate(() => openDialog("policynew"));
@@ -670,7 +670,7 @@ for (const theme of ["light", "dark"]) {
   await page.evaluate(() => { document.getElementById("ks-target").value = "mbp-01"; ksRefresh(); document.getElementById("ks-why").value = "Held ready for an incident on this host"; ksCreate(); });
   await page.waitForTimeout(250);
   ok(/mbp-01/.test(await pg()), "switches: the new switch is on the page");
-  ok(/allowing/.test(await pg()), "switches: a new switch is created allowing");
+  ok(/calls allowed/.test(await pg()), "switches: a new switch is created off");
 
   // Nothing may cover the same target twice.
   await page.evaluate(() => openDialog("switchnew"));
@@ -711,7 +711,7 @@ for (const theme of ["light", "dark"]) {
   await page.waitForTimeout(250);
   const cards = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"));
   ok(!/mbp-01/.test(cards), "switches: the created switch card is gone, got " + cards);
-  ok(/core-platform/.test(cards) && /every irreversible tool/.test(cards), "switches: the shipped switches are untouched");
+  ok(/core-platform/.test(cards) && /[Ee]very irreversible tool/.test(cards), "switches: the shipped switches are untouched");
   ok(errs.length === 0, "switches: no JavaScript error: " + errs.join(" | "));
   await page.close();
 }
@@ -824,11 +824,11 @@ for (const theme of ["light", "dark"]) {
   }), "run rig: the strip sits above the tab bar");
 
   // Both readings, and the change each asks for.
-  ok(/Wrong model tier/.test(await rig()), "run rig: an overkill model is badged in the header");
-  ok(/Wrong effort setting/.test(await rig()), "run rig: an overkill effort setting is badged in the header");
+  ok(/Heavier model than needed/.test(await rig()), "run rig: an overkill model is badged in the header");
+  ok(/More effort than needed/.test(await rig()), "run rig: an overkill effort setting is badged in the header");
   await page.evaluate(() => { S.tab.run = "cost"; render(); });
   await page.waitForTimeout(200);
-  ok(/generated · not the record/.test(await panel()), "run fit: the panel says the reading is generated");
+  ok(/Generated estimate/.test(await panel()), "run fit: the panel says the reading is generated");
   ok(/Read from this run only/.test(await panel()), "run fit: the panel cites what it read");
   ok(/Move this agent to/.test(await panel()), "run fit: the model card offers the change");
   ok(/Set effort to/.test(await panel()), "run fit: the effort card offers the change");
@@ -974,7 +974,7 @@ for (const theme of ["light", "dark"]) {
   const { page, errs } = await open("#/a-intel/core-platform/tools/policy");
   const txt = await page.evaluate(() => document.body.innerText);
   ok(!/Cedar/i.test(txt), "policy: the page names no policy language");
-  ok(/tools\.policy_versions/.test(txt), "policy: the store is named");
+  ok(!/tools\.policy_versions/.test(txt), "policy: the page names no storage table");
 
   const heads = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"));
   ok(/Where a version lives/.test(heads), "policy: the storage panel renders, got " + heads);
@@ -1106,7 +1106,7 @@ for (const theme of ["light", "dark"]) {
     "funding: Funding source then Model routes, got " + fheads.join(" ~ "));
   const ftxt = await page.evaluate(() =>
     [...document.querySelectorAll(".panel")].map((x) => x.innerText).join("\n"));
-  ok(/client_attested/.test(ftxt), "funding: the Total row names its basis");
+  ok(/reported by harness|observed by gateway/i.test(ftxt), "funding: the Total row names its basis");
   ok(/Rotate/.test(ftxt) && /Revoke/.test(ftxt), "funding: the held key carries rotate and revoke");
 
   await page.evaluate(() => orgTab("plane"));
@@ -1132,7 +1132,7 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
-// The Change identity dialog listed the roles as plain badges and told you to go edit them on the
+// The Edit identity dialog (formerly Change identity) listed the roles as plain badges and told you to go edit them on the
 // panel behind it. A drill-down that cannot write is a dead end.
 {
   const { page, errs } = await open("#/a-intel/core-platform/agents/summarizer");
@@ -1234,8 +1234,8 @@ for (const theme of ["light", "dark"]) {
   const avail = await foot("a-intel/ledger-service");
   ok(avail.includes("Link to this workspace"), "repositories: an available repo offers Link, got " + avail.join(" ~ "));
   ok(!avail.includes("Unlink"), "repositories: an unlinked repo has nothing to unlink, got " + avail.join(" ~ "));
-  ok(avail.filter((b) => b === "Link to this workspace" || b === "Add Oxagen").length === 2,
-    "repositories: Link and Add Oxagen are both offered, got " + avail.join(" ~ "));
+  ok(avail.filter((b) => b === "Link to this workspace" || b === "Add .oxagen/").length === 2,
+    "repositories: Link and Add .oxagen/ are both offered, got " + avail.join(" ~ "));
   const primaries = await page.evaluate(() =>
     document.querySelectorAll("#layer .dlg .dlg-f button.primary").length);
   ok(primaries === 1, "repositories: the footer carries one primary, got " + primaries);

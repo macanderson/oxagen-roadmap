@@ -131,8 +131,8 @@ function srvToolCount(){return SERVERS.reduce(function(n,x){return n+(x.tools||0
    from the record so the same key shows the same numbers on every page. Nothing here is a score. */
 var TOK_PARTS=[["conv","Conversation","var(--st-allowed)","the operator's prompt, steer messages and the model's own text"],
   ["results","Tool results","var(--muted)","tool result bodies that entered the window"],
-  ["ctx","Context frames","var(--st-proven)","recalled records, memory and graph frames Oxagen injected"],
-  ["tools","Tool definitions","var(--st-approval)","the belt as the model is shown it, every request"],
+  ["ctx","Context frames","var(--st-proven)","recalled records, memory and graph frames oxagen injected"],
+  ["tools","Tool definitions","var(--st-approval)","the toolbelt as the model is shown it, every request"],
   ["steering","Steering","var(--k-rule)","the stable prefix: must and should records, gate notices"],
   ["system","System","var(--dim)","the harness's own system prompt"]];
 function tokShare(n,d){return d?n/d:0;}
@@ -207,10 +207,10 @@ function coachAgent(a){
   if(typeof a==="string")a=agent(a);
   var t=agentTok(a); if(!t) return [];
   var sp=money(a.spend30)||0, per$=function(tok){return sp*tokShare(tok,t.total);}, out=[], slug=a.key.split(".").pop(), base='#/'+ORG.slug+'/'+a.ws;
-  if(t.shares.tools>0.16) out.push({k:"belt",sev:"approval",title:"Narrow the belt",
-    signal:per(t.shares.tools)+' of every request is tool definitions · '+t.neverCalled+' of '+a.belt+' tools never called in 30 days',
+  if(t.shares.tools>0.16) out.push({k:"belt",sev:"approval",title:"Narrow the toolbelt",
+    signal:per(t.shares.tools)+' of every request is tool definitions · '+t.neverCalled+' of '+plural(a.belt,"tool")+' never called in 30 days',
     tok:t.parts.tools,usd:per$(t.parts.tools)*Math.min(0.6,t.neverCalled/Math.max(1,a.belt)),
-    say:"The model is shown "+a.belt+" tools on every call and used "+(a.belt-t.neverCalled)+". Drop the "+t.neverCalled+" it never calls from the grant, or switch the belt to searchable so unused definitions leave the prompt.",
+    say:"The model is shown "+plural(a.belt,"tool")+" on every call and used "+(a.belt-t.neverCalled)+". Drop the "+t.neverCalled+" it never calls from the grant, or switch the toolbelt to searchable so unused definitions leave the prompt.",
     act:["Edit the grant",'S.tab.agent=\'toolbelt\';go(\''+base+'/agents/'+slug+'/toolbelt\')']});
   if(t.cacheRate<0.72) out.push({k:"cache",sev:"approval",title:"Keep the prefix stable",
     signal:per(t.cacheRate)+' cache hit rate · '+tokn(t.fresh)+' input tokens paid at full price',
@@ -233,7 +233,7 @@ function coachAgent(a){
     say:"Runs whose steps are all read-and-sort shaped reason at flagship prices. Set a light default in the definition and let the harness escalate on a write.",
     act:["Edit the definition",'S.tab.agent=\'definition\';go(\''+base+'/agents/'+slug+'/definition\')']});
   if(t.retries>Math.max(2,(a.runs30||0)*0.04)) out.push({k:"retry",sev:"denied",title:"Stop the retry storms",
-    signal:t.retries+' runs with three or more provider retries in one turn',
+    signal:plural(t.retries,"run")+' with three or more provider retries in one turn',
     tok:Math.round(t.retries*t.perCall*2.5),usd:per$(Math.round(t.retries*t.perCall*2.5)),
     say:"Consecutive provider errors were retried inside one turn and every retry paid the whole prompt again. Cap retries per turn in the harness settings and check the provider key's health.",
     act:["Open incidents",'S.tab.agent=\'incidents\';go(\''+base+'/agents/'+slug+'/incidents\')']});
@@ -252,24 +252,24 @@ function coachOperator(p){
   var row=(SPEND.byOperator||[]).filter(function(o){return o.p===p;})[0];
   var wide=list.filter(function(a){return agentTok(a).shares.tools>0.16;});
   if(wide.length) out.push({k:"grants",sev:"approval",title:"Grants are wider than the work",
-    signal:wide.length+' of '+list.length+' agents spend over 16% of every request on tool definitions',
+    signal:wide.length+' of '+plural(list.length,"agent")+' spend over 16% of every request on tool definitions',
     tok:wide.reduce(function(n,a){return n+agentTok(a).parts.tools;},0),usd:per$(wide.reduce(function(n,a){return n+agentTok(a).parts.tools;},0))*0.4,
-    say:"The same role template gave every agent the whole belt. Cut each grant to the tools its runs call: "+wide.map(function(a){return a.key.split(".").pop();}).slice(0,3).join(", ")+(wide.length>3?' and '+(wide.length-3)+' more':'')+'.',
+    say:"The same role template gave every agent the whole toolbelt. Cut each grant to the tools its runs call: "+wide.map(function(a){return a.key.split(".").pop();}).slice(0,3).join(", ")+(wide.length>3?' and '+(wide.length-3)+' more':'')+'.',
     act:["Open Identities",'go(\'#/'+ORG.slug+'/'+ws().slug+'/agents\')']});
   var reread=list.filter(function(a){return agentTok(a).dupReads>(a.runs30||0)*0.15;});
   if(reread.length) out.push({k:"prompts",sev:"approval",title:"Prompts that make the agent re-read",
-    signal:reread.reduce(function(n,a){return n+agentTok(a).dupReads;},0)+' repeated reads across '+reread.length+' agents · the brief says "confirm" where a record could say "known"',
+    signal:reread.reduce(function(n,a){return n+agentTok(a).dupReads;},0)+' repeated reads across '+plural(reread.length,"agent")+' · the brief says "confirm" where a record could say "known"',
     tok:reread.reduce(function(n,a){return n+agentTok(a).parts.results*0.3;},0),usd:per$(reread.reduce(function(n,a){return n+agentTok(a).parts.results*0.3;},0)),
     say:"A brief that asks the agent to confirm a file it already has makes it read the file again on every run. Move the fact into a Steering record once; it is reviewed like code and reaches every run.",
     act:["Write a record",'wzOpen(\'record\')']});
   var pp=operatorPrompts(p);
   if(pp&&pp.avg>1.5) out.push({k:"prompts",sev:"approval",title:"Get to one prompt per session",
-    signal:pp.avg.toFixed(1)+' prompts per session over '+pp.runs+' runs · '+pp.oneShot+' one-shot',
+    signal:plural(pp.avg.toFixed(1),"prompt")+' per session over '+plural(pp.runs,"run")+' · '+pp.oneShot+' one-shot',
     tok:0,usd:pp.waste,
     say:"A prompt after the first fixes or fills what the first left out, and every one re-runs the window. Either the first prompt is missing context the agent needed, or the design was not settled before the run started. Put the missing context in a Steering record and settle the design in the task before the run.",
     act:["Write a record",'wzOpen(\'record\')']});
   if(t.cacheRate<0.74) out.push({k:"cache",sev:"q",title:"Publish steering between runs, not during",
-    signal:per(t.cacheRate)+' cache hit rate across '+list.length+' agents',
+    signal:per(t.cacheRate)+' cache hit rate across '+plural(list.length,"agent"),
     tok:t.tokIn-t.cacheRead,usd:per$(t.tokIn-t.cacheRead)*0.4,
     say:"Steering publishes and grant edits during the day landed inside live runs and broke their prefix. Batch them, or publish to a workspace with no live run.",
     act:["Open steering",'go(\'#/'+ORG.slug+'/'+ws().slug+'/steering\')']});
@@ -292,7 +292,7 @@ function coachStrip(a){
   var t=agentTok(a); if(!t) return '';
   var items=coachItems("agents",a.key), sp=money(a.spend30)||0;
   return '<div class="grid g2">'+
-   '<div class="panel" style="margin:0;align-self:start"><div class="panel-h"><h3>30-day token use</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(t.total)+' tok · '+usd(fmt2(sp))+' · <span class="basis">'+(t.observed?'gateway_observed':'client_attested')+'</span></span></div>'+
+   '<div class="panel" style="margin:0;align-self:start"><div class="panel-h"><h3>30-day token use</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(t.total)+' tok · '+usd(fmt2(sp))+' · '+basisChip(t.observed?'gateway_observed':'client_attested')+'</span></div>'+
     '<div class="panel-b">'+tokBars(t,{tight:true})+'<div class="hr"></div><dl class="kv">'+
     '<dt>Cache hit rate</dt><dd>'+per(t.cacheRate)+' · '+tokn(t.cacheRead)+' of '+tokn(t.tokIn)+' input tokens served from cache</dd>'+
     '<dt>Per run</dt><dd>'+tokn(t.perRun)+' tok · '+(a.runs30?usd(fmt2(sp/a.runs30)):'—')+'</dd>'+
@@ -420,7 +420,7 @@ function roDerive(R){
     else if(/#\d+$/.test(name)){k="pr";st="open";}
     out.push({kind:k,name:name,where:"",state:st,note:note});
   });
-  if(R.status==="parked")out.push({kind:"gate",name:"awaiting approval",where:"Oxagen",state:"awaiting",note:"a call is parked; nothing has been committed"});
+  if(R.status==="parked")out.push({kind:"gate",name:"awaiting approval",where:"oxagen",state:"awaiting",note:"a call is parked; nothing has been committed"});
   if(R.sealed)out.push({kind:"seal",name:"sealed",where:"chain",state:"sealed",note:""});
   return out;
 }
@@ -571,7 +571,7 @@ function avatarBody(){
   }
   if(d.kind!=="photo"){
     out+='<div class="field"><label>Tone</label>'+avToneRow(d,shape)+
-     '<div class="hint">Solid, soft or line. Three tones from the house scale, each fixing its own glyph colour, so there is no combination that fails.</div></div>';
+     '<div class="hint">Solid, soft or line. Three tones from the house scale, each fixing its own glyph color, so there is no combination that fails.</div></div>';
   }
   out+='</div></div>';
   out+='<div class="note" style="margin-top:6px">'+(forPerson?'Saved with <span class="mono">set_preferences</span> and recorded as a frame, like any change to your account.':
@@ -602,7 +602,33 @@ function avSave(){
 }
 function per(n){return Math.round(n*100)+"%";}
 function ic0(n){return Math.round(n).toLocaleString("en-US");}
-function usd(a){return "$"+a;}
+// Every dollar figure goes through usd(): a dollar sign, thousands separators, two decimals (more when the
+// source carries them, as a per-million price does), and a true minus sign. A string with no number in it,
+// such as "—", passes through unchanged.
+function usd(a){
+  var s=String(a==null?"":a).replace(/[$,\s]/g,"").replace("−","-"),n=Number(s);
+  if(s===""||!isFinite(n))return /\d/.test(String(a))?"$"+a:String(a);
+  var d=(s.split(".")[1]||"").length;
+  return (n<0?"−":"")+"$"+Math.abs(n).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:Math.min(Math.max(2,d),6)});
+}
+// A whole-dollar figure, for yearly projections where cents would be false precision.
+function usd0(a){var n=Math.round(Number(String(a).replace(/[$,\s]/g,"").replace("−","-")));return isFinite(n)?(n<0?"−":"")+"$"+Math.abs(n).toLocaleString("en-US"):String(a);}
+// plural(3,"turn") is "3 turns"; plural(1,"turn") is "1 turn". Pass the plural when adding "s" is wrong.
+function plural(n,one,many){var v=typeof n==="number"?n.toLocaleString("en-US"):n;return v+" "+(Number(String(n).replace(/,/g,""))===1?one:(many||one+"s"));}
+// A true minus sign for a negative percentage or number shown as text.
+function minus(x){return String(x).replace(/^-/,"−");}
+// Stored keys shown to people. The page shows the label and keeps the key in a tooltip.
+var KEY_LABEL={gateway_observed:"Observed by gateway",client_attested:"Reported by harness",moves_funds:"Moves funds",
+  commits_spend:"Commits spend",third_party:"Third party",hooks_removed:"Hooks removed",chain_break:"Chain break",
+  unknown_tool:"Unknown tool",initiating_principal:"Person who started the run","policy.decision":"Policy decision",
+  per_run_micros:"Per-run budget",cache_write_5m:"Cache write (5 min)",input_uncached:"Uncached input",
+  content_exact:"Exact content match",deny_tools:"Denied tools",above_micros:"Auto-approve limit","approval.above_micros":"Auto-approve limit"};
+// A separator between chips: read aloud and copied as ", ", invisible on screen.
+var SEP='<span class="vh">, </span>';
+function keyText(k){return KEY_LABEL[k]||String(k);}
+function keyLabel(k){return KEY_LABEL[k]?'<span title="'+h(k)+'">'+h(KEY_LABEL[k])+'</span>':h(k);}
+// The spend basis chip: "Observed by gateway" or "Reported by harness".
+function basisChip(k){return '<span class="basis" title="'+h(k)+'">'+h(keyText(k))+'</span>';}
 function tab(page,def){return S.tab[page]||def;}
 
 var LOGO='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 574.244 106.313" role="img" aria-label="oxagen"><g transform="translate(0,0) scale(2.842952)"><path d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D4AF37"/></g><g transform="translate(120.376,13.067)"><path d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D4AF37"/></g></svg>';
@@ -626,9 +652,9 @@ function statusBadge(st){
    egress is the gateway, the only tier that earns the word enforced against the machine's operator)
    with Phase 5, so every rung is real and a badge names the one the run actually earned. */
 var TIERS=[["observe","Recorded only. No hook is installed and nothing is delivered."],
- ["harness","Hooks installed. Steering is delivered and the four blocking hook events can refuse: client-attested and fail-open."],
- ["gateway","Model and MCP traffic routed through the gateway. Metering observed, budgets enforced on routed traffic."],
- ["contained","The agent runs under an OS sandbox whose only egress is the gateway. The only tier that earns the word enforced."]];
+ ["harness","Hooks installed. Steering is delivered and four hook events can refuse a call. The harness reports spend, and a call goes ahead if its hook fails."],
+ ["gateway","Model and MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it."],
+ ["contained","The agent runs in an OS sandbox whose only network exit is the gateway."]];
 var TIER_NA={};
 function tierBadge(t){
   if(!t) return '';
@@ -756,10 +782,11 @@ function effSvg(e){
 }
 /* hazard = risk mark + side-effect glyph. Filled triangle is reserved for critical. */
 function hazard(r,e){
-  return '<span class="hz hz-'+h(r)+'" title="risk '+h(r)+'">'+riskSvg(r)+'<span>'+h(r)+'</span></span>'+
-   (e?'<span class="hz he-'+h(e)+'" title="side effect '+h(e)+'">'+effSvg(e)+'<span>'+h(e)+'</span></span>':'');
+  function cap(s){s=String(s);return s.charAt(0).toUpperCase()+s.slice(1);}
+  return '<span class="hz hz-'+h(r)+'" title="Risk: '+h(r)+'">'+riskSvg(r)+'<span>'+h(cap(r))+'</span></span>'+
+   (e?'<span class="hz he-'+h(e)+'" title="Side effect: '+h(e)+'">'+effSvg(e)+'<span>'+h(cap(e))+'</span></span>':'');
 }
-var GATE_L={allow:"allowed",require_approval:"needs approval",deny:"denied",killed:"kill switch",mandate:"mandate + approval"};
+var GATE_L={allow:"Allowed",require_approval:"Needs approval",deny:"Blocked",killed:"Stopped by kill switch",mandate:"Mandate + approval"};
 function gateSvg(g){
   var s='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
   if(g==="allow") return s+'<path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
@@ -786,11 +813,12 @@ function toolGate(t){
   if(k==="killed"){
     var srv=null, tv=null;
     SWITCHES.forEach(function(s){ if(!S.switches[s.id])return; if(s.lvl==="Tool version"&&s.target===id)tv=s; if(s.lvl==="Provider"&&s.target===t.s)srv=s; });
-    return gate("killed",tv?("flipped by "+tv.by+" · "+tv.why):("provider switch is on · "+(srv?srv.why:"")));
+    return gate("killed",tv?("Turned on by "+tv.by+". "+tv.why):("The switch on this provider is on. "+(srv?srv.why:"")));
   }
-  if(k==="mandate") return gate("mandate","financial effect "+t.fin+": a mandate is required, and its own rule decides when a person approves");
-  if(k==="require_approval") return gate("require_approval","pol_v41 rule rg_0093 · require_approval on side_effect:irreversible");
-  return gate("allow","pol_v41 · allowed wherever a grant reaches this version");
+  if(k==="mandate") return gate("mandate","Financial effect: "+keyText(t.fin)+". A mandate is required, and its own rule decides when a person approves.");
+  var pv=activePolicy().replace("pol_v","policy v");
+  if(k==="require_approval") return gate("require_approval","Rule rg_0093 in "+pv+": every irreversible call needs approval.");
+  return gate("allow","Allowed by "+pv+" wherever a grant reaches this version.");
 }
 function namesToggle(){
   return '<div class="seg" role="group" aria-label="Tool names"><button class="btn sm" aria-pressed="'+(S.toolNames!=="api")+'" onclick="S.toolNames=\'label\';render()">Labels</button>'+
@@ -799,12 +827,12 @@ function namesToggle(){
 /* Category filter chips. `pick` is the onclick with %s where the category goes. */
 function catChips(counts,sel,pick,total){
   var out='<button class="btn sm" aria-pressed="'+(!sel)+'" onclick="'+pick.replace("%s","")+'">All <span class="dim">'+total+'</span></button>';
-  TCAT_ORDER.forEach(function(c){ if(!counts[c])return;
+  TCAT_ORDER.forEach(function(c){ if(counts[c]==null)return;
    out+='<button class="btn sm t-'+c+'" aria-pressed="'+(sel===c)+'" title="'+h(TCAT[c].s)+'" onclick="'+pick.replace("%s",c)+'">'+catSvg(c)+h(TCAT[c].l)+'<span class="dim">'+counts[c]+'</span></button>';});
   return '<div class="row tcs">'+out+'</div>';
 }
 function toolCatsBody(){
-  return '<p class="muted" style="font-size:12.5px;margin-bottom:12px">A category says what a tool <b>acts on</b>. It is orthogonal to the hazard (how bad a wrong call is) and to the gate (what this belt decided). Ordered from least to most consequential.</p>'+
+  return '<p class="muted" style="font-size:12.5px;margin-bottom:12px">A category says what a tool <b>acts on</b>. It is orthogonal to the hazard (how bad a wrong call is) and to the gate (what this toolbelt decided). Ordered from least to most consequential.</p>'+
    '<div class="tleg">'+TCAT_ORDER.map(function(c){var d=TCAT[c];
     return '<div class="c t-'+c+'"><div class="ti">'+catSvg(c)+'</div><div style="min-width:0"><div class="l">'+h(d.l)+'</div><div class="s">'+h(d.s)+'</div><div class="eg">'+h(d.eg)+'</div></div></div>';}).join("")+'</div>'+
    '<div class="hr"></div><p class="eyebrow q">The two axes that carry a decision</p>'+
@@ -831,7 +859,7 @@ function errorState(what,code){
   return '<div class="state-wrap"><div class="ico" style="color:var(--st-failed);border-color:color-mix(in srgb,var(--st-failed) 40%,transparent)" aria-hidden="true">'+
    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 8v5M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></div>'+
    '<h2>'+h(what)+' could not be loaded</h2>'+
-   '<p>The control plane answered <code>'+h(code)+'</code>. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.</p>'+
+   '<p>The control plane answered <code>'+h(code)+'</code>. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by oxagen.</p>'+
    '<div class="acts"><button class="btn primary" onclick="render()">Try again</button>'+
    '<button class="btn" onclick="openDialog(\'incident\')">Open an incident</button></div>'+
    '<p class="mono dim" style="margin-top:16px;font-size:11.5px">trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z</p></div>';
@@ -1321,7 +1349,7 @@ function draftCommit(slug){
   var ch=defChanges(slug)||[], a=agentBySlug(slug);
   var AREA={model_tier:"model routing","budget.per_run_micros":"budget",tools:"toolbelt",deny_tools:"toolbelt",side_effects:"side effects","instructions.body":"instructions",name:"metadata",description:"metadata"};
   function fmt(v){if(v===undefined)return "unset";if(Array.isArray(v))return "["+v.join(", ")+"]";if(typeof v==="string"&&v.length>48)return JSON.stringify(v.slice(0,45)+"…");return JSON.stringify(v);}
-  function money(m){return "$"+((m||0)/1e6).toFixed(2);}
+  function money(m){return usd(((m||0)/1e6).toFixed(2));}
   var areas={},lines=[],risk=[];
   ch.forEach(function(c){
     var area=AREA[c.key]||(c.key.indexOf("harness.")===0?"harness":"definition");areas[area]=1;
@@ -1344,7 +1372,7 @@ function draftCommit(slug){
     :c0.key==="tools"||c0.key==="deny_tools"?"Change "+slug+" toolbelt"
     :"Update "+slug+" "+c0.key.split(".").pop();
   else title="Update "+slug+": "+al.join(", ");
-  var kind=risk.length?"widens authority":!ch.length?"formatting":(al.length===1&&(al[0]==="metadata"||al[0]==="harness"))?"cosmetic":"behavioural";
+  var kind=risk.length?"widens authority":!ch.length?"formatting":(al.length===1&&(al[0]==="metadata"||al[0]==="harness"))?"cosmetic":"behavioral";
   var branch="agent/"+slug+"/"+(title.replace(slug,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,40)||"edit");
   var tok=310+ch.length*46+lines.join(" ").length;
   return {title:title,body:lines.join("\n"),areas:al,risk:risk,kind:kind,changes:ch,branch:branch,
@@ -1381,7 +1409,7 @@ function commitBody(){
      :'<div class="field"><label>Branch head</label><div class="hint" style="margin-top:9px">'+(ex?h(String(ex.ahead))+' commit'+(ex.ahead===1?'':'s')+' ahead of '+h(w.branch)+' · '+h(PEOPLE[ex.by]?PEOPLE[ex.by].name:ex.by)+' · '+h(ex.when)+(ex.pr?'<br><span class="mono">'+h(ex.pr)+'</span> is open for it; this commit joins that pull request.':'<br>No pull request yet.'):'Your open change for this agent.')+'</div></div>')+
    '</div>'+
    '<div class="field"><label>Summary</label><input value="'+h(c.title)+'" aria-label="Summary" oninput="cmSet(\'title\',this.value)">'+
-    '<div class="cm-draft"><span class="b b-q">'+h(d.kind)+'</span>'+d.areas.map(function(x){return '<span class="b b-q">'+h(x)+'</span>';}).join("")+
+    '<div class="cm-draft"><span class="b b-q">'+h(d.kind)+'</span>'+d.areas.map(function(x){return '<span class="b b-q">'+h(x)+'</span>';}).join(SEP)+
     '<span>Drafted by <span class="mono">'+h(d.model)+'</span> · light tier · '+d.tokens+' tokens · $'+d.cost+' · '+d.ms+' ms</span>'+
     '<button class="btn sm ghost" type="button" onclick="cmRedraft()">Redraft</button></div></div>'+
    '<div class="field"><label>Description</label><textarea rows="4" aria-label="Description" oninput="cmSet(\'body\',this.value)">'+h(c.body)+'</textarea>'+
@@ -1455,7 +1483,7 @@ function icon(n){
 }
 /* The six record kinds of context-record/v0.1. Icon + hue per kind; the statement is always the headline. */
 var KINDS={
- rule:{l:"rule",d:"A directive that steers behaviour",i:'<path d="M4 12h14M13 7l5 5-5 5"/>'},
+ rule:{l:"rule",d:"A directive that steers behavior",i:'<path d="M4 12h14M13 7l5 5-5 5"/>'},
  constraint:{l:"constraint",d:"A hard boundary: require or forbid",i:'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M9 12h6"/>'},
  procedure:{l:"procedure",d:"Steps, in order",i:'<path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/>'},
  fact:{l:"fact",d:"A checkable claim about the world",i:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.5"/>'},
@@ -1792,7 +1820,7 @@ function approvalCard(a){
   return '<div class="apcard'+(crit?' crit':'')+(done?' done':'')+'" id="ap-'+a.id+'">'+
    '<div class="aphead"><div style="min-width:0">'+
     '<p class="eyebrow" style="margin-bottom:6px">'+(done?'Approval '+h(st.status):'Approval required')+'</p>'+
-    (a.amount?'<div class="amt">'+usd(a.amount)+'<span class="cur">'+h(a.currency)+'</span></div>':'<div class="amt" style="font-size:17px">'+h(a.tool)+'</div>')+
+    (a.amount?'<div class="amt">'+usd(a.amount)+' <span class="cur">'+h(a.currency)+'</span></div>':'<div class="amt" style="font-size:17px">'+h(a.tool)+'</div>')+
     '<div class="row" style="margin-top:6px;gap:7px">'+agentCard(a.agent,{layout:"compact",key:a.agent})+'</div>'+
     '<div class="muted" style="font-size:12.5px;margin-top:4px">'+(a.amount?'<span class="mono">'+h(a.tool)+'</span> → ':'')+'<span class="mono">'+h(a.counterparty)+'</span>'+
      (r?'<br>task <span class="mono">'+h(r.task)+'</span> '+h(r.taskTitle):'')+'</div>'+
@@ -1818,7 +1846,7 @@ function approvalCard(a){
        '<dt>Operator</dt><dd>'+h((PEOPLE[a.op]||{name:a.op}).name)+'</dd>'+
        '<dt>Policy</dt><dd><span class="mono">'+h(a.policy)+'</span>'+(pol?' <span class="dim">activated '+h(pol.at)+' by '+h(pol.by)+'</span>':'')+'</dd>'+
        '<dt>Rule</dt><dd>'+h(a.rule)+'</dd>'+
-       '<dt>Tier</dt><dd>'+h(a.tier)+((TIER_RANK[a.tier]||0)>=2?' <span class="dim">· routed through the gateway, so the decision was made on the server before the call left the host</span>':a.tier==="harness"?' <span class="dim">· the call was routed through Oxagen, so the decision was made on the server. The agent’s native tools are client-attested and fail-open</span>':' <span class="dim">· recorded only</span>')+'</dd></dl></div>')+
+       '<dt>Tier</dt><dd>'+h(a.tier)+((TIER_RANK[a.tier]||0)>=2?' <span class="dim">· routed through the gateway, so oxagen decided before the call left the host</span>':a.tier==="harness"?' <span class="dim">· the call was routed through oxagen, so oxagen made the decision. The agent’s native tools are client-attested and fail-open</span>':' <span class="dim">· recorded only</span>')+'</dd></dl></div>')+
      '<div><p class="eyebrow q" style="margin-bottom:7px">The call</p><dl class="kv">'+
       '<dt>Tool version</dt><dd class="mono">'+h(a.tool)+'</dd>'+
       '<dt>Input digest</dt><dd class="mono">'+h(a.digest)+'</dd>'+
@@ -2194,8 +2222,8 @@ var EFFORT_LADDER=["low","medium","high"];
    reports usage afterwards, so the setting is never seen. Saying "medium" there would be a guess. */
 function runEffort(R){
   if(TIER_RANK[R.tier]>=2&&R.effort) return {v:R.effort,seen:true};
-  if(TIER_RANK[R.tier]>=2) return {v:null,seen:false,why:"this agent sent no effort setting, so the model used its own default"};
-  return {v:null,seen:false,why:"the model call did not go through Oxagen, so the request body was never read"};
+  if(TIER_RANK[R.tier]>=2) return {v:null,seen:false,gw:true,why:"this agent sent no effort setting, so the model used its own default"};
+  return {v:null,seen:false,why:"the model call did not go through oxagen, so the request body was never read"};
 }
 
 /* What a reviewer reads: the shape of the run, not its prose. Turns, corrective prompts, how much
@@ -2205,52 +2233,57 @@ function runFit(R){
   var prompts=w.prompts, rung=modelRung(R.model);
   var reasonShare=m.tokOut?m.reasoning/m.tokOut:0;
   var redone=prompts>1||(m.errs||0)>0;
-  var fit={read:prompts+" prompt"+(prompts===1?"":"s")+" · "+R.turn+" turn"+(R.turn===1?"":"s")+" · "+
+  var fit={read:plural(prompts,"prompt")+" · "+plural(R.turn,"turn")+" · "+
     tokn(m.tokOut)+" output tokens, "+per(reasonShare)+" of them reasoning · "+
-    ((m.errs||0)?m.errs+" tool call"+(m.errs===1?"":"s")+" failed":"no tool call failed")};
+    ((m.errs||0)?plural(m.errs,"tool call")+" failed":"no tool call failed")};
 
   /* The model. Down a rung when a small job landed first time on a big model; up a rung when the
      run had to be corrected on a small one. Reasoning share is a fixed fraction of output per model
      family, so it reads the shape of the work instead: prompts, failed calls, turns, and steps. */
+  /* A move is suggested only where the record shows a saving (down a rung) or measured rework, meaning
+     follow-up prompts that cost money (up a rung). Anything else fits, and the page says so. */
   var small=R.turn<=3||m.steps<=12;
-  if(!redone&&small&&rung.rank>0){
-    var lower=MODEL_LADDER[rung.rank-1];
-    var save=Math.max(0,(parseFloat(R.cost)||0)-(m.tokIn*PRICE.inEff+m.tokOut*lower.out));
-    fit.model={verdict:"over",title:"Wrong model tier",
-     say:"This run landed in "+R.turn+" turn"+(R.turn===1?"":"s")+" and "+m.steps+" steps, first try, with no tool call failing. "+
-      lower.lab+" answers this shape of work, and this run would have cost about "+usd(save.toFixed(2))+" less.",
+  var lower=rung.rank>0?MODEL_LADDER[rung.rank-1]:null, upper=rung.rank<MODEL_LADDER.length-1?MODEL_LADDER[rung.rank+1]:null;
+  var save=lower?Math.max(0,(parseFloat(R.cost)||0)-(m.tokIn*PRICE.inEff+m.tokOut*lower.out)):0;
+  if(!redone&&small&&lower&&save>=0.005){
+    fit.model={verdict:"over",title:"Heavier model than needed",
+     say:"This run finished in "+plural(R.turn,"turn")+" and "+plural(R.steps,"step")+", first try, with no failed tool call. "+
+      lower.lab+" can do this kind of work, and this run would have cost about "+usd(save.toFixed(2))+" less.",
      suggest:lower.m,suggestLab:lower.lab,delta:-save};
-  } else if(redone&&rung.rank<MODEL_LADDER.length-1){
-    var upper=MODEL_LADDER[rung.rank+1];
-    var more=Math.max(0,(m.tokIn*PRICE.inEff+m.tokOut*upper.out)-(parseFloat(R.cost)||0))+w.usd;
-    fit.model={verdict:"under",title:"Wrong model tier",
-     say:"This run took "+prompts+" prompts to land and wasted "+usd(fmt2(w.usd))+" getting there. "+
-      upper.lab+" costs about "+usd(more.toFixed(2))+" more on this shape of work, and the correction is what you are paying for now.",
-     suggest:upper.m,suggestLab:upper.lab,delta:more};
+  } else if(prompts>1&&w.usd>0&&upper){
+    /* The heavier model is priced on the same tokens, less the rework it would likely have avoided. */
+    var net=(m.tokIn*PRICE.inEff+m.tokOut*upper.out)-(parseFloat(R.cost)||0)-w.usd;
+    fit.model={verdict:"under",title:"Lighter model than needed",
+     say:"This run needed "+plural(prompts-1,"extra prompt")+" ("+usd(fmt2(w.usd))+" of rework). "+
+      upper.lab+" would likely cost "+usd(Math.abs(net).toFixed(2))+" "+(net<0?"less":"more")+" for this kind of work.",
+     suggest:upper.m,suggestLab:upper.lab,delta:net};
   } else {
-    fit.model={verdict:"fit",title:"Model fit",
-     say:modelRung(R.model).lab+" matches this shape of work. Nothing in the record argues for moving it either way."};
+    fit.model={verdict:"fit",title:"Model fits this work",
+     say:rung.lab+" fits this work. No change suggested."};
   }
 
   /* The effort setting, only where Oxagen saw it. */
-  if(!eff.seen){
-    fit.effort={verdict:"unseen",title:"Effort setting",
-     say:"Oxagen did not capture the effort setting for this run, because "+eff.why+". It is captured at the gateway and contained tiers."};
+  if(!eff.seen&&eff.gw){
+    fit.effort={verdict:"unseen",title:"No effort setting",
+     say:"This agent sent no effort setting, so the model used its own default."};
+  } else if(!eff.seen){
+    fit.effort={verdict:"unseen",title:"Effort not captured",
+     say:"oxagen did not capture the effort setting for this run: "+eff.why+". It is captured at the gateway and contained tiers."};
   } else {
     var er=EFFORT_LADDER.indexOf(eff.v);
     if(!redone&&er>0&&m.reasoning>0.2*m.tokOut){
-      fit.effort={verdict:"over",title:"Wrong effort setting",
-       say:"This run landed first try and still spent "+tokn(m.reasoning)+" tokens thinking, "+per(reasonShare)+
-        " of everything it wrote. At "+EFFORT_LADDER[er-1]+" the model thinks less and the output bill falls.",
+      fit.effort={verdict:"over",title:"More effort than needed",
+       say:"This run finished first try and still spent "+tokn(m.reasoning)+" tokens reasoning, "+per(reasonShare)+
+        " of its output. At effort "+EFFORT_LADDER[er-1]+" the model reasons less and output costs less.",
        suggest:EFFORT_LADDER[er-1],delta:-(m.reasoning*0.45*rung.out)};
     } else if(redone&&er<EFFORT_LADDER.length-1){
-      fit.effort={verdict:"under",title:"Wrong effort setting",
-       say:"This run "+(prompts>1?"took "+prompts+" prompts to land":"had "+m.errs+" tool call"+(m.errs===1?"":"s")+" fail")+
-        " on effort "+eff.v+". At "+EFFORT_LADDER[er+1]+" the model thinks before it acts, which is cheaper than being told again.",
+      fit.effort={verdict:"under",title:"Less effort than needed",
+       say:"This run "+(prompts>1?"needed "+plural(prompts-1,"extra prompt"):"had "+plural(m.errs,"failed tool call"))+
+        " at effort "+eff.v+". At effort "+EFFORT_LADDER[er+1]+" the model reasons before it acts, which costs less than a correction.",
        suggest:EFFORT_LADDER[er+1],delta:m.reasoning*0.6*rung.out};
     } else {
-      fit.effort={verdict:"fit",title:"Effort setting",
-       say:"Effort "+eff.v+" matches this run. "+per(reasonShare)+" of the output was reasoning and nothing had to be done twice."};
+      fit.effort={verdict:"fit",title:"Effort fits this run",
+       say:"Effort "+eff.v+" fits this run. "+(redone?"It is already the highest setting.":per(reasonShare)+" of the output was reasoning and nothing had to be redone.")};
     }
   }
   fit.eff=eff;
@@ -2344,7 +2377,7 @@ function runWhere(R){
   var k=runWork(R);
   var prs=k.prs.length
     ? k.prs.map(function(p){return '<a class="b b-q lk" href="'+h(p.url)+'" target="_blank" rel="noopener" title="'+h(p.title)+'">'+
-        avSvg("git-pull-request")+h(p.ref)+'</a>';}).join("")
+        avSvg("git-pull-request")+h(p.ref)+'</a>';}).join(SEP)
     : '<span class="b b-q dim">no pull request</span>';
   return '<div class="row where" style="margin-top:6px">'+
    '<a class="b b-q lk" href="'+h(ghRepoUrl(k.repo))+'" target="_blank" rel="noopener">'+h(k.repo)+'</a>'+
@@ -2353,7 +2386,7 @@ function runWhere(R){
     avSvg("git-branch")+h(k.branch.name)+(k.branch.stated?'':' <span class="dim">derived</span>')+'</a>'+
    prs+
    '<button class="b b-q lk mono" onclick="copyPath(\''+h(k.path)+'\')" title="'+
-    (k.stated?'Oxagen recorded this checkout on '+h(k.machine)+'. Click to copy the path.'
+    (k.stated?'oxagen recorded this checkout on '+h(k.machine)+'. Click to copy the path.'
      :k.enrolled?h(k.machine)+' has this repository enrolled at '+h(k.base)+'; the branch differs, so the work is in a worktree off it. Click to copy the path.'
      :'No checkout on '+h(k.machine)+' is enrolled, so this path is worked out from the repository name. Click to copy it.')+'">'+
     avSvg("folder-tree")+h(k.machine)+':'+h(k.path)+(k.stated?'':' <span class="dim">derived</span>')+'</button>'+
@@ -2365,7 +2398,7 @@ function runRig(R){
   return '<div class="row rig" style="margin-top:8px">'+
    '<span class="b b-q">'+(a?h(a.harnessLabel):"harness")+(a&&a.harnessV?' <span class="mono dim">'+h(a.harnessV)+'</span>':'')+'</span>'+
    '<span class="b b-q mono">'+h(R.model)+'</span>'+
-   '<span class="b b-q">effort '+(eff.seen?h(eff.v):'<span class="dim">not captured</span>')+'</span>'+
+   '<span class="b b-q">effort '+(eff.seen?h(eff.v):eff.gw?'<span class="dim">model default</span>':'<span class="dim">not captured</span>')+'</span>'+
    fitBadge(f.model)+fitBadge(f.effort)+'</div>';
 }
 /* The argument in full, with the change it asks for. The model is set in the agent definition, so
@@ -2381,11 +2414,11 @@ function runFitPanel(R){
      (kind==="model"?'Move this agent to '+h(x.suggestLab):'Set effort to '+h(x.suggest))+'</button></div></div>';
   }
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Model fit</h3>'+
-   '<span class="b b-q" style="margin-left:auto;font-size:10.5px">generated · not the record</span></div>'+
+   '<span class="b b-q" style="margin-left:auto;font-size:10.5px">Generated estimate</span></div>'+
    card(f.model,"model")+card(f.effort,"effort")+
    '<div class="panel-b"><div class="note">Read from this run only: '+h(f.read)+
-   '. A reading is an argument, not a verdict, and it changes nothing until somebody merges the change to '+
-   (a?'<span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>':'the agent definition')+'.</div></div></div>';
+   '. Nothing changes until the change to '+
+   (a?'<span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>':'the agent definition')+' merges.</div></div></div>';
 }
 DLG_EXT.fitchange=function(arg){
   var parts=String(arg||"").split(":"), R=run(parts[0]); if(!R)return noSuch("Run");
@@ -2395,10 +2428,10 @@ DLG_EXT.fitchange=function(arg){
    b:'<div class="note">'+h(x.say)+'</div>'+
     '<dl class="kv" style="margin-top:14px"><dt>Agent</dt><dd>'+(a?h(a.name):h(R.agent))+'</dd>'+
     '<dt>File</dt><dd class="mono" style="font-size:11.5px">'+h(file)+'</dd>'+
-    '<dt>Today</dt><dd class="mono">'+(parts[1]==="effort"?h(f.eff.v||"not captured"):h(R.model))+'</dd>'+
+    '<dt>Today</dt><dd class="mono">'+(parts[1]==="effort"?h(f.eff.v||(f.eff.gw?"model default":"not captured")):h(R.model))+'</dd>'+
     '<dt>Proposed</dt><dd class="mono">'+h(x.suggest)+'</dd>'+
-    '<dt>Effect on this shape of run</dt><dd>'+(x.delta<0?usd(Math.abs(x.delta).toFixed(2))+' less':usd(Math.abs(x.delta).toFixed(2))+' more')+' a run</dd></dl>'+
-    '<div class="note" style="margin-top:14px">Every run the agent has already sealed keeps the model it ran on. This changes the next one.</div>',
+    '<dt>Effect per run</dt><dd>'+(x.delta<0?usd(Math.abs(x.delta).toFixed(2))+' less':usd(Math.abs(x.delta).toFixed(2))+' more')+'</dd></dl>'+
+    '<div class="note" style="margin-top:14px">Runs the agent has already sealed keep the settings they ran with. This changes the next run.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn primary" onclick="fitPr(\''+h(R.id)+':'+h(parts[1])+'\')">Open the pull request</button>'};
 };
@@ -2410,14 +2443,14 @@ function fitPr(arg){
    repo:ws().main,base:ws().branch,branch:"agents/"+slug+"-"+parts[1],
    pr:ws().main+"#"+(524+OXPRS.length),by:PEOPLE.marcus.name,byKind:"person",
    opened:"just now",state:"checks_running",
-   trigger:"A model fit reading of "+R.id+" argued the "+(parts[1]==="effort"?"effort setting":"model tier")+" was the wrong size.",
+   trigger:"A model fit reading of "+R.id+" found the "+(parts[1]==="effort"?"effort setting":"model class")+" was the wrong size.",
    files:[["mod",".oxagen/agents/"+slug+".toml",(parts[1]==="effort"?"effort = ":"model = ")+x.suggest]],
    checks:[["schema","pass","agent-definition/v0.3; "+(parts[1]==="effort"?"effort":"model")+" is a value the harness accepts."],
-    ["belt_unchanged","pass","The toolbelt and its tier are untouched, so nothing this agent may do changes."],
+    ["belt_unchanged","pass","The toolbelt is unchanged, so nothing this agent may do changes."],
     ["budget_fit","pass","The agent's daily budget covers the new price at its 30-day run count."]]};
   OXPRS.unshift(p);
   closeDialog(); render();
-  act("Opened "+p.pr+". The next run uses it; every sealed run keeps the model it ran on.","gold");
+  act("Opened "+p.pr+". The first run after it merges uses the change. Sealed runs keep the settings they ran with.","gold");
 }
 function runStatRow(R){
   var m=runMetrics(R), w=runWaste(R), p=w.prompts, s=m.series;
@@ -2425,11 +2458,11 @@ function runStatRow(R){
   var tile=function(k,v,sub,color){return '<div class="stat"><span class="k">'+k+'</span><span class="v"'+(color?' style="color:'+color+'"':'')+'>'+v+'</span><span class="s">'+sub+'</span></div>';};
   return '<div class="rstats">'+
    tile("Tokens",tokn(m.tokTotal),tokn(m.tokIn)+' in, '+tokn(m.tokOut)+' out')+
-   tile("Prompts",p,p===1?'one-shot session':(p-1)+' corrective',p>2?"var(--st-approval)":null)+
-   tile("Cost",usd(R.cost),'<span class="basis">'+h(R.basis)+'</span>')+
-   tile("Wasted",fmt$(w.usd),w.corrective?(p-1)+' corrective prompt'+(p===2?'':'s'):w.listed?h(w.listed.badges[0][0]):'nothing bought nothing',w.usd>0?"var(--st-critical)":null)+
-   tile("Wall clock",msDur(m.wall),(wp[0]==="waiting on a person"?'mostly waiting on a person':wp[0]==="model"?'mostly in the model':'mostly in '+wp[0]+' calls'))+
-   tile("Cache hit",per(R.cache),'saved about $'+s.saved.toFixed(2))+'</div>';
+   tile("Prompts",p,p===1?'No follow-up prompts':plural(p-1,"follow-up prompt"),p>2?"var(--st-approval)":null)+
+   tile("Cost",usd(R.cost),basisChip(R.basis))+
+   tile("Unproductive",fmt$(w.usd),w.corrective?plural(p-1,"follow-up prompt"):w.listed?h(w.listed.badges[0][0]):'None',w.usd>0?"var(--st-critical)":null)+
+   tile("Wall clock",msDur(m.wall),(wp[0]==="waiting on a person"?'mostly waiting on a person':wp[0]==="model"?'mostly in the model':'mostly in '+wp[0]+" calls"))+
+   tile("Cache hit",per(R.cache),'saved about '+usd(s.saved.toFixed(2)))+'</div>';
 }
 /* Every issue a session touched: the task it was started for, and any it read, referenced or closed.
    A session is not one issue; the tab says which is which and links to each. */
@@ -2458,7 +2491,7 @@ function issuesTab(R){
      '<td>'+(u?'<a href="'+h(u)+'" target="_blank" rel="noopener">View ↗</a>':'<span class="dim">no link</span>')+'</td></tr>';}).join("");
   return '<div class="panel"><div class="panel-h"><h3>Issues</h3><span class="b b-q" style="margin-left:auto">'+L.length+' in this session</span></div>'+
    '<div class="tw"><table><thead><tr><th>Issue</th><th>Status</th><th>Relation</th><th>Edge</th><th></th></tr></thead><tbody>'+(rows||'<tr><td colspan="5" class="dim">No issue is linked to this session.</td></tr>')+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">A session can touch more than one issue: the task it was started for, and any it read, referenced or closed on the way. The relation says which, the edge says how Oxagen knows, and the status is read from the tracker when the page loads.</div></div></div>';
+   '<div class="panel-b"><div class="note">A session can touch more than one issue: the task it was started for, and any it read, referenced or closed on the way. The relation says which, the edge says how oxagen knows, and the status is read from the tracker when the page loads.</div></div></div>';
 }
 /* Spend by area: the run's cost split across what the tokens were spent on. Input is a third of the
    money and splits by the tokens each area put into the window; output is the rest. Tool calls are
@@ -2471,10 +2504,10 @@ function runAreas(R){
   var results=Math.max(0,m.tokIn-first-follow-ctx-defs-sys);
   var inCost=total/3, per=function(t){return inCost*tokShare(t,m.tokIn);};
   var areas=[["Initial prompt",first,per(first),"the first prompt, carried in every request"],
-    ["Follow-up prompts",follow,per(follow),p>1?(p-1)+" corrective prompt"+(p===2?"":"s")+", each re-sent with the window":"none"],
-    ["Context retrievals",ctx,per(ctx),"context frames and steering Oxagen injected"],
-    ["Tool definitions",defs,per(defs),"the belt as the model is shown it"],
-    ["Tool calls",results,per(results),m.calls.length+" calls, result bodies in the window"],
+    ["Follow-up prompts",follow,per(follow),p>1?plural(p-1,"follow-up prompt")+", each re-sent with the window":"none"],
+    ["Context retrievals",ctx,per(ctx),"context frames and steering oxagen injected"],
+    ["Tool definitions",defs,per(defs),"the toolbelt as the model sees it"],
+    ["Tool calls",results,per(results),plural(m.calls.length,"call")+", result bodies in the window"],
     ["System prompt",sys,per(sys),"the harness's own prompt"],
     ["Model output",m.tokOut,total*2/3,tokn(m.reasoning)+" of it reasoning"]];
   var byTool={}, msTot=0; m.calls.forEach(function(c){msTot+=c.ms;});
@@ -2484,12 +2517,12 @@ function runAreas(R){
 }
 function runSpendByArea(R){
   var A=runAreas(R), mx=Math.max.apply(null,A.areas.map(function(a){return a[2];}))||1;
-  var bars=A.areas.map(function(a){return '<div class="meter"'+tipAttr(a[3])+'><div class="lab">'+a[0]+'<b>'+(a[2]>0&&a[2]<0.005?'$'+a[2].toFixed(3):fmt$(a[2]))+' <span class="dim" style="font-weight:500">· '+tokn(a[1])+' tok</span></b></div><div class="bar"><i style="width:'+Math.max(1,Math.round(a[2]/mx*100))+'%;background:var(--st-approval)"></i></div></div>';}).join("");
-  var top=A.tools.slice(0,8).map(function(t){return '<div class="rs-file"><span class="mono" title="'+h(t.id)+'">'+h(toolParts(t.id).n)+'</span><span class="mono dim">'+t.calls+' call'+(t.calls===1?'':'s')+' · <b style="color:var(--fg)">'+fmt$(t.usd)+'</b></span></div>';}).join("");
-  return '<div class="panel"><div class="panel-h"><h3>Spend by area</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+usd(R.cost)+' · '+h(R.basis)+'</span></div>'+
+  var bars=A.areas.map(function(a){return '<div class="meter"'+tipAttr(a[3])+'><div class="lab">'+a[0]+'<b>'+(a[2]>0&&a[2]<0.005?usd(a[2].toFixed(3)):fmt$(a[2]))+' <span class="dim" style="font-weight:500">· '+tokn(a[1])+' tok</span></b></div><div class="bar"><i style="width:'+Math.max(1,Math.round(a[2]/mx*100))+'%;background:var(--st-approval)"></i></div></div>';}).join("");
+  var top=A.tools.slice(0,8).map(function(t){return '<div class="rs-file"><span class="mono" title="'+h(t.id)+'">'+h(toolParts(t.id).n)+'</span><span class="mono dim">'+plural(t.calls,"call")+' · <b style="color:var(--fg)">'+fmt$(t.usd)+'</b></span></div>';}).join("");
+  return '<div class="panel"><div class="panel-h"><h3>Spend by area</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+usd(R.cost)+' · '+basisChip(R.basis)+'</span></div>'+
    '<div class="panel-b" style="display:grid;gap:9px">'+bars+'</div>'+
-   (A.tools.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="eyebrow q" style="margin:0 0 4px">Dearest tools</p><div class="rs-files" style="margin:0;border:0">'+top+'</div>'+'</div>':'')+
-   ('<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Input is a third of the money, split by the tokens each area put into the window; output is the rest. Tool calls split again by the wall clock each tool held, so the dearest tool is visible. A follow-up prompt re-sends the window, which is why it costs more than its own words.</div></div>')+'</div>';
+   (A.tools.length?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="eyebrow q" style="margin:0 0 4px">Most expensive tools</p><div class="rs-files" style="margin:0;border:0">'+top+'</div>'+'</div>':'')+
+   ('<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Input is about a third of the cost, split by the tokens each area added to the context window. Output is the rest. Tool calls are split again by how long each tool ran. A follow-up prompt re-sends the whole window, so it costs more than its own words.</div></div>')+'</div>';
 }
 function runSide(R){
   var g=runGraphOf(R), m=runMetrics(R), outs=R.outputs||[];
@@ -2539,21 +2572,21 @@ function runInstruments(R){
   var t1=instTile("Cost so far",h(R.basis),usd(R.cost)+'<small>USD</small>',
     '<b>$'+s.perTurn.toFixed(2)+'</b> per turn · turn '+(s.peak+1)+' was the dearest'+(medRun!=null?' · '+deltaHtml(total,medRun,function(d){return "$"+d.toFixed(2);},false)+' vs this agent’s median run $'+medRun.toFixed(2):''),
     '<div class="cols">'+costCols+'<span class="base"></span></div><div class="ax"><span>turn 1</span><span>turn '+s.n+(R.status==="live"?" · live":"")+'</span></div>',
-    'cache hit <b>'+per(R.cache)+'</b> · saved ≈ <b>$'+s.saved.toFixed(2)+'</b> against an uncached prompt');
+    'Cache hit <b>'+per(R.cache)+'</b> · saved about <b>'+usd(s.saved.toFixed(2))+'</b> compared with no cache');
 
   /* 2 · wall clock — model, tool, waiting on a person, harness */
   var wp=[["model",m.modelMs,"fk-model",msDur(m.modelMs)],["tool",m.toolMs,"fk-tool",msDur(m.toolMs)],
           ["waiting on a person",m.waitMs,"fk-gov",msDur(m.waitMs)],["harness",m.overMs,"neu",msDur(m.overMs)]];
   var lead=wp.slice().sort(function(x,y){return y[1]-x[1];})[0];
-  var t2=instTile("Wall clock",R.status==="live"?"so far":"start to seal",msDur(m.wall)+'<small>elapsed</small>',
-    '<b>'+pct(lead[1],m.wall)+'</b> of it '+(lead[0]==="waiting on a person"?'waiting on a person':lead[0]==="model"?'in the model':'in '+lead[0]+' calls')+
-    (m.parked?' · '+m.parked+' call'+(m.parked===1?'':'s')+' parked for approval':''),
+  var t2=instTile("Wall clock",R.status==="live"?"so far":"start to seal",msDur(m.wall)+' <small>elapsed</small>',
+    '<b>'+pct(lead[1],m.wall)+'</b> of it '+(lead[0]==="waiting on a person"?'waiting on a person':lead[0]==="model"?'in the model':'in '+lead[0]+" calls")+
+    (m.parked?' · '+plural(m.parked,"call")+' waited for approval':''),
     stack3(wp,m.wall)+stackLeg(wp),
-    'Running '+m.batches.length+' batch'+(m.batches.length===1?'':'es')+' together cost <b>'+msDur(m.toolMs)+'</b> of wall clock against <b>'+msDur(m.serialMs)+'</b> one at a time.');
+    m.serialMs>m.toolMs?'Running '+plural(m.batches.length,"batch","batches")+' in parallel took <b>'+msDur(m.toolMs)+'</b> instead of <b>'+msDur(m.serialMs)+'</b> one at a time.':'');
 
   /* 3 · tokens */
   var tp=[["cache read",m.cacheRead,"fk-model",tokn(m.cacheRead)],["fresh input",m.fresh,"fk-tool",tokn(m.fresh)],["output",m.tokOut,"fk-gov",tokn(m.tokOut)]];
-  var t3=instTile("Tokens","in and out",tokn(m.tokTotal)+'<small>tokens</small>',
+  var t3=instTile("Tokens","in and out",tokn(m.tokTotal)+' <small>tokens</small>',
     '<b>'+tokn(m.tokIn)+'</b> in · <b>'+tokn(m.tokOut)+'</b> out'+(m.reasoning?' · '+tokn(m.reasoning)+' of the output was reasoning':''),
     stack3(tp,m.tokIn+m.tokOut)+stackLeg(tp),
     'Cache hit <b>'+per(R.cache)+'</b> of input · <b>'+tokn(m.perCall)+'</b> tokens per model call · effective input price $1.88 per million'+(m.cacheWrite?'':' · nothing written to cache'));
@@ -2563,9 +2596,9 @@ function runInstruments(R){
   var stepCols=s.steps.map(function(n,i){var mh=s.model[i]/stepMx*100,th=s.tool[i]/stepMx*100;
     return '<button type="button" class="c" style="height:100%"'+tipAttr("Turn "+(i+1)+" · "+n+" steps · "+s.model[i]+" model · "+s.tool[i]+" tool")+' aria-label="turn '+(i+1)+' '+n+' steps" onclick="runTab(\'trace\')">'+
       (n===stepMx?'<span class="lab">'+n+'</span>':'')+'<i class="fk-tool" style="height:'+Math.max(2,Math.round(th))+'%"></i><i class="fk-model" style="height:'+Math.max(2,Math.round(mh))+'%"></i></button>';}).join("");
-  var t4=instTile("Shape of the run",FRAMES.length+' frames in view',
-    R.turn+'<small>turns</small><span class="sep">·</span>'+R.steps+'<small>steps</small><span class="sep">·</span>'+R.frames+'<small>frames</small>',
-    'A step is one model call or one tool call; a frame is one recorded event.',
+  var t4=instTile("Turns and steps",(FRAMES.length<R.frames?FRAMES.length+' of '+plural(R.frames,"frame"):plural(R.frames,"frame"))+' shown',
+    R.turn+' <small>'+(R.turn===1?"turn":"turns")+'</small><span class="sep"> · </span>'+R.steps+' <small>'+(R.steps===1?"step":"steps")+'</small><span class="sep"> · </span>'+R.frames+' <small>'+(R.frames===1?"frame":"frames")+'</small>',
+    'A step is one model call or one tool call. A frame is one recorded event.',
     '<div class="cols">'+stepCols+'<span class="base"></span></div><div class="ax"><span>turn 1</span><span>turn '+s.n+'</span></div>'+
     stackLeg([["model calls",m.modelN,"fk-model",m.modelN],["tool calls",m.calls.length,"fk-tool",m.calls.length]]),
     '<b>'+m.fan.toFixed(1)+'</b> tools per batch · <b>'+(m.calls.length/Math.max(1,m.modelN)).toFixed(2)+'</b> tool calls per model call');
@@ -2577,20 +2610,20 @@ function runInstruments(R){
      '<span class="ti">'+catSvg(f.cat)+'</span><span class="fl">'+h(TCAT[f.cat].l)+'</span>'+
      '<span class="fb"><i style="width:'+Math.round(f.n/fmx*100)+'%"></i></span><span class="fn">'+f.n+'</span></button>';}).join("");
   var rest=m.families.slice(4).reduce(function(a,f){return a+f.n;},0);
-  var t5=instTile("Tool calls",m.families.length+' famil'+(m.families.length===1?'y':'ies'),
-    m.calls.length+'<small>calls</small>'+(m.errs?'<small>'+deltaHtml(m.errs,0,function(d){return d+" failed";},false)+'</small>':''),
-    '', '<div class="fams">'+famRows+(rest?'<div class="frow rest"><span class="ti"></span><span class="fl">other</span><span class="fb"><i style="width:'+Math.round(rest/fmx*100)+'%"></i></span><span class="fn">'+rest+'</span></div>':'')+'</div>',
-    '<b>'+m.par+'</b> of '+m.batches.length+' batches ran in parallel · up to <b>'+m.maxPar+'</b> at once');
+  var t5=instTile("Tool calls",plural(m.families.length,"family","families"),
+    m.calls.length+' <small>'+(m.calls.length===1?"call":"calls")+'</small>'+(m.errs?'<small>'+deltaHtml(m.errs,0,function(d){return d+" failed";},false)+'</small>':''),
+    '', '<div class="fams">'+famRows+(rest?'<div class="frow rest"><span class="ti"></span><span class="fl">Other</span><span class="fb"><i style="width:'+Math.round(rest/fmx*100)+'%"></i></span><span class="fn">'+rest+'</span></div>':'')+'</div>',
+    '<b>'+m.par+'</b> of '+plural(m.batches.length,"batch","batches")+' ran in parallel · up to <b>'+m.maxPar+'</b> at once');
 
   /* 6 · productive ratio */
   var ref=a?a.ratio:null;
   var t6=instTile("Productive ratio","steps that advanced the task",
     per(R.ratio)+(ref!=null?'<small>'+deltaHtml(R.ratio*100,ref*100,function(d){return Math.round(d)+" pts";},true)+' vs 30-day '+per(ref)+'</small>':''),
     '',
-    '<div class="stk"><i class="fk-model" style="flex:'+s.adv+'"'+tipAttr(s.adv+" steps advanced the task")+'></i><i style="flex:'+s.idle+';background:var(--rule)"'+tipAttr(s.idle+" steps did not: retries, re-reads and waits")+'></i>'+
+    '<div class="stk"><i class="fk-model" style="flex:'+s.adv+'"'+tipAttr(plural(s.adv,"step")+" advanced the task")+'></i><i style="flex:'+s.idle+';background:var(--rule)"'+tipAttr(plural(s.idle,"step")+" did not: retries, re-reads and waits")+'></i>'+
     (ref!=null?'<span class="ref" style="left:'+Math.round(ref*100)+'%"'+tipAttr("this agent’s 30-day productive ratio · "+per(ref))+'></span>':'')+'</div>'+
     stackLeg([["advanced",s.adv,"fk-model",s.adv],["did not",s.idle,"neu",s.idle]]),
-    s.idle?'<b>'+s.idle+'</b> steps did not move the task: '+Math.ceil(s.idle*0.55)+' retries, '+Math.floor(s.idle*0.3)+' re-reads, '+Math.max(0,s.idle-Math.ceil(s.idle*0.55)-Math.floor(s.idle*0.3))+' waits.':'Every step advanced the task.');
+    s.idle?'<b>'+plural(s.idle,"step")+'</b> did not advance the task: '+plural(Math.ceil(s.idle*0.55),"retry","retries")+', '+plural(Math.floor(s.idle*0.3),"re-read")+', '+plural(Math.max(0,s.idle-Math.ceil(s.idle*0.55)-Math.floor(s.idle*0.3)),"wait")+'.':'Every step advanced the task.');
 
   return '<div class="inst-grid">'+t1+t2+t3+t4+t5+t6+'</div>';
 }
@@ -2601,34 +2634,33 @@ function runInstruments(R){
 function callsPanel(R){
   var m=runMetrics(R),fmx=m.families.length?m.families[0].n:1;
   var rows=m.families.map(function(f){
-    return '<tr><td><span class="fcell t-'+f.cat+'"><span class="ti">'+catSvg(f.cat)+'</span><span class="fx"><b>'+h(TCAT[f.cat].l)+'</b><span>'+f.tools+' distinct tool'+(f.tools===1?'':'s')+'</span></span></span></td>'+
+    return '<tr><td><span class="fcell t-'+f.cat+'"><span class="ti">'+catSvg(f.cat)+'</span><span class="fx"><b>'+h(TCAT[f.cat].l)+'</b><span>'+plural(f.tools,"distinct tool")+'</span></span></span></td>'+
      '<td class="num">'+f.n+'</td><td class="fbc"><span class="fb"'+tipAttr(TCAT[f.cat].l+" · "+pct(f.n,m.calls.length)+" of calls")+'><i style="width:'+Math.round(f.n/fmx*100)+'%"></i></span></td>'+
      '<td class="num">'+pct(f.n,m.calls.length)+'</td><td class="num">'+msDur(f.ms)+'</td>'+
      '<td class="num">'+(f.err?'<span class="b b-denied"><span class="d"></span>'+f.err+'</span>':'<span class="dim">0</span>')+'</td></tr>';}).join("");
   var hmx=Math.max.apply(null,Object.keys(m.hist).map(function(k){return m.hist[k];}));
   var hrows=Object.keys(m.hist).sort().map(function(k){
-    return '<div class="hrow"><span class="hk">'+k+' tool'+(k==="1"?"":"s")+'</span><span class="fb"'+tipAttr(m.hist[k]+" batches asked for "+k+" tool"+(k==="1"?"":"s")+" at once")+'><i style="width:'+Math.round(m.hist[k]/hmx*100)+'%"></i></span><span class="hv">'+m.hist[k]+'</span></div>';}).join("");
+    return '<div class="hrow"><span class="hk">'+k+' tool'+(k==="1"?"":"s")+'</span><span class="fb"'+tipAttr(plural(m.hist[k],"batch","batches")+" ran "+plural(+k,"tool")+" at once")+'><i style="width:'+Math.round(m.hist[k]/hmx*100)+'%"></i></span><span class="hv">'+m.hist[k]+'</span></div>';}).join("");
   return '<div class="panel" style="margin-bottom:16px"><div class="panel-h"><h3>Tool calls</h3>'+
-   '<span class="mono dim" style="font-size:11px;margin-left:auto">'+m.calls.length+' calls · '+m.batches.length+' batches · '+m.families.length+' families</span></div>'+
+   '<span class="mono dim" style="font-size:11px;margin-left:auto">'+plural(m.calls.length,"call")+' · '+plural(m.batches.length,"batch","batches")+' · '+plural(m.families.length,"family","families")+'</span></div>'+
    '<div class="cc">'+
     '<div class="cc-c wide"><p class="eyebrow q">Calls by family</p>'+
      '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Family</th><th class="num">Calls</th><th></th><th class="num">Share</th><th class="num">Wall clock</th><th class="num">Failed</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-     '<p class="muted" style="font-size:11.5px;margin:9px 0 0">A family says what a tool <b>acts on</b>. It is orthogonal to the hazard and to what the belt decided.</p></div>'+
+     '<p class="muted" style="font-size:11.5px;margin:9px 0 0">A family groups tools by what they act on. It says nothing about risk or policy.</p></div>'+
     '<div class="cc-c"><p class="eyebrow q">Tools per batch</p>'+
      '<div class="hist">'+hrows+'</div>'+
      '<dl class="kv" style="margin-top:12px"><dt>Batches</dt><dd>'+m.batches.length+' · <b>'+m.par+'</b> ran more than one tool</dd>'+
-     '<dt>Widest batch</dt><dd>'+m.maxPar+' tools at once</dd>'+
-     '<dt>Mean fan-out</dt><dd>'+m.fan.toFixed(2)+' tools per batch</dd>'+
-     '<dt>Wall clock won</dt><dd><b>'+msDur(m.serialMs-m.toolMs)+'</b> · '+msDur(m.toolMs)+' together against '+msDur(m.serialMs)+' in turn</dd></dl></div>'+
+     '<dt>Widest batch</dt><dd>'+plural(m.maxPar,"tool")+' at once</dd>'+
+     '<dt>Time saved by batching</dt><dd><b>'+msDur(Math.max(0,m.serialMs-m.toolMs))+'</b> · '+msDur(m.toolMs)+' in parallel instead of '+msDur(m.serialMs)+' one at a time</dd></dl></div>'+
     '<div class="cc-c"><p class="eyebrow q">Speculative prefetch</p>'+
      '<div class="spec"><div class="sv">'+m.used+'<small> of '+m.started+' used</small></div>'+
       '<div class="stk"><i class="fk-model" style="flex:'+m.used+'"'+tipAttr(m.used+" prefetched reads the model went on to ask for")+'></i><i style="flex:'+Math.max(0,m.discarded)+';background:var(--rule)"'+tipAttr(m.discarded+" discarded unread")+'></i></div>'+
       stackLeg([["used",m.used,"fk-model",m.used],["discarded",m.discarded,"neu",m.discarded]])+'</div>'+
-     '<dl class="kv" style="margin-top:12px"><dt>Eligible</dt><dd>'+m.eligible+' read-only calls · a write is never speculated</dd>'+
+     '<dl class="kv" style="margin-top:12px"><dt>Eligible</dt><dd>'+plural(m.eligible,"read-only call")+' · writes are never prefetched</dd>'+
      '<dt>Hit rate</dt><dd>'+pct(m.used,Math.max(1,m.started))+'</dd>'+
-     '<dt>Wall clock saved</dt><dd><b>'+msDur(m.savedMs)+'</b></dd>'+
-     '<dt>Billed</dt><dd>discarded reads are recorded and billed; nothing is hidden</dd></dl>'+
-     '<div class="note" style="margin-top:11px">The harness starts a read it expects the model to ask for before the step is final. Only read-only families are eligible: a discarded write would be an effect nobody asked for, and policy runs on the speculated call exactly as it would on a real one.</div></div>'+
+     '<dt>Time saved by prefetch</dt><dd><b>'+msDur(m.savedMs)+'</b></dd>'+
+     '<dt>Billed</dt><dd>Discarded reads are recorded and billed.</dd></dl>'+
+     '<div class="note" style="margin-top:11px">The harness starts reads it expects the model to ask for before the step is final. Only read-only tools are prefetched, and policy checks a prefetched call the same way as any other.</div></div>'+
    '</div></div>';
 }
 
@@ -2645,12 +2677,12 @@ function runTimeline(R){
   var marks="",parkedAt=-2,ticks=fr.map(function(f,i){
     var k=fkOf(f.kind),tall=k==="op"||f.kind==="approval_request"||(f.kind==="policy_decision"&&/approve/.test(f.sum)),on=i===S.frame&&S.tab.run==="player";
     if(f.kind==="control.steer")marks+='<span class="rt-mark" style="left:'+xs[i].toFixed(2)+'%">steer</span>';
-    if(f.kind==="approval_request"||(f.kind==="policy_decision"&&/approve/.test(f.sum))){if(i-parkedAt>1)marks+='<span class="rt-mark right" style="left:'+xs[i].toFixed(2)+'%">parked · approval</span>';parkedAt=i;}
+    if(f.kind==="approval_request"||(f.kind==="policy_decision"&&/approve/.test(f.sum))){if(i-parkedAt>1)marks+='<span class="rt-mark right" style="left:'+xs[i].toFixed(2)+'%">parked for approval</span>';parkedAt=i;}
     return '<button type="button" class="rt-tick fk-'+k+(tall?" tall":f.cost&&+f.cost?" cost":"")+(on?" on":"")+'" style="left:'+xs[i].toFixed(2)+'%"'+
       tipAttr("frame "+f.seq+" · "+f.kind+"\n"+f.t+(f.cost&&+f.cost?" · $"+f.cost:"")+"\n"+f.sum)+' aria-label="frame '+f.seq+' '+h(f.kind)+'" onclick="openFrame('+i+')"></button>';}).join("");
   var c=fkCounts(fr),leg=FK_ORDER.filter(function(k){return c[k];}).map(function(k){return '<span class="fk-'+k+'"><i></i>'+FK_LABEL[k]+' <b>'+c[k]+'</b></span>';}).join("");
   var el=Math.round(t1-t0),elapsed=el>=60?Math.floor(el/60)+"m "+(el%60)+"s":el+" s";
-  return '<div class="panel rt"><div class="panel-h"><h3>Timeline</h3><span class="mono dim" style="font-size:11px">'+fr.length+' frames shown · '+R.frames+' in the run</span><div class="rt-leg">'+leg+'</div></div>'+
+  return '<div class="panel rt"><div class="panel-h"><h3>Timeline</h3><span class="mono dim" style="font-size:11px">'+(fr.length<R.frames?fr.length+' of '+plural(R.frames,"frame"):plural(R.frames,"frame"))+' shown</span><div class="rt-leg">'+leg+'</div></div>'+
    '<div class="panel-b"><div class="rt-turns">'+turns+'</div><div class="rt-track">'+bands+ticks+'<div class="rt-axis"><span>'+h(fr[0].t.slice(0,8))+'</span><span>+'+elapsed+' · '+h(fr[fr.length-1].t.slice(0,8))+(R.status==="live"?' · live':'')+'</span></div></div><div class="rt-marks">'+marks+'</div>'+
    '<div class="rt-foot"><span class="grow">Every tick is a frame, and the taller ones need a person. Click one to open it, or hover for the record.</span>'+
    '<span>'+bounds.length+' turn'+(bounds.length===1?'':'s')+' in view</span></div></div></div>';
@@ -2762,13 +2794,14 @@ function txGroupOf(kind){for(var i=0;i<TX_GROUPS.length;i++){if(TX_GROUPS[i][2].
 /* the speed divides the ceiling as well as the gap: a run's gaps are either ~0 (one model step's rows) or
    many seconds (a model thinking), so a fixed 1.2 s cap would make 6× look like 1× */
 function txPaced(gap,speed){return Math.max(90/speed,Math.min(1400/speed,gap*1000/speed));}
+// A compacted run carries a dated start ("2025-07-02 11:20:44"). The clock reads only the time.
 function txClock(R,t){
-  var p=String(R.started||"00:00:00").split(":"),base=(+p[0])*3600+(+p[1])*60+(+p[2]);
+  var p=String(R.started||"00:00:00").split(" ").pop().split(":"),base=(+p[0])*3600+(+p[1])*60+(+p[2]);
   var s=base+t,hh=Math.floor(s/3600)%24,mm=Math.floor(s/60)%60,ss=s%60;
   return (hh<10?"0":"")+hh+":"+(mm<10?"0":"")+mm+":"+(ss<10?"0":"")+ss.toFixed(1);
 }
 function txMoney(n){return "$"+(Math.round(n*10000)/10000).toFixed(4);}
-function txMoney2(n){return "$"+n.toFixed(2);}
+function txMoney2(n){return usd(n.toFixed(2));}
 function txFold(text){
   var m=String(text).match(/^[\s\S]*?[.!?](?=\s|$)/);
   if(!m||m[0].length>=text.length-1)return {head:text,rest:""};
@@ -2809,10 +2842,10 @@ function txDiffBlock(d,open){
    projection from what the run record carries, and say so in the runbar */
 function txEntries(R){
   if(TRANSCRIPTS[R.id])return TRANSCRIPTS[R.id];
-  var e=[{t:0,kind:"prompt",body:R.taskTitle+(R.task?"\n\nTask "+R.task+".":""),meta:{task:R.task,by:PEOPLE[R.op]?PEOPLE[R.op].name:""}}];
+  var e=[{t:0,kind:"prompt",body:R.taskTitle+(R.task&&R.task!=="—"?"\n\nTask "+R.task+".":""),meta:{task:R.task,by:PEOPLE[R.op]?PEOPLE[R.op].name:""}}];
   var t=2;
   if(R.summary){t+=4;e.push({t:t,kind:"text",body:R.summary});}
-  t+=0.2;e.push({t:t,kind:"usage",meta:{model:R.model,tin:null,cache:null,tout:null,cost:parseFloat(R.cost)||0,req:"rollup · "+R.frames+" frames"}});
+  t+=0.2;e.push({t:t,kind:"usage",meta:{model:R.model,tin:null,cache:null,tout:null,cost:parseFloat(R.cost)||0,req:"rollup · "+plural(R.frames,"frame")+""}});
   if(R.status==="sealed"||R.status==="compacted")e.push({t:t+0.5,kind:"complete",title:"sealed "+(R.sealed||""),body:""});
   return e;
 }
@@ -2839,7 +2872,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
   var q=S.tx.q.trim(),open=!!S.tx.open[i],inner="",dot="",body=e.body||"";
   if(e.kind==="prompt"){
     inner='<div class="tx-role you"><div class="tx-rolegut"><span class="tx-roletag">YOU</span></div><div><div class="tx-prose">'+txHi(body,q)+'</div>'+
-     '<div class="tx-sub">'+(e.meta&&e.meta.by?'<span>'+h(e.meta.by)+' · operator</span>':'')+(e.meta&&e.meta.task?'<span class="mono">task '+h(e.meta.task)+'</span>':'')+'<span>first prompt</span></div></div></div>';
+     '<div class="tx-sub">'+(e.meta&&e.meta.by?'<span>'+h(e.meta.by)+' · operator</span>':'')+(e.meta&&e.meta.task&&e.meta.task!=="—"?'<span class="mono">task '+h(e.meta.task)+'</span>':'<span>No linked task</span>')+'<span>first prompt</span></div></div></div>';
   } else if(e.kind==="steer"){
     inner='<div class="tx-role steer"><div class="tx-rolegut"><span class="tx-roletag">STEER</span></div><div><div class="tx-prose">“'+txHi(body,q)+'”</div>'+
      '<div class="tx-sub"><span>'+h(e.meta.by)+' · '+h(e.meta.role)+'</span><span>delivered at the next boundary · '+e.meta.tok+' tok</span>'+
@@ -2861,7 +2894,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
   } else if(e.kind==="context_recall"){
     var m2=e.meta||{},list=open?CTXF:CTXF.slice(0,3),hid=CTXF.length-list.length,hidTok=0;
     CTXF.slice(list.length).forEach(function(f){hidTok+=f.tok;});
-    inner='<div><button class="tx-fold" style="color:var(--st-proven);font-weight:600;font-size:12.5px" onclick="txOpen('+i+')">◉ recall · '+m2.frames+' frames · '+tokn(m2.tok)+' tok · '+m2.scored+' scored · '+m2.ms+' ms</button>'+
+    inner='<div><button class="tx-fold" style="color:var(--st-proven);font-weight:600;font-size:12.5px" onclick="txOpen('+i+')">◉ recall · '+plural(m2.frames,"frame")+' · '+tokn(m2.tok)+' tok · '+m2.scored+' scored · '+m2.ms+' ms</button>'+
      '<div class="tx-recall">'+list.map(function(f){return '<span class="k">'+h(f.kind)+'</span><span class="l">'+txHi(f.label,q)+(open?' <span class="dim">· '+h(f.node)+' · score '+f.score+'</span>':'')+'</span><span class="n">'+tokn(f.tok)+' tok</span>';}).join("")+'</div>'+
      (hid>0?'<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⋯ '+hid+' more · '+tokn(hidTok)+' tok · provenance</button>':'')+
      (e.fr!=null?'<div class="tx-sub" style="margin-left:20px"><button class="tx-chip gov" onclick="openFrame('+e.fr+')">context.assembled · fr '+e.fr+'</button><button class="tx-chip" style="cursor:pointer" onclick="runTab(\'trace\')">open the Context tab</button></div>':'')+'</div>';
@@ -2883,10 +2916,10 @@ function txRow(R,e,i,cum,rows,answerIdx){
     if(r&&r.body&&!e.diff){
       var L=r.body.split("\n"),budget=6,anchor=Math.min(txSalient(L),Math.max(0,L.length-budget)),shown=open?L:L.slice(anchor,anchor+budget),hidden=open?0:L.length-shown.length;
       inner+='<pre class="tx-out'+(failed?' err':'')+'">'+txHi(shown.join("\n"),q)+'</pre>';
-      if(hidden>0)inner+='<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⋯ '+hidden+' more line'+(hidden===1?'':'s')+'</button>';
+      if(hidden>0)inner+='<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⋯ '+plural(hidden,"more line","more lines")+'</button>';
       else if(open&&L.length>budget)inner+='<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⏶ collapse</button>';
     }
-    if(e.parked)inner+='<div class="tx-sub" style="margin-left:20px">held at the gateway for up to ten minutes; the model sees a wait with a reason, not a failure. Approve or deny from the card under Governed actions.</div>';
+    if(e.parked)inner+='<div class="tx-sub" style="margin-left:20px">Held at the gateway for up to 10 minutes. The model sees a wait with a reason. Approve or deny it from the card under Governed actions.</div>';
     inner+='</div>';
   } else if(e.kind==="complete"){
     inner='<div><span style="color:var(--st-allowed);font-weight:600">'+txHi(e.title,q)+'</span>'+(body?' <span class="dim">'+txHi(body,q)+'</span>':'')+'</div>';
@@ -2907,19 +2940,19 @@ function transcriptTab(R,compacted){
   var synth=!TRANSCRIPTS[R.id];
   var tools='<div class="tx-tools">'+
    '<input type="search" value="'+h(S.tx.q)+'" placeholder="Search the transcript…" aria-label="search the transcript" oninput="txQ(this.value)">'+
-   (S.tx.q.trim()?'<span class="dim mono" style="font-size:10.5px">'+rows.length+' of '+all.length+' entries</span>':'')+
+   (S.tx.q.trim()?'<span class="dim mono" style="font-size:10.5px">'+rows.length+' of '+plural(all.length,"entry","entries")+'</span>':'')+
    txKindChips(R,errN)+
    '<div class="tx-play">'+
     '<button class="btn sm ghost" onclick="S.tx.think=!S.tx.think;S.tx.open={};render()">'+(S.tx.think?"collapse the provider’s thinking":"expand the provider’s thinking")+'</button>'+
    '</div></div>';
-  var runbar='<div class="tx-runbar"><span class="name">'+h(R.task||R.id)+'</span><span class="meta">'+h(R.agent)+' · '+h(R.model)+' · '+R.turn+' turns · '+R.steps+' steps'+(synth?' · projected from the run record':' · '+all.length+' entries')+'</span>'+
+  var runbar='<div class="tx-runbar"><span class="name">'+h(R.task&&R.task!=="—"?R.task:R.id)+'</span><span class="meta">'+h(R.agent)+' · '+h(R.model)+' · '+plural(R.turn,"turn")+' · '+plural(R.steps,"step")+(synth?' · projected from the run record':' · '+plural(all.length,"entry","entries"))+'</span>'+
    '<span class="tx-chips" style="margin-left:0">'+(S.tx.errs?'<span class="tx-chip err">errors only</span>':'')+(runStatus(R)==="paused"?'<span class="tx-chip warn">⏸ paused</span>':R.status==="live"?'<span class="tx-chip ok">● live</span>':R.status==="parked"?'<span class="tx-chip warn">⏸ parked</span>':'')+'</span>'+
    '<span class="tx-burn"><span>burn</span><span class="bar"><i id="txbar"></i></span><b id="txburn">'+txMoney2(0)+'</b><span>of '+txMoney2(total)+'</span></span></div>';
-  var feed='<div class="tx-feed" id="txfeed" data-n="'+rows.length+'" data-paced="'+paced+'">'+(rows.length?html:'<div class="tx-empty">'+(S.tx.errs?'no failed calls in this run.':S.tx.q?'nothing matches this search.':'nothing to show with these filters.')+'</div>')+'</div>';
+  var feed='<div class="tx-feed" id="txfeed" data-n="'+rows.length+'" data-paced="'+paced+'">'+(rows.length?html:'<div class="tx-empty">'+(S.tx.errs?'No failed calls in this run.':S.tx.q?'Nothing matches this search.':'Nothing to show with these filters.')+'</div>')+'</div>';
   setTimeout(txStart,0);
-  return (compacted?'<div class="warn" style="margin-bottom:12px"><b>Compacted.</b> This transcript is rendered from the archive segment; the frames left the graph after the hot window and nothing was recomputed.</div>':'')+
+  return (compacted?'<div class="warn" style="margin-bottom:12px"><b>Compacted.</b> This transcript is read from the archive. Its frames were moved out of the live record, and nothing was recomputed.</div>':'')+
    '<div class="txs">'+tools+'<div class="tx-frame">'+runbar+feed+'</div>'+
-   '<p class="note" style="margin-top:12px">The transcript is what the agent showed its operator. The gateway\u2019s own frames sit behind the \u2696 chips. Thinking is the text a provider returned, labelled as that. Oxagen has no access to a model\u2019s hidden reasoning.</p><p hidden> each tool call with the output it read, and what every model step cost. The gateway\'s own frames sit behind the ⚖ chips; the transcript never replaces them.</p></div>';
+   '<p class="note" style="margin-top:12px">The transcript is what the agent showed its operator. Select \u2696 to see what the gateway recorded.</p><p hidden> each tool call with the output it read, and what every model step cost. The gateway\'s own frames sit behind the ⚖ chips; the transcript never replaces them.</p></div>';
 }
 /* ---- playback ---- */
 function txStart(){
@@ -3005,8 +3038,8 @@ function pauseBanner(R){
   var c=S.runCtl[R.id]; if(!c||c.status==="resuming")return "";
   var paused=c.status==="paused";
   return '<div class="pause-banner" role="status"><span class="g">❙❙</span><div class="grow"><b>'+(paused?'Paused':'Pausing')+'</b> at turn '+c.turn+' · step '+c.step+
-   (paused?' · by '+h(c.by)+' at '+h(c.at):' · takes effect at the next boundary')+(c.reason?' · <span class="q">“'+h(c.reason)+'”</span>':'')+
-   '<div class="dim" style="font-size:11.5px;margin-top:2px">run token held · budget reservation held · pending approvals keep their clocks · nothing new dispatches</div></div>'+
+   (paused?' · by '+h(c.by)+' at '+h(c.at):' · takes effect at the next checkpoint')+(c.reason?' · <span class="q">“'+h(c.reason)+'”</span>':'')+
+   '<div class="dim" style="font-size:11.5px;margin-top:2px">The run token and budget reservation are held. Pending approvals keep counting down. Nothing new starts.</div></div>'+
    (paused?'<button class="btn sm" onclick="resumeRun(\''+R.id+'\')">▶ Resume run</button>':'')+
    '<button class="btn sm ghost" onclick="openFrame(FRAMES.length-1)">Open the pause frame</button></div>';
 }
@@ -3092,14 +3125,14 @@ function linkedWork(R){
   var repos=g.repos.map(function(r){return lwItem("⌂",r.name,(r.ref?r.ref+" · ":"")+(r.note||""),r,ghRepoUrl(r.name));});
   var k=runWork(R);
   var arts=g.artifacts.map(function(a){return '<div class="lw-item"><span class="ic">'+(artIc[a.kind]||"·")+'</span><div class="t"><b>'+artRef(a,k)+(a.state?' <span class="b '+(artState[a.state]||"b-q")+'" style="font-size:10px;vertical-align:1px">'+h(a.state)+'</span>':'')+'</b><span class="sub">'+h(a.title)+'</span>'+edgeChip(a)+'</div></div>';});
-  var files=g.files.length?'<div class="panel lw-files" style="margin-bottom:16px"><div class="panel-h"><h3>Files changed</h3><span class="dsum"><b class="a" style="color:var(--st-allowed)">+'+dm.add+'</b> <b class="d" style="color:var(--st-denied)">\u2212'+dm.del+'</b><span class="dbar" aria-hidden="true"><i class="a" style="flex:'+dm.add+'"></i><i class="d" style="flex:'+dm.del+'"></i></span>\u00b7 '+g.files.length+' file'+(g.files.length===1?'':'s')+' \u00b7 as the harness reported them</span></div><div class="panel-b" style="padding-top:2px">'+
+  var files=g.files.length?'<div class="panel lw-files" style="margin-bottom:16px"><div class="panel-h"><h3>Files changed</h3><span class="dsum"><b class="a" style="color:var(--st-allowed)">+'+dm.add+'</b> <b class="d" style="color:var(--st-denied)">\u2212'+dm.del+'</b><span class="dbar" aria-hidden="true"><i class="a" style="flex:'+dm.add+'"></i><i class="d" style="flex:'+dm.del+'"></i></span>\u00b7 '+plural(g.files.length,"file")+' \u00b7 as the harness reported them</span></div><div class="panel-b" style="padding-top:2px">'+
    g.files.map(function(f){var rows=txDiffRows(f.before,f.after),st=diffStat(rows);return '<details><summary><span class="p">'+h(f.path)+'</span>'+(f.note?'<span class="dim" style="font-size:11px;flex:none">'+h(f.note)+'</span>':'')+'<span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span></summary>'+diffHtml(rows,3)+'</details>';}).join("")+'</div></div>':'';
   return '<section aria-label="Linked work">'+
    '<div class="lw-note"><p class="eyebrow q" style="margin:0">Linked work</p>'+
-    '<span><span class="edge observed">observed</span> written by Oxagen from a tool call routed through it</span>'+
+    '<span><span class="edge observed">observed</span> written by oxagen from a tool call routed through it</span>'+
     '<span><span class="edge stated">stated</span> carried by the task</span>'+
-    '<span><span class="edge inferred">inferred</span> a light-tier model read the frames and proposed it, scored and cited. '+inf+' of '+(g.repos.length+g.artifacts.length)+'</span></div>'+
-   '<div class="lw">'+panel("Repositories",repos,"no repository was touched")+panel("Pull requests and artifacts",arts,"nothing was produced yet")+'</div>'+files+'</section>';
+    '<span><span class="edge inferred">inferred</span> a light model read the frames and proposed it, scored and cited. '+inf+' of '+(g.repos.length+g.artifacts.length)+'</span></div>'+
+   '<div class="lw">'+panel("Repositories",repos,"No repository was touched.")+panel("Pull requests and artifacts",arts,"Nothing produced yet.")+'</div>'+files+'</section>';
 }
 
 /* ===================== Frames of a run, synthesized from its record =====================
@@ -3260,7 +3293,7 @@ function framesFromRunSynth(R){
      case "tool_requested": fr.dig=frDig(key+"in");fr.sum=call.id+" · input digest "+fr.dig+" · schema ok"+(o2.apr?" · parks on "+o2.apr:"");break;
      case "policy_decision":
       if(o2.apr){var A=APPROVALS.filter(function(a){return a.id===o2.apr;})[0];fr.pol={outcome:"approve",rule:A.rule,ms:7};fr.sum="approve · "+A.policy+" · "+A.rule+" · parked "+A.timeout;}
-      else{var cat=toolMeta(call.id).cat,rd=cat==="read"||cat==="query";fr.pol={outcome:"allow",rule:rd?"rg_0088":"rg_0091",why:rd?"read on "+repo:"write under the belt",ms:Math.round(4+rnd()*6)};
+      else{var cat=toolMeta(call.id).cat,rd=cat==="read"||cat==="query";fr.pol={outcome:"allow",rule:rd?"rg_0088":"rg_0091",why:rd?"read on "+repo:"write under the toolbelt",ms:Math.round(4+rnd()*6)};
         fr.sum="allow · pol_v41 · rule "+fr.pol.rule+" ("+fr.pol.why+") · untainted · "+fr.pol.ms+" ms";}
       break;
      case "token_issued": fr.grant="cg_"+frHex(key+"cg",6).toUpperCase();fr.sum="credential grant "+fr.grant+" · "+toolParts(call.id).n.split("__")[0]+" connection · scoped to this call · TTL 5m";break;
@@ -3269,11 +3302,11 @@ function framesFromRunSynth(R){
      case "checkpoint": fr.from=cpPrev;fr.head=frDig(key+"head");fr.sum="chain head "+fr.head+" · frames "+cpPrev+"–"+q+" · host device key, countersigned at ingest";cpPrev=q+1;break;
      case "record.appended": fr.rec={id:"rec_"+frHex(key+"rec",8).toUpperCase(),text:sentences.length?sentences[recN%sentences.length]:R.taskTitle,sources:lastTool.slice(-2)};recN++;
       fr.sum=fr.rec.id+" · note · "+fr.rec.text.slice(0,72)+(fr.rec.text.length>72?"…":"");break;
-     case "turn_start": fr.sum="turn "+o2.turn+" of "+T+" · "+s.steps[o2.turn-1]+" steps follow";break;
-     case "turn_end": fr.sum="turn "+o2.turn+" ended · "+s.steps[o2.turn-1]+" steps · $"+s.cost[o2.turn-1].toFixed(2)+" · cache "+per(s.cache[o2.turn-1]);break;
+     case "turn_start": fr.sum="turn "+o2.turn+" of "+T+" · "+plural(s.steps[o2.turn-1],"step")+" follow";break;
+     case "turn_end": fr.sum="turn "+o2.turn+" ended · "+plural(s.steps[o2.turn-1],"step")+" · $"+s.cost[o2.turn-1].toFixed(2)+" · cache "+per(s.cache[o2.turn-1]);break;
      case "approval_request": var A2=APPROVALS.filter(function(a){return a.id===o2.apr;})[0];fr.sum=A2.id+" · "+A2.tool+" · parked "+A2.parkedAt+" · "+A2.approvers.split(" — ")[0];break;
      case "error": fr.err={code:"run_token_revoked",source:"gateway",outcome:"halted"};fr.sum="run_token_revoked · kill switch hooks_removed · nothing dispatched after this frame";break;
-     case "agent_stop": fr.sum="outcome "+R.status+" · "+N+" frames · $"+R.cost+" · the seal envelope follows as seq "+N;break;
+     case "agent_stop": fr.sum="outcome "+R.status+" · "+plural(N,"frame")+" · $"+R.cost+" · the seal envelope follows as seq "+N;break;
     }
     out.push(fr);
   }
@@ -3330,7 +3363,7 @@ function fdContext(f,R){
   var c=f.ctx||{budget:CTXW.budget,used:CTXW.used,rows:CTXF.map(function(x){return {kind:x.kind,label:x.label,tok:x.tok,node:x.node,dig:"",cited:x.cited};})};
   var sum=c.rows.reduce(function(a,x){return a+x.tok;},0);
   return frKv([["Budget",tokn(c.budget)+" tokens"],["Used",tokn(c.used)+" tokens · "+pct(c.used,c.budget)+" of budget · "+tokn(c.budget-c.used)+" headroom"],
-    ["Context frames",c.rows.length+" · counted as context_frame_tokens"],["Assembled by","assembleSteering · "+h(R.tier)+" tier"]])+
+    ["Context frames",c.rows.length+' · counted as <span class="mono">context_frame_tokens</span>'],["Assembled by","the steering assembler · "+h(R.tier)+" tier"]])+
    frSec("Context frames served",'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Frame</th><th>Kind</th><th>Evidence</th><th class="num">Tokens</th><th>Use</th></tr></thead><tbody>'+
     c.rows.map(function(x){return '<tr><td class="mono" style="font-size:11px">'+h(x.node)+'</td><td class="mono">'+h(x.kind)+'</td><td>'+h(x.label)+(x.dig?'<div class="dim mono" style="font-size:10.5px">'+h(x.dig)+'</div>':'')+'</td>'+
      '<td class="num">'+tokn(x.tok)+'</td><td>'+(x.cited!=null?frameBtn(x.cited,"cited at frame "+x.cited):x.cited===null?'<span class="b b-q">never cited</span>':'<span class="dim">served</span>')+'</td></tr>';}).join("")+
@@ -3354,17 +3387,17 @@ function fdRequest(f,R){
     '<div class="row" style="gap:8px;font-size:11px"><b class="mono" style="color:var(--fg)">'+role+'</b><span class="mono dim" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+label+'</span><span class="mono dim" style="margin-left:auto">'+tokn(tok)+' tok</span></div>'+
     '<div style="font-size:12.5px;margin-top:4px;white-space:pre-wrap">'+text+'</div></div>';};
   return frKv([["Provider · model",frProvider(R.model)+' · <b style="color:var(--fg)">'+h(R.model)+'</b>'],
-    ["Parameters","max_tokens 8192 · temperature 1.0 · stream true"],
-    ["Tools offered","14 tools · "+tokn(cp.tools)+" tool_definition_tokens"],
-    ["Context frames",rq.ctxN+" · "+tokn(cp.ctx)+" context_frame_tokens"],
+    ["Parameters",'<span class="mono">max_tokens 8192 · temperature 1.0 · stream true</span>'],
+    ["Tools offered","14 tools · "+tokn(cp.tools)+' <span class="mono">tool_definition_tokens</span>'],
+    ["Context frames",rq.ctxN+" · "+tokn(cp.ctx)+' <span class="mono">context_frame_tokens</span>'],
     ["Prompt tokens",tokn(rq.tok)+(nextR?" · answered at "+frameBtn(nextR.seq,"frame "+nextR.seq):"")],
     steer?["Carries",'<span class="b b-proven"><span class="d"></span>control.steer</span> from '+frameBtn(steer.seq,"frame "+steer.seq)]:null])+
-   frSec("Prompt composition",frBar([["system",cp.system,"var(--dim)"],["steering",cp.steering,"var(--k-rule)"],["tool definitions",cp.tools,"var(--st-approval)"],["context frames",cp.ctx,"var(--st-proven)"],["conversation",cp.conv,"var(--st-allowed)"]],rq.tok),tokn(rq.tok)+" tokens measured by Oxagen")+
+   frSec("Prompt composition",frBar([["system",cp.system,"var(--dim)"],["steering",cp.steering,"var(--k-rule)"],["tool definitions",cp.tools,"var(--st-approval)"],["context frames",cp.ctx,"var(--st-proven)"],["conversation",cp.conv,"var(--st-allowed)"]],rq.tok),tokn(rq.tok)+" tokens measured by oxagen")+
    frSec("Message stack",
-    msg("system","agent definition · .oxagen/agents/"+h(String(R.agent).split(".").pop())+".yaml",cp.system,"You are "+h(R.agent)+(a?", operated by "+h(PEOPLE[a.operator]?PEOPLE[a.operator].name:a.operator):"")+". Work only inside the grants on your belt.")+
-    msg("steering","steering.compiled · "+(f.bundle!=null?"bundle v"+f.bundle+" · ":"")+"pol_v41",cp.steering,"The workspace’s published Steering records, compiled once and served from cache.")+
+    msg("system","agent definition · .oxagen/agents/"+h(String(R.agent).split(".").pop())+".yaml",cp.system,"You are "+h(R.agent)+(a?", operated by "+h(PEOPLE[a.operator]?PEOPLE[a.operator].name:a.operator):"")+". Work only inside the grants on your toolbelt.")+
+    msg("steering","steering.compiled · "+(f.bundle!=null?"bundle v"+f.bundle+" · ":"")+"pol_v41",cp.steering,"The workspace’s published steering records, compiled once and served from cache.")+
     (steer?msg("steering","control.steer · frame "+steer.seq+" · operator authority",+((/(\d+) tok/.exec(steer.sum)||[0,0])[1]),h(quote||steer.sum),true):"")+
-    msg("context",rq.ctxN+" context frames",cp.ctx,"Delivered at UserPromptSubmit, cited by content digest.")+
+    msg("context",rq.ctxN+" context frames",cp.ctx,"Delivered when the prompt was submitted, cited by content digest.")+
     msg("conversation","turn "+(f.turn||1)+" so far",cp.conv,"Prior turns and tool results, served from the recording."),
     steer?"the operator’s steer is highlighted":"no operator steer since the last request");
 }
@@ -3379,7 +3412,7 @@ function fdResponse(f,R){
     var parts=rows.map(function(r){return r[1]*r[2];}),acc=0;parts.forEach(function(p,k){if(k<parts.length-1)acc+=p;});parts[parts.length-1]=Math.max(0,c-acc);
     body='<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">USD / M</th><th class="num">Cost USD</th></tr></thead><tbody>'+
      rows.map(function(r,k){return '<tr><td class="mono">'+r[0]+'</td><td class="num">'+tokn(r[1])+'</td><td class="num dim">'+(r[2]*1e6).toFixed(2)+'</td><td class="num">'+(r[1]?parts[k].toFixed(4):'—')+'</td></tr>';}).join("")+
-     '<tr><td><b>total</b></td><td class="num"><b>'+tokn(tin+u.out+u.rsn)+'</b></td><td></td><td class="num"><b>$'+f.cost+'</b></td></tr></tbody></table></div>';
+     '<tr><td><b>total</b></td><td class="num"><b>'+tokn(tin+u.out+u.rsn)+'</b></td><td></td><td class="num"><b>'+usd(f.cost)+'</b></td></tr></tbody></table></div>';
   } else {
     var W=runContext(R);
     body='<div class="tw"><table class="narrow" data-lt="off"><tbody>'+[["input_uncached",u.inU],["cache_read",u.cr],["cache_write_5m",0],["output",u.out],["reasoning",0],W.none?null:["tool_definition_tokens",W.tools],W.none?null:["steering_tokens",W.steering]]
@@ -3391,7 +3424,7 @@ function fdResponse(f,R){
    frSec("Usage by token class",body,f.u?"input at the published effective price, split by class; output at list":"as the provider reported it")+
    frSec("Cost record",frPre({usage:{input:u.inU,cache_read:u.cr,cache_write_5m:u.cw,output:u.out,reasoning:u.rsn},cost_micros:Math.round(c*1e6),currency:"USD",cost_basis:R.basis,provider_request_id:req}))+
    frSec("Derived",frKv([["Cache hit rate",'<b style="color:var(--fg)">'+per(hit)+'</b> · '+tokn(u.cr)+' of '+tokn(tin)+' input tokens'],
-    ["Effective input price",tin?"$"+(c/3/tin*1e6).toFixed(2)+" per million across input classes":"—"],
+    ["Effective input price",tin?usd((c/3/tin*1e6).toFixed(2))+" per million input tokens, all classes":"—"],
     ["Cache write cost share","0% · nothing written"],
     f.turn?["Turn",'turn '+f.turn+' · this call is '+pct(c,runSeries(R).cost[f.turn-1]||c)+' of the turn’s spend']:null]));
 }
@@ -3406,7 +3439,7 @@ function fdToolReq(f,R){
     ["Taint sources",A&&A.tainted?'<span style="color:var(--st-denied)">'+h((A.taint||[]).map(function(x){return x.path+" from frame "+x.frame;}).join(", "))+'</span>':"none · no argument was copied from a prior tool output"],
     A?["Hazard",riskBadge(A.risk)+' '+effBadge(A.side)+' <span class="dim">egress '+h(A.egress)+'</span>']:null])+
    frSec("Validated input",readout("canonical input","exactly what the gateway will dispatch",frPre(input)))+
-   '<div class="note" style="margin-top:12px">Nothing has been dispatched yet. The next frame'+(nx?' ('+frameBtn(nx.seq,"frame "+nx.seq)+')':'')+' is the policy decision that says whether it ever is: same call, same policy version, same answer, no model in the path.</div>';
+   '<div class="note" style="margin-top:12px">Nothing has been dispatched yet. The next frame'+(nx?' ('+frameBtn(nx.seq,"frame "+nx.seq)+')':'')+' is the policy decision on whether it runs. The same call under the same policy version always gets the same answer, and no model is involved.</div>';
 }
 function fdToolCall(f,R){
   var c=frCallOf(f,R),io=frIO(f,R); if(!c)return null;
@@ -3426,14 +3459,14 @@ function fdPolicy(f,R){
   var approve=A||(f.pol?f.pol.outcome==="approve":f.sum.indexOf("approve")===0);
   var rule=A?(A.rules[0]||{}).id:f.pol?f.pol.rule:(approve?"rg_0093":"rg_0088"),c=frCallOf(f,R);
   var conds=A?A.rules.map(function(x){return [x.id,x.text,x.v];}):
-    [["tool on the belt",c?c.id:"—","pass"],["delegation ceiling","agent ∩ operator","held"],["taint","no argument from untrusted output","pass"],["kill switches","none armed for this tool","pass"]];
+    [["tool on the toolbelt",c?c.id:"—","pass"],["delegation ceiling","the narrower of agent and operator","held"],["taint","no argument from untrusted output","pass"],["kill switches","none armed for this tool","pass"]];
   return '<div class="row" style="gap:10px;margin-bottom:12px"><span class="b '+(approve?'b-approval':'b-allowed')+'"><span class="d"></span>'+(approve?'approve':'allow')+'</span>'+
     '<span class="dim" style="font-size:12px;margin-left:auto">decided in '+(f.pol?f.pol.ms:6)+' ms</span></div>'+
    frSec("Conditions evaluated",'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Condition</th><th>Value</th><th>Result</th></tr></thead><tbody>'+
     conds.map(function(x){var v=x[2],cls=/^(pass|held|allow)$/.test(v)?"b-allowed":v==="approve"?"b-approval":v==="constrain"?"b-q":"b-denied";
      return '<tr><td class="mono" style="font-size:11.5px">'+h(x[0])+'</td><td style="font-size:12px">'+h(x[1])+'</td><td><span class="b '+cls+'"><span class="d"></span>'+h(v)+'</span></td></tr>';}).join("")+
-    '</tbody></table></div>',"derived from the call and the record, none from prose")+
-   frSec("Decision",frPre({outcome:approve?"approve":"allow",policy_version:A?A.policy:"pol_v41",rules_fired:[rule],delegation_ceiling:"agent ∩ operator, held",
+    '</tbody></table></div>',"derived from the call and the record only")+
+   frSec("Decision",frPre({outcome:approve?"approve":"allow",policy_version:A?A.policy:"pol_v41",rules_fired:[rule],delegation_ceiling:"held: the narrower of agent and operator",
      taint:{marked:!!(A&&A.tainted),sources:A&&A.taint?A.taint.map(function(x){return x.path;}):[]},kill_switches:"none armed for this tool",enforcement_tier:R.tier}));
 }
 function fdApproval(f,R){
@@ -3442,7 +3475,7 @@ function fdApproval(f,R){
   var ap=apState(id);
   var facts=frKv([["Approval",'<span class="mono">'+h(A.id)+'</span>'],["Call",'<span class="mono">'+h(A.tool)+'</span> · '+riskBadge(A.risk)],
     ["Rule",h(A.rule)],A.amount?["Amount",usd(A.amount)+" "+h(A.currency)+" · "+h(A.counterparty)]:null,["Approvers",h(A.approvers)],["Waited",h(A.waited)+" of "+h(A.timeout)]]);
-  if(A.waited==="expired")return '<div class="warn"><b>Expired.</b> Nobody answered inside '+h(A.timeout)+'. The call ended and the reason reached the model as the permission decision; nothing dispatched.</div>'+facts;
+  if(A.waited==="expired")return '<div class="warn"><b>Expired.</b> Nobody answered inside '+h(A.timeout)+'. The call ended, the reason reached the model as the permission decision, and nothing was dispatched.</div>'+facts;
   if(ap.status!=="pending")return '<div class="note">Resolved: <b>'+h(ap.status)+'</b>'+(ap.by&&ap.by!=="—"?' by '+h(ap.by):'')+'. The decision is a frame of its own.</div>'+facts;
   return '<div class="warn"><b>Parked.</b> The call is held for up to '+h(A.timeout)+'. The model is shown a wait with a reason, not a failure. '+
    'On resolution the gateway mints a single-use approval token bound to this exact call digest.</div>'+facts+
@@ -3454,35 +3487,35 @@ function fdRecord(f,R){
   return frKv([["Record id",'<b class="mono" style="color:var(--fg)">'+h(r.id)+'</b>'],["Lineage",'<span class="mono">lin_'+frHex(R.agent,6)+'</span> · a correction is a new record on this lineage'],
     ["Kind","note"],["Record hash",'<span class="mono">'+frDig(r.id)+'</span>'],["Sharing scope","workspace · "+h(R.ws)],["Retention","7 years from the seal"]])+
    frSec("Body",'<div class="callout">'+h(r.text)+'</div>')+
-   frSec("Provenance",r.sources.length?'<div class="row" style="gap:8px">'+r.sources.map(function(s){return frameBtn(s,"frame "+s+" · tool_call");}).join("")+'</div>':'<span class="dim">no tool result cited</span>',"every learned thing walks back to the frame that taught it");
+   frSec("Provenance",r.sources.length?'<div class="row" style="gap:8px">'+r.sources.map(function(s){return frameBtn(s,"frame "+s+" · tool_call");}).join("")+'</div>':'<span class="dim">no tool result cited</span>',"each record links to the frame it came from");
 }
 function fdCheckpoint(f,R){
   /* Walk by position, not seq: an authored list can carry sparse seqs, so L[seq] is not this frame. */
   var L=frList(R),from=f.from!=null?f.from:0,at=L.indexOf(f);
   if(f.from==null)for(var i=(at<0?L.length:at)-1;i>=0;i--)if(L[i].kind==="checkpoint"){from=L[i].seq+1;break;}
   return frKv([["Covers","frames "+from+"–"+f.seq+" · every 20 frames or 60 seconds, whichever comes first"],["Producer","host device key · ed25519"],
-    ["Producer signature",'<span class="mono">ed25519:'+frHex(R.id+"cp"+f.seq,14)+'…</span>'],["Countersigned by Oxagen",'<span style="color:var(--st-allowed)">yes, at ingest</span>'],
+    ["Producer signature",'<span class="mono">ed25519:'+frHex(R.id+"cp"+f.seq,14)+'…</span>'],["Countersigned by oxagen",'<span style="color:var(--st-allowed)">yes, at ingest</span>'],
     ["Chain head",'<span class="mono">'+h(f.head||frDig(R.id+f.seq+"head"))+'</span>']])+
-   '<div class="note" style="margin-top:12px">A checkpoint pins the chain mid-run so a crash or a network drop cannot cost the frames already recorded. Oxagen attests receipt and chain integrity here, not the truth of a client-attested body.</div>';
+   '<div class="note" style="margin-top:12px">A checkpoint pins the chain mid-run so a crash or a network drop cannot cost the frames already recorded. Here oxagen attests that it received the frames and that the chain is intact. It does not attest that a body reported by the harness is true.</div>';
 }
 function fdError(f,R){
   var e=f.err||{code:"error",source:"gateway",outcome:R.status};
   return '<div class="row" style="gap:10px;margin-bottom:12px"><span class="b b-failed"><span class="d"></span>'+h(e.code)+'</span><span class="dim" style="font-size:12.5px">'+h(e.outcome)+'</span></div>'+
-   frKv([["Source",h(e.source)],["Cause",R.status==="halted"?"kill switch hooks_removed revoked the run token":"—"],["Billed",'<span style="color:var(--st-allowed)">no</span>'],
-    ["After this frame","nothing dispatched; the remaining frames close the run"]]);
+   frKv([["Source",h(e.source)],["Cause",R.status==="halted"?"oxagen detected that the agent\'s hooks were removed and revoked the run token":"—"],["Billed",'<span style="color:var(--st-allowed)">no</span>'],
+    ["After this frame","Nothing was dispatched. The remaining frames close the run."]]);
 }
 function fdTurn(f,R){
   var s=runSeries(R),t=f.turn||1,L=frList(R),fs=L.filter(function(x){return x.turn===t;}),start=f.kind==="turn_start";
   return frKv([["Turn",t+" of "+s.n],["Frames",fs.length?fs.length+" · seq "+fs[0].seq+"–"+fs[fs.length-1].seq:"—"],["Steps",s.steps[t-1]+" · "+s.model[t-1]+" model calls, "+s.tool[t-1]+" tool calls"],
-    ["Turn spend","$"+s.cost[t-1].toFixed(2)+" USD"],["Cache hit rate",per(s.cache[t-1])]])+
-   '<div class="note" style="margin-top:12px">'+(start?'One prompt, a schedule or a resumed context, through to the agent stopping. ':'')+'Turns are derived from these frames and materialized in the rollups; the Cost tab draws them.</div>';
+    ["Turn spend",usd(s.cost[t-1].toFixed(2))],["Cache hit rate",per(s.cache[t-1])]])+
+   '<div class="note" style="margin-top:12px">'+(start?'A turn runs from one prompt, schedule or resumed context until the agent stops. ':'')+'Turns are derived from these frames and stored in the rollups. The Cost tab charts them.</div>';
 }
 function fdAgent(f,R){
   var a=agent(R.agent);
   if(f.kind==="agent_start")return frKv([["Run",'<b class="mono" style="color:var(--fg)">'+h(R.id)+'</b>'],["Agent",'<span class="mono">'+h(R.agent)+'</span>'+(a?' · '+h(a.harnessLabel):'')],
-    ["Operator",h(PEOPLE[R.op]?PEOPLE[R.op].name:R.op)+" · initiating principal"],["Workspace",h(R.ws)],["Task",h(R.task)+" · "+h(R.taskTitle)],
+    ["Operator",h(PEOPLE[R.op]?PEOPLE[R.op].name:R.op)+" · initiating principal"],["Workspace",h(R.ws)],["Task",R.task&&R.task!=="—"?h(R.task)+" · "+h(R.taskTitle):h(R.taskTitle)+' <span class="dim">· no linked task</span>'],
     ["Policy version","pol_v41"],["Enforcement tier",tierBadge(R.tier)]])+
-   '<div class="note" style="margin-top:12px">Everything above is built by server code, never by the agent. It cannot name its own operator or choose its own tier.</div>';
+   '<div class="note" style="margin-top:12px">Everything above is built by oxagen, never by the agent. It cannot name its own operator or choose its own tier.</div>';
   return frKv([["Outcome",'<b style="color:var(--fg)">'+h(R.status)+'</b>'],["Turns",R.turn],["Steps",R.steps],["Frames",R.frames+" · seq 0–"+(R.frames-1)],
     ["Total spend",usd(R.cost)+" USD · "+h(R.basis)],["Sealed",R.sealed?h(R.sealed)+" · the seal envelope follows as seq "+R.frames:"not sealed"]])+
    '<div class="row" style="margin-top:12px"><button class="btn sm" onclick="runTab(\'evidence\')">Chain and seal</button></div>';
@@ -3491,7 +3524,7 @@ function fdToken(f,R){
   var c=frCallOf(f,R),vendor=c?toolParts(c.id).n.split("__")[0]:"github";
   return frKv([["Credential grant",'<span class="mono">'+h(f.grant||"cg_01K5RS8")+'</span>'],["Connection",h(vendor)+" · brokered by the gateway"],
     ["Minted",c?'a token scoped to <span class="mono">'+h(c.id)+'</span> and this call id':'installation token limited to <span class="mono">a-intel/platform</span>'],
-    ["TTL","5 minutes, bound to call id"],["Seen by the agent",'<b style="color:var(--st-allowed)">never</b>. The agent holds one run token, good for talking to Oxagen and nothing else']]);
+    ["TTL","5 minutes, bound to call id"],["Seen by the agent",'<b style="color:var(--st-allowed)">never</b>. The agent holds one run token, which works only for calls to oxagen.']]);
 }
 var FD_KIND={"context.assembled":fdContext,"model.request":fdRequest,"model.response":fdResponse,tool_requested:fdToolReq,tool_call:fdToolCall,
   policy_decision:fdPolicy,approval_request:fdApproval,"record.appended":fdRecord,checkpoint:fdCheckpoint,error:fdError,
@@ -3502,10 +3535,10 @@ function frameDetail(f){
   if(f.kind==="control.pause"||f.kind==="control.resume"){
     var paused=f.kind==="control.pause";
     return '<div class="panel" style="background:var(--ink)"><div class="panel-b">'+
-     '<p class="eyebrow q">'+(paused?'Took effect at the boundary after seq '+(f.seq-1)+' · attributed to the operator':'Delivered at the next boundary · the reason reached the model as a control frame')+'</p>'+
+     '<p class="eyebrow q">'+(paused?'Took effect at the checkpoint after frame '+(f.seq-1)+' · attributed to the operator':'Delivered at the next checkpoint · the reason reached the model as a control frame')+'</p>'+
      '<p style="margin:0;color:var(--fg)">'+h(f.reason||"—")+'</p>'+
      '<div class="kv" style="margin-top:12px"><dt>Issuer</dt><dd>'+h(f.by||"Marcus Bell")+' · <span class="mono">'+(paused?'run.pause':'run.resume')+'</span></dd>'+
-     '<dt>While paused</dt><dd>'+(paused?'run token held · budget reservation held · pending approvals keep their clocks · no new dispatch':'the pause frame and this one are both in the chain; the gap is visible in the receipts')+'</dd>'+
+     '<dt>While paused</dt><dd>'+(paused?'The run token and budget reservation are held. Pending approvals keep counting down. Nothing new starts.':'The pause frame and this one are both in the chain, so the gap shows in the receipts.')+'</dd>'+
      '<dt>Digest</dt><dd class="mono">'+h(f.dig||"sha256:pending")+'</dd></div></div></div>';
   }
   if(f.kind==="control.steer"){
@@ -3517,15 +3550,15 @@ function frameDetail(f){
      '<div class="kv" style="margin-top:12px"><dt>Issuer</dt><dd>'+h(String(f.sum).split(" · ")[0])+' · operator authority</dd>'+
      '<dt>Injected into</dt><dd>'+(carried?frameBtn(carried.seq,"model.request · frame "+carried.seq)+', immediately after the cached system block':'the next model request')+'</dd>'+
      '<dt>Digest</dt><dd class="mono">'+h(f.dig||frDig(R.id+f.seq+"steer"))+'</dd></div>'+
-     '<div class="note" style="margin-top:12px">Steering is evidence, quoted and cited. Oxagen never executes it as an instruction; whether the harness treats it as one is the harness’s contract.</div></div></div>';
+     '<div class="note" style="margin-top:12px">Steering is evidence, quoted and cited. oxagen never runs it as an instruction. Whether the harness treats it as one is up to the harness.</div></div></div>';
   }
   var body=FD_KIND[f.kind]?FD_KIND[f.kind](f,R):null;
-  var digestOnly=R.grade==="digest"?'<div class="note" style="margin-bottom:12px">Client-attested at '+h(R.tier)+' tier with digests only: the producer sent digests, not bodies. What follows is the envelope Oxagen countersigned; the content is as the harness reported it.</div>':'';
+  var digestOnly=R.grade==="digest"?'<div class="note" style="margin-bottom:12px">Reported by harness at the '+h(R.tier)+' tier, with replay grade <b>digest</b>: the producer sent digests, not bodies. What follows is the envelope oxagen countersigned. The content is as the harness reported it.</div>':'';
   return digestOnly+(body!=null?body:
    '<dl class="kv"><dt>Frame hash</dt><dd class="mono">sha256:'+(7331+f.seq*977).toString(16)+'e9c4a1b07f2d</dd>'+
-   '<dt>prev_hash</dt><dd class="mono">sha256:'+(7331+(f.seq-1)*977).toString(16)+'e9c4a1b07f2d</dd>'+
+   '<dt>Previous hash</dt><dd class="mono">sha256:'+(7331+(f.seq-1)*977).toString(16)+'e9c4a1b07f2d</dd>'+
    '<dt>Body</dt><dd>content-addressed, encrypted, retained 7 years</dd>'+
-   '<dt>Attested by</dt><dd>'+(f.tier?"the producer (client-attested), countersigned by Oxagen at ingest":"Oxagen, on its own runner")+'</dd></dl>');
+   '<dt>Attested by</dt><dd>'+(f.tier?"the producer (reported by harness), countersigned by oxagen at ingest":"oxagen, on its own runner")+'</dd></dl>');
 }
 
 /* ===================== the context window shown to the agent ===================== */
@@ -3699,7 +3732,7 @@ function wfFindings(R,s){
     if(/cache/i.test(fd.kind)){turn=lowCache;why="the turn with the lowest cache hit rate";}
     else if(/tail/i.test(fd.kind)){turn=s.n-1;why="the last turn";}
     else if(fd.level==="tool"||/tool call/i.test(fd.kind)){turn=mostTool;why="the turn with the most tool calls";}
-    else {turn=s.peak;why="the dearest turn";}
+    else {turn=s.peak;why="the most expensive turn";}
     out.push({fd:fd,turn:turn,why:why});
   });
   return out;
@@ -3710,13 +3743,13 @@ function wfChart(R,s,tf,finds){
   var X=function(k){return pl+gap*k+gap/2;},Yb=function(v){return pt+ih-v/mx*ih;},Yc=function(v){return pt+ih-(total?v/total:0)*ih;};
   var g="",bars="",labs="",pts=[pl+","+Yc(0).toFixed(1)],cum=0,marks="";
   for(i=0;i<=4;i++){var v=mx*i/4,y=Yb(v);g+='<line x1="'+pl+'" y1="'+y.toFixed(1)+'" x2="'+(W-pr)+'" y2="'+y.toFixed(1)+'" stroke="var(--border)" stroke-width="1"/>'+
-    '<text x="'+(pl-8)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="end" fill="var(--dim)" font-size="10.5">$'+v.toFixed(2)+'</text>';}
+    '<text x="'+(pl-8)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="end" fill="var(--dim)" font-size="10.5">'+usd(v.toFixed(2))+'</text>';}
   for(i=0;i<n;i++){
     var c=s.cost[i],x=X(i)-bw/2,y2=Yb(c),bh=Math.max(2,pt+ih-y2),fnd=finds.filter(function(x){return x.turn===i;});
     var fill=fnd.length?"var(--st-denied)":"var(--st-approval)";
     bars+='<rect class="wf-bar" data-turn="'+(i+1)+'" data-c="'+c+'" x="'+x.toFixed(1)+'" y="'+y2.toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" rx="3" fill="'+fill+'" opacity="'+(fnd.length?".95":".8")+'">'+
-      '<title>Turn '+(i+1)+' · $'+c.toFixed(2)+' · cache '+per(s.cache[i])+' · '+s.steps[i]+' steps · '+tf.n[i]+' frames</title></rect>';
-    labs+='<text x="'+X(i).toFixed(1)+'" y="'+(y2-6).toFixed(1)+'" text-anchor="middle" fill="var(--fg)" font-size="10.5">$'+c.toFixed(2)+'</text>'+
+      '<title>Turn '+(i+1)+' · '+usd(c.toFixed(2))+' · cache '+per(s.cache[i])+' · '+plural(s.steps[i],"step")+' · '+plural(tf.n[i],"frame")+'</title></rect>';
+    labs+='<text x="'+X(i).toFixed(1)+'" y="'+(y2-6).toFixed(1)+'" text-anchor="middle" fill="var(--fg)" font-size="10.5">'+usd(c.toFixed(2))+'</text>'+
       '<text x="'+X(i).toFixed(1)+'" y="'+(pt+ih+16)+'" text-anchor="middle" fill="var(--muted)" font-size="11">T'+(i+1)+'</text>'+
       '<text x="'+X(i).toFixed(1)+'" y="'+(pt+ih+30)+'" text-anchor="middle" fill="var(--dim)" font-size="10">'+per(s.cache[i])+' cache</text>';
     cum+=c;pts.push((X(i)+bw/2).toFixed(1)+","+Yc(cum).toFixed(1));
@@ -3736,15 +3769,15 @@ function costTab(R){
   var light=/haiku|flash|light/i.test(R.model||""),op=light?PRICE.outLight:PRICE.out,cum=0;
   var rows=s.cost.map(function(c,i){var from=cum;cum+=c;var fnd=finds.filter(function(x){return x.turn===i;});
     return '<tr'+(fnd.length?' style="background:var(--hl)"':'')+'><td class="mono">T'+(i+1)+'</td><td class="num">'+s.steps[i]+'</td><td class="num">'+tf.n[i]+'</td><td class="num">'+per(s.cache[i])+'</td>'+
-     '<td class="num wf-cost">$'+c.toFixed(2)+'</td><td class="num dim">$'+from.toFixed(2)+' → $'+cum.toFixed(2)+'</td><td>'+
+     '<td class="num wf-cost">'+usd(c.toFixed(2))+'</td><td class="num dim">'+usd(from.toFixed(2))+' → '+usd(cum.toFixed(2))+'</td><td>'+
      (fnd.length?fnd.map(function(x){return '<button class="b b-denied" style="cursor:pointer" onclick="openDialog(\'evidence\',\''+h(x.fd.id)+'\')"'+tipAttr("pinned to "+x.why)+'><span class="d"></span>'+h(x.fd.kind)+'</button>';}).join(" "):'<span class="dim">—</span>')+'</td></tr>';}).join("");
   var stepSum=s.steps.reduce(function(a,b){return a+b;},0),frameSum=tf.n.reduce(function(a,b){return a+b;},0);
-  var foot='<tr class="wf-total"><td><b>total</b></td><td class="num"><b>'+stepSum+'</b></td><td class="num"><b>'+frameSum+'</b></td><td class="num">'+per(s.cacheAvg)+'</td><td class="num"><b class="wf-sum">$'+cum.toFixed(2)+'</b></td><td class="num dim">of '+usd(R.cost)+' recorded</td><td></td></tr>';
+  var foot='<tr class="wf-total"><td><b>total</b></td><td class="num"><b>'+stepSum+'</b></td><td class="num"><b>'+frameSum+'</b></td><td class="num">'+per(s.cacheAvg)+'</td><td class="num"><b class="wf-sum">'+usd(cum.toFixed(2))+'</b></td><td class="num dim">of '+usd(R.cost)+' recorded</td><td></td></tr>';
   /* spend by token class: input at the effective price split by class, output at list */
   var inCost=total/3,pu=inCost/Math.max(1,m.fresh+0.1*m.cacheRead),outVis=m.tokOut-m.reasoning;
   var cls=[["input_uncached",m.fresh,m.fresh*pu],["cache_read",m.cacheRead,m.cacheRead*pu*0.1],["cache_write_5m",m.cacheWrite,0],["output",outVis,outVis*op]];
   var sofar=cls.reduce(function(a,x){return a+x[2];},0);cls.push(["reasoning",m.reasoning,Math.max(0,total-sofar)]);
-  var clsRows=cls.map(function(x){return '<tr><td class="mono">'+x[0]+'</td><td class="num">'+tokn(x[1])+'</td><td class="num">'+(x[1]?'$'+x[2].toFixed(4):'—')+'</td><td class="num dim">'+(total?(x[2]/total*100).toFixed(1):'0.0')+'%</td></tr>';}).join("")+
+  var clsRows=cls.map(function(x){return '<tr><td class="mono">'+x[0]+'</td><td class="num">'+tokn(x[1])+'</td><td class="num">'+(x[1]?usd(x[2].toFixed(4)):'—')+'</td><td class="num dim">'+(total?(x[2]/total*100).toFixed(1):'0.0')+'%</td></tr>';}).join("")+
     '<tr><td><b>total</b></td><td class="num"><b>'+tokn(m.tokTotal)+'</b></td><td class="num"><b>'+usd(R.cost)+'</b></td><td class="num dim">100.0%</td></tr>';
   /* the mean request carries the run's window's system, steering and tool blocks; the rest splits by the composition rule */
   var CW=runContext(R),mc=frReqComp(m.perCall,CW.none?{}:{system:CW.system,steering:CW.steering,tools:CW.tools});
@@ -3754,18 +3787,18 @@ function costTab(R){
     '<span><i style="display:inline-block;width:14px;border-top:2px dashed var(--fg);margin-right:5px;vertical-align:middle"></i>cost so far</span></div>';
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Waterfall</h3>'+
     '<div class="sp" style="margin-left:auto;display:flex;gap:6px;align-items:center;flex-wrap:wrap">'+
-     (finds.length?'<span class="b b-denied"><span class="d"></span>'+finds.length+' finding'+(finds.length===1?'':'s')+'</span>':'')+
-     '<span class="b b-q">'+s.n+' turn'+(s.n===1?'':'s')+' · '+usd(R.cost)+' '+h(R.basis)+'</span></div></div>'+
+     (finds.length?'<span class="b b-denied"><span class="d"></span>'+plural(finds.length,"finding")+'</span>':'')+
+     '<span class="b b-q">'+plural(s.n,"turn")+' · '+usd(R.cost)+' · '+keyLabel(R.basis)+'</span></div></div>'+
     '<div class="panel-b"><div style="overflow-x:auto">'+wfChart(R,s,tf,finds)+'</div>'+legend+
-    '<p class="muted" style="font-size:11.5px;margin:10px 0 0">Bar height is the turn’s cost on the left scale; the dashed line is cost accumulating to '+usd(R.cost)+'. '+
-     (finds.length?'Diamonds are Spend findings that name this run, pinned to the turn their pattern points at. ':'')+'Each mark opens.</p></div>'+
+    '<p class="muted" style="font-size:11.5px;margin:10px 0 0">Bar height is the turn’s cost on the left scale. The dashed line is the running total, which reaches '+usd(R.cost)+'. '+
+     (finds.length?'Diamonds are Spend findings that name this run, pinned to the turn their pattern points at. ':'')+'Select a mark to open it.</p></div>'+
     '<div class="tw"><table class="wf-table" data-lt="off"><thead><tr><th>Turn</th><th class="num">Steps</th><th class="num">Frames</th><th class="num">Cache hit</th><th class="num">Cost</th><th class="num">Running total</th><th>Pinned</th></tr></thead>'+
      '<tbody>'+rows+foot+'</tbody></table></div>'+
-    (tf.counted?'':'<div class="panel-b" style="font-size:11.5px"><span class="dim">Frames per turn are apportioned by steps: this run’s frames in view do not carry their turn.</span></div>')+'</div>'+
+    (tf.counted?'':'<div class="panel-b" style="font-size:11.5px"><span class="dim">This run’s frames do not record their turn, so frames per turn are estimated from steps.</span></div>')+'</div>'+
    '<div class="grid g2"><div class="panel"><div class="panel-h"><h3>Spend by token class</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.tokTotal)+' tokens</span></div>'+
     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">Cost</th><th class="num">Share</th></tr></thead><tbody>'+clsRows+'</tbody></table></div>'+
-    '<div class="panel-b"><div class="note">Input is a third of the money and priced at the effective rate across its classes, a cache read at a tenth of an uncached token; output and reasoning are priced at '+(light?'the light-tier':'the flagship')+' list rate.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Prompt composition</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.perCall)+' tok</span></div><div class="panel-b" style="display:grid;gap:11px">'+
+    '<div class="panel-b"><div class="note">Input is about a third of the cost. It is priced at the effective rate across its classes, and a cache read costs a tenth of an uncached token. Output and reasoning are priced at the list rate for the '+(light?'light':'complex')+' model class.</div></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Prompt composition</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(m.perCall)+' tokens per request, on average</span></div><div class="panel-b" style="display:grid;gap:11px">'+
     comp.map(function(x){return '<div class="meter"><div class="lab">'+x[0]+'<b>'+tokn(x[1])+' tok</b></div><div class="bar"><i style="width:'+Math.round(x[1]/Math.max(1,m.perCall)*100)+'%;background:'+x[2]+'"></i></div></div>';}).join("")+
     '<div class="hr"></div><dl class="kv">'+
     '<dt>Effective input price</dt><dd>$1.88 per million across all input classes</dd>'+
@@ -3784,10 +3817,10 @@ function chainTab(R){
     '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>no gaps</span></div><div class="panel-b">'+
     '<dl class="kv"><dt>Frames</dt><dd class="num">'+R.frames+' · dense seq 0 … '+(R.frames-1)+(sealed?' · the seal is envelope '+R.frames:'')+'</dd>'+
     '<dt>Rule</dt><dd class="mono" style="font-size:11.5px">hash = SHA256(prev_hash ‖ canonical(envelope))</dd>'+
-    '<dt>telemetry_gap frames</dt><dd>0. A gap is recorded, never repaired</dd>'+
-    '<dt>Checkpoints</dt><dd>'+cpN+' · every 20 frames · signed by the host device key, countersigned by Oxagen at ingest</dd>'+
-    '<dt>Completeness gaps</dt><dd>'+(R.grade==="full"?"none, every body recorded":R.grade==="partial"?"bodies missing on some frames, recorded as gaps":R.grade==="digest"?"bodies not sent, digests only":"none, the frames are in the archive segment")+'</dd></dl>'+
-    '<div class="note" style="margin-top:13px">Frames from a wrapped agent are client-attested: producer-signed and countersigned at ingest, so Oxagen attests receipt and chain integrity, not the truth of the content. Frames Oxagen writes itself, a decision on a routed call or a witness result, are Oxagen-attested.</div></div></div>'+
+    '<dt>Telemetry gap frames</dt><dd>0. A gap is recorded, never repaired.</dd>'+
+    '<dt>Checkpoints</dt><dd>'+cpN+' · every 20 frames · signed by the host device key, countersigned by oxagen at ingest</dd>'+
+    '<dt>Completeness gaps</dt><dd>'+(R.grade==="full"?"None. The replay grade is full.":R.grade==="partial"?"Some frames are missing bodies, so the replay grade is lowered.":R.grade==="digest"?"Bodies were not sent, only digests.":"None. Frames are in the archive segment.")+'</dd></dl>'+
+    '<div class="note" style="margin-top:13px">Frames from a wrapped agent are reported by harness: signed by the producer and countersigned at ingest. oxagen attests that it received them and that the chain is intact. It does not attest that their content is true. Frames oxagen writes itself, such as a decision on a routed call or a witness result, are attested by oxagen.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Seal and attestation</h3>'+(sealed?'<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>sealed</span>':'')+'</div>'+
     '<div class="panel-b">'+(sealed?'<dl class="kv">'+
     '<dt>Merkle root</dt><dd class="mono" style="word-break:break-all">'+root+'</dd>'+
@@ -3795,13 +3828,13 @@ function chainTab(R){
     '<dt>Archive segment</dt><dd class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</dd>'+
     '<dt>Signature</dt><dd class="mono">ed25519 · '+h(ORG.attester)+'</dd>'+
     '<dt>Signs over</dt><dd class="mono" style="font-size:11.5px">run_id, attempt_id, frame_count, merkle_root, archive_segment_digest, enforcement_tier, completeness_gaps</dd>'+
-    '<dt>Enforcement tier</dt><dd>'+tierBadge(R.tier)+' · computed from what was actually routed, not from what the adapter could do on paper</dd>'+
+    '<dt>Enforcement tier</dt><dd>'+tierBadge(R.tier)+' · computed from what was routed, not from what the adapter supports</dd>'+
     '<dt>Verify offline</dt><dd><button class="btn sm" onclick="openDialog(\'runexport\')">Export the bundle</button></dd></dl>':
     '<p class="muted">The seal is computed at run end, for every terminal outcome. Until then the chain is verifiable frame by frame but there is no Merkle root and no attestation.</p>')+
     '</div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Checkpoints</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+cps.length+' of '+cpN+'</span></div>'+
     (cps.length?'<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Frame</th><th class="num">Covers</th><th>Chain head</th><th>Signature</th></tr></thead><tbody>'+cpRows+'</tbody></table></div>':
-     '<div class="panel-b muted" style="font-size:12.5px">No checkpoint frame is in view; the recorder writes one every 20 frames.</div>')+'</div>'+
+     '<div class="panel-b muted" style="font-size:12.5px">No checkpoint frame is shown. The recorder writes one every 20 frames.</div>')+'</div>'+
    '</div>';
 }
 
@@ -3809,8 +3842,8 @@ function chainTab(R){
    interface (docs/fleet-operations-wedge.md, D14); the chain and the seal stay under Evidence. ---- */
 DLG_EXT.runexport=function(){
   var R=run(S.frameRun)||RUNS[0],sealed=R.status!=="live"&&R.status!=="parked";
-  return {t:"Export this run",s:"segment, attestation, key ids and the verifier",w:false,
-   b:'<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>run '+h(R.id)+' · '+R.frames+' frames'+(sealed?' and the seal':'')+'</option><option>task '+h(R.task)+' · every run</option><option>agent '+h(R.agent)+' · all runs</option></select></div>'+
+  return {t:"Export this run",s:"The segment, attestation, key IDs and verifier.",w:false,
+   b:'<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>run '+h(R.id)+' · '+plural(R.frames,"frame")+(sealed?' and the seal':'')+'</option>'+(R.task&&R.task!=="—"?'<option>task '+h(R.task)+' · every run</option>':'')+'<option>agent '+h(R.agent)+' · all runs</option></select></div>'+
     '<div class="field"><label>Format</label><select aria-label="Format"><option>Signed bundle (segment + verifier)</option><option>Frames as NDJSON</option><option>Receipts as CSV</option></select></div>'+
     frKv([["Segment",'<span class="mono">seg_'+h(R.id.replace(/^run_/,""))+'.ndjson.zst</span> · '+R.frames+' frame envelopes'],["Seal",sealed?"included · verifies offline":"not yet. The run is open, so the bundle carries checkpoints only"]])+
     '<div class="callout" style="margin-top:12px">Runs as <span class="mono">export_data</span>, a governed action with third-party egress. Bodies for erased subjects are not in the bundle. Their digests are, so the chain still verifies.</div>',
@@ -3822,10 +3855,10 @@ DLG_EXT.runexport=function(){
    Every cell in the composition view is a reference to a reusable object, so the registry page
    that owns that object is one click away and nothing is described twice. */
 function agentHealth(a){
-  if(tamperCount(a)) return ["critical","tamper",tamperCount(a)+" open incident"+(tamperCount(a)>1?"s":"")];
-  if(!a.enrolled) return ["q","not enrolled","no hook is installed, so its runs are recorded only"];
-  if(a.tier==="observe") return ["approval","observe","enrolled, and nothing is delivered or refused yet"];
-  return ["allowed","healthy","frames arriving, chain intact"];
+  if(tamperCount(a)) return ["critical","Tamper",plural(tamperCount(a),"open incident")];
+  if(!a.enrolled) return ["q","Not enrolled","Not monitored: no hook installed"];
+  if(a.tier==="observe") return ["approval","Observe","enrolled, and nothing is delivered or refused yet"];
+  return ["allowed","Healthy","frames arriving, chain intact"];
 }
 /* The steering that reaches one agent, or null when no preview prompt is set up for it. */
 function agentSteering(a){
@@ -3853,9 +3886,9 @@ function pAgents(){
 
   var list=AGENTS.filter(function(a){return a.ws===w.slug;}), view=agentViewSet();
   var acts=function(a){
-    return '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">Edit</button>'+
-     '<button class="btn sm" onclick="openDialog(\'assignrole\',\''+a.key+'\')">Roles</button>'+
-     '<button class="btn sm danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button></td>';
+    return '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">Edit</button><span class="vh">, </span>'+
+     '<button class="btn sm" onclick="openDialog(\'assignrole\',\''+a.key+'\')">Roles</button><span class="vh">, </span>'+
+     '<button class="btn sm danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Retire</button></td>';
   };
   var head, rows;
   if(view==="composition"){
@@ -3867,18 +3900,18 @@ function pAgents(){
        '<td>'+agentCard(a)+'</td>'+
        '<td style="font-size:12px;max-width:26ch">'+h(a.desc)+'</td>'+
        '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(a.operator,22)+h(PEOPLE[a.operator].name)+'</span></td>'+
-       '<td>'+(M?(M.gates.length+M.prefix.length+M.volatile.length)+' items<div class="dim mono" style="font-size:10px">'+tokn(M.tok.total)+' tok'+(M.delivered?'':' · not delivered')+'</div>'
+       '<td>'+(M?plural((M.gates.length+M.prefix.length+M.volatile.length),"record")+'<div class="dim mono" style="font-size:10px">'+tokn(M.tok.total)+' tok'+(M.delivered?'':' · not delivered')+'</div>'
                :'<span class="dim">—</span>')+'</td>'+
-       '<td>'+belts.length+' belt'+(belts.length===1?'':'s')+'<div class="dim mono" style="font-size:10px">'+beltTotal(a)+' tools · '+h(a.beltMode)+'</div></td>'+
+       '<td>'+plural(beltTotal(a),"tool")+'<div class="dim" style="font-size:10px">'+(belts.length?plural(belts.length,"toolbelt"):'from role grants')+' · '+beltModeLabel(a.beltMode)+'</div></td>'+
        '<td class="mono" style="font-size:11.5px">'+h(a.host||"—")+'<div class="dim" style="font-size:10px;font-family:var(--font)">'+h(rt?rt.kind+" · "+a.tier:a.tier)+'</div></td>'+
        '<td class="mono dim" style="font-size:11px">'+h(a.principal||"prn_pending")+'</td>'+
        '<td><span class="b b-'+hl[0]+'"><span class="d"></span>'+h(hl[1])+'</span></td>'+
-       '<td class="num">'+a.runs30.toLocaleString()+'<div class="dim mono" style="font-size:10px">runs 30d</div></td>'+
+       '<td class="num">'+plural(a.runs30,"run")+'<div class="dim mono" style="font-size:10px">(30 days)</div></td>'+
        acts(a)+'</tr>';
     }).join("");
   } else {
     head='<th>Agent</th><th>Harness</th><th>Operator</th><th>Status</th><th>Tier</th>'+
-      '<th class="num">Belt</th><th class="num">Runs 30d</th><th class="num">Spend 30d</th><th class="num">Tokens 30d</th>'+
+      '<th class="num">Tools</th><th class="num">Runs (30 days)</th><th class="num">Spend (30 days)</th><th class="num">Tokens (30 days)</th>'+
       '<th>Mandates</th><th>Incidents</th><th></th>';
     rows=list.map(function(a){
       return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/agents/'+defSlug(a)+'\')">'+
@@ -3887,7 +3920,7 @@ function pAgents(){
        '<td><span class="row" style="gap:7px;flex-wrap:nowrap;white-space:nowrap">'+personAv(a.operator,22)+h(PEOPLE[a.operator].name)+'</span></td>'+
        '<td><span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span></td>'+
        '<td>'+tierBadge(a.tier)+'</td>'+
-       '<td class="num">'+a.belt+'<div class="dim mono" style="font-size:10px">'+h(a.beltMode)+'</div></td>'+
+       '<td class="num">'+beltTotal(a)+'<div class="dim" style="font-size:10px">'+beltModeLabel(a.beltMode)+'</div></td>'+
        '<td class="num">'+a.runs30.toLocaleString()+'</td>'+
        '<td class="num">'+usd(fmt2(n$(a.spend30)))+'</td>'+
        '<td class="num">'+tokn(agentTok(a).total)+'<div class="dim mono" style="font-size:10px">'+per(agentTok(a).cacheRate)+' cached</div></td>'+
@@ -3912,7 +3945,7 @@ function pAgents(){
      : 'Each row is what this agent did and what it cost over the last 30 days.')+'</p></div>'+
    '<div class="sp">'+viewPick+'<span class="mono dim" style="font-size:11px">.oxagen/agents/ @ '+h(list[0]?list[0].commit:"")+'</span></div></div>'+
    '<div class="tw"><table><thead><tr>'+head+'</tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">An agent has one principal and runs on one runtime. Its steering, its toolbelts and '+
+   '<div class="panel-b"><div class="note">An agent has one principal and runs on one runtime. Its steering, its toolbelts, and '+
    'its tools are workspace objects it refers to, so changing one changes every agent that refers to it.</div></div></div>';
 }
 
@@ -3962,7 +3995,7 @@ var BELT=[
  {id:"search_graph@1",d:"Hybrid semantic search over the workspace graph.",
   dec:"allow",rule:"grant:agent.graph.read",pinned:true,
   scope:"labels: Service, Release, Ticket, Commit · max_hops 2"},
- {id:"expand_graph@1",d:"Typed traversal from a node to its neighbours.",
+ {id:"expand_graph@1",d:"Typed traversal from a node to its neighbors.",
   dec:"allow",rule:"grant:agent.graph.read",scope:"max_hops 2"},
  {id:"recall_context@2",d:"Retrieve published Steering records for this turn's goal.",
   dec:"allow",rule:"grant:agent.graph.read",pinned:true,scope:"scope: workspace + repository"},
@@ -3971,7 +4004,7 @@ var BELT=[
  {id:"open_context_pr@1",d:"Open a pull request on the main repo from a proposal.",
   dec:"allow",rule:"grant:agent.repo.write #11",scope:"repo: a-intel/platform"},
  {id:"send_message@1",d:"Message another agent in this workspace, or a run.",
-  dec:"allow",rule:"agent tool default",scope:"@agent only. @all is not granted"},
+  dec:"allow",rule:"agent tool default",scope:"@agent only (no @all)"},
  {id:"claude_code__Bash@2.1",d:"Run a shell command in the host's working directory.",
   dec:"allow",rule:"grant:agent.repo.write #9 (harness tier)",
   scope:"deny: curl, ssh, aws, gh auth · cwd under a-intel/platform"},
@@ -3986,10 +4019,10 @@ var BELT=[
  {id:"stripe__create_payment@5",d:"Create and confirm a payment against a saved counterparty.",
   dec:"mandate",rule:"mnd_7K2ETQ4 · approval above $100.00, always for moves_funds",
   scope:"counterparties: vendor:aws, vendor:github · $250.00 per call"},
- {id:"search_tools@1",d:"Search this agent's belt by name and description. Returns names only.",
-  dec:"allow",rule:"meta-tool (searchable belt)",meta:true,pinned:true,scope:"the index covers the belt only"},
- {id:"load_tools@1",d:"Load full definitions for named tools from the belt.",
-  dec:"allow",rule:"meta-tool (searchable belt)",meta:true,pinned:true,scope:"belt members only"}
+ {id:"search_tools@1",d:"Search this agent's toolbelt by name and description. Returns names only.",
+  dec:"allow",rule:"meta-tool (searchable toolbelt)",meta:true,pinned:true,scope:"the index covers the toolbelt only"},
+ {id:"load_tools@1",d:"Load full definitions for named tools from the toolbelt.",
+  dec:"allow",rule:"meta-tool (searchable toolbelt)",meta:true,pinned:true,scope:"toolbelt members only"}
 ];
 
 /* ---- toolbelts: the reusable composition between a tool and an agent ----
@@ -4031,16 +4064,16 @@ function beltGates(b){
 }
 function beltGateCell(b){
   var g=beltGates(b), tone={allow:"allowed",require_approval:"approval",mandate:"proven",killed:"critical"};
-  var lab={allow:"allowed",require_approval:"approval",mandate:"mandate",killed:"killed"};
+  var lab={allow:["allowed","allowed"],require_approval:["needs approval","need approval"],mandate:["needs a mandate","need a mandate"],killed:["stopped","stopped"]};
   var out=["allow","require_approval","mandate","killed"].filter(function(k){return g[k];})
-    .map(function(k){return '<span class="b b-'+tone[k]+'" style="font-size:10.5px"><span class="d"></span>'+g[k]+' '+lab[k]+'</span>';}).join("");
+    .map(function(k){return '<span class="b b-'+tone[k]+'" style="font-size:10.5px"><span class="d"></span>'+plural(g[k],lab[k][0],lab[k][1])+'</span>';}).join(SEP);
   return out||'<span class="dim">—</span>';
 }
 function beltAvailability(b){
   var g=beltGates(b), blocked=g.killed+g.missing;
   return {blocked:blocked,
-    why:blocked?(g.killed?g.killed+' behind a kill switch':'')+(g.killed&&g.missing?' · ':'')+(g.missing?g.missing+' not in the registry':'')
-               :(g.mandate||g.require_approval?'some calls stop for a mandate or an approval':'every version is in the registry and no switch covers it')};
+    why:blocked?(g.killed?g.killed+' stopped by a kill switch':'')+(g.killed&&g.missing?' · ':'')+(g.missing?g.missing+' not in the registry':'')
+               :(g.mandate||g.require_approval?'Some calls wait for a mandate or an approval.':'Every tool version is in the registry and no kill switch covers it.')};
 }
 /* Which toolbelts reach a provider, and which agents that puts in front of it. */
 function providerBelts(id){return TOOLBELTS.filter(function(b){return beltProviders(b).indexOf(id)>=0;});}
@@ -4067,8 +4100,8 @@ var BELT_OUTSIDE=[
  {id:"github__delete_repository@1",why:"Denied by the workspace policy for every agent, at every version."},
  {id:"stripe__create_refund@3",why:"No grant. Financial tool, and no mandate in this workspace covers refunds."},
  {id:"aws_billing__purchase_savings_plan@2",why:"No grant. Mandated tool, FinOps workspace only."},
- {id:"snowflake__run_query@2",why:"Server not granted to any role in this workspace."},
- {id:"okta__deactivate_user",why:"Server not registered in this organization."}
+ {id:"snowflake__run_query@2",why:"Provider not granted to any role in this workspace."},
+ {id:"okta__deactivate_user",why:"Provider not registered in this organization."}
 ];
 
 /* Registry size is verCount(): the sum of each server's versions, the same figure the Tools page shows. */
@@ -4103,6 +4136,8 @@ function beltPresentation(a){
   if(S.beltMode) return S.beltMode;
   return a.beltMode||((a.belt||0)>FULL_BELT_LIMIT?"searchable":"full");
 }
+/* the presentation as the page names it: "All tools sent" or "Searchable" */
+function beltModeLabel(m){return m==="searchable"?"Searchable":"All tools sent";}
 function beltOf(a){
   var ids=AGENT_BELTS[a.key]||[], out=[];
   ids.forEach(function(id){var b=beltById(id); if(b) out.push(beltMember(b));});
@@ -4128,15 +4163,15 @@ function iamMoney(v,basis){
   return '<span class="num">'+usd(v)+'</span> <span class="dim" style="font-size:.85em">USD</span>'+
    (basis?'<span class="sub">'+h(basis)+'</span>':'');
 }
-/* the ∩ formula every governed computation on this page renders through */
+/* the intersection formula every governed computation on this page renders through. Each term narrows the result. */
 function iamWire(terms,out,nil){
   var s='<div class="iamw">';
   terms.forEach(function(t,i){
-    s+=(i?'<span class="op">∩</span>':'')+'<span class="t">'+h(t[0])+(t[1]?'<i>'+h(t[1])+'</i>':'')+'</span>';});
+    s+=(i?'<span class="op">and</span>':'')+'<span class="t">'+h(t[0])+(t[1]?'<i>'+h(t[1])+'</i>':'')+'</span>';});
   return s+'<span class="eqs">=</span><span class="t '+(nil?'nil':'out')+'">'+h(out[0])+
    (out[1]?'<i>'+h(out[1])+'</i>':'')+'</span></div>';
 }
-/* a flat label → value list in the same boxes. Not an intersection: no ∩, no = */
+/* a flat label → value list in the same boxes. Not an intersection: no "and", no = */
 function iamPairs(pairs){
   return '<div class="iamw">'+pairs.map(function(p){
     return '<span class="t">'+h(p[0])+'<i>'+h(p[1])+'</i></span>';}).join("")+'</div>';
@@ -4160,7 +4195,7 @@ function beltFocus(){setTimeout(function(){var e=el("beltq");
    are all ceilings on the principal, so they sit together under Permissions rather than beside
    the belt. The rev1 tab ids still resolve, so an old link lands on the tab that absorbed it. */
 var IAM_TABS=[["overview","Overview"],["identity","Identity"],["steering","Steering"],["toolbelt","Toolbelt"],
-  ["runtime","Runtime"],["permissions","Permissions"],["activity","Activity"],["source","Source"]];
+  ["runtime","Runtime"],["permissions","Permissions"],["activity","Activity"],["definition","Definition"]];
 var IAM_TAB_KEYS={}; IAM_TABS.forEach(function(x){IAM_TAB_KEYS[x[0]]=1;});
 var IAM_TAB_ALIAS={mandates:"permissions",budgets:"permissions",runs:"activity",
   enrollment:"runtime",incidents:"activity"};
@@ -4202,7 +4237,7 @@ function pAgent(r){
     '<button class="btn" onclick="openAvatar(\'agent:'+a.key+'\')">Edit avatar</button>'+
     '<button class="btn" onclick="openDialog(\'rotatecred\',\''+a.key+'\')">Rotate credential</button>'+
     '<button class="btn danger" onclick="openDialog(\'suspendagent\',\''+a.key+'\')">Suspend</button>'+
-    '<button class="btn danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Deregister</button>'+
+    '<button class="btn danger" onclick="openDialog(\'delagent\',\''+a.key+'\')">Retire agent</button>'+
    '</div></div>'+tabs+body(a,r);
 }
 
@@ -4213,32 +4248,32 @@ function aIdentity(a,r){
   return '<div class="grid">'+
   '<div class="grid g2">'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Identity</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">In Postgres, revocable in one second.</p></div></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">Revocable within one second.</p></div></div>'+
     '<div class="panel-b"><dl class="kv">'+
     '<dt>Agent key</dt><dd class="mono">'+h(a.key)+'</dd>'+
     '<dt>Principal</dt><dd class="mono">'+h(a.principal||"prn_pending")+
-     '<span class="sub">minted at registration and never reused. A retired agent\'s runs keep their identity</span></dd>'+
+     '<span class="sub">minted at registration and never reused, so a retired agent\'s runs keep their identity</span></dd>'+
     '<dt>Kind</dt><dd>agent · workspace <span class="mono">'+h(w.slug)+'</span> required</dd>'+
     '<dt>Harness</dt><dd>'+h(a.harnessLabel)+' <span class="mono dim">'+h(a.harnessV||"—")+'</span></dd>'+
-    '<dt>Model tier</dt><dd>'+h(a.model)+' → <span class="mono">'+
+    '<dt>Model class</dt><dd>'+h(a.model)+' → <span class="mono">'+
      h(a.model==="light"?"z-ai/glm-flash-latest":"z-ai/glm-latest")+'</span></dd>'+
     '<dt>Operator</dt><dd>'+h(op.name)+
      '<span class="sub">accountable for every run · IAM field <span class="mono">initiating_principal</span></span></dd>'+
     '<dt>Lifecycle state</dt><dd><span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span>'+
-     '<span class="sub">registered → enrolled → active → retired. Deregistering retires the principal and never deletes it, so old runs keep their identity.</span></dd>'+
+     '<span class="sub">registered → enrolled → retired, with suspended or unenrolled in between. Retiring ends the principal and keeps it, so old runs keep their identity.</span></dd>'+
     '<dt>First frame</dt><dd class="mono">'+h(a.firstFrame||"—")+'</dd>'+
     '</dl></div></div>'+
 
    '<div class="panel" style="border-color:color-mix(in srgb,var(--st-proven) 34%,var(--border))">'+
     '<div class="panel-h"><div style="flex:1;min-width:0"><h3>Credentials</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">The single property most of the threat model rests on.</p></div>'+
-    '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>none</span></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">What this agent holds</p></div>'+
+    '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>run token only</span></div>'+
     '<div class="panel-b" style="display:grid;gap:12px">'+
-    iamPairs([["API key","none"],["OAuth token","none"],["Cloud role","none"],["GitHub token","none"],
-              ["Run token","one, and it reaches Oxagen only"]])+
-    '<p style="font-size:12.5px;margin:0">It holds one run token, and that token is good for talking to Oxagen and '+
+    iamPairs([["API key","Not held"],["OAuth token","Not held"],["Cloud role","Not held"],["GitHub token","Not held"],
+              ["Run token","Held · works only with oxagen"]])+
+    '<p style="font-size:12.5px;margin:0">It holds one run token, and that token is good for talking to oxagen and '+
     'nothing else. Every secret a call needs is minted by the broker at dispatch, scoped to that one call, and never '+
-    'transmitted to the agent. A leaked run token cannot reach a provider.</p>'+
+    'sent to the agent. A leaked run token cannot reach a provider.</p>'+
     '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/tools/providers\')">See the connections that mint them</button>'+
     '</div></div></div>'+
 
@@ -4246,17 +4281,17 @@ function aIdentity(a,r){
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Run credential</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">Long-lived, purpose-locked, hashed at rest, shown to the operator once.</p></div></div>'+
     '<div class="panel-b"><dl class="kv">'+
-    '<dt>Key</dt><dd class="mono">'+h(a.cred||"—")+'<span class="sub">shown once at issue; stored as a hash</span></dd>'+
+    '<dt>Key</dt><dd class="mono">'+h(a.cred||"—")+'<span class="sub">shown once at issue and stored as a hash</span></dd>'+
     '<dt>Purpose lock</dt><dd class="mono">run_start, control_channel</dd>'+
     '<dt>Issued</dt><dd>'+h(a.issued||"—")+' to '+h(op.name)+'</dd>'+
     '<dt>Last used</dt><dd class="mono">'+h(a.enrolled?(a.lastUsed||"—"):"never")+'</dd>'+
     '<dt>Run tokens</dt><dd>'+(a.enrolled?(a.tokens||0)+' active · 15 minute TTL · refreshed on the control channel':'0 active')+
      '<span class="sub">Revoking the key or suspending the agent kills every run token at the next call. This is what makes a halt stick.</span></dd>'+
-    '<dt>Host device key</dt><dd class="mono">'+h(a.enrolled?(a.devKey||"—"):"not enrolled")+
+    '<dt>Host device key</dt><dd class="mono">'+h(a.enrolled?(a.devKey||"—"):"—")+
      '<span class="sub">'+(a.enrolled?'signs checkpoints from '+h(a.host||"its host")
-       :'checkpoints are unsigned until a host enrolls')+'</span></dd>'+
+       :'Not enrolled. Checkpoints are unsigned until a host enrolls.')+'</span></dd>'+
     '</dl>'+
-    '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'identity\',\''+a.key+'\')">Change identity</button>'+
+    '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'identity\',\''+a.key+'\')">Edit identity</button>'+
     '<button class="btn danger" onclick="openDialog(\'revokecred\',\''+a.key+'\')">Revoke credential</button></div>'+
     '</div></div>'+
 
@@ -4272,7 +4307,7 @@ function aIdentity(a,r){
     '<dt>Delegation</dt><dd>subagents narrow, never widen'+
      '<span class="sub">a subagent\'s effective permission is this agent\'s grants ∩ the invoking human\'s grants</span></dd>'+
     '<dt>Tamper incidents</dt><dd>'+(tamperCount(a)
-      ?'<span class="b b-critical"><span class="d"></span>'+tamperCount(a)+' · '+h(agentTamper(a)[0].kind)+'</span> '+
+      ?'<span class="b b-critical"><span class="d"></span>'+tamperCount(a)+' · '+keyLabel(agentTamper(a)[0].kind)+'</span> '+
        '<button class="btn sm ghost" onclick="S.tab.agent=\'activity\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/activity\')">Read them</button>'
       :'<span class="b b-allowed"><span class="d"></span>0</span>')+'</dd>'+
     '</dl>'+
@@ -4305,18 +4340,18 @@ function aOverview(a,r){
       ["Open",'S.tab.agent=\'steering\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/steering\')'])+
     part("Toolbelt",belts.length?belts.map(function(b){
         return '<button class="lnk" onclick="S.beltPick=\''+h(b.id)+'\';go(\'#/'+ORG.slug+'/'+S.ws+'/tools/toolbelts\')">'+h(b.name)+'</button>';
-      }).join(' <span class="dim">·</span> '):'<span class="dim">none assigned</span>',
-      beltTotal(a)+' tool versions in all, sent as a '+h(beltPresentation(a))+' belt',
-      ["Open",'S.tab.agent=\'toolbelt\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/toolbelt\')'])+
+      }).join(' <span class="dim">·</span> '):plural(beltTotal(a),"tool"),
+      (belts.length?plural(beltTotal(a),"tool")+' · ':'from role grants · no named toolbelt · ')+beltModeLabel(beltPresentation(a)),
+      ["Open toolbelt",'S.tab.agent=\'toolbelt\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/toolbelt\')'])+
     part("Runtime",'<span class="mono">'+h(a.host||"—")+'</span> '+tierBadge(a.tier),
       rt?h(rt.kind)+' · '+h(rt.harness)+' '+h(rt.harnessV)+' · '+h(rt.os):'no host is enrolled',
-      ["Open",'S.tab.agent=\'runtime\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/runtime\')'])+
+      ["Open runtime",'S.tab.agent=\'runtime\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/runtime\')'])+
     part("Owner",h(op.name)+' <span class="mono dim">'+h(op.role)+'</span>',
       'accountable for every run this agent makes')+
-    part("Permissions",agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+
-      (a.mandates.length?' · <span class="b b-approval"><span class="d"></span>'+a.mandates.length+' mandate</span>':' · no mandate'),
-      'a toolbelt says what it can see; its roles and the policy say what it may call',
-      ["Open",'S.tab.agent=\'permissions\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/permissions\')'])+
+    part("Permissions",plural(agentRolesOf(a.key).length,"role")+
+      (a.mandates.length?' · <span class="b b-approval"><span class="d"></span>'+plural(a.mandates.length,"mandate")+'</span>':' · no mandate'),
+      'A toolbelt says what it can see. Its roles and the policy say what it may call.',
+      ["Open permissions",'S.tab.agent=\'permissions\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/permissions\')'])+
     '</dl></div></div>'+
 
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Last 30 days</h3>'+
@@ -4324,17 +4359,16 @@ function aOverview(a,r){
     '<button class="btn sm" style="margin-left:auto" onclick="S.tab.agent=\'activity\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/activity\')">Open activity</button></div>'+
     '<div class="panel-b" style="display:grid;gap:14px">'+
     '<div class="grid g2">'+
-     '<div class="stat"><span class="k">Runs</span><span class="v">'+a.runs30.toLocaleString()+'</span><span class="s">'+h(a.lastUsed?'last at '+a.lastUsed:'none recorded')+'</span></div>'+
-     '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(n$(a.spend30)))+'</span><span class="s">'+((TIER_RANK[a.tier]||0)>=2?'gateway_observed':'client_attested')+'</span></div>'+
+     '<div class="stat"><span class="k">Runs</span><span class="v">'+a.runs30.toLocaleString()+'</span><span class="s">'+h('in the last 30 days'+(a.lastUsed?' · last at '+a.lastUsed:''))+'</span></div>'+
+     '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(n$(a.spend30)))+'</span><span class="s">'+basisChip((TIER_RANK[a.tier]||0)>=2?'gateway_observed':'client_attested')+'</span></div>'+
      '<div class="stat"><span class="k">Tokens</span><span class="v">'+tokn(tk.total)+'</span><span class="s">'+per(tk.cacheRate)+' cache read over input</span></div>'+
-     '<div class="stat"><span class="k">Tamper incidents</span><span class="v"'+(tamperCount(a)?' style="color:var(--st-critical)"':'')+'>'+tamperCount(a)+'</span><span class="s">'+h(hl[2])+'</span></div>'+
+     '<div class="stat"><span class="k">Tamper incidents</span><span class="v"'+(tamperCount(a)?' style="color:var(--st-critical)"':'')+'>'+(tamperCount(a)||a.enrolled?tamperCount(a):'—')+'</span><span class="s">'+h(hl[2])+'</span></div>'+
     '</div>'+
-    '<div class="note">Every tool definition on the belt is paid for as input on every call, whether the tool is used or '+
-    'not, which is why the belt width and the token bill are read together.</div></div></div></div>'+
+    '<div class="note">Every tool on the toolbelt is sent, and paid for, on every model call, whether or not it\'s used.</div></div></div></div>'+
 
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Definition in git</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Identity is in Postgres; the definition is a file, and the file is the source of truth.</p></div>'+
-   '<button class="btn sm" style="margin-left:auto" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/definition\')">Open the file</button></div>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Definition</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">The definition file in git is the source of truth. Identity and credentials are managed by oxagen.</p></div>'+
+   '<button class="btn sm" style="margin-left:auto" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/definition\')">Open definition</button></div>'+
    '<div class="panel-b"><dl class="kv">'+
    '<dt>Path</dt><dd class="mono">.oxagen/agents/'+h(sl)+'.toml</dd>'+
    '<dt>Repo</dt><dd class="mono">'+h(w.main)+' @ '+h(w.branch)+'</dd>'+
@@ -4352,10 +4386,10 @@ function aOverview(a,r){
 /* ---- Runtime: the host this agent runs on, and what that seam earns ---- */
 function aRuntime(a,r){
   if(!a.enrolled) return '<div class="panel"><div class="panel-b">'+
-   emptyState("No runtime is enrolled for this agent",
-    "Until a host enrolls, this agent has an identity and a toolbelt but no hook is installed. Its runs would be graded <span class=\"mono\">observe</span>, and no report could say more.",
-    '<button class="btn primary" onclick="openDialog(\'wrap\')">Wrap it</button>'+
-    '<button class="btn" onclick="openDialog(\'register\')">Show the CLI path</button>')+'</div></div>';
+   emptyState("No runtime is enrolled",
+    "Until one is, runs are recorded at the <span class=\"mono\">observe</span> tier: nothing is delivered and nothing can be blocked.",
+    '<button class="btn primary" onclick="openDialog(\'wrap\')">Enroll a runtime</button>'+
+    '<button class="btn" onclick="openDialog(\'register\')">Show CLI steps</button>')+'</div></div>';
 
   return '<div class="grid">'+aRuntimeHost(a)+
   '<div class="grid g2">'+
@@ -4363,24 +4397,22 @@ function aRuntime(a,r){
     '<p class="muted" style="margin:2px 0 0;font-size:12px">The tier is computed per run from what was actually routed.</p></div>'+
     '<button class="btn sm" style="margin-left:auto" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/runtimes\')">All runtimes</button></div>'+
     '<div class="panel-b">'+tierLadder(a.tier)+'<dl class="kv" style="margin-top:14px">'+
-    '<dt>Model calls</dt><dd>'+(TIER_RANK[a.tier]>=2?'routed through the loopback proxy on the host. Tokens are counted from the bytes that pass through it and the run token is the only credential the call carries. Spend is <span class="basis">gateway_observed</span>.':'not routed through Oxagen. The harness calls its provider with its own key and reports usage. Spend is <span class="basis">client_attested</span>.')+'</dd>'+
-    '<dt>Tool calls over MCP</dt><dd>'+(TIER_RANK[a.tier]>=2?'every provider the harness reaches over MCP is reached through the gateway and decided on the server.':a.tier==="harness"?'the providers registered with Oxagen are routed through Oxagen and decided on the server. Any other MCP server the harness holds is not.':'recorded only')+'</dd>'+
-    '<dt>Harness-native tools</dt><dd>'+(a.tier==="contained"?'the four blocking hook events can refuse, and the sandbox refuses a write to the settings file, the hook entries or the hook binary':TIER_RANK[a.tier]>=1?'the four blocking hook events can refuse: client-attested and fail-open':'recorded only')+'</dd>'+
+    '<dt>Model calls</dt><dd>'+(TIER_RANK[a.tier]>=2?'routed through the loopback proxy on the host. Tokens are counted from the bytes that pass through it and the run token is the only credential the call carries. Spend is '+basisChip("gateway_observed")+'.':'not routed through oxagen. The harness calls its provider with its own key and reports usage. Spend is '+basisChip("client_attested")+'.')+'</dd>'+
+    '<dt>Tool calls over MCP</dt><dd>'+(TIER_RANK[a.tier]>=2?'every provider the harness reaches over MCP is reached through the gateway and decided by oxagen.':a.tier==="harness"?'the providers registered with oxagen are routed through oxagen, which decides each call. Any other MCP tool the harness holds is not.':'recorded only')+'</dd>'+
+    '<dt>Harness-native tools</dt><dd>'+(a.tier==="contained"?'the four blocking hook events can refuse, and the sandbox refuses a write to the settings file, the hook entries or the hook binary':TIER_RANK[a.tier]>=1?'the four blocking hook events can refuse. The result is reported by the harness, and a failed hook lets the call through (fail-open)':'recorded only')+'</dd>'+
     '<dt>Budgets</dt><dd>'+(TIER_RANK[a.tier]>=2?'enforced before the call: a run budget by the proxy, a shared budget by a reservation on the control plane':'a recorded number and a notice in steering, never a stop')+'</dd>'+
     '<dt>Steering</dt><dd>'+(TIER_RANK[a.tier]>=1?'delivered at SessionStart and UserPromptSubmit, and as files in the checkout':'not delivered: no hook is installed')+'</dd>'+
     '<dt>Credentials held by this agent</dt><dd><b style="color:var(--st-allowed)">none</b></dd>'+
     '</dl>'+
-    '<div class="note" style="margin-top:13px">The tier is computed per run from what was actually routed and rendered verbatim. '+
-    'No report can say a stronger word than the tier allows, and only <span class="mono">contained</span> earns the word enforced.</div></div></div>'+
+    '<div class="note" style="margin-top:13px">Only <span class="mono">contained</span> is fully enforced: all traffic must pass through oxagen.</div></div></div>'+
 
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Rollback</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Shown beside the installer from the first screen, and never hidden afterwards.</p></div></div>'+
+   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Unenroll this host from the CLI</h3></div></div>'+
     '<div class="panel-b">'+
     '<pre>oxagen agent unenroll --host '+h(a.host||"this")+' \\\n  --restore-settings</pre>'+
     '<div class="note" style="margin-top:12px">If hooks are stripped by hand instead, the next run records '+
-    '<span class="mono">hooks_removed</span> and the tier falls to <span class="mono">observe</span>. It is never upgraded after the fact.</div>'+
+    keyLabel("hooks_removed")+' and the tier falls to <span class="mono">observe</span>. It is never upgraded after the fact.</div>'+
     '<div class="row" style="margin-top:14px">'+
-    '<button class="btn" onclick="act(\'Smoke session queued. One turn, recorded like any other run.\')">Run a smoke session</button>'+
+    '<button class="btn" onclick="act(\'Test session queued. One turn, recorded like any other run.\')">Run a test session</button>'+
     '<button class="btn danger" onclick="openDialog(\'unenroll\',\''+a.key+'\')">Unenroll</button></div>'+
     '</div></div></div></div>';
 }
@@ -4390,15 +4422,15 @@ function aRuntime(a,r){
 function aRuntimeHost(a){
   var rt=agentRuntime(a), deg=rt&&rt.health!=="ok";
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Host</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">One click produced a signed installer with a one-time enrollment token embedded. Nothing was pasted.</p></div>'+
+   '</div>'+
    '<span class="b b-'+(deg?"approval":"allowed")+'" style="margin-left:auto"><span class="d"></span>'+h(rt?rt.health:"connected")+'</span>'+
    '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/runtimes/'+h((rt&&rt.id)||a.host||"")+'\')">Open the runtime</button></div>'+
    '<div class="panel-b"><dl class="kv">'+
    '<dt>Runtime</dt><dd class="mono">'+h((rt&&rt.name)||a.host||"—")+
     (rt?'<span class="sub">'+h(rt.kind+' · '+rt.os+' · started by '+rt.started)+'</span>':'')+'</dd>'+
    '<dt>Harness</dt><dd>'+h((rt&&rt.harness)||a.harnessLabel)+' <span class="mono dim">'+
-    h((rt&&rt.harnessV)||a.harnessV||"—")+'</span><span class="sub">the runtime is shared; every agent on it is seen through the same hooks</span></dd>'+
-   '<dt>Device key</dt><dd class="mono">'+h(a.devKey||"—")+'<span class="sub">signs checkpoints; Oxagen countersigns at ingest</span></dd>'+
+    h((rt&&rt.harnessV)||a.harnessV||"—")+'</span><span class="sub">the runtime is shared. Every agent on it is seen through the same hooks.</span></dd>'+
+   '<dt>Device key</dt><dd class="mono">'+h(a.devKey||"—")+'<span class="sub">signs checkpoints; oxagen countersigns at ingest</span></dd>'+
    '<dt>Collector</dt><dd class="mono">oxagend '+h((rt&&rt.collector)||a.collector||"1.6.2")+
     '<span class="sub">'+(rt&&rt.gaps?h(rt.gaps+' telemetry gap'+(rt.gaps>1?'s':'')+' in the last 24h')
       :'last frame 4 seconds ago · 0 telemetry gaps in the last 24h')+'</span></dd>'+
@@ -4406,11 +4438,10 @@ function aRuntimeHost(a){
    '<dt>Hooks written</dt><dd class="mono" style="font-size:11.5px">'+
     h((rt&&rt.hooks)||"SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, Stop")+
     '<span class="sub" style="font-family:var(--font)">'+(rt&&rt.hookCount<5?'Fewer than five events are wired, so some calls are recorded rather than decided.':'Five run as command hooks. The first four can refuse.')+'</span></dd>'+
-   '<dt>Model proxy</dt><dd>'+((TIER_RANK[a.tier]||0)>=2?'loopback proxy on the host<span class="sub">every model call leaves through it; tokens are counted from the bytes that pass.</span>':'not routed<span class="sub">model traffic goes from the harness to its provider. Routing it is the gateway tier.</span>')+'</dd>'+
-   '<dt>Oxagen MCP endpoint</dt><dd class="mono">mcp.oxagen.com/w/'+h(S.ws)+'<span class="sub">providers registered here are routed through Oxagen and decided on the server</span></dd>'+
+   '<dt>Model proxy</dt><dd>'+((TIER_RANK[a.tier]||0)>=2?'loopback proxy on the host<span class="sub">every model call leaves through it. Tokens are counted from the bytes that pass.</span>':'not routed<span class="sub">model traffic goes from the harness to its provider. Routing it is the gateway tier.</span>')+'</dd>'+
+   '<dt>oxagen MCP endpoint</dt><dd class="mono">mcp.oxagen.com/w/'+h(S.ws)+'<span class="sub">providers registered here are routed through oxagen, which decides each call</span></dd>'+
    '<dt>Settings</dt><dd>'+h((rt&&rt.settings)||"user settings")+'<span class="sub">an enterprise managed enrollment writes locked settings instead</span></dd>'+
-   '<dt>Tier earned</dt><dd>'+tierBadge(a.tier)+
-    '<span class="sub">Computed per run from what was actually routed. The UI cannot render a stronger word than the tier allows.</span></dd>'+
+   '<dt>Tier earned</dt><dd>'+tierBadge(a.tier)+'</dd>'+
    '<dt>First frame</dt><dd class="mono">'+h(a.firstFrame||"—")+'</dd>'+
    '<dt>Last checkpoint</dt><dd class="mono">'+h((rt&&rt.checkpoint)||("seq 41,208 · "+(a.lastUsed||"—")))+' · chain intact</dd>'+
    (rt&&rt.note?'<dt>Note</dt><dd>'+h(rt.note)+'</dd>':'')+
@@ -4420,6 +4451,7 @@ function aRuntimeHost(a){
 /* ---- Toolbelt: the only tool list the model is ever shown ---- */
 function aToolbelt(a,r){
   var mode=beltPresentation(a), belt=beltOf(a), total=beltTotal(a);
+  var grantReach=Math.min(verCount(),Math.max(total,Math.round(verCount()*0.62)));
   var pinned=belt.filter(function(x){return x.pinned;});
   /* Every query word has to appear, and an API name is split on its separators first, so
      "stripe payment" finds stripe__create_payment and "delete repository" does not settle
@@ -4441,7 +4473,7 @@ function aToolbelt(a,r){
      '<td>'+catBadge(toolMeta(x.n).cat)+'</td>'+
      '<td>'+gate(x.dec,x.note||x.rule)+'<span class="sub mono">'+h(x.rule)+'</span></td>'+
      '<td>'+hazard(x.risk,x.eff)+'</td>'+
-     '<td><span class="b b-q">'+h(x.eg)+'</span></td><td>'+finBadge(x.fin)+'</td>'+
+     '<td><span class="b b-q">'+keyLabel(x.eg)+'</span></td><td>'+finBadge(x.fin)+'</td>'+
      '<td class="dim mono" style="font-size:10.5px">'+h(x.dig)+'</td></tr>';
   }
   var rows=bv==="group"
@@ -4449,7 +4481,7 @@ function aToolbelt(a,r){
       var rs=bsel.filter(function(x){return toolMeta(x.n).cat===c;});
       return '<tr class="tgrp t-'+c+'"><td colspan="6"><span class="ti">'+catSvg(c)+'</span><b>'+h(TCAT[c].l)+
        '</b><span class="muted">'+h(TCAT[c].s)+'</span></td>'+
-       '<td class="dim" style="font-size:11px;white-space:nowrap">'+rs.length+' tool'+(rs.length>1?'s':'')+'</td></tr>'+
+       '<td class="dim" style="font-size:11px;white-space:nowrap">'+plural(rs.length,"tool")+'</td></tr>'+
        rs.map(row).join("");}).join("")
    : bsel.map(row).join("");
 
@@ -4466,37 +4498,37 @@ function aToolbelt(a,r){
        return '<div class="i"><div style="min-width:0">'+toolCell(x.id,{sz:"sm"})+
         '<div class="dsc">'+h(x.d)+'</div></div><span class="rk">'+hazard(x.risk)+gate(x.dec)+'</span></div>';
       }).join("")+'</div>'+
-      '<p class="muted" style="font-size:12px;margin:8px 0 0">'+hits.length+' of '+total+' belt members matched. '+
+      '<p class="muted" style="font-size:12px;margin:8px 0 0">'+hits.length+' of '+plural(total,"tool")+' matched. '+
       '<span class="mono">search_tools</span> returned names and one-line descriptions only; the model must call '+
       '<span class="mono">load_tools</span> to see a schema, and both calls are recorded as frames.</p>'
     : '<div class="iamr"><div class="zip"><b>Zero results.</b> '+
-      (outHit.length?'<span class="mono">'+h(outHit[0].id)+'</span> exists in the registry, but it is not on this agent\'s belt: '+h(outHit[0].why)
-                    :'Nothing on this agent\'s belt matches that.')+
-      '<div style="margin-top:10px;color:var(--st-proven)">A search never returns a tool outside the belt. What the model '+
+      (outHit.length?'<span class="mono">'+h(outHit[0].id)+'</span> exists in the registry, but it is not on this agent\'s toolbelt: '+h(outHit[0].why)
+                    :'Nothing on this agent\'s toolbelt matches that.')+
+      '<div style="margin-top:10px;color:var(--st-proven)">A search never returns a tool outside the toolbelt. What the model '+
       'cannot call, it cannot find, and so cannot be prompt-injected into calling.</div></div></div>';
 
   return '<div class="grid">'+
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Belt computation</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">At run start, cached with the bundle version, recomputed on any deny-generation bump.</p></div>'+
-   '<span class="b b-q mono" style="margin-left:auto;font-size:10.5px">'+h(activePolicy())+' · deny gen '+S.denyGen+'</span></div>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>How the toolbelt is built</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Built at run start, and rebuilt when the policy bundle or a kill switch changes.</p></div>'+
+   '<span class="b b-q mono" style="margin-left:auto;font-size:10.5px">'+h(activePolicy())+' · kill-switch generation '+S.denyGen+'</span></div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
-   iamWire([["grants","1,204 versions reachable"],["delegation ceiling",PEOPLE[a.operator].name],
+   iamWire([["grants",grantReach.toLocaleString()+" tool versions reachable"],["delegation ceiling",PEOPLE[a.operator].name],
             ["policy bundle",activePolicy()],["kill switches",flippedSwitches()+" flipped"]],
-           ["belt",total+" tool versions"])+
+           ["toolbelt",plural(total,"tool version")])+
    '<p style="font-size:12.5px;margin:0">The registry holds <b class="num">'+verCount().toLocaleString()+
-   '</b> tool versions across '+srvCount()+' servers. This agent\'s model is shown <b class="num">'+total+
-   '</b> of them. A call by name to anything outside the belt is rejected before lookup, recorded as '+
+   '</b> tool versions from '+plural(srvCount(),"provider")+'. This agent\'s model is shown <b class="num">'+total+
+   '</b> of them. A call by name to anything outside the toolbelt is rejected before lookup, recorded as '+
    '<span class="mono">unknown_tool</span>, and counted toward an automatic halt.</p></div></div>'+
 
   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Model view</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+
    (total>FULL_BELT_LIMIT
-    ? 'The belt is '+total+' tools, over this workspace\'s full-belt limit of '+FULL_BELT_LIMIT+', so it is presented as a searchable belt.'
-    : 'The belt is '+total+' tools, under this workspace\'s full-belt limit of '+FULL_BELT_LIMIT+', so every definition is in the request.')+
+    ? plural(total,"tool")+' · Searchable (over the limit of '+FULL_BELT_LIMIT+').'
+    : plural(total,"tool")+' · under this workspace\'s limit of '+FULL_BELT_LIMIT+', so all tool definitions are sent with every request.')+
    '</p></div>'+
-   '<div class="seg" role="group" aria-label="Belt presentation">'+
-    '<button class="btn sm" aria-pressed="'+(mode==="searchable")+'" onclick="S.beltMode=\'searchable\';render()">Searchable belt</button>'+
-    '<button class="btn sm" aria-pressed="'+(mode==="full")+'" onclick="S.beltMode=\'full\';render()">Full belt</button></div></div>'+
+   '<div class="seg" role="group" aria-label="Toolbelt presentation">'+
+    '<button class="btn sm" aria-pressed="'+(mode==="searchable")+'" onclick="S.beltMode=\'searchable\';render()">Searchable</button>'+
+    '<button class="btn sm" aria-pressed="'+(mode==="full")+'" onclick="S.beltMode=\'full\';render()">All tools sent</button></div></div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
    (mode==="searchable"
     ? '<div class="note"><b>Searchable belt.</b> The request carries two meta-tools plus the tools pinned as '+
@@ -4511,7 +4543,7 @@ function aToolbelt(a,r){
       'whether the call will be held for approval, and any budget or mandate ceiling. A model that knows a call will be '+
       'held plans differently than one that does not. The schema digest lets a run\'s frames prove exactly which schema '+
       'the model saw.</p>'
-    : '<div class="note"><b>Full belt.</b> Every definition is in the request, and there are no meta-tools to call. '+
+    : '<div class="note"><b>All tools sent.</b> Every definition is in the request, and there are no meta-tools to call. '+
       (total>FULL_BELT_LIMIT
        ? 'At '+total+' tools this belt is over the workspace limit of '+FULL_BELT_LIMIT+'. This is the view a smaller belt gets, shown here for comparison.'
        : 'At '+total+' tools it is under the limit of '+FULL_BELT_LIMIT+', which is how this agent actually runs.')+
@@ -4523,11 +4555,11 @@ function aToolbelt(a,r){
       }).join(",\n")+(total>6?',\n  <span class="c">… '+(total-6)+' more</span>':'')+'\n]</pre>')+
    '</div></div>'+
 
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Belt search</h3>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Toolbelt search</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">This is <span class="mono">search_tools</span> running against the same index the model queries.</p></div></div>'+
    '<div class="panel-b" style="display:grid;gap:11px">'+
    '<div class="iams"><span class="dim mono">search_tools(</span>'+
-   '<input id="beltq" type="text" placeholder="release notes" value="'+h(S.beltQuery||"")+'" aria-label="Search this agent\'s belt" '+
+   '<input id="beltq" type="text" placeholder="release notes" value="'+h(S.beltQuery||"")+'" aria-label="Search this agent\'s toolbelt" '+
    'oninput="S.beltQuery=this.value" onkeydown="if(event.key===\'Enter\'){S.beltRan=true;render();beltFocus();}">'+
    '<span class="dim mono">)</span>'+
    '<button class="btn sm" onclick="S.beltRan=true;render()">Run</button></div>'+
@@ -4537,29 +4569,31 @@ function aToolbelt(a,r){
    results+'</div></div>'+
 
   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Per-tool decision rules</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">What the policy engine will answer for each member of this belt, '+
-   'before the call is ever made. Deterministic and versioned. No model participates.</p></div>'+
-   '<div class="sp">'+namesToggle()+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">What the policy engine will answer for each tool on this toolbelt, '+
+   'before the call is ever made. Deterministic, versioned, replayable. No model participates.</p></div>'+
+   (belt.length?'<div class="sp">'+namesToggle()+
    '<div class="seg" role="group" aria-label="Layout"><button class="btn sm" aria-pressed="'+(bv==="group")+'" onclick="S.beltView=\'group\';render()">By category</button>'+
    '<button class="btn sm" aria-pressed="'+(bv==="flat")+'" onclick="S.beltView=\'flat\';render()">Flat</button></div>'+
-   '<span class="b b-q">'+belt.length+' of '+total+' shown</span></div></div>'+
+   '<span class="b b-q">'+belt.length+' of '+total+' shown</span></div>':'')+'</div>'+
+   (!belt.length?'<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">No per-tool rule is recorded yet for the '+
+     plural(total,"tool")+' on this toolbelt.</p></div>':
    '<div class="panel-b" style="border-bottom:1px solid var(--border);display:grid;gap:10px">'+
    catChips(bcount,bc,"S.beltCat='%s';render()",belt.length)+
    '<div class="row" style="gap:14px;font-size:12px">'+
     '<span class="hz hz-critical">'+riskSvg("critical")+'<span>'+hz.critical+' critical</span></span>'+
     '<span class="hz hz-high">'+riskSvg("high")+'<span>'+hz.high+' high</span></span>'+
-    '<span class="row" style="gap:5px">'+gate("require_approval")+'<span class="dim">'+gc.require_approval+'</span></span>'+
-    (gc.mandate?'<span class="row" style="gap:5px">'+gate("mandate")+'<span class="dim">'+gc.mandate+'</span></span>':'')+
-    '<span class="row" style="gap:5px">'+gate("deny")+'<span class="dim">'+gc.deny+'</span></span>'+
+    '<span class="gt gt-require_approval">'+gateSvg("require_approval")+gc.require_approval+' need approval</span>'+
+    (gc.mandate?'<span class="gt gt-mandate">'+gateSvg("mandate")+gc.mandate+' need a mandate</span>':'')+
+    '<span class="gt gt-deny">'+gateSvg("deny")+gc.deny+' denied</span>'+
     '<button class="btn sm ghost" style="margin-left:auto" onclick="openDialog(\'toolcats\')">What the categories mean</button></div></div>'+
    '<div class="tw"><table'+(bv==="group"?' data-lt="off"':'')+'><thead><tr><th>Tool</th><th>Category</th><th>Decision</th>'+
-   '<th>Hazard</th><th>Egress</th><th>Financial</th><th>Schema digest</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   (total>belt.length?'<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">The remaining '+(total-belt.length)+
+   '<th>Hazard</th><th>Egress</th><th>Financial</th><th>Schema digest</th></tr></thead><tbody>'+rows+'</tbody></table></div>')+
+   (belt.length&&total>belt.length?'<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">The other '+(total-belt.length)+
      ' are the same github and harness families at other versions.</p></div>':'')+'</div>'+
 
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Off the belt</h3>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Not on the toolbelt</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">A sample of the '+(verCount()-total).toLocaleString()+
-   ' registry versions outside this belt, and why each one is out.</p></div>'+
+   ' registry versions outside this toolbelt, and why each one is out.</p></div>'+
    '<span class="b b-denied" style="margin-left:auto"><span class="d"></span>not visible to the model</span></div>'+
    '<div class="tw"><table><thead><tr><th>Tool</th><th>Reason</th></tr></thead><tbody>'+
    outside.map(function(x){return '<tr><td>'+toolCell(x.id,{sz:"sm"})+'</td><td class="muted">'+h(x.why)+'</td></tr>';}).join("")+
@@ -4577,24 +4611,24 @@ function permRoles(a){
     var ro=roleById(roleBase(x));
     return '<dt class="mono">'+h(x)+'</dt><dd class="mono" style="font-size:11.5px">'+
      (ro?h(ro.perms.join(" · ")):'—')+'<span class="sub">'+(ro?h(ro.desc):'not a registered role')+'</span></dd>';
-   }).join(""):'<dt>Roles</dt><dd class="dim">none held. It can reach nothing but its own run channel</dd>';
+   }).join(""):'<dt>Roles</dt><dd class="dim">None held. It can reach only its own run channel.</dd>';
 
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Roles</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Effective permission is its own grants ∩ the invoking human\'s grants. Subagents can only narrow.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">A subagent can use only what both its own grants and the invoking person\'s grants allow. Subagents can only narrow.</p></div>'+
    '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'assignrole\',\''+a.key+'\')">Assign a role</button></div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
    iamWire(held.map(function(x){return [roleBase(x),""];}).concat([[op.name,op.role]]),
-           [beltTotal(a)+" tool versions","the belt its model is shown"])+
+           [beltTotal(a)+" tool versions","the toolbelt its model is shown"])+
    '<dl class="kv">'+roleRows+
    '<dt>Resource scope</dt><dd class="mono" style="font-size:11.5px">side_effects: read, write · repositories: '+
     h([w.main].concat(w.linked||[]).join(", "))+' · egress: third_party · max_hops 2</dd>'+
-   '<dt>Spend ceiling</dt><dd>'+iamMoney(a.budget,"per run, checked at each hook boundary")+' · '+
+   '<dt>Spend ceiling</dt><dd>'+iamMoney(a.budget,"per run, checked at each checkpoint")+' · '+
     iamMoney(a.budgetDay||a.budget,"per day, on reported spend")+'</dd>'+
    '<dt>Can move money</dt><dd>'+(a.mandates.length
      ?'<span class="b b-approval"><span class="d"></span>'+a.mandates.length+' mandate</span>, and only inside it'
      :'<span class="b b-allowed"><span class="d"></span>no</span>. No mandate, so a financial call is denied before dispatch')+'</dd>'+
    '</dl>'+
-   '<div class="note">Assigning a toolbelt grants nothing. It widens what the model is shown; every call on it is still '+
+   '<div class="note">Assigning a toolbelt grants nothing. It widens what the model is shown. Every call on it is still '+
    'decided against these roles, the policy on the tool, and the mandate ledger.</div>'+
    '</div></div>';
 }
@@ -4607,20 +4641,20 @@ function permBudgets(a){
   var runPct=Math.round(a.budgetUsed/money(a.budget)*100);
 
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Budgets</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Checked at each hook boundary against the spend the harness reports. A breach pauses the run at the next boundary: client-attested and fail-open. On the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers the proxy enforces the ceiling before the call.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Hard limit, checked at each checkpoint against reported spend. If the harness stops reporting, the run is not paused (fail-open). On the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers the proxy blocks the call before it is sent.</p></div>'+
    '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'budget\')">Set budget</button></div>'+
    '<div class="panel-b" style="display:grid;gap:14px">'+
-   '<div class="meter"><div class="lab">Per run · hard<b>'+usd(a.budget)+'</b></div>'+
+   '<div class="meter"><div class="lab">Per-run hard limit<b>'+usd(a.budget)+'</b></div>'+
     '<div class="bar"><i style="width:'+Math.min(100,runPct)+'%;background:'+
     (runPct>80?"var(--st-critical)":"var(--st-allowed)")+'"></i></div>'+
     '<div class="dim" style="font-size:11.5px">highest run this month '+usd(a.budgetUsed.toFixed(2))+
     ' · basis: price book 2026-09 at the provider\'s list rate</div></div>'+
-   '<div class="meter"><div class="lab">Per day · hard<b>'+usd(a.usedDay||"0.00")+' of '+usd(a.budgetDay||a.budget)+'</b></div>'+
+   '<div class="meter"><div class="lab">Per-day hard limit<b>'+usd(a.usedDay||"0.00")+' of '+usd(a.budgetDay||a.budget)+'</b></div>'+
     '<div class="bar"><i style="width:'+pct.toFixed(0)+'%;background:'+dayCol+'"></i></div>'+
     '<div class="dim" style="font-size:11.5px">resets 00:00 UTC · mode hard · currency USD</div></div>'+
    '<dl class="kv">'+
-   '<dt>Mode</dt><dd>hard: checked at each hook boundary on reported spend</dd>'+
-   '<dt>On a breach</dt><dd><span class="mono">pause</span> at the next boundary, a '+
+   '<dt>Mode</dt><dd>Hard limit, checked at each checkpoint against reported spend</dd>'+
+   '<dt>On a breach</dt><dd><span class="mono">pause</span> at the next checkpoint, a '+
     '<span class="mono">policy.decision</span> frame, and the operator notified</dd>'+
    '<dt>Delegation ceiling</dt><dd>max_hops 2 · a subagent inherits this ceiling and may only lower it</dd>'+
    '</dl></div></div>';
@@ -4634,19 +4668,20 @@ function permMandates(a){
    '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>cannot move money</span></div>'+
    '<div class="panel-b" style="display:grid;gap:13px">'+
    '<p style="font-size:13px;margin:0">A financial tool call from this agent is denied before dispatch. That is true whether '+
-   'the tool is on its belt or not, and it is checked at step 5 of the call pipeline, before any credential is minted and '+
+   'the tool is on its toolbelt or not. It is checked before any credential is minted and '+
    'before anything is sent to a provider.</p>'+
    iamChain([
     ["Call",'<span class="mono">stripe__create_payment@5</span> · amount $1,204.18 USD'],
-    ["Financial class",'moves_funds, read from the tool version\'s declared <span class="mono">amount_path</span>'],
+    ["Financial class",keyLabel("moves_funds")+', read from the tool version\'s declared <span class="mono">amount_path</span>'],
     ["Mandate lookup",'none for <span class="mono">'+h(a.key)+'</span>'],
-    ["Decision",gate("deny")+' <span class="mono">no_mandate</span> · mandate ledger unchanged · no credential minted']])+
+    ["Decision",gate("deny")+' · no mandate · mandate ledger unchanged · no credential minted']])+
    '<div class="row"><button class="btn" onclick="openDialog(\'mandate\')">Request a mandate</button></div>'+
    '</div></div>';
 
+  var byStatus={}; mine.forEach(function(m){byStatus[m.status]=(byStatus[m.status]||0)+1;});
   return '<div class="panel"><div class="panel-h"><h3>Mandates held</h3>'+
-   '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>'+mine.length+' active</span></div><div class="tw"><table>'+
-   '<thead><tr><th>Mandate</th><th>Effect</th><th class="num">Per call</th><th class="num">Per period</th>'+
+   '<span class="b b-approval" style="margin-left:auto"><span class="d"></span>'+Object.keys(byStatus).map(function(k){return byStatus[k]+' '+h(k);}).join(' · ')+'</span></div><div class="tw"><table>'+
+   '<thead><tr><th>Mandate</th><th>Effect</th><th class="num">Auto-approve limit</th><th class="num">Per period</th>'+
    '<th class="num">Remaining</th><th>Expires</th><th>Status</th></tr></thead><tbody>'+
    mine.map(function(m){return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+defSlug(a)+'/mandates/'+m.id+'\')">'+
     '<td class="mono">'+h(m.id)+'</td><td class="mono" style="font-size:11.5px">'+h(m.effect)+'</td>'+
@@ -4655,8 +4690,8 @@ function permMandates(a){
     '<td><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span></td></tr>';}).join("")+
    '</tbody></table></div>'+
    '<div class="panel-b"><div class="note">A mandate is the only thing that lets this agent move money, and it is spent '+
-   'against a ledger: every draw reserves, then settles or releases. Its tools appear on the belt gated '+
-   '<span class="mono">mandate + approval</span>, never plain <span class="mono">allowed</span>.</div></div></div>';
+   'against a ledger: every draw reserves, then settles or releases. Its tools appear on the toolbelt gated '+
+   '<span class="mono">mandate + approval</span> rather than <span class="mono">allowed</span>.</div></div></div>';
 }
 
 /* ══════════════════════════════ Activity ══════════════════════════════
@@ -4674,7 +4709,7 @@ function actAccounting(a){
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Token accounting</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">By class, measured on every model call.</p></div>'+
     '<span class="mono dim" style="margin-left:auto;font-size:11px">30 days</span></div>'+
-    '<div class="tw"><table data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens 30d</th>'+
+    '<div class="tw"><table data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens (30 days)</th>'+
     '<th class="num">Rate</th><th class="num">Cost</th></tr></thead><tbody>'+
     tok.map(function(x){return '<tr><td>'+h(x[0])+'</td><td class="num">'+x[1].toLocaleString()+'</td>'+
      '<td class="num">'+usd(x[2])+' / M</td><td class="num">'+usd(x[3])+'</td></tr>';}).join("")+
@@ -4686,11 +4721,11 @@ function actAccounting(a){
     'are paid on every call whether the tool is used or not.</div></div></div>'+
 
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Last 30 days</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Read from the run records, not from the agent row.</p></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">Read from the run records.</p></div>'+
     '<button class="btn sm" style="margin-left:auto" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/spend\')">Open on Spend</button></div>'+
     '<div class="panel-b" style="display:grid;gap:14px"><dl class="kv">'+
     '<dt>Runs</dt><dd><span class="num">'+a.runs30.toLocaleString()+'</span></dd>'+
-    '<dt>Spend</dt><dd>'+iamMoney(a.spend30,"model calls as the harness reported them + priced tool calls, client_attested")+'</dd>'+
+    '<dt>Spend</dt><dd>'+iamMoney(a.spend30,"model calls as the harness reported them, plus priced tool calls")+'</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(a.ratio)+'<span class="sub">the share of spend on turns that produced a change</span></dd>'+
     '<dt>Tokens</dt><dd><span class="num">'+tokn(agentTok(a).total)+'</span> · '+per(agentTok(a).cacheRate)+' cached</dd>'+
     '</dl>'+
@@ -4714,8 +4749,8 @@ function actIncidents(a){
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Nothing has been detected on this agent in the retention window.</p></div>'+
    '<span class="b b-allowed" style="margin-left:auto"><span class="d"></span>clean · 90 days</span></div>'+
    '<div class="panel-b"><p style="font-size:12.5px;margin:0">Detectors that would raise one: '+
-   '<span class="mono">hooks_removed</span>, <span class="mono">chain_break</span>, '+
-   '<span class="mono">unknown_tool</span> bursts, <span class="mono">credential_probe</span>, '+
+   keyLabel("hooks_removed")+', '+keyLabel("chain_break")+', '+
+   keyLabel("unknown_tool")+' bursts, '+keyLabel("credential_probe")+', '+
     'a receipt modified after the fact, and a same-<span class="mono">seq</span> '+
    'frame arriving with a different hash. Each one fires the same commands policy does, and each is a security event '+
    'with who, why, and what it stopped.</p>'+
@@ -4726,7 +4761,7 @@ function actIncidents(a){
   var edge={critical:"var(--st-critical)",warning:"var(--st-approval)",info:"var(--border)"};
   return list.map(function(i){
    return '<div class="panel" style="border-color:color-mix(in srgb,'+(edge[i.sev]||"var(--border)")+' 34%,var(--border))">'+
-    '<div class="panel-h"><div style="flex:1;min-width:0"><h3 class="mono" style="font-size:14px">'+h(i.kind)+'</h3>'+
+    '<div class="panel-h"><div style="flex:1;min-width:0"><h3 class="mono" style="font-size:14px">'+keyLabel(i.kind)+'</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+h(i.at)+' · detected by '+h(i.by)+' · '+h(i.scope)+'</p></div>'+
     '<span class="b b-'+(tone[i.sev]||"q")+'" style="margin-left:auto"><span class="d"></span>'+h(i.sev)+'</span>'+
     '<span class="b b-'+(i.status==="open"?"critical":"allowed")+'"><span class="d"></span>'+h(i.status)+'</span></div>'+
@@ -4737,7 +4772,7 @@ function actIncidents(a){
                :'<dt>Owner</dt><dd>'+h(i.owner||"unassigned")+(i.due?' · due '+h(i.due):'')+'</dd>')+
     '<dt>Incident</dt><dd class="mono">'+h(i.id)+'</dd></dl>'+
     '<div class="row"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/audit/incidents\')">Open on Audit</button>'+
-    (i.runs?'<span class="dim" style="font-size:11.5px">'+i.runs+' run'+(i.runs>1?'s':'')+' affected</span>':'')+'</div>'+
+    (i.runs?'<span class="dim" style="font-size:11.5px">'+plural(i.runs,"run")+' affected</span>':'')+'</div>'+
     '</div></div>';}).join("")+
    '<div class="panel"><div class="panel-b"><div class="note">A tamper incident never raises the tier of the frames it '+
    'touched. The window it covers stays labeled as what was actually observed, which is why the count here and the count '+
@@ -4755,112 +4790,111 @@ function pTools(){
   if(S.state==="denied") return deniedState("the tool registry","tools.read on core-platform");
   if(S.state==="empty") return emptyState("No provider is registered",
     "Until a provider is imported, no agent in this workspace has a toolbelt, and every call by name is <span class=\"mono\">unknown_tool</span>. Importing a provider pulls its tool list, versions each tool, and stores both schemas.",
-    '<button class="btn primary" onclick="openDialog(\'import\')">Import a provider</button>'+
+    '<button class="btn primary" onclick="openDialog(\'import\')">Add provider</button>'+
     '<button class="btn" onclick="openDialog(\'connection\')">Add a connection</button>');
 
   /* Registry's count is the only one that waits on a person: observed schemas to approve. */
   var np=proposals().length;
   var tabs='<div class="tabs" role="tablist">'+
-   [["tools","Tools",np?np+" to approve":verCount().toLocaleString(),np?"var(--st-approval)":""],
+   [["tools","Tools",np?np:verCount().toLocaleString(),np?"var(--st-approval)":"",np?plural(np,"schema needs approval","schemas need approval"):plural(verCount(),"tool version")],
     ["toolbelts","Toolbelts",TOOLBELTS.length],["providers","Providers",PROVIDERS.length],
     ["policy","Policy",POLICIES.length],["switches","Kill switches",switchesOn()]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/tools/'+x[0]+'\')">'+x[1]+
-     (x[2]?'<span class="n"'+(x[3]?' style="color:'+x[3]+'"':'')+'>'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
+     (x[2]?'<span class="n"'+(x[3]?' style="color:'+x[3]+'"':'')+(x[4]?' title="'+h(x[4])+'"':'')+'>'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var body="";
   if(t==="tools"){
     var props=proposals();
     var rc=S.regCat||"", rcount={};
+    TCAT_ORDER.forEach(function(c){rcount[c]=0;});
     TOOLS.forEach(function(x){var c=toolMeta(x.n).cat;rcount[c]=(rcount[c]||0)+1;});
     var tsel=rc?TOOLS.filter(function(x){return toolMeta(x.n).cat===rc;}):TOOLS;
     var trows=tsel.map(function(x){var m=toolMeta(x.n), tb=beltsWithTool(x.n+"@"+x.v);
       return '<tr class="click hz-row-'+h(x.risk)+'" onclick="openDialog(\'tool\',\''+x.n+'@'+x.v+'\')">'+
        '<td>'+toolCell(x.n+"@"+x.v)+'</td>'+
-       '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm ghost" onclick="openDialog(\'server\',\''+h(x.s)+'\')">'+h(x.s)+'</button></td>'+
+       '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm ghost" onclick="openDialog(\'server\',\''+h(x.s)+'\')">'+h((serverById(x.s)||{}).system||x.s)+'</button></td>'+
        '<td>'+catBadge(m.cat)+'</td>'+
        '<td>'+hazard(x.risk,x.eff)+'</td><td>'+toolGate(x)+'</td>'+
-       '<td><span class="b b-q">'+h(x.eg)+'</span></td><td>'+finBadge(x.fin)+'</td>'+
+       '<td><span class="b b-q">'+(KEY_LABEL[x.eg]?keyLabel(x.eg):h(x.eg.charAt(0).toUpperCase()+x.eg.slice(1)))+'</span></td><td>'+finBadge(x.fin)+'</td>'+
        '<td>'+originBadge(toolOrigin(x))+'</td>'+
        '<td class="mono dim" style="font-size:11px">'+h(toolDigest(x))+'</td>'+
-       '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(""):'<span class="dim">—</span>')+'</td>'+
+       '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(SEP):'<span class="dim">—</span>')+'</td>'+
        '<td class="num">'+agentsWithTool(x.n+"@"+x.v).length+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("");
     body='<div class="grid">'+
      (props.length?'<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>'+props.length+' awaiting approval</span>'+
-      '<div class="grow"><b>'+props.length+' output schema'+(props.length>1?'s were':' was')+' observed, not declared.</b>'+
-      'The '+(function(){var ss={};props.forEach(function(t){ss[t.s]=1;});var k=Object.keys(ss);
-        return k.map(function(n){return '<span class="mono">'+h(n)+'</span>';}).join(k.length>2?', ':' and ');})()+
-        (Object.keys(props.reduce(function(m,t){m[t.s]=1;return m;},{})).length>1?' servers declare':' server declares')+
-        ' no <span class="mono">outputSchema</span> for '+(props.length>1?'these tools':'this tool')+'. '+
-      'The gateway recorded the outputs, inferred a schema, and filed it as a registry proposal. Until an admin approves, outputs are validated only for size and type, '+
-      'and every run that used them says so in its completeness record.</div>'+
+      '<div class="grow"><b>'+plural(props.length,"tool")+(function(){var ss={};props.forEach(function(t){ss[t.s]=1;});var k=Object.keys(ss);
+        /* name the providers only while the list stays short enough to read */
+        return k.length>3?'':' from '+k.map(function(n){var sv=serverById(n);return h(sv?sv.system:n);}).join(k.length>2?', ':' and ');})()+
+        (props.length>1?' have':' has')+' no declared output schema.</b> '+
+      'oxagen inferred one from real outputs and filed it for approval. Until approved, outputs are only checked for size and type.</div>'+
       '<button class="btn" onclick="openDialog(\'schema\')">Review</button></div>':'')+
      '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tools</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">Every version imported from every provider. RBAC reaches the version, so a provider shipping a new one does not widen a toolbelt.</p></div>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">Every tool version from every provider. Permissions apply per version, so a new version from a provider isn’t added to any toolbelt automatically.</p></div>'+
      '<div class="sp">'+namesToggle()+'<span class="b b-q">'+tsel.length+' of '+verCount().toLocaleString()+' shown</span>'+
-     '<button class="btn sm" onclick="openDialog(\'import\')">Import a provider</button></div></div>'+
+     '<button class="btn sm" onclick="openDialog(\'import\')">Add provider</button></div></div>'+
      '<div class="panel-b" style="border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap">'+
      '<div style="flex:1;min-width:0">'+catChips(rcount,rc,"S.regCat='%s';render()",TOOLS.length)+'</div>'+
      '<button class="btn sm ghost" onclick="openDialog(\'toolcats\')">What the categories mean</button></div>'+
-     '<div class="tw"><table><thead><tr><th>Tool version</th><th>Provider</th><th>Category</th><th>Hazard</th><th>Gate today</th><th>Egress</th><th>Financial</th><th>Schema origin</th><th>Digest</th>'+
+     '<div class="tw"><table><thead><tr><th>Tool version</th><th>Provider</th><th>Category</th><th>Hazard</th><th>Gate</th><th>Egress</th><th>Financial</th><th>Schema origin</th><th>Digest</th>'+
      '<th>Toolbelts</th><th class="num">Agents</th><th class="num">Calls 30d</th></tr></thead><tbody>'+trows+'</tbody></table></div>'+
-     '<div class="panel-b"><div class="note">The gate shown is today’s: the version’s own kill switch, then its provider’s, then <span class="mono">pol_v41</span>. '+
-     'A toolbelt decides which agents are shown the tool; the gate decides whether the call survives. Open a provider on any row '+
-     'to see what it imported and the connection it is reached with.</div></div></div>'+
+     '<div class="panel-b"><div class="note">The gate checks the tool version’s kill switch first, then its provider’s kill switch, then '+h(activePolicy().replace("pol_v","policy v"))+'. '+
+     'A toolbelt decides which agents can see a tool. The gate decides whether a call goes through. Select a provider on any row '+
+     'to see what it imported and how oxagen connects to it.</div></div></div>'+
      '</div>';
   } else if(t==="toolbelts"){
     body='<div class="grid">'+
      '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Toolbelts</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">A toolbelt is a named set of tool versions assigned to agents. It decides what a model is shown, and nothing else.</p></div>'+
-     '<div class="sp"><span class="b b-q">'+TOOLBELTS.length+' belts · '+beltToolCount()+' tool versions</span>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">A toolbelt is a named set of tool versions assigned to agents. It decides which tools a model can see. It grants no permission.</p></div>'+
+     '<div class="sp"><span class="b b-q">'+plural(TOOLBELTS.length,"toolbelt")+' · '+plural(beltToolCount(),"tool version")+'</span>'+
      '<button class="btn sm primary" onclick="openDialog(\'beltnew\')">New toolbelt</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Toolbelt</th><th>Owner</th><th class="num">Tools</th><th>Providers</th>'+
-     '<th>Agents assigned</th><th>Gates on its tools</th><th>Availability today</th><th>Updated</th></tr></thead><tbody>'+
+     '<th>Agents assigned</th><th>Gates on its tools</th><th>Availability</th><th>Updated</th></tr></thead><tbody>'+
      TOOLBELTS.map(function(b){
       var keys=agentsOfBelt(b.id), provs=beltProviders(b), avail=beltAvailability(b);
       return '<tr '+rowClick("openDialog('belt','"+b.id+"')","Open "+b.name)+'>'+
        '<td><b>'+h(b.name)+'</b><span class="sub">'+h(b.desc)+'</span></td>'+
-       '<td class="mono" style="font-size:11.5px">'+h(b.owner)+'<span class="sub">'+h(b.by)+'</span></td>'+
+       '<td class="mono" style="font-size:11.5px">'+h(b.owner)+'<span class="sub">'+h(PEOPLE[b.by]?PEOPLE[b.by].name:b.by)+'</span></td>'+
        '<td class="num">'+b.tools.length+'</td>'+
-       '<td>'+provs.map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join("")+'</td>'+
-       '<td>'+(keys.length?keys.map(function(k){return '<span class="b b-q" style="font-size:10.5px">'+h(k.split(".").pop())+'</span>';}).join("")
-                          :'<span class="dim">unassigned</span>')+'</td>'+
+       '<td>'+provs.map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join(SEP)+'</td>'+
+       '<td>'+(keys.length?keys.map(function(k){return '<span class="b b-q" style="font-size:10.5px">'+h(k.split(".").pop())+'</span>';}).join(SEP)
+                          :'<span class="dim">Unassigned</span>')+'</td>'+
        '<td>'+beltGateCell(b)+'</td>'+
-       '<td>'+(avail.blocked?'<span class="b b-critical"><span class="d"></span>'+avail.blocked+' unavailable</span>'
-                            :'<span class="b b-allowed"><span class="d"></span>all reachable</span>')+
+       '<td>'+(avail.blocked?'<span class="b b-critical"><span class="d"></span>Unavailable</span>'
+                            :'<span class="b b-allowed"><span class="d"></span>All reachable</span>')+
         '<span class="sub">'+h(avail.why)+'</span></td>'+
        '<td class="muted mono" style="font-size:11px">'+h(b.updated)+'</td></tr>';}).join("")+
      '</tbody></table></div>'+
-     '<div class="panel-b"><div class="note">Assigning a belt is not a permission. Every call on it still meets the agent\'s roles, '+
-     'the policy on the tool version, the kill switches, and the mandate ledger. A belt with a red availability has a tool its agents '+
-     'can see and cannot call today.</div></div></div>'+
+     '<div class="panel-b"><div class="note">Assigning a toolbelt grants no permission. Every call from it is still checked against the agent’s roles, '+
+     'the policy on the tool version, the kill switches, and the agent’s mandates. If Availability shows <b>Unavailable</b>, agents can see a tool '+
+     'they can’t call today.</div></div></div>'+
      '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Assignments</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">The same belt reaches many agents, which is what makes a change to it worth reviewing.</p></div></div>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">One toolbelt can reach many agents, so review a change to it before you save.</p></div></div>'+
      '<div class="tw"><table><thead><tr><th>Agent</th><th>Toolbelts</th><th class="num">Tool versions</th><th>Providers</th><th>Tier</th></tr></thead><tbody>'+
      Object.keys(TOOLBELT_ASSIGN).map(function(k){
       var a=agentByKey(k), bs=beltsOfAgent(k), seen={}, pv=[];
       bs.forEach(function(b){beltProviders(b).forEach(function(s){if(!seen[s]){seen[s]=1;pv.push(s);}});});
       return '<tr '+(a?rowClick("go('#/"+ORG.slug+"/"+S.ws+"/agents/"+defSlug(a)+"/toolbelt')","Open "+k):"")+'>'+
        '<td><b class="mono" style="font-size:11.5px">'+h(k)+'</b>'+(a?'<span class="sub">'+h(a.desc||a.harnessLabel)+'</span>':'')+'</td>'+
-       '<td>'+bs.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join("")+'</td>'+
+       '<td>'+bs.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(SEP)+'</td>'+
        '<td class="num">'+(a?beltTotal(a):(AGENT_BELTS[k]||[]).length)+'</td>'+
-       '<td>'+pv.map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join("")+'</td>'+
+       '<td>'+pv.map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join(SEP)+'</td>'+
        '<td>'+(a?tierBadge(a.tier):'<span class="dim">—</span>')+'</td></tr>';}).join("")+
      '</tbody></table></div></div></div>';
   } else if(t==="providers"){
     body='<div class="grid">'+
      '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Providers</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+srvCount()+' providers hold '+verCount().toLocaleString()+' tool versions. A provider is the system the tools belong to; the transport is how Oxagen reaches it.</p></div>'+
-     '<div class="sp"><button class="btn sm primary" onclick="openDialog(\'import\')">Add a provider</button></div></div>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(srvCount(),"provider")+' hold '+verCount().toLocaleString()+' tool versions. A provider is the system the tools belong to. The transport is how oxagen reaches it.</p></div>'+
+     '<div class="sp"><button class="btn sm primary" onclick="openDialog(\'import\')">Add provider</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Provider</th><th>Transport</th><th class="num">Tools</th><th>Toolbelts</th><th>Agents</th><th>Health</th><th>Connection</th><th>Authorization</th><th>Last import</th><th></th></tr></thead><tbody>'+
      PROVIDERS.map(function(sv){
       var c=connByServer(sv.id), tb=providerBelts(sv.id), ag=providerAgents(sv.id);
       return '<tr '+rowClick("openDialog('server','"+sv.id+"')","Open "+sv.name)+'>'+
        '<td><b>'+h(sv.system)+'</b><span class="sub">'+h(sv.desc)+'</span></td>'+
        '<td><span class="b b-q">'+h(sv.transport)+'</span><span class="sub mono" style="font-size:10.5px">'+h(sv.wire)+' · '+h(sv.url)+'</span></td>'+
-       '<td class="num">'+sv.tools+'<span class="sub">'+sv.versions+' versions</span></td>'+
-       '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(""):'<span class="dim">—</span>')+'</td>'+
+       '<td class="num">'+sv.tools+'<span class="sub">'+plural(sv.versions,"version")+'</span></td>'+
+       '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(SEP):'<span class="dim">—</span>')+'</td>'+
        '<td class="num">'+(ag.length||'<span class="dim">—</span>')+'</td>'+
-       '<td>'+(sv.health==="ok"?'<span class="b b-allowed"><span class="d"></span>ok</span>':'<span class="b b-approval"><span class="d"></span>degraded</span>')+'</td>'+
+       '<td>'+(needsAuth(sv)&&!c?'<span class="dim">Not connected</span>':sv.health==="ok"?'<span class="b b-allowed"><span class="d"></span>Healthy</span>':'<span class="b b-approval"><span class="d"></span>Degraded</span>')+'</td>'+
        '<td style="font-size:12px" class="rowacts" onclick="event.stopPropagation()">'+(c
          ?'<button class="btn sm ghost" onclick="openDialog(\'conn\',\''+c.id+'\')">'+h(c.name)+'</button>'+
           '<div class="dim mono" style="font-size:10.5px">'+h(c.kind)+'</div>'
@@ -4868,21 +4902,23 @@ function pTools(){
        '<td>'+authBadge(sv)+'</td>'+
        '<td class="muted mono" style="font-size:11px">'+h(sv.imported)+'</td>'+
        '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="openDialog(\'server\',\''+sv.id+'\')">Open</button>'+
-       (needsAuth(sv)?'<button class="btn sm primary" onclick="openDialog(\'oauth\',\''+sv.id+'\')">'+(c&&c.authState==="expired"?"Reconnect":"Connect")+'</button>':'')+
+       (needsAuth(sv)?(c&&c.authState!=="expired"
+         ?'<button class="btn sm" onclick="openDialog(\'conn\',\''+c.id+'\')">Manage connection</button>'
+         :'<button class="btn sm primary" onclick="openDialog(\'oauth\',\''+sv.id+'\')">'+(c?"Reconnect":"Connect")+'</button>'):'')+
        '<button class="btn sm danger" onclick="openDialog(\'serverdel\',\''+sv.id+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div>'+
      '<div class="panel-b"><div class="note">MCP is one transport among several. A provider reached over <span class="mono">http</span>, '+
-     '<span class="mono">native</span> or a harness <span class="mono">local</span> hook is imported, versioned and decided the same way, '+
-     'so the transport is a property of the row and never the name of the collection.</div></div>'+
+     '<span class="mono">native</span>, or a harness <span class="mono">local</span> hook is imported, versioned, and checked the same way.</div></div>'+
      (function(){var ex=CONNECTIONS.filter(function(c){return c.authState==="expired"||c.status==="review due";});
        return ex.length?'<div class="panel-b"><div class="warn"><b>'+ex.length+' connection'+(ex.length>1?'s need':' needs')+' attention.</b> '+
-        ex.map(function(c){return h(c.name)+(c.authState==="expired"?' has an expired token; calls through it are denied until it is reconnected':' was due for review '+h(c.next));}).join('. ')+'.</div></div>':'';})()+
+        ex.map(function(c){return h(c.name)+(c.authState==="expired"?' has an expired token. Calls through it are blocked until it is reconnected':' was due for review '+h(c.next));}).join('. ')+'.</div></div>':'';})()+
      '</div>'+
      grantsLog()+'</div>';
   } else if(t==="policy"){
-    body='<div class="panel"><div class="panel-h"><h3>Policy versions</h3>'+
-     '<div class="sp"><span class="b b-q mono" style="font-size:10.5px">tools.policy_versions</span>'+
-     '<button class="btn sm" onclick="openDialog(\'policynew\')">Draft a version</button></div></div>'+
+    body='<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Policy versions</h3>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">Every version of the policy that decides tool calls.</p></div>'+
+     '<div class="sp">'+
+     '<button class="btn sm" onclick="openDialog(\'policynew\')">Draft new version</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Version</th><th>State</th><th>Author</th><th>When</th><th class="num">Rules</th><th>Tests</th><th>What changed</th><th></th></tr></thead><tbody>'+
      POLICIES.map(function(p){
       var sm={active:"allowed",superseded:"q"};
@@ -4890,16 +4926,16 @@ function pTools(){
        '<td>'+h(p.by)+'</td><td class="mono dim" style="font-size:11px">'+h(p.at)+'</td><td class="num">'+p.rules+'</td>'+
        '<td><span class="b b-'+(/pass/.test(p.tests)?"allowed":"q")+'">'+h(p.tests)+'</span></td><td style="font-size:12px">'+h(p.note)+'</td>'+
        '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'policyver\',\''+p.v+'\')">Open</button>'+
-       (p.state==="active"?'<button class="btn sm" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft a change</button>':
-        p.state==="draft"?'<button class="btn sm" onclick="openDialog(\'policyedit\',\''+p.v+'\')">Edit</button>'+
-         '<button class="btn sm primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>'+
+       (p.state==="active"?'<button class="btn sm" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft new version</button>':
+        p.state==="draft"?'<button class="btn sm" onclick="openDialog(\'policyedit\',\''+p.v+'\')">Edit</button><span class="vh">, </span>'+
+         '<button class="btn sm primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button><span class="vh">, </span>'+
          '<button class="btn sm danger" onclick="openDialog(\'policydiscard\',\''+p.v+'\')">Discard</button>':
         '<button class="btn sm" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')+'</td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b"><div class="note">A version is activated by a governed action with approval, and in regulated mode it is a pull request instead. A draft is the only version you can edit or discard: once a version has decided anything it is kept, because every decision cites the version that made it.</div></div></div>'+
      '<div class="hr"></div>'+
      '<div class="panel"><div class="panel-h"><h3>Where a version lives</h3></div>'+
      '<div class="panel-b"><dl class="kv">'+
-      '<dt>Store</dt><dd>One row in Postgres, <span class="mono">tools.policy_versions</span>, holding the rules, the tests and the version string. A policy version is not a Steering record and never reaches a model.</dd>'+
+      '<dt>Store</dt><dd>One stored version holding the rules, the tests and the version string. A policy version is not a Steering record and never reaches a model.</dd>'+
       '<dt>In regulated mode</dt><dd>The rules are a file in <span class="mono">.oxagen/policy/</span> in the main repo, and a change is a pull request. Postgres holds the compiled copy the gateway reads.</dd>'+
       '<dt>Compiled from</dt><dd>The rules you write here, plus the enforcement grants on each agent and the role grants on each operator. A rule can read those, so you do not restate a grant as a rule.</dd>'+
       '<dt>Who reads it</dt><dd>The gateway, on every tool call, before the call leaves. No model is in the decision path, so the same call and the same version always decide the same way.</dd>'+
@@ -4908,7 +4944,7 @@ function pTools(){
      '<div class="hr"></div>'+
      '<p class="eyebrow q">Conditions a rule may test</p>'+
      '<div class="row">'+["tool version","risk","side effect","egress","financial class","amount by path","counterparty","repository","path prefix","recipient domain","taint and its sources","time window","rate","sequence","operator role","enforcement tier","budget position","mandate position"]
-      .map(function(c){return '<span class="b b-q" style="font-size:10.5px">'+h(c)+'</span>';}).join("")+'</div>'+
+      .map(function(c){return '<span class="b b-q" style="font-size:10.5px">'+h(c)+'</span>';}).join(SEP)+'</div>'+
      '<div class="hr"></div><p class="eyebrow q">Sequence rule</p>'+
      '<p class="muted" style="margin:0 0 8px;font-size:12.5px">A rule names the call it governs, then the condition that lets it through. This one denies a payment unless the same run already priced it.</p>'+
      '<pre><span class="c">// a payment requires a prior quote call in the same run</span>\n'+
@@ -4917,18 +4953,18 @@ function pTools(){
   } else if(t==="switches"){
     var cls=SWITCHES.filter(function(s){return s.cls;}), rest=SWITCHES.filter(function(s){return !s.cls;});
     body='<div class="ks-stack">'+
-     '<div><p class="eyebrow q" style="display:flex;gap:8px;align-items:center">Class switches<span class="b b-q mono" style="font-size:10.5px">deny generation '+S.denyGen+'</span></p><div class="ks-stack">'+cls.map(switchCard).join("")+'</div></div>'+
+     '<div><p class="eyebrow q" style="display:flex;gap:8px;align-items:center">Class switches<span class="b b-q mono" style="font-size:10.5px">Kill-switch generation '+S.denyGen+'</span></p><div class="ks-stack">'+cls.map(switchCard).join("")+'</div></div>'+
      '<div><p class="eyebrow q" style="display:flex;gap:8px;align-items:center">Scoped switches'+
       '<button class="btn sm" style="margin-left:auto" onclick="openDialog(\'switchnew\')">Create a switch</button></p>'+
       '<div class="grid g2">'+rest.map(switchCard).join("")+'</div></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Tools</h1>'+
    '<p>The registry is the only source of tools an agent can see.</p></div>'+
-   '<div class="acts"><button class="btn" onclick="openDialog(\'import\')">Import a provider</button>'+
+   '<div class="acts"><button class="btn" onclick="openDialog(\'import\')">Add provider</button>'+
    /* One gold action per screen. Toolbelts, Providers and Policy each carry their own primary, so
       on those tabs the header yields the gold and New tool reads as a plain action. */
    '<button class="btn'+(t==="toolbelts"||t==="providers"||t==="policy"?'':' primary')+'" onclick="wzOpen(\'tool\')">New tool</button>'+
-   '<button class="btn danger" onclick="openDialog(\'switch\')">Flip a kill switch</button></div></div>'+(S.killBanner||"")+tabs+body;
+   '<button class="btn danger" onclick="openDialog(\'switch\')">Stop a tool…</button></div></div>'+(S.killBanner||"")+tabs+body;
 }
 
 /* ---------- Credential grants (W9): how the broker chooses, and what it minted ----------
@@ -4938,20 +4974,20 @@ var BROKER_CAPS=[
  ["session policy","Session policies","a temporary session whose policy is the intersection of the connection and the call"],
  ["installation token","Installation tokens","a token limited to the repositories the call names"],
  ["restricted key","Restricted keys","a key limited to the tool’s actions and the call’s targets"],
- ["none","None","the stored credential, used server-side by the gateway for this call only, never sent to the agent"]];
+ ["none","None","the stored credential, used by the gateway for this call only and never sent to the agent"]];
 var GRANTS=[
  {id:"cg_01K5RS8",tool:"github__list_pull_requests@3",agent:"a-intel.core.release-manager",run:"run_01K5RS7M2E8FJ3QW",seq:6,conn:"con_01K2A7",scope:"repos [a-intel/platform]",ttl:"5m",at:"2026-09-11 09:14:09Z",state:"expired"},
  {id:"cg_01K5RS4",tool:"linear__get_issue@2",agent:"a-intel.core.triage",run:"run_01K5RP2D6H4KLM8V",seq:4,conn:"con_01K2A8",scope:"issue:read",ttl:"2m",at:"2026-09-11 08:57:31Z",state:"expired"},
- {id:null,tool:"stripe__create_payment@4",agent:"a-intel.finops.invoice-bot",run:"run_01K5RN8F3J2GHY6T",conn:"con_01K2A9",scope:"payment_intents:write · amount ≤ $2,450.00",ttl:"10m",at:"2026-09-11 08:40:19Z",state:"not minted",
-  note:"Parked for approval apr_01K5RN9T4. The broker mints only after a human answers."},
+ {id:null,tool:"stripe__create_payment@4",agent:"a-intel.finops.invoice-bot",run:"run_01K5RN8F3J2GHY6T",conn:"con_01K2A9",scope:"payment_intents:write · amount ≤ $2,450.00",ttl:"10m",at:"2026-09-11 08:40:19Z",state:"not issued",
+  note:"Waiting on approval apr_01K5RN9T4. A credential is issued only after someone approves."},
  {id:"cg_01K4X7T1",rcp:"rcp_01K4X8M2E",conn:"con_01K2A9",scope:"payment_intents:write · customer cus_aintel only",ttl:"10m",state:"settled"}];
 function grantsLog(){
   var total=CONNECTIONS.reduce(function(s,c){return s+c.grants30;},0);
   var rows=GRANTS.map(function(g){
     var r=g.rcp?receiptById(g.rcp):null, tool=g.tool||(r&&r.tool), agent=g.agent||(r&&r.agent), run=g.run||(r&&r.runId), at=g.at||(r&&r.at.replace(/\.\d+Z$/,"Z"));
     var c=null; CONNECTIONS.forEach(function(x){if(x.id===g.conn) c=x;});
-    var st=g.state==="settled"?'<span class="b b-allowed"><span class="d"></span>settled</span>':g.state==="expired"?'<span class="b b-q">expired</span>':'<span class="b b-approval"><span class="d"></span>'+h(g.state)+'</span>';
-    return '<tr class="grant-row"><td class="mono" style="font-size:11px">'+(g.id?h(g.id):'<span class="dim">—</span>')+'<div class="dim" style="font-size:10.5px">'+h(at||"")+'</div></td>'+
+    var st=g.state==="settled"?'<span class="b b-allowed"><span class="d"></span>Settled</span>':g.state==="expired"?'<span class="b b-q">Expired</span>':'<span class="b b-approval"><span class="d"></span>'+h(g.state.charAt(0).toUpperCase()+g.state.slice(1))+'</span>';
+    return '<tr class="grant-row"><td class="mono" style="font-size:11px">'+(g.id?h(g.id):'<span class="dim">Not issued</span>')+'<div class="dim" style="font-size:10.5px">'+h(at||"")+'</div></td>'+
      '<td>'+toolCell(tool,{sz:"sm"})+'</td>'+
      '<td><span class="mono" style="font-size:11px">'+h(agent)+'</span><div class="dim mono" style="font-size:10.5px">'+h(run)+(g.seq?' · seq '+g.seq:'')+'</div></td>'+
      '<td class="mono" style="font-size:11px">'+(c?'<a href="#" onclick="event.preventDefault();openDialog(\'conn\',\''+h(c.id)+'\')">'+h(g.conn)+'</a>':h(g.conn))+
@@ -4959,10 +4995,10 @@ function grantsLog(){
      '<td class="mono" style="font-size:11px;min-width:22ch">'+h(g.scope)+(g.note?'<div class="dim" style="font-size:10.5px">'+h(g.note)+'</div>':'')+(g.rcp?'<div style="font-size:10.5px">receipt '+receiptLink(g.rcp)+'</div>':'')+'</td>'+
      '<td class="mono">'+h(g.ttl)+'</td><td>'+st+'</td></tr>';}).join("");
   return '<div class="panel" style="margin-top:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Credential grants log</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+total.toLocaleString()+' grants in 30 days across '+CONNECTIONS.length+' connections. Each one is recorded on its call’s frames and receipt.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(total.toLocaleString(),"grant")+' in 30 days across '+CONNECTIONS.length+' connections. Each one is recorded on its call’s frames and receipt.</p></div>'+
    '<span class="b b-q grants-shown">'+GRANTS.length+' most recent shown</span></div>'+
    '<div class="tw"><table data-lt="1"><thead><tr><th>Grant</th><th>Tool version</th><th>Agent and run</th><th>Connection</th><th>Scope</th><th>TTL</th><th>State</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">TTL defaults to the call’s expected duration plus a margin, never more than one hour. The agent sees the result, never the credential.</p></div></div>';
+   '<div class="panel-b"><p class="muted" style="margin:0;font-size:12px">TTL defaults to the call’s expected duration plus a margin, never more than one hour. The agent sees the result and never the credential.</p></div></div>';
 }
 /* ---------- Providers, connections, mandates and policy versions: open, edit, remove ----------
    Every row on the Tools page that names a record opens it here. The dialogs write to the
@@ -4970,7 +5006,7 @@ function grantsLog(){
    says what stops working before it asks. */
 function brokerMints(downscope){
   for(var i=0;i<BROKER_CAPS.length;i++){if(BROKER_CAPS[i][0]===downscope)return BROKER_CAPS[i][2];}
-  return "the stored credential, used server-side for this call only";
+  return "the stored credential, used by oxagen for this call only";
 }
 function serverById(id){for(var i=0;i<SERVERS.length;i++){if(SERVERS[i].id===id)return SERVERS[i];}return null;}
 function connById(id){for(var i=0;i<CONNECTIONS.length;i++){if(CONNECTIONS[i].id===id)return CONNECTIONS[i];}return null;}
@@ -4995,27 +5031,27 @@ function oauthKind(c){return c&&(c.kind==="oauth"||c.kind==="github_app");}
 DLG_EXT.oauth=function(id){
   var sv=serverById(id); if(!sv) return noSuch("Provider");
   var c=connByServer(sv.id), back=c&&c.authState==="expired";
-  return {t:(back?"Reconnect ":"Connect ")+sv.name,s:"OAuth · you authorize it, Oxagen holds the token",w:false,
-   b:(back?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Calls through this connection are denied until you authorize it again. Nothing else about the connection changes.</div>':'')+
-    '<div class="field"><label for="oa-client">Client id</label><input id="oa-client" value="'+h(c&&c.client||"")+'" placeholder="issued by '+h(sv.name)+'" autocomplete="off"></div>'+
-    '<div class="field"><label for="oa-secret">Client secret</label><input id="oa-secret" type="password" placeholder="'+(c&&c.client?"leave empty to keep the current one":"issued by "+sv.name)+'" autocomplete="off"></div>'+
+  return {t:(back?"Reconnect ":"Connect ")+sv.system,s:"OAuth. You authorize it and oxagen holds the token.",w:false,
+   b:(back?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Calls through this connection are blocked until you authorize it again. Nothing else about the connection changes.</div>':'')+
+    '<div class="field"><label for="oa-client">Client id</label><input id="oa-client" value="'+h(c&&c.client||"")+'" placeholder="Issued by '+h(sv.system)+'" autocomplete="off"></div>'+
+    '<div class="field"><label for="oa-secret">Client secret</label><input id="oa-secret" type="password" placeholder="'+(c&&c.client?"Leave empty to keep the current one":"Issued by "+sv.system)+'" autocomplete="off"></div>'+
     '<div class="field"><label for="oa-url">Authorization URL</label><input id="oa-url" value="'+h(c&&c.authUrl||"")+'" placeholder="https://'+h(sv.name)+'.com/oauth/authorize"></div>'+
     '<div class="field"><label for="oa-scopes">Scopes</label><input id="oa-scopes" value="'+h(c&&c.scopes||"")+'" placeholder="read, write">'+
-    '<div class="hint">Ask for the narrowest set the tools need. The broker downscopes again per call, but it cannot ask for less than nothing.</div></div>'+
+    '<div class="hint">Ask for the narrowest set the tools need. oxagen narrows the scopes again on each call.</div></div>'+
     '<div class="field"><label>Redirect URL</label><div class="mono" style="font-size:12px">'+h(ASST_ENGINE_URL.replace(/^https?:\/\//,"https://"))+'/oauth/callback</div>'+
-    '<div class="hint">Register this with '+h(sv.name)+' before you authorize.</div></div>'+
-    '<div class="note">Authorizing opens '+h(sv.name)+' in a new tab. When it redirects back, Oxagen exchanges the code, envelopes the token under the organization key, and records who authorized it. The token is never returned to a screen and never sent to an agent.</div>',
+    '<div class="hint">Register this with '+h(sv.system)+' before you authorize.</div></div>'+
+    '<div class="note">Authorizing opens '+h(sv.system)+' in a new tab. When it redirects back, oxagen exchanges the code, encrypts the token with the organization key, and records who authorized it. The token never appears on a screen and is never sent to an agent.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
-    '<button class="btn primary" onclick="oauthAuthorize(\''+sv.id+'\')">Authorize with '+h(sv.name)+'</button>'};
+    '<button class="btn primary" onclick="oauthAuthorize(\''+sv.id+'\')">Authorize with '+h(sv.system)+'</button>'};
 };
 function oauthAuthorize(id){
   var sv=serverById(id); if(!sv) return;
   function v(k){var n=el(k);return n?n.value.trim():"";}
   var client=v("oa-client"), url=v("oa-url"), scopes=v("oa-scopes");
-  if(!client||!url){ act("A client id and an authorization URL come first. "+sv.name+" issues both when you register Oxagen as an app."); return; }
+  if(!client||!url){ act("Enter a client id and an authorization URL first. "+sv.system+" issues both when you register oxagen as an app."); return; }
   var c=connByServer(sv.id);
   if(!c){
-    c={id:"con_"+rid(6,"0123456789ABCDEFGHJKMNPQRSTVWXYZ"),kind:"oauth",name:sv.name+" · "+ORG.name,owner:"Marcus Bell",servers:sv.id,
+    c={id:"con_"+rid(6,"0123456789ABCDEFGHJKMNPQRSTVWXYZ"),kind:"oauth",name:sv.system+" · "+ORG.name,owner:"Marcus Bell",servers:sv.id,
        reviewed:"2026-09-11",next:"2026-12-10",grants30:0,status:"active",downscope:"token exchange"};
     CONNECTIONS.push(c);
     sv.conn=c.name;
@@ -5023,25 +5059,25 @@ function oauthAuthorize(id){
   c.client=client; c.authUrl=url; if(scopes) c.scopes=scopes;
   c.authState="connected"; c.tokenExp="2026-12-20 09:00 UTC";
   closeDialog(); render();
-  act(sv.name+" authorized as "+c.owner+". The token is enveloped under the organization key and expires "+c.tokenExp+".","gold");
+  act(sv.system+" authorized as "+c.owner+". The token is encrypted under the organization key and expires "+c.tokenExp+".","gold");
 }
 function oauthRefresh(cid){
   var c=connById(cid); if(!c) return;
   c.authState="connected"; c.tokenExp="2026-12-20 09:00 UTC";
   closeDialog(); render();
-  act("Refreshed against the provider. The new token expires "+c.tokenExp+"; grants already minted keep their own TTL.");
+  act("Refreshed with the provider. The new token expires "+c.tokenExp+". Credentials already issued keep their own expiry.");
 }
 function oauthDisconnect(cid){
   var c=connById(cid); if(!c) return;
   c.authState="not connected"; c.tokenExp="";
   closeDialog(); render();
-  act("Disconnected "+c.name+". Every call through it is denied until it is authorized again.");
+  act("Disconnected "+c.name+". Every call through it is blocked until someone authorizes it again.");
 }
 function serverReimport(id){
   var sv=serverById(id); if(!sv) return;
   sv.imported="2026-09-11 09:14 UTC";
   closeDialog(); render();
-  act("Re-imported "+sv.name+" from tools/list. New versions land as new rows; nothing widens a belt on its own.");
+  act("Re-imported "+sv.system+". New versions appear as new rows. No toolbelt gains a tool on its own.");
 }
 function noSuch(what){return {t:what,w:false,b:'<div class="note">That record is no longer here.</div>',
   f:'<button class="btn" onclick="closeDialog()">Close</button>'};}
@@ -5055,7 +5091,7 @@ DLG_EXT.server=function(id){
      '<dt>Authorization</dt><dd>'+authBadge(sv)+'</dd>'+
      '<dt>Scopes</dt><dd class="mono" style="font-size:11.5px">'+h(c.scopes||"—")+'</dd>'+
      '<dt>Owner</dt><dd>'+h(c.owner)+' · reviewed '+h(c.reviewed)+', next '+h(c.next)+'</dd>'+
-     '<dt>What the broker mints</dt><dd>'+h(brokerMints(c.downscope))+'</dd>'+
+     '<dt>Issued per call</dt><dd>'+h(brokerMints(c.downscope))+'</dd>'+
      '<dt>Grants 30d</dt><dd>'+c.grants30.toLocaleString()+'</dd></dl>'+
      '<div class="row" style="margin-top:11px">'+
       (oauthKind(c)
@@ -5066,36 +5102,36 @@ DLG_EXT.server=function(id){
       (oauthKind(c)&&c.authState==="connected"?'<button class="btn sm" onclick="oauthDisconnect(\''+c.id+'\')">Disconnect</button>':'')+
       '<button class="btn sm danger" onclick="openDialog(\'connrevoke\',\''+c.id+'\')">Revoke</button></div>'
    : needsAuth(sv)
-     ? '<div class="note">This provider is reached as somebody, and nobody is connected yet. Every call to it is denied until it is.</div>'+
+     ? '<div class="note">This provider needs a connection, and none exists yet. Every call to it is blocked until someone connects it.</div>'+
        '<div class="row" style="margin-top:11px"><button class="btn sm primary" onclick="openDialog(\'oauth\',\''+sv.id+'\')">Connect with OAuth</button>'+
        '<button class="btn sm" onclick="openDialog(\'connection\')">Add a key or a role instead</button></div>'
-     : '<div class="note">Reached '+h(sv.transport)+', with no credential to hold. There is nothing here to authorize.</div>';
+     : '<div class="note">This provider holds no credential, so there is nothing to authorize.</div>';
   var pbelt=providerBelts(sv.id), pag=providerAgents(sv.id);
   return {t:sv.system,s:sv.transport+" · "+sv.wire+" · "+sv.url,w:true,
-   b:(sv.health==="ok"?'':'<div class="warn"><b>This provider is degraded.</b> Calls to it are retried once and then denied; the run says so on its frames.</div>')+
-    (c&&c.authState==="expired"?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Reconnect to bring the '+tv.length+' tools below back into reach.</div>':'')+
+   b:(sv.health==="ok"?'':'<div class="warn"><b>This provider is degraded.</b> Calls to it are retried once and then blocked. The run records each one on its frames.</div>')+
+    (c&&c.authState==="expired"?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Reconnect to bring the '+plural(tv.length,"tool")+' below back into reach.</div>':'')+
     (props.length?'<div class="warn"><b>'+props.length+' schema'+(props.length>1?'s are':' is')+' awaiting approval.</b> '+
       'Until an admin approves, outputs are validated only for size and type.</div>':'')+
     '<dl class="kv"><dt>System</dt><dd>'+h(sv.desc)+'</dd>'+
     '<dt>Transport</dt><dd class="mono">'+h(sv.transport)+' · '+h(sv.wire)+
-     '<span class="sub">how Oxagen reaches it. The registry, the policy and the receipts are the same whichever it is.</span></dd>'+
+     '<span class="sub">How oxagen reaches it. The registry, the policy, and the receipts work the same for every transport.</span></dd>'+
     '<dt>Registry name</dt><dd class="mono">'+h(sv.name)+'</dd>'+
     '<dt>Schemas</dt><dd>'+h(sv.schemas)+'</dd>'+
-    '<dt>Tool versions</dt><dd>'+sv.versions+' across '+sv.tools+' tools</dd>'+
-    '<dt>Toolbelts</dt><dd>'+(pbelt.length?pbelt.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join("")
-      :'<span class="dim">on no toolbelt in this workspace</span>')+'</dd>'+
-    '<dt>Agents reached</dt><dd>'+(pag.length?pag.map(function(k){return '<span class="b b-q" style="font-size:10.5px">'+h(k.split(".").pop())+'</span>';}).join("")
+    '<dt>Tool versions</dt><dd>'+sv.versions+' across '+plural(sv.tools,"tool")+'</dd>'+
+    '<dt>Toolbelts</dt><dd>'+(pbelt.length?pbelt.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(SEP)
+      :'<span class="dim">Not on any toolbelt in this workspace</span>')+'</dd>'+
+    '<dt>Agents reached</dt><dd>'+(pag.length?pag.map(function(k){return '<span class="b b-q" style="font-size:10.5px">'+h(k.split(".").pop())+'</span>';}).join(SEP)
       :'<span class="dim">none</span>')+'</dd>'+
     '<dt>Last import</dt><dd class="mono">'+h(sv.imported)+'</dd></dl>'+
     '<p class="eyebrow" style="margin:18px 0 8px">Authorization</p>'+conn+
-    '<p class="eyebrow" style="margin:18px 0 8px">Tools imported from '+h(sv.name)+'</p>'+
+    '<p class="eyebrow" style="margin:18px 0 8px">Tools imported from '+h(sv.system)+'</p>'+
     (tv.length
-     ? '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Hazard</th><th>Gate today</th><th class="num">Agents</th><th class="num">Calls 30d</th></tr></thead><tbody>'+
+     ? '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Hazard</th><th>Gate</th><th class="num">Agents</th><th class="num">Calls 30d</th></tr></thead><tbody>'+
        tv.map(function(x){return '<tr class="click" onclick="openDialog(\'tool\',\''+x.n+'@'+x.v+'\')"><td class="mono" style="font-size:11.5px">'+h(x.n)+'@'+h(x.v)+'</td>'+
         '<td>'+hazard(x.risk,x.eff)+'</td><td>'+toolGate(x)+'</td>'+
         '<td class="num">'+agentsWithTool(x.n+"@"+x.v).length+'</td><td class="num">'+x.calls30.toLocaleString()+'</td></tr>';}).join("")+
        '</tbody></table></div>'+
-       '<p class="muted" style="font-size:12px;margin:8px 0 0">'+tv.length+' of the '+sv.versions+' versions this provider has shipped are in the registry. Re-import to pull the rest.</p>'
+       '<p class="muted" style="font-size:12px;margin:8px 0 0">'+tv.length+' of the '+plural(sv.versions,"version")+' this provider has shipped are in the registry. Re-import to pull the rest.</p>'
      : '<div class="note">Nothing from this provider is in the registry yet. Re-import to pull its tool list.</div>'),
    f:'<button class="btn danger" onclick="openDialog(\'serverdel\',\''+sv.id+'\')">Remove</button>'+
     '<span class="grow"></span>'+
@@ -5108,31 +5144,31 @@ DLG_EXT.belt=function(id){
   var b=beltCatalogById(id); if(!b) return noSuch("Toolbelt");
   var keys=agentsOfBelt(b.id), av=beltAvailability(b);
   return {t:b.name,s:b.desc,w:true,
-   b:(av.blocked?'<div class="warn"><b>'+av.blocked+' of the '+b.tools.length+' tool versions on this belt cannot be called today.</b> '+
-      h(av.why)+'. The agents carrying it are still shown them, and the call is refused at dispatch.</div>':'')+
+   b:(av.blocked?'<div class="warn"><b>'+av.blocked+' of the '+b.tools.length+' tool versions on this toolbelt cannot be called today.</b> '+
+      h(av.why)+'. Agents with this toolbelt can still see them, and each call is blocked when it is sent.</div>':'')+
     (b.note?'<div class="note" style="margin-bottom:14px">'+h(b.note)+'</div>':'')+
-    '<dl class="kv"><dt>Owner</dt><dd>'+h(b.owner)+'<span class="sub">last changed '+h(b.updated)+' by '+h(b.by)+'</span></dd>'+
-    '<dt>Providers</dt><dd>'+beltProviders(b).map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join("")+'</dd>'+
+    '<dl class="kv"><dt>Owner</dt><dd>'+h(b.owner)+'<span class="sub">Last changed '+h(b.updated)+' by '+h(PEOPLE[b.by]?PEOPLE[b.by].name:b.by)+'</span></dd>'+
+    '<dt>Providers</dt><dd>'+beltProviders(b).map(function(s){return '<span class="b b-q" style="font-size:10.5px">'+h(s)+'</span>';}).join(SEP)+'</dd>'+
     '<dt>Agents assigned</dt><dd>'+(keys.length
       ?keys.map(function(k){var a=agentByKey(k);
         return a?'<button class="btn sm ghost" onclick="closeDialog();go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+defSlug(a)+'/toolbelt\')">'+h(defSlug(a))+'</button>'
                 :'<span class="b b-q" style="font-size:10.5px">'+h(k)+'</span>';}).join("")
-      :'<span class="dim">unassigned. It is a catalogue entry until an agent carries it</span>')+'</dd>'+
+      :'<span class="dim">Unassigned. No agent carries it yet.</span>')+'</dd>'+
     '<dt>Gates on its tools</dt><dd>'+beltGateCell(b)+'</dd></dl>'+
-    '<p class="eyebrow" style="margin:18px 0 8px">Tool versions on this belt</p>'+
-    '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Provider</th><th>Hazard</th><th>Gate today</th><th class="num">Calls 30d</th></tr></thead><tbody>'+
+    '<p class="eyebrow" style="margin:18px 0 8px">Tool versions on this toolbelt</p>'+
+    '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Tool version</th><th>Provider</th><th>Hazard</th><th>Gate</th><th class="num">Calls 30d</th></tr></thead><tbody>'+
     b.tools.map(function(tid){var t=toolById(tid);
-      if(!t) return '<tr><td class="mono" style="font-size:11.5px">'+h(tid)+'</td><td colspan="4" class="dim">not in the registry. A call by this name is <span class="mono">unknown_tool</span></td></tr>';
+      if(!t) return '<tr><td class="mono" style="font-size:11.5px">'+h(tid)+'</td><td colspan="4" class="dim">Not in the registry. A call by this name fails as an unknown tool.</td></tr>';
       return '<tr class="click" onclick="openDialog(\'tool\',\''+h(tid)+'\')"><td>'+toolCell(tid,{sz:"sm"})+'</td>'+
        '<td class="mono" style="font-size:11px">'+h(t.s)+'</td><td>'+hazard(t.risk,t.eff)+'</td>'+
        '<td>'+toolGate(t)+'</td><td class="num">'+t.calls30.toLocaleString()+'</td></tr>';}).join("")+
     '</tbody></table></div>'+
-    '<div class="note" style="margin-top:12px">Assigning this belt grants nothing. It widens what the model is shown; every call on it '+
-    'is still decided against the agent\'s roles, the policy on the version, the kill switches, and the mandate ledger.</div>',
-   f:'<button class="btn danger" onclick="act(\'A belt cannot be removed while an agent carries it. Unassign it first.\')">Remove</button>'+
+    '<div class="note" style="margin-top:12px">Assigning this toolbelt grants no permission. It adds to what the model can see. Every call from it '+
+    'is still checked against the agent’s roles, the policy on the tool version, the kill switches, and the agent’s mandates.</div>',
+   f:'<button class="btn danger" onclick="act(\'A toolbelt cannot be removed while an agent carries it. Unassign it first.\')">Remove</button>'+
     '<span class="grow"></span>'+
-    '<button class="btn" onclick="act(\'Assignment is edited on the agent. Open its Toolbelt tab to add or remove this belt.\')">Assign to an agent</button>'+
-    '<button class="btn primary" onclick="act(\'A change to this belt reaches '+keys.length+' agent'+(keys.length===1?'':'s')+' at their next session.\')">Edit tools</button>'};
+    '<button class="btn" onclick="act(\'Assignment is edited on the agent. Open its Toolbelt tab to add or remove this toolbelt.\')">Assign to an agent</button>'+
+    '<button class="btn primary" onclick="act(\'A change to this toolbelt reaches '+keys.length+' agent'+(keys.length===1?'':'s')+' at their next session.\')">Edit tools</button>'};
 };
 DLG_EXT.beltnew=function(){
   return {t:"New toolbelt",s:"A named set of tool versions that many agents can carry.",w:false,
@@ -5140,10 +5176,10 @@ DLG_EXT.beltnew=function(){
     '<div class="field"><label for="tb-desc">What it is for</label><input id="tb-desc" placeholder="Land and publish: merge a pull request, cut a release, delete the merged branch."></div>'+
     '<div class="field"><label for="tb-owner">Owner</label><select id="tb-owner">'+
      ["platform","finops","security"].map(function(o){return '<option>'+o+'</option>';}).join("")+'</select></div>'+
-    '<div class="note">A belt is a job, not a category. Name it after the work an agent does with it, so a reviewer can tell '+
+    '<div class="note">A toolbelt is a job, not a category. Name it after the work an agent does with it, so a reviewer can tell '+
     'from the name alone whether an agent should carry it.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
-    '<button class="btn primary" onclick="closeDialog();act(\'Belt created. It reaches no agent until one is assigned it.\')">Create</button>'};
+    '<button class="btn primary" onclick="closeDialog();act(\'Toolbelt created. It reaches no agent until one is assigned it.\')">Create</button>'};
 };
 DLG_EXT.serveredit=function(id){
   var s=serverById(id); if(!s) return noSuch("Provider");
@@ -5156,7 +5192,7 @@ DLG_EXT.serveredit=function(id){
     '<div class="field"><label for="sv-conn">Connection</label><select id="sv-conn">'+
      ['none'].concat(CONNECTIONS.map(function(c){return c.name;})).map(function(n){return '<option'+(n===s.conn?' selected':'')+'>'+h(n)+'</option>';}).join("")+
      (CONNECTIONS.map(function(c){return c.name;}).indexOf(s.conn)<0&&s.conn!=="none"?'<option selected>'+h(s.conn)+'</option>':'')+'</select></div>'+
-    '<div class="note">Changing the endpoint does not re-import. Tool versions already on a belt keep their digest until a re-import brings a new one.</div>',
+    '<div class="note">Changing the endpoint does not re-import. Tool versions already on a toolbelt keep their digest until a re-import brings a new one.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="serverSave(\''+s.id+'\')">Save</button>'};
 };
 function serverSave(id){
@@ -5180,8 +5216,8 @@ DLG_EXT.serverdel=function(id){
 };
 function serverDelete(id){
   var i=-1; SERVERS.forEach(function(s,ix){if(s.id===id)i=ix;});
-  if(i<0) return; var n=SERVERS[i].name; SERVERS.splice(i,1);
-  closeDialog(); render(); act("Removed "+n+". Its tool versions are out of the registry and off every belt.");
+  if(i<0) return; var n=SERVERS[i].system||SERVERS[i].name; SERVERS.splice(i,1);
+  closeDialog(); render(); act("Removed "+n+". Its tool versions are out of the registry and off every toolbelt.");
 }
 
 DLG_EXT.conn=function(id){
@@ -5189,12 +5225,12 @@ DLG_EXT.conn=function(id){
   var due=c.status==="review due", fin=c.status.indexOf("financial")>-1;
   var g=GRANTS.filter(function(x){return x.conn===c.id;});
   return {t:c.name,s:c.id+" · "+c.kind,w:true,
-   b:(due?'<div class="warn"><b>The review date passed on '+h(c.next)+'.</b> It has issued '+c.grants30.toLocaleString()+' grants since. '+
+   b:(due?'<div class="warn"><b>The review date passed on '+h(c.next)+'.</b> It has issued '+plural(c.grants30.toLocaleString(),"grant")+' since. '+
       'Marking it reviewed sets the next date 90 days out and is recorded with your name on it.</div>':'')+
     '<dl class="kv"><dt>Owner</dt><dd>'+h(c.owner)+(fin?' · a finance role, required on a financial connection':'')+'</dd>'+
     '<dt>Providers</dt><dd class="mono">'+h(c.servers)+'</dd>'+
     '<dt>Downscope</dt><dd class="mono">'+h(c.downscope)+'</dd>'+
-    '<dt>What the broker mints</dt><dd>'+h(brokerMints(c.downscope))+'</dd>'+
+    '<dt>Issued per call</dt><dd>'+h(brokerMints(c.downscope))+'</dd>'+
     '<dt>Grants 30d</dt><dd>'+c.grants30.toLocaleString()+'</dd>'+
     '<dt>Reviewed</dt><dd>'+h(c.reviewed)+' · next '+h(c.next)+'</dd></dl>'+
     (g.length?'<p class="eyebrow" style="margin:16px 0 8px">Recent grants</p>'+
@@ -5214,11 +5250,11 @@ DLG_EXT.connedit=function(id){
   if(owners.indexOf(c.owner)<0) owners.unshift(c.owner);
   return {t:"Edit "+c.name,s:"The secret itself is never readable. Replace it to rotate.",w:false,
    b:'<div class="field"><label for="cn-name">Name</label><input id="cn-name" value="'+h(c.name)+'"></div>'+
-    '<div class="field"><label for="cn-owner">Owner (one person)</label><select id="cn-owner">'+
+    '<div class="field"><label for="cn-owner">Owner (a person)</label><select id="cn-owner">'+
      owners.map(function(o){return '<option'+(o===c.owner?' selected':'')+'>'+h(o)+'</option>';}).join("")+'</select></div>'+
     '<div class="field"><label for="cn-next">Next review</label><input id="cn-next" type="date" value="'+h(c.next)+'"></div>'+
-    '<div class="field"><label for="cn-secret">Replace the secret</label><input id="cn-secret" type="password" placeholder="leave empty to keep the current one" autocomplete="off">'+
-    '<div class="hint">A replacement is tested against the provider before it is saved. Grants already minted keep their TTL.</div></div>',
+    '<div class="field"><label for="cn-secret">Replace the secret</label><input id="cn-secret" type="password" placeholder="Leave empty to keep the current one" autocomplete="off">'+
+    '<div class="hint">A replacement is tested against the provider before it is saved. Credentials already issued keep their expiry.</div></div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="connSave(\''+c.id+'\')">Save</button>'};
 };
 function connSave(id){
@@ -5229,7 +5265,7 @@ function connSave(id){
   if(d&&d.value) c.next=d.value;
   if(c.status==="review due"&&d&&d.value>"2026-09-11") c.status="active";
   closeDialog(); render();
-  act(sec&&sec.value?"Tested against the provider, then saved. The old secret is dead at the next call.":"Saved.");
+  act(sec&&sec.value?"Tested against the provider, then saved. The old secret stops working at the next call.":"Saved.");
 }
 function connReviewed(id){
   var c=connById(id); if(!c) return;
@@ -5240,16 +5276,16 @@ function connReviewed(id){
 DLG_EXT.connrevoke=function(id){
   var c=connById(id); if(!c) return noSuch("Connection");
   return {t:"Revoke "+c.name+"?",w:false,
-   b:'<div class="warn"><b>Every grant it minted stops at the next use.</b> '+c.grants30.toLocaleString()+' were minted in 30 days. '+
-     'Calls to <span class="mono">'+h(c.servers)+'</span> are denied until another connection covers them.</div>'+
-    (c.status.indexOf("financial")>-1?'<div class="note">This connection is financial. Revoking it leaves its mandates in place with nothing to draw on; reserved amounts are released at the next boundary.</div>':''),
+   b:'<div class="warn"><b>Every credential it issued stops working at its next use.</b> It issued '+plural(c.grants30,"grant")+' in 30 days. '+
+     'Calls to <span class="mono">'+h(c.servers)+'</span> are blocked until another connection covers them.</div>'+
+    (c.status.indexOf("financial")>-1?'<div class="note">This connection is financial. Revoking it leaves its mandates in place with nothing to draw on. Reserved amounts are released at the next checkpoint.</div>':''),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn danger" onclick="connRevoke(\''+c.id+'\')">Revoke it</button>'};
 };
 function connRevoke(id){
   var i=-1; CONNECTIONS.forEach(function(c,ix){if(c.id===id)i=ix;});
   if(i<0) return; var n=CONNECTIONS[i].name; CONNECTIONS.splice(i,1);
-  closeDialog(); render(); act("Revoked "+n+". Its grants are dead at the next use.");
+  closeDialog(); render(); act("Revoked "+n+". Its credentials stop working at their next use.");
 }
 
 DLG_EXT.mandateedit=function(id){
@@ -5299,10 +5335,10 @@ DLG_EXT.policyver=function(v){
    b:'<dl class="kv"><dt>State</dt><dd>'+h(p.state)+'</dd><dt>Author</dt><dd>'+h(p.by)+'</dd>'+
     '<dt>Activated</dt><dd class="mono">'+h(p.at)+'</dd><dt>Rules</dt><dd>'+p.rules+'</dd>'+
     '<dt>Tests</dt><dd>'+h(p.tests)+'</dd><dt>What changed</dt><dd>'+h(p.note)+'</dd>'+
-    '<dt>Stored in</dt><dd><span class="mono">tools.policy_versions</span>, one row. In regulated mode the rules are a file in <span class="mono">.oxagen/policy/</span> and this row is the compiled copy.</dd></dl>'+
-    '<div class="note">The gateway evaluates these rules on every tool call, with no model in the decision path. Every <span class="mono">policy.decision</span> frame names the version that made it, so a run\'s Decision trace reads the same either way.</div>',
+    '<dt>Stored in</dt><dd>oxagen, as one version. In regulated mode the rules are a file in <span class="mono">.oxagen/policy/</span> and this version is the compiled copy.</dd></dl>'+
+    '<div class="note">The gateway evaluates these rules on every tool call, with no model in the decision path. Every <span class="mono">policy.decision</span> frame names the version that made it, so a replay reads the same either way.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
-    (p.state==="active"?'<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft a change</button>':
+    (p.state==="active"?'<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft new version</button>':
      p.state==="draft"?'<button class="btn" onclick="openDialog(\'policyedit\',\''+p.v+'\')">Edit</button>'+
       '<button class="btn primary" onclick="openDialog(\'policyactivate\',\''+p.v+'\')">Activate</button>':
      '<button class="btn primary" onclick="openDialog(\'policyrestore\',\''+p.v+'\')">Restore</button>')};
@@ -5314,11 +5350,11 @@ DLG_EXT.policynew=function(base){
   if(!from) return noSuch("Policy version");
   return {t:"Draft a policy version",s:"A draft decides nothing until an approver activates it",w:false,
    b:'<div class="field"><label for="pn-base">Based on</label><select id="pn-base">'+
-     opts.map(function(x){return '<option value="'+h(x.v)+'"'+(x.v===from.v?" selected":"")+'>'+h(x.v)+' — '+h(x.state)+', '+x.rules+' rules</option>';}).join("")+
+     opts.map(function(x){return '<option value="'+h(x.v)+'"'+(x.v===from.v?" selected":"")+'>'+h(x.v)+' ('+h(x.state)+', '+plural(x.rules,"rule")+')</option>';}).join("")+
      '</select><div class="hint">The draft opens as a copy of this version’s rules.</div></div>'+
      '<div class="field"><label for="pn-note">What changes</label><input id="pn-note" placeholder="Raises any egress call to approval">'+
      '<div class="hint">One sentence. The version list and every restore dialog show it.</div></div>'+
-     '<div class="note">Its rules compile and its tests run against it, and nothing it says reaches a call until it is activated.</div>',
+     '<div class="note">Its rules compile and its tests run. It decides no call until it is activated.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="policyDraft()">Create the draft</button>'};
 };
@@ -5337,9 +5373,9 @@ DLG_EXT.policyedit=function(v){
   var p=null; POLICIES.forEach(function(x){if(x.v===v)p=x;});
   if(!p) return noSuch("Policy version");
   if(p.state!=="draft") return {t:h(p.v)+" cannot be edited",w:false,
-   b:'<div class="note">'+h(p.v)+' is '+h(p.state)+'. Every decision it made cites it, so its rules are fixed. Draft a version from it instead.</div>',
+   b:'<div class="note">'+h(p.v)+' is '+h(p.state)+'. Every decision it made cites it, so its rules are fixed. Draft a new version from it instead.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
-     '<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft a change</button>'};
+     '<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft new version</button>'};
   return {t:"Edit "+p.v,s:"A draft, so it is the one version you can change",w:true,
    b:'<div class="field"><label for="pe-note">What changes</label><input id="pe-note" value="'+h(p.note)+'"></div>'+
      '<div class="field"><label>Rules</label>'+
@@ -5373,7 +5409,7 @@ DLG_EXT.policydiscard=function(v){
   if(p.state!=="draft") return {t:h(p.v)+" cannot be discarded",w:false,
    b:'<div class="note">'+h(p.v)+' is '+h(p.state)+'. Every decision it made cites it, so it is kept. Supersede it with a new version instead.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
-     '<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft a change</button>'};
+     '<button class="btn primary" onclick="openDialog(\'policynew\',\''+p.v+'\')">Draft new version</button>'};
   return {t:"Discard "+p.v+"?",w:false,
    b:'<div class="warn"><b>'+h(p.note)+'</b> goes with it.</div>'+
      '<div class="note">A draft has decided nothing, so nothing cites it and the row is removed outright. The active version is untouched.</div>',
@@ -5411,7 +5447,7 @@ DLG_EXT.policyactivate=function(v){
   var cur=POLICIES.filter(function(x){return x.state==="active";})[0];
   return {t:"Activate "+p.v+"?",w:false,
    b:'<div class="note">'+(cur?h(cur.v)+' is superseded and kept, because every decision it made cites it. ':'')+
-     'From the next call boundary every <span class="mono">policy.decision</span> frame names '+h(p.v)+'.</div>'+
+     'From the next tool call, every policy decision names '+h(p.v)+'.</div>'+
     '<dl class="kv"><dt>Rules</dt><dd>'+p.rules+'</dd><dt>Tests</dt><dd>'+h(p.tests)+'</dd>'+
     '<dt>What changes</dt><dd>'+h(p.note)+'</dd></dl>'+
     '<div class="warn"><b>This is a governed action.</b> It records your name, and in regulated mode it is a pull request instead of a button.</div>',
@@ -5423,7 +5459,7 @@ function policyActivate(v){
   if(!p) return;
   POLICIES.forEach(function(x){if(x.state==="active")x.state="superseded";});
   p.state="active"; S.denyGen+=1;
-  closeDialog(); render(); act(v+" is active. Deny generation is now "+S.denyGen+".","gold");
+  closeDialog(); render(); act(v+" is active. Kill-switch generation is now "+S.denyGen+".","gold");
 }
 
 /* ---------- Import, in three steps (W9): connect, review tools/list, classify and import ----------
@@ -5445,13 +5481,13 @@ DLG_EXT.import=function(arg){
   var picked=impPicked();
   var steps='<div class="row imp-steps" style="gap:8px;margin-bottom:14px;font-size:12px">'+[[1,"Connect"],[2,"Review tools/list"],[3,"Classify and import"]].map(function(x){
     return '<span class="b '+(x[0]===step?"b-approval":x[0]<step?"b-allowed":"b-q")+'"'+(x[0]===step?' aria-current="step"':'')+'>'+(x[0]<step?"✓":x[0])+' · '+x[1]+'</span>';}).join('<span class="dim">→</span>')+'</div>';
-  if(step===1) return {t:"Import tools from a provider",s:"The registry is the only source of tools an agent can see. Nothing reaches a belt until it is here.",w:false,
+  if(step===1) return {t:"Import tools from a provider",s:"The registry is the only source of tools an agent can see. Nothing reaches a toolbelt until it is here.",w:false,
    b:steps+'<div class="field"><label for="imp-url">Endpoint URL</label><input id="imp-url" value="https://mcp.confluence.a-intel.internal/mcp"></div>'+
     '<div class="field"><label for="imp-tr">Transport</label><select id="imp-tr"><option>streamable-http</option><option>sse</option><option>stdio</option></select></div>'+
     '<div class="field"><label for="imp-conn">Connection</label><select id="imp-conn"><option>Create one after import</option>'+CONNECTIONS.map(function(c){return '<option>'+h(c.id+' · '+c.name)+'</option>';}).join("")+'</select></div>'+
-    '<div class="note">Oxagen calls <span class="mono">tools/list</span>, versions every tool it finds, and stores both schemas. Where a provider declares no <span class="mono">outputSchema</span>, the gateway records observed outputs and files a registry proposal for an admin to approve.</div>',
+    '<div class="note">oxagen calls <span class="mono">tools/list</span>, versions every tool it finds, and stores both schemas. Where a provider declares no <span class="mono">outputSchema</span>, the gateway records observed outputs and files a registry proposal for an admin to approve.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="S.dlgArg=2;render()">Connect</button>'};
-  if(step===2) return {t:"Review tools/list",s:IMPORT_TOOLS.length+" tools returned by mcp.confluence.a-intel.internal · protocol 2025-06-18",w:true,
+  if(step===2) return {t:"Review tools/list",s:plural(IMPORT_TOOLS.length,"tool")+" returned by mcp.confluence.a-intel.internal · protocol 2025-06-18",w:true,
    b:steps+IMPORT_TOOLS.map(function(t){
      return '<label class="check imp-tool" style="margin-bottom:8px"><input type="checkbox"'+(S.impPick[t.n]?' checked':'')+' onchange="S.impPick[\''+t.n+'\']=this.checked;render()">'+
       '<div class="grow">'+toolCell("confluence__"+t.n+"@1",{sz:"sm"})+'<div class="dim" style="font-size:11.5px;margin-top:3px">'+h(t.d)+'</div></div>'+
@@ -5466,9 +5502,9 @@ DLG_EXT.import=function(arg){
     picked.map(function(t){return '<tr class="imp-row"><td>'+toolCell("confluence__"+t.n+"@1",{sz:"sm"})+'</td><td>'+hazard(t.risk,t.eff)+'</td>'+
      '<td><span class="b b-q">internal</span></td><td>'+finBadge("none")+'</td><td>'+(t.out?'<span class="b b-allowed">declared</span>':'<span class="b b-approval">observed</span>')+'</td></tr>';}).join("")+
     '</tbody></table></div>'+
-    '<div class="note" style="margin-top:14px"><b>What import does not do.</b> It grants nothing. These '+picked.length+' versions take the registry from '+n0.toLocaleString()+' to '+(n0+picked.length).toLocaleString()+' tool versions and sit there, callable by nobody, until a role grant puts them on a belt.</div>',
+    '<div class="note" style="margin-top:14px"><b>What import does not do.</b> It grants nothing. These '+plural(picked.length,"version")+' take the registry from '+n0.toLocaleString()+' to '+(n0+picked.length).toLocaleString()+' tool versions and sit there, callable by nobody, until a role grant puts them on a toolbelt.</div>',
    f:'<span class="grow">Credential kind <span class="mono">api_key</span> · downscoping <span class="mono">none available</span></span><button class="btn" onclick="S.dlgArg=2;render()">Back</button>'+
-    '<button class="btn primary" onclick="closeDialog();act(\'Imported '+picked.length+' tool versions from confluence. They are in the registry and on no belt.\')">Import '+picked.length+' tools</button>'};
+    '<button class="btn primary" onclick="closeDialog();act(\'Imported '+picked.length+' tool versions from confluence. They are in the registry and on no toolbelt.\')">Import '+plural(picked.length,"tool")+'</button>'};
 };
 
 /* ============================== Steering ============================== */
@@ -5538,12 +5574,12 @@ var PRP_SUPPORT=(function(){
 /* What the promoter measured for each proposal, and how it argues for it. */
 var PRP_META={
  "prp_01K5RU4A":{confidence:0.97,tok:46,recKind:"observation · repeat read",
-  support:function(s){return tokn(s.dups)+" duplicate tool calls across "+s.runs+" runs";},
+  support:function(s){return tokn(s.dups)+" duplicate tool calls across "+plural(s.runs,"run");},
   rationale:function(s){return "a-intel.core.release-manager called github__get_file_contents@2 on CHANGELOG.md with an identical input digest "+
    tokn(s.dups)+" times beyond the first read, across "+s.runs+" sealed runs: "+(s.dups/s.runs).toFixed(1)+" repeat reads a run. "+
    "Every repeat returned the response digest of the first read, so nothing was learned by reading again, and each one put the 2,900-token file back into the window. "+
-   "The brief tells the agent to confirm the changelog before each section. A rule that says to cache the first read changes that behaviour without editing the brief.";},
-  measure:function(s){return (s.dups/s.runs).toFixed(1)+" repeat reads a run · "+tokn(s.dups*2900)+" tokens re-entered the window over these "+s.runs+" runs";}},
+   "The brief tells the agent to confirm the changelog before each section. A rule that says to cache the first read changes that behavior without editing the brief.";},
+  measure:function(s){return (s.dups/s.runs).toFixed(1)+" repeat reads a run · "+tokn(s.dups*2900)+" tokens re-entered the window over these "+plural(s.runs,"run");}},
  "prp_01K5RU7B":{confidence:0.64,tok:38,recKind:"reflection · unsatisfied",
   support:function(s){return s.runs+" unsatisfied runs in 30 days";},
   rationale:function(s){return "The reflector marked "+s.runs+" triage runs unsatisfied in thirty days. In each, the agent labelled an issue it had not reproduced and a person relabelled it. "+
@@ -5551,7 +5587,7 @@ var PRP_META={
   measure:function(s){return "relabels by a person on "+s.runs+" of "+s.runs+" runs";}},
  "prp_01K5RU9C":{person:true,confidence:null,tok:29,recKind:"finding · data-layer drift",
   support:function(s){return s.runs+" data-layer drift findings";},
-  rationale:function(s){return "Marcus Bell raised this from "+s.runs+" drift findings across "+s.agents+" agents, each a migration renumbered after merge. "+
+  rationale:function(s){return "Marcus Bell raised this from "+s.runs+" drift findings across "+plural(s.agents,"agent")+", each a migration renumbered after merge. "+
    "A person's proposal goes through the same six checks as the promoter's.";},
   measure:function(s){return s.runs+" drift findings in 30 days";}},
  "prp_01K5RX1N":{confidence:0.71,tok:24,recKind:"memory · saying",
@@ -5581,7 +5617,7 @@ var CTXPR={prp:"prp_01K5RU4A", pr:"a-intel/platform#519", branch:"context/ctx.re
   {n:"record_hash recomputation",ms:600,ok:"recomputed over the canonical bytes · sha256:9a41c0e7bd238f45 matches the file"},
   {n:"Secret and PII scan",ms:900,ok:"statement, rationale and evidence scanned · 0 findings"},
   {n:"Conflict against active records",ms:1000,ok:function(){return RECORDS.filter(function(r){return r.status==="published"&&r.id!==CTXPR.record.id;}).length+" published records checked · no require on CHANGELOG.md reads";}},
-  {n:"constraint_effect ∈ {require, forbid}",ms:500,ok:"constraint_effect = forbid · grants nothing"}
+  {n:"Constraint is require or forbid",ms:500,ok:"constraint forbid · grants nothing"}
  ],
  record:{id:"ctx.release.no-reread-changelog",kind:"rule",force:"should",ce:"forbid",scope:"workspace",status:"published",isNew:true,tok:46,
   st:"Do not re-read CHANGELOG.md more than once in a run; cache the first read.",
@@ -5697,8 +5733,8 @@ DLG_EXT.ctxpr=function(arg){
   return {t:"Open a pull request",s:p.lineage+" · "+p.id,w:true,b:
    (open?'<div class="callout" style="margin-bottom:14px"><span class="mono">'+h(CTXPR.pr)+'</span> is already open for this concern. One concern, one pull request.</div>':'')+
    '<div class="field"><label>Concern</label><input value="'+h(p.st)+'" aria-label="Concern"><div class="hint">One concern per pull request.</div></div>'+
-   '<div class="field"><label>Kind</label><select aria-label="Kind"><option>'+h(p.kind)+': as the promoter proposed it</option><option>rule: a directive that steers behaviour</option><option>constraint: a hard boundary, require or forbid</option><option>procedure: steps, in order</option><option>fact: a checkable claim</option><option>memory: a durable recollection</option><option>preference: soft, often unfalsifiable</option></select></div>'+
-   '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace: opens on a-intel/platform</option><option>repository: opens on the linked repo itself</option></select>'+
+   '<div class="field"><label>Kind</label><select aria-label="Kind"><option>'+h(p.kind)+' — as the promoter proposed it</option><option>rule — a directive that steers behavior</option><option>constraint — a hard boundary, require or forbid</option><option>procedure — steps, in order</option><option>fact — a checkable claim</option><option>memory — a durable recollection</option><option>preference — soft, often unfalsifiable</option></select></div>'+
+   '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace — opens on a-intel/platform</option><option>repository — opens on the linked repo itself</option></select>'+
    '<div class="hint">The promoter picks the scope from where the evidence came.</div></div>'+
    '<div class="field"><label>Constraint effect</label><select aria-label="Constraint effect"><option>forbid</option><option>require</option></select>'+
    '<div class="hint">A record can never grant authority. These are the only two values.</div></div>'+
@@ -5731,7 +5767,7 @@ function prpDetail(p){
   }).join("");
   function tile(k,v,need,ok,sub){
     return '<div class="stat"><span class="k">'+k+'</span><span class="v" style="color:var(--st-'+(ok?"allowed":"approval")+')">'+v+
-     (need!=null?'<small>/ '+need+'</small>':'')+'</span><span class="s">'+sub+'</span></div>';
+     (need!=null?' <small>/ '+need+'</small>':'')+'</span><span class="s">'+sub+'</span></div>';
   }
   var tiles=tile("Supporting runs",s.runs,null,true,m.person?"proposed by a person":"sealed runs, from the rows below")+
    tile("Distinct agents",s.agents,null,true,"from the rows below")+
@@ -5878,7 +5914,7 @@ function recprChecks(def){
       :"no published record or open pull request holds any of these "+n+" lineages";},
     bad:function(){var x=lineageHit(def)||{};
       return x.claim==="published"
-        ?x.id+" is already published. One lineage, one record — amend the published one instead of opening a second under its id."
+        ?x.id+" is already published. A lineage holds one record, so amend the published one instead of opening a second under its id."
         :x.id+" is already claimed by "+x.claim+", which was opened first. Close one of them, or give this record a lineage of its own.";}},
    {n:"record_hash recomputation",ms:600,
     ok:function(){return one?"recomputed over the canonical bytes · "+def.hash.slice(0,20)+"… matches the file"
@@ -5887,11 +5923,11 @@ function recprChecks(def){
    {n:"Conflict against active records",ms:1000,ok:function(){
       return RECORDS.filter(function(r){return r.status==="published"&&!own(r);}).length+
         " published records checked · no require or forbid on the same subject";}},
-   {n:"constraint_effect ∈ {require, forbid}",ms:500,ok:function(){
+   {n:"Constraint is require or forbid",ms:500,ok:function(){
       if(!one){var c=recs.filter(function(r){return r.ce;}).length;
-        return c?(c+" of "+n+" carry constraint_effect, each require or forbid · grants nothing"):"no constraining kind · the field is absent, which is also a pass";}
+        return c?(c+" of "+n+" carry a constraint, each require or forbid · grants nothing"):"no constraining kind · the field is absent, which is also a pass";}
       var e=def.record.ce;
-      return e?("constraint_effect = "+e+" · grants nothing"):"not a constraining kind · the field is absent, which is also a pass";}}
+      return e?("constraint "+e+" · grants nothing"):"not a constraining kind · the field is absent, which is also a pass";}}
   ];
 }
 
@@ -6077,7 +6113,7 @@ function ctxprTab(){
      '<button class="btn'+(passed?' primary':'')+'" '+(passed?'':'disabled ')+'onclick="ctxprMerge()">Merge pull request</button></div>';
   var body=[
    '## '+p.st, '',
-   'Promoted by the Oxagen promoter from **'+s.runs+' runs across '+s.agents+' agent'+(s.agents===1?'':'s')+'**,',
+   'Promoted by the oxagen promoter from **'+plural(s.runs,"run")+' across '+s.agents+' agent'+(s.agents===1?'':'s')+'**,',
    'confidence '+s.meta.confidence.toFixed(2)+'.', '',
    '### What this asks for',
    'Strength `'+p.force+'`. Constraint effect `forbid`; it grants nothing.', '',
@@ -6085,7 +6121,7 @@ function ctxprTab(){
    '| Run | Date | Frame | Outcome | Repeat reads |','|---|---|---|---|---|'
   ].concat(s.rows.slice(0,3).map(function(r){return '| '+r.run+' | '+r.date+' | '+r.frame+' | `'+r.outcome+'` | '+r.dups+' |';}))
    .concat(['', '### What it costs', 'Adds '+s.meta.tok+' steering tokens a turn.', '', '---',
-    'Opened by Oxagen · workspace `core-platform` · governance `team`']).join('\n');
+    'Opened by oxagen · workspace `core-platform` · governance `team`']).join('\n');
   var promo=merged
    ? '<div class="panel" style="margin-bottom:14px" data-promo-bundle="'+sb.v+'"><div class="panel-h"><h3>promotion_event</h3></div><div class="panel-b"><dl class="kv code">'+
      '<dt>record_id</dt><dd>'+h(CTXPR.promo)+'</dd><dt>lineage_id</dt><dd>'+h(CTXPR.record.id)+'</dd>'+
@@ -6381,7 +6417,7 @@ function stgMemoryTab(w){
      '<td class="num">'+tokn(m.token_cost)+' tok</td><td>'+st+'</td></tr>';}).join("");
   var agg='<div class="grid g4" style="margin-bottom:14px">'+
    '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s" data-mem-folded="'+G.folded+'">folded from '+G.folded+' sayings</span></div>'+
-   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+'<small>runs</small></span><span class="s" data-mem-imports="'+G.imports+'">'+G.steers+' operator steers'+(G.imports?', ':' and ')+G.notes+' reflections'+(G.imports?', and '+G.imports+' imported line'+(G.imports===1?'':'s'):'')+'</span></div>'+
+   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s" data-mem-imports="'+G.imports+'">'+G.steers+' operator steers'+(G.imports?', ':' and ')+G.notes+' reflections'+(G.imports?', and '+G.imports+' imported line'+(G.imports===1?'':'s'):'')+'</span></div>'+
    '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
    '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · ')+'</span><span class="s">a rule is proposed as a record instead</span></div></div>';
   return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the volatile selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
@@ -6640,6 +6676,9 @@ function rtHealth(rt){
   return '<span class="b b-'+(ok?"allowed":"approval")+'"><span class="d"></span>'+h(ok?"healthy":rt.health)+'</span>';
 }
 function rtWs(rt){var x=wsBySlug(rt.ws);return x?x.name:rt.ws;}
+// A host provisioned but never enrolled has no collector, no hooks and no checkpoint.
+function rtEnrolled(rt){return rt.health!=="not enrolled";}
+function rtPerson(k){return PEOPLE[k]?PEOPLE[k].name:k;}
 
 function pRuntimes(r){
   var w=ws();
@@ -6649,12 +6688,12 @@ function pRuntimes(r){
   var L=RUNTIMES.filter(function(x){return x.ws===w.slug;});
   var sel=r&&r.id?rtById(r.id):null;
   var head='<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Runtimes</h1>'+
-   '<p>The hosts agents run on, and what each host’s seam earns.</p></div>'+
+   '<p>The hosts your agents run on, and the enforcement tier each one supports.</p></div>'+
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'wrap\')">Enroll a runtime</button></div></div>';
   if(S.state==="empty"||!L.length) return head+emptyState("No runtime is enrolled",
-    "Until a host enrolls, an agent has an identity and a toolbelt but no hook is installed. Its runs are graded <span class=\"mono\">observe</span>, and no report can say more.",
+    "Until a host enrolls, an agent has an identity and a toolbelt but no hooks. Its runs are recorded at the <span class=\"mono\">observe</span> tier.",
     '<button class="btn primary" onclick="openDialog(\'wrap\')">Enroll a runtime</button>'+
-    '<button class="btn" onclick="openDialog(\'register\')">Show the CLI path</button>');
+    '<button class="btn" onclick="openDialog(\'register\')">Show CLI steps</button>');
   if(sel) return head+rtDetail(sel);
   if(r&&r.id) return head+emptyState("No runtime here","Nothing enrolled in "+h(w.name)+" is called <span class=\"mono\">"+h(r.id)+"</span>.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/runtimes\')">All runtimes</button>');
@@ -6668,35 +6707,40 @@ function pRuntimes(r){
      '<td>'+h(rt.model)+'</td>'+
      '<td>'+tierBadge(rt.tier)+'</td>'+
      '<td class="num">'+(ag.length||'<span class="dim">0</span>')+
-       (ag.length?'<span class="sub mono">'+h(ag.map(function(a){return a.key;}).join(", "))+'</span>':'<span class="sub">enrolled, nothing assigned</span>')+'</td>'+
-     '<td class="mono" style="font-size:11.5px">oxagend '+h(rt.collector)+
-       '<span class="sub">'+(rt.gaps?h(rt.gaps+" telemetry gap"+(rt.gaps>1?"s":"")+" in 24h"):"0 gaps in 24h")+'</span></td>'+
-     '<td class="num">'+rt.hookCount+' of 5'+(rt.hookCount<5?'<span class="sub">some calls are recorded, not decided</span>':'')+'</td>'+
+       (ag.length?'<span class="sub mono">'+h(ag.map(function(a){return a.key;}).join(", "))+'</span>':'<span class="sub">'+(rtEnrolled(rt)?'No agent assigned':'Not enrolled')+'</span>')+'</td>'+
+     (rtEnrolled(rt)?'<td class="mono" style="font-size:11.5px">oxagend '+h(rt.collector)+
+       '<span class="sub">'+(rt.gaps?h(plural(rt.gaps,"telemetry gap")+" in 24h"):"0 gaps in 24h")+'</span></td>'
+       :'<td>—<span class="sub">Not installed</span></td>')+
+     '<td class="num">'+rt.hookCount+' of 5'+(!rt.hookCount?'<span class="sub">No hooks installed</span>':rt.hookCount<5?'<span class="sub">Some calls are recorded without a decision</span>':'')+'</td>'+
      '<td>'+rtHealth(rt)+'</td>'+
      '<td class="mono" style="font-size:11px">'+h(rt.checkpoint)+'</td></tr>';}).join("");
 
-  var deg=L.filter(function(x){return x.health!=="ok";}).length;
-  var idle=L.filter(function(x){return !rtAgents(x.id).length;}).length;
+  var deg=L.filter(function(x){return rtEnrolled(x)&&x.health!=="ok";});
+  var unen=L.filter(function(x){return !rtEnrolled(x);}).length;
+  var idle=L.filter(function(x){return rtEnrolled(x)&&!rtAgents(x.id).length;}).length;
+  var top=L.filter(rtEnrolled).sort(function(a,b){return TIER_RANK[b.tier]-TIER_RANK[a.tier];})[0];
   return head+
    '<div class="grid g4" style="margin-bottom:14px">'+
-   '<div class="stat"><span class="k">Runtimes</span><span class="v">'+L.length+'</span><span class="s">'+idle+' with no agent assigned</span></div>'+
-   '<div class="stat"><span class="k">Agents hosted</span><span class="v">'+L.reduce(function(n,x){return n+rtAgents(x.id).length;},0)+'</span><span class="s">a host is shared; its hooks see every one of them</span></div>'+
-   '<div class="stat"><span class="k">Highest tier earned</span><span class="v" style="font-size:15px;padding-top:6px">'+
-     tierBadge(L.slice().sort(function(a,b){return TIER_RANK[b.tier]-TIER_RANK[a.tier];})[0].tier)+
-     '</span><span class="s">computed per run from what was actually routed</span></div>'+
-   '<div class="stat"><span class="k">Degraded</span><span class="v">'+deg+'</span><span class="s">'+(deg?"a gap is a hole in the record, not a failed run":"every collector is reporting")+'</span></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Enrolled hosts</h3>'+
+   '<div class="stat"><span class="k">Runtimes</span><span class="v">'+L.length+'</span><span class="s">'+
+     (unen?unen+' not enrolled':idle?idle+' with no agent assigned':'All enrolled')+'</span></div>'+
+   '<div class="stat"><span class="k">Agents hosted</span><span class="v">'+L.reduce(function(n,x){return n+rtAgents(x.id).length;},0)+'</span><span class="s">Several agents can share one host</span></div>'+
+   '<div class="stat"><span class="k">Highest tier</span><span class="v" style="font-size:15px;padding-top:6px">'+
+     (top?tierBadge(top.tier):'—')+
+     '</span><span class="s">'+(top?'Computed per run from routed traffic':'No host is enrolled')+'</span></div>'+
+   '<div class="stat" title="A telemetry gap is a hole in the record, not a failed run."><span class="k">Health</span><span class="v">'+(deg.length?deg.length+' degraded':'Healthy')+'</span><span class="s">'+
+     (deg.length?h(deg.map(function(x){return x.name+(x.gaps?' has telemetry gaps':' is '+x.health);}).join(". ")):'Every collector is reporting')+'</span></div></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Hosts</h3>'+
    '<span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Runtime</th><th>Kind</th><th>Harness</th><th>Model surface</th><th>Tier</th>'+
    '<th>Agents</th><th>Collector</th><th>Hooks</th><th>Health</th><th>Last checkpoint</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">The tier is a property of the seam, not of the agent: two agents on one host earn the same tier, and the same agent moved to a weaker host earns less. It is computed per run from what was actually routed and is never upgraded after the fact.</div></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>The tier ladder</h3></div>'+
+   '<div class="panel-b"><div class="note">The tier belongs to the host, not the agent. Two agents on one host get the same tier, and an agent moved to a host with a lower tier gets that lower tier. The tier is computed per run from what was actually routed and is never raised afterward.</div></div></div>'+
+   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Tier ladder</h3></div>'+
    '<div class="panel-b">'+tierLadder(null)+
-   '<div class="note" style="margin-top:13px">Only <span class="mono">contained</span> earns the word enforced. On <span class="mono">observe</span> nothing is delivered and nothing can refuse, which is why an agent with no runtime still has an identity and a toolbelt and receives no steering.</div></div></div>';
+   '<div class="note" style="margin-top:13px">Only <span class="mono">contained</span> is fully enforced: all traffic must pass through oxagen. On <span class="mono">observe</span>, nothing is delivered and nothing can be blocked. An agent with no runtime still has an identity and a toolbelt, but it receives no steering.</div></div></div>';
 }
 
 function rtDetail(rt){
-  var ag=rtAgents(rt.id), base="#/"+ORG.slug+"/"+S.ws;
+  var ag=rtAgents(rt.id), base="#/"+ORG.slug+"/"+S.ws, on=rtEnrolled(rt);
   return '<div class="row" style="margin-bottom:14px"><button class="btn sm" onclick="go(\''+base+'/runtimes\')">← All runtimes</button></div>'+
    '<div class="grid">'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+h(rt.name)+'</h3>'+
@@ -6704,17 +6748,18 @@ function rtDetail(rt){
     rtHealth(rt)+'</div>'+
    '<div class="panel-b"><dl class="kv">'+
    '<dt>Workspace</dt><dd>'+h(rtWs(rt))+'</dd>'+
-   '<dt>Owner</dt><dd class="mono">'+h(rt.owner)+'</dd>'+
+   '<dt>Owner</dt><dd>'+h(rtPerson(rt.owner))+'</dd>'+
    '<dt>Harness</dt><dd>'+h(rt.harness)+' <span class="mono dim">'+h(rt.harnessV)+'</span></dd>'+
-   '<dt>Collector</dt><dd class="mono">oxagend '+h(rt.collector)+'<span class="sub">'+
-     (rt.gaps?h(rt.gaps+" telemetry gap"+(rt.gaps>1?"s":"")+" in the last 24h"):"0 telemetry gaps in the last 24h")+'</span></dd>'+
-   '<dt>Hook binary</dt><dd class="mono">oxagen-hook '+h(rt.collector)+' · fails closed against its cached bundle</dd>'+
-   '<dt>Hooks written</dt><dd class="mono" style="font-size:11.5px">'+h(rt.hooks)+
-     '<span class="sub" style="font-family:var(--font)">'+(rt.hookCount<5?'Fewer than five events are wired, so some calls are recorded rather than decided.':'Five run as command hooks. The first four can refuse.')+'</span></dd>'+
-   '<dt>Model surface</dt><dd>'+h(rt.model)+'<span class="sub">'+(TIER_RANK[rt.tier]>=2?'every model call leaves through it; tokens are counted from the bytes that pass':'model traffic goes from the harness to its provider; routing it is the gateway tier')+'</span></dd>'+
-   '<dt>Settings</dt><dd>'+h(rt.settings)+'</dd>'+
-   '<dt>Tier earned</dt><dd>'+tierBadge(rt.tier)+'<span class="sub">computed per run from what was actually routed</span></dd>'+
-   '<dt>Last checkpoint</dt><dd class="mono">'+h(rt.checkpoint)+' · chain intact</dd>'+
+   (on?'<dt>Collector</dt><dd class="mono">oxagend '+h(rt.collector)+'<span class="sub" style="font-family:var(--font)">'+
+     (rt.gaps?h(plural(rt.gaps,"telemetry gap")+" in the last 24h. A gap is a hole in the record, not a failed run."):"0 telemetry gaps in the last 24h")+'</span></dd>'+
+   '<dt>Hook binary</dt><dd class="mono">oxagen-hook '+h(rt.collector)+'<span class="sub" style="font-family:var(--font)">Refuses a call if it cannot reach oxagen and has no cached policy</span></dd>'
+   :'<dt>Collector</dt><dd>—<span class="sub">Not installed. This host is not enrolled.</span></dd>')+
+   '<dt>Hooks installed</dt><dd'+(rt.hookCount?' class="mono" style="font-size:11.5px"':'')+'>'+h(rt.hookCount?rt.hooks:"None")+
+     '<span class="sub" style="font-family:var(--font)">'+(!rt.hookCount?'Runs here are recorded only.':rt.hookCount<5?'Fewer than five events are wired, so some calls are recorded without a decision.':'Five run as command hooks. The first four can refuse a call.')+'</span></dd>'+
+   '<dt>Model surface</dt><dd>'+h(rt.model)+'<span class="sub">'+(TIER_RANK[rt.tier]>=2?'Every model call goes through it, and tokens are counted from the traffic.':'Model calls go from the harness straight to its provider. Routing them through oxagen is the gateway tier.')+'</span></dd>'+
+   '<dt>Settings</dt><dd>'+(rt.settings&&rt.settings!=="—"?h(rt.settings):'—<span class="sub">Not written until the host enrolls</span>')+'</dd>'+
+   '<dt>Tier</dt><dd>'+tierBadge(rt.tier)+'<span class="sub">Computed per run from routed traffic</span></dd>'+
+   '<dt>Last checkpoint</dt><dd'+(on?' class="mono"':'')+'>'+(on?h(rt.checkpoint)+' · chain intact':'—<span class="sub">No run has been recorded here</span>')+'</dd>'+
    (rt.note?'<dt>Note</dt><dd>'+h(rt.note)+'</dd>':'')+
    '</dl></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Agents on this host</h3>'+
@@ -6722,18 +6767,22 @@ function rtDetail(rt){
    (ag.length?'<div class="tw"><table><thead><tr><th>Agent</th><th>Operator</th><th>Tier</th><th>Principal</th><th>Runs 30d</th></tr></thead><tbody>'+
      ag.map(function(a){
        return '<tr onclick="go(\''+agentUrl(a)+'\')" style="cursor:pointer"><td>'+agentCard(a,{link:false})+'</td>'+
-        '<td>'+h(a.operator)+'</td><td>'+tierBadge(a.tier)+'</td>'+
+        '<td>'+h(rtPerson(a.operator))+'</td><td>'+tierBadge(a.tier)+'</td>'+
         '<td class="mono" style="font-size:11px">'+h(a.principal||"—")+'</td>'+
         '<td class="num">'+(a.runs30||0).toLocaleString()+'</td></tr>';}).join("")+'</tbody></table></div>'
-    :'<div class="panel-b dim">This host is enrolled and no agent is assigned to it. It records nothing until one runs here.</div>')+
-   '<div class="panel-b"><div class="note">Every agent here is seen through the same hooks and earns the same tier. An agent’s identity, its steering and its toolbelt are its own; only the seam is shared.</div></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Rollback</h3></div><div class="panel-b">'+
+    :'<div class="panel-b dim">'+(on?'No agent is assigned to this host. It records nothing until one runs here.':'This host is not enrolled, so no agent runs here yet.')+'</div>')+
+   (ag.length?'<div class="panel-b"><div class="note">Every agent here runs through the same hooks and gets the same tier. Each agent keeps its own identity, steering, and toolbelt.</div></div>':'')+'</div>'+
+   (on?'<div class="panel"><div class="panel-h"><h3>Unenroll this host from the CLI</h3></div><div class="panel-b">'+
    '<pre>oxagen agent unenroll --host '+h(rt.id)+' \\\n  --restore-settings</pre>'+
-   '<div class="note" style="margin-top:12px">If hooks are stripped by hand instead, the next run records <span class="mono">hooks_removed</span> and the tier falls to <span class="mono">observe</span>. It is never upgraded after the fact.</div>'+
+   '<div class="note" style="margin-top:12px">If someone removes the hooks by hand instead, the next run records '+keyLabel("hooks_removed")+' and the tier drops to <span class="mono">observe</span>. The tier is never raised afterward.</div>'+
    '<div class="row" style="margin-top:14px">'+
-   '<button class="btn" onclick="act(\'Smoke session queued on '+h(rt.name)+'. One turn, recorded like any other run.\')">Run a smoke session</button>'+
+   '<button class="btn" onclick="act(\'Test session queued on '+h(rt.name)+'. One turn, recorded like any other run.\')">Run a test session</button>'+
    '<button class="btn danger" onclick="openDialog(\'unenroll\',\''+h(rt.id)+'\')">Unenroll</button></div>'+
-   '</div></div></div>';
+   '</div></div>'
+   :'<div class="panel"><div class="panel-h"><h3>Enroll this host</h3></div><div class="panel-b">'+
+   '<p class="muted" style="margin:0 0 10px">Run the installer on the host itself. Enrolling installs the hooks and the collector.</p>'+
+   '<button class="btn primary" onclick="openDialog(\'wrap\')">Enroll a runtime</button></div></div>')+
+   '</div>';
 }
 
 /* ============================== Repositories ==============================
@@ -6753,15 +6802,15 @@ var OXPR_KIND={
  config:   {l:"configuration", d:".oxagen/workspace.toml",        i:"org"}
 };
 var OX_STATE={
- governed:{b:"b-allowed", l:"governed"},
- unbound: {b:"b-q",       l:"no .oxagen/"},
- drift:   {b:"b-approval",l:"drift"}
+ governed:{b:"b-allowed", l:"Present"},
+ unbound: {b:"b-q",       l:"No .oxagen/"},
+ drift:   {b:"b-approval",l:"Drift"}
 };
 var WC_STATE={
  "in-sync":     {b:"b-allowed",  l:"in sync"},
  behind:        {b:"b-approval", l:"behind"},
  uncommitted:   {b:"b-approval", l:"uncommitted"},
- unbound:       {b:"b-q",        l:"unbound"}
+ unbound:       {b:"b-q",        l:"not linked"}
 };
 var PR_STATE={
  open:           {b:"b-q",        l:"open"},
@@ -6780,7 +6829,7 @@ function repoMeta(r){
    slug rather than held as one list, because drift is a fact about one workspace's file against
    its own live state and belongs to nobody else. */
 var DRIFT={
- "core-platform":[["[servers.linear]","absent","present since 2026-09-14","the file"],
+ "core-platform":[["[providers.linear]","absent","present since 2026-09-14","the file"],
                   ["budget.monthly_usd","400","600","the file"],
                   ["[[repos]] a-intel/mobile","role = linked","linked, no .oxagen/","neither"]]
 };
@@ -6797,7 +6846,7 @@ function oxState(r){return OX_STATE[r.ox||"governed"]||OX_STATE.governed;}
    call site: a workspace's main repo always exists, whether or not anybody has indexed it. */
 function repoRecordFor(name,w){
   return {n:name,role:"main",branch:w.branch,head:w.head||null,indexed:"\u2014",
-    issues:"enabled",events:"\u2014",symbols:0,drift:"\u2014",
+    issues:"enabled",events:"\u2014",symbols:null,drift:"\u2014",
     ox:"governed",oxCommit:w.head||null,oxFiles:0,lang:"",visibility:"private",pushed:""};
 }
 function wsRepos(){
@@ -6841,7 +6890,7 @@ function oxWorkspaceToml(w,repo,mode,role){
    'role = "'+(role||(repo.n===w.main?"main":"linked"))+'"\n'+
    'production_branch = "'+repo.branch+'"\n'+
    'issues = '+(String(repo.issues).indexOf("enabled")===0?"true":"false")+'\n\n'+
-   '[servers]\n'+
+   '[providers]\n'+
    'github = { transport = "mcp", downscope = "installation token" }\n'+
    'linear = { transport = "mcp", downscope = "token exchange" }\n\n'+
    '[budget]\n'+
@@ -6871,22 +6920,22 @@ function repoTab(){
     return '<tr '+rowClick("openDialog('repo','"+h(r.n)+"')","Open "+r.n)+'>'+
      '<td><span class="row-ic">'+icon("repo")+'</span><b class="mono">'+h(r.n)+'</b>'+
        (repoMeta(r)?'<div class="dim" style="font-size:11px;margin-top:2px">'+h(repoMeta(r))+'</div>':'')+'</td>'+
-     '<td>'+(r.role==="main"?'<span class="b b-proven">main</span>':r.role==="linked"?'<span class="b b-q">linked</span>':'<span class="b b-q" style="opacity:.7">not linked</span>')+'</td>'+
-     '<td><span class="mono">'+h(r.branch)+'</span><div class="dim mono" style="font-size:11px">'+h(r.head)+'</div></td>'+
-     '<td>'+stBadge(st)+(r.oxFiles?'<div class="dim mono" style="font-size:11px;margin-top:2px">'+r.oxFiles+' files</div>':'')+'</td>'+
+     '<td>'+(r.role==="main"?'<span class="b b-proven">Main repository</span>':r.role==="linked"?'<span class="b b-q">Linked</span>':'<span class="b b-q" style="opacity:.7">Not linked</span>')+'</td>'+
+     '<td><span class="mono">'+h(r.branch)+'</span><div class="dim mono" style="font-size:11px">'+(r.head?h(r.head):'—')+'</div></td>'+
+     '<td data-v="'+h(st.l)+'">'+stBadge({b:st.b,l:st.l+(st===OX_STATE.governed&&r.oxFiles?' · '+plural(r.oxFiles,"file"):'')})+'</td>'+
      '<td class="muted" style="font-size:12px">'+h(avail?"—":r.events)+'</td>'+
-     '<td class="num">'+(avail?'<span class="dim">—</span>':r.symbols.toLocaleString())+'</td>'+
+     '<td class="num">'+(avail||r.symbols==null?'<span class="dim">—</span>':r.symbols.toLocaleString())+'</td>'+
      '<td>'+(st===OX_STATE.governed
-        ?'<span class="dim" style="font-size:11.5px">nothing waiting</span>'
-        :'<button class="btn sm" onclick="event.stopPropagation();wzOpen(\'init\',\''+h(r.n)+'\')">Add Oxagen</button>')+'</td></tr>';}).join("");
+        ?'<span class="dim" style="font-size:11.5px">No action needed</span>'
+        :'<button class="btn sm" onclick="event.stopPropagation();wzOpen(\'init\',\''+h(r.n)+'\')">Add .oxagen/</button>')+'</td></tr>';}).join("");
 
   return banner+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Repositories</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">One main repo, any number of linked. The main repo holds the workspace’s steering and configuration; a linked repo may hold records that steer only runs on it.</p></div>'+
-   '<div class="sp"><button class="btn sm" onclick="wzOpen(\'init\')">Add Oxagen to a repository</button></div></div>'+
-   '<div class="tw"><table><thead><tr><th>Repository</th><th>Role</th><th>Production branch</th><th>.oxagen/</th><th>Events</th><th class="num">Symbols</th><th></th></tr></thead>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">The main repository holds the workspace’s steering and configuration, and each linked repository can hold records for its own runs.</p></div>'+
+   '<div class="sp"><button class="btn sm" onclick="wzOpen(\'init\')">Add .oxagen/</button></div></div>'+
+   '<div class="tw"><table><thead><tr><th>Repository</th><th>Role</th><th>Production branch</th><th><span class="id">.oxagen/</span></th><th>Events</th><th class="num">Symbols</th><th></th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Changing which repository is <span class="mono">main</span> is an organization-owner action with approval, and it lands in the audit record as a security event. The production branch never moves on its own: when GitHub’s default branch changes, the App records it and prompts, and the binding stays where it is until somebody confirms.</div></div></div>';
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Changing the main repository needs an organization owner and an approval, and Audit records it as a security event. When GitHub’s default branch changes, the GitHub App records the change, and the production branch stays put until someone confirms the move.</div></div></div>';
 }
 
 /* ---- tab 2: the working copies ---- */
@@ -6896,9 +6945,9 @@ function copyTab(){
      the screen with no primary action and no way to link its first directory — which is the one
      thing this tab exists to do. */
   if(!rows.length) return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">No directory on anybody’s disk is linked to '+h(w.name)+' yet.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">No directory is linked to '+h(w.name)+' yet.</p></div>'+
    '<div class="sp"><button class="btn primary" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
-   '<div class="panel-b"><div class="note">A directory is linked by running <span class="mono">oxagen init</span> in it. Nothing here is linked by a person typing a path: the browser cannot see a filesystem, and a path typed into a form proves nothing about what is at it.</div></div></div>';
+   '<div class="panel-b"><div class="note">Run <span class="mono">oxagen init</span> in a directory to link it. You cannot link one by typing a path here, because the browser cannot see your filesystem.</div></div></div>';
   var stale=rows.filter(function(c){return c.oxagen!=="in-sync";});
   var trows=rows.map(function(c){
     var st=WC_STATE[c.oxagen]||WC_STATE.unbound;
@@ -6915,22 +6964,22 @@ function copyTab(){
   /* The banner that used to sit here said in a paragraph what the .oxagen/ column says in a
      word, on the row of the copy it is true of. The count is already on the tab. */
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">The same <span class="mono">.oxagen/</span> tree on a machine. Each is a directory somebody ran <span class="mono">oxagen init</span> in; the enrollment is the machine’s, and the link is one gitignored file.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Each row is a directory where someone ran <span class="mono">oxagen init</span>, linked by one gitignored file.</p></div>'+
    '<div class="sp"><button class="btn primary" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
-   '<div class="tw"><table><thead><tr><th>Directory</th><th>Repository</th><th>Branch</th><th>.oxagen/</th><th>Symlinks</th><th>Bundle</th><th>Last seen</th></tr></thead>'+
+   '<div class="tw"><table><thead><tr><th>Directory</th><th>Repository</th><th>Branch</th><th><span class="id">.oxagen/</span></th><th>Symlinks</th><th>Bundle</th><th>Last seen</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div></div>'+
    '<div class="grid g2" style="margin-top:14px">'+
    '<div class="panel"><div class="panel-h"><h3>Files to review</h3></div><div class="panel-b">'+
    '<pre>.oxagen/\n  workspace.toml     <span class="c"># committed. reviewed. the source of truth.</span>\n'+
    '  workspace.json     <span class="c"># gitignored · this machine’s link</span>\n'+
    '  rules/\n  proposals/\n  agents/\n  skills/\n  tools/</pre>'+
-   '<div class="note" style="margin-top:12px">The committed file says what the workspace is. The gitignored one says which workspace <em>this checkout</em> is talking to, which is a fact about a laptop and not about the product, so it is never reviewed, never merged, and never the same file in two places.</div></div></div>'+
+   '<div class="note" style="margin-top:12px"><span class="mono">workspace.toml</span> describes the workspace and goes through review. <span class="mono">workspace.json</span> names the workspace <em>this checkout</em> talks to. It describes one machine, so nobody commits or reviews it.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Sync</h3></div><div class="panel-b">'+
    '<div class="kv"><dt><span class="mono">oxagen init</span></dt><dd>Links this directory. Reads the git remote, matches it to a repository the installation can reach, and writes <span class="mono">.oxagen/workspace.json</span>. Idempotent.</dd>'+
-   '<dt><span class="mono">oxagen pull</span></dt><dd>Fast-forwards <span class="mono">.oxagen/</span> to the production branch and re-points the Stella symlinks. It never merges your work.</dd>'+
-   '<dt><span class="mono">oxagen status</span></dt><dd>What this copy has against what is published: the bundle version, the records in force, and anything uncommitted under <span class="mono">.oxagen/</span>.</dd>'+
-   '<dt><span class="mono">oxagen propose</span></dt><dd>Turns a local edit under <span class="mono">.oxagen/</span> into a proposal. Opening and merging its pull request happen here, because both gate on a role only a signed-in person holds.</dd></div>'+
-   '<div class="note" style="margin-top:12px">Stella symlinks into this directory rather than copying it, so there is no second copy that could drift. A copy whose symlinks read <span class="mono">missing</span> is one where Stella will load nothing.</div></div></div></div>';
+   '<dt><span class="mono">oxagen pull</span></dt><dd>Fast-forwards <span class="mono">.oxagen/</span> to the production branch and re-points the stella symlinks. It never merges your work.</dd>'+
+   '<dt><span class="mono">oxagen status</span></dt><dd>Compares this copy with what is published: the bundle version, the records in force, and anything uncommitted under <span class="mono">.oxagen/</span>.</dd>'+
+   '<dt><span class="mono">oxagen propose</span></dt><dd>Turns a local edit under <span class="mono">.oxagen/</span> into a proposal. You open and merge its pull request here, because both need a role that only a signed-in person holds.</dd></div>'+
+   '<div class="note" style="margin-top:12px">stella reads this directory through symlinks, so there is no second copy to drift. Where the symlinks read <span class="mono">missing</span>, stella loads nothing.</div></div></div></div>';
 }
 
 /* ---- tab 3: the changes ---- */
@@ -6953,8 +7002,8 @@ function chgTab(){
        '<div class="dim mono" style="font-size:11px;margin-top:2px">'+h(p.branch)+'</div></td>'+
      '<td><span class="b b-q">'+h(k.l)+'</span></td>'+
      '<td class="mono" style="font-size:12px">'+h(p.pr)+'</td>'+
-     '<td>'+(p.byKind==="person"?h(p.by):'<span class="mono">'+h(p.by)+'</span>')+
-       '<div class="dim" style="font-size:11px">'+h(p.byKind==="person"?"a person":p.byKind)+'</div></td>'+
+     '<td data-v="'+h(p.by)+'">'+(p.byKind==="person"?h(p.by):'<span class="mono">'+h(p.by)+'</span>')+
+       '<div class="dim" style="font-size:11px">'+(p.byKind==="person"?"Person":"Automatic")+'</div></td>'+
      '<td>'+stBadge(st)+'</td>'+
      '<td>'+oxprCiLight(p)+'</td>'+
      '<td class="muted" style="font-size:12px">'+h(p.opened)+'</td></tr>';}).join("");
@@ -6962,12 +7011,12 @@ function chgTab(){
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Four kinds of file and one lifecycle. Whoever opened it (a person, the promoter, or the reconciler), the checks, the merge and the publication are the same.</p></div></div>'+
    '<div class="tw"><table><thead><tr><th>Change</th><th>Kind</th><th>Pull request</th><th>Opened by</th><th>State</th><th>Checks</th><th>Opened</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A change is in force from the merge commit, not from when it was written. While a pull request is open the thing it carries steers nothing: it is not in the compiled bundle, not in the record index, and the bundle version has not moved.</div></div></div>'+
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A change takes effect at its merge commit. While its pull request is open, it steers nothing: it is not in the compiled bundle or the record index, and the bundle version has not moved.</div></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Automatic proposals</h3></div><div class="panel-b">'+
-   '<div class="kv"><dt>the promoter</dt><dd>Aggregates records across runs by lineage and opens a proposal with the runs it cites. There is no threshold; a person reads the support and decides.</dd>'+
-   '<dt>the reconciler</dt><dd>Reads <span class="mono">.oxagen/workspace.toml</span> against what the control plane has, and opens one pull request per real difference. It never edits live state to match the file.</dd>'+
-   '<dt>a person</dt><dd>Every creation wizard (agent, tool, skill, Steering record) ends here. None of them has a Save button that ends in a database.</dd></div>'+
-   '<div class="note" style="margin-top:12px">Drift is reported, never repaired in place. A reconciler that silently edited either side would make the file a description of the past and the product unreviewable. The pull request is the only place a person can say which of the two was right.</div></div></div>';
+   '<div class="kv"><dt>Promoter</dt><dd>Groups records across runs by lineage and opens a proposal that cites those runs. There is no threshold. A person reads the cited runs and decides.</dd>'+
+   '<dt>Reconciler</dt><dd>Compares <span class="mono">.oxagen/workspace.toml</span> with the control plane’s live state and opens one pull request per difference. It does not edit live state to match the file.</dd>'+
+   '<dt>Person</dt><dd>Every creation wizard (agent, tool, skill, and record) ends here. None of them saves straight to the database.</dd></div>'+
+   '<div class="note" style="margin-top:12px">The reconciler reports drift and does not repair it. A person decides which side is right, in the pull request.</div></div></div>';
 }
 
 /* Merge is enabled only when every check has reported, none failed, and the pull request is not
@@ -7003,7 +7052,7 @@ function oxprMerge(id){
 }
 /* Close: the comment Oxagen leaves on the pull request, previewed before it is posted. */
 function closeComment(url){
-  var m=me(); return "Closed by "+m.name+" <"+m.email+">\n\n---\nAdded via Oxagen "+url;
+  var m=me(); return "Closed by "+m.name+" <"+m.email+">\n\n---\nAdded via oxagen "+url;
 }
 function prClose(kind,id){
   var url, pr;
@@ -7011,7 +7060,7 @@ function prClose(kind,id){
   else if(kind==="ctxpr"){S.ctxpr.st="closed"; pr=CTXPR.pr; url="https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/steering/proposals/prs";}
   else {var d=recprById(id); if(!d) return; recprSt(d).st="closed"; pr=d.pr; url="https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/steering/proposals/prs";}
   closeDialog(); render();
-  act("Closed "+pr+" without merging. Comment posted: “Closed by "+me().name+" <"+me().email+">”, then Added via Oxagen "+url+".");
+  act("Closed "+pr+" without merging. Comment posted: “Closed by "+me().name+" <"+me().email+">”, then Added via oxagen "+url+".");
 }
 DLG_EXT.closepr=function(arg){
   var a=String(arg||"").split("|"), kind=a[0], id=a[1], pr, url;
@@ -7020,8 +7069,8 @@ DLG_EXT.closepr=function(arg){
   else {var d=recprById(id); pr=d?d.pr:id; url="https://app.oxagen.sh/"+ORG.slug+"/"+ws().slug+"/steering/proposals/prs";}
   var m=me();
   return {t:"Close "+pr,s:"without merging",w:false,
-   b:'<p style="margin:0 0 10px;font-size:13px">The pull request closes on GitHub and nothing is published. Oxagen posts this comment on it:</p>'+
-    '<div class="gh-comment"><p>Closed by '+h(m.name)+' &lt;'+h(m.email)+'&gt;</p><hr><p>Added via Oxagen <a href="'+h(url)+'">'+h(url)+'</a></p></div>'+
+   b:'<p style="margin:0 0 10px;font-size:13px">The pull request closes on GitHub and nothing is published. oxagen posts this comment on it:</p>'+
+    '<div class="gh-comment"><p>Closed by '+h(m.name)+' &lt;'+h(m.email)+'&gt;</p><hr><p>Added via oxagen <a href="'+h(url)+'">'+h(url)+'</a></p></div>'+
     '<div class="note" style="margin-top:12px">Closing is a governed action: it is recorded in Audit with your name, and the branch stays until someone deletes it.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger solid" onclick="prClose(\''+h(kind)+'\',\''+h(id)+'\')">Close pull request</button>'};
 };
@@ -7095,16 +7144,16 @@ function cfgTab(){
    (repo.head?' at <span class="mono">'+h(repo.head)+'</span>':' \u00b7 <span class="dim">not indexed yet</span>')+'</p></div></div>'+
    '<div class="panel-b"><pre>'+h(oxWorkspaceToml(w,repo,"team","main"))+'</pre></div></div>'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Drift</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">The file against what the control plane has. Reported, never repaired in place.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">The file compared with the control plane’s live state.</p></div>'+
    (reconcile?'<div class="sp"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+h(w.slug)+'/repositories/changes\');S.oxprSel=\''+h(reconcile)+'\';render()">See the pull request</button></div>':'')+'</div>'+
    (drift.length
-     ?'<div class="tw"><table class="narrow"><thead><tr><th>Declared</th><th>In the file</th><th>Live</th><th>Right</th></tr></thead><tbody>'+
+     ?'<div class="tw"><table class="narrow"><thead><tr><th>Declared</th><th>In the file</th><th>Live</th><th>Resolution</th></tr></thead><tbody>'+
       drift.map(function(d){return '<tr><td class="mono" style="font-size:11.5px">'+h(d[0])+'</td>'+
         '<td class="muted" style="font-size:12px">'+h(d[1])+'</td><td class="muted" style="font-size:12px">'+h(d[2])+'</td>'+
-        '<td>'+(d[3]==="the file"?'<span class="b b-q">the file</span>':'<span class="b b-approval">a person decides</span>')+'</td></tr>';}).join("")+
+        '<td>'+(d[3]==="the file"?'<span class="b b-q">Use the file</span>':'<span class="b b-approval">A person decides</span>')+'</td></tr>';}).join("")+
       '</tbody></table></div>'+
-      '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Two of these the reconciler can argue for, because it read both sides. The third it cannot: a repository with no <span class="mono">.oxagen/</span> is a decision about scope, not a difference between two records, so it waits for a person.</div></div>'
-     :'<div class="panel-b"><div class="note">The reconciler last read <span class="mono">'+h(w.main)+'</span> against the control plane and found nothing between them. Drift is reported here, never repaired in place, so an empty table is the reconciler saying the file and the live state agree, not that nobody looked.</div></div>')+
+      '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Where the reconciler read both sides, it proposes the file’s value. A linked repository with no <span class="mono">.oxagen/</span> is a scope decision, so it waits for a person.</div></div>'
+     :'<div class="panel-b"><div class="note">The reconciler last compared <span class="mono">'+h(w.main)+'</span> with the control plane and found no drift.</div></div>')+
    '</div></div>'+
    '<div class="grid g2" style="margin-top:14px">'+
    '<div class="panel"><div class="panel-h"><h3>.oxagen/rules/governance.toml</h3></div><div class="panel-b">'+
@@ -7112,9 +7161,9 @@ function cfgTab(){
    '<div class="kv" style="margin-top:12px"><dt><span class="mono">solo</span></dt><dd>The author may merge their own.</dd>'+
    '<dt><span class="mono">team</span></dt><dd>A code-owner review is required. This is what a missing file means.</dd>'+
    '<dt><span class="mono">regulated</span></dt><dd>A named approver from a role must approve, and the promotion ledger is hash-chained.</dd></div>'+
-   '<div class="note" style="margin-top:12px">The mode is read on the production branch when a pull request is opened and again when it is merged, so raising it takes effect on everything still open, and it is changed by a pull request like everything else, never by a settings screen. A file that exists but names no mode refuses both, rather than quietly falling back to <span class="mono">team</span>.</div></div></div>'+
+   '<div class="note" style="margin-top:12px">oxagen reads the mode from the production branch when a pull request opens and again when it merges, so raising it applies to every open pull request. You change the mode with a pull request. There is no setting for it. A file that names no mode blocks both steps and does not fall back to <span class="mono">team</span>.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Tree</h3></div><div class="panel-b">'+
-   '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, servers, budgets</span>\n'+
+   '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, providers, budgets</span>\n'+
    '  workspace.json             <span class="c"># gitignored · this machine’s link</span>\n'+
    '  rules/\n    governance.toml          <span class="c"># mode = team</span>\n'+
    '    promotions.jsonl         <span class="c"># hash-chained ledger (regulated)</span>\n'+
@@ -7123,7 +7172,7 @@ function cfgTab(){
    '  agents/&lt;slug&gt;.toml         <span class="c"># one per agent</span>\n'+
    '  skills/&lt;name&gt;/SKILL.md     <span class="c"># pinned by version and digest</span>\n'+
    '  tools/&lt;name&gt;.toml          <span class="c"># manifest, schema, handler beside it</span></pre>'+
-   '<div class="note" style="margin-top:12px">Oxagen reads <span class="mono">.oxagen/</span> and nothing else. Whatever sits under <span class="mono">.stella/</span> is invisible to it, and it never looks.</div></div></div></div>';
+   '<div class="note" style="margin-top:12px">oxagen reads only <span class="mono">.oxagen/</span>. It does not read <span class="mono">.stella/</span>.</div></div></div></div>';
 }
 
 /* A Repositories tab's address: the app's path segments (working-copies, configuration). */
@@ -7134,14 +7183,15 @@ function pRepos(){
   if(S.state==="error") return errorState("Repositories","503 installation_unreachable");
   if(S.state==="denied") return deniedState("this workspace’s repositories","repository.read on "+w.slug);
   if(S.state==="empty") return emptyState("This workspace has no repository yet",
-    "A workspace without a main repo cannot exist, so this state is the moment between creating one and binding it. The main repo is where steering and configuration are managed in source control. Until it is bound, there is nowhere to publish a record.",
-    '<button class="btn primary" onclick="wzOpen(\'init\')">Add Oxagen to a repository</button>');
+    "Every workspace needs a main repository. It keeps steering and configuration in source control, and until you connect one, a record has nowhere to be published.",
+    '<button class="btn primary" onclick="wzOpen(\'init\')">Connect repository</button>');
 
   var open=oxprOpen().length, stale=wsCopies().filter(function(c){return c.oxagen!=="in-sync";}).length;
+  var bound=wsRepos().filter(function(r){return r.role!=="available";}).length;
   var tabs='<div class="tabs" role="tablist">'+
-   [["repos","Repositories",wsRepos().filter(function(r){return r.role!=="available";}).length],
-    ["copies","Working copies",stale],
-    ["changes","Changes",open],
+   [["repos","Repositories",bound,plural(bound,"connected repository","connected repositories")],
+    ["copies","Working copies",stale,plural(stale,"working copy","working copies")+" out of sync"],
+    ["changes","Changes",open,plural(open,"open change")],
     ["config","Configuration",0]]
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="go(repoTabHref(\''+x[0]+'\'))">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
@@ -7150,8 +7200,8 @@ function pRepos(){
   /* Give up the header's gold only where the tab below actually renders an enabled one. */
   var tabPrimary=(t==="changes"&&oxprCanMerge(selectedOxpr()))||t==="copies";
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Repositories</h1>'+
-   '<p>Where this workspace’s files live and every change Oxagen has proposed to them.</p></div>'+
-   '<div class="acts"><button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'init\')">Add Oxagen to a repository</button></div></div>'+tabs+body;
+   '<p>Where this workspace’s files live and every change oxagen has proposed to them.</p></div>'+
+   '<div class="acts"><button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'init\')">Add .oxagen/</button></div></div>'+tabs+body;
 }
 
 /* ============================== Spend ============================== */
@@ -7172,22 +7222,22 @@ function spendTokens(WT){
     '<dt>Cache hit rate</dt><dd>'+per(WT.cacheRate)+' · cache_read ÷ (input_uncached + cache_read), token-weighted</dd>'+
     '<dt>Cache write cost share</dt><dd>'+per(tokShare(WT.cacheWrite*1.25,WT.tokIn))+' · high when a prefix is written and never read</dd>'+
     '<dt>Effective input price</dt><dd>$1.88 per million across every input class</dd>'+
-    '<dt>Unmapped classes</dt><dd>0 · a class Oxagen does not know is stored under its raw name and priced at zero, so the gap stays visible</dd></dl></div></div>'+
+    '<dt>Unmapped classes</dt><dd>0 · a class oxagen does not know is stored under its raw name and priced at zero, so the gap stays visible</dd></dl></div></div>'+
    '<div class="panel" style="margin:0"><div class="panel-h"><h3>Prompt composition</h3></div>'+
     '<div class="panel-b">'+tokBars(WT)+'</div>'+
-    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Tool definitions, context frames and steering are measured by Oxagen from the request it assembled; tool results and conversation are the rest of the input. A part that grows without its citation rate growing is a finding, and Coaching says what to change.</div></div></div></div>'+
+    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Tool definitions, context frames and steering are measured by oxagen from the request it assembled; tool results and conversation are the rest of the input. A part that grows without its citation rate growing is a finding, and Coaching says what to change.</div></div></div></div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By harness</h3><span class="b b-q" style="margin-left:auto">'+per(WT.observed)+' of tokens observed by the gateway</span></div>'+
     '<div class="tw"><table><thead><tr><th>Harness</th><th class="num">Agents</th><th class="num">Tokens</th><th class="num">Cache hit</th><th class="num">Spend</th><th>Basis</th></tr></thead><tbody>'+
     hs.map(function(x){var obs=tokShare(x.observed,x.total);
       return '<tr><td><b>'+h(x.label)+'</b></td><td class="num">'+x.agents+'</td><td class="num">'+tokn(x.total)+'</td><td class="num">'+per(tokShare(x.cacheRead,x.tokIn))+'</td><td class="num">'+fmt$(x.spend)+'</td>'+
-       '<td>'+(obs>=0.999?'<span class="basis">gateway_observed</span>':obs<=0.001?'<span class="basis">client_attested</span>':'<span class="basis">gateway_observed</span> '+per(obs)+' · <span class="basis">client_attested</span> '+per(1-obs))+'</td></tr>';}).join("")+
+       '<td>'+(obs>=0.999?basisChip("gateway_observed") :obs<=0.001?basisChip("client_attested") :basisChip("gateway_observed")+' '+per(obs)+' · '+basisChip("client_attested")+' '+per(1-obs))+'</td></tr>';}).join("")+
     '</tbody></table></div><div class="panel-b"><div class="note">Observed means the gateway\u2019s proxy counted the tokens from the bytes that passed through it. Self-reported means the harness\u2019s own telemetry said so; a class it does not report is marked absent, never zero, and a cache hit rate over a mixed fleet is never computed from missing data as if it were zero.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>By agent</h3></div>'+
     '<div class="tw"><table><thead><tr><th>Agent</th><th class="num">Runs</th><th class="num">Tokens</th><th class="num">Per run</th><th class="num">Cache hit</th><th class="num">Tool defs</th><th class="num">Context</th><th class="num">Tool results</th><th class="num">Reasoning</th><th>Basis</th></tr></thead><tbody>'+
     AGENTS.filter(function(a){return a.ws===w.slug;}).sort(function(a,b){return agentTok(b).total-agentTok(a).total;}).slice(0,12).map(function(a){var t=agentTok(a);
       return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+a.ws+'/agents/'+a.key.split(".").pop()+'\')"><td>'+agentCard(a,{key:a.key})+'</td><td class="num">'+(a.runs30||0).toLocaleString()+'</td><td class="num">'+tokn(t.total)+'</td><td class="num">'+tokn(t.perRun)+'</td><td class="num">'+per(t.cacheRate)+'</td>'+
        '<td class="num'+(t.shares.tools>0.16?'" style="color:var(--st-approval)':'')+'">'+per(t.shares.tools)+'</td><td class="num">'+per(t.shares.ctx)+'</td><td class="num'+(t.shares.results>0.3?'" style="color:var(--st-approval)':'')+'">'+per(t.shares.results)+'</td><td class="num">'+per(tokShare(t.reasoning,t.tokOut))+'</td>'+
-       '<td class="mono dim" style="font-size:11px">'+(t.observed?'gateway_observed':'client_attested')+'</td></tr>';}).join("")+
+       '<td class="dim" style="font-size:11px">'+basisChip(t.observed?'gateway_observed':'client_attested')+'</td></tr>';}).join("")+
     '</tbody></table></div></div>';
 }
 /* ---------- Coaching: the agents and operators with something to change ----------
@@ -7202,7 +7252,7 @@ function coachAll(kind,id){return kind==="operators"?coachOperator(id):coachAgen
 function coachItems(kind,id){return coachAll(kind,id).filter(function(c){return !S.coachOff[coachKey(kind,id,c.k)];});}
 /* ---------- Spend drill-down: an operator, agent or tool → every metric, and its findings as potential savings ---------- */
 function n$(s){return parseFloat(String(s).replace(/,/g,""))||0;}
-function fmt$(n){return "$"+n.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmt$(n){return usd(Number(n).toFixed(2));}
 function spendHref(kind,id){return '#/'+ORG.slug+'/'+ws().slug+'/spend/'+kind+(id?'/'+encodeURIComponent(id):'');}
 /* Tabs and drills both write the hash: route() re-applies the hash's tab on every render, so state alone snaps back. */
 function spendGo(kind,id){
@@ -7233,14 +7283,14 @@ function spendWaste(parts){
   var byRun={}; RUNS.forEach(function(r){byRun[r.id]=r;});
   var mx=Math.max.apply(null,SPEND.wasteByCause.map(function(c){return parseFloat(c.spend.replace(/,/g,""));}));
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s"><span class="basis">client_attested</span> · USD</span></div>'+
+   '<div class="stat"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s">'+basisChip("client_attested")+' · USD</span></div>'+
    '<div class="stat"><span class="k">Share of spend</span><span class="v">'+per(SPEND.wasteShare)+'</span><span class="s">of '+usd(fmt2(spendMonthTotal()))+' this month</span></div>'+
    '<div class="stat"><span class="k">Runs with waste</span><span class="v">'+SPEND.wasteRuns+'</span><span class="s">of '+SPEND.runs.toLocaleString()+' sealed runs</span></div>'+
-   '<div class="stat"><span class="k">Largest cause</span><span class="v" style="font-size:17px;padding-top:4px">'+h(SPEND.wasteByCause[0].c)+'</span><span class="s">'+usd(SPEND.wasteByCause[0].spend)+' · '+SPEND.wasteByCause[0].runs+' runs</span></div></div>';
+   '<div class="stat"><span class="k">Largest cause</span><span class="v" style="font-size:17px;padding-top:4px">'+h(SPEND.wasteByCause[0].c)+'</span><span class="s">'+usd(SPEND.wasteByCause[0].spend)+' · '+plural(SPEND.wasteByCause[0].runs,"run")+'</span></div></div>';
   var causes='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By cause</h3></div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
    SPEND.wasteByCause.map(function(c){var v=parseFloat(c.spend.replace(/,/g,""));
-    return '<div class="meter"><div class="lab" style="display:flex;gap:8px;font-size:12px;align-items:baseline"><b style="margin-left:0">'+h(c.c)+'</b><span class="dim mono" style="font-size:10.5px">'+c.runs+' runs</span>'+
+    return '<div class="meter"><div class="lab" style="display:flex;gap:8px;font-size:12px;align-items:baseline"><b style="margin-left:0">'+h(c.c)+'</b><span class="dim mono" style="font-size:10.5px">'+plural(c.runs,"run")+'</span>'+
      '<b style="margin-left:auto;font-variant-numeric:tabular-nums">'+usd(c.spend)+'</b></div>'+
      '<div class="bar"><i style="width:'+Math.round(v/mx*100)+'%;background:var(--st-critical)"></i></div>'+
      '<div class="muted" style="font-size:11.5px;margin-top:3px">'+h(c.why)+'</div></div>';}).join("")+'</div></div>';
@@ -7249,7 +7299,7 @@ function spendWaste(parts){
    '<div class="panel-b" style="display:grid;gap:12px">'+
    SPEND.wasteRunsList.map(function(x){var r=byRun[x.run]; if(!r) return '';
     var href="#/"+ORG.slug+"/"+r.ws+"/runs/"+r.id;
-    var badges=x.badges.map(function(b){return '<span class="b b-'+b[1]+'"><span class="d"></span>'+h(b[0])+'</span>';}).join("");
+    var badges=x.badges.map(function(b){return '<span class="b b-'+b[1]+'"><span class="d"></span>'+h(b[0])+'</span>';}).join(SEP);
     var frac=Math.min(1,parseFloat(x.wasted)/parseFloat(r.cost));
     return '<div class="act-card" style="margin:0"><div class="t" style="flex-wrap:wrap"><a class="mono" href="'+href+'" style="font-size:12px">'+h(r.id)+'</a>'+
      '<span class="dim" style="font-size:12px">'+h(r.agent)+' · '+h(PEOPLE[r.op].name)+' · '+h(r.started)+'</span>'+
@@ -7257,7 +7307,7 @@ function spendWaste(parts){
      '<div class="row" style="margin-bottom:8px">'+badges+'</div>'+
      '<div class="bar" style="margin-bottom:8px"><i style="width:'+Math.round(frac*100)+'%;background:var(--st-critical)"></i></div>'+
      '<p class="muted" style="margin:0 0 9px;font-size:12.5px"><b style="color:var(--fg)">'+h(r.taskTitle)+'.</b> '+h(x.what)+'</p>'+
-     '<div class="row"><span class="dim mono" style="font-size:10.5px">'+r.frames+' frames · '+r.steps+' steps · cache '+per(r.cache)+' · '+h(r.model)+'</span>'+
+     '<div class="row"><span class="dim mono" style="font-size:10.5px">'+plural(r.frames,"frame")+' · '+plural(r.steps,"step")+' · cache '+per(r.cache)+' · '+h(r.model)+'</span>'+
      '<button class="btn sm" style="margin-left:auto" onclick="go(\''+href+'\')">Open the run</button>'+
      '<button class="btn sm" onclick="act(\'Frames that prove the waste on '+r.id+' opened.\')">Show the frames</button></div></div>';}).join("")+
    '</div><div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Wasted is a claim about frames, not about outcomes. It means the frames show the tokens bought nothing: a repeated call, a cold prefix, a turn spent waiting, a chain that broke. '+
@@ -7276,7 +7326,7 @@ var PROVIDER_KEYS=[
  {id:"pk_9f21",src:"Anthropic · pk_9f21",model:"claude-opus-5"},
  {id:"pk_9f21",src:"Anthropic · pk_9f21",model:"claude-sonnet-5"},
  {id:"pk_bdrk_7f2a",src:"AWS Bedrock us-east-1 · pk_bdrk_7f2a",model:"claude-haiku-4-5"},
- {id:"pk_or_5c08",src:"OpenRouter · pk_or_5c08",model:"z-ai/glm-latest (Oxagen)"},
+ {id:"pk_or_5c08",src:"OpenRouter · pk_or_5c08",model:"z-ai/glm-latest (oxagen)"},
  {id:"pk_or_5c08",src:"OpenRouter · pk_or_5c08",model:"z-ai/glm-flash-latest",tier:"light"},
  {id:"pk_vo_2e11",src:"Voyage AI · pk_vo_2e11",model:"voyage-4, voyage-code-3, voyage-context-3",tier:"embed"},
  {id:"pk_vo_2e11",src:"Voyage AI · pk_vo_2e11",model:"rerank-2.5",tier:"rerank"}
@@ -7295,7 +7345,7 @@ var APIKEYS=[
  {name:"FinOps export",key:"ox_live_7f2c…a19",principal:"svc_finops_export",grants:["cost.read","run.read"],by:"Dana Okafor",last:"2026-09-11 06:00Z",n30:1204,expires:"2027-01-04",st:"ok"},
  {name:"Terraform provisioning",key:"ox_live_a91b…4dd",principal:"svc_terraform",grants:["workspace.write","agent.write","grant.write"],by:"Marcus Bell",last:"2026-09-10 22:14Z",n30:37,expires:"2026-12-01",st:"ok"},
  {name:"Auditor read-only (Brandt KPM)",key:"ox_live_3kd0…77c",principal:"svc_auditor_bkpm",grants:["audit.read","receipt.read","export.read"],by:"Sofia Ruiz",last:"2026-09-11 08:41Z",n30:212,expires:"2026-10-02",st:"expiring"},
- {name:"CI smoke checks",key:"ox_live_ee54…0b2",principal:"svc_ci",grants:["run.read"],by:"Helena Vogt",last:"never used",n30:0,expires:"2026-11-15",st:"unused"}
+ {name:"CI smoke checks",key:"ox_live_ee54…0b2",principal:"svc_ci",grants:["run.read"],by:"Helena Vogt",last:"Never used",n30:0,expires:"2026-11-15",st:"unused"}
 ];
 /* The keys tab has its own address (#/a-intel/api-keys) so it can be linked from the command menu and the docs; the other tabs live on #/a-intel. */
 function orgTab(t){
@@ -7307,7 +7357,7 @@ function pOrganization(){
   var t=tab("organization","people");
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Organization","503 control_plane_unavailable");
-  if(S.state==="denied") return deniedState("this organization’s settings","org.admin: members, funding, and the data plane are owner-only");
+  if(S.state==="denied") return deniedState("this organization’s settings","org.admin");
   if(S.state==="empty") return emptyState("This organization has no workspaces",
     "A workspace owns one main repo, one steering set, a set of agents, tool grants, and budgets. A workspace without a main repo cannot exist.",
     '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button>');
@@ -7329,10 +7379,10 @@ function pOrganization(){
        '<td class="mono" style="font-size:11.5px">'+h(p.role.split(" · ")[0])+'</td>'+
        '<td>'+h(m.ws)+'</td><td>'+h(m.mfa)+'</td>'+
        '<td class="mono dim" style="font-size:11px">'+h(m.last)+'</td>'+
-       '<td><span class="b '+(m.status==="active"?"b-allowed":"b-q")+'"><span class="d"></span>'+h(m.status)+'</span></td>'+
-       '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'member\',\''+m.p+'\')">Open</button><button class="btn sm" onclick="openDialog(\'role\',\''+m.p+'\')">Change role</button><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
+       '<td><span class="b '+(m.status==="active"?"b-allowed":"b-q")+'"><span class="d"></span>'+h(m.status.charAt(0).toUpperCase()+m.status.slice(1))+'</span></td>'+
+       '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'member\',\''+m.p+'\')">Open</button><span class="vh">, </span><button class="btn sm" onclick="openDialog(\'role\',\''+m.p+'\')">Change role</button><span class="vh">, </span><button class="btn sm danger" onclick="openDialog(\'removemember\',\''+m.p+'\')">Remove</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
-     '<div class="note">Changing a role is a governed action. It passes IAM, writes an audit record, and bills as one action.</div></div></div>';
+     '<div class="note">Role changes are recorded in Audit and count as one governed action.</div></div></div>';
   } else if(t==="roles"){
     body=rolesBody();
   } else if(t==="invitations"){
@@ -7341,7 +7391,7 @@ function pOrganization(){
      '<thead><tr><th>Email</th><th>Role offered</th><th>Invited by</th><th>Sent</th><th>Expires</th><th></th></tr></thead><tbody>'+
      INVITES.map(function(i){return '<tr><td class="mono" style="font-size:12px">'+h(i.email)+'</td>'+
       '<td class="mono" style="font-size:11.5px">'+h(i.role)+'</td><td>'+h(i.by)+'</td><td>'+h(i.sent)+'</td><td>'+h(i.expires)+'</td>'+
-      '<td class="rowacts"><button class="btn sm" onclick="inviteResend(\''+h(i.email)+'\')">Resend</button>'+
+      '<td class="rowacts"><button class="btn sm" onclick="inviteResend(\''+h(i.email)+'\')">Resend</button><span class="vh">, </span>'+
       '<button class="btn sm danger" onclick="openDialog(\'invrevoke\',\''+h(i.email)+'\')">Revoke</button></td></tr>';}).join("")+
      '</tbody></table></div></div>';
   } else if(t==="workspaces"){
@@ -7353,7 +7403,7 @@ function pOrganization(){
       '<td class="mono dim" style="font-size:11.5px">'+(w.linked.length?h(w.linked.join(", ")):"—")+'</td>'+
       '<td class="num">'+w.agents+'</td><td>'+h(w.owner)+'</td>'+
       '<td><span class="b b-q">'+h(wsGov(w))+'</span><div class="dim mono" style="font-size:11px">'+h(w.retention)+' · ns '+h(w.ns)+'</div></td>'+
-      '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
+      '<td class="rowacts"><button class="btn sm" onclick="S.ws=\''+w.slug+'\';go(\'#/'+ORG.slug+'/'+w.slug+'\')">Open</button><span class="vh">, </span><button class="btn sm" onclick="openDialog(\'editws\',\''+w.slug+'\')">Edit</button><span class="vh">, </span><button class="btn sm danger" onclick="openDialog(\'archivews\',\''+w.slug+'\')">Archive</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">Changing which repository is main is an org-owner action with approval, recorded as a security event. A repository may be linked to more than one workspace; it is main for at most one.</div></div></div>';
   } else if(t==="funding"){
@@ -7361,26 +7411,26 @@ function pOrganization(){
   } else if(t==="plane"){
     body=orgPlaneBody();
   } else {
-    var KST={ok:["b-allowed","active"],expiring:["b-approval","expires in 21 days"],unused:["b-q","never used"]};
+    var KST={ok:["b-allowed","Active"],expiring:["b-approval",""],unused:["b-q","Never used"]};
     body='<div class="panel"><div class="panel-h"><h3>API keys</h3>'+
-     '<span class="dim" style="font-size:12px">each key is a service principal with its own grants</span>'+
-     '<div class="sp"><span class="b b-q">postgres · iam + vault</span>'+
+     '<span class="dim" style="font-size:12px">Each key is a service principal with its own grants</span>'+
+     '<div class="sp">'+
      '<button class="btn sm" onclick="openDialog(\'apikey\')">Create key</button></div></div><div class="tw"><table>'+
      '<thead><tr><th>Name</th><th>Principal</th><th>Grants</th><th>Created by</th><th>Last used</th><th class="num">Actions 30d</th><th>Expires</th><th></th></tr></thead><tbody>'+
-     APIKEYS.map(function(k,i){var st=KST[k.st];
+     APIKEYS.map(function(k,i){var st=KST[k.st]||KST.ok, lbl=k.st==="expiring"?"Expires in "+plural(Math.max(0,Math.round((Date.parse(k.expires)-Date.UTC(2026,8,11))/864e5)),"day"):st[1];
       return '<tr><td><b>'+h(k.name)+'</b><div class="dim mono" style="font-size:11px">'+h(k.key)+'</div></td>'+
        '<td class="mono" style="font-size:11.5px">'+h(k.principal)+'</td>'+
-       '<td style="max-width:26ch">'+k.grants.map(function(g){return '<span class="b b-q" style="margin:0 3px 3px 0;font-family:var(--mono);font-weight:500">'+h(g)+'</span>';}).join("")+'</td>'+
+       '<td style="max-width:26ch">'+k.grants.map(function(g){return '<span class="b b-q" style="margin:0 3px 3px 0;font-family:var(--mono);font-weight:500">'+h(g)+'</span>';}).join(SEP)+'</td>'+
        '<td>'+h(k.by)+'</td><td class="mono dim" style="font-size:11px">'+h(k.last)+'</td>'+
        '<td class="num">'+k.n30.toLocaleString()+'</td>'+
-       '<td><span class="b '+st[0]+'"><span class="d"></span>'+h(st[1])+'</span><div class="dim mono" style="font-size:11px">'+h(k.expires)+'</div></td>'+
-       '<td style="white-space:nowrap"><button class="btn sm" onclick="openDialog(\'rotatekey\','+i+')">Rotate</button> '+
+       '<td><span class="b '+st[0]+'"><span class="d"></span>'+h(lbl)+'</span><div class="dim mono" style="font-size:11px">'+h(k.expires)+'</div></td>'+
+       '<td style="white-space:nowrap"><button class="btn sm" onclick="openDialog(\'rotatekey\','+i+')">Rotate</button><span class="vh">, </span> '+
        '<button class="btn sm danger" onclick="openDialog(\'revokekey\','+i+')">Revoke</button></td></tr>';}).join("")+
      '</tbody></table></div><div class="panel-b">'+
      '<div class="note">A key is shown once, at creation, and never again. Keys carry grants, not roles, so an auditor’s key can read receipts and nothing else. Revoking a key ends its service principal’s access at the next call.</div></div></div>'+
      '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Surfaces this reaches</h3>'+
      '</div><div class="panel-b">'+
-     '<p class="muted" style="font-size:12.5px;margin:0 0 10px">One agent tool contract drives the API, MCP, the CLI and these screens, so a key that can do something here can do exactly that much everywhere else. Parity is checked by the manifest gate.</p>'+
+     '<p class="muted" style="font-size:12.5px;margin:0 0 10px">The API, MCP, the CLI and these screens share one set of actions, so a key that can do something here can do exactly that much everywhere else.</p>'+
      '<pre>$ oxagen login --org a-intel\n$ oxagen run list --workspace core-platform --since 24h\n$ oxagen run export run_01K5RS7M2E8FJ3QW --with-bodies --out ./run_01K5RS7M2E8FJ3QW.bundle\n$ oxagen agent status a-intel.finops.invoice-bot</pre></div></div>';
   }
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>'+h(ORG.name)+'</h1>'+
@@ -7444,7 +7494,7 @@ function spendModelRows(){return SPEND.byModel.concat(orgRoutesOffSpend());}
 function orgRoutesPanel(){
   var total=orgRoutesTotal();
   return '<div class="panel"><div class="panel-h"><h3>Model routes</h3>'+
-   '<div class="sp"><span class="b b-q">customer agents call their providers with their own keys, and Oxagen records what each harness reports</span></div></div><div class="tw"><table data-lt="off">'+
+   '<div class="sp"><span class="b b-q">customer agents call their providers with their own keys, and oxagen records what each harness reports</span></div></div><div class="tw"><table data-lt="off">'+
    '<thead><tr><th>Tier</th><th>Provider</th><th>Route</th><th>Fallback</th><th class="num">Use</th><th class="num">Cost</th><th></th></tr></thead><tbody>'+
    ORG_ROUTES.map(function(r,i){var u=orgRouteUse(r);
     return '<tr data-route="'+h(r.tier)+'" data-cost="'+u.cost.toFixed(2)+'"><td><span class="mono">'+h(r.tier)+'</span><div class="dim" style="font-size:11px;max-width:34ch">'+h(r.use)+'</div></td>'+
@@ -7453,7 +7503,7 @@ function orgRoutesPanel(){
      '<td class="mono dim" style="font-size:11px">'+(r.fallback?h(r.fallback):'—')+'</td>'+
      '<td class="num">'+orgUseCount(u)+'</td><td class="num">'+usd(fmt2(u.cost))+'</td>'+
      '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'editroute\','+i+')">Edit</button></td></tr>';}).join("")+
-   '<tr><td colspan="5"><b>Total</b> <span class="dim" style="font-size:11.5px">· basis client_attested · '+h(ORG.currency)+'</span></td><td class="num" id="orgRoutesTotal"><b>'+usd(fmt2(total))+'</b></td><td></td></tr>'+
+   '<tr><td colspan="5"><b>Total</b> <span class="dim" style="font-size:11.5px">· reported by harness · '+h(ORG.currency)+'</span></td><td class="num" id="orgRoutesTotal"><b>'+usd(fmt2(total))+'</b></td><td></td></tr>'+
    '</tbody></table></div><div class="panel-b">'+
    '<div class="note">Tiers point at rolling aliases so “latest” stays current without a deploy. Every <span class="mono">model.response</span> frame records the concrete model id the provider returned, and the cost record prices <i>that</i> id, so the record names the exact model and a price is never looked up by alias. The complex row is the Oxagenant line on Spend.</div></div></div>';
 }
@@ -7481,8 +7531,8 @@ function orgRouteSave(i){
 /* Data plane: one binding, three deployment modes. The org is on ORG.dataPlane; the other two render as previews. */
 S.planeView=null;
 var PLANE_MODES=[
- ["shared","Shared","Tenant data on Oxagen’s shared plane, isolated by row-level security with no bypass setting."],
- ["dedicated","Dedicated","Your own Postgres cluster and object-storage bucket. Identity, IAM, billing and the price book stay on the shared plane."],
+ ["shared","Shared","Tenant data on oxagen’s shared plane, isolated by row-level security with no bypass setting."],
+ ["dedicated","Dedicated","Your own database cluster and object-storage bucket. Identity, IAM, billing and the price book stay on the shared plane."],
  ["firewall","Behind the firewall","The same containers, as a signed bundle you run. Outbound only, and optional. Fully air-gapped is supported, not degraded."]];
 var FW_OUTBOUND=[
  ["GitHub Enterprise Server · github.a-intel.internal","repo binding, pull requests, checks, code graph","in use","allowed"],
@@ -7493,23 +7543,23 @@ var FW_OUTBOUND=[
 function planeDetail(v){
   if(v==="shared") return '<dl class="kv">'+
    '<dt>Binding</dt><dd><span class="b b-allowed"><span class="d"></span>shared</span> · '+h(ORG.region)+'</dd>'+
-   '<dt>Postgres</dt><dd>partitioned by <span class="mono">org_id</span> · row-level policies enforced</dd>'+
+   '<dt>Database</dt><dd>partitioned by <span class="mono">org_id</span> · row-level policies enforced</dd>'+
    '<dt>Object storage</dt><dd>object lock, compliance mode · per-organization key-encryption key</dd>'+
    '<dt>Key-encryption key</dt><dd class="mono">kek_aintel_2026Q3 · rotated 2026-09-10</dd>'+
     '<dt>Attester key</dt><dd class="mono">'+h(ORG.attester)+' · published so a customer can verify an export offline</dd>'+
-    '<dt>Gateway</dt><dd>Oxagen-hosted · the loopback proxy on every host reports to it, so metering is observed, never self-reported</dd></dl>';
+    '<dt>Gateway</dt><dd>oxagen-hosted · the loopback proxy on every host reports to it, so metering is observed, never self-reported</dd></dl>';
   if(v==="dedicated") return '<dl class="kv">'+
-   '<dt>Tenant data in Postgres</dt><dd>a dedicated cluster in your region, the same schema and the same row-level policies</dd>'+
-   '<dt>Identity and billing in Postgres</dt><dd>stay on the shared plane by design</dd>'+
+   '<dt>Tenant data</dt><dd>a dedicated cluster in your region, the same schema and the same row-level policies</dd>'+
+   '<dt>Identity and billing</dt><dd>stay on the shared plane by design</dd>'+
    '<dt>Object storage</dt><dd>your own bucket · object lock in compliance mode · write-once</dd>'+
-   '<dt>Key-encryption key</dt><dd>in your KMS, referenced by ARN; Oxagen never holds the key material</dd>'+
+   '<dt>Key-encryption key</dt><dd>in your KMS, referenced by ARN; oxagen never holds the key material</dd>'+
     '<dt>Gateway</dt><dd>inside your plane</dd>'+
     '<dt>Resolver</dt><dd>the only place a connection string is read. A call path that bypasses it is a defect, and CI fails on it.</dd></dl>';
   return '<dl class="kv">'+
    '<dt>Deployment</dt><dd>Kubernetes, customer-operated · Helm chart</dd>'+
    '<dt>Bundle version</dt><dd class="mono">oxagen/1.4.2</dd>'+
-   '<dt>Bundle signature</dt><dd><span class="mono">cosign · sha256:7f31c0…9b42</span> · verified against Oxagen release key <span class="mono">rel-2026-03</span>, the key an evidence bundle is checked against</dd>'+
-   '<dt>Containers</dt><dd>gateway · services · operator console · Stella engine · Postgres · S3-compatible object storage with object lock</dd>'+
+   '<dt>Bundle signature</dt><dd><span class="mono">cosign · sha256:7f31c0…9b42</span> · verified against oxagen release key <span class="mono">rel-2026-03</span>, the key an evidence bundle is checked against</dd>'+
+   '<dt>Containers</dt><dd>gateway · services · operator console · stella engine · database · S3-compatible object storage with object lock</dd>'+
    '<dt>Air-gapped mode</dt><dd><span class="b b-approval"><span class="d"></span>on</span>. Model routes resolve inside the network.</dd>'+
    '<dt>Licence</dt><dd>per organization, annual, invoiced. Stripe is not involved behind a firewall.</dd>'+
    '<dt>Next bundle</dt><dd><span class="mono">oxagen/1.4.3</span> available · applied on your schedule, never pushed</dd></dl>'+
@@ -7556,9 +7606,9 @@ DLG_EXT.plane=function(){
   return {t:"Request a change of data plane",s:ORG.name+" is on "+ORG.dataPlane,w:false,
    b:'<div class="note" style="margin-bottom:14px">Per-organization data planes make every store switchable. A dedicated plane, and a behind-the-firewall deployment, is a deployment mode rather than a fork.</div>'+
     '<div class="field"><label for="planeMode">Mode</label><select id="planeMode">'+
-     [["dedicated","dedicated · Oxagen cloud"],["firewall","behind your firewall · signed Helm bundle"],["airgap","air-gapped · in-firewall models"]].map(function(x){return '<option'+(x[0]===v?' selected':'')+'>'+h(x[1])+'</option>';}).join("")+'</select></div>'+
+     [["dedicated","dedicated · oxagen cloud"],["firewall","behind your firewall · signed Helm bundle"],["airgap","air-gapped · in-firewall models"]].map(function(x){return '<option'+(x[0]===v?' selected':'')+'>'+h(x[1])+'</option>';}).join("")+'</select></div>'+
     '<div class="field"><label for="planeRegion">Region</label><select id="planeRegion">'+["us-east-1","eu-west-1","ap-southeast-2"].map(function(r){return '<option'+(r===ORG.region?' selected':'')+'>'+r+'</option>';}).join("")+'</select></div>'+
-    '<dl class="kv"><dt>Included</dt><dd>the gateway inside your plane, a dedicated Postgres cluster and object store, and your own release key</dd>'+
+    '<dl class="kv"><dt>Included</dt><dd>the gateway inside your plane, a dedicated database cluster and object store, and your own release key</dd>'+
     '<dt>Plan</dt><dd>Enterprise, annual, invoiced · from $60,000 per year</dd></dl>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Request sent. An owner signs the annual agreement before anything moves.\')">Request it</button>'};
 };
@@ -7570,8 +7620,8 @@ DLG_EXT.role=function(p){
    b:'<div class="field"><label>Person</label><input value="'+h(pp.name)+'" disabled aria-label="Person"></div>'+
     '<div class="field"><label for="roleSel">Role</label><select id="roleSel">'+ROLES.filter(function(r){return r.kind==="human";}).map(function(r){return '<option'+(r.id===cur?' selected':'')+'>'+h(r.id)+'</option>';}).join("")+'</select>'+
     '</div>'+
-    '<div class="note">A grant is a governed action, not a settings change. It writes an audit record and bills as one action. It does not widen what their agents may do: an agent’s effective permission is its own grants intersected with the operator’s.</div>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Role changed. Recorded in the audit record with your name on it.\')">Change it</button>'};
+    '<div class="note">Role changes are recorded in Audit and count as one governed action. A new role does not widen what this person’s agents may do. An agent can only use the permissions it shares with its operator.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Role changed and recorded in Audit with your name.\')">Change it</button>'};
 };
 DLG_EXT.member=function(p){
   var m=orgMember(p), who=PEOPLE[p];
@@ -7582,7 +7632,7 @@ DLG_EXT.member=function(p){
   var base=who.role.split(" · ")[0];
   return {t:who.name,s:who.email,w:true,
    b:'<dl class="kv"><dt>Org role</dt><dd class="mono">'+h(who.role)+'</dd>'+
-    '<dt>Joined</dt><dd>by invitation · accepted with a verified email</dd>'+
+    '<dt>Joined</dt><dd>By invitation, accepted with a verified email</dd>'+
     '<dt>Two-factor</dt><dd>'+h(m.mfa)+'</dd><dt>Last seen</dt><dd class="mono">'+h(m.last)+'</dd>'+
     '</dl>'+
     '<p class="eyebrow" style="margin:16px 0 8px">Role per workspace</p>'+
@@ -7590,8 +7640,8 @@ DLG_EXT.member=function(p){
      orgMemberWs(m).map(function(w){return '<tr><td class="mono" style="font-size:12px">'+h(w.slug)+'</td><td class="mono" style="font-size:12px">'+h(base)+(m.ws==="all"?' <span class="dim">· every workspace</span>':'')+'</td></tr>';}).join("")+
     '</tbody></table></div>'+
     '<p class="eyebrow" style="margin:16px 0 8px">Agents they operate · <span data-member-agents="'+ags.length+'">'+ags.length+'</span></p>'+
-    (ags.length?'<div class="tw"><table class="narrow"><tbody>'+ags.map(function(a){return '<tr data-member-agent><td class="tkey" style="font-size:12px">'+h(a.key)+'</td><td class="mono dim" style="font-size:11.5px">'+h(a.ws)+'</td><td class="num">'+a.runs30.toLocaleString("en-US")+' runs · 30 d</td></tr>';}).join("")+'</tbody></table></div>'
-     :'<p class="muted" style="font-size:12.5px;margin:0">None. An agent’s effective permission is its grants intersected with its operator’s, so this person narrows nothing today.</p>')+
+    (ags.length?'<div class="tw"><table class="narrow"><tbody>'+ags.map(function(a){return '<tr data-member-agent><td class="tkey" style="font-size:12px">'+h(a.key)+'</td><td class="mono dim" style="font-size:11.5px">'+h(a.ws)+'</td><td class="num">'+plural(a.runs30,"run")+' in 30 days</td></tr>';}).join("")+'</tbody></table></div>'
+     :'<p class="muted" style="font-size:12.5px;margin:0">None. This person operates no agents.</p>')+
     '<p class="eyebrow" style="margin:16px 0 8px">Mandates</p>'+
     '<dl class="kv"><dt>Granted</dt><dd>'+(granted.length?granted.map(function(x){return '<span class="mono">'+h(x.id)+'</span> to <span class="mono">'+h(x.agent)+'</span> · '+h(x.status);}).join("<br>"):'none')+'</dd>'+
     '<dt>Held by their agents</dt><dd>'+(held.length?held.map(function(s){return '<span class="mono">'+h(s)+'</span>';}).join("<br>"):'none')+'</dd></dl>',
@@ -7599,54 +7649,57 @@ DLG_EXT.member=function(p){
 };
 
 /* ============================== Billing ============================== */
+/* Retained evidence has one figure, BILLING.retainedGb, read by Billing and by Audit › Retention alike. */
+function retainedGbText(){return (Number(BILLING.retainedGb)||0).toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1})+" GB";}
 function pBilling(){
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Billing","502 stripe_unreachable");
   if(S.state==="denied") return deniedState("billing","org.billing: plan and invoices are readable only by a finance role");
+  var gaIncl=BILLING.includedGau||250000, gaUsed=BILLING.used!=null?BILLING.used:BILLING.billable+gaIncl;
   if(S.state==="empty") return emptyState("Nothing billable yet",
     "You pay per governed action: a call Oxagen decided, delivered and recorded. The free tier has every governance feature on, an included monthly allowance, thirty days of evidence and three seats.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/work\')">Back to Work</button>');
 
   return '<div class="phead"><div class="t"><p class="eyebrow">Organization</p><h1>Billing</h1>'+
-   '<p>What Anderson Intelligence Corp. pays Oxagen.</p></div>'+
+   '<p>What Anderson Intelligence Corp. pays oxagen.</p></div>'+
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'plan\')">Change plan</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Plan</span><span class="v" style="font-size:19px">'+h(BILLING.plan)+'</span><span class="s">monthly, cancel any time</span></div>'+
-   '<div class="stat"><span class="k">Governed actions this period</span><span class="v">'+BILLING.billable.toLocaleString()+'</span><span class="s">above the included allowance · '+h(BILLING.tier2)+'</span></div>'+
-   '<div class="stat"><span class="k">Retained evidence</span><span class="v" style="font-size:19px">41.2 GB</span><span class="s">13 months included</span></div>'+
+   '<div class="stat"><span class="k">Governed actions this period</span><span class="v">'+ic0(gaUsed)+'</span><span class="s">'+ic0(BILLING.billable)+' above the '+ic0(gaIncl)+' included</span></div>'+
+   '<div class="stat"><span class="k">Retained evidence</span><span class="v" style="font-size:19px">'+retainedGbText()+'</span><span class="s">13 months included</span></div>'+
    '<div class="stat"><span class="k">Due '+h(BILLING.next)+'</span><span class="v">'+usd(BILLING.total)+'</span><span class="s">USD · after the onboarding discount</span></div></div>'+
    '<div class="split"><div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>This period</h3>'+
     '</div><div class="tw"><table>'+
     '<thead><tr><th>Line</th><th>Basis</th><th class="num">Amount</th></tr></thead><tbody>'+
-    '<tr><td>Governed actions 1 – '+BILLING.billable.toLocaleString()+'</td><td class="dim">'+h(BILLING.tier2)+'</td><td class="num">'+usd(BILLING.amount)+'</td></tr>'+
-    '<tr><td>Tokens</td><td class="dim">reported at zero · the customer\u2019s own model spend is on Spend</td><td class="num">$0.00</td></tr>'+
+    '<tr><td>Governed actions · '+ic0(gaUsed)+' used</td><td class="dim">'+h(BILLING.tier2)+'</td><td class="num">'+usd(BILLING.amount)+'</td></tr>'+
+    '<tr><td>Tokens</td><td class="dim">Not priced. Your own model spend is on Spend.</td><td class="num">$0.00</td></tr>'+
     '<tr><td>Evidence retention</td><td class="dim">'+h(BILLING.retention)+'</td><td class="num">$0.00</td></tr>'+
-    '<tr><td>Onboarding discount</td><td class="dim">'+h(BILLING.discount)+'</td><td class="num" style="color:var(--st-proven)">'+h(BILLING.discountAmount)+'</td></tr>'+
-    '<tr><td><b>Total</b></td><td class="dim">rounded to cents once, half-even</td><td class="num"><b>'+usd(BILLING.total)+' USD</b></td></tr>'+
+    '<tr><td>Onboarding discount</td><td class="dim">'+h(BILLING.discount)+'</td><td class="num" style="color:var(--st-proven)">'+usd(BILLING.discountAmount)+'</td></tr>'+
+    '<tr><td><b>Total</b></td><td class="dim"></td><td class="num"><b>'+usd(BILLING.total)+' USD</b></td></tr>'+
     '</tbody></table></div></div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Meters</h3></div><div class="tw"><table>'+
     '<thead><tr><th>Meter</th><th class="num">This period</th><th>Note</th></tr></thead><tbody>'+
     BILLING.meters.map(function(m){return '<tr><td>'+h(m.m)+'</td><td class="num">'+h(m.v)+'</td>'+
      '<td class="dim" style="font-size:11.5px">'+h(m.note)+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><div class="note">One priced meter: the governed action, a call Oxagen decided, delivered and recorded. Runs, tokens and retained evidence are reported so the price can move later without rewriting the meter.</div></div></div>'+
+    '</tbody></table></div><div class="panel-b"><div class="note">Only governed actions are priced. A governed action is a call oxagen decided, delivered and recorded. Runs, tokens and retained evidence are reported and not priced.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Invoices</h3></div><div class="tw"><table>'+
     '<thead><tr><th>Invoice</th><th>Period</th><th class="num">Governed actions</th><th class="num">Amount</th><th>Status</th><th>Paid</th><th></th></tr></thead><tbody>'+
     BILLING.invoices.map(function(i){return '<tr><td class="mono">'+h(i.n)+'</td><td>'+h(i.p)+'</td>'+
      '<td class="num">'+i.runs.toLocaleString()+'</td><td class="num">'+usd(i.amt)+'</td>'+
-     '<td><span class="b b-allowed"><span class="d"></span>'+h(i.st)+'</span></td><td>'+h(i.d)+'</td>'+
+     '<td><span class="b b-allowed"><span class="d"></span>'+h(i.st.charAt(0).toUpperCase()+i.st.slice(1))+'</span></td><td>'+(i.st==="open"?'<span class="dim">Not paid</span>':h(i.d))+'</td>'+
      '<td><a href="#">Open in Stripe ↗</a></td></tr>';}).join("")+
     '</tbody></table></div></div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Price list</h3></div><div class="tw"><table class="narrow"><tbody>'+
-    [["Free","every governance feature, an included monthly allowance, 30 days of evidence, 3 seats"],["Governed actions, blocks of 10,000","$30.00 per block at the published rate"],["Negotiated agreement","the same four figures, per organization"],
-     ["Invoice billing","never capped · overage invoiced at the contracted rate at period end"],["Evidence retention","13 months included on paid plans, then $0.10 per GB-month"],
-     ["Tokens Oxagen buys for you","at cost, no markup, capped"],["Enterprise, annual","from $60,000 per year"]]
+    [["Free","Every governance feature, an included monthly allowance, 30 days of evidence and 3 seats"],["Governed actions, blocks of 10,000","$30.00 per block at the published rate"],["Negotiated agreement","Custom pricing per organization"],
+     ["Invoice billing","Never capped. Overage is invoiced at the contracted rate at period end."],["Evidence retention","13 months included on paid plans, then $0.10 per GB-month"],
+     ["Tokens oxagen buys for you","At cost, no markup, capped"],["Enterprise, annual","From $60,000 per year"]]
     .map(function(p){return '<tr><td style="font-size:12.5px">'+h(p[0])+'</td><td class="num mono" style="font-size:11.5px">'+h(p[1])+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">No credits, no resellers, and no revenue dashboard. The free tier is the whole product, limited by retention and seats, never by features or volume. Upgrading is a governance decision, not a volume accident.</p></div></div>'+
+    '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">Every plan has every governance feature. Plans differ in evidence retention, seats and the included monthly allowance.</p></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Billable units</h3></div><div class="panel-b">'+
-    '<ul class="chain"><li class="on"><span class="h">Priced</span><div>A governed action: a call Oxagen decided, delivered and recorded, with its receipt in the chain.</div></li>'+
-    '<li class="on"><span class="h">Reported</span><div>Sealed runs, tokens by class, retained evidence: secondary meters, never priced.</div></li>'+
-    '<li class="on"><span class="h">Free</span><div>Denials, runs Oxagen halted before a model call, runs of the in-app agent. You never pay for Oxagen saying no.</div></li></ul></div></div></div></div>';
+    '<ul class="chain"><li class="on"><span class="h">Priced</span><div>A governed action: a call oxagen decided, delivered and recorded, with its receipt in the chain.</div></li>'+
+    '<li class="on"><span class="h">Reported</span><div>Sealed runs, tokens by class and retained evidence. Reported, never priced.</div></li>'+
+    '<li class="on"><span class="h">Free</span><div>Denials, runs oxagen halted before a model call, and runs of the in-app agent.</div></li></ul></div></div></div></div>';
 }
 
 /* ============================== Audit ============================== */
@@ -7656,9 +7709,9 @@ var AUD_SEV={critical:"critical",warning:"approval",info:"q"};
 var AUD_DEC={allow:"allowed",allowed:"allowed",approve:"approval",deny:"denied",denied:"denied",observed:"q"};
 
 var INCIDENTS=[
- {id:"exc_01K5RN2P",sev:"critical",title:"Money moved that Oxagen did not govern",kind:"mandate.exception",at:"2026-09-11 08:40",by:"gateway",
+ {id:"exc_01K5RN2P",sev:"critical",title:"Money moved that oxagen did not govern",kind:"mandate.exception",at:"2026-09-11 08:40",by:"gateway",
   scope:"con_01K2A9 · stripe · finops",
-  detail:"The Stripe webhook on the governed connection con_01K2A9 reported charge ch_3Qa8 for $18.00 USD, and no receipt exists for it. Every call Oxagen dispatched that day has a frame; this one has none, so it did not come through the tool gateway.",
+  detail:"The Stripe webhook on the governed connection con_01K2A9 reported charge ch_3Qa8 for $18.00 USD, and no receipt exists for it. Every call oxagen dispatched that day has a frame; this one has none, so it did not come through the tool gateway.",
   resolution:"Open. Dana Okafor is tracing the charge against the Stripe dashboard audit log. Until it closes, the mandate ledger for con_01K2A9 carries an exception, and the Mandate page says so.",
   status:"open",owner:"Dana Okafor",due:"2026-09-12",closedAt:"",closedBy:"",runs:0},
  {id:"inc_01K5RH8M3",sev:"info",title:"Tainted argument on a shell call, raised to approval; the approval expired",kind:"taint_raised",at:"2026-09-11 07:41",by:"policy engine",
@@ -7678,7 +7731,7 @@ var INCIDENTS=[
   status:"resolved",closedAt:"2026-09-05 16:10",closedBy:"Sofia Ruiz",runs:0},
  {id:"inc_01K4M2A8",sev:"warning",title:"Harness permission hooks removed mid-run",kind:"hooks_removed",at:"2026-09-02 09:38",by:"gateway",
   scope:"a-intel.core.triage · host mbp-01",
-  detail:"The Claude Code harness on mbp-01 reported its permission hooks gone between two steps. Oxagen dropped the run to observe tier for its remainder and labeled every later frame client-attested.",
+  detail:"The Claude Code harness on mbp-01 reported its permission hooks gone between two steps. oxagen dropped the run to observe tier for its remainder and labeled every later frame client-attested.",
   resolution:"A local harness update rewrote settings.json. Hooks restored and the host re-enrolled through the wrapper. Frames from the observe window stay labeled as such; the label is never upgraded after the fact.",
   status:"resolved",closedAt:"2026-09-02 11:20",closedBy:"Marcus Bell",runs:1},
  {id:"inc_01K4J9RW",sev:"info",title:"Run token presented directly to a provider",kind:"credential_probe",at:"2026-08-25 09:55",by:"gateway",
@@ -7694,10 +7747,10 @@ var RECEIPTS=[
   effect:"pi_3QaL8f2Xk",amount:"$884.60 USD",ws:"finops",runId:"run_01K5RF2J7M3EDC5F",
   who:[["Operator","Dana Okafor · usr_01K2A9DQ · org.billing"],["Agent","a-intel.finops.invoice-bot · prn_01K3Q2",1],["Run · turn · step","run_01K5RF2J7M3EDC5F · 2 · 5",1],["Task","PO-4471 · monthly infrastructure invoices"]],
   what:[["Tool version","stripe__create_payment@4",1],["Schema digest","sha256:0b41e7c9a2f53081",1],["Input digest","sha256:c81f04ea6b2d93a7",1],["Amount ($.amount)","88460000 micro-USD → $884.60 USD"],["Counterparty ($.recipient)","vendor:aws",1],["Input","retained in full · content_exact · 2 fields redacted before write"]],
-  authority:[["Decision","approve → approved, then allow on token"],["Policy version","pol_v41 (signed)",1],["Rules fired","mnd_7K2ETQ4.approval.above_micros · rg_0112",1],["Grants used","role finops.operator → stripe__create_payment@*",1],["Delegation ceiling","held: agent ∩ operator"],["Mandate","mnd_7K2ETQ4 · $884.60 reserved, then settled · $1,115.40 remaining this month",1],["Approval token","apt_01K4X7Q4 · single-use · bound to the call digest · approver Priya Natarajan",1],["Approver reason","“PO-4471 line 3, checked against the quote.”"],["Taint sources","none"]],
+  authority:[["Decision","approve → approved, then allow on token"],["Policy version","pol_v41 (signed)",1],["Rules fired","mnd_7K2ETQ4.approval.above_micros · rg_0112",1],["Grants used","role finops.operator → stripe__create_payment@*",1],["Delegation ceiling","held: the narrower of agent and operator"],["Mandate","mnd_7K2ETQ4 · $884.60 reserved, then settled · $1,115.40 remaining this month",1],["Approval token","apt_01K4X7Q4 · single-use · bound to the call digest · approver Priya Natarajan",1],["Approver reason","“PO-4471 line 3, checked against the quote.”"],["Taint sources","none"]],
   credential:[["Credential grant","cg_01K4X7T1",1],["Connection","con_01K2A9 · stripe · owner Dana Okafor · reviewed 2026-08-01",1],["Minted","restricted key · payment_intents:write · customer cus_aintel only"],["TTL","10 minutes, bound to the call id"],["Provider token id","rk_live_…9f2",1],["Agent saw","the result. Never the key."]],
   effectRows:[["Dispatched","2026-09-04 10:22:41.908Z · api.stripe.com"],["Response digest","sha256:7e10b4c9d2a3f508",1],["Output validation","pass"],["Redactions","2 (card last4, email)"],["External effect id","pi_3QaL8f2Xk",1],["Idempotency key","idk_c81f04ea · no duplicate suppressed",1]],
-  integrity:[["Frame hash","sha256:41c907e2bd38f450",1],["Chain position","27 of 31 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],["Tier","harness · this call was routed through Oxagen, which carried the credential"]]},
+  integrity:[["Frame hash","sha256:41c907e2bd38f450",1],["Chain position","27 of 31 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],["Tier","harness · this call was routed through oxagen, which carried the credential"]]},
  {id:"rcp_01K5RH8M2",at:"2026-09-11 07:41:31.512Z",agent:"a-intel.core.triage",operator:"Marcus Bell",tool:"bash__run@1",decision:"deny",tier:"harness",
   effect:"none: denied before dispatch",amount:"—",ws:"core-platform",runId:"run_01K5RH8M2V",
   who:[["Operator","Marcus Bell · usr_01K2B7XN · workspace.owner"],["Agent","a-intel.core.triage · prn_01K3T8",1],["Run · turn · step","run_01K5RH8M2V · 4 · 19",1],["Task","triage inbound issues on a-intel/platform"]],
@@ -7705,21 +7758,21 @@ var RECEIPTS=[
   authority:[["Decision","approve → expired → denied"],["Policy version","pol_v41 (signed)",1],["Rules fired","taint.write_or_exec → approve · approval.ttl.10m",1],["Grants used","role core.contributor → bash__run@*",1],["Delegation ceiling","held"],["Mandate","n/a"],["Approval","apr_01K5RH8M2 · no approver answered in 10 minutes",1],["Taint sources","frm_01K5RH8M2V-112 (tool output: issue body, ingested at turn 3)",1]],
   credential:[["Credential grant","none minted: denied before brokerage"],["Connection","not brokered"],["Minted","—"],["TTL","—"],["Provider token id","—"],["Agent saw","the denial and the reason. Nothing else."]],
   effectRows:[["Dispatched","never"],["Response digest","—"],["Output validation","—"],["Redactions","—"],["External effect id","none"],["Idempotency key","idk_c0771e9d (unused)",1]],
-  integrity:[["Frame hash","sha256:31be0d7712c4a9e8",1],["Chain position","19 of 26 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],["Tier","harness · routed through Oxagen. Denials are recorded and cost nothing"]]},
+  integrity:[["Frame hash","sha256:31be0d7712c4a9e8",1],["Chain position","19 of 26 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],["Tier","harness · routed through oxagen. Denials are recorded and cost nothing"]]},
  {id:"rcp_01K4ZA0J3",at:"2026-09-10 13:02:44.207Z",agent:"a-intel.core.docs-writer",operator:"Helena Vogt",tool:"notion__append_block@2",decision:"observed",tier:"observe",
   effect:"blk_9a71… (client-attested)",amount:"—",ws:"core-platform",runId:"run_01K5ZA0J2M",
   who:[["Operator","Helena Vogt · usr_01K2C4VG · workspace.member"],["Agent","a-intel.core.docs-writer · prn_01K3V2",1],["Run · turn · step","run_01K5ZA0J2M · 1 · 4",1],["Task","architecture notes"]],
   what:[["Tool version","notion__append_block@2",1],["Schema digest","sha256:5b1290aa04e7c3d1",1],["Input digest","sha256:9e33abc027f14d86",1],["Input","attested by the client · size and type checked only"]],
-  authority:[["Decision","observed: Oxagen did not decide this call"],["Policy version","n/a at observe tier"],["Rules fired","none: no gate ran"],["Grants used","not consulted"],["Delegation ceiling","not evaluated"],["Mandate","n/a"],["Approval","n/a"],["Taint sources","not computed"]],
-  credential:[["Credential grant","none: the agent used its own credential"],["Connection","not brokered"],["Minted","—"],["TTL","—"],["Provider token id","—"],["Agent saw","whatever it held. Oxagen cannot say."]],
+  authority:[["Decision","observed — oxagen did not decide this call"],["Policy version","n/a at observe tier"],["Rules fired","none — no gate ran"],["Grants used","not consulted"],["Delegation ceiling","not evaluated"],["Mandate","n/a"],["Approval","n/a"],["Taint sources","not computed"]],
+  credential:[["Credential grant","none — the agent used its own credential"],["Connection","not brokered"],["Minted","—"],["TTL","—"],["Provider token id","—"],["Agent saw","whatever it held. oxagen cannot say."]],
   effectRows:[["Dispatched","reported by the client at 2026-09-10 13:02:44.207Z"],["Provider","notion (unverified)"],["Response digest","sha256:1f770233bd9a4c08 (client-attested)",1],["Output validation","size and type only"],["External effect id","blk_9a71… (client-attested)",1],["Idempotency key","not enforced"]],
-  integrity:[["Frame hash","sha256:aa77110c2e5d93b4",1],["Chain position","4 of 9 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · signs the record, not the call",1],["Tier","observe · recorded only. This receipt can never be shown as decided by Oxagen."]]}
+  integrity:[["Frame hash","sha256:aa77110c2e5d93b4",1],["Chain position","4 of 9 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · signs the record, not the call",1],["Tier","observe · recorded only. This receipt can never be shown as decided by oxagen."]]}
 ];
 
 var EXPORTS=[
- {id:"exp_01K5R2A8",what:"Receipt export: September, financial class (CSV + JSON)",range:"2026-09-01 → 2026-09-11",runs:"1,204 receipts · every financial.effect ≠ none",size:"46 MB",at:"2026-09-11 07:02",by:"Dana Okafor",st:"ready",sig:"ed25519:MEQCIGa1…9c07",keys:"kek_aintel_2026Q3"},
- {id:"exp_01K4Q7M1",what:"Evidence bundle: all runs of a-intel.finops.invoice-bot",range:"2026-01-01 → 2026-09-05",runs:"962 runs · 31 archive segments · 188,440 frames",size:"0.8 GB",at:"2026-09-05 14:20",by:"Sofia Ruiz",st:"ready",sig:"ed25519:MEUCIQD8…4f21",keys:"kek_aintel_2026Q2, kek_aintel_2026Q3"},
- {id:"exp_01K5RV3E",what:"Evidence bundle: core-platform, August 2026",range:"2026-08-01 → 2026-08-31",runs:"4,118 runs · 118 archive segments · 1,004,212 frames",size:"3.9 GB",at:"2026-09-11 09:41",by:"Sofia Ruiz",st:"building",sig:"pending",keys:"kek_aintel_2026Q3"}
+ {id:"exp_01K5R2A8",what:"Receipt export — September, financial class (CSV + JSON)",range:"2026-09-01 → 2026-09-11",runs:"1,204 receipts, every one with a financial effect",size:"46 MB",at:"2026-09-11 07:02",by:"Dana Okafor",st:"ready",sig:"ed25519:MEQCIGa1…9c07",keys:"kek_aintel_2026Q3"},
+ {id:"exp_01K4Q7M1",what:"Evidence bundle — all runs of a-intel.finops.invoice-bot",range:"2026-01-01 → 2026-09-05",runs:"962 runs · 31 archive segments · 188,440 frames",size:"0.8 GB",at:"2026-09-05 14:20",by:"Sofia Ruiz",st:"ready",sig:"ed25519:MEUCIQD8…4f21",keys:"kek_aintel_2026Q2, kek_aintel_2026Q3"},
+ {id:"exp_01K5RV3E",what:"Evidence bundle — core-platform, August 2026",range:"2026-08-01 → 2026-08-31",runs:"4,118 runs · 118 archive segments · 1,004,212 frames",size:"3.9 GB",at:"2026-09-11 09:41",by:"Sofia Ruiz",st:"building",sig:"pending",keys:"kek_aintel_2026Q3"}
 ];
 
 var KEYS=[
@@ -7729,17 +7782,17 @@ var KEYS=[
  {name:"Run attestation · receipts and seals",id:ORG.attester,alg:"Ed25519",gen:"3",from:"2026-07-01",to:"2026-12-31",st:"active",covers:"signs every receipt and seal · published"},
  {name:"Run attestation · receipts and seals",id:"key_ox_aintel_2026Q1",alg:"Ed25519",gen:"2",from:"2026-01-01",to:"2026-07-01",st:"retiring",covers:"verify only: 3.1M receipts still cite it"},
  {name:"Host device key · mbp-01",id:"dev_mbp01_ed1",alg:"Ed25519",gen:"1",from:"2026-02-14",to:"2027-02-14",st:"active",covers:"signs Claude Code checkpoints"},
- {name:"Host device key · ci-runner-04",id:"dev_ci04_ed1",alg:"Ed25519",gen:"1",from:"2026-05-03",to:"2027-05-03",st:"active",covers:"signs Stella CI checkpoints"},
+ {name:"Host device key · ci-runner-04",id:"dev_ci04_ed1",alg:"Ed25519",gen:"1",from:"2026-05-03",to:"2027-05-03",st:"active",covers:"signs stella CI checkpoints"},
  {name:"Host device key · mbp-tlang",id:"dev_tlang_ed1",alg:"Ed25519",gen:"1",from:"2025-11-20",to:"2026-09-01",st:"expired",covers:"unenrolled 2026-09-01; runs keep their signatures"}
 ];
 
 
 
 var RETENTION_TIERS=[
- ["Ledger","Postgres","runs, attempts, seals, attestation, counts, cost, tier, gaps","forever","412k runs"],
- ["Frames","Postgres","frame rows with digests, cost, policy decisions","hot window · 13 months","2.6M frames"],
- ["Bodies and segments","Object storage, write-once","encrypted bodies; per-seal archive segment, Merkle root, attestation","7 years","41 GB"],
- ["Control-plane audit","Postgres","admin actions, IAM changes, repo bindings, plane changes, key rotations","7 years","118k events"]
+ ["Ledger","Database","runs, attempts, seals, attestation, counts, cost, tier, gaps","forever","412k runs"],
+ ["Frames","Database","frame rows with digests, cost, policy decisions","hot window · 13 months","2.6M frames"],
+ ["Bodies and segments","Object storage, write-once","encrypted bodies; per-seal archive segment, Merkle root, attestation","7 years",retainedGbText()],
+ ["Control-plane audit","Database","admin actions, IAM changes, repo bindings, plane changes, key rotations","7 years","118k events"]
 ];
 
 /* ---- small renderers shared by the audit tabs ---- */
@@ -7793,13 +7846,13 @@ function auditEvents(){
     ["By a service principal",String(svc),"Terraform, CI, exports, the archiver"],
     ["By an agent",String(AUDIT.filter(function(e){return auditActorKind(e.who)==="agent";}).length),"each one a governed action with a receipt"]])+
    '<div class="panel"><div class="panel-h"><h3>Control-plane events</h3><span class="muted" style="font-size:12.5px">admin actions, IAM changes, repo bindings, plane changes, key rotations</span>'+
-   '<div class="sp">'+auditStore("postgres · 7 years")+
+   '<div class="sp">'+
    '<select class="sel-sm" aria-label="Actor" onchange="act(\'Filtering is a mockup here. The API takes actor_kind.\')"><option>All actors</option><option>Humans</option><option>Agents</option><option>Services</option></select>'+
    '<select class="sel-sm" aria-label="Range" onchange="act(\'Range is a mockup here. The API takes since and until.\')"><option>Last 48 hours</option><option>Last 7 days</option><option>Last 30 days</option></select>'+
    '<button class="btn sm" onclick="openDialog(\'exportevents\')">CSV</button></div></div>'+
    '<div class="panel-b" style="border-bottom:1px solid var(--border)"><div class="field" style="margin:0"><input placeholder="Search events, receipts, actors, external ids" aria-label="Search the audit record"></div></div>'+
    '<div class="tw"><table><thead><tr><th>When</th><th>Event</th><th>Actor</th><th>What</th><th>Result</th><th>Severity</th><th>Reference</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">The record is written by the kernel, never by an agent. A client-attested call is labeled as such and can never be shown as decided by Oxagen.</div></div></div>';
+   '<div class="panel-b"><div class="note">The record is written by the kernel, never by an agent. A client-attested call is labeled as such and can never be shown as decided by oxagen.</div></div></div>';
 }
 
 function auditIncidents(){
@@ -7815,14 +7868,14 @@ function auditIncidents(){
      (i.status==="open"?'<button class="btn sm primary" onclick="openDialog(\'incidentclose\',\''+i.id+'\')">Resolve</button>':'')+'</td></tr>';}).join("");
   return auditStats([["Open",String(open.length),crit?"one critical · money moved without a receipt":"none critical",crit?"critical":"approval"],
     ["Critical · 12 months","1","open since 08:40 today"],
-    ["Median time to resolve","2 h<small>38 m</small>","across 5 resolved incidents"],
-    ["Money moved without a receipt","$18.00<small>USD</small>","one charge, 2026-09-11, open"]])+
-   (crit?'<div class="warn" style="margin-bottom:14px"><b>Critical · '+h(crit.id)+' · open.</b> Stripe charge <span class="mono">ch_3Qa8</span>, $18.00 USD, attributable to <span class="mono">con_01K2A9</span>, has no receipt. Money moved that Oxagen did not govern. '+
+    ["Median time to resolve","2h <small>38m</small>","across 5 resolved incidents"],
+    ["Money moved without a receipt","$18.00 <small>USD</small>","one charge, 2026-09-11, open"]])+
+   (crit?'<div class="warn" style="margin-bottom:14px"><b>Critical · '+h(crit.id)+' · open.</b> Stripe charge <span class="mono">ch_3Qa8</span>, $18.00 USD, attributable to <span class="mono">con_01K2A9</span>, has no receipt. Money moved that oxagen did not govern. '+
     '<a href="#" onclick="event.preventDefault();openDialog(\'incidentview\',\''+crit.id+'\')">Open the incident</a></div>':'')+
    '<div class="panel"><div class="panel-h"><h3>Incidents</h3><span class="muted" style="font-size:12.5px">raised by the policy engine, the gateway and the verifier</span>'+
-   '<div class="sp">'+auditStore("postgres")+'<button class="btn sm" onclick="openDialog(\'incident\')">Open an incident</button></div></div>'+
+   '<div class="sp"><button class="btn sm" onclick="openDialog(\'incident\')">Open an incident</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Severity</th><th>What happened</th><th>Opened</th><th>Detected by</th><th>State</th><th class="num"></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">Any external transaction attributable to a governed connection with no receipt is an exception at severity critical: money moved that Oxagen did not govern. That is the only way this number becomes non-zero.</div></div></div>';
+   '<div class="panel-b"><div class="note">Any external transaction attributable to a governed connection with no receipt is an exception at severity critical: money moved that oxagen did not govern. That is the only way this number becomes non-zero.</div></div></div>';
 }
 
 function auditReceipts(){
@@ -7857,14 +7910,14 @@ function auditExports(){
      '<div class="panel-b">'+auditFacts([["Export id",x.id,1],["Range",x.range],["Contents",x.runs],["Size",x.size],["Created",x.at+" by "+x.by],["Signature",x.sig,1],["Key ids",x.keys,1]])+
      (S.verified[x.id]?'<pre style="margin-top:12px">$ ./oxagen-verify --bundle '+h(x.id)+' --release-key rel-2026-03\n  merkle roots        recomputed and matched\n  seal attestations   signatures verified\n  chain continuity    no gaps, no reordering\n  <span class="s">OK</span>  internally consistent and signed</pre>':'')+'</div></div>';}).join("");
   var kinds=["run.sealed","approval.requested","tool_call.denied","kill_switch.flipped","mandate.exception"];
-  return '<div class="callout" style="margin-bottom:14px">An export is a verifiable bundle: archive segments, attestations, key ids, and a verifier script. The segment was written at seal time, so it is never a later copy of the graph. It is the same bytes the graph indexed, written once. A customer’s auditor checks it offline, without trusting Oxagen or the worker’s harness.</div>'+
+  return '<div class="callout" style="margin-bottom:14px">An export is a verifiable bundle: archive segments, attestations, key ids, and a verifier script. The segment was written at seal time, so it is never a later copy of the graph — it is the same bytes the graph indexed, written once. A customer’s auditor checks it offline, without trusting oxagen or the worker’s harness.</div>'+
    '<div class="grid g2">'+cards+'</div>'+
    '<div class="grid g2" style="margin-top:14px"><div class="panel"><div class="panel-h"><h3>Verifier</h3><span style="margin-left:auto">'+auditStore("ships inside every bundle")+'</span></div><div class="panel-b">'+
-   '<pre>$ tar xf exp_01K4Q7M1.tar.zst &amp;&amp; cd exp_01K4Q7M1\n$ ./oxagen-verify --bundle . --release-key rel-2026-03\n\n  manifest            31 segments, 188,440 frame envelopes (NDJSON)\n  merkle roots        31 / 31 recomputed and matched\n  seal attestations   962 / 962 signatures verified ('+h(ORG.attester)+', key_ox_aintel_2026Q1)\n  chain continuity    no gaps, no reordering\n  key ids present     kek_aintel_2026Q2, kek_aintel_2026Q3\n  tiers               harness 953 · observe 9\n\n  <span class="s">OK</span>  the bundle is internally consistent and signed by Oxagen release key rel-2026-03</pre>'+
-   '<div class="note" style="margin-top:12px">The verifier runs offline and needs no Oxagen service. It recomputes every Merkle root and checks every seal signature against the published key, so an auditor never has to trust Oxagen’s word for the chain.</div></div></div>'+
+   '<pre>$ tar xf exp_01K4Q7M1.tar.zst &amp;&amp; cd exp_01K4Q7M1\n$ ./oxagen-verify --bundle . --release-key rel-2026-03\n\n  manifest            31 segments, 188,440 frame envelopes (NDJSON)\n  merkle roots        31 / 31 recomputed and matched\n  seal attestations   962 / 962 signatures verified ('+h(ORG.attester)+', key_ox_aintel_2026Q1)\n  chain continuity    no gaps, no reordering\n  key ids present     kek_aintel_2026Q2, kek_aintel_2026Q3\n  tiers               harness 953 · observe 9\n\n  <span class="s">OK</span>  the bundle is internally consistent and signed by oxagen release key rel-2026-03</pre>'+
+   '<div class="note" style="margin-top:12px">The verifier runs offline and needs no oxagen service. It recomputes every Merkle root and checks every seal signature against the published key, so an auditor never has to trust oxagen’s word for the chain.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Outbound events</h3><span class="b b-q" style="margin-left:auto">Series A</span></div><div class="panel-b">'+
    '<p class="muted" style="font-size:12.5px;margin-top:0">Subscriptions name the event kinds; only those are emitted and everything else never leaves. Payloads carry ids and a link to the run and frame, never raw prompt or tool bodies.</p>'+
-   '<div class="row">'+kinds.map(function(e){return '<span class="b b-q mono" style="font-size:10.5px">'+h(e)+'</span>';}).join("")+'</div>'+
+   '<div class="row">'+kinds.map(function(e){return '<span class="b b-q mono" style="font-size:10.5px">'+h(e)+'</span>';}).join(SEP)+'</div>'+
    '<div class="hr"></div><dl class="kv"><dt>Dead-letter view</dt><dd>0 undelivered</dd><dt>Delivery</dt><dd>signed webhook, HMAC with a rotating secret, ordered per run, at-least-once with backoff</dd></dl></div></div></div>';
 }
 
@@ -7878,7 +7931,7 @@ function auditKeys(){
      '<td>'+auditBadge(st[k.st][0],st[k.st][1])+'</td><td style="font-size:12px;max-width:28ch">'+h(k.covers)+'</td>'+
      '<td class="num">'+(k===kek?'<button class="btn sm" onclick="openDialog(\'rotatekek\')">Rotate</button>':'')+'</td></tr>';}).join("");
   return '<div class="panel"><div class="panel-h"><h3>Keys</h3><span class="muted" style="font-size:12.5px">one key-encryption key per organization; data-encryption keys per object and per subject</span>'+
-   '<div class="sp">'+auditStore("kms + postgres")+'<button class="btn sm" onclick="openDialog(\'rotatekek\')">Rotate KEK</button></div></div>'+
+   '<div class="sp"><button class="btn sm" onclick="openDialog(\'rotatekek\')">Rotate KEK</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Key</th><th>Algorithm</th><th class="num">Gen</th><th>Valid from</th><th>Valid to</th><th>State</th><th>What it covers</th><th class="num"></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
    '<div class="panel-b"><div class="note" style="margin-bottom:12px">Rotation does not rewrite history. A retiring generation stays valid for decryption until every object it wrapped has been re-wrapped; a receipt keeps citing the signing generation it was signed under, so a four-month-old receipt still verifies after a rotation. Key ids and validity windows are published per organization, so a customer can verify an export offline years later.</div>'+
    '<div style="max-width:440px"><div class="row" style="justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:5px"><span>Re-wrap kek_aintel_2026Q2 → '+h(kek?kek.id:"kek_aintel_2026Q3")+'</span><span class="mono">61% · 866k of 1.42M objects</span></div><div class="bar"><i class="hold" style="width:61%"></i></div></div></div></div>';
@@ -7894,7 +7947,7 @@ function auditRetention(){
      ["Hot window","13 months, then frame rows are compacted into the segment. Bodies are never moved."],
      ["A compacted run","reads from the segment, not the hot table. Same bytes."],
      ["Workspace opt-down",WS.map(function(w){return w.slug+" "+(w.retention||"content_exact");}).join(" · "),1],
-     ["Cold storage cost","41 GB · $0.04 per month. The hot table, not the archive, is what needs a window."]])+'</div></div>'+
+     ["Storage price",retainedGbText()+". Included for 13 months, then $0.10 per GB-month (about "+usd((Number(BILLING.retainedGb)||0)*0.1)+" a month)."]])+'</div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Archive tiers</h3><span style="margin-left:auto">'+auditStore("three stores, one policy")+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Tier</th><th>Where</th><th>What it holds</th><th>Retention</th><th class="num">Held today</th></tr></thead><tbody>'+tiers+'</tbody></table></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Redaction</h3><span class="muted" style="font-size:12.5px">before write, never after</span></div>'+
@@ -7923,7 +7976,7 @@ function receiptDlgSub(){var r=S.dlg==="receipt"?receiptById(S.dlgArg):null;retu
 function receiptDlgBody(){
   if(S.dlg!=="receipt") return '';
   var r=receiptById(S.dlgArg); if(!r) return '<div class="note">No receipt selected.</div>';
-  var tier=r.tier==="observe"?'<span class="b b-q"><span class="d"></span>observe · recorded only</span>':auditBadge("allowed","harness · routed through Oxagen");
+  var tier=r.tier==="observe"?'<span class="b b-q"><span class="d"></span>observe · recorded only</span>':auditBadge("allowed","harness · routed through oxagen");
   function g(t,rows){return '<div class="rg"><h4>'+t+'</h4><div class="rb">'+auditFacts(rows)+'</div></div>';}
   return '<div class="row" style="margin-bottom:14px">'+auditBadge(AUD_DEC[r.decision]||"q",r.decision)+tier+
    (r.amount!=="—"?'<span class="b b-approval mono">'+h(r.amount)+'</span>':'')+auditStore(r.tool)+auditStore("workspace "+r.ws)+'</div>'+
@@ -7981,17 +8034,19 @@ function openDialog(kind,arg){if(kind==="wrap")return regStart();
 /* -------- kill switches (W9) -------- */
 function switchById(id){for(var i=0;i<SWITCHES.length;i++){if(SWITCHES[i].id===id)return SWITCHES[i];}return null;}
 function switchesOn(){var n=0;for(var k in S.switches){if(S.switches[k])n++;}return n;}
+/* A provider switch keys on the provider id, so the gate can match it; people read the provider's name. */
+function ksName(s){if(s.lvl==="Provider"){var p=serverById(s.target);return p?p.system:s.target;}return s.target;}
 function switchCard(s){
   var on=S.switches[s.id], m=S.flipMeta[s.id]||{};
   var by=m.by||s.by, at=m.at||s.at, why=m.why||s.why;
   var bc=on?"color-mix(in srgb,var(--st-denied) 45%,var(--border))":s.headline?"color-mix(in srgb,var(--gold) 30%,var(--border))":"var(--border)";
-  return '<div class="panel" style="border-color:'+bc+'"><div class="panel-h"><div class="ks-grow"><h3>'+h(s.target)+'</h3>'+
+  return '<div class="panel" style="border-color:'+bc+'"><div class="panel-h"><div class="ks-grow"><h3>'+h(ksName(s))+'</h3>'+
    '<p>'+h(s.lvl)+' · '+h(s.scope)+'</p></div>'+
-   '<button class="ks-sw'+(on?" on":"")+'" role="switch" aria-checked="'+(on?"true":"false")+'" aria-label="'+(on?"Clear":"Flip")+' the switch on '+h(s.target)+'" '+
-   'onclick="openDialog(\'switch\',\''+s.id+'\')"><i></i><span class="lbl">'+(on?"denying":"allowing")+'</span></button></div>'+
+   '<button class="ks-sw'+(on?" on":"")+'" role="switch" aria-checked="'+(on?"true":"false")+'" aria-label="'+(on?"Clear":"Flip")+' the switch on '+h(ksName(s))+'" '+
+   'onclick="openDialog(\'switch\',\''+s.id+'\')"><i></i><span class="lbl">'+(on?"On (calls blocked)":"Off (calls allowed)")+'</span></button></div>'+
    '<div class="panel-b"><dl class="kv"><dt>Blast radius</dt><dd>'+h(s.stops)+'</dd>'+
    (on&&by?'<dt>Flipped by</dt><dd>'+h(by)+'<span class="ks-sub">'+h(at)+'</span></dd><dt>Reason</dt><dd>'+h(why)+'</dd>':'')+
-   '<dt>Takes effect</dt><dd>at the next call boundary, through the deny generation, with token revocation behind it for anything that keeps calling</dd></dl>'+
+   '<dt>Takes effect</dt><dd>On the next tool call. Running agents that keep calling lose their run token.</dd></dl>'+
    (s.made?'<div class="row" style="margin-top:12px"><button class="btn sm" onclick="openDialog(\'switchedit\',\''+s.id+'\')">Edit</button>'+
      '<button class="btn sm danger" onclick="openDialog(\'switchdel\',\''+s.id+'\')">Remove</button></div>':'')+
    '</div></div>';
@@ -8011,24 +8066,24 @@ function ksAgentsFor(kind,target){
    return PEOPLE[a.operator]&&PEOPLE[a.operator].name===target;});
 }
 function ksTargets(kind){
-  if(kind==="Agent") return AGENTS.map(function(a){return {v:a.key,lab:a.key+" — "+a.name};});
+  if(kind==="Agent") return AGENTS.map(function(a){return {v:a.key,lab:a.name+" ("+a.key+")"};});
   if(kind==="Device"){
    var seen={},out=[];
    AGENTS.forEach(function(a){ if(!a.host||!a.enrolled||seen[a.host])return; seen[a.host]=1;
     var n=ksAgentsFor("Device",a.host).length;
-    out.push({v:a.host,lab:a.host+" — "+n+" agent"+(n===1?"":"s")+", key "+(a.devKey||"—")});});
+    out.push({v:a.host,lab:a.host+" ("+plural(n,"agent")+(a.devKey?", key "+a.devKey:"")+")"});});
    return out;
   }
   var ps={},ls=[];
   AGENTS.forEach(function(a){var p=PEOPLE[a.operator]; if(!p||ps[p.name])return; ps[p.name]=1;
    var n=ksAgentsFor("Operator’s agents",p.name).length;
-   ls.push({v:p.name,lab:p.name+" — "+n+" agent"+(n===1?"":"s")});});
+   ls.push({v:p.name,lab:p.name+" ("+plural(n,"agent")+")"});});
   return ls;
 }
 function ksBlast(kind,target){
   var as=ksAgentsFor(kind,target);
   var tools=0; as.forEach(function(a){tools+=(a.belt||0);});
-  return tools+" tool versions · "+as.length+" agent"+(as.length===1?"":"s");
+  return plural(tools,"tool version")+" · "+plural(as.length,"agent");
 }
 function ksScopeOf(kind){for(var i=0;i<KS_SCOPES.length;i++){if(KS_SCOPES[i].k===kind)return KS_SCOPES[i];}return KS_SCOPES[0];}
 function ksFields(kind,target,why){
@@ -8041,9 +8096,9 @@ function ksFields(kind,target,why){
    opts.map(function(o){return '<option value="'+h(o.v)+'"'+(o.v===target?" selected":"")+'>'+h(o.lab)+'</option>';}).join("")+
    '</select></div>'+
    '<div class="ks-banner info"><span class="b b-q" style="flex:none">blast radius</span>'+
-   '<div class="g"><b>'+h(ksBlast(kind,target))+'</b>A switch is created allowing. Flipping it denies every affected call at its next boundary.</div></div>'+
+   '<div class="g"><b>'+h(ksBlast(kind,target))+'</b>A new switch starts off (calls allowed). Turning it on blocks every affected call from the next tool call.</div></div>'+
    '<div class="field" style="margin-top:14px"><label for="ks-why">Why it exists</label>'+
-   '<input id="ks-why" value="'+h(why||"")+'" placeholder="Held ready for an incident on this host"><div class="hint">One sentence. It sits on the card until somebody flips it.</div></div>';
+   '<input id="ks-why" value="'+h(why||"")+'" placeholder="Held ready for an incident on this host"><div class="hint">One sentence. It stays on the card until someone turns the switch on.</div></div>';
 }
 function ksRefresh(){
   var host=el("ks-fields"); if(!host) return;
@@ -8052,7 +8107,7 @@ function ksRefresh(){
 DLG_EXT.switchnew=function(){
   return {t:"Create a kill switch",s:"An agent, the device it runs on, or everything one operator answers for",w:false,
    b:'<div id="ks-fields">'+ksFields("Agent","","")+'</div>'+
-     '<div class="note">The organization, workspace and class switches ship with the workspace and cannot be removed. One you create here can be edited and removed while it is allowing.</div>',
+     '<div class="note">The organization, workspace and class switches ship with the workspace and cannot be removed. One you create here can be edited, and removed while it is off.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="ksCreate()">Create it</button>'};
 };
@@ -8068,18 +8123,18 @@ function ksCreate(){
    by:null,at:null,why:null,stops:ksBlast(kind,target),made:true,note:why});
   S.switches[id]=false;
   S.tab.tools="switches";
-  closeDialog(); render(); act("Created a switch on "+target+". It is allowing until you flip it.","gold");
+  closeDialog(); render(); act("Created a switch on "+target+". It stays off until you turn it on.","gold");
 }
 DLG_EXT.switchedit=function(id){
   var sw=switchById(id);
   if(!sw) return noSuch("Kill switch");
-  if(!sw.made) return {t:h(sw.target)+" cannot be edited",w:false,
-   b:'<div class="note">'+h(sw.target)+' ships with the workspace, so its scope is fixed. Flip it, or create a narrower switch beside it.</div>',
+  if(!sw.made) return {t:h(ksName(sw))+" cannot be edited",w:false,
+   b:'<div class="note">'+h(ksName(sw))+' ships with the workspace, so its scope is fixed. Turn it on, or create a narrower switch beside it.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn primary" onclick="openDialog(\'switchnew\')">Create a switch</button>'};
   return {t:"Edit the switch on "+sw.target,w:false,
    b:'<div id="ks-fields">'+ksFields(sw.lvl==="Device"?"Device":sw.lvl,sw.target,sw.note||"")+'</div>'+
-     (S.switches[id]?'<div class="warn"><b>This switch is denying right now.</b> Moving it moves what is denied, at the next call boundary.</div>':''),
+     (S.switches[id]?'<div class="warn"><b>This switch is on right now.</b> Changing its target changes which calls are blocked, from the next tool call.</div>':''),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn danger" onclick="openDialog(\'switchdel\',\''+id+'\')">Remove</button>'+
      '<button class="btn primary" onclick="ksSave(\''+id+'\')">Save</button>'};
@@ -8095,16 +8150,16 @@ function ksSave(id){
 DLG_EXT.switchdel=function(id){
   var sw=switchById(id);
   if(!sw) return noSuch("Kill switch");
-  if(!sw.made) return {t:h(sw.target)+" cannot be removed",w:false,
-   b:'<div class="note">'+h(sw.target)+' ships with the workspace. Something has to stay flippable when an incident starts, so the organization, workspace and class switches are permanent. Clear it instead of removing it.</div>',
+  if(!sw.made) return {t:h(ksName(sw))+" cannot be removed",w:false,
+   b:'<div class="note">'+h(ksName(sw))+' ships with the workspace. A switch has to be ready when an incident starts, so the organization, workspace, and class switches are permanent. Turn it off instead of removing it.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   if(S.switches[id]) return {t:"Clear it before you remove it",w:false,
-   b:'<div class="warn"><b>'+h(sw.target)+' is denying right now.</b> Removing the switch would let every denied call through without a record of who allowed it.</div>'+
-     '<div class="note">Clear the switch first. Clearing records your name and your reason; removing it afterwards records nothing, because nothing is denied by then.</div>',
+   b:'<div class="warn"><b>The switch on '+h(ksName(sw))+' is on right now.</b> Removing it would let every blocked call through with no record of who allowed it.</div>'+
+     '<div class="note">Clear the switch first. Clearing it records your name and your reason. Removing it afterward records nothing, because by then it blocks nothing.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="openDialog(\'switch\',\''+id+'\')">Clear it</button>'};
   return {t:"Remove the switch on "+sw.target+"?",w:false,
-   b:'<div class="note">It is allowing, so nothing is denied by it and nothing changes for a run. The switch is gone from this page and you can create it again.</div>',
+   b:'<div class="note">It is off, so it blocks nothing and no run changes. The switch leaves this page, and you can create it again.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
      '<button class="btn danger" onclick="ksRemove(\''+id+'\')">Remove</button>'};
 };
@@ -8118,22 +8173,22 @@ function ksRemove(id){
 function switchDialog(){
   var s=switchById(S.dlg==="switch"&&S.dlgArg?S.dlgArg:"ks_cls_funds")||SWITCHES[0];
   var on=!S.switches[s.id]; /* true = this dialog flips the switch on */
-  return {t:(on?"Flip":"Clear")+" the switch on "+s.target, w:false,
+  return {t:(on?"Flip":"Clear")+" the switch on "+ksName(s), w:false,
    b:'<p class="muted" style="margin:0 0 14px;font-size:12.5px">'+h(s.lvl)+' · '+h(s.scope)+'</p>'+
     '<div class="ks-banner '+(on?"crit":"info")+'"><span class="b '+(on?"b-critical":"b-allowed")+'" style="flex:none"><span class="d"></span>'+(on?"blast radius":"restores")+'</span>'+
     '<div class="g"><b>'+h(s.stops)+'</b>'+(on
-     ?'Every affected call is denied at its next boundary. Runs in flight are not killed; their next non-read-only call fails closed and the frame names this switch and your reason.'
-     :'Denied calls resume at the next boundary. Nothing that was denied while the switch was on is retried.')+'</div></div>'+
-    (on&&s.cls?'<div class="note deny" style="margin-bottom:14px"><b>This is a class switch.</b> It does not name a server or an agent: it matches on the tool version’s declared class, '+
-     'so a tool imported tomorrow with <span class="mono">financial.effect: moves_funds</span> is denied the moment it enters the registry.</div>':'')+
-    '<div class="field"><label for="killwhy">Reason recorded on every denied call</label>'+
-    '<textarea id="killwhy" rows="2">'+(on?"Suspected compromise of the Stripe restricted key. Hold every money movement until the rotation is confirmed.":"Rotation confirmed at 15:02 UTC; the security owner signed off.")+'</textarea></div>'+
-    '<dl class="kv"><dt>Takes effect</dt><dd>next call boundary · deny generation bumps '+S.denyGen+' → '+(S.denyGen+1)+'</dd>'+
-    '<dt>Behind it</dt><dd>run-token revocation for anything that keeps calling</dd>'+
-    '<dt>Recorded as</dt><dd>a security event, and a <span class="mono">policy.decision</span> frame on every affected run</dd></dl>',
+     ?'Every affected call is blocked from the next tool call. Runs in flight keep running. Their next call that changes anything is blocked, and the record names this switch and your reason.'
+     :'Blocked calls are allowed again from the next tool call. Nothing blocked while the switch was on is retried.')+'</div></div>'+
+    (on&&s.cls?'<div class="note deny" style="margin-bottom:14px"><b>This is a class switch.</b> It names no provider or agent. It matches each tool version by the class it declares. '+
+     'A tool imported tomorrow that declares the same class is blocked as soon as it enters the registry.</div>':'')+
+    '<div class="field"><label for="killwhy">Reason (recorded on every blocked call and read by the model)</label>'+
+    '<textarea id="killwhy" rows="2">'+(on?"Suspected compromise of the Stripe restricted key. Hold every money movement until the rotation is confirmed.":"Rotation confirmed at 15:02 UTC. The security owner signed off.")+'</textarea></div>'+
+    '<dl class="kv"><dt>Takes effect</dt><dd>Next tool call · kill-switch generation '+S.denyGen+' → '+(S.denyGen+1)+'</dd>'+
+    '<dt>Backstop</dt><dd>Running agents that keep calling lose their run token.</dd>'+
+    '<dt>Recorded as</dt><dd>A security event, and a policy decision on every affected run</dd></dl>',
    f:'<span class="grow">'+(on?"You can clear this switch at any time. Nothing is destroyed.":"")+'</span>'+
     '<button class="btn" onclick="closeDialog()">Cancel</button>'+
-    '<button class="btn '+(on?"danger":"primary")+'" onclick="doFlip(\''+s.id+'\')">'+(on?"Deny now":"Allow again")+'</button>'};
+    '<button class="btn '+(on?"danger":"primary")+'" onclick="doFlip(\''+s.id+'\')">'+(on?"Block calls now":"Allow calls again")+'</button>'};
 }
 function doFlip(id){
   var s=switchById(id); if(!s) return;
@@ -8141,10 +8196,10 @@ function doFlip(id){
   var why=el("killwhy")?el("killwhy").value:"";
   S.switches[id]=on; S.denyGen+=1;
   if(on) S.flipMeta[id]={by:"Marcus Bell",at:"just now · this mockup",why:why};
-  var wide=(s.cls||s.lvl==="Organization")?" organization-wide":s.lvl==="Workspace"?" in "+s.target:"";
-  S.killBanner=on?'<div class="ks-banner crit"><span class="b b-critical" style="flex:none"><span class="d"></span>switch flipped</span>'+
-   '<div class="g"><b>'+h(s.target)+' is denied'+wide+'.</b>'+h(s.stops)+'. Every affected call fails closed at its next boundary; the frame names this switch and the reason. '+
-   'Deny generation is now <span class="mono">'+S.denyGen+'</span>.</div>'+
+  var wide=(s.cls||s.lvl==="Organization")?" across the organization":s.lvl==="Workspace"?" in "+s.target:"";
+  S.killBanner=on?'<div class="ks-banner crit"><span class="b b-critical" style="flex:none"><span class="d"></span>Switch on</span>'+
+   '<div class="g"><b>'+h(ksName(s))+' is blocked'+wide+'.</b>'+h(s.stops)+'. Every affected call is blocked from the next tool call. The record names this switch and the reason. '+
+   'Kill-switch generation is now '+S.denyGen+'.</div>'+
    '<button class="btn sm" onclick="openDialog(\'switch\',\''+id+'\')">Clear it</button></div>':null;
   S.tab.tools="switches";
   closeDialog();
@@ -8213,7 +8268,7 @@ function skRow(s){
      '<span class="sx-chip">'+h(s.kind)+'</span>'+
      '<span class="sx-chip">'+s.tokens.toLocaleString()+' tok</span>'+
      '<span class="sx-chip">'+h(s.digest.slice(0,18))+'…</span>'+
-     (s.cited?'<span class="sx-chip">cited in '+s.cited+' of '+s.runs+' runs</span>':'')+
+     (s.cited?'<span class="sx-chip">cited in '+s.cited+' of '+plural(s.runs,"run")+'</span>':'')+
       (s.citedAfter!=null?'<span class="sx-chip ok">cited '+skPct(s.citedBefore)+' → '+skPct(s.citedAfter)+' of loads</span>':'')+
     '</div></div>'+
    '<div class="rt">'+skTier(s.tier)+
@@ -8237,7 +8292,7 @@ function skCfgFile(){
   '<span class="k">registry</span>  = <span class="s">"a-intel"</span>\n'+
   '<span class="k">market</span>    = <span class="s">"hold"</span>                   <span class="c"># every version waits for a person</span>\n\n'+
   '[<span class="k">search</span>]\n'+
-  '<span class="k">mode</span>      = <span class="s">"searchable"</span>             <span class="c"># the belt carries a door, not a list</span>\n'+
+  '<span class="k">mode</span>      = <span class="s">"searchable"</span>             <span class="c"># the toolbelt carries a door, not a list</span>\n'+
   '<span class="k">top_k</span>     = <span class="n">'+SK_CFG.search.k+'</span>\n'+
   '<span class="k">min_score</span> = <span class="n">'+SK_CFG.search.minScore+'</span>\n'+
   '<span class="k">budget</span>    = <span class="n">'+SK_CFG.search.budget+'</span>                  <span class="c"># tokens a turn; past it a load is refused, never truncated</span>\n\n'+
@@ -8268,7 +8323,7 @@ function skRunPage(){
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("This run","502 frame_store_unreachable");
   if(S.state==="denied") return deniedState("this run","runs.read on "+w.slug);
-  return '<div class="phead"><div class="t"><p class="eyebrow">Run · '+h(SKRUN.id)+'</p>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">Run · <span class="id">'+h(SKRUN.id)+'</span></p>'+
     '<h1>'+h(SKRUN.taskTitle)+'</h1>'+
     '<p><span class="mono">'+h(SKRUN.agent)+'</span> · '+h(SKRUN.harness)+' · '+
       h(PEOPLE[SKRUN.op].name)+' · harness tier · <span class="mono">'+h(SKRUN.remote)+'@'+h(SKRUN.sha)+'</span></p></div>'+
@@ -8285,7 +8340,7 @@ function skRunPage(){
    '<div class="sx-tript">'+
     '<div class="sx-pane"><div class="sx-pane-h"><span class="eb">What the agent shows '+h(PEOPLE[SKRUN.op].name.split(" ")[0])+'</span><span class="who">harness</span></div>'+
      '<div class="sx-pane-b">'+skTrAgent(ans)+'</div></div>'+
-    '<div class="sx-pane hot"><div class="sx-pane-h"><span class="eb">What Oxagen put to a person</span><span class="who">Oxagen</span></div>'+
+    '<div class="sx-pane hot"><div class="sx-pane-h"><span class="eb">What oxagen put to a person</span><span class="who">oxagen</span></div>'+
      '<div class="sx-pane-b">'+skTrOperator(ans)+'</div></div>'+
     '<div class="sx-pane"><div class="sx-pane-h"><span class="eb">What was written down</span><span class="who">frames</span></div>'+
      '<div class="sx-pane-b"><div class="sx-fr">'+(ans?SK_AFTER[ans]:SK_FRAMES).map(skFrameRow).join("")+'</div>'+
@@ -8300,11 +8355,11 @@ function skTrAgent(ans){
   var out='<div class="sx-tr">'+
    '<div class="sx-msg op"><div class="mh"><b>'+h(PEOPLE[SKRUN.op].name)+'</b><span class="tm">09:14:01Z</span></div>'+
     '<p>Cut the first release notes for edge-proxy. Everything since the repo was created.</p></div>'+
-   '<div class="sx-msg gw"><div class="mh"><b>Oxagen</b><span class="sx-chip">interjection</span><span class="tm">09:14:02Z</span></div>'+
+   '<div class="sx-msg gw"><div class="mh"><b>oxagen</b><span class="sx-chip">interjection</span><span class="tm">09:14:02Z</span></div>'+
     '<p>Before I start: this repository is not bound to a workspace, so I have no skills config to work from. I am not going to guess which one applies.</p>'+
     '<p style="color:var(--muted);font-size:12px">Two ways forward, and they are not the same:</p>'+
     (ans?'':'<div class="sx-picks">'+
-      skPick("link","Link it to core-platform","Becomes a linked repo. Inherits "+SK_CFG.ver+", the belt, the budget and the harness tier of that workspace.")+
+      skPick("link","Link it to core-platform","Becomes a linked repo. Inherits "+SK_CFG.ver+", the toolbelt, the budget and the harness tier of that workspace.")+
       skPick("create","Create a new workspace","Called edge, with a-intel/edge-proxy as its main repo. Ships with skills off, like every workspace does.")+
      '</div>'+
      '<div class="row" style="gap:7px;margin-top:9px"><button class="btn primary sm"'+(SKS.picked?'':' disabled')+' onclick="skAnswer()">Send this answer</button>'+
@@ -8338,15 +8393,15 @@ function skTrOperator(ans){
    'a rule, a grant, a receipt, and a name that stays on it.</p></div></div>';
   return '<div class="sx-tr">'+
    '<div class="sx-msg gw"><div class="mh"><b>control.interject</b><span class="sx-chip held">the loop is held</span><span class="tm">09:14:02Z</span></div>'+
-    '<p><span class="mono">repo.unknown</span>: <span class="mono">'+h(SKRUN.remote)+'</span> resolves to no workspace in <span class="mono">'+h(ORG.slug)+'</span>.</p>'+
-    '<p><span class="mono">skills.enabled = true</span> and <span class="mono">unbound_repo = ask</span>, so Oxagen put it to a person instead of resolving nothing quietly.</p>'+
+    '<p><span class="mono">repo.unknown</span> — <span class="mono">'+h(SKRUN.remote)+'</span> resolves to no workspace in <span class="mono">'+h(ORG.slug)+'</span>.</p>'+
+    '<p><span class="mono">skills.enabled = true</span> and <span class="mono">unbound_repo = ask</span>, so oxagen put it to a person instead of resolving nothing quietly.</p>'+
    '</div>'+
    '<div class="sx-paths">'+
     '<div class="sx-path'+(SKS.picked==="link"?" on":"")+'"><h3>'+icon("git")+'Link</h3>'+
      '<p class="muted" style="font-size:12px;margin:0">to <b>core-platform</b></p>'+
      '<div class="sx-dl">'+
-      skDl("add","Inherits <span class=\"mono\">"+SK_CFG.ver+"</span>: 7 skills in scope, 1 withheld")+
-      skDl("add","Inherits the belt, the $2.00 run budget and the harness tier")+
+      skDl("add","Inherits <span class=\"mono\">"+SK_CFG.ver+"</span> — 7 skills in scope, 1 withheld")+
+      skDl("add","Inherits the toolbelt, the $2.00 run budget and the harness tier")+
       skDl("add","Becomes the third linked repo · indexed into the code graph")+
       skDl("same","Marcus already owns this workspace, so no new grant")+
       skDl("rem","Everything in edge-proxy is now in core-platform’s spend and audit")+
@@ -8354,8 +8409,8 @@ function skTrOperator(ans){
     '<div class="sx-path'+(SKS.picked==="create"?" on":"")+'"><h3>'+icon("skills")+'Create</h3>'+
      '<p class="muted" style="font-size:12px;margin:0">a workspace called <b>edge</b></p>'+
      '<div class="sx-dl">'+
-      skDl("rem","<b>Skills ship off.</b> 0 in scope, and <span class=\"mono\">search_skills</span> is not on the belt")+
-      skDl("rem","No belt, no budget, no price book until somebody sets them")+
+      skDl("rem","<b>Skills ship off.</b> 0 in scope, and <span class=\"mono\">search_skills</span> is not on the toolbelt")+
+      skDl("rem","No toolbelt, no budget, no price book until somebody sets them")+
       skDl("add","Its own spend, its own audit, its own owner")+
       skDl("add","<span class=\"mono\">a-intel/edge-proxy</span> becomes its main repo, branch <span class=\"mono\">main</span>")+
       skDl("same","This run continues either way, with a procedure or without one")+
@@ -8378,7 +8433,7 @@ function skAfterPanel(ans){
     'keeps the same digest, so “what procedure was it following” has an answer a year from now.</div></div></div>';
   return '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Workspace created</h3>'+
     '<span class="sp">'+skBadge("q","skills off")+'</span></div><div class="panel-b">'+
-   '<div class="sx-cfg"><div class="sx-cfg-h">a-intel/edge-proxy · .oxagen/workspace.toml <span class="grow"></span>committed by Oxagen, 09:17:39Z</div><pre>'+
+   '<div class="sx-cfg"><div class="sx-cfg-h">a-intel/edge-proxy · .oxagen/workspace.toml <span class="grow"></span>committed by oxagen, 09:17:39Z</div><pre>'+
    '<span class="k">slug</span>    = <span class="s">"edge"</span>\n'+
    '<span class="k">name</span>    = <span class="s">"Edge"</span>\n'+
    '<span class="k">owner</span>   = <span class="s">"marcus"</span>\n'+
@@ -8434,7 +8489,7 @@ DLG_EXT.skcfg=function(){
      '<div class="sx-skl">'+SK_CFG.sources.map(function(x){
       return '<div class="sx-row'+(x.on?"":" held")+'"><div class="sx-ki">'+icon(x.k==="registry"?"organization":x.k==="market"?"tools":"git")+'</div>'+
        '<div><div class="nm">'+h(x.label)+'</div><div class="st">'+h(x.d)+'</div></div>'+
-       '<div class="rt">'+(x.on?skBadge("allowed",x.n+" skills"):skBadge("q","not a source"))+'</div></div>';}).join("")+'</div></div>',
+       '<div class="rt">'+(x.on?skBadge("allowed",plural(x.n,"skill")):skBadge("q","not a source"))+'</div></div>';}).join("")+'</div></div>',
    f:'<span class="grow mono dim" style="font-size:11px">changing this is a pull request, not a save button</span><button class="btn" onclick="closeDialog()">Close</button>'};
 };
 DLG_EXT.skill=function(arg){
@@ -8477,7 +8532,7 @@ function skPr(s){
    trigger:"An operator retired "+s.id+".",
    files:[[inTree?"del":"mod",skRetireFile(s),inTree?"the procedure is removed":"the install line is removed"]],
    checks:[["schema","pass",inTree?"No other file in this tree names this skill.":"workspace.toml still parses and every other install resolves."],
-    ["citation_check","pass",(s.cited&&s.runs)?s.cited+" of "+s.runs+" runs cited it; each keeps the digest it recorded.":"No run has ever cited it."],
+    ["citation_check","pass",(s.cited&&s.runs)?s.cited+" of "+plural(s.runs,"run")+" cited it; each keeps the digest it recorded.":"No run has ever cited it."],
     ["grant_scan","pass","A skill grants nothing, so removing it takes no authority from any agent."],
     ["load_cost","pass","The search budget frees "+s.tokens.toLocaleString()+" tokens a turn it was loaded into."]]};
   OXPRS.unshift(p);
@@ -8495,7 +8550,7 @@ DLG_EXT.skretire=function(id){
      :'This one is installed, not written here. Retiring it is a pull request that takes its install line out of <span class="mono">.oxagen/workspace.toml</span>, and leaves it published where it came from.')+
     ' A search still returns it until that merges.</div>'+
     '<div class="warn">'+((s.cited&&s.runs)
-     ?s.cited+' of '+s.runs+' runs cited it. Each keeps the digest it recorded, and nothing rewrites what those runs were steered by.'
+     ?s.cited+' of '+plural(s.runs,"run")+' cited it. Each keeps the digest it recorded, and nothing rewrites what those runs were steered by.'
      :'No run has ever cited it, so no run changes.')+'</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
     '<button class="btn danger" onclick="skRetire(\''+h(s.id)+'\')">Open the pull request</button>'};
@@ -8512,8 +8567,8 @@ function skBody(s){
   var m={
    "a-intel.release-notes-from-prs":'<span class="c">---</span>\n<span class="k">name</span>: release-notes-from-prs\n<span class="k">scope</span>: workspace:core-platform\n<span class="c">---</span>\n\n<span class="k"># Cutting release notes</span>\n\n1. List the pull requests merged into <span class="s">main</span> since the last tag.\n2. Group them under <span class="s">Features</span>, <span class="s">Fixes</span>, <span class="s">Breaking</span>. A PR with no label goes to Fixes.\n3. Read CHANGELOG.md <span class="k">once</span>. It is 40k tokens; re-reading it is the single largest\n   waste in this task’s history.\n4. Write the draft to <span class="s">release/&lt;version&gt;-notes</span>. Open a PR.\n5. <span class="k">Never</span> publish the release. That is github__create_release, it needs approval,\n   and it is not yours to ask for.',
    "a-intel.rollback-a-bad-release":'<span class="c">---</span>\n<span class="k">name</span>: rollback-a-bad-release\n<span class="k">scope</span>: workspace:core-platform\n<span class="c">---</span>\n\n<span class="k"># Pulling a release back</span>\n\n<span class="k">Do not</span> revert the merge commit first. <span class="k">Do not</span> force-push main. Both of those\nhave cost us a day each, on 2025-03-11 and on 2025-11-02.\n\n1. Flip the feature flag. This is the only step that is fast.\n2. Cut a revert PR against main and let the ladder run on it.\n3. Only once the witness flips, tag and deploy.',
-   "a-intel.postgres-safe-migration":'<span class="c">---</span>\n<span class="k">name</span>: postgres-safe-migration\n<span class="k">scope</span>: workspace:core-platform, workspace:finops\n<span class="c">---</span>\n\n<span class="k"># Expand, backfill, contract</span>\n\nNever in one deploy. The four outages in 2025 were all one deploy.\n\n1. <span class="k">Expand</span>: add the column, nullable, no default on a large table.\n2. <span class="k">Backfill</span>: in batches, off the request path, resumable.\n3. <span class="k">Contract</span>: drop the old column, in a later deploy, after a week of dual reads.',
-   "a-intel.invoice-reconciliation":'<span class="c">---</span>\n<span class="k">name</span>: invoice-reconciliation\n<span class="k">scope</span>: workspace:finops\n<span class="c">---</span>\n\n<span class="c"># You are reading this because you opened it from Oxagen.</span>\n<span class="c"># An agent in core-platform cannot: scope says finops, and scope is</span>\n<span class="c"># checked before ranking, not after.</span>\n\n<span class="k"># Matching a statement line</span>\n\n1. Find the purchase order. No PO, no payment.\n2. Find the receipt. Amounts must agree to the cent.\n3. Anything above the mandate parks. That is not your call to make.',
+   "a-intel.safe-db-migration":'<span class="c">---</span>\n<span class="k">name</span>: safe-db-migration\n<span class="k">scope</span>: workspace:core-platform, workspace:finops\n<span class="c">---</span>\n\n<span class="k"># Expand, backfill, contract</span>\n\nNever in one deploy. The four outages in 2025 were all one deploy.\n\n1. <span class="k">Expand</span>: add the column, nullable, no default on a large table.\n2. <span class="k">Backfill</span>: in batches, off the request path, resumable.\n3. <span class="k">Contract</span>: drop the old column, in a later deploy, after a week of dual reads.',
+   "a-intel.invoice-reconciliation":'<span class="c">---</span>\n<span class="k">name</span>: invoice-reconciliation\n<span class="k">scope</span>: workspace:finops\n<span class="c">---</span>\n\n<span class="c"># You are reading this because you opened it from oxagen.</span>\n<span class="c"># An agent in core-platform cannot: scope says finops, and scope is</span>\n<span class="c"># checked before ranking, not after.</span>\n\n<span class="k"># Matching a statement line</span>\n\n1. Find the purchase order. No PO, no payment.\n2. Find the receipt. Amounts must agree to the cent.\n3. Anything above the mandate parks. That is not your call to make.',
    "oxagen.pdf-extract":'<span class="c">---</span>\n<span class="k">name</span>: pdf-extract\n<span class="k">publisher</span>: oxagen-marketplace\n<span class="c">---</span>\n\n<span class="c"># Held. The body below is the 0.9.3 the marketplace served on 2026-09-09.</span>\n<span class="c"># The digest Priya approved on 2026-08-21 was sha256:b78e...0c14, and this</span>\n<span class="c"># one is sha256:f41c...593a. No agent has seen either.</span>\n\n<span class="k"># Extracting tables</span>\n\n1. Detect ruled regions. 2. Read cells left to right. 3. Return rows.'
   };
   return m[s.id]||'<span class="c">---</span>\n<span class="k">name</span>: '+h(s.id.split(".").pop())+'\n<span class="c">---</span>\n\n'+h(s.st);
@@ -8539,7 +8594,7 @@ var SCENARIOS={
     note:"One live run, a child of this work order. A work order starts runs, and its page is where you open one to stop or steer it.",
     route:function(o){return {page:"workorder",org:o,ws:"core-platform",id:"wo_01K5RS7M4N"};}},
    {say:"Open the run. It is on turn 7 at harness tier, and the next call it wants is a release against a-intel/platform.",
-    note:"This call is routed through Oxagen, so the decision is made on the server. The agent’s native tools are client-attested and fail-open, and the run says so.",
+    note:"This call is routed through oxagen, so oxagen makes the decision. The agent’s native tools are client-attested and fail-open, and the run says so.",
     route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
     setup:function(){S.tab.run="transcript";}},
    {say:"Stopping is the first grant. Pause takes effect at the next boundary: the call in flight completes, nothing new dispatches, and the run keeps its token.",
@@ -8548,7 +8603,7 @@ var SCENARIOS={
     setup:function(){S.tab.run="transcript";},
     act:["Pause the run","openDialog('pause','run_01K5RS7M2E8FJ3QW')"]},
    {say:"Steering is the second grant. A steer lands at the boundary: the agent finishes the turn it is on, then reads it. Cutting a call in flight needs the gateway tier, which is not available yet.",
-    note:"Oxagen never executes steering as an instruction. It enters the run as a frame at the model request, carrying your authority.",
+    note:"oxagen never executes steering as an instruction. It enters the run as evidence at the steering position, carrying your authority.",
     route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
     setup:function(){S.tab.run="transcript";},
     act:["Steer this run","openSteer('run_01K5RS7M2E8FJ3QW')"]},
@@ -8566,7 +8621,7 @@ var SCENARIOS={
     route:function(o){return {page:"agents",org:o,ws:"core-platform"};},
     setup:function(){S.ftype={};},
     act:["Steer the whole fleet","openSteerFleet()"]},
-   {say:"The delivery report says who read it and when. Applied means the model call carrying it was made; queued, expired, cancelled and failed each say why.",
+   {say:"The delivery report says who read it and when. Applied means the model call carrying it was made; queued, expired, canceled and failed each say why.",
     note:"The header counts the rows under it. A run's row follows its own <span class=\"mono\">control.steer</span> frame, so it moves to applied while the report is open.",
     route:function(o){return {page:"agents",org:o,ws:"core-platform"};},
     act:["Open the delivery report","openDialog('deliveryreport')"]}
@@ -8661,8 +8716,8 @@ SCENARIOS["sixty-seconds-to-governed"]={title:"Sixty seconds to governed", ws:"c
 SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"core-platform",
  blurb:"The promoter learns a rule from runs, a person merges it as a pull request, and the next model call carries it.",
  steps:[
-  {say:"These are the Steering records that steer core-platform. Each one is a file in <span class=\"mono\">.oxagen/rules/</span> on a-intel/platform, and each was published by a merge.",
-   note:"Nothing on this page was saved into Oxagen. Each row names the frame type it emits, its version and hash, and the agents its scope reaches.",
+  {say:"These are the records that steer core-platform. Each one is a file in <span class=\"mono\">.oxagen/rules/</span> on a-intel/platform, and each was published by a merge.",
+   note:"Nothing on this page was saved into oxagen. oxagen’s registry indexes what git says is in force. Each record shows its force, its scope, its token cost and whether it compiles to text or to text and a gate.",
    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
    setup:function(){ctxprSet("none");S.tab.steering="sources";S.srcKind="record";S.prpSel=null;}},
   {say:"The promoter noticed release runs re-reading CHANGELOG.md and proposed a rule. Every count on this page comes from the supporting runs listed under it.",
@@ -8679,8 +8734,8 @@ SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"c
    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
    setup:function(){S.tab.steering="prs";S.prpSel=null;if(S.ctxpr.st==="none"||S.ctxpr.st==="merged")ctxprRun();},
    act:["Merge the pull request","ctxprMerge()"]},
-  {say:"The record is published. It is a file in the main repo now, and Sources reads it from the repository like every other.",
-   note:"The registry indexes what the repository says is in force. Nothing was saved into Oxagen.",
+  {say:"The record is published. It is a file in the main repo now, and the Records tab reads it from the repository like every other.",
+   note:"The registry indexes what the repository says is in force. Nothing was saved into oxagen.",
    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
    setup:function(){if(S.ctxpr.st!=="merged")ctxprSet("merged");S.tab.steering="sources";S.srcKind="record";S.prpSel=null;}},
   {say:"The Compiler resolves the envelope for one agent and one brief. The new rule is a <span class=\"mono\">should</span>, so it is a constraint frame in the session-start prefix. Under the envelope are the exclusions, each with its reason.",
@@ -8688,8 +8743,8 @@ SCENARIOS["learned-approved-changed"]={title:"Learned, approved, changed", ws:"c
    route:function(o){return {page:"steering",org:o,ws:"core-platform"};},
    setup:function(){if(S.ctxpr.st!=="merged")ctxprSet("merged");S.tab.steering="compiler";S.pv.agent="release-manager";S.pv.preset="release-notes";S.pv.text=null;S.prpSel=null;},
    act:["Ask it to merge instead","pvPreset('merge-green')"]},
-  {say:"Here it is on the run. The Decision trace reads the envelope this run received when it started, on bundle v41, and what it excluded. The new rule is in bundle v42 and reaches the agent at its next session start.",
-   note:"Recorded frames never change. Every frame links back to its source at the version it names.",
+  {say:"Here it is on the run. The <span class=\"mono\">steering.manifest</span> frame is what oxagen injected when this run started, on bundle v41, and what it cut. The new rule is in bundle v42 and reaches the agent at its next SessionStart.",
+   note:"Recorded frames never change. The manifest links every item back to where it is authored, and the readout says what the next bundle adds.",
    route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
    setup:function(){if(S.ctxpr.st!=="merged")ctxprSet("merged");S.tab.run="trace";S.ftype={};}},
   {say:"An agent's own definition is a file too: <span class=\"mono\">.oxagen/agents/docs-writer.toml</span>. Changing it is a pull request with checks, merged by a person, the same way the rule was.",
@@ -8740,11 +8795,11 @@ SCENARIOS["every-dollar-every-operator"]={title:"Every dollar, every operator", 
 SCENARIOS["toolbelt-governed"]={title:"The toolbelt, governed", ws:"core-platform",
  blurb:"What one agent may reach, the credential it never holds, and the switch that stops it everywhere at once.",
  steps:[
-  {say:"Triage’s belt is searchable, not preloaded: 52 tools, and the agent finds the one it needs by asking.",
-   note:"Search runs over the belt, never the registry, so a tool outside the grant cannot be found, let alone called.",
+  {say:"Triage’s toolbelt is searchable, not preloaded: 52 tools, and the agent finds the one it needs by asking.",
+   note:"Search runs over the toolbelt, never the registry, so a tool outside the grant cannot be found, let alone called.",
    route:function(o){return {page:"agent",org:o,ws:"core-platform",id:"triage",b:"toolbelt"};},
    setup:function(){S.tab.agent="toolbelt";},
-   act:["Search the belt for “delete branch”","S.beltQuery='delete branch';S.beltRan=true;render()"]},
+   act:["Search the toolbelt for “delete branch”","S.beltQuery='delete branch';S.beltRan=true;render()"]},
   {say:"Its identity is a principal with an operator, an enforcement tier and a definition digest, not a shared key.",
    note:"Every frame this agent writes carries this identity, which is what makes a receipt name it.",
    route:function(o){return {page:"agent",org:o,ws:"core-platform",id:"triage",b:"identity"};},
@@ -8780,12 +8835,12 @@ SCENARIOS["cio-console"]={title:"The CIO’s console", ws:"core-platform",
    route:function(o){return {page:"organization",org:o};},
    setup:function(){S.tab.organization="workspaces";S.rq="";},
    act:["Create a workspace","openDialog('newws')"]},
-  {say:"Oxagen’s own model calls run on routes by tier. Each row carries this month’s use and cost, and the total is what the platform cap has used.",
-   note:"Every model.response frame records the concrete model the provider returned, so the record names the model that answered and the cost record prices that id, never the alias.",
+  {say:"oxagen’s own model calls run on routes by tier. Each row carries this month’s use and cost, and the total is what the platform cap has used.",
+   note:"Every model.response frame records the concrete model the provider returned, so a replay names the model that answered and the cost record prices that id, never the alias.",
    route:function(o){return {page:"organization",org:o};},
    setup:function(){S.tab.organization="funding";S.rq="";},
    act:["Change the funding source","openDialog('funding')"]},
-  {say:"One critical incident: a Stripe charge with no receipt. Money moved that Oxagen did not govern, and the audit archiver caught it as exc_01K5RN2P.",
+  {say:"One critical incident: a Stripe charge with no receipt. Money moved that oxagen did not govern, and the audit archiver caught it as exc_01K5RN2P.",
    note:"An incident is a chain of records, not a summary. Open it to read the frames and the connection it points at.",
    route:function(o){return {page:"audit",org:o};},
    setup:function(){S.tab.audit="incidents";S.rq="";},
@@ -8795,7 +8850,7 @@ SCENARIOS["cio-console"]={title:"The CIO’s console", ws:"core-platform",
    route:function(o){return {page:"audit",org:o};},
    setup:function(){S.tab.audit="receipts";S.rq="stripe";},
    act:["Open the receipt","openDialog('receipt','rcp_01K4X8M2E')"]},
-  {say:"An evidence bundle is for the auditor, who should not have to trust Oxagen. Verify exp_01K4Q7M1 and the check runs against the release key, offline.",
+  {say:"An evidence bundle is for the auditor, who should not have to trust oxagen. Verify exp_01K4Q7M1 and the check runs against the release key, offline.",
    note:"Merkle roots recomputed, seal attestations verified, no gaps in the chain.",
    route:function(o){return {page:"audit",org:o};},
    setup:function(){S.tab.audit="exports";S.rq="";S.verified=S.verified||{};S.verified["exp_01K4Q7M1"]=false;},
@@ -8856,7 +8911,7 @@ function pScenarios(){
    '<p class="lede">'+ids.length+' demos, each one a walk through the real screens. A scenario owns no screens of its own, so it cannot drift away from the product it is demonstrating.</p>'+
    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px">'+ids.map(function(id){var s=SCENARIOS[id];
      return '<div class="scn-card"><b>'+h(s.title)+'</b><p>'+h(s.blurb)+'</p>'+
-      '<p class="mono dim" style="font-size:11px;margin:0">'+s.steps.length+' steps \u00b7 workspace '+h(s.ws)+'</p>'+
+      '<p class="mono dim" style="font-size:11px;margin:0">'+plural(s.steps.length,"step")+' \u00b7 workspace '+h(s.ws)+'</p>'+
       '<div><button class="btn primary sm" onclick="go(\''+scnHref(id,1)+'\')">Start</button></div></div>';
    }).join("")+'</div>';
 }
@@ -8883,12 +8938,12 @@ function steerModeField(){
   var on=S.steerInt;
   return '<div class="field"><label>Delivery</label>'+
    '<div class="steer-mode'+(on?" on":"")+'"><div class="grow"><b>'+(on?"Interrupt now":"At the boundary")+'</b>'+
-    '<div class="d">'+(on?"Every selected agent with a run in flight stops where it stands. The in-flight tool call is cancelled and recorded, the turn is cut, and this steer is the first thing it reads. Idle agents read it at their next run.":
+    '<div class="d">'+(on?"Every selected agent with a run in flight stops where it stands. The in-flight tool call is canceled and recorded, the turn is cut, and this steer is the first thing it reads. Idle agents read it at their next run.":
      "Each agent finishes the turn it is on, then reads this before its next model call. Nothing in flight is cut. Idle agents read it at their next run.")+'</div></div>'+
     '<button class="ks-sw int'+(on?" on":"")+'" role="switch" aria-checked="'+(on?"true":"false")+'" aria-label="Interrupt" onclick="steerToggleInt()"><span class="lbl">Interrupt</span><i></i></button></div>'+
    '<div class="hint">Interrupt cuts the call in flight at the proxy on the <span class="mono">gateway</span> and <span class="mono">contained</span> tiers. On the <span class="mono">harness</span> tier a steer lands at the next hook boundary.</div>'+
    '<div class="hint">Recorded per run as a <span class="mono">control.steer</span> frame attributed to you'+
-    (on?', preceded by a <span class="mono">control.interrupt</span> frame that names the cancelled call':'')+'.</div></div>';
+    (on?', preceded by a <span class="mono">control.interrupt</span> frame that names the canceled call':'')+'.</div></div>';
 }
 function steerFleetBody(){
   var list=fleetAgents(), n=steerCount();
@@ -8901,7 +8956,7 @@ function steerFleetBody(){
     '<div class="steer-list">'+rows+'</div>'+
     '<div class="hint">Every agent in '+h(ws().name)+', selected by default. Steering the fleet is a grant you hold by role, not a default.</div></div>'+
    steerTextField(STEER_DEFAULT,3)+steerModeField()+
-   '<div class="note">Oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.</div>';
+   '<div class="note">oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.</div>';
 }
 function steerFoot(fleet){
   var n=fleet?steerCount():1, on=S.steerInt, who=fleet?(n+' agent'+(n===1?'':'s')+' · '+steerLive()+' in flight'):'this run';
@@ -8999,8 +9054,8 @@ function steerSend(fleet){
     var ks=SWITCHES.filter(function(s){return s.on&&((s.lvl==="Agent"&&s.target===a.key)||(s.lvl==="Workspace"&&s.target===a.ws)||s.lvl==="Organization"||
       (s.lvl==="Operator’s agents"&&PEOPLE[a.operator]&&s.target===PEOPLE[a.operator].name));})[0];
     var mute=STEER_MUTES.filter(function(u){return u.agent===a.key;})[0];
-    if(ks){ t.kind="cancelled"; t.why="kill switch "+ks.id+" ("+ks.lvl.toLowerCase()+" · "+ks.target+") is armed; suppressed before it was queued"; }
-    else if(mute){ t.kind="cancelled"; t.why="steering muted for this agent by "+mute.by+" on "+mute.at+" · "+mute.why+"; suppressed before it was queued"; }
+    if(ks){ t.kind="canceled"; t.why="kill switch "+ks.id+" ("+ks.lvl.toLowerCase()+" · "+ks.target+") is armed; suppressed before it was queued"; }
+    else if(mute){ t.kind="canceled"; t.why="steering muted for this agent by "+mute.by+" on "+mute.at+" · "+mute.why+"; suppressed before it was queued"; }
     else if(a.enrolled===false||(r&&r.tier==="observe")){ t.kind="failed"; t.why=r&&r.tier==="observe"?"an observe-tier run has no seam to inject through":"the agent is not enrolled, so there is no seam to deliver through"; }
     else if(r){
       t.kind="run"; t.degraded=mode==="interrupt"; t.mode=t.degraded?"boundary":mode;
@@ -9017,7 +9072,7 @@ var STEER_MUTES=[{agent:"a-intel.core.docs-writer",by:"Priya Natarajan",at:"2026
 function steerRows(rep){
   var exp=steerClockAdd(rep.at,STEER_TTL), late=Date.now()-rep.ms>STEER_TTL;
   return rep.to.map(function(t){
-    if(t.kind==="cancelled"||t.kind==="failed") return {agent:t.agent,run:t.run,status:t.kind,mode:"—",when:rep.at.slice(0,8),why:t.why};
+    if(t.kind==="canceled"||t.kind==="failed") return {agent:t.agent,run:t.run,status:t.kind,mode:"—",when:rep.at.slice(0,8),why:t.why};
     if(t.kind==="idle") return late
       ?{agent:t.agent,run:null,status:"expired",mode:"next run",when:exp,why:"no run started inside the 10-minute delivery window"}
       :{agent:t.agent,run:null,status:"queued",mode:"next run",when:"—",why:"no run in flight; reads this at its next run, or expires at "+exp};
@@ -9042,7 +9097,7 @@ DLG_EXT.deliveryreport=function(){
     if(r.status==="applied"){ n.applied++; tok+=r.tokens; runsHit++; if(!first) first=r; }
     else if(r.status==="queued") n.queued++; else n.undelivered++;
   });
-  var cls={applied:"b-allowed",queued:"b-approval",expired:"b-denied",cancelled:"b-denied",failed:"b-denied"};
+  var cls={applied:"b-allowed",queued:"b-approval",expired:"b-denied",canceled:"b-denied",failed:"b-denied"};
   var trs=rows.map(function(r){
     return '<tr><td><span class="mono" style="font-size:12px">'+h(r.agent)+'</span><div class="mono dim" style="font-size:11px">'+(r.run?h(r.run):'no run in flight')+'</div></td>'+
      '<td><span class="b '+cls[r.status]+'"><span class="d"></span>'+h(r.status)+'</span></td>'+
@@ -9054,14 +9109,14 @@ DLG_EXT.deliveryreport=function(){
   return {t:n.applied+" applied, "+n.queued+" queued, "+n.undelivered+" undelivered",
    s:"Delivery report · "+rows.length+" recipient"+(rows.length===1?"":"s")+" · sent "+rep.at.slice(0,8)+" · "+(rep.mode==="interrupt"?"interrupt requested":"at the boundary"),w:true,
    b:'<p class="muted" style="font-size:12.5px;margin:0 0 12px">Every status change is a frame on the recipient’s run. <span class="mono">applied</span> is the only success status: the model request carrying the steer was made, and the row names that frame. '+
-     '<span class="mono">expired</span>, <span class="mono">cancelled</span> and <span class="mono">failed</span> count as undelivered.</p>'+
+     '<span class="mono">expired</span>, <span class="mono">canceled</span> and <span class="mono">failed</span> count as undelivered.</p>'+
     '<div class="grid g3" style="margin-bottom:14px">'+
      '<div class="stat"><span class="k">Applied</span><span class="v" style="color:var(--st-allowed)">'+n.applied+'</span><span class="s">a model call carried it</span></div>'+
      '<div class="stat"><span class="k">Queued</span><span class="v" style="color:var(--st-approval)">'+n.queued+'</span><span class="s">waiting for a boundary or a run</span></div>'+
-     '<div class="stat"><span class="k">Undelivered</span><span class="v" style="color:var(--st-denied)">'+n.undelivered+'</span><span class="s">expired, cancelled or failed</span></div></div>'+
+     '<div class="stat"><span class="k">Undelivered</span><span class="v" style="color:var(--st-denied)">'+n.undelivered+'</span><span class="s">expired, canceled or failed</span></div></div>'+
     '<div class="note" style="margin-bottom:12px"><span class="mono dim" style="font-size:11px">what was sent · '+h(rep.dig)+' · '+rep.tokens+' tok</span><br>“'+h(rep.text)+'”</div>'+
     '<div class="tw"><table><thead><tr><th>Agent and run</th><th>Status</th><th>Mode used</th><th class="num">Time</th><th>Why</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
-    '<p class="dim" style="font-size:11.5px;margin:10px 0 0">'+(runsHit?tok+' tokens injected across '+runsHit+' run'+(runsHit===1?'':'s')+' · client_attested':'Nothing injected yet; queued rows update here as each boundary is reached.')+'</p>',
+    '<p class="dim" style="font-size:11.5px;margin:10px 0 0">'+(runsHit?tok+' tokens injected across '+runsHit+' run'+(runsHit===1?'':'s')+' · reported by harness':'Nothing injected yet; queued rows update here as each boundary is reached.')+'</p>',
    f:'<span class="grow"></span><button class="btn" onclick="closeDialog()">Close</button>'+
     (first?'<button class="btn primary" onclick="closeDialog();openFrameIn(\''+h(first.run)+'\','+first.frame+')">Open the run that received it</button>':'')};
 };
@@ -9127,7 +9182,7 @@ DLG_EXT.deliveryreport=function(){
      what:[["Tool version",tool,1],["Amount",amount],["Counterparty","vendor:aws",1]],
      authority:[["Decision","approve → approved, then allow on token"],["Policy version","pol_v41 (signed)",1],["Rules fired",rules,1],["Mandate",mandate,1],["Approval token",token,1],["Approver reason",reason],["Taint sources","none"]],
      credential:cred,effectRows:eff,
-     integrity:[["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],["Tier","harness · this call was routed through Oxagen, which carried the credential"]]};
+     integrity:[["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],["Tier","harness · this call was routed through oxagen, which carried the credential"]]};
   };
   RECEIPTS.push(
    rc("rcp_01K4W2P7R","2026-09-02 07:12:09.331Z","aws_billing__purchase_savings_plan@2","sp-0a4f91c","$400.00 USD","run_01K4W2N6Q8",
@@ -9169,7 +9224,7 @@ function evidenceDlg(){
      '<div class="ev-who">'+avatarHtml(p.avatar,38,"person")+'<div style="min-width:0"><b style="font-size:13px">'+h(p.name)+'</b>'+
      '<div class="mono dim" style="font-size:11px">'+h(p.role)+' · operator on every run below</div>'+
      '<div style="font-size:12px;color:var(--muted);margin-top:5px">'+h(e.who.note)+'</div></div></div>'+
-     (a?agentCard(a,{layout:"compact",onclick:"closeDialog()",sub:h(a.harnessLabel)+' \u00b7 belt '+a.belt+' \u00b7 '+a.runs30.toLocaleString()+' runs 30d \u00b7 '+usd(a.spend30)+' spend'}):
+     (a?agentCard(a,{layout:"compact",onclick:"closeDialog()",sub:h(a.harnessLabel)+' \u00b7 toolbelt '+a.belt+' \u00b7 '+plural(a.runs30.toLocaleString(),"run")+' 30d \u00b7 '+usd(a.spend30)+' spend'}):
        '<div class="ev-who"><span class="avat" style="border-radius:9px;font-family:var(--mono);font-size:11px">ag</span><div style="min-width:0"><b class="mono" style="font-size:12.5px">'+h(e.who.agent)+'</b><div class="mono dim" style="font-size:11px">'+h(f.level)+' level</div></div></div>')+
      '</div></div></div></div>',
    f:'<span class="grow">Every run above is a sealed record. Open one to read the frames the arithmetic came from.</span>'+
@@ -9195,7 +9250,7 @@ function fixDlg(){
        'The waste is in how the agent behaves, not in its code: the brief says to confirm the changelog, so it re-reads the file. A Steering record changes the behaviour without a deploy; it is reviewed like code, published on merge and delivered at the steering position of the next run. '+
        'Supporting evidence: '+evLink+'.</p></div>'+
        '<div><p class="eyebrow q">Checks that will run</p><div class="tw"><table class="narrow"><tbody>'+
-       ["Schema","Lineage uniqueness","record_hash recomputation","Secret and PII scan","Conflict against active records","constraint_effect ∈ {require, forbid}"]
+       ["Schema","Lineage uniqueness","record_hash recomputation","Secret and PII scan","Conflict against active records","Constraint is require or forbid"]
        .map(function(c){return '<tr><td style="font-size:12px;padding:6px 10px">'+h(c)+'</td><td style="padding:6px 10px"><span class="b b-q">on push</span></td></tr>';}).join("")+
        '</tbody></table></div></div></div>'+
        '<div class="note" style="margin-top:14px">Merge is the publication. Until then the record steers nothing; after it, the Spend page shows the repeat reads disappearing on the next '+h(f.subject)+' run.</div>',
@@ -9209,8 +9264,8 @@ function fixDlg(){
      '<p class="eyebrow q">How to apply it</p><ul class="chain">'+x.steps.map(function(s){return '<li class="on"><div style="font-size:12.5px;color:var(--body)">'+h(s)+'</div></li>';}).join("")+'</ul>'+
      '<div class="ev-claim" style="margin:14px 0 0"><div class="stat"><span class="k">What you save</span><span class="v">'+usd(f.save)+'</span><span class="s">per '+h(f.window.replace(/^last /,""))+' on '+h(f.subject)+'</span></div>'+
      '<div class="stat"><span class="k">Evidence</span><span class="v" style="font-size:15px">'+evLink+'</span><span class="s">'+(e?h(e.confidence)+' confidence':'')+'</span></div>'+
-     '<div class="stat"><span class="k">Where the fix lives</span><span class="v" style="font-size:15px">'+(f.level==="workspace"?"workspace config":"the agent's own code")+'</span><span class="s">Oxagen cannot change it for you; it can show you exactly where</span></div></div>',
-   f:'<span class="grow">Oxagen records the change as a definition change when you apply it, so the saving is attributable on Spend.</span>'+
+     '<div class="stat"><span class="k">Where the fix lives</span><span class="v" style="font-size:15px">'+(f.level==="workspace"?"workspace config":"the agent's own code")+'</span><span class="s">oxagen cannot change it for you; it can show you exactly where</span></div></div>',
+   f:'<span class="grow">oxagen records the change as a definition change when you apply it, so the saving is attributable on Spend.</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button><button class="btn primary" onclick="closeDialog();act(\''+h(x.done).replace(/'/g,"\\'")+'\')">'+h(x.action)+'</button>'};
 }
 
@@ -9233,12 +9288,12 @@ function dialog(){
    "org-switch":{t:"Switch organization",w:false,b:
      '<div class="field"><input placeholder="Search organizations" aria-label="Search organizations"></div>'+
      '<button class="cmd-i on" onclick="closeDialog()"><span class="av">A</span>'+
-     '<span style="flex:1;min-width:0"><b>Anderson Intelligence Corp.</b><br><span class="dim mono" style="font-size:11px">a-intel · Team · '+ic0(ORG.agents)+' agents</span></span><span class="r">current</span></button>'+
-     '<div class="note" style="margin-top:14px">An organization owns a key-encryption key, a Postgres partition, a billing account, and optionally a dedicated data plane. You belong to one here.</div>',
+     '<span style="flex:1;min-width:0"><b>Anderson Intelligence Corp.</b><br><span class="dim mono" style="font-size:11px">a-intel · Team · '+plural(ic0(ORG.agents),"agent")+'</span></span><span class="r">current</span></button>'+
+     '<div class="note" style="margin-top:14px">An organization owns a key-encryption key, a database partition, a billing account, and optionally a dedicated data plane. You belong to one here.</div>',
      f:'<button class="btn" onclick="closeDialog()">Close</button>'},
    "ws-switch":{t:"Switch workspace",w:false,b:
      WS.map(function(w){return '<button class="cmd-i'+(w.slug===S.ws?" on":"")+'" onclick="S.ws=\''+w.slug+'\';closeDialog();go(\'#/'+ORG.slug+'/'+w.slug+'\')">'+
-      '<span><b>'+h(w.name)+'</b><br><span class="dim mono" style="font-size:11px">'+h(w.main)+' · '+h(w.branch)+' · '+w.agents+' agents</span></span>'+
+      '<span><b>'+h(w.name)+'</b><br><span class="dim mono" style="font-size:11px">'+h(w.main)+' · '+h(w.branch)+' · '+plural(w.agents,"agent")+'</span></span>'+
       (w.slug===S.ws?'<span class="r">current</span>':'')+'</button>';}).join("")+
      '<div class="hr"></div><button class="btn" onclick="closeDialog();openDialog(\'newws\')">Create a workspace</button>',
      f:'<button class="btn" onclick="closeDialog()">Close</button>'},
@@ -9251,14 +9306,14 @@ function dialog(){
      '<div class="field"><label>Address</label><select aria-label="Address"><option>this run</option><option>@a-intel.core.release-manager: every live run of this agent</option></select>'+
      '<div class="hint">To steer every live run in the workspace at once, use Steer on the Agents page.</div></div>'+
      steerModeField()+
-     '<div class="note">Oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.</div>',
+     '<div class="note">oxagen never executes steering as an instruction; it enters as evidence at the steering position with operator authority.</div>',
      f:steerFoot(false)},
    steerfleet:{t:"Steer the fleet",w:false,b:steerFleetBody(),f:steerFoot(true)},
    mandate:{t:"Grant a mandate",w:true,b:mandateBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Mandate granted. It is active from its start date and expires on its end date; every draw is a receipt.\')">Grant the mandate</button>'},
    ctxpr:{t:"Open a pull request",w:true,b:
      '<div class="field"><label>Concern</label><input value="Do not re-read CHANGELOG.md more than once in a run" aria-label="Concern"><div class="hint">One concern per pull request.</div></div>'+
-     '<div class="field"><label>Kind</label><select aria-label="Kind"><option>rule: a directive that steers behaviour</option><option>constraint: a hard boundary, require or forbid</option><option>procedure: steps, in order</option><option>fact: a checkable claim</option><option>memory: a durable recollection</option><option>preference: soft, often unfalsifiable</option></select></div>'+
-     '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace: opens on a-intel/platform</option><option>repository: opens on the linked repo itself</option></select>'+
+     '<div class="field"><label>Kind</label><select aria-label="Kind"><option>rule — a directive that steers behavior</option><option>constraint — a hard boundary, require or forbid</option><option>procedure — steps, in order</option><option>fact — a checkable claim</option><option>memory — a durable recollection</option><option>preference — soft, often unfalsifiable</option></select></div>'+
+     '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace — opens on a-intel/platform</option><option>repository — opens on the linked repo itself</option></select>'+
      '<div class="hint">The promoter picks the scope from where the evidence came.</div></div>'+
      '<div class="field"><label>Constraint effect</label><select aria-label="Constraint effect"><option>forbid</option><option>require</option></select>'+
      '<div class="hint">A record can never grant authority. These are the only two values.</div></div>'+
@@ -9292,7 +9347,7 @@ function dialog(){
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Request sent to Priya Natarajan.\')">Send the request</button>'},
    incident:{t:"Open an incident",w:false,b:
      '<div class="field"><label for="in-title">Subject</label><input id="in-title" value="Stripe charge ch_3Qa8 has no receipt"></div>'+
-     '<div class="field"><label for="in-sev">Severity</label><select id="in-sev"><option value="critical">critical: money moved that Oxagen did not govern</option><option value="warning">warning</option><option value="info">info</option></select></div>'+
+     '<div class="field"><label for="in-sev">Severity</label><select id="in-sev"><option value="critical">critical — money moved that oxagen did not govern</option><option value="warning">warning</option><option value="info">info</option></select></div>'+
      '<div class="field"><label>Attach</label><div class="row"><span class="b b-q mono" style="font-size:11px">con_01K2A9</span>'+
      '<span class="b b-q mono" style="font-size:11px">mnd_7K2ETQ4</span><span class="b b-q mono" style="font-size:11px">exc_01K5RN2P</span></div></div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="incidentRaise()">Raise it</button>'},
@@ -9354,7 +9409,7 @@ function dialog(){
      '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Shown once, at creation, and never again.</p>'+
      '<div class="field"><label for="ak-name">Name</label><input id="ak-name" value="Warehouse nightly export"></div>'+
      '<div class="field"><label for="ak-grants">Grants</label><select id="ak-grants"><option>audit.read, receipt.read, export.read</option><option>cost.read, run.read</option><option>workspace.write, agent.write, grant.write</option></select>'+
-     '<div class="hint">A key can reach exactly what a person with those grants can. One agent tool contract drives the API, MCP, the CLI, and these screens.</div></div>'+
+     '<div class="hint">A key can reach exactly what a person with those grants can, in the API, MCP, the CLI and these screens.</div></div>'+
      '<div class="field"><label for="ak-exp">Expires</label><select id="ak-exp"><option value="2026-12-10">90 days</option><option value="2027-03-10">180 days</option><option value="2027-09-11">1 year</option></select></div>'+
      '<div class="note">A key carries grants, not roles. It becomes a service principal and every call it makes is audited against it.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="apikeyCreate()">Create key</button>'},
@@ -9367,20 +9422,20 @@ function dialog(){
      '<div class="warn">Revocation ends the service principal’s access at the next call. Runs it started keep their records.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="apikeyRevoke('+kki+')">Revoke</button>'},
    plan:{t:"Change plan",w:false,b:
-     '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team: usage-based, monthly, cancel any time</option><option>Enterprise: annual, committed use at 20–30% off, from $60,000</option></select></div>'+
+     '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team (usage-based, monthly, cancel any time)</option><option>Enterprise (annual, committed use at 20–30% off, from $60,000)</option></select></div>'+
      '<div class="note">The free tier is in every plan: an included monthly allowance of governed actions and every governance feature on. Enterprise adds a dedicated data plane or behind-the-firewall deployment, and support with an SLA.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Plan change staged in Stripe. Oxagen holds the meter; Stripe holds the plan.\')">Change plan</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Plan change staged in Stripe. Stripe holds the plan and the invoices; oxagen counts the governed actions.\')">Change plan</button>'},
    /* ---- audit dialogs (W10 port) — bodies are built by guarded functions in the Audit section ---- */
    receipt:{t:receiptDlgTitle(),s:receiptDlgSub(),w:true,b:receiptDlgBody(),f:receiptDlgFoot()},
    incidentview:{t:incidentDlgTitle(),s:incidentDlgSub(),w:true,b:incidentDlgBody(),f:incidentDlgFoot()},
    exportevents:{t:"Export events",s:"CSV · the same rows the API and MCP return",w:false,b:
-     '<div class="note">'+AUDIT.length.toLocaleString()+' events in the last 30 days, with actor, actor kind, action, target, result, severity and event id. Nothing in a control-plane event is a prompt or tool body, so this export carries no redaction step.</div>',
+     '<div class="note">'+plural(AUDIT.length.toLocaleString(),"event")+' in the last 30 days, with actor, actor kind, action, target, result, severity and event id. Nothing in a control-plane event is a prompt or tool body, so this export carries no redaction step.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'In the product this downloads events.csv. A mockup writes nothing to disk.\')">Download CSV</button>'},
    newexport:{t:"Export an evidence bundle",s:"segments, attestations, key ids, and the verifier",w:false,b:
      '<div class="field"><label>Scope</label><select id="ex-scope" aria-label="Scope"><option>core-platform · all runs</option><option>finops · all runs</option><option>financial tool calls only · all workspaces</option><option>agent a-intel.finops.invoice-bot · all runs</option></select></div>'+
      '<div class="grid g2" style="gap:12px"><div class="field"><label>From</label><input id="ex-from" value="2026-08-01" aria-label="From"></div><div class="field"><label>To</label><input id="ex-to" value="2026-08-31" aria-label="To"></div></div>'+
      '<div class="field"><label>Format</label><select aria-label="Format"><option>Signed bundle (segments + verifier)</option><option>Receipts as CSV</option><option>Receipts as JSON</option></select></div>'+
-     '<div class="callout">Runs as <span class="mono">export_data</span>, a governed action with third-party egress. The bundle carries the verifier, so whoever receives it can check it without Oxagen.</div>',
+     '<div class="callout">Runs as <span class="mono">export_data</span> — a governed action with third-party egress. The bundle carries the verifier, so whoever receives it can check it without oxagen.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="queueExport()">Build bundle</button>'},
    rotatekek:{t:"Rotate the key-encryption key",s:"a new generation, nothing rewritten",w:false,b:
      '<dl class="kv"><dt>New generation</dt><dd>kek_aintel_2026Q4 in <span class="mono">arn:aws:kms:us-east-1:4471…:key/9c2f</span></dd>'+
@@ -9432,14 +9487,14 @@ var OBSERVED_SAMPLES={
 function schemaDlg(){
   var list=proposals();
   if(!list.length) return {t:"Every observed schema is approved",w:false,
-    b:'<p style="font-size:13px;margin:0 0 6px"><b>Nothing to review.</b></p><p class="muted" style="margin:0;font-size:12.5px">Output validation on the slack server is now strict against approved schemas.</p>',
+    b:'<p style="font-size:13px;margin:0 0 6px"><b>Nothing to review.</b></p><p class="muted" style="margin:0;font-size:12.5px">Output validation on the slack provider is now strict against approved schemas.</p>',
     f:'<button class="btn primary" onclick="closeDialog()">Done</button>'};
   var t=list[0];
   return {t:"Approve an observed output schema",w:true,
-   b:'<p class="eyebrow q"><span class="mono">'+h(t.n)+'@'+h(t.v)+'</span> · the slack server declares no outputSchema for this tool</p>'+
+   b:'<p class="eyebrow q"><span class="mono">'+h(t.n)+'@'+h(t.v)+'</span> · the slack provider declares no output schema for this tool</p>'+
      '<div class="note" style="margin-bottom:14px"><b>What has been happening until now.</b> The gateway recorded this tool’s outputs and validated them only for size and type. '+
      'Every run that used it says so in its completeness record. Approving the inferred schema turns strict validation on from the next call.</div>'+
-     '<dl class="kv"><dt>Observations</dt><dd><span class="num">'+t.calls30.toLocaleString()+'</span> responses over 30 days, from '+agentsWithTool(t.n+"@"+t.v).length+' agents</dd>'+
+     '<dl class="kv"><dt>Observations</dt><dd><span class="num">'+t.calls30.toLocaleString()+'</span> responses over 30 days, from '+plural(agentsWithTool(t.n+"@"+t.v).length,"agent")+'</dd>'+
      '<dt>Inferred from</dt><dd>the intersection of every observation · 0 outliers discarded</dd>'+
      '<dt>Digest on approval</dt><dd class="mono">sha256:'+t.n.length.toString(16)+'c4f9…7b02</dd></dl>'+
      codePair([{lab:"Inferred output schema",sp:"what approval enforces",code:OBSERVED_SCHEMAS[t.n]||"{}"},
@@ -9482,7 +9537,7 @@ function toolDlg(){
      '<p class="eyebrow q" style="margin:14px 0 8px">Input schema</p><pre>'+schema+'</pre>'+
      '<p class="muted" style="font-size:12px;margin:12px 0 0">Validation is strict in both directions: no additional properties, formats enforced, size caps. '+
      'A failure is <span class="mono">schema_violation</span> and the call is denied. The canonical input digest is computed here and is the call’s identity for idempotency, approval binding, and the receipt.</p>',
-   f:'<span style="margin-right:auto;font-size:12.5px;color:var(--muted)">On <b class="num">'+beltsWithTool(t.n+"@"+t.v).length+'</b> belts ·<b class="num">'+t.calls30.toLocaleString()+'</b> calls in 30 days</span>'+
+   f:'<span style="margin-right:auto;font-size:12.5px;color:var(--muted)">On <b class="num">'+beltsWithTool(t.n+"@"+t.v).length+'</b> toolbelts ·<b class="num">'+t.calls30.toLocaleString()+'</b> calls in 30 days</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'};
 }
 
@@ -9515,7 +9570,7 @@ function approveBody(){
 function denyBody(){
   return '<div class="field"><label>Reason for the agent</label>'+
    '<textarea rows="3" aria-label="Reason">Not this cycle. Open the release PR and leave the tag to a person.</textarea></div>'+
-   '<div class="note">Deny, approve, and expiry are all frames. A denial ends the call and is free. The customer never pays for Oxagen saying no.</div>';
+   '<div class="note">Deny, approve, and expiry are all frames. A denial ends the call and is free — the customer never pays for oxagen saying no.</div>';
 }
 function mandateBody(){
   return '<div class="field"><label>Agent</label><select aria-label="Agent"><option>a-intel.finops.invoice-bot</option></select></div>'+
@@ -9582,7 +9637,7 @@ function accountBody(){
   }
   if(tab==="privacy"){
     return '<div class="field"><label>Export</label>'+
-     '<div class="hint">A signed bundle: archive segments, attestations, key ids and a verifier script, so an auditor can check the chain offline without trusting Oxagen. Runs as <span class="mono">export_data</span>, a governed action with third-party egress.</div>'+
+     '<div class="hint">A signed bundle: archive segments, attestations, key ids and a verifier script, so an auditor can check the chain offline without trusting oxagen. Runs as <span class="mono">export_data</span> — a governed action with third-party egress.</div>'+
      '<div class="row" style="margin-top:4px"><button class="btn" onclick="act(\'Export queued. You will get a signed bundle and a verifier script.\')">Export my activity</button>'+
      '<button class="btn" onclick="act(\'An organization export needs an org owner. Priya Natarajan has been asked.\')">Export the organization</button></div></div>'+
      '<div class="field"><label>Erasure</label>'+
@@ -9669,9 +9724,9 @@ function cmdMenu(){
   var belt=cmdBeltHits().map(function(x){
     return item('closeDialog();openDialog(\'tool\',\''+h(x.id)+'\')','<span class="tcw">'+toolCell(x.id,{sz:"sm"})+'</span><span class="ds">'+h(x.d)+'</span><span class="r">'+hazard(x.risk,x.eff)+gate(x.dec)+'</span>',"belt");});
   var body=nav+
-   grp("Tools on the belt","risk and side effect, the same trailer the model sees",belt,"belt");
-  if(!n) body='<div class="cmd-empty"><b>Nothing on your belt matches “'+h(S.cmdq)+'”.</b>'+
-   '<p>A search never returns a tool outside the belt. What you cannot call, you cannot find, which is also what stops a prompt injection from naming one.</p></div>';
+   grp("Tools on the toolbelt","risk and side effect, the same trailer the model sees",belt,"belt");
+  if(!n) body='<div class="cmd-empty"><b>Nothing on your toolbelt matches “'+h(S.cmdq)+'”.</b>'+
+   '<p>A search never returns a tool outside the toolbelt. What you cannot call, you cannot find, which is also what stops a prompt injection from naming one.</p></div>';
   if(S.cmdSel>=n) S.cmdSel=0;
   setTimeout(cmdFocus,0);
   return '<div class="scrim" onclick="if(event.target===this){S.cmdq=\'\';closeDialog();}">'+
@@ -9699,7 +9754,7 @@ function agentCard(a,o){
   o=o||{}; var lay=o.layout||"list";
   if(!a) return '<span class="agc agc-'+lay+'"><span class="agid"><span class="tkey">'+h(o.key||"")+'</span></span></span>';
   var sz=o.sz||(lay==="detail"?60:lay==="compact"?30:26);
-  var sub=o.sub!=null?o.sub:lay==="compact"?h(a.harnessLabel)+' \u00b7 '+(a.runs30||0).toLocaleString()+' runs 30d \u00b7 '+usd(a.spend30):h(a.harnessLabel);
+  var sub=o.sub!=null?o.sub:lay==="compact"?h(a.harnessLabel)+' \u00b7 '+plural((a.runs30||0).toLocaleString(),"run")+' 30d \u00b7 '+usd(a.spend30):h(a.harnessLabel);
   var link=o.link!=null?o.link:lay==="compact";
   var inner=agentAv(a,sz)+'<span class="agid"><span class="tkey">'+h(a.key)+'</span>'+(sub?'<span class="sub">'+sub+'</span>':'')+'</span>';
   return link?'<a class="agc agc-'+lay+'" href="'+agentUrl(a)+'"'+(o.onclick?' onclick="'+o.onclick+'"':'')+'>'+inner+'</a>':'<span class="agc agc-'+lay+'">'+inner+'</span>';
@@ -9765,7 +9820,7 @@ function roleAssignees(id){
 }
 function permChips(perms,max){
   var shown=perms.slice(0,max||4);
-  return shown.map(function(p){return '<span class="b b-q" style="margin:0 3px 3px 0;font-family:var(--mono);font-weight:500">'+h(p)+'</span>';}).join("")+
+  return shown.map(function(p){return '<span class="b b-q" style="margin:0 3px 3px 0;font-family:var(--mono);font-weight:500">'+h(p)+'</span>';}).join(SEP)+
    (perms.length>shown.length?'<span class="dim" style="font-size:11px">+'+(perms.length-shown.length)+' more</span>':'');
 }
 /* Role kinds (human, agent, service), not record kinds. Named apart from kindBadge, which this used to
@@ -9778,16 +9833,16 @@ function rolesBody(){
     return '<tr class="click" onclick="roleOpen(\''+r.id+'\')"><td><span class="tkey">'+h(r.id)+'</span><div class="dim" style="font-size:11.5px">'+h(r.desc)+'</div></td>'+
      '<td>'+roleKindBadge(r.kind)+'</td><td class="mono" style="font-size:11.5px">'+h(r.scope)+'</td>'+
      '<td style="max-width:30ch">'+permChips(r.perms)+'</td>'+
-     '<td style="font-size:12px;white-space:nowrap">'+(n.total?[n.people?n.people+' people':'',n.agents?n.agents+' agent'+(n.agents>1?'s':''):'',n.svc?n.svc+' key'+(n.svc>1?'s':''):''].filter(Boolean).join(' · '):'<span class="dim">nobody</span>')+'</td>'+
+     '<td style="font-size:12px;white-space:nowrap">'+(n.total?[n.people?plural(n.people,"person","people") :'',n.agents?plural(n.agents,"agent"):'',n.svc?plural(n.svc,"key"):''].filter(Boolean).join(' · '):'<span class="dim">Not assigned</span>')+'</td>'+
      '<td style="font-size:11.5px">'+(locked?'<span class="b b-q">built-in</span>':'<span class="dim">'+h(r.by)+' · '+h(r.at)+'</span>')+'</td>'+
-     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="roleOpen(\''+r.id+'\')">'+(locked?'View':'Edit')+'</button>'+
+     '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="roleOpen(\''+r.id+'\')">'+(locked?'View':'Edit')+'</button><span class="vh">, </span>'+
       '<button class="btn sm" onclick="roleDup(\''+r.id+'\')">Duplicate</button>'+
-      '<button class="btn sm danger"'+(locked?' disabled title="Built-in roles cannot be deleted"':busy?' disabled title="Reassign the '+n.total+' holder'+(n.total>1?'s':'')+' first"':'')+' onclick="openDialog(\'roledel\',\''+r.id+'\')">Delete</button></td></tr>';
+      (locked?'':'<span class="vh">, </span><button class="btn sm danger"'+(busy?' disabled title="Reassign '+plural(n.total,"holder")+' first"':'')+' onclick="openDialog(\'roledel\',\''+r.id+'\')">Delete</button>')+'</td></tr>';
   }).join("");
   return '<div class="panel"><div class="panel-h"><h3>Roles</h3>'+
-   '<div class="sp"><span class="b b-q">postgres · iam</span><button class="btn sm primary" onclick="roleNew()">Create role</button></div></div>'+
+   '<div class="sp"><button class="btn sm primary" onclick="roleNew()">Create role</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Role</th><th>Kind</th><th>Scope</th><th>Permissions</th><th>Held by</th><th>Origin</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">A role is a permission set, nothing more. An agent’s effective permission is its roles ∩ its operator’s grants ∩ the policy bundle ∩ the kill switches. A role can widen what an agent may ask for, never what its operator may.</div></div></div>';
+   '<div class="panel-b"><div class="note">An agent can only do what its roles, its operator’s permissions, the policy and the kill switches all allow.</div></div></div>';
 }
 function roleNew(){S.roleEdit={id:"",kind:"agent",scope:"workspace",desc:"",perms:{},isNew:true};openDialog("roleedit");}
 function roleOpen(id){var r=roleById(id);if(!r)return;var p={};r.perms.forEach(function(x){p[x]=true;});S.roleEdit={id:r.id,orig:r.id,kind:r.kind,scope:r.scope,desc:r.desc,perms:p,builtin:r.builtin,isNew:false};openDialog("roleedit");}
@@ -9803,9 +9858,9 @@ function roleSave(){
   if(!perms.length){act("A role with no permissions grants nothing. Pick at least one.");return;}
   if(d.isNew){ if(roleById(id)){act("A role named "+id+" already exists.");return;}
     ROLES.push({id:id,kind:kind,scope:scope,desc:desc,perms:perms,builtin:false,by:PEOPLE.marcus.name,at:"2026-09-11"});
-    closeDialog(); act("Role "+id+" created, a governed action recorded with your name on it.","gold");
+    closeDialog(); act("Role "+id+" created and recorded in Audit with your name.","gold");
   } else { var r=roleById(d.orig); if(r){r.desc=desc;r.kind=kind;r.scope=scope;r.perms=perms;}
-    closeDialog(); act("Role "+d.orig+" updated. Every holder’s effective permission is recomputed at its next call."); }
+    closeDialog(); act("Role "+d.orig+" updated. Each holder gets the new permissions at its next call."); }
 }
 function roleDeleteConfirm(id){
   var i=-1;ROLES.forEach(function(r,ix){if(r.id===id)i=ix;});
@@ -9847,7 +9902,7 @@ DLG_EXT.rotatecred=function(key){
   var a=agent(key); if(!a)return noSuch("Agent");
   return {t:"Rotate the credential on "+a.key+"?",w:false,
    b:'<div class="note">A new key is minted and handed to the host at its next check-in. The old key stops working at the next call, and every live run token dies with it.</div>'+
-     '<div class="warn">A run in flight on this agent ends at its next call, not at a boundary. Its frames up to that point are kept.</div>',
+     '<div class="warn">A run in flight on this agent ends at its next call, without waiting for a checkpoint. Its frames up to that point are kept.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="closeDialog();act(\'Credential rotated on '+h(a.key)+'. The old key stops working at the next call and every live run token dies with it.\',\'gold\')">Rotate it</button>'};
 };
@@ -9855,15 +9910,15 @@ DLG_EXT.revokecred=function(key){
   var a=agent(key); if(!a)return noSuch("Agent");
   return {t:"Revoke the credential on "+a.key+"?",w:false,
    b:'<div class="note">Nothing is minted to replace it. '+h(a.key)+' cannot call anything until a new credential is issued, and every run token dies at the next call.</div>'+
-     '<div class="warn">Rotate is the reversible one. Revoke leaves the agent unable to run.</div>',
+     '<div class="warn">Revoke leaves the agent unable to run until a new credential is issued. To replace the key and keep running, rotate the credential instead.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
      '<button class="btn danger" onclick="closeDialog();act(\'Credential revoked on '+h(a.key)+'. Every run token dies at the next call.\')">Revoke it</button>'};
 };
 DLG_EXT.suspendagent=function(key){
   var a=agent(key); if(!a)return noSuch("Agent");
   return {t:"Suspend "+a.key+"?",w:false,
-   b:'<div class="note">Suspension is reversible and keeps the registration, the roles and the mandates. Every run token dies at the next call, even if the daemon is down, because the refusal is on the server.</div>'+
-     '<div class="note" style="margin-top:10px">Deregister is the one that ends the agent. This one you can undo.</div>',
+   b:'<div class="note">Suspension is reversible and keeps the registration, the roles and the mandates. Every run token dies at the next call, even if the daemon is down, because oxagen refuses the call itself.</div>'+
+     '<div class="note" style="margin-top:10px">Retire ends the agent. You can undo a suspension.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn danger" onclick="closeDialog();act(\'Agent '+h(a.key)+' suspended. Every run token dies at the next call, even if the daemon is down.\')">Suspend it</button>'};
 };
@@ -9873,10 +9928,10 @@ DLG_EXT.unenroll=function(key){
   var a=agent(key), rt=a?rtById(a.host):rtById(key);
   if(!a&&!rt)return noSuch("Runtime");
   return {t:"Unenroll "+((rt&&rt.name)||(a&&a.host)||"the host")+"?",w:false,
-   b:'<div class="note">Calls routed through Oxagen are refused from this host from now on. The hooks on the host are removed at its next check-in, so a host that is offline keeps them until it returns.</div>'+
+   b:'<div class="note">Calls routed through oxagen are refused from this host from now on. The hooks on the host are removed at its next check-in, so a host that is offline keeps them until it returns.</div>'+
      '<div class="warn">Checkpoints from this host are unsigned after this, and the chain records the gap.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it enrolled</button>'+
-     '<button class="btn danger" onclick="closeDialog();act(\'Host revoked. Calls routed through Oxagen are refused from now on. The hooks on the host are removed at its next check-in.\')">Unenroll it</button>'};
+     '<button class="btn danger" onclick="closeDialog();act(\'Host revoked. Calls routed through oxagen are refused from now on. The hooks on the host are removed at its next check-in.\')">Unenroll it</button>'};
 };
 DLG_EXT.cancelrun=function(){
   return {t:"Cancel this run?",w:false,
@@ -9943,7 +9998,7 @@ function agentRoleChips(a){
   return (list.length?list.map(function(r){return '<span class="rl-chip"><span>'+h(r)+'</span><button type="button" aria-label="Remove '+h(r)+'" title="Remove role" onclick="roleUnassign(\''+h(a.key)+'\',\''+h(r)+'\')">×</button></span>';}).join(""):'<span class="dim">none. It can call nothing</span>')+
    '<div><button class="btn sm" style="margin-top:6px" onclick="openDialog(\'assignrole\',\''+h(a.key)+'\')">Assign role</button></div>';
 }
-function roleUnassign(key,r){var l=agentRolesOf(key);var i=l.indexOf(r);if(i>=0)l.splice(i,1);render();act("Removed "+r+" from "+key+". Its belt is recomputed at the next run start.");}
+function roleUnassign(key,r){var l=agentRolesOf(key);var i=l.indexOf(r);if(i>=0)l.splice(i,1);render();act("Removed "+r+" from "+key+". Its toolbelt is recomputed at the next run start.");}
 function roleAssign(){
   var key=S.dlgArg, sel=el("asgRole"), scope=el("asgScope"), why=el("asgWhy"); if(!key||!sel) return;
   var r=roleById(sel.value); if(!r){act("Pick a role.");return;}
@@ -9962,7 +10017,7 @@ function assignRoleDlg(){
    '<div class="field" id="asgScopeF"'+(first&&first.scope==="repository"?'':' hidden')+'><label>Repository</label><select id="asgScope" aria-label="Repository">'+[ws().main].concat(ws().linked||[]).map(function(x){return '<option>'+h(x)+'</option>';}).join("")+'</select>'+
     '<div class="hint">A repository-scoped role is bound to one repo.</div></div>'+
    '<div class="field"><label>Why</label><input id="asgWhy" value="" placeholder="Read by the approver and kept in the audit record" aria-label="Reason"></div>'+
-   '<div class="note">Effective permission stays <span class="mono">roles ∩ '+h(PEOPLE[a.operator].name)+'’s grants</span>. A role cannot lift an agent above its operator.</div>',
+   '<div class="note">The agent can still do only what both its roles and '+h(PEOPLE[a.operator].name)+'’s grants allow. A role cannot lift an agent above its operator.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="roleAssign()">Assign</button>'};
 }
 function identitySave(){
@@ -9971,11 +10026,11 @@ function identitySave(){
 }
 function identityDlg(){
   var a=S.dlg==="identity"?agent(S.dlgArg):null; if(!a) return {t:"Identity",w:false,b:"",f:""};
-  return {t:"Change identity",s:a.key,w:false,b:
+  return {t:"Edit identity",s:a.key,w:false,b:
    '<div class="field"><label>Principal</label><input value="prn_01K2M7A4E8 · kind agent" readonly aria-label="Principal"><div class="hint">The principal is the agent’s IAM identity. It is created at registration and never reused.</div></div>'+
    '<div class="field"><label>Acts on behalf of</label><select id="idOp" aria-label="Parent user">'+Object.keys(PEOPLE).map(function(k){return '<option value="'+k+'"'+(a.operator===k?' selected':'')+'>'+h(PEOPLE[k].name)+' · '+h(PEOPLE[k].role)+'</option>';}).join("")+'</select>'+
     '<div class="hint">The parent user sets the delegation ceiling: the agent can never do what this person cannot.</div></div>'+
-   '<div class="field"><label>Roles held</label><div>'+agentRoleChips(a)+'</div><div class="hint">A role takes effect at the next run start, when the belt is recomputed.</div></div>'+
+   '<div class="field"><label>Roles held</label><div>'+agentRoleChips(a)+'</div><div class="hint">A role takes effect at the next run start, when the toolbelt is recomputed.</div></div>'+
    '<div class="note">Changing the parent user is a governed action with approval by the new parent. The old ceiling applies until they accept.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="identitySave()">Request the change</button>'};
 }
@@ -9992,7 +10047,7 @@ function agentDelete(key){
   closeDialog(); go('#/'+ORG.slug+'/'+a.ws+'/agents'); act(key+" deregistered. Credential revoked, definition archived by pull request, every run and frame kept.");
 }
 function agentDelDlg(){
-  var a=S.dlg==="delagent"?agent(S.dlgArg):null; if(!a) return {t:"Deregister agent",w:false,b:"",f:""};
+  var a=S.dlg==="delagent"?agent(S.dlgArg):null; if(!a) return {t:"Retire agent",w:false,b:"",f:""};
   var live=RUNS.filter(function(r){return r.agent===a.key&&r.status==="live";}).length;
   return {t:"Deregister agent",s:a.key,w:false,b:
    '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a pull request archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
@@ -10031,7 +10086,7 @@ function wsArchiveDlg(){
   var w=S.dlg==="archivews"?wsById(S.dlgArg):null; if(!w) return {t:"Archive workspace",w:false,b:"",f:""};
   var n=AGENTS.filter(function(a){return a.ws===w.slug;}).length;
   return {t:"Archive workspace",s:w.name,w:false,b:'<p style="font-size:13px">Archiving freezes <b>'+h(w.name)+'</b>: runs, frames, records and spend stay readable forever; agents cannot start, tools cannot be granted, and the main repo binding is released.</p>'+
-   (n?'<div class="warn">'+n+' agent'+(n>1?'s are':' is')+' registered here. Deregister or move them first.</div>':'<div class="note">No agents here. Archiving is an org-owner action, recorded as a security event.</div>'),
+   (n?'<div class="warn">'+n+' agent'+(n>1?'s are':' is')+' registered here. Retire or move them first.</div>':'<div class="note">No agents here. Archiving is an org-owner action, recorded as a security event.</div>'),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n?' disabled':'')+' onclick="wsArchive(\''+h(w.slug)+'\')">Archive</button>'};
 }
 
@@ -10086,7 +10141,7 @@ function apikeyCreate(){
   var grants=(el("ak-grants")?el("ak-grants").value:"run.read").split(",").map(function(g){return g.trim();});
   APIKEYS.push({name:name,key:"ox_live_"+rid(4)+"…"+rid(3),
     principal:"svc_"+name.toLowerCase().replace(/[^a-z0-9]+/g,"_").slice(0,20),
-    grants:grants,by:me().name,last:"never used",n30:0,
+    grants:grants,by:me().name,last:"Never used",n30:0,
     expires:el("ak-exp")?el("ak-exp").value:"2026-12-10",st:"unused"});
   closeDialog(); render();
   act("Created. The secret is shown once and stored hashed; api_key.create is in the audit record.");
@@ -10143,10 +10198,10 @@ function incidentResolveDlg(){
 var REG_TABS=[{id:"cc",n:"Claude Code",s:"one click · harness"},{id:"codex",n:"Codex CLI",s:"one click · harness"},{id:"sdk",n:"SDK agent",s:"five lines · harness"}];
 var REG_TOKEN="oxe_1time_7QK4M2NV9XR3T8ZP";
 var REG_HOST="mbell-mbp.local";
-var REG_PKG={macos:{f:"Oxagen-Agent-2.4.0.pkg",s:"14.2 MB",note:"notarized · Developer ID",sha:"sha256:3f9c71d2…b40a"},
-    windows:{f:"Oxagen-Agent-2.4.0.msi",s:"16.8 MB",note:"signed · EV certificate",sha:"sha256:7a21ce55…19f3"},
+var REG_PKG={macos:{f:"oxagen-agent-2.4.0.pkg",s:"14.2 MB",note:"notarized · Developer ID",sha:"sha256:3f9c71d2…b40a"},
+    windows:{f:"oxagen-agent-2.4.0.msi",s:"16.8 MB",note:"signed · EV certificate",sha:"sha256:7a21ce55…19f3"},
     linux:{f:"oxagen-agent_2.4.0_amd64.deb",s:"12.9 MB",note:"deb, rpm and curl script",sha:"sha256:c40b8e19…62dd"}};
-var REG_HARNESS={"claude-code":"Claude Code","codex-cli":"Codex CLI",stella:"Stella","claude-agent-sdk":"Claude Agent SDK",custom:"Custom"};
+var REG_HARNESS={"claude-code":"Claude Code","codex-cli":"Codex CLI",stella:"stella","claude-agent-sdk":"Claude Agent SDK",custom:"Custom"};
 S.reg=null; S.regN=0;
 function regTabFor(harness){return harness==="claude-code"?"cc":harness==="codex-cli"?"codex":"sdk";}
 function regNew(){return {slug:"perf-watch",harness:"claude-code",tier:"complex",os:"macos",lang:"ts",tab:"cc",log:0,first:false,polling:false,countdown:false,timers:[]};}
@@ -10165,7 +10220,7 @@ function regCancel(){
   var wasLive=!!(S.reg&&S.reg.first);
   regClear(); S.reg=null;
   go('#/'+ORG.slug+'/'+ws().slug);
-  act(wasLive?'Registration cancelled. The enrollment was revoked and the smoke run discarded.':'Registration cancelled. Nothing was installed and nothing was written.');
+  act(wasLive?'Registration canceled. The enrollment was revoked and the smoke run discarded.':'Registration canceled. Nothing was installed and nothing was written.');
 }
 /* The first frame unlocks: the agent (when it is new) and its smoke run are written once per flow. */
 function obUnlock(){
@@ -10200,7 +10255,7 @@ function regFinish(){
     var had=!!r.runId, run=obUnlock();
     if(had){var fs=obScnStepOf("work"); if(fs){scnGo(scnHref(S.scn.id,fs));return;}}
     render();
-    act('First frame received from '+key+'. Oxagen is unlocked; '+run.id+' is live.','gold');
+    act('First frame received from '+key+'. oxagen is unlocked; '+run.id+' is live.','gold');
     return;
   }
   var run2=obUnlock();
@@ -10229,8 +10284,8 @@ function regShell(step,inner){
       '<span class="sn">'+(done?'✓':s.n)+'</span><span class="slab">'+h(s.lab)+'</span></button>';}).join("")+'</nav>'+
    inner+
    '<p class="reg-cap" style="margin-top:22px;text-align:center">'+(ob
-    ?'The operator console does not open until an agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two.'
-    :'Registration does not complete until the agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two. Cancel at any time. Nothing is kept until the frame arrives.')+'</p></div></div>';
+    ?'The operator console does not open until an agent has talked to oxagen. That first frame is also the installer’s smoke test, so there is one path, not two.'
+    :'Registration does not complete until the agent has talked to oxagen. That first frame is also the installer’s smoke test, so there is one path, not two. Cancel at any time — nothing is kept until the frame arrives.')+'</p></div></div>';
 }
 function regName(){
   var r=S.reg, w=ws(), key=regKey();
@@ -10270,7 +10325,7 @@ function regWrap(){
      '<span class="dim" style="font-size:12px">or run</span><pre>oxagen agent enroll --token '+REG_TOKEN+'</pre></div></section>';
   } else if(r.tab==="codex"){
     panel='<section class="reg-wp" role="tabpanel"><div class="wm"><h3>Codex CLI</h3>'+
-     '<p>The same installer, with the Codex profile. It writes <span class="mono">~/.codex/config.toml</span>: the Oxagen MCP server, the notify hook to the collector, and the approval policy routed through Oxagen.</p>'+
+     '<p>The same installer, with the Codex profile. It writes <span class="mono">~/.codex/config.toml</span>: the oxagen MCP endpoint, the notify hook to the collector, and the approval policy routed through oxagen.</p>'+
      earn([["This agent","harness",' <span class="b b-q">or observe</span>'],["Next rung","gateway"],["Top rung","contained"]])+
      '<p class="dim">Which of the two the native tools earn depends on the harness version. On versions that do not expose an approval hook the agent is recorded only, and the run says so.</p></div>'+
      '<div class="wa"><p class="eyebrow q">Download</p>'+osTabs()+
@@ -10283,11 +10338,11 @@ function regWrap(){
      py:{install:"pip install oxagen",code:'<span class="k">from</span> oxagen <span class="k">import</span> oxagen\nagent = oxagen.agent.wrap(\n    key=<span class="s">"'+h(key)+'"</span>,\n    token=os.environ[<span class="s">"OXAGEN_AGENT_TOKEN"</span>],\n)'},
      go:{install:"go get github.com/oxagen/oxagen-go",code:'<span class="k">import</span> <span class="s">"github.com/oxagen/oxagen-go"</span>\nagent := oxagen.Agent.Wrap(oxagen.WrapOptions{\n    Key:   <span class="s">"'+h(key)+'"</span>,\n    Token: os.Getenv(<span class="s">"OXAGEN_AGENT_TOKEN"</span>),\n})'}}[r.lang];
     panel='<section class="reg-wp" role="tabpanel"><div class="wm"><h3>SDK agent</h3>'+
-     '<p>Five lines in your own process. <span class="mono">oxagen.agent.wrap({})</span> installs a frame emitter, the checkpoint gate before each turn, and the Oxagen MCP endpoint as the agent’s tool server. Works with the OpenAI Agents SDK, the Claude Agent SDK, Stella, and any custom loop.</p>'+
+     '<p>Five lines in your own process. <span class="mono">oxagen.agent.wrap({})</span> installs a frame emitter, the checkpoint gate before each turn, and the oxagen MCP endpoint as the agent’s tool provider. Works with the OpenAI Agents SDK, the Claude Agent SDK, stella, and any custom loop.</p>'+
      earn([["This agent","harness"],["Next rung","gateway"],["Top rung","contained"]])+'</div>'+
      '<div class="wa"><p class="eyebrow q">Agent credential</p>'+
      '<div class="reg-tok">issued once to the operator<br><b>oxa_live_••••••••••••3f7a</b><br><span class="dim">hashed at rest · purpose-locked · revocable</span></div>'+
-     '<p class="dim" style="margin:0;font-size:12px">Set it as <span class="mono">OXAGEN_AGENT_TOKEN</span>. Oxagen mints short-lived run tokens from it at run start. Revoking the credential kills every run token at the next call.</p>'+
+     '<p class="dim" style="margin:0;font-size:12px">Set it as <span class="mono">OXAGEN_AGENT_TOKEN</span>. oxagen mints short-lived run tokens from it at run start. Revoking the credential kills every run token at the next call.</p>'+
      '<pre><span class="c">$</span> '+h(sdk.install)+'</pre></div>'+
      '<div class="wfull"><div class="row"><div class="reg-os" role="tablist" aria-label="Language" style="max-width:300px;flex:1">'+["ts","py","go"].map(function(l){
        return '<button type="button" role="tab" aria-selected="'+(r.lang===l)+'" onclick="S.reg.lang=\''+l+'\';render()">'+({ts:"TypeScript",py:"Python",go:"Go"}[l])+'</button>';}).join("")+'</div>'+
@@ -10323,7 +10378,7 @@ function regRun(){
    :'<div><p class="eyebrow">Step 3 of 3</p><h1>Wait for the first frame</h1>'+
    '<p class="reg-lead">Registration completes the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen and lands you on Work looking at its run.</p></div>';
   if(S.state==="error") return head+
-   '<div class="reg-card"><div class="reg-err"><h2>The collector cannot reach Oxagen</h2>'+
+   '<div class="reg-card"><div class="reg-err"><h2>The collector cannot reach oxagen</h2>'+
    '<p>The host <span class="mono">'+REG_HOST+'</span> enrolled, but every request to <span class="mono">https://ingest.oxagen.com/v1</span> has been refused for 94 seconds (<span class="mono">ECONNREFUSED</span>, 6 attempts). No frame has arrived, so registration will not complete.</p>'+
    '<p>Check that outbound 443 to <span class="mono">ingest.oxagen.com</span> is allowed, then run <span class="mono">oxagen agent status</span>.</p>'+
    '<p class="mono dim" style="font-size:11px">request req_01JQ8F4B1PC7QM · host '+REG_HOST+'</p>'+
@@ -10396,7 +10451,7 @@ var OB_STEPS=[
  {id:"verify",lab:"Verify email",sub:"Six-digit code, good for ten minutes"},
  {id:"organization",lab:"Name the organization",sub:"Tenant, namespace and the first workspace"},
  {id:"wrap",lab:"Wrap an agent",sub:"Claude Code, Codex CLI or an SDK agent"},
- {id:"run",lab:"Start a run",sub:"The first frame is what opens Oxagen"}];
+ {id:"run",lab:"Start a run",sub:"The first frame is what opens oxagen"}];
 var OB_ALT=[
  {id:"login",lab:"Log in",sub:"Returning operator, then two-factor"},
  {id:"forgot",lab:"Forgot password",sub:"Reset link, good for sixty minutes"},
@@ -10460,7 +10515,7 @@ function obOfferCard(fr){
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Onboarding offer</h3>'+
    '<button class="btn sm ghost" style="margin-left:auto" onclick="S.obOfferOff=true;render()" aria-label="Dismiss the onboarding offer">Not now</button></div>'+
    '<div class="panel-b"><p style="margin:0 0 6px;font-size:13.5px"><b>Convert by '+h(obDate(OB_OFFER_DAYS))+' for '+h(deal)+'.</b></p>'+
-   '<p class="muted" style="margin:0 0 10px;font-size:12.5px">That is '+OB_OFFER_DAYS+' days from your first run. <span class="mono">'+h(fr.id)+'</span> cost <b>'+usd(fr.cost)+'</b> '+ORG.currency+', <span class="basis">'+h(fr.basis)+'</span>. Oxagen billed <b>'+usd(fmt2(billed))+'</b> for it: the included monthly allowance covered it, and Oxagen never marks up tokens.</p>'+
+   '<p class="muted" style="margin:0 0 10px;font-size:12.5px">That is '+plural(OB_OFFER_DAYS,"day")+' from your first run. <span class="mono">'+h(fr.id)+'</span> cost <b>'+usd(fr.cost)+'</b> '+ORG.currency+', <span class="basis">'+h(fr.basis)+'</span>. oxagen billed <b>'+usd(fmt2(billed))+'</b> for it: the included monthly allowance covered it, and oxagen never marks up tokens.</p>'+
    '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/billing\')">See plans</button></div></div>';
 }
 
@@ -10500,7 +10555,7 @@ function scnRailFloat(){var x=scnRail();return x?'<div class="scn-float">'+x+'</
 
 /* ---- the installer's own screens: download, installing, connected ---- */
 var OB_INSTALL=["Install the oxagend collector to /usr/local/bin","Install the oxagen-hook binary","Register a login item (launchd: com.oxagen.oxagend)",
- "Write Claude Code hooks to ~/.claude/settings.json","Fetch the signed policy bundle and cache it","Register the Oxagen MCP endpoint as a tool server",
+ "Write Claude Code hooks to ~/.claude/settings.json","Fetch the signed policy bundle and cache it","Register the oxagen MCP endpoint as a tool provider",
  "Enroll this host with an Ed25519 device key","Run a one-turn smoke session"];
 function obInstallStop(){if(S.ob.instT){clearTimeout(S.ob.instT);S.ob.instT=null;}}
 function obInstallScreen(n){obInstallStop();S.ob.inst=n;S.ob.instDone=n===2?OB_INSTALL.length:0;render();}
@@ -10517,7 +10572,7 @@ function obInstaller(){
   var st=S.ob.inst||0, pkg=REG_PKG.macos, w=ws(), key=ORG.slug+"."+w.slug.split("-")[0]+"."+obNew().slug;
   var body;
   function shell(inner){
-    return obShell('<div class="reg-card" style="margin-top:0"><div class="ch"><h3>Oxagen Agent Installer</h3><span class="sp">'+h(pkg.f)+'</span></div><div class="cb">'+inner+'</div></div>'+
+    return obShell('<div class="reg-card" style="margin-top:0"><div class="ch"><h3>oxagen Agent Installer</h3><span class="sp">'+h(pkg.f)+'</span></div><div class="cb">'+inner+'</div></div>'+
      (S.state==="error"?'':'<div class="row" style="justify-content:center;margin-top:14px;flex-wrap:wrap"><span class="dim" style="font-size:12px">Installer screen</span>'+
       ["Download","Installing","Connected"].map(function(l,i){return '<button class="btn sm'+(st===i?' sel':' ghost')+'" aria-pressed="'+(st===i)+'" onclick="obInstallScreen('+i+')">'+l+'</button>';}).join("")+'</div>'),true);
   }
@@ -10526,7 +10581,7 @@ function obInstaller(){
    '<p class="muted" style="font-size:13px;margin:8px 0 8px">The token <span class="mono">'+h(REG_TOKEN)+'</span> has already been used, at 13:58 on '+h(obDate(0))+' by host <span class="mono">mbp-marcus</span>. Enrollment tokens are single use.</p>'+
    '<p class="muted" style="font-size:13px;margin:0 0 14px">Nothing was installed. Generate a fresh token from the wrap step and run the installer again.</p>'+
    '<button class="btn" onclick="obGo(\'wrap\')">Back to wrap an agent</button>');
-  if(st===0) body='<h2 style="font-size:19px;margin:0 0 6px">Install the Oxagen agent</h2>'+
+  if(st===0) body='<h2 style="font-size:19px;margin:0 0 6px">Install the oxagen agent</h2>'+
    '<p class="muted" style="font-size:13px;margin:0 0 14px">One signed package installs the collector, the hook binary and a login item, then enrolls this host to <b>'+h(ORG.name)+' / '+h(w.name)+'</b>. The one-time enrollment token is embedded, so there is nothing to paste.</p>'+
    kvl([["Package",'<span class="mono">'+h(pkg.f)+'</span>'],["Size",h(pkg.s)],["Signature",h(pkg.note)],["Checksum",'<span class="mono">'+h(pkg.sha)+'</span>'],["Token",'<span class="mono">'+h(REG_TOKEN)+'</span>']])+
    '<div class="row" style="margin-top:16px"><button class="btn primary" onclick="obInstall()">Install</button><button class="btn" onclick="obGo(\'wrap\')">Cancel</button></div>'+
@@ -10540,11 +10595,11 @@ function obInstaller(){
     var fr=regLines().filter(function(l){return l.hit;})[0], dev=regLines()[0].x.replace(/^host enrolled · /,"");
     body='<div class="row" style="margin-bottom:10px"><span class="reg-ok"><span class="dot"></span>connected</span><span class="mono dim" style="margin-left:auto;font-size:11.5px">'+h(fr.t)+'</span></div>'+
      '<h2 style="font-size:19px;margin:0 0 6px">Connected to '+h(ORG.name)+'</h2>'+
-     '<p class="muted" style="font-size:13px;margin:0 0 12px">The smoke session produced its first frame and Oxagen countersigned it. <span class="mono">'+h(key)+'</span> is wrapped at <b>harness</b> tier.</p>'+
+     '<p class="muted" style="font-size:13px;margin:0 0 12px">The smoke session produced its first frame and oxagen countersigned it. <span class="mono">'+h(key)+'</span> is wrapped at <b>harness</b> tier.</p>'+
      '<div class="reg-frames"><div><span class="sq">0</span><span class="ts">'+h(fr.t)+'</span><span class="kd">agent_start</span><span class="bd">'+h(dev)+' · countersigned on ingest</span></div></div>'+
      '<p class="muted" style="font-size:12.5px;margin:12px 0 6px">Roll back at any time. This removes the hooks, the login item and the base URL, and restores your previous settings file:</p>'+
      '<pre style="margin:0">oxagen agent unenroll --host '+h(REG_HOST)+' --restore</pre>'+
-     '<div class="row" style="margin-top:14px"><button class="btn primary" onclick="obGo(\'run\')">Back to Oxagen</button><span class="dim" style="font-size:12px">The operator console is already unlocking in your browser.</span></div>';
+     '<div class="row" style="margin-top:14px"><button class="btn primary" onclick="obGo(\'run\')">Back to oxagen</button><span class="dim" style="font-size:12px">The operator console is already unlocking in your browser.</span></div>';
   }
   return shell(body);
 }
@@ -10553,8 +10608,8 @@ function obInstaller(){
 function obAccountTab(){
   function row(s,i){return '<div><span class="sn">'+(typeof i==="number"?i+1:"·")+'</span><div class="bd2"><div class="t1">'+h(s.lab)+'</div><div class="t2">'+h(s.sub)+'</div></div>'+
    '<button class="btn sm" onclick="obGo(\''+s.id+'\')">Open</button></div>';}
-  return '<div class="note" style="margin-bottom:16px"><b>Clickable demo only.</b> These are the screens a new operator sees before Oxagen opens, sign-up through the first frame. They are reachable from here so a walkthrough can start from the account you are signed in as. Nothing on them writes anything; Exit demo on any screen brings you back here, still signed in.</div>'+
-   '<div class="field"><label>Sixty seconds to governed</label><div class="ob-steps">'+OB_STEPS.map(row).join("")+'</div></div>'+
+  return '<div class="note" style="margin-bottom:16px"><b>Clickable demo only.</b> These are the screens a new operator sees before oxagen opens, sign-up through the first frame. They are reachable from here so a walkthrough can start from the account you are signed in as. Nothing on them writes anything; Exit demo on any screen brings you back here, still signed in.</div>'+
+   '<div class="field"><label>The path — sixty seconds to governed</label><div class="ob-steps">'+OB_STEPS.map(row).join("")+'</div></div>'+
    '<div class="field"><label>Also in the set</label><div class="ob-steps">'+OB_ALT.map(function(s){return row(s,null);}).join("")+'</div></div>'+
    '<div class="row"><button class="btn primary" onclick="obGo(\'signup\')">Start from sign-up</button>'+
    '<span class="dim" style="font-size:12px">The mockup-state bar still applies: error and denied render each screen’s failure.</span></div>';
@@ -10601,7 +10656,7 @@ function obCodeBack(e,inp){if(e.key==="Backspace"&&!inp.value&&inp.previousEleme
 function obSignup(){
   var err=S.state==="error", me=PEOPLE.marcus;
   return obShell('<div class="ob-h"><p class="eyebrow">Create your account</p><h1>Govern the agents you already run.</h1>'+
-   '<p class="ob-lead">Wrap Claude Code, Codex, Cursor, Stella or an Agent SDK agent, with an included monthly allowance of governed actions and every governance feature on.</p></div>'+
+   '<p class="ob-lead">Wrap Claude Code, Codex CLI, stella or an SDK agent, with an included monthly allowance of governed actions and every governance feature on.</p></div>'+
    '<div class="ob-panel">'+(err?obErr('<b>That email is already registered.</b> Log in instead, or reset your password.'):'')+
    obSso("organization")+'<div class="ob-or">or</div>'+
    '<form class="ob-form" onsubmit="event.preventDefault();obGo(\'verify\')">'+
@@ -10610,7 +10665,7 @@ function obSignup(){
     (err?'<div class="hint" style="color:var(--st-failed)">An account for this address was created on 9 Sep 2026.</div>':'')+'</div>'+
    '<div class="field"><label for="ob-pw">Password</label>'+obPwField("ob-pw")+'</div>'+
    obPrimary("Create account","Creating account…")+
-   '<p class="hint" style="margin:0;font-size:11.5px;color:var(--dim);line-height:1.45">By creating an account you agree to the Oxagen terms and privacy notice. Oxagen never stores your model provider keys in plain text, and never returns them once saved.</p></form></div>'+
+   '<p class="hint" style="margin:0;font-size:11.5px;color:var(--dim);line-height:1.45">By creating an account you agree to the oxagen terms and privacy notice. oxagen never stores your model provider keys in plain text, and never returns them once saved.</p></form></div>'+
    '<p class="ob-foot">Already have an account? <a href="#/welcome/login">Log in</a></p>'+
    '<div class="ob-tags"><span class="b b-q">included monthly allowance</span><span class="b b-q">no token markup</span><span class="b b-q">SOC 2 evidence built in</span></div>');
 }
@@ -10631,7 +10686,7 @@ function obLogin(){
    '<p>'+h(p.name)+' (organization owner, '+h(ORG.name)+') suspended <span class="mono">'+h(me.email)+'</span> on 9 Sep 2026. Runs already recorded are kept; no new run tokens are minted.</p>'+
    '<button class="btn" onclick="act(\'A message to the organization owner is drafted. Nothing else changes until they act.\')">Contact your organization owner</button></div>');
   var err=S.state==="error";
-  return obShell('<div class="ob-h"><p class="eyebrow">Welcome back</p><h1>Log in to Oxagen</h1></div>'+
+  return obShell('<div class="ob-h"><p class="eyebrow">Welcome back</p><h1>Log in to oxagen</h1></div>'+
    '<div class="ob-panel">'+(err?obErr('<b>Email or password is wrong.</b> Check both and try again, or reset your password.'):'')+
    obSso("work")+'<div class="ob-or">or</div>'+
    '<form class="ob-form" onsubmit="event.preventDefault();obGo(\'two-factor\')">'+
@@ -10639,7 +10694,7 @@ function obLogin(){
    '<div class="field"><div class="row" style="justify-content:space-between;margin-bottom:5px"><label for="ob-li-pw" style="margin:0">Password</label><a href="#/welcome/forgot" style="font-size:12px;color:var(--accent-text);text-decoration:none">Forgot password?</a></div>'+obPwField("ob-li-pw","current-password",true)+'</div>'+
    '<label class="ob-check"><input type="checkbox" checked><span>Keep me logged in on this device for 30 days</span></label>'+
    obPrimary("Log in","Logging in…")+'</form></div>'+
-   '<p class="ob-foot">New to Oxagen? <a href="#/welcome">Create an account</a> &nbsp;·&nbsp; Have an invitation? <a href="#/welcome/invite">Accept it</a></p>');
+   '<p class="ob-foot">New to oxagen? <a href="#/welcome">Create an account</a> &nbsp;·&nbsp; Have an invitation? <a href="#/welcome/invite">Accept it</a></p>');
 }
 function obTwoFactor(){
   var err=S.state==="error", me=PEOPLE.marcus;
@@ -10682,7 +10737,7 @@ function obInvite(){
    '<p>'+h(p.name)+' sent it to <span class="mono">'+h(me.email)+'</span>. You are logged in as <span class="mono">'+h(d.email)+'</span>. Log out and back in as the invited address, or ask '+h(p.name)+' to send a new invitation.</p>'+
    '<button class="btn" onclick="obGo(\'login\')">Log in as someone else</button></div>');
   var err=S.state==="error";
-  return obShell('<div class="ob-h"><p class="eyebrow">Invitation</p><h1>Join '+h(ORG.name)+' on Oxagen</h1></div>'+
+  return obShell('<div class="ob-h"><p class="eyebrow">Invitation</p><h1>Join '+h(ORG.name)+' on oxagen</h1></div>'+
    '<div class="ob-panel">'+(err?obErr('<b>This invitation has already been accepted.</b> It was used on 10 Sep 2026 at 09:14. Log in instead.'):'')+
    '<div class="row" style="flex-wrap:nowrap">'+personAv("priya",38)+'<div style="min-width:0"><div style="font-size:14px;font-weight:600">'+h(p.name)+'</div><div class="muted" style="font-size:12.5px">organization owner · invited you on 11 Sep 2026</div></div></div>'+
    '<div class="hr" style="margin:0"></div>'+
@@ -10791,9 +10846,9 @@ function orgKeyState(){
   return ORG_KEY.provisionedId?"ok":"none";
 }
 var ORG_KEY_SOURCES=[
- ["platform_minted","one key minted for this organization on Oxagen’s OpenRouter account",
-  "Oxagen owns, pays, rotates and revokes it. Its tokens are billed. The provider reports it on its own line, so the bill and the ledger can be compared."],
- ["platform","Oxagen’s shared account",
+ ["platform_minted","one key minted for this organization on oxagen’s OpenRouter account",
+  "oxagen owns, pays, rotates and revokes it. Its tokens are billed. The provider reports it on its own line, so the bill and the ledger can be compared."],
+ ["platform","oxagen’s shared account",
   "One key for every customer. Billed back at vendor cost plus a published markup. The provider returns one undifferentiated total, so our meter is the only witness to its own arithmetic."],
  ["customer_key","your own OpenRouter or vendor key",
   "You own and pay for it. Stored enveloped, tested before save, never returned, every read audited. Your tokens are reported and billed at zero."]
@@ -10816,7 +10871,7 @@ function orgKeySourceSet(v){
 }
 function orgKeySave(){
   var n=el("byokKey"), v=n?n.value.trim():"";
-  if(!v){ act("Paste a key first. Oxagen tests it against the provider before it saves anything."); return; }
+  if(!v){ act("Paste a key first. oxagen tests it against the provider before it saves anything."); return; }
   ORG_KEY.customerPrefix=v.slice(0,13);
   render();
   act("Tested against "+ASST_MODEL+" and saved, enveloped. Nothing was returned to this screen.","gold");
@@ -10838,11 +10893,11 @@ function orgKeyPanel(){
        :'<span class="dim">none saved yet</span>')+'</dd>'+
      '<dt>Billing</dt><dd>your tokens are reported and billed at zero; governed actions are billed as usual</dd>'+
      '<dt>Key storage</dt><dd>enveloped, tested before save, never returned, every read audited</dd>'+
-     '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · Stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
+     '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
      '</dl>'+
      '<div class="field" style="margin-top:14px"><label for="byokKey">Your OpenRouter or vendor key</label>'+
      '<input id="byokKey" type="password" autocomplete="off" placeholder="sk-or-v1-…" aria-label="Your key">'+
-     '<div class="hint">Oxagen calls '+h(ASST_MODEL)+' with it once to check it works, then envelopes it. It is never returned to a screen and never read from the environment.</div></div>';
+     '<div class="hint">oxagen calls '+h(ASST_MODEL)+' with it once to check it works, then envelopes it. It is never returned to a screen and never read from the environment.</div></div>';
   } else if(none){
     rows='<div class="note">No key is held for '+h(ORG.name)+'. The in-app agent cannot run, and nothing has been charged. Minting one is a governed action and puts your name on it.</div>';
   } else {
@@ -10853,7 +10908,7 @@ function orgKeyPanel(){
      '<dt>Minted</dt><dd>'+h(ORG_KEY.minted)+' by '+h(PEOPLE[ORG_KEY.mintedBy].name)+(ORG_KEY.rotated?' · rotated '+h(ORG_KEY.rotated):' · never rotated')+'</dd>'+
      '<dt>Monthly cap</dt><dd>'+usd(fmt2(ORG_KEY.capUsd))+' USD, set on the key at the provider as well as in our meter · <span id="orgCapUsed">'+usd(fmt2(orgRoutesTotal()))+'</span> used in '+h(SPEND.month)+', the total of the routes below</dd>'+
      '<dt>Reads</dt><dd>'+ORG_KEY.reads30+' in 30 days, each one an audit event</dd>'+
-     '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · Stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
+     '<dt>Engine</dt><dd><span class="mono">'+h(ASST_ENGINE_URL)+'</span> · stella '+h(ASST_ENGINE_VER)+' over HTTP, on this key</dd>'+
      '</dl>';
   }
   var acts=byok
@@ -10891,9 +10946,9 @@ function orgKeyPanel(){
 }
 
 DLG_EXT.mintkey=function(){
-  return {t:"Mint a model key for "+ORG.name, s:"Oxagen calls OpenRouter’s provisioning API and holds what comes back. The secret is never returned to this screen.", w:false,
-   b:'<div class="field"><label>Name on the account</label><input value="oxagen/'+h(ORG.slug)+'" aria-label="Name"><div class="hint">What the key is called on Oxagen’s OpenRouter account. It is how a person reading the provider’s bill finds this organization.</div></div>'+
-     '<div class="field"><label>Monthly cap</label><input value="2000.00" aria-label="Monthly cap"><div class="hint">Set on the key at the provider as well as in our meter, so a bug in our metering cannot spend past it.</div></div>'+
+  return {t:"Mint a model key for "+ORG.name, s:"oxagen calls OpenRouter’s provisioning API and holds what comes back. The secret is never returned to this screen.", w:false,
+   b:'<div class="field"><label>Name on the account</label><input value="oxagen/'+h(ORG.slug)+'" aria-label="Name"><div class="hint">What the key is called on oxagen’s OpenRouter account. It is how a person reading the provider’s bill finds this organization.</div></div>'+
+     '<div class="field"><label>Monthly cap</label><input value="2000.00" aria-label="Monthly cap"><div class="hint">Set on the key at the provider, not only in our meter — so a bug in our metering cannot spend past it.</div></div>'+
      '<div class="field"><label>What this writes</label>'+
       '<div class="sx-cfg"><div class="sx-cfg-h">POST https://openrouter.ai/api/v1/keys</div><pre>'+
       '<span class="k">name</span>  = <span class="s">"oxagen/'+h(ORG.slug)+'"</span>\n'+
@@ -10902,7 +10957,7 @@ DLG_EXT.mintkey=function(){
       '<span class="c"># clear is the prefix, the provisioned id and a hash. Nothing returns the secret.</span></pre></div></div>'+
      '<div class="note">Minting is a governed action. It appears in the audit record with your name, and every later read of the key is its own audit event.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
-     '<button class="btn primary" onclick="closeDialog();act(\'Key minted on Oxagen\\u2019s OpenRouter account as oxagen/'+h(ORG.slug)+', capped at $2,000.00 a month. The secret was enveloped and never returned; org.model_key.mint is in the audit record.\',\'gold\')">Mint the key</button>'};
+     '<button class="btn primary" onclick="closeDialog();act(\'Key minted on oxagen\\u2019s OpenRouter account as oxagen/'+h(ORG.slug)+', capped at $2,000.00 a month. The secret was enveloped and never returned; org.model_key.mint is in the audit record.\',\'gold\')">Mint the key</button>'};
 };
 DLG_EXT.rotateorgkey=function(){
   return {t:"Rotate this key", s:ORG_KEY.provisionedId+" · "+ORG_KEY.label, w:false,
@@ -11040,7 +11095,7 @@ function asstSheet(){
      cannot reach it says so by name rather than degrading quietly into something that looks like an
      answer. Same for a missing key: the turn is not free, so it cannot run without one. */
   if(S.asstEngine==="down") return asstHead('<span class="b b-failed" style="margin-left:auto"><span class="d"></span>engine down</span>')+
-   asstStateBlock("The Stella engine is not answering",
+   asstStateBlock("The stella engine is not answering",
     '<span class="mono">'+h(ASST_ENGINE_URL)+'</span> returned <code>503</code>. The engine is a required service; nothing falls back to an in-process loop, so the assistant says so by name rather than answering from somewhere else.',
     '<button class="btn sm" onclick="S.asstEngine=\'up\';render()">Retry</button>',
     "engine "+ASST_ENGINE_VER+" · last healthy 09:02:11Z")+
@@ -11300,7 +11355,7 @@ function cedPaint(){
   var fn=el("cedFindN");
   if(fn)fn.textContent=S.ced.find?(S.ced.matches?(S.ced.cur>=0?cedMatchIndex()+" of ":"")+S.ced.matches:"0"):"";
   var cn=el("cedCount");
-  if(cn)cn.textContent=lines.length+" lines · "+text.length+" chars";
+  if(cn)cn.textContent=plural(lines.length,"line")+" · "+text.length+" chars";
   var dirty=text!==S.cedBase[S.ced.key];
   var dot=el("cedDot"); if(dot){ if(dirty)dot.setAttribute("data-on","1"); else dot.removeAttribute("data-on"); }
   var st=el("cedState"); if(st)st.textContent=dirty?"modified":"unchanged";
@@ -11369,7 +11424,7 @@ function cedKey(e){
 S.wz=null;
 
 var CREATE={
- agent:{l:"Agent",d:"A principal that does work here, with a definition, a belt and a budget.",i:"agents",
+ agent:{l:"Agent",d:"A principal that does work here, with a definition, a toolbelt and a budget.",i:"agents",
    file:".oxagen/agents/&lt;slug&gt;.toml",need:"agent.write"},
  tool:{l:"Tool",d:"A capability an agent can be granted. Imported from a provider, or built here.",i:"tools",
    file:".oxagen/tools/&lt;name&gt;.toml",need:"tools.admin"},
@@ -11377,22 +11432,22 @@ var CREATE={
    file:".oxagen/skills/&lt;name&gt;/SKILL.md",need:"skills.admin"},
  record:{l:"Steering record",d:"One statement that steers every agent it reaches.",i:"steering",
    file:".oxagen/rules/&lt;lineage&gt;.toml",need:"steering.write"},
- import:{l:"Markdown import",d:"CLAUDE.md, AGENTS.md and any Markdown file, read into records and memories.",i:"dir",
+ import:{l:"Markdown import",d:"CLAUDE.md, AGENTS.md, and any Markdown file, read into records and memories.",i:"dir",
    file:"CLAUDE.md · AGENTS.md · any .md",need:"steering.write · memory.write"},
- init:{l:"Oxagen directory",d:"The .oxagen/ tree in a repository that has none. The one the others need first.",i:"repo",
+ init:{l:"Repository",d:"Adds the .oxagen/ tree to a repository that has none. The others need it first.",i:"repo",
    file:".oxagen/ &lt;in a repository&gt;",need:"repository.admin"}
 };
 
 DLG_EXT.create=function(){
  var w=ws();
- return {t:"Create", s:"You describe it, Oxagen drafts the file, you read it, and a pull request publishes it.", w:true,
+ return {t:"Create", s:"You describe it, oxagen drafts the file, you read it, and a pull request publishes it.", w:true,
   b:'<div class="wz-pick">'+Object.keys(CREATE).map(function(k){var c=CREATE[k];
      return '<button class="wz-card" onclick="wzOpen(\''+k+'\')">'+
       '<span class="ic">'+icon(c.i)+'</span>'+
       '<span class="tx"><b>'+h(c.l)+'</b><span class="d">'+h(c.d)+'</span>'+
       '<span class="fp mono">'+c.file+'</span></span></button>';}).join("")+'</div>'+
     '<div class="note" style="margin-top:14px">Each one ends on a pull request against '+h(w.main)+
-    '. The thing exists when somebody merges it, and that merge is where a reviewer can stop it. '+
+    '. The thing exists once someone merges it, and a reviewer can stop it there. '+
     'A memory from the Markdown import is the exception: it is written when you accept it, and it steers at may or below.</div>',
   f:'<span class="grow mono dim" style="font-size:11px">'+h(w.name)+' · '+h(w.main)+'</span><button class="btn" onclick="closeDialog()">Close</button>'};
 };
@@ -11490,7 +11545,7 @@ function wzDesc(placeholder,chips,hint){
   return '<div class="field"><div class="lab-row"><label for="wzDesc">In your own words</label>'+
    '<button class="btn wand" id="wzWandBtn" onclick="wzWand()" title="Have the assistant write it" aria-label="Have the assistant write it">'+avSvg("wand-sparkles")+'</button></div>'+
    '<textarea id="wzDesc" rows="4" placeholder="'+h(placeholder)+'" oninput="wzDescIn(this.value)" aria-label="Describe it">'+h(z.desc)+'</textarea>'+
-   '<div class="wand-note'+(raw&&!z.descAI?" on":"")+'" id="wzWandNote">Press the wand. <b>oxagen.assistant</b> rewrites what you wrote into the prose the file carries, and the next step opens when it has. Its turn is recorded, billed to Oxagen, and never counted as one of your runs.</div>'+
+   '<div class="wand-note'+(raw&&!z.descAI?" on":"")+'" id="wzWandNote">Press the wand. <b>oxagen.assistant</b> rewrites what you wrote into the prose the file carries, and the next step opens when it has. Its turn is recorded, billed to oxagen, and never counted as one of your runs.</div>'+
    (hint?'<div class="hint">'+hint+'</div>':'')+'</div>'+
    (chips&&chips.length?'<div class="wz-chips">'+chips.map(function(c){
      return '<button class="btn sm" onclick="wzSetR(\'desc\',\''+h(c).replace(/'/g,"\\'")+'\')">'+h(c)+'</button>';}).join("")+'</div>':'');
@@ -11980,13 +12035,13 @@ DLG_EXT.linkdir=function(){
    b:'<p style="margin-bottom:14px">Run this in the directory you want linked. It reads the git remote, matches it against the repositories this installation can reach, and writes the one gitignored file that says which workspace this checkout talks to.</p>'+
      '<div class="field"><label>In the directory</label>'+
      '<pre>oxagen init --org ' + h(ORG.slug) + ' --workspace ' + h(w.slug) + '\n\n<span class="c"># Pairing code: 4QF2-91KD  ·  expires in 9:41</span></pre>'+
-     '<div class="hint">The code authorises the pairing once. What identifies the copy afterwards is the machine’s enrollment, so a code that leaks after it is spent links nothing.</div></div>'+
+     '<div class="hint">The code works for one pairing. After that, the machine’s enrollment identifies the copy, so a used code links nothing.</div></div>'+
      '<div class="field"><label>What it writes, and what it does not</label>'+
-     wzChecks([["writes",'<span class="mono">.oxagen/workspace.json</span>: org, workspace, path, machine. Gitignored, never reviewed, never merged.'],
-       ["links",'<span class="mono">.stella/rules</span>, <span class="mono">.stella/proposals</span> and <span class="mono">.stella/agents</span> as symlinks into <span class="mono">.oxagen/</span>, so there is no second copy that could drift.'],
+     wzChecks([["writes",'<span class="mono">.oxagen/workspace.json</span>, with the org, workspace, path, and machine. It is gitignored, so nobody reviews or merges it.'],
+       ["links",'<span class="mono">.stella/rules</span>, <span class="mono">.stella/proposals</span> and <span class="mono">.stella/agents</span> as symlinks into <span class="mono">.oxagen/</span>, so there is no second copy to drift.'],
        ["does not write",'anything under <span class="mono">.oxagen/</span> that is committed. If the repository has no <span class="mono">.oxagen/</span> tree at all, it says so and offers the pull request that adds one.'],
-       ["does not read",'your working tree. Oxagen reads <span class="mono">.oxagen/</span> and nothing else; what a run needs from the rest of the repository reaches it as frames, at the hooks.']])+'</div>'+
-     '<div class="note">Linking a directory grants nothing. A person’s roles decide what they may do here, and an agent’s mandate decides what it may do there; a laptop is not a principal.</div>',
+       ["does not read",'your working tree. oxagen reads only <span class="mono">.oxagen/</span>. What a run needs from the rest of the repository reaches oxagen as frames, through the hooks.']])+'</div>'+
+     '<div class="note">Linking a directory grants nothing. A person’s roles decide what they can do here, and an agent’s mandate decides what it can do. A laptop is not a principal.</div>',
    f:'<span class="grow mono dim" style="font-size:11px">'+h(ORG.slug)+' · '+h(w.slug)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn primary" onclick="act(\'Waiting for a directory to pair…\',\'gold\')">Copy command</button>'};
@@ -11999,7 +12054,7 @@ DLG_EXT.linkdir=function(){
 DLG_EXT.copyoff=function(id){
   var c=copyById(id); if(!c)return noSuch("Working copy");
   return {t:"Disconnect "+c.path+"?",w:false,
-   b:'<div class="note">Oxagen forgets this directory. <span class="mono">'+h(c.machine)+'</span> stops reporting it, and the gitignored <span class="mono">.oxagen/workspace.json</span> in it stops resolving. Nothing on disk is deleted and nothing committed changes.</div>'+
+   b:'<div class="note">oxagen forgets this directory. <span class="mono">'+h(c.machine)+'</span> stops reporting it, and the gitignored <span class="mono">.oxagen/workspace.json</span> in it stops resolving. Nothing on disk is deleted and nothing committed changes.</div>'+
      (c.dirty?'<div class="warn">'+c.dirty+' uncommitted edit'+(c.dirty>1?'s':'')+' under <span class="mono">.oxagen/</span> here are carried by no pull request. Disconnecting does not lose them, and it does not propose them either.</div>':'')+
      '<div class="note" style="margin-top:10px">Running <span class="mono">oxagen init</span> in the directory again links it back.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
@@ -12008,7 +12063,7 @@ DLG_EXT.copyoff=function(id){
 function copyDisconnect(id){
   var c=copyById(id), i=WORKCOPIES.indexOf(c); if(i<0)return;
   WORKCOPIES.splice(i,1); closeDialog(); render();
-  act(c.path+" on "+c.machine+" disconnected. The directory is untouched; oxagen init links it back.");
+  act(c.path+" on "+c.machine+" disconnected. The directory is untouched. Run oxagen init there to link it again.");
 }
 
 DLG_EXT.workcopy=function(){
@@ -12023,15 +12078,15 @@ DLG_EXT.workcopy=function(){
      '<dt>Symlinks</dt><dd>'+(sym?'<span class="b b-allowed"><span class="d"></span>ok</span>':'<span class="b b-approval"><span class="d"></span>missing</span>')+'</dd>'+
      '<dt>Bundle</dt><dd><span class="mono">'+h(c.bundle)+'</span>'+(c.bundle!=="v"+STEER_BUNDLE.v?' <span class="dim">· published is v'+STEER_BUNDLE.v+'</span>':'')+'</dd>'+
      '<dt>Last seen</dt><dd>'+h(c.seen)+'</dd></div>'+
-     (ok&&sym?'<div class="note" style="margin-top:14px">This copy holds what is published. Nothing is waiting.</div>'
+     (ok&&sym?'<div class="note" style="margin-top:14px">This copy matches what is published. No action needed.</div>'
       :'<div class="note" style="margin-top:14px;border-left-color:var(--st-approval)">'+
-       (sym?'':'<b>Stella will load nothing here.</b> The symlinks under <span class="mono">.stella/</span> are absent, so its loader has no rules directory to read. <span class="mono">oxagen init</span> re-creates them. ')+
-       (c.oxagen==="behind"?'This copy is behind the production branch, so the person reading it is reading rules that are no longer in force. It does not change what a run is steered by: steering reaches a run from the merged commit, in the signed bundle.'
-        :c.oxagen==="uncommitted"?'There are edits under <span class="mono">.oxagen/</span> that no pull request carries. They steer nothing, here or in a run, until one does.':'')+'</div>')+
+       (sym?'':'<b>stella will load nothing here.</b> The symlinks under <span class="mono">.stella/</span> are absent, so its loader has no rules directory to read. <span class="mono">oxagen init</span> re-creates them. ')+
+       (c.oxagen==="behind"?'This copy is behind the production branch, so whoever reads it sees rules that are no longer in force. Runs are not affected: steering reaches a run from the merged commit, in the signed bundle.'
+        :c.oxagen==="uncommitted"?'There are edits under <span class="mono">.oxagen/</span> that no pull request carries. They steer nothing, here or in a run, until a pull request carries them.':'')+'</div>')+
      (c.dirty?'<div class="field" style="margin-top:14px"><label>Uncommitted under .oxagen/</label>'+
        wzFiles([["mod",".oxagen/rules/ctx.mobile.release-train.toml","statement edited locally"],
                 ["add",".oxagen/agents/screenshot-bot.toml","never committed"]])+
-       '<div class="hint">Turning these into a pull request is <span class="mono">oxagen propose</span>. Opening and merging it happen in Oxagen, because both gate on a role only a signed-in person holds.</div></div>':''),
+       '<div class="hint">Turning these into a pull request is <span class="mono">oxagen propose</span>. You open and merge it in oxagen, because both need a role that only a signed-in person holds.</div></div>':''),
    f:'<span class="grow mono dim" style="font-size:11px">'+h(c.id)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn danger" onclick="openDialog(\'copyoff\',\''+h(c.id)+'\')">Disconnect</button>'+
@@ -12046,7 +12101,7 @@ DLG_EXT.repounlink=function(n){
   if(!r||n===w.main)return noSuch("Repository");
   var copies=WORKCOPIES.filter(function(c){return c.repo===n;}).length;
   return {t:"Unlink "+n+" from "+w.name+"?",w:false,
-   b:'<div class="note">Its issues and events stop reaching this workspace, and a run can no longer bind to it here. The repository is untouched: nothing is deleted, no branch moves, and <span class="mono">.oxagen/</span> stays where it is.</div>'+
+   b:'<div class="note">Its issues and events stop reaching this workspace, and new runs here can no longer use it. The repository is untouched: nothing is deleted, no branch moves, and <span class="mono">.oxagen/</span> stays where it is.</div>'+
      ((r.ox||"governed")==="governed"?'<div class="warn">Records published in this repository stop steering runs in '+h(w.name)+' the moment this is written. Runs already recorded keep naming the hashes they carried.</div>':'')+
      (copies?'<div class="warn">'+copies+' working cop'+(copies>1?'ies are':'y is')+' linked through it. '+(copies>1?'They stop':'It stops')+' appearing on the Working copies tab.</div>':''),
    f:'<button class="btn" onclick="closeDialog()">Keep it linked</button>'+
@@ -12058,14 +12113,14 @@ function repoLink(n){
   if(w.linked.indexOf(n)<0)w.linked.push(n);
   r.role="linked";
   closeDialog(); render();
-  act(n+" linked to "+w.name+". Its issues and events reach this workspace, and a run may bind to it.","gold");
+  act(n+" linked to "+w.name+". Its issues and events reach this workspace, and runs here can use it.","gold");
 }
 function repoUnlink(n){
   var w=ws(), r=repoByName(n); if(!r||n===w.main)return;
   var i=(w.linked||[]).indexOf(n); if(i>=0)w.linked.splice(i,1);
   r.role="available";
   closeDialog(); render();
-  act(n+" unlinked from "+w.name+". Runs already recorded keep naming it; nothing new binds to it here.");
+  act(n+" unlinked from "+w.name+". Runs already recorded still name it. New runs here cannot use it.");
 }
 
 /* ---- one repository ---- */
@@ -12077,28 +12132,28 @@ DLG_EXT.repo=function(){
   if(!r) return {t:"Repository",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var w=ws(), st=oxState(r), gov=(r.ox||"governed")==="governed", avail=r.role==="available";
   var copies=WORKCOPIES.filter(function(c){return c.repo===r.n;});
-  return {t:r.n, s:(r.n===w.main?"main repo":avail?"not linked to this workspace":"linked repo")+" · "+r.lang, w:false,
-   b:'<div class="kv"><dt>Production branch</dt><dd><span class="mono">'+h(r.branch)+'</span> at <span class="mono">'+h(r.head)+'</span></dd>'+
+  return {t:r.n, s:[r.n===w.main?"main repository":avail?"not linked to this workspace":"linked repository",r.lang].filter(function(x){return x;}).join(" · "), w:false,
+   b:'<div class="kv"><dt>Production branch</dt><dd><span class="mono">'+h(r.branch)+'</span>'+(r.head?' at <span class="mono">'+h(r.head)+'</span>':'')+'</dd>'+
      '<dt>Visibility</dt><dd>'+h(r.visibility)+'</dd>'+
-     '<dt>.oxagen/</dt><dd>'+stBadge(st)+(gov?' <span class="dim">· '+r.oxFiles+' files at <span class="mono">'+h(r.oxCommit)+'</span></span>':'')+'</dd>'+
+     '<dt>.oxagen/</dt><dd>'+stBadge(st)+(gov&&r.oxFiles?' <span class="dim">· '+plural(r.oxFiles,"file")+(r.oxCommit?' at <span class="mono">'+h(r.oxCommit)+'</span>':'')+'</span>':'')+'</dd>'+
      '<dt>Issues</dt><dd>'+h(r.issues)+'</dd>'+
      '<dt>Events</dt><dd>'+h(r.events)+'</dd>'+
-     '<dt>Code graph</dt><dd>'+(avail?'<span class="dim">not indexed</span>':r.symbols.toLocaleString()+' symbols · indexed '+h(r.indexed))+'</dd>'+
+     '<dt>Code graph</dt><dd>'+(avail||r.symbols==null?'<span class="dim">Not indexed</span>':plural(r.symbols,"symbol")+' · indexed '+h(r.indexed))+'</dd>'+
      '<dt>Data layer</dt><dd>'+h(r.drift)+'</dd>'+
-     '<dt>Working copies</dt><dd>'+(copies.length?copies.length+' on '+copies.length+' machine'+(copies.length>1?'s':''):'<span class="dim">none</span>')+'</dd></div>'+
+     '<dt>Working copies</dt><dd>'+(copies.length?copies.length+' on '+plural(copies.length,"machine"):'<span class="dim">None</span>')+'</dd></div>'+
      (gov?'<div class="field" style="margin-top:14px"><label>Records published here</label>'+
        '<div class="note">Scope is <span class="mono">'+(r.n===w.main?'workspace':'repository')+'</span>. '+
-       (r.n===w.main?'These steer every run in '+h(w.name)+'.':'These steer only runs whose repository binding is this one. A record here may narrow what a workspace record allows; it may never widen it, and one that claimed workspace scope would fail the checks.')+'</div></div>'
+       (r.n===w.main?'These steer every run in '+h(w.name)+'.':'These steer only runs on this repository. A record here can narrow what a workspace record allows but cannot widen it. One that claims workspace scope fails the checks.')+'</div></div>'
       :'<div class="note" style="margin-top:14px;border-left-color:var(--st-approval)"><b>No <span class="mono">.oxagen/</span> here.</b> '+
-       (avail?'This repository is not linked to '+h(w.name)+' either. Adding Oxagen to it is what links it.'
-        :'Runs on this repository are steered by '+h(w.main)+' and by nothing of its own. There is nowhere to publish a repository-scoped record until the tree exists.')+'</div>'),
+       (avail?'This repository is not linked to '+h(w.name)+' either. Adding <span class="mono">.oxagen/</span> links it.'
+        :'Runs on this repository get steering from '+h(w.main)+' only. A record scoped to this repository has nowhere to go until the tree exists.')+'</div>'),
    f:'<span class="grow mono dim" style="font-size:11px">'+h(r.n)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
      (r.n===w.main?''
       :avail?'<button class="btn primary" onclick="repoLink(\''+h(r.n)+'\')">Link to this workspace</button>'
       :'<button class="btn danger" onclick="openDialog(\'repounlink\',\''+h(r.n)+'\')">Unlink</button>')+
      (gov?'<button class="btn" onclick="closeDialog();S.tab.repositories=\'changes\';go(\'#/'+ORG.slug+'/'+w.slug+'/repositories/changes\')">See its changes</button>'
-      :'<button class="btn'+(avail?'':' primary')+'" onclick="closeDialog();wzOpen(\'init\',\''+h(r.n)+'\')">Add Oxagen</button>')};
+      :'<button class="btn'+(avail?'':' primary')+'" onclick="closeDialog();wzOpen(\'init\',\''+h(r.n)+'\')">Add .oxagen/</button>')};
 };
 
 /* ============================== adding Oxagen to a repository ==============================
@@ -12122,7 +12177,7 @@ function wzInitCandidates(){
 }
 function wzInitFiles(){
   var r=wzInitRepo(), main=(S.wz.role||"linked")==="main";
-  return [["add",".oxagen/workspace.toml", main?"the workspace, its repos, servers and budgets":"the linked-repo declaration"],
+  return [["add",".oxagen/workspace.toml", main?"the workspace, its repos, providers, and budgets":"the linked-repo declaration"],
    ["add",".oxagen/rules/governance.toml","mode = "+(S.wz.mode||"team")],
    ["add",".oxagen/rules/.gitkeep","published records land here"],
    ["add",".oxagen/proposals/.gitkeep","candidates; steer nothing"],
@@ -12137,42 +12192,42 @@ var WZ_MODES=[
 function wzInit(){
   var z=S.wz, r=wzInitRepo(), w=ws(), cands=wzInitCandidates();
   if(z.step===1){
-    return {b:'<p style="margin-bottom:14px">Oxagen governs the files in a repository; it does not keep a copy of them. '+
-      'So the first thing it does in a repository is put the directory there, on a branch, in a pull request, which somebody reads.</p>'+
+    return {b:'<p style="margin-bottom:14px">oxagen governs the files in a repository and keeps no copy of them. '+
+      'So its first step is to add the directory on a branch, in a pull request that someone reviews.</p>'+
       '<div class="field"><label for="wzRepo">Repository</label>'+
       '<select id="wzRepo" onchange="wzSetR(\'repoName\',this.value)">'+
       cands.map(function(n){var c=repoByName(n);
         return '<option value="'+h(n)+'"'+(n===r.n?' selected':'')+'>'+h(n)+' · '+h(c?c.lang:"")+' · '+h(c?c.visibility:"")+'</option>';}).join("")+
       '</select><div class="hint">Only repositories the installation can already reach, and only the ones with no <span class="mono">.oxagen/</span> yet. '+
-      'A repository that has one is already governed; changing it is an ordinary pull request from the page it belongs to.</div></div>'+
+      'To change a repository that already has one, open a pull request from its page.</div></div>'+
       '<div class="wz-pick" style="grid-template-columns:1fr 1fr">'+
-      [["main","Make it the main repo","The workspace’s steering and configuration live here. Exactly one per workspace, and moving it is an owner action with approval."],
-       ["linked","Link it","Its agents work on it. It may carry records that steer only runs on this repository, and never records that claim the workspace."]]
+      [["main","Make it the main repository","The workspace’s steering and configuration live here. A workspace has exactly one, and moving it needs an owner and an approval."],
+       ["linked","Link it","Agents work on it. It can hold records that steer only runs on this repository, but no records scoped to the workspace."]]
       .map(function(x){var on=(z.role||"linked")===x[0], is=w.main===r.n;
         return '<button class="wz-card'+(on?" on":"")+'"'+(x[0]==="main"&&is?' disabled':'')+' onclick="wzSetR(\'role\',\''+x[0]+'\')">'+
          '<span class="tx"><b>'+h(x[1])+'</b><span class="d">'+h(x[2])+'</span></span></button>';}).join("")+'</div>'+
       '<div class="note" style="margin-top:14px">'+
       ((z.role||"linked")==="main"
-        ?h(w.main)+' is this workspace’s main repo today. Merging this makes '+h(r.n)+' the main repo instead. That is an organization-owner action with approval, recorded as a security event, and the one change on this page a reviewer cannot undo by closing the pull request.'
-        :h(w.main)+' is already this workspace’s main repo, so this one is linked.')+'</div>',
-     t:"Add Oxagen to a repository", s:"the directory every other file needs",
+        ?h(w.main)+' is this workspace’s main repository today. Merging this makes '+h(r.n)+' the main repository instead. That needs an organization owner and an approval, and Audit records it as a security event.'
+        :h(w.main)+' is already this workspace’s main repository, so this one is linked.')+'</div>',
+     t:"Connect repository", s:"adds .oxagen/, the directory every other file needs",
      f:wzNext("Next",true)};
   }
   if(z.step===2){
-    return {b:'<p style="margin-bottom:14px">Two things are decided once here, and both are then changed the way everything else is: by a pull request against this repository.</p>'+
+    return {b:'<p style="margin-bottom:14px">You set two things here. After this, you change either one with a pull request against this repository.</p>'+
       '<div class="field"><label for="wzBr">Production branch</label>'+
       '<select id="wzBr" onchange="wzSetR(\'branch\',this.value)">'+
       [r.branch,"main","release","production"].filter(function(v,i,a){return a.indexOf(v)===i;})
        .map(function(b){return '<option'+(b===(z.branch||r.branch)?' selected':'')+'>'+h(b)+'</option>';}).join("")+
-      '</select><div class="hint">GitHub’s default branch is <span class="mono">'+h(r.branch)+'</span>, which is the suggestion and not the decision. '+
-      'This is the only branch whose commits update the code graph, and the only one a record is published to. If GitHub’s default changes later, Oxagen records it and prompts; the binding never moves on its own.</div></div>'+
+      '</select><div class="hint">GitHub’s default branch is <span class="mono">'+h(r.branch)+'</span>, which is the suggestion. '+
+      'Only this branch’s commits update the code graph, and records are published only to this branch. If GitHub’s default changes later, oxagen records it and asks you to confirm before the production branch moves.</div></div>'+
       '<div class="field"><label>Governance mode</label>'+
       '<div class="wz-pick" style="grid-template-columns:1fr">'+
       WZ_MODES.map(function(m){var on=(z.mode||"team")===m[0];
         return '<button class="wz-card'+(on?" on":"")+'" onclick="wzSetR(\'mode\',\''+m[0]+'\')">'+
          '<span class="tx"><b>'+h(m[0])+'</b><span class="d">'+h(m[1])+' '+h(m[2])+'</span></span></button>';}).join("")+'</div>'+
-      '<div class="hint">This is read off <span class="mono">.oxagen/rules/governance.toml</span> when a pull request is opened and again when it is merged, so raising it takes effect on everything already in flight. Nothing else in Oxagen writes that file.</div></div>',
-     t:"Add Oxagen to a repository", s:"the directory every other file needs",
+      '<div class="hint">This is read off <span class="mono">.oxagen/rules/governance.toml</span> when a pull request is opened and again when it is merged, so raising it applies to every open pull request. Nothing else in oxagen writes that file.</div></div>',
+     t:"Connect repository", s:"adds .oxagen/, the directory every other file needs",
      f:wzNext("Next",true)};
   }
   if(z.step===3){
@@ -12181,16 +12236,16 @@ function wzInit(){
       ["Checks","write","the check runs on the head commit"],
       ["Metadata","read","mandatory"],
       ["Issues","read","task references, so spend rolls up to an issue"]];
-    return {b:wzDraftNote("What Oxagen will be able to do in "+r.n)+
+    return {b:wzDraftNote("What oxagen will be able to do in "+r.n)+
       '<div class="tw" style="margin-top:14px"><table class="narrow"><thead><tr><th>Permission</th><th>Level</th><th>What it is for</th></tr></thead><tbody>'+
       perms.map(function(x){return '<tr><td><b>'+h(x[0])+'</b></td><td><span class="b '+(x[1].indexOf("write")>=0?'b-approval':'b-q')+'">'+h(x[1])+'</span></td>'+
         '<td class="muted" style="font-size:12px">'+h(x[2])+'</td></tr>';}).join("")+'</tbody></table></div>'+
       '<div class="field" style="margin-top:14px"><label>And what it still cannot do</label>'+
       wzChecks([["push to "+(z.branch||r.branch),"Every write is to a branch. The production branch changes only by a merge somebody performed."],
         ["merge on its own","Merging gates on a role only a signed-in person holds, under the mode this repository declares."],
-        ["read a secret","The scan refuses a pull request that carries one. Nothing in <span class=\"mono\">.oxagen/</span> holds a credential; a server is named there and its credential lives in the vault."],
-        ["grant authority","Nothing in this tree can grant a tool, raise a tier or lift a budget. A record steers; a belt grants."]])+'</div>',
-     t:"Add Oxagen to a repository", s:"the directory every other file needs",
+        ["read a secret","The scan refuses a pull request that carries one. Nothing in <span class=\"mono\">.oxagen/</span> holds a credential. The file names a provider, and its credential stays in the vault."],
+        ["grant authority","Nothing in this tree can grant a tool, raise a tier, or lift a budget. A record steers. A toolbelt grants."]])+'</div>',
+     t:"Connect repository", s:"adds .oxagen/, the directory every other file needs",
      f:wzNext("Draft the files",true)};
   }
   if(z.step===4){
@@ -12200,18 +12255,18 @@ function wzInit(){
       '<div class="field"><label>.oxagen/rules/governance.toml</label>'+
       '<pre>'+h(oxGovernanceToml(z.mode||"team"))+'</pre></div>'+
       '<div class="note">Every line is yours to change before anybody reviews it. What lands is what the pull request carries, not what this screen drafted.</div>',
-     t:"Add Oxagen to a repository", s:"the directory every other file needs",
+     t:"Connect repository", s:"adds .oxagen/, the directory every other file needs",
      f:wzNext("Next",true)};
   }
-  var pr=wzPrStep("Add Oxagen to "+r.n,
-    'The pull request puts the directory in <span class="mono">'+h(r.n)+'</span>. Until somebody merges it, this repository is ungoverned and nothing here is in force. The merge is also the only place a reviewer can stop it.',
+  var pr=wzPrStep("Add .oxagen/ to "+r.n,
+    'The pull request puts the directory in <span class="mono">'+h(r.n)+'</span>. Until someone merges it, this repository is ungoverned and nothing here is in force. A reviewer can stop it there.',
     wzInitFiles(),
     [["schema","<span class=\"mono\">workspace.toml</span> parses, and every repository it declares resolves through this installation."],
-     ["layout","No <span class=\"mono\">.oxagen/</span> exists on "+h(z.branch||r.branch)+". Nothing is overwritten, and a repository that already has one is refused rather than merged into."],
-     ["governance","<span class=\"mono\">mode = "+h(z.mode||"team")+"</span> is one of the three. A file that parses but names no mode would refuse every later pull request, so it is refused now."],
+     ["layout","No <span class=\"mono\">.oxagen/</span> exists on "+h(z.branch||r.branch)+". Nothing is overwritten, and the check refuses a repository that already has one."],
+     ["governance","<span class=\"mono\">mode = "+h(z.mode||"team")+"</span> is one of the three. A file that parses but names no mode would block every later pull request, so the check refuses it now."],
      ["secret_pii_scan","No credential, key, email or personal datum in any added file."],
-     ["no_authority","Nothing added grants a tool, raises a tier or lifts a budget."]],
-    "Open pull request", "Opened "+r.n+"#118 · Add Oxagen", r.n);
+     ["no_authority","Nothing added grants a tool, raises a tier, or lifts a budget."]],
+    "Open pull request", "Opened "+r.n+"#118 · Add .oxagen/", r.n);
   return {b:pr.b, t:pr.t, s:"the directory every other file needs",
    f:'<button class="btn primary" onclick="wzOpenPr(\''+pr.msg.replace(/'/g,"\\'")+'\')">'+h(pr.btn)+'</button>'};
 }
@@ -12293,8 +12348,8 @@ function wzToolTitle(){
 function wzToolManifest(){
   var n=wzToolName(),hz=wzToolHaz(),cat=wzToolCat(),sum=String(S.wz.desc||"").trim().replace(/\s+/g," ");
   if(sum.length>140)sum=sum.slice(0,137)+"…";
-  return '# '+n+'@1: the registry entry. Merging this file is what creates the tool version;\n'+
-   '# it grants nothing. A role has to put it on a belt before any agent can call it.\n'+
+  return '# '+n+'@1 — the registry entry. Merging this file is what creates the tool version;\n'+
+   '# it grants nothing. A role has to put it on a toolbelt before any agent can call it.\n'+
    'name    = "'+n+'"\n'+
    'version = 1\n'+
    'title   = "'+wzToolTitle()+'"\n'+
@@ -12313,7 +12368,7 @@ function wzToolManifest(){
    'output = "schema/'+n+'.output.json"\n\n'+
    '[dispatch]\n'+
    'kind       = "mcp"\n'+
-   'server     = "a-intel-internal"\n'+
+   'provider   = "a-intel-internal"\n'+
    'timeout_ms = 15000\n'+
    'idempotent = '+(hz.eff==="read"?"true":"false")+'\n'+
    (hz.fin!=="none"?'\n[financial]\n# A financial tool must expose the amount it moves, in the smallest unit, or the gateway\n# cannot hold it against a mandate and denies it by construction.\namount_path   = "$.input.amount_minor"\ncurrency_path = "$.input.currency"\n':'');
@@ -12336,8 +12391,8 @@ var WZ_LANGS=[["ts","TypeScript"],["py","Python"],["go","Go"],["rust","Rust"]];
 function wzToolCode(lang){
   var n=wzToolName(),hz=wzToolHaz(),fin=hz.fin!=="none";
   var fn=n.replace(/__/g,"_");
-  if(lang==="ts") return '// tools/'+n+'.ts: the handler. Oxagen never runs this. Your MCP server does.\n'+
-   '// What Oxagen governs is the call that reaches it, and the receipt that leaves.\n'+
+  if(lang==="ts") return '// tools/'+n+'.ts — the handler. oxagen never runs this; your MCP server does.\n'+
+   '// What oxagen governs is the call that reaches it, and the receipt that leaves.\n'+
    'import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";\n'+
    'import { z } from "zod";\n\n'+
    'const Input = z.object({\n'+
@@ -12349,7 +12404,7 @@ function wzToolCode(lang){
    '    inputSchema: Input.shape,\n'+
    '    annotations: { readOnlyHint: '+(hz.eff==="read")+', destructiveHint: '+(hz.eff==="irreversible")+', idempotentHint: '+(hz.eff==="read")+' },\n'+
    '  }, async (args, extra) => {\n'+
-   '    // The credential arrives per call from the Oxagen broker. Never read one from the environment.\n'+
+   '    // The credential arrives per call from the oxagen broker. Never read one from the environment.\n'+
    '    const token = extra.requestInfo?.headers["x-oxagen-grant"];\n'+
    '    if (!token) throw new Error("no grant on this call");\n\n'+
    '    const res = await fetch(ENDPOINT, {\n'+
@@ -12361,7 +12416,7 @@ function wzToolCode(lang){
    '    return { content: [{ type: "text", text: await res.text() }] };\n'+
    '  });\n'+
    '}\n';
-  if(lang==="py") return '# tools/'+fn+'.py: the handler. Oxagen never runs this. Your MCP server does.\n'+
+  if(lang==="py") return '# tools/'+fn+'.py — the handler. oxagen never runs this; your MCP server does.\n'+
    'from mcp.server.fastmcp import FastMCP, Context\n'+
    'from pydantic import BaseModel, Field\n'+
    'import httpx\n\n'+
@@ -12375,7 +12430,7 @@ function wzToolCode(lang){
    ')\n'+
    'async def '+fn+'(args: Input, ctx: Context) -> str:\n'+
    '    """'+wzToolTitle()+'."""\n'+
-   '    # The grant is minted per call by the Oxagen broker. Do not read a key from the environment.\n'+
+   '    # The grant is minted per call by the oxagen broker. Do not read a key from the environment.\n'+
    '    grant = ctx.request_context.request.headers.get("x-oxagen-grant")\n'+
    '    if not grant:\n'+
    '        raise ValueError("no grant on this call")\n\n'+
@@ -12387,7 +12442,7 @@ function wzToolCode(lang){
    '        )\n'+
    '    r.raise_for_status()\n'+
    '    return r.text\n';
-  if(lang==="go") return '// tools/'+fn+'.go: the handler. Oxagen never runs this. Your MCP server does.\n'+
+  if(lang==="go") return '// tools/'+fn+'.go — the handler. oxagen never runs this; your MCP server does.\n'+
    'package tools\n\n'+
    'import (\n'+
    '\t"context"\n'+
@@ -12418,7 +12473,7 @@ function wzToolCode(lang){
    '\t\treturn &mcp.CallToolResult{Content: []mcp.Content{&mcp.TextContent{Text: string(b)}}}, out, nil\n'+
    '\t})\n'+
    '}\n';
-  return '// src/tools/'+fn+'.rs: the handler. Oxagen never runs this. Your MCP server does.\n'+
+  return '// src/tools/'+fn+'.rs — the handler. oxagen never runs this; your MCP server does.\n'+
    'use rmcp::{tool, tool_router, ErrorData, model::CallToolResult, handler::server::wrapper::Parameters};\n'+
    'use schemars::JsonSchema;\n'+
    'use serde::Deserialize;\n\n'+
@@ -12430,7 +12485,7 @@ function wzToolCode(lang){
    'impl Tools {\n'+
    '    #[tool(name = "'+n+'", description = "'+wzToolTitle()+'")]\n'+
    '    pub async fn '+fn+'(&self, Parameters(input): Parameters<Input>) -> Result<CallToolResult, ErrorData> {\n'+
-   '        // The grant arrives per call from the Oxagen broker; this process holds no credential.\n'+
+   '        // The grant arrives per call from the oxagen broker; this process holds no credential.\n'+
    '        let grant = self.header("x-oxagen-grant")\n'+
    '            .ok_or_else(|| ErrorData::invalid_request("no grant on this call", None))?;\n'+
    '        // The request id is the idempotency key, so a retried call is one effect and not two.\n'+
@@ -12449,8 +12504,8 @@ function wzTool(){
      b:wzDesc("Refund a Stripe charge when support asks for one, never above the amount on the original payment.",
        ["Process refunds against Stripe charges","Post a release note to the ops channel in Slack",
         "Read rows out of the Snowflake warehouse","Retire a feature flag in our own admin API"],
-       "Oxagen matches this against every provider it can already reach before it offers to write a line of code. Importing is nearly always the cheaper answer: an imported tool arrives with a schema, a publisher and a credential story.")+
-      '<div class="note">A tool is not permission. Whatever you create here lands in the registry callable by nobody until a role puts it on a belt.</div>',
+       "oxagen matches this against every provider it can already reach before it offers to write a line of code. Importing is nearly always the cheaper answer: an imported tool arrives with a schema, a publisher and a credential story.")+
+      '<div class="note">A tool is not permission. Whatever you create here lands in the registry callable by nobody until a role puts it on a toolbelt.</div>',
      f:wzNext("Match it",ok)};
   }
   if(z.step===2){
@@ -12470,26 +12525,26 @@ function wzTool(){
         '<span><i>Credential</i><span class="mono">'+h(s.cred)+'</span></span><span><i>Downscope</i><span class="mono">'+h(s.downscope)+'</span></span></span>'+
        '</button>';})():
       '<div class="wz-opt off"><span class="wz-opt-h"><b>Import a provider</b><span class="b b-q">nothing matched</span></span>'+
-      '<span class="d">No server in the catalogue answers this description. That is the case where writing one is the right answer.</span></div>';
+      '<span class="d">No provider in the catalogue answers this description. That is the case where writing one is the right answer.</span></div>';
     var build='<button class="wz-opt'+(z.path==="build"?" on":"")+'" onclick="wzSetR(\'path\',\'build\')" aria-pressed="'+(z.path==="build")+'">'+
      '<span class="wz-opt-h"><b>Build it</b>'+(rec==="build"?'<span class="b b-allowed">recommended</span>':'')+'</span>'+
-     '<span class="d">Oxagen drafts the manifest and a handler in TypeScript, Python, Go or Rust. The code is yours, in your repository; Oxagen governs the call that reaches it and the receipt that leaves.</span>'+
-     '<span class="wz-opt-kv"><span><i>You own</i>the server, the credential, the deploy</span>'+
-      '<span><i>Oxagen owns</i>the schema, the gate, the receipt</span>'+
+     '<span class="d">oxagen drafts the manifest and a handler in TypeScript, Python, Go or Rust. The code is yours, in your repository; oxagen governs the call that reaches it and the receipt that leaves.</span>'+
+     '<span class="wz-opt-kv"><span><i>You own</i>the endpoint, the credential, the deploy</span>'+
+      '<span><i>oxagen owns</i>the schema, the gate, the receipt</span>'+
       '<span><i>First call</i>after the pull request merges and a role grants it</span></span></button>';
-    return {t:"What Oxagen found", s:top?("The description matches "+ms.length+" server"+(ms.length>1?"s":"")+" it can already reach."):"Nothing in the catalogue answers this.",
+    return {t:"What oxagen found", s:top?("The description matches "+plural(ms.length,"provider")+" it can already reach."):"Nothing in the catalogue answers this.",
      b:wzDraftNote(top?"There is already a tool for this.":"Nobody has written this one.")+
        '<div class="wz-opts">'+imp+build+'</div>'+
        (ms.length>1?'<div class="note" style="margin-top:12px"><b>Also matched: </b>'+ms.slice(1).map(function(m){
          return '<button class="lnk" onclick="wzSetR(\'srv\',\''+h(m.s.id)+'\')">'+h(m.s.name)+'</button>';}).join(", ")+
-         '. Picking one of these changes which server the import walks.</div>':''),
+         '. Picking one of these changes which provider the import walks.</div>':''),
      f:wzNext(z.path==="import"?"Review its tools":"Draft the manifest",true,"wzSet('srv',"+(top?"'"+(z.srv||top.s.id)+"'":"null")+");")};
   }
   if(z.path==="import"){
     var s2=mcpSrv(z.srv)||(mcpMatch(z.desc)[0]||{s:MCP_CATALOG[0]}).s;
     return {t:"Import "+s2.name, s:"The importer calls tools/list, versions everything it finds, and stores both schemas.",
      b:'<div class="wz-sum"><dl class="kv">'+
-        '<dt>Server</dt><dd><span class="mono">'+h(s2.url)+'</span></dd>'+
+        '<dt>Provider</dt><dd><span class="mono">'+h(s2.url)+'</span></dd>'+
         '<dt>Publisher</dt><dd>'+h(s2.publisher)+(s2.verified?' <span class="b b-proven">verified</span>':' <span class="b b-approval">unverified</span>')+'</dd>'+
         '<dt>Transport</dt><dd><span class="mono">'+h(s2.transport)+'</span></dd>'+
         '<dt>Credential</dt><dd><span class="mono">'+h(s2.cred)+'</span> · downscoped '+h(s2.downscope)+'</dd>'+
@@ -12498,8 +12553,8 @@ function wzTool(){
        '<div class="wz-opt-tools" style="margin-top:12px">'+s2.tools.map(function(t){
          return '<span class="wz-mt">'+toolCell(s2.id+"__"+t.n+"@1",{sz:"sm"})+hazard(t.risk,t.eff)+
           (t.fin!=="none"?finBadge(t.fin):'')+'</span>';}).join("")+'</div>'+
-       (s2.fin?'<div class="warn" style="margin-top:12px"><b>This server moves money.</b> Its financial tools are denied by construction until a named human owner with a finance role holds the connection and every agent that may call them holds a mandate. Importing changes none of that.</div>':'')+
-       '<div class="note" style="margin-top:12px">Import grants nothing. These versions land in the registry and sit there, callable by nobody, until a role grant puts them on a belt.</div>',
+       (s2.fin?'<div class="warn" style="margin-top:12px"><b>This provider moves money.</b> Its financial tools are denied by construction until a named human owner with a finance role holds the connection and every agent that may call them holds a mandate. Importing changes none of that.</div>':'')+
+       '<div class="note" style="margin-top:12px">Import grants nothing. These versions land in the registry and sit there, callable by nobody, until a role grant puts them on a toolbelt.</div>',
      f:'<button class="btn primary" onclick="S.wz=null;openDialog(\'import\',1)">Open the importer</button>'};
   }
   if(z.step===3){
@@ -12522,19 +12577,19 @@ function wzTool(){
   }
   if(z.step===4){
     var lang=z.lang||"ts";
-    return {t:"The code", s:"A starting point in four languages. You own it; Oxagen governs the call that reaches it.",
+    return {t:"The code", s:"A starting point in four languages. You own it; oxagen governs the call that reaches it.",
      b:'<div class="wz-langs" role="tablist">'+WZ_LANGS.map(function(L){
         return '<button class="tab" role="tab" aria-selected="'+(lang===L[0])+'" onclick="wzSetR(\'lang\',\''+L[0]+'\')">'+h(L[1])+'</button>';}).join("")+'</div>'+
       '<div class="sx-cfg"><div class="sx-cfg-h">'+h(wzToolCodeFile(lang))+'<span class="grow"></span>'+h((CED_LANG[lang]||{}).label||"")+'</div>'+
       '<pre>'+hlCode(wzToolCode(lang),lang)+'</pre></div>'+
       '<div class="sx-cfg" style="margin-top:12px"><div class="sx-cfg-h">schema/'+h(wzToolName())+'.input.json<span class="grow"></span>JSON Schema</div>'+
       '<pre>'+hlJson(wzToolSchema())+'</pre></div>'+
-      '<div class="note" style="margin-top:12px">Three things every one of these does, in every language: it reads the grant off the call rather than a key out of the environment, it passes the request id as the idempotency key, and it declares its annotations so a server that lies about being read-only is a diff somebody can see.</div>',
+      '<div class="note" style="margin-top:12px">Three things every one of these does, in every language: it reads the grant off the call rather than a key out of the environment, it passes the request id as the idempotency key, and it declares its annotations so a provider that lies about being read-only is a diff somebody can see.</div>',
      f:wzNext("Open the pull request",true)};
   }
   var hz2=wzToolHaz(),n2=wzToolName();
   var pr=wzPrStep("Open the pull request",
-    "Merging this creates <span class=\"mono\">"+h(n2)+"@1</span> in the registry of "+h(w.name)+". It will be on no belt.",
+    "Merging this creates <span class=\"mono\">"+h(n2)+"@1</span> in the registry of "+h(w.name)+". It will be on no toolbelt.",
     [["add",".oxagen/tools/"+n2+".toml","the registry entry"],
      ["add",".oxagen/tools/schema/"+n2+".input.json","input schema"],
      ["add",".oxagen/tools/schema/"+n2+".output.json","output schema"],
@@ -12548,7 +12603,7 @@ function wzTool(){
        :["Financial","<span class=\"mono\">financial = \"none\"</span> and no field in the input schema looks like an amount"]),
      ["Secret and PII scan","the manifest, both schemas and the handler are scanned · a literal key in any of them fails the check"]],
     "Open the pull request",
-    w.main+"#524 opened. "+n2+"@1 exists when it merges, and it is on no belt until a role grant puts it there.");
+    w.main+"#524 opened. "+n2+"@1 exists when it merges, and it is on no toolbelt until a role grant puts it there.");
   return {t:pr.t, s:"A tool version is a file, like everything else here.", b:pr.b,
    f:'<button class="btn primary" onclick="wzOpenPr(\''+pr.msg.replace(/'/g,"\\'")+'\')">'+h(pr.btn)+'</button>'};
 }
@@ -12623,7 +12678,7 @@ function wzSkResults(){
       '<span class="sx-chip">'+h(s.kind)+'</span>'+
       '<span class="sx-chip">'+s.tokens.toLocaleString()+' tok</span>'+
       '<span class="sx-chip">'+h(s.digest.slice(0,18))+'…</span>'+
-      '<span class="sx-chip">'+s.installs.toLocaleString()+' workspaces</span>'+
+      '<span class="sx-chip">'+plural(s.installs.toLocaleString(),"workspace")+'</span>'+
       (s.cited!=null?'<span class="sx-chip ok">cited on '+skPct(s.cited)+' of loads</span>':'')+
       (s.pinned?'<span class="sx-chip">pinned here at '+h(s.pinned)+'</span>':'')+
      '</div></div>'+
@@ -12653,7 +12708,7 @@ function wzSkill(){
   var z=S.wz,w=ws();
   if(z.step===1){
     var opts=[["registry","Search the registry","Pin a published version by its digest. It arrives with a publisher, a version and a cited rate somebody measured.","organization"],
-              ["describe","Describe it","Write what the procedure is, in prose. Oxagen drafts the SKILL.md and you edit it before anybody reads it.","mirror"],
+              ["describe","Describe it","Write what the procedure is, in prose. oxagen drafts the SKILL.md and you edit it before anybody reads it.","mirror"],
               ["upload","Upload a bundle","A <span class=\"mono\">.skill</span> or <span class=\"mono\">.zip</span> built elsewhere. Use this to replace a pinned version and bump to the one in the bundle.","package"]];
     return {t:"Add a skill", s:"A skill is a file with a version and a digest. Three ways to get one; all three merge.",
      b:'<div class="wz-opts">'+opts.map(function(o){
@@ -12695,7 +12750,7 @@ function wzSkill(){
     var okd=wzDescOk();
     return {t:"Describe the skill", s:"Procedure, not policy. What to do, in what order, and the one thing never to do.",
      b:wzDesc("How we cut release notes: group merged PRs by surface, read the changelog once, open a PR, and never publish the release.",
-       ["How we cut release notes","How to roll a bad release back","How to run a safe Postgres migration","How to triage a flaky test"],
+       ["How we cut release notes","How to roll a bad release back","How to run a safe database migration","How to triage a flaky test"],
        "A skill tells an agent what to <i>do</i>. That is why the whole feature ships off, and why this ends in a pull request rather than a save.")+
       '<div class="note">Do not write authority into it. “You may merge” in a skill file grants nothing. The toolbelt decides, and a skill that implies otherwise is a skill that will be wrong in a run somebody has to read.</div>',
      f:wzNext("Draft the file",okd)};
@@ -12713,7 +12768,7 @@ function wzSkill(){
       '</div>'+
       cedHtml(key,".oxagen/skills/"+wzSkillSlug()+"/SKILL.md","md",{small:true,
         bar:'<button class="btn sm" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Revert</button>'})+
-      '<div class="note" style="margin-top:12px">Every token in this file is paid for on every turn it is loaded into, by every agent that loads it. That is the whole argument for a searchable belt over a pinned one, and it is why this box shows the price.</div>',
+      '<div class="note" style="margin-top:12px">Every token in this file is paid for on every turn it is loaded into, by every agent that loads it. That is the whole argument for a searchable toolbelt over a pinned one, and it is why this box shows the price.</div>',
      f:wzNext("Open the pull request",!!String(src).trim())};
   }
   var slug=wzSkillSlug(), rep=z.path==="upload"&&z.file&&z.file.from;
@@ -12769,7 +12824,7 @@ function wzAgentToml(){
   var belt=wzAgentBelt();
   return '# .oxagen/agents/'+slug+'.toml\n'+
    '# The definition is the record. Merging this creates the principal, the roles it asks for and\n'+
-   '# the toolbelt; nothing here is written to Postgres by this screen.\n'+
+   '# the toolbelt; this screen saves nothing.\n'+
    'schema = "agent-definition/v0.1"\n'+
    'slug = "'+slug+'"\n'+
    'name = "'+slug.replace(/-/g," ").replace(/^./,function(c){return c.toUpperCase();})+'"\n'+
@@ -12813,7 +12868,7 @@ function wzAgent(){
        '<div class="field"><label for="wzHarness">Harness</label><select id="wzHarness" onchange="wzSet(\'harness\',this.value)" aria-label="Harness">'+
         ["claude-code","stella","codex-cli","claude-agent-sdk","custom"].map(function(x){
           return '<option'+(z.harness===x?' selected':'')+'>'+h(x)+'</option>';}).join("")+'</select>'+
-        '<div class="hint">Oxagen generates the harness file beside the definition.</div></div>'+
+        '<div class="hint">oxagen generates the harness file beside the definition.</div></div>'+
        '<div class="field"><label for="wzTier">Model tier</label><select id="wzTier" onchange="wzSet(\'tier\',this.value)" aria-label="Model tier">'+
         ["complex","light"].map(function(x){return '<option'+(z.tier===x?' selected':'')+'>'+h(x)+'</option>';}).join("")+'</select>'+
         '<div class="hint">A tier, not a model id. The route behind it is the organization\u2019s and can change without touching this file.</div></div>'+
@@ -12832,8 +12887,8 @@ function wzAgent(){
         :'<span class="b b-denied">'+h(String(parsed.e&&parsed.e.message||"the file does not parse"))+'</span>')+'</div>'+
       cedHtml(key,".oxagen/agents/"+wzAgentSlug()+".toml","toml",{small:true,
         bar:'<button class="btn sm" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Revert</button>'})+
-      '<div class="note" style="margin-top:12px"><span class="mono">tools</span> is a request, not a grant. What the agent can actually reach is this list intersected with the roles it holds and with your own grants, and never wider than either.</div>',
-     f:wzNext("Pick the belt",!!parsed.d)};
+      '<div class="note" style="margin-top:12px"><span class="mono">tools</span> is a request, not a grant. What the agent can actually reach is this list intersected with the roles it holds and with your own grants — never wider than either.</div>',
+     f:wzNext("Pick the toolbelt",!!parsed.d)};
   }
   if(z.step===4){
     var picked=wzAgentBelt();
@@ -12849,9 +12904,9 @@ function wzAgent(){
      b:rows+
       '<div class="note" style="margin-top:10px">'+(picked.length?
         (parks.length?'<b>'+parks.length+' of these park for a person.</b> '+parks.map(function(x){return '<span class="mono">'+h(x)+'</span>';}).join(", ")+
-          ' are irreversible or high risk, so a call to one stops at the gateway and waits for an approver, every time, until somebody writes an auto-approval rule for it.'
-         :'<b>Nothing on this belt parks.</b> Every tool picked is a read or a reversible write, so runs finish without waiting on a person.')
-        :'Nothing picked. The definition falls back to <span class="mono">search_graph</span> and <span class="mono">recall_context</span>, which is a belt that can read the graph and nothing else.')+'</div>',
+          ' are irreversible or high risk, so a call to one stops at the gateway and waits for an approver — every time, until somebody writes an auto-approval rule for it.'
+         :'<b>Nothing on this toolbelt parks.</b> Every tool picked is a read or a reversible write, so runs finish without waiting on a person.')
+        :'Nothing picked. The definition falls back to <span class="mono">search_graph</span> and <span class="mono">recall_context</span>, which is a toolbelt that can read the graph and nothing else.')+'</div>',
      f:wzNext("Open the pull request",true,"wzAgentSync();")};
   }
   var slug2=wzAgentSlug();
@@ -12862,7 +12917,7 @@ function wzAgent(){
      ["mod",".oxagen/workspace.toml","adds "+slug2+" to this workspace\u2019s agents"]],
     [["Schema","<span class=\"mono\">agent-definition/v0.1</span> valid · slug matches the filename"],
      ["Key uniqueness","<span class=\"mono\">"+h(wzAgentKey())+"</span> is not held by another agent, live or archived"],
-     ["Belt","every pattern in <span class=\"mono\">tools</span> resolves to a version in the registry; a pattern that resolves to nothing fails"],
+     ["Toolbelt","every pattern in <span class=\"mono\">tools</span> resolves to a version in the registry; a pattern that resolves to nothing fails"],
      ["Authority","the definition asks for nothing wider than the roles it names, and nothing wider than yours"],
      ["Budget","<span class=\"mono\">per_run_micros</span> is set; an agent with no budget cannot start a run"]],
     "Open the pull request",
@@ -12883,10 +12938,10 @@ var KIND_USE={
    never:"It can narrow what is allowed. It can never widen it. A <span class=\"mono\">require</span> does not create the permission it requires.",
    deliver:"Compiled into the stable prefix at whatever force it carries, and asserted by the checks against every other published record on the same subject."},
  procedure:{use:"Steps, in order, where the order is the point.",
-   never:"A step is not an authority. Naming a governed action in step 4 does not put it on a belt.",
+   never:"A step is not an authority. Naming a governed action in step 4 does not put it on a toolbelt.",
    deliver:"Compiled like a rule, and rendered as an ordered list so a model cannot silently reorder it."},
  fact:{use:"A claim about the world that somebody could check and find false.",
-   never:"It steers nothing by itself. A fact that needs to change behaviour is a rule that cites it.",
+   never:"It steers nothing by itself. A fact that needs to change behavior is a rule that cites it.",
    deliver:"Delivered as a <span class=\"mono\">fact</span> context frame with provenance to this record and its commit, <span class=\"mono\">valid_from</span> set to the merge time."},
  memory:{use:"Something that happened, that explains what an agent is about to see.",
    never:"It never forbids anything, and it is never evidence on its own. It says why a retry is not a regression, and it does not prove that it was not.",
@@ -13044,7 +13099,7 @@ function crecPanel(rec){
     var forb=rec.ce==="forbid";
     return head+
      '<div class="crec-bound '+(forb?"forbid":"require")+'"><span class="w">'+h(rec.ce||"forbid")+'</span>'+
-      '<span class="d">'+(forb?(rec.grant?"This record carries an enforcement grant, so it compiles to text and to a gate. A call routed through Oxagen that crosses this boundary is denied before it is dispatched, with this record cited as the reason. The gate and its notice are on Steering, under Policy."
+      '<span class="d">'+(forb?(rec.grant?"This record carries an enforcement grant, so it compiles to text and to a gate. A call routed through oxagen that crosses this boundary is denied before it is dispatched, with this record cited as the reason. The gate and its notice are on Steering, under Policy."
                                        :"This record carries no enforcement grant, so it compiles to text. The agent reads the boundary in its stable prefix. Nothing refuses a call because of it until a grant compiles a gate.")
                               :"A run that has not done this cannot proceed past the point that needs it. The check is on the run, not on the call.")+'</span></div>'+
      deliver+
@@ -13061,9 +13116,9 @@ function crecPanel(rec){
      '<p class="eyebrow q" style="margin:0 0 6px">The claim, and how it is checked</p>'+
      '<dl class="kv"><dt>Falsifiable by</dt><dd>anybody who finds a second changelog in this repository, or a <span class="mono">docs/releases</span> that is not generated</dd>'+
      '<dt>valid_from</dt><dd>'+h(rec.pub||"\u2014")+', the merge time of <span class="mono">'+h(rec.commit||"")+'</span></dd>'+
-     '<dt>Last confirmed</dt><dd>'+cited+' runs read it and none contradicted it</dd>'+
+     '<dt>Last confirmed</dt><dd>'+plural(cited,"run")+' read it and none contradicted it</dd>'+
      '<dt>Steers</dt><dd>nothing by itself</dd></dl>'+
-     '<div class="note" style="margin-top:12px">A fact that needs to change behaviour is a rule that cites it. Keeping the two apart is what lets a fact go stale without silently turning off a rule.</div>'+
+     '<div class="note" style="margin-top:12px">A fact that needs to change behavior is a rule that cites it. Keeping the two apart is what lets a fact go stale without silently turning off a rule.</div>'+
      never+foot;
   }
   if(k==="memory"){
@@ -13110,7 +13165,7 @@ function crecSave(rec){
       ["Secret and PII scan","the new statement is scanned"],
       ["Conflict against active records","re-run in full, because the words changed"],
       ["constraint_effect","unchanged \u00b7 <span class=\"mono\">"+h(rec.ce||"absent")+"</span>"]],
-    msg:ws().main+"#528 opened. "+rec.id+" changes when it merges; until then every run still gets the words that are in force now."};
+    msg:ws().main+"#528 opened. "+rec.id+" changes"+" when it merges; until then every run still gets the words that are in force now."};
   openDialog("srcpr");
 }
 DLG_EXT.srcpr=function(){
@@ -13319,12 +13374,12 @@ function ltPager(st,total,onPage){
   var per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per));
   if(st.page>pages)st.page=pages; if(st.page<1)st.page=1;
   var from=total?((st.page-1)*per+1):0, to=Math.min(total,st.page*per);
-  var html='<div class="lp"><span class="lp-n">'+(total?from+'–'+to+' of '+total:'0 of 0')+'</span><span class="lp-pg">'+
+  var html='<div class="lp"><span class="lp-n">'+(total?from+'–'+to+' of '+total.toLocaleString("en-US")+(pages>1?' (page '+st.page+' of '+pages+')':''):'None')+'</span><span class="lp-pg">'+
    '<button class="btn sm" data-p="prev" aria-label="Previous page"'+(st.page<=1?' disabled':'')+'>‹</button>';
   var nums=[]; if(pages<=7){for(var i=1;i<=pages;i++)nums.push(i);} else {
     nums=[1]; var lo=Math.max(2,st.page-1), hi=Math.min(pages-1,st.page+1);
     if(lo>2)nums.push("…"); for(var j=lo;j<=hi;j++)nums.push(j); if(hi<pages-1)nums.push("…"); nums.push(pages);}
-  nums.forEach(function(p){html+= p==="…"?'<span class="el">…</span>':'<button class="btn sm" data-p="'+p+'"'+(p===st.page?' aria-current="page"':'')+'>'+p+'</button>';});
+  nums.forEach(function(p){html+= p==="…"?'<span class="el">…</span>':'<button class="btn sm" data-p="'+p+'" aria-label="Page '+p+' of '+pages+'"'+(p===st.page?' aria-current="page"':'')+'>'+p+'</button>';});
   html+='<button class="btn sm" data-p="next" aria-label="Next page"'+(st.page>=pages?' disabled':'')+'>›</button></span></div>';
   var lp=ltEl(html);
   lp.addEventListener("click",function(e){var b=e.target.closest("button[data-p]"); if(!b||b.disabled)return; var p=b.getAttribute("data-p");
@@ -13371,6 +13426,19 @@ function ltFacets(cols,vals,rows){
   return c.slice(0,3).map(function(col){return {key:String(col.i),label:col.name,values:col.values};});
 }
 
+/* A cell's text as it reads on screen. textContent runs adjacent elements together ("platformmbell",
+   "11 items1,161 tok"), so each element starts a new word, a hidden chip separator keeps its comma, and
+   avatar initials (aria-hidden) are skipped. */
+function ltCellText(el){
+  var out="";
+  (function walk(n){
+    if(n.nodeType===3){out+=n.nodeValue;return;}
+    if(n.nodeType!==1||n.getAttribute("aria-hidden")==="true")return;
+    if(out&&!/\s$/.test(out))out+=" ";
+    for(var c=n.firstChild;c;c=c.nextSibling)walk(c);
+  })(el);
+  return out.replace(/\s+/g," ").replace(/ ,/g,",").trim();
+}
 function ltTable(table,prefix){
   if(!table.tHead||!table.tBodies[0]||!table.tHead.rows[0]||table.getAttribute("data-lt"))return;
   table.setAttribute("data-lt","1");
@@ -13648,7 +13716,15 @@ document.addEventListener("click",function(e){
   function ulid(n){var s="";for(var i=0;i<n;i++)s+=B32[Math.floor(rnd()*32)];return s;}
   function hex(n){var s="";for(var i=0;i<n;i++)s+="0123456789abcdef"[Math.floor(rnd()*16)];return s;}
   function pad(n){return (n<10?"0":"")+n;}
-  function title(s){return s.split("-").map(function(w){return w.charAt(0).toUpperCase()+w.slice(1);}).join(" ");}
+  /* slug to display name: "pr-reviewer" reads "PR Reviewer", not "Pr Reviewer" */
+  var ACRONYMS={pr:"PR",po:"PO",ci:"CI",us:"US",eu:"EU",apac:"APAC",api:"API",mcp:"MCP",totp:"TOTP"};
+  function title(s){return s.split("-").map(function(w){return ACRONYMS[w]||w.charAt(0).toUpperCase()+w.slice(1);}).join(" ");}
+  /* an agent's display name: sentence case, acronyms kept, a region suffix in parentheses ("Cost reporter (US)") */
+  function agentTitle(slug){
+    var w=slug.split("-"), region=/^(us|eu|apac)$/.test(w[w.length-1])?ACRONYMS[w.pop()]:"";
+    var t=w.map(function(x,i){return ACRONYMS[x]||(i?x:x.charAt(0).toUpperCase()+x.slice(1));}).join(" ");
+    return region?t+" ("+region+")":t;
+  }
   /* the story's clock: 2026-09-11, a little after 09:14 UTC. daysAgo 0 renders as a bare time, like the seed rows. */
   var TODAY=Date.UTC(2026,8,11), NOW_SEC=9*3600+14*60;
   function dstr(ms){var d=new Date(ms);return d.getUTCFullYear()+"-"+pad(d.getUTCMonth()+1)+"-"+pad(d.getUTCDate());}
@@ -13695,7 +13771,8 @@ document.addEventListener("click",function(e){
     WSX[w.slug]={pre:w.pre,head:w.head,owner:owner.key,target:targets[w.slug]};
     PEOPLE[owner.key]={name:w.owner,role:"workspace.owner · "+w.slug,initials:owner.initials,email:(owner.first+"."+owner.last).toLowerCase().replace(/[^a-z.]/g,"")+"@a-intel.example",
       mfa:pick(["passkey","passkey + TOTP","hardware key"]),avatar:{kind:"initials",text:owner.initials,font:FONTS[pcur%3],tone:TONES[pcur%3]}};
-    MEMBERS.push({p:owner.key,ws:w.slug,status:"active",last:stamp(ri(0,2),daySec(1)),mfa:PEOPLE[owner.key].mfa});
+    var seen=ri(0,2); /* one day index for both the date and the time, so a today stamp stays before the mock's 09:14 */
+    MEMBERS.push({p:owner.key,ws:w.slug,status:"active",last:stamp(seen,daySec(seen)),mfa:PEOPLE[owner.key].mfa});
     WS.push({slug:w.slug,name:w.name,main:w.main,branch:w.branch,linked:w.linked,agents:0,owner:w.owner});
   });
   /* the rest of the people: members, a few auditors and billing holders, one more org owner */
@@ -13709,7 +13786,7 @@ document.addEventListener("click",function(e){
     var last=ri(0,9);
     PEOPLE[p.key]={name:p.first+" "+p.last,role:role,initials:p.initials,email:(p.first+"."+p.last).toLowerCase().replace(/[^a-z.]/g,"")+"@a-intel.example",
       mfa:pick(["TOTP","passkey","passkey + TOTP","hardware key"]),avatar:{kind:"initials",text:p.initials,font:FONTS[pcur%3],tone:TONES[(pcur>>1)%3]}};
-    MEMBERS.push({p:p.key,ws:wsOf,status:last>7?"invited":"active",last:last>7?"never":stamp(last,daySec(last)),mfa:PEOPLE[p.key].mfa});
+    MEMBERS.push({p:p.key,ws:wsOf,status:last>7?"invited":"active",last:last>7?"Never":stamp(last,daySec(last)),mfa:PEOPLE[p.key].mfa});
   }
   var OPS=Object.keys(PEOPLE);
   /* operators per workspace: the owner runs most of it, members run the rest */
@@ -13732,7 +13809,7 @@ document.addEventListener("click",function(e){
   };
   var GENERIC=["summarizer","weekly-digest","meeting-scribe","doc-linker","label-bot","stale-closer","owner-finder","backlog-groomer","status-poster"];
   var SUFFIX=["us","eu","apac","2","3","batch","nightly","canary"];
-  var HARN=[["claude-code","Claude Code",42],["codex-cli","Codex CLI",16],["stella","Stella",14],["claude-agent-sdk","Claude Agent SDK",12],["openai-agents","OpenAI Agents SDK",7],["langgraph","LangGraph",5],["custom","Custom (SDK-wrapped)",4]];
+  var HARN=[["claude-code","Claude Code",42],["codex-cli","Codex CLI",16],["stella","stella",14],["claude-agent-sdk","Claude Agent SDK",12],["openai-agents","OpenAI Agents SDK",7],["langgraph","LangGraph",5],["custom","Custom (SDK-wrapped)",4]];
   var DESC={
     "pr-reviewer":"Reviews every pull request against the workspace rules and leaves one comment per finding. Never approves, never merges.",
     "dependency-bot":"Opens one pull request per dependency bump with the changelog inlined. Waits for CI; a person merges.",
@@ -13746,7 +13823,7 @@ document.addEventListener("click",function(e){
   };
   var usedSlug={"release-manager":1,"stella-ci":1,triage:1,"invoice-bot":1,"docs-writer":1};
   var ICONS=["rocket","compass","microscope","stethoscope","pencil-line","receipt","wrench","flask-conical","key-round","package","satellite","bot","bird","bug","sprout","cog","brain","search","radio-tower","wand-sparkles","brick-wall","target","folder-tree","shield-check"];
-  var perWsAgents={}, madeAgents=[];
+  var perWsAgents={}, madeAgents=[], bw; /* bw: a generated toolbelt width, read once to pick its presentation */
   AGENTS.forEach(function(a){(perWsAgents[a.ws]=perWsAgents[a.ws]||[]).push(a);});
   WS.forEach(function(w){
     var x=WSX[w.slug], have=(perWsAgents[w.slug]||[]).length, pool=ROLES_BY[x.pre].concat(GENERIC), ops=operatorsFor(w.slug), n=0;
@@ -13761,8 +13838,8 @@ document.addEventListener("click",function(e){
       var tier=wpick([["gateway",68],["harness",19],["contained",8],["observe",5]]), tierNative=(wpick([["harness",1]]),tier);
       var incidents=wpick([[0,94],[1,5],[2,1]]);
       var av=rnd()<0.62?{kind:"icon",icon:ICONS[(n*7+w.slug.length)%ICONS.length],tone:TONES[n%3]}:{kind:"initials",text:slug.split("-").map(function(s){return s.charAt(0).toUpperCase();}).join("").slice(0,3),font:FONTS[n%3],tone:TONES[(n+1)%3]};
-      var made={key:"a-intel."+x.pre+"."+slug,name:title(slug),harness:hn[0],harnessLabel:hn[1],ws:w.slug,operator:wpick(ops),status:"enrolled",
-        tier:tier,tierNative:tierNative,belt:ri(3,58),beltMode:rnd()<0.72?"full":"searchable",runs30:runs30,spend30:m2(spend),ratio:ratio,
+      var made={key:"a-intel."+x.pre+"."+slug,name:agentTitle(slug),harness:hn[0],harnessLabel:hn[1],ws:w.slug,operator:wpick(ops),status:"registered",
+        tier:tier,tierNative:tierNative,belt:(bw=ri(3,58)),beltMode:(rnd(),bw>FULL_BELT_LIMIT?"searchable":"full"),runs30:runs30,spend30:m2(spend),ratio:ratio,
         digest:"sha256:"+hex(16),commit:x.head,budget:m2(pick([0.4,0.6,0.8,1,1.5,2,3])),budgetUsed:Math.round(rf(0.05,0.98)*100)/100,
         desc:DESC[base]||("Runs "+title(base).toLowerCase()+" for "+w.name+". Opens a pull request or a proposal; never merges, never pays."),
         avatar:av,mandates:[],incidents:incidents,model:rnd()<0.6?"complex":"light"};
@@ -13822,7 +13899,7 @@ document.addEventListener("click",function(e){
   });});
   BRANCHES.push({name:"agents/triage-reproduce-first",pr:"a-intel/platform#521",ahead:3,by:"marcus",when:"3 hours ago"},
     {name:"context/ctx.core.migration-order",pr:"a-intel/platform#520",ahead:1,by:"marcus",when:"yesterday"},
-    {name:"agents/pr-reviewer-belt-narrow",pr:null,ahead:2,by:people[8].key,when:"yesterday"},
+    {name:"agents/pr-reviewer-toolbelt-narrow",pr:null,ahead:2,by:people[8].key,when:"yesterday"},
     {name:"ops/slack-schema-approval",pr:"a-intel/platform#515",ahead:6,by:"priya",when:"2 days ago"},
     {name:"agents/dependency-bot-weekly",pr:"a-intel/platform#509",ahead:1,by:people[3].key,when:"4 days ago"});
 
@@ -13841,7 +13918,7 @@ document.addEventListener("click",function(e){
     pagerduty:["list_incidents","get_incident","acknowledge_incident","resolve_incident","create_incident","list_schedules","get_oncall","list_services","add_note","escalate_incident","snooze_incident"],
     salesforce:["query","get_account","update_account","list_accounts","get_opportunity","update_opportunity","create_opportunity","get_contact","create_contact","update_contact","list_contracts","get_contract","create_task","list_cases","get_case","update_case","create_case","close_case","describe_object","get_report","run_report","list_leads","convert_lead","send_email"],
     gdrive:["search_files","get_file","read_file","create_file","update_file","copy_file","move_file","trash_file","share_file","list_permissions","export_file","list_recent","get_folder","create_folder","list_revisions"],
-    "postgres-prod":["run_query","explain","list_tables","describe_table","list_indexes","get_table_stats","list_slow_queries","kill_query"],
+    "orders-db":["run_query","explain","list_tables","describe_table","list_indexes","get_table_stats","list_slow_queries","kill_query"],
     kubernetes:["list_pods","get_pod","get_logs","describe_pod","delete_pod","list_deployments","get_deployment","scale_deployment","rollout_restart","rollout_undo","list_services","list_nodes","get_node","cordon_node","drain_node","list_events","apply_manifest","list_jobs","create_job","get_configmap","list_namespaces"],
     sentry:["list_issues","get_issue","resolve_issue","ignore_issue","assign_issue","list_events","get_event","search_events","list_releases","create_release","list_projects","get_project_stats"],
     hubspot:["get_contact","search_contacts","create_contact","update_contact","get_company","search_companies","update_company","list_deals","get_deal","update_deal","create_deal","list_sequences","enroll_contact","send_email","list_lists","add_to_list","get_engagement","create_note","list_owners"],
@@ -13853,21 +13930,21 @@ document.addEventListener("click",function(e){
     "aws-billing":{cred:"cloud_role → STS session policy",eg:"third_party"}, slack:{cred:"oauth → token exchange",eg:"third_party"}, snowflake:{cred:"api_key → none",eg:"internal"},
     oxagen:{cred:"none",eg:"none"}, harness:{cred:"none",eg:"none"}, jira:{cred:"oauth → token exchange",eg:"third_party"}, datadog:{cred:"api_key → scoped app key",eg:"third_party"},
     pagerduty:{cred:"oauth → token exchange",eg:"third_party"}, salesforce:{cred:"oauth → token exchange",eg:"third_party"}, gdrive:{cred:"oauth → token exchange",eg:"third_party"},
-    "postgres-prod":{cred:"cloud_role → IAM auth token",eg:"internal"}, kubernetes:{cred:"cloud_role → short-lived kubeconfig",eg:"internal"}, sentry:{cred:"api_key → org token",eg:"third_party"},
+    "orders-db":{cred:"cloud_role → IAM auth token",eg:"internal"}, kubernetes:{cred:"cloud_role → short-lived kubeconfig",eg:"internal"}, sentry:{cred:"api_key → org token",eg:"third_party"},
     hubspot:{cred:"oauth → token exchange",eg:"third_party"}, notion:{cred:"oauth → token exchange",eg:"third_party"}, zendesk:{cred:"oauth → token exchange",eg:"third_party"}
   };
   var NEW_SRV=[
-    {id:"jira",name:"jira",kind:"MCP",transport:"streamable-http",url:"https://mcp.atlassian.com/a-intel",health:"ok",imported:"2026-08-21 10:02 UTC",conn:"Atlassian OAuth · a-intel",schemas:"declared"},
-    {id:"datadog",name:"datadog",kind:"MCP",transport:"streamable-http",url:"https://mcp.datadoghq.com",health:"ok",imported:"2026-09-01 07:40 UTC",conn:"Datadog app key · infra",schemas:"declared"},
-    {id:"pagerduty",name:"pagerduty",kind:"MCP",transport:"streamable-http",url:"https://mcp.pagerduty.com",health:"ok",imported:"2026-08-11 12:18 UTC",conn:"PagerDuty OAuth · a-intel",schemas:"declared"},
-    {id:"salesforce",name:"salesforce",kind:"MCP",transport:"streamable-http",url:"https://mcp.salesforce.com/a-intel",health:"ok",imported:"2026-08-30 15:55 UTC",conn:"Salesforce connected app · growth",schemas:"declared"},
-    {id:"gdrive",name:"gdrive",kind:"MCP",transport:"streamable-http",url:"https://mcp.google.com/drive",health:"ok",imported:"2026-07-19 09:12 UTC",conn:"Google Workspace OAuth · a-intel",schemas:"declared"},
-    {id:"postgres-prod",name:"postgres-prod",kind:"HTTP",transport:"https",url:"https://tools.a-intel.internal/pg",health:"ok",imported:"2026-06-02 08:30 UTC",conn:"IAM auth · aintel_prod read replica",schemas:"declared by admin"},
-    {id:"kubernetes",name:"kubernetes",kind:"MCP",transport:"stdio",url:"oxagen-run k8s-mcp@2.3.1",health:"degraded",imported:"2026-09-08 18:05 UTC",conn:"short-lived kubeconfig · prod-east",schemas:"2 observed, awaiting approval"},
-    {id:"sentry",name:"sentry",kind:"MCP",transport:"streamable-http",url:"https://mcp.sentry.dev",health:"ok",imported:"2026-08-26 11:44 UTC",conn:"Sentry org token · mobile",schemas:"declared"},
-    {id:"hubspot",name:"hubspot",kind:"MCP",transport:"streamable-http",url:"https://mcp.hubspot.com",health:"ok",imported:"2026-09-03 13:20 UTC",conn:"HubSpot OAuth · growth",schemas:"declared"},
-    {id:"notion",name:"notion",kind:"MCP",transport:"streamable-http",url:"https://mcp.notion.com",health:"ok",imported:"2026-07-28 16:01 UTC",conn:"Notion OAuth · a-intel",schemas:"declared"},
-    {id:"zendesk",name:"zendesk",kind:"MCP",transport:"streamable-http",url:"https://mcp.zendesk.com/a-intel",health:"ok",imported:"2026-08-15 09:48 UTC",conn:"Zendesk OAuth · support",schemas:"declared"}
+    {id:"jira",name:"jira",system:"Jira",desc:"Issues and service desk tickets in Atlassian Cloud.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.atlassian.com/a-intel",health:"ok",imported:"2026-08-21 10:02 UTC",conn:"Atlassian OAuth · a-intel",schemas:"declared"},
+    {id:"datadog",name:"datadog",system:"Datadog",desc:"Monitors, dashboards, and logs for production.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.datadoghq.com",health:"ok",imported:"2026-09-01 07:40 UTC",conn:"Datadog app key · infra",schemas:"declared"},
+    {id:"pagerduty",name:"pagerduty",system:"PagerDuty",desc:"On-call schedules and incidents.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.pagerduty.com",health:"ok",imported:"2026-08-11 12:18 UTC",conn:"PagerDuty OAuth · a-intel",schemas:"declared"},
+    {id:"salesforce",name:"salesforce",system:"Salesforce",desc:"Accounts, contacts, and opportunities for the growth team.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.salesforce.com/a-intel",health:"ok",imported:"2026-08-30 15:55 UTC",conn:"Salesforce connected app · growth",schemas:"declared"},
+    {id:"gdrive",name:"gdrive",system:"Google Drive",desc:"Shared documents and folders in the a-intel workspace.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.google.com/drive",health:"ok",imported:"2026-07-19 09:12 UTC",conn:"Google Workspace OAuth · a-intel",schemas:"declared"},
+    {id:"orders-db",name:"orders-db",system:"Orders database",desc:"Read replica of the production orders database.",kind:"HTTP",transport:"http",wire:"https",url:"https://tools.a-intel.internal/pg",health:"ok",imported:"2026-06-02 08:30 UTC",conn:"IAM auth · aintel_prod read replica",schemas:"declared by admin"},
+    {id:"kubernetes",name:"kubernetes",system:"Kubernetes",desc:"The prod-east cluster, reached by a local process.",kind:"MCP",transport:"mcp",wire:"stdio",url:"oxagen-run k8s-mcp@2.3.1",health:"degraded",imported:"2026-09-08 18:05 UTC",conn:"short-lived kubeconfig · prod-east",schemas:"2 observed, awaiting approval"},
+    {id:"sentry",name:"sentry",system:"Sentry",desc:"Errors and releases for the mobile apps.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.sentry.dev",health:"ok",imported:"2026-08-26 11:44 UTC",conn:"Sentry org token · mobile",schemas:"declared"},
+    {id:"hubspot",name:"hubspot",system:"HubSpot",desc:"Contacts and email sequences for marketing.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.hubspot.com",health:"ok",imported:"2026-09-03 13:20 UTC",conn:"HubSpot OAuth · growth",schemas:"declared"},
+    {id:"notion",name:"notion",system:"Notion",desc:"Team wiki pages and databases.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.notion.com",health:"ok",imported:"2026-07-28 16:01 UTC",conn:"Notion OAuth · a-intel",schemas:"declared"},
+    {id:"zendesk",name:"zendesk",system:"Zendesk",desc:"Support tickets and customer replies.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.zendesk.com/a-intel",health:"ok",imported:"2026-08-15 09:48 UTC",conn:"Zendesk OAuth · support",schemas:"declared"}
   ];
   NEW_SRV.forEach(function(s){s.tools=0;s.versions=0;SERVERS.push(s);});
   var srvBy={}; SERVERS.forEach(function(s){srvBy[s.id]=s;});
@@ -13887,9 +13964,9 @@ document.addEventListener("click",function(e){
       for(var v=0;v<nv;v++){
         var ver=String(top-v>0?top-v:1), id=n+"@"+ver; if(toolSeen[id])continue; toolSeen[id]=1;
         var cur=v===0, calls=cur?Math.round(skew(0,9000,3)):Math.round(skew(0,400,3));
-        var origin=sid==="oxagen"||sid==="harness"||sid==="postgres-prod"||sid==="aws-billing"?"declared":wpick([["imported",86],["observed_approved",10],["observed",4]]);
+        var origin=sid==="oxagen"||sid==="harness"||sid==="orders-db"||sid==="aws-billing"?"declared":wpick([["imported",86],["observed_approved",10],["observed",4]]);
         var row={n:n,v:ver,s:sid,risk:risk,eff:eff,eg:meta.eg,fin:fin,origin:origin,dig:origin==="observed"?"sha256:pending":"sha256:"+hex(6)+"…",
-          price:sid==="snowflake"||sid==="postgres-prod"?"0.04":sid==="aws-billing"||sid==="datadog"?"0.01":"0.00",cred:meta.cred,belts:cur?ri(0,34):ri(0,6),calls30:calls};
+          price:sid==="snowflake"||sid==="orders-db"?"0.04":sid==="aws-billing"||sid==="datadog"?"0.01":"0.00",cred:meta.cred,belts:cur?ri(0,34):ri(0,6),calls30:calls};
         if(origin==="observed")row.proposal=true;
         if(fin!=="none"){row.amount="$.amount";row.currency="$.currency";row.party=fin==="moves_funds"?"$.destination":"vendor:aws";row.idem="$.idempotency_key";}
         TOOLS.push(row); if(cur)toolPool.push(row);
@@ -13899,28 +13976,28 @@ document.addEventListener("click",function(e){
   SERVERS.forEach(function(s){var ns={},nv=0,np=0;TOOLS.forEach(function(t){if(t.s===s.id){ns[t.n]=1;nv++;if(t.proposal)np++;}});
     s.tools=Object.keys(ns).length; s.versions=nv;
     if(np) s.schemas=np+" observed, awaiting approval";});
-  var CONN_KIND={jira:"oauth",datadog:"api_key",pagerduty:"oauth",salesforce:"oauth",gdrive:"oauth","postgres-prod":"cloud_role",kubernetes:"cloud_role",sentry:"api_key",hubspot:"oauth",notion:"oauth",zendesk:"oauth"};
+  var CONN_KIND={jira:"oauth",datadog:"api_key",pagerduty:"oauth",salesforce:"oauth",gdrive:"oauth","orders-db":"cloud_role",kubernetes:"cloud_role",sentry:"api_key",hubspot:"oauth",notion:"oauth",zendesk:"oauth"};
   var ci=0;
   NEW_SRV.forEach(function(s){
     var kind=CONN_KIND[s.id], owner=pick(OPS), rev=ri(10,110);
-    CONNECTIONS.push({id:"con_01K"+ulid(3),kind:kind,name:{oauth:title(s.id)+" · a-intel workspace",api_key:title(s.id)+" · scoped key",cloud_role:title(s.id)+" · role, "+(s.id==="kubernetes"?"prod-east":"read replica")}[kind],owner:PEOPLE[owner].name,
+    CONNECTIONS.push({id:"con_01K"+ulid(3),kind:kind,name:{oauth:s.system+" · a-intel workspace",api_key:s.system+" · scoped key",cloud_role:s.system+" · role, "+(s.id==="kubernetes"?"prod-east":"read replica")}[kind],owner:PEOPLE[owner].name,
       servers:s.id,reviewed:dstr(TODAY-rev*86400000),next:dstr(TODAY+(90-rev)*86400000),grants30:Math.round(skew(20,9000,2.4)),status:rev>85?"review due":"active",downscope:{oauth:"token exchange",api_key:"scoped key",cloud_role:"session policy"}[kind]});
     ci++;
   });
 
   /* ---------- policies, records, proposals ---------- */
-  var POL_NOTES=["Adds the datadog and pagerduty servers to the infra class; mute_monitor needs approval.","Requires two approvers for any moves_funds call above $1,000.","Narrows every support agent to read-only on customer PII fields.",
-    "Raises kubernetes delete_pod and drain_node to approval in prod-east.","Denies salesforce send_email for every agent; a person sends.","Adds the hubspot server; enroll_contact requires approval."];
+  var POL_NOTES=["Adds the Datadog and PagerDuty providers to the infra class. Muting a monitor needs approval.","Requires two approvers for any call that moves more than $1,000.","Narrows every support agent to read-only on customer PII fields.",
+    "Requires approval for Kubernetes delete_pod and drain_node in prod-east.","Blocks Salesforce send_email for every agent. A person sends the email instead.","Adds the HubSpot provider. Enrolling a contact requires approval."];
   POL_NOTES.forEach(function(note,i){
     var v=39-i, d=TODAY-(18+i*11)*86400000;
     POLICIES.push({v:"pol_v"+v,state:"superseded",by:pick(["Priya Natarajan","Marcus Bell",PEOPLE[WSX.security.owner].name]),at:dstr(d)+" "+pad(ri(8,18))+":"+pad(ri(0,59)),rules:36-i,tests:(38-i)+" / "+(38-i)+" pass",note:note});
   });
   var REC_ST={
-    rule:["Every pull request description names the issue it closes and the test that proves it.","Post to a shared channel only after the run is sealed.","Prefer the workspace's own retry helper over ad-hoc loops.","Cite the receipt id when reporting money moved.","Group release notes by surface, never by author.","Ask before touching a file outside the task's directory.","Write the reproduction command into the issue before labelling it."],
+    rule:["Every pull request description names the issue it closes and the test that proves it.","Post to a shared channel only after the run is sealed.","Prefer the workspace's own retry helper over ad-hoc loops.","Cite the receipt id when reporting money moved.","Group release notes by surface, never by author.","Ask before touching a file outside the task's directory.","Write the reproduction command into the issue before labeling it."],
     constraint:["Never merge. A person merges.","Never send email to a customer address; draft only.","Never write to a production table; read replicas only.","Never delete a pod in prod-east without an approval token.","No agent may rotate a credential it holds.","Refunds above the mandate ceiling go to a human, not to deny."],
     procedure:["Reproduce, then bisect, then open the issue with the introducing commit.","Plan, wait for review, apply only after the plan comment is approved.","Read the runbook page named by the alert before any remediation call.","Backfill in day-sized partitions; verify row counts after each."],
     fact:["The production branch of a-intel/mobile is release, not main.","Invoices for PO-4471 arrive on the 3rd business day of the month.","prod-east has three availability zones; prod-west has two.","The support SLA is four hours for priority one, one business day otherwise.","aintel_prod.customers has 1.46M rows and a soft-delete column."],
-    memory:["The July savings-plan purchase was reverted; do not recommend the same term again.","Slack shipped an unapproved schema change on 2026-09-10; the server switch is on.","Customer 8841 asked never to be contacted by email.","The eval harness's baseline moved on 2026-08-19; compare against v3 numbers."],
+    memory:["The July savings-plan purchase was reverted; do not recommend the same term again.","Slack shipped an unapproved schema change on 2026-09-10; the provider kill switch is on.","Customer 8841 asked never to be contacted by email.","The eval harness's baseline moved on 2026-08-19; compare against v3 numbers."],
     preference:["Marcus prefers release notes in past tense.","The support team wants macros suggested, not applied.","Growth prefers campaign briefs as a table, not prose.","Dana wants spend digests before 07:00 UTC."]
   };
   var REC_AREA={"core-platform":"core",finops:"finops","data-platform":"data",support:"support",security:"sec",growth:"growth",mobile:"mobile",research:"research",infra:"infra"};
@@ -13958,7 +14035,7 @@ document.addEventListener("click",function(e){
     research:["Eval run · {model}","Ablation · {model}","Dataset curation · {topic}","Benchmark · {model}","Paper scout · weekly","Notebook cleanup"],
     infra:["Terraform plan · {pr}","Drift · prod-east","Cert rotation · {topic}","Capacity · Q4","k8s doctor · {ws}","Alert tuning · {topic}","Runbook · {topic}"]
   };
-  var FILL={dep:["openssl","pydantic","react","next","tokio","serde","postgres client","grpc"],ver:["4.11.1","4.12.0","4.11.2","5.0.0-rc1","2.9.3","3.1.0"],
+  var FILL={dep:["openssl","pydantic","react","next","tokio","serde","pg","grpc"],ver:["4.11.1","4.12.0","4.11.2","5.0.0-rc1","2.9.3","3.1.0"],
     bug:["checkout 500","worker restart","stale cache","timezone off by one","duplicate webhook","retry storm"],test:["test_idempotency_key","notes.contract.test.ts","test_retry_budget","export.bundle.spec"],
     table:["customers","events","invoices","devices","contracts","sessions"],month:["September","August"],vendor:["aws","gcp","datadog","snowflake","twilio","stripe"],ws:["core-platform","support","growth","infra"],
     model:["stg_orders","fct_revenue","dim_customer","eval-v3","checkpoint-0912","reranker-b"],topic:["billing","onboarding","exports","API keys","retention","two-factor"],camp:["autumn-launch","q4-webinar","partner-promo","founders-letter"],
@@ -13988,7 +14065,7 @@ document.addEventListener("click",function(e){
       var effort=(a.tier==="gateway"||a.tier==="contained")?wpick([["high",44],["medium",34],["low",14],[null,8]]):null;
       genRuns.push({id:id,agent:a.key,op:a.operator,ws:w.slug,status:status,turn:turn,steps:steps,frames:frames,cost:m2(cost),basis:(a.tier==="gateway"||a.tier==="contained")?"gateway_observed":"client_attested",tier:a.tier,effort:effort,prompts:wpick([[1,55],[2,25],[3,12],[4,5],[5,3]]),
         grade:grade,task:tref,taskTitle:task,
-        summary:(status==="live"?"In progress. ":status==="parked"?"Parked on approval. ":status==="halted"?"Halted before completion. ":"")+a.name+" worked "+task.toLowerCase()+" in "+steps+" steps over "+turn+" turn"+(turn===1?"":"s")+".",
+        summary:(status==="live"?"In progress. ":status==="parked"?"Parked on approval. ":status==="halted"?"Halted before completion. ":"")+a.name+" worked "+task.toLowerCase()+" in "+plural(steps,"step")+" over "+turn+" turn"+(turn===1?"":"s")+".",
         touched:[tref,pick(TOUCH).replace(/\{x\}/g,pick(["billing","export","worker","notes","retry","schema","auth","cache"])).replace(/\{n\}/,String(ri(100,240)))],
         gen:{model:"claude-haiku-4-5",when:sealedAt?"at seal "+sealedAt:"turn "+turn+" · regenerated at each turn boundary",frames:frames},
         started:when(d,sec,true),model:model,cache:Math.round(rf(0.55,0.94)*100)/100,ratio:ratio,sealed:sealedAt,_d:d,_s:sec});
@@ -14037,7 +14114,7 @@ document.addEventListener("click",function(e){
 
   /* ---------- audit ---------- */
   var EV=[["approval.requested",10,"agent"],["approval.resolved",9,"human"],["run.sealed",26,"agent"],["run.halted",4,"agent"],["tool_call.denied",6,"agent"],
-    ["budget.breached",2,"agent"],["agent.registered",3,"human"],["agent.deregistered",1,"human"],["role.assigned",3,"human"],["role.revoked",1,"human"],["api_key.created",1,"human"],["api_key.revoked",1,"human"],
+    ["budget.breached",2,"agent"],["agent.registered",3,"human"],["agent.retired",1,"human"],["role.assigned",3,"human"],["role.revoked",1,"human"],["api_key.created",1,"human"],["api_key.revoked",1,"human"],
     ["invitation.sent",2,"human"],["invitation.accepted",2,"human"],["connection.reviewed",2,"human"],["credential.granted",8,"service"],["export.created",2,"human"],["export.downloaded",1,"human"],
     ["steering_published",3,"human"],["context_pr.opened",3,"service"],["kill_switch.flipped",1,"human"],["kill_switch.cleared",1,"human"],
     ["schema.proposed",2,"service"],["schema.approved",1,"human"],["session.signed_in",6,"human"],["preferences.set",2,"human"]];
@@ -14050,12 +14127,12 @@ document.addEventListener("click",function(e){
     switch(ev){
       case "approval.requested": return t.n+"@"+t.v+" on "+pick(REPOS).n;
       case "approval.resolved": return pick(["approved","denied","expired"])+" · apr_01K5R"+ulid(4)+" · "+t.n+"@"+t.v;
-      case "run.sealed": return r.frames+" frames · "+tokn(runMetrics(r).tokTotal)+" tokens · "+r.task;
-      case "run.halted": return pick(["kill switch · server slack","budget reached at turn "+r.turn,"operator pause","hooks_removed"])+" · "+r.task;
-      case "tool_call.denied": return t.n+"@"+t.v+" · "+pick(["outside the belt","tainted argument","mandate ceiling","kill switch"]);
+      case "run.sealed": return plural(r.frames,"frame")+" · "+tokn(runMetrics(r).tokTotal)+" tokens · "+r.task;
+      case "run.halted": return pick(["kill switch · provider slack","budget reached at turn "+r.turn,"operator pause","hooks_removed"])+" · "+r.task;
+      case "tool_call.denied": return t.n+"@"+t.v+" · "+pick(["outside the toolbelt","tainted argument","mandate ceiling","kill switch"]);
       case "budget.breached": return "$"+m2(rf(0.4,3))+" per run reached at turn "+r.turn+" · paused at the next hook boundary";
       case "agent.registered": return r.agent+" · "+agentsBy[r.agent].harnessLabel+" · "+agentsBy[r.agent].tier+" tier";
-      case "agent.deregistered": return "a-intel."+pick(["core","data","growth"])+"."+pick(["stale-closer","weekly-digest","summarizer"])+"-old · runs retained";
+      case "agent.retired": return "a-intel."+pick(["core","data","growth"])+"."+pick(["stale-closer","weekly-digest","summarizer"])+"-old · runs retained";
       case "role.assigned": return p+" · "+pick(["workspace.member","workspace.owner","org.auditor"])+" · "+pick(allWs);
       case "role.revoked": return p+" · workspace.member · "+pick(allWs);
       case "api_key.created": return "svc_"+pick(["export","ci","terraform","auditor"])+"_"+ulid(4).toLowerCase()+" · grants run.read · expires "+dstr(TODAY+ri(30,180)*86400000);
@@ -14067,7 +14144,7 @@ document.addEventListener("click",function(e){
       case "export.created": return "exp_01K5R"+ulid(4)+" · "+pick(["receipt export","evidence bundle"])+" · "+pick(allWs);
       case "export.downloaded": return "exp_01K5R"+ulid(4)+" · signature verified";
       case "steering_published": return pick(RECORDS).id+" · "+pick(REPOS).n+"#"+ri(300,1900)+" merged";
-      case "context_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+ri(3,40)+" runs in support";
+      case "context_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+plural(ri(3,40),"run")+" in support";
       case "kill_switch.flipped": return pick(["tool version "+t.n+"@"+t.v,"agent "+r.agent,"provider kubernetes"])+" · "+pick(["schema regression","runaway retries","operator request"]);
       case "kill_switch.cleared": return "provider kubernetes · schema approved";
       case "schema.proposed": return t.n+"@"+t.v+" · output schema observed, not declared";
@@ -14096,8 +14173,8 @@ document.addEventListener("click",function(e){
     ["warning","Approval expired with money reserved","approval_expired","{agent} · finops","No approver resolved the parked payment inside ten minutes. The mandate released the reservation; nothing moved. The operator was paged by the gateway."],
     ["info","Tainted argument raised to approval","taint_raised","{agent} · {ws}","A shell argument was copied byte-for-byte from a tool result. Policy raised the call to approval; the operator denied it and the run halted cleanly."],
     ["warning","Client-attested frames with no provider request id","attestation_gap","{agent} · harness tier","Nine frames from a harness-tier agent carry no provider request id, so their cost cannot be matched to a provider invoice line. Spend is client-attested until the gateway tier, and the Spend page labels it so."],
-    ["critical","Hooks removed on an enrolled host","hooks_removed","{agent} · mbp-{n}","The host's harness settings lost the Oxagen hooks between two checkpoints. The collector halted the run at the next boundary and the agent's tier fell to observe until re-enrolment."],
-    ["info","Runaway retries on a read tool","retry_storm","{agent} · {ws}","The agent called the same read tool 212 times in one turn after a 429. The belt's retry budget denied the 213th; the run sealed unsatisfied."],
+    ["critical","Hooks removed on an enrolled host","hooks_removed","{agent} · mbp-{n}","The host's harness settings lost the oxagen hooks between two checkpoints. The collector halted the run at the next boundary and the agent's tier fell to observe until re-enrolment."],
+    ["info","Runaway retries on a read tool","retry_storm","{agent} · {ws}","The agent called the same read tool 212 times in one turn after a 429. The toolbelt's retry budget denied the 213th; the run sealed unsatisfied."],
     ["warning","Access review overdue on a governed connection","review_overdue","{conn}","The quarterly review of this connection is past due. Grants continue; the connection is flagged on the Tools page until an owner reviews it."]];
   for(var ii=0;ii<19;ii++){
     var inc=INC[ii%INC.length], r=pick(genRuns), d=ri(0,60), open=d<9?rnd()<0.7:rnd()<0.12;
@@ -14112,9 +14189,9 @@ document.addEventListener("click",function(e){
      back from the register rather than trusting the flag. Seed agents are left as authored. */
   var TK=["hooks_removed","chain_break","unknown_tool","credential_probe","receipt_modified","seq_conflict"];
   var TK_DETAIL={
-    hooks_removed:"The host's harness settings lost the Oxagen hooks between two checkpoints. The collector halted the run at the next boundary and the agent's tier fell to observe until re-enrolment.",
+    hooks_removed:"The host's harness settings lost the oxagen hooks between two checkpoints. The collector halted the run at the next boundary and the agent's tier fell to observe until re-enrolment.",
     chain_break:"A frame arrived whose previous-hash did not match the sealed frame before it. Every later frame on the run was marked unverifiable and the run sealed tampered.",
-    unknown_tool:"The agent called nine tool names that are not on its belt inside one turn. Each was denied before dispatch; the burst tripped the detector and paused the run.",
+    unknown_tool:"The agent called nine tool names that are not on its toolbelt inside one turn. Each was denied before dispatch; the burst tripped the detector and paused the run.",
     credential_probe:"The agent tried to read the credential grant behind a tool call instead of calling the tool. The broker refused, and the attempt is recorded as a security event.",
     receipt_modified:"A receipt row was rewritten after the run sealed. The chain kept the original hash, so the rewrite shows as a mismatch and the run is marked in its completeness record.",
     seq_conflict:"Two frames arrived with the same sequence number and different hashes. The second was rejected and the run sealed with a gap noted in its completeness record."};
@@ -14137,16 +14214,16 @@ document.addEventListener("click",function(e){
   for(var ei=0;ei<9;ei++){
     var r=pick(genRuns), m=pick(["July 2026","August 2026","June 2026","Q2 2026"]), what=pick(EXP_WHAT).replace("{m}",m).replace("{ws}",r.ws).replace("{agent}",r.agent), d=ri(1,70);
     EXPORTS.push({id:"exp_01K"+ulid(6),what:what,range:m.indexOf("Q2")===0?"2026-04-01 → 2026-06-30":m.indexOf("June")===0?"2026-06-01 → 2026-06-30":m.indexOf("July")===0?"2026-07-01 → 2026-07-31":"2026-08-01 → 2026-08-31",
-      runs:/Receipt|Audit|Spend/.test(what)?ic(ri(2000,90000))+" "+(/Audit/.test(what)?"events":/Spend/.test(what)?"cost records":"receipts"):ic(ri(400,6000))+" runs · "+ri(8,140)+" archive segments · "+ic(ri(40000,1400000))+" frames",
+      runs:/Receipt|Audit|Spend/.test(what)?ic(ri(2000,90000))+" "+(/Audit/.test(what)?"events":/Spend/.test(what)?"cost records":"receipts"):plural(ic(ri(400,6000)),"run")+" · "+ri(8,140)+" archive segments · "+plural(ic(ri(40000,1400000)),"frame"),
       size:/bundle/.test(what)?(rf(0.4,6.2)).toFixed(1)+" GB":ri(8,410)+" MB",at:stamp(d,daySec(d)),by:pick(["Sofia Ruiz","Dana Okafor","Priya Natarajan",pick(humans)]),st:rnd()<0.9?"ready":"expired",sig:"ed25519:"+ulid(6)+"…"+hex(4),keys:"kek_aintel_2026Q"+ri(2,3)});
   }
   var KEYN=[["Data platform exports","svc_data_export",["cost.read","run.read","export.create"]],["Grafana read-only","svc_grafana",["run.read","frame.read"]],["Support console","svc_support_console",["run.read","receipt.read"]],["Security SIEM feed","svc_siem",["audit.read","receipt.read"]],
     ["Terraform · staging","svc_terraform_stg",["workspace.write","agent.write"]],["Release pipeline","svc_release",["run.read","export.create"]],["Growth CRM sync","svc_crm_sync",["run.read"]],["Mobile CI","svc_mobile_ci",["run.read"]],["Auditor read-only (Halden LLP)","svc_auditor_hll",["audit.read","receipt.read","export.read"]],["Backfill runner","svc_backfill",["run.read","cost.read"]]];
-  KEYN.forEach(function(k,i){var st=wpick([["ok",70],["expiring",15],["unused",15]]),d=ri(0,20);APIKEYS.push({name:k[0],key:"ox_live_"+hex(4)+"…"+hex(3),principal:k[1],grants:k[2],by:pick(humans),last:st==="unused"?"never used":stamp(d,daySec(d))+"Z",n30:st==="unused"?0:Math.round(skew(3,9000,2.5)),expires:dstr(TODAY+(st==="expiring"?ri(5,25):ri(40,400))*86400000),st:st});});
+  KEYN.forEach(function(k,i){var st=wpick([["ok",70],["expiring",15],["unused",15]]),d=ri(0,20);APIKEYS.push({name:k[0],key:"ox_live_"+hex(4)+"…"+hex(3),principal:k[1],grants:k[2],by:pick(humans),last:st==="unused"?"Never used":stamp(d,daySec(d))+"Z",n30:st==="unused"?0:Math.round(skew(3,9000,2.5)),expires:dstr(TODAY+(st==="expiring"?ri(5,25):ri(40,400))*86400000),st:st});});
   for(var vi=0;vi<11;vi++){var f=pick(FIRST).toLowerCase(),s=ri(0,6);INVITES.push({email:f+"."+pick(LAST).toLowerCase().replace(/[^a-z]/g,"")+"@a-intel.example",role:pick(["workspace.member · "+pick(allWs),"org.auditor","workspace.owner · "+pick(allWs)]),by:pick(humans),sent:dstr(TODAY-s*86400000),expires:dstr(TODAY+(7-s)*86400000)});}
   if(parked.length)NOTIFS.push({kind:"approval.requested",tone:"approval",unread:true,t:"15:41",title:"Approval waiting · kubernetes__delete_pod@2",body:"a-intel.infra.k8s-doctor on "+parked[0].id+" wants to delete a crash-looping pod in prod-east. Rule role_grant rg_0121. Expires 15:51."});
   NOTIFS.push(
-    {kind:"run.sealed",tone:"allowed",unread:false,t:"15:30",title:"Run sealed · "+genRuns[3].id,body:genRuns[3].task+" sealed: "+genRuns[3].frames+" frames, "+usd(genRuns[3].cost)+" "+genRuns[3].basis+"."},
+    {kind:"run.sealed",tone:"allowed",unread:false,t:"15:30",title:"Run sealed · "+genRuns[3].id,body:genRuns[3].task+" sealed: "+plural(genRuns[3].frames,"frame")+", "+usd(genRuns[3].cost)+" "+keyText(genRuns[3].basis).toLowerCase()+"."},
     {kind:"budget.breached",tone:"failed",unread:false,t:"14:52",title:"Hard budget reached · "+fin[0].key,body:"$1.50 per run reached at turn 5. The run was paused at the next hook boundary."},
     {kind:"repository.indexed",tone:"allowed",unread:false,t:"14:20",title:"Code graph current · a-intel/data-platform",body:"Push "+hex(7)+" to main indexed in 58 s. 41 files re-parsed, 190 symbols versioned."},
     {kind:"context_pr.opened",tone:"gold",unread:false,t:"11:48",title:"Pull request opened · a-intel/support-console#188",body:"The promoter proposed a rule on lineage ctx.support.reply-in-customers-language, supported by 212 tickets."});
@@ -14162,7 +14239,7 @@ document.addEventListener("click",function(e){
   SPEND.byAgent=top.map(function(a){var sp=num$(a.spend30);return Object.assign({},seedByAgent[a.key]||{},{k:a.key,runs:a.runs30,spend:mc(sp),trend:(rnd()<0.55?"+":"-")+ri(0,18)+"%"});});
   var callsTot=Math.round(runsTot*31);
   SPEND.byModel=[{m:"claude-opus-5",calls:Math.round(callsTot*0.31),spend:mc(spendTot*0.62),cache:0.84},{m:"claude-sonnet-5",calls:Math.round(callsTot*0.33),spend:mc(spendTot*0.24),cache:0.81},
-    {m:"claude-haiku-4-5",calls:Math.round(callsTot*0.34),spend:mc(spendTot*0.09),cache:0.76},{m:"z-ai/glm-latest (Oxagen)",calls:Math.round(callsTot*0.02),spend:mc(spendTot*0.05),cache:0.62}];
+    {m:"claude-haiku-4-5",calls:Math.round(callsTot*0.34),spend:mc(spendTot*0.09),cache:0.76},{m:"z-ai/glm-latest (oxagen)",calls:Math.round(callsTot*0.02),spend:mc(spendTot*0.05),cache:0.62}];
   var oldTool=SPEND.byTool.reduce(function(s,t){return s+t.spend;},0), kT=spendTot*0.78/oldTool;
   SPEND.byTool.forEach(function(t){t.calls=Math.round(t.calls*kT);t.runs=Math.round(t.runs*kT);t.spend=Math.round(t.spend*kT*100)/100;});
   toolPool.slice().sort(function(a,b){return b.calls30-a.calls30;}).slice(0,26).forEach(function(t){if(SPEND.byTool.some(function(x){return x.t===t.n;}))return;var calls=t.calls30*Math.max(1,Math.round(kT/3)),pc=rf(0.12,1.9);SPEND.byTool.push({t:t.n,s:t.s,calls:calls,runs:Math.round(calls*rf(0.3,0.95)),spend:Math.round(calls*pc*100)/100,perCall:Math.round(pc*100)/100,perRun:Math.round(pc*rf(1,3)*100)/100,note:"—"});});
@@ -14173,7 +14250,7 @@ document.addEventListener("click",function(e){
     var sp=o.spend, tools=SPEND.byTool.slice(0,5).map(function(t){return [t.t,Math.round(sp*rf(0.04,0.22)*100)/100];}); tools.push(["(no tool call)",Math.round(sp*rf(0.1,0.25)*100)/100]);
     SPEND_DETAIL["operator:"+o.p]={cache:Math.round(rf(0.7,0.9)*100)/100,wasted:Math.round(sp*rf(0.08,0.24)*100)/100,perRun:Math.round(sp/Math.max(1,o.runs)*100)/100,
       trend:(rnd()<0.6?"+":"-")+ri(0,14)+"% vs August",modelCalls:Math.round(o.runs*31),toolCalls:Math.round(o.runs*9.4),agents:cuts(o.list,agentKey,function(a){return num$(a.spend30);},4),tools:tools,
-      models:[["claude-opus-5",Math.round(sp*0.62*100)/100],["claude-sonnet-5",Math.round(sp*0.24*100)/100],["claude-haiku-4-5",Math.round(sp*0.09*100)/100],["z-ai/glm-latest (Oxagen)",Math.round(sp*0.05*100)/100]]};
+      models:[["claude-opus-5",Math.round(sp*0.62*100)/100],["claude-sonnet-5",Math.round(sp*0.24*100)/100],["claude-haiku-4-5",Math.round(sp*0.09*100)/100],["z-ai/glm-latest (oxagen)",Math.round(sp*0.05*100)/100]]};
   });
   top.forEach(function(a){
     if(SPEND_DETAIL["agent:"+a.key])return; var sp=num$(a.spend30);
@@ -14184,18 +14261,12 @@ document.addEventListener("click",function(e){
   });
   /* Governed actions are the unit (ADR-055): the included allowance first, then blocks of 10,000 at $30. */
   var included=BILLING.includedGau||250000, gauTot=SPEND.actions, billable=Math.max(0,gauTot-included), blocks=Math.ceil(billable/10000), amount=blocks*30, disc=amount*0.2;
-  BILLING.runsUsed=runsTot; BILLING.billable=billable; BILLING.tier2=ic(blocks)+" blocks × $30.00 · "+ic(included)+" included"; BILLING.amount=mc(amount); BILLING.discountAmount="-"+mc(disc); BILLING.total=mc(amount-disc);
-  BILLING.retention="13 months included · "+(spendTot/420).toFixed(1)+" GB · $0.00";
+  BILLING.runsUsed=runsTot; BILLING.used=gauTot; BILLING.includedGau=included; BILLING.billable=billable; BILLING.tier2=ic(blocks)+" blocks × $30.00 · "+ic(included)+" included"; BILLING.amount=mc(amount); BILLING.discountAmount="-"+mc(disc); BILLING.total=mc(amount-disc);
+  BILLING.retention=retainedGbText()+" held · 13 months included";
   BILLING.invoices=[]; var mon=["August","July","June","May","April","March","February","January"], base=runsTot*0.93;
-  mon.forEach(function(m,i){var runs=Math.round(base*Math.pow(0.91,i)*rf(0.97,1.03)),gau=Math.round(runs*14.7),bill=Math.ceil(Math.max(0,gau-included)/10000)*30*0.8;BILLING.invoices.push({n:"INV-2026-"+pad(8-i),p:m+" 2026",runs:gau,amt:mc(bill),st:i===0&&rnd()<0.3?"open":"paid",d:"2026-"+pad(9-i)+"-01"});});
-  BILLING.meters=[{m:"Governed actions",v:ic(SPEND.actions),note:"the billable unit · "+ic(included)+" included this month"},{m:"Sealed runs with at least one model call",v:ic(runsTot),note:"reported, not priced"},{m:"Retained evidence",v:(spendTot/420).toFixed(1)+" GB",note:"13 months included"},
-    {m:"Runs Oxagen halted before any model call",v:ic(Math.round(runsTot*0.009)),note:"free"},{m:"Runs of the in-app agent",v:ic(Math.round(runsTot*0.03)),note:"free"}];
-  SWITCHES.forEach(function(s){
-    if(s.id==="ks_org")s.stops=AGENTS.length+" agents · "+ic(TOOLS.length)+" tool versions";
-    if(s.id==="ks_ws")s.stops=(WS[0].agents-7)+" agents · "+ic(Math.round(TOOLS.length*0.38))+" tool versions";
-    if(s.id==="ks_cls_irrev")s.stops=TOOLS.filter(function(t){return t.eff==="irreversible";}).length+" tool versions · "+Math.round(AGENTS.length*0.48)+" agents · "+RUNS.filter(function(r){return r.status==="live";}).length+" runs in flight";
-    if(s.id==="ks_cls_egress")s.stops=TOOLS.filter(function(t){return t.eg==="third_party";}).length+" tool versions · "+Math.round(AGENTS.length*0.9)+" agents · "+RUNS.filter(function(r){return r.status==="live"||r.status==="parked";}).length+" runs in flight";
-  });
+  mon.forEach(function(m,i){var runs=Math.round(base*Math.pow(0.91,i)*rf(0.97,1.03)),gau=Math.round(runs*14.7),bill=Math.ceil(Math.max(0,gau-included)/10000)*30*0.8;/* rf() and rnd() still run for every month so the seeded data after this stays put; the organization converted in March, so February and January have no invoice. */if(i<6)BILLING.invoices.push({n:"INV-2026-"+pad(8-i),p:m+" 2026",runs:gau,amt:mc(bill),st:i===0&&rnd()<0.3?"open":"paid",d:"2026-"+pad(9-i)+"-01"});});
+  BILLING.meters=[{m:"Governed actions",v:ic(SPEND.actions),note:"Priced · "+ic(included)+" included this month"},{m:"Sealed runs with at least one model call",v:ic(runsTot),note:"Reported, not priced"},{m:"Retained evidence",v:retainedGbText(),note:"Reported · 13 months included"},
+    {m:"Runs oxagen halted before any model call",v:ic(Math.round(runsTot*0.009)),note:"Free"},{m:"Runs of the in-app agent",v:ic(Math.round(runsTot*0.03)),note:"Free"}];
   /* ---------- spend findings ----------
      One finding per real waste pattern the frames would show, spread across tools, agents,
      operators and workspaces. `kind` is reused from FIX so every card's Fix dialog resolves,
@@ -14209,7 +14280,7 @@ document.addEventListener("click",function(e){
     "Cache the list at the workspace with a 24-hour TTL."],
    ["Duplicate tool calls","agent","identical input digests per run","the same read is issued several times in one run with an identical input digest",
     "Open a steering proposal: read once and reuse the result inside a run."],
-   ["Tool-list bloat","agent","tool_definition_tokens per model call","most of the belt was never called, and every definition is paid for on every model call",
+   ["Tool-list bloat","agent","tool_definition_tokens per model call","most of the toolbelt was never called, and every definition is paid for on every model call",
     "Narrow the grants to the tools actually used."],
    ["Wrong tier","agent","share of classification-shaped steps on a flagship model","classification-shaped steps went to a flagship model after a retry",
     "Pin the fallback route to the light tier."],
@@ -14245,24 +14316,24 @@ document.addEventListener("click",function(e){
     var users=AGENTS.filter(function(a){return a.belt>10;}), a=pick(users);
     var kind=t.eff==="read"?pick(["Unpaged results","Refetching a stable list"]):"Repeated shell commands";
     pushFinding(kind,"tool",t.n,skew(120,4200,1.9),a.key,a.operator,
-      ic(Math.round(t.calls30*rf(0.2,0.9)))+" runs · "+ic(t.calls30)+" tool calls",
+      plural(ic(Math.round(t.calls30*rf(0.2,0.9))),"run")+" · "+ic(t.calls30)+" tool calls",
       ic(ri(9000,52000))+" tok",ic(ri(400,3200))+" tok (grouped)",
-      "Across "+ic(t.calls30)+" calls in 30 days the result body averaged "+ic(ri(9,48))+"k tokens and re-entered the context on every later turn of the run.");
+      "Across "+plural(ic(t.calls30),"call")+" in 30 days the result body averaged "+ic(ri(9,48))+"k tokens and re-entered the context on every later turn of the run.");
   });
   fndAgents.slice(0,14).forEach(function(a,k){
     var kind=["Tool-list bloat","Duplicate tool calls","Wrong tier","Unproductive tail"][k%4];
     pushFinding(kind,"agent",a.key,skew(40,2600,2.0),a.key,a.operator,
-      ic(a.runs30)+" runs · "+ic(Math.round(a.runs30*rf(3,11)))+" model calls",
-      kind==="Tool-list bloat"?ic(ri(3000,12000))+" tok":kind==="Wrong tier"?ri(8,31)+"%":ri(3,14)+" steps",
+      plural(ic(a.runs30),"run")+" · "+ic(Math.round(a.runs30*rf(3,11)))+" model calls",
+      kind==="Tool-list bloat"?ic(ri(3000,12000))+" tok":kind==="Wrong tier"?ri(8,31)+"%":plural(ri(3,14),"step"),
       kind==="Tool-list bloat"?ic(ri(600,2400))+" tok":kind==="Wrong tier"?"0%":"1 step",
-      kind==="Tool-list bloat"?("tool_definition_tokens averages "+ic(ri(3000,12000))+" per model call; "+ri(Math.max(1,Math.round(a.belt*0.45)),Math.max(2,a.belt-2))+" of the "+a.belt+" tools on the belt were never called in "+ic(a.runs30)+" runs.")
-      :kind==="Duplicate tool calls"?("The same read was issued with an identical input digest "+rf(1.8,4.6).toFixed(1)+" times per run on average across "+ic(a.runs30)+" runs.")
+      kind==="Tool-list bloat"?("tool_definition_tokens averages "+ic(ri(3000,12000))+" per model call; "+ri(Math.max(1,Math.round(a.belt*0.45)),Math.max(2,a.belt-2))+" of the "+plural(a.belt,"tool")+" on the toolbelt were never called in "+plural(ic(a.runs30),"run")+".")
+      :kind==="Duplicate tool calls"?("The same read was issued with an identical input digest "+rf(1.8,4.6).toFixed(1)+" times per run on average across "+plural(ic(a.runs30),"run")+".")
       :kind==="Wrong tier"?(ri(78,96)+"% of this agent's steps are classification-shaped, but "+ri(8,31)+"% of its model calls went to a flagship model after a retry.")
-      :("On "+ic(Math.round(a.runs30*rf(0.2,0.7)))+" of "+ic(a.runs30)+" runs, more than six steps followed the last step that produced a kept side effect."));
+      :("On "+ic(Math.round(a.runs30*rf(0.2,0.7)))+" of "+plural(ic(a.runs30),"run")+", more than six steps followed the last step that produced a kept side effect."));
   });
   ops.slice(0,4).forEach(function(o){
     pushFinding("Cache writes never read","operator",PEOPLE[o.p].name,skew(20,420,1.8),o.list[0].key,o.p,
-      ic(Math.round(o.runs*0.04))+" runs","cache_write_5m on the final turn","no read inside the TTL",
+      plural(ic(Math.round(o.runs*0.04)),"run"),"cache_write_5m on the final turn","no read inside the TTL",
       "cache_write_5m on the last turn of "+ic(Math.round(o.runs*0.04))+" one-turn runs; nothing read the prefix inside the TTL.");
   });
   WS.slice(2,6).forEach(function(w){
@@ -14323,10 +14394,26 @@ S.tsel={}; S.dodEdit={}; S.tkDrafting={}; S.wo=null; S.ipz=null; S.wfz=null; S.d
     AGENTS.push({key:x.key,name:x.name,harness:x.harness,harnessLabel:x.harnessLabel,ws:"core-platform",operator:TK_ME,status:"enrolled",
       tier:x.tier,tierNative:x.tier,belt:belts[i],beltMode:"full",runs30:x.runs30,spend30:x.spend30,ratio:0.41,
       digest:"sha256:"+["4b1e","9a07","c2d5","e6f3"][i]+"0d7a1c5e93b2",commit:"a4c91e2",budget:"2.00",budgetUsed:0.28,
-      desc:x.desc,avatar:{kind:"icon",icon:x.icon,tone:x.tone},mandates:[],incidents:0,model:"complex",host:x.host});
+      desc:x.desc,avatar:{kind:"icon",icon:x.icon,tone:x.tone},mandates:[],incidents:0,model:"complex",host:x.host,
+      enrolled:true,principal:"prn_01JQ8W3F2M6XKD7A9RZT4BVCN"+["K","M","P","Q"][i],devKey:"ed25519:"+["5d31…a0c4","b812…6e27","0f9e…d153","c47a…29b8"][i]});
   });
   WS.forEach(function(w){if(w.slug==="core-platform")w.agents+=TK.agents.length;});
   ORG.agents=AGENTS.length;
+})();
+
+/* Kill-switch blast radius. Counted here, after the last agent is added, so a switch's agent count
+   matches the sidebar and the Agents page. No random draws: the generated data is unchanged. */
+(function switchStops(){
+  var live=RUNS.filter(function(r){return r.status==="live";}).length,
+      moving=RUNS.filter(function(r){return r.status==="live"||r.status==="parked";}).length;
+  function tv(n){return plural(n,"tool version");}
+  SWITCHES.forEach(function(s){
+    if(s.id==="ks_org")s.stops=plural(AGENTS.length,"agent")+" · "+tv(TOOLS.length);
+    if(s.id==="ks_ws"){var w=WS.filter(function(x){return x.slug===s.target;})[0];
+      s.stops=plural(w?w.agents:0,"agent")+" · "+tv(Math.round(TOOLS.length*0.38));}
+    if(s.id==="ks_cls_irrev")s.stops=tv(TOOLS.filter(function(t){return t.eff==="irreversible";}).length)+" · "+plural(Math.round(AGENTS.length*0.48),"agent")+" · "+plural(live,"run")+" in flight";
+    if(s.id==="ks_cls_egress")s.stops=tv(TOOLS.filter(function(t){return t.eg==="third_party";}).length)+" · "+plural(Math.round(AGENTS.length*0.9),"agent")+" · "+plural(moving,"run")+" in flight";
+  });
 })();
 
 /* ---- marks. Provider and harness logos are the simple-icons paths (CC0), drawn at one size and in the
@@ -14335,7 +14422,7 @@ S.tsel={}; S.dodEdit={}; S.tkDrafting={}; S.wo=null; S.ipz=null; S.wfz=null; S.d
    word for the unit of work (issue, incident, case, ticket) and for a comment only staff can read, so no
    screen says "issue" about a help desk. Trackers come first, so Jira stays the third card. ---- */
 var IP_KIND={
- github:{l:"GitHub",c:"currentColor",what:"repositories",unit:"issue",note:"comment",grp:"tracker",desc:"Issues from the repositories the Oxagen GitHub App can reach.",
+ github:{l:"GitHub",c:"currentColor",what:"repositories",unit:"issue",note:"comment",grp:"tracker",desc:"Issues from the repositories the oxagen GitHub App can reach.",
    url:function(t){var m=t.num.match(/^(.+)#(\d+)$/);return m?"https://github.com/"+m[1]+"/issues/"+m[2]:"#";},d:"M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"},
  linear:{l:"Linear",c:"#5E6AD2",what:"teams",unit:"issue",note:"comment",grp:"tracker",desc:"Issues from the Linear teams you choose.",
    url:function(t){return "https://linear.app/a-intel/issue/"+t.num;},d:"M2.886 4.18A11.982 11.982 0 0 1 11.99 0C18.624 0 24 5.376 24 12.009c0 3.64-1.62 6.903-4.18 9.105L2.887 4.18ZM1.817 5.626l16.556 16.556c-.524.33-1.075.62-1.65.866L.951 7.277c.247-.575.537-1.126.866-1.65ZM.322 9.163l14.515 14.515c-.71.172-1.443.282-2.195.322L0 11.358a12 12 0 0 1 .322-2.195Zm-.17 4.862 9.823 9.824a12.02 12.02 0 0 1-9.824-9.824Z"},
@@ -14410,15 +14497,15 @@ function tStatusBadge(k){
   return '<span class="b '+b+'"><span class="d"></span>'+h(s.name)+'</span>';
 }
 var READY={
- drafting:{b:"b-q",l:"drafting"},
- draft:{b:"b-approval",l:"draft"},
- changed:{b:"b-denied",l:"changed"},
- ready:{b:"b-allowed",l:"ready"},
- sent:{b:"b-proven",l:"in a work order"},
- accepted:{b:"b-q",l:"accepted"},
- closed:{b:"b-q",l:"closed"}
+ drafting:{b:"b-q",l:"Drafting"},
+ draft:{b:"b-approval",l:"Needs certification"},
+ changed:{b:"b-denied",l:"Changed since certified"},
+ ready:{b:"b-allowed",l:"Ready"},
+ sent:{b:"b-proven",l:"In a work order"},
+ accepted:{b:"b-q",l:"Accepted"},
+ closed:{b:"b-q",l:"Closed"}
 };
-function readyBadge(t){var m=READY[t.ready]||READY.draft;return '<span class="b '+m.b+'" title="readiness"><span class="d"></span>'+h(m.l)+'</span>';}
+function readyBadge(t){var m=READY[t.ready]||READY.draft;return '<span class="b '+m.b+'" title="Readiness"><span class="d"></span>'+h(m.l)+'</span>';}
 /* A person in a provider: the workspace member when mapped, the provider's own handle when not. Nothing
    pretends an unmapped account is a member. */
 function tkPerson(id,opts){
@@ -14426,7 +14513,7 @@ function tkPerson(id,opts){
   if(!p) return '<span class="dim">—</span>';
   if(p.state==="mapped"&&PEOPLE[p.to]) return '<span class="tkp">'+personAv(p.to,20)+'<span>'+h(PEOPLE[p.to].name)+(opts.handle?'<span class="dim mono" style="font-size:11px;margin-left:6px">'+ipLogo(p.kind,11)+' '+h(p.handle)+'</span>':'')+'</span></span>';
   return '<span class="tkp">'+ipLogo(p.kind,14)+'<span class="mono">'+h(p.handle)+'</span>'+
-    (p.state==="bot"||p.state==="requester"?'<span class="b b-q" style="font-size:10px">'+p.state+'</span>':'<span class="b b-q" style="font-size:10px" title="not mapped to a workspace member">not mapped</span>')+'</span>';
+    '<span class="vh"> (</span>'+(p.state==="bot"||p.state==="requester"?'<span class="b b-q" style="font-size:10px">'+p.state+'</span>':'<span class="b b-q" style="font-size:10px" title="Not mapped to a workspace member">not mapped</span>')+'<span class="vh">)</span></span>';
 }
 var DOD_TAGS=["code","test","docs","review"];
 var DOD_SRC={assistant:"oxagen.assistant",operator:"you"};
@@ -14436,7 +14523,7 @@ function stageChain(wf,opts){
   var st=wf.stages.map(function(s,i){
     var a=agent(s.agent);
     var cls=opts.state?opts.state(i):"";
-    return '<div class="stage '+cls+'"><span class="r"><i>'+(i+1)+'</i>'+h(s.role)+'</span>'+
+    return '<div class="stage '+cls+'"><span class="r"><i>'+(i+1)+'</i>'+(s.id?'<span class="id">'+h(s.role)+'</span>':h(s.role))+'</span>'+
       '<span class="ag">'+(a?hxIcon(a.harness,14)+agentAv(a,18)+'<b>'+h(a.name)+'</b>'+tierBadge(a.tier):'<span class="dim">no agent</span>')+'</span>'+
       (opts.sub?'<span class="sub">'+opts.sub(i,s)+'</span>':'<span class="sub">owns '+s.owns.map(tagChip).join(" ")+'</span>')+'</div>';
   });
@@ -14506,8 +14593,8 @@ function tkWfTab(){
      '<td><b>'+h(wf.name)+'</b><div class="dim mono" style="font-size:11px">'+h(wf.file)+'</div></td>'+
      '<td>'+wf.stages.map(function(s){var a=agent(s.agent);return '<span class="tkp" style="margin:0 6px 3px 0">'+(a?hxIcon(a.harness,13):"")+'<span style="font-size:12px">'+h(s.role)+'</span></span>';}).join('<span class="dim">→ </span>')+
        '<span class="dim">→ </span><span style="font-size:12px">You</span></td>'+
-     '<td>'+(wf.state==="published"?'<span class="b b-allowed"><span class="d"></span>published</span><div class="dim mono" style="font-size:11px">'+h(wf.commit)+'</div>'
-       :'<span class="b b-approval"><span class="d"></span>pull request open</span><div class="dim mono" style="font-size:11px">'+h(wf.pr)+'</div>')+'</td>'+
+     '<td>'+(wf.state==="published"?'<span class="b b-allowed"><span class="d"></span>Published</span><div class="dim mono" style="font-size:11px">'+h(wf.commit)+'</div>'
+       :'<span class="b b-approval"><span class="d"></span>In review</span><div class="dim mono" style="font-size:11px">'+h(wf.pr)+'</div>')+'</td>'+
      '<td class="num">'+wf.used+'</td></tr>';}).join("");
   return '<div class="split23"><div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Workflows</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">A workflow is a file in .oxagen/workflows that names its stages in order.</p></div></div>'+
@@ -14515,20 +14602,20 @@ function tkWfTab(){
    '<div class="panel"><div class="panel-h"><h3>How a workflow runs</h3></div><div class="panel-b">'+
    wzChecks([["1","Each stage is its own run, by its own agent, on the runtime that agent is enrolled on."],
      ["2","A stage owns the definition-of-done items with its tags. Its brief names those items and the handoff it received."],
-     ["3","When a stage hands off, Oxagen sends the next stage its brief. The handoff note arrives as quoted evidence, never as an instruction."],
-     ["4","A stage may return the work to an earlier stage, up to the number of returns the file allows. After that the work order parks for you in Approvals."],
+     ["3","When a stage hands off, oxagen sends the next stage its brief. The handoff note arrives as quoted evidence, never as an instruction."],
+     ["4","A stage may send the work back to an earlier stage, up to the number of times the file allows. After that, the work order waits for you in Approvals."],
      ["5","The last stage is always a person. Every item is accepted by you, and every pull request is merged by a person."]])+
    '<div class="note" style="margin-top:10px">Every agent in a workflow must be one you operate. A workflow that names an agent somebody else operates cannot be sent by you.</div></div></div></div>';
 }
 
 /* ---- tab: providers ---- */
-function wbLine(on,l){return '<li><span class="b '+(on?'b-allowed':'b-q')+'" style="flex:none"><span class="d"></span>'+(on?'on':'off')+'</span><span>'+h(l)+'</span></li>';}
+function wbLine(on,l){return '<li><span class="b '+(on?'b-allowed':'b-q')+'" style="flex:none"><span class="d"></span>'+(on?'On':'Off')+'</span><span>'+h(l)+'</span></li>';}
 function tkProvTab(){
   var cards=wsProviders().map(function(p){
     var k=IP_KIND[p.kind];
     return '<div class="panel ipc"><div class="panel-h">'+ipLogo(p.kind,24)+'<div style="flex:1;min-width:0"><h3>'+h(k.l)+'</h3>'+
       '<p class="muted" style="margin:1px 0 0;font-size:12px">'+h(p.accountLabel)+' <b class="mono" style="color:var(--fg)">'+h(p.account)+'</b></p></div>'+
-      '<span class="b '+(p.health==="ok"?'b-allowed':'b-denied')+'"><span class="d"></span>'+(p.health==="ok"?'syncing':'needs attention')+'</span></div>'+
+      '<span class="b '+(p.health==="ok"?'b-allowed':'b-denied')+'"><span class="d"></span>'+(p.health==="ok"?'Connected':'Needs attention')+'</span></div>'+
       '<div class="panel-b"><dl class="kv">'+
       '<dt>Authorization</dt><dd>'+h(p.auth)+'</dd>'+
       '<dt>'+h(p.scopeLabel.charAt(0).toUpperCase()+p.scopeLabel.slice(1))+'</dt><dd>'+p.scope.map(function(s){return '<span class="mono">'+h(s)+'</span>';}).join(", ")+'</dd>'+
@@ -14543,8 +14630,8 @@ function tkProvTab(){
       wbLine(p.writeback.status,"Move the status when a work order starts")+
       wbLine(p.writeback.close,"Close the "+k.unit+" as Done when you accept the work")+'</ul></div></div>'+
       '<div class="panel-b rowacts" style="border-top:1px solid var(--border)">'+
-      '<button class="btn sm" onclick="act(\''+h(k.l)+' sync queued. sync_issue_provider recorded as a governed action.\')">Sync now</button>'+
-      '<button class="btn sm" onclick="ipzOpen(\''+p.kind+'\',\''+p.id+'\')">Edit scope and fields</button>'+
+      '<button class="btn sm" onclick="act(\''+h(k.l)+' sync queued. Recorded in Audit as sync_issue_provider.\')">Sync now</button><span class="vh">, </span>'+
+      '<button class="btn sm" onclick="ipzOpen(\''+p.kind+'\',\''+p.id+'\')">Edit scope and fields</button><span class="vh">, </span>'+
       '<button class="btn sm danger" style="margin-left:auto" onclick="openDialog(\'ipoff\',\''+p.id+'\')">Disconnect</button></div></div>';
   });
   var have={}; wsProviders().forEach(function(p){have[p.kind]=1;});
@@ -14583,9 +14670,9 @@ function mapCells(m){return tkCols().map(function(k){return '<td class="mono" st
 function tkFieldsTab(){
   var cols=tkCols(), heads=cols.map(function(k){return IP_KIND[k].l;});
   var fr=TK_FIELDS.map(function(f){return '<tr><td><b>'+h(f.f)+'</b></td>'+(f.all?'<td class="mono" style="font-size:11.5px" colspan="'+cols.length+'">'+h(f.all)+'</td>':mapCells(f))+'</tr>';}).join("");
-  var sr=TSTATUS.map(function(s){return '<tr '+rowClick("openDialog('stedit','"+s.key+"')","Edit "+s.name)+'><td>'+tStatusBadge(s.key)+(s.builtin?'':' <span class="b b-q" style="font-size:10px">added</span>')+'</td><td>'+h(s.cat)+'</td>'+mapCells(s.map)+'</tr>';}).join("");
+  var sr=TSTATUS.map(function(s){return '<tr '+rowClick("openDialog('stedit','"+s.key+"')","Edit "+s.name)+'><td>'+tStatusBadge(s.key)+(s.builtin?'':' <span class="b b-q" style="font-size:10px">Added by you</span>')+'</td><td>'+h(s.cat)+'</td>'+mapCells(s.map)+'</tr>';}).join("");
   var rr=TRES.map(function(s){return '<tr '+rowClick("openDialog('resedit','"+s.key+"')","Edit "+s.name)+'><td><b>'+h(s.name)+'</b></td>'+mapCells(s.map)+'</tr>';}).join("");
-  var lr=TLABELS.map(function(l){return '<tr '+rowClick("openDialog('lbledit','"+l.key+"')","Edit "+l.name)+'><td>'+lblChip(l.key)+'</td><td class="mono" style="font-size:11.5px"><span class="swv" style="background:'+h(l.color)+'"></span>'+h(l.color)+'</td><td>'+h(l.group)+'</td>'+mapCells(l.map)+'<td><span class="b b-q" title="arrives after day 1">later</span></td></tr>';}).join("");
+  var lr=TLABELS.map(function(l){return '<tr '+rowClick("openDialog('lbledit','"+l.key+"')","Edit "+l.name)+'><td>'+lblChip(l.key)+'</td><td class="mono" style="font-size:11.5px"><span class="swv" style="background:'+h(l.color)+'"></span>'+h(l.color)+'</td><td>'+h(l.group)+'</td>'+mapCells(l.map)+'<td><span class="dim" title="Coming soon">—</span></td></tr>';}).join("");
   function panel(title,sub,btn,head,rows){
     return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+title+'</h3><p class="muted" style="margin:2px 0 0;font-size:12px">'+sub+'</p></div>'+
       (btn?'<div class="sp">'+btn+'</div>':'')+'</div><div class="tw"><table data-lt="off"><thead><tr>'+head.map(function(x){return '<th>'+x+'</th>';}).join("")+'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
@@ -14598,12 +14685,12 @@ function tkFieldsTab(){
 }
 
 /* ---- tab: people ---- */
-var TP_STATE={mapped:{b:"b-allowed",l:"mapped"},suggested:{b:"b-approval",l:"suggested"},unmapped:{b:"b-q",l:"not mapped"},bot:{b:"b-q",l:"bot"},requester:{b:"b-q",l:"requester"}};
+var TP_STATE={mapped:{b:"b-allowed",l:"Mapped"},suggested:{b:"b-approval",l:"Suggested"},unmapped:{b:"b-q",l:"Not mapped"},bot:{b:"b-q",l:"Bot"},requester:{b:"b-q",l:"Requester"}};
 function tkPeopleTab(){
   var sug=TPEOPLE.filter(function(p){return p.state==="suggested";});
   var banner=sug.length?'<div class="banner" style="margin-bottom:14px"><span class="b b-approval" style="flex:none"><span class="d"></span>'+sug.length+' suggested</span>'+
-    '<div class="grow"><b>'+sug.length+' match'+(sug.length>1?'es wait':' waits')+' on you</b>Each account’s verified email equals a workspace member’s. A match counts only when a person confirms it.</div>'+
-    '<button class="btn" onclick="tpConfirmAll()">Confirm '+(sug.length>1?'all '+sug.length:'it')+'</button></div>':'';
+    '<div class="grow"><b>'+plural(sug.length,"match needs","matches need")+' your confirmation</b>Each account’s verified email matches a workspace member. A match counts only when a person confirms it.</div>'+
+    '<button class="btn" onclick="tpConfirmAll()">Confirm '+plural(sug.length,"match","matches")+'</button></div>':'';
   var trs=TPEOPLE.filter(function(p){return wsProviders().some(function(x){return x.kind===p.kind;});}).map(function(p){
     var st=TP_STATE[p.state];
     return '<tr '+rowClick("openDialog('pmap','"+p.id+"')","Map "+p.handle)+'>'+
@@ -14635,7 +14722,7 @@ function tkDraftNow(id){
   setTimeout(function(){
     var d=TK_DRAFTS[id]||{dod:[{t:"The change the work item asks for is made",k:"check",tag:"code",src:"assistant"}],notes:[]};
     t.dod=d.dod.map(function(x){return Object.assign({},x);}); t.notes=d.notes.slice(); t.ready="draft"; delete S.tkDrafting[id];
-    render(); act("oxagen.assistant drafted "+t.dod.length+" items for "+t.num+". Read them, then certify.","gold");
+    render(); act("oxagen.assistant drafted "+plural(t.dod.length,"item")+" for "+t.num+". Read them, then certify.","gold");
   },900);
 }
 function tkEditable(t){return t.ready==="draft"||t.ready==="changed"||t.ready==="drafting";}
@@ -14643,13 +14730,13 @@ function dodSet(id,i,k,v){var t=taskById(id); if(!t||!t.dod[i])return; t.dod[i][
 function dodDel(id,i){var t=taskById(id); if(!t)return; t.dod.splice(i,1); render();}
 function dodAdd(id){var t=taskById(id); if(!t)return; var v=(el("dodNew")||{}).value||""; v=v.trim(); if(!v){act("Write the item first.");return;}
   t.dod.push({t:v,k:"check",tag:"code",src:"operator"}); render();}
-function dodReopen(id){var t=taskById(id); if(!t)return; t.ready="draft"; closeDialog(); act(t.num+" is a draft again. It is ready when somebody certifies it.");}
+function dodReopen(id){var t=taskById(id); if(!t)return; t.ready="draft"; closeDialog(); act(t.num+" needs certification again. It’s ready when somebody certifies it.");}
 function dodCertify(id){
   var t=taskById(id); if(!t)return;
   t.ready="ready"; t.certifiedBy=TK_ME; t.certifiedAt="2026-09-11 09:16"; t.digest="sha256:"+(t.id.slice(-6)+"7c1e04b9d2").toLowerCase();
   delete t.was; closeDialog();
   var p=wsProviders().filter(function(x){return x.kind===t.kind;})[0];
-  act("Certified. certify_task_dod recorded with the digest of "+t.dod.length+" items"+(p&&p.writeback.certify?", and the list posted as a "+IP_KIND[t.kind].note+" on "+t.num:"")+".","gold");
+  act("Certified. certify_task_dod recorded with the digest of "+plural(t.dod.length,"item")+(p&&p.writeback.certify?", and the list posted as a "+IP_KIND[t.kind].note+" on "+t.num:"")+".","gold");
 }
 DLG_EXT.certify=function(id){
   var t=taskById(id); if(!t)return noSuch("Work item");
@@ -14680,7 +14767,7 @@ function dodRows(t,edit){
      (edit?'<select class="sel-sm" aria-label="Tag of item '+(i+1)+'" onchange="dodSet(\''+t.id+'\','+i+',\'tag\',this.value)">'+DOD_TAGS.map(function(g){return '<option'+(g===d.tag?' selected':'')+'>'+g+'</option>';}).join("")+'</select>'+
        '<select class="sel-sm" aria-label="Kind of item '+(i+1)+'" onchange="dodSet(\''+t.id+'\','+i+',\'k\',this.value)"><option'+(d.k==="check"?' selected':'')+'>check</option><option'+(d.k==="review"?' selected':'')+'>review</option></select>'
       :tagChip(d.tag)+'<span class="tg">'+h(d.k)+'</span>')+
-     '<span class="dim" style="font-size:11px">'+h(src)+'</span></div></div>'+
+     '<span class="dim" style="font-size:11px" title="Where this item came from">'+h(src)+'</span></div></div>'+
      (edit?'<button class="iconbtn" aria-label="Remove item '+(i+1)+'" onclick="dodDel(\''+t.id+'\','+i+')">\u00d7</button>':'')+'</li>';}).join("")+'</ol>';
 }
 function pTask(r){
@@ -14692,8 +14779,8 @@ function pTask(r){
     '<button class="btn primary" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/work\')">Back to Work</button>');
   var k=IP_KIND[t.kind]||{l:"Oxagen",unit:"work item"}, own=t.kind==="oxagen", edit=tkEditable(t), drafting=t.ready==="drafting"||S.tkDrafting[t.id];
   var prim=drafting?'<button class="btn primary"'+(S.tkDrafting[t.id]?' disabled':'')+' onclick="tkDraftNow(\''+t.id+'\')">Draft it now</button>'
-    :t.ready==="draft"||t.ready==="changed"?'<button class="btn primary"'+(t.dod.length?'':' disabled')+' onclick="openDialog(\'certify\',\''+t.id+'\')">'+(t.ready==="changed"?'Certify again':'Certify definition of done')+'</button>'
-    :t.ready==="ready"?(tkSelectable(t)?dispatchButton([t.id]):'<button class="btn" disabled title="'+h(tkWhyNot(t))+'">Create work order and send to agent</button>')
+    :t.ready==="draft"||t.ready==="changed"?'<button class="btn primary"'+(t.dod.length?'':' disabled')+' onclick="openDialog(\'certify\',\''+t.id+'\')">'+'Certify definition of done'+'</button>'
+    :t.ready==="ready"?(tkSelectable(t)?dispatchButton([t.id]):'<button class="btn" disabled title="'+h(tkWhyNot(t))+'">Send to an agent…</button>')
     :t.wo?'<button class="btn primary" onclick="go(\''+woUrl(woById(t.wo)||{id:t.wo})+'\')">Open the work order</button>':'';
   var changedBanner=t.ready==="changed"?'<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
     '<div class="grow"><b>The description changed after certification</b>'+h(PEOPLE[(tPerson(t.updatedBy)||{}).to]?PEOPLE[tPerson(t.updatedBy).to].name:t.updatedBy)+' edited it in '+h(k.l)+' on '+h(t.updatedAt)+'. The certification from '+h(t.certifiedAt)+' no longer matches the work item, so it left ready.</div></div>'+
@@ -14709,13 +14796,13 @@ function pTask(r){
     (t.digest&&!edit?'<span class="mono dim" style="font-size:11px">'+h(t.digest)+'</span>':'')+'</div></div>'+
     '<div class="panel-b">'+(drafting?'<div class="row"><span class="ob-spin" aria-hidden="true"></span><span class="muted">Reading the description, the labels and the linked pull requests. Nothing is certified by the assistant.</span></div>'
       :dodRows(t,edit)+(edit?'<div class="row" style="margin-top:12px;flex-wrap:nowrap"><input id="dodNew" class="dod-in" placeholder="Add an item" aria-label="Add an item" style="flex:1" onkeydown="if(event.key===\'Enter\')dodAdd(\''+t.id+'\')"><button class="btn sm" onclick="dodAdd(\''+t.id+'\')">Add item</button></div>':''))+'</div>'+
-    (t.ready==="changed"?'<div class="panel-b" style="border-top:1px solid var(--border)"><div class="row" style="flex-wrap:nowrap"><span class="grow" style="flex:1;font-size:12.5px">oxagen.assistant suggests an item for the new scope: <b>Notes added after an incident closes are exported too</b></span><button class="btn sm" onclick="var t=taskById(\''+t.id+'\');t.dod.push({t:\'Notes added after an incident closes are exported too\',k:\'check\',tag:\'code\',src:\'assistant\'});render()">Add it</button></div></div>':'')+
+    (t.ready==="changed"?'<div class="panel-b" style="border-top:1px solid var(--border)"><div class="row" style="flex-wrap:nowrap"><span class="grow" style="flex:1;font-size:12.5px">oxagen.assistant suggests an item for the new scope: <b>Notes added after an incident closes are exported too</b></span><button class="btn sm" onclick="var t=taskById(\''+t.id+'\');t.dod.push({t:\'Notes added after an incident closes are exported too\',k:\'check\',tag:\'code\',src:\'assistant\'});render()">Add item</button></div></div>':'')+
     '</div>';
   var notes=(t.notes||[]).length?'<div class="panel"><div class="panel-h"><h3>Assistant notes</h3></div><div class="panel-b"><ul class="tk-notes">'+t.notes.map(function(n){return '<li>'+h(n)+'</li>';}).join("")+'</ul></div></div>':'';
   var hist=[[own?"Written":"Imported",t.createdAt,own?(t.finding?"from finding "+t.finding:"in Oxagen"):"from "+k.l]];
   if(t.dod.length) hist.push(["Definition of done drafted",t.createdAt,"oxagen.assistant"]);
   if(t.certifiedAt) hist.push(["Certified",t.certifiedAt,PEOPLE[t.certifiedBy].name]);
-  if(t.ready==="changed") hist.push(["Changed upstream",t.updatedAt,"left ready"]);
+  if(t.ready==="changed") hist.push(["Changed in "+k.l,t.updatedAt,"No longer ready"]);
   if(t.wo){var wo=woById(t.wo); if(wo)hist.push(["Sent in a work order",wo.sent,wo.id]); if(wo&&wo.accepted)hist.push(["Accepted",wo.accepted,PEOPLE[wo.by].name]);}
   var res=t.resolution?tRes(t.resolution):null;
   return '<div class="phead"><div class="t"><p class="eyebrow">'+wiLogo(t,13)+' '+h(t.num)+'</p><h1>'+h(t.subject)+'</h1>'+
@@ -14769,20 +14856,20 @@ function woAccept(id){
   (w.claims||[]).forEach(function(c){if(c)c.ok=TK_ME;});
   w.tasks.forEach(function(tid){var t=taskById(tid); if(t)t.ready="accepted";});
   var c=woClose(w);
-  closeDialog(); act("Accepted. accept_work_order recorded."+(c?(c.on?" Oxagen closes "+c.nums+" in "+c.m.l+" as Done.":" "+c.nums+" stays open in "+c.m.l+", because close on accept is off for that connection."):""),"gold");
+  closeDialog(); act("Accepted. accept_work_order recorded."+(c?(c.on?" oxagen closes "+c.nums+" in "+c.m.l+" as Done.":" "+c.nums+" stays open in "+c.m.l+", because close on accept is off for that connection."):""),"gold");
 }
 function woStop(id){var w=woById(id); if(!w)return; w.status="stopped"; closeDialog(); act("Stopped. The runtime is told at its next boundary; the work items go back to ready.");
   w.tasks.forEach(function(tid){var t=taskById(tid); if(t&&t.ready==="sent")t.ready="ready";});}
 DLG_EXT.woaccept=function(id){
   var w=woById(id); if(!w)return noSuch("Work order");
   var items=woItems(w);
-  return {t:"Accept the work",s:w.title,w:false,
-   b:'<p>You accept '+items.length+' items the agents claimed, with the evidence each one cited.</p>'+
+  return {t:"Accept all items",s:w.title,w:false,
+   b:'<p>You accept '+plural(items.length,"item")+' the agents claimed, with the evidence each one cited.</p>'+
     '<div class="note" style="margin:12px 0">Accepting records <span class="mono">accept_work_order</span> with your name. It does not merge anything. The pull request '+h((w.runs[w.runs.length-1]||{}).pr||"")+' is merged by a person on GitHub.</div>'+
     (function(){var c=woClose(w); if(!c)return "";
       return '<div class="note">'+(c.on?'The '+h(c.m.l)+' connection closes each '+h(c.m.unit)+' as Done, the resolution for work a person accepted.'
         :'The '+h(c.m.l)+' connection has close on accept off, so each '+h(c.m.unit)+' stays open there until somebody closes it. Turned on, it closes each one as Done.')+'</div>';})(),
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="woAccept(\''+w.id+'\')">Accept every item</button>'};
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="woAccept(\''+w.id+'\')">Accept all items</button>'};
 };
 DLG_EXT.wostop=function(id){
   var w=woById(id); if(!w)return noSuch("Work order");
@@ -14799,7 +14886,7 @@ function pWorkOrder(r){
   if(!w) return emptyState("No work order has this id",'Nothing in '+h(ws0.name)+' is called <span class="mono">'+h(r.id)+'</span>.',
     '<button class="btn primary" onclick="go(\'#/'+ORG.slug+'/'+ws0.slug+'/work/orders\')">Back to work orders</button>');
   var wf=w.target.kind==="workflow"?wfById(w.target.id):null, a=w.target.kind==="agent"?agent(w.target.id):null;
-  if(!wf&&a) wf={stages:[{role:"Work",agent:a.key,owns:DOD_TAGS,onFail:"stop"}],name:a.name};
+  if(!wf&&a) wf={stages:[{role:a.name,id:true,agent:a.key,owns:DOD_TAGS,onFail:"stop"}],name:a.name};
   var items=woItems(w), claimed=woClaimed(w), accepted=(w.claims||[]).filter(function(c){return c&&c.ok;}).length;
   var direct=w.kind==="direct";
   var canAccept=!direct&&items.length>0&&w.status!=="accepted"&&w.status!=="stopped"&&w.status!=="closed"&&claimed===items.length;
@@ -14811,15 +14898,15 @@ function pWorkOrder(r){
   };
   var stSub=function(i,s){
     var rs=w.runs.filter(function(x){return x.stage===i+1;}), lr=rs[rs.length-1];
-    if(!lr)return '<span class="dim">waiting</span>';
-    return (lr.state==="live"?'<span class="b b-allowed"><span class="d"></span>live</span> ':'<span class="b b-q">sealed</span> ')+runLink(lr.run)+(rs.length>1?' <span class="dim">'+rs.length+' runs</span>':'');
+    if(!lr)return '<span class="dim">Waiting</span>';
+    return (lr.state==="live"?'<span class="b b-allowed"><span class="d"></span>Running</span> ':lr.returned?'<span class="b b-denied">Sent back</span> ':'<span class="b b-q">Done</span> ')+runLink(lr.run)+(rs.length>1?' <span class="dim">'+plural(rs.length,"run")+'</span>':'');
   };
   var rows=items.map(function(it,i){
     var c=(w.claims||[])[i], owner=woOwner(wf,it.tag);
     return '<tr><td>'+h(it.t)+'<div class="meta" style="margin-top:4px">'+tagChip(it.tag)+'</div></td>'+
      '<td>'+it.from.map(function(id){var t=taskById(id);return t?'<span class="mono" style="font-size:11.5px">'+h(t.num.replace(/^a-intel\/platform/,""))+'</span>':"";}).join(" ")+(it.wo?'<span class="dim">work order</span>':'')+'</td>'+
      '<td>'+(owner!=null?h(wf.stages[owner].role):'')+'</td>'+
-     '<td>'+(c&&c.ok?'<span class="b b-allowed"><span class="d"></span>accepted</span>':c?'<span class="b b-approval"><span class="d"></span>claimed</span>':'<span class="b b-q"><span class="d"></span>open</span>')+'</td>'+
+     '<td>'+(c&&c.ok?'<span class="b b-allowed"><span class="d"></span>Accepted</span>':c?'<span class="b b-approval"><span class="d"></span>Claimed</span>':'<span class="b b-q"><span class="d"></span>Open</span>')+'</td>'+
      '<td style="font-size:12px">'+(c?h(c.ev)+'<div class="dim mono" style="font-size:11px">'+h((agent(c.by)||{}).name||c.by)+' '+h(c.run)+'</div>':'<span class="dim">\u2014</span>')+'</td></tr>';}).join("");
   var tgt=w.target.kind==="workflow"?'the '+(wfById(w.target.id)||{}).name+' workflow':(a?a.name:w.target.id);
   var sp=woSpend(w), open=w.status!=="accepted"&&w.status!=="stopped"&&w.status!=="closed";
@@ -14865,7 +14952,7 @@ function appUrl(route){return "https://app.oxagen.sh"+route.replace(/^#/,"");}
 function taskWorkOrders(t){return WORKORDERS.filter(function(w){return w.tasks.indexOf(t.id)>=0;});}
 function woTargetWords(w){return w.target.kind==="workflow"?"the "+woTargetName(w.target)+" workflow":woTargetName(w.target);}
 /* Read by an agent, so the state a person sees as "waiting on you" names the person instead. */
-function woStateWords(w){return w.status==="waiting on you"?"waiting on a person to accept":w.status==="parked"?"parked for a person":(WO_ST[w.status]||WO_ST.sent).l;}
+function woStateWords(w){return w.status==="waiting on you"?"waiting on a person to accept":w.status==="parked"?"parked for a person":(WO_ST[w.status]||WO_ST.sent).l.toLowerCase();}
 function taskPromptText(id){
   var t=taskById(id); if(!t)return "";
   var wos=taskWorkOrders(t), L=[];
@@ -15090,7 +15177,7 @@ DLG_EXT.wo=function(){
        return '<label class="check'+(ok?'':' off')+'" style="margin-bottom:8px"><input type="checkbox"'+(on?' checked':'')+(ok?'':' disabled')+' onchange="woRepo(\''+h(r.n)+'\',this.checked)">'+
         '<span class="grow"><span class="n">'+h(r.n)+'</span><span class="d">'+(r.role==="main"?'main repo':'linked repo')+' · production branch '+h(r.branch)+(ok?'':' · outside '+h(first.name)+'’s toolbelt')+'</span></span></label>';}).join("")+
      '<label class="check" style="border-color:color-mix(in srgb,var(--gold) 40%,var(--border))"><input type="checkbox" id="woOk"'+(z.confirm?' checked':'')+(nrep?'':' disabled')+' onchange="woConfirm(this.checked)">'+
-      '<span class="grow"><span class="n">I confirm the repositories</span><span class="d">'+h(agents.map(function(a){return a.name;}).join(", "))+' may push branches and open pull requests on '+(nrep===1?woRepoList()[0]:nrep+' repositories')+'. Nothing is merged without a person.</span></span></label></section>'+
+      '<span class="grow"><span class="n">I confirm the repositories</span><span class="d">'+h(agents.map(function(a){return a.name;}).join(", "))+' may push branches and open pull requests on '+(nrep===1?woRepoList()[0]:plural(nrep,"repository","repositories"))+'. Nothing is merged without a person.</span></span></label></section>'+
    '<section class="wo-sec"><h4>Spend cap</h4><div class="field" style="margin:0;max-width:220px"><input value="'+h(z.cap)+'" aria-label="Spend cap in US dollars" inputmode="decimal" onchange="S.wo.cap=this.value"></div>'+
      '<div class="hint">USD for the whole work order, every stage and every return. Each run also stays inside its own agent’s budget of $'+h(first.budget||"2.00")+' per run.</div>'+(agents.some(function(a){return a.harness==="cursor";})?'<div class="warn" style="margin-top:8px"><b>Cursor is not metered.</b> Cursor\u2019s model calls do not pass through the Oxagen gateway, so the cap counts every stage but that one.</div>':'')+'</section>';
   return {t:"Work order",s:z.tasks.length+" work item"+(z.tasks.length>1?"s":"")+" to "+woTargetName(z.target),w:true,b:b,
@@ -15113,7 +15200,7 @@ var IPZ={
    intro:"Oxagen uses the GitHub App already installed on <b>a-intel</b> for your repositories. Importing issues needs one more permission, which an organization owner approves on github.com.",
    perms:[["Issues","read and write","read issues, post the comments you turn on, and create the labels you choose"],["Metadata","read","list the repositories you choose"],["Pull requests","read","show the pull request linked to a work item"]],
    createPerm:null,creates:{status:["label",0,"label"],res:["label",0,"label"],label:["label",0,"label"]},
-   createNote:"GitHub has no custom statuses or close reasons, so Oxagen creates each value as a label, with the Issues permission.",
+   createNote:"GitHub has no custom statuses or close reasons, so oxagen creates each value as a label, with the Issues permission.",
    authBtn:"Request the Issues permission",
    authed:"Approved on github.com by mbell-ai. The installation 41829377 now has Issues: read and write.",
    signs:true,account:"a-intel",accountLabel:"GitHub organization",auth:"GitHub App installation 41829377",
@@ -15122,37 +15209,37 @@ var IPZ={
    est:142},
  linear:{keyed:true,scope:[["PLAT","Platform",true],["INFRA","Infrastructure",true],["SUP","Support",false],["DATA","Data",false]],
    scopeWhat:"Teams in the Anderson Intelligence workspace",
-   intro:"Oxagen asks Linear for a token that acts as the Oxagen app. Anything it posts is signed by Oxagen, not by you.",
-   perms:[["read","read","read issues, teams, users and workflow states"],["comments:create","write","post the comments you turn on"],["actor=app","","comments post as Oxagen, never as you"]],
+   intro:"oxagen asks Linear for a token that acts as the oxagen app. Anything it posts is signed by oxagen, not by you.",
+   perms:[["read","read","read issues, teams, users and workflow states"],["comments:create","write","post the comments you turn on"],["actor=app","","comments post as oxagen, never as you"]],
    createPerm:["write","write","create the workflow states and labels you choose on the Fields step"],
    creates:{status:["workflow state",1,""],res:["workflow state",1,""],label:["label",1,"label"]},
-   createNote:"Oxagen creates statuses and resolutions as workflow states, and labels as labels, with the write scope.",
+   createNote:"oxagen creates statuses and resolutions as workflow states, and labels as labels, with the write scope.",
    authBtn:"Authorize with Linear",
-   authed:"Authorized by Marcus Bell in Linear. The token belongs to the Oxagen app, not to a person.",
+   authed:"Authorized by Marcus Bell in Linear. The token belongs to the oxagen app, not to a person.",
    signs:true,account:"Anderson Intelligence",accountLabel:"Linear workspace",auth:"OAuth 2.0 as an app actor",
    people:[["marcus","Marcus Bell","marcus@a-intel.example","marcus","verified email"],["priya","Priya Natarajan","priya@a-intel.example","priya","verified email"],["ines.h","Ines Haddad","ines.haddad@a-intel.example","ines","verified email"],["support-rota","Support rota","support@a-intel.example",null,""]],
    values:{status:["Backlog","Todo","In Progress","In Review","Done","Canceled","Duplicate","label Blocked"],res:["Done","Canceled","Duplicate"],label:["priority Urgent","priority High","priority Medium","priority Low","label Bug","label Feature","label Improvement","label Docs","label Test","label Chore"]},
    est:88},
  jira:{keyed:true,site:{label:"Site",value:"a-intel.atlassian.net"},scope:[["OPS","Operations",true],["PLAT","Platform",true],["SEC","Security",false]],
    scopeWhat:"Projects on a-intel.atlassian.net",
-   intro:"Oxagen asks Atlassian for a token on one Jira Cloud site. Jira Server and Data Center are not supported yet.",
+   intro:"oxagen asks Atlassian for a token on one Jira Cloud site. Jira Server and Data Center are not supported yet.",
    perms:[["read:jira-work","read","read issues, statuses and resolutions"],["read:jira-user","read","read the people named on an issue"],["write:jira-work","write","post the comments and make the transitions you turn on, and add the labels you choose"],["offline_access","","refresh the token without asking you again"]],
    createPerm:["manage:jira-configuration","admin","create the statuses and resolutions you choose on the Fields step. A Jira admin approves it."],
    creates:{status:["status",1,"status"],res:["resolution",1,""],label:["label",0,"label"]},
-   createNote:"Oxagen creates statuses and resolutions with manage:jira-configuration. A new status reaches a project once a Jira admin adds it to the project’s workflow. A Jira label exists once an issue carries it, so Oxagen adds a label the first time it sets one.",
+   createNote:"oxagen creates statuses and resolutions with manage:jira-configuration. A new status reaches a project once a Jira admin adds it to the project’s workflow. A Jira label exists once an issue carries it, so oxagen adds a label the first time it sets one.",
    authBtn:"Authorize with Atlassian",
-   authed:"Authorized by Marcus Bell for a-intel.atlassian.net. Oxagen refreshes the token on its own.",
+   authed:"Authorized by Marcus Bell for a-intel.atlassian.net. oxagen refreshes the token on its own.",
    accountLabel:"Jira Cloud site",auth:"OAuth 2.0 (3LO) with offline access",
    people:[["Marcus Bell","Marcus Bell","marcus@a-intel.example","marcus","verified email"],["Priya Natarajan","Priya Natarajan","priya@a-intel.example","priya","verified email"],["Tobias Brennan","Tobias Brennan","tobias.brennan@a-intel.example","tobias","verified email"],["Automation for Jira","Automation for Jira","",null,"bot"]],
-   values:{status:["category To Do","category In Progress","category Done","status Blocked","flagged","In Review"],res:["Done","Fixed","Won't Do","Won't Fix","Duplicate","Cancelled","Cannot Reproduce"],label:["priority Highest","priority High","priority Medium","priority Low","priority Lowest","issue type Bug","issue type Story","issue type New Feature","issue type Improvement","issue type Task","label documentation","label test","label security"]},
+   values:{status:["category To Do","category In Progress","category Done","status Blocked","flagged","In Review"],res:["Done","Fixed","Won't Do","Won't Fix","Duplicate","Canceled","Cannot Reproduce"],label:["priority Highest","priority High","priority Medium","priority Low","priority Lowest","issue type Bug","issue type Story","issue type New Feature","issue type Improvement","issue type Task","label documentation","label test","label security"]},
    est:64},
  servicenow:{site:{label:"Instance",value:"a-intel.service-now.com"},scope:[["Service Desk","first-line IT support",true],["Network","network operations",true],["Database","database administration",false],["Hardware","desk-side hardware",false]],
    scopeWhat:"Assignment groups on a-intel.service-now.com",
-   intro:"Oxagen asks your ServiceNow instance for a token through an OAuth application an admin registers there. The token acts within the roles of the account that authorizes it.",
+   intro:"oxagen asks your ServiceNow instance for a token through an OAuth application an admin registers there. The token acts within the roles of the account that authorizes it.",
    perms:[["useraccount","read and write","act as the account that authorizes, within its roles"],["itil role","read and write","read incidents in the groups you choose, and post the work notes you turn on"],["refresh token","","refresh the token without asking you again"]],
    createPerm:["personalize_choices role","admin","add the state, close code, and category choices you choose on the Fields step. A ServiceNow admin grants it."],
    creates:{status:["state choice",1,"state"],res:["close code choice",1,"close code"],label:["category choice",1,"category"]},
-   createNote:"Oxagen adds choices to the incident table with the personalize_choices role. Priority comes from impact and urgency, so Oxagen never adds a priority.",
+   createNote:"oxagen adds choices to the incident table with the personalize_choices role. Priority comes from impact and urgency, so oxagen never adds a priority.",
    closeNote:"Resolving an incident runs the instance’s notifications, which by default email the caller.",
    authBtn:"Authorize with ServiceNow",
    authed:"Authorized by marcus.bell on a-intel.service-now.com. The token acts within that account’s roles.",
@@ -15162,24 +15249,24 @@ var IPZ={
    est:57},
  salesforce:{site:{label:"My Domain",value:"a-intel.my.salesforce.com"},scope:[["Tier 1 Support","first-line cases",true],["Billing Support","billing questions",true],["Escalations","cases a manager owns",false]],
    scopeWhat:"Case queues in the a-intel org",
-   intro:"Oxagen asks Salesforce for a token through a connected app. The token acts as the account that authorizes it, within that account’s profile and permission sets.",
+   intro:"oxagen asks Salesforce for a token through a connected app. The token acts as the account that authorizes it, within that account’s profile and permission sets.",
    perms:[["api","read and write","read cases, and post the internal comments you turn on"],["refresh_token","","refresh the token without asking you again"]],
    createPerm:["Customize Application","admin","add the Status, Type, and Priority values you choose on the Fields step, through the Metadata API. A Salesforce admin grants it."],
    creates:{status:["Status value",1,"status"],res:["closed Status value",1,"status"],label:["Type value",1,"type"]},
-   createNote:"Oxagen adds picklist values through the Metadata API, which needs Customize Application. A new Status value reaches a case once an admin adds it to the support process.",
+   createNote:"oxagen adds picklist values through the Metadata API, which needs Customize Application. A new Status value reaches a case once an admin adds it to the support process.",
    authBtn:"Authorize with Salesforce",
-   authed:"Authorized by Marcus Bell for a-intel.my.salesforce.com. Oxagen refreshes the token on its own.",
+   authed:"Authorized by Marcus Bell for a-intel.my.salesforce.com. oxagen refreshes the token on its own.",
    accountLabel:"Salesforce org",auth:"OAuth 2.0 through a connected app",
    people:[["marcus@a-intel.example","Marcus Bell","marcus@a-intel.example","marcus","verified email"],["priya@a-intel.example","Priya Natarajan","priya@a-intel.example","priya","verified email"],["dana@a-intel.example","Dana Okafor","dana@a-intel.example","dana","verified email"],["Rosa Diaz","Rosa Diaz","rosa.diaz@northwind.example",null,"requester"],["Automated Process","Automated Process","",null,"bot"]],
    values:{status:["status New","status Working","status Escalated","status Closed"],res:["status Closed"],label:["priority High","priority Medium","priority Low","type Problem","type Feature Request","type Question"]},
    est:76},
  zendesk:{site:{label:"Subdomain",value:"a-intel.zendesk.com"},scope:[["Support","first-line tickets",true],["Billing","billing questions",true],["Onboarding","new accounts",false]],
    scopeWhat:"Groups in the a-intel Zendesk account",
-   intro:"Oxagen asks Zendesk for a token on one account. The token acts as the staff account that authorizes it.",
+   intro:"oxagen asks Zendesk for a token on one account. The token acts as the staff account that authorizes it.",
    perms:[["read","read","read tickets, groups, and users"],["write","write","post the internal notes and make the status changes you turn on, and add the tags you choose"]],
    createPerm:["admin role","admin","add the custom ticket statuses you choose on the Fields step. The account that authorizes must be a Zendesk admin."],
    creates:{status:["custom status",1,"status"],res:["tag",0,"tag"],label:["tag",0,"tag"]},
-   createNote:"A Zendesk tag exists once a ticket carries it, so Oxagen adds a tag the first time it sets one. Custom statuses need an admin account. Priority and type are fixed in Zendesk, so Oxagen never adds one.",
+   createNote:"A Zendesk tag exists once a ticket carries it, so oxagen adds a tag the first time it sets one. Custom statuses need an admin account. Priority and type are fixed in Zendesk, so oxagen never adds one.",
    closeNote:"Solving a ticket runs Zendesk’s triggers, which by default email the requester.",
    authBtn:"Authorize with Zendesk",
    authed:"Authorized by Marcus Bell for a-intel.zendesk.com. The token acts as that staff account.",
@@ -15228,7 +15315,7 @@ function ipzSuggest(kind,x,k){var v=x.map[k]||"";
 function ipzCounts(){var z=S.ipz, c=0, a=0;
   IPZ_KINDS.forEach(function(x){Object.keys(z.map[x[0]]).forEach(function(key){if(z.map[x[0]][key]==="__create")c++;}); a+=z.add[x[0]].length;});
   return {create:c,add:a};}
-function ipzSteps(){return ["Provider","Authorize","Scope","Fields","People","Review"];}
+function ipzSteps(){return ["Tracker","Authorize","Scope","Fields","People","Review"];}
 function ipzRail(){
   var st=ipzSteps(),cur=S.ipz.step;
   return '<div class="wz-rail" role="list">'+st.map(function(l,i){var n=i+1,cls=n===cur?"on":n<cur?"done":"";
@@ -15239,7 +15326,7 @@ function ipzRail(){
 function ipzMapRow(kind,x,chip){
   var z=S.ipz, k=z.kind, vals=IPZ[k].values[kind], cur=ipzSuggest(kind,x,k), set=z.map[kind][x.key], v=set===undefined?cur:set;
   var can=ipzCan(kind), has=vals.indexOf(v)>=0, P=IP_KIND[k].l;
-  var src=v==="__create"?'<span class="b b-approval" style="font-size:10px" title="Oxagen creates it as a '+h(can||"")+'">create</span>'
+  var src=v==="__create"?'<span class="b b-approval" style="font-size:10px" title="oxagen creates it as a '+h(can||"")+'">create</span>'
     :v?'<span class="b b-q" style="font-size:10px">'+(set===undefined?'suggested':'chosen')+'</span>':'<span class="dim" style="font-size:11px">—</span>';
   return '<tr><td>'+chip+'</td><td><select class="sel-sm" aria-label="'+h(x.name)+'" onchange="ipzSet(\''+kind+'\',\''+h(x.key)+'\',this.value)"><option value="">nothing</option>'+
     vals.map(function(o){return '<option'+(o===v?' selected':'')+'>'+h(o)+'</option>';}).join("")+(v&&v!=="__create"&&!has?'<option selected>'+h(v)+'</option>':'')+
@@ -15260,14 +15347,14 @@ function ipzBody(){
   if(z.step===2){
     var perms=d.perms.concat(d.createPerm&&z.create?[d.createPerm]:[]);
     var cannot=[["edit","a subject or a description, or delete "+ipUnitA(k)],
-      d.signs?["act as you","every write is signed by the Oxagen app"]:["act as anyone else","every write appears under the account that authorizes, so authorize with one made for Oxagen"]]
-      .concat(m.grp==="desk"?[["reply to a requester","every "+m.note+" Oxagen posts is one only staff can read"]]:[])
-      .concat([["read more","than the "+m.what+" you choose next"],["assign",ipUnitA(k)+" to anyone in "+m.l],["rename or delete","a status, resolution, or label, including one Oxagen created"]]);
+      d.signs?["act as you","every write is signed by the oxagen app"]:["act as anyone else","every write appears under the account that authorizes, so authorize with one made for oxagen"]]
+      .concat(m.grp==="desk"?[["reply to a requester","every "+m.note+" oxagen posts is one only staff can read"]]:[])
+      .concat([["read more","than the "+m.what+" you choose next"],["assign",ipUnitA(k)+" to anyone in "+m.l],["rename or delete","a status, resolution, or label, including one oxagen created"]]);
     return {b:'<div class="row" style="margin-bottom:14px;flex-wrap:nowrap">'+ipLogo(k,28)+'<p style="margin:0">'+d.intro+'</p></div>'+
       (d.site?'<div class="field"><label for="ipzSite">'+h(d.site.label)+'</label><input id="ipzSite" value="'+h(z.site)+'" oninput="S.ipz.site=this.value"></div>':'')+
       (d.createPerm?'<label class="check" style="margin-bottom:12px"><input type="checkbox" id="ipzCreate"'+(z.create?' checked':'')+' onchange="ipzCreateOn(this.checked)"><span class="grow"><span class="n">Create values in '+h(m.l)+'</span>'+
         '<span class="d">Needs '+h(d.createPerm[0])+' too, so the Fields step can create the statuses, resolutions, and labels '+h(m.l)+' lacks.</span></span></label>':'')+
-      '<div class="field"><label>What Oxagen needs</label><div class="tw"><table data-lt="off"><thead><tr><th>Permission</th><th>Access</th><th>Why</th></tr></thead><tbody>'+
+      '<div class="field"><label>What oxagen needs</label><div class="tw"><table data-lt="off"><thead><tr><th>Permission</th><th>Access</th><th>Why</th></tr></thead><tbody>'+
        perms.map(function(p){return '<tr><td class="mono">'+h(p[0])+'</td><td>'+h(p[1]||"—")+'</td><td>'+h(p[2])+'</td></tr>';}).join("")+'</tbody></table></div></div>'+
       '<div class="field"><label>What it still cannot do</label>'+wzChecks(cannot)+'</div>'+
       (z.authed?'<div class="banner"><span class="b b-allowed" style="flex:none"><span class="d"></span>authorized</span><div class="grow"><b>'+h(m.l)+' is authorized</b>'+h(d.authed)+'</div></div>'
@@ -15293,8 +15380,8 @@ function ipzBody(){
           '<button class="btn sm" aria-label="Remove '+h(ipzPlain(v))+'" onclick="ipzUnadd(\''+kind+'\','+i+')">Remove</button></td></tr>';}).join("");
       var used={}; list.forEach(function(x){var s=z.map[kind][x.key]; ipzTokens(s===undefined?x.map[k]:s).forEach(function(t){used[t]=1;});});
       z.add[kind].forEach(function(v){used[ipzPlain(v)]=1;});
-      var only=vals.map(function(v,i){return used[ipzPlain(v)]?"":'<button class="btn sm" aria-label="Add '+h(ipzPlain(v))+' to Oxagen" onclick="ipzAdd(\''+kind+'\','+i+')">Add “'+h(ipzPlain(v))+'”</button>';}).filter(Boolean);
-      return '<div class="field"><label>'+title+'</label><div class="tw"><table data-lt="off"><thead><tr><th>Oxagen</th><th>'+h(m.l)+'</th><th>Source</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+      var only=vals.map(function(v,i){return used[ipzPlain(v)]?"":'<button class="btn sm" aria-label="Add '+h(ipzPlain(v))+' to oxagen" onclick="ipzAdd(\''+kind+'\','+i+')">Add “'+h(ipzPlain(v))+'”</button>';}).filter(Boolean);
+      return '<div class="field"><label>'+title+'</label><div class="tw"><table data-lt="off"><thead><tr><th>oxagen</th><th>'+h(m.l)+'</th><th>Source</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
         (only.length?'<div class="row" style="gap:6px;margin-top:8px"><span class="dim" style="font-size:12px">Only in '+h(m.l)+'</span>'+only.join("")+'</div>':'')+'</div>';
     }
     var cnt=ipzCounts();
@@ -15318,7 +15405,7 @@ function ipzBody(){
         return '<tr><td><span class="tkp">'+ipLogo(k,13)+'<span><b class="mono">'+h(p[0])+'</b><div class="dim" style="font-size:11px">'+h(p[1])+'</div></span></span></td>'+
          '<td class="mono" style="font-size:11.5px">'+h(p[2]||"—")+'</td>'+
          '<td>'+(fixed?'<span class="b b-q">'+h(p[4])+'</span> <span class="dim" style="font-size:11px">never mapped</span>':
-          '<select class="sel-sm" aria-label="Member for '+h(p[0])+'" onchange="S.ipz.people[\''+h(p[0])+'\']=this.value;render()"><option value="">not mapped</option>'+
+          '<select class="sel-sm" aria-label="Member for '+h(p[0])+'" onchange="S.ipz.people[\''+h(p[0])+'\']=this.value;render()"><option value="">Not mapped</option>'+
           members.map(function(x){return '<option value="'+x+'"'+(z.people[p[0]]===x?' selected':'')+'>'+h(PEOPLE[x].name)+'</option>';}).join("")+'</select>'+
           (z.people[p[0]]&&p[4]?' <span class="b b-q" style="font-size:10px">'+h(p[4])+'</span>':''))+'</td></tr>';}).join("")+'</tbody></table></div>'+
       '<div class="note" style="margin-top:12px">'+mapped+' mapped, '+(d.people.length-mapped)+' not mapped. Mapping grants nothing. An account left not mapped still appears on its work items under its own name, and you can map it later on the People tab.'+
@@ -15333,7 +15420,7 @@ function ipzBody(){
      '<dt>Authorization</dt><dd>'+h(d.authed)+'</dd>'+
      '<dt>'+h(m.what.charAt(0).toUpperCase()+m.what.slice(1))+'</dt><dd class="mono">'+h(scope.join(", "))+'</dd>'+
      '<dt>Import</dt><dd>'+h(z.filter)+'</dd>'+
-     '<dt>Fields</dt><dd>'+TSTATUS.length+' statuses, '+TRES.length+' resolutions, and '+TLABELS.length+' labels mapped.'+(c.create?' '+c.create+' to create in '+h(m.l)+'.':'')+(c.add?' '+c.add+' to add to Oxagen.':'')+'</dd>'+
+     '<dt>Fields</dt><dd>'+plural(TSTATUS.length,"status","statuses")+', '+plural(TRES.length,"resolution")+', and '+plural(TLABELS.length,"label")+' mapped.'+(c.create?' '+c.create+' to create in '+h(m.l)+'.':'')+(c.add?' '+c.add+' to add to oxagen.':'')+'</dd>'+
      '<dt>People</dt><dd>'+mappedN+' mapped, '+(d.people.length-mappedN)+' not mapped</dd>'+
      '<dt>Writes</dt><dd>'+(["certify","send","status","close"].filter(function(x){return z.wb[x];}).join(", ")||"none")+'</dd></dl>'+
     '<div class="field"><label>When you connect</label>'+wzChecks(steps.map(function(s,i){return [String(i+1),s];}))+'</div>',
@@ -15356,7 +15443,7 @@ function ipzApply(z){
 function ipzFinish(){
   var z=S.ipz, k=z.kind, d=IPZ[k], m=IP_KIND[k];
   var scope=d.scope.filter(function(s){return z.scope[s[0]];}).map(function(s){return d.keyed?s[0]+" · "+s[1]:s[0];});
-  var made=ipzApply(z), madeL=made?(made===1?" and create_provider_value for the value Oxagen creates":" and create_provider_value for each of the "+made+" values Oxagen creates"):"";
+  var made=ipzApply(z), madeL=made?(made===1?" and create_provider_value for the value oxagen creates":" and create_provider_value for each of the "+made+" values oxagen creates"):"";
   if(z.edit){var p=IPROV.filter(function(x){return x.id===z.edit;})[0]; if(p){p.scope=scope;p.filter=z.filter;p.writeback=Object.assign({},z.wb);}
     S.ipz=null; closeDialog(); act(m.l+" saved. update_issue_provider recorded"+madeL+". The next read applies it."); return;}
   IPROV.push({id:"ipc_01K6TG"+k.slice(0,2).toUpperCase(),kind:k,ws:S.ws,account:d.site?z.site:d.account,accountLabel:d.accountLabel,auth:d.auth,
@@ -15370,7 +15457,7 @@ function ipzFinish(){
   act(m.l+" connected. connect_issue_provider recorded"+madeL+". Importing "+scope.length+" "+m.what+". Drafts appear as each work item is read.","gold");
 }
 DLG_EXT.ipwz=function(){
-  var z=S.ipz; if(!z)return {t:"Connect an issue provider",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  var z=S.ipz; if(!z)return {t:"Connect an issue tracker",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var part=ipzBody();
   return {t:z.edit?"Edit "+IP_KIND[z.kind].l:"Connect an issue provider",s:z.edit?"Scope, fields and the writes it may make":"Import work items from an issue tracker or a help desk",w:true,
    b:ipzRail()+part.b,
@@ -15385,7 +15472,7 @@ DLG_EXT.ipoff=function(id){
     '<div class="note">Connecting '+h(m.l)+' again reads the same work items back into the same work item ids.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it connected</button><button class="btn danger" onclick="ipOff(\''+p.id+'\')">Disconnect it</button>'};
 };
-function ipOff(id){var i=-1;IPROV.forEach(function(x,j){if(x.id===id)i=j;}); if(i<0)return; var p=IPROV.splice(i,1)[0]; closeDialog(); act(IP_KIND[p.kind].l+" disconnected. disconnect_issue_provider recorded and the token revoked.");}
+function ipOff(id){var i=-1;IPROV.forEach(function(x,j){if(x.id===id)i=j;}); if(i<0)return; var p=IPROV.splice(i,1)[0]; closeDialog(); act(IP_KIND[p.kind].l+" disconnected, and its token revoked. Recorded in Audit as disconnect_issue_provider.");}
 
 /* ---- field editors ---- */
 var LBL_SWATCHES=["#D6455E","#E0803A","#C9A227","#57A97C","#3FA2A2","#3B82F6","#5B93D6","#9D8BE3","#D677B5","#C0453C","#A1A1AA","#71717A"];
@@ -15418,10 +15505,10 @@ DLG_EXT.lbledit=function(key){
   return {t:key==="new"?"Add a label":"Edit "+l.name,w:true,
    b:'<div class="grid g2"><div class="field"><label for="lblName">Name</label><input id="lblName" value="'+h(l.name)+'" oninput="var p=el(\'lblPrevN\');if(p)p.textContent=this.value||\'Label\'"></div>'+
      '<div class="field"><label for="lblGroup">Group</label><select id="lblGroup"><option'+(l.group==="Priority"?' selected':'')+'>Priority</option><option'+(l.group==="Type"?' selected':'')+'>Type</option><option>Area</option></select></div></div>'+
-    '<div class="field"><label>Colour</label><div class="row"><div class="swatches">'+LBL_SWATCHES.map(function(s){return '<button class="sw" data-c="'+s+'" style="background:'+s+'" aria-label="Colour '+s+'" aria-pressed="'+(s===c)+'" onclick="lblSw(\''+s+'\')"></button>';}).join("")+'</div>'+
-      '<input id="lblHex" class="mono" style="width:110px" value="'+h(c)+'" aria-label="Hex colour" oninput="if(/^#[0-9a-f]{6}$/i.test(this.value))lblSw(this.value)">'+
+    '<div class="field"><label>Color</label><div class="row"><div class="swatches">'+LBL_SWATCHES.map(function(s){return '<button class="sw" data-c="'+s+'" style="background:'+s+'" aria-label="Color '+s+'" aria-pressed="'+(s===c)+'" onclick="lblSw(\''+s+'\')"></button>';}).join("")+'</div>'+
+      '<input id="lblHex" class="mono" style="width:110px" value="'+h(c)+'" aria-label="Hex color" oninput="if(/^#[0-9a-f]{6}$/i.test(this.value))lblSw(this.value)">'+
       '<span class="lbl" id="lblPrev" style="--lc:'+h(c)+'"><i aria-hidden="true"></i><span id="lblPrevN">'+h(l.name||"Label")+'</span></span></div>'+
-      '<div class="hint">The colour is Oxagen’s. Oxagen sets a label’s colour in a provider once, when it creates the label there, and never changes it after.</div></div>'+
+      '<div class="hint">The color is oxagen’s. oxagen sets a label’s color in a tracker once, when it creates the label there, and never changes it after.</div></div>'+
     '<div class="field"><label>Mapped from</label></div><div class="grid g3">'+mapFields(l.map,"lblm-","label")+'</div>'+
     '<div class="field"><label>Definition of done items</label><div class="banner"><span class="b b-q" style="flex:none">later</span><div class="grow"><b>A label will carry definition-of-done items</b>'+
       'When a work item has this label, its items copy into the work item’s draft before oxagen.assistant adds its own. '+(l.key==="bug"?'Bug would carry “A test reproduces the defect and fails before the fix”.':'')+' The templates will live in .oxagen/dod/labels/ and change by pull request.</div></div></div>',
@@ -15492,10 +15579,10 @@ function wfToml(name,stages){
 DLG_EXT.wfview=function(id){
   var wf=wfById(id); if(!wf)return noSuch("Workflow");
   return {t:wf.name,s:wf.desc,w:true,
-   b:stageChain(wf,{sub:function(i,s){return 'owns '+s.owns.map(tagChip).join(" ")+'<br><span class="dim" style="font-size:11px">'+(s.onFail==="stop"?'on failure it stops and asks you':'on failure it returns to stage '+s.onFail.split(":")[1]+', at most '+(s.maxReturns||1)+' times')+'</span>';}})+
+   b:stageChain(wf,{sub:function(i,s){return 'owns '+s.owns.map(tagChip).join(" ")+'<br><span class="dim" style="font-size:11px">'+(s.onFail==="stop"?'If it fails: stop and ask you':'If it fails: send back to '+h((wf.stages[+s.onFail.split(":")[1]-1]||{}).role||"stage "+s.onFail.split(":")[1])+' (up to '+plural(s.maxReturns||1,"time")+')')+'</span>';}})+
     '<div class="field" style="margin-top:16px"><label>'+h(wf.file)+'</label><pre>'+h(wfToml(wf.name,wf.stages))+'</pre></div>'+
     '<div class="note">'+(wf.state==="published"?'Published at '+h(wf.commit)+'. A change to this file is a pull request.':'In '+h(wf.pr)+'. It can be used when it merges.')+'</div>',
-   f:'<button class="btn" onclick="closeDialog()">Close</button><button class="btn" onclick="wfzOpen(\''+wf.id+'\')">Change it</button>'};
+   f:'<button class="btn" onclick="closeDialog()">Close</button><button class="btn" onclick="wfzOpen(\''+wf.id+'\')">Edit workflow</button>'};
 };
 function wfzOpen(fromId){
   var wf=fromId?wfById(fromId):null;
@@ -15532,12 +15619,12 @@ DLG_EXT.wfnew=function(){
       '<span class="sp" style="margin-left:auto;display:flex;gap:4px"><button class="iconbtn" aria-label="Move stage '+(i+1)+' up" onclick="wfMove('+i+',-1)">↑</button><button class="iconbtn" aria-label="Move stage '+(i+1)+' down" onclick="wfMove('+i+',1)">↓</button>'+
       (z.stages.length>1?'<button class="iconbtn" aria-label="Remove stage '+(i+1)+'" onclick="wfDelStage('+i+')">×</button>':'')+'</span></div>'+
       '<div class="row" style="margin-top:8px"><span class="dim" style="font-size:12px">Owns</span>'+DOD_TAGS.map(function(g){return '<label class="tgck"><input type="checkbox"'+(s.owns.indexOf(g)>=0?' checked':'')+' onchange="wfSet('+i+',\'own\',\''+g+':\'+(this.checked?1:0))">'+g+'</label>';}).join("")+
-      '<span class="dim" style="font-size:12px;margin-left:8px">On failure</span><select class="sel-sm" aria-label="On failure of stage '+(i+1)+'" onchange="wfSet('+i+',\'onFail\',this.value)"><option value="stop"'+(s.onFail==="stop"?' selected':'')+'>stop and ask you</option>'+
-      z.stages.slice(0,i).map(function(x,j){return '<option value="return:'+(j+1)+'"'+(s.onFail==="return:"+(j+1)?' selected':'')+'>return to stage '+(j+1)+'</option>';}).join("")+'</select>'+
-      (s.onFail!=="stop"?'<select class="sel-sm" aria-label="Most returns of stage '+(i+1)+'" onchange="wfSet('+i+',\'maxReturns\',+this.value)">'+[1,2,3].map(function(n){return '<option value="'+n+'"'+((s.maxReturns||1)===n?' selected':'')+'>at most '+n+'</option>';}).join("")+'</select>':'')+'</div></div>';
+      '<span class="dim" style="font-size:12px;margin-left:8px">If it fails</span><select class="sel-sm" aria-label="If stage '+(i+1)+' fails" onchange="wfSet('+i+',\'onFail\',this.value)"><option value="stop"'+(s.onFail==="stop"?' selected':'')+'>stop and ask you</option>'+
+      z.stages.slice(0,i).map(function(x,j){return '<option value="return:'+(j+1)+'"'+(s.onFail==="return:"+(j+1)?' selected':'')+'>send back to stage '+(j+1)+'</option>';}).join("")+'</select>'+
+      (s.onFail!=="stop"?'<select class="sel-sm" aria-label="Most returns of stage '+(i+1)+'" onchange="wfSet('+i+',\'maxReturns\',+this.value)">'+[1,2,3].map(function(n){return '<option value="'+n+'"'+((s.maxReturns||1)===n?' selected':'')+'>up to '+plural(n,"time")+'</option>';}).join("")+'</select>':'')+'</div></div>';
   }).join('<div class="wf-arrow" aria-hidden="true">↓</div>');
   var slug=String(z.name||"workflow").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-  return {t:z.from?"Change a workflow":"New workflow",s:"Stages in order, each an agent you operate, and a person last",w:true,
+  return {t:z.from?"Edit workflow":"New workflow",s:"Stages in order, each an agent you operate, and a person last",w:true,
    b:'<div class="field"><div class="lab-row"><label for="wfDesc">In your own words</label><button class="btn wand" onclick="wfWand()" title="Have the assistant draft the stages" aria-label="Have the assistant draft the stages">'+avSvg("wand-sparkles")+'</button></div>'+
      '<textarea id="wfDesc" rows="2" placeholder="A bug fixer passes a fix to a validator, which passes it to a documenter, which passes it to an architect for final review." oninput="S.wfz.desc=this.value">'+h(z.desc)+'</textarea></div>'+
     '<div class="field"><label for="wfName">Name</label><input id="wfName" value="'+h(z.name)+'" onchange="S.wfz.name=this.value;render()"></div>'+

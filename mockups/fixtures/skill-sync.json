@@ -25,7 +25,7 @@
   "skills": 1,
   "files": 1,
   "checkouts": 4,
-  "note": "postgres-safe-migration 1.4.0 merged two days ago. Two checkouts still hold 1.3.0 and get 1.4.0 at their next sync."
+  "note": "safe-db-migration 1.4.0 merged two days ago. Two checkouts still hold 1.3.0 and get 1.4.0 at their next sync."
  },
  {
   "repo": "a-intel/mobile",
