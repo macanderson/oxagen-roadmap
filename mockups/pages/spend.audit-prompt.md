@@ -21,12 +21,12 @@ Work through every check. For each, record PASS, FAIL or N/A (with why). Cite ev
 
 1. **Route and shell.** The build serves `/spend`, and the grouping and the key are query values (`?by=`, `&key=`), so a side panel is a URL a person can share. Spend is lit in the sidebar and carries no count. The breadcrumb ends on Spend. The Approvals button and its drawer are present. The document title names the page.
 2. **Old routes.** Each lands on its canonical form with a 308 and never a 404: `/spend/operator`, `/spend/agent`, `/spend/model`, `/spend/tool` to `?by=` the same kind; `/spend/task` to `?by=work`; `/spend/cost_center` to `?by=cost_center`; `/spend/pricing` to `?by=model`; `/spend/<operator|agent|tool>/<key>` to `?by=<kind>&key=<key>`. `/spend/tokens`, `/spend/coaching` and `/spend/waste` land on `/spend/optimization`; `/spend/findings` and `/spend?finding=<id>` land on `/work/findings` with the finding's dialog. No drill page renders anywhere.
-3. **Header.** Eyebrow the workspace name, h1 "Spend", subtext "What the tokens bought, with the basis on every number." Actions in order: Export report, Set a budget. Set a budget is the one gold action on the screen.
+3. **Header.** Eyebrow the workspace name, h1 "Spend", and no subtext. Actions in order: Export report, Set a budget. Set a budget is the one gold action on the screen.
 4. **Tiles.** Four tiles, in order: Organization spend (with its basis, "Observed by gateway + Reported by harness", and USD), Tokens (with "served from cache"), Observed by the gateway ("of tokens counted by the proxy"), Unproductive spend (in the critical ink, with its share of spend). The Unproductive spend tile opens Optimization. A tile whose figure no contract answers prints "not recorded", never a zero.
 5. **Tabs.** Overview · Budgets (N) · Optimization, each a path segment. Changing the tab drops `by` and `key`.
-6. **September by day.** The panel heading names the month, the caption is one sentence, and the right side shows the month to date. The bars are one image with a label naming the range, and each bar's tooltip names its day and amount. If no contract answers the month by day, the build prints the chart as not recorded rather than drawing seeded bars.
+6. **September by day.** The panel heading names the month, it carries no caption, and the right side shows the month to date. The bars are one image with a label naming the range, and each bar's tooltip names its day and amount. If no contract answers the month by day, the build prints the chart as not recorded rather than drawing seeded bars.
 7. **Group by.** A group of six buttons with `aria-pressed`: Work order, Operator, Agent, Model, Tool, Cost center. A button writes `?by=` and closes an open panel.
-8. **The table.** Heading "By <grouping>", subtext "Select a row to open it here. There is no drill page." Search, filters, Rows and a pager above the rows. Rows open ordered by spend, largest first. Every column the spec names, in order, per grouping:
+8. **The table.** Heading "By <grouping>", and no subtext. Search, filters, Rows and a pager above the rows. Rows open ordered by spend, largest first. Every column the spec names, in order, per grouping:
    - Work order: Work order · Kind · Sent by · Runs · Items accepted · Per accepted item · Spend (no Share).
    - Operator: Operator · Agents · Runs · Tokens · Cache hit · Budget position · Spend · Share.
    - Agent: Agent · Runs · Tokens per run · Cache hit · Trend · Spend · Share.
@@ -36,7 +36,7 @@ Work through every check. For each, record PASS, FAIL or N/A (with why). Cite ev
    Missing or renamed columns are FAILs. Extra columns are noted.
 9. **Selecting a row.** A row writes `&key=`, carries `aria-selected`, and opens the side panel. Selecting it again, or **Close**, removes the key. With a panel open, the table narrows to the name, Spend and Share.
 10. **Side panels.** Each carries the fields the spec lists, in order, and its action:
-    - Operator: Role, Agents, Runs, Spend, Budget, Bounded tasks; the caption that it reports the record; **Open the habits** to `/spend/optimization?part=habits`.
+    - Operator: Role, Agents, Runs, Spend, Budget, Bounded tasks; no caption; **Open the habits** to `/spend/optimization?part=habits`.
     - Agent: the agent card, Runs, Spend with the change on last month, Tokens per run, Cache hit, Tool definitions, Cost center; the recommendation count; **Open the agent** and **Recommendations** to `?part=agents`.
     - Model: Model calls, Spend, Cache hit, Provider key; **Model routes** to Organization.
     - Tool: Kind, Calls, Per call, Per run, Record.

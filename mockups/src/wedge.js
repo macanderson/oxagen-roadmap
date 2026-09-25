@@ -1119,8 +1119,7 @@ function spendDays(total){
 }
 function spendDayChart(total){
   var D=spendDays(total), mx=Math.max.apply(null,D.map(function(d){return d.usd;}));
-  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>September by day</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">From the daily rollup, rebuilt from frames. Weekends run lighter.</p></div>'+
+  return '<div class="panel" data-help="month-by-day" style="margin-bottom:14px"><div class="panel-h"><h3>September by day</h3>'+
    '<span class="sp mono dim" style="font-size:11px">'+fmt$(total)+' to date</span></div>'+
    '<div class="panel-b"><div class="sp-days" role="img" aria-label="Spend by day, 1 to 11 September">'+D.map(function(d){
      return '<i style="height:'+Math.max(4,Math.round(d.usd/mx*100))+'%"'+tipAttr("Sep "+d.day+" · "+fmt$(d.usd))+'></i>';}).join("")+'</div>'+
@@ -1177,8 +1176,7 @@ function spendSide(by,key){
     kv='<dt>Role</dt><dd class="mono">'+h(p.role||"")+'</dd><dt>Agents</dt><dd>'+o.agents+' operated, '+mine.length+' in view</dd><dt>Runs</dt><dd>'+o.runs.toLocaleString()+'</dd>'+
       '<dt>Spend</dt><dd>'+usd(o.spend)+'</dd><dt>Budget</dt><dd>'+per(o.used)+' of '+usd(o.budget)+'</dd>'+
       '<dt>Bounded tasks</dt><dd'+fut("work orders")+'>'+(wos.length?wos.length+' work order'+(wos.length===1?'':'s')+' sent, '+acc+' item'+(acc===1?'':'s')+' accepted'+(acc?', '+fmt$(wsp/acc)+' per accepted item':''):'none sent in view')+'</dd>';
-    foot='<p class="muted" style="margin:0 0 8px;font-size:12px">The record, not a grade. Habits and the rules they suggest are on Optimization.</p>'+
-      '<button class="btn sm" onclick="spendPartGo(\'habits\')">Open the habits</button>'; }
+    foot='<button class="btn sm" onclick="spendPartGo(\'habits\')">Open the habits</button>'; }
   else if(by==="agent"){ var a=agent(key), t=agentTok(key), ag=SPEND.byAgent.filter(function(x){return x.k===key;})[0], rec=a?coachAgent(a):[];
     head=agentCard(a||key,{layout:"compact",key:key}); title="";
     kv='<dt>Runs</dt><dd>'+ag.runs.toLocaleString()+'</dd><dt>Spend</dt><dd>'+usd(ag.spend)+', '+h(ag.trend)+' on last month</dd>'+
@@ -1201,18 +1199,15 @@ function spendSide(by,key){
     kv='<dt>Work order</dt><dd><a class="mono" href="'+woUrl(w)+'">'+h(w.id)+'</a> '+woKindBadge(w)+'</dd><dt>Sent by</dt><dd>'+h((PEOPLE[w.by]||{name:w.by}).name)+'</dd>'+
       '<dt>Runs</dt><dd>'+(rs.length?rs.map(function(x){return runLink(x.run);}).join("<br>"):'none')+'</dd><dt>Spend</dt><dd>'+fmt$(row.usd)+(w.cap?' of a '+usd(w.cap)+' cap':'')+'</dd>';
     foot='<button class="btn sm" onclick="go(woUrl(woById(\''+h(key)+'\')))">Open the work order</button>'; }
-  return '<aside class="panel sp-side" aria-label="'+h(title||key)+'"><div class="panel-h"><div style="flex:1;min-width:0">'+(head||'<h3>'+h(title)+'</h3>')+'</div>'+
+  return '<aside class="panel sp-side" data-help="side-panel" aria-label="'+h(title||key)+'"><div class="panel-h"><div style="flex:1;min-width:0">'+(head||'<h3>'+h(title)+'</h3>')+'</div>'+
     '<button class="btn sm" onclick="spendKey(null)" aria-label="Close">Close</button></div>'+
     '<div class="panel-b"><dl class="kv">'+kv+'</dl>'+(foot?'<div style="margin-top:12px">'+foot+'</div>':'')+'</div></aside>';
 }
 function spendOverview(){
   var by=S.spendBy||"work", key=S.spendKey, total=spendMonthTotal();
-  var seg='<div class="kf stg-seg" role="group" aria-label="Group by"><span class="dim" style="font-size:12px;align-self:center;margin-right:4px">Group by</span>'+
+  var seg='<div class="kf stg-seg" role="group" aria-label="Group by" data-help="group-by"><span class="dim" style="font-size:12px;align-self:center;margin-right:4px">Group by</span>'+
    SPEND_BY.map(function(x){return '<button class="btn sm" aria-pressed="'+(by===x[0])+'" onclick="spendBy(\''+x[0]+'\')">'+h(x[1])+'</button>';}).join("")+'</div>';
-  var note=by==="work"?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="muted" style="margin:0;font-size:12px">'+WORKORDERS.length.toLocaleString()+' work orders in view, most of them direct: a run started from an operator’s own terminal. The rest of the month’s runs roll up the same way.</p></div>'
-    :by==="cost_center"?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="muted" style="margin:0;font-size:12px">A run with no label is charged to <span class="mono">~none</span>, so the centers sum to the month (ADR-142).</p></div>':'';
-  var table='<div class="panel"'+(by==="work"?fut("work orders"):'')+'><div class="panel-h"><div style="flex:1;min-width:0"><h3>By '+h(SPEND_BY.filter(function(x){return x[0]===by;})[0][1].toLowerCase())+'</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Select a row to open it here. There is no drill page.</p></div></div>'+spendTable(by)+note+'</div>';
+  var table='<div class="panel" data-help="grouped-table"'+(by==="work"?fut("work orders"):'')+'><div class="panel-h"><h3>By '+h(SPEND_BY.filter(function(x){return x[0]===by;})[0][1].toLowerCase())+'</h3></div>'+spendTable(by)+'</div>';
   return spendDayChart(total)+seg+(key?'<div class="sp-cols"><div style="min-width:0">'+table+'</div>'+spendSide(by,key)+'</div>':table);
 }
 function spendBudgets(){
@@ -1228,7 +1223,7 @@ function spendBudgets(){
      '<div class="dim" style="font-size:11px">'+per(u)+'</div></td>'+
      '<td class="num" style="white-space:nowrap"><button class="btn sm" onclick="openDialog(\'budgetedit\',\''+i+'\')">Edit</button> '+
      '<button class="btn sm danger" onclick="openDialog(\'budgetdel\',\''+i+'\')">Remove</button></td></tr>';}).join("")+
-   '</tbody></table></div><div class="panel-b"><div class="note">A hard budget is checked at each checkpoint, from a running counter fed by the usage each harness reports. A breach is a <span class="mono">policy.decision</span> frame and a pause, never a silent stop. A soft budget sends a notice.</div></div></div>';
+   '</tbody></table></div></div>';
 }
 /* ---- Optimization ---- */
 /* A prompt habit is read off the recorded turns of an operator's runs. It is written as a rule the
@@ -1250,13 +1245,12 @@ function spendOptimization(){
   var recs=[]; mine.forEach(function(a){coachAgent(a).forEach(function(c){recs.push({a:a,c:c});});});
   recs.sort(function(x,y){return y.c.usd-x.c.usd;});
   var recHtml='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Recommendations for agents</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+recs.length+' across '+mine.length+' agents in '+h(w.name)+'. Each names the signal it came from and the change that moves it.</p></div></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+recs.length+' across '+mine.length+' agents in '+h(w.name)+'.</p></div></div>'+
     '<div class="tw"><table><thead><tr><th>Agent</th><th>Recommendation</th><th>The record</th><th class="num">A month</th><th></th></tr></thead><tbody>'+
     recs.map(function(x){return '<tr><td>'+agentCard(x.a,{sub:"",sz:22,link:true})+'</td><td><b style="font-weight:500">'+h(x.c.title)+'</b><div class="dim" style="font-size:11.5px;max-width:52ch">'+h(x.c.say)+'</div></td>'+
       '<td class="mono dim" style="font-size:11px;max-width:30ch">'+x.c.signal+'</td><td class="num">'+(x.c.usd?fmt$(x.c.usd):'<span class="dim">—</span>')+'</td>'+
       '<td><button class="btn sm" onclick="'+x.c.act[1]+'">'+h(x.c.act[0])+'</button></td></tr>';}).join("")+'</tbody></table></div></div>';
-  var habHtml='<div class="panel" style="margin-bottom:14px" id="habits"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Operator habits</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Read from the recorded turns and written as rules to adopt. Listed by name. The record shows what happened. It never grades the person.</p></div></div>'+
+  var habHtml='<div class="panel" style="margin-bottom:14px" id="habits"><div class="panel-h"><h3>Operator habits</h3></div>'+
     (habits.length?'<div class="hab-list">'+habits.map(function(x){
       return '<article class="hab"><div class="hab-h"><b>'+h(x.name)+'</b><span class="dim">'+h(x.habit)+'</span></div>'+
        '<p class="mono dim hab-rec">'+x.record+(x.usd?' · '+fmt$(x.usd)+' in the record':'')+'</p>'+
@@ -1265,7 +1259,7 @@ function spendOptimization(){
        '<button class="btn sm" onclick="act(\'Rule shared with '+h(x.name)+'. It quotes the turns it was read from.\')">Share with '+h(x.name.split(" ")[0])+'</button></div></article>';}).join("")+'</div>'
      :'<div class="panel-b"><p class="muted" style="margin:0">No prompt habit stands out in this workspace’s recorded turns.</p></div>')+'</div>';
   var part=S.spendPart||"waste";
-  var seg='<div class="kf stg-seg" role="group" aria-label="Optimization">'+[["waste","Unproductive spend"],["tokens","Tokens and cache"],["agents","Recommendations",recs.length],["habits","Operator habits",habits.length]].map(function(x){
+  var seg='<div class="kf stg-seg" role="group" aria-label="Optimization" data-help="parts">'+[["waste","Unproductive spend"],["tokens","Tokens and cache"],["agents","Recommendations",recs.length],["habits","Operator habits",habits.length]].map(function(x){
     return '<button class="btn sm" aria-pressed="'+(part===x[0])+'" onclick="spendPartGo(\''+x[0]+'\')">'+h(x[1])+(x[2]!=null?' <span class="dim">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
   return seg+(part==="tokens"?spendTokens(WT):part==="agents"?recHtml:part==="habits"?habHtml:spendWaste("body"));
 }
@@ -1288,8 +1282,7 @@ function pSpend(){
    '<div class="stat"><span class="k">Observed by the gateway</span><span class="v">'+per(WT.observed)+'</span><span class="s">of tokens counted by the proxy</span></div>'+
    '<div class="stat click" onclick="spendView(\'optimization\')"><span class="k">Unproductive spend</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s">'+wasteShareText()+' of spend · Optimization</span></div></div>';
   var body=t==="budgets"?spendBudgets():t==="optimization"?spendOptimization():spendOverview();
-  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Spend</h1>'+
-   '<p>What the tokens bought, with the basis on every number.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Spend</h1></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'spendexport\')">Export report</button>'+
    '<button class="btn primary" onclick="openDialog(\'budget\')">Set a budget</button></div></div>'+strip+tabs+body;
 }
