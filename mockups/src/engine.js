@@ -9839,8 +9839,9 @@ var CMDS=[
  {g:"Go",i:[["Work","#/a-intel/core-platform/work","⌘ 1"],["Agents","#/a-intel/core-platform/agents","⌘ 2"],
    ["Tools","#/a-intel/core-platform/tools","⌘ 3"],
    ["Steering","#/a-intel/core-platform/steering","⌘ 4"],["Spend","#/a-intel/core-platform/spend","⌘ 5"],
-   ["Organization","#/a-intel"],["API keys","#/a-intel/api-keys"],["Billing","#/a-intel/billing"],["Audit","#/a-intel/audit"],
-   ["Onboarding demo: sign up","#/welcome"],["Onboarding demo: log in","#/welcome/login"]]},
+   ["Organization","#/a-intel"],["API keys","#/a-intel/api-keys"],["Billing","#/a-intel/billing"],["Audit","#/a-intel/audit"]]
+   /* the onboarding demo is mockup chrome: its entries show only under ?debug=true */
+   .concat(PRODUCT?[]:[["Onboarding demo: sign up","#/welcome"],["Onboarding demo: log in","#/welcome/login"]])},
  {g:"Assistant",i:[
    ["Open the assistant","!asstToggle(true)"],["Ask why a run came back tampered","!asstToggle(true)"],
    ["Ask what an agent cost this month","!asstToggle(true)"],["Mint a model key for this organization","!openDialog('mintkey')"]]},
