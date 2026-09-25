@@ -28,7 +28,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 7. **States.** Force each state and compare copy and controls with the design:
    - **loading** (`state=loading`): the shell and the rail stay and the cards are the skeleton; no data, no zeros, no stale log.
    - **error** (`state=error`): h2 “The collector cannot reach Oxagen”, the two paragraphs and the request line verbatim, Check again, then Cancel · Back, no repository panel, and no gold action.
-   - **access denied** (`state=denied`): “You cannot see onboarding”, the missing permission `org.create for marcus@a-intel.example`, the grant sentence, Request access (opens `request-access`) and Back to Work, then Signed in as, Needed, and Decided by (`pol_v41 · deny wins over every allow`).
+   - **access denied** (`state=denied`): “You cannot see onboarding”, the missing permission `org.create for marcus@a-intel.example`, the grant sentence, Request access (opens `request-access`) and Back to Work, then Signed in as, Needed, and Decided by (`pol_v41`).
    Loading must not flash values. Error must name the request id and host. Denied must name the missing permission and offer Request access.
 8. **Trust language.** The received card says `harness`, “chain intact”, `attested=device-key`, and `countersigned`, and nothing stronger. Nothing on it says enforced. The provisional copy says what stays off and does not soften it. Nothing on the page mentions a witness, a proof, a verdict, a definition of done, a trust or spend score, or a per-run price.
 9. **Headings and captions.** No heading on the built page carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing, except where the spec quotes longer rendered copy.

@@ -71,18 +71,18 @@ Each section has a number and a heading. Sections 1 to 5 carry one data line und
 
 **1 Envelope.** "53 SteeringFrames reached this run." With a type filter on, the count reads "9 `procedure` of 53 SteeringFrames reached this run." Marked future-only.
 
-- Two meters. "Session-start prefix", "1,102 of 4,096 tok", caption "16 KiB in the signed bundle, header included". "Per-prompt selection", "415 of 430 tok", caption "picked for this brief under the workspace budget". The session-start meter is the Session start tally plus the bundle's 38-token compile header. The per-prompt meter is the Prompt submit tally.
+- Two meters, with no caption. "Session-start prefix", "1,102 of 4,096 tok". "Per-prompt selection", "415 of 430 tok". The session-start meter is the Session start tally plus the bundle's 38-token compile header. The per-prompt meter is the Prompt submit tally.
 - The type strip: one button per frame type present, with its count, in type order: goal 2, invariant 1, constraint 15, procedure 9, context 10, invocation 2, capability 14. A type with no frame is not drawn (this agent holds no mandate, so there is no `delegation`). Each button carries `aria-pressed`. Pressing one filters the Envelope and the Exclusions to that type and adds "Show every type". Pressing it again clears the filter.
-- The injection points, in this order. A point with no frame is not drawn. Each point has its name, one caption, and a tally of frames and tokens.
+- The injection points, in this order. A point with no frame is not drawn. Each point has its name and a tally of frames and tokens. The Envelope help (`mockups/help/run.md`) says what each point is.
 
-| Point | Caption | Demo tally |
-|---|---|---|
-| Session start | "the stable prefix, delivered in the signed bundle" | "14 frames · 1,064 tok" |
-| Prompt | "the brief the run started with" | "8 frames · 228 tok" |
-| Prompt submit | "the per-prompt selection, picked for this prompt" | "8 frames · 415 tok" |
-| Model request | "added at the gateway, between turns" | "1 frame · 22 tok" |
-| Checkout files | "synced into the checkout, loaded by the harness" | "9 frames · 9,140 tok" |
-| Tool list | "the tool definitions the toolbelt shows the model" | "13 frames · 977 tok" |
+| Point | Demo tally |
+|---|---|
+| Session start | "14 frames · 1,064 tok" |
+| Prompt | "8 frames · 228 tok" |
+| Prompt submit | "8 frames · 415 tok" |
+| Model request | "1 frame · 22 tok" |
+| Checkout files | "9 frames · 9,140 tok" |
+| Tool list | "13 frames · 977 tok" |
 
 - Each point is a table with the columns Type · Frame · Source · Force · Tokens.
   - Type: the frame type badge, whose title is the type's meaning.
