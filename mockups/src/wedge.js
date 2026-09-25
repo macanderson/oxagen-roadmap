@@ -1017,7 +1017,7 @@ function srcReachPanel(o){
 function srcHead(o,kindLabel,title,badges,lead,acts){
   var back=stgHash("sources").replace(/\?.*$/,"")+"?kind="+(o?o.g:"");
   return '<div class="phead"><div class="t"><p class="eyebrow"><a href="'+back+'">Steering</a> · '+h(kindLabel)+'</p>'+
-   '<h1'+(title.length>90?' style="font-size:19px"':'')+'>'+h(title)+'</h1>'+
+   '<h1'+(title.length>90?' style="font-size:20px"':'')+'>'+h(title)+'</h1>'+
    '<div class="row" style="margin-top:8px">'+badges+'</div>'+(lead?'<p style="margin-top:8px">'+lead+'</p>':'')+'</div>'+
    '<div class="acts">'+(acts||'')+'</div></div>';
 }
