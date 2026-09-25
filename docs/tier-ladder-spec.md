@@ -165,7 +165,7 @@ Enrollment points the harness at the loopback proxy by rewriting its base URL (`
 
 The proxy speaks Anthropic Messages, OpenAI Responses, and OpenAI Chat Completions, streamed or not. A websocket upgrade gets `426`, and Codex falls back to HTTP. The proxy ties each call to a session by, in order: the `x-oxagen-session` header (read and removed), the harness's own session header, the session id inside Anthropic `metadata.user_id`, a Responses `prompt_cache_key` that names a known session, and the one live session of that harness. A call that matches none is sealed on the daemon's own chain and marked `unattributed` (`model-proxy.ts:73-83`).
 
-The MCP aggregator that re-serves a wrapped harness's MCP servers through loopback (ADR-094 part 3) is not on `main` (`oxagen` #3299, open). Today a wrapped harness reaches `gateway` through model traffic only, and Claude Desktop through its Oxagen MCP calls only. `gateway-plan.md` moves the gateway to a service Oxagen or the customer runs, with Oxagen holding the keys, and routes MCP for Claude Code, Codex, Cursor, and Stella through it.
+The MCP aggregator that re-serves a wrapped harness's MCP servers through loopback (ADR-094 part 3) is not on `main` (`oxagen` #3299, open). Today a wrapped harness reaches `gateway` through model traffic only, and Claude Desktop through its Oxagen MCP calls only. `gateway-plan.md` adds a cloud gateway after the local one, with Oxagen holding the keys, and routes MCP for Claude Code, Codex, Cursor, and Stella through both.
 
 ### Metering
 

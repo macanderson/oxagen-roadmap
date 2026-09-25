@@ -1,222 +1,128 @@
-# The Oxagen gateway
+# The Oxagen gateways
 
 | | |
 |---|---|
-| **Status** | Plan v2, for review. Nothing in it is built. v1 planned a relay on each laptop. The maintainer chose the cloud gateway model on 2026-09-25, and v2 replaces v1. |
+| **Status** | Plan v3, for review. Nothing in it is built. |
 | **Date** | 2026-09-25 |
 | **Owner** | Mac Anderson |
-| **Decision** | Every customer agent's model and MCP traffic routes through Oxagen's gateway. Oxagen holds the model keys and the MCP credentials. Oxagen hosts the gateway by default, and the largest customers can run it in their own network. Oxagen is the one place a team sets up steering, tools, skills, agent profiles, and memories. Agents on different runtimes message and start one another through Oxagen. |
-| **Tracks** | `oxagen` #3299 item 6 (MCP), and the ADR this plan asks for (below) |
-| **Source** | `macanderson/oxagen` at `main` `c0a40a9ce`: `packages/tacho/src/collector/model-proxy.ts`, `mcp-gateway.ts`, `packages/agent/src/runtime/materialize-tools.ts`, `packages/database/src/schema/mcp.ts`, `packages/iam/src/machine-key-scope.ts`, `packages/handlers/src/tacho.events.ingest.ts`. Kong's documentation, read 2026-09-25 |
-| **Supersedes in part** | ADR-094 (the gateway runs on the laptop, and prompt bodies never reach Oxagen), ADR-143 (the vendor key sits in a file on the laptop), ADR-122:19 (an agent's own identity cannot call an external tool) |
-| **Related** | `tier-ladder-spec.md`, `oxagen` #4310 (the in-app agent leaves the toolbelt) |
+| **Decision** | ADR-187 in `macanderson/oxagen` (proposed, #4321): every customer agent's model and MCP calls pass a local gateway and then a cloud gateway, and Oxagen holds the keys. This plan holds the detail the ADR leaves out. |
+| **Tracks** | `oxagen` #3299 (Phase 4), #4319 (the ADR) |
+| **Source** | `macanderson/oxagen` at `main` `22902576f`, and the vendor documentation linked below, read 2026-09-25 |
+| **Related** | `tier-ladder-spec.md`, `dod-spec.md`, `mission-control-spec.md` §7.6, `oxagen` #4310 (the in-app agent leaves the toolbelt) |
 
 ---
 
-## The problem
+## Terms
 
-You set up a team's tools, rules, and budgets in Oxagen, and then your agents run without most of it. Oxagen delivers context records at session start and records what the hooks see. The rest stops at the authoring side:
+- **Local gateway.** The process on the machine the agent runs on. Today this is the model proxy inside `tachod`.
+- **Cloud gateway.** The service that holds the keys and governs every call. Oxagen hosts it by default, and a customer may host it in its own network.
 
-| | Claude Code, Codex, Cursor, Stella CLI | Claude Desktop |
+## Path
+
+```
+agent ──> local gateway ──> cloud gateway ──> model provider, MCP server
+          screens for         holds the keys, applies policy,
+          sensitive data      budgets, and operator commands,
+                              meters, and records
+```
+
+ADR-187 records what each gateway does, the operator commands, the live run view, the work record, and the proposals still open. This plan covers the screen, commands per harness, waste, harness setup, context record delivery, and the build order.
+
+## Sensitive-data screen
+
+- **What it sees.** A model request carries the whole conversation: the prompt, the files the agent read, and every tool result. Screening the request screens everything the provider would see. Responses pass through.
+- **What it does.** It rejects the request or strips the sensitive data out. Proposal 2 in ADR-187 makes this a workspace setting: off, flag, strip, or reject.
+- **How it detects.** Open. A language model running on the machine is one candidate. Pattern rules for keys and passwords are another.
+- **Where it runs.** On every enrolled machine, and inside a contained runtime's sandbox. Claude Code on the web has no local gateway, so its calls are unscreened.
+- **Skipping it.** The machine's owner could point a harness straight at the cloud gateway. Proposal 3 in ADR-187 has the local gateway sign each request with its scan verdict, so a workspace that requires screening can refuse unsigned calls. Budgets and commands hold either way, because the keys are in the cloud.
+
+## Commands per harness
+
+Where the cloud gateway carries a run's model calls, it applies each command directly. Where it does not, the hooks are the only way in.
+
+| Command | Model calls through the cloud gateway (Claude Code, Codex, Stella) | Model calls outside it (Cursor, Claude Code on the web) |
 |---|---|---|
-| Context records | `must` and `should` records at session start. `may` and `info` are cut | Pull only, through read-only tools |
-| Toolbelt | No. The workspace's registered MCP servers reach only Oxagen's in-app agent | No |
-| Skills | No. `.oxagen/skills/` is written and never delivered | No |
-| Agent profile | Budget, containment, and tool rules go into the signed bundle. `instructions` do not reach the agent | No |
-| Memories | No. Tacho records memory file paths, never their content | Pull only |
-| Model keys | In `credentials.json` on the laptop for Claude Code and Codex, readable by the machine's owner | n/a |
+| Steer | Added to the next model request | Delivered at the next hook |
+| Interrupt | The call in flight is aborted, and the steer rides the retry | The next tool call is refused, with the steer as the reason |
+| Pause | The call in flight is aborted and new calls are refused. The hooks refuse tool calls | The hooks refuse the next tool call and prompt |
+| Resume | Calls are accepted again | The hooks allow again |
+| Cancel | The call in flight is aborted, the run token is revoked, every later call is refused, and the run is sealed | The hooks refuse every tool call and prompt, and the run is sealed |
 
-The kill switch has the same gap. Today's gateway runs on the laptop. The machine's owner can unset the base URL, read the key from custody, and call the vendor directly. So a paused or cancelled run can keep going.
+A bulk command goes to every live run of the selected agents. The report lists each run with the command's result and the record entry that proves it (`mission-control-spec.md` §7.6).
 
-## What Kong does
+## Send To
 
-Kong Gateway puts the AI MCP Proxy plugin between an MCP client and the upstream servers. The plugin applies OAuth, per-tool access lists (Kong Gateway 3.13 and later, with an audit log), and rate limits, and it logs each JSON-RPC call with its payload ([MCP gateway](https://developer.konghq.com/mcp/), [AI MCP Proxy](https://developer.konghq.com/plugins/ai-mcp-proxy/)). Kong runs the control plane as a service (Konnect). The data plane that carries traffic runs in one of two places:
+**Send To...** on the work backlog starts a run. The send menu and the work order dialog in `mockups/pages/work-backlog.md` stay: work items, definition of done, brief, repositories, and spend cap. The dialog gains three choices, or one existing agent that fixes them:
 
-- **Kong-hosted.** With Dedicated Cloud Gateways, Kong manages both planes ([announcement](https://konghq.com/blog/product-releases/dedicated-cloud-gateways)).
-- **Customer-hosted.** In hybrid mode, the customer runs the data plane, and it pulls its configuration from the control plane. A data plane node caches that configuration and keeps proxying while the control plane is down ([hybrid mode](https://developer.konghq.com/gateway/hybrid-mode/)).
-
-Oxagen takes the same shape: a control plane Oxagen runs, and a data plane Oxagen or the customer runs.
-
-## Where Oxagen goes past it
-
-Oxagen's gateway governs agents, not API consumers. Each call carries an agent's identity, a run, and the mandate the team set for that agent:
-
-- **Spend and budgets.** The gateway meters every model call from the bytes it saw and prices it. It refuses the next call when the run's or the agent's day budget runs out, and it reserves an in-flight call's ceiling so parallel calls cannot overrun. The proxy on the laptop already does this (`model-proxy.ts`). The gateway moves it to where the owner cannot remove it.
-- **A kill switch the agent cannot route around.** Oxagen holds the only key the agent's harness can use. A paused, cancelled, or killed run gets no new token, and the gateway cuts its calls in flight.
-- **One place to set up the agent.** The same mandate supplies steering, tools, skills, profile, memories, and budget.
-- **A record per run.** Each call lands on the run's hash-chained record, and the control plane computes the run's tier from it.
-
-## Architecture
-
-### Control plane
-
-This is the existing Oxagen API and app. It holds the mandate for each agent: access, budget and rules, and equipment (toolbelt, skills, steering, profile, memories). It also holds the key vault, signs each gateway's authority to mint run tokens, ingests the record, and computes the tier. It never carries a model or MCP call.
-
-### Data plane
-
-The gateway is one service with two listeners:
-
-- **Model.** It speaks Anthropic Messages, OpenAI Responses, and OpenAI Chat Completions, streamed or not. The routing, metering, budget, model allowlist, and interrupt logic in `packages/tacho/src/collector/model-proxy.ts` move here.
-- **MCP.** Streamable HTTP. It serves the agent's toolbelt, one endpoint per server (below).
-
-The gateway pulls a signed configuration for each workspace from the control plane and caches it, as the host bundle works today. It streams operator commands (pause, cancel, kill, steer) from the control plane and applies them to calls in flight.
-
-### Deployment
-
-| | Oxagen-hosted (default) | Customer-hosted |
-|---|---|---|
-| Who runs the gateway | Oxagen, in regions it chooses | The customer, in its own network, from the same image |
-| Where keys and MCP credentials live | Oxagen's vault, one KMS key per organization | The customer's KMS or vault. They never reach Oxagen |
-| Where prompt and tool bodies go | Through Oxagen's gateway, retained under the workspace's retention policy | They stay in the customer's network. Only digests, usage, and frames reach Oxagen |
-| How it reaches the control plane | Inside Oxagen | Outbound only, over mutual TLS. The gateway dials the control plane, and nothing dials in |
-
-Both run the same code. A customer moves from one to the other by pointing its enrollment at a new gateway URL and moving its keys.
-
-### The laptop
-
-`tachod` stays, with a narrower job:
-
-- The hooks stay. They veto the harness's built-in tools (Bash, Edit, Write), deliver steering at session start, and record events. The gateway never sees those tools.
-- `tachod` fetches run tokens for the harness (`apiKeyHelper` for Claude Code) and holds no vendor key.
-- It relays a stdio MCP server that must run on the laptop (below).
-
-## Keys and the kill switch
-
-1. **Oxagen holds the vendor keys.** A team adds its Anthropic and OpenAI organization keys to Oxagen once. Enrollment removes any vendor key from the harness's config, and `credentials.json` on the laptop goes away.
-2. **The harness holds a run token.** The gateway mints an `oxrt_` token for one agent, one host, and one run. A token is short-lived, and a run is not: `tachod` fetches a fresh one for as long as the run may continue. Claude Code re-runs its key helper every five minutes and on any 401 (ADR-143 §2), so a run that lasts days picks up hundreds of tokens without noticing. Codex has no key helper and reads a fixed value, so it gets a run-scoped token that lives as long as the run.
-3. **The gateway swaps the token for the key.** It verifies the token, checks the mandate and the run's state on every call, and forwards the call with the organization's key.
-4. **Kill means no open call and no next call.** Pause, cancel, or kill marks the run at the gateway, aborts its calls in flight, and refuses its next call, whatever the token's expiry. It also stops minting for the run. The harness has no other key to try.
-
-The kill never waits for a token to expire. The token's short life only limits how long a stolen token stays useful.
-
-**Long runs.** The gateway mints tokens, not the API, so a run that lasts days keeps working while the control plane is unreachable. The gateway keeps serving from its cached configuration, as a Kong data plane does, and applies a command as soon as it arrives. A customer-hosted gateway mints its own tokens.
-
-This holds against the agent and against every process the agent starts. It holds against the machine's owner for the organization's keys. It does not hold against a key the owner brings from elsewhere. Two controls close that gap: the vendor's own organization settings, which stop members creating personal API keys, and the `contained` tier, whose sandbox reaches only the gateway.
-
-**Subscription logins are out.** Oxagen cannot hold a Claude Pro or Max login or a ChatGPT sign-in. A run on one stays `harness_held` (ADR-143), and the kill switch does not bind it. Enrollment says so, and the run's record shows it.
-
-**Keys at rest.** Today one platform variable, `AUTH_TOKEN_ENCRYPTION_KEY`, encrypts every workspace's MCP credentials (`packages/plugins/src/credentials/kms.ts:4-5`). Custody of model keys needs one KMS key per organization, and the customer's own KMS on a customer-hosted plane.
-
-## MCP
-
-### The toolbelt
-
-The workspace already registers MCP servers in `mcp.mcp_servers`, with encrypted credentials and published tool schemas (`packages/database/src/schema/mcp.ts:131-204`). The gateway serves them.
-
-- **One endpoint per server, under its own name.** The gateway serves `https://<gateway>/mcp/<agent>/<server>`. Enrollment writes each one into the harness's config under the server's registered name. Tool names stay `mcp__<server>__<tool>`, so each harness's per-server hook matchers, permission rules, and allowlists keep working.
-- **One tool builder.** The gateway builds each agent's list with the server-side `materializeTools`, so no second copy of the builder exists (ADR-078 §4 holds).
-- **Credentials stay in Oxagen.** The gateway connects upstream with the workspace's stored credential and runs OAuth itself. The harness never sees the credential.
-- **Per-tool rules.** Allow, deny, or approval, plus input narrowing, apply to each call before it goes upstream.
-- **Approval.** A call that needs a person is parked. The gateway returns a result that names the pending approval. The person decides in Oxagen, and the agent's retry goes through.
-- **Metering and billing.** Each call is metered and billed as one governed action (ADR-165), as the in-app path does today.
-
-### Importing what the harness has
-
-Enrollment reads the MCP servers already configured in the harness, in the user's config and in the repository. It proposes each one into the workspace toolbelt, moves its credential into custody, and replaces the entry with the gateway's:
-
-- **In the user's config,** enrollment edits the file directly, with displace-and-restore, so `unenroll` puts every file back byte for byte.
-- **In the repository** (`.mcp.json`, `.codex/config.toml`, `.cursor/mcp.json`, `.stella/mcp.toml`), Oxagen opens a pull request, the way a context record lands. The entry then reaches every checkout and every cloud session that clones the repository.
-
-A cloud session of Claude Code on the web loads the repository's `.mcp.json`, so its MCP calls reach the gateway once the gateway's domain is on the environment's network allowlist. Its model calls do not: Anthropic's infrastructure makes them with the user's subscription ([cloud sessions](https://code.claude.com/docs/en/claude-code-on-the-web)).
-
-### Pinning
-
-On a managed device the harness reaches MCP servers through the gateway only:
-
-- **Claude Code:** `managed-mcp.json` holds the gateway entries, with `allowManagedMcpServersOnly: true`. The allowlist matches by `serverUrl` ([managed MCP](https://code.claude.com/docs/en/managed-mcp)).
-- **Codex:** `requirements.toml` holds an `[mcp_servers.<id>]` entry per server, with a `url` identity, and `features.apps = false` ([managed configuration](https://learn.chatgpt.com/docs/enterprise/managed-configuration)).
-- **Cursor:** the Enterprise MCP Allowlist in Cursor's team settings allows the gateway's URLs only. Oxagen cannot write it. The admin guide gives the pattern ([model and integration management](https://cursor.com/docs/enterprise/model-and-integration-management)).
-- **Stella:** the gateway entries reach `.stella/mcp.toml` through a pull request. Stella skips that file in an untrusted checkout, and it has no managed server list an admin could pin.
-- **Claude Desktop:** its enterprise policy is an on/off switch for local servers. Oxagen's entry is the one it writes today.
-
-### Laptop-only servers
-
-A stdio server that reads the developer's files or a local database cannot run in a cloud gateway. Two ways to carry it:
-
-- **In a customer-hosted gateway,** when the server needs the customer's network but not the laptop.
-- **Through `tachod`,** which relays it and checks each call against the signed bundle. The daemon seals the call, and the record marks it as seen on the host, not by the gateway.
-
-### Vendor-run tools
-
-The vendor runs these tools, so no gateway sees them: claude.ai connectors in Claude Code, Codex apps and hosted web search, Cursor Cloud Agents, Claude Desktop's remote connectors, and the built-in web search and fetch tools. On a managed device Oxagen turns them off (`disableClaudeAiConnectors`, `features.apps = false`). Elsewhere the hooks see what they can, and the record marks the rest as unrouted.
-
-## Delivery
-
-| What | How it reaches the agent |
+| Choice | Options |
 |---|---|
-| Context records | Session start, as today. The gateway adds the per-prompt selection (#3296): it sees every model call, so it can add the `may` and `info` records that fit each turn |
-| Style preferences | A context record of kind `preference`, delivered the same way, with its own place in the app |
-| Skills | A pull request puts each published skill in the directory each harness reads (`.claude/skills/` and the others), as `propose_skill` already writes `.oxagen/skills/` |
-| Agent profiles | The pull request that commits an agent definition also writes the per-harness agent files (`.claude/agents/` and the others), as `mission-control-spec.md` §6.2 specifies and ADR-101:82-84 leaves unbuilt. The definition's `instructions` go out at session start |
-| Memories | `tachod` reads each harness's memory files, under the workspace's retention policy, and imports them into the agent's memory store. Recall goes out at session start and per prompt through the gateway |
+| Harness | Claude Code, Codex, Cursor, or Stella |
+| Runtime | An enrolled machine, a contained CI runner, or a customer-hosted runner |
+| Toolbelt | The workspace toolbelt, narrowed to the tools this work needs |
 
-The in-app agent is Oxagen's own and is not part of this. #4310 takes the workspace toolbelt and rules off it.
+On **Send**, Oxagen creates the work order and hands it to the chosen runtime, which starts the harness headless with the brief. On an enrolled machine the local gateway starts it. On a CI runner the contained launcher starts it (ADR-152). The run is bound to the work order from its first call.
 
-## Agent messages and triggers
+## Waste
 
-An agent on one runtime can message an agent on another, or start one, through Oxagen. A Claude Code run on a laptop can ask a Codex run in CI a question, or hand work to a Stella agent. The gateway makes this possible: every agent already connects to it, whatever its runtime, so Oxagen is the one place that can address them all.
+The cloud gateway assigns each call a waste reason code, by a rule an operator can read:
 
-### Messages
+| Reason | How it is measured |
+|---|---|
+| Failed outcome | Spend on runs that failed verification or were abandoned |
+| Errors and retries | Calls that errored, timed out, or were cancelled, and the retries they caused |
+| Cache misses | A repeated prompt prefix that missed the provider's cache, found by comparing prefix digests |
+| Loops | The same tool call, or a near-identical model request, repeated within a run |
+| Reverted work | Runs whose changes were reverted, or whose pull request closed without merging |
+| Oversized model | A costlier model where a cheaper one passes verification at the same rate on the same kind of task. This needs verification data, so it comes last |
 
-`mission-control-spec.md` §7.6 and `work-in-flight-spec.md` §6 define the message. Neither is built. The gateway serves the capabilities to every agent as MCP tools on its Oxagen endpoint:
+The headline figure is cost per verified outcome.
 
-- **`send_agent_message`** takes a recipient (a run id, a work order id, or an agent slug), a kind (`question`, `answer`, or `notice`), a body of at most 4,000 characters, an optional `in_reply_to`, a delivery mode, and an expiry.
-- **`list_agent_messages`** reads the thread.
+## Harness setup
 
-Delivery follows the recipient's route:
+Enrollment points each harness's model calls and MCP servers at the local gateway. It edits the user's config directly and restores it on `unenroll`. It changes a repository's config through a pull request, as a context record lands, which also reaches cloud sessions that clone the repository.
 
-- **Through the gateway.** The gateway adds the message to the recipient's next model request, right after the steering block. This works for any agent whose model traffic the gateway carries, which covers agents on the Claude Code, Codex, and Stella harnesses.
-- **Through the hook.** For an agent whose model calls skip the gateway, which today means an agent on the Cursor harness, the hook delivers the message at the next boundary it has.
+| Harness | Model calls | MCP servers | Pinning on a managed device |
+|---|---|---|---|
+| Claude Code | `ANTHROPIC_BASE_URL`, with `apiKeyHelper` fetching the run token | `~/.claude.json`, and `.mcp.json` by pull request | `managed-mcp.json` with `allowManagedMcpServersOnly: true`, and hooks in managed settings ([managed MCP](https://code.claude.com/docs/en/managed-mcp)) |
+| Codex | `openai_base_url`, with a whole-run token (proposal 7) | `~/.codex/config.toml`, and `.codex/config.toml` by pull request | `requirements.toml` server identities, and `features.apps = false` ([managed configuration](https://learn.chatgpt.com/docs/enterprise/managed-configuration)) |
+| Cursor | None. Cursor's model calls go to Cursor's servers | `~/.cursor/mcp.json`, and `.cursor/mcp.json` by pull request | The MCP allowlist in Cursor's team dashboard, which only the customer's admin can set, and enterprise hooks ([integration management](https://cursor.com/docs/enterprise/model-and-integration-management)) |
+| Stella | `providers.<id>.base_url` | `.stella/mcp.toml` by pull request. Stella skips it in an untrusted checkout | None. Stella has no managed server list |
+| Claude Desktop | None | Oxagen's MCP entry, as today | An on/off policy for local servers |
+| Claude Code on the web | None. Anthropic's infrastructure calls Anthropic with the user's subscription | `.mcp.json` by pull request, pointed at the cloud gateway, with its domain on the environment's network allowlist ([cloud environments](https://code.claude.com/docs/en/cloud-environments)) | Server-managed settings |
 
-The existing rules hold. A message from an agent enters as quoted evidence with the sender named, never as an instruction, and a tool call built from it is marked as built from untrusted input. Each send is a governed action. Per-run inbound budgets, a rate limit per sender, duplicate suppression, expiry, and an operator mute bound it. Every status change is a frame on both runs, so "did the agent see it" points at the model request that carried it.
+Tools a vendor runs never pass either gateway: claude.ai connectors, Codex apps and hosted web search, Cursor Cloud Agents and its built-in browser and search, and Claude Desktop's remote connectors. On a managed device Oxagen turns them off (proposal 8). Elsewhere the record marks them as unrouted.
 
-### Triggers
+## Context record delivery
 
-An agent can start a run of another agent on another runtime:
+Context records keep their name. Their kinds include skills, business rules, code rules, style preferences, facts, and memories, alongside the kinds in use today.
 
-- **`start_agent_run`** takes the target agent, a brief (ARP carries an operator-authored brief, ADR-157), the parent run, and an optional budget.
-- **The work order is the record.** A trigger creates a work order, the dispatch record `work-in-flight-spec.md` §9 defines, linked to the parent run. The child's spend rolls up to the parent and its lineage shows both.
-- **The child runs under its own mandate.** A trigger passes a brief, never the parent's authority. Starting another agent needs a grant naming the sender and the target. No agent holds it by default.
-- **Oxagen routes the start and runs no turn.** An agent has one runtime, so the work order goes to the target agent's own runtime, and that runtime starts it: `tachod` on the enrolled host the agent runs on, the contained launcher on the agent's CI runner, or the agent's customer-hosted runner. ADR-043 stands: Oxagen starts a process the customer chose, as the contained launcher does, and runs no turn itself.
-- **The answer comes back as a message.** When the child seals, Oxagen sends its outcome to the parent as an `answer`, with the child's run linked.
+| Kind | How it reaches the agent |
+|---|---|
+| Business rules, code rules, style preferences, facts | The cloud gateway adds the ones that fit each turn. Where model calls skip it, the session-start hook delivers them |
+| Skills | A pull request puts each skill in the directory each harness reads, such as `.claude/skills/` |
+| Memories | Stored in Oxagen. The cloud gateway adds the recalled ones to each turn |
 
-## The tier ladder
+Two kinds move in the code: memories live in Neo4j as `AgentMemory` today, and skills live in `.oxagen/skills/`, both separate from context records.
 
-The tiers keep their words (`tier-ladder-spec.md`). Two things change:
+## Proposed build order
 
-- **A new source for `gateway`.** A call the gateway carried is on the control plane's own record, which is stronger evidence than a frame the host sealed. Ingest promotes a run to `gateway` from either source.
-- **A new fact on the run.** The run records who held the key: Oxagen, the customer's KMS, or the harness. "Enforced" for the kill switch is allowed only when Oxagen or the customer's KMS held it, scoped to "for calls made with the organization's keys".
-
-## The ADR
-
-One ADR in `oxagen` records the decision. It supersedes in part:
-
-- **ADR-094:** a gateway Oxagen hosts carries prompt bodies, under the workspace's retention policy. The laptop proxy stays only for the stdio relay.
-- **ADR-143:** vendor keys move from the laptop to Oxagen's vault or the customer's KMS.
-- **ADR-122:19:** an agent's own identity can hold a grant for an external tool, so the toolbelt works without a person on the call.
-
-It keeps ADR-078 §4. There is still one tool builder, and it is the server's.
-
-## Build order
-
-1. **The ADR** above, and the retention default for bodies the gateway carries.
-2. **Agent identity and tokens.** An agent principal per enrolled agent, grants for external tools, run tokens minted by the gateway and refreshed for the life of the run, and a kill checked on every call.
-3. **The model gateway, Oxagen-hosted.** Port the proxy's routes, metering, budgets, allowlist, and interrupt. Add the per-organization key vault. Enrollment points each harness's base URL at the gateway and removes the local key.
-4. **The MCP gateway.** The toolbelt endpoint per server, OAuth and credential custody, per-tool rules, approval, metering, and billing. Enrollment imports the harness's servers and writes the gateway's entries.
-5. **Pinning** for Claude Code, Codex, and Cursor.
-6. **Delivery for the rest:** skills sync, the agent-file generator, per-prompt steering, and memory import and recall.
-7. **Agent messages and triggers.** `send_agent_message`, `list_agent_messages`, and `start_agent_run` on the gateway, delivery through the model request or the hook, and work orders routed to the target agent's own runtime.
-8. **The customer-hosted gateway.** Packaging, the outbound control channel, and the customer's KMS.
-9. **The laptop relay** for stdio servers that must stay on the machine.
+1. Keys and run tokens, and the cloud gateway's model entry point with metering, budgets, and operator commands. The local gateway forwards to it.
+2. The live run view and the work record, with pull request and CI changes arriving by webhook.
+3. Send To: work orders that launch a harness on an enrolled machine or a CI runner.
+4. The signed record and the SOC 2 evidence export.
+5. The MCP entry point and toolbelt, enrollment's import, and pinning.
+6. The sensitive-data screen, once its detection design is chosen.
+7. Skills and memories as context record kinds, and their delivery.
+8. Verification of done, spend by outcome, and waste reason codes.
+9. Agent messages and triggers, HTTP egress, and the customer-hosted cloud gateway.
 
 ## Definition of done
 
-- A Claude Code, Codex, or Cursor run on an enrolled host makes every model call and every toolbelt call through the gateway. Its record says so, and its tier is `gateway`.
+- An enrolled Claude Code, Codex, or Stella run makes every model call through the local gateway and then the cloud gateway, and its record says so.
 - No vendor key or MCP credential is on the enrolled machine.
-- Killing a run aborts its model call in flight and refuses its next one, whatever its token's expiry.
-- A run that lasts several days keeps working across token refreshes, and through a control plane outage.
-- A budget refuses the next call once the run's observed spend reaches it.
-- Skills, agent files, and context records published in Oxagen reach each harness through a pull request to the repository.
-- A Claude Code run on a laptop sends a question to a Codex run in CI, and the Codex run's record shows the model request that carried it.
-- An agent with the grant starts a run of another agent on another runtime, and the parent receives the child's outcome as a message.
-- A customer-hosted gateway serves the same run with keys only in the customer's KMS, and no prompt body reaches Oxagen.
+- A request with a planted secret is rejected, or reaches the provider with the secret stripped, according to the workspace's setting.
+- An operator steers, pauses, resumes, interrupts, and cancels a live run, and a bulk command reaches every selected agent's live runs, each with a record entry.
+- An operator opens a live run and sees spend so far, tool calls by name, the diff, the pull request, and CI status, updating as the run goes.
+- Each run records its repository, branch, directory, files changed, pull request, CI status, and related issues.
+- Send To on selected work items creates a work order and starts the chosen harness on the chosen runtime, and the run carries the work order from its first call.
+- A run that lasts several days keeps working across token refreshes and through a control plane outage.
