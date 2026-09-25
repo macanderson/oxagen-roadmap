@@ -986,7 +986,8 @@ for (const theme of ["light", "dark"]) {
   for (const row of ["Store", "In regulated mode", "Compiled from", "Who reads it", "What it writes"]) {
     ok(new RegExp(row).test(where), "policy: the storage panel states " + row);
   }
-  ok(/not a Steering record/.test(where), "policy: a version is distinguished from a Steering record");
+  // Why a version is not a Steering record is component help (mockups/help/tools-policy.md), not page copy.
+  ok(/Store\s+oxagen/.test(where), "policy: the storage panel names the store");
   ok(/\.oxagen\/policy\//.test(where), "policy: regulated mode names the file");
   ok(/policy\.decision/.test(where), "policy: the frame it writes is named");
 

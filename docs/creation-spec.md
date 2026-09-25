@@ -74,7 +74,7 @@ did. Oxagen gives the first one where it can, because an imported tool arrives w
 publisher and a credential story, and a tool you write arrives with none of those until you write
 them too.
 
-1. **Describe** — the capability, not the implementation.
+1. **Describe** — the capability, not the implementation. The step's subtitle reads "Describe what the tool does."
 2. **Recommendation** — `mcpMatch()` scores the description against `MCP_CATALOG` on **whole words,
    never substrings**: "admin" contains "dm", and a matcher that does not know that will offer to
    import Slack for a feature-flag tool, which is worse than offering nothing because the operator
@@ -84,12 +84,14 @@ them too.
 3. **Import** — hands off to the existing importer with the server chosen. A server that moves money
    carries the warning that its financial tools are denied by construction until a named human owner
    with a finance role holds the connection and every agent that may call them holds a mandate.
-   Import grants nothing.
+   Import grants nothing. The step no longer says so on screen: the wizard's component help
+   (`mockups/help/tools.md`, Tool creation wizard) carries it.
 4. **Manifest** (the build path) — `.oxagen/tools/<name>.toml`, drafted from the description, in the
    source editor. The classification chips above it are **read out of the file** by `tomlParse`, not
    out of a form: break the file and the chips say so and the step will not advance. Declare the
    worst case, not the common case — the gate a call gets is computed from category, risk, side
-   effects, egress and financial class and nothing else.
+   effects, egress and financial class and nothing else. That advice is component help, and the
+   step shows only the file and its chips.
 5. **Code** — a handler in TypeScript, Python, Go or Rust, plus the input JSON Schema. All four do
    the same three things: read the grant off the call rather than a key out of the environment, pass
    the request id as the idempotency key so a retried call is one effect and not two, and declare
