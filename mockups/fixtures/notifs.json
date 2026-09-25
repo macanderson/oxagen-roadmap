@@ -37,7 +37,7 @@
   "unread": false,
   "t": "15:09",
   "title": "Run sealed · run_01K5YX2D6R",
-  "body": "a-intel.core.stella-ci sealed a-intel/platform#1887: 212 frames, 38,400 tokens, $2.41 gateway_observed. Cache hit rate 0.86."
+  "body": "a-intel.core.stella-ci sealed a-intel/platform#1887: 212 frames, 38,400 tokens, $2.41 observed by gateway. Cache hit rate 0.86."
  },
  {
   "kind": "repository.indexed",

@@ -301,7 +301,7 @@ function coachStrip(a){
   var t=agentTok(a); if(!t) return '';
   var items=coachItems("agents",a.key), sp=money(a.spend30)||0;
   return '<div class="grid g2">'+
-   '<div class="panel" style="margin:0;align-self:start"><div class="panel-h"><h3>30-day token use</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(t.total)+' tok · '+usd(fmt2(sp))+' · <span class="basis">'+(t.observed?'gateway_observed':'client_attested')+'</span></span></div>'+
+   '<div class="panel" style="margin:0;align-self:start"><div class="panel-h"><h3>30-day token use</h3><span class="mono dim" style="margin-left:auto;font-size:11px">'+tokn(t.total)+' tok · '+usd(fmt2(sp))+' · '+basisChip(t.observed?'gateway_observed':'client_attested')+'</span></div>'+
     '<div class="panel-b">'+tokBars(t,{tight:true})+'<div class="hr"></div><dl class="kv">'+
     '<dt>Cache hit rate</dt><dd>'+per(t.cacheRate)+' · '+tokn(t.cacheRead)+' of '+tokn(t.tokIn)+' input tokens served from cache</dd>'+
     '<dt>Per run</dt><dd>'+tokn(t.perRun)+' tok · '+(a.runs30?usd(fmt2(sp/a.runs30)):'—')+'</dd>'+
@@ -626,6 +626,16 @@ function usd0(a){var n=Math.round(Number(String(a).replace(/[$,\s]/g,"").replace
 function plural(n,one,many){var v=typeof n==="number"?n.toLocaleString("en-US"):n;return v+" "+(Number(String(n).replace(/,/g,""))===1?one:(many||one+"s"));}
 // A true minus sign for a negative percentage or number shown as text.
 function minus(x){return String(x).replace(/^-/,"−");}
+// Stored keys shown to people. The page shows the label and keeps the key in a tooltip.
+var KEY_LABEL={gateway_observed:"Observed by gateway",client_attested:"Reported by harness",moves_funds:"Moves funds",
+  commits_spend:"Commits spend",third_party:"Third party",hooks_removed:"Hooks removed",chain_break:"Chain break",
+  unknown_tool:"Unknown tool",initiating_principal:"Person who started the run","policy.decision":"Policy decision",
+  per_run_micros:"Per-run budget",cache_write_5m:"Cache write (5 min)",input_uncached:"Uncached input",
+  content_exact:"Exact content match",deny_tools:"Denied tools",above_micros:"Auto-approve limit","approval.above_micros":"Auto-approve limit"};
+function keyText(k){return KEY_LABEL[k]||String(k);}
+function keyLabel(k){return KEY_LABEL[k]?'<span title="'+h(k)+'">'+h(KEY_LABEL[k])+'</span>':h(k);}
+// The spend basis chip: "Observed by gateway" or "Reported by harness".
+function basisChip(k){return '<span class="basis" title="'+h(k)+'">'+h(keyText(k))+'</span>';}
 function tab(page,def){return S.tab[page]||def;}
 
 var LOGO='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 574.244 106.313" role="img" aria-label="oxagen"><g transform="translate(0,0) scale(2.842952)"><path d="M6.300 0.000L12.600 3.320L12.600 9.960L6.300 13.280L0.000 9.960L0.000 3.320ZM1.000 3.885L1.000 9.395L6.300 12.150L11.600 9.395L11.600 3.885L6.300 1.130Z M19.376 0.000L25.676 3.320L25.676 9.960L19.376 13.280L13.076 9.960L13.076 3.320ZM14.076 3.885L14.076 9.395L19.376 12.150L24.676 9.395L24.676 3.885L19.376 1.130Z M12.838 10.240L19.138 13.560L19.138 20.200L12.838 23.520L6.538 20.200L6.538 13.560ZM7.538 14.125L7.538 19.635L12.838 22.390L18.138 19.635L18.138 14.125L12.838 11.370Z M19.376 20.480L25.676 23.800L25.676 30.440L19.376 33.760L13.076 30.440L13.076 23.800ZM14.076 24.365L14.076 29.875L19.376 32.630L24.676 29.875L24.676 24.365L19.376 21.610Z" fill="currentColor"/><path d="M25.914 10.240L32.214 13.560L32.214 20.200L25.914 23.520L19.614 20.200L19.614 13.560Z M6.300 20.480L12.600 23.800L12.600 30.440L6.300 33.760L0.000 30.440L0.000 23.800Z" fill="#D4AF37"/></g><g transform="translate(120.376,13.067)"><path d="M33.9083 68.758Q24.1657 68.758 16.4786 64.7737Q8.79142 60.7894 4.39571 53.2965Q0 45.8035 0 35.3862V33.3718Q0 22.9544 4.39571 15.4615Q8.79142 7.96854 16.4786 3.98427Q24.1657 0 33.9083 0Q43.6509 0 51.3381 3.98427Q59.0252 7.96854 63.4209 15.4615Q67.8166 22.9544 67.8166 33.3718V35.3862Q67.8166 45.8035 63.4209 53.2965Q59.0252 60.7894 51.3381 64.7737Q43.6509 68.758 33.9083 68.758ZM33.9083 55.3486Q42.1895 55.3486 47.4689 50.0198Q52.7484 44.691 52.7484 35.0142V33.7437Q52.7484 24.067 47.5233 18.7382Q42.2981 13.4094 33.9083 13.4094Q25.6502 13.4094 20.3592 18.7382Q15.0683 24.067 15.0683 33.7437V35.0142Q15.0683 44.691 20.3592 50.0198Q25.6502 55.3486 33.9083 55.3486Z M176.569 68.758Q169.637 68.758 164.119 66.3453Q158.601 63.9327 155.387 59.2935Q152.173 54.6542 152.173 48.0088Q152.173 41.3403 155.387 36.8558Q158.601 32.3712 164.27 30.1017Q169.94 27.8323 177.174 27.8323H196.047V23.8925Q196.047 18.7316 192.874 15.5274Q189.701 12.3232 182.99 12.3232Q176.411 12.3232 173.049 15.3842Q169.686 18.4452 168.627 23.3593L154.691 18.7315Q156.27 13.6133 159.748 9.39702Q163.225 5.18071 169.049 2.59035Q174.874 0 183.208 0Q195.972 0 203.326 6.42816Q210.681 12.8563 210.681 24.9392V50.4707Q210.681 54.4204 214.368 54.4204H219.795V66.9148H209.197Q204.464 66.9148 201.442 64.5334Q198.42 62.1521 198.42 58.1563V57.8864H196.126Q195.392 59.6967 193.399 62.2985Q191.406 64.9004 187.388 66.8292Q183.369 68.758 176.569 68.758ZM179.05 56.4348Q186.581 56.4348 191.314 52.1592Q196.047 47.8837 196.047 40.6031V39.2405H178.175Q173.175 39.2405 170.208 41.3881Q167.241 43.5358 167.241 47.5513Q167.241 51.5668 170.34 54.0008Q173.439 56.4348 179.05 56.4348Z M227.767 34.6423V32.6279Q227.767 22.3817 231.86 15.0863Q235.953 7.79081 242.768 3.8954Q249.582 0 257.706 0Q266.935 0 271.762 3.33256Q276.589 6.66512 278.81 10.4107H281.042V1.8432H295.801V79.33Q295.801 85.6989 292.104 89.4725Q288.408 93.2462 282.079 93.2462H238.369V80.0541H277.023Q280.779 80.0541 280.779 76.1043V57.2775H278.547Q277.161 59.5683 274.665 61.8904Q272.168 64.2125 268.057 65.7414Q263.946 67.2702 257.706 67.2702Q249.582 67.2702 242.756 63.3748Q235.93 59.4794 231.848 52.1724Q227.767 44.8655 227.767 34.6423ZM261.938 54.0781Q270.151 54.0781 275.573 48.8612Q280.996 43.6443 280.996 34.2704V32.9999Q280.996 23.4943 275.627 18.3432Q270.259 13.1921 261.938 13.1921Q253.749 13.1921 248.315 18.3432Q242.881 23.4943 242.881 32.9999V34.2704Q242.881 43.6443 248.315 48.8612Q253.749 54.0781 261.938 54.0781Z M344.764 68.758Q334.998 68.758 327.583 64.6108Q320.167 60.4636 316.031 52.9048Q311.896 45.346 311.896 35.1689V33.589Q311.896 23.3889 315.977 15.8416Q320.059 8.2944 327.397 4.1472Q334.735 0 344.385 0Q353.881 0 360.956 4.1867Q368.031 8.37341 371.981 15.8515Q375.931 23.3297 375.931 33.2895V38.6974H327.181Q327.468 46.3334 332.587 50.9496Q337.707 55.5658 345.198 55.5658Q352.522 55.5658 356.101 52.3534Q359.681 49.141 361.553 45.0629L373.985 51.4813Q372.119 55.0656 368.63 59.1042Q365.141 63.1428 359.394 65.9504Q353.648 68.758 344.764 68.758ZM327.313 27.2892H360.622Q360.095 20.7986 355.7 16.9954Q351.304 13.1921 344.277 13.1921Q337.055 13.1921 332.691 16.9954Q328.327 20.7986 327.313 27.2892Z M391.548 66.9148V1.8432H406.353V10.9769H408.585Q410.303 7.25429 414.832 3.99908Q419.361 0.743866 428.435 0.743866Q435.956 0.743866 441.695 4.12911Q447.434 7.51435 450.651 13.5903Q453.868 19.6663 453.868 27.9442V66.9148H438.8V29.1226Q438.8 21.1969 434.891 17.3492Q430.983 13.5015 423.9 13.5015Q415.872 13.5015 411.244 18.8237Q406.617 24.146 406.617 33.9445V66.9148Z" fill="currentColor"/><path d="M73.9979 66.9148 98.2261 34.0696 74.3764 1.8432H91.9626L107.9 24.3499H110.131L126.068 1.8432H143.654L119.805 34.0696L144.033 66.9148H126.206L110.131 44.0065H107.9L91.8244 66.9148Z" fill="#D4AF37"/></g></svg>';
@@ -1740,7 +1750,7 @@ function pFleet(){
      than calling it "today", and read the basis off the runs instead of asserting one. */
   var spendShown=list.reduce(function(s,r){return s+parseFloat(r.cost);},0).toFixed(2);
   var bases=[]; list.forEach(function(r){if(r.basis&&bases.indexOf(r.basis)<0)bases.push(r.basis);});
-  var basisLabel=bases.length?bases.map(function(b){return '<span class="basis">'+h(b)+'</span>';}).join(' + '):'<span class="dim">no basis recorded</span>';
+  var basisLabel=bases.length?bases.map(function(b){return basisChip(b);}).join(' + '):'<span class="dim">no basis recorded</span>';
   /* Cache hit rate over the same runs, spend-weighted (§12.6), never a constant. */
   var cNum=0,cDen=0;
   list.forEach(function(r){ if(typeof r.cache==="number"){var c=parseFloat(r.cost)||0;cNum+=r.cache*c;cDen+=c;} });
@@ -4445,7 +4455,7 @@ function costTab(R){
     '<div class="hr"></div><dl class="kv">'+
     '<dt>Effective input price</dt><dd>$1.88 per million across all input classes</dd>'+
     '<dt>Cache write cost share</dt><dd>'+(m.cacheWrite?pct(m.cacheWrite,m.tokIn):'0.0% — nothing written this run')+'</dd>'+
-    '<dt>Basis</dt><dd><span class="basis">'+h(R.basis)+'</span>'+(R.basis==="gateway_observed"?' · counted by the proxy from the bytes that passed through it':' · the harness\u2019s own telemetry; absent classes are marked, never zero')+'</dd>'+
+    '<dt>Basis</dt><dd>'+basisChip(R.basis)+(R.basis==="gateway_observed"?' · counted by the proxy from the bytes that passed through it':' · the harness\u2019s own telemetry; absent classes are marked, never zero')+'</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(R.ratio)+' · '+s.adv+' of '+plural(R.steps,"step")+' advanced the task</dd></dl></div></div></div>';
 }
 
@@ -5105,7 +5115,7 @@ function aOverview(a,r){
     '<div class="panel-b" style="display:grid;gap:14px">'+
     '<div class="grid g2">'+
      '<div class="stat"><span class="k">Runs</span><span class="v">'+a.runs30.toLocaleString()+'</span><span class="s">'+h(a.lastUsed?'last at '+a.lastUsed:'none recorded')+'</span></div>'+
-     '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(n$(a.spend30)))+'</span><span class="s">'+((TIER_RANK[a.tier]||0)>=2?'gateway_observed':'client_attested')+'</span></div>'+
+     '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(n$(a.spend30)))+'</span><span class="s">'+basisChip((TIER_RANK[a.tier]||0)>=2?'gateway_observed':'client_attested')+'</span></div>'+
      '<div class="stat"><span class="k">Tokens</span><span class="v">'+tokn(tk.total)+'</span><span class="s">'+per(tk.cacheRate)+' cache read over input</span></div>'+
      '<div class="stat"><span class="k">Tamper incidents</span><span class="v"'+(tamperCount(a)?' style="color:var(--st-critical)"':'')+'>'+tamperCount(a)+'</span><span class="s">'+h(hl[2])+'</span></div>'+
     '</div>'+
@@ -5185,7 +5195,7 @@ function aRuntime(a,r){
     '<p class="muted" style="margin:2px 0 0;font-size:12px">The tier is computed per run from what was actually routed.</p></div>'+
     '<button class="btn sm" style="margin-left:auto" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/runtimes\')">All runtimes</button></div>'+
     '<div class="panel-b">'+tierLadder(a.tier)+'<dl class="kv" style="margin-top:14px">'+
-    '<dt>Model calls</dt><dd>'+(TIER_RANK[a.tier]>=2?'routed through the loopback proxy on the host. Tokens are counted from the bytes that pass through it and the run token is the only credential the call carries. Spend is <span class="basis">gateway_observed</span>.':'not routed through oxagen. The harness calls its provider with its own key and reports usage. Spend is <span class="basis">client_attested</span>.')+'</dd>'+
+    '<dt>Model calls</dt><dd>'+(TIER_RANK[a.tier]>=2?'routed through the loopback proxy on the host. Tokens are counted from the bytes that pass through it and the run token is the only credential the call carries. Spend is '+basisChip("gateway_observed")+'.':'not routed through oxagen. The harness calls its provider with its own key and reports usage. Spend is '+basisChip("client_attested")+'.')+'</dd>'+
     '<dt>Tool calls over MCP</dt><dd>'+(TIER_RANK[a.tier]>=2?'every provider the harness reaches over MCP is reached through the gateway and decided by oxagen.':a.tier==="harness"?'the providers registered with oxagen are routed through oxagen, which decides each call. Any other MCP tool the harness holds is not.':'recorded only')+'</dd>'+
     '<dt>Harness-native tools</dt><dd>'+(a.tier==="contained"?'the four blocking hook events can refuse, and the sandbox refuses a write to the settings file, the hook entries or the hook binary':TIER_RANK[a.tier]>=1?'the four blocking hook events can refuse: client-attested and fail-open':'recorded only')+'</dd>'+
     '<dt>Budgets</dt><dd>'+(TIER_RANK[a.tier]>=2?'enforced before the call: a run budget by the proxy, a shared budget by a reservation on the control plane':'a recorded number and a notice in steering, never a stop')+'</dd>'+
@@ -5540,7 +5550,7 @@ function actAccounting(a){
     '<button class="btn sm" style="margin-left:auto" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/spend\')">Open on Spend</button></div>'+
     '<div class="panel-b" style="display:grid;gap:14px"><dl class="kv">'+
     '<dt>Runs</dt><dd><span class="num">'+a.runs30.toLocaleString()+'</span></dd>'+
-    '<dt>Spend</dt><dd>'+iamMoney(a.spend30,"model calls as the harness reported them + priced tool calls, client_attested")+'</dd>'+
+    '<dt>Spend</dt><dd>'+iamMoney(a.spend30,"model calls as the harness reported them + priced tool calls, reported by harness")+'</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(a.ratio)+'<span class="sub">the share of spend on turns that produced a change</span></dd>'+
     '<dt>Tokens</dt><dd><span class="num">'+tokn(agentTok(a).total)+'</span> · '+per(agentTok(a).cacheRate)+' cached</dd>'+
     '</dl>'+
@@ -8369,7 +8379,7 @@ function pSpend(){
    .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="spendGo(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(spendMonthTotal()))+'</span><span class="s"><span class="basis">gateway_observed</span> + <span class="basis">client_attested</span> · USD</span></div>'+
+   '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(spendMonthTotal()))+'</span><span class="s">'+basisChip("gateway_observed")+' + '+basisChip("client_attested")+' · USD</span></div>'+
    '<div class="stat"><span class="k">Tokens</span><span class="v">'+tokn(WT.total)+'</span><span class="s">'+per(WT.cacheRate)+' served from cache</span></div>'+
    '<div class="stat"><span class="k">Observed by the gateway</span><span class="v">'+per(WT.observed)+'</span><span class="s">of tokens counted by the proxy</span></div>'+
    '<div class="stat"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s">'+per(SPEND.wasteShare)+' of spend</span></div></div>';
@@ -8433,7 +8443,7 @@ function pSpend(){
      spendModelRows().map(function(m){var k=spendKeyOf(m.m,m.tier);
       return '<tr'+(m.route?' data-route="'+h(m.tier)+'"':'')+'><td class="tkey" style="font-size:12px">'+h(m.m)+(m.route?'<div class="dim" style="font-size:11px">oxagen’s own work · '+h(m.provider)+'</div>':'')+'</td><td style="font-size:12px">'+(k?'<span class="mono">'+h(k.id)+'</span><div class="dim" style="font-size:11px">'+h(k.src.split(" · ")[0])+'</div>':'<span class="dim">—</span>')+'</td><td class="num">'+(m.route?orgUseCount(m):m.calls.toLocaleString())+'</td>'+
        '<td class="num">'+usd(m.spend)+'</td><td class="num">'+(m.cache==null?'<span class="dim">—</span>':per(m.cache))+'</td>'+
-       '<td class="mono dim" style="font-size:11px">client_attested</td></tr>';}).join("")+
+       '<td class="dim" style="font-size:11px">'+basisChip("client_attested")+'</td></tr>';}).join("")+
      '<tr><td colspan="3"><b>Total</b> <span class="dim" style="font-size:11.5px">· the month’s spend</span></td><td class="num" id="spendModelTotal"><b>'+usd(fmt2(spendMonthTotal()))+'</b></td><td></td><td></td></tr>'+
      '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">The oxagen line and the light, embed and rerank rows are oxagen’s own work, routed by tier and billed back at vendor cost plus a published markup; they count toward the organization’s funding cap and are set under <a href="#/'+ORG.slug+'">Organization → Model routes</a>.</p></div></div>';
   } else if(t==="tool"){
@@ -8490,14 +8500,14 @@ function spendTokens(WT){
     '<div class="tw"><table><thead><tr><th>Harness</th><th class="num">Agents</th><th class="num">Tokens</th><th class="num">Cache hit</th><th class="num">Spend</th><th>Basis</th></tr></thead><tbody>'+
     hs.map(function(x){var obs=tokShare(x.observed,x.total);
       return '<tr><td><b>'+h(x.label)+'</b></td><td class="num">'+x.agents+'</td><td class="num">'+tokn(x.total)+'</td><td class="num">'+per(tokShare(x.cacheRead,x.tokIn))+'</td><td class="num">'+fmt$(x.spend)+'</td>'+
-       '<td>'+(obs>=0.999?'<span class="basis">gateway_observed</span>':obs<=0.001?'<span class="basis">client_attested</span>':'<span class="basis">gateway_observed</span> '+per(obs)+' · <span class="basis">client_attested</span> '+per(1-obs))+'</td></tr>';}).join("")+
+       '<td>'+(obs>=0.999?basisChip("gateway_observed") :obs<=0.001?basisChip("client_attested") :basisChip("gateway_observed")+' '+per(obs)+' · '+basisChip("client_attested")+' '+per(1-obs))+'</td></tr>';}).join("")+
     '</tbody></table></div><div class="panel-b"><div class="note">Observed means the gateway\u2019s proxy counted the tokens from the bytes that passed through it. Self-reported means the harness\u2019s own telemetry said so; a class it does not report is marked absent, never zero, and a cache hit rate over a mixed fleet is never computed from missing data as if it were zero.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>By agent</h3></div>'+
     '<div class="tw"><table><thead><tr><th>Agent</th><th class="num">Runs</th><th class="num">Tokens</th><th class="num">Per run</th><th class="num">Cache hit</th><th class="num">Tool defs</th><th class="num">Context</th><th class="num">Tool results</th><th class="num">Reasoning</th><th>Basis</th></tr></thead><tbody>'+
     AGENTS.filter(function(a){return a.ws===w.slug;}).sort(function(a,b){return agentTok(b).total-agentTok(a).total;}).slice(0,12).map(function(a){var t=agentTok(a);
       return '<tr class="click" onclick="go(\'#/'+ORG.slug+'/'+a.ws+'/agents/'+a.key.split(".").pop()+'\')"><td>'+agentCard(a,{key:a.key})+'</td><td class="num">'+(a.runs30||0).toLocaleString()+'</td><td class="num">'+tokn(t.total)+'</td><td class="num">'+tokn(t.perRun)+'</td><td class="num">'+per(t.cacheRate)+'</td>'+
        '<td class="num'+(t.shares.tools>0.16?'" style="color:var(--st-approval)':'')+'">'+per(t.shares.tools)+'</td><td class="num">'+per(t.shares.ctx)+'</td><td class="num'+(t.shares.results>0.3?'" style="color:var(--st-approval)':'')+'">'+per(t.shares.results)+'</td><td class="num">'+per(tokShare(t.reasoning,t.tokOut))+'</td>'+
-       '<td class="mono dim" style="font-size:11px">'+(t.observed?'gateway_observed':'client_attested')+'</td></tr>';}).join("")+
+       '<td class="dim" style="font-size:11px">'+basisChip(t.observed?'gateway_observed':'client_attested')+'</td></tr>';}).join("")+
     '</tbody></table></div></div>';
 }
 /* ---------- Coaching: the agents and operators with something to change ----------
@@ -8627,7 +8637,7 @@ function coachDetail(kind,s){
    '<div class="stat"><span class="k">Rows open</span><span class="v">'+s.items.length+'</span><span class="s">'+coachSevChips(s.items)+'</span></div>'+
    '<div class="stat"><span class="k">At stake</span><span class="v">'+fmt$(s.usd)+'</span><span class="s">a month, across every row below</span></div>'+
    '<div class="stat"><span class="k">Tokens</span><span class="v">'+(t?tokn(t.total):"\u2014")+'</span><span class="s">'+(t?per(t.cacheRate)+" served from cache":"")+'</span></div>'+
-   '<div class="stat"><span class="k">Basis</span><span class="v" style="font-size:15px"><span class="basis">'+(t&&t.observed?"gateway_observed":"client_attested")+'</span></span>'+
+   '<div class="stat"><span class="k">Basis</span><span class="v" style="font-size:15px">'+basisChip(t&&t.observed?"gateway_observed":"client_attested")+'</span>'+
    '<span class="s">'+(t&&t.observed?"counted by the proxy":"reported by the harness")+'</span></div></div>';
   var cards='<div style="display:grid;gap:10px">'+s.items.map(function(c){return coachCard(c,s.label,{kind:kind,id:s.id});}).join("")+'</div>';
   var back=hid.length?'<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Dismissed</h3>'+
@@ -8760,7 +8770,7 @@ function spendDrill(dr){
 
   var T=[], share=per(spend/monthN), wasted=d.wasted||0, OT=kind==="operator"?operatorTok(E.id):null, AT=kind==="agent"?agentTok(E.id):null;
   if(kind==="operator"){
-    T=[["Spend · "+h(SPEND.month), fmt$(spend), share+' of workspace · '+(OT.observed>=0.999?'<span class="basis">gateway_observed</span>':OT.observed<=0.001?'<span class="basis">client_attested</span>':'<span class="basis">gateway_observed</span> '+per(OT.observed)+' · <span class="basis">client_attested</span> '+per(1-OT.observed))],
+    T=[["Spend · "+h(SPEND.month), fmt$(spend), share+' of workspace · '+(OT.observed>=0.999?basisChip("gateway_observed") :OT.observed<=0.001?basisChip("client_attested") :basisChip("gateway_observed")+' '+per(OT.observed)+' · '+basisChip("client_attested")+' '+per(1-OT.observed))],
        ["Tokens", tokn(OT.total), tokn(OT.tokIn)+' in · '+tokn(OT.tokOut)+' out'],
        ["Cache hit rate", per(OT.cacheRate), tokn(OT.cacheRead)+' input tokens served from cache'],
        ["Observed", per(OT.observed), 'of tokens counted by the gateway · the rest self-reported'],
@@ -8771,7 +8781,7 @@ function spendDrill(dr){
        ["Budget position", per(r.used), 'of '+usd(r.budget)+' monthly', r.used>0.8?"var(--st-critical)":null],
        ["Trend", h(d.trend||"—"), 'spend, same period']];
   } else if(kind==="agent"){
-    T=[["Spend · "+h(SPEND.month), fmt$(spend), share+' of workspace · <span class="basis">'+(AT.observed?'gateway_observed':'client_attested')+'</span>'],
+    T=[["Spend · "+h(SPEND.month), fmt$(spend), share+' of workspace · '+basisChip(AT.observed?'gateway_observed':'client_attested')],
        ["Tokens", tokn(AT.total), tokn(AT.perRun)+' per run · '+tokn(AT.perCall)+' per call'],
        ["Cache hit rate", per(AT.cacheRate), tokn(AT.cacheRead)+' input tokens served from cache'],
        ["Tool definitions", per(AT.shares.tools), 'of every request · '+plural(AT.neverCalled,"tool")+' never called', AT.shares.tools>0.16?"var(--st-approval)":null],
@@ -8783,7 +8793,7 @@ function spendDrill(dr){
     if(d.budget) T.push(["Budget · "+h(d.budget.period), usd(d.budget.used), 'of '+usd(d.budget.limit)+' · '+h(d.budget.mode)+' · '+per(n$(d.budget.used)/n$(d.budget.limit))]);
   } else {
     var total=SPEND.byTool.reduce(function(s,x){return s+x.spend;},0), hot=r.perCall>=1.5||r.perRun>=10;
-    T=[["Spend · "+h(SPEND.month), fmt$(spend), per(spend/total)+' of tool-attributed spend · <span class="basis">client_attested</span>'],
+    T=[["Spend · "+h(SPEND.month), fmt$(spend), per(spend/total)+' of tool-attributed spend · '+basisChip("client_attested")],
        ["Calls", r.calls.toLocaleString(), plural(r.runs.toLocaleString(),"run")+' used it'],
        ["Average per call", fmt$(r.perCall), 'the calling turn plus the turn that read the result'],
        ["Average per run", fmt$(r.perRun), hot?'high for the toolbelt':'spend ÷ runs that used it', hot?"var(--st-approval)":null],
@@ -8879,7 +8889,7 @@ function spendWaste(){
   var byRun={}; RUNS.forEach(function(r){byRun[r.id]=r;});
   var mx=Math.max.apply(null,SPEND.wasteByCause.map(function(c){return parseFloat(c.spend.replace(/,/g,""));}));
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s"><span class="basis">client_attested</span> · USD</span></div>'+
+   '<div class="stat"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s">'+basisChip("client_attested")+' · USD</span></div>'+
    '<div class="stat"><span class="k">Share of spend</span><span class="v">'+per(SPEND.wasteShare)+'</span><span class="s">of '+usd(fmt2(spendMonthTotal()))+' this month</span></div>'+
    '<div class="stat"><span class="k">Runs with waste</span><span class="v">'+SPEND.wasteRuns+'</span><span class="s">of '+SPEND.runs.toLocaleString()+' sealed runs</span></div>'+
    '<div class="stat"><span class="k">Largest cause</span><span class="v" style="font-size:17px;padding-top:4px">'+h(SPEND.wasteByCause[0].c)+'</span><span class="s">'+usd(SPEND.wasteByCause[0].spend)+' · '+plural(SPEND.wasteByCause[0].runs,"run")+'</span></div></div>';
@@ -9113,7 +9123,7 @@ function orgRoutesPanel(){
      '<td class="mono dim" style="font-size:11px">'+(r.fallback?h(r.fallback):'—')+'</td>'+
      '<td class="num">'+orgUseCount(u)+'</td><td class="num">'+usd(fmt2(u.cost))+'</td>'+
      '<td class="rowacts"><button class="btn sm" onclick="openDialog(\'editroute\','+i+')">Edit</button></td></tr>';}).join("")+
-   '<tr><td colspan="5"><b>Total</b> <span class="dim" style="font-size:11.5px">· basis client_attested · '+h(ORG.currency)+'</span></td><td class="num" id="orgRoutesTotal"><b>'+usd(fmt2(total))+'</b></td><td></td></tr>'+
+   '<tr><td colspan="5"><b>Total</b> <span class="dim" style="font-size:11.5px">· reported by harness · '+h(ORG.currency)+'</span></td><td class="num" id="orgRoutesTotal"><b>'+usd(fmt2(total))+'</b></td><td></td></tr>'+
    '</tbody></table></div><div class="panel-b">'+
    '<div class="note">Tiers point at rolling aliases so “latest” stays current without a deploy. Every <span class="mono">model.response</span> frame records the concrete model id the provider returned, and the cost record prices <i>that</i> id — so a replay names the exact model and a price is never looked up by alias. The complex row is the Oxagenant line on Spend.</div></div></div>';
 }
@@ -11131,7 +11141,7 @@ DLG_EXT.deliveryreport=function(){
      '<div class="stat"><span class="k">Undelivered</span><span class="v" style="color:var(--st-denied)">'+n.undelivered+'</span><span class="s">expired, canceled or failed</span></div></div>'+
     '<div class="note" style="margin-bottom:12px"><span class="mono dim" style="font-size:11px">what was sent · '+h(rep.dig)+' · '+rep.tokens+' tok</span><br>“'+h(rep.text)+'”</div>'+
     '<div class="tw"><table><thead><tr><th>Agent and run</th><th>Status</th><th>Mode used</th><th class="num">Time</th><th>Why</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
-    '<p class="dim" style="font-size:11.5px;margin:10px 0 0">'+(runsHit?tok+' tokens injected across '+runsHit+' run'+(runsHit===1?'':'s')+' · client_attested':'Nothing injected yet; queued rows update here as each boundary is reached.')+'</p>',
+    '<p class="dim" style="font-size:11.5px;margin:10px 0 0">'+(runsHit?tok+' tokens injected across '+runsHit+' run'+(runsHit===1?'':'s')+' · reported by harness':'Nothing injected yet; queued rows update here as each boundary is reached.')+'</p>',
    f:'<span class="grow"></span><button class="btn" onclick="closeDialog()">Close</button>'+
     (first?'<button class="btn primary" onclick="closeDialog();S.tab.run=\'player\';S.frame='+first.frame+';go(\'#/'+ORG.slug+'/'+h(rep.ws)+'/runs/'+h(first.run)+'\')">Open the run that received it</button>':'')};
 };
@@ -11846,7 +11856,7 @@ function rolesBody(){
     return '<tr class="click" onclick="roleOpen(\''+r.id+'\')"><td><span class="tkey">'+h(r.id)+'</span><div class="dim" style="font-size:11.5px">'+h(r.desc)+'</div></td>'+
      '<td>'+roleKindBadge(r.kind)+'</td><td class="mono" style="font-size:11.5px">'+h(r.scope)+'</td>'+
      '<td style="max-width:30ch">'+permChips(r.perms)+'</td>'+
-     '<td style="font-size:12px;white-space:nowrap">'+(n.total?[n.people?plural(n.people,"person","people")+'':'',n.agents?n.agents+' agent'+(n.agents>1?'s':''):'',n.svc?n.svc+' key'+(n.svc>1?'s':''):''].filter(Boolean).join(' · '):'<span class="dim">nobody</span>')+'</td>'+
+     '<td style="font-size:12px;white-space:nowrap">'+(n.total?[n.people?plural(n.people,"person","people") :'',n.agents?n.agents+' agent'+(n.agents>1?'s':''):'',n.svc?n.svc+' key'+(n.svc>1?'s':''):''].filter(Boolean).join(' · '):'<span class="dim">nobody</span>')+'</td>'+
      '<td style="font-size:11.5px">'+(locked?'<span class="b b-q">built-in</span>':'<span class="dim">'+h(r.by)+' · '+h(r.at)+'</span>')+'</td>'+
      '<td class="rowacts" onclick="event.stopPropagation()"><button class="btn sm" onclick="roleOpen(\''+r.id+'\')">'+(locked?'View':'Edit')+'</button>'+
       '<button class="btn sm" onclick="roleDup(\''+r.id+'\')">Duplicate</button>'+
@@ -15722,7 +15732,7 @@ document.addEventListener("click",function(e){
   for(var vi=0;vi<11;vi++){var f=pick(FIRST).toLowerCase(),s=ri(0,6);INVITES.push({email:f+"."+pick(LAST).toLowerCase().replace(/[^a-z]/g,"")+"@a-intel.example",role:pick(["workspace.member · "+pick(allWs),"org.auditor","workspace.owner · "+pick(allWs)]),by:pick(humans),sent:dstr(TODAY-s*86400000),expires:dstr(TODAY+(7-s)*86400000)});}
   if(parked.length)NOTIFS.push({kind:"approval.requested",tone:"approval",unread:true,t:"15:41",title:"Approval waiting · kubernetes__delete_pod@2",body:"a-intel.infra.k8s-doctor on "+parked[0].id+" wants to delete a crash-looping pod in prod-east. Rule role_grant rg_0121. Expires 15:51."});
   NOTIFS.push(
-    {kind:"run.sealed",tone:"allowed",unread:false,t:"15:30",title:"Run sealed · "+genRuns[3].id,body:genRuns[3].task+" sealed: "+plural(genRuns[3].frames,"frame")+", "+usd(genRuns[3].cost)+" "+genRuns[3].basis+"."},
+    {kind:"run.sealed",tone:"allowed",unread:false,t:"15:30",title:"Run sealed · "+genRuns[3].id,body:genRuns[3].task+" sealed: "+plural(genRuns[3].frames,"frame")+", "+usd(genRuns[3].cost)+" "+keyText(genRuns[3].basis).toLowerCase()+"."},
     {kind:"budget.breached",tone:"failed",unread:false,t:"14:52",title:"Hard budget reached · "+fin[0].key,body:"$1.50 per run reached at turn 5. The run was paused at the next hook boundary."},
     {kind:"repository.indexed",tone:"allowed",unread:false,t:"14:20",title:"Code graph current · a-intel/data-platform",body:"Push "+hex(7)+" to main indexed in 58 s. 41 files re-parsed, 190 symbols versioned."},
     {kind:"context_pr.opened",tone:"gold",unread:false,t:"11:48",title:"Context PR opened · a-intel/support-console#188",body:"The promoter proposed a rule on lineage ctx.support.reply-in-customers-language, supported by 212 tickets."});
