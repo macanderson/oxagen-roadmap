@@ -114,6 +114,89 @@
   ],
   "tasks": [
     {
+      "id": "tsk_01K5RS482Q",
+      "kind": "github",
+      "num": "a-intel/platform#482",
+      "repo": "a-intel/platform",
+      "subject": "Cut 4.11.0 release notes",
+      "body": "The 4.11 milestone closed on 2026-09-09. Draft the 4.11.0 notes from the pull requests merged since v4.10.3 and put a draft release up for review. A person publishes the release.",
+      "labels": ["p1", "documentation"],
+      "owner": "gh:mbell-ai",
+      "createdBy": "gh:mbell-ai",
+      "createdAt": "2026-09-10 16:40",
+      "updatedBy": "gh:mbell-ai",
+      "updatedAt": "2026-09-11 09:12",
+      "closedAt": null,
+      "status": "in-review",
+      "resolution": null,
+      "ready": "sent",
+      "certifiedBy": "marcus",
+      "certifiedAt": "2026-09-11 09:12",
+      "digest": "sha256:c3a17e05b9d24f81",
+      "wo": "wo_01K5RS7M4N",
+      "dod": [
+        {
+          "t": "Every pull request merged into a-intel/platform since v4.10.3 appears once, linked",
+          "k": "check",
+          "tag": "docs",
+          "src": "issue"
+        },
+        {
+          "t": "Breaking changes come before Fixes, each with its migration note",
+          "k": "check",
+          "tag": "docs",
+          "src": "assistant"
+        },
+        {
+          "t": "The draft is on a release branch and main is untouched",
+          "k": "check",
+          "tag": "code",
+          "src": "operator"
+        },
+        {
+          "t": "The GitHub release is a draft, and a person publishes it",
+          "k": "review",
+          "tag": "review",
+          "src": "operator"
+        }
+      ],
+      "notes": ["The issue names the range and the output. The house format is ctx.release.notes-format."]
+    },
+    {
+      "id": "tsk_01K6SH7C2F",
+      "kind": "oxagen",
+      "num": "WI-14",
+      "repo": "a-intel/platform",
+      "subject": "Narrow triage's toolbelt to the 18 tools it calls",
+      "body": "Picked up from finding fnd_01K5RT2A. triage's belt carries 52 tools, and 34 of them were not called once in 1,340 runs. Its tool definitions average 9,140 tokens per model call, 3.9 times the workspace median.",
+      "labels": ["p2", "improvement"],
+      "owner": "lin:marcus",
+      "createdBy": "lin:marcus",
+      "createdAt": "2026-09-11 08:52",
+      "updatedBy": "lin:marcus",
+      "updatedAt": "2026-09-11 08:52",
+      "closedAt": null,
+      "status": "open",
+      "resolution": null,
+      "ready": "draft",
+      "finding": "fnd_01K5RT2A",
+      "dod": [
+        {
+          "t": "triage's belt lists the 18 tools it called in the last 30 days, and nothing else",
+          "k": "check",
+          "tag": "code",
+          "src": "assistant"
+        },
+        {
+          "t": "Over the next 7 days, triage's tool definitions average under 3,000 tokens per model call",
+          "k": "check",
+          "tag": "test",
+          "src": "assistant"
+        }
+      ],
+      "notes": ["Written in Oxagen from a finding. There is no provider issue to close."]
+    },
+    {
       "id": "tsk_01K6S2M4QF", "kind": "github", "num": "a-intel/platform#612", "repo": "a-intel/platform",
       "subject": "Rate limiter returns 500 instead of 429 when the key bucket is empty",
       "body": "POST /v1/keys returns 500 once a key's bucket is empty. The limiter throws RateLimitExhausted and nothing maps it, so the client sees an internal error and retries at once.\n\nSteps: create a key with a 5 per minute limit, send 6 requests in 10 seconds. The sixth returns 500.\n\nExpected: 429 with Retry-After.",
@@ -290,6 +373,53 @@
     }
   ],
   "workOrders": [
+    {
+      "id": "wo_01K5RS7M4N",
+      "ws": "core-platform",
+      "kind": "dispatched",
+      "title": "Cut 4.11.0 release notes",
+      "tasks": ["tsk_01K5RS482Q"],
+      "target": {
+        "kind": "agent",
+        "id": "a-intel.core.release-manager"
+      },
+      "by": "marcus",
+      "sent": "2026-09-11 09:13",
+      "status": "in progress",
+      "stage": 1,
+      "returns": 0,
+      "repos": ["a-intel/platform"],
+      "cap": "10.00",
+      "digest": "sha256:5d0e81c27a4b9f36",
+      "prompt": "Cut the 4.11.0 release notes for a-intel/platform.\n\nDraft from every pull request merged since the v4.10.3 tag, group them under Features, Fixes and Breaking, and write the draft to release/4.11.0-notes.md on a release branch. Then create the GitHub release v4.11.0 as a draft so nothing publishes until it is approved. Follow ctx.release.notes-format. Do not touch main.",
+      "runs": [
+        {
+          "stage": 1,
+          "run": "run_01K5RS7M2E8FJ3QW",
+          "state": "live",
+          "pr": "",
+          "note": ""
+        }
+      ],
+      "claims": [
+        {
+          "by": "a-intel.core.release-manager",
+          "run": "run_01K5RS7M2E8FJ3QW",
+          "ev": "release/4.11.0-notes.md lists 27 entries; compare v4.10.3...main counts 27"
+        },
+        {
+          "by": "a-intel.core.release-manager",
+          "run": "run_01K5RS7M2E8FJ3QW",
+          "ev": "release:lint ok, 3 sections, Breaking before Fixes"
+        },
+        {
+          "by": "a-intel.core.release-manager",
+          "run": "run_01K5RS7M2E8FJ3QW",
+          "ev": "commit 3f2a9c1 on release/4.11.0-notes, main untouched"
+        },
+        null
+      ]
+    },
     {
       "id": "wo_01K6T9QX", "ws": "core-platform", "title": "Same-minute migration stamps",
       "tasks": ["tsk_01K6SF2W6Q"], "target": { "kind": "workflow", "id": "fix-validate-document-review" },

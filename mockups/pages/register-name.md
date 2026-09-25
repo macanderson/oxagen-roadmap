@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/core-platform/register/name` |
 | Scope | workspace gate |
-| Spec | §14 Mission Control; Appendix F page 3 |
+| Spec | §14; Appendix F page 3 |
 | Design | `mockups/src/engine.js` → `pRegister(r) → regName()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · access denied |
 | Storybook | `Oxagen / … / register-name`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
@@ -24,7 +24,7 @@ Actions (card footer): **Cancel** · **Continue** (gold). The shell carries a se
   - **Workspace**: read-only input, “Core platform · a-intel/platform”. Hint “Its definition file lands in `.oxagen/agents/` in the main repo.”
   - **Harness**: select with `claude-code`, `codex-cli`, `stella`, `claude-agent-sdk`, `custom`. Hint “Picks the installer on the next step. It can be changed there.”
   - **Model tier**: select with `complex`, `light`. Hint “The harness calls the model with its own key. The tier is recorded on every frame.”
-- Note under the grid: “Continue mints a one-time enrollment token for `a-intel.core.perf-watch`. Nothing is written to Postgres and no PR is opened until the first frame arrives; the smoke session then opens the Context PR that adds the definition file.”
+- Note under the grid: “Continue mints a one-time enrollment token for `a-intel.core.perf-watch`. Nothing is written to Postgres and no PR is opened until the first frame arrives; the smoke session then opens the pull request that adds the definition file.”
 
 **Shell.** No sidebar and no topbar, so this page has no approvals button and no approvals drawer. The gate shell (`regShell`) is the brandmark, the signed-in email `marcus@a-intel.example`, and a **Cancel** button, then a three-step rail (`nav` labelled “Register an agent”): 1 Name the agent, 2 Wrap the agent, 3 Wait for the first frame. The current step carries `aria-current="step"`, a done step shows ✓ and is a button back to that step, and a later step is disabled. Under the card a caption reads “Registration does not complete until the agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two. Cancel at any time — nothing is kept until the frame arrives.” The phone layout is the same card at full width.
 
@@ -42,13 +42,13 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - The slug is normalised live: lower case, letters, digits, and hyphens only, and `agent` when empty (`regSlug`). The key is `<org>.<first segment of the workspace slug>.<slug>`, so `core-platform` gives `a-intel.core.perf-watch`.
 - Changing the harness preselects the matching tab on the wrap step (`regTabFor`: Claude Code, Codex CLI, or SDK agent for everything else).
 - Continue goes to `/register/wrap`. Nothing is written yet.
-- Either Cancel (`regCancel`) clears `S.reg` and its timers, returns to Fleet, and toasts “Registration cancelled. Nothing was installed and nothing was written.”
+- Either Cancel (`regCancel`) clears `S.reg` and its timers, returns to Work, and toasts “Registration cancelled. Nothing was installed and nothing was written.”
 
 ## States
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
 - **loading**: the shell and the rail stay. The card is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
-- **access denied**: “You cannot see agent registration”, then “Your roles on Anderson Intelligence Corp. do not include `agent.register on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Fleet**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “agent.register on core-platform”, *Decided by* “pol_v41 · deny wins over every allow”.
+- **access denied**: “You cannot see agent registration”, then “Your roles on Anderson Intelligence Corp. do not include `agent.register on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Work**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “agent.register on core-platform”, *Decided by* “pol_v41 · deny wins over every allow”.
 
 ## Mobile
 

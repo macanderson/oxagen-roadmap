@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/welcome/login` |
 | Scope | auth |
-| Spec | §14 Mission Control; Appendix F sign-in flows |
+| Spec | §14; Appendix F sign-in flows |
 | Design | `mockups/src/engine.js` → `pWelcome(r) → obLogin()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
 | Storybook | `Oxagen / … / login`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
@@ -36,7 +36,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Submit (`obGo('two-factor')`) goes to Two-factor. Google and GitHub (`obSignedIn`) sign in directly and land on Fleet with the toast “Signed in as Marcus Bell. The session is recorded like any other governed action.”
+- Submit (`obGo('two-factor')`) goes to Two-factor. Google and GitHub (`obSignedIn`) sign in directly and land on Work with the toast “Signed in as Marcus Bell. The session is recorded like any other governed action.”
 - Show and Hide toggle the password field between `password` and `text`.
 - Forgot password? goes to `forgot-password.md`. Create an account goes to sign-up. Accept it goes to `accept-invitation.md`.
 

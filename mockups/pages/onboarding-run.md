@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/welcome/run` |
 | Scope | onboarding gate |
-| Spec | §14 Mission Control; Appendix F onboarding (the gate); §10.1 Repositories |
+| Spec | §14; Appendix F onboarding (the gate); §10.1 Repositories |
 | Design | `mockups/src/engine.js` → `pWelcome(r) → regRun()` in onboard mode with `obRepoPanel()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
 | Storybook | `Oxagen / … / onboarding-run`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
@@ -12,17 +12,17 @@
 
 ## Job
 
-Step 3 of 3 of the gate: start a run. The operator console opens the moment the first frame reaches Oxagen and lands you on Fleet looking at your own run. The repository the installer saw can be bound now or later.
+Step 3 of 3 of the gate: start a run. The operator console opens the moment the first frame reaches Oxagen and lands you on Work looking at your own run. The repository the installer saw can be bound now or later.
 
 ## What is on the page
 
-**Header.** Eyebrow “Step 3 of 3”, h1 “Start a run”, lead “The operator console opens the moment the first frame from `a-intel.core.release-manager` reaches Oxagen, and lands you on Fleet looking at your own run.”
+**Header.** Eyebrow “Step 3 of 3”, h1 “Start a run”, lead “The operator console opens the moment the first frame from `a-intel.core.release-manager` reaches Oxagen, and lands you on Work looking at your own run.”
 Actions (card footer) while waiting: **Cancel** · **Back** · **Open the installer** (ghost, goes to `installer.md`) · caption “There is no Done button — the frame is the completion.” After the frame: **Cancel** · countdown caption (`#regAuto`) · **Open Oxagen** (gold).
 
 - **Waiting for the first frame**: the card in `register-run.md` with this page’s key: spinner, h3, “polling · 1s”, chips `a-intel.core.release-manager` · “Claude Code” · “host mbell-mbp.local”, the log (`regLines`) filling one line at a time, “waiting…”, and “Start Claude Code in any repository on `mbell-mbp.local`. The installer already ran a one-turn smoke session; if it is still in flight this flips on its own.” After the flip: **First frame received**, the two frame rows, the badges `harness` · “replay grade: full” · “chain intact”, and the tier sentence, as in `register-run.md`.
-- **Repository detected** (`obRepoPanel`, below the frame card): h3 “Repository detected”, “reported by the installer”. Chip `git@github.com:a-intel/platform.git`. Copy: “Read from the git remote of `~/src/platform`, the directory the installer ran in. Production branch `main`.” Button **Bind a-intel/platform as the main repo** with the GitHub glyph: gold while waiting, plain once the frame has arrived. Copy: “One click installs the GitHub App on `a-intel/platform`: repo binding, Context PRs, checks, merge handling and the code graph.” Divider, then “**Skip for now** — core-platform stays **provisional for 14 days**. Runs record and spend counts, but steering, context records and agent definitions stay off until a main repo is bound.” (Skip for now is a link button.)
-- After Bind, the panel becomes **Main repo**: “bound” (dot and word), chips `a-intel/platform` · “production branch: main” · “GitHub App installed” (green dot), and “Steering, context records and agent definitions will live in `a-intel/platform` under `.oxagen/`, published through Context PRs.”
-- After Skip, the panel becomes **No main repo bound** with a badge “provisional”: “**core-platform is provisional until 25 Sep 2026** (14 days). Runs record and spend counts. Steering, context records, and agent definitions stay off until a main repo is bound.” and **Bind a-intel/platform now**.
+- **Repository detected** (`obRepoPanel`, below the frame card): h3 “Repository detected”, “reported by the installer”. Chip `git@github.com:a-intel/platform.git`. Copy: “Read from the git remote of `~/src/platform`, the directory the installer ran in. Production branch `main`.” Button **Bind a-intel/platform as the main repo** with the GitHub glyph: gold while waiting, plain once the frame has arrived. Copy: “One click installs the GitHub App on `a-intel/platform`: repo binding, pull requests, checks, merge handling and the code graph.” Divider, then “**Skip for now** — core-platform stays **provisional for 14 days**. Runs record and spend counts, but Steering records and agent definitions stay off until a main repo is bound.” (Skip for now is a link button.)
+- After Bind, the panel becomes **Main repo**: “bound” (dot and word), chips `a-intel/platform` · “production branch: main” · “GitHub App installed” (green dot), and “Steering records and agent definitions will live in `a-intel/platform` under `.oxagen/`, published through pull requests.”
+- After Skip, the panel becomes **No main repo bound** with a badge “provisional”: “**core-platform is provisional until 25 Sep 2026** (14 days). Runs record and spend counts. Steering records and agent definitions stay off until a main repo is bound.” and **Bind a-intel/platform now**.
 
 **Shell.** No sidebar and no topbar, so this page has no approvals button and no approvals drawer. The gate shell (`regShell` in onboard mode): brandmark, `marcus@a-intel.example`, **Cancel**; the rail (`nav` labelled “Onboarding”) with steps 1 and 2 done (✓, buttons back), step 3 Start a run current; the caption “The operator console does not open until an agent has talked to Oxagen. That first frame is also the installer’s smoke test, so there is one path, not two.” The phone layout is the same cards at full width.
 
@@ -38,17 +38,17 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- The poll and the countdown are those of `register-run.md`. **Open Oxagen** or the countdown runs `regFinish`: it writes the agent and its smoke run, sets Fleet’s first-run view (`S.firstRun`), goes to Fleet, and toasts “Welcome to Oxagen. First frame received from a-intel.core.release-manager, its run is live on Fleet, and the organization is out of the gate.” in gold. Fleet then shows its first-run banner, and its provisional banner if the repo was skipped.
-- **Bind** (`obBind`) installs the GitHub App on `a-intel/platform`, clears the provisional flag, and toasts “GitHub App installed on a-intel/platform. Main repo bound — Context PRs, checks and the code graph are on.”
-- **Skip for now** (`obSkip`) marks the workspace provisional for 14 days from today. Skipping is reversible from this panel and from Fleet’s provisional banner.
-- **Back** returns to Wrap an agent. **Open the installer** shows the package’s own screens; it renders only outside a scenario walk. Either Cancel (`obExit`) clears the onboarding state and goes to Fleet.
+- The poll and the countdown are those of `register-run.md`. **Open Oxagen** or the countdown runs `regFinish`: it writes the agent and its smoke run, sets Work’s first-run view (`S.firstRun`), goes to Work, and toasts “Welcome to Oxagen. First frame received from a-intel.core.release-manager, its run is live under a direct work order, and the organization is out of the gate.” in gold. Work then shows its first-run banner, and its provisional banner if the repo was skipped.
+- **Bind** (`obBind`) installs the GitHub App on `a-intel/platform`, clears the provisional flag, and toasts “GitHub App installed on a-intel/platform. Main repo bound — pull requests, checks and the code graph are on.”
+- **Skip for now** (`obSkip`) marks the workspace provisional for 14 days from today. Skipping is reversible from this panel and from the provisional banner on Work.
+- **Back** returns to Wrap an agent. **Open the installer** shows the package’s own screens; it renders only outside a scenario walk. Either Cancel (`obExit`) clears the onboarding state and goes to Work.
 
 ## States
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell). The story captures the waiting card with an empty log and the Repository detected panel; the flip happens in the browser about five seconds later.
 - **loading**: the shell and the rail stay. The cards are replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
 - **error**: the header stays. The card reads h2 “The collector cannot reach Oxagen”, the two paragraphs and the request line of `register-run.md` (`https://ingest.oxagen.com/v1`, `ECONNREFUSED`, 6 attempts, 94 seconds, `req_01JQ8F4B1PC7QM · host mbell-mbp.local`), and **Check again**. Footer: **Cancel** · **Back**. No repository panel and no gold action.
-- **access denied**: “You cannot see onboarding”, then “Your roles on Anderson Intelligence Corp. do not include `org.create for marcus@a-intel.example`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Fleet**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “org.create for marcus@a-intel.example”, *Decided by* “pol_v41 · deny wins over every allow”.
+- **access denied**: “You cannot see onboarding”, then “Your roles on Anderson Intelligence Corp. do not include `org.create for marcus@a-intel.example`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Work**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “org.create for marcus@a-intel.example”, *Decided by* “pol_v41 · deny wins over every allow”.
 
 ## Mobile
 

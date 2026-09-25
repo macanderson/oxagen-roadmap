@@ -6,8 +6,8 @@ runs the checks and then the browser guard.
 
 | Script | Builds | From |
 |---|---|---|
-| `node tools/build-mockup.mjs` | `mockups/missioncontrol.html`, the one self-contained master | `mockups/src/{engine.css,shell.html,engine.js}` and `mockups/fixtures/*.json` (inlined as `FIXTURES`) |
-| `node tools/build-stories.mjs` | `mockups/stories/**`, the Storybook catalog | `mockups/catalog.mjs` (every page with its states; every scenario) |
+| `node tools/build-mockup.mjs` | `mockups/missioncontrol.html`, the one self-contained master | `mockups/src/{engine.css,shell.html,engine.js}`, then `wedge.js` (the fleet operations wedge views) and `boot.js` (the first render) in one script, and `mockups/fixtures/*.json` (inlined as `FIXTURES`) |
+| `node tools/build-stories.mjs` | `mockups/stories/**`, the Storybook catalog | `mockups/catalog.mjs` (every page with its states, a future-only story for a view marked `future`, every scenario). The stories render through `mockups/stories/_view.js`, which is hand-written |
 | `python3 tools/build-docs.py` | `docs/missioncontrol-docs.html`, every document on one page | `docs/*.md` and `docs/_house/oxagen-doc.css` (needs `markdown-it-py`) |
 | `node tools/build-badges.mjs` | `badges/*.svg`, `badges/index.html`, `badges/README.md` | the verdict and attestation vocabularies in the script, coloured with the engine's tokens |
 
@@ -17,7 +17,7 @@ Edit the sources, run the build, commit both. A `--check` failure means the two 
 
 ```sh
 node tools/check-mockup.mjs                 # every page × state × shell, then every scenario
-node tools/check-mockup.mjs --only fleet    # one page id, or one scenario id
+node tools/check-mockup.mjs --only work-backlog  # one page id, or one scenario id
 node tools/check-mockup.mjs --pages         # pages only;  --scenarios  scenarios only
 node tools/check-mockup.mjs --shots out/    # a screenshot per view
 ```
@@ -28,8 +28,9 @@ It opens `mockups/missioncontrol.html` in headless Chromium once per view in `mo
 and the `#chrome` bar, the scenario rail, the Scenarios nav item and every piece of onboarding-demo
 copy are gone; `S.state` and `S.mobile` are pinned to what the URL says; the state's own markup is on
 screen (the skeleton, the empty / error / denied panel, or a loaded page with a heading and no state
-panel); a mobile shell page has the thumb bar and never scrolls sideways. On the loaded mobile
-fleet it checks the mobile shell's own guarantees: five thumb-bar slots at least 44 px tall in the
+panel); a mobile shell page has the thumb bar and never scrolls sideways; a view with a `drawer`
+has that drawer open; the future-only story of a view marked `future` outlines at least one
+`data-future` field. On the loaded mobile workspace root (Work) it checks the mobile shell's own guarantees: five thumb-bar slots at least 44 px tall in the
 bottom quarter, More as a full-width bottom sheet with the rest of the app in it, the drawer over a
 scrim that closes it, list tables as cards, every input 16 px or larger. Per scenario it opens step
 1 and, for every step, asserts the rail is on screen and names the step, the page under it
@@ -39,16 +40,17 @@ A scenario in the catalog with no `SCENARIOS` entry fails; nothing skips.
 
 Run `build-mockup.mjs --check` on every edit to the sources; run `check-mockup.mjs` before you ship.
 
-## The tasks guard
+## The Work guard
 
 ```sh
-node tools/check-tasks.mjs           # every Tasks flow
+node tools/check-tasks.mjs           # every Work flow
 node tools/check-tasks.mjs --shots   # also write a screenshot per step to .claude/shots/tasks/
 ```
 
-Walks the Tasks surface (`docs/tasks-spec.md`) the way an operator meets it: connecting Jira through
-the six-step wizard with one account left not mapped; drafting a definition of done with the
-assistant, editing it and certifying it; a certified task that changed upstream; the send menu
+Walks the Work surface (`docs/tasks-spec.md`, `docs/fleet-operations-wedge.md`) the way an operator
+meets it: connecting Jira through the six-step wizard from the Intake dialog with one account left not
+mapped; drafting a definition of done with the assistant, editing it and certifying it; a certified
+work item that changed upstream; the send menu
 listing only agents the operator runs, each with its harness mark; the work order merging every
 definition of done, resolving `@` mentions and refusing to send until the repositories are
 confirmed; a workflow of four agents and a person, and the builder drafting one from a sentence;
@@ -106,19 +108,19 @@ removing the no-key refusal, and dropping the `inert` guard — and catches all 
 ## The record end-to-end guard
 
 ```sh
-node tools/check-record-e2e.mjs           # wizard → Context PR → checks → merge → published
+node tools/check-record-e2e.mjs           # wizard → pull request → checks → merge → published
 node tools/check-record-e2e.mjs --shots   # a screenshot at each stage
 ```
 
-A context record is the one object in the product that goes all the way from a sentence somebody
+A Steering record is the one object in the product that goes all the way from a sentence somebody
 typed to something that steers every agent in a workspace, and every step between those two is a
 place the guarantee can be lost. This walks the whole path in one session and asserts the things
 that make it a governed publication rather than a save button: while the pull request is open the
-record is **not** in Records, **not** in the compiled bundle, **not** in the audit log and the
+record is **not** in Sources, **not** in the compiled bundle, **not** in the audit log and the
 bundle version has not moved; merge is blocked until every check reports, and forcing it through
 publishes nothing; merge publishes exactly once — one record, one rule, one version, one audit
 event; and the promoter's own pull request is untouched throughout. It then opens the record's page
-and finds it in the list, and separately checks that closing a pull request without merging leaves
+and finds it at the top of Sources, and separately checks that closing a pull request without merging leaves
 nothing behind and that a kind which constrains nothing takes the other branch of the sixth check.
 
 It also covers what the review of PR #36 found, each reproduced before it was fixed: a lineage that

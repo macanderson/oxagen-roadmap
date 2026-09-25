@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/core-platform/register/wrap` |
 | Scope | workspace gate |
-| Spec | §14 Mission Control; Appendix F page 3 |
+| Spec | §14; Appendix F page 3 |
 | Design | `mockups/src/engine.js` → `pRegister(r) → regWrap()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · access denied |
 | Storybook | `Oxagen / … / register-wrap`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
@@ -40,14 +40,14 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 - **Download for <OS>** (`regInstall(harness)`) records the harness, toasts “Signed installer for <OS> downloaded with the one-time token embedded.”, resets the first-frame log, and moves to step 3.
 - **I have already installed it — continue** (`regInstall(null)`) moves to step 3 without changing the harness.
-- **Back** returns to Name the agent. Either Cancel returns to Fleet with the toast in `register-name.md`.
+- **Back** returns to Name the agent. Either Cancel returns to Work with the toast in `register-name.md`.
 - The tier ladder shows all four tiers as real: `harness` for this agent, `gateway` and `contained` as the next rungs, and `observe` as the fallback for a Codex CLI without an approval hook.
 
 ## States
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell), Claude Code tab and macOS selected.
 - **loading**: the shell and the rail stay. The card is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
-- **access denied**: “You cannot see agent registration”, then “Your roles on Anderson Intelligence Corp. do not include `agent.register on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Fleet**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “agent.register on core-platform”, *Decided by* “pol_v41 · deny wins over every allow”.
+- **access denied**: “You cannot see agent registration”, then “Your roles on Anderson Intelligence Corp. do not include `agent.register on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Work**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “agent.register on core-platform”, *Decided by* “pol_v41 · deny wins over every allow”.
 
 ## Mobile
 

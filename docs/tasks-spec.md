@@ -2,14 +2,14 @@
 
 | | |
 |---|---|
-| **Status** | Spec v1, for design review. No code is written against it yet. |
+| **Status** | Spec v1, for design review. No code is written against it yet. The fleet operations wedge renamed Tasks to Work and moved Providers, Fields and People into the Intake dialog (`fleet-operations-wedge.md`). This spec keeps the words it was written in: a task is a work item, and the Tasks page is Work. |
 | **Date** | 2026-09-24 |
 | **Owner** | Mac Anderson |
-| **Source** | `mockups/src/engine.js` (the Tasks section: `pTasks`, `pTask`, `pWorkOrder`, `DLG_EXT.ipwz`, `DLG_EXT.wo`, `DLG_EXT.certify`, `DLG_EXT.wfnew`), `mockups/fixtures/tasks.json`, rendered in `mockups/missioncontrol.html` |
+| **Source** | `mockups/src/wedge.js` (`pWork`, `backlogTab`, `findingsTab`, `DLG_EXT.intake`) and `mockups/src/engine.js` (`pTask`, `pWorkOrder`, `DLG_EXT.ipwz`, `DLG_EXT.wo`, `DLG_EXT.certify`, `DLG_EXT.wfnew`), `mockups/fixtures/tasks.json`, rendered in `mockups/missioncontrol.html` |
 | **Builds on** | ADR-043 (Oxagen governs agents, it does not run them), ADR-096 (the launcher may contain the process), ADR-101 (four first-class harnesses), ADR-157 (ARP carries an operator-authored brief), ADR-053 (the assistant), ADR-052 (the governed action is the billable unit) |
 | **Related** | `creation-spec.md` (every definition is a file, and a wizard ends on a pull request), `dod-spec.md` (the run dod, a different object), `mission-control-spec.md` §1 (the operator), §7.6 (agent messages are quoted evidence), §11.2 (connectors) |
 | **Amended by** | `work-in-flight-spec.md` (CSV upload, four more task fields, agent-minute estimates, agent messages, scope claims, and the plan) |
-| **Pages** | `mockups/pages/tasks.md`, `tasks-providers.md`, `task.md`, `work-order.md`, each with its audit prompt |
+| **Pages** | `mockups/pages/work-backlog.md`, `work-intake.md`, `work-item.md`, `work-orders.md`, `work-order.md`, `work-workflows.md`, `work-findings.md`, each with its audit prompt |
 | **Check** | `node tools/check-tasks.mjs` walks every flow below in the built mockup |
 
 ## 1. The situation
@@ -705,10 +705,13 @@ Every write is gated server-side, whatever the UI hides.
 
 | Page | Route | Spec | Audit |
 |---|---|---|---|
-| Tasks (Tasks, Work orders, Workflows tabs, the send menu, the work order dialog, the workflow builder) | `#/:org/:ws/tasks`, `/tasks/work-orders`, `/tasks/workflows` | `mockups/pages/tasks.md` | `tasks.audit-prompt.md` |
-| Providers, Fields, People, and the connection wizard | `#/:org/:ws/tasks/{providers,fields,people}` | `mockups/pages/tasks-providers.md` | `tasks-providers.audit-prompt.md` |
-| One task | `#/:org/:ws/tasks/:taskId` | `mockups/pages/task.md` | `task.audit-prompt.md` |
-| One work order | `#/:org/:ws/tasks/work-orders/:woId` | `mockups/pages/work-order.md` | `work-order.audit-prompt.md` |
+| Backlog | `#/:org/:ws/work` | `mockups/pages/work-backlog.md` | `work-backlog.audit-prompt.md` |
+| Intake (Providers, Fields, People, and the connection wizard) | `#/:org/:ws/work?intake=providers` | `mockups/pages/work-intake.md` | `work-intake.audit-prompt.md` |
+| One work item | `#/:org/:ws/work/items/:item` | `mockups/pages/work-item.md` | `work-item.audit-prompt.md` |
+| Work orders | `#/:org/:ws/work/orders` | `mockups/pages/work-orders.md` | `work-orders.audit-prompt.md` |
+| One work order | `#/:org/:ws/work/orders/:order` | `mockups/pages/work-order.md` | `work-order.audit-prompt.md` |
+| Workflows | `#/:org/:ws/work/workflows` | `mockups/pages/work-workflows.md` | `work-workflows.audit-prompt.md` |
+| Findings | `#/:org/:ws/work/findings` | `mockups/pages/work-findings.md` | `work-findings.audit-prompt.md` |
 
 Tasks is a Workspace nav item under Fleet. Its count is the drafts and changed certifications waiting on
 a person plus the work orders waiting on you, because a count in navigation appears only where

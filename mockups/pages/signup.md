@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/welcome/signup` |
 | Scope | auth |
-| Spec | §14 Mission Control; Appendix F sign-in flows (not a page) |
+| Spec | §14; Appendix F sign-in flows (not a page) |
 | Design | `mockups/src/engine.js` → `pWelcome(r) → obSignup()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error |
 | Storybook | `Oxagen / … / signup`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |

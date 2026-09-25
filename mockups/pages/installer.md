@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/welcome/installer` |
 | Scope | auth |
-| Spec | §14 Mission Control; Appendix F not a page. These are the signed package’s own screens |
+| Spec | §14; Appendix F not a page. These are the signed package’s own screens |
 | Design | `mockups/src/engine.js` → `pWelcome(r) → obInstaller()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · error |
 | Storybook | `Oxagen / … / installer`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |

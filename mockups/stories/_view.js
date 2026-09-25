@@ -1,8 +1,9 @@
 // One story is one URL of the master file, framed. The controls are what the URL pins: the state,
-// the shell (desktop, or a phone frame with the mobile shell inside it), the theme, and whether
-// the mockup chrome (state bar, scenario rail, onboarding demo) is hidden. Nothing here is
-// product UI; the product is inside the frame.
-import { mockupUrl, STATE_WORD } from "../catalog.mjs";
+// the shell (desktop, or a phone frame with the mobile shell inside it), the theme, whether the
+// mockup chrome (state bar, scenario rail, onboarding demo) is hidden, whether future-only fields
+// are outlined, and which global drawer is open. Nothing here is product UI; the product is inside
+// the frame.
+import { mockupUrl } from "../catalog.mjs";
 
 const MASTER = "./missioncontrol.html";
 
@@ -11,12 +12,14 @@ export const argTypes = {
   shell: { control: "inline-radio", options: ["desktop", "mobile"], description: "S.mobile, pinned; mobile draws a 390×844 phone" },
   theme: { control: "inline-radio", options: ["system", "dark", "light"] },
   product: { control: "boolean", description: "?product=1: no state bar, scenario rail or onboarding demo" },
+  future: { control: "boolean", description: "?future=1: outline every field no contract carries today" },
+  drawer: { control: "inline-radio", options: [null, "approvals", "stella"], description: "?drawer=: open the Approvals or the Stella drawer" },
   hash: { control: "text", description: "the route the frame opens on" },
 };
 
-export function view({ state, shell, theme, product, hash, file = MASTER }) {
+export function view({ state, shell, theme, product, future, drawer, hash, file = MASTER }) {
   const mobile = shell === "mobile";
-  const src = mockupUrl(file, { product, state: state || null, mobile: shell ? mobile : null, theme: theme === "system" ? null : theme, hash });
+  const src = mockupUrl(file, { product, state: state || null, mobile: shell ? mobile : null, theme: theme === "system" ? null : theme, future: !!future, drawer: drawer || null, hash });
   const wrap = document.createElement("div");
   wrap.style.cssText = mobile
     ? "min-height:100vh;display:grid;place-items:center;background:#F4F4F5;padding:24px 16px"

@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/core-platform/register/run` |
 | Scope | workspace gate |
-| Spec | §14 Mission Control; Appendix F page 3 |
+| Spec | §14; Appendix F page 3 |
 | Design | `mockups/src/engine.js` → `pRegister(r) → regRun()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · loading · error · access denied |
 | Storybook | `Oxagen / … / register-run`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
@@ -12,12 +12,12 @@
 
 ## Job
 
-Step 3 of 3: wait for the first frame. Registration completes the moment the first frame from the new key reaches Oxagen and lands you on Fleet looking at its run. There is no Done button: the frame is the completion.
+Step 3 of 3: wait for the first frame. Registration completes the moment the first frame from the new key reaches Oxagen and lands you on Work looking at its run. There is no Done button: the frame is the completion.
 
 ## What is on the page
 
-**Header.** Eyebrow “Step 3 of 3”, h1 “Wait for the first frame”, lead “Registration completes the moment the first frame from `a-intel.core.perf-watch` reaches Oxagen and lands you on Fleet looking at its run.”
-Actions (card footer) while waiting: **Cancel** · **Back** · caption “There is no Done button — the frame is the completion.” No gold action. After the frame: **Cancel** · countdown caption (`#regAuto`) · **Open in Fleet** (gold).
+**Header.** Eyebrow “Step 3 of 3”, h1 “Wait for the first frame”, lead “Registration completes the moment the first frame from `a-intel.core.perf-watch` reaches Oxagen and lands you on Work looking at its run.”
+Actions (card footer) while waiting: **Cancel** · **Back** · caption “There is no Done button — the frame is the completion.” No gold action. After the frame: **Cancel** · countdown caption (`#regAuto`) · **Open in Work** (gold).
 
 - **Waiting for the first frame** (the loaded story): card header with a spinner, h3 “Waiting for the first frame”, and “polling · 1s”. Chips: `a-intel.core.perf-watch` · the harness label (“Claude Code”) · “host mbell-mbp.local”. A log (`regLines`) that fills one line at a time, then “waiting…”: `14:01:48 host enrolled · device key ed25519:7f3a…c19e`, `14:01:52 collector oxagend running · pid 4412 · launchd com.oxagen.oxagend`, `14:01:55 hooks written · ~/.claude/settings.json · 5 events` (Codex CLI: `~/.codex/config.toml written · notify hook → collector`; SDK: `oxagen.agent.wrap() attached · frame emitter, checkpoint gate`), `14:01:58 signed policy bundle fetched · v41 · cached for offline` (SDK: `OXAGEN_AGENT_TOKEN accepted · run token minted`), `14:02:01 hooks answered · SessionStart 41 ms · tier harness`, `14:02:04 MCP endpoint registered · 0 tools granted yet`. Below: “Start Claude Code in any repository on `mbell-mbp.local`. The installer already ran a one-turn smoke session; if it is still in flight this flips on its own.”
 - **First frame received** (after the poll flips): header “connected” (dot and word), h3 “First frame received”, “14:02:11.402”. Two frame rows: seq 0 `14:02:11.402` `agent_start` “harness=claude-code · host=mbell-mbp.local · attested=device-key · countersigned”; seq 1 `14:02:11.418` `oxagen:run.start` “agent=a-intel.core.perf-watch · operator=Marcus Bell · tier=harness · steering=none published”. Badges: tier `harness` · “replay grade: full” · “chain intact”. Copy: “The tier is computed from what was actually routed, not from what the adapter can do on paper. The hooks answered, so this run is harness: delivered, recorded, client-attested, fail-open.”
@@ -36,8 +36,8 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## Functionality
 
 - The poll (`regSchedule`) starts 520 ms after the loaded render and adds a log line every 780 ms. At the sixth line it flips to First frame received. It stops when you leave the step or the state is not loaded.
-- After the flip a six-second countdown runs in `#regAuto` (“Opening automatically…”, then “Opening automatically in N…”) and then `regFinish` runs. **Open in Fleet** runs it at once.
-- `regFinish` writes the agent (status enrolled, tier `harness`) and its smoke run (“Installer smoke session”, cost 0.02 with basis `client_attested`, replay grade full) once per flow, clears `S.reg`, goes to Fleet, and toasts “a-intel.core.perf-watch registered — first frame received. Its smoke run is live on Fleet.” in gold. The smoke session opens the Context PR that adds `.oxagen/agents/<slug>.toml`.
+- After the flip a six-second countdown runs in `#regAuto` (“Opening automatically…”, then “Opening automatically in N…”) and then `regFinish` runs. **Open in Work** runs it at once.
+- `regFinish` writes the agent (status enrolled, tier `harness`) and its smoke run (“Installer smoke session”, cost 0.02 with basis `client_attested`, replay grade full) once per flow, clears `S.reg`, goes to Work, and toasts “a-intel.core.perf-watch registered. First frame received, and its smoke run is live under a direct work order.” in gold. The smoke session opens the pull request that adds `.oxagen/agents/<slug>.toml`.
 - **Back** returns to the wrap step and resets the log. Cancel after the frame toasts “Registration cancelled. The enrollment was revoked and the smoke run discarded.”; before it, the toast in `register-name.md`.
 
 ## States
@@ -45,7 +45,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell). The story captures the waiting card with an empty log; the flip happens in the browser about five seconds later.
 - **loading**: the shell and the rail stay. The card is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
 - **error**: the header stays. The card reads h2 “The collector cannot reach Oxagen”, then “The host `mbell-mbp.local` enrolled, but every request to `https://ingest.oxagen.com/v1` has been refused for 94 seconds (`ECONNREFUSED`, 6 attempts). No frame has arrived, so registration will not complete.”, then “Check that outbound 443 to `ingest.oxagen.com` is allowed, then run `oxagen agent status`.”, then `request req_01JQ8F4B1PC7QM · host mbell-mbp.local`. Action **Check again** (toast “Checked again — still refused. Nothing has changed on the host.”). Footer: **Cancel** · **Back**. No gold action.
-- **access denied**: “You cannot see agent registration”, then “Your roles on Anderson Intelligence Corp. do not include `agent.register on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Fleet**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “agent.register on core-platform”, *Decided by* “pol_v41 · deny wins over every allow”.
+- **access denied**: “You cannot see agent registration”, then “Your roles on Anderson Intelligence Corp. do not include `agent.register on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold, opens dialog `request-access`), **Back to Work**. Below: *Signed in as* “Marcus Bell · workspace.owner · core-platform”, *Needed* “agent.register on core-platform”, *Decided by* “pol_v41 · deny wins over every allow”.
 
 ## Mobile
 

@@ -1,168 +1,172 @@
-# Agent detail
+# Agent › Overview
 
 | | |
 |---|---|
-| Route | `#/a-intel/core-platform/agents/<slug>/<tab>` (tabs: `overview`, `identity`, `steering`, `toolbelt`, `runtime`, `permissions`, `activity`, `definition`) |
+| Route | `#/a-intel/core-platform/agents/triage` (`…/triage/overview` is the same tab). A tab id that matches nothing falls back to Overview |
 | Scope | workspace |
-| Spec | §14 Mission Control; §12.6 token classes; §8 the call pipeline; Appendix F page 3; `docs/agent-ontology-ia.md` for the object model |
-| Design | `mockups/src/engine.js` → `pAgent()`, with `IAM_TABS`, `IAM_TAB_ALIAS`, and the tab bodies `aOverview()`, `aIdentity()`, `aSteering()`, `aToolbelt()`, `aRuntime()` with `aRuntimeHost()`, `aPermissions()` with `permRoles()`, `permBudgets()` and `permMandates()`, `aActivity()` with `actRuns()`, `actAccounting()` and `actIncidents()`, and `defForm()`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| Spec | `docs/fleet-operations-wedge.md`: D3, D14 (no replay grade), D17, and the Cuts row for the Definition in git tab. `docs/fleet-operations-ia.md` (Agents: “Overview: composition, current work, tokens and recommendations”) and `docs/fleet-operations-routes.md` (Agents). Token classes: `docs/mission-control-spec.md` §12.6 |
+| Design | `mockups/src/engine.js` → `pAgent()` (the header, the tab bar and the states), `IAM_TABS`, `IAM_TAB_ALIAS`, the agent branch of `route()`, `aOverview()`, `coachStrip()`, `coachItems()`, `coachAgent()`, `agentHealth()`, `agentTok()` and `agentSteering()`, and the dialogs `rotatecred`, `suspendagent` and `delagent`; built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · empty · loading · error · access denied |
-| Storybook | `Oxagen / … / agent`: one story per tab and per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Storybook | `Oxagen / Agents / Overview`: Loaded, Empty, Loading, Error, Access denied, and each of them · mobile |
 | Audit | `agent.audit-prompt.md` |
 
 ## Job
 
-One agent, answered in the order a person asks: what it is made of, who it is, what steers it, what it can reach, where it runs, what it may do, what it did, and what file says so. Composition happens here. The registries on Tools, Steering, and Runtimes own the reusable objects; this page assigns a reference and shows what the reference resolved to.
+One agent, answered in the order a person asks: who it is, what it is made of, what it costs, and what to change. The Overview is the first tab of the agent page and the one a roster row opens.
+
+This spec owns the agent header and the tab bar, which every tab shares, and the Overview tab. Each other tab has its own spec: `agent-identity.md`, `agent-steering.md`, `agent-toolbelt.md`, `agent-runtime.md`, `agent-permissions.md`, `agent-activity.md` and `agent-source.md`. The Source tab draws its own header, specified in `agent-source.md`.
 
 ## What is on the page
 
-**Header**: eyebrow “Agent”, then the agent card (avatar, name, key, harness) as the h1. Under it, four badges: the lifecycle status, the enforcement tier, `replay <grade>`, and `operator <name>`. Then the agent description. Actions, all plain: **Edit avatar** (opens `avatar`) · **Rotate credential** · **Suspend** (danger) · **Deregister** (danger; opens `delagent`). No gold action; the one gold action of the workspace is Wrap Claude Code on the Agents page.
+**Header.** Eyebrow “Agent”. The h1 is the agent card in its detail layout: the avatar, the agent key in mono (“a-intel.core.triage”) and the harness label (“Codex CLI”). Under it one row of badges: the lifecycle status as a dot and a word (“enrolled”), the tier as recorded (“gateway”), and “operator Marcus Bell”. Then the agent's description (“Labels incoming issues, reproduces where it can, and opens a proposal when it cannot.”). Actions, in this order, none of them gold:
 
-**Tabs**, in order, each a route segment: **Overview** · **Identity** · **Steering** · **Toolbelt** (count = `beltTotal`) · **Runtime** · **Permissions** (count = mandates held) · **Activity** (count = tamper incidents) · **Definition in git**. Rev1 tab ids still resolve through `IAM_TAB_ALIAS`, so an old link lands on the tab that absorbed it: `mandates` → `permissions`, `budgets` → `permissions`, `runs` → `activity`, `incidents` → `activity`, `enrollment` → `runtime`. An id that matches nothing falls back to `overview`. The belt search and the presentation override reset when the agent changes, so one agent's query never renders under another's name.
+- **Edit avatar** opens the avatar editor for the agent (“Avatar · Triage”).
+- **Rotate credential** opens `rotatecred`.
+- **Suspend** (danger) opens `suspendagent`.
+- **Deregister** (danger) opens `delagent`.
 
-### Overview
+**Tabs**, in this order, each a path segment: **Overview** (the bare path) · **Identity** · **Steering** · **Toolbelt** · **Runtime** · **Permissions** · **Activity** · **Source**. The tab bar is `role=tablist` and each tab is `role=tab` with `aria-selected`. Three tabs carry a live count, and a count of zero draws nothing:
 
-What this agent is made of, and the first question the page answers.
+| Tab | Count | Demo |
+|---|---|---|
+| Toolbelt | The tools on the agent's belt | 52 |
+| Permissions | The mandates the agent holds | none for Triage; 1 for invoice-bot |
+| Activity | The tamper incidents recorded against the agent | 1 |
 
-- **30-day token use** (`coachStrip`): a badge reading total tokens, dollars, and the cost basis; a stacked bar per token class (Conversation, Tool results, Context frames, Tool definitions, Steering, System, Output, Reasoning); then Cache hit rate, Per run, Per model call, and Basis.
-- **Coaching**: up to three items read off the same token record, each with what to change and what it is worth. Empty copy: “Nothing to change. Every share is inside the workspace norm and the cache holds.” Footer: **All coaching for this workspace →**.
-- **Composition** panel, badged with the health verdict from `agentHealth()`. Rows, each with an **Open** button to the tab or registry that owns it: Identity (the principal, “minted at registration and never reused”) · Steering (items and token cost, or “no preview prompt is set up”) · Toolbelt (each assigned belt as a link into Tools → Toolbelts, over “N tool versions in all, sent as a full|searchable belt”) · Runtime (host and tier badge, over kind, harness, and OS) · Owner (name, role, “accountable for every run this agent makes”) · Permissions (role count and mandate count, over “a toolbelt says what it can see; its roles and the policy say what it may call”).
-- **Last 30 days** panel: four stats (Runs with the last run time, Spend with its basis word, Tokens with the cache rate, Tamper incidents with the health reason) and the note that every tool definition on the belt is paid for as input on every call. **Open activity** in the header.
-- **Definition in git** panel: Path, Repo, Commit, `definition_digest`, and the generated file beside it, over “A pull request that edits a generated file without regenerating it fails the checks.” **Open the file** in the header.
+Older addresses still land on the tab that absorbed them: `…/enrollment` on Runtime, `…/budgets` and `…/mandates` on Permissions, `…/runs` and `…/incidents` on Activity, all in place. `…/mandates/<id>` becomes `…/permissions?delegation=<id>` and `…/definition` becomes `…/source`, both rewritten in place. The belt search and the belt presentation reset when another agent opens, so one agent's query never shows under another's name.
 
-### Identity
+**Overview.** Five panels. The first two sit side by side, then Composition beside Last 30 days, then Definition in git across the width.
 
-The principal, and the one property most of the threat model rests on. Roles moved to Permissions; tier delivery moved to Runtime.
+**30-day token use.** The header reads “124,910,766 tok · $402.11 · gateway_observed”: the agent's 30-day total, its spend, and the basis (`gateway_observed` on the `gateway` and `contained` tiers, `client_attested` below them). The body is eight bars in this order, each with its tokens and its share of the total: Conversation, Tool results, Context frames, Tool definitions, Steering, System, Output, Reasoning. Under them:
 
-- **Identity**: Agent key · Principal · Kind · Harness · Model tier (tier → the model id it routes to) · Operator (`initiating_principal`) · Lifecycle state (“registered → enrolled → active → retired. Deregistering retires the principal and never deletes it, so old runs keep their identity.”) · First frame.
-- **Credentials**, badged `none`: API key, OAuth token, Cloud role, GitHub token all read `none`; Run token reads “one, and it reaches Oxagen only”. The paragraph states that every secret a call needs is minted by the broker at dispatch, scoped to that one call, and never transmitted to the agent. **See the connections that mint them** opens Tools → Providers.
-- **Run credential**: Key (shown once, stored as a hash) · Purpose lock · Issued · Last used · Run tokens (count, 15 minute TTL) · Host device key. Actions: **Change identity** (opens `identity`), **Revoke credential** (danger).
-- **Trust relationships**: Accountable human · Workspace · Runtime · Delegation (“subagents narrow, never widen”) · Replay · Tamper incidents, with **Read them** into Activity when the count is not zero. **Open its permissions** at the foot.
+- **Cache hit rate**: “83% · 89,161,305 of 107,423,259 input tokens served from cache”.
+- **Per run**: “93,217 tok · $0.30”.
+- **Per model call**: “2,586 tok in the mean request”.
+- **Basis**: “observed by the gateway proxy from the bytes that passed through it”, or on a client-attested agent “self-reported by the harness · absent classes are marked, never zero”.
 
-### Steering
+**Optimization.** The badge reads “2 from the token record”. At most three items, ordered by the money at stake. Each item is a badge with its title, a signal line in mono, “$<amount> a month at stake”, and one action. On the demo record:
 
-The agent-scoped view of the workspace library. Nothing is authored here.
+| Item | Signal | At stake | Action |
+|---|---|---|---|
+| Stop writing cache for one-turn runs | “7,814,133 cache write tokens · a write with no later read inside the TTL” | $31.44 a month | **Edit the definition** (the Source tab) |
+| Narrow the belt | “34% of every request is tool definitions · 11 of 52 tools never called in 30 days” | $24.87 a month | **Edit the grant** (the Toolbelt tab) |
 
-- When no steering is scoped to the agent and no preview prompt is set up, the tab is one panel, “No steering is assembled for this agent”, with **Open the library**.
-- On the `observe` tier, a warning bar above everything: nothing below reaches this agent, because no hook is installed, and what follows is what the assembler would deliver on `harness`.
-- Two meters: **Stable prefix · SessionStart additional context** in bytes against the 16 KiB cap, and **Volatile selection · token budget** in tokens, with the prompt it was ranked against.
-- **What reaches this agent**: Item · Kind · Force · Scope · Body · Source · Where it lands · Token cost. Kind is the kind badge the Library table shows (`steering.md`), and its filter lists the word on the badge. “Where it lands” is the gate plane, the stable prefix, or volatile with its rank. Header actions: **Change what is assigned** (Steering → Assignments) and **Open in the compiler** (Steering → Compiler, seeded with this agent).
-- **Cut for this agent**: Item · Kind · Force · Token cost · Cut because · Why, with the count in the panel header.
+The other items the rules can raise are Keep the prefix stable (**Open steering**), Page the tool results (**Propose a record**), Lower the context budget (**Open the compiler**), Route classification-shaped work to a light model (**Edit the definition**) and Stop the retry storms (**Open incidents**). With none: “Nothing to change. Every share is inside the workspace norm and the cache holds.” The foot of the panel links “Optimization for this workspace →” to Spend › Optimization (`#/a-intel/core-platform/spend/optimization`). The items are the same ones Spend › Optimization lists for this agent.
 
-### Toolbelt
+**Composition.** Subtext: “One principal, and a reference to every other object it uses.” The badge is the agent's health (`tamper`, `not enrolled`, `observe` or `healthy`, as on the roster). Six rows, each with a sub-line; every row but Owner has an **Open** button to the tab that owns it:
 
-The only tool list the model is ever shown, and the assignment that produced it.
+| Row | Value | Sub-line |
+|---|---|---|
+| Identity | `prn_01JQ8W3F2M6XKD7A9RZT4BVCNG` | “minted at registration and never reused” |
+| Steering | “14 items · 1,162 tok” | “assembled from the workspace's Steering Sources and delivered at SessionStart and UserPromptSubmit”. On the observe tier: “assembled, and not delivered: no hook is installed on the observe tier”. With no standing brief the value is “no preview prompt is set up”, over a two-sentence sub-line with a “never” contrast (“steering comes from the workspace's sources. This agent holds a reference, never a copy”), which is a copy defect; a build states one fact |
+| Toolbelt | Each assigned belt as a link into Tools › Toolbelts (Repository reader, Repository contributor, Release control, Context graph, Workstation, Issue tracker, Messaging, Cloud cost) | “52 tool versions in all, sent as a searchable belt” |
+| Runtime | The host (`mbp-01`) and the tier badge | “workstation · Codex CLI 1.4.0 · macOS 15.5 · arm64”, or “no host is enrolled” |
+| Owner | “Marcus Bell workspace.owner · core-platform” | “accountable for every run this agent makes” |
+| Permissions | “1 role · no mandate”, or the role count with a mandate badge | “a toolbelt says what it can see; its roles and the policy say what it may call” |
 
-- **Belt computation**: a wire diagram from grants, the delegation ceiling, the policy bundle, and the kill switches to the belt, with the active policy and deny generation in the header. The paragraph names the registry version count, the number this agent's model is shown, and what a call outside the belt does (`unknown_tool`, counted toward an automatic halt).
-- **Model view**: a two-button group labelled Belt presentation, **Searchable belt** and **Full belt**, each with `aria-pressed`. The subtext states the belt width against the workspace full-belt limit of 40 and which presentation that earns. The body shows the tools block of the next model request verbatim, with the machine-readable trailer on every definition (risk grade, whether the call is held, the ceiling, the schema digest).
-- **Belt search**: `search_tools` running against the index the model queries, with five example queries. A hit list shows names and one-line descriptions only. A miss says whether the tool exists in the registry and why it is off this belt, over “A search never returns a tool outside the belt.”
-- **Per-tool decision rules**: Tool · Category · Decision · Hazard · Egress · Financial · Schema digest, grouped by category or flat (a two-button group labelled Layout), with category chips, the critical and high hazard counts, the approval, mandate, and deny counts, and **What the categories mean** (opens `toolcats`). A row opens `tool`.
-- **Off the belt**: Tool · Reason, badged “not visible to the model”.
+The Steering row still counts the rev1 assembler's items, while the Steering tab counts SteeringFrames: 14 items here against 45 SteeringFrames there for Triage. A build shows the Steering tab's count of SteeringFrames and their tokens.
 
-### Runtime
+**Last 30 days.** Subtext: “This agent's own rollup, the same one the Agents table reads.” **Open activity** in the header opens the Activity tab. Four stats: Runs (“1,340”, “last at 2026-09-11 14:19:02”), Spend (“$402.11” over its basis, `gateway_observed`), Tokens (“124,910,766” over “83% cache read over input”) and Tamper incidents (“1”, in the critical colour when not zero, over the health reason). The mockup's reason reads “1 open incident” although Triage's only incident is resolved; a build counts every recorded incident and says how many are open. A note closes the panel: “Every tool definition on the belt is paid for as input on every call, whether the tool is used or not, which is why the belt width and the token bill are read together.”
 
-- When no host is enrolled, the tab is the empty state “No runtime is enrolled”, with **Enroll a runtime** (the Register agent gate) and **Show CLI steps** (opens `register`).
-- **Host**, read from the runtime record so this page and Runtimes cannot disagree: Runtime · Harness · Device key · Collector · Hook binary · Hooks written · Model proxy · Oxagen MCP endpoint · Settings · Tier earned · First frame · Last checkpoint, plus the runtime's note when it has one. The health badge and **Open the runtime** sit in the header.
-- **What this tier delivers**: the tier ladder with this agent's rung marked, then Model calls, Tool calls over MCP, Harness-native tools, Budgets, Steering, and Credentials held by this agent (`none`). Each answer changes with the tier. **All runtimes** in the header.
-- **Unenroll this host from the CLI**: the `oxagen agent unenroll` command, the note that hand-stripped hooks record Hooks removed (`hooks_removed` in the tooltip) and drop the tier to `observe`, **Run a test session**, and **Unenroll** (danger).
+**Definition in git.** Subtext: “Identity is in Postgres; the definition is a file, and the file is the source of truth.” **Open the file** in the header opens the Source tab (the mockup goes through the old `/definition` address, which lands there). Rows: Path (`.oxagen/agents/triage.toml`), Repo (`a-intel/platform @ main`), Commit (`a4c91e2`), `definition_digest` (`sha256:73ad0e15f8c9b224`), and Generated beside it (`.claude/agents/triage.md`, with the sub-line “A pull request that edits a generated file without regenerating it fails the checks.”).
 
-### Permissions
+**Dialogs this page opens.**
 
-Roles, ceilings, and mandates, which are all limits on the principal. It never lists tools.
+- The avatar editor, titled “Avatar · <name>”, with the agent key under it: kind (Icon, Initials or Photo), glyph and tone.
+- `rotatecred`, titled “Rotate the credential on a-intel.core.triage?”. It says a new key is minted and handed to the host at its next check-in, that the old key stops working at the next call and every live run token dies with it, and warns that a run in flight ends at its next call. **Cancel** and **Rotate it** (gold).
+- `suspendagent`, titled “Suspend a-intel.core.triage?”. It says suspension is reversible and keeps the registration, the roles and the mandates, and that every run token dies at the next call because the refusal is on the server. **Cancel** and **Suspend it** (danger).
+- `delagent`, titled “Deregister agent” with the agent key: what is kept, what ends (the roles, the mandates and the host enrollment), what is in flight, the checkbox “I understand this cannot be undone”, **Cancel** and **Deregister** (danger).
+- The Optimization actions open the Source tab, the Toolbelt tab, Steering, the Compiler, the Steering record wizard or the Activity tab. The mockup's Edit the definition and Open incidents go through the old `/definition` and `/incidents` addresses, which land on Source and Activity; a build links the canonical paths.
 
-- **Roles**: a wire from the roles held and the operator to the belt, then each role with its permission ids and description, Resource scope, Spend ceiling (per run and per day), and Can move money. **Assign a role** opens `assignrole`. Closing note: “Assigning a toolbelt grants nothing. It widens what the model is shown; every call on it is still decided against these roles, the policy on the tool, and the mandate ledger.”
-- **Budgets**: a per-run meter and a per-day meter, then Mode, On a breach, and Delegation ceiling. The subtext states that budgets are checked at each hook boundary on reported spend and fail open, and that the proxy enforces the ceiling before the call on the `gateway` and `contained` tiers. **Set budget** opens `budget`.
-- **Mandates held**: Mandate · Effect · Per call · Per period · Remaining · Expires · Status; a row opens the mandate page. With no mandate, the panel is “No mandate”, badged “cannot move money”, with the four-step denial chain (Call, Financial class, Mandate lookup, Decision `no_mandate`) and **Request a mandate** (opens `mandate`).
-
-### Activity
-
-- **Runs**: Run · Status · Tokens · Cost · Frames · Started; a row opens the run. When no run of this agent is in the player's window, the panel says so, gives the 30-day count, and offers **Open the audit record**.
-- **Token accounting**: Class · Tokens 30d · Rate · Cost, one row per class plus Tool definitions counted as input, over the cache hit rate and the tool-definition share of input.
-- **Last 30 days**: Runs, Spend with its basis, Productive ratio, Tokens with the cache rate, then any finding open against this agent with **Evidence** (opens `evidence`) and **Fix** (opens `fix`). **Open on Spend** in the header.
-- **Tamper incidents**: one panel per incident, with What happened, What it stopped, Closed or Owner, the incident id, and **Open on Audit**. With none, the panel lists the detectors that would raise one and offers **Open the incident register**. Closing note: a tamper incident never raises the tier of the frames it touched.
-
-### Definition in git
-
-The form and the file, side by side.
-
-- Panels: **Identity** (Schema and Slug read-only, Name, Description) · **Model and budget** (Model tier, Per-run budget in USD, stored as `per_run_micros`) · **Tools** (`tools` and `deny_tools` as chip lists, Side effects as read, write, and irreversible, where irreversible is disabled without a mandate) · **Instructions** (the `[instructions]` body) · **Harness** (harness read-only, color).
-- **Source** panel: the file link into the source editor, Repository, `definition_digest`, At commit, and the generated file beside it.
-- **Changing this agent**: the four-step chain (edit, checks, review, merge is the change) and the note that deleting an agent is a pull request that removes the file.
-- A bar above the split states the file's condition: a parse error with the failing message, unsaved changes with the diff stat against the commit, or a pending branch with its pull request. **Save changes** and **Open a pull request** both open `commit`.
-
-**Dialogs this page opens:** `avatar`, `delagent`, `identity`, `assignrole`, `budget`, `mandate`, `tool`, `toolcats`, `evidence`, `fix`, `commit`, `register` (from an unenrolled Runtime tab), `request-access` (from denied), `incident` (from error).
-
-**Shell.** Same as the Agents page, with the breadcrumb … / Agents / `<agent name>`. Sidebar Workspace nav: Fleet · Agents · Tools · Steering · Runtimes · Repositories · Spend.
+**Shell.** As on Agents, with Agents lit and the breadcrumb Anderson Intelligence Corp. / Core platform / Agents / triage.
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the constant in `mockups/src/engine.js` that the design renders from.
+Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under `packages/oxagen/src/contracts/` in `macanderson/oxagen` `main`.
 
-| Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
+| Element | Mockup collection | Target store or contract | Backing today in macanderson/oxagen | Status |
 |---|---|---|---|---|
-| Identity, principal, credentials | `AGENTS` (`mockups/fixtures/agents.json`) | `iam.principals` kind=agent | `iam.principals`; `agent.credential.*` | ✅ |
-| Roles held | `S.agentRoles` via `agentRolesOf()`, `ROLES` | `iam.role_grants` | `agent.role.*`, `iam.role.list` | ✅ |
-| Steering reaching this agent | `STG_PREVIEW` (`mockups/fixtures/steering-preview.json`) via `agentSteering()` | the assembler’s registry port; `steering.manifest` frames | `agent.context_records`; nothing assembles per agent yet | 🟡 |
-| Toolbelt assignments | `TOOLBELTS`, `TOOLBELT_ASSIGN` (`mockups/fixtures/toolbelts.json`) via `beltsOfAgent()` | `tools.toolbelts`, `tools.toolbelt_assignments` | none | ❌ |
-| The computed belt and what is off it | `TOOLS` via `beltOf()`, `beltOutside()` | grants × policy at run start | `agent.tools`/`tool_versions`; `policy.evaluate` | 🟡 |
-| Runtime, collector, hooks, checkpoint | `RUNTIMES` (`mockups/fixtures/runtimes.json`) via `agentRuntime()` | `control.runtimes`, `control.enrollments` | `tacho.hosts`; `tacho.enrollment.{create,revoke}` | ✅ |
-| Tier earned | `tier` | computed per run from what was routed (G6) | none; a stored column today | ❌ (G6) |
-| Budgets | `budget`, `budgetUsed`, `budgetDay`, `usedDay` | `cost.budgets` | `agent.budget.set`; enforcement at hook boundaries | 🟡 |
-| Mandates | `MANDATES` (`mockups/fixtures/mandates.json`) | `tools.mandates`, `tools.mandate_ledger` | none | ❌ (G1) |
-| Runs | `RUNS` (`mockups/fixtures/runs.json`) | `run.runs` | ClickHouse frames + `run.list` | ✅ |
-| Token accounting by class | `agentTok(a)`, the class table in `actAccounting()` | `cost.daily_totals` with the §12.6 classes | ClickHouse `token_usage`, totals only | ❌ (G3) |
-| Findings | `FINDINGS` (`mockups/fixtures/findings.json`) | `insight.findings` | none | ❌ |
-| Tamper incidents | `INCIDENTS` (`mockups/fixtures/audit.json`) via `agentTamper()` | `audit.audit_events` incident kinds | `tacho.incidents` | ✅ |
-| Definition file | `agentTomlSeed()`, `S.defBase`/`S.defSrc` | the repo at `.oxagen/agents/<slug>.toml` | `agent.definition.{get,put}`; Context PR | ✅ |
+| Agent card, description, status, operator | `AGENTS` | `get_agent` `identity` | `agent.get.ts:91-145`, identity at `:121-138`; status `unenrolled`, `enrolled`, `suspended`, `retired` (`agent.list.ts:34-48`) | ✅ |
+| Tier badge | `AGENTS` `tier` | `list_agents` `enforcementTier` | `agent.list.ts:78-83`. `get_agent` carries no tier | ✅ |
+| Edit avatar | `openAvatar()` | `update_agent_def` `avatarUrl` | `agent.definition.update.ts:12`, `:38` | ✅ |
+| Rotate credential | `rotatecred` | `rotate_agent_credential` | `agent.credential.rotate.ts:14`. It returns the new key once to the caller; nothing hands it to the host at check-in | 🟡 |
+| Suspend | `suspendagent` | `suspend_agent` | `agent.suspend.ts:14`; a suspended principal anchors no governed run and its belt is empty (`agent.suspend.ts:1-9`) | ✅ |
+| Deregister | `delagent` | `retire_agent`, then a pull request removing the file | `agent.retire.ts:16`; the file is left in place (`agent.retire.ts:1-9`) | 🟡 |
+| Tab counts | `beltTotal()`, `a.mandates`, `tamperCount()` | `get_agent_toolbelt` `tools`; `list_agents` `mandates` and `tamperIncidentsRecorded` | `agent.toolbelt.get.ts:155`; `agent.list.ts:117-130` | ✅ |
+| 30-day total, spend and basis | `agentTok(a)`, `spend30` | `get_spend` grouped by agent: `tokens` by class and `cost` with its basis | `spend.get.ts:34`; token classes `input_uncached`, `cache_read`, `cache_write_5m`, `cache_write_1h`, `output`, `reasoning` (`spend.shared.ts:107-116`); basis (`spend.shared.ts:13-18`) | ✅ |
+| Output and Reasoning bars | `agentTok(a)` | The same token classes | `spend.shared.ts:107-116` | ✅ |
+| Conversation, Tool results, Context frames, Tool definitions, Steering and System bars | `agentTok(a).parts` | Measured prompt composition (§12.6) | `cost.run_totals` has `tool_definition_tokens`, `context_frame_tokens` and `steering_tokens`, null until a recorder measures them (`packages/database/src/schema/cost.ts:320-323`). Conversation, tool results and system have no column | ❌ |
+| Cache hit rate, per run, per model call | `agentTok(a)` | Cache read over input; tokens over `runs` and over `calls` | `get_spend` row `runs`, `calls` (`spend.shared.ts:150-160`); `list_agents` `tokens30d.cacheReadRate` (`agent.list.ts:95-116`) | ✅ |
+| Optimization | `coachItems("agents", key)` over `coachAgent()` and `agentTok(a)` | Recommendations for this agent, derived at read time from the token record | No recommendation contract. The findings job ships four kinds, one of them the cache-write finding the first item mirrors (`finding.shared.ts:15-20`, `list_findings` at `finding.list.ts:23`) | ❌ |
+| Composition, Identity | `a.principal` | `get_agent` `identity.principalId` | `agent.get.ts:121-138` | ✅ |
+| Composition, Steering | `agentSteering(a)` | The agent's envelope for its standing brief | No capability resolves an envelope without a run (#3879) | ❌ |
+| Composition, Toolbelt | `beltsOfAgent()`, `beltTotal()`, `beltPresentation()` | Stored toolbelts; `get_agent_toolbelt` for the count and the presentation | No toolbelt table; `agent.toolbelt.get.ts:147-155` | 🟡 |
+| Composition, Runtime | `RUNTIMES` via `agentRuntime()` | `get_agent` `hosts`; `list_tacho_hosts` | `agent.get.ts:53-73`; `packages/oxagen/src/tacho/schemas.ts:50-124` (platform, OS version, arch, harnesses; no host kind) | 🟡 |
+| Composition, Owner and Permissions | `PEOPLE`, `agentRolesOf()`, `a.mandates` | `get_agent` `identity.operatorId` and `roles`; `list_agents` `mandates` | `agent.get.ts:130`, `:140`; `agent.list.ts:117-121` | ✅ |
+| Health badge | `agentHealth()` | Derived from `status`, `enforcementTier` and open tamper incidents | `agent.list.ts:122-125` | ✅ |
+| Last 30 days: runs, spend, tokens, incidents | `runs30`, `spend30`, `agentTok(a)`, `tamperCount()` | `list_agents` `runs30d`, `spend30d`, `tokens30d`, `tamperIncidents`; `get_spend` by agent | `agent.list.ts:86-130`. `spend30d` and `tokens30d` count wrapped sessions only | 🟡 |
+| Last run time | `a.lastUsed` | The agent's newest run | No per-agent field; the newest run is found on `list_runs` pages (`run.list.ts:476`) | 🟡 |
+| Definition in git: path, commit, digest | `a.commit`, `a.digest` | `get_agent` `definition` | `agent.get.ts:75-89`: `path`, `digest`, `commitSha`, `branch`, `pullRequestUrl`, the cached `source` | ✅ |
+| Definition in git: repo | `w.main`, `w.branch` | The workspace's bound repository | The repository binding; `definition.branch` is the branch of the last commit | 🟡 |
+| Generated beside it | `.claude/agents/<slug>.md` | The subagent file generated from the definition | `propose_agent` writes it when it proposes the agent (`agent.propose.ts:17-20`, `:35`). No check fails a pull request that edits it without regenerating it | 🟡 |
+
+## Future-only fields
+
+The Overview carries no `data-future` mark, and the catalog gives `agent` no future story. These fields have no contract today and are unmarked in the design. A build renders each as not recorded until its contract ships:
+
+- The six input composition bars (Conversation, Tool results, Context frames, Tool definitions, Steering, System).
+- Optimization.
+- The Composition Steering row.
+- The named toolbelts in the Composition Toolbelt row (the tool count and presentation ship).
+- The host kind in the Composition Runtime row.
 
 ## Functionality
 
-- Every tab is a route segment, so a tab is linkable and the browser back button moves between tabs.
-- The tab counts are live: the Toolbelt count is `beltTotal(a)`, Permissions is the mandates held, Activity is the tamper incidents. A count of zero renders no badge.
-- Identity is stable and everything else is a reference. The principal does not move when the persona, the belt, the model, or the machine changes, which is why a run from a year ago and a run from this morning are the same actor.
-- A toolbelt assignment grants nothing. The belt decides what the model is shown; the roles, the policy on the tool, and the mandate ledger decide whether the call survives. Both have to allow the call.
-- The Host panel reads the `RUNTIMES` record, so the collector, the hooks, and the last checkpoint match the Runtimes page exactly. The agent row carries only its own key.
-- Belt search runs the same index `search_tools` queries, and it never returns a tool outside the belt. What the model cannot call, it cannot find, so it cannot be prompt-injected into calling it.
-- The belt presentation toggle is a preview, not a setting. It is per agent (`S.beltFor`), resets when you open another agent, and changes nothing about how the agent runs.
-- Editing the definition never writes to Postgres. Every path ends in a commit on a branch, and the merge is the change.
-- Deregister opens a pull request that removes the file. The principal is retired, never deleted.
-- Suspend and Revoke credential kill every live run token at the next call, which is what makes a halt stick.
+- Every tab is a path segment, so a tab is linkable and the back button moves between tabs. The tab counts are live and read from the record.
+- Identity is stable and everything else is a reference. The principal does not move when the belt, the model or the machine changes, which is why a run from a year ago and a run from this morning are the same actor.
+- Every Composition row names a reusable object, states nothing the registry that owns it states, and opens the tab or the registry that owns it.
+- The 30-day token use total equals the sum of its eight bars, and it is the same figure the roster's Tokens 30d column and the Last 30 days panel show.
+- Optimization items are derived from the token rollup at read time and never stored as a model's text. Each item names what to change and what it is worth, and its action opens the place the change is made.
+- Rotate credential and Suspend each end every live run token at the next call. Suspend is reversible; Deregister retires the principal and never deletes it.
 
 ## States
 
-- **loaded**: the page as described above, on the demo record. An agent slug that matches nothing falls back to the first agent.
-- **empty**: “This agent has never run”. “It is registered and enrolled, but no frame has arrived. Its belt is computed at run start, so there is nothing yet to show for tools either.” Action: **Back to Fleet**. The Runtime tab carries its own empty state when no host is enrolled, and the Steering tab carries its own when nothing is assembled.
-- **loading**: the shell stays; the page body is replaced by the skeleton.
-- **error**: “This agent could not be loaded”. “The control plane answered `503 iam_principals_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the trace line beneath.
-- **access denied**: “You cannot see this agent”. “Your roles on Anderson Intelligence Corp. do not include `agent.read on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by*.
+- **loaded**: as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell, agent Triage). An agent slug that matches nothing falls back to the first agent.
+- **empty**: “This agent has never run”. “It is registered and enrolled, but no frame has arrived. Its belt is computed at run start, so there is nothing yet to show for tools either.” Action: **Back to Work**. The header and the tab bar are replaced along with the body.
+- **loading**: the shell stays; the page body is the skeleton (four tile blocks and a panel of seven rows).
+- **error**: “This agent could not be loaded”. “The control plane answered `503 iam_principals_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again** (gold) and **Open an incident**, over the line “trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z”.
+- **access denied**: “You cannot see this agent”. “Your roles on Anderson Intelligence Corp. do not include `agent.read on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it.” Actions: **Request access** (gold) and **Back to Work**. Below: Signed in as (“Marcus Bell · workspace.owner · core-platform”), Needed (`agent.read on core-platform`) and Decided by (`pol_v41` · deny wins over every allow).
+
+The empty, loading, error and denied states belong to the whole agent page. `agent-identity.md`, `agent-toolbelt.md` and `agent-runtime.md` list the three that apply to their tabs.
 
 ## Mobile
 
-Top bar collapses to hamburger · current crumb · search glyph · notifications · approvals · avatar. The five-slot thumb bar replaces the sidebar (Fleet, Agents, Tools, Spend, More). The tab strip scrolls horizontally and keeps the selected tab in view. The header actions wrap under the agent card. Every table becomes a stack of cards, each cell labelled with its column header; the definition split becomes one column, form above source. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; touch targets are ≥ 44 px; inputs are 16 px; nothing scrolls sideways.
+The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The top bar shows the current crumb (the agent's slug). The header actions wrap under the description. The tab strip scrolls in its own row and keeps the selected tab in view. The Overview panels stack in one column, the token bars keep their labels and values, each Optimization item wraps within the panel, and the Composition rows put the Open button under each value. Every dialog rises from the bottom edge as a sheet. Touch targets are at least 44 px and nothing scrolls sideways.
 
 ## Permissions
 
-- Read: `agent.read`
-- Writes (each a governed action recorded in Audit): `agent.credential.rotate`, `agent.credential.revoke`, `agent.suspend`, `agent.deregister`, `agent.role.assign`, `budget.set`, `enrollment.revoke`, `agent.write` (the commit on the definition)
+- Read: `get_agent`, `list_agents` and `get_agent_toolbelt` admit org Owner, Admin and Member, and workspace Owner and Member. The mockup names the permission `agent.read`.
+- Writes, each a governed action recorded in Audit: Edit avatar (`update_agent_def`: org Owner or Admin, workspace Owner or Member), Rotate credential (`rotate_agent_credential`: org Owner or Admin), Suspend (`suspend_agent`: org Owner or Admin), Deregister (`retire_agent`: org Owner or Admin).
 
 ## Backend gaps this page depends on
 
-- G1 mandates, including the ledger the mandate table reads
-- G3 the token classes of §12.6, which the accounting table and the token panel both read
-- G6 the tier computed per run, which every tier answer on the Runtime tab depends on
-- toolbelts as a stored object, with assignments to agents
-- the per-agent steering assembly the Steering tab renders
-- findings, which the Activity tab lists against this agent
+- Measured prompt composition written to `cost.run_totals` and rolled up per agent, for the six input bars.
+- A recommendation read for one agent, derived from the token record, for Optimization.
+- An envelope per agent without a run (#3879), for the Steering row.
+- Stored toolbelts with assignments, for the named belts.
+- A host kind on the host record.
+- Gateway-observed spend and tokens rolled up per agent on `list_agents`.
+- The current work order an agent is on. `docs/fleet-operations-ia.md` puts current work on the Overview; the mockup does not draw it yet, and no store holds a work order.
 
 ## Rules every build of this page must keep
 
-- Every badge that describes trust (enforcement tier, health, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a client-attested window is labelled as such, and only `contained` earns the word enforced.
-- Identity never mixes with steering. The principal, the credentials, and the lifecycle live on Identity; what influences behaviour lives on Steering and is owned by the workspace library.
-- Permissions never lists tools, and Toolbelt never claims a permission.
-- A panel that names a reusable object links to the registry that owns it and states no fact that registry owns.
-- Every number that is money shows its basis. Every token figure is this agent's own rollup, and the cache rate under it is cache read over input for this agent.
-- Every explanation is a chain of links to frames, records, and commits, not a summary.
-- No gold action on this page; gold is identity and appears once per screen at most.
-- No heading carries a comma, a mid-dot, or a not/never contrast; subtext under a heading is one sentence or nothing.
-- A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do; nothing silently does nothing.
-- Every rev1 tab id keeps resolving through `IAM_TAB_ALIAS`, so an old link lands on the tab that absorbed it.
+- A frame (a recorded event) and a SteeringFrame (a resolved input) never share a name on screen.
+- A Steering Source and a SteeringFrame are never shown as each other. The Steering row counts what reaches the agent and links to the Steering tab, which shows the frames and their sources apart.
+- No person is scored or ranked. Owner names who is accountable and carries no figure about them. Optimization recommends a change to the agent, never a grade.
+- Every enforcement claim states the tier. “Enforced” only for calls routed through Oxagen.
+- Headers are rollups of the rows beneath them: the token total is the sum of its bars, and the tab counts are the records the tabs list.
+- Every badge that describes trust (tier, health, cost basis) shows the recorded value and nothing stronger. There is no replay grade on the page (D14).
+- Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing. A quoted string above that breaks this rule is a mockup defect to fix, not copy to reproduce.
+- Exactly one gold (primary) action per screen. The agent header has none by design; the gold on this page belongs to an open dialog's primary button or to a not-loaded state's first action.
+- A future-only field is marked in the design and renders as not recorded in a build until its contract ships.
+- A not-loaded state replaces the page body, never the shell.

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Spec v1, for design review. No code is written against it yet. |
+| **Status** | Spec v1, for design review. No code is written against it yet. The fleet operations wedge renamed Tasks to Work (`fleet-operations-wedge.md`). This spec keeps the words of `tasks-spec.md`: a task is a work item, and the Tasks page is Work. |
 | **Date** | 2026-09-24 |
 | **Owner** | Mac Anderson |
 | **Extends** | `tasks-spec.md` (providers, the task record, the definition of done, work orders, and workflows). §2 lists every line of it this spec changes. |
@@ -104,7 +104,7 @@ CSV is the seventh card on step 1 of the connection wizard (tasks-spec §5.1), i
 
 - **The text is untrusted.** A row reaches an agent's brief the way an issue body does, as quoted
   evidence, and a tool call built from it is taint-marked (mission-control-spec §6.7).
-- **Formulas.** Oxagen stores every cell as text and evaluates none. When the Tasks tab exports to
+- **Formulas.** Oxagen stores every cell as text and evaluates none. When the Backlog exports to
   CSV, a cell that begins with `=`, `+`, `-`, `@`, a tab, or a carriage return gets a leading `'`, so
   a spreadsheet opens it as text.
 - **Personal data.** A help-desk export can carry requester names and emails. Review flags each column
@@ -508,7 +508,7 @@ tasks-spec §6.6 reasons for field settings. On day 1 every agent in a pool is o
 
 ### 8.7 The In flight tab
 
-A fourth tab on the Tasks page, beside Tasks, Work orders, and Workflows. One row per open work order,
+A fifth tab on the Work page, beside Backlog, Work orders, Workflows, and Findings. One row per open work order,
 grouped by plan:
 
 | Column | Shows |
@@ -523,7 +523,7 @@ grouped by plan:
 | Link | Current, Delayed, or Offline, as ADR-162 defines link health |
 | Messages | The thread count, with parked threads flagged |
 
-The Tasks nav count (tasks-spec §15) adds collisions, parked threads, and stale claims, because each
+The Work nav count (tasks-spec §15) adds collisions, parked threads, and stale claims, because each
 waits on a person.
 
 ### 8.8 Work order states

@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/run-interjection.md?raw";
 
 export default {
-  title: "Oxagen/Workspace/Run · interjection",
+  title: "Oxagen/Runs/Held for an answer",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/runs/run_01K6QW3D5N7TYBA2" },

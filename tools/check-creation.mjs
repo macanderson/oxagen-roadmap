@@ -360,16 +360,18 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
   await page.close();
 }
 {
-  const { page, errs } = await open("#/a-intel/core-platform/steering/skills/a-intel.release-notes-from-prs/source");
+  const { page, errs } = await open("#/a-intel/core-platform/steering/sources/skill/a-intel.release-notes-from-prs");
   const r = await page.evaluate(() => ({
     h1: document.querySelector("#pg h1")?.textContent || "",
+    bar: document.querySelector("#pg .ced")?.innerText || document.getElementById("pg").innerText,
     tab: document.querySelector('#pg .tabs .tab[aria-selected="true"]')?.textContent || "",
     ced: !!document.getElementById("cedT"),
     gutter: (g => g ? (g.children.length || g.textContent.split("\n").filter(Boolean).length) : 0)(document.getElementById("cedG")),
     hl: document.querySelectorAll("#cedH span").length,
     txt: document.getElementById("cedT")?.value || "",
   }));
-  ok(/SKILL\.md/.test(r.h1), "skill source: the path is the heading, got " + r.h1);
+  ok(/a-intel\.release-notes-from-prs/.test(r.h1), "skill source: the skill's id is the heading, got " + r.h1);
+  ok(/\.oxagen\/skills\/release-notes-from-prs\/SKILL\.md/.test(r.bar), "skill source: the editor names the SKILL.md path");
   ok(r.ced && r.gutter > 8, "skill source: editor with a gutter, " + r.gutter + " lines");
   ok(r.hl > 5, "skill source: markdown highlighted, " + r.hl + " spans");
   ok(!/<span/.test(r.txt), "skill source: the editor holds text, not markup");
@@ -391,8 +393,8 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
   const cases = [
     ["#/a-intel/core-platform/tools", "New tool"],
     ["#/a-intel/core-platform/agents", "New agent"],
-    ["#/a-intel/core-platform/steering/skills", "Add a skill"],
-    ["#/a-intel/core-platform/steering", "Write a context record"],
+    ["#/a-intel/core-platform/steering?kind=skill", "New source"],
+    ["#/a-intel/core-platform/steering", "New source"],
     ["#/a-intel/core-platform/steering", "Import Markdown"],
   ];
   for (const [hash, label] of cases) {
@@ -401,7 +403,11 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
     const found = await page.evaluate(l => [...document.querySelectorAll("#pg .acts .btn")].some(b => b.textContent.trim() === l), label);
     ok(found, "entry point: " + label + " on " + hash);
   }
-  await page.evaluate(() => openDialog("create"));
+  await page.evaluate(() => openDialog("newsrc"));
+  await page.waitForTimeout(150);
+  const kinds = await page.evaluate(() => [...document.querySelectorAll("#layer .wz-card b")].map(b => b.textContent).join("|"));
+  ok(/Steering record/.test(kinds) && /Skill/.test(kinds) && /Document/.test(kinds) && /Glossary term/.test(kinds), "new source: a card per authored kind, got " + kinds);
+  await page.evaluate(() => { closeDialog(); openDialog("create"); });
   await page.waitForTimeout(150);
   const cards = await page.evaluate(() => document.querySelectorAll("#layer .wz-card").length);
   ok(cards === 6, "create chooser: six cards, got " + cards);
@@ -515,7 +521,7 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
   await page.waitForTimeout(250);
   const after = await page.evaluate(() => {
     const m = memById("mem_01K5R0N2");
-    return { prs: RECPRS.length, mem: MEMORY.length, dlg: S.dlg, toast: S.toast, ev: AUDIT[0].ev, tab: S.tab.steering,
+    return { prs: RECPRS.length, mem: MEMORY.length, dlg: S.dlg, toast: S.toast, ev: AUDIT[0].ev, hash: location.hash,
       claude: (RECPRS.find((p) => p.src === "CLAUDE.md") || {}).records?.length, say: (m.sayings || []).some((x) => x.file === "apps/api/CLAUDE.md" && x.line === 3),
       prov: MEMORY[0].provenance, force: MEMORY[0].force };
   });
@@ -523,12 +529,8 @@ ok(seen.size === 6, "six kinds, six different treatments, got " + seen.size);
   ok(after.claude === 8, "import: CLAUDE.md's pull request carries its 8 records, got " + after.claude);
   ok(after.say && /^CLAUDE\.md:L32 · import by /.test(after.prov) && after.force === "info", "import: the fold and the new memory keep file and line");
   ok(/^Opened 4 pull requests for 18 records\. Wrote 1 memory\. Added 1 saying to existing memories\./.test(after.toast), "import: the toast counts what happened, got " + after.toast);
-  ok(after.ev === "steering_imported" && after.tab === "prs", "import: it is audited and lands on the pull requests");
+  ok(after.ev === "steering_imported" && /\/steering\/proposals\/prs$/.test(after.hash), "import: it is audited and lands on the pull requests, got " + after.hash);
 
-  await page.evaluate((h) => { location.hash = h; }, "#/a-intel/core-platform/steering/memory");
-  await page.waitForTimeout(250);
-  const shelf = await page.evaluate(() => ({ text: document.querySelector("#pg").innerText, imports: document.querySelector("[data-mem-imports]")?.dataset.memImports }));
-  ok(/CLAUDE\.md:L32/.test(shelf.text) && Number(shelf.imports) >= 2, "import: the shelf shows the file and counts imported lines, got " + shelf.imports);
   await page.evaluate(() => openDialog("memory", "mem_01K5R0N2"));
   await page.waitForTimeout(150);
   ok(await page.evaluate(() => [...document.querySelectorAll("#layer [data-mem-src]")].some((x) => x.textContent === "apps/api/CLAUDE.md:L3")), "import: the memory shows the imported saying's source");
@@ -714,16 +716,20 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
-// An ontology note is a file on the workspace repository, so writing, changing and retiring one
-// each open a pull request and nothing on the page claims a merge it has not seen.
+// A glossary term (an ontology note until the fleet operations wedge) is a file on the workspace
+// repository, so writing, changing and retiring one each open a pull request and nothing on the page
+// claims a merge it has not seen. Terms are a source kind on Steering › Sources.
 {
-  const { page, errs } = await open("#/a-intel/core-platform/steering/ontology");
+  const { page, errs } = await open("#/a-intel/core-platform/steering?kind=glossary");
   const dtxt = () => page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
-  const terms = () => page.evaluate(() => [...document.querySelectorAll("table tbody tr td:first-child b")].map((x) => x.textContent).join("|"));
+  const terms = () => page.evaluate(() => [...document.querySelectorAll("table tbody tr .src-t")].map((x) => x.textContent).join("|"));
   const prs = () => page.evaluate(() => OXPRS.filter((x) => x.kind === "ontology").map((x) => x.files[0][0] + ":" + x.files[0][1]).join("|"));
 
   ok(/release train/.test(await terms()), "ontology: the shipped definitions are listed");
-  ok(await page.evaluate(() => !!document.querySelector("[onclick*=\"ontnew\"]")), "ontology: the panel writes a new definition");
+  await page.evaluate(() => openDialog("newsrc"));
+  await page.waitForTimeout(150);
+  ok(await page.evaluate(() => !!document.querySelector("#layer [onclick*=\"ontnew\"]")), "ontology: New source writes a new definition");
+  await page.evaluate(() => closeDialog());
   ok(!(await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"))).includes("Index"), "ontology: the Index roadmap panel is gone");
 
   // Opening a row reads the note; it offers both writes.
@@ -735,7 +741,7 @@ for (const theme of ["light", "dark"]) {
   // Writing one.
   await page.evaluate(() => openDialog("ontnew"));
   await page.waitForTimeout(150);
-  ok(/Write an ontology note/.test(await dtxt()), "ontology: the create dialog opens");
+  ok(/Define a glossary term/.test(await dtxt()), "ontology: the create dialog opens");
   const kinds = await page.evaluate(() => [...document.querySelectorAll("#on-kind option")].map((o) => o.value).join("|"));
   ok(/term/.test(kinds) && /entity/.test(kinds) && /alias/.test(kinds) && /boundary/.test(kinds), "ontology: the four note kinds are offered, got " + kinds);
 
@@ -980,7 +986,7 @@ for (const theme of ["light", "dark"]) {
   for (const row of ["Store", "In regulated mode", "Compiled from", "Who reads it", "What it writes"]) {
     ok(new RegExp(row).test(where), "policy: the storage panel states " + row);
   }
-  ok(/not a context record/.test(where), "policy: a version is distinguished from a context record");
+  ok(/not a Steering record/.test(where), "policy: a version is distinguished from a Steering record");
   ok(/\.oxagen\/policy\//.test(where), "policy: regulated mode names the file");
   ok(/policy\.decision/.test(where), "policy: the frame it writes is named");
 
@@ -1003,11 +1009,13 @@ for (const theme of ["light", "dark"]) {
 }
 
 // The mandate page wired Change limits to the grant wizard, so editing opened a form that creates
-// a second mandate, and Revoke was a toast that reported a write it never made.
+// a second mandate, and Revoke was a toast that reported a write it never made. The mandate page is
+// now Delegation on the agent's Permissions tab, and its old address lands there.
 {
   const { page, errs } = await open("#/a-intel/finops/agents/invoice-bot/mandates/mnd_7K2ETQ4");
+  ok(/permissions\?delegation=mnd_7K2ETQ4/.test(await page.evaluate(() => location.hash)), "mandate: the old address lands on Delegation");
   const acts = await page.evaluate(() =>
-    [...document.querySelectorAll(".phead .acts button")].map((b) => b.getAttribute("onclick") + "|" + b.textContent.trim()));
+    [...document.querySelectorAll(".dlg-m .dlg-m-h button")].map((b) => b.getAttribute("onclick") + "|" + b.textContent.trim()));
   ok(acts.some((a) => /openDialog\('mandateedit','mnd_7K2ETQ4'\)\|Change limits/.test(a)),
     "mandate: Change limits opens the edit dialog on this mandate, got " + acts.join(" ~ "));
   ok(acts.some((a) => /openDialog\('mandaterevoke','mnd_7K2ETQ4'\)\|Revoke/.test(a)),
@@ -1079,7 +1087,8 @@ for (const theme of ["light", "dark"]) {
   const tabs = await page.evaluate(() =>
     [...document.querySelectorAll('[role="tab"]')].map((t) => t.textContent.replace(/\d+$/, "").trim()));
   ok(tabs.includes("Data plane"), "organization: the Data plane tab is present, got " + tabs.join(" ~ "));
-  ok(tabs.length === 7, "organization: seven tabs, got " + tabs.length + ": " + tabs.join(" ~ "));
+  ok(tabs.includes("Cost centers"), "organization: the Cost centers tab is present, got " + tabs.join(" ~ "));
+  ok(tabs.length === 8, "organization: eight tabs, got " + tabs.length + ": " + tabs.join(" ~ "));
 
   const sub = await page.evaluate(() => {
     const ps = [...document.querySelectorAll(".phead .t p")];
@@ -1142,17 +1151,17 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
-// Two gate buttons carried the mid-dot the plain-noun rule bans, and one pointed at a Mandates
-// ledger tab that no longer exists.
+// Steering › Gates is gone: a gate notice is a policy source on Sources, and each row links to where
+// its gate is edited. No link carries a mid-dot or points at the cut Mandates ledger.
 {
-  const { page, errs } = await open("#/a-intel/core-platform/steering/policy");
-  const opens = await page.evaluate(() =>
-    [...document.querySelectorAll("button")].map((b) => b.textContent.trim()).filter((t) => /^Open /.test(t)));
-  ok(opens.length > 0, "gates: an Edited on button opens its editor");
-  ok(!opens.some((l) => /·/.test(l)), "gates: no Open button carries a mid-dot, got " + opens.join(" ~ "));
-  ok(!opens.some((l) => /Mandates/.test(l)), "gates: no Open button points at the cut Mandates ledger, got " + opens.join(" ~ "));
-  for (const label of ["Open the policy tab", "Open the kill switches tab", "Open the record"]) {
-    ok(opens.includes(label), "gates: " + label + " is present, got " + opens.join(" ~ "));
+  const { page, errs } = await open("#/a-intel/core-platform/steering?kind=policy");
+  const homes = await page.evaluate(() =>
+    [...document.querySelectorAll("table tbody tr td:last-child a")].map((a) => a.textContent.trim() + "|" + a.getAttribute("href")));
+  ok(homes.length > 0, "gates: each gate notice links to where its gate is edited");
+  ok(!homes.some((l) => /·/.test(l.split("|")[0])), "gates: no link carries a mid-dot, got " + homes.join(" ~ "));
+  ok(!homes.some((l) => /Mandates/.test(l)), "gates: no link points at the cut Mandates ledger, got " + homes.join(" ~ "));
+  for (const [label, href] of [["Tools › Policy", /tools\/policy$/], ["Tools › Kill switches", /tools\/switches$/], ["Steering record", /sources\/record\//]]) {
+    ok(homes.some((l) => l.startsWith(label + "|") && href.test(l.split("|")[1])), "gates: " + label + " is linked, got " + homes.join(" ~ "));
   }
   ok(errs.length === 0, "gates: no JavaScript error: " + errs.join(" | "));
   await page.close();
@@ -1162,7 +1171,7 @@ for (const theme of ["light", "dark"]) {
 // A skill could be written and edited and never retired. One written here is a file; one installed
 // is a line in workspace.toml. Both are a pull request, and the drill-down offers it either way.
 {
-  const { page, errs } = await open("#/a-intel/core-platform/steering/skills");
+  const { page, errs } = await open("#/a-intel/core-platform/steering?kind=skill");
   const foot = async (kind, arg) => {
     await page.evaluate(([k, a]) => { closeDialog(); openDialog(k, a); }, [kind, arg]);
     await page.waitForTimeout(220);
@@ -1254,7 +1263,7 @@ for (const theme of ["light", "dark"]) {
 // A working copy could be connected and never disconnected. The link is one gitignored file on a
 // laptop, so this is not a pull request and the confirm has to say so.
 {
-  const { page, errs } = await open("#/a-intel/core-platform/repositories/copies");
+  const { page, errs } = await open("#/a-intel/core-platform/repositories/working-copies");
   const cid = await page.evaluate(() => wsCopies()[0].id);
   await page.evaluate((i) => { closeDialog(); openDialog("workcopy", i); }, cid);
   await page.waitForTimeout(220);
@@ -1335,7 +1344,7 @@ for (const theme of ["light", "dark"]) {
 // The memory tab told you to promote a memory and no row offered it, and nothing forgot one:
 // a fact an agent got wrong kept being recalled with no way to stop it.
 {
-  const { page, errs } = await open("#/a-intel/core-platform/steering/memory");
+  const { page, errs } = await open("#/a-intel/core-platform/steering?kind=memory");
   const clickable = await page.evaluate(() => document.querySelectorAll("table tbody tr.click").length);
   const total = await page.evaluate(() => stgMemory("core-platform").length);
   ok(clickable === total, "memory: every row opens its item, got " + clickable + " of " + total);
@@ -1371,7 +1380,7 @@ for (const theme of ["light", "dark"]) {
   await page.evaluate((i) => { closeDialog(); memPromote(i); }, mid2);
   await page.waitForTimeout(350);
   const title = await page.evaluate(() => document.querySelector(".dlg-h h2").textContent);
-  ok(/context record/i.test(title), "memory: promoting opens the record wizard, got " + title);
+  ok(/Steering record/i.test(title), "memory: promoting opens the record wizard, got " + title);
   const wz = await page.evaluate(() => S.wz && { kind: S.wz.kind, from: S.wz.fromMemory, desc: S.wz.desc });
   ok(wz && wz.kind === "record" && wz.from === mid2,
     "memory: the wizard knows which memory it came from, got " + JSON.stringify(wz && { k: wz.kind, f: wz.from }));
@@ -1383,28 +1392,19 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
-// Memories fold by concept. A memory keeps every saying that said the same thing, the Memory tab
-// counts the sayings it really folded, and a memory that reaches the workspace setting becomes a
-// proposal whose supporting runs are those sayings.
+// Memories fold by concept. A memory keeps every saying that said the same thing, its dialog lists
+// them, and a memory that reached the workspace setting opens the proposal those sayings support.
+// The Memory shelf with its fold tile and setting left with the fleet operations wedge.
 {
-  const { page, errs } = await open("#/a-intel/core-platform/steering/memory");
+  const { page, errs } = await open("#/a-intel/core-platform/steering");
   const f = await page.evaluate(() => {
-    const L = stgMemory("core-platform"), sum = L.reduce((n, m) => n + (m.sayings || []).length, 0);
-    const shown = +document.querySelector("[data-mem-folded]")?.dataset.memFolded;
-    const proposed = document.querySelectorAll('td[data-mem-fold="proposed"]').length;
-    return { sum, shown, proposed, want: L.filter(m => m.proposedAs).length, n: L.length };
+    const L = stgMemory("core-platform");
+    return { n: L.length, sum: L.reduce((n, m) => n + (m.sayings || []).length, 0), want: L.filter(m => m.proposedAs).length,
+      ready: L.filter(m => memFoldOf(m).st === "ready").length, proposed: L.filter(m => memFoldOf(m).st === "proposed").length };
   });
-  ok(f.sum > 0 && f.shown === f.sum, "fold: the tile counts the sayings folded, got " + f.shown + " for " + f.sum);
+  ok(f.sum > f.n, "fold: memories hold more sayings than there are memories, got " + f.sum + " for " + f.n);
   ok(f.proposed === f.want && f.want > 0, "fold: a proposed memory reads proposed, got " + f.proposed + " of " + f.want);
-  await page.selectOption("#memFoldN", "2");
-  await page.waitForTimeout(200);
-  const r = await page.evaluate(() => {
-    const want = stgMemory("core-platform").filter(m => !m.proposedAs && (m.sayings || []).length >= 2 &&
-      new Set((m.sayings || []).map(x => x.run)).size >= 2).length;
-    return { want, got: document.querySelectorAll('td[data-mem-fold="ready"]').length, set: S.memFold.sayings };
-  });
-  ok(r.set === 2 && r.want > 0 && r.got === r.want, "fold: lowering the setting marks what now meets it, got " + r.got + " of " + r.want);
-  await page.evaluate(() => { S.memFold.sayings = 3; render(); openDialog("memory", "mem_01K5R0N2"); });
+  await page.evaluate(() => { S.memFold.sayings = 3; openDialog("memory", "mem_01K5R0N2"); });
   await page.waitForTimeout(250);
   const d = await page.evaluate(() => ({
     says: +document.querySelector("#layer [data-mem-says]")?.dataset.memSays,
@@ -1417,10 +1417,10 @@ for (const theme of ["light", "dark"]) {
     "fold: a proposed memory opens its proposal instead of a second one, got " + d.foot.join(" ~ "));
   await page.evaluate(() => [...document.querySelectorAll("#layer .dlg .dlg-f button")].find(b => /Open the proposal/.test(b.textContent)).click());
   await page.waitForTimeout(350);
-  const p = await page.evaluate(() => ({ sel: S.prpSel, tab: S.tab.steering,
+  const p = await page.evaluate(() => ({ sel: S.prpSel, hash: location.hash,
     rows: +document.querySelector("[data-prp-rows]")?.getAttribute("data-prp-rows"),
     text: document.querySelector("main")?.innerText || document.body.innerText }));
-  ok(p.sel === "prp_01K5RX1N" && p.tab === "proposals", "fold: the proposal opens, got " + p.sel + " on " + p.tab);
+  ok(p.sel === "prp_01K5RX1N" && /\/steering\/proposals$/.test(p.hash), "fold: the proposal opens, got " + p.sel + " on " + p.hash);
   ok(p.rows === 3, "fold: the proposal cites each saying as a supporting run, got " + p.rows);
   ok(/Remember to not use the latest version of node/.test(p.text), "fold: the evidence quotes the sayings");
   ok(errs.length === 0, "fold: no JavaScript error: " + errs.join(" | "));
@@ -1466,14 +1466,188 @@ for (const theme of ["light", "dark"]) {
     const t = await pg.evaluate(() => document.querySelector(".run-main").innerText);
     ok(re.test(t), "run memories: " + what + ", got " + t.slice(0, 160).replace(/\s+/g, " "));
   }
-  await pg.evaluate((h) => { location.hash = h; }, "#/a-intel/core-platform/steering/skills/reflect");
-  await pg.waitForTimeout(250);
-  const k = await pg.evaluate(() => document.querySelector("main")?.innerText || document.body.innerText);
-  ok(/every sealed run/.test(k) && /611/.test(k) && /\$8\.61/.test(k), "reflection: every sealed run is captured, and the cost follows");
-  const ex = await pg.evaluate(() => { [...document.querySelectorAll("button")].find(b => /Export for research/.test(b.textContent)).click(); return S.toast; });
-  ok(/^Exported/.test(ex), "reflection: research.read exports, got " + ex);
+  /* The Reflection page under Steering › Skills left with the fleet operations wedge; the self-grade is read on the run. */
   ok(e2.length === 0, "run memories: no JavaScript error as priya: " + e2.join(" | "));
   await pg.close();
+}
+
+// Cost centers (ADR-142): the labels on Organization, the charge on an agent's Identity tab, and the
+// Cost center grouping on Spend. An organization Owner, Admin or Billing member writes. Marcus, a
+// workspace owner, reads, and every write he tries names who can. The grouping must sum to the month's
+// spend to the cent, which only holds if it is derived from the generated fleet rather than typed in,
+// and it must read the same labels the Organization page edits.
+{
+  const as = async (who, hash) => {
+    const pg = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+    const errs = []; pg.on("pageerror", e => errs.push(String(e.message || e)));
+    await pg.goto(FILE + "?product=1&state=loaded&mobile=0" + (who ? "&as=" + who : "") + hash);
+    await pg.waitForTimeout(300);
+    return { pg, errs };
+  };
+  const toast = pg => pg.evaluate(() => S.toast || "");
+  const rows = pg => pg.evaluate(() => [...document.querySelectorAll("tr[data-cost-center]")].map(t => t.dataset.costCenter));
+
+  const m = await as("", "#/a-intel");
+  await m.pg.evaluate(() => orgTab("costcenters")); await m.pg.waitForTimeout(150);
+  const r = await m.pg.evaluate(() => ({
+    tab: [...document.querySelectorAll(".tabs .tab")].map(b => b.textContent).find(t => /^Cost centers/.test(t)) || "",
+    ro: document.querySelector("[data-cc-readonly]")?.innerText || "",
+    ws: document.querySelectorAll("tr[data-cc-ws]").length, wsWant: WS.length,
+  }));
+  ok(r.tab === "Cost centers4", "cost centers: Organization has the tab with its count, got " + r.tab);
+  ok((await rows(m.pg)).join() === "ENG-1001,ENG-1040,FIN-2040,MKT-3300", "cost centers: the four labels list, got " + (await rows(m.pg)).join());
+  ok(/Owner, Admin or Billing/.test(r.ro) && /Dana Okafor/.test(r.ro), "cost centers: a reader is told who can change the list, got " + r.ro);
+  ok(r.ws === r.wsWant, "cost centers: every workspace has a row, got " + r.ws + " of " + r.wsWant);
+  await m.pg.evaluate(() => [...document.querySelectorAll("[data-cc-panel] button")].find(b => /Add a cost center/.test(b.textContent)).click());
+  ok(/^Only an organization Owner, Admin or Billing member/.test(await toast(m.pg)) && !(await dlg(m.pg)),
+    "cost centers: a reader's add is refused without a dialog, got " + (await toast(m.pg)));
+  await m.pg.evaluate(() => { location.hash = "#/a-intel/core-platform/spend?by=cost_center&key=ENG-1001"; }); await m.pg.waitForTimeout(250);
+  await m.pg.evaluate(() => [...document.querySelectorAll(".sp-side button")].find(b => b.textContent === "Export the statement").click());
+  ok(/can export the chargeback statement/.test(await toast(m.pg)), "cost centers: a reader's export is refused, got " + (await toast(m.pg)));
+  ok(m.errs.length === 0, "cost centers: no JavaScript error as marcus: " + m.errs.join(" | "));
+  await m.pg.close();
+
+  const d = await as("dana", "#/a-intel");
+  await d.pg.evaluate(() => orgTab("costcenters")); await d.pg.waitForTimeout(150);
+  const cells = await d.pg.evaluate(() => Object.fromEntries([...document.querySelectorAll("tr[data-cost-center]")].map(t =>
+    [t.dataset.costCenter, [...t.querySelectorAll("td.num")].map(c => +c.textContent).join("/")])));
+  ok(!(await d.pg.evaluate(() => document.querySelector("[data-cc-readonly]"))), "cost centers: a Billing member gets no read-only note");
+  ok(cells["ENG-1001"] === "19/1" && cells["ENG-1040"] === "3/0" && cells["FIN-2040"] === "0/1" && cells["MKT-3300"] === "0/0",
+    "cost centers: each label counts the agents and workspaces that name it, got " + JSON.stringify(cells));
+
+  for (const [label, re, what] of [["bad label", /A label is 1 to 64 letters/, "a label with a space is refused"],
+                                   ["ENG-1001", /ENG-1001 is already on the list/, "a duplicate label is refused"]]) {
+    await d.pg.evaluate(() => openDialog("ccadd")); await d.pg.waitForTimeout(80);
+    await type(d.pg, "#cc-label", label);
+    await d.pg.evaluate(() => ccAdd());
+    const e = await d.pg.evaluate(() => document.getElementById("cc-err")?.textContent || "");
+    ok(re.test(e), "cost centers: " + what + ", got " + e);
+    await d.pg.evaluate(() => closeDialog());
+  }
+  await d.pg.evaluate(() => openDialog("ccadd")); await d.pg.waitForTimeout(80);
+  await type(d.pg, "#cc-label", "OPS-5100"); await type(d.pg, "#cc-desc", "Operations");
+  await d.pg.evaluate(() => ccAdd()); await d.pg.waitForTimeout(80);
+  ok(/^Added OPS-5100\./.test(await toast(d.pg)), "cost centers: adding a label says so, got " + (await toast(d.pg)));
+  ok((await rows(d.pg)).includes("OPS-5100"), "cost centers: the new label lists");
+  ok(await d.pg.evaluate(() => AUDIT[0].ev === "cost_center_created" && /OPS-5100/.test(AUDIT[0].what)), "cost centers: adding a label writes cost_center_created");
+
+  await d.pg.evaluate(() => openDialog("ccdel", "ENG-1040")); await d.pg.waitForTimeout(80);
+  const dc = await d.pg.evaluate(() => document.querySelector("[data-cc-del-count]")?.textContent || "");
+  ok(dc === "3 agents and 0 workspaces name ENG-1040 today.", "cost centers: deleting names what still points at the label, got " + dc);
+  await d.pg.evaluate(() => [...document.querySelectorAll("#layer .dlg-f button")].find(b => b.textContent === "Delete").click());
+  await d.pg.waitForTimeout(80);
+  ok(/^Deleted ENG-1040\. Runs already rolled up keep it\. 3 agents fall back/.test(await toast(d.pg)), "cost centers: deleting says where the agents go, got " + (await toast(d.pg)));
+  ok(!(await rows(d.pg)).includes("ENG-1040") && await d.pg.evaluate(() => !Object.values(CC.agents).includes("ENG-1040")),
+    "cost centers: a deleted label leaves the list and every agent that named it");
+  ok(await d.pg.evaluate(() => AUDIT[0].ev === "cost_center_deleted"), "cost centers: deleting writes cost_center_deleted");
+
+  await d.pg.evaluate(() => openDialog("ccws", "growth")); await d.pg.waitForTimeout(80);
+  await d.pg.selectOption("#cc-pick", "MKT-3300");
+  await d.pg.evaluate(() => ccSetWs("growth")); await d.pg.waitForTimeout(80);
+  ok(/^Growth is charged to MKT-3300\./.test(await toast(d.pg)), "cost centers: charging a workspace says so, got " + (await toast(d.pg)));
+  ok(await d.pg.evaluate(() => document.querySelector('tr[data-cc-ws="growth"]').innerText.includes("MKT-3300")), "cost centers: the workspace row shows its new label");
+
+  await d.pg.evaluate(() => { location.hash = "#/a-intel/core-platform/spend/cost_center"; }); await d.pg.waitForTimeout(250);
+  const s = await d.pg.evaluate(() => {
+    const rs = [...document.querySelectorAll("#pg table tbody tr")];
+    const label = r => r.cells[0].querySelector(".mono")?.textContent || "";
+    return { hash: location.hash, heading: [...document.querySelectorAll("#pg .panel h3")].map(x => x.textContent).find(t => /^By /.test(t)),
+      labels: rs.map(label), deleted: rs.filter(r => /deleted/.test(r.cells[0].textContent)).map(label),
+      sum: Math.round(spendRows("cost_center").reduce((n, r) => n + r.usd, 0) * 100), want: Math.round(n$(SPEND.spend) * 100),
+      agents: rs.reduce((n, r) => n + +r.cells[1].textContent, 0), wantAgents: SPEND.byAgent.length };
+  });
+  ok(/\/spend\?by=cost_center$/.test(s.hash) && s.heading === "By cost center", "cost centers: the old route opens Spend grouped by cost center, got " + s.hash + " ~ " + s.heading);
+  ok(s.labels.includes("ENG-1001") && s.labels.includes("~none"), "cost centers: Spend groups by the fixture's labels and ~none, got " + s.labels.join());
+  ok(s.sum === s.want, "cost centers: the rows sum to the month's spend to the cent, got " + s.sum + " of " + s.want);
+  ok(s.agents === s.wantAgents, "cost centers: every agent lands in exactly one row, got " + s.agents + " of " + s.wantAgents);
+  ok(s.deleted.join() === "ENG-1040", "cost centers: a deleted label keeps the runs already rolled up, got " + s.deleted.join());
+  await d.pg.evaluate(() => { location.hash = "#/a-intel/core-platform/spend?by=agent&key=a-intel.core.triage"; }); await d.pg.waitForTimeout(250);
+  const side = await d.pg.evaluate(() => [...document.querySelectorAll(".sp-side dt")].find(t => t.textContent === "Cost center")?.nextElementSibling.textContent);
+  ok(side === "ENG-1001", "cost centers: an agent's side panel shows the label Organization set, got " + side);
+  await d.pg.evaluate(() => { location.hash = "#/a-intel/core-platform/spend?by=cost_center&key=ENG-1001"; }); await d.pg.waitForTimeout(250);
+  await d.pg.evaluate(() => [...document.querySelectorAll(".sp-side button")].find(b => b.textContent === "Export the statement").click());
+  await d.pg.waitForTimeout(80);
+  ok(/cost_micros/.test((await dlg(d.pg))?.body || ""), "cost centers: the export lists its columns");
+  await d.pg.evaluate(() => ccExport()); await d.pg.waitForTimeout(80);
+  ok(/^Exported cost-centers-2026-09\.csv\./.test(await toast(d.pg)) && await d.pg.evaluate(() => AUDIT[0].ev === "cost_center_statement_exported"),
+    "cost centers: exporting says so and writes cost_center_statement_exported, got " + (await toast(d.pg)));
+
+  for (const [ws, pick, from, re] of [["core-platform", "a-intel.core.stella-ci", "agent", /its own label, which wins over the workspace/],
+                                      ["data-platform", null, "workspace", /inherited from workspace data-platform/],
+                                      ["security", null, "none", /~none row/]]) {
+    const key = await d.pg.evaluate(([w, k]) => k || AGENTS.find(a => a.ws === w && !CC.agents[a.key]).key, [ws, pick]);
+    await d.pg.evaluate(([w, k]) => { location.hash = "#/a-intel/" + w + "/agents/" + k.split(".").pop() + "/identity"; }, [ws, key]);
+    await d.pg.waitForTimeout(250);
+    const c = await d.pg.evaluate(() => ({ from: document.querySelector("[data-cc-from]")?.dataset.ccFrom, text: document.querySelector("[data-cc-cell]")?.innerText || "" }));
+    ok(c.from === from && re.test(c.text), "cost centers: an agent's Identity tab says where its runs roll up (" + from + "), got " + JSON.stringify(c));
+  }
+  ok(d.errs.length === 0, "cost centers: no JavaScript error as dana: " + d.errs.join(" | "));
+  await d.pg.close();
+
+  const ph = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const pe = []; ph.on("pageerror", e => pe.push(String(e.message || e)));
+  for (const hash of ["#/a-intel", "#/a-intel/core-platform/spend?by=cost_center&key=ENG-1001"]) {
+    await ph.goto(FILE + "?product=1&state=loaded&mobile=1&theme=dark&as=dana" + hash);
+    await ph.waitForTimeout(300);
+    if (hash === "#/a-intel") { await ph.evaluate(() => orgTab("costcenters")); await ph.waitForTimeout(150); }
+    const over = await ph.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    ok(over <= 0, "cost centers: no sideways scroll on a phone in the dark theme at " + hash + ", got " + over + "px");
+  }
+  ok(pe.length === 0, "cost centers: no JavaScript error on a phone: " + pe.join(" | "));
+  await ph.close();
+}
+
+/* ---------------- notifications: selecting one marks it read ----------------
+   The bell's label, the dialog footer and the unread rows must all move together, one at a time. */
+{
+  const { page, errs } = await open("#/a-intel/core-platform");
+  const read = () => page.evaluate(() => ({
+    bell: document.querySelector('[aria-label^="Notifications,"]')?.getAttribute("aria-label") || "",
+    dot: !!document.querySelector('[aria-label^="Notifications,"] .dot'),
+    rows: document.querySelectorAll("#layer .li[data-notif]").length,
+    foot: document.querySelector("#layer .dlg-f .grow")?.textContent || "",
+    focus: document.activeElement?.hasAttribute("data-notif") || false,
+    all: [...document.querySelectorAll("#layer .dlg-f button")].find(b => /Mark all read/.test(b.textContent))?.disabled,
+  }));
+  await page.evaluate(() => openDialog("notifs")); await page.waitForTimeout(120);
+  const a = await read();
+  const n = a.rows;
+  ok(n >= 2, "notifications: the fixture opens with at least two unread, got " + n);
+  ok(a.bell === "Notifications, " + n + " unread" && a.dot, "notifications: the bell names the unread count and shows the dot, got " + a.bell);
+  ok(a.foot === n + " unread · select one to mark it read", "notifications: the footer names the count and how to mark one, got " + a.foot);
+  ok(await page.evaluate(() => [...document.querySelectorAll("#layer .li[data-notif]")].every(e => e.getAttribute("role") === "button" && /^Mark read: /.test(e.getAttribute("aria-label")))),
+    "notifications: every unread item is a button labelled Mark read");
+
+  await page.click("#layer .li[data-notif]"); await page.waitForTimeout(120);
+  const b = await read();
+  ok(b.rows === n - 1, "notifications: a click marks exactly one read, got " + b.rows + " of " + n);
+  ok(b.bell === "Notifications, " + (n - 1) + " unread", "notifications: the bell count drops with it, got " + b.bell);
+  ok(b.foot === (n - 1) + " unread · select one to mark it read", "notifications: the footer count drops with it, got " + b.foot);
+  ok(b.focus, "notifications: focus moves to the next unread item");
+  const ev1 = await page.evaluate(() => AUDIT[0] || {});
+  ok(ev1.ev === "notification_read" && /^Read “/.test(ev1.what), "notifications: marking one read records a notification_read audit event, got " + JSON.stringify(ev1));
+  ok(await page.evaluate(() => [...document.querySelectorAll("#layer .li:not(.unread)")].every(e => !e.hasAttribute("role"))),
+    "notifications: a read item is plain text, not a button");
+
+  await page.keyboard.press("Enter"); await page.waitForTimeout(120);
+  ok((await read()).rows === n - 2, "notifications: Enter on the focused item marks it read");
+
+  await page.evaluate(() => [...document.querySelectorAll("#layer .dlg-f button")].find(b => /Mark all read/.test(b.textContent)).click());
+  await page.waitForTimeout(150);
+  const said = await page.evaluate(() => S.toast || "");
+  ok(/^All notifications marked read\. Audit records who read each one\./.test(said), "notifications: Mark all read says Audit records it, got " + said);
+  const evAll = await page.evaluate(k => AUDIT.slice(0, k).filter(e => e.ev === "notification_read" && /^Read “/.test(e.what)).length, n - 2);
+  ok(evAll === n - 2, "notifications: Mark all read records one read event per item, got " + evAll + " of " + (n - 2));
+  const c = await read();
+  ok(c.bell === "Notifications, 0 unread" && !c.dot, "notifications: the bell reads 0 unread with no dot, got " + c.bell);
+  await page.evaluate(() => openDialog("notifs")); await page.waitForTimeout(120);
+  const d = await read();
+  ok(d.foot === "All read" && d.all === true && d.rows === 0, "notifications: the reopened dialog reads All read with Mark all read disabled, got " + JSON.stringify(d));
+  await page.evaluate(() => { closeDialog(); NOTIFS[0].unread = true; openDialog("notifs"); }); await page.waitForTimeout(120);
+  await page.click("#layer .li[data-notif]"); await page.waitForTimeout(120);
+  ok(await page.evaluate(() => document.activeElement?.matches(".dlg .x") || false), "notifications: marking the last unread one moves focus to the close button");
+  ok(errs.length === 0, "notifications: no JavaScript error: " + errs.join(" | "));
+  await page.close();
 }
 
 await browser.close();

@@ -4,7 +4,7 @@ import { view, argTypes } from "../_view.js";
 import spec from "../../pages/repositories.md?raw";
 
 export default {
-  title: "Oxagen/Workspace/Repositories",
+  title: "Oxagen/Repositories/Repositories",
   tags: ["autodocs"],
   argTypes,
   args: { shell: "desktop", theme: "system", product: true, hash: "#/a-intel/core-platform/repositories" },

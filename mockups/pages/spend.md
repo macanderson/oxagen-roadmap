@@ -1,102 +1,180 @@
-# Spend
+# Spend overview
 
 | | |
 |---|---|
-| Route | `#/a-intel/core-platform/spend[/<tab>[/<drill>]]` |
+| Route | `#/a-intel/core-platform/spend`, with `?by=work\|operator\|agent\|model\|tool\|cost_center` (default `work`, which the hash leaves out) and `&key=` for the side panel: `?by=operator&key=marcus`, `?by=agent&key=a-intel.core.triage`, `?by=cost_center&key=ENG-1001`, `?by=work&key=wo_01K5RS7M4N`. Old routes rewritten here in place (`fleet-operations-routes.md`, Spend): `/spend/operator`, `/spend/agent`, `/spend/model` and `/spend/tool` to `?by=` the same kind; `/spend/task` to `?by=work`; `/spend/cost_center` to `?by=cost_center`; `/spend/pricing` to `?by=model`; `/spend/<operator\|agent\|tool>/<key>` to `?by=<kind>&key=<key>` (the mockup also takes a key after `cost_center`, `model` and `task`). There are no drill pages. `/spend/tokens`, `/spend/coaching` and `/spend/waste` land on Optimization (`spend-optimization.md`), and `/spend/findings` and `/spend?finding=<id>` on Work, Findings, with that finding's dialog open |
 | Scope | workspace |
-| Spec | §12.6 token classes, §12.7 attribution, §12.8 findings, §14 Mission Control; Appendix F page 7 |
-| Design | `mockups/src/engine.js` → `pSpend()` (with `spendTokens`, `spendCoaching`, `spendDrill`, `spendByTool`, `spendWaste`, `spendAgentHistory`), built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
-| States | loaded, empty, loading, error, access denied |
-| Storybook | `Oxagen / … / spend`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` |
+| Spec | `docs/fleet-operations-wedge.md`: D10 (three views, no drill pages), D15 (no person scored or ranked), Work rule 4 (Spend attributes a run to its work order), the Cuts rows for the Spend drill pages and for operator scores, and Open decision 5 (`work_order_id` on the run). `docs/fleet-operations-ia.md`, Spend. `docs/fleet-operations-routes.md`, Spend. In `macanderson/oxagen`: the operator review in `docs/VISION.md` and ADR-142 (cost centers). `docs/mission-control-spec.md` §12.3 (rounding once), §12.6 (token classes), §12.7 (attribution) and §12.9 (statements) |
+| Design | `mockups/src/wedge.js`: `pSpend()`, `spendOverview()`, `spendDayChart()`, `spendDays()`, `spendRows()`, `spendTable()`, `spendSide()`, `ccOf()`, `wasteShareText()`, `spendHref2()`. `mockups/src/engine.js`: the `spend` branch of `route()`, `spendMonthTotal()`, `spendModelRows()`, `spendKeyOf()`, `wsTok()`, `operatorTok()`, `agentTok()`, `coachAgent()`, and the `spendexport` and `budget` dialogs. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| States | loaded |
+| Storybook | `Oxagen / Spend / Overview`: Loaded, Loaded · mobile, Loaded · future-only fields marked |
 | Audit | `spend.audit-prompt.md` |
+
+This spec covers the Spend header, the four tiles and the three tabs, which every Spend view shares, and the Overview tab. `spend-budgets.md` and `spend-optimization.md` cover the other two tabs.
 
 ## Job
 
-What the tokens bought, with the basis on every number: findings ranked by the money at stake, tokens by class, prompt part and harness, coaching for each agent and operator, spend by operator, agent, model and tool, wasted spend by cause, and budgets.
+Say what this workspace's month cost and where the money went. One table groups the month by work order, operator, agent, model, tool or cost center, and a row opens a side panel on the same page. The page reports the record. It scores no person, ranks no person and gives no verdict (D15). For one operator the side panel follows the operator review in `docs/VISION.md`: spend cut by the person who started the run, and outcome per dollar for bounded tasks, with the person's prompt habits one link away on Optimization.
 
 ## What is on the page
 
-**Header**: eyebrow "<workspace name>", h1 "Spend", subtext "What the tokens bought, with the basis on every number."
-Actions: **Export report** (opens `spendexport`), **Set a budget** (gold; opens `budget`).
+**Shell.** The sidebar lists Work (8), Agents, Tools (29), Steering (9), Runtimes (2), Spend and Repositories (5), then Organization, Billing and Audit (3). Spend is lit and carries no count, because nothing on it waits on a person. The foot holds the Stella launcher and the connection badge. The top bar holds the breadcrumbs (Anderson Intelligence Corp. / Core platform / Spend), ⌘K search, notifications, the Approvals button with its count, and the account avatar.
 
-**Summary tiles** (one number and one basis line each; hidden on a drill):
-- **Spend**: $ of the month, basis `gateway_observed` + `client_attested`, USD.
-- **Tokens**: the month's tokens, "N% served from cache".
-- **Observed by the gateway**: %, "of tokens counted by the proxy".
-- **Wasted**: $ in the critical colour, "N% of spend".
+**Header.** Eyebrow the workspace name ("Core platform"), h1 "Spend", subtext "What the tokens bought, with the basis on every number." Actions: **Export report** (opens `spendexport`) and **Set a budget** (gold, opens `budget`, specified in `spend-budgets.md`).
 
-**Tabs**: Findings (N), Tokens, Coaching (N), By operator, By agent, By model, By tool, Wasted spend (N), Budgets (N).
+**Tiles**, four in a row, each one number and one line beneath it:
 
-- **Findings**: a hero (eyebrow "Savings identified", the total at stake, "N% of $ spent this month · about $ a year at this run rate", a share strip with a legend of the eight largest kinds plus "N smaller findings", and the facts N findings, N operators involved, N high confidence and N medium, "every one opens to its evidence"). Filters: Level (agent, operator, tool, workspace), Confidence (high, medium), Sort (Rank, Savings high first, Savings low first, Finding A–Z), Rows, pager. Ranked cards: rank, kind, level badge, confidence badge, operator and agent, the finding, "evidence <runs and calls> · <window> · trend", the amount "at stake · N% of identified", a share bar, **Evidence** (opens `evidence`), **Fix** (opens `fix`). A note beneath states the method.
-- **Tokens**: **By token class** (Class, Tokens, Share, Cost for `input_uncached`, `cache_read`, `cache_write`, `output`, `reasoning`; header "N tokens · <month>"; beneath: Cache hit rate, Cache write cost share, Effective input price, Unmapped classes). **Prompt composition** (meters for Conversation, Tool results, Context frames, Tool definitions, Steering, System, Output, Reasoning; "measured from the request, every call"). **By harness** (badge "N% of tokens observed by the gateway"; Harness, Agents, Tokens, Cache hit, Spend, Basis). **By agent** (Agent, Runs, Tokens, Per run, Cache hit, Tool defs, Context, Tool results, Reasoning, Basis; the twelve largest; a row opens the agent page).
-- **Coaching**: tiles Agent coaching (N, "$ a month at stake"), Operator coaching (N, "$ a month at stake"), Signals read (7, "from the token record"), Memories aggregated (N, link "Steering memory"). Sub-tabs **Agent coaching (N)** and **Operator coaching (N)**. Agents rank by money at stake, eight a page ("agents 1–8 of N · ranked by money at stake"); each panel shows the agent card, "N tok · cache N% · observed" or "self-reported", an "N items" badge, and one card per item: a severity badge with the title, "$ a month" or "no dollar figure", the signal line with its tokens, one paragraph, the one action (Edit the grant, Open steering, Propose a record, Preview the window, Edit the definition, Open incidents), and **Send to the operator**. Agent signals: Narrow the belt, Keep the prefix stable, Page the tool results, Lower the context budget, Route classification-shaped work to a light model, Stop the retry storms, Stop writing cache for one-turn runs. Operator panels show the person, "N agents · N tok · cache N% · N% observed", and their items: Grants are wider than the work, Prompts that make the agent re-read, Get to one prompt per session (prompts per session over 1.5, with runs and one-shot count), Publish steering between runs, Resize the budget before it stops a run, Move the last self-reported agents behind the gateway (actions Open Identities, Write a record, Open steering, Set a budget). An agent with nothing to change says "Every share is inside the workspace norm and the cache holds. Nothing to change."
-- **By operator**: Operator, Role, Agents, Runs, Spend, Tokens, Cache hit, Potential savings (with the finding count), Budget position (bar and "N% of $"). A row drills to `/spend/operator/<id>`. A note says every run has exactly one operator.
-- **By agent**: Agent, Runs, Spend, Tokens, Per run, Cache hit, Potential savings, Trend; a row drills to `/spend/agent/<key>`. A note says a harness-tier agent is self-reported and an absent class is marked absent, never zero.
-- **By model**: **Models and keys** (“Every model the workspace called this month, and the provider key it was billed to.”; **Model routes** opens Organization): Model, Provider key, Model calls, Spend, Cache hit rate, Basis; a Total row equal to the month's spend. Consumption reads here; the routes themselves are configured under Organization → Model funding and routes.
-- **By tool**: the table in the left two thirds (Tool, Server, Calls, Runs, Cumulative, Share, Avg per call, Avg per run, Potential savings, What the frames say; a row drills to `/spend/tool/<name>`), and in the right third one chart at a time under a three-button switcher: **Cumulative spend**, **Avg per run**, **Avg per call**, in that order. The chart holds the leading twelve tools; the table holds every one.
-- **Wasted spend**: tiles Wasted (`client_attested`, USD), Share of spend, Runs with waste, Largest cause. **By cause** meters: cache misses, corrective prompts, retry loops, context bloat, idle while parked, halted early, each with its runs, amount and one line of why. **Runs with waste**: one card per run (id, agent, operator, started, "$ wasted of $", badges naming what was wrong, a bar, the task and what was wasted, frames, steps, cache and model), **Open the run**, **Show the frames**.
-- **Budgets**: Scope, Period, Limit, Used, Mode (hard or soft), Position; **Set a budget**.
-- **Drill** (`/spend/<operator|agent|tool>/<id>`): a crumb bar "← By operator / <name>", eyebrow, h2 and one line of counts; actions **Open the agent** (agent only) and **Export this view**; a hero "Potential savings" with a share strip and "N on this <kind> directly · N attributed through evidence"; stat tiles (operator: Spend, Tokens, Cache hit rate, Observed, Wasted, Productive ratio, Runs, Model calls, Budget position, Trend; agent: Spend, Tokens, Cache hit rate, Tool definitions, Wasted, Spend per run, Productive ratio, Model calls, Trend, Budget; tool: Spend, Calls, Average per call, Average per run, Result body, Repeat calls, Retries, Cache hit rate, Wasted, Trend); **Spend by day** (a 30-day sparkline with peak and average); for an agent with history, **Monthly spend per run** and **Token use**; three cross-cut panels (By agent, By operator, By tool, By model as the kind allows); **Findings** for the entity.
+| Tile | Number | Line beneath |
+|---|---|---|
+| Spend | $439,498.34 | `gateway_observed` + `client_attested` · USD |
+| Tokens | 20,503,823,758 | 80% served from cache |
+| Observed by the gateway | 92% | of tokens counted by the proxy |
+| Wasted | $3,591.92, in the critical ink | 0.8% of spend · Optimization |
 
-**Dialogs this page opens:** `spendexport`, `budget`, `evidence`, `fix`, `incident` (error state), `request-access` (denied state).
+The Wasted tile opens Optimization. Its share is computed from the Wasted and Spend figures, so it cannot disagree with them.
 
-**Shell.** Sidebar (organization switcher, workspace switcher, Workspace nav: Fleet, Agents, Tools, Steering, Runtimes, Repositories, Spend; Organization nav: Organization, Billing, Audit; the assistant launcher, agent count, data plane and connection badge at the foot), top bar (Menu, breadcrumbs, ⌘K "Search or run an action", Notifications with the unread count, **Approvals** with the count of everything waiting on you across the organization, account avatar → Account, Preferences, Security and sessions, Privacy and data, Switch theme, Sign out). The Approvals button opens the right-hand drawer `#apdrawer`: heading "Approvals" with an "N waiting" badge and a close button, an open interjection row with **Answer it**, one row per pending approval (tool and amount, agent, task, workspace, risk badges, countdown), the full approval card with **Approve** and **Deny** when a row is picked and "‹ All approvals" to return, "N resolved today" beneath. Escape closes it. There is no assistant button in the top bar.
+**Tabs**: Overview · Budgets (4) · Optimization. Each is a path segment: `/spend`, `/spend/budgets`, `/spend/optimization`. Changing the tab drops the grouping and the key.
+
+**September by day.** A panel with the caption "From the daily rollup, rebuilt from frames. Weekends run lighter." and, at its right, "$439,498.34 to date". One bar per day from 1 to 24 September, in one image (`role="img"`, labelled "Spend by day, 1 to 24 September"). Each bar's tooltip reads "Sep <day> · <amount>". The axis reads Sep 1, Sep 12 and Sep 24.
+
+**Group by.** A segmented control (`role="group"`, labelled "Group by") with the caption "Group by" and six buttons, the current one `aria-pressed`: Work order · Operator · Agent · Model · Tool · Cost center. A button writes `?by=` and closes any open side panel.
+
+**The table.** Heading "By <grouping>" ("By work order", "By operator", "By agent", "By model", "By tool", "By cost center") and the subtext "Select a row to open it here. There is no drill page." The shell's list tools sit above the rows: the search field "Search this list", up to three filters, each on a column of two to eight short values (such as "All · Kind" on By work order and "All · Provider key" on By model), Rows (5, 10, 25, 50 or All, with 10 by default), sortable column headers, and a pager that counts the rows (1,166 work orders, ten to a page). Rows open ordered by spend, largest first.
+
+Columns, in order:
+
+| Group by | Columns |
+|---|---|
+| Work order | Work order (the id in mono over the title) · Kind (`direct` or `dispatched`) · Sent by · Runs · Items accepted ("N of M", or a dash) · Per accepted item (a dash when none was accepted) · Spend |
+| Operator | Operator (the name over the role, such as `workspace.owner · core-platform`) · Agents · Runs · Tokens · Cache hit · Budget position (a bar, red above 80%, over "N% of $X") · Spend · Share |
+| Agent | Agent (the agent card) · Runs · Tokens per run · Cache hit · Trend (a badge, such as "-4%" or "+5%") · Spend · Share |
+| Model | Model (the id in mono, and each of Oxagen's own routes adds "Oxagen’s own work · <provider>") · Provider key · Model calls · Cache hit (a dash where the route reports no cache) · Spend · Share |
+| Tool | Tool (the name in mono over its kind, such as `harness`, `jira` or `stripe`) · Calls · Runs · Per call · Spend · Share |
+| Cost center | Cost center (the label in mono, and `~none` adds "no agent or workspace label"; a label deleted since its runs rolled up keeps its row and adds a `deleted` badge) · Agents · Workspaces · Spend · Share |
+
+Two groupings end on a note. By work order: "1,166 work orders in view, most of them direct: a run started from an operator’s own terminal. The rest of the month’s runs roll up the same way." By cost center: "A run with no label is charged to ~none, so the centers sum to the month (ADR-142)."
+
+Selecting a row writes `&key=`, marks the row (`aria-selected`) and opens the side panel. Selecting the open row again closes it. While a panel is open, the table narrows to the name column, Spend and, on every grouping but By work order, Share. The panel takes the right column (340 px).
+
+**The side panel** is an `aside` labelled with its title, with **Close** at its top right (`aria-label="Close"`). One per grouping:
+
+- **Operator** (`?by=operator&key=marcus`): heading "Marcus Bell". Role `workspace.owner · core-platform`. Agents "24 operated, 28 in view". Runs "14,225". Spend "$49,545.43". Budget "87% of $57,000.00". Bounded tasks "4 work orders sent, 2 items accepted, $2.07 per accepted item" (future-only). Beneath, the caption "The record, not a grade. Habits and the rules they suggest are on Optimization." and **Open the habits**, which opens `/spend/optimization?part=habits`.
+- **Agent** (`?by=agent&key=a-intel.core.triage`): the compact agent card is the heading ("a-intel.core.triage", "Codex CLI · 1,340 runs 30d · $402.11"). Runs "1,340". Spend "$402.11, +9% on last month". Tokens per run "93,217". Cache hit "83%". Tool definitions "34% of every request". Cost center `ENG-1001`. Beneath: "2 recommendations for this agent on Optimization.", **Open the agent**, and **Recommendations**, which opens `/spend/optimization?part=agents`.
+- **Model** (`?by=model&key=claude-opus-5`): heading the model id. Model calls "1,201,471". Spend "$272,442.52". Cache hit "84%". Provider key `Anthropic · pk_9f21`. **Model routes** opens Organization.
+- **Tool** (`?by=tool&key=claude_code__Bash`): heading the tool name. Kind "harness". Calls "164,664 in 35,611 runs". Per call "$0.70". Per run "$3.25". Record "result bodies average 4.1k tokens; 31% of calls are re-runs of the same command". No action.
+- **Cost center** (`?by=cost_center&key=ENG-1001`): heading the label. Agents "64". Spend "$107,722.08". Resolved from "the agent’s label, else its workspace’s", or for `~none` "no label on the agent or its workspace". **Export the statement** (opens `ccexport`).
+- **Work order** (`?by=work&key=wo_01K5RS7M4N`): heading the title, "Cut 4.11.0 release notes". Work order `wo_01K5RS7M4N` (a link to the work order) with its `dispatched` badge. Sent by "Marcus Bell". Runs `run_01K5RS7M2E8FJ3QW` (one link per run). Spend "$4.13 of a $10.00 cap". **Open the work order**.
+
+**Dialogs this page opens:** `spendexport`, `ccexport` and `budget`.
+
+- **`spendexport`**, "Export a spend report". Timeframe: This month · September 2026 (to date), Last month · August 2026, Last 30 days, Last 90 days, Quarter to date · Q3 2026, Year to date · 2026, Custom range, with From and To dates beneath. Include: four choices, the first naming everything on the page, then "By operator and agent only", "By tool only" and "Wasted spend only". The note "Delivered as CSV and a signed PDF to marcus@a-intel.example. Every figure carries its basis; the report is built from frames, so a large range takes a few minutes." Footer: **Cancel**, **Generate report** (gold).
+- **`ccexport`**, "Export the chargeback statement", subtitle "CSV · every workspace". Month: September 2026 (to date), August 2026, July 2026. Columns, as badges: `line`, `cost_center`, `runs`, `unpriced_runs`, `cost_micros`, `cost_cents`, `currency`, `basis`, `run_ids` (`FIXTURES.COST_CENTERS.columns`). The note "One line per cost center, one for ~none (spend with no label), and the organization total they sum to. Each line lists the run ids behind it, and cost is in micros and in cents." Footer: **Cancel**, **Export CSV** (gold). Exporting writes `cost_center_statement_exported` to Audit and toasts "Exported cost-centers-<month>.csv. In the product this downloads the file. A mockup writes nothing to disk."
+- **`budget`**, "Set a budget": see `spend-budgets.md`.
 
 ## Data sources
 
-Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBacked` in production). From `docs/implementation-plan.md` §3; the *mockup collection* column names the file in `mockups/fixtures/` (as `FIXTURES.<NAME>`) or the function in `mockups/src/engine.js` that the design renders from.
+Legend: ✅ shipped · 🟡 partial · ❌ future-only. The mockup collection is a file in `mockups/fixtures/` (as `SPEND`, `WORKORDERS` and so on) or a function in the mockup source. A fixture is not evidence that anything ships.
 
-| Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
+| Element | Mockup collection | Target store or contract | Backing today in macanderson/oxagen | Status |
 |---|---|---|---|---|
-| Totals, by operator, agent, model | `SPEND` | `cost.run_totals`, `cost.daily_totals` | ClickHouse `token_usage`, `usage_events`; `billing.usage.breakdown` | 🟡 |
-| Tokens by class, prompt part, harness | `agentTok`, `operatorTok`, `wsTok` | `cost.run_totals`, `cost.daily_totals` with `tool_definition_tokens`, `context_frame_tokens`, `steering_tokens`, `cache_hit_rate`, `retries`; `get_spend`, `get_run_cost` | ClickHouse `token_usage` | 🟡 |
-| Coaching | `coachAgent`, `coachOperator`, `operatorPrompts` | derived at read time from the same rollup; `list_coaching` (read, `noBillingGate`) | none | ❌ |
-| By tool | `SPEND.byTool`, `SPEND_DETAIL` | `control.tool_calls` × price | ClickHouse `tool_invocations` | 🟡 |
-| Findings, evidence, fix | `FINDINGS`, `EVIDENCE`, `FIX` | findings job (M2) | none | ❌ (G4) |
-| Wasted spend by cause and run | `SPEND.wasteByCause`, `SPEND.wasteRunsList`, `runWaste` | `cost.run_totals` | none | ❌ (G4) |
-| Budgets | `SPEND.budgets` | `billing.budgets` | `billing.spend_budgets`; `billing.budget.{get,set}` | ✅ |
+| Spend tile | `SPEND.spend` plus Oxagen's own routes, through `spendMonthTotal()` | `get_spend` total for the month (`cost.daily_totals`) | `packages/oxagen/src/contracts/spend.get.ts:34-73`; the tile, `apps/app/src/features/spend/summary.tsx:36-49` | ✅ |
+| Tokens tile and its cache share | `wsTok()` | the token classes on every `get_spend` row | `packages/oxagen/src/contracts/spend.shared.ts:107-116`; `apps/app/src/features/spend/summary.tsx:26-28, 50-59` | ✅ |
+| Observed by the gateway | `wsTok().observed` | the share of tokens by basis | No read counts tokens by basis. The app prints "not recorded" (`apps/app/src/features/spend/summary.tsx:60-62`) | ❌ |
+| Wasted tile | `SPEND.wasteTotal`, `wasteShareText()` | `list_waste`: `wasted` and `share` | `packages/oxagen/src/contracts/spend.waste.ts:26-56`, with one cause, `cache_write_never_read` (line 14); `apps/app/src/features/spend/summary.tsx:63-78` | 🟡 |
+| September by day | `spendDays()`, seeded from the month's total | `cost.daily_totals`, one row per UTC day and group | The table keeps a row per day (`packages/database/src/schema/cost.ts:388-395`). No contract answers the workspace's month by day. `get_spend_drill` answers a daily series for one operator, agent or tool (`packages/oxagen/src/contracts/spend.drill.ts:59-117`) | 🟡 |
+| By work order | `WORKORDERS`, `woSpend()`, `woItems()` | `work_order_id` on the run record, and the work order store | Nothing stores a work order. The run's `taskRef` is free text and null for wrapped runs (wedge, Work, Shipped today). The shipped `task` level keys on the run's goal (ADR-142 §5; `apps/app/src/features/spend/tables.tsx:557-591`) | ❌ |
+| By operator | `SPEND.byOperator`, `operatorTok()` | `get_spend` at `operator` | Operator, Role, Runs, Spend, Tokens and Cache hit ship (`apps/app/src/features/spend/tables.tsx:177-268`). Agents and Budget position print "not recorded" (lines 243-245, 259-261) | 🟡 |
+| By agent | `SPEND.byAgent`, `agentTok()` | `get_spend` at `agent` | Runs, Spend, Tokens, Per run and Cache hit ship (`tables.tsx:270-347`). Trend prints "not recorded" (lines 337-339) | 🟡 |
+| By model | `spendModelRows()`, `PROVIDER_KEYS` | `get_spend` at `model` | Model, Model calls, Spend, Cache hit rate, Basis and the Total row ship (`tables.tsx:349-436`). The provider key prints "not recorded" and the provider sits beneath it (lines 388-397) | 🟡 |
+| By tool | `SPEND.byTool` | `get_spend` at `tool` | Calls, Runs, spend, Share, Avg per call and Avg per run ship (`tables.tsx:439-555`). The server and what the frames say print "not recorded" (lines 500-502, 536-538) | 🟡 |
+| By cost center | `SPEND.byAgent` through `ccOf()`, which reads `CC.rolledBy` after `ccReady()` resolves each agent from `FIXTURES.COST_CENTERS` | `get_spend` at `cost_center`; `cost.cost_centers`; the agent and workspace labels | The level and the `~none` key (`packages/oxagen/src/contracts/spend.shared.ts:124-140`). The table prints `~none` as "No cost center" (`apps/app/src/features/spend/cost-centers.tsx:29-97`). `set_cost_center` sets the labels (`packages/oxagen/src/contracts/cost_center.set.ts:38`). The level answers runs, so the Agents and Workspaces columns are in no read | 🟡 |
+| Operator side panel | `PEOPLE`, `SPEND.byOperator`, `WORKORDERS` | `get_spend_drill` for one operator; the operator review | Role, Runs and Spend come from the `operator` rows. `get_spend_drill` answers the person's daily series, averages, share and tools (`packages/oxagen/src/contracts/spend.drill.ts:59-117`). Agents, Budget and Bounded tasks are in no read | 🟡 |
+| Agent side panel | `SPEND.byAgent`, `agentTok()`, `coachAgent()`, `ccOf()` | `get_spend_drill` for one agent; `get_agent` | Runs, Spend, Tokens per run and Cache hit come from the rollup. The agent's cost-center label comes from `get_agent` (`packages/oxagen/src/contracts/agent.get.ts:136`). The trend, the tool definition share and the recommendation count are in no read | 🟡 |
+| Model side panel | `spendModelRows()`, `spendKeyOf()` | `get_spend` at `model` | Calls, spend and cache hit ship. The provider key does not | 🟡 |
+| Tool side panel | `SPEND.byTool` | `get_spend` at `tool` | Calls, runs, per call and per run ship (`tables.tsx:451-459`). Kind (the server) and Record do not | 🟡 |
+| Cost center side panel | `SPEND.byAgent`, `ccOf()` | `get_spend` at `cost_center`; `export_cost_center_statement` | Spend ships. The statement exports the organization's month, one line per center plus `~none` (`packages/oxagen/src/contracts/spend.cost_center_statement.export.ts:48-89`). The agent count is in no read | 🟡 |
+| Work order side panel | `WORKORDERS` | the work order store | none | ❌ |
+| Export report | the `spendexport` dialog | `export_statement` | A calendar month as CSV (`packages/oxagen/src/contracts/spend.statement.export.ts:31-65`). A date range, a signed PDF and email delivery are not built | 🟡 |
+
+In the app an operator key is the principal's public id (`prn_…`, `packages/oxagen/src/contracts/spend.shared.ts:101-104`). The mockup keys a person by a handle such as `marcus`.
+
+## Future-only fields
+
+The view carries these `data-future` marks. `?future=1` outlines them.
+
+| Mark | Reason | What a build shows today |
+|---|---|---|
+| The By work order panel | work orders | No work order grouping. The app groups by task reference, the run's goal text, under `/spend/task`, which the route map sends to `?by=work`. Until `work_order_id` ships, the build names the grouping and prints its rows as not recorded |
+| Each `direct` badge in Kind | direct work orders | Nothing: no run is filed under a work order |
+| Bounded tasks on the operator panel | work orders | not recorded |
+
+The design leaves these fields unmarked, although no contract carries them today. A build prints each as not recorded until its contract ships:
+
+- the September by day chart (the store holds the days, and no contract answers them)
+- the Observed by the gateway tile
+- Agents and Budget position on By operator
+- Trend on By agent
+- Provider key on By model
+- the tool's kind and its Record
+- Agents and Workspaces on By cost center
+- Agents, Budget and Bounded tasks on the operator panel
+- the trend, Tool definitions and the recommendation count on the agent panel
+- the whole work order side panel
 
 ## Functionality
 
-- Each saving is measured minus counterfactual over the runs it cites, at the price each call actually paid. Evidence opens the runs, the people and the arithmetic; Fix opens the change that removes it (a Context PR or a help article by finding kind).
-- Every tile is a rollup of the rows beneath it: the Spend tile equals the Total row of By model, and the Tokens tile equals the By token class total. Coaching derives at read time from the same rollup the Tokens tab prints, so the two cannot disagree.
-- Tokens are counted per model call by class and by prompt part (conversation, tool results, context frames, tool definitions, steering, system). Observed means the gateway proxy counted them from the bytes that passed through it. Self-reported means the harness said so; a class it does not report is marked absent, never zero, and a cache hit rate over a mixed fleet is never computed from missing data as if it were zero.
-- Every run has exactly one operator. A run that arrived without one is attributed to the agent's owning operator and flagged, never dropped and never spread.
-- A prompt after the first is corrective. Its cost counts toward wasted spend as "corrective prompts", and an operator averaging more than 1.5 prompts a session gets the coaching item "Get to one prompt per session".
-- Wasted is a claim about frames, not about outcomes. Work a human accepted is never counted.
-- A hard budget is checked at each hook boundary from a running counter fed by what each harness reports. A breach is a `policy.decision` frame and a pause at the next boundary. A soft budget records and reports and never blocks.
-- Sending a coaching note is a governed action. Nothing on this page changes an agent by itself.
+- **One page, no drill.** The grouping and the key live in the query (`?by=`, `&key=`), so a side panel is a URL. `/spend/<kind>/<key>` rewrites to it in place. Changing the grouping closes the panel.
+- **The month.** Every figure covers the calendar month to date in UTC, as `get_spend` reads it (`apps/app/src/features/spend/view.ts:100-104`). Every figure reads this workspace's runs. The one organization-wide read is the cost-center statement (ADR-142).
+- **Partitions.** The Spend tile is the month's total and equals the Total row of By model. By operator, By agent and By cost center each partition the same month: every run lands in exactly one row at its full cost and basis, `~none` included, so each grouping's rows sum to the tile. By work order partitions it too once every run carries `work_order_id`. Until then it lists the work orders in view. By tool does not partition: a tool's spend is the tokens of the turn that called it plus the turn that read its result, so a turn counts toward every tool it called.
+- **Share** is the row's spend over the month's spend on the Spend tile, on the basis beside each figure. By work order has no Share column.
+- **Attribution.** Every run has exactly one operator. A run that arrived without one is charged to the agent's owning operator and flagged, never dropped and never spread (§12.7). A run's spend belongs to its parent work order (wedge, Work rule 4). A run with no parent from Oxagen is filed under a direct work order, titled from its task reference or first prompt.
+- **Cost centers** (ADR-142). A run is charged to its agent's label if the label is live, else to its workspace's, else to `~none`. A run keeps the cost center its first rollup resolved, so a statement for a closed month stays where finance booked it. **Export the statement** downloads the organization's month as CSV: one line per center and one for `~none`, each with its run count, unpriced runs, cost in micros and cents, basis and run ids, and a total line. Micros reconcile, and cents are rounded once per line, half to even.
+- **The operator panel** is the operator review's record for one person. It shows spend cut by the person who started the run, and outcome per dollar for bounded tasks: items accepted from the work orders the person dispatched, and spend per accepted item. It links to the person's prompt habits on Optimization. It carries no score, no rank, no severity and no verdict. The review also splits the person's spend by agent and by workspace. The design's panel shows the totals, and the split waits on a read that carries it.
+- **The agent panel** counts the recommendations Optimization lists for the agent and links to them.
+- **Money.** Every amount carries its basis (`gateway_observed`, `client_attested`, both, or `estimated`) as the record states it. Amounts are integer micros on the wire and are rounded once, at display or at a statement line. A figure no frame priced prints "not recorded", never a zero.
+- **Actions.** **Set a budget** opens `budget`. **Export report** opens `spendexport` and exports the month's statement as CSV. **Export the statement** needs org Owner, Admin or Billing. For anyone else it opens no dialog and shows a toast that names who holds the role (`ccDenied()`). Neither export changes anything.
 
 ## States
 
-- **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: "No spend to report yet". Rollups are derived indexes rebuilt from frames. With no model call recorded there is nothing to roll up, and nothing billable. Action: **Back to Fleet**.
-- **loading**: the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
-- **error**: "Spend could not be loaded". The control plane answered `504 rollup_rebuild_in_progress`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
-- **access denied**: "You cannot see this workspace's spend". Your roles on the organization do not include `spend.read on core-platform`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it. Actions: **Request access** (opens `request-access`), **Back to Fleet**. Below: *Signed in as* (name, role), *Needed* (the permission), *Decided by* (`pol_v41`, deny wins over every allow).
+Loaded only. This change designs the loaded state. The build uses the shell's standard loading, error, empty and denied panels until they are designed. The renderer's standard panels read as follows. Empty: "No spend to report yet", "Rollups are rebuilt from frames. With no model call recorded there is nothing to roll up, and nothing billable.", with **Open Work**. Error: "Spend could not be loaded" with `504 rollup_rebuild_in_progress`, **Try again**, **Open an incident** and the trace line. Denied: "You cannot see this workspace’s spend", naming `spend.read on core-platform`, with **Request access** and **Back to Work**.
 
 ## Mobile
 
-The top bar collapses to hamburger, current crumb, search glyph, notifications, approvals and avatar. A fixed five-slot thumb bar replaces the sidebar: **Fleet** (count = approvals waiting), **Agents**, **Tools**, **Spend**, **More** (count = open critical incidents). **More** is a bottom sheet listing Steering (with Skills inside it), Repositories, Organization, Billing, Audit, Search, Notifications, Account, Switch organization, Switch workspace. The hamburger opens the full sidebar as a drawer over a scrim. The approvals drawer opens full-width. Every dialog rises from the bottom edge as a sheet with a drag handle and full-width footer buttons; every list table becomes a stack of cards, each cell labelled with its column header; touch targets are at least 44 px; inputs are 16 px; nothing scrolls sideways.
+The thumb bar holds Work (8), Agents, Tools, Spend and More (3), with Spend lit. More holds Steering, Runtimes, Repositories, Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The top bar collapses to the menu button, the page name, search, notifications, Approvals and the avatar.
+
+The header actions sit under the subtext, and the four tiles form a two by two grid. The tabs stay one row. The Group by buttons wrap. The table becomes one card per row, each cell labelled with its column, under the search field, the filter and Rows. With a key open, the side panel stacks below the table and its pager: for `?by=operator&key=marcus` it starts about 2,400 px down the page, and picking a card does not scroll to it. The selected card is shaded. Dialogs rise from the bottom edge as sheets. Nothing scrolls sideways at 390 px.
 
 ## Permissions
 
-- Read: `spend.read`
-- Writes (each a governed action recorded in Audit): `budget.set`, `spend.export`, `incident.open`, a coaching note sent to an operator
+- Read: `spend.read`, the permission the denied panel names, as the app names it too (`apps/app/src/data/read.ts:94-97`). Shipped roles: `get_spend`, `get_spend_drill` and `list_waste` allow org Owner, Admin, Billing and Member, and workspace Owner and Member.
+- Export report: `export_statement`, the same roles as the reads.
+- Export the statement: `export_cost_center_statement`, org Owner, Admin or Billing (`packages/oxagen/src/contracts/spend.cost_center_statement.export.ts:61-64`).
+- Set a budget: `set_spend_budget`, org Owner, Admin or Billing, and workspace Owner or Admin (see `spend-budgets.md`).
+- Setting a cost-center label is `set_cost_center` (org Owner, Admin or Billing). It is not an action on this page.
 
 ## Backend gaps this page depends on
 
-- G3 price book and rollup
-- G4 findings job (findings, evidence, fix, wasted spend by cause)
-- Token classes and prompt parts on `cost.run_totals` and `cost.daily_totals` (§12.6)
-- `list_coaching` contract
+- `work_order_id` on the run record and a work order store (wedge Open decision 5): By work order, the work order panel and Bounded tasks.
+- A day-by-day series for the workspace's month. The store holds `cost.daily_totals` by day, and no contract answers it.
+- Tokens by basis, for the Observed by the gateway tile.
+- An operator's agent count, and a ceiling scoped to one operator (the staged `set_budget` in `packages/oxagen/src/contracts/v2/set-budget.ts` is inert until cutover, `v2/_define.ts:5-15`).
+- The agent's month against the month before (Trend).
+- The provider key a model call was billed to.
+- The server a tool belongs to, and what its frames say.
+- The agents and workspaces behind a cost center.
+- The prompt composition shares on the rollup (the agent panel's Tool definitions).
+- The operator review as one read: one person's spend by agent and by workspace, and outcome per dollar.
+- A statement for a date range, and the signed PDF §12.9 names.
 
 ## Rules every build of this page must keep
 
-- Every badge that describes trust (enforcement tier, replay grade, attestation, cost basis) shows the recorded value and nothing stronger; a client-attested figure is labelled as such and is never rendered as observed.
-- Every number that is money shows its basis. Headers are rollups of the rows beneath them, never typed twice.
-- Every explanation is a chain of links to frames, records and commits, not a summary.
-- A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
-- Exactly one gold action per screen. Gold is identity; it never encodes state. State reads as a dot and a word, so it survives greyscale.
-- A not-loaded state replaces the page body, never the shell. Stub controls say what the product would do; nothing silently does nothing.
-- A count in navigation appears only where something waits on a person.
+- A frame (a recorded event) and a SteeringFrame (a resolved input) never share a name on screen. When the tool panel says what the frames say, it means recorded frames.
+- This view shows no Steering Source and no SteeringFrame, so neither can be shown as the other here.
+- Every figure reads the record: the rollup, rebuilt from frames. No inference, no score, no estimate presented as recorded, and no model-written account of why the money went where it did.
+- No person is scored or ranked. The operator grouping and panel carry no rank number, severity, grade or verdict, and the panel says it reports the record. Habits appear on Optimization in alphabetical order.
+- Every money figure states its basis, and every enforcement claim states its tier. A budget holds only for model calls routed through Oxagen.
+- Headers are rollups of the rows beneath them. The Spend tile equals the Total of By model and the sum of every partitioning grouping. The Tokens tile equals the token class total on Optimization.
+- Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
+- Exactly one gold action per screen: **Set a budget** in the header.
+- A future-only field is marked in the design and renders as not recorded in a build until its contract ships.
+- Every figure on the page reads the same scope, this workspace. The cost-center statement is the one organization-wide export.

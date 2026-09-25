@@ -12,7 +12,7 @@ You are auditing the **Register agent · Wrap** page of Oxagen (`#/a-intel/core-
 
 1. The page spec: `pages/register-wrap.md` (read it first, in full).
 2. The design, rendered: the `register-wrap` stories in Storybook (`npm run storybook`), one per state (loaded, loading, access denied), desktop and mobile; or `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0|1>#<route>` in a browser or with Playwright. `node tools/check-mockup.mjs` confirms the design renders in every state.
-3. The product spec for context: `docs/mission-control-spec.md` §14 (Mission Control), Appendix F (the pages that survive), Appendix A (target tables); the data mapping in `docs/implementation-plan.md` §3.
+3. The product spec for context: `docs/mission-control-spec.md` §14, Appendix F (the pages that survive), Appendix A (target tables); the data mapping in `docs/implementation-plan.md` §3.
 4. The build under audit: `{{APP_ROOT}}` (the Next.js app), served at `{{APP_URL}}`. Route under audit: `/a-intel/core-platform/register/wrap`.
 
 ## Procedure
@@ -27,7 +27,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 6. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows must be wired to the named store; 🟡 rows must be wired for the fields that exist and render `NotBacked` (an honest “not recorded yet”, never a zero) for the rest. A fixture reaching production is a FAIL.
 7. **States.** Force each state and compare copy and controls with the design:
    - **loading** (`state=loading`): the shell and the rail stay and the card is the skeleton; no data, no zeros, no stale panels.
-   - **access denied** (`state=denied`): “You cannot see agent registration”, the missing permission `agent.register on core-platform`, the grant sentence, Request access (opens `request-access`) and Back to Fleet, then Signed in as, Needed, and Decided by (`pol_v41 · deny wins over every allow`).
+   - **access denied** (`state=denied`): “You cannot see agent registration”, the missing permission `agent.register on core-platform`, the grant sentence, Request access (opens `request-access`) and Back to Work, then Signed in as, Needed, and Decided by (`pol_v41 · deny wins over every allow`).
    Loading must not flash values. Denied must name the missing permission and offer Request access.
 8. **Trust language.** Every tier badge shows the recorded word: `harness` for this agent, `gateway` and `contained` as real next rungs, `observe` only where the spec shows it. Nothing says the harness tier is enforced; the copy says client-attested and fail-open. Nothing on the page mentions a witness, a proof, a verdict, a definition of done, a trust or spend score, or a per-run price.
 9. **Headings and captions.** No heading on the built page carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing, except where the spec quotes longer rendered copy.

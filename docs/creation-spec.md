@@ -1,13 +1,13 @@
-# Creating things in Oxagen: agents, tools, skills and context records
+# Creating things in Oxagen: agents, tools, skills and Steering records
 
 | | |
 |---|---|
-| **Status** | Spec v1, for build — rev 1 scope |
+| **Status** | Spec v1, for build, rev 1 scope. Amended 2026-09-24 by the fleet operations wedge (`fleet-operations-wedge.md`): a context record is a Steering record, skills are a kind on Steering › Sources, and the editing pages are the Steering source pages |
 | **Date** | 2026-09-15 |
 | **Owner** | Mac Anderson |
-| **Source** | `mockups/src/engine.js` → `DLG_EXT.create`, `DLG_EXT.wz`, `wzTool`, `wzSkill`, `wzAgent`, `wzRecord`, `pRecord`, `pSkillSource`; rendered in `mockups/missioncontrol.html` |
+| **Source** | `mockups/src/engine.js` → `DLG_EXT.create`, `DLG_EXT.wz`, `wzTool`, `wzSkill`, `wzAgent`, `wzRecord`, `wzImport`, `wzImpPublish`, `pRecord`, `pSkillSource`; rendered in `mockups/missioncontrol.html` |
 | **Builds on** | ADR-043 (Oxagen governs, it does not run); `mission-control-spec.md` §10 (context and steering), §14 (Mission Control); `w13-in-the-loop-scenario.md` |
-| **Related** | `pages/record.md`, `pages/skill-source.md`, `pages/tools.md`, `pages/agents.md`, `pages/skills.md`, `pages/steering.md` |
+| **Related** | `pages/steering-source.md`, `pages/steering-source-skill.md`, `pages/tools.md`, `pages/agents.md`, `pages/steering.md`, `pages/steering-prs.md`, `pages/repositories-changes.md` |
 
 ## 1. One shape, four things
 
@@ -28,8 +28,14 @@ repository, under your review. What Oxagen governs is the call, not the source.
 
 **The drafting turn belongs to `oxagen.assistant`.** It is recorded with frames and a receipt like
 any turn, and it is billed to Oxagen, never to the tenant: it is not one of your runs and it never
-appears in Fleet or in Spend. Every line it drafts is the operator's to change before anybody
+appears in Work or in Spend. Every line it drafts is the operator's to change before anybody
 reviews it, and the wizard says so on every drafting step.
+
+**The Markdown import is the one exception.** It reads CLAUDE.md, AGENTS.md, and any Markdown file
+into records and memories. The records it accepts take the same road, one pull request per source
+file. A line it accepts as a memory is written when the import publishes, steers at `may` or
+`info`, and opens no pull request. The `create` chooser says so in its note. The wizard is
+specified under Markdown import in `mockups/pages/steering.md`.
 
 ### Entry points
 
@@ -39,11 +45,13 @@ reviews it, and the wizard says so on every drafting step.
 |---|---|---|
 | Agents | **New agent** | `wzOpen("agent")` |
 | Tools | **New tool** | `wzOpen("tool")` |
-| Steering · Skills | **Add a skill** | `wzOpen("skill")` |
-| Steering (every other tab) | **Write a context record** | `wzOpen("record")` |
+| Steering › Sources | **New source**, then **Write one** on the Steering record card | `DLG_EXT.newsrc`, then `wzOpen("record")` |
+| Steering › Sources | **New source**, then **Add one** on the Skill card | `DLG_EXT.newsrc`, then `wzOpen("skill")` |
+| Steering (header, every tab) | **Import Markdown** | `wzOpen("import")` |
 
-Skills is a tab of Steering, not a page of its own. Steering is the hub for everything that steers
-an agent: Records, Skills, Memory, Ontology, Policy, Proposals, Preview (`mockups/pages/steering.md`).
+Skills are a kind of Steering Source, not a page of their own. Sources lists every kind in one list
+with a kind filter (`mockups/pages/steering.md`). The New source chooser also registers a document
+and defines a glossary term, which are dialogs of their own and not wizards of this spec.
 
 **New agent** is not **Register an agent**. Register wraps an agent that already runs on a machine
 or in CI; New agent writes one that does not exist yet. Both end on a pull request; they start from
@@ -111,17 +119,17 @@ Three ways in, one way out.
    recomputed at merge, grants (a skill cannot raise a tier or add a tool), secret scan, and the load
    cost against the workspace's search budget.
 
-**Changing a skill** is `pages/skill-source.md`: the same editor over `SKILL.md`, reached from the
-catalog row's **Edit** and from the skill dialog, ending on the same kind of pull request with the
+**Changing a skill** is `pages/steering-source-skill.md`: the same editor over `SKILL.md`, reached from
+the skill's row on Steering › Sources and from the skill dialog, ending on the same kind of pull request with the
 patch version bumped.
 
 **Where it ends.** The pull request is listed on Repositories · Changes with kind `skill`. After the
 merge the skill is in the catalog on Steering · Skills, and **sync** materializes its files into
 each enrolled checkout. The Delivered by sync panel shows each repository’s state. The harness loads
 the file by its own progressive disclosure. Only the description line competes in the assembler, and
-Steering · Preview shows it competing.
+Steering › Compiler shows it competing.
 
-## 5. A context record
+## 5. A Steering record
 
 The kind is not a label. It decides how the statement is delivered, what the checks assert about it,
 and how a run is allowed to use it — so the wizard makes you pick one before it will let you write
@@ -141,19 +149,20 @@ the sentence, and it shows what each kind can never do.
 5. **Pull request** — merge is the publication, and the record is in force from the merge commit, not
    from when it was written.
 
-**Reading and changing one** is `pages/record.md`: the statement as the headline, a per-kind panel,
+**Reading and changing one** is `pages/steering-source.md`: the statement as the headline, a per-kind panel,
 and the statement in the same editor.
 
-**Where it ends.** The wizard closes on Steering · Proposals, on the Context PRs view
+**Where it ends.** The wizard closes on Steering › Proposals, on the Pull requests view
 (`#/:org/:ws/steering/proposals/prs`), with the new pull request selected. After the merge the record
 is on Steering · Records with its force, scope, token cost, and compilation chip: “compiles to text”,
 or “compiles to text and a gate” when it carries an enforcement grant. A record written in the wizard
-carries no grant. Steering · Preview shows where the record lands for an agent and a prompt: the
+carries no grant. Steering › Compiler shows where the record lands for an agent and a prompt: the
 stable prefix for `must` and `should`, the volatile selection for `may` and `info`.
 
 ## 6. What this feature must never do
 
-- Write a row. Every path ends on a pull request.
+- Write a row. Every path ends on a pull request. A memory accepted in the Markdown import is the one
+  exception (§1), and it steers at `may` or `info`.
 - Let a record, a skill or a tool manifest grant authority. A record steers; a skill is prose; a tool
   version lands in the registry callable by nobody until a role grant puts it on a belt.
 - Show a number stronger than the record holds, or a gate softer than policy would apply.

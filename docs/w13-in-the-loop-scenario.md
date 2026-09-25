@@ -4,7 +4,8 @@
 |---|---|
 | **Status** | In the master. In the spec since 2026-09-18: `mission-control-spec.md` §10.6 (skills are steering, and they are files) and §10.7 (the Steering hub) |
 | **Amended 2026-09-18** | Skills now lives under Steering. It is the second of the hub's seven tabs (Records, Skills, Memory, Ontology, Policy, Proposals, Preview) and has no top-level navigation entry of its own. Every route below moved from `…/skills…` to `…/steering/skills…`, and an old link is rewritten in place. The five views (Catalog, Search, In the loop, Reflection, Versions) are views inside the Skills tab. Approved by the maintainer on 2026-09-18 with the steering, graph and gateway review (`reviews/2026-09-18-steering-graph-gateway-review.md`) |
-| **Mockup** | `mockups/missioncontrol.html#/a-intel/core-platform/scenarios/in-the-loop/1`, and the W13 story in Storybook |
+| **Retired** | 2026-09-24, by the fleet operations wedge (`fleet-operations-collapse.md`). The skills console this scenario walked is cut: skills are a kind on Steering › Sources and the search is the Compiler. The interjection it ended on stays, on the run (`mockups/pages/run-interjection.md`) and in the Approvals drawer. What follows is the record of the scenario as it was |
+| **Mockup** | The scenario is gone from the master. The interjection is `mockups/missioncontrol.html#/a-intel/core-platform/runs/run_01K6QW3D5N7TYBA2` |
 | **Owner** | Mac Anderson |
 
 **Wow moment.** An agent starts a run in a repository nobody has bound. Because skills are on,
