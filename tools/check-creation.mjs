@@ -979,7 +979,7 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
-// The Change identity dialog listed the roles as plain badges and told you to go edit them on the
+// The Edit identity dialog (formerly Change identity) listed the roles as plain badges and told you to go edit them on the
 // panel behind it. A drill-down that cannot write is a dead end.
 {
   const { page, errs } = await open("#/a-intel/core-platform/agents/summarizer");

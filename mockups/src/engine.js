@@ -5006,28 +5006,28 @@ function aIdentity(a,r){
     '<div class="panel-b"><dl class="kv">'+
     '<dt>Agent key</dt><dd class="mono">'+h(a.key)+'</dd>'+
     '<dt>Principal</dt><dd class="mono">'+h(a.principal||"prn_pending")+
-     '<span class="sub">minted at registration and never reused — a retired agent\'s runs keep their identity</span></dd>'+
+     '<span class="sub">minted at registration and never reused, so a retired agent\'s runs keep their identity</span></dd>'+
     '<dt>Kind</dt><dd>agent · workspace <span class="mono">'+h(w.slug)+'</span> required</dd>'+
     '<dt>Harness</dt><dd>'+h(a.harnessLabel)+' <span class="mono dim">'+h(a.harnessV||"—")+'</span></dd>'+
-    '<dt>Model tier</dt><dd>'+h(a.model)+' → <span class="mono">'+
+    '<dt>Model class</dt><dd>'+h(a.model)+' → <span class="mono">'+
      h(a.model==="light"?"z-ai/glm-flash-latest":"z-ai/glm-latest")+'</span></dd>'+
     '<dt>Operator</dt><dd>'+h(op.name)+
      '<span class="sub">accountable for every run · IAM field <span class="mono">initiating_principal</span></span></dd>'+
     '<dt>Lifecycle state</dt><dd><span class="b b-allowed"><span class="d"></span>'+h(a.status)+'</span>'+
-     '<span class="sub">registered → enrolled → active → retired. Retiring ends the principal and never deletes it, so old runs keep their identity.</span></dd>'+
+     '<span class="sub">registered → enrolled → retired, with suspended or unenrolled in between. Retiring ends the principal and keeps it, so old runs keep their identity.</span></dd>'+
     '<dt>First frame</dt><dd class="mono">'+h(a.firstFrame||"—")+'</dd>'+
     '</dl></div></div>'+
 
    '<div class="panel" style="border-color:color-mix(in srgb,var(--st-proven) 34%,var(--border))">'+
     '<div class="panel-h"><div style="flex:1;min-width:0"><h3>Credentials</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">The single property most of the threat model rests on.</p></div>'+
-    '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>none</span></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">What this agent holds</p></div>'+
+    '<span class="b b-proven" style="margin-left:auto"><span class="d"></span>run token only</span></div>'+
     '<div class="panel-b" style="display:grid;gap:12px">'+
-    iamPairs([["API key","none"],["OAuth token","none"],["Cloud role","none"],["GitHub token","none"],
-              ["Run token","one, and it reaches oxagen only"]])+
+    iamPairs([["API key","Not held"],["OAuth token","Not held"],["Cloud role","Not held"],["GitHub token","Not held"],
+              ["Run token","Held · works only with oxagen"]])+
     '<p style="font-size:12.5px;margin:0">It holds one run token, and that token is good for talking to oxagen and '+
     'nothing else. Every secret a call needs is minted by the broker at dispatch, scoped to that one call, and never '+
-    'transmitted to the agent. A leaked run token cannot reach a provider.</p>'+
+    'sent to the agent. A leaked run token cannot reach a provider.</p>'+
     '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/tools/providers\')">See the connections that mint them</button>'+
     '</div></div></div>'+
 
@@ -5035,17 +5035,17 @@ function aIdentity(a,r){
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Run credential</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">Long-lived, purpose-locked, hashed at rest, shown to the operator once.</p></div></div>'+
     '<div class="panel-b"><dl class="kv">'+
-    '<dt>Key</dt><dd class="mono">'+h(a.cred||"—")+'<span class="sub">shown once at issue; stored as a hash</span></dd>'+
+    '<dt>Key</dt><dd class="mono">'+h(a.cred||"—")+'<span class="sub">shown once at issue and stored as a hash</span></dd>'+
     '<dt>Purpose lock</dt><dd class="mono">run_start, control_channel</dd>'+
     '<dt>Issued</dt><dd>'+h(a.issued||"—")+' to '+h(op.name)+'</dd>'+
     '<dt>Last used</dt><dd class="mono">'+h(a.enrolled?(a.lastUsed||"—"):"never")+'</dd>'+
     '<dt>Run tokens</dt><dd>'+(a.enrolled?(a.tokens||0)+' active · 15 minute TTL · refreshed on the control channel':'0 active')+
      '<span class="sub">Revoking the key or suspending the agent kills every run token at the next call. This is what makes a halt stick.</span></dd>'+
-    '<dt>Host device key</dt><dd class="mono">'+h(a.enrolled?(a.devKey||"—"):"— not enrolled —")+
+    '<dt>Host device key</dt><dd class="mono">'+h(a.enrolled?(a.devKey||"—"):"—")+
      '<span class="sub">'+(a.enrolled?'signs checkpoints from '+h(a.host||"its host")
-       :'checkpoints are unsigned until a host enrolls')+'</span></dd>'+
+       :'Not enrolled. Checkpoints are unsigned until a host enrolls.')+'</span></dd>'+
     '</dl>'+
-    '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'identity\',\''+a.key+'\')">Change identity</button>'+
+    '<div class="row" style="margin-top:14px"><button class="btn" onclick="openDialog(\'identity\',\''+a.key+'\')">Edit identity</button>'+
     '<button class="btn danger" onclick="openDialog(\'revokecred\',\''+a.key+'\')">Revoke credential</button></div>'+
     '</div></div>'+
 
@@ -5056,14 +5056,14 @@ function aIdentity(a,r){
      '<span class="sub">every run of this agent carries their name as <span class="mono">initiating_principal</span></span></dd>'+
     '<dt>Workspace</dt><dd>'+h(w.name)+' <span class="mono dim">'+h(w.slug)+'</span>'+
      '<span class="sub">the principal is scoped to it and cannot be used in another</span></dd>'+
-    '<dt>Runtime</dt><dd class="mono">'+h(a.host||"— not enrolled —")+
-     '<span class="sub">'+(a.enrolled?'its device key countersigns this agent\'s checkpoints':'nothing signs its checkpoints yet')+'</span></dd>'+
-    '<dt>Delegation</dt><dd>subagents narrow, never widen'+
+    '<dt>Runtime</dt><dd class="mono">'+h(a.host||"—")+
+     '<span class="sub">'+(a.enrolled?'its device key countersigns this agent\'s checkpoints':'Not enrolled. Nothing signs its checkpoints yet.')+'</span></dd>'+
+    '<dt>Delegation</dt><dd>subagents can only narrow access'+
      '<span class="sub">a subagent can use only what both this agent and the invoking person are granted</span></dd>'+
     '<dt>Replay</dt><dd class="mono">'+h(a.replay||"render")+
      '<span class="sub">what a reader can do with this agent\'s frames after the fact</span></dd>'+
     '<dt>Tamper incidents</dt><dd>'+(tamperCount(a)
-      ?'<span class="b b-critical"><span class="d"></span>'+tamperCount(a)+' · '+h(agentTamper(a)[0].kind)+'</span> '+
+      ?'<span class="b b-critical"><span class="d"></span>'+tamperCount(a)+' · '+keyLabel(agentTamper(a)[0].kind)+'</span> '+
        '<button class="btn sm ghost" onclick="S.tab.agent=\'activity\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/activity\')">Read them</button>'
       :'<span class="b b-allowed"><span class="d"></span>0</span>')+'</dd>'+
     '</dl>'+
@@ -5089,10 +5089,10 @@ function aOverview(a,r){
     '<div class="panel-b"><dl class="kv">'+
     part("Identity",'<span class="mono">'+h(a.principal||"prn_pending")+'</span>',
       'minted at registration and never reused',["Open identity",'S.tab.agent=\'identity\';go(\''+'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/identity\')'])+
-    part("Steering",M?plural((M.gates.length+M.prefix.length+M.volatile.length),"item")+' · <span class="mono">'+tokn(M.tok.total)+' tok</span>':'<span class="dim">no preview prompt is set up</span>',
+    part("Steering",M?plural((M.gates.length+M.prefix.length+M.volatile.length),"record")+' · <span class="mono">'+tokn(M.tok.total)+' tok</span>':'<span class="dim">no steering records reach this agent</span>',
       M?(M.delivered?'assembled from the workspace library and delivered at SessionStart and UserPromptSubmit'
                     :'assembled, and not delivered: no hook is installed on the observe tier')
-       :'steering is a workspace library; this agent holds a reference, never a copy',
+       :'Steering is a workspace library. This agent holds a reference to it.',
       ["Open steering",'S.tab.agent=\'steering\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/steering\')'])+
     part("Toolbelt",belts.length?belts.map(function(b){
         return '<button class="lnk" onclick="S.beltPick=\''+h(b.id)+'\';go(\'#/'+ORG.slug+'/'+S.ws+'/tools/toolbelts\')">'+h(b.name)+'</button>';
@@ -5104,9 +5104,9 @@ function aOverview(a,r){
       ["Open runtime",'S.tab.agent=\'runtime\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/runtime\')'])+
     part("Owner",h(op.name)+' <span class="mono dim">'+h(op.role)+'</span>',
       'accountable for every run this agent makes')+
-    part("Permissions",agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+
-      (a.mandates.length?' · <span class="b b-approval"><span class="d"></span>'+a.mandates.length+' mandate</span>':' · no mandate'),
-      'a toolbelt says what it can see; its roles and the policy say what it may call',
+    part("Permissions",plural(agentRolesOf(a.key).length,"role")+
+      (a.mandates.length?' · <span class="b b-approval"><span class="d"></span>'+plural(a.mandates.length,"mandate")+'</span>':' · no mandate'),
+      'A toolbelt says what it can see. Its roles and the policy say what it may call.',
       ["Open permissions",'S.tab.agent=\'permissions\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/permissions\')'])+
     '</dl></div></div>'+
 
@@ -5115,16 +5115,16 @@ function aOverview(a,r){
     '<button class="btn sm" style="margin-left:auto" onclick="S.tab.agent=\'activity\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/activity\')">Open activity</button></div>'+
     '<div class="panel-b" style="display:grid;gap:14px">'+
     '<div class="grid g2">'+
-     '<div class="stat"><span class="k">Runs</span><span class="v">'+a.runs30.toLocaleString()+'</span><span class="s">'+h(a.lastUsed?'last at '+a.lastUsed:'none recorded')+'</span></div>'+
+     '<div class="stat"><span class="k">Runs</span><span class="v">'+a.runs30.toLocaleString()+'</span><span class="s">'+h('in the last 30 days'+(a.lastUsed?' · last at '+a.lastUsed:''))+'</span></div>'+
      '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(n$(a.spend30)))+'</span><span class="s">'+basisChip((TIER_RANK[a.tier]||0)>=2?'gateway_observed':'client_attested')+'</span></div>'+
      '<div class="stat"><span class="k">Tokens</span><span class="v">'+tokn(tk.total)+'</span><span class="s">'+per(tk.cacheRate)+' cache read over input</span></div>'+
-     '<div class="stat"><span class="k">Tamper incidents</span><span class="v"'+(tamperCount(a)?' style="color:var(--st-critical)"':'')+'>'+tamperCount(a)+'</span><span class="s">'+h(hl[2])+'</span></div>'+
+     '<div class="stat"><span class="k">Tamper incidents</span><span class="v"'+(tamperCount(a)?' style="color:var(--st-critical)"':'')+'>'+(tamperCount(a)||a.enrolled?tamperCount(a):'—')+'</span><span class="s">'+h(hl[2])+'</span></div>'+
     '</div>'+
     '<div class="note">Every tool on the toolbelt is sent, and paid for, on every model call, whether or not it\'s used.</div></div></div></div>'+
 
-  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Definition in git</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">The definition is a file in your repository, and the file is the source of truth.</p></div>'+
-   '<button class="btn sm" style="margin-left:auto" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/definition\')">Open the file</button></div>'+
+  '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Definition</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">The definition file in git is the source of truth. Identity and credentials are managed by oxagen.</p></div>'+
+   '<button class="btn sm" style="margin-left:auto" onclick="S.tab.agent=\'definition\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/definition\')">Open definition</button></div>'+
    '<div class="panel-b"><dl class="kv">'+
    '<dt>Path</dt><dd class="mono">.oxagen/agents/'+h(sl)+'.toml</dd>'+
    '<dt>Repo</dt><dd class="mono">'+h(w.main)+' @ '+h(w.branch)+'</dd>'+
@@ -11923,7 +11923,7 @@ DLG_EXT.rotatecred=function(key){
   var a=agent(key); if(!a)return noSuch("Agent");
   return {t:"Rotate the credential on "+a.key+"?",w:false,
    b:'<div class="note">A new key is minted and handed to the host at its next check-in. The old key stops working at the next call, and every live run token dies with it.</div>'+
-     '<div class="warn">A run in flight on this agent ends at its next call, not at a boundary. Its frames up to that point are kept.</div>',
+     '<div class="warn">A run in flight on this agent ends at its next call, without waiting for a checkpoint. Its frames up to that point are kept.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="closeDialog();act(\'Credential rotated on '+h(a.key)+'. The old key stops working at the next call and every live run token dies with it.\',\'gold\')">Rotate it</button>'};
 };
@@ -11931,14 +11931,14 @@ DLG_EXT.revokecred=function(key){
   var a=agent(key); if(!a)return noSuch("Agent");
   return {t:"Revoke the credential on "+a.key+"?",w:false,
    b:'<div class="note">Nothing is minted to replace it. '+h(a.key)+' cannot call anything until a new credential is issued, and every run token dies at the next call.</div>'+
-     '<div class="warn">Rotate is the reversible one. Revoke leaves the agent unable to run.</div>',
+     '<div class="warn">Revoke leaves the agent unable to run until a new credential is issued. To replace the key and keep running, rotate the credential instead.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
      '<button class="btn danger" onclick="closeDialog();act(\'Credential revoked on '+h(a.key)+'. Every run token dies at the next call.\')">Revoke it</button>'};
 };
 DLG_EXT.suspendagent=function(key){
   var a=agent(key); if(!a)return noSuch("Agent");
   return {t:"Suspend "+a.key+"?",w:false,
-   b:'<div class="note">Suspension is reversible and keeps the registration, the roles and the mandates. Every run token dies at the next call, even if the daemon is down, because oxagen refuses the call, not the agent’s host.</div>'+
+   b:'<div class="note">Suspension is reversible and keeps the registration, the roles and the mandates. Every run token dies at the next call, even if the daemon is down, because oxagen refuses the call itself.</div>'+
      '<div class="note" style="margin-top:10px">Retire ends the agent. You can undo a suspension.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn danger" onclick="closeDialog();act(\'Agent '+h(a.key)+' suspended. Every run token dies at the next call, even if the daemon is down.\')">Suspend it</button>'};
@@ -12047,7 +12047,7 @@ function identitySave(){
 }
 function identityDlg(){
   var a=S.dlg==="identity"?agent(S.dlgArg):null; if(!a) return {t:"Identity",w:false,b:"",f:""};
-  return {t:"Change identity",s:a.key,w:false,b:
+  return {t:"Edit identity",s:a.key,w:false,b:
    '<div class="field"><label>Principal</label><input value="prn_01K2M7A4E8 · kind agent" readonly aria-label="Principal"><div class="hint">The principal is the agent’s IAM identity. It is created at registration and never reused.</div></div>'+
    '<div class="field"><label>Acts on behalf of</label><select id="idOp" aria-label="Parent user">'+Object.keys(PEOPLE).map(function(k){return '<option value="'+k+'"'+(a.operator===k?' selected':'')+'>'+h(PEOPLE[k].name)+' · '+h(PEOPLE[k].role)+'</option>';}).join("")+'</select>'+
     '<div class="hint">The parent user sets the delegation ceiling: the agent can never do what this person cannot.</div></div>'+
@@ -12065,15 +12065,15 @@ function agentDelete(key){
   var i=-1;AGENTS.forEach(function(a,ix){if(a.key===key)i=ix;});
   if(i<0)return; var a=AGENTS[i]; AGENTS.splice(i,1); delete S.agentRoles[key];
   WS.forEach(function(w){if(w.slug===a.ws&&w.agents>0)w.agents--;});
-  closeDialog(); go('#/'+ORG.slug+'/'+a.ws+'/agents'); act(key+" retired. Credential revoked, definition archived by a context PR, every run and frame kept.");
+  closeDialog(); go('#/'+ORG.slug+'/'+a.ws+'/agents'); act(key+" retired. Its credential is revoked, a Context PR archives its definition, and every run and frame is kept.");
 }
 function agentDelDlg(){
   var a=S.dlg==="delagent"?agent(S.dlgArg):null; if(!a) return {t:"Retire agent",w:false,b:"",f:""};
   var live=RUNS.filter(function(r){return r.agent===a.key&&r.status==="live";}).length;
   return {t:"Retire agent",s:a.key,w:false,b:
    '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a Context PR archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
-   '<dl class="kv"><dt>Kept</dt><dd>every run, frame, receipt and score — the record is never deleted</dd><dt>Ends</dt><dd>'+agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+', '+a.mandates.length+' mandate'+(a.mandates.length===1?'':'s')+', the host enrollment</dd>'+
-   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span> — canceled at the next boundary and recorded</dd>':'')+'</dl>'+
+   '<dl class="kv"><dt>Kept</dt><dd>every run, frame, receipt, and score. The record is kept in full.</dd><dt>Ends</dt><dd>'+plural(agentRolesOf(a.key).length,"role")+', '+plural(a.mandates.length,"mandate")+', and the host enrollment</dd>'+
+   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+plural(live,"live run")+'</span>, canceled at the next checkpoint and recorded</dd>':'')+'</dl>'+
    '<label class="check" style="margin-top:12px"><input type="checkbox" id="delAgentOk" onchange="el(\'delAgentBtn\').disabled=!this.checked"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Re-registering creates a new principal with a provisional score.</span></span></label>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button id="delAgentBtn" class="btn danger" disabled onclick="agentDelete(\''+h(a.key)+'\')">Retire</button>'};
 }
