@@ -37,7 +37,7 @@ or the build fails.
 
 `<page>` is the catalog id of the view on screen. A tab falls back to the first tab of its page when
 its own key has no section: `agent-toolbelt/header` opens `agent/header` if `agent-toolbelt.md` has
-no Page header section. The tab families are the agent tabs (`agent`), the run tabs (`run`), Tools
+no Page header section. The tab families are the agent tabs, the Definition tab's source page included (`agent`), the run tabs (`run`), Tools
 (`tools`), the Steering tabs (`steering`), Spend (`spend`), Repositories (`repositories`),
 Organization (`organization`), and the Work tabs (`work-backlog`). A record page (a work item, a
 work order, a source, a runtime) has no fallback, so a part it lacks a section for shows as missing.

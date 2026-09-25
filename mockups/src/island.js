@@ -45,7 +45,7 @@ function islPageId(r,under){
    written for the tab falls back to the family's first tab. Only tabs fall back: a record page (a
    work item, a work order, a source, a runtime) has parts of its own, and a miss there must show. */
 var ISL_FAMILY={"agent-identity":"agent","agent-steering":"agent","agent-toolbelt":"agent","agent-runtime":"agent",
-  "agent-permissions":"agent","agent-activity":"agent","run-transcript":"run","run-cost":"run","run-evidence":"run",
+  "agent-permissions":"agent","agent-activity":"agent","agent-source":"agent","run-transcript":"run","run-cost":"run","run-evidence":"run",
   "run-memories":"run","tools-toolbelts":"tools","tools-providers":"tools","tools-policy":"tools","tools-switches":"tools",
   "steering-assignments":"steering","steering-compiler":"steering","steering-proposals":"steering","steering-prs":"steering",
   "spend-budgets":"spend","spend-optimization":"spend","repositories-copies":"repositories","repositories-changes":"repositories",
