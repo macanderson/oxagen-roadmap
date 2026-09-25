@@ -454,7 +454,7 @@ for (const theme of ["light", "dark"]) {
   const dtxt = () => page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
   const rows = () => page.evaluate(() => [...document.querySelectorAll("table tbody tr")].map((r) => r.innerText).join("|"));
 
-  ok(/Draft a version/.test(await page.evaluate(() => document.body.innerText)), "policy: the panel header drafts a version");
+  ok(/Draft new version/.test(await page.evaluate(() => document.body.innerText)), "policy: the panel header drafts a version");
   ok(/Discard/.test(await rows()), "policy: the draft row carries Discard");
 
   await page.evaluate(() => openDialog("policynew"));
@@ -523,7 +523,7 @@ for (const theme of ["light", "dark"]) {
   await page.evaluate(() => { document.getElementById("ks-target").value = "mbp-01"; ksRefresh(); document.getElementById("ks-why").value = "Held ready for an incident on this host"; ksCreate(); });
   await page.waitForTimeout(250);
   ok(/mbp-01/.test(await pg()), "switches: the new switch is on the page");
-  ok(/allowing/.test(await pg()), "switches: a new switch is created allowing");
+  ok(/calls allowed/.test(await pg()), "switches: a new switch is created off");
 
   // Nothing may cover the same target twice.
   await page.evaluate(() => openDialog("switchnew"));
@@ -564,7 +564,7 @@ for (const theme of ["light", "dark"]) {
   await page.waitForTimeout(250);
   const cards = await page.evaluate(() => [...document.querySelectorAll(".panel-h h3")].map((x) => x.textContent).join("|"));
   ok(!/mbp-01/.test(cards), "switches: the created switch card is gone, got " + cards);
-  ok(/core-platform/.test(cards) && /every irreversible tool/.test(cards), "switches: the shipped switches are untouched");
+  ok(/core-platform/.test(cards) && /[Ee]very irreversible tool/.test(cards), "switches: the shipped switches are untouched");
   ok(errs.length === 0, "switches: no JavaScript error: " + errs.join(" | "));
   await page.close();
 }
