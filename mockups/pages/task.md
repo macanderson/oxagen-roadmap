@@ -5,11 +5,11 @@
 | Route | `#/a-intel/core-platform/tasks/<taskId>`, for example `tsk_01K6S7C5PA` |
 | Scope | workspace |
 | Spec | `docs/tasks-spec.md` §6 (the task record), §8 (the definition of done), §9.1 (selecting); `docs/work-graph-spec.md` §4 (dependencies), §5 (readiness on the graph), §11.2, §12.2 |
-| Design | `mockups/src/engine.js` → `pTask()`, `dodRows()`, `tkDraftNow()`, `taskPromptText()`, `tkDeps()`, `DLG_EXT.certify`, `DLG_EXT.dodreopen`, `DLG_EXT.tklink`; data `mockups/fixtures/tasks.json` |
+| Design | `mockups/src/engine.js` → `pTask()`, `dodRows()`, `tkDraftNow()`, `taskPromptText()`, `tkDepsPanel()`, `tkPathUp()`, `tkLinkAdd()`, `tkUnlink()`, `DLG_EXT.certify`, `DLG_EXT.dodreopen`, `DLG_EXT.tklink`; data `mockups/fixtures/tasks.json` |
 | States | loaded · loading · error · access denied |
 | Storybook | `Oxagen / Workspace / Task`: one story per state, desktop and mobile |
 | Audit | `task.audit-prompt.md` |
-| Check | `node tools/check-tasks.mjs` (flows 2, 3, and 8) |
+| Check | `node tools/check-tasks.mjs` (flows 2, 3, 8, and 13) |
 
 ## Job
 
@@ -46,7 +46,7 @@ Then two columns.
 - **Assistant notes**: the assumptions and gaps the assistant recorded, one per line. Absent when there are none.
 
 **Right**
-- **Dependencies**, with **Add a dependency** (plain) in its header. Two lists, **Blocked by** and **Blocks**. Each row: the provider logo, the number in mono as a link to that task, the subject, the state as a dot and a word (`open`, `in a work order`, `accepted`, `closed as Done`, `closed as Won't do`), and the source: the provider's logo with "from GitHub", or "added here by Marcus Bell on 2026-09-11". An `oxagen` row has **Remove**; a `provider` row's title reads "Read from GitHub. Remove the link there." Under the lists, when any: "1 link to an issue outside the scope of this connection." With no dependency: "None. This task waits on nothing, and nothing waits on it." The panel is outlined as future-only.
+- **Dependencies**, with **Add a dependency** (plain) in its header. Two lists, **Blocked by** and **Blocks**. Each row: the provider logo, the number in mono as a link to that task, the subject, the state as a dot and a word (`open`, `in a work order`, `accepted`, `closed as Done`, `closed as Won't do`), and the source: the provider's logo with "from GitHub", or "added here by Marcus Bell on 2026-09-11". An `oxagen` row has **Remove**; a `provider` row's title reads "Read from GitHub. Remove the link there." Under the lists, when any: "1 link to an issue outside the scope of this connection." With no dependency: "None. This task waits on nothing, and nothing waits on it."
 - **Fields** with the readiness badge in its header, as a key-value list: Task id (mono), Number (a link to the issue), Status, Resolution, Labels (colour chips), Owner, Created by, Created at, Updated by, Updated at, Closed at. A person is the mapped member with avatar and, beside it, the provider handle with its logo; an account that is not mapped is its handle with `not mapped`; a bot is its handle with `bot`.
 - **History**: Imported, Definition of done drafted, Certified, Changed upstream, Dependency added, Dependency removed, Unblocked, Queued in a work order, Sent in a work order, Accepted, each with its time and who.
 

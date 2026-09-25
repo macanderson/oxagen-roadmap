@@ -3,9 +3,9 @@
 | | |
 |---|---|
 | **Status** | Spec v1, for design review. No code is written against it yet. It amends `tasks-spec.md` and cites it by section. It keeps that spec's words: a unit of work is a task, and the page is Tasks. The request that asked for this spec said "work item". The closed fleet operations wedge (PR #90) renamed task to work item, and the ARP brand spec bans "task" as a user-facing noun (`ARP-Brand-spec.md` line 37). Whether the word changes is decision 1 in §16, for Mac. |
-| **Date** | 2026-09-25 |
+| **Date** | 2026-09-24 |
 | **Owner** | Mac Anderson |
-| **Source** | `mockups/src/engine.js` (`pTasks`, `tkTaskTab`, `tkWhyNot`, `stageChain`, `pTask`, `pWorkOrder`, `DLG_EXT.wo`, `DLG_EXT.wfnew`, `DLG_EXT.tklink`), `mockups/fixtures/tasks.json`, rendered in `mockups/missioncontrol.html` |
+| **Source** | `mockups/src/engine.js` (`pTasks`, `tkTaskTab`, `tkWhyNot`, `stageChain`, `pTask`, `pWorkOrder`, `tkBlockedByCell`, `tkLayers`, `tkGraph`, `tkDepsPanel`, `woOrderPanel`, `woSendPanel`, `wfDepths`, `DLG_EXT.wo`, `DLG_EXT.wfnew`, `DLG_EXT.tklink`, `DLG_EXT.worelease`, `DLG_EXT.wowithdraw`), `mockups/fixtures/tasks.json`, rendered in `mockups/missioncontrol.html` |
 | **Builds on** | `tasks-spec.md` (the task record, the definition of done, work orders, workflows). ADR-043 (Oxagen governs agents and does not run them), ADR-101 (four first-class harnesses), ADR-157 (ARP carries an operator-authored brief), ADR-052 (the governed action is the billable unit) |
 | **Inspiration** | The Oxagen ARP document pack, `macanderson/oxagen-arp` at `7d9af52`: `ARP-design.md`, `ARP-Schema-spec.md`, `ARP-API-spec.md`, `ARP-Brand-spec.md`. Each borrowed idea is marked "ARP:" with its line. ARP has no dependency graph of its own. It fans one work request out to a fixed set of targets and never joins them (`ARP-design.md` lines 323 to 333). The graph in this spec is new design. |
 | **Related** | `creation-spec.md` (a workflow is a file, changed by pull request), `dod-spec.md` (the run dod, a different object), `mission-control-spec.md` §1 (the operator) |
@@ -109,7 +109,7 @@ the task page says "1 link to an issue outside the scope of this connection".
 
 A parent and child read as "the parent is blocked by the child" because a parent is done when its
 children are. A workspace that reads parents the other way round removes the dependency on the task page.
-The scopes and fields in this table were read from each provider's documentation on 2026-09-25 and not
+The scopes and fields in this table were read from each provider's documentation on 2026-09-24 and not
 tested against a live tenant, the same caveat as `tasks-spec.md` §18.
 
 A `provider` dependency cannot be removed in Oxagen. Removing the link in the provider removes it on the
@@ -184,6 +184,10 @@ line: "2 of 3 tasks are blocked. Oxagen sends this work order when they are unbl
 The prompt, the repositories, the cap, and the confirmation are the same, because the brief is fixed at
 the send. A queued brief cannot change either.
 
+A task in a queued work order keeps the readiness `ready`, because it has not reached a runtime. Its row
+on the Tasks tab reads `ready` with "queued in wo_01K6TB2X" under it, and its checkbox is disabled with
+"Already queued in wo_01K6TB2X. Withdraw it to send elsewhere." Readiness keeps its seven values.
+
 Section 6 gains **Expires**, a date, default 14 days from the send, at most 90. ARP: a work order "names
 allowed tools and context, rule versions, budget, expiry, and review points" and a request carries a "queue
 expiry" (`ARP-design.md` lines 52 and 1497).
@@ -206,9 +210,8 @@ expiry" (`ARP-design.md` lines 52 and 1497).
 
 When the last blocker of a queued work order's tasks is accepted or closed `Done`, Oxagen releases the
 work order in the same transaction: its state becomes `sent`, its tasks `sent`, the runtime is told the
-way §9.6 of `tasks-spec.md` says, and `work_order.released` is recorded. Two queued work orders that
-carry the same task cannot both release: the task is `sent` to the first by send time, and the second
-waits with the reason "#482 is already in wo_01K6TB2X" until that work order stops or expires.
+way §9.6 of `tasks-spec.md` says, and `work_order.released` is recorded. A task sits in at most one
+queued work order at a time (§6.1), so two queued work orders never wait on the same task.
 
 **Send now** on a queued work order releases it before its blockers are done. It is a person's decision,
 recorded as `release_work_order` with the person and the blockers still open, and the brief gains one
@@ -497,7 +500,7 @@ Every write is gated server-side, whatever the UI hides.
 ## 14. What exists today
 
 Legend: ✅ exists · 🟡 partial · ❌ missing. Read from `macanderson/oxagen` `origin/main` at `eace53664`
-on 2026-09-25.
+on 2026-09-24.
 
 | Need | Today | Status |
 |---|---|---|
@@ -511,7 +514,7 @@ on 2026-09-25.
 
 ## 15. Flows the check walks
 
-`node tools/check-tasks.mjs` gains these flows in the built mockup:
+`node tools/check-tasks.mjs` walks these flows in the built mockup:
 
 9. A task with an open blocker shows "blocked by #481" under `ready`, and its checkbox is enabled.
 10. Sending it opens the work order dialog with the queued line and **Queue until unblocked**, and the

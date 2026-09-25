@@ -5,11 +5,11 @@
 | Route | `#/a-intel/core-platform/tasks/work-orders/<woId>`, for example `wo_01K6T9QX` |
 | Scope | workspace |
 | Spec | `docs/tasks-spec.md` §9.5 (what sending records), §9.6 (delivery), §10.3 (running a workflow), §11 (completing work); `docs/work-graph-spec.md` §6 (queued sends), §7 (sends and targets), §8.2 (running stages beside each other), §11.3, §12.3, §12.4 |
-| Design | `mockups/src/engine.js` → `pWorkOrder()`, `stageChain()`, `woItemsFor()`, `woPromptText()`, `stageLayers()`, `woOrderPanel()`, `DLG_EXT.woaccept`, `DLG_EXT.wostop`, `DLG_EXT.worelease`, `DLG_EXT.wowithdraw`; data `mockups/fixtures/tasks.json` |
+| Design | `mockups/src/engine.js` → `pWorkOrder()`, `stageChain()`, `woItemsFor()`, `woPromptText()`, `wfDepths()`, `stageNeeds()`, `woActiveStages()`, `woStageWords()`, `woWaitsOn()`, `woOrderPanel()`, `woSendPanel()`, `woRelease()`, `woWithdraw()`, `woRetry()`, `DLG_EXT.woaccept`, `DLG_EXT.wostop`, `DLG_EXT.worelease`, `DLG_EXT.wowithdraw`; data `mockups/fixtures/tasks.json` |
 | States | loaded · loading · error · access denied |
 | Storybook | `Oxagen / Workspace / Work order`: one story per state, desktop and mobile |
 | Audit | `work-order.audit-prompt.md` |
-| Check | `node tools/check-tasks.mjs` (flows 5, 7, and 8) |
+| Check | `node tools/check-tasks.mjs` (flows 5, 7, 8, 10, 12, and 14) |
 
 ## Job
 
@@ -28,7 +28,7 @@ Actions, by state:
 | `stopped`, `expired` | **Copy prompt**, **Send again** (plain; opens the work order dialog with the same tasks, target, prompt and repositories, and records `retry_of`) |
 | `accepted` | **Copy prompt** |
 
-A work order is `in progress` from its start receipt, not from its send (`work-graph-spec.md` §6.2). **Send now**, **Withdraw**, **Send again** and the queued subtext are outlined as future-only.
+A work order is `in progress` from its start receipt, not from its send (`work-graph-spec.md` §6.2).
 
 **Copy prompt** copies the prompt exactly as sent, then **References**: the work order id, title, Oxagen link, and prompt digest, each task's number, subject, issue link, and Oxagen task id and link, and the pull request when one exists. The toast reads "Prompt copied, with N tasks."
 
@@ -43,8 +43,8 @@ Then two columns.
 - **Handoffs**: every stage run in order, "<role>" or "<role> returned the work", its run id, and its note, or "running". A run recorded before a return that re-ran its stage is marked "before the return". A stage that needed two stages shows the note from each, with its stage and run. Note: "A handoff note reaches the next stage as quoted evidence. It is never an instruction to that agent."
 
 **Right**
-- **Order**: the work order's tasks in the order the graph implies, numbered, each with its blockers inside this work order ("after #481") and, while queued, the blockers outside it ("waits on #479, not in this work order"). One task with no dependency reads "No order among these tasks." Outlined as future-only.
-- **Send**, only for a send with several work orders: one row per sibling with its target's harness mark and name, its state, items claimed over total, and cost with its basis, in send order, with no rank. Outlined as future-only.
+- **Order**: the work order's tasks in the order the graph implies, numbered, each with its blockers inside this work order ("after #481") and, while queued, the blockers outside it ("waits on #479, not in this work order"). One task with no dependency reads "No order among these tasks.
+- **Send**, only for a send with several work orders: one row per sibling with its target's harness mark and name, its state, items claimed over total, and cost with its basis, in send order, with no rank.
 - **Tasks**: each task's provider logo, number, and subject, linking to the task.
 - **Repositories**: the repositories the work order may change, "Branches and pull requests only. The production branch is never pushed.", and the pull request when one exists.
 - **Prompt**: the digest in the header, the brief as sent in a monospace block, and "As sent. A sent prompt cannot change."

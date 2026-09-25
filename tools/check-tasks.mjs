@@ -21,6 +21,12 @@
 //   7. labels carry a colour and a mapping, a resolution can be created in a provider, and a claimed work
 //      order can be accepted
 //   8. the task and the work order each copy a prompt that names the other
+//   9. a task the graph blocks names its blockers, can be selected, and a queued task cannot
+//  10. sending a blocked task queues the work order, which can be sent now or withdrawn
+//  11. the Graph view draws the open tasks by layer
+//  12. stages that need the same stage run beside each other, in the file and on the work order
+//  13. a dependency that would close a cycle is refused with the path
+//  14. a send to two agents makes two work orders under one send
 // Every assertion names a string the surface is supposed to render, never a value read back out of
 // the control under test.
 import { mkdirSync } from "node:fs";
@@ -325,6 +331,86 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/A draft\. Nobody has certified it\./.test(c) && !/Certified by/.test(c), "copy: a draft is not called certified");
   ok(/No work order carries this task/.test(c), "copy: a task in no work order says so");
   await done(d.page, [...t.errs, ...d.errs], "copy task");
+}
+
+/* 9 to 14. the work graph (docs/work-graph-spec.md §15) */
+{
+  const { page, errs } = await open(H);
+  let t = await text(page);
+  ok(/Blocked by other tasks/i.test(t) && !/Being drafted/i.test(t), "graph: the Blocked by other tasks tile replaces Being drafted");
+  ok(/Blocked by/i.test(await text(page, "thead")), "graph: the Tasks table carries a Blocked by column");
+  const row640 = await text(page, 'tr[aria-label="Open a-intel/platform#640"]');
+  ok(/blocked by #612, #618/.test(row640), "graph: a ready task names its open blockers under its badge");
+  ok(!(await page.locator('input[aria-label="Select a-intel/platform#640"]').isDisabled()), "graph: a task the graph blocks can still be selected");
+  const row644 = await text(page, 'tr[aria-label="Open a-intel/platform#644"]');
+  ok(/queued in wo_01K6TB2X/.test(row644), "graph: a task in a queued work order says so");
+  ok(await page.locator('input[aria-label="Select a-intel/platform#644"]').isDisabled(), "graph: a queued task cannot be selected twice");
+  /* 11. the Graph view */
+  await page.click(".panel-h >> text=Graph");
+  ok((await page.locator(".wg-card").count()) >= 12 && (await page.locator(".wg-edges path").count()) >= 3, "graph: the Graph view draws the open tasks and their edges");
+  const x640 = await page.locator('.wg-card[aria-label="Open a-intel/platform#640"]').evaluate(e => parseInt(e.style.left, 10));
+  const x612 = await page.locator('.wg-card[aria-label="Open a-intel/platform#612"]').evaluate(e => parseInt(e.style.left, 10));
+  ok(x612 === 0 && x640 > x612, "graph: #612 sits in layer 0 and #640 in the layer after it");
+  ok(/Unblocked tasks sit in layer 0/.test(await text(page)), "graph: the Graph view says what a layer is");
+  await shot(page, "09-graph");
+  /* 10. queueing a blocked task */
+  await page.click(".panel-h >> text=List");
+  await page.click('input[aria-label="Select a-intel/platform#640"]');
+  await page.click("#dspBtn");
+  await page.click(".dsp-i >> nth=0");
+  let d = await dlgText(page);
+  ok(/1 of 1 task is blocked/.test(d) && /Expires/.test(d), "queue: the dialog says the task is blocked and offers an expiry");
+  ok(/Queue until unblocked/.test(await text(page, "#woSend")), "queue: the footer reads Queue until unblocked");
+  await page.click("#layer .dlg input[type=checkbox] >> nth=-1");
+  await page.click("#woSend");
+  await page.waitForTimeout(200);
+  t = await text(page);
+  ok(/queued/.test(t) && /Queued by Marcus Bell/.test(t) && /Send now/.test(t) && /Withdraw/.test(t), "queue: the work order opens queued with Send now and Withdraw");
+  ok(/waits on #612 and #618/.test(t), "queue: the State tile names what it waits on");
+  await shot(page, "10-queued");
+  await page.click(".phead >> text=Withdraw");
+  await page.click("#layer .dlg-f >> text=Withdraw");
+  await page.waitForTimeout(150);
+  ok(/stopped/.test(await text(page, ".stat")), "queue: withdrawing before a start receipt stops it");
+  await done(page, errs, "graph");
+}
+{
+  /* 12. stages that run beside each other */
+  const { page, errs } = await open(H + "/workflows");
+  ok(/Validate\s*∥\s*Document/.test(await text(page, "tbody")), "stages: the Workflows tab joins parallel stages with ∥");
+  await page.click("text=Fix, validate, document, review");
+  ok(/after Validate and Document/.test(await dlgText(page)) && /needs = \["Validate", "Document"\]/.test(await dlgText(page)), "stages: wfview shows the fan-in stage and the v0.2 file");
+  await page.click("#layer .dlg-f >> text=Close");
+  await page.goto(FILE + "?product=1&state=loaded&mobile=0" + H + "/work-orders/wo_01K6T9QX");
+  await page.waitForTimeout(300);
+  ok((await page.locator(".stage-col").count()) === 1 && (await page.locator(".stage-col .stage").count()) === 2, "stages: Validate and Document share one column on the work order");
+  ok(/stages 2 and 3 of 4/.test(await text(page, ".stat")), "stages: the State tile counts both running stages");
+  await done(page, errs, "stages");
+}
+{
+  /* 13. a cycle is refused */
+  const { page, errs } = await open(H + "/tsk_01K6S2M4QF");
+  await page.click("text=Add a dependency");
+  await page.click(".tkl-i >> text=#640");
+  const d = await dlgText(page);
+  ok(/Refused\. #612 already blocks #640\./.test(d), "cycle: adding a dependency that closes a cycle is refused with the path");
+  ok(await page.locator("#layer .dlg-f button", { hasText: "Add" }).isDisabled(), "cycle: Add is disabled on a refusal");
+  await page.click("#layer .dlg-f >> text=Cancel");
+  await done(page, errs, "cycle");
+}
+{
+  /* 14. a send to two agents */
+  const { page, errs } = await open(H + "/work-orders");
+  const t = await text(page, "tbody");
+  ok(/2 work orders/.test(t) && /partial/.test(t) && /1 of 2 in this send/.test(t) && /2 of 2 in this send/.test(t), "send: two work orders sit under one send row marked partial");
+  await page.click('tr[aria-label="Open wo_01K6TC5A"]');
+  await page.waitForTimeout(200);
+  ok(/1 of 2 in send snd_01K6TC59/.test(await text(page, ".phead")) && (await page.locator(".panel-h h3", { hasText: /^Send$/ }).count()) === 1, "send: the work order names its send and shows the Send panel");
+  await page.click(".phead >> text=Stop the work order");
+  await page.click("#layer .dlg-f >> text=Stop it");
+  await page.waitForTimeout(150);
+  ok(/Send again/.test(await text(page, ".phead")), "send: a stopped work order offers Send again");
+  await done(page, errs, "send");
 }
 
 await browser.close();
