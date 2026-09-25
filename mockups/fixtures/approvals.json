@@ -12,31 +12,31 @@
   "amount": "2,450.00",
   "currency": "USD",
   "counterparty": "vendor:aws",
-  "rule": "mandate mnd_7K2ETQ4 · approval.above_micros = 100000000",
+  "rule": "mandate mnd_7K2ETQ4 · auto-approve limit $250.00",
   "mandate": "mnd_7K2ETQ4",
   "policy": "pol_v41",
   "digest": "sha256:c81f04ea6b2d93a7",
   "waited": "4m 12s",
   "timeout": "10m",
   "tainted": false,
-  "tier": "harness",
+  "tier": "gateway",
   "parkedAt": "09:31:08Z",
-  "approvers": "role:org.billing: Marcus Bell, Priya Natarajan · Dana Okafor is the operator of this run and is excluded by fin.no_self_approval",
+  "approvers": "role:org.billing · Marcus Bell, Priya Natarajan · Dana Okafor is the operator of this run and is excluded by fin.no_self_approval",
   "rules": [
    {
     "id": "mandate.approval.always_for",
     "v": "approve",
-    "text": "Mandate mnd_7K2ETQ4 requires approval for every call whose financial effect is moves_funds."
+    "text": "Mandate mnd_7K2ETQ4 requires approval for every call that moves funds."
    },
    {
     "id": "mandate.approval.above_micros",
     "v": "approve",
-    "text": "Amount $2,450.00 USD is above the mandate's approval threshold of $100.00 USD."
+    "text": "Amount $2,450.00 USD is above the mandate's auto-approve limit of $250.00 USD."
    },
    {
     "id": "mandate.limits.per_call",
     "v": "approve",
-    "text": "Amount is above the per-call ceiling of $250.00 USD. The mandate routes the excess to a human instead of denying it outright."
+    "text": "Amount is above the auto-approve limit of $250.00 USD. The mandate routes the excess to a human instead of denying it outright."
    },
    {
     "id": "mandate.counterparties.allow",
@@ -46,7 +46,7 @@
    {
     "id": "fin.no_self_approval",
     "v": "constrain",
-    "text": "Dana Okafor is the operator of this run and cannot resolve its own approval; eligible approvers are the remaining holders of role:org.billing."
+    "text": "Dana Okafor operates this run and can't approve their own request. The other holders of role:org.billing can approve it."
    }
   ]
  },
@@ -72,7 +72,7 @@
   "tainted": false,
   "tier": "harness",
   "parkedAt": "09:14:51Z",
-  "approvers": "role:workspace.owner: Marcus Bell, Priya Natarajan",
+  "approvers": "role:workspace.owner · Marcus Bell, Priya Natarajan",
   "rules": [
    {
     "id": "rg_0093.require_approval",
@@ -113,7 +113,7 @@
   "tainted": true,
   "tier": "harness",
   "parkedAt": "07:31:31Z",
-  "approvers": "role:workspace.owner: Marcus Bell, Priya Natarajan",
+  "approvers": "role:workspace.owner · Marcus Bell, Priya Natarajan",
   "taint": [
    {
     "frame": 9,

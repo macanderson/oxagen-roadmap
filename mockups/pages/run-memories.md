@@ -39,7 +39,7 @@ On `run_01K5RK7C2V8BNM3X` the three rows are:
 Each row opens the memory dialog. Two notes replace the table:
 
 - A run that has not sealed: "Nothing is written until the seal. This run is <status>. When its chain seals, oxagen reads it and writes what it learned here." (`run_01K5RS7M2E8FJ3QW` reads "live".)
-- A sealed run that wrote none: "This run wrote no memories. oxagen read the sealed run and found nothing another run would need, and no operator steered it."
+- A sealed run that wrote none: "This run wrote no memories. The post-run review read the sealed run and found nothing another run would need, and no operator steered it."
 
 **Self-grade**, with the chip "research only". Four states:
 

@@ -28,7 +28,7 @@ The fleet operations wedge left this tab's design alone. Two things around it mo
 
 - **Import a provider** (plain) opens `import`.
 - **New tool** opens the tool creation wizard (`wzOpen('tool')`). It is gold on the Tools and Kill switches tabs. On Toolbelts, Providers and Policy it is plain, because those tabs carry their own gold.
-- **Flip a kill switch** (danger) opens `switch` on the class switch "every moves_funds tool".
+- **Kill switches…** (danger) opens `switch` on the class switch "every moves_funds tool".
 
 After a switch is flipped, a banner sits between the header and the tab bar on every tab. `tools-switches.md` specifies it.
 
@@ -128,7 +128,7 @@ The renderer puts no `data-future` mark on this view, and the catalog gives it n
 `pTools()` branches on the state before it draws the header, so every state but loaded replaces the whole page body, header and tab bar included. The shell stays. Every Tools tab shows the same four panels.
 
 - **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: "No provider is registered". "Until a provider is imported, no agent in this workspace has a toolbelt, and every call by name is unknown_tool. Importing a provider pulls its tool list, versions each tool, and stores both schemas." Actions: **Import a provider** (gold, opens `import`) and **Add a connection** (opens `connection`).
+- **empty**: "No provider is registered". "Until a provider is imported, no agent in this workspace has a toolbelt, and every call by name is unknown_tool. Importing a provider pulls its tool list, versions each tool, and stores both schemas." Actions: **Add provider** (gold, opens `import`) and **Add a connection** (opens `connection`).
 - **loading**: the skeleton, four tile blocks and a panel of seven rows.
 - **error**: "Tools could not be loaded". "The control plane answered 503 tool_registry_unavailable. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen." Actions: **Try again** (gold) and **Open an incident** (opens `incident`). Then "trace 01K5RSXQ7F2E · us-east-1 · 2026-09-11 09:16:04Z".
 - **access denied**: "You cannot see the tool registry". "Your roles on Anderson Intelligence Corp. do not include tools.read on core-platform. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it." Actions: **Request access** (gold, opens `request-access`) and **Back to Work** (`#/a-intel/core-platform/work`). Below: Signed in as "Marcus Bell · workspace.owner · core-platform", Needed "tools.read on core-platform", Decided by "pol_v41 · deny wins over every allow".

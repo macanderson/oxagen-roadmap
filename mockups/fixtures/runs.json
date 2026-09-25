@@ -267,7 +267,7 @@
   "prompts": 3,
   "issues": [
    {
-    "ref": "LIN-2044",
+    "ref": "PLAT-2044",
     "title": "Flaky worker restart on Safari",
     "rel": "duplicate of",
     "status": "in progress",
@@ -538,10 +538,10 @@
   "grade": "partial",
   "task": "a-intel/platform#514",
   "taskTitle": "Reproduce: checkout 500",
-  "summary": "Halted after three steps. The run token was revoked by the hooks_removed kill switch before the agent wrote a label or a comment; the only frames are two reads of the issue and the policy decision that stopped it.",
+  "summary": "Halted after three steps. oxagen detected that the host's hooks were removed and revoked the run token before the agent wrote a label or a comment. The only frames are two reads of the issue and the policy decision that stopped it.",
   "touched": [
    "a-intel/platform#514",
-   "kill switch \u00b7 hooks_removed"
+   "hooks removed"
   ],
   "outputs": [
    {
@@ -562,7 +562,7 @@
    },
    {
     "kind": "halt",
-    "name": "kill switch \u00b7 hooks_removed",
+    "name": "hooks removed",
     "where": "oxagen",
     "state": "blocked",
     "note": "the run token was revoked before a label or a comment was written",
@@ -822,7 +822,7 @@
   "grade": "digest",
   "task": "\u2014",
   "taskTitle": "Style pass on CLI reference",
-  "summary": "Made 41 wording and heading-case edits across docs/cli/reference.md and opened pull request #503. Observed at client tier, so only digests were recorded and the change is unverified: this summary is drawn from what the harness reported, not from what oxagen saw.",
+  "summary": "Made 41 wording and heading-case edits across docs/cli/reference.md and opened pull request #503. Recorded at the harness tier, so only digests were kept and the change is unverified: this summary is drawn from what the harness reported, not from what oxagen saw.",
   "touched": [
    "a-intel/platform#503",
    "docs/cli/reference.md"
@@ -861,7 +861,7 @@
     "name": "sealed",
     "where": "chain",
     "state": "sealed",
-    "note": "client tier; drawn from what the harness reported, not what oxagen saw"
+    "note": "harness tier; drawn from what the harness reported, not what oxagen saw"
    }
   ],
   "gen": {

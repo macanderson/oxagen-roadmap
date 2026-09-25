@@ -13,7 +13,7 @@
   "unread": true,
   "t": "15:21",
   "title": "Hard budget reached · a-intel.core.docs-writer",
-  "body": "$0.80 per run reached at turn 3 of run_01K5ZA0J2M. The run was paused at the next hook boundary."
+  "body": "$0.80 per run reached at turn 3 of run_01K5ZA0J2M. The run was paused at the next checkpoint."
  },
  {
   "kind": "approval.resolved",
