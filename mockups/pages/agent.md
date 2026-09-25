@@ -34,7 +34,8 @@ What this agent is made of, and the first question the page answers.
 
 The principal, and the one property most of the threat model rests on. Roles moved to Permissions; tier delivery moved to Runtime.
 
-- **Identity**: Agent key · Principal · Kind · Harness · Model tier (tier → the model id it routes to) · Operator (`initiating_principal`) · Lifecycle state (“registered → enrolled → active → retired. Deregistering retires the principal and never deletes it, so old runs keep their identity.”) · First frame.
+- **Identity**: Agent key · Principal · Kind · Harness · Model tier (tier → the model id it routes to) · Operator (`initiating_principal`) · Cost center · Lifecycle state (“registered → enrolled → active → retired. Deregistering retires the principal and never deletes it, so old runs keep their identity.”) · First frame.
+- **Cost center** (`ccAgentCell()`): the label this agent's runs roll up to, in mono, or "None", then **Change** (opens `ccagent`). One line beneath says why: "its own label, which wins over the workspace’s", "inherited from workspace <slug>", or "neither it nor its workspace names one, so its runs land on Spend’s No cost center row". The cell carries `data-cc-from` set to `agent`, `workspace` or `none`.
 - **Credentials**, badged `none`: API key, OAuth token, Cloud role, GitHub token all read `none`; Run token reads “one, and it reaches Oxagen only”. The paragraph states that every secret a call needs is minted by the broker at dispatch, scoped to that one call, and never transmitted to the agent. **See the connections that mint them** opens Tools → Providers.
 - **Run credential**: Key (shown once, stored as a hash) · Purpose lock · Issued · Last used · Run tokens (count, 15 minute TTL) · Host device key. Actions: **Change identity** (opens `identity`), **Revoke credential** (danger).
 - **Trust relationships**: Accountable human · Workspace · Runtime · Delegation (“subagents narrow, never widen”) · Replay · Tamper incidents, with **Read them** into Activity when the count is not zero. **Open its permissions** at the foot.
@@ -90,7 +91,7 @@ The form and the file, side by side.
 - **Changing this agent**: the four-step chain (edit, checks, review, merge is the change) and the note that deleting an agent is a pull request that removes the file.
 - A bar above the split states the file's condition: a parse error with the failing message, unsaved changes with the diff stat against the commit, or a pending branch with its pull request. **Save changes** and **Open a pull request** both open `commit`.
 
-**Dialogs this page opens:** `avatar`, `delagent`, `identity`, `assignrole`, `budget`, `mandate`, `tool`, `toolcats`, `evidence`, `fix`, `commit`, `register` (from an unenrolled Runtime tab), `request-access` (from denied), `incident` (from error).
+**Dialogs this page opens:** `avatar`, `delagent`, `identity`, `ccagent`, `assignrole`, `budget`, `mandate`, `tool`, `toolcats`, `evidence`, `fix`, `commit`, `register` (from an unenrolled Runtime tab), `request-access` (from denied), `incident` (from error).
 
 **Shell.** Same as the Agents page, with the breadcrumb … / Agents / `<agent name>`. Sidebar Workspace nav: Fleet · Agents · Tools · Steering · Runtimes · Repositories · Spend.
 
@@ -101,6 +102,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 | Element | Mockup collection | Target store (spec) | Backing today (repo) | Status |
 |---|---|---|---|---|
 | Identity, principal, credentials | `AGENTS` (`mockups/fixtures/agents.json`) | `iam.principals` kind=agent | `iam.principals`; `agent.credential.*` | ✅ |
+| Cost center | `FIXTURES.COST_CENTERS` (`agents`, `workspaces`) via `ccOfAgent()` | `cost_center` on the agent, then on its workspace | `agent.agents.cost_center`, `workspace.workspaces.cost_center`; `set_cost_center` (ADR-142) | ✅ |
 | Roles held | `S.agentRoles` via `agentRolesOf()`, `ROLES` | `iam.role_grants` | `agent.role.*`, `iam.role.list` | ✅ |
 | Steering reaching this agent | `STG_PREVIEW` (`mockups/fixtures/steering-preview.json`) via `agentSteering()` | the assembler’s registry port; `steering.manifest` frames | `agent.context_records`; nothing assembles per agent yet | 🟡 |
 | Toolbelt assignments | `TOOLBELTS`, `TOOLBELT_ASSIGN` (`mockups/fixtures/toolbelts.json`) via `beltsOfAgent()` | `tools.toolbelts`, `tools.toolbelt_assignments` | none | ❌ |
@@ -127,6 +129,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - Editing the definition never writes to Postgres. Every path ends in a commit on a branch, and the merge is the change.
 - Deregister opens a pull request that removes the file. The principal is retired, never deleted.
 - Suspend and Revoke credential kill every live run token at the next call, which is what makes a halt stick.
+- **Change** on the cost center opens `ccagent`: a select of the organization's labels, with "None (inherit the workspace’s)" first, and a hint naming the workspace's label. Saving writes `cost_center_set` to Audit. Runs rolled up after the change land on the new label, and runs already rolled up keep theirs. With no labels in the organization, the dialog says to add one on the Organization page and offers no Save.
 
 ## States
 
@@ -143,7 +146,7 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 ## Permissions
 
 - Read: `agent.read`
-- Writes (each a governed action recorded in Audit): `agent.credential.rotate`, `agent.credential.revoke`, `agent.suspend`, `agent.deregister`, `agent.role.assign`, `budget.set`, `enrollment.revoke`, `agent.write` (the commit on the definition)
+- Writes (each a governed action recorded in Audit): `agent.credential.rotate`, `agent.credential.revoke`, `agent.suspend`, `agent.deregister`, `agent.role.assign`, `budget.set`, `enrollment.revoke`, `agent.write` (the commit on the definition), `cost_center.set` (an organization Owner, Admin or Billing member; anyone else who presses **Change** gets a toast that names who holds the role)
 
 ## Backend gaps this page depends on
 
