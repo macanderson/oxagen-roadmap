@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dialog</title>
+<meta name="description" content="A task or a decision that needs an answer before the page goes on.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Dialog</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Overlays</p>
+  <h1>Dialog</h1>
+  <p class="dx-lead">A dialog opens over the page for one task: invite a person, set a budget, approve a schema, retire an agent. It has a header that names the task, a body that holds the fields or the facts, and a footer with Cancel and the one action. On a phone it rises from the bottom edge as a sheet.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.dlg</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 471 to 490, phone 689 to 701</span>
+    <span><b>Used on</b> Work (Intake), Agents, Spend (Set a budget), Organization (Invite a person), Tools, Steering</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-form">
+    <figcaption class="dx-story-h"><b>Form dialog</b><span>Shown over its scrim. The scrim is <code>position:fixed</code> in the product. The inline override keeps it in this canvas.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="form" data-name="Form dialog">
+<div class="scrim" style="position:relative;inset:auto;z-index:auto;padding:28px 18px;border-radius:12px">
+  <div class="dlg" role="dialog" aria-modal="true" aria-label="Invite a person">
+    <div class="dlg-h"><h2>Invite a person</h2><button class="iconbtn x" aria-label="Close">×</button></div>
+    <div class="dlg-b">
+      <div class="field"><label for="iv-email">Email</label><input id="iv-email" value="rowan@a-intel.example"></div>
+      <div class="field"><label for="iv-role">Role</label><select id="iv-role"><option>workspace.member · core-platform</option><option>workspace.owner · core-platform</option><option>org.auditor</option><option>org.billing</option></select></div>
+      <div class="note">An invitation is the only way into the organization. It expires in seven days, and accepting it requires a verified email and two-factor.</div>
+    </div>
+    <div class="dlg-f"><button class="btn">Cancel</button><button class="btn primary">Send the invitation</button></div>
+  </div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-confirm">
+    <figcaption class="dx-story-h"><b>Destructive confirm</b><span>The subtitle names the record, the body says what ends and what is kept, and the danger button stays disabled until the check is ticked.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="confirm" data-name="Destructive confirm">
+<div class="dlg" role="dialog" aria-modal="true" aria-label="Retire agent">
+  <div class="dlg-h sub"><div class="grow"><h2>Retire agent</h2><p>a-intel.core.triage</p></div><button class="iconbtn x" aria-label="Close">×</button></div>
+  <div class="dlg-b">
+    <p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a pull request archives <span class="mono">.oxagen/agents/triage.toml</span>.</p>
+    <dl class="kv"><dt>Kept</dt><dd>every run, frame and receipt</dd><dt>Ends</dt><dd>2 roles, 1 mandate, the host enrollment</dd><dt>In flight</dt><dd><span style="color:var(--st-failed)">1 live run</span>, canceled at the next boundary and recorded</dd></dl>
+    <label class="check" style="margin-top:12px"><input type="checkbox"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Registering again creates a new principal.</span></span></label>
+  </div>
+  <div class="dlg-f"><button class="btn">Cancel</button><button class="btn danger" disabled>Retire agent</button></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-tabs">
+    <figcaption class="dx-story-h"><b>Tabs in a dialog</b><span>Tabs sit flush between the header and the body, with the dialog's 18px side padding.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="tabs" data-name="Tabs in a dialog">
+<div class="dlg" role="dialog" aria-modal="true" aria-label="Account">
+  <div class="dlg-h"><h2>Account</h2><button class="iconbtn x" aria-label="Close">×</button></div>
+  <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="true">Profile</button><button class="tab" role="tab" aria-selected="false">Preferences</button><button class="tab" role="tab" aria-selected="false">Security</button><button class="tab" role="tab" aria-selected="false">Privacy</button></div>
+  <div class="dlg-b">
+    <div class="fields"><div class="field"><label for="ac-name">Name</label><input id="ac-name" value="Marcus Bell"></div><div class="field"><label for="ac-email">Email</label><input id="ac-email" value="marcus@a-intel.example" readonly></div></div>
+    <div class="field"><label for="ac-tz">Time zone</label><select id="ac-tz"><option>America/New_York</option><option>UTC</option></select><div class="hint">Times on every page read in this zone. Frames keep UTC.</div></div>
+  </div>
+  <div class="dlg-f"><button class="btn">Cancel</button><button class="btn primary">Save profile</button></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-wide">
+    <figcaption class="dx-story-h"><b>Wide review</b><span><code>.dlg.wide</code> is 820px for a review that compares two sources side by side. The footer note names the governed action.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="wide" data-name="Wide review">
+        <div class="dlg wide" role="dialog" aria-modal="true" aria-label="Approve an observed output schema">
+          <div class="dlg-h"><h2>Approve an observed output schema</h2><button class="iconbtn x" aria-label="Close">×</button></div>
+          <div class="dlg-b">
+            <dl class="kv" style="margin-bottom:14px"><dt>Observations</dt><dd><span class="num">1,284</span> responses over 30 days, from 3 agents</dd><dt>Digest on approval</dt><dd class="mono">sha256:1bc4f9a07b02</dd></dl>
+            <div class="cpair"><div><div class="lab">Inferred output schema<span class="sp">what approval enforces</span></div><pre>{
+  "ok": "boolean",
+  "channel": "string",
+  "ts": "string"
+}</pre></div><div><div class="lab">One recorded response<span class="sp">for comparison</span></div><pre>{
+  "ok": true,
+  "channel": "C07RELEASE",
+  "ts": "1726650112.004"
+}</pre></div></div>
+          </div>
+          <div class="dlg-f"><span class="grow">Approving records <span class="mono">approve_tool_schema</span> as a governed action.</span><button class="btn">Not yet</button><button class="btn primary">Approve schema</button></div>
+        </div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Scrim</td><td><code>.scrim</code></td><td>The fixed backdrop: <code>rgba(0,0,0,.68)</code> with a 3px blur. It places the dialog 70px from the top and scrolls when the dialog is taller than the window.</td></tr>
+      <tr><td>Shell</td><td><code>.dlg</code></td><td>A <code>--panel</code> box with a 1px <code>--rule</code> border, a 14px radius, and <code>--shadow</code>, at most 600px wide.</td></tr>
+      <tr><td>Wide shell</td><td><code>.dlg.wide</code></td><td>The same shell at most 820px wide, for side-by-side reviews.</td></tr>
+      <tr><td>Header</td><td><code>.dlg-h</code></td><td>The h2 title (16px Geist 600) and the close button, 15px by 18px padding, with a bottom border.</td></tr>
+      <tr><td>Subtitle</td><td><code>.dlg-h.sub .grow p</code></td><td>One line under the title: a record id or one fact, 12.5px <code>--muted</code>.</td></tr>
+      <tr><td>Close</td><td><code>.iconbtn.x</code></td><td>A 32px icon button pushed to the right edge, labelled Close.</td></tr>
+      <tr><td>Tabs</td><td><code>.dlg .tabs</code></td><td>Optional tabs between the header and the body, flush with the body's padding.</td></tr>
+      <tr><td>Body</td><td><code>.dlg-b</code></td><td>The fields and facts, 17px by 18px padding. It scrolls inside a 62vh ceiling.</td></tr>
+      <tr><td>Footer</td><td><code>.dlg-f</code></td><td>Cancel then the action, right-aligned, 13px by 18px padding, with a top border.</td></tr>
+      <tr><td>Footer note</td><td><code>.dlg-f .grow</code></td><td>One sentence at the left of the footer, 12px <code>--muted</code>.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A task that needs input before it runs: invite a person, set a budget, connect an issue tracker.</li><li>A confirm for an action that ends something: retire an agent, remove a budget, revoke a key.</li><li>A review that compares two sources before a governed action, in the wide shell.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Items waiting on a person across the organization: use the <a href="drawer.html">drawer</a>.</li><li>The result of an action: use a <a href="toast.html">toast</a>.</li><li>Reading a record: link to its page.</li><li>A short list of choices: use a <a href="menu.html">menu</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="dlg" style="max-width:340px"><div class="dlg-h"><h2>Are you sure?</h2></div><div class="dlg-b"><p style="font-size:13px;margin:0">This action cannot be undone.</p></div><div class="dlg-f"><button class="btn primary">Cancel</button><button class="btn primary">OK</button></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A title that names nothing, a body that says nothing about what ends, two gold buttons, and an OK that could mean anything.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="dlg" style="max-width:340px"><div class="dlg-h"><h2>Revoke key</h2></div><div class="dlg-b"><dl class="kv"><dt>Ends</dt><dd>every call signed with <span class="mono">oxk_live_4F2A</span></dd><dt>Kept</dt><dd>the audit record of each use</dd></dl></div><div class="dlg-f"><button class="btn">Cancel</button><button class="btn danger">Revoke key</button></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>The title and the button name the act, and the body says what ends and what is kept.</p></div>
+  </div>
+  <ul>
+    <li>One dialog at a time. A dialog opened from Intake returns to Intake when it closes (<code>S.dlgBack</code>), so the person never loses the step they were on.</li>
+    <li>The footer holds at most one gold button. A destructive action uses <code>.btn.danger</code> and no gold.</li>
+    <li>Cancel comes first and the action last. A review that can wait may say &quot;Not yet&quot; in place of Cancel.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Title</b>: names the task in sentence case: &quot;Invite a person&quot;, &quot;Set a budget&quot;, &quot;Approve an observed output schema&quot;. Never &quot;Are you sure?&quot; or &quot;Confirm&quot;.</li>
+    <li><b>Subtitle</b>: one line, the record the dialog acts on (<code>a-intel.core.triage</code>) or one fact.</li>
+    <li><b>Action button</b>: the act, and the record where it helps: &quot;Send the invitation&quot;, &quot;Approve schema&quot;, &quot;Retire agent&quot;. Never OK, Submit, Yes, or Done for an action that writes.</li>
+    <li><b>Destructive confirm</b>: a key-value list that names what is kept, what ends, and what is in flight, and a check card that reads &quot;I understand this cannot be undone&quot; with the consequence under it.</li>
+    <li><b>Footer note</b>: one sentence that names the governed action the button records, with the action name in mono.</li>
+    <li><b>Hints</b>: under the field they explain, one or two sentences, in the present tense.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The shell is <code>role=&quot;dialog&quot;</code> with <code>aria-modal=&quot;true&quot;</code> and an <code>aria-label</code> equal to its title.</li>
+    <li>The close button is labelled Close. Escape closes the dialog, and so does a click on the scrim outside it.</li>
+    <li>Opening moves focus into the dialog, to the first field or the close button. Tab stays inside while it is open. Closing returns focus to the control that opened it. The mockup does not do this yet. See Findings.</li>
+    <li>Every field has a visible label tied to it with <code>for</code>. A disabled danger button says why in the check card beside it.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>The dialog becomes a bottom sheet: full width, an 18px top radius, a 36 by 4px grab handle in <code>--rule</code>, and a rise from the bottom edge (none under reduced motion).</li>
+    <li>The sheet is at most the window height minus 24px, and only the body scrolls.</li>
+    <li>The footer reverses so the action comes first, each button takes half the row at 46px tall, and a footer note takes its own line.</li>
+    <li>Inputs are 16px and 44px tall, and <code>.fields</code> stacks to one column.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--panel</code></td><td>Shell ground</td></tr>
+      <tr><td><code>--rule</code></td><td>Shell border</td></tr>
+      <tr><td><code>--border</code></td><td>Header and footer dividers</td></tr>
+      <tr><td><code>--shadow</code></td><td>Shell shadow</td></tr>
+      <tr><td><code>--fg</code></td><td>Title</td></tr>
+      <tr><td><code>--muted</code></td><td>Subtitle and footer note</td></tr>
+      <tr><td><code>--gold, --on-gold</code></td><td>The one primary action</td></tr>
+      <tr><td><code>--st-failed</code></td><td>The danger action</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 471 to 490, phone 689 to 701</td><td>The rules that draw it</td></tr>
+      <tr><td><code>dialog()</code> at <code>engine.js:9565</code></td><td>Builds the scrim, shell, header, tabs, body, and footer from a <code>{t, s, w, tabs, b, f}</code> record. The shell markup is at 9662 to 9667.</td></tr>
+      <tr><td><code>openDialog(kind, arg)</code> at <code>engine.js:8320</code></td><td>Opens a dialog by kind and remembers the dialog to return to.</td></tr>
+      <tr><td><code>closeDialog()</code> at <code>engine.js:8438</code></td><td>Closes it, or returns to the dialog it was opened from.</td></tr>
+      <tr><td><code>DLG_EXT</code> at <code>engine.js:23</code></td><td>The registry of dialogs defined outside <code>dialog()</code>, such as <code>budgetedit</code> and <code>budgetdel</code>.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>Escape closes the open dialog through the document key handler at engine.js 13895.</li>
+    <li>The account dialog's tabs come from <code>accountTabs()</code> (engine.js 9795). The wide review is <code>schemaDlg()</code> (9691).</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>No focus management</h4><p><code>render()</code> writes the dialog into <code>#layer</code> and moves no focus. Focus stays on the page behind, Tab walks out of the dialog, and closing does not return focus to the opener. A build needs all three.</p></div>
+  <div class="dx-find"><h4><span class="b b-allowed"><span class="d"></span>fixed</span>Retired term in the retire dialog</h4><p>The retire dialog read &quot;Deregister agent&quot; with a Deregister button, a term the copy review retired, and <code>check-copy.mjs</code> never opened it. It reads Retire agent now, the page specs quote it, and <code>check-copy.mjs</code> opens the dialog.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Scrim color is fixed</h4><p>The scrim is <code>rgba(0,0,0,.68)</code> in both themes (engine.css 471). It follows no token.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Two footer note idioms</h4><p>Most footers use <code>.dlg-f .grow</code>. The schema review writes an inline <code>margin-right:auto</code> span instead (engine.js 9707).</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Vague action labels</h4><p>Set a budget's action reads &quot;Set it&quot; (engine.js 9569). The action names its record elsewhere, as in &quot;Send the invitation&quot;.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's dialog against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Dialog audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the dialog component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/dialog.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 471 to 490, phone 689 to 701. The mockup renders it with dialog() (engine.js:9565), openDialog(kind, arg) (engine.js:8320), closeDialog() (engine.js:8438), DLG_EXT (engine.js:23).
+3. The build's implementation: find it by its root selector (.dlg) or its name, and list every route that renders it.
+4. Where to see it in the design: Work (Intake), Agents, Spend (Set a budget), Organization (Invite a person), Tools, Steering. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Shell. Every dialog is one `role=&quot;dialog&quot;` element with `aria-modal=&quot;true&quot;` and an accessible name equal to its visible title. A dialog without both is a FAIL.
+2. Layout. The shell is at most 600px wide (820px for a wide review), on `--panel` with a 1px `--rule` border, a 14px radius, and `--shadow`, 70px from the top of the window, over a scrim with a 3px blur.
+3. Header. The title is an h2 at 16px Geist 600. A subtitle is one 12.5px `--muted` line. The close button is last in the header, 32px, and labelled Close.
+4. Footer. Buttons are right-aligned with Cancel first and the action last. At most one gold button, and none when the action is destructive. An action labelled OK, Submit, or Yes is a FAIL.
+5. Destructive confirm. The body names what is kept, what ends, and what is in flight. The danger button is disabled until the &quot;I understand&quot; check is ticked. A destructive action that runs on one click is a FAIL.
+6. Focus. Opening moves focus into the dialog. Tab and Shift+Tab stay inside. Escape and a click on the scrim close it. Closing returns focus to the opener. Any one missing is a FAIL.
+7. Return path. A dialog opened from another dialog (Intake to the connection wizard) returns to it on close. Only one dialog shows at a time.
+8. Body scroll. A long body scrolls inside the dialog at a 62vh ceiling while the header and footer stay put, and the page behind does not scroll.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: The dialog becomes a bottom sheet: full width, an 18px top radius, a 36 by 4px grab handle in `--rule`, and a rise from the bottom edge (none under reduced motion). The sheet is at most the window height minus 24px, and only the body scrolls. The footer reverses so the action comes first, each button takes half the row at 46px tall, and a footer note takes its own line. Inputs are 16px and 44px tall, and `.fields` stacks to one column.
+13. Accessibility. The shell is `role=&quot;dialog&quot;` with `aria-modal=&quot;true&quot;` and an `aria-label` equal to its title. The close button is labelled Close. Escape closes the dialog, and so does a click on the scrim outside it. Opening moves focus into the dialog, to the first field or the close button. Tab stays inside while it is open. Closing returns focus to the control that opened it. The mockup does not do this yet. See Findings. Every field has a visible label tied to it with `for`. A disabled danger button says why in the check card beside it.
+14. One implementation. The build draws the dialog from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Dialog: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="menu.html"><span>Previous</span>Menu</a><a class="nx" href="drawer.html"><span>Next</span>Drawer</a></nav>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Switch</title>
+<meta name="description" content="An on-or-off setting, with the state named in words beside it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Switch</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Actions and input</p>
+  <h1>Switch</h1>
+  <p class="dx-lead">A switch flips one setting on or off: a kill switch, whether a commit opens a pull request, whether skills are on for a workspace. The knob's position and color repeat the state the label already names in words. A kill switch turning on stops real calls, so it never flips on one click: it opens a dialog that states the blast radius and asks for a reason before it takes effect.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.ks-sw</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 736 to 745, commit dialog 1020 to 1024, Skills 1627 to 1630</span>
+    <span><b>Used on</b> Tools (Kill switches tab), Agents (definition editor, commit dialog), Steering (fleet steer, Library Skills)</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-kill">
+    <figcaption class="dx-story-h"><b>Kill switch</b><span>Off is neutral. On turns <code>--st-denied</code>, the same tone as a denial, because turning it on means calls are blocked.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="kill" data-name="Kill switch">
+<button type="button" class="ks-sw" role="switch" aria-checked="false" aria-label="Flip the switch on payment-gateway"><i></i><span class="lbl">Off (calls allowed)</span></button>
+<button type="button" class="ks-sw on" role="switch" aria-checked="true" aria-label="Clear the switch on payment-gateway"><i></i><span class="lbl">On (calls blocked)</span></button>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-int">
+    <figcaption class="dx-story-h"><b>Immediate toggle</b><span><code>.ks-sw.int</code> turns <code>--st-approval</code> blue when on: an immediate, reversible setting, not a governed block. Used for the commit dialog's pull request toggle and the fleet steer's Interrupt delivery mode.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="int" data-name="Immediate toggle">
+<button type="button" class="ks-sw int" role="switch" aria-checked="false" aria-label="Open a pull request"><i></i><span class="lbl">PR</span></button>
+<button type="button" class="ks-sw int on" role="switch" aria-checked="true" aria-label="Open a pull request"><i></i><span class="lbl">PR</span></button>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-commit">
+    <figcaption class="dx-story-h"><b>In the commit dialog</b><span><code>.cm-sw</code> hides the switch's own label and prints the state as a badge and a sentence beside it instead.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="commit" data-name="In the commit dialog">
+<div class="cm-sw">
+  <button type="button" class="ks-sw int on" role="switch" aria-checked="true" aria-label="Open a pull request"><i></i><span class="lbl">PR</span></button>
+  <div class="tx"><b>Opens the pull request for <span class="mono">feature/rotate-key</span></b>The commit is already on the branch. This asks the code owners of <span class="mono">.oxagen/agents/</span> to review it against main.</div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-skills">
+    <figcaption class="dx-story-h"><b>Skills preview</b><span><code>.sx-sw</code> in the Skills dialog always reads on: it previews the file's outcome, not a live setting. Clicking it explains that the pull request is the real control.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="skills" data-name="Skills preview">
+<div class="sx-ga" style="display:flex;align-items:center;gap:10px">
+  <div class="grow"><div class="n">skills.enabled</div><div class="d">false &rarr; true in <span class="mono">.oxagen/skills/config.toml</span></div></div>
+  <button type="button" class="sx-sw" role="switch" aria-checked="true" aria-label="Enabled"><i></i></button>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-confirm">
+    <figcaption class="dx-story-h"><b>The governed confirm</b><span>Flipping a kill switch on opens this dialog instead of flipping on click. <code>.ks-banner</code> states the blast radius before the reason field.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="confirm" data-name="The governed confirm">
+<div class="dlg" role="dialog" aria-modal="true" aria-label="Flip the switch on payment-gateway">
+  <div class="dlg-h"><h2>Flip the switch on payment-gateway</h2><button class="iconbtn x" aria-label="Close">&times;</button></div>
+  <div class="dlg-b">
+    <p class="muted" style="margin:0 0 14px;font-size:12.5px">Provider &middot; every agent calling this provider</p>
+    <div class="ks-banner crit"><span class="b b-critical" style="flex:none"><span class="d"></span>blast radius</span>
+      <div class="g"><b>Every write call to Stripe</b>Every affected call is blocked from the next tool call. Runs in flight keep running. Their next call that changes anything is blocked, and the record names this switch and your reason.</div>
+    </div>
+    <div class="field"><label for="killwhy">Reason (recorded on every blocked call and read by the model)</label><textarea id="killwhy" rows="2">Suspected compromise of the Stripe restricted key. Hold every money movement until the rotation is confirmed.</textarea></div>
+  </div>
+  <div class="dlg-f"><span class="grow">You can clear this switch at any time. Nothing is destroyed.</span><button class="btn">Cancel</button><button class="btn danger">Block calls now</button></div>
+</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Kill switch</td><td><code>.ks-sw</code></td><td>An inline flex button with no border of its own, a 9px gap between its knob and label, pushed to the end of its row with <code>margin-left:auto</code>.</td></tr>
+      <tr><td>Knob</td><td><code>.ks-sw i</code></td><td>A 34 by 19px pill, <code>--hl</code> ground, 1px <code>--rule</code> border, with a 13px circular <code>--muted</code> dot inset 2px, <code>::after</code>. On, the dot slides 15px right.</td></tr>
+      <tr><td>Label</td><td><code>.ks-sw .lbl</code></td><td>12px <code>--muted</code> text beside the knob, stating the state in words.</td></tr>
+      <tr><td>On, denied tone</td><td><code>.ks-sw.on</code></td><td>The knob tints <code>--st-denied</code> (ground and border) and its dot fills <code>--st-denied</code>. The label turns <code>--st-denied</code> too.</td></tr>
+      <tr><td>On, approval tone</td><td><code>.ks-sw.int.on</code></td><td>The immediate-toggle variant: the same shapes, tinted <code>--st-approval</code> (ground, border, dot, and a bold label) instead of denied.</td></tr>
+      <tr><td>Commit dialog wrapper</td><td><code>.cm-sw</code></td><td>A <code>--ink</code> card, 1px <code>--border</code>, 9px radius, 10px by 12px padding, that hides the switch's own <code>.lbl</code> and prints the state as a badge and sentence (<code>.tx</code>) instead.</td></tr>
+      <tr><td>Skills preview switch</td><td><code>.sx-sw</code></td><td>42 by 23px, its own size and radius rather than <code>.ks-sw</code>'s, styled from <code>--sk-on</code> when checked rather than <code>--st-approval</code>.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A kill switch that blocks or restores real calls: Tools, Kill switches, and the incident switches on a provider, a device, or an operator's agents.</li><li>An immediate, reversible setting attached to one action, such as whether a commit opens a pull request or a fleet steer interrupts in flight.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Choosing one of several options: use a <a href="segmented-control.html">segmented control</a>.</li><li>A setting that writes through a pull request rather than taking effect at once: show the outcome as text or a badge, as the Skills preview does, and put the actual control on the confirm button.</li><li>A momentary action: use a <a href="button.html">button</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><button type="button" class="ks-sw on" role="switch" aria-checked="true" aria-label="Toggle"><i></i><span class="lbl">On</span></button></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>&quot;Toggle&quot; and &quot;On&quot; say nothing about what turning it on does. A kill switch's label states the consequence: &quot;On (calls blocked)&quot;.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><button type="button" class="ks-sw on" role="switch" aria-checked="true" aria-label="Clear the switch on payment-gateway"><i></i><span class="lbl">On (calls blocked)</span></button></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>The label states the effect, and the <code>aria-label</code> names the switch and the action clicking it takes next.</p></div>
+  </div>
+  <ul>
+    <li>A kill switch never flips on the click that lands on it. It opens a confirm dialog stating the blast radius, and the flip happens on that dialog's action button.</li>
+    <li>State is a word first (the label), then a shape (the knob position), then a color. The color alone never carries it.</li>
+    <li>An immediate toggle (<code>.int</code>) is for a setting with no blast radius beyond the one thing it is attached to. Anything wider gets the kill switch's confirm.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Kill switch label</b>: the state and its consequence, in one line: &quot;On (calls blocked)&quot;, &quot;Off (calls allowed)&quot;.</li>
+    <li><b>Kill switch <code>aria-label</code></b>: the action the click performs and the target it acts on: &quot;Flip the switch on payment-gateway&quot;, &quot;Clear the switch on payment-gateway&quot;.</li>
+    <li><b>Confirm dialog</b>: states the blast radius first (what stops and how much), then asks for a reason that is &quot;recorded on every blocked call and read by the model,&quot; then names when it takes effect (&quot;Next tool call&quot;) and that running agents lose their run token.</li>
+    <li><b>Confirm action label</b>: the effect, not a generic confirm: &quot;Block calls now&quot;, &quot;Allow calls again&quot;.</li>
+    <li><b>Reversibility note</b>: a switch that can be turned back off says so in the footer: &quot;You can clear this switch at any time. Nothing is destroyed.&quot;</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>Every switch is a <code>button</code> with <code>role=&quot;switch&quot;</code> and <code>aria-checked</code> reflecting its state.</li>
+    <li>An icon-only or label-hidden switch (<code>.cm-sw .ks-sw</code>) still carries its own <code>aria-label</code>, since its visible <code>.lbl</code> is hidden by CSS.</li>
+    <li>The knob and dot are decorative. Nothing but the button's own accessible name and <code>aria-checked</code> need to be read.</li>
+    <li>The Skills preview switch (<code>.sx-sw</code>) is a <code>button</code> with <code>role=&quot;switch&quot;</code> that can never change state: clicking it shows a toast instead of toggling <code>aria-checked</code>. A control that cannot be operated should not present as an interactive switch. See Findings.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>No phone-specific rule changes the switch's size. Unlike <code>.menu-i</code>, <code>.tab</code>, and <code>.navitem</code>, which grow to a 44px minimum height on phone, <code>.ks-sw</code> and <code>.sx-sw</code> stay at their desktop height (about 19 to 23px). See Findings.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--hl</code></td><td>Knob ground, off</td></tr>
+      <tr><td><code>--rule</code></td><td>Knob border, off</td></tr>
+      <tr><td><code>--muted</code></td><td>Knob dot and label, off</td></tr>
+      <tr><td><code>--st-denied</code></td><td>Kill switch on</td></tr>
+      <tr><td><code>--st-approval</code></td><td>Immediate toggle on</td></tr>
+      <tr><td><code>--sk-on</code></td><td>Skills preview switch on (see Findings)</td></tr>
+      <tr><td><code>--ink</code></td><td>Commit dialog wrapper ground</td></tr>
+      <tr><td><code>--border</code></td><td>Commit dialog wrapper border</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 736 to 745, commit dialog 1020 to 1024, Skills 1627 to 1630</td><td>The rules that draw it</td></tr>
+      <tr><td><code>switchCard(s)</code> at <code>engine.js:8329</code></td><td>The kill switch row on the Tools page, with its dynamic on and off label.</td></tr>
+      <tr><td><code>switchDialog()</code> at <code>engine.js:8463</code></td><td>The confirm dialog: blast radius, reason field, and the effect and reversibility copy.</td></tr>
+      <tr><td><code>doFlip(id)</code> at <code>engine.js:8483</code></td><td>Applies the flip after the confirm dialog's action button, and raises the persistent kill banner when a switch turns on.</td></tr>
+      <tr><td><code>cmSet(k, v)</code> at <code>engine.js:1452</code></td><td>Sets a field on the open commit, including the PR toggle's <code>pr</code> flag.</td></tr>
+      <tr><td><code>steerToggleInt()</code> at <code>engine.js:9217</code></td><td>Flips the fleet steer's Interrupt delivery mode.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>The Skills preview switch appears inside <code>DLG_EXT.skenable</code> (engine.js 8701), whose dialog states outright: &quot;This is a governed action. It writes a file, opens a pull request, and puts your name on both.&quot;</li>
+    <li><code>--sk-on</code> (engine.css 1604) is the same green as <code>--st-allowed</code>, defined a second time under its own name for the Skills page.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>The knob and label swap order between switches</h4><p>The commit dialog's PR toggle writes <code>&lt;i&gt;&lt;/i&gt;&lt;span class=&quot;lbl&quot;&gt;PR&lt;/span&gt;</code> (engine.js 1427), knob first. The fleet steer's Interrupt toggle writes <code>&lt;span class=&quot;lbl&quot;&gt;Interrupt&lt;/span&gt;&lt;i&gt;&lt;/i&gt;</code> (engine.js 9174), label first. <code>.ks-sw</code> sets no explicit order, so DOM order is visual order: one switch shows its knob on the left, the other on the right, for the same component.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Three switch classes for three different jobs</h4><p><code>.ks-sw</code> (a governed block that always confirms), <code>.ks-sw.int</code> (an immediate, reversible toggle), and <code>.sx-sw</code> (a read-only preview of a future state) look almost identical but behave nothing alike. The visual similarity between a switch that asks for a reason and one that flips on a click risks a person treating a kill switch as casually as the PR toggle.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>A switch that cannot be switched</h4><p><code>.sx-sw</code> in the Skills dialog is <code>role=&quot;switch&quot;</code> and <code>aria-checked=&quot;true&quot;</code> forever. Its <code>onclick</code> shows a toast explaining that the pull request is the real control rather than changing state. It reads to a screen reader as an operable switch that never operates.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>A second green token</h4><p><code>--sk-on</code> (engine.css 1604) duplicates <code>--st-allowed</code>'s color under a page-specific name, rather than the Skills page reusing the shared state token.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's switch against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Switch audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the switch component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/switch.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 736 to 745, commit dialog 1020 to 1024, Skills 1627 to 1630. The mockup renders it with switchCard(s) (engine.js:8329), switchDialog() (engine.js:8463), doFlip(id) (engine.js:8483), cmSet(k, v) (engine.js:1452), steerToggleInt() (engine.js:9217).
+3. The build's implementation: find it by its root selector (.ks-sw) or its name, and list every route that renders it.
+4. Where to see it in the design: Tools (Kill switches tab), Agents (definition editor, commit dialog), Steering (fleet steer, Library Skills). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Anatomy. The knob is 34 by 19px with a 13px dot, the label states the state in words, and on turns the color the reference specifies for that variant (denied for a kill switch, approval for `.int`).
+2. Governed confirm. A kill switch never changes state on the click that lands on it. It opens a dialog stating the blast radius, requires a reason, and flips only on that dialog's action button. A kill switch that flips on one click is a FAIL.
+3. Label truth. The visible label and the `aria-label` both state the consequence, not a bare &quot;On&quot;, &quot;Off&quot;, or &quot;Toggle&quot;.
+4. Role and state. Every switch is a `button` with `role=&quot;switch&quot;` and `aria-checked` matching its actual state. A switch whose `aria-checked` never changes when clicked, without an explicit read-only affordance, is a FAIL.
+5. Color is not the only signal. Confirm that the label's words change with the state, not only the knob's color and position.
+6. Reversibility. A kill switch's confirm dialog, when turning on, states that the switch can be cleared later. Its off-facing confirm restores calls and says so.
+7. Phone touch target. Measure the switch's hit area at 390px width. Under 44px tall is a FAIL, matching the same bar the reference sets for `.menu-i` and `.tab`.
+8. One idiom. List every place in the build that draws an on-or-off control by hand rather than through one shared switch component.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: No phone-specific rule changes the switch's size. Unlike `.menu-i`, `.tab`, and `.navitem`, which grow to a 44px minimum height on phone, `.ks-sw` and `.sx-sw` stay at their desktop height (about 19 to 23px). See Findings.
+13. Accessibility. Every switch is a `button` with `role=&quot;switch&quot;` and `aria-checked` reflecting its state. An icon-only or label-hidden switch (`.cm-sw .ks-sw`) still carries its own `aria-label`, since its visible `.lbl` is hidden by CSS. The knob and dot are decorative. Nothing but the button's own accessible name and `aria-checked` need to be read. The Skills preview switch (`.sx-sw`) is a `button` with `role=&quot;switch&quot;` that can never change state: clicking it shows a toast instead of toggling `aria-checked`. A control that cannot be operated should not present as an interactive switch. See Findings.
+14. One implementation. The build draws the switch from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Switch: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="form-field.html"><span>Previous</span>Form field</a><a class="nx" href="menu.html"><span>Next</span>Menu</a></nav>
+</main>
+</div>
+</body>
+</html>

@@ -35,7 +35,7 @@ const RULES = [
   ["brand case", /Oxagen|Stella/],
   ["storage tag", /postgres|kms \+|tools\.policy_versions/i],
   ["math notation", /[∩∈≠]/],
-  ["US spelling", /colour|behaviour|labelling|Cancelled/],
+  ["US spelling", /colour|behaviour|labelling|[Cc]ancelled/],
   ["uppercased id", /\b(WO|TSK|RUN)_[0-9A-Z]{6,}\b|A-INTEL\//],
   // The rest of the review's glossary: one term per concept, and no internal names in page copy.
   ["retired term", /\bfr \d|interjection|Wasted spend|[Mm]odel tier|Wrong (model )?tier|light tier|client tier|\bseams?\b|issue provider|Bind it|not bound|volatile selection|\bshelf\b|text plane|gate plane|a call at most|(^|\n)PER CALL\n/],
@@ -97,6 +97,9 @@ const OVERLAYS = [
   ["assistant", "asstToggle(true)"],
   ...["create", "newws", "mintkey", "import", "funding", "switch", "budget", "role", "notifs", "plan", "steerfleet"]
     .map((k) => [`dialog ${k}`, `openDialog('${k}')`]),
+  // Dialogs that need a record to open. The retire dialog said Deregister until 2026-09-25 because
+  // no route or overlay here ever opened it.
+  ["dialog delagent", "openDialog('delagent','a-intel.core.triage')"],
 ].filter(([name]) => !only || name.includes(only));
 
 const browser = await launchChromium(root);

@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chips</title>
+<meta name="description" content="Eight small inline blocks that each name one thing inside a list: a role, a check, a provenance edge, a work item, a label, a DoD tag, a person, or a mention.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Chips</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Data display</p>
+  <h1>Chips</h1>
+  <p class="dx-lead">A chip is one item inside a list that would be cramped as a table row and lost as plain text: a role an agent holds, a provenance edge behind a claim, a work item pinned to an order, a tracker label. Every family here renders inline, wraps at the row, and truncates its own label before it breaks anything around it. A chip that can be removed carries a real button, never a click handler on the whole block.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.rl-chip, .sx-chip, .edge, .chip, .lbl, .tg, .tkp, .mref</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 770 and 924 to 931 (chip and chips), 1234 to 1239 (edge), 1350 to 1357 (role chip), 1604 to 1606 and 1644 to 1648 (self-check chip and its tokens), 2169 (person), 2186 to 2189 (label), 2194 to 2195 (dod tag), 2246 to 2248 (mention)</span>
+    <span><b>Used on</b> Agents, Work, Run (Decision trace, Transcript), Steering</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-role">
+    <figcaption class="dx-story-h"><b>Role chip</b><span>Every role an agent holds, each removable, joined by a hidden <code>, </code> so the list reads and copies correctly.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="role" data-name="Role chip">
+<div>
+  <span class="rl-chip"><span>a-intel.platform.writer</span><button type="button" aria-label="Remove a-intel.platform.writer" title="Remove role">×</button></span><span class="vh">, </span><span class="rl-chip"><span>a-intel.pr.author</span><button type="button" aria-label="Remove a-intel.pr.author" title="Remove role">×</button></span>
+  <div><button class="btn sm" style="margin-top:6px">Assign role</button></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-self-check">
+    <figcaption class="dx-story-h"><b>Self-check chip</b><span>Facts about a skill review, in <code>--sk-*</code> hues. The plain, uncolored chip carries a fact with no state at all.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="self-check" data-name="Self-check chip">
+<div class="row" style="gap:6px;flex-wrap:wrap">
+  <span class="sx-chip src">a-intel/platform</span>
+  <span class="sx-chip">rule</span>
+  <span class="sx-chip">1,204 tok</span>
+  <span class="sx-chip ok">cited 41% → 68% of loads</span>
+  <span class="sx-chip held">the loop is held</span>
+  <span class="sx-chip res">research only</span>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-provenance">
+    <figcaption class="dx-story-h"><b>Provenance edge</b><span>What kind of evidence backs a claim, plus the frames that cite it. <code>button.edge</code> opens the frame it names.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="provenance" data-name="Provenance edge">
+<span class="ev"><span class="edge observed">observed</span></span>
+<span class="ev" style="margin-left:10px"><span class="edge stated">stated</span></span>
+<span class="ev" style="margin-left:10px"><span class="edge inferred">inferred · 74%</span><button class="edge" type="button">fr 12</button><button class="edge" type="button">fr 14</button></span>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-removable">
+    <figcaption class="dx-story-h"><b>Removable chip</b><span>A work item pinned to a work order. The inline override below stands in for the dialog's real width.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="removable" data-name="Removable chip">
+<div class="wo-work items" style="max-width:420px">
+  <span class="chip"><span class="ipl" title="GitHub"><svg width="12" height="12" viewBox="0 0 24 24" role="img" aria-label="GitHub"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></span><span class="mono">PLAT-1893</span><span>Cut 4.11.0 release notes</span></span>
+  <span class="chip"><span class="ipl" title="GitHub"><svg width="12" height="12" viewBox="0 0 24 24" role="img" aria-label="GitHub"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></span><span class="mono">PLAT-1901</span><span>Retry flaky checkout test</span><button type="button" aria-label="Remove PLAT-1901">×</button></span>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-label">
+    <figcaption class="dx-story-h"><b>Label</b><span>A tracker label, colored from the tracker's own value, not a token. See Findings.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="label" data-name="Label">
+<span class="lbls">
+  <span class="lbl" style="--lc:#D6455E"><i aria-hidden="true"></i>P0</span>
+  <span class="lbl" style="--lc:#C0453C"><i aria-hidden="true"></i>Bug</span>
+  <span class="lbl" style="--lc:#9D8BE3"><i aria-hidden="true"></i>Documentation</span>
+</span>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-dod-tag">
+    <figcaption class="dx-story-h"><b>DoD tag</b><span>Which part of the definition of done an item belongs to, one of four fixed words.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="dod-tag" data-name="DoD tag">
+<div class="row" style="gap:6px">
+  <span class="tg tg-code">code</span>
+  <span class="tg tg-test">test</span>
+  <span class="tg tg-docs">docs</span>
+  <span class="tg tg-review">review</span>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-person">
+    <figcaption class="dx-story-h"><b>Person chip</b><span>A provider account: a mapped workspace member by name, or a raw handle marked not mapped.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="person" data-name="Person chip">
+<div class="row" style="gap:16px;flex-wrap:wrap">
+  <span class="tkp"><span class="avx person f-sans tn-soft" style="width:20px;height:20px;font-size:8px" aria-hidden="true">PN</span><span>Priya Natarajan</span></span>
+  <span class="tkp"><span class="ipl" title="GitHub"><svg width="14" height="14" viewBox="0 0 24 24" role="img" aria-label="GitHub"><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg></span><span class="mono">rwan-oss</span><span class="vh"> (</span><span class="b b-q" style="font-size:10px" title="Not mapped to a workspace member">not mapped</span><span class="vh">)</span></span>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-mention">
+    <figcaption class="dx-story-h"><b>Mention chip</b><span>A record or an agent named in a work-order brief, and a mention nothing could resolve.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="mention" data-name="Mention chip">
+<div class="mrefs">
+  <span class="mref"><span class="kg k-rule" title="rule"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h14M13 7l5 5-5 5"/></svg></span><span class="mono">rec_release_gate</span><span class="dim">340 tok</span></span>
+  <span class="mref"><span class="hx" style="width:13px;height:13px" title="claude-code"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#D97757" d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg></span><span>a-intel.core.release-manager</span><span class="dim">profile</span></span>
+  <span class="mref bad"><span class="mono">@marcus.b</span><span>not found</span></span>
+</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Role chip</td><td><code>.rl-chip</code></td><td>The role id in mono and a remove button, in <code>--hl</code> on <code>--border</code>.</td></tr>
+      <tr><td>Self-check chip</td><td><code>.sx-chip</code>, <code>.sx-chip.src/.held/.ok/.res</code></td><td>A short mono fact, plain by default or tinted from a <code>--sk-*</code> hue by state class.</td></tr>
+      <tr><td>Provenance edge</td><td><code>.edge</code>, <code>.edge.observed/.stated/.inferred</code>, <code>button.edge</code></td><td>The kind of evidence behind a claim, and a clickable variant that opens the frame it cites.</td></tr>
+      <tr><td>Removable chip</td><td><code>.chip</code>, <code>.chips</code></td><td>A record's short name and a remove button. <code>.chips</code> is the bordered, focusable field the chip is meant to sit inside.</td></tr>
+      <tr><td>Label</td><td><code>.lbl</code></td><td>A pill with a colored dot (<code>.lbl i</code>) and the tracker's own label name, colored by an inline <code>--lc</code>.</td></tr>
+      <tr><td>DoD tag</td><td><code>.tg</code>, <code>.tg-code/-test/-docs/-review</code></td><td>A mono word naming which part of the definition of done an item belongs to.</td></tr>
+      <tr><td>Person chip</td><td><code>.tkp</code></td><td>An avatar or a provider logo, a name or a handle, and a hidden aside for an unmapped account.</td></tr>
+      <tr><td>Mention chip</td><td><code>.mref</code>, <code>.mref.bad</code></td><td>An icon, a name, and a qualifier for a record or an agent named in text, or a denied-hue chip for a reference nothing could resolve.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A short list of named things beside each other: roles, labels, tags, mentions, provenance edges.</li><li>One item a person can remove from a list without leaving the field they are editing.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A record with fields of its own: use a <a href="record-card.html">record card</a> or a table row.</li><li>A single fact with a state that changes: use a <a href="badge.html">badge</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><span class="chip">github__merge_pull_request<span onclick="">×</span></span></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>The remove control is a span with a click handler, not a button. It has no label and cannot be reached by keyboard.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><span class="chip"><span class="mono">github__merge_pull_request</span><button type="button" aria-label="Remove github__merge_pull_request">×</button></span></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>A real button, labeled with what it removes, reachable by keyboard.</p></div>
+  </div>
+  <ul>
+    <li>A chip that can be removed is a real <code>button</code> with an <code>aria-label</code> naming the thing it removes.</li>
+    <li>A list of chips of the same kind is joined by the hidden separator (<code>SEP</code>, a visually hidden <code>, </code>), so it reads and copies as a list.</li>
+    <li>A chip truncates its own label before it wraps or pushes its row wider.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Role chip word</b>: the role id verbatim, in mono, with no casing change.</li>
+    <li><b>Self-check chip word</b>: whatever the record calls it (a source label, a digest, a token count). CSS applies no capitals here, unlike <code>.tcb</code> or <code>.kb</code>.</li>
+    <li><b>Provenance edge word</b>: one of exactly three, lowercase: observed, stated, inferred. Inferred may add a confidence percent.</li>
+    <li><b>Removable chip label</b>: the record's short name or id, ellipsized when the field runs out of room.</li>
+    <li><b>Label name</b>: whatever the tracker calls it (&quot;P0&quot;, &quot;New Feature&quot;). Its casing is the tracker's own.</li>
+    <li><b>DoD tag word</b>: one of exactly four, lowercase, mono: code, test, docs, review.</li>
+    <li><b>Person chip</b>: the workspace member's real name when mapped, or the provider's raw handle when not. Never a guess at a name.</li>
+    <li><b>Mention word</b>: the record's id or the agent's name, with a token count or &quot;profile&quot; as a qualifier.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>A chip that removes something is a real <code>button</code> with an <code>aria-label</code> naming what it removes (&quot;Remove a-intel.pr.author&quot;).</li>
+    <li>A list of same-kind chips is joined by the hidden separator <code>SEP</code>, so a screen reader and a copy-paste both read them as a list, not one run-on word.</li>
+    <li>An unmapped person chip states &quot;not mapped&quot; inside a visually hidden pair of parentheses, so it reads as an aside on the handle rather than a second badge.</li>
+    <li><code>.mref.bad</code> sets the denied hue as both text and border. Report its contrast on <code>--hl</code> in both themes.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>Every chip keeps <code>white-space:nowrap</code> on its own text and truncates before the row wraps.</li>
+    <li>A chip's remove button stays reachable at 390px even where the chip itself shrinks to fit two per row.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--hl, --border, --fg</code></td><td>Role chip and removable chip ground</td></tr>
+      <tr><td><code>--dim, --st-failed</code></td><td>Remove button, and its hover</td></tr>
+      <tr><td><code>--sk-on, --sk-off, --sk-held, --sk-res</code></td><td>Self-check chip hues</td></tr>
+      <tr><td><code>--accent-text</code></td><td>Self-check chip's <code>.src</code> variant</td></tr>
+      <tr><td><code>--st-proven, --st-approval, --k-rule</code></td><td>Provenance edge: observed, stated, inferred</td></tr>
+      <tr><td><code>--lc (inline, per record)</code></td><td>Label hue. Not a fixed token. See Findings.</td></tr>
+      <tr><td><code>--fk-model, --fk-gov, --k-rule, --fk-op</code></td><td>DoD tag: code, test, docs, review</td></tr>
+      <tr><td><code>--muted, --dim</code></td><td>Person chip's unmapped state</td></tr>
+      <tr><td><code>--st-denied</code></td><td>Mention chip's not-found state</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 770 and 924 to 931 (chip and chips), 1234 to 1239 (edge), 1350 to 1357 (role chip), 1604 to 1606 and 1644 to 1648 (self-check chip and its tokens), 2169 (person), 2186 to 2189 (label), 2194 to 2195 (dod tag), 2246 to 2248 (mention)</td><td>The rules that draw it</td></tr>
+      <tr><td><code>agentRoleChips(a)</code> at <code>engine.js:10287</code></td><td>Every role an agent holds, as removable chips joined by <code>SEP</code>, with an Assign role button.</td></tr>
+      <tr><td><code>edgeChip(it)</code> at <code>engine.js:3186</code></td><td>One provenance edge, plus a <code>button.edge</code> per frame it cites.</td></tr>
+      <tr><td><code>lblChip(k)</code> at <code>engine.js:14821</code></td><td>One work-item label, colored from the tracker's own value.</td></tr>
+      <tr><td><code>lblChips(ks)</code> at <code>engine.js:14825</code></td><td>A <code>.lbls</code> row of <code>lblChip()</code>.</td></tr>
+      <tr><td><code>tagChip(t)</code> at <code>engine.js:14852</code></td><td>One DoD tag.</td></tr>
+      <tr><td><code>tkPerson(id, opts)</code> at <code>engine.js:14843</code></td><td>A provider account as a mapped teammate or a raw handle.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li><code>.chips</code> is defined twice (engine.css 770 and 924). The later definition, the input-styled field with a focus ring, wins. <code>.chip</code> is only ever used inside the work order dialog's <code>wo-work items</code> container, which is neither of those two, so it never gets either definition's border, background, or minimum height.</li>
+    <li><code>.rl-tog</code>, the toggle beside a role chip in the CSS (engine.css 1354 to 1357), has no emitter in engine.js or wedge.js.</li>
+    <li>The self-check tokens (<code>--sk-on</code>, <code>--sk-off</code>, <code>--sk-held</code>, <code>--sk-res</code>) live in their own <code>:root</code> block (engine.css 1604), apart from the token blocks <a href="../colors.html">Colors</a> documents.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Label colors do not follow the theme</h4><p><code>lblChip()</code> reads a hex straight off the record (<code>LBL_SWATCHES</code>, engine.js 16012, and <code>fixtures/tasks.json</code>). Of the twelve swatches, nine equal a dark-theme token exactly (P0's <code>#D6455E</code> is <code>--st-critical</code>, Documentation's <code>#9D8BE3</code> is <code>--k-rule</code>, and so on), and three (<code>#E0803A</code>, <code>#C9A227</code>, <code>#3B82F6</code>) match no token at all. None of the twelve switches for light.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>The removable chip never reaches its own field</h4><p><code>.chip</code> renders inside a plain div today, never inside <code>.chips</code>, so the bordered, focus-ringed field this chip was styled for has nothing in it. See Source.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>A role's toggle has no emitter</h4><p><code>.rl-tog</code> sits right beside <code>.rl-chip</code> in the CSS, styled as an on or off switch, but nothing in engine.js or wedge.js renders one.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Self-check chips keep the source's casing</h4><p><code>.sx-chip</code> applies no <code>text-transform</code>, so whatever string the record supplies (a digest, a raw kind) reaches the page unchanged. Every other typed chip in this family (<code>.tg</code>, <code>.lbl</code>) either enforces a fixed vocabulary or is free text by design. <code>.sx-chip</code> mixes both, with no rule saying which fields get to be plain text.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's chips against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Chips audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the chips component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/chips.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 770 and 924 to 931 (chip and chips), 1234 to 1239 (edge), 1350 to 1357 (role chip), 1604 to 1606 and 1644 to 1648 (self-check chip and its tokens), 2169 (person), 2186 to 2189 (label), 2194 to 2195 (dod tag), 2246 to 2248 (mention). The mockup renders it with agentRoleChips(a) (engine.js:10287), edgeChip(it) (engine.js:3186), lblChip(k) (engine.js:14821), lblChips(ks) (engine.js:14825), tagChip(t) (engine.js:14852), tkPerson(id, opts) (engine.js:14843).
+3. The build's implementation: find it by its root selector (.rl-chip, .sx-chip, .edge, .chip, .lbl, .tg, .tkp, .mref) or its name, and list every route that renders it.
+4. Where to see it in the design: Agents, Work, Run (Decision trace, Transcript), Steering. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Role chip. The role id in mono plus a labeled remove button, with `SEP` between chips. A role list with no separator, or a remove button with no `aria-label`, is a FAIL.
+2. Self-check chip. Plain text by default, or a `--sk-*` hue by state class (`src`, `held`, `ok`, `res`). A self-check chip colored from a state token (`--st-*`) instead of `--sk-*` is a FAIL.
+3. Provenance edge. One of exactly three words in its own hue (observed, stated, inferred), and a clickable `button.edge` that opens the frame it names with a visible focus ring.
+4. Removable chip. A label and a remove button that only removes. Report whether the chip sits inside `.chips` or a plain container, and cite the difference in border, background, and focus ring.
+5. Label. `--lc` set inline from the record's own color, a colored dot, and the tracker's own name. Report every label's color in both themes; a color that resolves to no token is a known finding, not a new one.
+6. DoD tag. One of exactly four words (code, test, docs, review), each in its own hue, in mono. A fifth word or an inline color is a FAIL.
+7. Person chip. A mapped teammate shows an avatar and a real name. An unmapped account shows the provider's logo, its raw handle, and &quot;not mapped&quot; inside a hidden aside. A person chip with no avatar or logo is a FAIL.
+8. Mention chip. A record or an agent mention shows an icon and a name. A not-found mention uses `.mref.bad`'s denied hue. Report its text and border contrast on `--hl` in both themes.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: Every chip keeps `white-space:nowrap` on its own text and truncates before the row wraps. A chip's remove button stays reachable at 390px even where the chip itself shrinks to fit two per row.
+13. Accessibility. A chip that removes something is a real `button` with an `aria-label` naming what it removes (&quot;Remove a-intel.pr.author&quot;). A list of same-kind chips is joined by the hidden separator `SEP`, so a screen reader and a copy-paste both read them as a list, not one run-on word. An unmapped person chip states &quot;not mapped&quot; inside a visually hidden pair of parentheses, so it reads as an aside on the handle rather than a second badge. `.mref.bad` sets the denied hue as both text and border. Report its contrast on `--hl` in both themes.
+14. One implementation. The build draws the chips from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Chips: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="typed-badges.html"><span>Previous</span>Typed badges</a><a class="nx" href="meter.html"><span>Next</span>Meter</a></nav>
+</main>
+</div>
+</body>
+</html>

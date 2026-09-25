@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tooltip</title>
+<meta name="description" content="One hover layer, text only, the same content on focus.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Tooltip</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Overlays</p>
+  <h1>Tooltip</h1>
+  <p class="dx-lead">A tooltip explains a mark that has no room for its own label: a bar in a chart, a segment in a stacked meter, a step in the run timeline. One node in the whole page shows the text, positioned over the element on hover or keyboard focus, and hides again on mouseleave or blur. A short, static label uses the browser's own <code>title</code> attribute instead.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.rtip</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 1436 to 1437</span>
+    <span><b>Used on</b> Run (instruments, cost and step charts), Spend (basis and category charts)</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-node">
+    <figcaption class="dx-story-h"><b>The tooltip node</b><span><code>#rtip</code> is <code>position:fixed</code>, so this example fixes it in place with an inline override to keep it inside the canvas.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="node" data-name="The tooltip node">
+<div style="position:relative;height:64px">
+  <div class="meter" style="width:220px">
+    <div class="lab">Input tokens<b>41,200 <span class="dim" style="font-weight:500">&middot; 62%</span></b></div>
+  </div>
+  <div id="rtip" class="rtip" role="tooltip" style="position:absolute;left:8px;top:38px">41,200 tokens &middot; 62% of the call</div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-chart">
+    <figcaption class="dx-story-h"><b>On a chart segment</b><span>Every segment in a stacked or column chart carries <code>tipAttr()</code>: the same text on hover and on keyboard focus.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="chart" data-name="On a chart segment">
+<div class="stk" style="width:220px">
+  <i class="fk-model" style="flex:6" data-tip="6 steps advanced the task"></i>
+  <i style="flex:2;background:var(--rule)" data-tip="2 steps did not: retries, re-reads and waits"></i>
+</div>
+<div id="rtip" class="rtip" role="tooltip" style="position:relative;left:auto;top:auto">2 steps did not: retries, re-reads and waits</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-native-title">
+    <figcaption class="dx-story-h"><b>Native title</b><span>A badge or a chip that only needs one line of static text uses the browser's own <code>title</code>, not <code>rtip</code>.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="native-title" data-name="Native title">
+<span class="basis" title="gateway_observed">Observed by gateway</span>
+<span class="b b-tier b-allowed" title="Every call runs at a broker the gateway controls.">gateway</span>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Node</td><td><code>.rtip</code> (<code>#rtip</code>)</td><td>A <code>--fg</code> ground with <code>--ink</code> text, mono, 11px, 5px by 8px padding, a 6px radius, <code>--shadow-sm</code>, at most 340px wide, <code>pointer-events:none</code>, <code>position:fixed</code>.</td></tr>
+      <tr><td>Content</td><td>text only</td><td><code>textContent</code>, never HTML. Line breaks are literal <code>\n</code> in the source string, rendered by <code>white-space:pre-line</code>.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A chart bar, a stacked segment, or a frame marker whose value or breakdown has no room to print beside it.</li><li>The exact same fact belongs on hover and on keyboard focus, such as a cost breakdown per turn.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A short, static label on a badge or chip: use the native <code>title</code> attribute.</li><li>Text a person needs to read without hovering: print it in the layout.</li><li>Rich content (a mini card, a list, an image): open a <a href="dialog.html">dialog</a> or a <a href="menu.html">menu</a> instead.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><i class="fk-model" style="flex:6" title="6 steps advanced the task"></i></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A native title on a chart segment shows late, has no keyboard-focus equivalent on a non-focusable element, and cannot be positioned to avoid the viewport edge.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><i class="fk-model" tabindex="0" style="flex:6" data-tip="6 steps advanced the task"></i></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>The engine's hover layer: one shared node, shown the same way on hover and focus.</p></div>
+  </div>
+  <ul>
+    <li>One tooltip node per page. Every hover target updates the same <code>#rtip</code> rather than creating its own.</li>
+    <li>Text only, one line or a few short lines. A tooltip that needs a heading or a list is a <a href="dialog.html">dialog</a> or a <a href="menu.html">menu</a>, not a bigger tooltip.</li>
+    <li>The content on focus is identical to the content on hover. A tooltip that only shows on mouse events leaves a keyboard reader with less information than a pointer gets.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Wording</b>: the value, then its basis or breakdown, joined with a mid-dot: &quot;6 steps · $1.42 · cache 62%&quot;. No sentence case requirement beyond the page's own numbers and labels.</li>
+    <li><b>Length</b>: short enough to read at a glance. A tooltip that needs scrolling belongs on the page instead.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The node carries <code>role=&quot;tooltip&quot;</code>.</li>
+    <li><code>tipAttr()</code> wires <code>onmouseenter</code>, <code>onmousemove</code>, <code>onmouseleave</code>, <code>onfocus</code>, and <code>onblur</code> to the same show and hide functions, so the content on focus matches the content on hover exactly.</li>
+    <li>Escape does not hide the tooltip. Tabbing past the element is the only way to dismiss it today. See Findings.</li>
+    <li>The node is <code>pointer-events:none</code>, so it never blocks the element or its neighbors from being clicked.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>Hover has no equivalent on a touch pointer. A chart segment's value should also be reachable without the tooltip on a touch device. The mockup does not provide one today.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--fg, --ink</code></td><td>Node ground and text</td></tr>
+      <tr><td><code>--shadow-sm</code></td><td>Node shadow</td></tr>
+      <tr><td><code>--mono</code></td><td>Node type</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 1436 to 1437</td><td>The rules that draw it</td></tr>
+      <tr><td><code>tipAttr(s)</code> at <code>engine.js:2123</code></td><td>Writes the <code>data-tip</code> attribute and the four event handlers. 16 calls, across the run instruments, the calls panel, the token bars, the step stack, and the Spend charts.</td></tr>
+      <tr><td><code>rtTip(node, ev)</code> at <code>engine.js:2124</code></td><td>Creates <code>#rtip</code> once, sets its text from <code>data-tip</code>, and positions it above the target, flipping below when it would clip the top of the viewport.</td></tr>
+      <tr><td><code>rtTipHide()</code> at <code>engine.js:2134</code></td><td>Hides <code>#rtip</code> on mouseleave or blur.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>No Escape to dismiss</h4><p>Nothing in <code>engine.js</code> calls <code>rtTipHide()</code> on Escape. The dialog, the drawer, and the mention list all close on Escape. The tooltip only hides on <code>mouseleave</code> or <code>blur</code>, so a keyboard reader must tab away to clear it.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Two hover idioms, correctly split</h4><p>16 sites use <code>tipAttr()</code> for dynamic, computed text on charts and instruments. Dozens more use a native <code>title</code> for a short, static label on a badge, a chip, or an icon button. The split matches the usage rule above. Neither idiom is misapplied today.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's tooltip against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Tooltip audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the tooltip component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/tooltip.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 1436 to 1437. The mockup renders it with tipAttr(s) (engine.js:2123), rtTip(node, ev) (engine.js:2124), rtTipHide() (engine.js:2134).
+3. The build's implementation: find it by its root selector (.rtip) or its name, and list every route that renders it.
+4. Where to see it in the design: Run (instruments, cost and step charts), Spend (basis and category charts). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. One node. The whole page shares one `#rtip`. Two tooltips open on screen at once, or a second node created per hover target, is a FAIL.
+2. Same content on focus. Tab to a chart segment or frame marker and confirm the tooltip text matches what hovering it shows, word for word.
+3. Text only. The tooltip renders as plain text, never HTML, never an image, never an interactive control.
+4. Positioning. The tooltip stays inside the viewport, flipping below the target when it would clip the top edge, and never covers the element it explains.
+5. Native title. Every badge or chip with a short static label uses `title`, not `data-tip`. A static label reimplemented with the tooltip layer is a FAIL.
+6. Dismiss. Hovering away, blurring the element, or tabbing past it hides the tooltip. If the build adds Escape-to-dismiss, confirm it does not also close a dialog or the drawer behind it.
+7. Pointer events. The node does not block clicks on the element underneath it or its neighbors.
+8. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+9. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+10. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+11. Phone. At 390 by 844 with a touch pointer: Hover has no equivalent on a touch pointer. A chart segment's value should also be reachable without the tooltip on a touch device. The mockup does not provide one today.
+12. Accessibility. The node carries `role=&quot;tooltip&quot;`. `tipAttr()` wires `onmouseenter`, `onmousemove`, `onmouseleave`, `onfocus`, and `onblur` to the same show and hide functions, so the content on focus matches the content on hover exactly. Escape does not hide the tooltip. Tabbing past the element is the only way to dismiss it today. See Findings. The node is `pointer-events:none`, so it never blocks the element or its neighbors from being clicked.
+13. One implementation. The build draws the tooltip from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Tooltip: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="toast.html"><span>Previous</span>Toast</a><a class="nx" href="state-surfaces.html"><span>Next</span>State surfaces</a></nav>
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tabs</title>
+<meta name="description" content="The views of one page or record, with one open and a count beside each.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Tabs</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Page structure</p>
+  <h1>Tabs</h1>
+  <p class="dx-lead">Tabs split one page or one record into views that share its header: a run's Decision trace, Transcript, Cost, Memories, and Evidence, or Work's Backlog, Work orders, Workflows, and Findings. Each tab is a route, so a tab can be linked and the back button returns to it. A count beside a tab says how many rows the view holds.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.tabs</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 227 to 231, 1439 to 1441, 1597, dialog 489 to 490, phone 674 to 676</span>
+    <span><b>Used on</b> Work, Run, Agent, Agent source, Tools, Steering, Spend, Repositories, Organization, Audit, Account dialog</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-page">
+    <figcaption class="dx-story-h"><b>Page tabs with counts</b><span>Work's four tabs. A count renders only when it is above zero.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="page" data-name="Page tabs with counts">
+<div class="tabs" role="tablist" aria-label="Work">
+  <button class="tab" role="tab" aria-selected="true">Backlog<span class="vh"> </span><span class="n">3</span></button>
+  <button class="tab" role="tab" aria-selected="false">Work orders<span class="vh"> </span><span class="n">2</span></button>
+  <button class="tab" role="tab" aria-selected="false">Workflows</button>
+  <button class="tab" role="tab" aria-selected="false">Findings<span class="vh"> </span><span class="n">7</span></button>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-record">
+    <figcaption class="dx-story-h"><b>Record tabs with a state and a figure</b><span>The Run page. A dot marks a tab that holds something waiting, and Cost carries its figure.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="record" data-name="Record tabs with a state and a figure">
+<div class="tabs" role="tablist" aria-label="Run">
+  <button class="tab" role="tab" aria-selected="true" title="1">Decision trace<span class="st" title="A call is parked for approval"></span></button>
+  <button class="tab" role="tab" aria-selected="false" title="2">Transcript<span class="vh"> </span><span class="n" title="48 transcript entries">48</span></button>
+  <button class="tab" role="tab" aria-selected="false" title="3">Cost<span class="vh"> </span><span class="n money" title="Cost of this run">$4.13</span></button>
+  <button class="tab" role="tab" aria-selected="false" title="4">Memories<span class="vh"> </span><span class="n" title="2 memories">2</span></button>
+  <button class="tab" role="tab" aria-selected="false" title="5">Evidence<span class="vh"> </span><span class="n" title="The chain is sealed">sealed</span></button>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-states">
+    <figcaption class="dx-story-h"><b>Tab state dots</b><span><code>.st</code> is waiting, <code>.st.ok</code> is healthy, and <code>.st.bad</code> is failing. Each dot has a title that says which.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="states" data-name="Tab state dots">
+<div class="tabs" role="tablist" aria-label="Tools">
+  <button class="tab" role="tab" aria-selected="false">Tools<span class="vh"> </span><span class="n" style="color:var(--st-approval)" title="2 schemas need approval">2</span></button>
+  <button class="tab" role="tab" aria-selected="true">Toolbelts<span class="vh"> </span><span class="n" title="6 toolbelts">6</span></button>
+  <button class="tab" role="tab" aria-selected="false">Providers<span class="st ok" title="Every provider is connected"></span></button>
+  <button class="tab" role="tab" aria-selected="false">Kill switches<span class="st bad" title="1 kill switch on"></span></button>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-dialog">
+    <figcaption class="dx-story-h"><b>Tabs in a dialog</b><span>Inside <code>.dlg</code> the strip loses its bottom margin and takes the dialog's 18px side padding.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="dialog" data-name="Tabs in a dialog">
+<div class="dlg" role="dialog" aria-modal="true" aria-label="Account" style="position:relative;max-width:520px;margin:0">
+  <div class="dlg-h"><h2>Account</h2><button class="iconbtn x" aria-label="Close">×</button></div>
+  <div class="tabs" role="tablist" aria-label="Account">
+    <button class="tab" role="tab" aria-selected="true">Profile</button>
+    <button class="tab" role="tab" aria-selected="false">Preferences</button>
+    <button class="tab" role="tab" aria-selected="false">Security</button>
+  </div>
+  <div class="dlg-b"><p class="muted" style="margin:0">The profile fields sit here.</p></div>
+</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Strip</td><td><code>.tabs</code></td><td>A flex row with a 1px <code>--border</code> underline, 16px below it, scrolling sideways when the tabs overflow.</td></tr>
+      <tr><td>Tab</td><td><code>.tab</code></td><td>A button: 13px Geist 500 in <code>--muted</code>, 8px by 13px padding, a 2px transparent underline.</td></tr>
+      <tr><td>Selected tab</td><td><code>.tab[aria-selected=&quot;true&quot;]</code></td><td>Text in <code>--fg</code> and a 2px <code>--gold</code> underline.</td></tr>
+      <tr><td>Count</td><td><code>.tab .n</code></td><td>10.5px Monaspace Neon in <code>--dim</code>, 5px after the name, with a hidden space before it so it reads as &quot;Backlog 3&quot;.</td></tr>
+      <tr><td>Money count</td><td><code>.tab .n.money</code></td><td>A figure in <code>--muted</code>, such as the Cost tab's total.</td></tr>
+      <tr><td>State dot</td><td><code>.tab .st</code></td><td>A 6px dot, <code>--st-approval</code> by default. <code>.ok</code> is <code>--st-allowed</code> and <code>.bad</code> is <code>--st-failed</code>.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  <p class="dx-sub">Tabs switch views of the same subject. Anything else is a different component.</p>
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Views of one record that share its header: a run, an agent, a tool.</li><li>Views of one page that share its header and stat row: Work, Tools, Spend.</li><li>Sections of one dialog, such as Account.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Filtering or regrouping one list: use a <a href="segmented-control.html">segmented control</a>.</li><li>Moving between pages: use the sidebar.</li><li>Steps in a sequence: use a <a href="timeline.html">timeline</a> or the wizard's steps.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="tabs" role="tablist" style="margin:0"><button class="tab" role="tab" aria-selected="true">Table</button><button class="tab" role="tab" aria-selected="false">Graph</button></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Tabs that switch how one list is drawn. That is a segmented control, and the list keeps its header.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="seg" role="group" aria-label="View"><button class="btn sm" aria-pressed="true">List</button><button class="btn sm" aria-pressed="false">Graph</button></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>A segmented control for two views of the same list.</p></div>
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="tabs" role="tablist" style="margin:0"><button class="tab" role="tab" aria-selected="true">Overview of the agent</button><button class="tab" role="tab" aria-selected="false">Runs, costs · 30d</button></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Long labels, a comma, and a mid-dot. A tab name is one or two plain words.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="tabs" role="tablist" style="margin:0"><button class="tab" role="tab" aria-selected="true">Overview</button><button class="tab" role="tab" aria-selected="false">Activity<span class="vh"> </span><span class="n">1,340</span></button></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>Plain nouns, and the figure sits in the count.</p></div>
+  </div>
+  <ul>
+    <li>Each tab is a route. Selecting one changes the address, so a link opens that tab and the back button returns to the last one.</li>
+    <li>The first tab is the default view of the record. The Run page opens on the Decision trace.</li>
+    <li>The tab count equals the rows its view holds. Spend's Budgets tab and the table under it show the same number.</li>
+    <li>When the strip overflows, the selected tab scrolls into view.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Name</b>: one or two words, a plain noun, in sentence case: &quot;Decision trace&quot;, &quot;Kill switches&quot;.</li>
+    <li><b>Count</b>: a number formatted with thousands separators, rendered only above zero. A figure such as the Cost tab's total goes through <code>usd()</code> and takes <code>.money</code>.</li>
+    <li><b>Title</b>: a count or a dot carries a <code>title</code> with the full phrase, such as &quot;48 transcript entries&quot; or &quot;A call is parked for approval&quot;.</li>
+    <li><b>Word counts</b>: a word in the count slot is lowercase and names a state (&quot;sealed&quot;, &quot;live&quot;).</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The strip is <code>role=&quot;tablist&quot;</code> with an <code>aria-label</code> naming the page or record. Each tab is a <code>button</code> with <code>role=&quot;tab&quot;</code> and <code>aria-selected</code>.</li>
+    <li>A hidden space (<code>.vh</code>) sits between the name and the count, so a screen reader says &quot;Transcript 48&quot;, not &quot;Transcript48&quot;.</li>
+    <li>The state dot is color only. Its <code>title</code> carries the words, and the build must also expose them to a screen reader, such as with <code>aria-describedby</code> or hidden text.</li>
+    <li>Keyboard: Tab reaches each tab and Enter or Space opens it. Arrow keys between tabs are the WAI-ARIA pattern and the mockup does not implement them. See Findings.</li>
+    <li>The selected underline is 2px of gold, and the selected text changes from <code>--muted</code> to <code>--fg</code>, so the state does not rest on color alone.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>Tabs grow to 44px tall at 14px, with 12px by 14px padding.</li>
+    <li>The strip bleeds to the screen edges (negative 16px margins) and snaps each tab to its start as it scrolls.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--border</code></td><td>Strip underline</td></tr>
+      <tr><td><code>--muted</code></td><td>Tab name at rest, money count</td></tr>
+      <tr><td><code>--fg</code></td><td>Selected and hovered tab name</td></tr>
+      <tr><td><code>--gold</code></td><td>Selected underline (see Findings)</td></tr>
+      <tr><td><code>--dim</code></td><td>Count</td></tr>
+      <tr><td><code>--st-approval, --st-allowed, --st-failed</code></td><td>State dot</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 227 to 231, 1439 to 1441, 1597, dialog 489 to 490, phone 674 to 676</td><td>The rules that draw it</td></tr>
+      <tr><td><code>runTabs(R, t)</code> at <code>engine.js:2782</code></td><td>The Run page's five tabs, with the state dot and the Cost figure.</td></tr>
+      <tr><td><code>tabN(n, title, style)</code> at <code>engine.js:677</code></td><td>A count with its hidden space and title. Renders nothing for zero.</td></tr>
+      <tr><td><code>dialog()</code> at <code>engine.js:9565</code></td><td>Renders <code>d.tabs</code> into a strip between a dialog's header and body.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>Pages write the strip inline: Work (<code>WORK_TABS</code> in <code>wedge.js</code>), Tools (engine.js 4831), agent, Steering, Spend, Repositories, Organization, and Audit. There are 15 <code>role=&quot;tab&quot;</code> sites.</li>
+    <li><code>render()</code> scrolls the selected tab into view when the strip overflows.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold marks the selected tab</h4><p>The selected underline is <code>--gold</code>. By the brand's rule gold is identity plus one action, never a state. <code>--fg</code> would carry the same meaning. See <a href="../colors.html#gold">Colors</a>.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>No arrow keys or tab panels</h4><p>Tabs are reached with Tab only, and no view carries <code>role=&quot;tabpanel&quot;</code> or <code>aria-controls</code>. Because each tab is a route, a build may render them as links in a <code>nav</code> instead. Either pattern is fine, and the build must pick one.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Unlabelled strips</h4><p>Six strips have <code>role=&quot;tablist&quot;</code> with no <code>aria-label</code> (engine.js 1199, 4251, 4831, 7229, 7403, 8057, and every dialog through <code>dialog()</code>).</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Count color by inline style</h4><p>The Tools tab colors its count <code>--st-approval</code> with an inline style when a schema waits. A modifier class would let an audit find every colored count.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Count contrast</h4><p>The count is <code>--dim</code>, which is 3.67:1 on <code>--panel</code> in dark and 2.56:1 in light. A count is a figure a person reads.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's tabs against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Tabs audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the tabs component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/tabs.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 227 to 231, 1439 to 1441, 1597, dialog 489 to 490, phone 674 to 676. The mockup renders it with runTabs(R, t) (engine.js:2782), tabN(n, title, style) (engine.js:677), dialog() (engine.js:9565).
+3. The build's implementation: find it by its root selector (.tabs) or its name, and list every route that renders it.
+4. Where to see it in the design: Work, Run, Agent, Agent source, Tools, Steering, Spend, Repositories, Organization, Audit, Account dialog. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Structure. Each strip is a tablist with an accessible name, and each tab has role tab and aria-selected, or the build renders the strip as navigation links with aria-current. A mix of the two is a FAIL.
+2. Routes. Every tab changes the address. Opening the address directly opens that tab, and the back button returns to the previous tab. A tab that only toggles local state is a FAIL.
+3. Selected state. The selected tab's text is --fg with a 2px underline, and unselected tabs are --muted. Report the underline color. Gold is a finding against the brand rule.
+4. Counts. A count renders only above zero, uses thousands separators, sits in 10.5px Monaspace Neon, and equals the rows of the view it opens. Quote any count that disagrees with its view.
+5. State dots. Each dot has words a screen reader can reach. A dot with only a color is a FAIL.
+6. Overflow. With the window narrowed until the strip overflows, the strip scrolls sideways, the page does not, and the selected tab stays in view.
+7. Keyboard. Tab reaches every tab, and Enter or Space opens it. Record whether arrow keys move between tabs.
+8. Names. Every tab name is one or two words in sentence case, with no comma, mid-dot, or trailing count in the name itself.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: Tabs grow to 44px tall at 14px, with 12px by 14px padding. The strip bleeds to the screen edges (negative 16px margins) and snaps each tab to its start as it scrolls.
+13. Accessibility. The strip is `role=&quot;tablist&quot;` with an `aria-label` naming the page or record. Each tab is a `button` with `role=&quot;tab&quot;` and `aria-selected`. A hidden space (`.vh`) sits between the name and the count, so a screen reader says &quot;Transcript 48&quot;, not &quot;Transcript48&quot;. The state dot is color only. Its `title` carries the words, and the build must also expose them to a screen reader, such as with `aria-describedby` or hidden text. Keyboard: Tab reaches each tab and Enter or Space opens it. Arrow keys between tabs are the WAI-ARIA pattern and the mockup does not implement them. See Findings. The selected underline is 2px of gold, and the selected text changes from `--muted` to `--fg`, so the state does not rest on color alone.
+14. One implementation. The build draws the tabs from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Tabs: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="layout-grid.html"><span>Previous</span>Layout grid</a><a class="nx" href="segmented-control.html"><span>Next</span>Segmented control</a></nav>
+</main>
+</div>
+</body>
+</html>

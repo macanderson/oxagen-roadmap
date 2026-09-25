@@ -14,7 +14,7 @@
 
 Every open work item in the workspace, whether it is ready, and where it went. The Backlog is the one place work leaves Oxagen for an agent: you select ready work items and send them, in a work order, to an agent you operate or to a published workflow of such agents. Work opens on this tab, and the workspace root lands here.
 
-A work item arrives from a connected issue provider, from a finding a person picked up, or from a person writing it in Oxagen. It is ready when a person certifies its definition of done. The Intake dialog (`work-intake.md`) connects the providers.
+A work item arrives from a connected issue tracker, from a finding a person picked up, or from a person writing it in Oxagen. It is ready when a person certifies its definition of done. The Intake dialog (`work-intake.md`) connects the providers.
 
 ## What is on the page
 

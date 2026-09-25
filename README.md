@@ -8,6 +8,7 @@ One place to see what Oxagen is building next, exactly how it will look, and wha
 
 ```
 index.html                    the roadmap app, ONE file: built from roadmap/app.html + roadmap/data.json (edit those, never this)
+stella-in-app-agent-roadmap.html  the in-app stella build spec: parity with stella in the terminal, contained sessions, 38 specs with workflow prompts
 roadmap/app.html              the app: the pages, the Claude drawer, the GitHub wiring, the shared store
 roadmap/data.json             the roadmap content: surfaces, witness, dod, decisions, milestones, the catalog, the issue triage snapshot
 mockups/missioncontrol.html   the master: every page, dialog, auth screen and guided scenario, self-contained, open from disk

@@ -29,7 +29,7 @@ The agent header and the tab bar are as `agent.md` specifies, with Identity sele
 | Model tier | “light → z-ai/glm-flash-latest”: the tier and the model it routes to | none |
 | Operator | “Marcus Bell” | “accountable for every run · IAM field initiating_principal” |
 | Cost center | `ccAgentCell()`: the label this agent's runs roll up to, in mono (`ENG-1001` on Triage), or “None”, then **Change** (opens `ccagent`) | Why, on a line carrying `data-cc-from` (`agent`, `workspace` or `none`): “its own label, which wins over the workspace’s”, “inherited from workspace <slug>”, or “neither it nor its workspace names one, so its runs land on Spend’s ~none row” |
-| Lifecycle state | The status badge (“enrolled”) | “registered → enrolled → active → retired. Deregistering retires the principal and never deletes it, so old runs keep their identity.” |
+| Lifecycle state | The status badge (“enrolled”) | “registered → enrolled → active → retired. Retiring an agent retires its principal and never deletes it, so old runs keep their identity.” |
 | First frame | “2026-04-18 09:51:33Z” | none |
 
 **Credentials.** Subtext: “The single property most of the threat model rests on.” The header badge reads “none”. Five pairs: API key “none”, OAuth token “none”, Cloud role “none”, GitHub token “none”, Run token “one, and it reaches Oxagen only”. Then the paragraph: “It holds one run token, and that token is good for talking to Oxagen and nothing else. Every secret a call needs is minted by the broker at dispatch, scoped to that one call, and never transmitted to the agent. A leaked run token cannot reach a provider.” **See the connections that mint them** opens Tools › Providers.
@@ -96,7 +96,7 @@ The tab carries no `data-future` mark, and the catalog gives it no future story.
 
 - **Run token**, **Purpose lock** and **Run tokens**: the run-token exchange is not served.
 - **Change identity**: no capability changes an agent's operator.
-- **Revoke credential**: the backend refuses an unpaired revoke. The design keeps Rotate credential (header) and Deregister for this; a standalone revoke needs a maintainer decision before it can ship.
+- **Revoke credential**: the backend refuses an unpaired revoke. The design keeps Rotate credential (header) and Retire agent for this; a standalone revoke needs a maintainer decision before it can ship.
 
 ## Functionality
 

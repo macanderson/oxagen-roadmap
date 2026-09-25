@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Menu</title>
+<meta name="description" content="A short list of choices, anchored to the button that opened it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Menu</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Actions and input</p>
+  <h1>Menu</h1>
+  <p class="dx-lead">A menu opens beside the control that owns it: the account button, a dispatch action, an @-mention while typing. It lists items to pick, closes on Escape or a click outside, and never holds a field longer than a search box. A menu with a search field, such as the dispatch menu, narrows its own list as you type.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.menu</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 616 to 622, 2219 to 2227</span>
+    <span><b>Used on</b> every page (account menu), Work (send to agent), Work order (mention list)</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-account">
+    <figcaption class="dx-story-h"><b>Account menu</b><span>Anchored under the avatar button with <code>.rel</code>. The inline <code>position:relative</code> on <code>.rel</code> below keeps the anchoring, but the menu itself needs <code>position:relative</code> in place of <code>absolute</code> to draw in this canvas.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="account" data-name="Account menu">
+<div class="rel" style="width:250px">
+  <div class="menu" style="position:relative;top:auto;right:auto">
+    <div class="menu-hd"><b>Marcus Bell</b><span>marcus@a-intel.example</span></div>
+    <button class="menu-i">Account</button>
+    <button class="menu-i">Preferences</button>
+    <button class="menu-i">Security and sessions</button>
+    <button class="menu-i">Privacy and data</button>
+    <div class="hr" style="margin:5px 0"></div>
+    <button class="menu-i">Switch theme</button>
+    <button class="menu-i">Sign out</button>
+  </div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-dispatch">
+    <figcaption class="dx-story-h"><b>Dispatch menu</b><span><code>.dsp-menu</code> adds a search field and grouped, labelled sections over the plain menu shell.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="dispatch" data-name="Dispatch menu">
+<div class="rel" style="width:360px">
+  <div class="menu dsp-menu" role="menu" aria-label="Send to" style="position:relative;top:auto;right:auto">
+    <div class="menu-hd"><b>Send 2 work items to</b><span>agents where you are the registered operator</span></div>
+    <input class="dsp-q" type="search" placeholder="Search agents and workflows" aria-label="Search agents and workflows" value="">
+    <div class="menu-l">Agents you operate</div>
+    <button class="menu-i dsp-i" role="menuitem"><span class="tx"><b>a-intel.core.release-manager</b><span>Claude Code &middot; edge-runner-3</span></span></button>
+    <button class="menu-i dsp-i" role="menuitem"><span class="tx"><b>a-intel.core.triage</b><span>Claude Code &middot; edge-runner-1</span></span></button>
+    <div class="menu-l">Workflows</div>
+    <button class="menu-i dsp-i" role="menuitem"><span class="tx"><b>Release cut</b><span>3 stages then you</span></span></button>
+  </div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-empty">
+    <figcaption class="dx-story-h"><b>No match</b><span><code>.menu-l</code> labels a section. <code>.menu-e</code> is its empty line when nothing matches the search.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="empty" data-name="No match">
+<div class="menu" style="position:relative;top:auto;right:auto;width:280px">
+  <div class="menu-l">Agents you operate</div>
+  <div class="menu-e">No agent you operate matches.</div>
+</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Anchor</td><td><code>.rel</code></td><td><code>position:relative</code> on the button's wrapper, so the menu positions against it.</td></tr>
+      <tr><td>Shell</td><td><code>.menu</code></td><td>A <code>--panel</code> box, 1px <code>--rule</code> border, 12px radius, <code>--shadow</code>, 250px wide by default, absolutely positioned 42px below and flush with the right edge of its anchor.</td></tr>
+      <tr><td>Item</td><td><code>.menu-i</code></td><td>A full-width, left-aligned button, 13px <code>--body</code> text, 8px by 10px padding, 8px radius. Hover sets <code>--hl</code> ground and <code>--fg</code> text.</td></tr>
+      <tr><td>Header</td><td><code>.menu-hd</code></td><td>A name and a detail line above the items, 10px by 11px top padding, a bottom border.</td></tr>
+      <tr><td>Section label</td><td><code>.menu-l</code></td><td>A 10.5px uppercase <code>--dim</code> label above a group of items.</td></tr>
+      <tr><td>Empty line</td><td><code>.menu-e</code></td><td>A 12px <code>--dim</code> line where a group has no matches.</td></tr>
+      <tr><td>Divider</td><td><code>.hr</code></td><td>A 1px <code>--border</code> rule between groups.</td></tr>
+      <tr><td>Dispatch shell</td><td><code>.menu.dsp-menu</code></td><td>The same shell widened to 360px (capped at <code>100vw - 32px</code>) and up to 460px tall, scrolling its list.</td></tr>
+      <tr><td>Dispatch item</td><td><code>.dsp-i</code></td><td>An item row with an icon, an avatar, and a two-line label (<code>.tx</code>) in place of plain text.</td></tr>
+      <tr><td>Dispatch search</td><td><code>.dsp-q</code></td><td>A search input inside the menu, <code>--ink</code> ground, gold border on focus, that filters the list as you type.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A short, fixed list of choices anchored to the control that opens it: account actions, a send-to list, an @-mention.</li><li>A list long enough to want a search field, kept inside the menu itself (<code>.dsp-menu</code>).</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A page-level choice among a handful of views: use a <a href="segmented-control.html">segmented control</a> or <a href="tabs.html">tabs</a>.</li><li>A task that needs more than picking one item: use a <a href="dialog.html">dialog</a>.</li><li>An on-or-off setting: use a <a href="switch.html">switch</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="menu" style="position:relative;top:auto;right:auto;width:220px"><div class="menu-i" style="cursor:pointer">Account</div><div class="menu-i" style="cursor:pointer">Sign out</div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Items are <code>div</code>s with a pointer cursor, not buttons. Nothing here is keyboard operable, and a screen reader has no reason to treat them as choices.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="menu" style="position:relative;top:auto;right:auto;width:220px"><button class="menu-i">Account</button><button class="menu-i">Sign out</button></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>Real buttons. Tab reaches each one, Enter and Space activate it.</p></div>
+  </div>
+  <ul>
+    <li>One menu open at a time. Opening a second closes the first.</li>
+    <li>An item is a verb or a destination, never a description of what the menu contains.</li>
+    <li>A menu with more than about a dozen items gets a search field rather than growing past its max height.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Items</b>: a short label, sentence case, no end punctuation: &quot;Switch theme&quot;, &quot;Sign out&quot;, &quot;Account&quot;.</li>
+    <li><b>Header</b>: a name and one detail line, when the menu is scoped to a person or a task (&quot;Marcus Bell&quot;, &quot;marcus@a-intel.example&quot;).</li>
+    <li><b>Section labels</b>: a plain noun in capitals, set by CSS from a sentence-case string: &quot;Agents you operate&quot;, &quot;Workflows&quot;.</li>
+    <li><b>Empty line</b>: names what was searched and that nothing matched: &quot;No agent you operate matches.&quot;</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The dispatch menu is <code>role=&quot;menu&quot;</code> with an <code>aria-label</code>, and its items are <code>role=&quot;menuitem&quot;</code>. The account menu and the mention list carry no such roles today. See Findings.</li>
+    <li>Every item is a real <code>button</code>, reachable by Tab and activated by Enter or Space.</li>
+    <li>A click anywhere outside <code>.rel</code> closes the open menu, and Escape closes it from anywhere on the page.</li>
+    <li>There is no arrow-key roving focus inside a menu. Tab is the only way to move between items today. See Findings.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>The dispatch menu's width caps at <code>100vw - 32px</code>, so it never runs off the phone screen.</li>
+    <li><code>.menu-i</code> grows to a 44px minimum height on phone, so an item stays a full touch target even where its content is one short word.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--panel</code></td><td>Shell ground</td></tr>
+      <tr><td><code>--rule</code></td><td>Shell border</td></tr>
+      <tr><td><code>--shadow</code></td><td>Shell shadow</td></tr>
+      <tr><td><code>--body, --fg</code></td><td>Item text, at rest and on hover</td></tr>
+      <tr><td><code>--hl</code></td><td>Item hover ground</td></tr>
+      <tr><td><code>--dim</code></td><td>Section label and empty line</td></tr>
+      <tr><td><code>--border</code></td><td>Header and divider rule</td></tr>
+      <tr><td><code>--ink</code></td><td>Dispatch search field ground</td></tr>
+      <tr><td><code>--gold</code></td><td>Dispatch search field focus border</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 616 to 622, 2219 to 2227</td><td>The rules that draw it</td></tr>
+      <tr><td><code>userMenu()</code> at <code>engine.js:1767</code></td><td>The account menu: header, four settings items, a divider, theme and sign-out.</td></tr>
+      <tr><td><code>dispatchMenu(ids)</code> at <code>engine.js:15143</code></td><td>The send-to menu shell: header, search field, and <code>dspList()</code>.</td></tr>
+      <tr><td><code>dspList()</code> at <code>engine.js:15134</code></td><td>Filters agents you operate and published workflows by the search text and renders both groups.</td></tr>
+      <tr><td><code>mentListHtml()</code> at <code>engine.js:15699</code></td><td>The @-mention list while typing a work item prompt, a listbox rather than a menu (see Findings).</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>A document-level click handler (engine.js 13936) closes the open layer on any click outside <code>.rel</code>, shared by the account and dispatch menus.</li>
+    <li>Escape closes the open layer through the shared key handler (engine.js 13934). The mention list has its own Escape handler (engine.js 15652).</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>No arrow-key navigation</h4><p>Neither <code>userMenu()</code> nor <code>dispatchMenu()</code> handles <code>ArrowDown</code> or <code>ArrowUp</code>. Only the command palette (engine.js 9936) supports arrow-key roving focus. The APG menu pattern expects arrow keys to move between items. Here Tab is the only way.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>The account menu carries no menu role</h4><p><code>userMenu()</code>'s shell has no <code>role=&quot;menu&quot;</code> and its items no <code>role=&quot;menuitem&quot;</code>, unlike the dispatch menu, which has both. A screen reader announces the dispatch menu as a menu and the account menu as a plain group of buttons.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>A second, near-identical idiom for a filtered list</h4><p>The @-mention list (<code>mentListHtml()</code>, engine.js 15640) uses its own classes, <code>.ment-list</code> and <code>.ment-i</code> (engine.css 2240 to 2244), styled separately from <code>.menu</code> and <code>.menu-i</code> though the shape, padding, and hover state are the same. Its <code>role=&quot;listbox&quot;</code> and <code>role=&quot;option&quot;</code> are the correct pattern for an autocomplete, but the visual duplication could share <code>.menu-i</code>'s rules.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Two knob orders under one class</h4><p>This finding belongs to the switch, not the menu: see <a href="switch.html#findings">Switch</a>.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's menu against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Menu audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the menu component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/menu.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 616 to 622, 2219 to 2227. The mockup renders it with userMenu() (engine.js:1767), dispatchMenu(ids) (engine.js:15143), dspList() (engine.js:15134), mentListHtml() (engine.js:15699).
+3. The build's implementation: find it by its root selector (.menu) or its name, and list every route that renders it.
+4. Where to see it in the design: every page (account menu), Work (send to agent), Work order (mention list). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Anchoring. A menu opens directly below and flush with the trailing edge of the control that owns it, inside a `position:relative` wrapper.
+2. Roles. Every menu is `role=&quot;menu&quot;` with items `role=&quot;menuitem&quot;`, or, for a filtered autocomplete list, `role=&quot;listbox&quot;` with `role=&quot;option&quot;`. A menu with neither role is a FAIL.
+3. Keyboard. Tab reaches every item. If the build adds arrow-key navigation (the reference does not have it yet), confirm it wraps at both ends and Home and End jump to the first and last item.
+4. Dismiss. Escape and a click outside the menu close it, and focus returns to the control that opened it.
+5. One open at a time. Opening a second menu, or a dialog, closes any menu already open.
+6. Search. A menu with a search field narrows its list as you type and shows a stated empty line when nothing matches, never a blank group.
+7. Items. Every item is a native `button`, not a `div` or `span` with a click handler.
+8. Phone. Menu items are at least 44px tall on a touch pointer, and a wide menu such as the dispatch list never exceeds the viewport width.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: The dispatch menu's width caps at `100vw - 32px`, so it never runs off the phone screen. `.menu-i` grows to a 44px minimum height on phone, so an item stays a full touch target even where its content is one short word.
+13. Accessibility. The dispatch menu is `role=&quot;menu&quot;` with an `aria-label`, and its items are `role=&quot;menuitem&quot;`. The account menu and the mention list carry no such roles today. See Findings. Every item is a real `button`, reachable by Tab and activated by Enter or Space. A click anywhere outside `.rel` closes the open menu, and Escape closes it from anywhere on the page. There is no arrow-key roving focus inside a menu. Tab is the only way to move between items today. See Findings.
+14. One implementation. The build draws the menu from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Menu: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="switch.html"><span>Previous</span>Switch</a><a class="nx" href="dialog.html"><span>Next</span>Dialog</a></nav>
+</main>
+</div>
+</body>
+</html>

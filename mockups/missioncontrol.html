@@ -17,9 +17,7 @@
   --fg:#FFFFFF; --body:#E4E4E7; --muted:#A1A1AA; --dim:#71717A;
   --gold:#D4AF37; --gold-bright:#F1CE65; --gold-deep:#8A7223; --accent-text:#D4AF37;
   --spot:22%;
-  --on-gold:#09090B;
-  /* the glyph on a gold-deep avatar: paper reads at 4.66:1 on #8A7223. Gold-deep holds in both themes, so this does too. */
-  --on-gold-deep:#FFFFFF;
+  --on-gold:#09090B; --on-gold-deep:#FFFFFF;
   --st-allowed:#57A97C; --st-approval:#5B93D6; --st-denied:#C66A4A;
   --st-proven:#3FA2A2; --st-failed:#C0453C; --st-critical:#D6455E; --st-observe:#A1A1AA;
   --k-rule:#9D8BE3;
@@ -73,7 +71,9 @@ a:hover{text-decoration:underline}
 /* Identifiers keep their case inside uppercase labels: wo_01K6T9QX, a-intel/platform#590, workspace.owner. */
 .eyebrow.id,.eyebrow .id,.b .id,.stat .k .id,th .id,.k .id{text-transform:none}
 h1,h2,h3,h4{margin:0;letter-spacing:-.015em}
-h1,h2,h3{font-family:var(--font-display)}
+/* Space Grotesk sets the page h1 and the wordmarks, and nothing below 20px. Every other heading,
+   panel title and label is Geist: the display face loses its shape at small sizes. */
+h1{font-family:var(--font-display)}
 h4{font-weight:600}
 h1{font-size:24px;font-weight:700}
 h2{font-size:18px;font-weight:600}
@@ -1939,7 +1939,7 @@ button.wz-opt:hover{border-color:var(--rule)}
 /* Page content is under #viewport; a dialog is under #layer, and render() puts the phone class on
    both. Every rule below that dresses a dialog has to name #layer or it never fires. */
 #viewport.phone .crec-grid{grid-template-columns:1fr}
-#viewport.phone .crec-h h1{font-size:18px}
+#viewport.phone .crec-h h1{font-size:20px}
 #layer.phone .wz-pick,#layer.phone .wz-kinds,#layer.phone .wz-opt-kv,
 #viewport.phone .wz-pick,#viewport.phone .wz-kinds,#viewport.phone .wz-opt-kv{grid-template-columns:1fr}
 #layer.phone .wz-rail,#viewport.phone .wz-rail{gap:4px}
@@ -12777,17 +12777,17 @@ function agentDelete(key){
   var i=-1;AGENTS.forEach(function(a,ix){if(a.key===key)i=ix;});
   if(i<0)return; var a=AGENTS[i]; AGENTS.splice(i,1); delete S.agentRoles[key];
   WS.forEach(function(w){if(w.slug===a.ws&&w.agents>0)w.agents--;});
-  closeDialog(); go('#/'+ORG.slug+'/'+a.ws+'/agents'); act(key+" deregistered. Credential revoked, definition archived by pull request, every run and frame kept.");
+  closeDialog(); go('#/'+ORG.slug+'/'+a.ws+'/agents'); act(key+" retired. Credential revoked, definition archived by pull request, every run and frame kept.");
 }
 function agentDelDlg(){
   var a=S.dlg==="delagent"?agent(S.dlgArg):null; if(!a) return {t:"Retire agent",w:false,b:"",f:""};
   var live=RUNS.filter(function(r){return r.agent===a.key&&r.status==="live";}).length;
-  return {t:"Deregister agent",s:a.key,w:false,b:
+  return {t:"Retire agent",s:a.key,w:false,b:
    '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a pull request archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
    '<dl class="kv"><dt>Kept</dt><dd>every run, frame and receipt. The record is never deleted</dd><dt>Ends</dt><dd>'+agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+', '+a.mandates.length+' mandate'+(a.mandates.length===1?'':'s')+', the host enrollment</dd>'+
-   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span>, cancelled at the next boundary and recorded</dd>':'')+'</dl>'+
+   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span>, canceled at the next boundary and recorded</dd>':'')+'</dl>'+
    '<label class="check" style="margin-top:12px"><input type="checkbox" id="delAgentOk" onchange="el(\'delAgentBtn\').disabled=!this.checked"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Re-registering creates a new principal.</span></span></label>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button id="delAgentBtn" class="btn danger" disabled onclick="agentDelete(\''+h(a.key)+'\')">Deregister</button>'};
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button id="delAgentBtn" class="btn danger" disabled onclick="agentDelete(\''+h(a.key)+'\')">Retire agent</button>'};
 }
 function memberRemove(p){var i=-1;MEMBERS.forEach(function(m,ix){if(m.p===p)i=ix;});if(i<0)return;MEMBERS.splice(i,1);closeDialog();act(PEOPLE[p].name+" removed. Grants ended; runs stay attributed to them.");}
 function memberDelDlg(){
@@ -18494,7 +18494,7 @@ function ipzFinish(){
 DLG_EXT.ipwz=function(){
   var z=S.ipz; if(!z)return {t:"Connect an issue tracker",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var part=ipzBody();
-  return {t:z.edit?"Edit "+IP_KIND[z.kind].l:"Connect an issue provider",s:z.edit?"Scope, fields and the writes it may make":"Import work items from an issue tracker or a help desk",w:true,
+  return {t:z.edit?"Edit "+IP_KIND[z.kind].l:"Connect an issue tracker",s:z.edit?"Scope, fields and the writes it may make":"Import work items from an issue tracker or a help desk",w:true,
    b:ipzRail()+part.b,
    f:'<span class="grow mono dim" style="font-size:11px">needs <span style="color:var(--accent-text)">issue_provider.connect</span> on '+h(S.ws)+'</span>'+part.f};
 };
@@ -18763,8 +18763,8 @@ function pWork(r){
   if(S.state==="error") return errorState("Work","503 work_index_unavailable");
   if(S.state==="denied") return deniedState("this workspace\u2019s work","work.read on "+w.slug);
   if(S.state==="empty") return emptyState("No work in "+w.name+" yet",
-    "Work arrives from a connected issue provider, from a finding a person picks up, or written here. A run an agent starts on its own is filed under a direct work order.",
-    '<button class="btn primary" onclick="openDialog(\'intake\',\'providers\')">Connect an issue provider</button>');
+    "Work arrives from a connected issue tracker, from a finding a person picks up, or written here. A run an agent starts on its own is filed under a direct work order.",
+    '<button class="btn primary" onclick="openDialog(\'intake\',\'providers\')">Connect an issue tracker</button>');
   fileRuns();
   /* First run (W1): straight after onboarding the workspace holds one run, the smoke session, filed
      under a direct work order. Work opens on it alone. S.firstRun is cleared to see the seeded workspace. */
@@ -19703,7 +19703,7 @@ function srcReachPanel(o){
 function srcHead(o,kindLabel,title,badges,lead,acts){
   var back=stgHash("sources").replace(/\?.*$/,"")+"?kind="+(o?o.g:"");
   return '<div class="phead"><div class="t"><p class="eyebrow"><a href="'+back+'">Steering</a> · '+h(kindLabel)+'</p>'+
-   '<h1'+(title.length>90?' style="font-size:19px"':'')+'>'+h(title)+'</h1>'+
+   '<h1'+(title.length>90?' style="font-size:20px"':'')+'>'+h(title)+'</h1>'+
    '<div class="row" style="margin-top:8px">'+badges+'</div>'+(lead?'<p style="margin-top:8px">'+lead+'</p>':'')+'</div>'+
    '<div class="acts">'+(acts||'')+'</div></div>';
 }
@@ -20089,9 +20089,9 @@ DLG_EXT.intake=function(){
   var n=wsProviders().length;
   var seg='<div class="kf stg-seg" role="group" aria-label="Intake" style="margin-bottom:14px">'+INTAKE_PARTS.map(function(x){
     return '<button class="btn sm" aria-pressed="'+(part===x[0])+'" onclick="intakePart(\''+x[0]+'\')">'+h(x[1])+'</button>';}).join("")+'</div>';
-  return {t:"Intake",s:n+" issue provider"+(n===1?"":"s")+" connected to "+ws().name+". Each imported issue becomes a work item.",w:true,
+  return {t:"Intake",s:n+" issue tracker"+(n===1?"":"s")+" connected to "+ws().name+". Each imported issue becomes a work item.",w:true,
    b:seg+(part==="fields"?tkFieldsTab():part==="people"?tkPeopleTab():tkProvTab()),
-   f:'<button class="btn" onclick="ipzOpen()">Connect an issue provider</button><button class="btn primary" onclick="closeDialog()">Done</button>'};
+   f:'<button class="btn" onclick="ipzOpen()">Connect an issue tracker</button><button class="btn primary" onclick="closeDialog()">Done</button>'};
 };
 
 /* ============================== boot ==============================

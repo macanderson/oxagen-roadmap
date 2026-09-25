@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Segmented control</title>
+<meta name="description" content="Two to five choices, one pressed, that change how one list is drawn or filtered.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Segmented control</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Page structure</p>
+  <h1>Segmented control</h1>
+  <p class="dx-lead">A segmented control switches how the view under it is drawn or which rows it shows, and the view keeps its header. Tool names as labels or API names, a toolbelt grouped by category or listed flat, a work order list filtered to live runs. The mockup draws it four ways today, and this page names the one to build.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.seg</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 284 to 287, kind filter 221 to 223, selected button 144</span>
+    <span><b>Used on</b> Agents, Tools, agent Toolbelt, Organization deployment mode, import wizard, Work orders, Backlog</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-seg">
+    <figcaption class="dx-story-h"><b>Segmented control</b><span>The pattern to build: <code>.seg</code> holds small buttons, and <code>aria-pressed</code> marks the one that is on.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="seg" data-name="Segmented control">
+<div class="seg" role="group" aria-label="Tool names">
+  <button class="btn sm" aria-pressed="true">Labels</button>
+  <button class="btn sm" aria-pressed="false">API names</button>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-layout">
+    <figcaption class="dx-story-h"><b>Layout pick</b><span>The toolbelt layout on an agent's Toolbelt tab, beside a count of what is shown.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="layout" data-name="Layout pick">
+<div class="row" style="gap:10px">
+  <div class="seg" role="group" aria-label="Layout">
+    <button class="btn sm" aria-pressed="true">By category</button>
+    <button class="btn sm" aria-pressed="false">Flat</button>
+  </div>
+  <span class="b b-q">18 of 52 shown</span>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-filter-counts">
+    <figcaption class="dx-story-h"><b>Filter with counts</b><span>A filter row in a panel header. The count sits in <code>.dim</code> inside each button.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="filter-counts" data-name="Filter with counts">
+<div class="panel">
+  <div class="panel-h">
+    <h3>Work orders</h3>
+    <div class="sp">
+      <div class="seg" role="group" aria-label="Show">
+        <button class="btn sm" aria-pressed="true">All <span class="dim">6</span></button>
+        <button class="btn sm" aria-pressed="false">Live <span class="dim">2</span></button>
+        <button class="btn sm" aria-pressed="false">Waiting on you <span class="dim">1</span></button>
+        <button class="btn sm" aria-pressed="false">Done <span class="dim">3</span></button>
+      </div>
+    </div>
+  </div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-columns">
+    <figcaption class="dx-story-h"><b>Column set on the Agents panel</b><span>The Agents panel header reuses the kind filter row <code>.kf</code>, with its padding and border set to zero inline, as a two-way pick.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="columns" data-name="Column set on the Agents panel">
+<div class="panel">
+  <div class="panel-h">
+    <h3>Registered in Core platform</h3>
+    <div class="sp">
+      <div class="kf" role="group" aria-label="Columns" style="padding:0;border:0">
+        <button class="btn sm" aria-pressed="true">Composition</button>
+        <button class="btn sm" aria-pressed="false">Operations</button>
+      </div>
+    </div>
+  </div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-idioms">
+    <figcaption class="dx-story-h"><b>The two idioms to retire</b><span>A <code>.btn.sm.sel</code> group with no pressed state, and a <code>span.chips</code> group that draws an input box around its buttons.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="idioms" data-name="The two idioms to retire">
+<div style="display:grid;gap:14px">
+  <div class="row" style="gap:6px"><button class="btn sm sel">All <span class="dim">6</span></button><button class="btn sm">Live <span class="dim">2</span></button><button class="btn sm">Done <span class="dim">3</span></button></div>
+  <span class="chips" role="group" aria-label="View" style="max-width:220px;margin:0"><button class="btn sm sel" aria-pressed="true">List</button><button class="btn sm" aria-pressed="false">Graph</button></span>
+</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Track</td><td><code>.seg</code></td><td>An inline flex group on <code>--void</code> with a 1px <code>--border</code>, an 8px radius, 2px padding, and 2px between segments.</td></tr>
+      <tr><td>Segment</td><td><code>.seg .btn.sm</code></td><td>A small button with a transparent border and ground: 12px Geist 500, 4px by 9px padding.</td></tr>
+      <tr><td>Pressed segment</td><td><code>.seg .btn[aria-pressed=&quot;true&quot;]</code></td><td><code>--hl</code> ground, a <code>--rule</code> border, and <code>--fg</code> text.</td></tr>
+      <tr><td>Count</td><td><code>.btn .dim</code></td><td>A number after the label in <code>--dim</code>.</td></tr>
+      <tr><td>Kind filter row</td><td><code>.kf</code></td><td>A wrapping row with a bottom border, made for kind filters. Its pressed style matches <code>.seg</code>. The Agents panel uses it as a column pick.</td></tr>
+      <tr><td>Category row</td><td><code>.row.tcs</code></td><td>The tool category filter from <code>catChips()</code>, with the same pressed style.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  <p class="dx-sub">A segmented control changes the view under it and never leaves the page.</p>
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Two to five ways to draw the same list: labels or API names, grouped or flat.</li><li>A small, fixed set of filters in a panel header, each with its count.</li><li>A setting with a few named values, such as the deployment mode.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Views with their own content and route: use <a href="tabs.html">tabs</a>.</li><li>A long or open-ended list of values: use a select in a <a href="form-field.html">form field</a>, or the list table's filters.</li><li>An on or off setting: use a <a href="switch.html">switch</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="row" style="gap:6px"><button class="btn sm sel">All</button><button class="btn sm">Live</button><button class="btn sm">Done</button></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A <code>.sel</code> group with no <code>aria-pressed</code>. A screen reader hears three buttons and no choice.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><div class="seg" role="group" aria-label="Show"><button class="btn sm" aria-pressed="true">All</button><button class="btn sm" aria-pressed="false">Live</button><button class="btn sm" aria-pressed="false">Done</button></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>One track, a group label, and a pressed state on every segment.</p></div>
+  </div>
+  <ul>
+    <li>Exactly one segment is pressed.</li>
+    <li>The choice holds until the page reloads. The engine keeps it in <code>S</code> and re-renders.</li>
+    <li>A filter's counts come from the same rows the list shows, so All equals the list's total.</li>
+    <li>Never gold. A pressed segment uses <code>--hl</code> and <code>--fg</code>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Segment labels</b>: one or two words in sentence case, the same part of speech across the group: &quot;Labels&quot; and &quot;API names&quot;, &quot;By category&quot; and &quot;Flat&quot;.</li>
+    <li><b>Counts</b>: a plain number with thousands separators, in <code>.dim</code> after the label.</li>
+    <li><b>Group label</b>: the <code>aria-label</code> names what the choice changes: &quot;Tool names&quot;, &quot;Layout&quot;, &quot;Show&quot;.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The track is <code>role=&quot;group&quot;</code> with an <code>aria-label</code>, and each segment is a <code>button</code> with <code>aria-pressed</code>. A radio group (<code>role=&quot;radiogroup&quot;</code>, <code>role=&quot;radio&quot;</code>, <code>aria-checked</code>, arrow keys) is also correct. Pick one for the whole build.</li>
+    <li>The pressed segment differs by ground, border, and text color, not by color alone.</li>
+    <li>Every segment is reachable with Tab and toggles with Enter or Space.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>Segments take the small button's phone size: 36px tall at 13px.</li>
+    <li>A track wider than the screen wraps. A control with more than three segments moves below the panel title.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--void</code></td><td>Track ground</td></tr>
+      <tr><td><code>--border</code></td><td>Track border</td></tr>
+      <tr><td><code>--hl</code></td><td>Pressed segment ground</td></tr>
+      <tr><td><code>--rule</code></td><td>Pressed segment border</td></tr>
+      <tr><td><code>--fg</code></td><td>Pressed segment text</td></tr>
+      <tr><td><code>--dim</code></td><td>Count</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 284 to 287, kind filter 221 to 223, selected button 144</td><td>The rules that draw it</td></tr>
+      <tr><td><code>namesToggle()</code> at <code>engine.js:886</code></td><td>Labels or API names for tools. The reference <code>.seg</code>.</td></tr>
+      <tr><td><code>catChips(counts, sel, pick, total)</code> at <code>engine.js:891</code></td><td>The tool category filter row, <code>.row.tcs</code>, with <code>aria-pressed</code>.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li><code>.seg</code> is written inline at four more sites: toolbelt presentation (engine.js 4561), toolbelt layout (4607), deployment mode (7799), and the import wizard (12096). The Agents column pick is <code>.kf</code> (3961).</li>
+    <li>Work orders draw their filter as a <code>.btn.sm.sel</code> row (<code>wedge.js</code> 181), and Backlog draws List and Graph as <code>span.chips[role=group]</code> (<code>wedge.js</code> 137).</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Four idioms for one control</h4><p><code>.seg</code> with <code>aria-pressed</code> (five sites), <code>.btn.sm.sel</code> rows (seven sites), <code>span.chips[role=group]</code> (Backlog), and <code>.kf</code> with inline overrides (the Agents panel's Composition and Operations). <code>.chips</code> is also the bordered input box of a tag field (engine.css 924), so Backlog's view switch looks like a text input. Build <code>.seg</code> only.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>The kind filter row has lost its job</h4><p><code>.kf</code> was made for Steering's kind filters, which the fleet operations wedge removed. Its one remaining use is the Agents column pick, which is a <code>.seg</code>.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>No pressed state on the work order filter</h4><p><code>wedge.js</code> 181 marks the chosen filter with <code>.sel</code> and no <code>aria-pressed</code>, so a screen reader cannot tell which filter is on.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Two definitions of .chips</h4><p><code>.chips</code> is defined at engine.css 770 as a plain row and at 924 as an input box. The later one wins everywhere.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's segmented control against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Segmented control audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the segmented control component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/segmented-control.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 284 to 287, kind filter 221 to 223, selected button 144. The mockup renders it with namesToggle() (engine.js:886), catChips(counts, sel, pick, total) (engine.js:891).
+3. The build's implementation: find it by its root selector (.seg) or its name, and list every route that renders it.
+4. Where to see it in the design: Agents, Tools, agent Toolbelt, Organization deployment mode, import wizard, Work orders, Backlog. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. One idiom. Every control that switches or filters one view uses the same component. List each site that draws it another way, with its file and line.
+2. Pressed state. Each segment exposes its state with aria-pressed, or the group is a radiogroup with aria-checked. A segment whose state is only a class is a FAIL.
+3. Group name. Each group has an accessible name that says what the choice changes.
+4. Look. The track is --void with a --border outline, the pressed segment is --hl with a --rule border and --fg text, and no segment is gold.
+5. Counts. A count beside a filter equals the rows the list shows under that filter, and All equals the list's total.
+6. Behavior. Choosing a segment re-renders the view under it without leaving the page, and the choice survives a re-render.
+7. Labels. Segment labels are sentence case, one or two words, and parallel in form.
+8. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+9. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+10. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+11. Phone. At 390 by 844 with a touch pointer: Segments take the small button's phone size: 36px tall at 13px. A track wider than the screen wraps. A control with more than three segments moves below the panel title.
+12. Accessibility. The track is `role=&quot;group&quot;` with an `aria-label`, and each segment is a `button` with `aria-pressed`. A radio group (`role=&quot;radiogroup&quot;`, `role=&quot;radio&quot;`, `aria-checked`, arrow keys) is also correct. Pick one for the whole build. The pressed segment differs by ground, border, and text color, not by color alone. Every segment is reachable with Tab and toggles with Enter or Space.
+13. One implementation. The build draws the segmented control from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Segmented control: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="tabs.html"><span>Previous</span>Tabs</a><a class="nx" href="stat-box.html"><span>Next</span>Stat box</a></nav>
+</main>
+</div>
+</body>
+</html>

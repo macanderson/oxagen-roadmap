@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Drawer</title>
+<meta name="description" content="Every call parked for a person, one drawer, opened from any page.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Drawer</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Overlays</p>
+  <h1>Drawer</h1>
+  <p class="dx-lead">The drawer lists every call parked for a decision across the organization: pending approvals and a paused agent waiting on an answer. Picking a row opens the full approval card in place, with approve and deny, so a decision never needs another page. One drawer exists at a time, and it opens from the topbar button on every page.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.apd</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 2072 to 2099, countdown 818 to 831</span>
+    <span><b>Used on</b> every page (topbar)</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-trigger">
+    <figcaption class="dx-story-h"><b>Trigger button</b><span>The topbar button. The count is pending approvals plus an open interjection, and it drives the badge and the <code>aria-label</code>.</span></figcaption>
+    <div class="dx-canvas row"></div>
+    <template data-story="trigger" data-name="Trigger button">
+<button class="iconbtn apd-btn" aria-pressed="false" aria-controls="apdrawer" aria-label="Approvals, 4 waiting on you across all workspaces">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/><path d="M12 8v4l2.5 1.5"/></svg>
+  <span class="cnt">4</span>
+</button>
+<button class="iconbtn apd-btn" aria-pressed="true" aria-controls="apdrawer" aria-label="Approvals, 4 waiting on you across all workspaces">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/><path d="M12 8v4l2.5 1.5"/></svg>
+  <span class="cnt">4</span>
+</button>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-list">
+    <figcaption class="dx-story-h"><b>Open drawer</b><span><code>.apd</code> is <code>position:fixed</code>. The inline <code>position:relative</code> and <code>inset:auto</code> below keep it in this canvas. The product draws it pinned to the right edge of the window.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="list" data-name="Open drawer">
+<div class="apd-scrim open" style="position:relative;inset:auto;background:none"></div>
+<aside id="apdrawer" class="apd open" role="complementary" aria-label="Approvals" style="position:relative;top:auto;bottom:auto;right:auto;width:100%;max-width:420px;border-left:1px solid var(--border);border-radius:12px;overflow:hidden">
+  <div class="apd-h"><h3>Approvals</h3><span class="b b-approval"><span class="d"></span>4 waiting on you in all workspaces</span>
+    <button class="iconbtn" style="margin-left:auto" aria-label="Close approvals">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="apd-b">
+    <p class="eyebrow q" style="margin:0 0 8px">4 waiting on you</p>
+    <div class="apd-list">
+      <div class="apd-row inter" style="cursor:default">
+        <span class="g"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/></svg></span>
+        <span class="tt"><b>a-intel.core.triage is paused and needs a decision</b><span>It's working in <span class="mono">a-intel/edge-config</span>, which isn't linked to any workspace, so there's no skill configuration to apply. No cost since 09:14. If nobody answers within 30 min, the request is denied.</span></span>
+        <button class="btn sm primary" style="flex:none">Answer</button>
+      </div>
+      <button class="apd-row crit" aria-label="Open approval ap_stripe_9f21">
+        <span class="g"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/></svg></span>
+        <span class="tt"><b>$1,240.00 USD &middot; stripe__create_payment@5</b><span>invoice-bot &middot; pay Q3 vendor invoice &middot; Core platform</span>
+          <span class="mono" style="font-size:11px">work order &middot; wo_01K6TF3Q</span>
+          <span class="m"><span class="b b-critical">critical</span><span class="b b-denied">Irreversible</span></span></span>
+        <span class="apsm-clk warn" data-countdown="ap_stripe_9f21" data-pre="Expires in " style="flex:none">Expires in 1:48</span>
+      </button>
+      <button class="apd-row" aria-label="Open approval ap_gh_4410">
+        <span class="g"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/></svg></span>
+        <span class="tt"><b>github__create_release@2</b><span>release-manager &middot; cut v0.6.0 &middot; Core platform</span>
+          <span class="m"><span class="b b-approval">medium</span></span></span>
+        <span class="apsm-clk" data-countdown="ap_gh_4410" data-pre="Expires in " style="flex:none">Expires in 8:32</span>
+      </button>
+    </div>
+    <p class="eyebrow q" style="margin:18px 0 8px">1 resolved today</p>
+    <div class="apd-list">
+      <button class="apd-row done" aria-label="Open approval ap_stripe_7f02">
+        <span class="g"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/></svg></span>
+        <span class="tt"><b>$412.00 USD &middot; stripe__create_payment@5</b><span>invoice-bot &middot; Core platform</span></span>
+        <span class="b b-allowed" style="flex:none"><span class="d"></span>approved</span>
+      </button>
+    </div>
+    <div class="note" style="margin-top:14px;font-size:11.5px">Approving allows this exact call once. When the approval expires, the call ends and the agent is told why.</div>
+  </div>
+</aside>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-detail">
+    <figcaption class="dx-story-h"><b>Row selected</b><span>Picking a row keeps the drawer open and shows the full approval card in its place, with a back link to the list.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="detail" data-name="Row selected">
+<aside id="apdrawer" class="apd open" role="complementary" aria-label="Approvals" style="position:relative;top:auto;bottom:auto;right:auto;width:100%;max-width:420px;border-left:1px solid var(--border);border-radius:12px;overflow:hidden">
+  <div class="apd-h"><h3>Approvals</h3><span class="b b-approval"><span class="d"></span>4 waiting on you in all workspaces</span>
+    <button class="iconbtn" style="margin-left:auto" aria-label="Close approvals">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="apd-b">
+    <button class="btn sm" style="margin-bottom:12px">&lsaquo; All approvals</button>
+    <div class="apcard crit" id="ap-ap_stripe_9f21">
+      <div class="aphead">
+        <div style="min-width:0">
+          <p class="eyebrow" style="margin-bottom:6px">Approval required</p>
+          <div class="amt">$1,240.00 <span class="cur">USD</span></div>
+          <div class="muted" style="font-size:12.5px;margin-top:4px"><span class="mono">stripe__create_payment@5</span> &rarr; <span class="mono">Northwind Textiles</span></div>
+          <div class="row" style="margin-top:9px"><span class="b b-critical">critical</span><span class="b b-denied">Irreversible</span></div>
+        </div>
+        <div class="r"><span class="eyebrow q" style="font-size:10px;margin:0">times out in</span><span class="clock warn" data-countdown="ap_stripe_9f21">1:48</span></div>
+      </div>
+      <div class="apbody">
+        <p class="muted" style="font-size:11.5px;flex:1;min-width:220px">Approving allows this exact call once. Denying ends the call, and the agent is told your reason.</p>
+      </div>
+      <div class="apfoot">
+        <span class="muted" style="font-size:11.5px;flex:1;min-width:220px">Approving allows this exact call once. Denying ends the call, and the agent is told your reason.</span>
+        <span class="r"><button class="btn ghost sm">Open run</button><button class="btn danger">Deny payment</button><button class="btn primary">Approve $1,240.00 USD</button></span>
+      </div>
+    </div>
+  </div>
+</aside>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-empty">
+    <figcaption class="dx-story-h"><b>Nothing waiting</b><span>Nothing is parked. The text says what would park here.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="empty" data-name="Nothing waiting">
+<aside id="apdrawer" class="apd open" role="complementary" aria-label="Approvals" style="position:relative;top:auto;bottom:auto;right:auto;width:100%;max-width:420px;border-left:1px solid var(--border);border-radius:12px;overflow:hidden">
+  <div class="apd-h"><h3>Approvals</h3><span class="b b-q"><span class="d"></span>0 waiting on you in all workspaces</span>
+    <button class="iconbtn" style="margin-left:auto" aria-label="Close approvals">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
+    </button>
+  </div>
+  <div class="apd-b">
+    <div style="text-align:center;padding:26px 6px">
+      <p class="muted" style="font-size:12.5px;margin:0">Nothing is waiting on you.</p>
+      <p class="dim" style="font-size:11.5px;margin:8px 0 0">A call parks here when policy returns <span class="mono">approve</span>. A denied call never parks. It ends at once and costs nothing.</p>
+    </div>
+  </div>
+</aside>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>Scrim</td><td><code>.apd-scrim</code></td><td>The fixed backdrop, <code>rgba(0,0,0,.42)</code>, that fades in with <code>.open</code> and closes the drawer on click.</td></tr>
+      <tr><td>Panel</td><td><code>.apd</code></td><td>A <code>--panel</code> box 680px wide (<code>min(680px, 100vw - 56px)</code>), pinned to the right edge, full height, with a 1px <code>--border</code> left edge. Phone drops it to full width.</td></tr>
+      <tr><td>Header</td><td><code>.apd-h</code></td><td>The h3 title (14px), the total badge, and the close button, 14px by 16px padding, with a bottom border.</td></tr>
+      <tr><td>Body</td><td><code>.apd-b</code></td><td>The rows, 14px by 16px padding. It scrolls on its own when the list is taller than the window.</td></tr>
+      <tr><td>List</td><td><code>.apd-list</code></td><td>An 8px grid of rows, one per section (waiting on you, resolved today).</td></tr>
+      <tr><td>Row</td><td><code>.apd-row</code></td><td>A full-width button: a 26px icon tile (<code>.g</code>), the title block (<code>.tt</code>), and a clock or a resolved badge, in a <code>--panel</code> card with a 1px <code>--border</code>. Hover lifts the border to <code>--rule</code>.</td></tr>
+      <tr><td>Critical row</td><td><code>.apd-row.crit</code></td><td>The border tints toward <code>--st-critical</code> at 45%, for a critical, irreversible, or tainted call.</td></tr>
+      <tr><td>Interjection row</td><td><code>.apd-row.inter</code></td><td>A paused agent waiting on an answer. Its border tints toward <code>--st-approval</code>, it is not a button (<code>cursor:default</code>), and it carries its own Answer button rather than opening a card.</td></tr>
+      <tr><td>Resolved row</td><td><code>.apd-row.done</code></td><td>72% opacity, its clock replaced by an approved or denied badge.</td></tr>
+      <tr><td>Title block</td><td><code>.apd-row .tt</code></td><td>The call and its context: a bold 12.5px title, an 11.5px <code>--muted</code> line, and <code>.m</code>, a wrapped row of risk and taint badges.</td></tr>
+      <tr><td>Countdown</td><td><code>.apsm-clk</code></td><td>13px mono, <code>--st-approval</code>, tabular figures. Past two minutes left it turns <code>.warn</code> (<code>--st-critical</code>). A resolved call shows <code>.done</code> (<code>--dim</code>, an em dash).</td></tr>
+      <tr><td>Selected card</td><td><code>.apd .apcard</code></td><td>The full approval card, margin removed to sit flush in the body, with a <code>‹ All approvals</code> back button above it.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Every call parked for a person across the organization: pending approvals and a paused agent waiting on an answer.</li><li>A quick decision that should not cost a page navigation: approve, deny, or open the run for more context.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A task or a decision scoped to the page you are on: use a <a href="dialog.html">dialog</a>.</li><li>The result of a decision already made: use a <a href="toast.html">toast</a>.</li><li>A record's own approvals history: link to the run.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div class="apd-row" style="cursor:default"><span class="tt"><b>3 things need you</b></span></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>One row standing in for three calls. Each call is its own row, its own clock, and its own decision.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><button class="apd-row" aria-label="Open approval ap_gh_4410" style="width:auto"><span class="g"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 5 6v6c0 4 3 7.5 7 9 4-1.5 7-5 7-9V6z"/></svg></span><span class="tt"><b>github__create_release@2</b><span>release-manager &middot; Core platform</span></span><span class="apsm-clk">Expires in 8:32</span></button></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>One call, one row, its own countdown.</p></div>
+  </div>
+  <ul>
+    <li>One drawer. It opens from the topbar button on every page, and only one selected card shows at a time.</li>
+    <li>A row's clock keeps running while the drawer is open. <code>tick()</code> updates every <code>[data-countdown]</code> node once a second.</li>
+    <li>Selecting a row keeps the drawer open. Closing the drawer while a row is selected forgets the selection, so it reopens on the list.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Title</b>: the h3 reads &quot;Approvals&quot; always. The badge states the count and its scope: &quot;4 waiting on you in all workspaces&quot;.</li>
+    <li><b>Row title</b>: the amount and tool for a payment (&quot;$1,240.00 USD · stripe__create_payment@5&quot;), or the tool alone otherwise.</li>
+    <li><b>Row subline</b>: the agent, the task, and the workspace, joined with a mid-dot, matching the rest of the run vocabulary.</li>
+    <li><b>Countdown</b>: &quot;Expires in &quot; plus <code>m:ss</code>, read from the record's deadline. A resolved row reads its outcome instead: &quot;approved&quot; or &quot;denied&quot;.</li>
+    <li><b>Empty state</b>: names what would park here and why nothing has: &quot;A call parks here when policy returns <code>approve</code>. A denied call never parks.&quot;</li>
+    <li><b>Interjection copy</b>: names the agent, what it is doing, the cost so far, and what happens if nobody answers in time.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>The trigger is <code>aria-controls=&quot;apdrawer&quot;</code> with <code>aria-pressed</code> for open state, and its <code>aria-label</code> states the count so a screen reader hears it without opening the drawer.</li>
+    <li>The panel is <code>role=&quot;complementary&quot;</code> with <code>aria-label=&quot;Approvals&quot;</code>, and carries <code>inert</code> and <code>aria-hidden=&quot;true&quot;</code> while closed.</li>
+    <li>Escape closes the drawer when no dialog is open, and a click on the scrim closes it.</li>
+    <li>Every row is a real <code>button</code> with an <code>aria-label</code> naming the approval it opens, except the interjection row, which is not clickable and carries its own labelled Answer button.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li><code>.apd.phone</code> becomes full width with no left border, and is removed from the layout entirely (<code>display:none</code>) rather than just hidden while closed.</li>
+    <li>The scrim, header, and footer actions keep their sizes. Only the panel width changes.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--panel</code></td><td>Panel and row ground</td></tr>
+      <tr><td><code>--border</code></td><td>Row border and header divider</td></tr>
+      <tr><td><code>--rule</code></td><td>Row border on hover</td></tr>
+      <tr><td><code>--hl</code></td><td>Row icon tile ground</td></tr>
+      <tr><td><code>--muted</code></td><td>Row icon tile color and sublines</td></tr>
+      <tr><td><code>--st-critical</code></td><td>Critical row border tint and the critical badge</td></tr>
+      <tr><td><code>--st-approval</code></td><td>Interjection row border tint and the countdown</td></tr>
+      <tr><td><code>--dim</code></td><td>Resolved countdown</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 2072 to 2099, countdown 818 to 831</td><td>The rules that draw it</td></tr>
+      <tr><td><code>apdButton()</code> at <code>engine.js:1681</code></td><td>The topbar trigger, with the live count.</td></tr>
+      <tr><td><code>apdToggle(v)</code> at <code>engine.js:1687</code></td><td>Opens or closes the drawer and clears the selection on close.</td></tr>
+      <tr><td><code>apdRow(a)</code> at <code>engine.js:1690</code></td><td>One approval row, pending or resolved.</td></tr>
+      <tr><td><code>apdInterjectionRow(x)</code> at <code>engine.js:1702</code></td><td>The paused-agent row, with its own Answer button.</td></tr>
+      <tr><td><code>apdBody(a)</code> at <code>engine.js:1708</code></td><td>The list, or the selected approval's card when <code>S.apd.sel</code> is set.</td></tr>
+      <tr><td><code>apdHtml()</code> at <code>engine.js:1722</code></td><td>The scrim and the panel, assembled from <code>apdBody()</code>.</td></tr>
+      <tr><td><code>approvalCard(a)</code> at <code>engine.js:1894</code></td><td>The full card shown for a selected row, shared with the Run page.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>Escape closes the drawer through the document key handler at engine.js 1673, guarded on no dialog being open.</li>
+    <li><code>approvalCardSm()</code> (engine.js 1810) is a second, compact card that nothing in the mockup calls, so its <code>.apsm*</code> rules draw only the countdown class this page documents. See Findings.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Stale comment names a tile that does not exist</h4><p>The section comment at engine.js 1618 says &quot;The Agents page keeps a 'Waiting on you' tile that opens it.&quot; No stat, button, or link anywhere in engine.js calls <code>apdToggle</code>. The topbar trigger is the only way to open the drawer today.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>A card with no caller</h4><p><code>approvalCardSm()</code> (engine.js 1810) draws a second, compact approval card. Nothing calls it, so of its rules only <code>.apsm-clk</code> renders, through the drawer's own countdown. The rest of <code>.apsm*</code> is unused.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Hard-coded scrim</h4><p><code>.apd-scrim</code> sets <code>rgba(0,0,0,.42)</code> in both themes, matching <code>.scrim</code>'s own hard-coded color on the <a href="dialog.html">dialog</a> page. Neither follows a token.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Retired word still on screen</h4><p>The word &quot;interjection&quot; appears only in code names and this reference. The drawer's own copy reads &quot;is paused and needs a decision,&quot; which already avoids it. Mac still owns whether &quot;interjection&quot; is retired as a term everywhere it appears in source.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's drawer against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Drawer audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the drawer component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/drawer.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 2072 to 2099, countdown 818 to 831. The mockup renders it with apdButton() (engine.js:1681), apdToggle(v) (engine.js:1687), apdRow(a) (engine.js:1690), apdInterjectionRow(x) (engine.js:1702), apdBody(a) (engine.js:1708), apdHtml() (engine.js:1722), approvalCard(a) (engine.js:1894).
+3. The build's implementation: find it by its root selector (.apd) or its name, and list every route that renders it.
+4. Where to see it in the design: every page (topbar). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Trigger. The topbar carries one button with `aria-controls=&quot;apdrawer&quot;`, an `aria-label` stating the live count, and `aria-pressed` reflecting open state. A count of zero shows no badge.
+2. Panel. `role=&quot;complementary&quot;`, `aria-label=&quot;Approvals&quot;`, 680px wide capped at `100vw - 56px`, pinned to the right edge, over a scrim that closes it on click.
+3. Rows. Each pending or resolved row is a `button` with an `aria-label` naming the approval. A critical, irreversible, or tainted call shows the critical border tint. A resolved row shows its outcome badge, not a clock.
+4. Countdown. Every open row's clock updates once a second and turns to the warn color under two minutes remaining. A resolved row shows an em dash, never a stale time.
+5. Selection. Picking a row replaces the list with the full approval card and a back control. The drawer stays open, and closing it during selection clears the selection for next time.
+6. Interjection. A paused agent renders as a non-clickable row with its own Answer button, distinct from an approval row, and never shows a clock.
+7. Focus and close. Escape and a scrim click close the drawer when no dialog is open. The panel is `inert` and `aria-hidden` while closed.
+8. One instance. Only one drawer exists on the page at once, shared across every route. Any second copy is a FAIL.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: `.apd.phone` becomes full width with no left border, and is removed from the layout entirely (`display:none`) rather than just hidden while closed. The scrim, header, and footer actions keep their sizes. Only the panel width changes.
+13. Accessibility. The trigger is `aria-controls=&quot;apdrawer&quot;` with `aria-pressed` for open state, and its `aria-label` states the count so a screen reader hears it without opening the drawer. The panel is `role=&quot;complementary&quot;` with `aria-label=&quot;Approvals&quot;`, and carries `inert` and `aria-hidden=&quot;true&quot;` while closed. Escape closes the drawer when no dialog is open, and a click on the scrim closes it. Every row is a real `button` with an `aria-label` naming the approval it opens, except the interjection row, which is not clickable and carries its own labelled Answer button.
+14. One implementation. The build draws the drawer from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Drawer: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="dialog.html"><span>Previous</span>Dialog</a><a class="nx" href="toast.html"><span>Next</span>Toast</a></nav>
+</main>
+</div>
+</body>
+</html>

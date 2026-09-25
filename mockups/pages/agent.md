@@ -23,7 +23,7 @@ This spec owns the agent header and the tab bar, which every tab shares, and the
 - **Edit avatar** opens the avatar editor for the agent (“Avatar for Triage”).
 - **Rotate credential** opens `rotatecred`.
 - **Suspend** (danger) opens `suspendagent`.
-- **Deregister** (danger) opens `delagent`.
+- **Retire agent** (danger) opens `delagent`.
 
 **Tabs**, in this order, each a path segment: **Overview** (the bare path) · **Identity** · **Steering** · **Toolbelt** · **Runtime** · **Permissions** · **Activity** · **Source**. The tab bar is `role=tablist` and each tab is `role=tab` with `aria-selected`. Three tabs carry a live count, and a count of zero draws nothing:
 
@@ -85,7 +85,7 @@ The Steering row still counts the rev1 assembler's items, while the Steering tab
   - **Cancel** and **Save avatar** (gold). Save closes the dialog and shows the receipt “Avatar updated on <key>. The definition change opens as a pull request.” The Register an agent dialog and the wizard open the same editor on the agent they are about to register, and Save returns to them.
 - `rotatecred`, titled “Rotate the credential on a-intel.core.triage?”. It says a new key is minted and handed to the host at its next check-in, that the old key stops working at the next call and every live run token dies with it, and warns that a run in flight ends at its next call. **Cancel** and **Rotate it** (gold).
 - `suspendagent`, titled “Suspend a-intel.core.triage?”. It says suspension is reversible and keeps the registration, the roles and the mandates, and that every run token dies at the next call because the refusal is on the server. **Cancel** and **Suspend it** (danger).
-- `delagent`, titled “Deregister agent” with the agent key: what is kept, what ends (the roles, the mandates and the host enrollment), what is in flight, the checkbox “I understand this cannot be undone”, **Cancel** and **Deregister** (danger).
+- `delagent`, titled “Retire agent” with the agent key: what is kept, what ends (the roles, the mandates and the host enrollment), what is in flight, the checkbox “I understand this cannot be undone”, **Cancel** and **Retire agent** (danger).
 - The Optimization actions open the Source tab, the Toolbelt tab, Steering, the Compiler, the Steering record wizard or the Activity tab. The mockup's Edit the definition and Open incidents go through the old `/definition` and `/incidents` addresses, which land on Source and Activity; a build links the canonical paths.
 
 **Shell.** As on Agents, with Agents lit and the breadcrumb Anderson Intelligence Corp. / Core platform / Agents / triage.
@@ -101,7 +101,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 | Edit avatar | `openAvatar()` | `avatar` in `.oxagen/agents/<slug>.toml`, through a pull request | `agent.definition.update.ts:12`, `:38` takes `avatarUrl`, but it also requires `config` with a graph and adds an `agent_versions` row on every call. The app's editor has the agent subject and no write yet (macanderson/oxagen#4280, #3855) | 🟡 |
 | Rotate credential | `rotatecred` | `rotate_agent_credential` | `agent.credential.rotate.ts:14`. It returns the new key once to the caller; nothing hands it to the host at check-in | 🟡 |
 | Suspend | `suspendagent` | `suspend_agent` | `agent.suspend.ts:14`; a suspended principal anchors no governed run and its belt is empty (`agent.suspend.ts:1-9`) | ✅ |
-| Deregister | `delagent` | `retire_agent`, then a pull request removing the file | `agent.retire.ts:16`; the file is left in place (`agent.retire.ts:1-9`) | 🟡 |
+| Retire agent | `delagent` | `retire_agent`, then a pull request removing the file | `agent.retire.ts:16`; the file is left in place (`agent.retire.ts:1-9`) | 🟡 |
 | Tab counts | `beltTotal()`, `a.mandates`, `tamperCount()` | `get_agent_toolbelt` `tools`; `list_agents` `mandates` and `tamperIncidentsRecorded` | `agent.toolbelt.get.ts:155`; `agent.list.ts:117-130` | ✅ |
 | 30-day total, spend and basis | `agentTok(a)`, `spend30` | `get_spend` grouped by agent: `tokens` by class and `cost` with its basis | `spend.get.ts:34`; token classes `input_uncached`, `cache_read`, `cache_write_5m`, `cache_write_1h`, `output`, `reasoning` (`spend.shared.ts:107-116`); basis (`spend.shared.ts:13-18`) | ✅ |
 | Output and Reasoning bars | `agentTok(a)` | The same token classes | `spend.shared.ts:107-116` | ✅ |
@@ -137,7 +137,7 @@ The Overview carries no `data-future` mark, and the catalog gives `agent` no fut
 - Every Composition row names a reusable object, states nothing the registry that owns it states, and opens the tab or the registry that owns it.
 - The 30-day token use total equals the sum of its eight bars, and it is the same figure the roster's Tokens 30d column and the Last 30 days panel show.
 - Optimization items are derived from the token rollup at read time and never stored as a model's text. Each item names what to change and what it is worth, and its action opens the place the change is made.
-- Rotate credential and Suspend each end every live run token at the next call. Suspend is reversible; Deregister retires the principal and never deletes it.
+- Rotate credential and Suspend each end every live run token at the next call. Suspend is reversible; Retire agent retires the principal and never deletes it.
 
 ## States
 
@@ -156,7 +156,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More h
 ## Permissions
 
 - Read: `get_agent`, `list_agents` and `get_agent_toolbelt` admit org Owner, Admin and Member, and workspace Owner and Member. The mockup names the permission `agent.read`.
-- Writes, each a governed action recorded in Audit: Edit avatar (`update_agent_def`: org Owner or Admin, workspace Owner or Member), Rotate credential (`rotate_agent_credential`: org Owner or Admin), Suspend (`suspend_agent`: org Owner or Admin), Deregister (`retire_agent`: org Owner or Admin).
+- Writes, each a governed action recorded in Audit: Edit avatar (`update_agent_def`: org Owner or Admin, workspace Owner or Member), Rotate credential (`rotate_agent_credential`: org Owner or Admin), Suspend (`suspend_agent`: org Owner or Admin), Retire agent (`retire_agent`: org Owner or Admin).
 
 ## Backend gaps this page depends on
 
