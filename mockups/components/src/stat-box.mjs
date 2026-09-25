@@ -126,7 +126,7 @@ export default {
   ],
   helpers: [
     ["tile(k, v, s, col)", "engine.js:2557", "Writes one stat box. `col` sets the value's tone. About 15 calls."],
-    ["runStatRow(R)", "engine.js:2554", "The Run page's row of six, with a local tile of its own."],
+    ["runStatRow(R)", "engine.js:2552", "The Run page's row of six, with a local tile of its own."],
     ["basisChip(k)", "engine.js:698", "The spend basis chip in the subline."],
   ],
   sourceNotes: [

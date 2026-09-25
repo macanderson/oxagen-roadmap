@@ -397,8 +397,6 @@ body = """
 You prepare releases for this repository. Read the changelog conventions in
 .oxagen/rules before writing notes. Open a pull request; a person merges it.
 """
-[harness.claude-code]
-color = "blue"
 [harness.codex-cli]
 sandbox = "read-only"
 ```

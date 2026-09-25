@@ -176,10 +176,10 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 983 to 1012</td><td>The rules that draw it</td></tr>
-      <tr><td><code>diffLines(a, b)</code> at <code>engine.js:1350</code></td><td>An LCS line diff of two strings into rows marked <code>+</code>, <code>-</code>, or space.</td></tr>
-      <tr><td><code>diffStat(rows)</code> at <code>engine.js:1359</code></td><td>Counts additions and deletions for <code>.dstat</code>.</td></tr>
-      <tr><td><code>diffHtml(rows, ctx)</code> at <code>engine.js:1360</code></td><td>The unified form with <code>ctx</code> lines of context. Transcript, linked work, and the record save dialog.</td></tr>
-      <tr><td><code>diffSplitHtml(rows, ctx, labels)</code> at <code>engine.js:1373</code></td><td>The split form. The commit dialog.</td></tr>
+      <tr><td><code>diffLines(a, b)</code> at <code>engine.js:1348</code></td><td>An LCS line diff of two strings into rows marked <code>+</code>, <code>-</code>, or space.</td></tr>
+      <tr><td><code>diffStat(rows)</code> at <code>engine.js:1357</code></td><td>Counts additions and deletions for <code>.dstat</code>.</td></tr>
+      <tr><td><code>diffHtml(rows, ctx)</code> at <code>engine.js:1358</code></td><td>The unified form with <code>ctx</code> lines of context. Transcript, linked work, and the record save dialog.</td></tr>
+      <tr><td><code>diffSplitHtml(rows, ctx, labels)</code> at <code>engine.js:1371</code></td><td>The split form. The commit dialog.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -206,7 +206,7 @@
 ## Inputs
 
 1. mockups/components/diff.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 983 to 1012. The mockup renders it with diffLines(a, b) (engine.js:1350), diffStat(rows) (engine.js:1359), diffHtml(rows, ctx) (engine.js:1360), diffSplitHtml(rows, ctx, labels) (engine.js:1373).
+2. The design source: mockups/src/engine.css lines 983 to 1012. The mockup renders it with diffLines(a, b) (engine.js:1348), diffStat(rows) (engine.js:1357), diffHtml(rows, ctx) (engine.js:1358), diffSplitHtml(rows, ctx, labels) (engine.js:1371).
 3. The build's implementation: find it by its root selector (.diff) or its name, and list every route that renders it.
 4. Where to see it in the design: Run transcript, Linked work, Record save dialog, Commit dialog, Agent source. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
