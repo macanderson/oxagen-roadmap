@@ -29,18 +29,18 @@ The fleet operations wedge left this page's design alone. `runtime` is now a uni
 | Workspace | Core platform |
 | Owner | Marcus Bell |
 | Harness | Claude Code 2.1.4 |
-| Collector | oxagend 1.6.2, over "0 telemetry gaps in the last 24h" |
-| Hook binary | "oxagen-hook 1.6.2", over "Refuses a call if it cannot reach oxagen and has no cached policy" |
-| Hooks installed | `SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, Stop`, over "Five run as command hooks. The first four can refuse a call." A host with fewer reads "Fewer than five events are wired, so some calls are recorded without a decision." |
-| Model surface | loopback proxy, over "Every model call goes through it, and tokens are counted from the traffic." Below the `gateway` tier: "Model calls go from the harness straight to its provider. Routing them through oxagen is the gateway tier." |
+| Collector | oxagend 1.6.2, over "0 telemetry gaps in the last 24h" (on `mbp-01`, "2 telemetry gaps in the last 24h") |
+| Hook binary | "oxagen-hook 1.6.2" |
+| Hooks installed | `SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, Stop`, over "5 of 5". A host with fewer reads "4 of 5. Some calls are recorded without a decision." What each hook can refuse is in the component help (`mockups/help/runtime.md`, Host) |
+| Model surface | loopback proxy, with no line beneath. What each surface means for metering is in the component help (`mockups/help/runtime.md`, Host) |
 | Settings | user settings (managed settings, locked, on `ci-runner-07`) |
-| Tier | the `gateway` badge, over "Computed per run from routed traffic" |
+| Tier | the `gateway` badge |
 | Last checkpoint | "seq 41,208 · 2026-09-11 09:12:44Z · chain intact" |
 | Note | only where the host has one. `ci-runner-07`: "The only runtime here in an OS sandbox whose only network exit is the gateway. That is what makes it contained." |
 
 At `gateway` and above, the Model surface line still joins two facts in one sentence, which the plain-noun rule bars in a caption. A build keeps both facts and gives each its own sentence.
 
-**Agents on this host** panel. Title "Agents on this host", with the agent count as a badge (3). List controls: "Search this list", **Rows** and the pager (the table has too few rows for a filter). Columns in order: Agent · Operator · Tier · Principal · Runs 30d.
+**Agents on this host** panel. Title "Agents on this host", with the agent count as a badge (28). List controls: "Search this list", **Rows** and the pager (the table has too few rows for a filter). Columns in order: Agent · Operator · Tier · Principal · Runs 30d.
 
 - *Agent*: the agent card, with its harness mark, its avatar, its key and its harness ("a-intel.core.release-manager" over "Claude Code").
 - *Operator*: the operator accountable for the agent, by name (Marcus Bell).
@@ -48,17 +48,17 @@ At `gateway` and above, the Model surface line still joins two facts in one sent
 - *Principal*: the principal id in mono (`prn_01JQ8W3F2M6XKD7A9RZT4BVCNE`), or a dash.
 - *Runs 30d*: runs in the last 30 days.
 - A row opens the agent. The design binds the click to the row alone, with no keyboard access. A build makes each row reachable and operable by keyboard.
-- The demo host carries three agents: `a-intel.core.release-manager` (Claude Code, `gateway`, 212 runs), `a-intel.core.bug-fixer` (Claude Code, `gateway`, 46) and `a-intel.core.documenter` (Cursor, `harness`, 22). The documenter row contradicts the panel note and the host's single harness: a Cursor agent at `harness` on a Claude Code host that earns `gateway`. A build shows each harness the host carries and the tier the record holds for each.
+- The design named three agents on the demo host: `a-intel.core.release-manager` (Claude Code, `gateway`, 212 runs), `a-intel.core.bug-fixer` (Claude Code, `gateway`, 46) and `a-intel.core.documenter` (Cursor, `harness`, 22). The fixtures now place 28 agents on it, ten to a page, and several run a harness other than Claude Code (Codex CLI, LangGraph, Claude Agent SDK, stella). The documenter row contradicts the panel note and the host's single harness: a Cursor agent at `harness` on a Claude Code host that earns `gateway`. A build shows each harness the host carries and the tier the record holds for each.
 - An enrolled host with no agent reads "No agent is assigned to this host. It records nothing until one runs here."
-- Note: "Every agent here runs through the same hooks and gets the same tier. Each agent keeps its own identity, steering, and toolbelt."
+- No note closes the panel. What the agents on one host share, and what each keeps, is in the component help (`mockups/help/runtime.md`, Agents on this host).
 
-**Unenroll this host from the CLI** panel. Title "Unenroll this host from the CLI". The command in a code block: `oxagen agent unenroll --host mbell-mbp-16 \` and `--restore-settings` on the next line. Note: "If someone removes the hooks by hand instead, the next run records Hooks removed and the tier drops to observe. The tier is never raised afterward." Actions: **Run a test session** ("Test session queued on mbell-mbp-16. One turn, recorded like any other run.") and **Unenroll** (danger, opens `unenroll`). The design's command does not match the shipped CLI (see Data sources).
+**Unenroll this host from the CLI** panel. Title "Unenroll this host from the CLI". The command in a code block: `oxagen agent unenroll --host mbell-mbp-16 \` and `--restore-settings` on the next line. No note: what happens when hooks are removed by hand is in the component help (`mockups/help/runtime.md`, Unenroll this host from the CLI). Actions: **Run a test session** ("Test session queued on mbell-mbp-16.") and **Unenroll** (danger, opens `unenroll`). The design's command does not match the shipped CLI (see Data sources).
 
-**A host that is not enrolled.** On `ci-runner-08` the design reads not enrolled in every line: the Collector is "—" over "Not installed. This host is not enrolled.", no Hook binary row renders, Hooks installed is "None" over "Runs here are recorded only.", the Last checkpoint is "—" over "No run has been recorded here", and the agents panel reads "This host is not enrolled, so no agent runs here yet." In place of the CLI panel, "Enroll this host" reads "Run the installer on the host itself. Enrolling installs the hooks and the collector." and offers no Unenroll. Its **Enroll a runtime** is gold beside the header's, two gold actions on one screen. A build keeps one.
+**A host that is not enrolled.** On `ci-runner-08` the design reads not enrolled in every line: the Collector is "—" over "Not installed. This host is not enrolled.", no Hook binary row renders, Hooks installed is "None" over "Runs here are recorded only.", the Last checkpoint is "—" over "No run has been recorded here", and the agents panel reads "This host is not enrolled, so no agent runs here yet." In place of the CLI panel, "Enroll this host" reads "Run the installer on the host itself." and offers no Unenroll. Its **Enroll a runtime** is gold beside the header's, two gold actions on one screen. A build keeps one.
 
 **Dialogs this page opens.**
 
-- `unenroll`, "Unenroll mbell-mbp-16?". Note: "Calls routed through oxagen are refused from this host from now on. The hooks on the host are removed at its next check-in, so a host that is offline keeps them until it returns." Warning: "Checkpoints from this host are unsigned after this, and the chain records the gap." Footer: **Keep it enrolled** and **Unenroll it** (danger: "Host revoked. Calls routed through oxagen are refused from now on. The hooks on the host are removed at its next check-in."). No gold.
+- `unenroll`, "Unenroll mbell-mbp-16?". Note: "Calls routed through oxagen are refused from this host from now on." Warning: "Checkpoints from this host are unsigned after this, and the chain records the gap." Footer: **Keep it enrolled** and **Unenroll it** (danger: "Host revoked."). No gold. When the hooks leave the host is in the component help (`mockups/help/runtime.md`, Host unenrollment).
 - Enroll a runtime starts Register agent (`register-name.md`). The error state opens `incident`, and the denied state `request-access`.
 
 ## Data sources

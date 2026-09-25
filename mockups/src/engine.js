@@ -6796,8 +6796,7 @@ function pRuntimes(r){
   if(S.state==="denied") return deniedState("the runtimes of this workspace","runtime.read on "+w.slug);
   var L=RUNTIMES.filter(function(x){return x.ws===w.slug;});
   var sel=r&&r.id?rtById(r.id):null;
-  var head='<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Runtimes</h1>'+
-   '<p>The hosts your agents run on, and the enforcement tier each one supports.</p></div>'+
+  var head='<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Runtimes</h1></div>'+
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'wrap\')">Enroll a runtime</button></div></div>';
   if(S.state==="empty"||!L.length) return head+emptyState("No runtime is enrolled",
     "Until a host enrolls, an agent has an identity and a toolbelt but no hooks. Its runs are recorded at the <span class=\"mono\">observe</span> tier.",
@@ -6816,7 +6815,7 @@ function pRuntimes(r){
      '<td>'+h(rt.model)+'</td>'+
      '<td>'+tierBadge(rt.tier)+'</td>'+
      '<td class="num">'+(ag.length||'<span class="dim">0</span>')+
-       (ag.length?'<span class="sub mono">'+h(ag.map(function(a){return a.key;}).join(", "))+'</span>':'<span class="sub">'+(rtEnrolled(rt)?'No agent assigned':'Not enrolled')+'</span>')+'</td>'+
+       (ag.length?'<span class="sub mono">'+h(ag.slice(0,3).map(function(a){return a.key;}).join(", ")+(ag.length>3?" and "+(ag.length-3)+" more":""))+'</span>':'<span class="sub">'+(rtEnrolled(rt)?'No agent assigned':'Not enrolled')+'</span>')+'</td>'+
      (rtEnrolled(rt)?'<td class="mono" style="font-size:11.5px">oxagend '+h(rt.collector)+
        '<span class="sub">'+(rt.gaps?h(plural(rt.gaps,"telemetry gap")+" in 24h"):"0 gaps in 24h")+'</span></td>'
        :'<td>—<span class="sub">Not installed</span></td>')+
@@ -6832,27 +6831,25 @@ function pRuntimes(r){
    '<div class="grid g4" style="margin-bottom:14px">'+
    '<div class="stat"><span class="k">Runtimes</span><span class="v">'+L.length+'</span><span class="s">'+
      (unen?unen+' not enrolled':idle?idle+' with no agent assigned':'All enrolled')+'</span></div>'+
-   '<div class="stat"><span class="k">Agents hosted</span><span class="v">'+L.reduce(function(n,x){return n+rtAgents(x.id).length;},0)+'</span><span class="s">Several agents can share one host</span></div>'+
+   '<div class="stat"><span class="k">Agents hosted</span><span class="v">'+L.reduce(function(n,x){return n+rtAgents(x.id).length;},0)+'</span><span class="s">On '+plural(L.filter(function(x){return rtAgents(x.id).length;}).length,"host")+'</span></div>'+
    '<div class="stat"><span class="k">Highest tier</span><span class="v" style="font-size:15px;padding-top:6px">'+
      (top?tierBadge(top.tier):'—')+
-     '</span><span class="s">'+(top?'Computed per run from routed traffic':'No host is enrolled')+'</span></div>'+
+     '</span><span class="s">'+(top?h(top.name):'No host is enrolled')+'</span></div>'+
    '<div class="stat" title="A telemetry gap is a hole in the record, not a failed run."><span class="k">Health</span><span class="v">'+(deg.length?deg.length+' degraded':'Healthy')+'</span><span class="s">'+
      (deg.length?h(deg.map(function(x){return x.name+(x.gaps?' has telemetry gaps':' is '+x.health);}).join(". ")):'Every collector is reporting')+'</span></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Hosts</h3>'+
    '<span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Runtime</th><th>Kind</th><th>Harness</th><th>Model surface</th><th>Tier</th>'+
-   '<th>Agents</th><th>Collector</th><th>Hooks</th><th>Health</th><th>Last checkpoint</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">The tier belongs to the host, not the agent. Two agents on one host get the same tier, and an agent moved to a host with a lower tier gets that lower tier. The tier is computed per run from what was actually routed and is never raised afterward.</div></div></div>'+
+   '<th>Agents</th><th>Collector</th><th>Hooks</th><th>Health</th><th>Last checkpoint</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Tier ladder</h3></div>'+
-   '<div class="panel-b">'+tierLadder(null)+
-   '<div class="note" style="margin-top:13px">Only <span class="mono">contained</span> is fully enforced: all traffic must pass through oxagen. On <span class="mono">observe</span>, nothing is delivered and nothing can be blocked. An agent with no runtime still has an identity and a toolbelt, but it receives no steering.</div></div></div>';
+   '<div class="panel-b">'+tierLadder(null)+'</div></div>';
 }
 
 function rtDetail(rt){
   var ag=rtAgents(rt.id), base="#/"+ORG.slug+"/"+S.ws, on=rtEnrolled(rt);
   return '<div class="row" style="margin-bottom:14px"><button class="btn sm" onclick="go(\''+base+'/runtimes\')">← All runtimes</button></div>'+
    '<div class="grid">'+
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+h(rt.name)+'</h3>'+
+   '<div class="panel" data-help="host"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+h(rt.name)+'</h3>'+
     '<p class="muted" style="margin:2px 0 0;font-size:12px">'+h(rt.kind+" · "+rt.os+" · started by "+rt.started)+'</p></div>'+
     rtHealth(rt)+'</div>'+
    '<div class="panel-b"><dl class="kv">'+
@@ -6860,14 +6857,14 @@ function rtDetail(rt){
    '<dt>Owner</dt><dd>'+h(rtPerson(rt.owner))+'</dd>'+
    '<dt>Harness</dt><dd>'+hxName(rt.harness)+' <span class="mono dim">'+h(rt.harnessV)+'</span></dd>'+
    (on?'<dt>Collector</dt><dd class="mono">oxagend '+h(rt.collector)+'<span class="sub" style="font-family:var(--font)">'+
-     (rt.gaps?h(plural(rt.gaps,"telemetry gap")+" in the last 24h. A gap is a hole in the record, not a failed run."):"0 telemetry gaps in the last 24h")+'</span></dd>'+
-   '<dt>Hook binary</dt><dd class="mono">oxagen-hook '+h(rt.collector)+'<span class="sub" style="font-family:var(--font)">Refuses a call if it cannot reach oxagen and has no cached policy</span></dd>'
+     (rt.gaps?h(plural(rt.gaps,"telemetry gap")+" in the last 24h"):"0 telemetry gaps in the last 24h")+'</span></dd>'+
+   '<dt>Hook binary</dt><dd class="mono">oxagen-hook '+h(rt.collector)+'</dd>'
    :'<dt>Collector</dt><dd>—<span class="sub">Not installed. This host is not enrolled.</span></dd>')+
    '<dt>Hooks installed</dt><dd'+(rt.hookCount?' class="mono" style="font-size:11.5px"':'')+'>'+h(rt.hookCount?rt.hooks:"None")+
-     '<span class="sub" style="font-family:var(--font)">'+(!rt.hookCount?'Runs here are recorded only.':rt.hookCount<5?'Fewer than five events are wired, so some calls are recorded without a decision.':'Five run as command hooks. The first four can refuse a call.')+'</span></dd>'+
-   '<dt>Model surface</dt><dd>'+h(rt.model)+'<span class="sub">'+(TIER_RANK[rt.tier]>=2?'Every model call goes through it, and tokens are counted from the traffic.':'Model calls go from the harness straight to its provider. Routing them through oxagen is the gateway tier.')+'</span></dd>'+
+     '<span class="sub" style="font-family:var(--font)">'+(!rt.hookCount?'Runs here are recorded only.':rt.hookCount+' of 5'+(rt.hookCount<5?'. Some calls are recorded without a decision.':''))+'</span></dd>'+
+   '<dt>Model surface</dt><dd>'+h(rt.model)+'</dd>'+
    '<dt>Settings</dt><dd>'+(rt.settings&&rt.settings!=="—"?h(rt.settings):'—<span class="sub">Not written until the host enrolls</span>')+'</dd>'+
-   '<dt>Tier</dt><dd>'+tierBadge(rt.tier)+'<span class="sub">Computed per run from routed traffic</span></dd>'+
+   '<dt>Tier</dt><dd>'+tierBadge(rt.tier)+'</dd>'+
    '<dt>Last checkpoint</dt><dd'+(on?' class="mono"':'')+'>'+(on?h(rt.checkpoint)+' · chain intact':'—<span class="sub">No run has been recorded here</span>')+'</dd>'+
    (rt.note?'<dt>Note</dt><dd>'+h(rt.note)+'</dd>':'')+
    '</dl></div></div>'+
@@ -6880,16 +6877,15 @@ function rtDetail(rt){
         '<td class="mono" style="font-size:11px">'+h(a.principal||"—")+'</td>'+
         '<td class="num">'+(a.runs30||0).toLocaleString()+'</td></tr>';}).join("")+'</tbody></table></div>'
     :'<div class="panel-b dim">'+(on?'No agent is assigned to this host. It records nothing until one runs here.':'This host is not enrolled, so no agent runs here yet.')+'</div>')+
-   (ag.length?'<div class="panel-b"><div class="note">Every agent here runs through the same hooks and gets the same tier. Each agent keeps its own identity, steering, and toolbelt.</div></div>':'')+'</div>'+
+   '</div>'+
    (on?'<div class="panel"><div class="panel-h"><h3>Unenroll this host from the CLI</h3></div><div class="panel-b">'+
    '<pre>oxagen agent unenroll --host '+h(rt.id)+' \\\n  --restore-settings</pre>'+
-   '<div class="note" style="margin-top:12px">If someone removes the hooks by hand instead, the next run records '+keyLabel("hooks_removed")+' and the tier drops to <span class="mono">observe</span>. The tier is never raised afterward.</div>'+
    '<div class="row" style="margin-top:14px">'+
-   '<button class="btn" onclick="act(\'Test session queued on '+h(rt.name)+'. One turn, recorded like any other run.\')">Run a test session</button>'+
+   '<button class="btn" onclick="act(\'Test session queued on '+h(rt.name)+'.\')">Run a test session</button>'+
    '<button class="btn danger" onclick="openDialog(\'unenroll\',\''+h(rt.id)+'\')">Unenroll</button></div>'+
    '</div></div>'
    :'<div class="panel"><div class="panel-h"><h3>Enroll this host</h3></div><div class="panel-b">'+
-   '<p class="muted" style="margin:0 0 10px">Run the installer on the host itself. Enrolling installs the hooks and the collector.</p>'+
+   '<p class="muted" style="margin:0 0 10px">Run the installer on the host itself.</p>'+
    '<button class="btn primary" onclick="openDialog(\'wrap\')">Enroll a runtime</button></div></div>')+
    '</div>';
 }
@@ -7017,11 +7013,9 @@ function oxGovernanceToml(mode){
 function repoTab(){
   var w=ws(), rows=wsRepos();
   var unbound=rows.filter(function(r){return (r.ox||"governed")==="unbound"&&r.role!=="available";});
-  var banner=unbound.length?'<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>'+
+  var banner=unbound.length?'<div class="banner" data-help="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>'+
    unbound.length+' linked repositor'+(unbound.length>1?'ies carry':'y carries')+' no .oxagen/</span>'+
-   '<div class="grow"><b>A run on '+h(unbound.map(function(r){return r.n;}).join(", "))+' is steered by the main repo and by nothing of its own.</b> '+
-   'Repository-scoped records live in that repository, so until it has a <span class="mono">.oxagen/</span> tree there is nowhere to put one, '+
-   'and a record that tried would have to claim workspace scope, which the checks refuse.</div>'+
+   '<div class="grow"><b>A run on '+h(unbound.map(function(r){return r.n;}).join(", "))+' is steered by the main repo and by nothing of its own.</b></div>'+
    '<button class="btn" onclick="wzOpen(\'init\',\''+h(unbound[0].n)+'\')">Add .oxagen/</button></div>':'';
 
   var trows=rows.map(function(r){
@@ -7039,12 +7033,10 @@ function repoTab(){
         :'<button class="btn sm" onclick="event.stopPropagation();wzOpen(\'init\',\''+h(r.n)+'\')">Add .oxagen/</button>')+'</td></tr>';}).join("");
 
   return banner+
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Repositories</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">The main repository holds the workspace’s steering and configuration, and each linked repository can hold records for its own runs.</p></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Repositories</h3>'+
    '<div class="sp"><button class="btn sm" onclick="wzOpen(\'init\')">Add .oxagen/</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Repository</th><th>Role</th><th>Production branch</th><th><span class="id">.oxagen/</span></th><th>Events</th><th class="num">Symbols</th><th></th></tr></thead>'+
-   '<tbody>'+trows+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Changing the main repository needs an organization owner and an approval, and Audit records it as a security event. When GitHub’s default branch changes, the GitHub App records the change, and the production branch stays put until someone confirms the move.</div></div></div>';
+   '<tbody>'+trows+'</tbody></table></div></div>';
 }
 
 /* ---- tab 2: the working copies ---- */
@@ -7056,7 +7048,7 @@ function copyTab(){
   if(!rows.length) return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">No directory is linked to '+h(w.name)+' yet.</p></div>'+
    '<div class="sp"><button class="btn primary" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
-   '<div class="panel-b"><div class="note">Run <span class="mono">oxagen init</span> in a directory to link it. You cannot link one by typing a path here, because the browser cannot see your filesystem.</div></div></div>';
+   '<div class="panel-b"><p class="muted" style="margin:0">Run <span class="mono">oxagen init</span> in a directory to link it.</p></div></div>';
   var stale=rows.filter(function(c){return c.oxagen!=="in-sync";});
   var trows=rows.map(function(c){
     var st=WC_STATE[c.oxagen]||WC_STATE.unbound;
@@ -7072,8 +7064,7 @@ function copyTab(){
 
   /* The banner that used to sit here said in a paragraph what the .oxagen/ column says in a
      word, on the row of the copy it is true of. The count is already on the tab. */
-  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Each row is a directory where someone ran <span class="mono">oxagen init</span>, linked by one gitignored file.</p></div>'+
+  return '<div class="panel"><div class="panel-h"><h3>Working copies</h3>'+
    '<div class="sp"><button class="btn primary" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Directory</th><th>Repository</th><th>Branch</th><th><span class="id">.oxagen/</span></th><th>Symlinks</th><th>Bundle</th><th>Last seen</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div></div>'+
@@ -7081,14 +7072,12 @@ function copyTab(){
    '<div class="panel"><div class="panel-h"><h3>Files to review</h3></div><div class="panel-b">'+
    '<pre>.oxagen/\n  workspace.toml     <span class="c"># committed. reviewed. the source of truth.</span>\n'+
    '  workspace.json     <span class="c"># gitignored · this machine’s link</span>\n'+
-   '  rules/\n  proposals/\n  agents/\n  skills/\n  tools/</pre>'+
-   '<div class="note" style="margin-top:12px"><span class="mono">workspace.toml</span> describes the workspace and goes through review. <span class="mono">workspace.json</span> names the workspace <em>this checkout</em> talks to. It describes one machine, so nobody commits or reviews it.</div></div></div>'+
+   '  rules/\n  proposals/\n  agents/\n  skills/\n  tools/</pre></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Sync</h3></div><div class="panel-b">'+
-   '<div class="kv"><dt><span class="mono">oxagen init</span></dt><dd>Links this directory. Reads the git remote, matches it to a repository the installation can reach, and writes <span class="mono">.oxagen/workspace.json</span>. Idempotent.</dd>'+
-   '<dt><span class="mono">oxagen pull</span></dt><dd>Fast-forwards <span class="mono">.oxagen/</span> to the production branch and re-points the stella symlinks. It never merges your work.</dd>'+
+   '<div class="kv"><dt><span class="mono">oxagen init</span></dt><dd>Links this directory and writes <span class="mono">.oxagen/workspace.json</span>.</dd>'+
+   '<dt><span class="mono">oxagen pull</span></dt><dd>Fast-forwards <span class="mono">.oxagen/</span> to the production branch and re-points the stella symlinks.</dd>'+
    '<dt><span class="mono">oxagen status</span></dt><dd>Compares this copy with what is published: the bundle version, the records in force, and anything uncommitted under <span class="mono">.oxagen/</span>.</dd>'+
-   '<dt><span class="mono">oxagen propose</span></dt><dd>Turns a local edit under <span class="mono">.oxagen/</span> into a proposal. You open and merge its pull request here, because both need a role that only a signed-in person holds.</dd></div>'+
-   '<div class="note" style="margin-top:12px">stella reads this directory through symlinks, so there is no second copy to drift. Where the symlinks read <span class="mono">missing</span>, stella loads nothing.</div></div></div></div>';
+   '<dt><span class="mono">oxagen propose</span></dt><dd>Turns a local edit under <span class="mono">.oxagen/</span> into a proposal.</dd></div></div></div></div>';
 }
 
 /* ---- tab 3: the changes ---- */
@@ -7116,16 +7105,13 @@ function chgTab(){
      '<td>'+stBadge(st)+'</td>'+
      '<td>'+oxprCiLight(p)+'</td>'+
      '<td class="muted" style="font-size:12px">'+h(p.opened)+'</td></tr>';}).join("");
-  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Open pull requests</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Four kinds of file and one lifecycle. Whoever opened it (a person, the promoter, or the reconciler), the checks, the merge and the publication are the same.</p></div></div>'+
+  return '<div class="panel"><div class="panel-h"><h3>Open pull requests</h3></div>'+
    '<div class="tw"><table><thead><tr><th>Change</th><th>Kind</th><th>Pull request</th><th>Opened by</th><th>State</th><th>Checks</th><th>Opened</th></tr></thead>'+
-   '<tbody>'+trows+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A change takes effect at its merge commit. While its pull request is open, it steers nothing: it is not in the compiled bundle or the record index, and the bundle version has not moved.</div></div></div>'+
+   '<tbody>'+trows+'</tbody></table></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Automatic proposals</h3></div><div class="panel-b">'+
-   '<div class="kv"><dt>Promoter</dt><dd>Groups records across runs by lineage and opens a proposal that cites those runs. There is no threshold. A person reads the cited runs and decides.</dd>'+
-   '<dt>Reconciler</dt><dd>Compares <span class="mono">.oxagen/workspace.toml</span> with the control plane’s live state and opens one pull request per difference. It does not edit live state to match the file.</dd>'+
-   '<dt>Person</dt><dd>Every creation wizard (agent, tool, skill, and record) ends here. None of them saves straight to the database.</dd></div>'+
-   '<div class="note" style="margin-top:12px">The reconciler reports drift and does not repair it. A person decides which side is right, in the pull request.</div></div></div>';
+   '<div class="kv"><dt>Promoter</dt><dd>Groups records across runs by lineage and opens a proposal that cites those runs.</dd>'+
+   '<dt>Reconciler</dt><dd>Compares <span class="mono">.oxagen/workspace.toml</span> with the control plane’s live state and opens one pull request per difference.</dd>'+
+   '<dt>Person</dt><dd>Every creation wizard (agent, tool, skill, and record) ends here.</dd></div></div></div>';
 }
 
 /* Merge is enabled only when every check has reported, none failed, and the pull request is not
@@ -7192,7 +7178,7 @@ function oxprDetail(p){
   var k=OXPR_KIND[p.kind]||OXPR_KIND.config, st=PR_STATE[p.state]||PR_STATE.open;
   var failed=p.checks.filter(function(c){return c[1]==="fail";});
   var canMerge=oxprCanMerge(p);
-  return '<div class="panel"><div class="panel-h">'+
+  return '<div class="panel" data-help="pull-request"><div class="panel-h">'+
    '<button class="btn sm" onclick="S.oxprSel=null;render()">← All changes</button>'+
    '<h3 style="margin-left:10px">'+h(p.title)+'</h3><span class="sp">'+oxprCiLight(p)+stBadge(st)+'</span></div>'+
    '<div class="panel-b">'+
@@ -7218,16 +7204,10 @@ function oxprDetail(p){
    '</div>'+
    '<div class="panel-b" style="border-top:1px solid var(--border)">'+
    (p.state==="merged"
-     ?'<div class="note">Merged. The file is on <span class="mono">'+h(p.base)+'</span>, the promotion event is on the ledger, and the workspace’s steering version is the ledger’s length.</div>'
+     ?'<div class="note">Merged. The file is on <span class="mono">'+h(p.base)+'</span> and the promotion event is on the ledger.</div>'
      :p.state==="closed"
      ?'<div class="note">Closed without merging. The comment on '+h(p.pr)+' names who closed it and links back here.</div>'
-     :'<label class="sec-lb">What merge will do</label>'+wzChecks([
-       ["1",'Squash the branch onto <span class="mono">'+h(p.base)+'</span>, pinned to the commit the checks ran on.'],
-       ["2",'Delete the head branch.'],
-       ["3",'Re-index from the merged commit and bump the workspace bundle version.'],
-       ["4",'Append the promotion event to the ledger, with the approver and the commit sha.'],
-       ["5",'Write one audit event. The change is in force from that commit, not from now.']])+
-      '<div class="row" style="margin-top:14px;gap:8px">'+
+     :'<div class="row" style="gap:8px">'+
       '<button class="btn'+(canMerge?' primary':'')+'"'+(canMerge?'':' disabled')+' onclick="oxprMerge(\''+h(p.id)+'\')">Merge pull request</button>'+
       '<button class="btn danger" onclick="openDialog(\'closepr\',\'oxpr|'+h(p.id)+'\')">Close pull request</button>'+
       '<span class="grow"></span><span class="dim" style="font-size:11.5px">'+
@@ -7252,25 +7232,19 @@ function cfgTab(){
    '<p class="muted" style="margin:2px 0 0;font-size:12px">On <span class="mono">'+h(w.main)+'</span>'+
    (repo.head?' at <span class="mono">'+h(repo.head)+'</span>':' \u00b7 <span class="dim">not indexed yet</span>')+'</p></div></div>'+
    '<div class="panel-b"><pre>'+h(oxWorkspaceToml(w,repo,"team","main"))+'</pre></div></div>'+
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Drift</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">The file compared with the control plane’s live state.</p></div>'+
+   '<div class="panel"><div class="panel-h"><h3>Drift</h3>'+
    (reconcile?'<div class="sp"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+h(w.slug)+'/repositories/changes\');S.oxprSel=\''+h(reconcile)+'\';render()">See the pull request</button></div>':'')+'</div>'+
    (drift.length
      ?'<div class="tw"><table class="narrow"><thead><tr><th>Declared</th><th>In the file</th><th>Live</th><th>Resolution</th></tr></thead><tbody>'+
       drift.map(function(d){return '<tr><td class="mono" style="font-size:11.5px">'+h(d[0])+'</td>'+
         '<td class="muted" style="font-size:12px">'+h(d[1])+'</td><td class="muted" style="font-size:12px">'+h(d[2])+'</td>'+
         '<td>'+(d[3]==="the file"?'<span class="b b-q">Use the file</span>':'<span class="b b-approval">A person decides</span>')+'</td></tr>';}).join("")+
-      '</tbody></table></div>'+
-      '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Where the reconciler read both sides, it proposes the file’s value. A linked repository with no <span class="mono">.oxagen/</span> is a scope decision, so it waits for a person.</div></div>'
+      '</tbody></table></div>'
      :'<div class="panel-b"><div class="note">The reconciler last compared <span class="mono">'+h(w.main)+'</span> with the control plane and found no drift.</div></div>')+
    '</div></div>'+
    '<div class="grid g2" style="margin-top:14px">'+
    '<div class="panel"><div class="panel-h"><h3>.oxagen/rules/governance.toml</h3></div><div class="panel-b">'+
-   '<pre>'+h(oxGovernanceToml("team"))+'</pre>'+
-   '<div class="kv" style="margin-top:12px"><dt><span class="mono">solo</span></dt><dd>The author may merge their own.</dd>'+
-   '<dt><span class="mono">team</span></dt><dd>A code-owner review is required. This is what a missing file means.</dd>'+
-   '<dt><span class="mono">regulated</span></dt><dd>A named approver from a role must approve, and the promotion ledger is hash-chained.</dd></div>'+
-   '<div class="note" style="margin-top:12px">oxagen reads the mode from the production branch when a pull request opens and again when it merges, so raising it applies to every open pull request. You change the mode with a pull request. There is no setting for it. A file that names no mode blocks both steps and does not fall back to <span class="mono">team</span>.</div></div></div>'+
+   '<pre>'+h(oxGovernanceToml("team"))+'</pre></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Tree</h3></div><div class="panel-b">'+
    '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, providers, budgets</span>\n'+
    '  workspace.json             <span class="c"># gitignored · this machine’s link</span>\n'+
@@ -7280,8 +7254,7 @@ function cfgTab(){
    '  proposals/*.toml           <span class="c"># candidates; steer nothing</span>\n'+
    '  agents/&lt;slug&gt;.toml         <span class="c"># one per agent</span>\n'+
    '  skills/&lt;name&gt;/SKILL.md     <span class="c"># pinned by version and digest</span>\n'+
-   '  tools/&lt;name&gt;.toml          <span class="c"># manifest, schema, handler beside it</span></pre>'+
-   '<div class="note" style="margin-top:12px">oxagen reads only <span class="mono">.oxagen/</span>. It does not read <span class="mono">.stella/</span>.</div></div></div></div>';
+   '  tools/&lt;name&gt;.toml          <span class="c"># manifest, schema, handler beside it</span></pre></div></div></div>';
 }
 
 /* A Repositories tab's address: the app's path segments (working-copies, configuration). */
@@ -7308,8 +7281,7 @@ function pRepos(){
   /* the page header gives up the gold when the tab below holds the one primary action */
   /* Give up the header's gold only where the tab below actually renders an enabled one. */
   var tabPrimary=(t==="changes"&&oxprCanMerge(selectedOxpr()))||t==="copies";
-  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Repositories</h1>'+
-   '<p>Where this workspace’s files live and every change oxagen has proposed to them.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Repositories</h1></div>'+
    '<div class="acts"><button class="btn'+(tabPrimary?'':' primary')+'" onclick="wzOpen(\'init\')">Add .oxagen/</button></div></div>'+tabs+body;
 }
 
@@ -7328,19 +7300,18 @@ function spendTokens(WT){
     '<div class="tw"><table class="narrow" data-lt="off"><thead><tr><th>Class</th><th class="num">Tokens</th><th class="num">Share</th><th class="num">Cost</th></tr></thead><tbody>'+
     cls.map(function(x){return '<tr><td class="mono"'+tipAttr(x[2])+'>'+x[0]+'</td><td class="num">'+tokn(x[1])+'</td><td class="num dim">'+per(tokShare(x[1],clsTot))+'</td><td class="num">'+(x[0]==="cache_read"?fmt$(per$(x[1])*0.1):fmt$(per$(x[1])))+'</td></tr>';}).join("")+
     '</tbody></table></div><div class="panel-b"><dl class="kv">'+
-    '<dt>Cache hit rate</dt><dd>'+per(WT.cacheRate)+' · cache reads as a share of all input tokens, token-weighted</dd>'+
-    '<dt>Cache write cost share</dt><dd>'+per(tokShare(WT.cacheWrite*1.25,WT.tokIn))+' · high when a prefix is written and never read</dd>'+
-    '<dt>Effective input price</dt><dd>$1.88 per million across every input class</dd>'+
-    '<dt>Unmapped classes</dt><dd>0 · a class oxagen does not know is stored under its raw name and priced at zero, so the gap stays visible</dd></dl></div></div>'+
+    '<dt>Cache hit rate</dt><dd>'+per(WT.cacheRate)+'</dd>'+
+    '<dt>Cache write cost share</dt><dd>'+per(tokShare(WT.cacheWrite*1.25,WT.tokIn))+'</dd>'+
+    '<dt>Effective input price</dt><dd>$1.88 per million</dd>'+
+    '<dt>Unmapped classes</dt><dd>0</dd></dl></div></div>'+
    '<div class="panel" style="margin:0"><div class="panel-h"><h3>Prompt composition</h3></div>'+
-    '<div class="panel-b">'+tokBars(WT)+'</div>'+
-    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Tool definitions, context frames and steering are measured by oxagen from the request it assembled; tool results and conversation are the rest of the input. A part that grows without its citation rate growing is a finding, and Optimization › Agents says what to change.</div></div></div></div>'+
+    '<div class="panel-b">'+tokBars(WT)+'</div></div></div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>By harness</h3><span class="b b-q" style="margin-left:auto">'+per(WT.observed)+' of tokens observed by the gateway</span></div>'+
     '<div class="tw"><table><thead><tr><th>Harness</th><th class="num">Agents</th><th class="num">Tokens</th><th class="num">Cache hit</th><th class="num">Spend</th><th>Basis</th></tr></thead><tbody>'+
     hs.map(function(x){var obs=tokShare(x.observed,x.total);
       return '<tr><td><b>'+hxName(x.label)+'</b></td><td class="num">'+x.agents+'</td><td class="num">'+tokn(x.total)+'</td><td class="num">'+per(tokShare(x.cacheRead,x.tokIn))+'</td><td class="num">'+fmt$(x.spend)+'</td>'+
        '<td>'+(obs>=0.999?basisChip("gateway_observed") :obs<=0.001?basisChip("client_attested") :basisChip("gateway_observed")+' '+per(obs)+' · '+basisChip("client_attested")+' '+per(1-obs))+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><div class="note">Observed means the gateway\u2019s proxy counted the tokens from the bytes that passed through it. Self-reported means the harness\u2019s own telemetry said so; a class it does not report is marked absent, never zero, and a cache hit rate over a mixed fleet is never computed from missing data as if it were zero.</div></div></div>'+
+    '</tbody></table></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>By agent</h3></div>'+
     '<div class="tw"><table><thead><tr><th>Agent</th><th class="num">Runs</th><th class="num">Tokens</th><th class="num">Per run</th><th class="num">Cache hit</th><th class="num">Tool defs</th><th class="num">Context</th><th class="num">Tool results</th><th class="num">Reasoning</th><th>Basis</th></tr></thead><tbody>'+
     AGENTS.filter(function(a){return a.ws===w.slug;}).sort(function(a,b){return agentTok(b).total-agentTok(a).total;}).slice(0,12).map(function(a){var t=agentTok(a);
@@ -7419,8 +7390,7 @@ function spendWaste(parts){
      '<div class="row"><span class="dim mono" style="font-size:10.5px">'+plural(r.frames,"frame")+' · '+plural(r.steps,"step")+' · cache '+per(r.cache)+' · '+h(r.model)+'</span>'+
      '<button class="btn sm" style="margin-left:auto" onclick="go(\''+href+'\')">Open the run</button>'+
      '<button class="btn sm" onclick="act(\'Frames behind the unproductive spend on '+r.id+' opened.\')">Show the frames</button></div></div>';}).join("")+
-   '</div><div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Unproductive spend means the frames show the tokens bought nothing: a repeated call, a cold prefix, a turn spent waiting, or a chain that broke. '+
-   'Work a person accepted is never counted here.</div></div></div>';
+   '</div></div>';
   return (parts==="body"?"":strip)+causes+runs;
 }
 
@@ -7724,14 +7694,14 @@ DLG_EXT.ccexport=function(){
    b:'<div class="field"><label for="cc-month">Month</label><select id="cc-month"><option value="2026-09">September 2026 (to date)</option><option value="2026-08">August 2026</option><option value="2026-07">July 2026</option></select></div>'+
     '<div class="field"><label>Columns</label><div class="row" style="flex-wrap:wrap;gap:4px">'+
      CC.columns.map(function(c){return '<span class="b b-q mono" style="font-size:11px">'+h(c)+'</span>';}).join("")+'</div></div>'+
-    '<div class="note">One line per cost center, one for <span class="mono">~none</span> (spend with no label), and the organization total they sum to. Each line lists the run ids behind it, and cost is in micros and in cents.</div>',
+    '<div class="note">One line per cost center, one for <span class="mono">~none</span> (spend with no label), and the organization total they sum to.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="ccExport()">Export CSV</button>'};
 };
 function ccExport(){
   var m=(document.getElementById("cc-month")||{}).value||"2026-09";
   auditEvent("cost_center_statement_exported",me().name,"Exported the chargeback statement for "+m,"info","cost-centers-"+m+".csv");
   closeDialog();
-  act("Exported cost-centers-"+m+".csv. In the product this downloads the file. A mockup writes nothing to disk.");
+  act("Exported cost-centers-"+m+".csv.");
 }
 
 /* ---- Organization records (W10 · cio-console port). Identity, routes and workspace settings the tabs read.
@@ -9662,7 +9632,7 @@ function dialog(){
      '<div class="fields" style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div class="field"><label>From</label><input type="date" value="2026-09-01" aria-label="From"></div>'+
       '<div class="field"><label>To</label><input type="date" value="2026-09-11" aria-label="To"></div></div>'+
      '<div class="field"><label>Include</label><select aria-label="Include"><option>Everything on this page: by operator, agent, tool, unproductive spend, and budgets</option><option>By operator and agent only</option><option>By tool only</option><option>Unproductive spend only</option></select></div>'+
-     '<div class="note">Delivered as CSV and a signed PDF to <span class="mono">marcus@a-intel.example</span>. Every figure carries its basis; the report is built from frames, so a large range takes a few minutes.</div>',
+     '<div class="note">Delivered as CSV and a signed PDF to <span class="mono">marcus@a-intel.example</span>.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'The report is being generated and will be sent to your email momentarily\')">Generate report</button>'},
    budget:{t:"Set a budget",w:false,b:budgetForm(null),
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="budgetSave(-1)">Set it</button>'},
@@ -10236,10 +10206,10 @@ DLG_EXT.unenroll=function(key){
   var a=agent(key), rt=a?rtById(a.host):rtById(key);
   if(!a&&!rt)return noSuch("Runtime");
   return {t:"Unenroll "+((rt&&rt.name)||(a&&a.host)||"the host")+"?",w:false,
-   b:'<div class="note">Calls routed through oxagen are refused from this host from now on. The hooks on the host are removed at its next check-in, so a host that is offline keeps them until it returns.</div>'+
+   b:'<div class="note">Calls routed through oxagen are refused from this host from now on.</div>'+
      '<div class="warn">Checkpoints from this host are unsigned after this, and the chain records the gap.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it enrolled</button>'+
-     '<button class="btn danger" onclick="closeDialog();act(\'Host revoked. Calls routed through oxagen are refused from now on. The hooks on the host are removed at its next check-in.\')">Unenroll it</button>'};
+     '<button class="btn danger" onclick="closeDialog();act(\'Host revoked.\')">Unenroll it</button>'};
 };
 DLG_EXT.cancelrun=function(){
   return {t:"Cancel this run?",w:false,
@@ -10259,28 +10229,28 @@ function budgetForm(b){
   function opt(v,cur,label){return '<option value="'+h(v)+'"'+(v===cur?' selected':'')+'>'+h(label||v)+'</option>';}
   return '<div class="field"><label for="bgScope">Scope</label><select id="bgScope" aria-label="Scope">'+
      BUDGET_SCOPES.map(function(v){return opt(v,sc);}).join("")+'</select>'+
-     (b?'<div class="hint">Changing the scope moves the budget. The spend already recorded against the old scope stays there.</div>':'')+'</div>'+
+     '</div>'+
    '<div class="field"><label for="bgPeriod">Period</label><select id="bgPeriod" aria-label="Period">'+
      ["per run","daily","monthly"].map(function(v){return opt(v,pd);}).join("")+'</select></div>'+
    '<div class="field"><label for="bgLimit">Limit (USD)</label><input id="bgLimit" value="'+h(lim)+'" aria-label="Limit">'+
      (ag?'<div class="hint">Highest run this month: '+usd(ag.budgetUsed.toFixed(2))+'.</div>':'')+'</div>'+
    '<div class="field"><label for="bgMode">Mode</label><select id="bgMode" aria-label="Mode">'+
-     opt("hard",md,"hard: checked at each checkpoint, pauses at the next one")+
-     opt("soft",md,"soft: recorded and reported, never blocks")+'</select></div>';
+     opt("hard",md,"Hard: refuses routed calls over the limit")+
+     opt("soft",md,"Soft: sends a notice")+'</select></div>';
 }
 function budgetAt(i){i=parseInt(i,10);return (i>=0&&i<SPEND.budgets.length)?SPEND.budgets[i]:null;}
 DLG_EXT.budgetedit=function(arg){
   var b=budgetAt(arg); if(!b)return noSuch("Budget");
   return {t:"Edit the budget on "+b.scope,w:false,b:budgetForm(b)+
-    '<div class="note">A lower limit applies from the next boundary. It does not undo spend already recorded in this period, so a budget cut below what is used reads as breached at once.</div>',
+    '<div class="note">A new limit applies from the next boundary.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="budgetSave('+parseInt(arg,10)+')">Save</button>'};
 };
 DLG_EXT.budgetdel=function(arg){
   var b=budgetAt(arg); if(!b)return noSuch("Budget");
   return {t:"Remove the budget on "+b.scope+"?",w:false,
-   b:'<div class="note">'+h(b.scope)+' has no ceiling after this. Runs there are still metered and still cost money, and the spend already recorded stays on the ledger.</div>'+
-     (b.mode==="hard"?'<div class="warn">This is a hard budget. Removing it means nothing pauses a run on this scope at a checkpoint.</div>':''),
+   b:'<div class="note">'+h(b.scope)+' has no ceiling after this.</div>'+
+     (b.mode==="hard"?'<div class="warn">This is a hard budget. Removing it lets routed calls on this scope run past the limit.</div>':''),
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
      '<button class="btn danger" onclick="budgetDel('+parseInt(arg,10)+')">Remove it</button>'};
 };
@@ -10291,14 +10261,14 @@ function budgetSave(i){
   if(!limit||isNaN(parseFloat(limit.replace(/,/g,"")))){toast("A budget needs a limit in USD.","denied");return;}
   var b=budgetAt(i);
   if(b){ b.scope=scope; b.period=period; b.limit=limit; b.mode=mode;
-    closeDialog(); render(); act("Budget on "+scope+" set to $"+limit+" "+period+", "+mode+". It applies from the next boundary.","gold");
+    closeDialog(); render(); act("Budget on "+scope+" set to $"+limit+" "+period+", "+mode+".","gold");
   } else { SPEND.budgets.push({scope:scope,period:period,limit:limit,used:"0.00",mode:mode});
-    closeDialog(); render(); act("Budget set on "+scope+": $"+limit+" "+period+", "+mode+". A breach is a policy.decision frame and, by policy, a pause.","gold"); }
+    closeDialog(); render(); act("Budget set on "+scope+": $"+limit+" "+period+", "+mode+".","gold"); }
 }
 function budgetDel(i){
   var b=budgetAt(i); if(!b)return;
   SPEND.budgets.splice(i,1); closeDialog(); render();
-  act("Budget on "+b.scope+" removed. Runs there are metered and uncapped.");
+  act("Budget on "+b.scope+" removed.");
 }
 
 /* ---- identities and role assignment on an agent ---- */
@@ -12341,16 +12311,10 @@ DLG_EXT.wz=function(){
 DLG_EXT.linkdir=function(){
   var w=ws();
   return {t:"Connect a directory", s:"one command, run in the directory", w:false,
-   b:'<p style="margin-bottom:14px">Run this in the directory you want linked. It reads the git remote, matches it against the repositories this installation can reach, and writes the one gitignored file that says which workspace this checkout talks to.</p>'+
+   b:'<p style="margin-bottom:14px">Run this in the directory you want linked.</p>'+
      '<div class="field"><label>In the directory</label>'+
      '<pre>oxagen init --org ' + h(ORG.slug) + ' --workspace ' + h(w.slug) + '\n\n<span class="c"># Pairing code: 4QF2-91KD  ·  expires in 9:41</span></pre>'+
-     '<div class="hint">The code works for one pairing. After that, the machine’s enrollment identifies the copy, so a used code links nothing.</div></div>'+
-     '<div class="field"><label>What it writes, and what it does not</label>'+
-     wzChecks([["writes",'<span class="mono">.oxagen/workspace.json</span>, with the org, workspace, path, and machine. It is gitignored, so nobody reviews or merges it.'],
-       ["links",'<span class="mono">.stella/rules</span>, <span class="mono">.stella/proposals</span> and <span class="mono">.stella/agents</span> as symlinks into <span class="mono">.oxagen/</span>, so there is no second copy to drift.'],
-       ["does not write",'anything under <span class="mono">.oxagen/</span> that is committed. If the repository has no <span class="mono">.oxagen/</span> tree at all, it says so and offers the pull request that adds one.'],
-       ["does not read",'your working tree. oxagen reads only <span class="mono">.oxagen/</span>. What a run needs from the rest of the repository reaches oxagen as frames, through the hooks.']])+'</div>'+
-     '<div class="note">Linking a directory grants nothing. A person’s roles decide what they can do here, and an agent’s mandate decides what it can do. A laptop is not a principal.</div>',
+     '<div class="hint">The code works for one pairing.</div></div>',
    f:'<span class="grow mono dim" style="font-size:11px">'+h(ORG.slug)+' · '+h(w.slug)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn primary" onclick="act(\'Waiting for a directory to pair…\',\'gold\')">Copy command</button>'};
@@ -12363,16 +12327,15 @@ DLG_EXT.linkdir=function(){
 DLG_EXT.copyoff=function(id){
   var c=copyById(id); if(!c)return noSuch("Working copy");
   return {t:"Disconnect "+c.path+"?",w:false,
-   b:'<div class="note">oxagen forgets this directory. <span class="mono">'+h(c.machine)+'</span> stops reporting it, and the gitignored <span class="mono">.oxagen/workspace.json</span> in it stops resolving. Nothing on disk is deleted and nothing committed changes.</div>'+
-     (c.dirty?'<div class="warn">'+c.dirty+' uncommitted edit'+(c.dirty>1?'s':'')+' under <span class="mono">.oxagen/</span> here are carried by no pull request. Disconnecting does not lose them, and it does not propose them either.</div>':'')+
-     '<div class="note" style="margin-top:10px">Running <span class="mono">oxagen init</span> in the directory again links it back.</div>',
+   b:'<div class="note">oxagen forgets this directory. Nothing on disk is deleted.</div>'+
+     (c.dirty?'<div class="warn">'+c.dirty+' uncommitted edit'+(c.dirty>1?'s':'')+' under <span class="mono">.oxagen/</span> here are carried by no pull request.</div>':''),
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
      '<button class="btn danger" onclick="copyDisconnect(\''+h(c.id)+'\')">Disconnect it</button>'};
 };
 function copyDisconnect(id){
   var c=copyById(id), i=WORKCOPIES.indexOf(c); if(i<0)return;
   WORKCOPIES.splice(i,1); closeDialog(); render();
-  act(c.path+" on "+c.machine+" disconnected. The directory is untouched. Run oxagen init there to link it again.");
+  act(c.path+" on "+c.machine+" disconnected.");
 }
 
 DLG_EXT.workcopy=function(){
@@ -12389,13 +12352,13 @@ DLG_EXT.workcopy=function(){
      '<dt>Last seen</dt><dd>'+h(c.seen)+'</dd></div>'+
      (ok&&sym?'<div class="note" style="margin-top:14px">This copy matches what is published. No action needed.</div>'
       :'<div class="note" style="margin-top:14px;border-left-color:var(--st-approval)">'+
-       (sym?'':'<b>stella will load nothing here.</b> The symlinks under <span class="mono">.stella/</span> are absent, so its loader has no rules directory to read. <span class="mono">oxagen init</span> re-creates them. ')+
-       (c.oxagen==="behind"?'This copy is behind the production branch, so whoever reads it sees rules that are no longer in force. Runs are not affected: steering reaches a run from the merged commit, in the signed bundle.'
-        :c.oxagen==="uncommitted"?'There are edits under <span class="mono">.oxagen/</span> that no pull request carries. They steer nothing, here or in a run, until a pull request carries them.':'')+'</div>')+
+       (sym?'':'<b>stella will load nothing here.</b> The symlinks under <span class="mono">.stella/</span> are absent. <span class="mono">oxagen init</span> re-creates them. ')+
+       (c.oxagen==="behind"?'This copy is behind the production branch.'
+        :c.oxagen==="uncommitted"?'There are edits under <span class="mono">.oxagen/</span> that no pull request carries.':'')+'</div>')+
      (c.dirty?'<div class="field" style="margin-top:14px"><label>Uncommitted under .oxagen/</label>'+
        wzFiles([["mod",".oxagen/rules/ctx.mobile.release-train.toml","statement edited locally"],
                 ["add",".oxagen/agents/screenshot-bot.toml","never committed"]])+
-       '<div class="hint">Turning these into a pull request is <span class="mono">oxagen propose</span>. You open and merge it in oxagen, because both need a role that only a signed-in person holds.</div></div>':''),
+       '<div class="hint">Turning these into a pull request is <span class="mono">oxagen propose</span>.</div></div>':''),
    f:'<span class="grow mono dim" style="font-size:11px">'+h(c.id)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn danger" onclick="openDialog(\'copyoff\',\''+h(c.id)+'\')">Disconnect</button>'+
@@ -12410,9 +12373,9 @@ DLG_EXT.repounlink=function(n){
   if(!r||n===w.main)return noSuch("Repository");
   var copies=WORKCOPIES.filter(function(c){return c.repo===n;}).length;
   return {t:"Unlink "+n+" from "+w.name+"?",w:false,
-   b:'<div class="note">Its issues and events stop reaching this workspace, and new runs here can no longer use it. The repository is untouched: nothing is deleted, no branch moves, and <span class="mono">.oxagen/</span> stays where it is.</div>'+
-     ((r.ox||"governed")==="governed"?'<div class="warn">Records published in this repository stop steering runs in '+h(w.name)+' the moment this is written. Runs already recorded keep naming the hashes they carried.</div>':'')+
-     (copies?'<div class="warn">'+copies+' working cop'+(copies>1?'ies are':'y is')+' linked through it. '+(copies>1?'They stop':'It stops')+' appearing on the Working copies tab.</div>':''),
+   b:'<div class="note">Its issues and events stop reaching this workspace, and new runs here can no longer use it.</div>'+
+     ((r.ox||"governed")==="governed"?'<div class="warn">Records published in this repository stop steering runs in '+h(w.name)+'.</div>':'')+
+     (copies?'<div class="warn">'+copies+' working cop'+(copies>1?'ies are':'y is')+' linked through it.</div>':''),
    f:'<button class="btn" onclick="closeDialog()">Keep it linked</button>'+
      '<button class="btn danger" onclick="repoUnlink(\''+h(n)+'\')">Unlink it</button>'};
 };
@@ -12422,14 +12385,14 @@ function repoLink(n){
   if(w.linked.indexOf(n)<0)w.linked.push(n);
   r.role="linked";
   closeDialog(); render();
-  act(n+" linked to "+w.name+". Its issues and events reach this workspace, and runs here can use it.","gold");
+  act(n+" linked to "+w.name+".","gold");
 }
 function repoUnlink(n){
   var w=ws(), r=repoByName(n); if(!r||n===w.main)return;
   var i=(w.linked||[]).indexOf(n); if(i>=0)w.linked.splice(i,1);
   r.role="available";
   closeDialog(); render();
-  act(n+" unlinked from "+w.name+". Runs already recorded still name it. New runs here cannot use it.");
+  act(n+" unlinked from "+w.name+".");
 }
 
 /* ---- one repository ---- */
@@ -12452,10 +12415,10 @@ DLG_EXT.repo=function(){
      '<dt>Working copies</dt><dd>'+(copies.length?copies.length+' on '+plural(copies.length,"machine"):'<span class="dim">None</span>')+'</dd></div>'+
      (gov?'<div class="field" style="margin-top:14px"><label>Records published here</label>'+
        '<div class="note">Scope is <span class="mono">'+(r.n===w.main?'workspace':'repository')+'</span>. '+
-       (r.n===w.main?'These steer every run in '+h(w.name)+'.':'These steer only runs on this repository. A record here can narrow what a workspace record allows but cannot widen it. One that claims workspace scope fails the checks.')+'</div></div>'
+       (r.n===w.main?'These steer every run in '+h(w.name)+'.':'These steer only runs on this repository.')+'</div></div>'
       :'<div class="note" style="margin-top:14px;border-left-color:var(--st-approval)"><b>No <span class="mono">.oxagen/</span> here.</b> '+
        (avail?'This repository is not linked to '+h(w.name)+' either. Adding <span class="mono">.oxagen/</span> links it.'
-        :'Runs on this repository get steering from '+h(w.main)+' only. A record scoped to this repository has nowhere to go until the tree exists.')+'</div>'),
+        :'Runs on this repository get steering from '+h(w.main)+' only.')+'</div>'),
    f:'<span class="grow mono dim" style="font-size:11px">'+h(r.n)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
      (r.n===w.main?''

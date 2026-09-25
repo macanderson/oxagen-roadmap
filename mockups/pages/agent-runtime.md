@@ -62,7 +62,7 @@ A note closes the panel: “Only contained is fully enforced: all traffic must p
 
 **Dialogs this tab opens.**
 
-- `unenroll`, titled “Unenroll mbp-01?”: “Calls routed through oxagen are refused from this host from now on. The hooks on the host are removed at its next check-in, so a host that is offline keeps them until it returns.” and “Checkpoints from this host are unsigned after this, and the chain records the gap.” **Keep it enrolled** and **Unenroll it** (danger).
+- `unenroll`, titled “Unenroll mbp-01?”: “Calls routed through oxagen are refused from this host from now on.” and “Checkpoints from this host are unsigned after this, and the chain records the gap.” **Keep it enrolled** and **Unenroll it** (danger, toasting “Host revoked.”). When the hooks leave the host is in the component help (`mockups/help/runtime.md`, Host unenrollment).
 - `register`, titled “Register an agent”: Agent name, Avatar, Harness (claude-code, codex, cursor, stella, claude-agent-sdk, custom), Model class, and the note that it opens a pull request adding the definition file. **Cancel** and **Open the pull request**. The button that opens it reads Show CLI steps, yet the dialog shows no CLI steps, and it always proposes the slug `perf-watch`, an agent the workspace already has; a build shows the enrollment command for this agent.
 
 ## Data sources
