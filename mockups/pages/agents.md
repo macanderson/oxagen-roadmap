@@ -51,7 +51,7 @@ Composition columns, in order:
 | Toolbelt | “N belts” over “N tools · full” or “N tools · searchable” |
 | Runtime | The host id (mono) over the host's kind and the tier, such as “workstation · gateway”. With no host enrolled: a dash over the tier alone |
 | Principal | `prn_…`, or `prn_pending` |
-| Health | One badge, from `agentHealth()` in this order: `tamper` while a tamper incident against the agent is open, `not enrolled` when no host is enrolled, `observe` on the observe tier, `healthy` otherwise. The mockup also counts resolved incidents, so Triage reads `tamper` with its only incident resolved; a build counts open ones |
+| Health | One badge, from `agentHealth()` in this order: `tamper` while a tamper incident against the agent is open, `not enrolled` when no host is enrolled, `observe` on the observe tier, `healthy` otherwise. The mockup counts resolved incidents as open, and `agentTamper()` matches an incident's scope by prefix, so `backlog-groomer-us` and `schema-guard-eu` take on the incidents of `backlog-groomer` and `schema-guard`. Five of the seven `tamper` badges in Core platform rest on resolved incidents (Triage, release-manager, stella-ci, schema-guard, schema-guard-eu). A build counts the open incidents recorded against the agent itself |
 | Activity | Runs in 30 days over “runs 30d” |
 | (unlabelled) | The row actions |
 
@@ -72,7 +72,7 @@ Operations columns, in order:
 | Incidents | A count badge, or 0 |
 | (unlabelled) | The row actions |
 
-The mockup's Status reads `enrolled` for every agent, including the 63 that Composition's Health marks `not enrolled`, and those agents still carry a tier. A build shows the recorded status, so Status and Health agree.
+The mockup's Status reads `enrolled` for every agent, including the 60 that Composition's Health marks `not enrolled`, and those agents still carry a tier. A build shows the recorded status, so Status and Health agree.
 
 **Row actions**, in both column sets: **Edit** (the agent's Source tab; the mockup opens the Overview instead), **Roles** (opens `assignrole` for that agent), **Deregister** (danger; opens `delagent`). Clicking anywhere else on a row opens the agent's Overview.
 
