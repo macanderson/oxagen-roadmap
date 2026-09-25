@@ -131,7 +131,7 @@
    "name": "Won't do",
    "builtin": true,
    "map": {
-    "github": "state_reason not_planned",
+    "github": "state_reason not_planned without label canceled",
     "linear": "Canceled with label Won't do",
     "jira": "Won't Do, Won't Fix",
     "servicenow": "close code No resolution provided"
@@ -150,12 +150,12 @@
   },
   {
    "key": "cancelled",
-   "name": "Cancelled",
+   "name": "Canceled",
    "builtin": true,
    "map": {
-    "github": "state_reason not_planned with label cancelled",
+    "github": "state_reason not_planned with label canceled",
     "linear": "Canceled",
-    "jira": "Cancelled",
+    "jira": "Canceled",
     "servicenow": "state Canceled"
    }
   },
@@ -709,14 +709,14 @@
      "src": "assistant"
     },
     {
-     "t": "An incident note records every run paused by mistake since the tacho 1.6 release",
+     "t": "An incident note records every run paused by mistake since the oxagend 1.6 release",
      "k": "review",
      "tag": "review",
      "src": "assistant"
     }
    ],
    "notes": [
-    "The issue does not say which tacho version. The assistant assumed 1.6.2, the collector on the named host.",
+    "The issue does not say which oxagend version. The assistant assumed 1.6.2, the collector on the named host.",
     "Item 4 is a person's review. An agent can gather the list, and a person accepts it."
    ]
   },
@@ -1194,7 +1194,7 @@
      "run": "run_01K6TC4E2M",
      "state": "sealed",
      "pr": "a-intel/platform#524",
-     "note": "Returned: the backwards pair still passes. Item 2 is not met.",
+     "note": "Sent back: the backwards pair still passes. Item 2 is not met.",
      "returned": true
     },
     {
@@ -1432,7 +1432,7 @@
    "file": ".oxagen/workflows/fix-validate-document-review.toml",
    "state": "published",
    "commit": "a4c91e2",
-   "used": 4,
+   "used": 1,
    "desc": "A bug fix goes to a validator and a documenter at the same time, and an architect reviews both before you accept it.",
    "stages": [
     {
@@ -1491,7 +1491,7 @@
    "file": ".oxagen/workflows/fix-and-review.toml",
    "state": "published",
    "commit": "a4c91e2",
-   "used": 9,
+   "used": 0,
    "desc": "One agent fixes and an architect reviews.",
    "stages": [
     {
@@ -1588,7 +1588,7 @@
    "key": "a-intel.core.architect",
    "name": "Architect",
    "harness": "stella",
-   "harnessLabel": "Stella",
+   "harnessLabel": "stella",
    "icon": "compass",
    "tone": "solid",
    "desc": "Reviews a pull request against the architecture rules and the review items. Comments; never approves on its own.",

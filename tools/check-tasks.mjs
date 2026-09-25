@@ -10,15 +10,15 @@
 //
 // The flows, in order:
 //   1. connect Jira through the six-step wizard, create one value in Jira, leave one account not mapped,
-//      and see it on Providers
+//      and see it on Trackers
 //  1b. connect ServiceNow with creation off, and see its column on Fields
 //   2. draft a definition of done with the assistant, edit it, and certify it
-//   3. a certified task that changes upstream leaves ready
+//   3. a certified task that changes in its tracker is no longer ready
 //   4. only ready tasks can be selected; the send menu lists only agents you operate, with harness marks
 //   5. the work order merges every definition of done, drafts a prompt, resolves @ mentions, and will not
 //      send until the repositories are confirmed; sending tags the tasks and opens the work order
 //   6. a workflow chains stages and ends with a person; the builder drafts stages from a sentence
-//   7. labels carry a colour and a mapping, a resolution can be created in a provider, and a claimed work
+//   7. labels carry a color and a mapping, a resolution can be created in a provider, and a claimed work
 //      order can be accepted
 //   8. the task and the work order each copy a prompt that names the other
 //   9. a task the graph blocks names its blockers, can be selected, and a queued task cannot
@@ -66,9 +66,9 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/GitHub/.test(t) && /Linear/.test(t), "providers: GitHub and Linear are connected");
   ok(/Jira/.test(t) && /Connect/.test(t), "providers: Jira is offered");
   ok((await page.locator(".ipl svg").count()) >= 3, "providers: every provider shows its logo as an SVG");
-  await page.click("text=Connect an issue provider");
+  await page.click("text=Connect an issue tracker");
   let d = await dlgText(page);
-  ok(/Provider Authorize Scope Fields People Review/.test(d.replace(/[0-9]/g, "").replace(/\s+/g, " ")) || (await page.locator(".wz-st").count()) === 6, "wizard: six steps");
+  ok(/Tracker Authorize Scope Fields People Review/.test(d.replace(/[0-9]/g, "").replace(/\s+/g, " ")) || (await page.locator(".wz-st").count()) === 6, "wizard: six steps");
   ok((await page.locator(".ipz-card").count()) === 6, "wizard: six providers to choose from");
   ok(/Issue trackers/.test(d) && /Help desks/.test(d) && /ServiceNow/.test(d) && /Salesforce/.test(d) && /Zendesk/.test(d), "wizard: offers the help desks beside the trackers");
   ok(await footBtn(page, "Next").isDisabled(), "wizard: Next waits for a choice");
@@ -118,14 +118,14 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await page.fill(".lt-q", "Jira");
   await page.waitForTimeout(100);
   t = await text(page);
-  ok(/Automation for Jira/.test(t) && /not mapped/.test(t), "people: the new accounts are listed, one not mapped");
+  ok(/Automation for Jira/.test(t) && /not mapped/i.test(t), "people: the new accounts are listed, one not mapped");
   await done(page, errs, "connect");
 }
 
 /* 1b. connecting a help desk */
 {
   const { page, errs } = await open(H + "/providers");
-  await page.click("text=Connect an issue provider");
+  await page.click("text=Connect an issue tracker");
   await page.click(".ipz-card >> text=ServiceNow");
   await footBtn(page, "Next").click();
   let d = await dlgText(page);
@@ -177,7 +177,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await footBtn(page, "Certify").click();
   t = await text(page);
   ok(/Certified by Marcus Bell/.test(t), "certify: the task is certified");
-  ok(/ready/.test(await text(page, ".phead")) || /Create work order and send to agent/.test(t), "certify: the task can be sent");
+  ok(/\bready\b/i.test(await text(page, ".phead")) || /Send to an agent/.test(t), "certify: the task can be sent");
   await shot(page, "03-certified");
   await done(page, errs, "certify");
 }
@@ -186,9 +186,9 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
 {
   const { page, errs } = await open(H + "/tsk_01K6SC1Y5M");
   const t = await text(page);
-  ok(/The description changed after certification/.test(t), "changed: says why it left ready");
+  ok(/The description changed after certification/.test(t), "changed: says why it is no longer ready");
   ok(/Certified against/.test(t) && /Now/.test(t), "changed: shows both versions");
-  ok(/Certify again/.test(t), "changed: offers to certify again");
+  ok(/Changed since certified/.test(t) && /Certify definition of done/.test(t), "changed: offers to certify again");
   await done(page, errs, "changed");
 }
 
@@ -238,7 +238,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/Hand review questions to @a-intel\.core\.validator/.test(t), "sent: the prompt is kept as sent");
   await page.goto(FILE + "?product=1&state=loaded&mobile=0" + H + "/tsk_01K6S2M4QF");
   await page.waitForTimeout(200);
-  ok(/in a work order/.test(await text(page)), "sent: the task is tagged to the work order");
+  ok(/in a work order/i.test(await text(page)), "sent: the task is tagged to the work order");
   await done(page, errs, "work order");
 }
 
@@ -261,7 +261,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/role = "Validate"/.test(b) && /max_returns = 2/.test(b), "builder: the file carries the stages and the return bound");
   ok(/by = "operator"/.test(b), "builder: the file ends with the operator");
   await footBtn(w.page, "Open pull request").click();
-  ok(/pull request open/.test(await text(w.page)), "builder: a workflow exists as a pull request until it merges");
+  ok(/In review/.test(await text(w.page)), "builder: a workflow exists as a pull request until it merges");
   await done(w.page, [...errs, ...w.errs], "workflow");
 }
 
@@ -270,15 +270,15 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   const { page, errs } = await open(H + "/fields");
   const t = await text(page);
   ok(/P0/.test(t) && /P3/.test(t) && /New Feature/.test(t) && /Documentation/.test(t) && /Chore/.test(t), "fields: the default labels ship");
-  ok((await page.locator("td b", { hasText: /^Done$/ }).count()) >= 1 && /Won't do/.test(t) && /Duplicate/.test(t) && /Cancelled/.test(t) && /Other/.test(t), "fields: the default resolutions ship");
+  ok((await page.locator("td b", { hasText: /^Done$/ }).count()) >= 1 && /Won't do/.test(t) && /Duplicate/.test(t) && /Canceled/.test(t) && /Other/.test(t), "fields: the default resolutions ship");
   ok(!/Won't fix|\bFixed\b/.test(t.replace(/Done, Fixed|Won't Do, Won't Fix/g, "")), "fields: no resolution is named Fixed or Won't fix");
   ok(/Open/.test(t) && /Blocked/.test(t) && /Closed/.test(t), "fields: the three status categories");
   await page.click("text=New Feature >> nth=0");
   const d = await dlgText(page);
-  ok(/A label will carry definition-of-done items/.test(d), "label: says labels will carry definition-of-done items");
-  await page.click('button[aria-label="Colour #9D8BE3"]');
+  ok(/Definition of done items/.test(d) && (await page.locator('#layer .dlg [title="Coming soon"]').count()) >= 1, "label: definition-of-done items are marked coming soon");
+  await page.click('button[aria-label="Color #9D8BE3"]');
   await footBtn(page, "Save label").click();
-  ok(/#9D8BE3/.test(await text(page)), "label: the colour is saved");
+  ok(/#9D8BE3/.test(await text(page)), "label: the color is saved");
   await page.locator("td b", { hasText: /^Won't do$/ }).click();
   let r = await dlgText(page);
   ok(/Creating one needs write/.test(r), "resolution: Linear without the write scope says what creating needs");
@@ -288,10 +288,10 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/label Won't do/.test(await text(page)), "resolution: the GitHub mapping names the label Oxagen creates");
   await page.close();
   const w = await open(H + "/work-orders/wo_01K6TA2M");
-  ok(!(await w.page.locator(".phead button", { hasText: "Accept the work" }).isDisabled()), "accept: enabled when every item is claimed");
-  await w.page.click(".phead >> text=Accept the work");
-  await footBtn(w.page, "Accept every item").click();
-  ok(/3 \/ 3/.test(await text(w.page)) && /accepted/.test(await text(w.page)), "accept: every item accepted");
+  ok(!(await w.page.locator(".phead button", { hasText: "Accept all items" }).isDisabled()), "accept: enabled when every item is claimed");
+  await w.page.click(".phead >> text=Accept all items");
+  await footBtn(w.page, "Accept all items").click();
+  ok(/3 \/ 3/.test(await text(w.page)) && /Accepted/.test(await text(w.page)), "accept: every item accepted");
   await done(w.page, [...errs, ...w.errs], "accept");
 }
 
@@ -365,13 +365,13 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await page.click("#woSend");
   await page.waitForTimeout(200);
   t = await text(page);
-  ok(/queued/.test(t) && /Queued by Marcus Bell/.test(t) && /Send now/.test(t) && /Withdraw/.test(t), "queue: the work order opens queued with Send now and Withdraw");
+  ok(/Queued/.test(t) && /Queued by Marcus Bell/.test(t) && /Send now/.test(t) && /Withdraw/.test(t), "queue: the work order opens queued with Send now and Withdraw");
   ok(/waits on #612 and #618/.test(t), "queue: the State tile names what it waits on");
   await shot(page, "10-queued");
   await page.click(".phead >> text=Withdraw");
   await page.click("#layer .dlg-f >> text=Withdraw");
   await page.waitForTimeout(150);
-  ok(/stopped/.test(await text(page, ".stat")), "queue: withdrawing before a start receipt stops it");
+  ok(/Stopped/.test(await text(page, ".stat")), "queue: withdrawing before a start receipt stops it");
   await done(page, errs, "graph");
 }
 {
@@ -402,12 +402,12 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   /* 14. a send to two agents */
   const { page, errs } = await open(H + "/work-orders");
   const t = await text(page, "tbody");
-  ok(/2 work orders/.test(t) && /partial/.test(t) && /1 of 2 in this send/.test(t) && /2 of 2 in this send/.test(t), "send: two work orders sit under one send row marked partial");
+  ok(/2 work orders/.test(t) && /Partial/.test(t) && /1 of 2 in this send/.test(t) && /2 of 2 in this send/.test(t), "send: two work orders sit under one send row marked partial");
   await page.click('tr[aria-label="Open wo_01K6TC5A"]');
   await page.waitForTimeout(200);
   ok(/1 of 2 in send snd_01K6TC59/.test(await text(page, ".phead")) && (await page.locator(".panel-h h3", { hasText: /^Send$/ }).count()) === 1, "send: the work order names its send and shows the Send panel");
-  await page.click(".phead >> text=Stop the work order");
-  await page.click("#layer .dlg-f >> text=Stop it");
+  await page.click(".phead >> text=Stop work order");
+  await page.click("#layer .dlg-f >> text=Stop work order");
   await page.waitForTimeout(150);
   ok(/Send again/.test(await text(page, ".phead")), "send: a stopped work order offers Send again");
   await done(page, errs, "send");

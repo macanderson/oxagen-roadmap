@@ -12,34 +12,34 @@
 
 ## Job
 
-The hosts agents run on, and what each host's seam earns. A runtime is a workstation, a CI runner, or a hosted container. Several agents can run on one host through one set of hooks, so a runtime is an object of its own rather than a field on an agent.
+The hosts your agents run on, and the enforcement tier each one supports. A runtime is a workstation, a CI runner, or a hosted container. Several agents can run on one host through one set of hooks, so a runtime is an object of its own rather than a field on an agent.
 
-What a runtime earns is the tier, and the tier bounds every claim Oxagen makes about a run, so the ladder lives here. Nothing on this page enrolls a host: enrollment is an installer, run on the host itself.
+A runtime supports a tier, and the tier bounds every claim oxagen makes about a run, so the ladder lives here. Nothing on this page enrolls a host. Enrollment is an installer, run on the host itself.
 
 ## What is on the page
 
-**Page header.** Eyebrow: the workspace name (“Core platform”), h1 “Runtimes”, subtext “The hosts agents run on, and what each host’s seam earns.” One action, **Enroll a runtime** (gold), which opens the wrap dialog.
+**Page header.** Eyebrow: the workspace name (“Core platform”), h1 “Runtimes”, subtext “The hosts your agents run on, and the enforcement tier each one supports.” One action, **Enroll a runtime** (gold), which opens the wrap dialog.
 
 **Stat strip**, four tiles, each a count over the workspace's runtimes:
 
-- **Runtimes**, with “N with no agent assigned”.
-- **Agents hosted**, with “a host is shared; its hooks see every one of them”.
-- **Highest tier earned**, the tier badge of the highest-ranked runtime, with “computed per run from what was actually routed”.
-- **Degraded**, with “a gap is a hole in the record, not a failed run” when any host is degraded, and “every collector is reporting” when none is.
+- **Runtimes**, with “N not enrolled”, or “N with no agent assigned”, or “All enrolled”.
+- **Agents hosted**, with “Several agents can share one host”.
+- **Highest tier**, the tier badge of the highest-ranked enrolled runtime, with “Computed per run from routed traffic”. With no enrolled host it reads “—” and “No host is enrolled”.
+- **Health**, “Healthy” with “Every collector is reporting”, or “N degraded” with the hosts that have telemetry gaps. The tile's tooltip reads “A telemetry gap is a hole in the record, not a failed run.”
 
-**Enrolled hosts** panel, badged with the runtime count. A row opens the runtime. Columns: **Runtime** (the name, with the operating system in mono underneath) · **Kind** (`workstation`, `ci`, or `hosted`) · **Harness** (with its version in mono) · **Model surface** · **Tier** · **Agents** (the count, with the agent keys underneath, or “enrolled, nothing assigned”) · **Collector** (`oxagend <version>`, with the telemetry gaps in 24 hours underneath) · **Hooks** (“N of 5”, with “some calls are recorded, not decided” below five) · **Health** · **Last checkpoint**.
+**Hosts** panel, badged with the runtime count. A row opens the runtime. Columns: **Runtime** (the name, with the operating system in mono underneath), **Kind** (`workstation`, `ci`, or `hosted`), **Harness** (with its version in mono), **Model surface**, **Tier**, **Agents** (the count, with the agent keys underneath, or “No agent assigned”, or “Not enrolled”), **Collector** (`oxagend <version>`, with “N telemetry gaps in 24h” underneath, or “—” and “Not installed”), **Hooks** (“N of 5”, with “Some calls are recorded without a decision” below five and “No hooks installed” at zero), **Health**, and **Last checkpoint**.
 
-A panel note, verbatim: “The tier is a property of the seam, not of the agent: two agents on one host earn the same tier, and the same agent moved to a weaker host earns less. It is computed per run from what was actually routed and is never upgraded after the fact.”
+A panel note, verbatim: “The tier belongs to the host, not the agent. Two agents on one host get the same tier, and an agent moved to a host with a lower tier gets that lower tier. The tier is computed per run from what was actually routed and is never raised afterward.”
 
-**The tier ladder** panel: `tierLadder(null)`, the four rungs `observe`, `harness`, `gateway`, and `contained`, each with what it needs and what it earns. A note: only `contained` earns the word enforced, and on `observe` nothing is delivered and nothing can refuse, which is why an agent with no runtime still has an identity and a toolbelt and receives no steering.
+**Tier ladder** panel: `tierLadder(null)`, the four rungs `observe`, `harness`, `gateway`, and `contained`, each with what it needs and what it supports. A note, verbatim: “Only `contained` is fully enforced: all traffic must pass through oxagen. On `observe`, nothing is delivered and nothing can be blocked. An agent with no runtime still has an identity and a toolbelt, but it receives no steering.”
 
 ### Runtime detail
 
 Reached at `#/:org/:ws/runtimes/<runtime-id>`. A back button, **← All runtimes**, then three panels.
 
-- **The host**, titled with the runtime name, subtitled “<kind> · <os> · started by <who>”, with the health badge in the header. A key-value list: **Workspace** · **Owner** · **Harness** (with its version) · **Collector** (`oxagend <version>`, with the telemetry gaps in the last 24 hours) · **Hook binary** (“oxagen-hook <version> · fails closed against its cached bundle”) · **Hooks written** (the hook list in mono, with “Fewer than five events are wired, so some calls are recorded rather than decided.” or “Five run as command hooks. The first four can refuse.”) · **Model surface** (with how model traffic is routed at this tier) · **Settings** · **Tier earned** (the badge, with “computed per run from what was actually routed”) · **Last checkpoint** (“<id> · chain intact”) · **Note**, where the host has one.
-- **Agents on this host**, badged with the count. Columns: **Agent** · **Operator** · **Tier** · **Principal** · **Runs 30d**. A row opens the agent. Where no agent is assigned: “This host is enrolled and no agent is assigned to it. It records nothing until one runs here.” A panel note: “Every agent here is seen through the same hooks and earns the same tier. An agent’s identity, its steering and its toolbelt are its own; only the seam is shared.”
-- **Rollback**: the unenroll command as a pre (`oxagen agent unenroll --host <id> --restore-settings`), a note that hooks stripped by hand make the next run record `hooks_removed` and drop the tier to `observe`, and two actions, **Run a smoke session** and **Unenroll** (danger).
+- **The host**, titled with the runtime name, subtitled “<kind> · <os> · started by <who>”, with the health badge in the header. A key-value list: **Workspace**, **Owner** (the person's name), **Harness** (with its version), **Collector** (`oxagend <version>`, with “N telemetry gaps in the last 24h. A gap is a hole in the record, not a failed run.”), **Hook binary** (`oxagen-hook <version>`, with “Refuses a call if it cannot reach oxagen and has no cached policy”), **Hooks installed** (the hook list in mono, with “Fewer than five events are wired, so some calls are recorded without a decision.” or “Five run as command hooks. The first four can refuse a call.”), **Model surface** (with how model traffic is routed at this tier), **Settings**, **Tier** (the badge, with “Computed per run from routed traffic”), **Last checkpoint** (“<id> · chain intact”), and **Note**, where the host has one. A host that is not enrolled shows “—” with “Not installed. This host is not enrolled.” for the collector, “None” and “Runs here are recorded only.” for the hooks, and “No run has been recorded here” for the checkpoint.
+- **Agents on this host**, badged with the count. Columns: **Agent**, **Operator**, **Tier**, **Principal**, and **Runs 30d**. A row opens the agent. Where no agent is assigned: “No agent is assigned to this host. It records nothing until one runs here.” Where the host is not enrolled: “This host is not enrolled, so no agent runs here yet.” A panel note: “Every agent here runs through the same hooks and gets the same tier. Each agent keeps its own identity, steering, and toolbelt.”
+- **Unenroll this host from the CLI**, on an enrolled host: the unenroll command as a pre (`oxagen agent unenroll --host <id> --restore-settings`), a note that hooks removed by hand make the next run record “Hooks removed” (`hooks_removed` in the tooltip) and drop the tier to `observe`, and two actions, **Run a test session** and **Unenroll** (danger). A host that is not enrolled shows **Enroll this host** instead: “Run the installer on the host itself. Enrolling installs the hooks and the collector.” with **Enroll a runtime**.
 
 **Dialogs this page opens:** `wrap` (enroll a runtime), `register`.
 
@@ -53,35 +53,35 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 |---|---|---|---|---|
 | Runtimes | `FIXTURES.RUNTIMES` as `RUNTIMES` | a host row per enrolled runtime, written by the installer | the enrollment record exists per agent, not per host | ❌ |
 | Agents on a host | `AGENTS[].host` via `rtAgents()` | the same host row, joined from the agent | `agent.agents` carries the host today | 🟡 |
-| Tier earned | `RUNTIMES[].tier` | computed per run from the frames, then rolled up to the host | computed per run; no host rollup | 🟡 |
+| Tier | `RUNTIMES[].tier` | computed per run from the frames, then rolled up to the host | computed per run; no host rollup | 🟡 |
 | Collector version and gaps | `RUNTIMES[].collector`, `.gaps` | the collector's own heartbeat | heartbeats exist; the 24-hour gap count does not | 🟡 |
 | Hooks written | `RUNTIMES[].hooks`, `.hookCount` | the settings file the installer wrote, read back at check-in | the installer writes it; nothing reads it back | ❌ |
 | Last checkpoint | `RUNTIMES[].checkpoint` | the frame chain's last checkpoint per host | the chain is per run | 🟡 |
 
 ## Functionality
 
-- The tier is a property of the seam. Two agents on one host earn the same tier, and the same agent on a weaker host earns less.
+- The tier belongs to the host. Two agents on one host get the same tier, and an agent moved to a host with a lower tier gets that lower tier.
 - A tier is computed per run from what was actually routed, and it is never upgraded after the fact.
 - Enrollment happens on the host. **Enroll a runtime** opens the wrap dialog, which shows the command; nothing on this page installs a hook.
-- A telemetry gap is a hole in the record, not a failed run. The Health cell says degraded; the collector cell says how many gaps.
-- Unenrolling revokes the host: calls routed through Oxagen are refused from then on, and the hooks are removed at the host's next check-in. Hooks stripped by hand instead make the next run record `hooks_removed`, and the tier falls to `observe`.
+- A telemetry gap is a hole in the record, not a failed run. The Health cell says degraded, and the collector cell says how many gaps.
+- Unenrolling revokes the host. Calls routed through oxagen are refused from then on, and the hooks are removed at the host's next check-in. Hooks removed by hand instead make the next run record `hooks_removed`, and the tier falls to `observe`.
 
 ## States
 
 - **loaded**: the page as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: “No runtime is enrolled”: “Until a host enrolls, an agent has an identity and a toolbelt but no hook is installed. Its runs are graded `observe`, and no report can say more.” Actions: **Enroll a runtime** (gold), **Show the CLI path**.
+- **empty**: “No runtime is enrolled”: “Until a host enrolls, an agent has an identity and a toolbelt but no hooks. Its runs are recorded at the `observe` tier.” Actions: **Enroll a runtime** (gold), **Show CLI steps**.
 - **loading**: the shell stays; the page body, header included, is replaced by the skeleton.
 - **error**: “Runtimes could not be loaded”, `503 collector_unreachable`, with **Try again**, **Open an incident**, and the trace line.
 - **access denied**: “You cannot see the runtimes of this workspace”, naming `runtime.read on core-platform`, with **Request access**, **Back to Fleet**, *Signed in as*, *Needed*, and *Decided by*.
 
 ## Mobile
 
-Both tables become stacks of cards, each cell labelled with its column header; the page never scrolls sideways; touch targets are ≥ 44 px; inputs are 16 px. Runtimes is inside the **More** bottom sheet, which is the lit thumb-bar slot on this page. Every dialog rises from the bottom edge as a sheet.
+Both tables become stacks of cards, each cell labeled with its column header; the page never scrolls sideways; touch targets are ≥ 44 px; inputs are 16 px. Runtimes is inside the **More** bottom sheet, which is the lit thumb-bar slot on this page. Every dialog rises from the bottom edge as a sheet.
 
 ## Permissions
 
 - Read: `runtime.read`
-- Writes (each a governed action recorded in Audit): `runtime.enroll`, `runtime.unenroll`; running a smoke session needs `agent.run`.
+- Writes (each a governed action recorded in Audit): `runtime.enroll`, `runtime.unenroll`; running a test session needs `agent.run`.
 
 ## Backend gaps this page depends on
 
@@ -92,7 +92,7 @@ Both tables become stacks of cards, each cell labelled with its column header; t
 
 ## Rules every build of this page must keep
 
-- Status vocabulary. Hook tier: delivered, recorded, client-attested, fail-open. Never "enforced", except for `contained`, and a control claim carries its scope: "for actions routed through Oxagen".
+- Status vocabulary. Hook tier: delivered, recorded, client-attested, fail-open. Never "enforced", except for `contained`, and a control claim carries its scope: "for actions routed through oxagen".
 - Every badge that describes trust shows the recorded value and nothing stronger. A tier is never upgraded after the fact.
 - Every explanation is a chain of links to runs, frames, and commits, not a summary.
 - Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast.

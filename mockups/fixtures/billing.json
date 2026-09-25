@@ -6,8 +6,9 @@
  "tier1": "free tier: unlimited runs, 30 days of evidence, 3 seats",
  "tier2": "32 blocks × $30.00 · governed actions above the included allowance",
  "amount": "965.40",
- "retention": "13 months included · 41.2 GB · $0.00",
- "discount": "Onboarding discount — 20% off usage for 12 months (converted 2026-03-02, 5 days after first run)",
+ "retention": "41.2 GB held · 13 months included",
+ "retainedGb": 41.2,
+ "discount": "20% off usage for 12 months (converted 2026-03-02, 5 days after first run)",
  "discountAmount": "-193.08",
  "total": "772.32",
  "next": "2026-10-01",
@@ -41,7 +42,7 @@
   {
    "m": "Governed actions",
    "v": "3,218",
-   "note": "the billable unit · one per call Oxagen decided, delivered and recorded"
+   "note": "the billable unit · one per call oxagen decided, delivered and recorded"
   },
   {
    "m": "Pending a signature",

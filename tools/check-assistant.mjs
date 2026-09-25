@@ -100,7 +100,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   /* its runs are Oxagen's: nothing in the panel links into the tenant's run index by the turn id */
   ok(!h.links.some(x => /runs\/run_01K5RT9X4M2/.test(x)), "the turn id is not a link into the tenant's run index");
   const badge = await page.evaluate(() => document.querySelector("#asst .msg .who .b")?.textContent || "");
-  ok(/not yours/i.test(badge), "the turn badge says whose run it is, got " + badge);
+  ok(/oxagen’s run/i.test(badge), "the turn badge says whose run it is, got " + badge);
 
   /* Escape closes it, and does not fall through to a route change */
   const before = await page.evaluate(() => location.hash);
@@ -128,7 +128,7 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
   await shot(page, "asst-engine-down");
   await page.evaluate(() => { [...document.querySelectorAll("#asst .btn")].find(b => /Retry/.test(b.textContent)).click(); });
   await page.waitForTimeout(300);
-  ok(/Narrow its belt/.test((await host(page)).text), "Retry brings the conversation back");
+  ok(/Narrow its toolbelt/.test((await host(page)).text), "Retry brings the conversation back");
   ok(errs.length === 0, "engine-down errors: " + errs.join(" | "));
   await page.close();
 }

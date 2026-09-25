@@ -17,7 +17,7 @@
   "settings": "user settings",
   "checkpoint": "seq 41,208 · 2026-09-11 09:12:44Z",
   "gaps": 0,
-  "owner": "mbell"
+  "owner": "marcus"
  },
  {
   "id": "ci-runner-07",
@@ -25,7 +25,7 @@
   "kind": "CI runner",
   "ws": "core-platform",
   "os": "Ubuntu 24.04 · x86_64",
-  "harness": "Stella",
+  "harness": "stella",
   "harnessV": "0.9.2",
   "model": "loopback proxy",
   "tier": "contained",
@@ -37,8 +37,8 @@
   "settings": "managed settings, locked",
   "checkpoint": "seq 12,904 · 2026-09-11 09:15:58Z",
   "gaps": 0,
-  "owner": "mbell",
-  "note": "The only runtime here under an OS sandbox whose sole egress is the gateway, which is what earns the contained tier."
+  "owner": "marcus",
+  "note": "The only runtime here in an OS sandbox whose only network exit is the gateway. That is what makes it contained."
  },
  {
   "id": "mbp-01",
@@ -66,7 +66,7 @@
   "name": "oxagen-hosted",
   "kind": "hosted",
   "ws": "finops",
-  "os": "Oxagen container · us-east-1",
+  "os": "oxagen container · us-east-1",
   "harness": "OpenAI Agents SDK",
   "harnessV": "0.9.1",
   "model": "gateway",
@@ -75,11 +75,11 @@
   "hooks": "SDK wrapper, all five events",
   "hookCount": 5,
   "health": "ok",
-  "started": "Oxagen scheduler",
+  "started": "oxagen scheduler",
   "settings": "managed settings, locked",
   "checkpoint": "seq 6,730 · 2026-09-11 08:52:10Z",
   "gaps": 0,
-  "owner": "dsong"
+  "owner": "dana"
  },
  {
   "id": "priya-mbp-14",
@@ -100,7 +100,7 @@
   "checkpoint": "seq 2,118 · 2026-09-11 07:58:33Z",
   "gaps": 0,
   "owner": "priya",
-  "note": "Model calls go from the harness to its provider, so spend on this runtime is client-attested."
+  "note": "Model calls go from the harness straight to its provider, so spend on this runtime is reported by harness."
  },
  {
   "id": "ci-runner-08",
@@ -108,7 +108,7 @@
   "kind": "CI runner",
   "ws": "core-platform",
   "os": "Ubuntu 24.04 · x86_64",
-  "harness": "Stella",
+  "harness": "stella",
   "harnessV": "0.9.2",
   "model": "not routed",
   "tier": "observe",
@@ -120,7 +120,7 @@
   "settings": "—",
   "checkpoint": "—",
   "gaps": 0,
-  "owner": "mbell",
-  "note": "Provisioned and never enrolled. Anything that runs here is recorded only, and no report about it can say more than observe."
+  "owner": "marcus",
+  "note": "Provisioned but never enrolled. Anything that runs here is recorded only, at the observe tier."
  }
 ]
