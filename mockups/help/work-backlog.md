@@ -30,36 +30,38 @@ D1 makes Work the primary surface: the workspace root lands here, and Backlog, W
 ### States
 Loaded is the designed state. Loading shows `skeleton()`. Error shows "503 work_index_unavailable". Denied names `work.read on core-platform`. Empty reads "No work in Core platform yet" with **Connect an issue tracker** (gold). On a phone the two Backlog actions stack under the heading, the gold one at full width, and each is at least 44 px tall.
 
-## Tiles
+## Stat cards {#work-backlog/stat-cards}
 
-Four tiles count what is ready, what waits on you, what is out in work orders, and which work orders have a live run.
+A scope switch, **All work** or **My work**, over four cards: Open, In progress, In review and Pending approvals.
 
 ### Purpose
-You open Work and want the state of the workspace in one glance: how much you could send now, how much needs your hand first, how much is already with an agent, and how much is running this minute. Each tile answers one of those with one number and one caption. Live work orders is also a way in: it opens the Work orders tab.
+You open Work and want the state of the workspace in one glance: how much is open, how much is out with an agent, how much waits on a person to accept, and how many calls wait on an approver. Each card answers one of those with one number and one caption, and each is a way in: Open goes to the Backlog, In progress and In review go to the In progress tab, and Pending approvals opens the Approvals drawer. **My work** narrows every card to what is yours.
 
 ### Rationale
-D3 retired the Fleet page, whose tiles counted runs. Work counts work, and the tiles are the part of Fleet that moved here. "Waiting on you" replaces Fleet's waiting count for work: the definitions of done a person must certify, plus the work orders a person must accept. A tile is a rollup of the rows below it and is never typed twice, so the tiles, the tab count and the sidebar count read the same sums. The work graph changed Ready to send: it counts only ready items the graph does not block (`work-graph-spec.md` §11.1), and the blocked count lives in the Blocked by column and the Graph rather than in a fifth tile.
+D3 retired the Fleet page, whose tiles counted runs. Work counts work, and the cards follow a work item through its life: open on the Backlog, in progress in a work order, in review while its work order waits on a person to accept, and back on the Backlog as accepted. The cards replaced four tiles (Ready to send, Waiting on you, In work orders and Live work orders) when the In progress tab arrived (`docs/work-in-flight-spec.md` §8.7). Ready to send lives on as the Open card's caption. A card is a rollup of the rows under the tabs and is never typed twice, so a card, a tab and the sidebar read the same sums. A work order waits on the person who sent it, so In review follows the sender, and My work counts it for that person.
 
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
-| Ready to send | `wsTasks()` where `ready==="ready"` and not `tkGraphBlocked()` | rollup over `tasks.tasks` and `tasks.task_dependencies` | none |
-| Waiting on you: to certify | `wsTasks()` in `draft` or `changed` | rollup over `tasks.tasks` | none |
-| Waiting on you: to accept | `woWaiting()` over `WORKORDERS` | `tasks.work_orders` in `waiting on you` | none |
-| In work orders | `wsTasks()` where `ready==="sent"` | rollup over `tasks.work_order_tasks` | none |
-| Live work orders | `woLive()` over `wsWorkOrders()` | work orders with a live run | none |
-| Parked on a person | `wsRunCounts(S.ws).parked` | `list_approvals` pending, by run | partial |
+| Open, and ready to send | `wsTasks()` through `wiOpen()`, ready and not `tkGraphBlocked()` | rollup over `tasks.tasks` and `tasks.task_dependencies` | none |
+| In progress, and with a live run | `wsTasks()` in `sent` whose work order does not wait on you, `woLive()` | `tasks.work_order_tasks` and `tasks.work_orders` by state | none |
+| In review | `wiInReview()`: a `sent` item whose work order is `waiting on you` | `tasks.work_orders` in `waiting on you` | none |
+| Pending approvals | `APPROVALS` pending in the workspace, through `apState()` | `list_approvals` | shipped |
+| My work | `wiMine()`, `apMine()` | the owner's member mapping, the work order's sender, and the approvers an approval names | none: `list_approvals` names no approver |
 
 ### Logic
-1. `backlogTab()` computes every tile from the rows it renders, then draws them with `tile()`.
-2. Ready to send counts `ready` rows with no open blocker. Caption "certified and unblocked".
-3. Waiting on you adds drafts and changed certifications to `woWaiting()`. Caption "7 to certify · 1 to accept". The value turns the approval colour while above zero.
-4. In work orders counts `sent` rows. Caption "sent to an agent or a workflow".
-5. Live work orders counts work orders where `woLive()` finds a live run, read off the run where it is in view. The caption adds "· 6 parked on a person" only while `wsRunCounts()` finds a parked run. The tile is a button that goes to `workHash("orders")`.
-6. The row carries `data-future`, because no contract stores a work item or a work order today.
+1. `workStats()` draws the cards under the header on every Work tab, from the same rows the tabs render.
+2. `S.workScope` holds the scope, `all` by default. It holds as you move between tabs, and it is session state, not a route segment.
+3. My work counts a work item whose owner is mapped to you or whose work order you sent (`wiMine()`), and an approval whose approvers name you (`apMine()`).
+4. Open counts items in no work order that are neither accepted nor closed. Its caption counts the `ready` ones the graph does not block: "3 ready to send".
+5. In progress counts `sent` items whose work order does not wait on a person. Its caption counts those with a live run: "3 with a live run".
+6. In review counts `sent` items whose work order waits on a person to accept. Its caption reads "waiting on a person to accept", or "waiting on you to accept" in My work.
+7. Pending approvals counts the workspace's pending approvals and turns the approval colour above zero. Its caption reads "calls waiting on an approver", or "calls you can approve" in My work.
+8. Each card is a button with an `aria-label` naming where it goes.
+9. The Open, In progress and In review cards carry `data-future`, because no contract stores a work item or a work order today.
 
 ### States
-A build renders each tile as `not recorded` until `list_tasks` and `list_work_orders` ship. A workspace with no provider and no written item shows the empty Backlog panel instead of the tiles. On a phone the tiles sit two by two.
+A build renders the three work cards as `not recorded` until `list_tasks` and `list_work_orders` ship. A workspace with no connected provider and no written work item (the demo's `finops`) shows the empty Backlog panel instead of the scope switch and the cards. On a phone the cards sit two by two.
 
 ## Tabs
 

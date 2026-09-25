@@ -116,7 +116,7 @@ function workStats(){
     return '<button class="stat click" onclick="'+on+'" aria-label="'+h(label)+'"'+(why?fut(why):'')+'><span class="k">'+k+'</span>'+
       '<span class="v"'+(col?' style="color:'+col+'"':'')+'>'+v+'</span><span class="s">'+s+'</span></button>';
   }
-  return '<div class="wk-stats"><div class="seg" role="group" aria-label="Scope">'+
+  return '<div class="wk-stats" data-help="work-backlog/stat-cards"><div class="seg" role="group" aria-label="Scope">'+
      '<button class="btn sm" aria-pressed="'+!mine+'" onclick="S.workScope=\'all\';render()">All work</button>'+
      '<button class="btn sm" aria-pressed="'+mine+'" onclick="S.workScope=\'mine\';render()">My work</button></div>'+
    '<div class="grid g4">'+
@@ -179,10 +179,9 @@ function inProgressTab(){
      '<td'+fut("work orders")+'>'+(wo?woBadge(wo):'<span class="dim">\u2014</span>')+'</td>'+
      '<td class="num"'+fut("work orders")+'>'+(items?woClaimed(wo)+' / '+items:'<span class="dim">\u2014</span>')+'</td>'+
      '<td class="mono dim" style="font-size:11.5px">'+h(t.updatedAt)+'</td></tr>';}).join("");
-  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>In progress</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Work items sent to an agent or a workflow in a work order.</p></div></div>'+
+  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>In progress</h3></div></div>'+
    '<div class="tw"><table><thead><tr><th>Work item</th><th data-facet="multi">Labels</th><th data-facet="multi">Owner</th><th>Work order</th><th>Sent to</th><th>State</th><th class="num">Items claimed</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A work item stays here until you accept every item of its work order. It then returns to the Backlog as Accepted.</div></div></div>';
+   '</div>';
 }
 /* A work item written in Oxagen, or opened from a finding, carries the Oxagen mark where a provider item carries its provider's. */
 function wiLogo(t,size){

@@ -26,7 +26,7 @@ function islPageId(r,under){
   if(p==="register") return "register-"+(r.step||"name");
   if(p==="organization") return S.tab.organization==="keys"?"organization-api-keys":S.tab.organization==="roles"?"organization-roles":"organization";
   if(p==="billing"||p==="audit"||p==="agents") return p;
-  if(p==="work"){ if(S.dlg==="intake"&&!under) return "work-intake"; return "work-"+({orders:"orders",workflows:"workflows",findings:"findings"}[r.tab]||"backlog"); }
+  if(p==="work"){ if(S.dlg==="intake"&&!under) return "work-intake"; return "work-"+({"in-progress":"in-progress",orders:"orders",workflows:"workflows",findings:"findings"}[r.tab]||"backlog"); }
   if(p==="workitem") return "work-item";
   if(p==="workorder") return "work-order";
   if(p==="run"){ if(typeof SKRUN!=="undefined"&&r.id===SKRUN.id) return "run-interjection";
@@ -50,7 +50,7 @@ var ISL_FAMILY={"agent-identity":"agent","agent-steering":"agent","agent-toolbel
   "steering-assignments":"steering","steering-compiler":"steering","steering-proposals":"steering","steering-prs":"steering",
   "spend-budgets":"spend","spend-optimization":"spend","repositories-copies":"repositories","repositories-changes":"repositories",
   "repositories-config":"repositories","organization-api-keys":"organization","organization-roles":"organization",
-  "work-orders":"work-backlog","work-workflows":"work-backlog","work-findings":"work-backlog"};
+  "work-in-progress":"work-backlog","work-orders":"work-backlog","work-workflows":"work-backlog","work-findings":"work-backlog"};
 function islFamily(id){return ISL_FAMILY[id]||null;}
 function islSlug(s){return String(s||"").toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");}
 function islHelp(key){
@@ -95,7 +95,7 @@ function islTargets(){
     pg.querySelectorAll(".phead").forEach(function(x){ if(!x.closest("#layer")) add(x,pid+"/header",x.querySelector(".t > .eyebrow, .eyebrow, .t h1, h1")); });
     pg.querySelectorAll(".sumry").forEach(function(x){add(x,pid+"/summary",null);});
     var strips=[];
-    pg.querySelectorAll(".stat").forEach(function(s){var p=s.parentElement; if(p&&!p.closest(".panel")&&strips.indexOf(p)<0) strips.push(p);});
+    pg.querySelectorAll(".stat").forEach(function(s){var p=s.parentElement; if(p&&!p.closest(".panel")&&!p.closest("[data-help]")&&strips.indexOf(p)<0) strips.push(p);});
     strips.forEach(function(p,i){add(p,pid+"/tiles"+(i?"-"+(i+1):""),null);});
     pg.querySelectorAll(".tabs").forEach(function(t){ if(!t.closest(".panel")&&!t.closest(".dlg")&&!t.closest("[data-help]")) add(t,pid+"/tabs",null); });
     pg.querySelectorAll(".panel").forEach(function(x){
