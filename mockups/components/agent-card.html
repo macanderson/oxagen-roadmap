@@ -164,7 +164,7 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 1301 to 1331 (agent card, its three layouts, and the rule comment above them), 1335 (a steer-list override)</td><td>The rules that draw it</td></tr>
-      <tr><td><code>agentCard(a, o)</code> at <code>engine.js:9983</code></td><td>The one function that draws an agent identity. <code>o.layout</code> picks list, compact, or detail. 17 calls.</td></tr>
+      <tr><td><code>agentCard(a, o)</code> at <code>engine.js:9986</code></td><td>The one function that draws an agent identity. <code>o.layout</code> picks list, compact, or detail. 17 calls.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -191,7 +191,7 @@
 ## Inputs
 
 1. mockups/components/agent-card.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 1301 to 1331 (agent card, its three layouts, and the rule comment above them), 1335 (a steer-list override). The mockup renders it with agentCard(a, o) (engine.js:9983).
+2. The design source: mockups/src/engine.css lines 1301 to 1331 (agent card, its three layouts, and the rule comment above them), 1335 (a steer-list override). The mockup renders it with agentCard(a, o) (engine.js:9986).
 3. The build's implementation: find it by its root selector (.agc) or its name, and list every route that renders it.
 4. Where to see it in the design: Agents, Work, Run, Approvals, Spend, Tools, Steering. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

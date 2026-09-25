@@ -98,8 +98,8 @@ export default {
     ["--gold", "Gold tone (see Findings)"],
   ],
   helpers: [
-    ["toast(msg, tone)", "engine.js:1975", "Appends one row to `#toast` and removes it after 4.2 seconds. 17 calls."],
-    ["act(msg, tone)", "engine.js:1974", "Records the message on state and calls `toast()`. Over 200 calls. The usual way a change reports itself."],
+    ["toast(msg, tone)", "engine.js:1978", "Appends one row to `#toast` and removes it after 4.2 seconds. 17 calls."],
+    ["act(msg, tone)", "engine.js:1977", "Records the message on state and calls `toast()`. Over 200 calls. The usual way a change reports itself."],
   ],
   sourceNotes: [
     "The stack container itself, `<div id=\"toast\" role=\"status\" aria-live=\"polite\">`, is written once in the page shell rather than by any function in `engine.js`.",
