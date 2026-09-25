@@ -11188,7 +11188,7 @@ pnpm --filter @oxagen/desktop dev          # tauri dev over Vite on :1420
 <header class="mast">
   <p class="eyebrow">Oxagen · Specification</p>
   <h1>Creating things in Oxagen: agents, tools, skills and Steering records</h1>
-  <dl class="facts"><dt>Status</dt><dd>Spec v1, for build, rev 1 scope. Amended 2026-09-24 by the fleet operations wedge (<code>fleet-operations-wedge.md</code>): a context record is a Steering record, skills are a kind on Steering › Sources, and the editing pages are the Steering source pages</dd><dt>Date</dt><dd>2026-09-15</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/engine.js</code> → <code>DLG_EXT.create</code>, <code>DLG_EXT.wz</code>, <code>wzTool</code>, <code>wzSkill</code>, <code>wzAgent</code>, <code>wzRecord</code>, <code>pRecord</code>, <code>pSkillSource</code>; rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs, it does not run); <code>mission-control-spec.md</code> §10 (context and steering), §14 (Mission Control); <code>w13-in-the-loop-scenario.md</code></dd><dt>Related</dt><dd><code>pages/steering-source.md</code>, <code>pages/steering-source-skill.md</code>, <code>pages/tools.md</code>, <code>pages/agents.md</code>, <code>pages/steering.md</code>, <code>pages/steering-prs.md</code>, <code>pages/repositories-changes.md</code></dd></dl>
+  <dl class="facts"><dt>Status</dt><dd>Spec v1, for build, rev 1 scope. Amended 2026-09-24 by the fleet operations wedge (<code>fleet-operations-wedge.md</code>): a context record is a Steering record, skills are a kind on Steering › Sources, and the editing pages are the Steering source pages</dd><dt>Date</dt><dd>2026-09-15</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Source</dt><dd><code>mockups/src/engine.js</code> → <code>DLG_EXT.create</code>, <code>DLG_EXT.wz</code>, <code>wzTool</code>, <code>wzSkill</code>, <code>wzAgent</code>, <code>wzRecord</code>, <code>wzImport</code>, <code>wzImpPublish</code>, <code>pRecord</code>, <code>pSkillSource</code>; rendered in <code>mockups/missioncontrol.html</code></dd><dt>Builds on</dt><dd>ADR-043 (Oxagen governs, it does not run); <code>mission-control-spec.md</code> §10 (context and steering), §14 (Mission Control); <code>w13-in-the-loop-scenario.md</code></dd><dt>Related</dt><dd><code>pages/steering-source.md</code>, <code>pages/steering-source-skill.md</code>, <code>pages/tools.md</code>, <code>pages/agents.md</code>, <code>pages/steering.md</code>, <code>pages/steering-prs.md</code>, <code>pages/repositories-changes.md</code></dd></dl>
 </header>
 <div class="grid">
 <nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#creation/1-one-shape-four-things">1. One shape, four things</a></li><li><a href="#creation/2-the-wizard-shell">2. The wizard shell</a></li><li><a href="#creation/3-a-tool">3. A tool</a></li><li><a href="#creation/4-a-skill">4. A skill</a></li><li><a href="#creation/5-a-steering-record">5. A Steering record</a></li><li><a href="#creation/6-what-this-feature-must-never-do">6. What this feature must never do</a></li></ol></nav>
@@ -11211,6 +11211,11 @@ repository, under your review. What Oxagen governs is the call, not the source.<
 any turn, and it is billed to Oxagen, never to the tenant: it is not one of your runs and it never
 appears in Work or in Spend. Every line it drafts is the operator's to change before anybody
 reviews it, and the wizard says so on every drafting step.</p>
+<p><strong>The Markdown import is the one exception.</strong> It reads CLAUDE.md, AGENTS.md, and any Markdown file
+into records and memories. The records it accepts take the same road, one pull request per source
+file. A line it accepts as a memory is written when the import publishes, steers at <code>may</code> or
+<code>info</code>, and opens no pull request. The <code>create</code> chooser says so in its note. The wizard is
+specified under Markdown import in <code>mockups/pages/steering.md</code>.</p>
 <h3 id="creation/entry-points">Entry points</h3>
 <p><code>Create</code> in ⌘K opens the chooser (<code>DLG_EXT.create</code>), and each page carries its own:</p>
 <div class="tw"><table>
@@ -11241,6 +11246,11 @@ reviews it, and the wizard says so on every drafting step.</p>
 <td>Steering › Sources</td>
 <td><strong>New source</strong>, then <strong>Add one</strong> on the Skill card</td>
 <td><code>DLG_EXT.newsrc</code>, then <code>wzOpen(&quot;skill&quot;)</code></td>
+</tr>
+<tr>
+<td>Steering (header, every tab)</td>
+<td><strong>Import Markdown</strong></td>
+<td><code>wzOpen(&quot;import&quot;)</code></td>
 </tr>
 </tbody>
 </table></div>
@@ -11343,7 +11353,8 @@ carries no grant. Steering › Compiler shows where the record lands for an agen
 stable prefix for <code>must</code> and <code>should</code>, the volatile selection for <code>may</code> and <code>info</code>.</p>
 <h2 id="creation/6-what-this-feature-must-never-do">6. What this feature must never do</h2>
 <ul>
-<li>Write a row. Every path ends on a pull request.</li>
+<li>Write a row. Every path ends on a pull request. A memory accepted in the Markdown import is the one
+exception (§1), and it steers at <code>may</code> or <code>info</code>.</li>
 <li>Let a record, a skill or a tool manifest grant authority. A record steers; a skill is prose; a tool
 version lands in the registry callable by nobody until a role grant puts it on a belt.</li>
 <li>Show a number stronger than the record holds, or a gate softer than policy would apply.</li>
