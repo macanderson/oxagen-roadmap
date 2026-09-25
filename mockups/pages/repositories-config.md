@@ -18,23 +18,23 @@ Show the workspace's configuration as the main repository holds it on the produc
 
 ## What is on the page
 
-**Header and tabs** as `repositories.md`, with Configuration selected. The tab carries no count. The header's **Add Oxagen to a repository** is the gold action.
+**Header and tabs** as `repositories.md`, with Configuration selected. The tab carries no count. The header's **Add .oxagen/** is the gold action.
 
 Two rows of two panels.
 
-**`.oxagen/workspace.toml`.** Subtext "On a-intel/platform at a4c91e2", or "On <repository> · not indexed yet" when the head is unknown. The file in full: its two comment lines (what the file is, and that the machine's link is the gitignored `.oxagen/workspace.json`), `schema = "oxagen-workspace/v0.1"`, `org`, `workspace`, one `[[repos]]` table with `name`, `role`, `production_branch` and `issues`, a `[servers]` table naming `github` and `linear` with their transport and downscope, and a `[budget]` table with `monthly_usd` and `per_run_usd`. The panel always shows the workspace's main repository, never the first repository in a list.
+**`.oxagen/workspace.toml`.** Subtext "On a-intel/platform at a4c91e2", or "On <repository> · not indexed yet" when the head is unknown. The file in full: its two comment lines (what the file is, and that the machine's link is the gitignored `.oxagen/workspace.json`), `schema = "oxagen-workspace/v0.1"`, `org`, `workspace`, one `[[repos]]` table with `name`, `role`, `production_branch` and `issues`, a `[providers]` table naming `github` and `linear` with their transport and downscope, and a `[budget]` table with `monthly_usd` and `per_run_usd`. The panel always shows the workspace's main repository, never the first repository in a list.
 
-**Drift.** Subtext "The file against what the control plane has. Reported, never repaired in place." **See the pull request** (small) opens Changes on the reconciliation pull request. The shell's list tools sit above the rows: Rows and a pager over the three rows. Columns: Declared · In the file · Live · Right.
+**Drift.** Subtext "The file compared with the control plane’s live state." **See the pull request** (small) opens Changes on the reconciliation pull request. The shell's list tools sit above the rows: Rows and a pager over the three rows. Columns: Declared · In the file · Live · Resolution.
 
-| Declared | In the file | Live | Right |
+| Declared | In the file | Live | Resolution |
 |---|---|---|---|
-| `[servers.linear]` | absent | present since 2026-09-14 | the file |
-| `budget.monthly_usd` | 400 | 600 | the file |
-| `[[repos]] a-intel/mobile` | role = linked | linked, no .oxagen/ | a person decides |
+| `[providers.linear]` | absent | present since 2026-09-14 | Use the file |
+| `budget.monthly_usd` | 400 | 600 | Use the file |
+| `[[repos]] a-intel/mobile` | role = linked | linked, no .oxagen/ | A person decides |
 
-Right is a badge: `the file` in the neutral ink, or `a person decides` in the approval ink. The note beneath: "Two of these the reconciler can argue for, because it read both sides. The third it cannot: a repository with no .oxagen/ is a decision about scope, not a difference between two records, so it waits for a person."
+Resolution is a badge: "Use the file" in the neutral ink, or "A person decides" in the approval ink. The note beneath: "Where the reconciler read both sides, it proposes the file’s value. A linked repository with no .oxagen/ is a scope decision, so it waits for a person."
 
-With no drift recorded for the workspace, the panel drops the table and says the reconciler read the main repository against the control plane and found nothing between them, and that an empty table means the file and the live state agree, not that nobody looked. Drift belongs to one workspace: another workspace's rows never render here.
+With no drift recorded for the workspace, the panel drops the table and reads "The reconciler last compared <main repository> with the control plane and found no drift." Drift belongs to one workspace: another workspace's rows never render here.
 
 **`.oxagen/rules/governance.toml`.** The file in full: two comment lines (it is read on the production branch when a pull request is opened and again when it is merged, and a missing file means team), `mode = "team"` and `separation_of_duties = false`. Beneath, the three modes:
 
@@ -48,7 +48,7 @@ A note says the mode is read on the production branch when a pull request is ope
 
 ```
 .oxagen/
-  workspace.toml             # linked repos, servers, budgets
+  workspace.toml             # linked repos, providers, budgets
   workspace.json             # gitignored · this machine’s link
   rules/
     governance.toml          # mode = team
@@ -60,7 +60,7 @@ A note says the mode is read on the production branch when a pull request is ope
   tools/<name>.toml          # manifest, schema, handler beside it
 ```
 
-The note: "Oxagen reads .oxagen/ and nothing else. Whatever sits under .stella/ is invisible to it, and it never looks."
+The note: "oxagen reads only .oxagen/. It does not read .stella/."
 
 **Dialogs this page opens:** none of its own. **See the pull request** moves to Changes, and the header opens the init wizard (specified in `repositories.md`).
 
@@ -93,7 +93,7 @@ The view carries no `data-future` mark. Drift and its **See the pull request** a
 
 ## States
 
-The catalog lists all five. The header, tabs and state panels are the Repositories ones in `repositories.md`. Empty reads "This workspace has no repository yet" with **Add Oxagen to a repository**. Loading is the skeleton. Error reads "Repositories could not be loaded" with `503 installation_unreachable`. Access denied reads "You cannot see this workspace’s repositories" and names `repository.read on core-platform`. On this tab the loaded state has two more forms: no drift recorded (the note above), and, in the app, no `workspace.toml` on the production branch yet.
+The catalog lists all five. The header, tabs and state panels are the Repositories ones in `repositories.md`. Empty reads "This workspace has no repository yet" with **Connect repository**. Loading is the skeleton. Error reads "Repositories could not be loaded" with `503 installation_unreachable`. Access denied reads "You cannot see this workspace’s repositories" and names `repository.read on core-platform`. On this tab the loaded state has two more forms: no drift recorded (the note above), and, in the app, no `workspace.toml` on the production branch yet.
 
 ## Mobile
 
@@ -119,5 +119,5 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 - Every enforcement claim states the tier. The mode copy claims only what the merge gate enforces, and nothing in `.oxagen/` grants authority.
 - Headers are rollups of the rows beneath them. The file panel and the Drift table describe the same file at the same commit, so a value in one cannot contradict the other.
 - Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
-- Exactly one gold action per screen: the header's **Add Oxagen to a repository**.
+- Exactly one gold action per screen: the header's **Add .oxagen/**.
 - A future-only field is marked in the design and renders as not recorded in a build until its contract ships.

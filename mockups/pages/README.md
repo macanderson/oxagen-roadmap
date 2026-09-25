@@ -47,7 +47,7 @@ the wedge deleted, and which spec took each deleted spec's content, is in
 
 - **Work** is the workspace root. `work-backlog`, `work-orders`, `work-workflows` and `work-findings`
   are its four tabs, `work-item` and `work-order` are one record each, and `work-intake` is the Intake
-  dialog (providers, fields, people and the connection wizard). A run is a child execution record of
+  dialog (trackers, fields, people and the connection wizard). A run is a child execution record of
   its work order. The product spec of work items and work orders is `docs/tasks-spec.md`, written
   when Work was called Tasks, and `node tools/check-tasks.mjs` walks it.
 - **A run** has five tabs: the Decision trace (`run`), `run-transcript`, `run-cost`,

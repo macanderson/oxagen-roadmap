@@ -740,7 +740,7 @@ var TOOLMETA={
  github__get_commit:["Get commit","read"], claude_code__Edit:["Edit file","file"],
  claude_code__WebFetch:["Fetch a web page","read"], expand_graph:["Expand the graph","read"],
  append_record:["Append record","record"], open_context_pr:["Open a pull request","vcs"],
- send_message:["Send message","message"], search_tools:["Search the belt","read"],
+ send_message:["Send message","message"], search_tools:["Search the toolbelt","read"],
  load_tools:["Load tool definitions","read"], okta__deactivate_user:["Deactivate user","access"]
 };
 /* The first row of a tool call leads with the tool's short name and its arguments: a harness-native
@@ -1203,7 +1203,7 @@ function pAgentSource(r){
    '<div class="row" style="margin-top:8px"><span class="b b-q mono">'+h(w.main)+'</span>'+
    (pend?'<span class="b b-approval"><span class="d"></span>'+h(pend.branch)+'</span>':'<span class="b b-q mono">'+h(w.branch)+' @ '+h(a.commit)+'</span>')+
    '<span class="b b-q">source of truth</span><span class="b b-q mono">'+h(a.key)+'</span></div>'+
-   '<p style="margin-top:8px">The agent definition is this file. Saving opens a pull request against the main repo. Nothing is written to Postgres.</p></div>'+
+   '<p style="margin-top:8px">The agent definition is this file. Saving opens a pull request against the main repo. Nothing is written to oxagen’s database.</p></div>'+
    '<div class="acts"><button class="btn" id="edDiscard" onclick="edDiscard()"'+(dirty?'':' disabled')+'>Discard</button>'+
    '<button class="btn primary" id="edSave" onclick="edSave()">Save</button></div></div>'+tabs+
    '<div class="panel ed" id="ed">'+
@@ -1404,7 +1404,7 @@ function commitBody(){
   return '<p class="eyebrow q"><span class="mono" style="text-transform:none;letter-spacing:0">.oxagen/agents/'+h(c.slug)+'.toml</span> · <span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span> · '+(c.prOnly?'already on the branch, no pull request yet':'from the '+(c.from==="editor"?"source editor":"form"))+'</p>'+
    '<div class="cm-repo"><span class="k">Repository</span><span class="v">'+h(w.main)+'<span class="b b-q" style="gap:4px">'+lock+' primary</span></span>'+
    '<span class="k">Base</span><span class="v">'+h(w.branch)+' @ '+h(a.commit)+'</span>'+
-   '<span class="hint">The primary repository bound to workspace '+h(w.name)+'. Every agent definition in this workspace lives here; it is not chosen per change.</span></div>'+
+   '<span class="hint">The main repository linked to workspace '+h(w.name)+'. Every agent definition in this workspace lives here; it is not chosen per change.</span></div>'+
    '<div class="fields"><div class="field"><label>Branch</label><select aria-label="Branch" onchange="cmSet(\'branch\',this.value);render()">'+
     '<option value="__new"'+(c.branch==="__new"?' selected':'')+'>+ New branch</option>'+
     (pend?'<option value="'+h(pend.branch)+'"'+(c.branch===pend.branch?' selected':'')+'>'+h(pend.branch)+' · this agent’s open change</option>':'')+
@@ -1520,7 +1520,8 @@ function pendingCount(w){var c=0;for(var i=0;i<APPROVALS.length;i++){if(APPROVAL
    its page shows and its title says what it counts. Each entry is [count, title]. A zero draws nothing.
    On first-run Fleet the organization is the one smoke run, so the counts read off it too. */
 // A nav count: a hidden space keeps "Fleet 8" from reading as "Fleet8", and the title names the count.
-function navCt(c,hot){return c&&c[0]?'<span class="vh"> </span><span class="ct'+(hot?' hot':'')+'" title="'+h(c[1])+'">'+c[0]+'</span>':'';}
+function navCt(c,hot){var n=Array.isArray(c)?c[0]:c, t=Array.isArray(c)?c[1]:"";
+  return n?'<span class="vh"> </span><span class="ct'+(hot?' hot':'')+'"'+(t?' title="'+h(t)+'"':'')+'>'+n+'</span>':'';}
 
 function sidebar(r){
   var w=ws(), cur=PAGES[r.page]||"";
@@ -1532,6 +1533,8 @@ function sidebar(r){
     return '<button class="navitem" '+(cur===label?'aria-current="page"':'')+' onclick="go(\''+href+'\')">'+
       '<span class="ic">'+icon(id)+'</span>'+label+navCt(c,hot)+'</button>';
   }
+  /* A count carries what it counts in its title: "3 items waiting on you", "2 hosts not healthy". */
+  function ct(n,one,many,tail){return n?[n,plural(n,one,many)+(tail?" "+tail:"")]:0;}
   var base="#/"+ORG.slug+"/"+w.slug;
   return (S.side?'<div class="side-scrim" onclick="S.side=false;render()"></div>':'')+'<aside class="side'+(S.side?" open":"")+'">'+
    '<div class="side-top"><div class="brandmark">'+LOGO+'</div>'+
@@ -1543,18 +1546,18 @@ function sidebar(r){
    '<div class="navlabel">Workspace</div>'+
    /* Work first: every run is a child of a work order, so what is live and what waits on you starts here.
       A count appears only where something waits on a person; parked calls count on the Approvals button. */
-   item("work","Work",base+"/work",fr?0:tkWaiting()+woWaiting(),true)+
+   item("work","Work",base+"/work",fr?0:ct(tkWaiting()+woWaiting(),"item","items","waiting on you"),true)+
    item("agents","Agents",base+"/agents")+
-   item("tools","Tools",base+"/tools",fr?0:proposals().length,true)+
-   item("steering","Steering",base+"/steering",fr?0:stgNavCount(w.slug),false)+
-   item("runtimes","Runtimes",base+"/runtimes",fr?0:RUNTIMES.filter(function(x){return x.ws===w.slug&&x.health!=="ok";}).length,true)+
+   item("tools","Tools",base+"/tools",fr?0:ct(proposals().length,"output schema","output schemas","to approve"),true)+
+   item("steering","Steering",base+"/steering",fr?0:ct(stgNavCount(w.slug),"proposal or pull request","proposals and pull requests","open"),false)+
+   item("runtimes","Runtimes",base+"/runtimes",fr?0:ct(RUNTIMES.filter(function(x){return x.ws===w.slug&&x.health!=="ok";}).length,"host","hosts","not healthy"),true)+
    item("spend","Spend",base+"/spend")+
-   item("repo","Repositories",base+"/repositories",fr?0:oxprOpen().length)+
+   item("repo","Repositories",base+"/repositories",fr?0:ct(oxprOpen().length,"open pull request"))+
    (PRODUCT?"":item("scenarios","Scenarios",base+"/scenarios"))+
    '<div class="navlabel">Organization</div>'+
    item("organization","Organization","#/"+ORG.slug)+
    item("billing","Billing","#/"+ORG.slug+"/billing")+
-   item("audit","Audit","#/"+ORG.slug+"/audit",fr?0:INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length,true)+
+   item("audit","Audit","#/"+ORG.slug+"/audit",fr?0:ct(INCIDENTS.filter(function(i){return i.status==="open"&&i.sev==="critical";}).length,"open critical incident"),true)+
    '</nav><div class="side-foot">'+
    asstLaunch()+
    '<div class="row" style="justify-content:space-between;padding:0 4px"><span class="mono dim" style="font-size:10.5px">'+orgAgents+(orgAgents===1?' agent':' agents')+' in this organization</span>'+
@@ -1868,7 +1871,7 @@ function approvalCard(a){
        '<dt>Operator</dt><dd>'+h((PEOPLE[a.op]||{name:a.op}).name)+'</dd>'+
        '<dt>Policy</dt><dd><span class="mono">'+h(a.policy)+'</span>'+(pol?' <span class="dim">activated '+h(pol.at)+' by '+h(pol.by)+'</span>':'')+'</dd>'+
        '<dt>Rule</dt><dd>'+h(a.rule)+'</dd>'+
-       '<dt>Tier</dt><dd>'+h(a.tier)+((TIER_RANK[a.tier]||0)>=2?' <span class="dim">· routed through the gateway, so oxagen decided before the call left the host</span>':a.tier==="harness"?' <span class="dim">· the call was routed through oxagen, so oxagen made the decision. The agent’s native tools are client-attested and fail-open</span>':' <span class="dim">· recorded only</span>')+'</dd></dl></div>')+
+       '<dt>Tier</dt><dd>'+h(a.tier)+((TIER_RANK[a.tier]||0)>=2?' <span class="dim">· routed through the gateway, so oxagen decided before the call left the host</span>':a.tier==="harness"?' <span class="dim">· the call was routed through oxagen, so oxagen made the decision. The agent’s native tools are reported by the harness and fail open</span>':' <span class="dim">· recorded only</span>')+'</dd></dl></div>')+
      '<div><p class="eyebrow q" style="margin-bottom:7px">The call</p><dl class="kv">'+
       '<dt>Tool version</dt><dd class="mono">'+h(a.tool)+'</dd>'+
       '<dt>Input digest</dt><dd class="mono">'+h(a.digest)+'</dd>'+
@@ -2598,7 +2601,7 @@ function runInstruments(R){
   var costCols=s.cost.map(function(c,i){
     return '<button type="button" class="c fk-model'+(i===s.n-1&&R.status==="live"?" cur":"")+'"'+tipAttr("Turn "+(i+1)+" · $"+c.toFixed(2)+" · cache "+per(s.cache[i])+(i===s.peak?" · dearest turn":""))+' aria-label="turn '+(i+1)+' $'+c.toFixed(2)+'" onclick="runTab(\'cost\')">'+
       (i===s.peak?'<span class="lab">$'+c.toFixed(2)+'</span>':'')+'<i style="height:'+Math.max(4,Math.round(c/mx*100))+'%"></i></button>';}).join("");
-  var t1=instTile("Cost so far",h(R.basis),usd(R.cost)+'<small>USD</small>',
+  var t1=instTile("Cost so far",h(keyText(R.basis)),usd(R.cost)+' <small>USD</small>',
     '<b>$'+s.perTurn.toFixed(2)+'</b> per turn · turn '+(s.peak+1)+' was the dearest'+(medRun!=null?' · '+deltaHtml(total,medRun,function(d){return "$"+d.toFixed(2);},false)+' vs this agent’s median run $'+medRun.toFixed(2):''),
     '<div class="cols">'+costCols+'<span class="base"></span></div><div class="ax"><span>turn 1</span><span>turn '+s.n+(R.status==="live"?" · live":"")+'</span></div>',
     'Cache hit <b>'+per(R.cache)+'</b> · saved about <b>'+usd(s.saved.toFixed(2))+'</b> compared with no cache');
@@ -2896,7 +2899,7 @@ function txAnswerIdx(rows,R){
 }
 function txGovChip(g){
   if(!g)return "";
-  return '<button class="tx-chip gov'+(g.o==="approve"?" appr":"")+'" title="policy decision · frame '+g.fr+'" onclick="openFrame('+g.fr+')">⚖ '+h(g.o)+' · '+h(g.rule)+' · fr '+g.fr+'</button>';
+  return '<button class="tx-chip gov'+(g.o==="approve"?" appr":"")+'" title="policy decision · frame '+g.fr+'" onclick="openFrame('+g.fr+')">⚖ '+h(g.o)+' · '+h(g.rule)+' · frame '+g.fr+'</button>';
 }
 function txRow(R,e,i,cum,rows,answerIdx){
   var q=S.tx.q.trim(),open=!!S.tx.open[i],inner="",dot="",body=e.body||"";
@@ -2906,7 +2909,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
   } else if(e.kind==="steer"){
     inner='<div class="tx-role steer"><div class="tx-rolegut"><span class="tx-roletag">STEER</span></div><div><div class="tx-prose">“'+txHi(body,q)+'”</div>'+
      '<div class="tx-sub"><span>'+h(e.meta.by)+' · '+h(e.meta.role)+'</span><span>delivered at the next boundary · '+e.meta.tok+' tok</span>'+
-     (e.fr!=null?'<button class="tx-chip gov appr" onclick="openFrame('+e.fr+')">control.steer · fr '+e.fr+'</button>':'')+'</div></div></div>';
+     (e.fr!=null?'<button class="tx-chip gov appr" onclick="openFrame('+e.fr+')">control.steer · frame '+e.fr+'</button>':'')+'</div></div></div>';
   } else if(e.kind==="text"){
     var isAns=i===answerIdx,f=txFold(body),folded=!isAns&&!open&&f.rest.length>0;
     inner='<div class="tx-role agent"><div class="tx-rolegut"><span class="tx-roletag">'+(isAns?"ANSWER":"AGENT")+'</span></div><div class="tx-prose'+(isAns?' tx-answer':'')+'">'+
@@ -2920,14 +2923,14 @@ function txRow(R,e,i,cum,rows,answerIdx){
     var m=e.meta||{};
     inner='<div class="tx-usage"><span class="u">usage: '+h(m.model||"")+(m.tin!=null?' · in '+tokn(m.tin)+' · cache '+tokn(m.cache||0)+' · out '+tokn(m.tout||0):'')+(m.req?' · '+h(m.req):'')+'</span>'+
      '<span class="tx-chips"><span class="tx-chip cost">'+txMoney(m.cost||0)+'</span><span class="tx-chip burn">Σ '+txMoney(cum)+'</span>'+
-     (e.fr!=null?'<button class="tx-chip gov" onclick="openFrame('+e.fr+')">model.response · fr '+e.fr+'</button>':'')+'</span></div>';
+     (e.fr!=null?'<button class="tx-chip gov" onclick="openFrame('+e.fr+')">model.response · frame '+e.fr+'</button>':'')+'</span></div>';
   } else if(e.kind==="context_recall"){
     var m2=e.meta||{},list=open?CTXF:CTXF.slice(0,3),hid=CTXF.length-list.length,hidTok=0;
     CTXF.slice(list.length).forEach(function(f){hidTok+=f.tok;});
     inner='<div><button class="tx-fold" style="color:var(--st-proven);font-weight:600;font-size:12.5px" onclick="txOpen('+i+')">◉ recall · '+plural(m2.frames,"frame")+' · '+tokn(m2.tok)+' tok · '+m2.scored+' scored · '+m2.ms+' ms</button>'+
      '<div class="tx-recall">'+list.map(function(f){return '<span class="k">'+h(f.kind)+'</span><span class="l">'+txHi(f.label,q)+(open?' <span class="dim">· '+h(f.node)+' · score '+f.score+'</span>':'')+'</span><span class="n">'+tokn(f.tok)+' tok</span>';}).join("")+'</div>'+
      (hid>0?'<button class="tx-fold" style="margin-left:20px" onclick="txOpen('+i+')">⋯ '+hid+' more · '+tokn(hidTok)+' tok · provenance</button>':'')+
-     (e.fr!=null?'<div class="tx-sub" style="margin-left:20px"><button class="tx-chip gov" onclick="openFrame('+e.fr+')">context.assembled · fr '+e.fr+'</button><button class="tx-chip" style="cursor:pointer" onclick="runTab(\'trace\')">open the Context tab</button></div>':'')+'</div>';
+     (e.fr!=null?'<div class="tx-sub" style="margin-left:20px"><button class="tx-chip gov" onclick="openFrame('+e.fr+')">context.assembled · frame '+e.fr+'</button><button class="tx-chip" style="cursor:pointer" onclick="runTab(\'trace\')">open the Context tab</button></div>':'')+'</div>';
   } else if(e.kind==="tool"){
     var r=e.res,failed=!!(r&&r.err),pending=!r,cls=e.cls||"execute";
     dot='<span class="tx-dot'+(cls==="mutate"?' solid':'')+'" style="color:var(--'+(failed?'st-failed':'tx-'+cls)+')"></span>';
@@ -2935,7 +2938,7 @@ function txRow(R,e,i,cum,rows,answerIdx){
     if(e.diff){var st=diffStat(txDiffRows(e.diff.before,e.diff.after));chips+='<span class="tx-chip"><span style="color:var(--st-allowed)">+'+st.add+'</span> <span style="color:var(--st-denied)">−'+st.del+'</span></span>';}
     if(r&&r.ms!=null)chips+='<span class="tx-chip'+(failed?' err':'')+'">'+(r.ms>=1000?(r.ms/1000).toFixed(1)+' s':r.ms+' ms')+'</span>';
     if(r&&r.body&&!e.diff){var ln=r.body.split("\n").length;if(ln>1)chips+='<span class="tx-chip'+(failed?' err':'')+'">'+ln+' lines</span>';}
-    if(e.parked)chips+='<button class="tx-chip gov appr" onclick="openFrame('+e.parked.fr+')">⏸ parked · '+h(e.parked.ap)+' · fr '+e.parked.fr+'</button>';
+    if(e.parked)chips+='<button class="tx-chip gov appr" onclick="openFrame('+e.parked.fr+')">⏸ parked · '+h(e.parked.ap)+' · frame '+e.parked.fr+'</button>';
     else if(pending)chips+='<span class="tx-chip">running…</span>';
     chips+=txGovChip(e.gov);
     if(e.raw)chips+='<button class="tx-fold" onclick="txOpen('+i+')" aria-label="'+(open?"hide":"show")+' arguments">'+(open?"⏶":"⋯")+'</button>';
@@ -3128,7 +3131,7 @@ function runGraphOf(R){
 }
 function edgeChip(it){
   var lab=it.edge==="observed"?"observed":it.edge==="stated"?"stated":"inferred"+(it.conf!=null?" · "+Math.round(it.conf*100)+"%":"");
-  var frs=(it.fr||[]).map(function(f){return '<button class="edge" onclick="openFrame('+f+')">fr '+f+'</button>';}).join("");
+  var frs=(it.fr||[]).map(function(f){return SEP+'<button class="edge" onclick="openFrame('+f+')">frame '+f+'</button>';}).join("");
   return '<span class="ev"><span class="edge '+h(it.edge)+'">'+lab+'</span>'+frs+'</span>';
 }
 /* Where an artifact lives on the forge. A reference with no address stays plain text. */
@@ -3833,7 +3836,7 @@ function costTab(R){
     '<div class="hr"></div><dl class="kv">'+
     '<dt>Effective input price</dt><dd>$1.88 per million across all input classes</dd>'+
     '<dt>Cache write cost share</dt><dd>'+(m.cacheWrite?pct(m.cacheWrite,m.tokIn):'0.0%, nothing written this run')+'</dd>'+
-    '<dt>Basis</dt><dd><span class="basis">'+h(R.basis)+'</span>'+(R.basis==="gateway_observed"?' · counted by the proxy from the bytes that passed through it':' · the harness\u2019s own telemetry; absent classes are marked, never zero')+'</dd>'+
+    '<dt>Basis</dt><dd>'+basisChip(R.basis)+(R.basis==="gateway_observed"?' · counted by the proxy from the bytes that passed through it':' · the harness\u2019s own telemetry; absent classes are marked, never zero')+'</dd>'+
     '<dt>Productive ratio</dt><dd>'+per(R.ratio)+' · '+s.adv+' of '+R.steps+' steps advanced the task</dd></dl></div></div></div>';
 }
 
@@ -3910,7 +3913,7 @@ function pAgents(){
   if(S.state==="error") return errorState("Agents","503 iam_principals_unavailable");
   if(S.state==="denied") return deniedState("the agents in this workspace","agent.read on core-platform");
   if(S.state==="empty") return emptyState("No agent registered in "+w.name,
-    "An agent's identity lives in Postgres. Its definition is a file in <span class=\"mono\">.oxagen/agents/</span> in the main repo. Registering one opens a pull request. Nothing is written to Postgres first.",
+    "An agent's identity lives in oxagen’s database. Its definition is a file in <span class=\"mono\">.oxagen/agents/</span> in the main repo. Registering one opens a pull request. Nothing is written to the database first.",
     '<button class="btn primary" onclick="regStart()">Register agent</button>'+
     '<button class="btn" onclick="openDialog(\'register\')">Show the CLI path</button>');
 
@@ -4238,7 +4241,7 @@ function pAgent(r){
   if(S.state==="error") return errorState("This agent","503 iam_principals_unavailable");
   if(S.state==="denied") return deniedState("this agent","agent.read on core-platform");
   if(S.state==="empty") return emptyState("This agent has never run",
-    "It is registered and enrolled, but no frame has arrived. Its belt is computed at run start, so there is nothing yet to show for tools either.",
+    "It is registered and enrolled, but no frame has arrived. Its toolbelt is computed at run start, so there is nothing yet to show for tools either.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/work\')">Back to Work</button>');
 
   /* the belt search and the presentation override are per agent, not global */
@@ -4338,7 +4341,7 @@ function aIdentity(a,r){
     '<dt>Runtime</dt><dd class="mono">'+h(a.host||"not enrolled")+
      '<span class="sub">'+(a.enrolled?'its device key countersigns this agent\'s checkpoints':'nothing signs its checkpoints yet')+'</span></dd>'+
     '<dt>Delegation</dt><dd>subagents narrow, never widen'+
-     '<span class="sub">a subagent\'s effective permission is this agent\'s grants ∩ the invoking human\'s grants</span></dd>'+
+     '<span class="sub">a subagent may do only what both this agent and the invoking person are granted</span></dd>'+
     '<dt>Tamper incidents</dt><dd>'+(tamperCount(a)
       ?'<span class="b b-critical"><span class="d"></span>'+tamperCount(a)+' · '+keyLabel(agentTamper(a)[0].kind)+'</span> '+
        '<button class="btn sm ghost" onclick="S.tab.agent=\'activity\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/activity\')">Read them</button>'
@@ -4564,7 +4567,7 @@ function aToolbelt(a,r){
     '<button class="btn sm" aria-pressed="'+(mode==="full")+'" onclick="S.beltMode=\'full\';render()">All tools sent</button></div></div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
    (mode==="searchable"
-    ? '<div class="note"><b>Searchable belt.</b> The request carries two meta-tools plus the tools pinned as '+
+    ? '<div class="note"><b>Searchable.</b> The request carries two meta-tools plus the tools pinned as '+
       'always-present: '+pinned.length+' definitions instead of '+total+'. Both meta-tools are themselves governed calls '+
       'recorded as frames, so the record shows what the model looked for and what it was shown.</div>'+
       '<pre><span class="c">// the tools block of the next model request, verbatim</span>\n[\n'+
@@ -4578,9 +4581,9 @@ function aToolbelt(a,r){
       'the model saw.</p>'
     : '<div class="note"><b>All tools sent.</b> Every definition is in the request, and there are no meta-tools to call. '+
       (total>FULL_BELT_LIMIT
-       ? 'At '+total+' tools this belt is over the workspace limit of '+FULL_BELT_LIMIT+'. This is the view a smaller belt gets, shown here for comparison.'
+       ? 'At '+total+' tools this toolbelt is over the workspace limit of '+FULL_BELT_LIMIT+'. This is the view a smaller toolbelt gets, shown here for comparison.'
        : 'At '+total+' tools it is under the limit of '+FULL_BELT_LIMIT+', which is how this agent actually runs.')+
-      ' The tool-definition token count is measured on every model call, and the findings job flags belts wider than the agent uses.</div>'+
+      ' The tool-definition token count is measured on every model call, and the findings job flags toolbelts wider than the agent uses.</div>'+
       '<pre><span class="c">// '+total+' definitions · '+(total*323).toLocaleString()+' tokens of tool definitions</span>\n[\n'+
       belt.filter(function(x){return !x.meta;}).slice(0,6).map(function(x){
        return '  { <span class="k">"name"</span>: <span class="s">"'+h(x.n)+'"</span>, <span class="k">"input_schema"</span>: { <span class="c">/* '+h(x.dig)+' */</span> },\n'+
@@ -4970,7 +4973,7 @@ function pTools(){
      '<div class="panel"><div class="panel-h"><h3>Where a version lives</h3></div>'+
      '<div class="panel-b"><dl class="kv">'+
       '<dt>Store</dt><dd>One stored version holding the rules, the tests and the version string. A policy version is not a Steering record and never reaches a model.</dd>'+
-      '<dt>In regulated mode</dt><dd>The rules are a file in <span class="mono">.oxagen/policy/</span> in the main repo, and a change is a pull request. Postgres holds the compiled copy the gateway reads.</dd>'+
+      '<dt>In regulated mode</dt><dd>The rules are a file in <span class="mono">.oxagen/policy/</span> in the main repo, and a change is a pull request. oxagen’s database holds the compiled copy the gateway reads.</dd>'+
       '<dt>Compiled from</dt><dd>The rules you write here, plus the enforcement grants on each agent and the role grants on each operator. A rule can read those, so you do not restate a grant as a rule.</dd>'+
       '<dt>Who reads it</dt><dd>The gateway, on every tool call, before the call leaves. No model is in the decision path, so the same call and the same version always decide the same way.</dd>'+
       '<dt>What it writes</dt><dd>One <span class="mono">policy.decision</span> frame per call, naming the version and the rules that fired. The Decision trace reads the decision back without re-running it.</dd>'+
@@ -5243,7 +5246,7 @@ DLG_EXT.serverdel=function(id){
   var tv=serverTools(s.id), belts=providerBelts(s.id).length;
   return {t:"Remove "+s.name+"?",w:false,
    b:'<div class="warn"><b>'+s.versions+' tool versions leave the registry.</b> '+
-     (belts?belts+(belts>1?' toolbelts lose a tool and the calls they cover':' toolbelt loses a tool and the calls it covers')+' are denied as <span class="mono">unknown_tool</span> from the next call boundary.':'No belt reaches it, so nothing in flight is denied.')+'</div>'+
+     (belts?belts+(belts>1?' toolbelts lose a tool and the calls they cover':' toolbelt loses a tool and the calls it covers')+' are denied as <span class="mono">unknown_tool</span> from the next call boundary.':'No toolbelt reaches it, so nothing in flight is denied.')+'</div>'+
     '<div class="note">The registry rows are kept, so a run that already called this server still cites the version it called. Re-importing the same endpoint restores it.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn danger" onclick="serverDelete(\''+s.id+'\')">Remove it</button>'};
@@ -6833,7 +6836,7 @@ function rtDetail(rt){
    plane actually has. Nothing on this page writes a row and nothing here merges. */
 
 var OXPR_KIND={
- bootstrap:{l:"Oxagen init", d:"the .oxagen/ tree itself",        i:"repo"},
+ bootstrap:{l:"oxagen init", d:"the .oxagen/ tree itself",        i:"repo"},
  record:   {l:"Steering record", d:".oxagen/rules/<lineage>.toml", i:"steering"},
  skill:    {l:"skill",       d:".oxagen/skills/<name>/SKILL.md",  i:"skills"},
  agent:    {l:"agent",       d:".oxagen/agents/<slug>.toml",      i:"agents"},
@@ -6952,7 +6955,7 @@ function repoTab(){
    '<div class="grow"><b>A run on '+h(unbound.map(function(r){return r.n;}).join(", "))+' is steered by the main repo and by nothing of its own.</b> '+
    'Repository-scoped records live in that repository, so until it has a <span class="mono">.oxagen/</span> tree there is nowhere to put one, '+
    'and a record that tried would have to claim workspace scope, which the checks refuse.</div>'+
-   '<button class="btn" onclick="wzOpen(\'init\',\''+h(unbound[0].n)+'\')">Add Oxagen</button></div>':'';
+   '<button class="btn" onclick="wzOpen(\'init\',\''+h(unbound[0].n)+'\')">Add .oxagen/</button></div>':'';
 
   var trows=rows.map(function(r){
     var st=oxState(r), avail=r.role==="available";
@@ -7759,7 +7762,7 @@ var PLANE_MODES=[
  ["dedicated","Dedicated","Your own database cluster and object-storage bucket. Identity, IAM, billing and the price book stay in shared infrastructure."],
  ["firewall","Behind the firewall","The same containers, as a signed bundle you run. Outbound only, and optional. Fully air-gapped is supported, not degraded."]];
 var FW_OUTBOUND=[
- ["GitHub Enterprise Server · github.a-intel.internal","repo binding, pull requests, checks, code graph","in use","allowed"],
+ ["GitHub Enterprise Server · github.a-intel.internal","repository link, pull requests, checks, code graph","in use","allowed"],
  ["Model providers","none, every tier resolves inside the network","not used","q"],
  ["Voyage AI","none, embeddings served in-firewall","not used","q"],
  ["Signed usage report · meter.oxagen.com","licence metering: run counts and retained GB, no content","weekly","allowed"],
@@ -7961,7 +7964,7 @@ var INCIDENTS=[
   status:"resolved",closedAt:"2026-09-05 16:10",closedBy:"Sofia Ruiz",runs:0},
  {id:"inc_01K4M2A8",sev:"warning",title:"Harness permission hooks removed mid-run",kind:"hooks_removed",at:"2026-09-02 09:38",by:"gateway",
   scope:"a-intel.core.triage · host mbp-01",
-  detail:"The Claude Code harness on mbp-01 reported its permission hooks gone between two steps. oxagen dropped the run to observe tier for its remainder and labeled every later frame client-attested.",
+  detail:"The Claude Code harness on mbp-01 reported its permission hooks gone between two steps. oxagen dropped the run to observe tier for its remainder and labeled every later frame as reported by the harness.",
   stopped:"Every later frame was marked unverifiable.",
   resolution:"A local harness update rewrote settings.json. Hooks restored and the host re-enrolled through the wrapper. Frames from the observe window stay labeled as such; the label is never upgraded after the fact.",
   status:"resolved",closedAt:"2026-09-02 11:20",closedBy:"Marcus Bell",runs:1},
@@ -7992,12 +7995,12 @@ var RECEIPTS=[
   effectRows:[["Dispatched","never"],["Response digest","—"],["Output validation","—"],["Redactions","—"],["External effect id","none"],["Idempotency key","idk_c0771e9d (unused)",1]],
   integrity:[["Frame hash","sha256:31be0d7712c4a9e8",1],["Chain position","19 of 26 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · verified",1],["Tier","harness · routed through oxagen. Denials are recorded and cost nothing"]]},
  {id:"rcp_01K4ZA0J3",at:"2026-09-10 13:02:44.207Z",agent:"a-intel.core.docs-writer",operator:"Helena Vogt",tool:"notion__append_block@2",decision:"observed",tier:"observe",
-  effect:"blk_9a71… (client-attested)",amount:"—",ws:"core-platform",runId:"run_01K5ZA0J2M",
+  effect:"blk_9a71… (reported by harness)",amount:"—",ws:"core-platform",runId:"run_01K5ZA0J2M",
   who:[["Operator","Helena Vogt · usr_01K2C4VG · workspace.member"],["Agent","a-intel.core.docs-writer · prn_01K3V2",1],["Run · turn · step","run_01K5ZA0J2M · 1 · 4",1],["Task","architecture notes"]],
   what:[["Tool version","notion__append_block@2",1],["Schema digest","sha256:5b1290aa04e7c3d1",1],["Input digest","sha256:9e33abc027f14d86",1],["Input","attested by the client · size and type checked only"]],
   authority:[["Decision","observed (oxagen did not decide this call)"],["Policy version","n/a at observe tier"],["Rules fired","none (no gate ran)"],["Grants used","not consulted"],["Delegation ceiling","not evaluated"],["Mandate","n/a"],["Approval","n/a"],["Taint sources","not computed"]],
   credential:[["Credential grant","none (the agent used its own credential)"],["Connection","not brokered"],["Minted","—"],["TTL","—"],["Provider token id","—"],["Agent saw","whatever it held. oxagen cannot say."]],
-  effectRows:[["Dispatched","reported by the client at 2026-09-10 13:02:44.207Z"],["Provider","notion (unverified)"],["Response digest","sha256:1f770233bd9a4c08 (client-attested)",1],["Output validation","size and type only"],["External effect id","blk_9a71… (client-attested)",1],["Idempotency key","not enforced"]],
+  effectRows:[["Dispatched","reported by the client at 2026-09-10 13:02:44.207Z"],["Provider","notion (unverified)"],["Response digest","sha256:1f770233bd9a4c08 (reported by harness)",1],["Output validation","size and type only"],["External effect id","blk_9a71… (reported by harness)",1],["Idempotency key","not enforced"]],
   integrity:[["Frame hash","sha256:aa77110c2e5d93b4",1],["Chain position","4 of 9 · verified"],["Gateway signature","ed25519 · "+ORG.attester+" · signs the record, not the call",1],["Tier","observe · recorded only. This receipt can never be shown as decided by oxagen."]]}
 ];
 
@@ -8024,7 +8027,7 @@ var RETENTION_TIERS=[
  ["Ledger","Database","runs, attempts, seals, attestation, counts, cost, tier, gaps","forever","412k runs"],
  ["Frames","Database","frame rows with digests, cost, policy decisions","hot window · 13 months","2.6M frames"],
  ["Bodies and segments","Object storage, write-once","encrypted bodies; per-seal archive segment, Merkle root, attestation","7 years",retainedGbText()],
- ["Control-plane audit","Database","admin actions, IAM changes, repo bindings, plane changes, key rotations","7 years","118k events"]
+ ["Control-plane audit","Database","admin actions, IAM changes, repository links, plane changes, key rotations","7 years","118k events"]
 ];
 
 /* ---- small renderers shared by the audit tabs ---- */
@@ -8077,14 +8080,14 @@ function auditEvents(){
     ["Denied",String(den),"denials are recorded and cost nothing"],
     ["By a service principal",String(svc),"Terraform, CI, exports, and the audit archive"],
     ["By an agent",String(AUDIT.filter(function(e){return auditActorKind(e.who)==="agent";}).length),"each one a governed action with a receipt"]])+
-   '<div class="panel"><div class="panel-h"><h3>Control-plane events</h3><span class="muted" style="font-size:12.5px">admin actions, IAM changes, repo bindings, plane changes, key rotations</span>'+
+   '<div class="panel"><div class="panel-h"><h3>Control-plane events</h3><span class="muted" style="font-size:12.5px">admin actions, IAM changes, repository links, plane changes, key rotations</span>'+
    '<div class="sp">'+
    '<select class="sel-sm" aria-label="Actor" onchange="act(\'Filtering is a mockup here. The API takes actor_kind.\')"><option>All actors</option><option>Humans</option><option>Agents</option><option>Services</option></select>'+
    '<select class="sel-sm" aria-label="Range" onchange="act(\'Range is a mockup here. The API takes since and until.\')"><option>Last 48 hours</option><option>Last 7 days</option><option>Last 30 days</option></select>'+
    '<button class="btn sm" onclick="openDialog(\'exportevents\')">Export CSV</button></div></div>'+
    '<div class="panel-b" style="border-bottom:1px solid var(--border)"><div class="field" style="margin:0"><input placeholder="Search events, receipts, actors, external ids" aria-label="Search the audit record"></div></div>'+
    '<div class="tw"><table><thead><tr><th>When</th><th>Event</th><th>Actor</th><th>What</th><th>Result</th><th>Severity</th><th>Reference</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">oxagen writes the record. An agent cannot. A client-attested call is labeled as such and can never be shown as decided by oxagen.</div></div></div>';
+   '<div class="panel-b"><div class="note">oxagen writes the record. An agent cannot. A call the harness reported is labeled as such and can never be shown as decided by oxagen.</div></div></div>';
 }
 
 function auditIncidents(){
@@ -8121,7 +8124,7 @@ function auditReceipts(){
      '<td class="num mono" style="font-size:12px">'+h(r.amount)+'</td><td class="mono" style="font-size:11.5px">'+h(r.effect)+'</td><td>'+tierBadge(r.tier)+'</td></tr>';}).join("");
   var chips=["stripe","harness","observe","deny","a-intel.finops.invoice-bot","pi_3QaL8f2Xk"];
   return '<div class="panel"><div class="panel-h"><h3>Receipt search</h3><span class="muted" style="font-size:12.5px">One signed record per tool call</span>'+
-   '<div class="sp">'+auditStore("postgres frames + object storage bodies")+'</div></div>'+
+   '<div class="sp">'+auditStore("frames in the database, bodies in object storage")+'</div></div>'+
    '<div class="panel-b" style="border-bottom:1px solid var(--border)"><div class="row"><div class="field" style="margin:0;flex:1;min-width:200px">'+
    '<input id="rq" value="'+h(S.rq||"")+'" placeholder="agent key, tool, external effect id, call digest, receipt id" aria-label="Search receipts" onkeydown="if(event.key===\'Enter\'){S.rq=this.value;render();}"></div>'+
    '<button class="btn" onclick="S.rq=el(\'rq\').value;render()">Search</button></div>'+
@@ -8602,7 +8605,7 @@ function skTrAgent(ans){
       '<p>'+(ans==="link"?"Link it to core-platform.":"Make a new workspace. Call it edge.")+'</p></div>'+
      '<div class="sx-msg agent"><div class="mh"><b>'+h(SKRUN.agent)+'</b><span class="sx-chip">turn 1</span><span class="tm">09:17:39Z</span></div>'+
       (ans==="link"
-       ? '<p>Bound. I have <span class="mono">a-intel.release-notes-from-prs@2.1.0</span> and I am following it: group the merged pull requests, write the draft to a release branch, publish nothing.</p>'+
+       ? '<p>Linked. I have <span class="mono">a-intel.release-notes-from-prs@2.1.0</span> and I am following it: group the merged pull requests, write the draft to a release branch, publish nothing.</p>'+
          '<p style="color:var(--muted);font-size:12px">2 skills were withheld from my search. I am told the count and the reason class, not the names.</p>'
        : '<p>Working in <b>edge</b>. Skills are off in this workspace, so I will do this from the commit history directly and write the draft to a branch.</p>'+
          '<p style="color:var(--muted);font-size:12px">I will say so in the pull request, because a reviewer should know this was done without the release-notes procedure.</p>')+
@@ -8621,7 +8624,7 @@ function skTrOperator(ans){
   if(ans) return '<div class="sx-tr"><div class="sx-msg gw"><div class="mh"><b>Answered</b>'+skBadge("allowed","closed")+'<span class="tm">09:17:38Z</span></div>'+
    '<p>'+h(PEOPLE[SKRUN.op].name)+' chose <b>'+(ans==="link"?"link to core-platform":"create the workspace edge")+'</b>. '+
    'Receipt <span class="mono">'+(ans==="link"?"rcp_01K6QW44":"rcp_01K6QW45")+'</span>, waited 3m 36s.</p>'+
-   '<p style="font-size:12px;color:var(--muted)">Binding a repository is a governed action, so this answer went through the same path as approving a payment: '+
+   '<p style="font-size:12px;color:var(--muted)">Linking a repository is a governed action, so this answer went through the same path as approving a payment: '+
    'a rule, a grant, a receipt, and a name that stays on it.</p></div></div>';
   return '<div class="sx-tr">'+
    '<div class="sx-msg gw"><div class="mh"><b>control.interject</b><span class="sx-chip held">the loop is held</span><span class="tm">09:14:02Z</span></div>'+
@@ -8691,7 +8694,7 @@ function skAnswer(){
 }
 function skReset(){
   SKS.answered=null;SKS.picked=null;SKS.q="cut the first release notes";
-  render();act("Reset. The repo is unbound again and the run is waiting.","gold");
+  render();act("Reset. The repo is not linked again and the run is waiting.","gold");
 }
 
 /* An interjection is a run that has stopped for a person, not a row in a table, so it waits in the Approvals drawer. */
@@ -8826,7 +8829,7 @@ var SCENARIOS={
     note:"One live run, a child of this work order. A work order starts runs, and its page is where you open one to stop or steer it.",
     route:function(o){return {page:"workorder",org:o,ws:"core-platform",id:"wo_01K5RS7M4N"};}},
    {say:"Open the run. It is on turn 7 at harness tier, and the next call it wants is a release against a-intel/platform.",
-    note:"This call is routed through oxagen, so oxagen makes the decision. The agent’s native tools are client-attested and fail-open, and the run says so.",
+    note:"This call is routed through oxagen, so oxagen makes the decision. The agent’s native tools are reported by the harness and fail open, and the run says so.",
     route:function(o){return {page:"run",org:o,ws:"core-platform",id:"run_01K5RS7M2E8FJ3QW"};},
     setup:function(){S.tab.run="transcript";}},
    {say:"Stopping is the first grant. Pause takes effect at the next boundary: the call in flight completes, nothing new dispatches, and the run keeps its token.",
@@ -8930,11 +8933,11 @@ SCENARIOS["sixty-seconds-to-governed"]={title:"Sixty seconds to governed", ws:"c
    note:"Nothing is written before that frame: no agent, no run, no pull request. When it lands, Oxagen unlocks here and the scenario stays on this step.",
    route:function(o){return {page:"welcome",step:"run",org:o,ws:"core-platform"};},
    setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}}},
-  {say:"The installer read the git remote, so binding the main repo is one click: the GitHub App, pull requests, checks and the code graph.",
+  {say:"The installer read the git remote, so linking the main repo is one click: the GitHub App, pull requests, checks and the code graph.",
    note:"Skip for now and the workspace stays provisional for "+OB_PROVISIONAL_DAYS+" days. Runs record and spend counts; Steering records and agent definitions stay off.",
    route:function(o){return {page:"welcome",step:"run",org:o,ws:"core-platform"};},
    setup:function(){obScnArm();if(!S.reg||S.reg.mode!=="onboard"){regClear();S.reg=obNew();}S.reg.repo=null;obScnUnprov();},
-   act:["Bind the main repo","obBind()"]},
+   act:["Link the main repo","obBind()"]},
   {say:"Work opens on the run the installer started, filed under a direct work order, and nothing else. There is one row.",
    note:"The onboarding offer sits beside what that run cost. Oxagen billed nothing for it, because it is inside the free monthly runs.",
    route:function(o){return {page:"work",org:o,ws:"core-platform",tab:"orders"};},
@@ -9062,7 +9065,7 @@ SCENARIOS["cio-console"]={title:"The CIO’s console", ws:"core-platform",
    route:function(o){return {page:"organization",org:o};},
    setup:function(){S.tab.organization="people";S.rq="";},
    act:["Change a role","openDialog('role')"]},
-  {say:"A workspace is a governance partition with exactly one main repo, bound at creation. Its namespace is immutable because it is part of every agent key.",
+  {say:"A workspace is a governance partition with exactly one main repo, linked at creation. Its namespace is immutable because it is part of every agent key.",
    note:"Retention mode is per workspace. <span class=\"mono\">content_exact</span> is the default; <span class=\"mono\">digest_only</span> is recorded as a completeness gap.",
    route:function(o){return {page:"organization",org:o};},
    setup:function(){S.tab.organization="workspaces";S.rq="";},
@@ -9104,8 +9107,8 @@ SCENARIOS["the-account"]={title:"Whose account it is", ws:"core-platform",
   {say:"Notifications map to frame kinds and audit events, never to something invented for a bell.",
    route:function(o){return {page:"work",org:o,ws:"core-platform",tab:"backlog"};},
    act:["Open notifications","openDialog('notifs')"]},
-  {say:"The command menu is <span class=\"mono\">search_tools</span>. Search “run” and it returns the actions and the belt tools inside your grants, with their hazards. Nothing outside the belt.",
-   note:"Try a tool that is not on the belt, such as delete repository: nothing matches, which is also what stops a prompt injection from naming it.",
+  {say:"The command menu is <span class=\"mono\">search_tools</span>. Search “run” and it returns the actions and the toolbelt tools inside your grants, with their hazards. Nothing outside the toolbelt.",
+   note:"Try a tool that is not on the toolbelt, such as delete repository: nothing matches, which is also what stops a prompt injection from naming it.",
    route:function(o){return {page:"work",org:o,ws:"core-platform",tab:"backlog"};},
    setup:function(){S.cmdq="run";S.cmdSel=0;S.cmdCaret=null;},
    act:["Open the command menu","openDialog('cmd')"]}
@@ -9606,10 +9609,10 @@ function dialog(){
      '<div class="field"><label for="nw-main">Main repository</label><select id="nw-main"><option>a-intel/warehouse</option><option>a-intel/data-platform</option></select>'+
      '<div class="hint">Required at creation. A workspace without a main repo cannot exist.</div></div>'+
      '<div class="field"><label for="nw-branch">Production branch</label><select id="nw-branch"><option value="main">main (GitHub’s default, suggested)</option><option value="release">release</option><option value="production">production</option></select>'+
-     '<div class="hint">The only branch whose commits update the code graph. If GitHub’s default changes later you are prompted; the binding never moves on its own.</div></div>'+
+     '<div class="hint">The only branch whose commits update the code graph. If GitHub’s default changes later you are prompted; the setting never moves on its own.</div></div>'+
      '<div class="field"><label for="nw-gov">Governance mode</label><select id="nw-gov"><option value="team">team: a code-owner review is required</option><option value="solo">solo: the author may merge</option><option value="regulated">regulated: a named approver and a ledger entry</option></select></div>'+
      '<div class="field"><label for="nw-ret">Retention mode</label><select id="nw-ret"><option value="content_exact">Exact content: keep prompts and tool bodies in full</option><option value="digest_only">Digest only: recorded as a completeness gap</option></select></div>'+
-     '<div class="note">Until the GitHub App binds the main repo the workspace is provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</div>',
+     '<div class="note">Until the GitHub App links the main repo the workspace is provisional for 14 days: runs record and spend counts, but steering, records and agent definitions stay off.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="wsCreate()">Create</button>'},
    schema:schemaDlg(),
    toolcats:{t:"Tool categories",w:true,b:toolCatsBody(),f:'<span class="grow" style="font-size:12.5px;color:var(--muted)">Category is a registry attribute, not a policy: a rule may reference it, but only risk, side effect, financial effect and egress carry a decision by themselves.</span><button class="btn" onclick="closeDialog()">Close</button>'},
@@ -10113,7 +10116,7 @@ function roleEditDlg(){
    '<div class="grid g2"><div class="field"><label>Kind</label><select id="roleKind" aria-label="Kind"'+(ro?' disabled':'')+' onchange="S.roleEdit.kind=this.value">'+["human","agent","service"].map(function(k){return '<option'+(d.kind===k?' selected':'')+'>'+k+'</option>';}).join("")+'</select>'+
     '<div class="hint">Who can hold it. An agent role can be assigned only to agents.</div></div>'+
    '<div class="field"><label>Scope</label><select id="roleScope" aria-label="Scope"'+(ro?' disabled':'')+' onchange="S.roleEdit.scope=this.value">'+["organization","workspace","repository"].map(function(k){return '<option'+(d.scope===k?' selected':'')+'>'+k+'</option>';}).join("")+'</select>'+
-    '<div class="hint">A repository-scoped role is bound to a named repo at assignment.</div></div></div>'+
+    '<div class="hint">A repository-scoped role applies to a named repo, chosen at assignment.</div></div></div>'+
    '<div class="row" style="justify-content:space-between;margin-bottom:4px"><label style="font-size:12px;font-weight:600;color:var(--muted)">Permissions · <span id="rolePermN">'+n+'</span> selected</label>'+(ro?'<span class="b b-q">built-in · read-only</span>':'')+'</div>'+
    '<div class="perm-grid">'+PERMS.map(function(g){return '<div class="pg"><div class="h">'+h(g[0])+'</div>'+g[1].map(function(p){
      return '<label class="check"><input type="checkbox"'+(d.perms[p]?' checked':'')+(ro?' disabled':'')+' onchange="rolePerm(\''+p+'\',this.checked)"><span class="n mono">'+h(p)+'</span></label>';}).join("")+'</div>';}).join("")+'</div>'+
@@ -10253,7 +10256,7 @@ function assignRoleDlg(){
     opts.map(function(r){return '<option value="'+h(r.id)+'"'+(first&&r.id===first.id?' selected':'')+(held.indexOf(r.id)>=0?' disabled':'')+'>'+h(r.id)+(held.indexOf(r.id)>=0?' · held':'')+': '+h(r.desc)+'</option>';}).join("")+'</select>'+
     '<div class="hint">Only agent-kind roles are listed. <a href="#" onclick="closeDialog();orgTab(\'roles\');return false">Manage roles</a></div></div>'+
    '<div class="field" id="asgScopeF"'+(first&&first.scope==="repository"?'':' hidden')+'><label>Repository</label><select id="asgScope" aria-label="Repository">'+[ws().main].concat(ws().linked||[]).map(function(x){return '<option>'+h(x)+'</option>';}).join("")+'</select>'+
-    '<div class="hint">A repository-scoped role is bound to one repo.</div></div>'+
+    '<div class="hint">A repository-scoped role applies to one repo.</div></div>'+
    '<div class="field"><label>Why</label><input id="asgWhy" value="" placeholder="Read by the approver and kept in the audit record" aria-label="Reason"></div>'+
    '<div class="note">The agent can still do only what both its roles and '+h(PEOPLE[a.operator].name)+'’s grants allow. A role cannot lift an agent above its operator.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="roleAssign()">Assign</button>'};
@@ -10290,7 +10293,7 @@ function agentDelDlg(){
   return {t:"Retire agent",s:a.key,w:false,b:
    '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a pull request archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
    '<dl class="kv"><dt>Kept</dt><dd>every run, frame and receipt. The record is never deleted</dd><dt>Ends</dt><dd>'+agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+', '+a.mandates.length+' mandate'+(a.mandates.length===1?'':'s')+', the host enrollment</dd>'+
-   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span>, canceled at the next boundary and recorded</dd>':'')+'</dl>'+
+   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span>, canceled at the next checkpoint and recorded</dd>':'')+'</dl>'+
    '<label class="check" style="margin-top:12px"><input type="checkbox" id="delAgentOk" onchange="el(\'delAgentBtn\').disabled=!this.checked"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Re-registering creates a new principal.</span></span></label>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button id="delAgentBtn" class="btn danger" disabled onclick="agentDelete(\''+h(a.key)+'\')">Retire agent</button>'};
 }
@@ -10323,7 +10326,7 @@ function wsArchive(slug){var i=-1;WS.forEach(function(w,ix){if(w.slug===slug)i=i
 function wsArchiveDlg(){
   var w=S.dlg==="archivews"?wsById(S.dlgArg):null; if(!w) return {t:"Archive workspace",w:false,b:"",f:""};
   var n=AGENTS.filter(function(a){return a.ws===w.slug;}).length;
-  return {t:"Archive workspace",s:w.name,w:false,b:'<p style="font-size:13px">Archiving freezes <b>'+h(w.name)+'</b>: runs, frames, records and spend stay readable forever; agents cannot start, tools cannot be granted, and the main repo binding is released.</p>'+
+  return {t:"Archive workspace",s:w.name,w:false,b:'<p style="font-size:13px">Archiving freezes <b>'+h(w.name)+'</b>: runs, frames, records and spend stay readable forever; agents cannot start, tools cannot be granted, and the main repo link is released.</p>'+
    (n?'<div class="warn">'+n+' agent'+(n>1?'s are':' is')+' registered here. Retire or move them first.</div>':'<div class="note">No agents here. Archiving is an org-owner action, recorded as a security event.</div>'),
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger"'+(n?' disabled':'')+' onclick="wsArchive(\''+h(w.slug)+'\')">Archive</button>'};
 }
@@ -10539,7 +10542,7 @@ function regName(){
     '<div class="hint">Picks the installer on the next step. It can be changed there.</div></div>'+
    '<div class="field"><label>Model class</label><select aria-label="Model class" onchange="S.reg.tier=this.value">'+opts(["complex","light"],r.tier)+'</select>'+
     '<div class="hint">The harness calls the model with its own key. The tier is recorded on every frame.</div></div></div>'+
-   '<div class="note">Continue creates a one-time enrollment token for <span class="mono regKeyLive">'+h(key)+'</span>. Nothing is written to Postgres and no PR opens until the agent first connects. That first session then opens the pull request that adds the definition file.</div>'+
+   '<div class="note">Continue creates a one-time enrollment token for <span class="mono regKeyLive">'+h(key)+'</span>. Nothing is written to the database and no PR opens until the agent first connects. That first session then opens the pull request that adds the definition file.</div>'+
    '</div></div>'+
    '<div class="reg-foot">'+regCancelBtn()+'<div class="sp"><button class="btn primary" onclick="regNav(\'wrap\')">Continue</button></div></div>';
 }
@@ -10556,7 +10559,7 @@ function regWrap(){
     panel='<section class="reg-wp" role="tabpanel"><div class="wm"><h3>Claude Code <span class="b" style="color:var(--st-allowed);border-color:color-mix(in srgb,var(--st-allowed) 45%,transparent);background:color-mix(in srgb,var(--st-allowed) 12%,transparent)">recommended</span></h3>'+
      '<p>The installer writes the hooks, installs the <span class="mono">oxagend</span> collector and the <span class="mono">oxagen-hook</span> binary, registers them to start at login, and enrolls this host with an Ed25519 device key. Nothing is copied or pasted: the one-time enrollment token is embedded in the download.</p>'+
      earn([["This agent","harness"],["Next rung","gateway"],["Top rung","contained"]])+
-     '<p class="dim">The tier is computed per run from what was actually routed, never from what the adapter can do on paper. Hooks deliver steering and can refuse at four events, client-attested and fail-open.</p></div>'+
+     '<p class="dim">The tier is computed per run from what was actually routed, never from what the adapter can do on paper. Hooks deliver steering and can refuse at four events. The harness reports what they did, and they fail open.</p></div>'+
      '<div class="wa"><p class="eyebrow q">Download</p>'+osTabs()+
      '<button class="btn primary" style="justify-content:center" onclick="regInstall(\'claude-code\')">Download for '+osName[r.os]+'</button>'+
      '<div class="dim mono" style="font-size:11px;line-height:1.6">'+osFile.f+'<br>'+osFile.s+' · '+osFile.note+'<br>'+osFile.sha+'</div>'+tok()+
@@ -10614,7 +10617,7 @@ function regRun(){
   var head=ob?'<div><p class="eyebrow">Step 3 of 3</p><h1>Start a run</h1>'+
    '<p class="reg-lead">The operator console opens the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen, and lands you on Work looking at your own run.</p></div>'
    :'<div><p class="eyebrow">Step 3 of 3</p><h1>Wait for the first frame</h1>'+
-   '<p class="reg-lead">Registration completes the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen and lands you on Work looking at its run.</p></div>';
+   '<p class="reg-lead">Registration completes the moment the first frame from <span class="mono">'+h(key)+'</span> reaches oxagen and lands you on Work looking at its run.</p></div>';
   if(S.state==="error") return head+
    '<div class="reg-card"><div class="reg-err"><h2>The collector cannot reach oxagen</h2>'+
    '<p>The host <span class="mono">'+REG_HOST+'</span> enrolled, but every request to <span class="mono">https://ingest.oxagen.com/v1</span> has been refused for 94 seconds (<span class="mono">ECONNREFUSED</span>, 6 attempts). No frame has arrived, so registration will not complete.</p>'+
@@ -10630,7 +10633,7 @@ function regRun(){
      '<div><span class="sq">0</span><span class="ts">14:02:11.402</span><span class="kd">agent_start</span><span class="bd">harness='+h(r.harness)+' · host='+REG_HOST+' · attested=device-key · countersigned</span></div>'+
      '<div><span class="sq">1</span><span class="ts">14:02:11.418</span><span class="kd">oxagen:run.start</span><span class="bd">agent='+h(key)+' · operator='+h(me.name)+' · tier=harness · steering=none published</span></div></div>'+
      '<div class="row" style="margin-top:12px">'+tierBadge("harness")+'<span class="b b-q">chain intact</span></div>'+
-     '<p class="muted" style="font-size:12.5px;margin:12px 0 0">The tier is computed from what was actually routed, not from what the adapter can do on paper. The hooks answered, so this run is <b>harness</b>: delivered, recorded, client-attested, fail-open.</p></div></div>';
+     '<p class="muted" style="font-size:12.5px;margin:12px 0 0">The tier is computed from what was actually routed, not from what the adapter can do on paper. The hooks answered, so this run is <b>harness</b>: delivered, recorded, reported by the harness, and fail-open.</p></div></div>';
     foot='<div class="reg-foot">'+regCancelBtn()+''+
      '<div class="sp"><span class="reg-cap" id="regAuto">'+(r.runId?'Unlocked · <span class="mono">'+h(r.runId)+'</span> is live':'Opening automatically…')+'</span><button class="btn primary" onclick="regFinish()">'+(ob?"Open oxagen":"Open in Work")+'</button></div></div>';
   } else {
@@ -10717,7 +10720,7 @@ function obGo(step){
 }
 function obExit(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);if(!PRODUCT)act('Onboarding demo closed. Nothing was written.');}
 function obSignedIn(){regClear();S.reg=null;go('#/'+ORG.slug+'/'+ws().slug);act('Signed in as '+PEOPLE.marcus.name+'. The session is recorded like any other governed action.');}
-function obBind(){if(S.reg)S.reg.repo="bound";delete ws().provisional;render();act('GitHub App installed on '+ws().main+'. Main repo bound. Pull requests, checks, and the code graph are on.');}
+function obBind(){if(S.reg)S.reg.repo="bound";delete ws().provisional;render();act('GitHub App installed on '+ws().main+'. Main repo linked. Pull requests, checks, and the code graph are on.');}
 function obSkip(){
   var w=ws(); if(S.reg)S.reg.repo="skipped";
   if(!w.provisional){w.provisional={since:obDate(0),until:obDate(OB_PROVISIONAL_DAYS)}; if(S.obScn)S.obScn.prov.push(w.slug);}
@@ -10737,8 +10740,8 @@ function obFirstRun(w){
 function obFirstBanners(w,fr){
   var out="";
   if(w.provisional) out+='<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none">provisional</span>'+
-   '<div class="grow"><b>'+h(w.name)+' is provisional until '+h(w.provisional.until)+'.</b>Runs record and spend counts. Steering records and agent definitions stay off until a main repo is bound, because there is nowhere to publish them to.</div>'+
-   '<button class="btn sm" onclick="obBind()">Bind '+h(w.main)+'</button></div>';
+   '<div class="grow"><b>'+h(w.name)+' is provisional until '+h(w.provisional.until)+'.</b>Runs record and spend counts. Steering records and agent definitions stay off until a main repo is linked, because there is nowhere to publish them to.</div>'+
+   '<button class="btn sm" onclick="obBind()">Link '+h(w.main)+'</button></div>';
   if(fr) out+='<div class="banner" style="margin-bottom:14px"><span class="b b-q" style="flex:none">first run</span>'+
    '<div class="grow"><b>One run so far.</b>This workspace has recorded the installer’s smoke session, <span class="mono">'+h(fr.id)+'</span> from <span class="mono">'+h(fr.agent)+'</span>, filed under a direct work order, and nothing else.</div>'+
    '<button class="btn sm" onclick="S.firstRun=null;render()">Show the seeded workspace</button></div>';
@@ -11005,18 +11008,18 @@ function obOrg(){
 /* step 3, onboard mode: the repo the installer saw — bind it, or stay provisional */
 function obRepoPanel(){
   var r=S.reg, w=ws();
-  if(r.repo==="bound") return '<div class="reg-card ob-repo"><div class="ch"><span class="reg-ok"><span class="dot"></span>bound</span><h3>Main repo</h3></div><div class="cb">'+
+  if(r.repo==="bound") return '<div class="reg-card ob-repo"><div class="ch"><span class="reg-ok"><span class="dot"></span>linked</span><h3>Main repo</h3></div><div class="cb">'+
    '<div class="row" style="margin-bottom:10px"><span class="b b-q mono">'+h(w.main)+'</span><span class="b b-q">production branch: '+h(w.branch)+'</span><span class="b b-allowed"><span class="d"></span>GitHub App installed</span></div>'+
    '<p class="muted" style="font-size:12.5px;margin:0">Steering records and agent definitions will live in <span class="mono">'+h(w.main)+'</span> under <span class="mono">.oxagen/</span>, published through pull requests.</p></div></div>';
-  if(r.repo==="skipped") return '<div class="reg-card ob-repo"><div class="ch"><span class="b b-denied">provisional</span><h3>No main repo bound</h3></div><div class="cb">'+
-   '<p class="muted" style="font-size:12.5px;margin:0 0 10px"><b>'+h(w.slug)+' is provisional until '+h(w.provisional?w.provisional.until:obDate(OB_PROVISIONAL_DAYS))+'</b> ('+OB_PROVISIONAL_DAYS+' days). Runs record and spend counts. Steering records and agent definitions stay off until a main repo is bound.</p>'+
-   '<button class="btn sm" onclick="obBind()">Bind '+h(w.main)+' now</button></div></div>';
+  if(r.repo==="skipped") return '<div class="reg-card ob-repo"><div class="ch"><span class="b b-denied">provisional</span><h3>No main repo linked</h3></div><div class="cb">'+
+   '<p class="muted" style="font-size:12.5px;margin:0 0 10px"><b>'+h(w.slug)+' is provisional until '+h(w.provisional?w.provisional.until:obDate(OB_PROVISIONAL_DAYS))+'</b> ('+OB_PROVISIONAL_DAYS+' days). Runs record and spend counts. Steering records and agent definitions stay off until a main repo is linked.</p>'+
+   '<button class="btn sm" onclick="obBind()">Link '+h(w.main)+' now</button></div></div>';
   return '<div class="reg-card ob-repo"><div class="ch"><h3>Repository detected</h3><span class="sp">reported by the installer</span></div><div class="cb">'+
    '<div class="row" style="margin-bottom:6px"><span class="b b-q mono">git@github.com:'+h(w.main)+'.git</span></div>'+
    '<p class="muted" style="font-size:12.5px;margin:0 0 12px">Read from the git remote of <span class="mono">~/src/platform</span>, the directory the installer ran in. Production branch <span class="mono">'+h(w.branch)+'</span>.</p>'+
-   '<button class="btn'+(r.first?"":" primary")+'" onclick="obBind()">'+OB_ICON.github+'<span>Bind '+h(w.main)+' as the main repo</span></button>'+
-   '<p class="muted" style="font-size:12.5px;margin:12px 0 0">One click installs the GitHub App on <span class="mono">'+h(w.main)+'</span>: repo binding, pull requests, checks, merge handling and the code graph.</p>'+
-   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> and '+h(w.slug)+' stays <b>provisional for '+plural(OB_PROVISIONAL_DAYS,"day")+'</b>. Runs record and spend counts, but Steering records and agent definitions stay off until a main repo is bound.</p></div></div>';
+   '<button class="btn'+(r.first?"":" primary")+'" onclick="obBind()">'+OB_ICON.github+'<span>Link '+h(w.main)+' as the main repo</span></button>'+
+   '<p class="muted" style="font-size:12.5px;margin:12px 0 0">One click installs the GitHub App on <span class="mono">'+h(w.main)+'</span>: repository link, pull requests, checks, merge handling and the code graph.</p>'+
+   '<div class="hr"></div><p class="muted" style="font-size:12.5px;margin:0"><button type="button" class="ob-link" style="color:var(--muted)" onclick="obSkip()">Skip for now</button> and '+h(w.slug)+' stays <b>provisional for '+plural(OB_PROVISIONAL_DAYS,"day")+'</b>. Runs record and spend counts, but Steering records and agent definitions stay off until a main repo is linked.</p></div></div>';
 }
 function pWelcome(r){
   var step=r.step||"signup";
@@ -11351,8 +11354,8 @@ function asstSheet(){
    '<div class="asst-b">'+
    '<div class="msg op"><div class="who">'+h(me().name)+'</div><div class="bub">Triage is burning money on tool definitions. Narrow its toolbelt to what it actually used in the last 30 days, and tell me what you changed.</div></div>'+
    '<div class="msg"><div class="who">'+stellaName()+' <span class="b b-q" style="font-size:9.5px"><span class="id">run_01K5RT9X4M2</span> · oxagen’s run</span></div><div class="bub">'+
-   '<p style="margin:0 0 10px">I read the finding and the belt. 34 of the 52 tools on <span class="mono">a-intel.core.triage</span> were never called in 1,340 runs. '+
-   'Narrowing the belt is a change to the agent definition, so it is a pull request, not a write to Postgres. I opened one.</p>'+
+   '<p style="margin:0 0 10px">I read the finding and the toolbelt. 34 of the 52 tools on <span class="mono">a-intel.core.triage</span> were never called in 1,340 runs. '+
+   'Narrowing the toolbelt is a change to the agent definition, so it is a pull request, not a database write. I opened one.</p>'+
    '<div class="act-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_context_pr</code></div>'+
    '<dl class="kv" style="font-size:11.5px"><dt>Pull request</dt><dd><a href="#">a-intel/platform#521</a></dd>'+
    '<dt>File</dt><dd class="mono" style="font-size:11px">.oxagen/agents/triage.toml</dd>'+
@@ -13897,7 +13900,7 @@ DLG_EXT.more=function(){
    b:'<div class="mgrid">'+
      t("steering","Steering","sources, assignments, compiler, proposals",'go(\''+base+'/steering\')',fr?0:stgNavCount(w.slug),false)+
      t("runtimes","Runtimes","hosts, harnesses, hooks, tiers",'go(\''+base+'/runtimes\')',RUNTIMES.filter(function(x){return x.ws===w.slug&&x.health!=="ok";}).length,true)+
-     t("repo","Repositories","bindings, working copies, changes",'go(\''+base+'/repositories\')',oxprOpen().length)+
+     t("repo","Repositories","links, working copies, changes",'go(\''+base+'/repositories\')',oxprOpen().length)+
      t("organization","Organization","people, workspaces, funding",'go(\'#/'+ORG.slug+'\')')+
      t("billing","Billing","plan, meters, invoices",'go(\'#/'+ORG.slug+'/billing\')')+
      t("audit","Audit","events, incidents, holds",'go(\'#/'+ORG.slug+'/audit\')',crit,true)+
@@ -14439,7 +14442,7 @@ document.addEventListener("click",function(e){
     ["critical","Budget breached three times in one hour","budget_breach","{agent} · {ws}","The agent hit its per-run ceiling on three consecutive runs while retrying the same failing command. Each run paused at the next checkpoint once reported spend crossed the ceiling."],
     ["warning","Approval expired with money reserved","approval_expired","{agent} · finops","No approver resolved the parked payment inside ten minutes. The mandate released the reservation; nothing moved. The operator was paged by the gateway."],
     ["info","Tainted argument raised to approval","taint_raised","{agent} · {ws}","A shell argument was copied byte-for-byte from a tool result. Policy raised the call to approval; the operator denied it and the run halted cleanly."],
-    ["warning","Client-attested frames with no provider request id","attestation_gap","{agent} · harness tier","Nine frames from a harness-tier agent carry no provider request id, so their cost cannot be matched to a provider invoice line. Spend is client-attested until the gateway tier, and the Spend page labels it so."],
+    ["warning","Frames reported by the harness with no provider request id","attestation_gap","{agent} · harness tier","Nine frames from a harness-tier agent carry no provider request id, so their cost cannot be matched to a provider invoice line. Spend is reported by the harness until the gateway tier, and the Spend page labels it so."],
     ["critical","Hooks removed on an enrolled host","hooks_removed","{agent} · mbp-{n}","The host's harness settings lost the oxagen hooks between two checkpoints. The collector halted the run at the next boundary and the agent's tier fell to observe until re-enrolment."],
     ["info","Runaway retries on a read tool","retry_storm","{agent} · {ws}","The agent called the same read tool 212 times in one turn after a 429. The toolbelt's retry budget denied the 213th; the run sealed unsatisfied."],
     ["warning","Access review overdue on a governed connection","review_overdue","{conn}","The quarterly review of this connection is past due. Grants continue; the connection is flagged on the Tools page until an owner reviews it."]];
@@ -15175,18 +15178,18 @@ function tkProvTab(){
       '<button class="btn sm" onclick="ipzOpen(\''+k+'\')">Connect</button></div></div></div>';});
   return '<div class="grid g2">'+cards.join("")+avail.join("")+'</div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>How imports work</h3></div><div class="panel-b">'+
-   wzChecks([["events","Each provider sends an event when an issue, incident, case, or ticket changes. Oxagen reads it again and updates the work item."],
-     ["reconcile","Every 15 minutes Oxagen lists what changed since the last read, so a missed event costs at most 15 minutes."],
-     ["fields","Oxagen reads the thirteen fields on the Fields tab and nothing else. Custom fields are not read."],
-     ["writes","Oxagen writes to a provider only what the switches on its card allow. It never edits a subject or a description, and it never replies to a requester."],
-     ["creates","Oxagen creates a status, resolution, or label in a provider only when you choose Create for it. It never renames or deletes one."]])+'</div></div>';
+   wzChecks([["events","Each provider sends an event when an issue, incident, case, or ticket changes. oxagen reads it again and updates the work item."],
+     ["reconcile","Every 15 minutes oxagen lists what changed since the last read, so a missed event costs at most 15 minutes."],
+     ["fields","oxagen reads the thirteen fields on the Fields tab and nothing else. Custom fields are not read."],
+     ["writes","oxagen writes to a provider only what the switches on its card allow. It never edits a subject or a description, and it never replies to a requester."],
+     ["creates","oxagen creates a status, resolution, or label in a provider only when you choose Create for it. It never renames or deletes one."]])+'</div></div>';
 }
 
 /* ---- tab: fields ---- */
 /* Where each of the thirteen fields comes from, per provider. The tab shows a column for each connected
    provider, so a workspace with one help desk reads one column, not six. */
 var TK_FIELDS=[
- {f:"Work item id",all:"tsk_ ULID, minted by Oxagen"},
+ {f:"Work item id",all:"tsk_ ULID, minted by oxagen"},
  {f:"Number",github:"owner/repo#number",linear:"identifier, PLAT-231",jira:"key, OPS-88",servicenow:"number, INC0012345",salesforce:"CaseNumber, 00001026",zendesk:"id, #4821"},
  {f:"Subject",github:"title",linear:"title",jira:"summary",servicenow:"short_description",salesforce:"Subject",zendesk:"subject"},
  {f:"Description",github:"body",linear:"description",jira:"description, converted to Markdown",servicenow:"description",salesforce:"Description",zendesk:"the first comment"},
@@ -15214,7 +15217,7 @@ function tkFieldsTab(){
   return panel("Work item fields","Thirteen fields, read the same way from every provider.","",["Field"].concat(heads),fr)+
    panel("Statuses","Every status belongs to one of three categories: open, blocked, or closed.",'<button class="btn sm" onclick="openDialog(\'stedit\',\'new\')">Add status</button>',["Status","Category"].concat(heads),sr)+
    panel("Resolutions","A closed work item carries one resolution.",'<button class="btn sm" onclick="openDialog(\'resedit\',\'new\')">Add resolution</button>',["Resolution"].concat(heads),rr)+
-   panel("Labels","A label has a colour and a mapping to each provider’s own labels, priorities, types, or tags.",'<button class="btn sm" onclick="openDialog(\'lbledit\',\'new\')">Add label</button>',["Label","Colour","Group"].concat(heads,["Definition of done items"]),lr)+
+   panel("Labels","A label has a color and a mapping to each provider’s own labels, priorities, types, or tags.",'<button class="btn sm" onclick="openDialog(\'lbledit\',\'new\')">Add label</button>',["Label","Color","Group"].concat(heads,["Definition of done items"]),lr)+
    '<div class="note">Field settings are workspace settings. Each change is a governed action in Audit and applies to the next read of every work item. A value a provider lacks can be created there from its editor. Later, a label carries definition-of-done items that copy into the draft of every work item that has it, and those templates live in .oxagen/ as files.</div>';
 }
 
@@ -15237,7 +15240,7 @@ function tkPeopleTab(){
   return banner+'<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>People</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Accounts in your providers and the workspace member each one is.</p></div></div>'+
    '<div class="tw"><table><thead><tr><th>Account</th><th>Provider</th><th>Email</th><th>Workspace member</th><th>Match</th><th>State</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Mapping says who an account is in Oxagen and grants nothing. An account left not mapped still owns and creates work items under its own handle. Only a signed-in member can certify a definition of done or send a work order, whatever the mapping says.</div></div></div>';
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Mapping says who an account is in oxagen and grants nothing. An account left not mapped still owns and creates work items under its own handle. Only a signed-in member can certify a definition of done or send a work order, whatever the mapping says.</div></div></div>';
 }
 function tpConfirmAll(){TPEOPLE.forEach(function(p){if(p.state==="suggested"){p.state="mapped";}});render();act("Matches confirmed. map_provider_person recorded once per account.");}
 
@@ -15248,7 +15251,7 @@ var TK_DRAFTS={
    {t:"The CSV has one row per agent with tokens, cost and the cost basis",k:"check",tag:"code",src:"issue"},
    {t:"A test exports one month and asserts the header and the row count",k:"check",tag:"test",src:"assistant"},
    {t:"The Spend docs page names the export and its columns",k:"check",tag:"docs",src:"assistant"}],
-  notes:["The issue does not say whether the CSV includes wasted spend. The assistant left it out and says so in item 2.","Finance is named as the reader. Nothing in the work item says who may run the export."]}
+  notes:["The issue does not say whether the CSV includes unproductive spend. The assistant left it out and says so in item 2.","Finance is named as the reader. Nothing in the work item says who may run the export."]}
 };
 function tkDraftNow(id){
   var t=taskById(id); if(!t)return;
@@ -15341,7 +15344,7 @@ function pTask(r){
   if(tkBlockers(t).length&&!tkGraphBlocked(t)) hist.push(["Unblocked",t.updatedAt,"every blocker is done"]);
   if(t.wo){var wo=woById(t.wo); if(wo&&wo.status==="queued")hist.push(["Queued in a work order",wo.sent,wo.id]); else if(wo)hist.push(["Sent in a work order",wo.released||wo.sent,wo.id]); if(wo&&wo.accepted)hist.push(["Accepted",wo.accepted,PEOPLE[wo.by].name]);}
   var res=t.resolution?tRes(t.resolution):null;
-  return '<div class="phead"><div class="t"><p class="eyebrow">'+wiLogo(t,13)+' '+h(t.num)+'</p><h1>'+h(t.subject)+'</h1>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+wiLogo(t,13)+' <span class="id">'+h(t.num)+'</span></p><h1>'+h(t.subject)+'</h1>'+
    '<p>'+(own?(t.finding?'Written in Oxagen from finding <span class="mono">'+h(t.finding)+'</span>':'Written in Oxagen'):'Imported from '+h(k.l))+'. Updated '+h(t.updatedAt)+'.'+(t.ready==="ready"&&tkGraphBlocked(t)?' Blocked by '+h(tkOpenBlockers(t).map(function(b){return tkNum(b.task);}).join(" and "))+'.':'')+'</p></div>'+
    '<div class="acts"><button class="btn" onclick="copyTaskPrompt(\''+t.id+'\')" title="Copy the work item and its work orders as text">Copy prompt</button>'+
    (own?(t.finding?'<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/work/findings?finding='+h(t.finding)+'\')">Open the finding</button>':'')
@@ -15455,7 +15458,7 @@ function pWorkOrder(r){
      '<td style="font-size:12px">'+(c?h(c.ev)+'<div class="dim mono" style="font-size:11px">'+h((agent(c.by)||{}).name||c.by)+' '+h(c.run)+'</div>':'<span class="dim">\u2014</span>')+'</td></tr>';}).join("");
   var tgt=w.target.kind==="workflow"?'the '+(wfById(w.target.id)||{}).name+' workflow':(a?a.name:w.target.id);
   var sp=woSpend(w), open=w.status!=="accepted"&&w.status!=="stopped"&&w.status!=="closed";
-  return '<div class="phead"><div class="t"><p class="eyebrow"><span class="mono">'+h(w.id)+'</span> '+woKindBadge(w)+'</p><h1>'+h(w.title)+'</h1>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow"><span class="mono id">'+h(w.id)+'</span> '+woKindBadge(w)+'</p><h1>'+h(w.title)+'</h1>'+
    (direct?'<p>Oxagen opened it on '+h(w.sent)+' for a run '+h((PEOPLE[w.by]||{}).name||w.by)+' started outside Oxagen'+(w.ref?', titled from its task reference <span class="mono">'+h(w.ref)+'</span>':'')+'.</p>'
      :w.status==="queued"?'<p>Queued by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' for '+h(tgt)+'. It is sent when '+h(woWaitsOnText(w))+' is done, or expires on '+h(w.expires||"")+'.'+woSubMore(w)+'</p>'
      :'<p>Sent by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' to '+h(tgt)+'.'+woSubMore(w)+'</p>')+'</div>'+

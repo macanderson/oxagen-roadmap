@@ -123,9 +123,9 @@ export default {
     ["--st-approval, --st-allowed, --st-failed", "State dot"],
   ],
   helpers: [
-    ["runTabs(R, t)", "engine.js:2725", "The Run page's five tabs, with the state dot and the Cost figure."],
+    ["runTabs(R, t)", "engine.js:2728", "The Run page's five tabs, with the state dot and the Cost figure."],
     ["tabN(n, title, style)", "engine.js:620", "A count with its hidden space and title. Renders nothing for zero."],
-    ["dialog()", "engine.js:9507", "Renders `d.tabs` into a strip between a dialog's header and body."],
+    ["dialog()", "engine.js:9510", "Renders `d.tabs` into a strip between a dialog's header and body."],
   ],
   sourceNotes: [
     "Pages write the strip inline: Work (`WORK_TABS` in `wedge.js`), Tools (engine.js 4831), agent, Steering, Spend, Repositories, Organization, and Audit. There are 15 `role=\"tab\"` sites.",

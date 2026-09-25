@@ -132,9 +132,9 @@ tamper      = <span class="bad">"chain_break at frame 188"</span></pre>`,
     ["--st-allowed, --st-approval, --st-denied, --st-failed", "String, number, denied, and failure tones"],
   ],
   helpers: [
-    ["frJson(o, ind)", "engine.js:3364", "Writes a JSON value with `.k` keys and `.s` strings."],
-    ["frPre(o)", "engine.js:3373", "Wraps `frJson()` in a wrapping `pre` for the frame detail."],
-    ["readout(title, right, inner)", "engine.js:3729", "The labelled slab of what the model read. Two calls, both in frame detail."],
+    ["frJson(o, ind)", "engine.js:3367", "Writes a JSON value with `.k` keys and `.s` strings."],
+    ["frPre(o)", "engine.js:3376", "Wraps `frJson()` in a wrapping `pre` for the frame detail."],
+    ["readout(title, right, inner)", "engine.js:3732", "The labelled slab of what the model read. Two calls, both in frame detail."],
     ["codePair(panes, cls)", "engine.js:1338", "Two labelled panes. Used by the fix dialog and the schema dialog."],
   ],
   sourceNotes: [

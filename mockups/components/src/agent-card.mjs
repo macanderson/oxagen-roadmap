@@ -37,8 +37,8 @@ export default {
     },
   ],
   anatomy: [
-    ["Card", "`.agc`", "A flex row with a 10px gap. `color:inherit` and no underline, so it reads the same as a link or a static span."],
     ["Harness mark", "`.agc>.hx`", "The harness logo from `hxIcon()`, 15px (16px in the compact layout), 6px before the avatar. In the detail layout it leads the second line instead, where a 60px avatar would dwarf it."],
+    ["Card", "`.agc`", "A flex row with a 10px gap. `color:inherit` and no underline, so it reads the same as a link or a static span."],
     ["Identity block", "`.agc .agid`", "A column holding the key and its second line, 240px max, each line ellipsized on its own. The only part allowed to shrink."],
     ["Key", "`.agc .agid .tkey`", "The agent's key in Monaspace Neon."],
     ["Second line", "`.agc .agid .sub`", "One line under the key: the harness by default, or the 30-day figures in the compact layout."],
@@ -74,8 +74,8 @@ export default {
   ],
   a11y: [
     "A linked agent card is a real `a` with the key as its visible text, so a screen reader announces the destination by name, not by a generic \"link\".",
-    "The avatar is `aria-hidden`. The key and the second line carry the full identity in text.",
     "The harness mark is `aria-hidden` when the second line names the harness. When a caller replaces the second line, the mark carries `role=\"img\"` and the harness name as its `aria-label`.",
+    "The avatar is `aria-hidden`. The key and the second line carry the full identity in text.",
     "The detail layout's card sits inside the page's own `h1`, so the agent's key is announced as the page's heading, not as a caption beside it.",
   ],
   phone: [
@@ -90,8 +90,8 @@ export default {
     ["--dim", "List and compact layouts' second line"],
   ],
   helpers: [
-    ["hxIcon(harness, size, alone)", "engine.js:14743", "The harness mark, found by key or by label. `alone` adds `role=\"img\"` and an `aria-label` when no text beside the mark names the harness."],
-    ["agentCard(a, o)", "engine.js:9988", "The one function that draws an agent identity. `o.layout` picks list, compact, or detail. 17 calls."],
+    ["hxIcon(harness, size, alone)", "engine.js:14746", "The harness mark, found by key or by label. `alone` adds `role=\"img\"` and an `aria-label` when no text beside the mark names the harness."],
+    ["agentCard(a, o)", "engine.js:9991", "The one function that draws an agent identity. `o.layout` picks list, compact, or detail. 17 calls."],
   ],
   sourceNotes: [
     "`o.sub` overrides the second line outright, so a caller can put a run's turn number or a mandate's toolbelt count there instead of the harness. Several call sites do.",

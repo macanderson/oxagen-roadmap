@@ -29,22 +29,22 @@ A proposal argues from runs, and a person decides whether that is enough. There 
 - Each proposal is a record card:
   - Top line: the kind badge (its icon and the kind in capitals), the force, the state badge with a dot, the checks badge where a pull request is open, and **Review**.
   - The statement, as the card's headline.
-  - The meta line: "from <source>" (a findings job with its finding id, the reflector with a run id, a person, or "memory fold · mem_01K5R0N2" for the proposal a memory made), the support line, the proposal id, the scope and the lineage.
+  - The meta line: "from <source>" (a findings job with its finding id, the post-run review with a run id, a person, or "memory fold · mem_01K5R0N2" for the proposal a memory made), the support line, the proposal id, the scope and the lineage.
 - State badges: "candidate" (no pull request), "ready for a pull request" (the promoter's proposal before its pull request opens), "open pull request", "published" or "merged". The checks badge reads "6 / 6 checks pass", or the count so far while checks run ("5 / 6 · conflict check running").
 - The ten proposals at load:
 
 | Kind and force | State | Statement | From | Support | Lineage |
 |---|---|---|---|---|---|
 | RULE, should | open pull request, 6 / 6 checks pass | "Do not re-read CHANGELOG.md more than once in a run; cache the first read." | findings job · fnd_01K5RT6C | "682 duplicate tool calls across 212 runs" | `ctx.release.no-reread-changelog` |
-| RULE, should | candidate | "Reproduce before labelling; if you cannot reproduce in two steps, open a proposal instead." | reflector · run_01K5RH3G8K5PAS7D | "14 unsatisfied runs in 30 days" | `ctx.triage.reproduce-first` |
+| RULE, should | candidate | "Reproduce before labeling; if you cannot reproduce in two steps, open a proposal instead." | post-run review · run_01K5RH3G8K5PAS7D | "14 unsatisfied runs in 30 days" | `ctx.triage.reproduce-first` |
 | CONSTRAINT, must | open pull request, 5 / 6 · conflict check running | "Migrations run in filename order; never renumber a merged migration." | Marcus Bell | "3 data-layer drift findings" | `ctx.platform.migration-order` |
 | RULE, should | candidate | "Build and test on Node 20. Do not move to a newer Node release until main passes on it." | memory fold · mem_01K5R0N2 | "3 sayings from 3 runs" | `ctx.platform.node-20` |
 | RULE, should | open pull request, 6 / 6 pass | "Draft the first reply in the language the ticket was written in." | findings job · fnd_01K5RU9Q | "212 tickets re-routed for language in 30 days" | `ctx.support.reply-in-customers-language` |
-| PROCEDURE, must | candidate | "Post the plan and wait for a review comment before any apply call." | reflector · run_01K5RD0D4ADEV8K7 | "3 halted runs, 1 incident" | `ctx.infra.plan-before-apply` |
+| PROCEDURE, must | candidate | "Post the plan and wait for a review comment before any apply call." | post-run review · run_01K5RD0D4ADEV8K7 | "3 halted runs, 1 incident" | `ctx.infra.plan-before-apply` |
 | PROCEDURE, should | open pull request, 5 / 5 pass | "Backfill in day-sized partitions and verify row counts after each." | Amara Lindqvist | "2 quality-gate failures traced to whole-table backfills" | `ctx.data.backfill-partitions` |
 | CONSTRAINT, must | merged, 7 / 7 pass | "No agent may rotate a credential it holds." | Ines Haddad | "policy review 2026-09" | `ctx.sec.never-rotate-own-credential` |
-| PREFERENCE, may | candidate | "Campaign briefs are a table of channel, audience, budget and owner." | reflector · 14 runs | "9 briefs rewritten by hand" | `ctx.growth.brief-as-table` |
-| FACT, info | open pull request, 4 / 4 pass | "The production branch of a-intel/mobile is release, not main." | reflector · run_01K5RMYJ6V9CRJM9 | "4 runs targeted main" | `ctx.mobile.release-branch` |
+| PREFERENCE, may | candidate | "Campaign briefs are a table of channel, audience, budget and owner." | post-run review · 14 runs | "9 briefs rewritten by hand" | `ctx.growth.brief-as-table` |
+| FACT, info | open pull request, 4 / 4 pass | "The production branch of a-intel/mobile is release, not main." | post-run review · run_01K5RMYJ6V9CRJM9 | "4 runs targeted main" | `ctx.mobile.release-branch` |
 
 The mockup's third proposal reads "open Context PR" in its state badge; the product word is "open pull request". Every Steering record pull request runs the same six checks, so a checks badge counts out of six; the fixture's "5 / 5", "7 / 7" and "4 / 4" are not a design.
 
@@ -84,9 +84,9 @@ The mockup's third proposal reads "open Context PR" in its state badge; the prod
 
 - While a pull request is already open for the proposal, a callout first: "a-intel/platform#519 is already open for this concern. One concern, one pull request."
 - Fields: Concern (the statement, with the hint "One concern per pull request."), Kind (the promoter's kind first, then the six kinds, each with a short description), Scope (workspace, which opens on a-intel/platform, or repository, which opens on the linked repository; the hint "The promoter picks the scope from where the evidence came."), Constraint effect (forbid or require; the hint "A record can never grant authority. These are the only two values.") and Supporting evidence (the support line and the finding id).
-- A note: "Merge is the publication. The 6 checks run the same rules as stella context validate: Schema, Lineage uniqueness, record_hash recomputation, Secret and PII scan, Conflict against active records, constraint_effect ∈ {require, forbid}."
+- A note: "Merge is the publication. The 6 checks run the same rules as stella context validate: Schema, Lineage uniqueness, record_hash recomputation, Secret and PII scan, Conflict against active records, Constraint is require or forbid."
 - Footer: Cancel and **Open the pull request** (gold), or **Go to a-intel/platform#519** when one is open. Opening pushes the branch, opens the pull request, queues the six checks, and moves to the Pull requests view with it selected: "Branch context/ctx.release.no-reread-changelog pushed and a-intel/platform#519 opened. 6 checks queued."
-- The mockup's Kind and Scope options join each value to its description with a dash; the build writes them as "rule: a directive that steers behaviour". The Constraint effect field applies to a constraint only (the contract refuses an effect on any other kind).
+- The mockup's Kind and Scope options join each value to its description with a colon ("rule: a directive that steers behavior"). The Constraint effect field applies to a constraint only (the contract refuses an effect on any other kind).
 
 ## Data sources
 
@@ -100,7 +100,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 | "from <source>" | `PROPOSALS[].from` | Who raised it | `source` (`context.proposal.create.ts:41`) | ✅ |
 | Support line ("682 duplicate tool calls across 212 runs") | `PRP_META[].support` over `PRP_SUPPORT` | A measure over the supporting runs | `support` carries run ids, agent keys, record ids and evidence links (`context.steering.shared.ts:193-204`); the counts derive from them, the measure does not (#3881) | 🟡 |
 | Tiles: Supporting runs and Distinct agents | `prpStats()` | Counts of the support | `support.runs` and `support.agents` | ✅ |
-| Tile: Confidence | `PRP_META[].confidence` | The promoter's estimate | None. ADR-061 records that the promoter and the reflector are not built (#3881) | ❌ |
+| Tile: Confidence | `PRP_META[].confidence` | The promoter's estimate | None. ADR-061 records that the promoter and the post-run review are not built (#3881) | ❌ |
 | Promoter evidence | `PRP_META[].rationale` | The proposal's rationale | `rationale` | ✅ |
 | Supporting runs: Run | `PRP_SUPPORT[].run` | The runs the proposal cites | `support.runs` | ✅ |
 | Supporting runs: agent, date, Frame, Outcome and Record kind | `PRP_SUPPORT[]` | Each cited run's terminal status, citing frame and record | None. Evidence links may carry `frame:<run>/<seq>` refs, but no read joins a run's outcome (#3881) | ❌ |
@@ -113,7 +113,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 
 ## Future-only fields
 
-The mockup marks no field on this view with `data-future`, and the catalog gives it no future-only story. These fields are future-only in `macanderson/oxagen` all the same, and a build renders each as not recorded until its contract ships: the support measure in each support line, the Confidence tile, the supporting runs' agent, date, frame, outcome and record kind, the Costs and Baseline rows, every proposal the promoter, a findings job or the reflector would raise, and the proposal a memory fold raised.
+The mockup marks no field on this view with `data-future`, and the catalog gives it no future-only story. These fields are future-only in `macanderson/oxagen` all the same, and a build renders each as not recorded until its contract ships: the support measure in each support line, the Confidence tile, the supporting runs' agent, date, frame, outcome and record kind, the Costs and Baseline rows, every proposal the promoter, a findings job or the post-run review would raise, and the proposal a memory fold raised.
 
 ## Functionality
 
@@ -144,7 +144,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 ## Backend gaps this page depends on
 
 - The support measure, each cited run's outcome, citing frame and record, and the promoter's confidence (#3881).
-- The promoter, the findings job and the reflector that raise proposals from runs (ADR-061).
+- The promoter, the findings job and the post-run review that raise proposals from runs (ADR-061).
 - The fold that turns a memory's sayings into a proposal, and each saying's run outcome from its terminal status.
 - The steering tokens a turn before and after a merge, and the baseline measure.
 

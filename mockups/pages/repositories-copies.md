@@ -18,9 +18,9 @@ Show which directories, on which machines, hold this workspace's `.oxagen/` tree
 
 ## What is on the page
 
-**Header and tabs** as `repositories.md`, with Working copies (2) selected. On this tab the header's **Add Oxagen to a repository** is plain, because the panel's **Connect a directory** is the one gold action.
+**Header and tabs** as `repositories.md`, with Working copies (2) selected. On this tab the header's **Add .oxagen/** is plain, because the panel's **Connect a directory** is the one gold action.
 
-**Working copies panel.** Heading "Working copies", subtext "The same .oxagen/ tree on a machine. Each is a directory somebody ran oxagen init in; the enrollment is the machine’s, and the link is one gitignored file." **Connect a directory** (gold, opens `linkdir`) at the right. The shell's list tools sit above the rows: "Search this list", the filters "All · Symlinks" (missing, ok), "All · Bundle" (v39, v41) and "All · Repository" (a-intel/billing, a-intel/mobile, a-intel/platform), Rows, sortable headers and a pager over the four rows.
+**Working copies panel.** Heading "Working copies", subtext "Each row is a directory where someone ran oxagen init, linked by one gitignored file." **Connect a directory** (gold, opens `linkdir`) at the right. The shell's list tools sit above the rows: "Search this list", the filters "Any symlinks" (Missing, Ok), "Any bundle" (v39, v41) and "Any repository" (a-intel/billing, a-intel/mobile, a-intel/platform), Rows, sortable headers and a pager over the four rows.
 
 Columns, in order: Directory · Repository · Branch · `.oxagen/` · Symlinks · Bundle · Last seen.
 
@@ -33,12 +33,12 @@ Columns, in order: Directory · Repository · Branch · `.oxagen/` · Symlinks �
 
 - **Directory** carries a folder icon, the path in mono, and the machine and person beneath.
 - **Branch** prints the branch over its head commit.
-- **`.oxagen/`** is a badge: `in sync` in the allowed ink, `behind` or `uncommitted` in the approval ink, or `unbound` in the neutral ink, with the count of uncommitted files beneath.
+- **`.oxagen/`** is a badge: `in sync` in the allowed ink, `behind` or `uncommitted` in the approval ink, or `not linked` in the neutral ink, with the count of uncommitted files beneath.
 - **Symlinks** is a badge, `ok` or `missing`.
 - Every row opens `workcopy` on click, Enter or Space (`role="button"`, `tabindex="0"`, `aria-label="Open <path> on <machine>"`).
 - No banner sits above the table. The `.oxagen/` cell carries the state on the row it is true of, and the count is on the tab.
 
-With no copy linked, the panel reads "No directory on anybody’s disk is linked to Core platform yet.", keeps **Connect a directory** (gold), and adds the note "A directory is linked by running oxagen init in it. Nothing here is linked by a person typing a path: the browser cannot see a filesystem, and a path typed into a form proves nothing about what is at it."
+With no copy linked, the panel reads "No directory is linked to Core platform yet.", keeps **Connect a directory** (gold), and adds the note "Run oxagen init in a directory to link it. You cannot link one by typing a path here, because the browser cannot see your filesystem."
 
 **Files to review.** The tree:
 
@@ -58,22 +58,22 @@ A note beneath says the committed file says what the workspace is, and the gitig
 **Sync.** Four commands, each with one line:
 
 - `oxagen init`: "Links this directory. Reads the git remote, matches it to a repository the installation can reach, and writes .oxagen/workspace.json. Idempotent."
-- `oxagen pull`: "Fast-forwards .oxagen/ to the production branch and re-points the Stella symlinks. It never merges your work."
-- `oxagen status`: "What this copy has against what is published: the bundle version, the records in force, and anything uncommitted under .oxagen/."
-- `oxagen propose`: "Turns a local edit under .oxagen/ into a proposal. Opening and merging its pull request happen here, because both gate on a role only a signed-in person holds."
+- `oxagen pull`: "Fast-forwards .oxagen/ to the production branch and re-points the stella symlinks. It never merges your work."
+- `oxagen status`: "Compares this copy with what is published: the bundle version, the records in force, and anything uncommitted under .oxagen/."
+- `oxagen propose`: "Turns a local edit under .oxagen/ into a proposal. You open and merge its pull request here, because both need a role that only a signed-in person holds."
 
-The note: "Stella symlinks into this directory rather than copying it, so there is no second copy that could drift. A copy whose symlinks read missing is one where Stella will load nothing."
+The note: "stella reads this directory through symlinks, so there is no second copy to drift. Where the symlinks read missing, stella loads nothing."
 
 **Dialogs this page opens:** `linkdir`, `workcopy` and `copyoff`, and the init wizard from the header (specified in `repositories.md`).
 
-- **`linkdir`**, "Connect a directory", subtitle "one command, run in the directory". The lead: "Run this in the directory you want linked. It reads the git remote, matches it against the repositories this installation can reach, and writes the one gitignored file that says which workspace this checkout talks to." Under "In the directory": `oxagen init --org a-intel --workspace core-platform` and the comment "# Pairing code: 4QF2-91KD · expires in 9:41", with the hint "The code authorises the pairing once. What identifies the copy afterwards is the machine’s enrollment, so a code that leaks after it is spent links nothing." Under "What it writes, and what it does not", four lines. Writes: `.oxagen/workspace.json`, with org, workspace, path and machine, gitignored, never reviewed and never merged. Links: `.stella/rules`, `.stella/proposals` and `.stella/agents` as symlinks into `.oxagen/`. Does not write: anything committed under `.oxagen/`, and a repository with no tree is told so and offered the pull request that adds one. Does not read: the working tree, because Oxagen reads `.oxagen/` and nothing else. The note: "Linking a directory grants nothing. A person’s roles decide what they may do here, and an agent’s mandate decides what it may do there; a laptop is not a principal." Footer: "a-intel · core-platform", **Close**, **Copy command** (gold), which reports "Waiting for a directory to pair…".
+- **`linkdir`**, "Connect a directory", subtitle "one command, run in the directory". The lead: "Run this in the directory you want linked. It reads the git remote, matches it against the repositories this installation can reach, and writes the one gitignored file that says which workspace this checkout talks to." Under "In the directory": `oxagen init --org a-intel --workspace core-platform` and the comment "# Pairing code: 4QF2-91KD · expires in 9:41", with the hint "The code works for one pairing. After that, the machine’s enrollment identifies the copy, so a used code links nothing." Under "What it writes, and what it does not", four lines. Writes: `.oxagen/workspace.json`, with org, workspace, path and machine, gitignored, never reviewed and never merged. Links: `.stella/rules`, `.stella/proposals` and `.stella/agents` as symlinks into `.oxagen/`. Does not write: anything committed under `.oxagen/`, and a repository with no tree is told so and offered the pull request that adds one. Does not read: the working tree, because Oxagen reads `.oxagen/` and nothing else. The note: "Linking a directory grants nothing. A person’s roles decide what they can do here, and an agent’s mandate decides what it can do. A laptop is not a principal." Footer: "a-intel · core-platform", **Close**, **Copy command** (gold), which reports "Waiting for a directory to pair…".
 - **`workcopy`**, titled with the path, subtitled "<machine> · <person>". Facts: Repository, Remote ("git@github.com:a-intel/platform.git"), Branch ("feat/ledger-compaction at b71d4ae"), Machine ("macOS 15.3 · arm64 · enr_01K5RQ4B9C"), `.oxagen/`, Symlinks, Bundle (with "· published is v41" when it trails), Last seen. Then one note by the copy's state:
-  - in sync with symlinks ok: "This copy holds what is published. Nothing is waiting."
-  - behind: "This copy is behind the production branch, so the person reading it is reading rules that are no longer in force. It does not change what a run is steered by: steering reaches a run from the merged commit, in the signed bundle."
-  - symlinks missing: "Stella will load nothing here. The symlinks under .stella/ are absent, so its loader has no rules directory to read. oxagen init re-creates them."
-  - uncommitted: that there are edits under `.oxagen/` no pull request carries, and they steer nothing, here or in a run, until one does. Beneath, "Uncommitted under .oxagen/" lists the files (`.oxagen/rules/ctx.mobile.release-train.toml`, "statement edited locally"; `.oxagen/agents/screenshot-bot.toml`, "never committed") with the hint "Turning these into a pull request is oxagen propose. Opening and merging it happen in Oxagen, because both gate on a role only a signed-in person holds."
+  - in sync with symlinks ok: "This copy matches what is published. No action needed."
+  - behind: "This copy is behind the production branch, so whoever reads it sees rules that are no longer in force. Runs are not affected: steering reaches a run from the merged commit, in the signed bundle."
+  - symlinks missing: "stella will load nothing here. The symlinks under .stella/ are absent, so its loader has no rules directory to read. oxagen init re-creates them."
+  - uncommitted: that there are edits under `.oxagen/` no pull request carries, and they steer nothing, here or in a run, until one does. Beneath, "Uncommitted under .oxagen/" lists the files (`.oxagen/rules/ctx.mobile.release-train.toml`, "statement edited locally"; `.oxagen/agents/screenshot-bot.toml`, "never committed") with the hint "Turning these into a pull request is oxagen propose. You open and merge it in oxagen, because both need a role that only a signed-in person holds."
   - Footer: the copy's id in mono, **Close**, **Disconnect** (red, opens `copyoff`), and on a copy that is not in sync or has symlinks missing, **Ask for a pull** (gold), which reports "Asked <machine> to run oxagen pull".
-- **`copyoff`**, "Disconnect <path>?". The note: "Oxagen forgets this directory. <machine> stops reporting it, and the gitignored .oxagen/workspace.json in it stops resolving. Nothing on disk is deleted and nothing committed changes." With uncommitted edits, the warning "2 uncommitted edits under .oxagen/ here are carried by no pull request. Disconnecting does not lose them, and it does not propose them either." Then "Running oxagen init in the directory again links it back." Footer: **Keep it**, **Disconnect it** (red), which reports "<path> on <machine> disconnected. The directory is untouched; oxagen init links it back."
+- **`copyoff`**, "Disconnect <path>?". The note: "oxagen forgets this directory. <machine> stops reporting it, and the gitignored .oxagen/workspace.json in it stops resolving. Nothing on disk is deleted and nothing committed changes." With uncommitted edits, the warning "2 uncommitted edits under .oxagen/ here are carried by no pull request. Disconnecting does not lose them, and it does not propose them either." Then "Running oxagen init in the directory again links it back." Footer: **Keep it**, **Disconnect it** (red), which reports "<path> on <machine> disconnected. The directory is untouched. Run oxagen init there to link it again."
 
 ## Data sources
 
@@ -105,7 +105,7 @@ The view carries no `data-future` mark. Almost all of it is future-only all the 
 
 ## States
 
-The catalog lists all five. The header, tabs and state panels are the Repositories ones in `repositories.md`. Empty reads "This workspace has no repository yet" with **Add Oxagen to a repository**. Loading is the skeleton. Error reads "Repositories could not be loaded" with `503 installation_unreachable`. Access denied reads "You cannot see this workspace’s repositories" and names `repository.read on core-platform`. On this tab the loaded state has a second form, the empty list described above, for a workspace with a repository and no linked directory.
+The catalog lists all five. The header, tabs and state panels are the Repositories ones in `repositories.md`. Empty reads "This workspace has no repository yet" with **Connect repository**. Loading is the skeleton. Error reads "Repositories could not be loaded" with `503 installation_unreachable`. Access denied reads "You cannot see this workspace’s repositories" and names `repository.read on core-platform`. On this tab the loaded state has a second form, the empty list described above, for a workspace with a repository and no linked directory.
 
 ## Mobile
 

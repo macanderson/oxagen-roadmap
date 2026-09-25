@@ -82,8 +82,8 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
     <tbody>
-      <tr><td>Card</td><td><code>.agc</code></td><td>A flex row with a 10px gap. <code>color:inherit</code> and no underline, so it reads the same as a link or a static span.</td></tr>
       <tr><td>Harness mark</td><td><code>.agc&gt;.hx</code></td><td>The harness logo from <code>hxIcon()</code>, 15px (16px in the compact layout), 6px before the avatar. In the detail layout it leads the second line instead, where a 60px avatar would dwarf it.</td></tr>
+      <tr><td>Card</td><td><code>.agc</code></td><td>A flex row with a 10px gap. <code>color:inherit</code> and no underline, so it reads the same as a link or a static span.</td></tr>
       <tr><td>Identity block</td><td><code>.agc .agid</code></td><td>A column holding the key and its second line, 240px max, each line ellipsized on its own. The only part allowed to shrink.</td></tr>
       <tr><td>Key</td><td><code>.agc .agid .tkey</code></td><td>The agent's key in Monaspace Neon.</td></tr>
       <tr><td>Second line</td><td><code>.agc .agid .sub</code></td><td>One line under the key: the harness by default, or the 30-day figures in the compact layout.</td></tr>
@@ -130,8 +130,8 @@
   
   <ul>
     <li>A linked agent card is a real <code>a</code> with the key as its visible text, so a screen reader announces the destination by name, not by a generic &quot;link&quot;.</li>
-    <li>The avatar is <code>aria-hidden</code>. The key and the second line carry the full identity in text.</li>
     <li>The harness mark is <code>aria-hidden</code> when the second line names the harness. When a caller replaces the second line, the mark carries <code>role=&quot;img&quot;</code> and the harness name as its <code>aria-label</code>.</li>
+    <li>The avatar is <code>aria-hidden</code>. The key and the second line carry the full identity in text.</li>
     <li>The detail layout's card sits inside the page's own <code>h1</code>, so the agent's key is announced as the page's heading, not as a caption beside it.</li>
   </ul>
 </section>
@@ -167,8 +167,8 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 1309 to 1334 (agent card, its three layouts, and the rule comment above them), 1338 (a steer-list override), 2166 to 2167 (the harness mark inside the card)</td><td>The rules that draw it</td></tr>
-      <tr><td><code>hxIcon(harness, size, alone)</code> at <code>engine.js:14743</code></td><td>The harness mark, found by key or by label. <code>alone</code> adds <code>role=&quot;img&quot;</code> and an <code>aria-label</code> when no text beside the mark names the harness.</td></tr>
-      <tr><td><code>agentCard(a, o)</code> at <code>engine.js:9988</code></td><td>The one function that draws an agent identity. <code>o.layout</code> picks list, compact, or detail. 17 calls.</td></tr>
+      <tr><td><code>hxIcon(harness, size, alone)</code> at <code>engine.js:14746</code></td><td>The harness mark, found by key or by label. <code>alone</code> adds <code>role=&quot;img&quot;</code> and an <code>aria-label</code> when no text beside the mark names the harness.</td></tr>
+      <tr><td><code>agentCard(a, o)</code> at <code>engine.js:9991</code></td><td>The one function that draws an agent identity. <code>o.layout</code> picks list, compact, or detail. 17 calls.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -195,7 +195,7 @@
 ## Inputs
 
 1. mockups/components/agent-card.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 1309 to 1334 (agent card, its three layouts, and the rule comment above them), 1338 (a steer-list override), 2166 to 2167 (the harness mark inside the card). The mockup renders it with hxIcon(harness, size, alone) (engine.js:14743), agentCard(a, o) (engine.js:9988).
+2. The design source: mockups/src/engine.css lines 1309 to 1334 (agent card, its three layouts, and the rule comment above them), 1338 (a steer-list override), 2166 to 2167 (the harness mark inside the card). The mockup renders it with hxIcon(harness, size, alone) (engine.js:14746), agentCard(a, o) (engine.js:9991).
 3. The build's implementation: find it by its root selector (.agc) or its name, and list every route that renders it.
 4. Where to see it in the design: Agents, Work, Run, Approvals, Spend, Tools, Steering. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -216,7 +216,7 @@ Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and li
 11. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
 12. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
 13. Phone. At 390 by 844 with a touch pointer: The detail layout wraps at 390px: the score slot (`.agc-detail&gt;.scs`), when present, drops to its own row instead of squeezing the avatar. The list and compact layouts keep their sizes. The identity block's ellipsis is what keeps them inside a narrow card or cell.
-14. Accessibility. A linked agent card is a real `a` with the key as its visible text, so a screen reader announces the destination by name, not by a generic &quot;link&quot;. The avatar is `aria-hidden`. The key and the second line carry the full identity in text. The harness mark is `aria-hidden` when the second line names the harness. When a caller replaces the second line, the mark carries `role=&quot;img&quot;` and the harness name as its `aria-label`. The detail layout's card sits inside the page's own `h1`, so the agent's key is announced as the page's heading, not as a caption beside it.
+14. Accessibility. A linked agent card is a real `a` with the key as its visible text, so a screen reader announces the destination by name, not by a generic &quot;link&quot;. The harness mark is `aria-hidden` when the second line names the harness. When a caller replaces the second line, the mark carries `role=&quot;img&quot;` and the harness name as its `aria-label`. The avatar is `aria-hidden`. The key and the second line carry the full identity in text. The detail layout's card sits inside the page's own `h1`, so the agent's key is announced as the page's heading, not as a caption beside it.
 15. One implementation. The build draws the agent card from one shared component. List every place that draws it by hand, with its file and line.
 
 ## Output

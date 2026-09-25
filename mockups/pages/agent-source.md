@@ -12,18 +12,18 @@
 
 ## Job
 
-The agent's definition, `.oxagen/agents/<slug>.toml`, in a source editor. The file is the definition of record: the name, the description, the model tier, the tools and the tools it may never call, the side effects, the budget, the instructions and the harness settings. Saving never writes Postgres. It commits to a branch and opens a pull request, and the merge is the change.
+The agent's definition, `.oxagen/agents/<slug>.toml`, in a source editor. The file is the definition of record: the name, the description, the model class, the tools and the tools it may never call, the side effects, the budget, the instructions and the harness settings. Saving never writes Postgres. It commits to a branch and opens a pull request, and the merge is the change.
 
 The instructions in this file reach the agent as a `procedure` SteeringFrame, listed on the agent's Steering tab with this file as its source.
 
 ## What is on the page
 
-**Header.** The eyebrow reads “Agent · Source”, with Agent a link to the agent's Overview. The h1 is the path in mono: `.oxagen/agents/release-manager.toml`. Chips: the main repository (`a-intel/platform`), the branch at its commit (`main @ a4c91e2`, or the pending branch as a badge when a commit sits on a branch that has not merged), “source of truth”, and the agent key (`a-intel.core.release-manager`). Subtext: “The agent definition is this file. Saving opens a pull request against the main repo. Nothing is written to Postgres.” Actions, in this order:
+**Header.** The eyebrow reads “Agent · Source”, with Agent a link to the agent's Overview. The h1 is the path in mono: `.oxagen/agents/release-manager.toml`. Chips: the main repository (`a-intel/platform`), the branch at its commit (`main @ a4c91e2`, or the pending branch as a badge when a commit sits on a branch that has not merged), “source of truth”, and the agent key (`a-intel.core.release-manager`). Subtext: “The agent definition is this file. Saving opens a pull request against the main repo. Nothing is written to oxagen’s database.” Actions, in this order:
 
 - **Discard** returns the draft to the base. It is disabled while the draft is unchanged.
 - **Save** (gold) opens the commit dialog.
 
-**Tabs.** The agent's eight tabs (`agent.md`), with Source selected. Each opens its tab. This page draws the tab bar without the counts the other tabs carry, which is a mockup defect: a build shows the same counts on every tab.
+**Tabs.** The agent's eight tabs (`agent.md`), with Definition selected. Each opens its tab. This page draws the tab bar without the counts the other tabs carry, which is a mockup defect: a build shows the same counts on every tab.
 
 **Editor.** One panel.
 
@@ -59,12 +59,12 @@ Keys: ⌘S saves (opens the commit dialog), Tab indents by two spaces, ⇧Tab ou
 
 **Commit dialog** (from Save), titled “Commit this change”, with an eyebrow line “.oxagen/agents/release-manager.toml · +1 −1 · from the source editor”: the path, the diff stat of the draft against the base, and where the change came from.
 
-- Repository and Base: `a-intel/platform` (“primary”) at `main @ a4c91e2`, with “The primary repository bound to workspace Core platform. Every agent definition in this workspace lives here; it is not chosen per change.”
+- Repository and Base: `a-intel/platform` (“primary”) at `main @ a4c91e2`, with “The main repository linked to workspace Core platform. Every agent definition in this workspace lives here; it is not chosen per change.”
 - **Branch**: a select that opens on “+ New branch” and lists the repository's branches, each with its pull request where it has one. **New branch name** (“agent/release-manager/update-color”), with “Cut from main @ a4c91e2. Suggested by the same draft as the summary.”
 - **Summary**: a drafted one-line summary (“Update release-manager color”), badges for the change's kind and area (“cosmetic”, “harness”), the line naming the model that drafted it, and **Redraft**.
 - **Description**: the drafted body, with “Becomes the commit message and the pull request body. The draft is a starting point; what you commit is what you wrote.”
 - **Open a pull request**: a switch (`role=switch`), on by default, with “Against main, titled from the summary. Governance mode team asks the code owners of .oxagen/agents/ to review; merge is the change.” Off, it reads “Push the commit to the branch only. Nothing changes for the running agent until someone opens and merges a pull request; your coding agent can pick the branch up from the repo.” When the draft touches a sensitive field, a callout says the checks will hold the merge for a code-owner review.
-- **Diff against main**, with the count of lines changed, then the note: “Merge is the change. The principal, roles, and toolbelt update when the pull request merges; until then the running definition stays at a4c91e2 and definition_digest does not move.”
+- **Diff against main**, with the count of lines changed, then the note: “The principal, roles, and toolbelt update when the pull request merges. Until then the running definition stays at a4c91e2 and its definition_digest doesn’t change.”
 - The footer names what will be written (“New branch agent/release-manager/update-color on a-intel/platform”), then **Cancel** and the primary button: **Commit and open the pull request**, **Commit to the branch** (switch off, or a branch whose pull request is already open), or **Open the pull request** (the commit is already on the branch). It is disabled until the branch and the summary are filled.
 
 Committing records the pending branch; the header's branch chip then shows it until it merges.
@@ -79,7 +79,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 |---|---|---|---|---|
 | The file text | `defBase()` and `defSrc()` from `agentTomlSeed()` | `.oxagen/agents/<slug>.toml` at the head of the default branch | `get_agent` `definition.source` is the text of the last commit `commit_agent_definition` cached, with its `path`, `digest`, `commitSha`, `branch` and `pullRequestUrl` (`agent.get.ts:75-89`, `:142`). No read returns the file at the default branch's head | 🟡 |
 | The file's schema and fields | `agentTomlSeed()` | `agent-definition/v0.1` | `AGENT_DEFINITION_SCHEMA` and `AGENT_DEFINITION_DIR` (`agent.definition.commit.ts:25-26`); the budget table (`packages/oxagen/src/agent-definition-source.ts:19-31`); `model_tier`, `tools`, `side_effects` and the instructions are checked by `propose_agent` (`agent.propose.ts:185-225`) | ✅ |
-| Repository and branch chips | `w.main`, `w.branch`, `a.commit`, `S.defPending` | The workspace's bound repository; the definition's commit; a pending branch | `get_agent` `definition.commitSha`, `branch`, `pullRequestUrl` (`agent.get.ts:75-89`) | 🟡 |
+| Repository and branch chips | `w.main`, `w.branch`, `a.commit`, `S.defPending` | The workspace's main repository; the definition's commit; a pending branch | `get_agent` `definition.commitSha`, `branch`, `pullRequestUrl` (`agent.get.ts:75-89`) | 🟡 |
 | Branches in the commit dialog | `BRANCHES` | `list_branches` | `repo.branch.list.ts:5` | ✅ |
 | Save: commit and pull request | `openCommit()`, `S.defPending` | `commit_agent_definition` | `agent.definition.commit.ts:46`. It commits to a branch that is never the default branch, opens or reuses the pull request, and refuses a file whose `schema` is not `agent-definition/v0.1` or whose `slug` is not the agent's (`agent.definition.commit.ts:1-24`) | ✅ |
 | Drafted summary and description, Redraft | the drafter in the commit dialog | A model-written draft of the commit message | No capability drafts a commit message. `summarize_agent_def` summarizes what an agent does (`agent.definition.summarize.ts:5`) | ❌ |

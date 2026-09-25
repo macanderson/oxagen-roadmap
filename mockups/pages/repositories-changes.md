@@ -18,37 +18,37 @@ List every pull request Oxagen has open on this workspace's repositories, of eve
 
 ## What is on the page
 
-**Header and tabs** as `repositories.md`, with Changes (5) selected. The header's **Add Oxagen to a repository** is gold on the list and on a pull request that cannot merge. It is plain when the selected pull request can merge, because **Merge pull request** is then the one gold action.
+**Header and tabs** as `repositories.md`, with Changes (5) selected. The header's **Add .oxagen/** is gold on the list and on a pull request that cannot merge. It is plain when the selected pull request can merge, because **Merge pull request** is then the one gold action.
 
 ### The list
 
-**Open pull requests panel.** Heading "Open pull requests". The subtext says there are four kinds of file and one lifecycle, and that whoever opened a pull request (a person, the promoter, or the reconciler), the checks, the merge and the publication are the same. The shell's list tools sit above the rows: "Search this list", the filters "All · State", "All · Kind" and "All · Opened by", Rows, sortable headers and a pager over the six rows.
+**Open pull requests panel.** Heading "Open pull requests". The subtext says there are four kinds of file and one lifecycle, and that whoever opened a pull request (a person, the promoter, or the reconciler), the checks, the merge and the publication are the same. The shell's list tools sit above the rows: "Search this list", the filters "Any state", "Any kind" and "Any opened by", Rows, sortable headers and a pager over the six rows.
 
 Columns, in order: Change · Kind · Pull request · Opened by · State · Checks · Opened.
 
 | Change (branch) | Kind | Pull request | Opened by | State | Checks | Opened |
 |---|---|---|---|---|---|---|
-| Add Oxagen to a-intel/mobile (`oxagen/init`) | Oxagen init | a-intel/mobile#118 | Marcus Bell, a person | checks running | 2 / 5 | 6 min ago |
-| ctx.release.no-reread-changelog (`context/ctx.release.no-reread-changelog`) | Steering record | a-intel/platform#523 | the promoter | checks passed | 6 / 6 | 38 min ago |
-| a-intel.release-notes-from-prs 2.1.0 → 2.2.0 (`skills/a-intel.release-notes-from-prs`) | skill | a-intel/platform#522 | Priya Natarajan, a person | checks failed | 4 / 6 | 2 h ago |
-| release-manager · budget and belt (`agents/release-manager`) | agent | a-intel/platform#521 | Marcus Bell, a person | checks passed | 4 / 4 | 3 h ago |
-| Reconcile workspace.toml against live state (`oxagen/reconcile-2026-09-17`) | configuration | a-intel/platform#524 | the reconciler | checks passed | 4 / 4 | 11 min ago |
-| ctx.platform.changelog-once (`context/ctx.platform.changelog-once`) | Steering record | a-intel/platform#519 | Marcus Bell, a person | merged | 6 / 6 | yesterday |
+| Add .oxagen/ to a-intel/mobile (`oxagen/init`) | oxagen init | a-intel/mobile#118 | Marcus Bell, Person | checks running | 2 / 5 | 6 min ago |
+| ctx.release.no-reread-changelog (`context/ctx.release.no-reread-changelog`) | Steering record | a-intel/platform#523 | the promoter, Automatic | checks passed | 6 / 6 | 38 min ago |
+| a-intel.release-notes-from-prs 2.1.0 → 2.2.0 (`skills/a-intel.release-notes-from-prs`) | skill | a-intel/platform#522 | Priya Natarajan, Person | checks failed | 4 / 6 | 2 h ago |
+| release-manager · budget and toolbelt (`agents/release-manager`) | agent | a-intel/platform#521 | Marcus Bell, Person | checks passed | 4 / 4 | 3 h ago |
+| Reconcile workspace.toml against live state (`oxagen/reconcile-2026-09-17`) | configuration | a-intel/platform#524 | the reconciler, Automatic | checks passed | 4 / 4 | 11 min ago |
+| ctx.platform.changelog-once (`context/ctx.platform.changelog-once`) | Steering record | a-intel/platform#519 | Marcus Bell, Person | merged | 6 / 6 | yesterday |
 
 - **Change** carries the kind's icon, the title, and the branch in mono beneath.
-- **Kind** is one of `Oxagen init` (the `.oxagen/` tree itself), `Steering record` (`.oxagen/rules/<lineage>.toml`), `skill` (`.oxagen/skills/<name>/SKILL.md`), `agent` (`.oxagen/agents/<slug>.toml`), `tool` (`.oxagen/tools/<name>.toml`) or `configuration` (`.oxagen/workspace.toml`).
-- **Opened by** names a person, `the promoter` or `the reconciler`, with "a person", "promoter" or "reconciler" beneath.
+- **Kind** is one of `oxagen init` (the `.oxagen/` tree itself), `Steering record` (`.oxagen/rules/<lineage>.toml`), `skill` (`.oxagen/skills/<name>/SKILL.md`), `agent` (`.oxagen/agents/<slug>.toml`), `tool` (`.oxagen/tools/<name>.toml`) or `configuration` (`.oxagen/workspace.toml`).
+- **Opened by** names a person, `the promoter` or `the reconciler`, with "Person" or "Automatic" beneath.
 - **State** is a badge: `open`, `checks running`, `checks passed`, `checks failed`, `merged` or `closed`.
 - **Checks** is the CI light and "done / total". The light blinks blue while any check runs, shows a red ✕ the moment one fails (pulsing while others still run), stays green when every check passed, and grey while all are queued. Its title says "running", "N failed", "all passed" or "queued".
 - A row opens that pull request on click, Enter or Space (`role="button"`, `tabindex="0"`, `aria-label="Open <title>"`).
 
-A note closes the panel: "A change is in force from the merge commit, not from when it was written. While a pull request is open the thing it carries steers nothing: it is not in the compiled bundle, not in the record index, and the bundle version has not moved."
+A note closes the panel: "A change takes effect at its merge commit. While its pull request is open, it steers nothing: it is not in the compiled bundle or the record index, and the bundle version has not moved."
 
 **Automatic proposals panel.** Three openers, each with one line:
 
-- the promoter: "Aggregates records across runs by lineage and opens a proposal with the runs it cites. There is no threshold; a person reads the support and decides."
-- the reconciler: "Reads .oxagen/workspace.toml against what the control plane has, and opens one pull request per real difference. It never edits live state to match the file."
-- a person: every creation wizard (agent, tool, skill, record) ends here, and none of them has a Save button that ends in a database.
+- Promoter: "Groups records across runs by lineage and opens a proposal that cites those runs. There is no threshold. A person reads the cited runs and decides."
+- Reconciler: "Compares .oxagen/workspace.toml with the control plane’s live state and opens one pull request per difference. It does not edit live state to match the file."
+- Person: "Every creation wizard (agent, tool, skill, and record) ends here. None of them saves straight to the database."
 
 A note says drift is reported and never repaired in place, because a reconciler that silently edited either side would make the file a description of the past, and the pull request is the only place a person can say which of the two was right.
 
@@ -63,20 +63,20 @@ Selecting a row replaces the list with the pull request. The panel's head holds 
 | Kind | Checks, in the order they run |
 |---|---|
 | Steering record | `schema`, `lineage_uniqueness`, `record_hash`, `secret_pii_scan`, `conflict_against_active`, `constraint_effect` |
-| Oxagen init | `schema`, `layout`, `governance`, `secret_pii_scan`, `no_authority` |
+| oxagen init | `schema`, `layout`, `governance`, `secret_pii_scan`, `no_authority` |
 | skill | `frontmatter`, `semver`, `digest`, `grants`, `secret_pii_scan`, `load_cost` |
-| agent | `schema`, `belt`, `budget`, `secret_pii_scan` |
+| agent | `schema`, `toolbelt`, `budget`, `secret_pii_scan` |
 | configuration | `schema`, `drift_is_real`, `no_authority`, `secret_pii_scan` |
 
 On a failure the note "<check> stopped the run." follows, with what the check asserted, then "The checks behind it stayed queued, merge is disabled, and nothing was published." For #522: `grants` failed ("The bundle adds github__merge_pull_request to its tool list. A skill cannot raise a tier or add a tool."), and `secret_pii_scan` and `load_cost` read "Did not run: grants stopped the run."
 
 - **What merge will do**, five numbered steps: "Squash the branch onto <base>, pinned to the commit the checks ran on." "Delete the head branch." "Re-index from the merged commit and bump the workspace bundle version." "Append the promotion event to the ledger, with the approver and the commit sha." "Write one audit event. The change is in force from that commit, not from now."
-- **Actions**: **Merge pull request** is gold only when every check has reported and none failed, and disabled otherwise. **Close pull request** is red and opens `closepr`. A line at the right reads "Governance: team on GitHub" when merge is enabled, or "Merge stays disabled until every check reports." otherwise. Merging reports "Merged <pull request>. Squashed onto <base>, head branch deleted, bundle bumped, promotion event and audit event written."
+- **Actions**: **Merge pull request** is gold only when every check has reported and none failed, and disabled otherwise. **Close pull request** is red and opens `closepr`. A line at the right reads "GitHub enforces team (code-owner review) governance." when merge is enabled, or "Merge stays disabled until every check reports." otherwise. Merging reports "Merged <pull request>. Squashed onto <base>, head branch deleted, bundle bumped, promotion event and audit event written."
 - A merged pull request shows, in place of the steps and actions, "Merged. The file is on main, the promotion event is on the ledger, and the workspace’s steering version is the ledger’s length." A closed one shows "Closed without merging. The comment on <pull request> names who closed it and links back here."
 
 **Dialogs this page opens:** `closepr`, and the init wizard from the header (specified in `repositories.md`).
 
-- **`closepr`**, "Close <pull request>", subtitle "without merging". The lead: "The pull request closes on GitHub and nothing is published. Oxagen posts this comment on it:". The comment, previewed as GitHub renders it: "Closed by Marcus Bell <marcus@a-intel.example>", a horizontal rule, then "Added via Oxagen" and the full address of this pull request in Oxagen as the link text (`https://app.oxagen.sh/a-intel/core-platform/repositories/changes/<id>`). The note: "Closing is a governed action: it is recorded in Audit with your name, and the branch stays until someone deletes it." Footer: **Cancel**, **Close pull request** (red). Closing reports that the pull request closed without merging and quotes the comment posted.
+- **`closepr`**, "Close <pull request>", subtitle "without merging". The lead: "The pull request closes on GitHub and nothing is published. oxagen posts this comment on it:". The comment, previewed as GitHub renders it: "Closed by Marcus Bell <marcus@a-intel.example>", a horizontal rule, then "Added via oxagen" and the full address of this pull request in Oxagen as the link text (`https://app.oxagen.sh/a-intel/core-platform/repositories/changes/<id>`). The note: "Closing is a governed action: it is recorded in Audit with your name, and the branch stays until someone deletes it." Footer: **Cancel**, **Close pull request** (red). Closing reports that the pull request closed without merging and quotes the comment posted.
 
 ## Data sources
 
@@ -109,13 +109,13 @@ The view carries no `data-future` mark. These are future-only all the same, and 
 - **The governance mode** is read from `.oxagen/rules/governance.toml` on the production branch when a pull request is opened and again when it is merged, so the line beside Merge names the mode in force.
 - **In force from the merge commit.** While a pull request is open, what it carries steers nothing: it is not in the compiled bundle or the record index, and the bundle version has not moved.
 - **Closing** publishes nothing, is a governed action, and lands in Audit with the person's name. The comment names who closed it and links back to the pull request in Oxagen.
-- **Nothing in `.oxagen/` grants authority.** A check refuses a record, skill, agent or init tree that tries: `constraint_effect`, `grants`, `belt` and `no_authority`.
+- **Nothing in `.oxagen/` grants authority.** A check refuses a record, skill, agent or init tree that tries: `constraint_effect`, `grants`, `toolbelt` and `no_authority`.
 - **Drift is reported, never repaired in place.** The reconciler opens a pull request per difference and never edits live state or the file on its own.
 - **Selecting a row** holds the selection only for this workspace: a selection from another workspace never renders here.
 
 ## States
 
-The catalog lists all five. The header, tabs and state panels are the Repositories ones in `repositories.md`. Empty reads "This workspace has no repository yet" with **Add Oxagen to a repository**. Loading is the skeleton. Error reads "Repositories could not be loaded" with `503 installation_unreachable`. Access denied reads "You cannot see this workspace’s repositories" and names `repository.read on core-platform`. The app's own empty list reads "Oxagen has no pull request open or merged on this workspace’s repositories." (`repositories.json`, `changes.empty`).
+The catalog lists all five. The header, tabs and state panels are the Repositories ones in `repositories.md`. Empty reads "This workspace has no repository yet" with **Connect repository**. Loading is the skeleton. Error reads "Repositories could not be loaded" with `503 installation_unreachable`. Access denied reads "You cannot see this workspace’s repositories" and names `repository.read on core-platform`. The app's own empty list reads "Oxagen has no pull request open or merged on this workspace’s repositories." (`repositories.json`, `changes.empty`).
 
 ## Mobile
 
@@ -146,6 +146,6 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 - Every enforcement claim states the tier. A pull request steers nothing until it merges, and nothing in `.oxagen/` grants authority.
 - Headers are rollups of the rows beneath them. The Changes count equals the open pull requests in the list, merged and closed ones excluded.
 - Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
-- Exactly one gold action per screen: **Merge pull request** when it can merge, the header's **Add Oxagen to a repository** otherwise.
+- Exactly one gold action per screen: **Merge pull request** when it can merge, the header's **Add .oxagen/** otherwise.
 - A future-only field is marked in the design and renders as not recorded in a build until its contract ships.
 - The words are pull request and Steering record. Context PR and context record appear nowhere on screen.
