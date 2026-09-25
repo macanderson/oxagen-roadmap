@@ -31,7 +31,7 @@ Routing a call through a daemon Oxagen runs adds four things over the hook:
 
 ## Decisions
 
-### One route per server, under its own name
+### One route per server
 
 The daemon serves one loopback route for each MCP server the harness had, and the harness config keeps the original server name. A single endpoint that merges every server would rename the tools. That breaks every per-server rule the harnesses key on: Claude Code's `mcp__github__.*` matchers and permission rules, Codex's `enabled_tools` and `tools.<tool>.approval_mode`, Cursor's `Mcp(server:tool)` rules, and Stella's tool policy and per-server caps (`stella-mcp/src/lib.rs:47-53`). The MCP tools specification also says an aggregating proxy should prefix tool names and should not rely on `serverInfo.name` ([tools](https://modelcontextprotocol.io/specification/2026-07-28/server/tools)). One route per server avoids both.
 
@@ -46,13 +46,13 @@ Today `enforcementTierOf` promotes a session to `gateway` on two kinds of eviden
 
 The relayed call is daemon-sealed, like a model call. So ingest gains a third road that mirrors `modelRouted`: the verified chain holds a `tool_call` frame with `source: collector`, `fidelity: proxy`, and `tool_source: mcp`. A record posted through the local OTLP endpoint cannot carry that source and fidelity. ADR-095 already licenses the road ("model and MCP requests seen by the gateway for that run give `gateway`"). This is the first thing to build, because without it routing MCP earns no tier.
 
-### One call, one record
+### One record per call
 
 `PreToolUse` still fires for every `mcp__*` call after routing. The hook stays: it refuses before the call starts, and it is the only check on built-in tools. So each routed call arrives twice, once from the hook and once from the relay.
 
 Ingest keeps both and counts the call once, the way metering already treats a model call (`ingest:280-296`). The relay frame carries the input digest the hook also records. Ingest links the two on the session, the tool name, and the input digest, and the observed frame replaces the self-reported one in every count. This answers the Cursor writer's objection (`cursor-writer.ts:42-54`: "would record the same call twice… and put one harness on two tiers"). A run earns one tier, the highest its record supports, and each call shows how it was seen.
 
-### Oxagen does not edit repositories
+### User scope only
 
 Enrollment rewrites user-scope config only. A project file (`.mcp.json`, `.codex/config.toml`, `.cursor/mcp.json`, `.stella/mcp.toml`) belongs to the repository. Oxagen does not write into it, because the change would land in the customer's commits. A project-scope server stays hook-checked at `harness` strength on a laptop. On a managed device, the pin below either blocks it or lets an admin add it to the relayed set.
 
@@ -137,7 +137,7 @@ With that in place, Stella gets the same writer and pin as the others. Two Stell
 
 **Stella in-app runs** (`arun_`) are a separate case. The engine runs on `stella-serve` with a `remote` tool surface, and every tool call returns to Oxagen's kernel (ADR-053). External MCP for those runs executes server-side under `mcp.<server>.<tool>` identities (ADR-122). No local relay is involved, and none is needed.
 
-## What never routes
+## Unroutable surfaces
 
 These calls never pass a local gateway, whatever Oxagen builds. The matrix names each one.
 
@@ -165,7 +165,7 @@ Each phase ships on its own and leaves the matrix true.
 5. **Contained.** The bridge serves the relay routes, and `contained/configuration.ts` writes each server's relay into the container's harness config. The `contained` CI job proves an MCP call inside the container reaches its upstream only through the bridge.
 6. **Credentials and OAuth.** The daemon holds upstream credentials and runs OAuth for relayed HTTP servers. The credential-custody spec's claim becomes true.
 
-A separate Stella track runs beside phases 1 to 3: the managed MCP scope in `macanderson/stella`, then a Stella writer.
+A separate Stella track runs beside phases 1 to 3: the managed MCP scope in `macanderson/stella` (#6564), then a Stella writer.
 
 ## Definition of done
 

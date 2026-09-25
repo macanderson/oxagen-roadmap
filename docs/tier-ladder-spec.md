@@ -27,7 +27,7 @@ Each rung adds one route to the ones below it, for a wrapped harness. The ladder
 
 The claims each tier may make, from ADR-095:
 
-| Tier | It may say | It may never say |
+| Tier | Allowed words | Refused words |
 |---|---|---|
 | `observe` | "recorded" | Anything about refusal or delivery |
 | `harness` | "delivered", "recorded", "client-attested", "fail-open" | "enforced" |
@@ -368,12 +368,14 @@ A command that cannot reach a run is refused for a reason about the run, never a
 
 Checked at `oxagen` `main` `4a21610ef` on 2026-09-25.
 
-| Tier | Built | Running in production |
-|---|---|---|
-| `observe` | Yes | Yes |
-| `harness` | Yes. Claude Code, Codex, Cursor, and Stella through hooks | Yes |
-| `gateway` | Model proxy, credential custody, budgets, allowlist, and interrupt are on `main`. The MCP aggregator for wrapped harnesses is not (#3299 open). Claude Desktop's MCP gateway is on `main` | Model traffic for enrolled Claude Code, Codex, and Stella hosts. MCP for Claude Desktop only |
-| `contained` | Receipt route and tier binding (#3772) and the launcher (#3813) merged 2026-09-23. Phase 5 (#3300) is open with `needs:rig`. Contained runs pushing through the Git proxy (#3815) are open | No. The `contained-run` CI job waits on the repository variable `OXAGEN_CONTAINED_ENABLED`, and `docs/VISION.md:107-110` says no production run has reached the tier |
+| Tier | On `main` |
+|---|---|
+| `observe` | Yes |
+| `harness` | Yes. Claude Code, Codex, Cursor, and Stella through hooks |
+| `gateway` | Model proxy, credential custody, budgets, allowlist, and interrupt are on `main`. Enrollment routes model traffic for Claude Code, Codex, and Stella. The MCP aggregator for wrapped harnesses is not built (#3299 open), so MCP reaches the gateway for Claude Desktop only |
+| `contained` | Receipt route and tier binding (#3772) and the launcher (#3813) merged 2026-09-23. Phase 5 (#3300) is open with `needs:rig`. Contained runs pushing through the Git proxy (#3815) are open. The `contained-run` CI job waits on the repository variable `OXAGEN_CONTAINED_ENABLED` |
+
+No source checked for this spec says which tiers recorded production runs have reached, except `contained`, which none has (`docs/VISION.md:107-110`).
 
 ## Conflicts
 

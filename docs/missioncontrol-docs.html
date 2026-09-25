@@ -10492,8 +10492,8 @@ Begin with Phase 1. Write the fixtures before the code.
 <thead>
 <tr>
 <th>Tier</th>
-<th>It may say</th>
-<th>It may never say</th>
+<th>Allowed words</th>
+<th>Refused words</th>
 </tr>
 </thead>
 <tbody>
@@ -11031,33 +11031,29 @@ required = true
 <thead>
 <tr>
 <th>Tier</th>
-<th>Built</th>
-<th>Running in production</th>
+<th>On <code>main</code></th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td><code>observe</code></td>
 <td>Yes</td>
-<td>Yes</td>
 </tr>
 <tr>
 <td><code>harness</code></td>
 <td>Yes. Claude Code, Codex, Cursor, and Stella through hooks</td>
-<td>Yes</td>
 </tr>
 <tr>
 <td><code>gateway</code></td>
-<td>Model proxy, credential custody, budgets, allowlist, and interrupt are on <code>main</code>. The MCP aggregator for wrapped harnesses is not (#3299 open). Claude Desktop's MCP gateway is on <code>main</code></td>
-<td>Model traffic for enrolled Claude Code, Codex, and Stella hosts. MCP for Claude Desktop only</td>
+<td>Model proxy, credential custody, budgets, allowlist, and interrupt are on <code>main</code>. Enrollment routes model traffic for Claude Code, Codex, and Stella. The MCP aggregator for wrapped harnesses is not built (#3299 open), so MCP reaches the gateway for Claude Desktop only</td>
 </tr>
 <tr>
 <td><code>contained</code></td>
-<td>Receipt route and tier binding (#3772) and the launcher (#3813) merged 2026-09-23. Phase 5 (#3300) is open with <code>needs:rig</code>. Contained runs pushing through the Git proxy (#3815) are open</td>
-<td>No. The <code>contained-run</code> CI job waits on the repository variable <code>OXAGEN_CONTAINED_ENABLED</code>, and <code>docs/VISION.md:107-110</code> says no production run has reached the tier</td>
+<td>Receipt route and tier binding (#3772) and the launcher (#3813) merged 2026-09-23. Phase 5 (#3300) is open with <code>needs:rig</code>. Contained runs pushing through the Git proxy (#3815) are open. The <code>contained-run</code> CI job waits on the repository variable <code>OXAGEN_CONTAINED_ENABLED</code></td>
 </tr>
 </tbody>
 </table></div>
+<p>No source checked for this spec says which tiers recorded production runs have reached, except <code>contained</code>, which none has (<code>docs/VISION.md:107-110</code>).</p>
 <h2 id="tiers/conflicts">Conflicts</h2>
 <p>These are places where the page copy, the ADRs, and the code disagree today. Each needs one side changed.</p>
 <ol>
@@ -11093,7 +11089,7 @@ required = true
   <dl class="facts"><dt>Status</dt><dd>Plan v1, for review. Nothing in it is built.</dd><dt>Date</dt><dd>2026-09-25</dd><dt>Owner</dt><dd>Mac Anderson</dd><dt>Tracks</dt><dd><code>oxagen</code> #3299 item 6, &quot;Build the MCP aggregator: re-serve the harness's existing MCP servers through the loopback proxy. Where a vendor offers managed settings, pin them.&quot;</dd><dt>Source</dt><dd><code>macanderson/oxagen</code> at <code>main</code> <code>4a21610ef</code>: <code>packages/tacho/src/collector/mcp-gateway.ts</code>, <code>host/mcp-config-writer.ts</code>, <code>host/cursor-writer.ts</code>, <code>contained/bridge.ts</code>, <code>contained/configuration.ts</code>, <code>packages/handlers/src/tacho.events.ingest.ts</code>. <code>macanderson/stella</code>: <code>crates/stella-cli/src/agent.rs</code>, <code>crates/stella-mcp/</code>. Vendor documentation read on 2026-09-25, linked where used</dd><dt>Builds on</dt><dd>ADR-094 part 3 (the MCP aggregator), ADR-095 (the ladder), ADR-078 §3 (a second MCP server never touches Oxagen), ADR-143 (credential custody), ADR-152 (the contained bridge)</dd><dt>Related</dt><dd><code>tier-ladder-spec.md</code> (the <code>gateway</code> tier and its conflicts), <code>oxagen</code> <code>docs/reference/harness-matrix.md</code></dd></dl>
 </header>
 <div class="grid">
-<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#mcp-gateway/the-gap">The gap</a></li><li><a href="#mcp-gateway/what-routing-adds">What routing adds</a></li><li><a href="#mcp-gateway/decisions">Decisions</a></li><li><a href="#mcp-gateway/harnesses">Harnesses</a></li><li><a href="#mcp-gateway/what-never-routes">What never routes</a></li><li><a href="#mcp-gateway/build-order">Build order</a></li><li><a href="#mcp-gateway/definition-of-done">Definition of done</a></li></ol></nav>
+<nav class="toc" aria-label="Contents of this document"><p>Contents</p><ol><li><a href="#mcp-gateway/the-gap">The gap</a></li><li><a href="#mcp-gateway/what-routing-adds">What routing adds</a></li><li><a href="#mcp-gateway/decisions">Decisions</a></li><li><a href="#mcp-gateway/harnesses">Harnesses</a></li><li><a href="#mcp-gateway/unroutable-surfaces">Unroutable surfaces</a></li><li><a href="#mcp-gateway/build-order">Build order</a></li><li><a href="#mcp-gateway/definition-of-done">Definition of done</a></li></ol></nav>
 <main>
 <h2 id="mcp-gateway/the-gap">The gap</h2>
 <p>You enroll Claude Code, Codex, Cursor, or Stella, and each MCP tool call the agent makes goes straight from the harness to the MCP server. The <code>PreToolUse</code> hook sees the call as <code>mcp__&lt;server&gt;__&lt;tool&gt;</code>, records it, and can refuse it. That evidence is client-attested. No wrapped run earns <code>gateway</code> through MCP today.</p>
@@ -11108,7 +11104,7 @@ required = true
 <li><strong>Credential custody, later.</strong> The gateway can hold an upstream server's credential so the harness never sees it (phase 6).</li>
 </ol>
 <h2 id="mcp-gateway/decisions">Decisions</h2>
-<h3 id="mcp-gateway/one-route-per-server-under-its-own-name">One route per server, under its own name</h3>
+<h3 id="mcp-gateway/one-route-per-server">One route per server</h3>
 <p>The daemon serves one loopback route for each MCP server the harness had, and the harness config keeps the original server name. A single endpoint that merges every server would rename the tools. That breaks every per-server rule the harnesses key on: Claude Code's <code>mcp__github__.*</code> matchers and permission rules, Codex's <code>enabled_tools</code> and <code>tools.&lt;tool&gt;.approval_mode</code>, Cursor's <code>Mcp(server:tool)</code> rules, and Stella's tool policy and per-server caps (<code>stella-mcp/src/lib.rs:47-53</code>). The MCP tools specification also says an aggregating proxy should prefix tool names and should not rely on <code>serverInfo.name</code> (<a href="https://modelcontextprotocol.io/specification/2026-07-28/server/tools">tools</a>). One route per server avoids both.</p>
 <ul>
 <li><strong>An HTTP server.</strong> Enrollment rewrites its <code>url</code> to <code>http://127.0.0.1:&lt;port&gt;/mcp/relay/&lt;server&gt;</code>. The daemon forwards each request to the original URL with the original headers.</li>
@@ -11118,10 +11114,10 @@ required = true
 <h3 id="mcp-gateway/a-third-road-to-gateway-at-ingest">A third road to <code>gateway</code> at ingest</h3>
 <p>Today <code>enforcementTierOf</code> promotes a session to <code>gateway</code> on two kinds of evidence (<code>ingest:810-841</code>): a model call the loopback proxy sealed, or an MCP call the control plane served itself. A relayed call to a third-party server fits neither. The control plane never serves it, because the call goes from the machine to the server.</p>
 <p>The relayed call is daemon-sealed, like a model call. So ingest gains a third road that mirrors <code>modelRouted</code>: the verified chain holds a <code>tool_call</code> frame with <code>source: collector</code>, <code>fidelity: proxy</code>, and <code>tool_source: mcp</code>. A record posted through the local OTLP endpoint cannot carry that source and fidelity. ADR-095 already licenses the road (&quot;model and MCP requests seen by the gateway for that run give <code>gateway</code>&quot;). This is the first thing to build, because without it routing MCP earns no tier.</p>
-<h3 id="mcp-gateway/one-call-one-record">One call, one record</h3>
+<h3 id="mcp-gateway/one-record-per-call">One record per call</h3>
 <p><code>PreToolUse</code> still fires for every <code>mcp__*</code> call after routing. The hook stays: it refuses before the call starts, and it is the only check on built-in tools. So each routed call arrives twice, once from the hook and once from the relay.</p>
 <p>Ingest keeps both and counts the call once, the way metering already treats a model call (<code>ingest:280-296</code>). The relay frame carries the input digest the hook also records. Ingest links the two on the session, the tool name, and the input digest, and the observed frame replaces the self-reported one in every count. This answers the Cursor writer's objection (<code>cursor-writer.ts:42-54</code>: &quot;would record the same call twice… and put one harness on two tiers&quot;). A run earns one tier, the highest its record supports, and each call shows how it was seen.</p>
-<h3 id="mcp-gateway/oxagen-does-not-edit-repositories">Oxagen does not edit repositories</h3>
+<h3 id="mcp-gateway/user-scope-only">User scope only</h3>
 <p>Enrollment rewrites user-scope config only. A project file (<code>.mcp.json</code>, <code>.codex/config.toml</code>, <code>.cursor/mcp.json</code>, <code>.stella/mcp.toml</code>) belongs to the repository. Oxagen does not write into it, because the change would land in the customer's commits. A project-scope server stays hook-checked at <code>harness</code> strength on a laptop. On a managed device, the pin below either blocks it or lets an admin add it to the relayed set.</p>
 <h3 id="mcp-gateway/restore-exactly">Restore exactly</h3>
 <p>Each writer uses displace-and-restore, as <code>host/mcp-config-writer.ts</code> already does for Claude Desktop. <code>unenroll</code> leaves every file byte-identical to before <code>enroll</code> ran (#3299 definition of done). The health report gains <code>mcp_servers.ours</code>, the MCP counterpart of <code>model_base_urls.ours</code> (<code>wire.ts:1006-1019</code>), so an operator sees a server someone pointed back at its upstream.</p>
@@ -11238,7 +11234,7 @@ required = true
 </ol>
 <p>With that in place, Stella gets the same writer and pin as the others. Two Stella details the relay must handle: a stdio child gets only its <code>env</code> table plus <code>PATH</code> (<code>stella-mcp/src/stdio.rs:244-262</code>), so the relay replaces the command and cannot be injected through the environment. Stella also replays <code>Mcp-Session-Id</code> per transport (<code>stella-mcp/src/http.rs:1-8</code>), so the HTTP route keeps one session per server.</p>
 <p><strong>Stella in-app runs</strong> (<code>arun_</code>) are a separate case. The engine runs on <code>stella-serve</code> with a <code>remote</code> tool surface, and every tool call returns to Oxagen's kernel (ADR-053). External MCP for those runs executes server-side under <code>mcp.&lt;server&gt;.&lt;tool&gt;</code> identities (ADR-122). No local relay is involved, and none is needed.</p>
-<h2 id="mcp-gateway/what-never-routes">What never routes</h2>
+<h2 id="mcp-gateway/unroutable-surfaces">Unroutable surfaces</h2>
 <p>These calls never pass a local gateway, whatever Oxagen builds. The matrix names each one.</p>
 <div class="tw"><table>
 <thead>
@@ -11302,7 +11298,7 @@ required = true
 <li><strong>Contained.</strong> The bridge serves the relay routes, and <code>contained/configuration.ts</code> writes each server's relay into the container's harness config. The <code>contained</code> CI job proves an MCP call inside the container reaches its upstream only through the bridge.</li>
 <li><strong>Credentials and OAuth.</strong> The daemon holds upstream credentials and runs OAuth for relayed HTTP servers. The credential-custody spec's claim becomes true.</li>
 </ol>
-<p>A separate Stella track runs beside phases 1 to 3: the managed MCP scope in <code>macanderson/stella</code>, then a Stella writer.</p>
+<p>A separate Stella track runs beside phases 1 to 3: the managed MCP scope in <code>macanderson/stella</code> (#6564), then a Stella writer.</p>
 <h2 id="mcp-gateway/definition-of-done">Definition of done</h2>
 <ul>
 <li>A Claude Code, Codex, or Cursor run whose MCP call went through a relay reads <code>gateway</code> at ingest, and the call is counted once.</li>
