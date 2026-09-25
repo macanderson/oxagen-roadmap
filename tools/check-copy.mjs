@@ -35,7 +35,7 @@ const RULES = [
   ["brand case", /Oxagen|Stella/],
   ["storage tag", /postgres|kms \+|tools\.policy_versions/i],
   ["math notation", /[∩∈≠]/],
-  ["US spelling", /colour|behaviour|labelling|Cancelled/],
+  ["US spelling", /colour|behaviour|labelling|cancelled|neighbour/i],
   ["uppercased id", /\b(WO|TSK|RUN)_[0-9A-Z]{6,}\b|A-INTEL\//],
   // The rest of the review's glossary: one term per concept, and no internal names in page copy.
   ["retired term", /\bfr \d|interjection|Wasted spend|[Mm]odel tier|Wrong (model )?tier|light tier|client tier|\bseams?\b|issue provider|Bind it|\bBind\b|not bound|\bunbound\b|[Vv]olatile selection|[Cc]lient-attested|\bshelf\b|text plane|gate plane|a call at most|(^|\n)PER CALL\n/],
@@ -62,6 +62,7 @@ function workspaceRoutes(ws, agents) {
   return [
     b,
     ...["tasks", "work-orders", "workflows", "providers", "fields", "people"].map((t) => `${b}/tasks/${t}`),
+    `${b}/work/findings`,
     `${b}/tasks/tsk_01K6S7C5PA`, `${b}/tasks/tsk_01K6S2M4QF`,
     ...["wo_01K6T9QX", "wo_01K6TA2M", "wo_01K6RZ41"].map((w) => `${b}/tasks/work-orders/${w}`),
     `${b}/agents`,
@@ -99,7 +100,7 @@ const OVERLAYS = [
   ["approvals drawer", "apdToggle(true)"],
   ["approval", "apdToggle(true); var p=apdPending()[0]; if(p) apdSelect(p.id)"],
   ["assistant", "asstToggle(true)"],
-  ...["create", "newws", "mintkey", "import", "funding", "switch", "budget", "role", "notifs", "plan", "steerfleet"]
+  ...["create", "newws", "mintkey", "import", "funding", "switch", "budget", "role", "notifs", "plan", "steerfleet", "more"]
     .map((k) => [`dialog ${k}`, `openDialog('${k}')`]),
 ].filter(([name]) => !only || name.includes(only));
 

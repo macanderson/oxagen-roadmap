@@ -12720,7 +12720,7 @@ function agentDelDlg(){
   return {t:"Retire agent",s:a.key,w:false,b:
    '<p style="font-size:13px">This ends the agent’s identity. Its credential is revoked, every run token dies at the next call, and a pull request archives <span class="mono">.oxagen/agents/'+h(a.key.split(".").pop())+'.toml</span>.</p>'+
    '<dl class="kv"><dt>Kept</dt><dd>every run, frame and receipt. The record is never deleted</dd><dt>Ends</dt><dd>'+agentRolesOf(a.key).length+' role'+(agentRolesOf(a.key).length===1?'':'s')+', '+a.mandates.length+' mandate'+(a.mandates.length===1?'':'s')+', the host enrollment</dd>'+
-   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span>, cancelled at the next boundary and recorded</dd>':'')+'</dl>'+
+   (live?'<dt>In flight</dt><dd><span style="color:var(--st-failed)">'+live+' live run'+(live>1?'s':'')+'</span>, canceled at the next checkpoint and recorded</dd>':'')+'</dl>'+
    '<label class="check" style="margin-top:12px"><input type="checkbox" id="delAgentOk" onchange="el(\'delAgentBtn\').disabled=!this.checked"><span class="grow"><span class="n" style="font-family:var(--font)">I understand this cannot be undone</span><span class="d">Re-registering creates a new principal.</span></span></label>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button id="delAgentBtn" class="btn danger" disabled onclick="agentDelete(\''+h(a.key)+'\')">Retire</button>'};
 }
@@ -16327,7 +16327,7 @@ DLG_EXT.more=function(){
    b:'<div class="mgrid">'+
      t("steering","Steering","sources, assignments, compiler, proposals",'go(\''+base+'/steering\')',fr?0:stgNavCount(w.slug),false)+
      t("runtimes","Runtimes","hosts, harnesses, hooks, tiers",'go(\''+base+'/runtimes\')',RUNTIMES.filter(function(x){return x.ws===w.slug&&x.health!=="ok";}).length,true)+
-     t("repo","Repositories","bindings, working copies, changes",'go(\''+base+'/repositories\')',oxprOpen().length)+
+     t("repo","Repositories","links, working copies, changes",'go(\''+base+'/repositories\')',oxprOpen().length)+
      t("organization","Organization","people, workspaces, funding",'go(\'#/'+ORG.slug+'\')')+
      t("billing","Billing","plan, meters, invoices",'go(\'#/'+ORG.slug+'/billing\')')+
      t("audit","Audit","events, incidents, holds",'go(\'#/'+ORG.slug+'/audit\')',crit,true)+
@@ -17629,7 +17629,7 @@ function tkFieldsTab(){
   return panel("Work item fields","Thirteen fields, read the same way from every provider.","",["Field"].concat(heads),fr)+
    panel("Statuses","Every status belongs to one of three categories: open, blocked, or closed.",'<button class="btn sm" onclick="openDialog(\'stedit\',\'new\')">Add status</button>',["Status","Category"].concat(heads),sr)+
    panel("Resolutions","A closed work item carries one resolution.",'<button class="btn sm" onclick="openDialog(\'resedit\',\'new\')">Add resolution</button>',["Resolution"].concat(heads),rr)+
-   panel("Labels","A label has a color and a mapping to each provider’s own labels, priorities, types, or tags.",'<button class="btn sm" onclick="openDialog(\'lbledit\',\'new\')">Add label</button>',["Label","Colour","Group"].concat(heads,["Definition of done items"]),lr)+
+   panel("Labels","A label has a color and a mapping to each provider’s own labels, priorities, types, or tags.",'<button class="btn sm" onclick="openDialog(\'lbledit\',\'new\')">Add label</button>',["Label","Color","Group"].concat(heads,["Definition of done items"]),lr)+
    '<div class="note">Field settings are workspace settings. Each change is a governed action in Audit and applies to the next read of every work item. A value a provider lacks can be created there from its editor. Later, a label carries definition-of-done items that copy into the draft of every work item that has it, and those templates live in .oxagen/ as files.</div>';
 }
 

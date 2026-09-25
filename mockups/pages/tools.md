@@ -40,7 +40,7 @@ After a switch is flipped, a banner sits between the header and the tab bar on e
 | Toolbelts | 9 | Toolbelts in the catalogue |
 | Providers | 19 | Providers in the roster |
 | Policy | 9 | Policy versions |
-| Kill switches | 2 | Switches denying now |
+| Kill switches | 2 | Kill switches on |
 
 `pTools()` reads the tab from the path. A tab id it does not serve falls back to Tools, and `servers` (the Providers tab's name before rev1) lands on Providers.
 

@@ -46,14 +46,14 @@ A direct work order has no items, and the panel is absent.
 - Issue: the reference in mono and the title under it.
 - Status: "open", "closed", "in progress" or "blocked", as a dot and a word.
 - Relation: "task", "referenced", or the relation with its reason ("resolves · the draft lists each fix once").
-- Edge: "stated", "observed", or "inferred" with its confidence ("inferred · 70%"), and one chip per frame it cites ("fr 9", "fr 12"), each opening that frame.
+- Edge: "stated", "observed", or "inferred" with its confidence ("inferred · 70%"), and one chip per frame it cites ("frame 9", "frame 12"), each opening that frame.
 - "View ↗", the tracker's own page for the issue, or "no link".
 
 The demo run lists `a-intel/platform#482` (task, stated), `#480` (referenced, closed, observed), `#471` and `#465` (inferred). With none: "No issue is linked to this session." Under the table: "A session can touch more than one issue: the task it was started for, and any it read, referenced or closed on the way. The relation says which, the edge says how Oxagen knows, and the status is read from the tracker when the page loads."
 
 **Linked work.** Eyebrow "Linked work" and a legend: "observed" (written by oxagen from a tool call routed through it), "stated" (carried by the task), and "inferred" (a light model read the frames and proposed it, scored and cited), with the count of inferred items against the total ("2 of 5"). Two panels, each with a count:
 
-- Repositories: one row per repository, a link to the forge, with its ref and note and its edge chip (`a-intel/platform`, "a4c91e2 · main · read; branch release/4.11.0-notes pushed · main untouched", observed, fr 5, fr 7). Empty: "No repository was touched."
+- Repositories: one row per repository, a link to the forge, with its ref and note and its edge chip (`a-intel/platform`, "a4c91e2 · main · read; branch release/4.11.0-notes pushed · main untouched", observed, frame 5, frame 7). Empty: "No repository was touched."
 - Pull requests and artifacts: one row per branch, release, pull request or file, each reference a link to the forge where it has one, with its state and edge chip. Empty: "Nothing produced yet."
 
 Then **Files changed**: "+20 −0 · 1 file · as the harness reported them", and one row per file with its note and stat (`release/4.11.0-notes.md`, "new file · 2 writes", +20 −0) that opens its diff in place.

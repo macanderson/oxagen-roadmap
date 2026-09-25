@@ -86,7 +86,7 @@ The mockup's Status reads `enrolled` for every agent, including the 60 that Comp
 - `deliveryreport` opens when the steer is sent. Title: the counts (“0 applied, 67 queued, 1 undelivered”). Subtitle: “Delivery report · 68 recipients · sent <time> · at the boundary”. Three stat boxes (Applied, Queued, Undelivered), the text as sent with its digest and token count, and a table: Agent and run · Status · Mode used · Time · Why. `applied` is the only success; `expired`, `cancelled` and `failed` count as undelivered. A recipient behind an armed kill switch, a muted agent, an agent that is not enrolled, and an `observe`-tier run are refused before anything is queued, each with its reason.
 - `wz`, the agent wizard, titled “Create an agent”, with five steps: Describe, Identity, Definition, Toolbelt, Pull request. It ends on a pull request that adds `.oxagen/agents/<slug>.toml`. Its spec is `docs/creation-spec.md`.
 - `assignrole`, titled “Assign a role”, for the row's agent: the agent-kind roles, each marked held where the agent holds it, and the line that effective permission stays the agent's roles intersected with its operator's grants.
-- `delagent`, titled “Deregister agent”: what is kept, what ends (roles, mandates, the host enrollment) and what is in flight, a confirmation checkbox, and **Deregister** (danger).
+- `delagent`, titled “Retire agent”: what is kept, what ends (roles, mandates, the host enrollment) and what is in flight, a confirmation checkbox, and **Retire** (danger).
 
 New agent is not Register agent. Register wraps an agent that already runs; New agent writes one that does not exist yet. Both end on a pull request, from opposite ends.
 
@@ -122,7 +122,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. The mockup collection is
 | New agent | `wzOpen('agent')` | `propose_agent` | `agent.propose.ts:276` | ✅ |
 | Register agent | `regStart()` | `register_agent`, `create_tacho_enrollment` | `agent.register.ts:17`; `tacho.enrollment.create.ts:25` | ✅ |
 | Roles | `assignrole` over `S.agentRoles` | `assign_agent_role`, `list_agent_roles` | `agent.role.assign.ts:26`; `agent.role.list.ts:38` | ✅ |
-| Deregister | `delagent` | `retire_agent`, then a pull request that removes the file | `agent.retire.ts:16`. It retires the identity and leaves the file; removing it is a separate `commit_agent_definition` (`agent.retire.ts:1-9`) | 🟡 |
+| Retire | `delagent` | `retire_agent`, then a pull request that removes the file | `agent.retire.ts:16`. It retires the identity and leaves the file; removing it is a separate `commit_agent_definition` (`agent.retire.ts:1-9`) | 🟡 |
 
 ## Future-only fields
 
@@ -139,7 +139,7 @@ The view carries no `data-future` mark, and the catalog gives it no future story
 - Assigning a toolbelt is not a permission. The toolbelt says what an agent can reach; its roles, mandates and budgets say what it may do. A call has to pass both.
 - Steer sends one `steer` command per selected agent, addressed to its live runs, and one per idle agent for its next run. Oxagen records each as a `control.steer` frame and delivers the text as an `invocation` SteeringFrame whose provenance is the command id and the digest of the text. It never runs the text as an instruction.
 - New agent writes a pull request that adds `.oxagen/agents/<slug>.toml`; nothing is written to the database until the agent is registered after merge. Register agent mints the identity of an agent that already runs.
-- Deregister retires the principal and never deletes it, so its runs keep their identity. Removing the definition file is a pull request.
+- Retire keeps the principal and never deletes it, so its runs keep their identity. Removing the definition file is a pull request.
 - The Health cell, the Incidents column and the agent's Activity tab read the same incident record the Audit page reads.
 
 ## States
@@ -153,7 +153,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More h
 ## Permissions
 
 - Read: `list_agents` admits org Owner, Admin and Member, and workspace Owner and Member (`agent.list.ts:159-162`). The mockup names the permission `agent.read`.
-- Writes, each a governed action recorded in Audit: Steer (`dispatch_command`: org Owner or Admin, workspace Owner or Member), New agent (`propose_agent`: org Owner or Admin), Register agent (`register_agent`: org Owner or Admin), Roles (`assign_agent_role`: org Owner or Admin, and never above the assigner's own grants), Deregister (`retire_agent`: org Owner or Admin).
+- Writes, each a governed action recorded in Audit: Steer (`dispatch_command`: org Owner or Admin, workspace Owner or Member), New agent (`propose_agent`: org Owner or Admin), Register agent (`register_agent`: org Owner or Admin), Roles (`assign_agent_role`: org Owner or Admin, and never above the assigner's own grants), Retire (`retire_agent`: org Owner or Admin).
 
 ## Backend gaps this page depends on
 

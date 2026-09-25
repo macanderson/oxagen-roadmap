@@ -24,7 +24,7 @@ The agent header and the tab bar are as `agent.md` specifies, with Steering sele
 
 **1 · What it receives.** The sentence: “44 SteeringFrames for its standing brief, “Cut the 4.11.0 release notes”.” **Open in the Compiler** on the right opens `#/a-intel/core-platform/steering/compiler/release-manager`. The standing brief is the agent's preview prompt, or its description when no prompt is set up. On pr-reviewer the description ends in a full stop inside the quotation marks and the sentence adds its own after them, a copy defect a build avoids.
 
-- Two meters. **Session-start prefix**: “1,102 of 4,096 tok”, captioned “16 KiB in the signed bundle, header included”. **Volatile selection**: “419 of 430 tok”, captioned “picked for this brief under the workspace budget”.
+- Two meters. **Session-start prefix**: “1,102 of 4,096 tok”, captioned “16 KiB in the signed bundle, header included”. **Per-prompt selection**: “419 of 430 tok”, captioned “picked for this brief under the workspace budget”.
 - The type strip: one button per frame type present, in type order, each the type badge and its count, with `aria-pressed`. The demo reads goal 1, invariant 1, constraint 9, procedure 10, context 9, capability 14. Pressing one filters the frames and the exclusions to that type and adds **Show every type**.
 - The injection points that carry frames, in this order, each with its name, its caption and a tally:
 
@@ -70,7 +70,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 | Source, version and frame hash | `srcCell()`, `frameOf()` | `source.kind`, `source.id`, `source.version`, `hash` | None on a frame. A Steering record's own fields ship: version, checksum, commit, path (`list_records` at `context.records.list.ts:16`, `get_record` at `context.records.get.ts:126`) | ❌ |
 | Force and tokens | `it.force`, `it.tok` | `force`, `token_cost` | On `steering.manifest` items (`wire.ts:643-654`) | 🟡 |
 | Session-start prefix meter | `E.prefixTok`, `E.prefixCap` | The prefix cap and what the prefix spends | The assembler's budget is 2,000 tokens, sized to the smallest harness limit (`packages/steering-assembler/src/assemble.ts:100`); the manifest records `budget_tokens` and `spent_tokens` (`wire.ts:666-677`). The design's cap is 16 KiB, 4,096 tokens | 🟡 |
-| Volatile selection meter and Prompt submit frames | `E.volatileTok`, `E.volatileCap` | A per-prompt selection ranked for the brief at prompt submit | The shipped assembler builds the session-start prefix only; `may` and `info` items are cut as `tier` (`assemble.ts:59-60`) | ❌ |
+| Per-prompt selection meter and Prompt submit frames | `E.volatileTok`, `E.volatileCap` | A per-prompt selection ranked for the brief at prompt submit | The shipped assembler builds the session-start prefix only; `may` and `info` items are cut as `tier` (`assemble.ts:59-60`) | ❌ |
 | Checkout files frames | `M.skills`, `SOURCES.bundles` | Skill bundles synced into the checkout | Skill sync and bundles are future-only on Sources | ❌ |
 | Tool list frames | `beltOf()` | One `capability` frame per tool the toolbelt shows | The toolbelt ships (`get_agent_toolbelt`, `agent.toolbelt.get.ts:94`); capability frames do not | ❌ |
 | Exclusions with reason `tier`, `over_budget`, `superseded` | `mapCut()`, `XR` | Exclusion reasons | Recorded on `steering.manifest` as `tier`, `budget` and `superseded` (`wire.ts:641`) | 🟡 |

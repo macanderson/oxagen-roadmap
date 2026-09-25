@@ -75,7 +75,7 @@ The Steering row still counts the rev1 assembler's items, while the Steering tab
 - The avatar editor, titled “Avatar · <name>”, with the agent key under it: kind (Icon, Initials or Photo), glyph and tone.
 - `rotatecred`, titled “Rotate the credential on a-intel.core.triage?”. It says a new key is minted and handed to the host at its next check-in, that the old key stops working at the next call and every live run token dies with it, and warns that a run in flight ends at its next call. **Cancel** and **Rotate it** (gold).
 - `suspendagent`, titled “Suspend a-intel.core.triage?”. It says suspension is reversible and keeps the registration, the roles and the mandates, and that every run token dies at the next call because the refusal is on the server. **Cancel** and **Suspend it** (danger).
-- `delagent`, titled “Deregister agent” with the agent key: what is kept, what ends (the roles, the mandates and the host enrollment), what is in flight, the checkbox “I understand this cannot be undone”, **Cancel** and **Deregister** (danger).
+- `delagent`, titled “Retire agent” with the agent key: what is kept, what ends (the roles, the mandates and the host enrollment), what is in flight, the checkbox “I understand this cannot be undone”, **Cancel** and **Retire** (danger).
 - The Optimization actions open the Definition tab, the Toolbelt tab, Steering, the Compiler, the Steering record wizard or the Activity tab. The mockup's Edit the definition and Open incidents go through the old `/definition` and `/incidents` addresses, which land on the Definition tab and Activity; a build links the canonical paths.
 
 **Shell.** As on Agents, with Agents lit and the breadcrumb Anderson Intelligence Corp. / Core platform / Agents / triage.

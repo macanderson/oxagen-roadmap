@@ -59,7 +59,7 @@ Keys: ⌘S saves (opens the commit dialog), Tab indents by two spaces, ⇧Tab ou
 
 **Commit dialog** (from Save), titled “Commit this change”, with an eyebrow line “.oxagen/agents/release-manager.toml · +1 −1 · from the source editor”: the path, the diff stat of the draft against the base, and where the change came from.
 
-- Repository and Base: `a-intel/platform` (“primary”) at `main @ a4c91e2`, with “The primary repository bound to workspace Core platform. Every agent definition in this workspace lives here; it is not chosen per change.”
+- Repository and Base: `a-intel/platform` (“primary”) at `main @ a4c91e2`, with “The main repository linked to workspace Core platform. Every agent definition in this workspace lives here; it is not chosen per change.”
 - **Branch**: a select that opens on “+ New branch” and lists the repository's branches, each with its pull request where it has one. **New branch name** (“agent/release-manager/update-color”), with “Cut from main @ a4c91e2. Suggested by the same draft as the summary.”
 - **Summary**: a drafted one-line summary (“Update release-manager color”), badges for the change's kind and area (“cosmetic”, “harness”), the line naming the model that drafted it, and **Redraft**.
 - **Description**: the drafted body, with “Becomes the commit message and the pull request body. The draft is a starting point; what you commit is what you wrote.”

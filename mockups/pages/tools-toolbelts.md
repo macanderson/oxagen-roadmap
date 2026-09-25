@@ -37,7 +37,7 @@ This tab is unchanged by the fleet operations wedge except for that rule. The fr
   - A row opens `belt`. It is keyboard reachable, with `role="button"` and the label "Open <toolbelt name>".
 - **Note**: "Assigning a toolbelt grants no permission. Every call from it is still checked against the agent’s roles, the policy on the tool version, the kill switches, and the agent’s mandates. If Availability shows Unavailable, agents can see a tool they can’t call today."
 
-The demo catalogue holds nine toolbelts: Repository reader, Repository contributor, Release control, Context graph, Workstation, Issue tracker, Messaging, Payments and Cloud cost. Messaging reads "Unavailable" over "1 stopped by a kill switch", because the Slack provider switch is denying `slack__post_message@2`.
+The demo catalogue holds nine toolbelts: Repository reader, Repository contributor, Release control, Context graph, Workstation, Issue tracker, Messaging, Payments and Cloud cost. Messaging reads "Unavailable" over "1 stopped by a kill switch", because the Slack provider switch is on and blocking `slack__post_message@2`.
 
 **Delivery panel.** Title "Delivery". Caption: "One toolbelt can reach many agents, so review a change to it before you save." List controls with the filters "Any tier", "Any toolbelts" and "Any providers". Columns in order: Agent · Toolbelts · Tool versions · Providers · Tier.
 

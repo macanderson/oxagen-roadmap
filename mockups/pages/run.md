@@ -69,7 +69,7 @@ Each section has a number, a heading and one sentence under it.
 
 **1 Envelope.** "53 SteeringFrames reached this run, by where they entered." Marked future-only.
 
-- Two meters. "Session-start prefix", "1,102 of 4,096 tok", caption "16 KiB in the signed bundle, header included". "Volatile selection", "415 of 430 tok", caption "picked for this brief under the workspace budget". The session-start meter is the Session start tally plus the bundle's 38-token compile header. The per-prompt meter is the Prompt submit tally.
+- Two meters. "Session-start prefix", "1,102 of 4,096 tok", caption "16 KiB in the signed bundle, header included". "Per-prompt selection", "415 of 430 tok", caption "picked for this brief under the workspace budget". The session-start meter is the Session start tally plus the bundle's 38-token compile header. The per-prompt meter is the Prompt submit tally.
 - The type strip: one button per frame type present, with its count, in type order: goal 2, invariant 1, constraint 15, procedure 9, context 10, invocation 2, capability 14. A type with no frame is not drawn (this agent holds no mandate, so there is no `delegation`). Each button carries `aria-pressed`. Pressing one filters the Envelope and the Exclusions to that type and adds "Show every type". Pressing it again clears the filter.
 - The injection points, in this order. A point with no frame is not drawn. Each point has its name, one caption, and a tally of frames and tokens.
 

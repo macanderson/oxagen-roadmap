@@ -128,7 +128,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with Agents lit. More h
 - No person is scored or ranked. An incident names who closed it, never a grade.
 - Every enforcement claim states the tier. “Enforced” only for calls routed through Oxagen.
 - Headers are rollups of the rows beneath them: the work order and run counts in the subtext equal the rows, a work order's cost is the sum of its runs, the token table sums to the agent's 30-day total, the cache rate here equals the Overview's, and the tab count equals the incident panels.
-- Every number that is money shows its basis, and a client-attested figure says so.
+- Every number that is money shows its basis, and a figure the harness reported says so.
 - Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing. A quoted string above that breaks this rule is a mockup defect to fix, not copy to reproduce.
 - Exactly one gold (primary) action per screen. The tab has none of its own.
 - A future-only field is marked in the design and renders as not recorded in a build until its contract ships.

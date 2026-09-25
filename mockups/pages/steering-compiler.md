@@ -31,7 +31,7 @@ It runs the same resolver that builds an agent's Steering tab and a run's Decisi
 - Caption: "44 SteeringFrames for release-manager in a-intel/platform."
 - Two meters, each a bar with `role=img` and a percent label:
   - "Session-start prefix", "1,102 of 4,096 tok", with "16 KiB in the signed bundle, header included" under it. The figure is the compile header (38 tok) plus the Session start frames.
-  - "Volatile selection", "419 of 430 tok", with "picked for this brief under the workspace budget" under it. The figure is the Prompt submit frames.
+  - "Per-prompt selection", "419 of 430 tok", with "picked for this brief under the workspace budget" under it. The figure is the Prompt submit frames.
 - The type strip: a button per frame type present, each the type badge and its count, with `aria-pressed`: `goal` 1, `invariant` 1, `constraint` 9, `procedure` 10, `context` 9 and `capability` 14. Pressing one filters both sections to that type, and "Show every type" clears it.
 - One block per injection point that carries frames, in this order, each with its name, its description in dim text, and "<n> frames · <tok> tok" at the right:
 
@@ -86,7 +86,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 | The envelope | `resolveEnvelope()` over `assembleSteering()` and `stgItems()` | A read-only capability that runs the assembler for one agent and one brief | None (#3879). `assembleSteering` (`packages/steering-assembler/src/assemble.ts:251`) runs only inside the policy bundle build (`packages/handlers/src/lib/tacho-steering.ts:226`), over Steering records alone (`:195`) | ❌ |
 | Frame types, source versions and hashes | `frameOf()`, `srcCell()` | Every SteeringFrame's `type`, `source.version` and `hash` | `steering.manifest` items carry id, kind, force, tokens, outcome and reason (`packages/tacho/src/wire.ts:643-654`) | ❌ |
 | The session-start meter | `STEERING_PREVIEW.budget` (16,384 bytes at 4 bytes a token) | The prefix budget | The shipped budget is 2,000 tokens (`assemble.ts:100`; `tacho-steering.ts:89`), because Claude Code reads at most 10,000 characters of a hook answer. Each run's `steering.manifest` records `budget_tokens` and `spent_tokens` (`wire.ts:666-677`). The mockup's 4,096 has no source | 🟡 |
-| The volatile meter and its 430-token budget | `STEERING_PREVIEW.budget.volatileTok` | A per-prompt budget for `may` and `info` | None. `may` and `info` records are cut as `tier` today (`assemble.ts:60`, `:134`) | ❌ |
+| The per-prompt meter and its 430-token budget | `STEERING_PREVIEW.budget.volatileTok` | A per-prompt budget for `may` and `info` | None. `may` and `info` records are cut as `tier` today (`assemble.ts:60`, `:134`) | ❌ |
 | Exclusions `tier`, `over_budget` (recorded as `budget`) and `superseded` | `mapCut()`, `XR_SHIPPED` | The manifest's cut reasons | Recorded per run (`wire.ts:641`). Not resolvable here without #3879 | 🟡 |
 | Every other exclusion reason | `XR` | The closed vocabulary of the wedge spec | None | ❌ |
 | The candidates: records, instructions, skills, glossary terms, memory, gate notices, documents, mandates, toolbelts | `RECORDS`, `STEERING_PREVIEW.instructions`, `SKILLS`, `ONTOLOGY`, `MEMORY`, `GATES`, `SOURCES`, `MANDATES`, `TOOLBELTS` | The assembler's source adapters | The assembler accepts the kinds `record`, `steer`, `skill`, `memory`, `ontology`, `policy` and `instruction` (`assemble.ts:48-56`); only records are adapted (`tacho-steering.ts:195`) | 🟡 |
@@ -99,7 +99,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 | The " · #<hash>" part of every Source cell | `per-frame provenance` | Nothing after the version |
 | Every Reason badge other than `tier`, `over_budget` and `superseded` | `steering.manifest records tier, budget and superseded today` | The reason reads "not recorded" |
 
-The Exclusions section as a whole carries no mark in the mockup and is future-only in `macanderson/oxagen` for the same reason as the envelope (#3879). So are the standing briefs, the brief chips, "works in <repository>" and the volatile meter. A build renders each as not recorded; the agent select and the tier are the only live data on the tab until the capability ships.
+The Exclusions section as a whole carries no mark in the mockup and is future-only in `macanderson/oxagen` for the same reason as the envelope (#3879). So are the standing briefs, the brief chips, "works in <repository>" and the per-prompt meter. A build renders each as not recorded; the agent select and the tier are the only live data on the tab until the capability ships.
 
 ## Functionality
 
