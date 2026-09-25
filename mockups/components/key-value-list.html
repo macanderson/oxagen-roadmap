@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Key-value list</title>
+<meta name="description" content="One record's fields, a label and a value per row.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="../docs-kit/fonts.css">
+<link rel="stylesheet" href="../src/engine.css">
+<link rel="stylesheet" href="../docs-kit/docs.css">
+<script src="../docs-kit/docs.js"></script>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="../components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="../typography.html">Typography</a>
+    <a href="../colors.html">Colors</a>
+    <a href="../prose.html">Prose</a>
+    <a href="../components.html" aria-current="page">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="../missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-crumb"><a href="../components.html">Components</a><span aria-hidden="true">/</span><span>Key-value list</span></div>
+<div class="dx-hero">
+  <p class="eyebrow">Data display</p>
+  <h1>Key-value list</h1>
+  <p class="dx-lead">A key-value list reads one record top to bottom: an approval's tool version and digest, an agent's principal and credential, a run's frame hash. Each row is a label and a value, never a table of many records. A value can carry a second line of context, and a missing value reads as a dash.</p>
+  <div class="dx-meta">
+    <span><b>Root</b> <code>.kv</code></span>
+    <span><b>CSS</b> <code>engine.css</code> lines 307 to 309, 550, 2116</span>
+    <span><b>Used on</b> Approvals (approval card), Agents (Identity tab), Organization (API keys), Run (Chain tab, frame detail), Spend, Billing</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="examples">Examples</h2>
+  <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
+  <figure class="dx-story" id="story-default">
+    <figcaption class="dx-story-h"><b>Default rows</b><span>A <code>dl.kv</code>, from the approval card's &quot;The call&quot; block: <code>frKv()</code> writes this shape.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="default" data-name="Default rows">
+<dl class="kv">
+  <dt>Tool version</dt><dd class="mono">stripe__create_payment@4</dd>
+  <dt>Input digest</dt><dd class="mono">sha256:c81f04ea6b2d93a7</dd>
+  <dt>Idempotency</dt><dd class="mono">idk_c81f04ea</dd>
+</dl>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-sub">
+    <figcaption class="dx-story-h"><b>Second line</b><span>A value can carry one more fact on a <code>.sub</code> line, from the agent Identity tab.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="sub" data-name="Second line">
+<dl class="kv">
+  <dt>Agent key</dt><dd class="mono">a-intel.core.release-manager</dd>
+  <dt>Principal</dt><dd class="mono">prn_01JQ8W3F2M6XKD7A9RZT4BVCNE<span class="sub">minted at registration and never reused, so a retired agent's runs keep their identity</span></dd>
+  <dt>Operator</dt><dd>Marcus Bell<span class="sub">accountable for every run · IAM field <span class="mono">initiating_principal</span></span></dd>
+</dl>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-mono-list">
+    <figcaption class="dx-story-h"><b>All-mono list</b><span><code>.kv.code</code> sets every value in Monaspace Neon at 12px, from the account preferences preview.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="mono-list" data-name="All-mono list">
+<dl class="kv code">
+  <dt>date</dt><dd>11 September 2026, 15:47 UTC</dd>
+  <dt>number</dt><dd>18,472.36</dd>
+  <dt>money</dt><dd>$18,472.36 USD</dd>
+  <dt>duration</dt><dd>6 m 11 s</dd>
+</dl>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-empty">
+    <figcaption class="dx-story-h"><b>Empty value</b><span>A record with nothing to show reads a dash in <code>.dim</code>, from a frame's control record.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="empty" data-name="Empty value">
+<dl class="kv">
+  <dt>Source</dt><dd>the agent's hooks</dd>
+  <dt>Cause</dt><dd><span class="dim">—</span></dd>
+  <dt>Billed</dt><dd><span style="color:var(--st-allowed)">no</span></dd>
+</dl>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-chain-tab">
+    <figcaption class="dx-story-h"><b>Run chain tab</b><span>Two panels of <code>dl.kv</code>, from the Run page's Chain tab.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="chain-tab" data-name="Run chain tab">
+<div class="grid g2">
+  <div class="panel"><div class="panel-h"><h3>Hash chain</h3><span class="b b-allowed" style="margin-left:auto"><span class="d"></span>no gaps</span></div><div class="panel-b">
+    <dl class="kv"><dt>Frames</dt><dd class="num">212 · dense seq 0 … 211</dd>
+    <dt>Rule</dt><dd class="mono" style="font-size:11.5px">hash = SHA256(prev_hash ‖ canonical(envelope))</dd>
+    <dt>Checkpoints</dt><dd>10 · every 20 frames · signed by the host device key, countersigned by oxagen at ingest</dd></dl>
+  </div></div>
+  <div class="panel"><div class="panel-h"><h3>Seal and attestation</h3><span class="b b-allowed" style="margin-left:auto"><span class="d"></span>sealed</span></div><div class="panel-b">
+    <dl class="kv"><dt>Merkle root</dt><dd class="mono" style="word-break:break-all">sha256:b41e07c9a2f5308d6e14bb90c7f2a331</dd>
+    <dt>Archive segment</dt><dd class="mono">seg_01K5RS7M2E8FJ3QW.ndjson.zst</dd>
+    <dt>Signature</dt><dd class="mono">ed25519 · a-intel</dd></dl>
+  </div></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-denied">
+    <figcaption class="dx-story-h"><b>Denied state</b><span>The denied state writes a bare <code>div.kv</code> with no <code>dl</code>, from <code>deniedState()</code>.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="denied" data-name="Denied state">
+<div class="kv" style="margin-top:0;text-align:left;max-width:420px">
+  <dt>Signed in as</dt><dd>Marcus Bell · <span class="mono">workspace.member</span></dd>
+  <dt>Needed</dt><dd><span class="mono">agent.read on core-platform</span></dd>
+  <dt>Decided by</dt><dd><span class="mono">pol_v41</span> · deny wins over every allow</dd>
+</div>
+    </template>
+  </figure>
+</section>
+
+<section class="dx-sec">
+  <h2 id="anatomy">Anatomy</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Part</th><th>Selector</th><th>What it holds</th></tr></thead>
+    <tbody>
+      <tr><td>List</td><td><code>.kv</code></td><td>A two-column grid, auto by 1fr, with a 7px by 16px gap, 12.5px, baseline-aligned rows.</td></tr>
+      <tr><td>Label</td><td><code>.kv dt</code></td><td><code>--dim</code> text that does not wrap (see Findings for its contrast).</td></tr>
+      <tr><td>Value</td><td><code>.kv dd</code></td><td><code>--body</code> text with no default margin, wraps at any character so a long id never overflows the row.</td></tr>
+      <tr><td>Second line</td><td><code>.kv dd .sub</code></td><td>One more fact under the value, in the shared <code>.sub</code> style.</td></tr>
+      <tr><td>All-mono values</td><td><code>.kv.code dd</code></td><td>Every value in Monaspace Neon at 11.5px, for a row of formatted figures.</td></tr>
+      <tr><td>Empty value</td><td><code>.kv dd .dim</code></td><td>A dash in <code>--dim</code> where a field has no value to show.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="usage">Usage</h2>
+  
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>One record's fields, read top to bottom: an approval, a credential, a hash chain, a seal.</li><li>A field that needs one more sentence of context, on the value's <code>.sub</code> line.</li><li>A short, fixed set of facts inside a panel body or a dialog body.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Many records of the same shape: use a <a href="table.html">table</a>.</li><li>Two or three figures a person checks at a glance: use <a href="stat-box.html">stat boxes</a>.</li><li>A record's changing state over time: use a <a href="timeline.html">timeline</a>.</li></ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><div style="display:flex;gap:18px;width:100%"><div><b>Tool version</b><div>stripe__create_payment@4</div></div><div><b>Input digest</b><div style="word-break:break-all">sha256:c81f04ea6b2d93a7</div></div></div></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Hand-built rows with bold labels and no <code>dt</code>/<code>dd</code> pairing. A screen reader cannot tell a label from its value.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><dl class="kv" style="width:100%;margin:0"><dt>Tool version</dt><dd class="mono">stripe__create_payment@4</dd><dt>Input digest</dt><dd class="mono">sha256:c81f04ea6b2d93a7</dd></dl></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>A real definition list. The label and value pair is explicit in the markup, not just in the layout.</p></div>
+  </div>
+  <ul>
+    <li>Every row is a <code>dt</code> and a <code>dd</code> inside one <code>dl</code>. A <code>div.kv</code> with no <code>dl</code> is a departure from the pattern, not a variant of it (see Findings).</li>
+    <li>An id, a hash, or a stored key is set in mono, either row by row with <code>dd.mono</code> or for the whole list with <code>.kv.code</code>.</li>
+    <li>A missing value is a dash in <code>.dim</code>, never a blank cell or the word &quot;none&quot; dressed up as a value.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="content">Content</h2>
+  
+  <ul>
+    <li><b>Label</b>: a plain noun or a short phrase in sentence case (&quot;Tool version&quot;, &quot;Input digest&quot;). No question mark, no colon: the grid column does that job.</li>
+    <li><b>Value</b>: the fact itself, formatted for what it is: <code>usd()</code> for money, a full id or hash in mono, a sentence for a rule or a purpose.</li>
+    <li><b>Second line</b>: one sentence of context under the value, starting in lowercase, with no design reasoning.</li>
+    <li><b>Empty value</b>: <code>—</code> in <code>.dim</code>. A field nothing recorded reads &quot;not recorded&quot; as the value instead, when a bare dash would read as an error.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="a11y">Accessibility</h2>
+  
+  <ul>
+    <li>A <code>.kv</code> is a real <code>dl</code>, so a screen reader can associate each <code>dt</code> with the <code>dd</code> that follows it.</li>
+    <li>The denied-state list writes <code>dt</code> and <code>dd</code> directly inside a <code>div</code>, with no <code>dl</code> ancestor. That breaks the list semantics the same markup relies on everywhere else. See Findings.</li>
+    <li>The label is <code>--dim</code>, which is 3.67:1 on <code>--panel</code> in dark and 2.56:1 in light. A label is a word a person reads to understand the row, so it falls short of 4.5:1. See <a href="../colors.html#findings">Colors</a>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="phone">Phone</h2>
+  
+  <ul>
+    <li>The grid keeps its two columns. A long value wraps under its own label rather than the row reflowing to one column.</li>
+    <li>Inside a dialog sheet the list keeps its padding and font size: nothing shrinks below 12.5px.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="tokens">Tokens</h2>
+  
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Token</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td><code>--dim</code></td><td>Label, empty value (see Findings)</td></tr>
+      <tr><td><code>--body</code></td><td>Value</td></tr>
+      <tr><td><code>--mono</code></td><td><code>.kv.code</code> values and any <code>dd.mono</code></td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="source">Source</h2>
+  <p class="dx-sub">Where the mockup defines and renders it.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Where</th><th>What</th></tr></thead>
+    <tbody>
+      <tr><td><code>mockups/src/engine.css</code> lines 307 to 309, 550, 2116</td><td>The rules that draw it</td></tr>
+      <tr><td><code>frKv(rows)</code> at <code>engine.js:3361</code></td><td>Writes a <code>dl.kv</code> from an array of <code>[label, value]</code> pairs, dropping any falsy row. About 15 calls, mostly frame detail.</td></tr>
+      <tr><td><code>kvl(pairs, cls)</code> at <code>engine.js:9827</code></td><td>The same shape again: a <code>dl.kv</code> from pairs, with an optional extra class. 7 calls, all in the account dialog.</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>87 more sites write <code>&lt;dl class=&quot;kv&quot;&gt;</code> or <code>&lt;div class=&quot;kv&quot;&gt;</code> inline as strings, across the approval card, the agent tabs, Organization, Billing, Steering, and every frame-detail reader that does not go through <code>frKv()</code>.</li>
+    <li><code>frKv()</code> and <code>kvl()</code> do the same job in near-identical code: build the same markup from the same shape of input, one for frame detail, one for the account dialog. A build needs only one.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>A key-value block with no list</h4><p><code>deniedState()</code> (engine.js 872) writes <code>dt</code> and <code>dd</code> directly inside a <code>div.kv</code>, with no <code>dl</code>. <code>dt</code> and <code>dd</code> are only valid inside a <code>dl</code>, so a screen reader reads the six rows as six unrelated pieces of text with no label-value pairing.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Label contrast</h4><p><code>.kv dt</code> is <code>--dim</code>, which is 3.67:1 on <code>--panel</code> in dark and 2.56:1 in light. A row's label is a word a person reads to use the row, so it belongs on <code>--muted</code> (6.91:1 dark, 4.83:1 light), the same finding as the stat box label. See <a href="../colors.html#findings">Colors</a>.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Two helpers, one shape</h4><p><code>frKv()</code> and <code>kvl()</code> both turn an array of pairs into the same <code>dl.kv</code> markup. One shared helper would replace both, and the 87 inline copies besides them.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's key-value list against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Key-value list audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the key-value list component in the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/components/key-value-list.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
+2. The design source: mockups/src/engine.css lines 307 to 309, 550, 2116. The mockup renders it with frKv(rows) (engine.js:3361), kvl(pairs, cls) (engine.js:9827).
+3. The build's implementation: find it by its root selector (.kv) or its name, and list every route that renders it.
+4. Where to see it in the design: Approvals (approval card), Agents (Identity tab), Organization (API keys), Run (Chain tab, frame detail), Spend, Billing. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
+
+1. Structure. Every key-value list is one `dl` with a `dt` and a `dd` per row, in that order. A `div.kv` with bare `dt`/`dd` and no `dl` ancestor is a FAIL.
+2. Grid. Two columns, auto width for the label and `1fr` for the value, 7px by 16px gap, baseline-aligned, 12.5px text.
+3. Label. `--dim` text, sentence case, no trailing colon or question mark. Report its contrast on the ground it sits on; below 4.5:1 is a FAIL to note, not to block on, since the reference carries the same gap.
+4. Value. `--body` text that wraps at any character, so a full hash or id never pushes the row wider than its column.
+5. Mono values. An id, a hash, a key, or a digest renders in Monaspace Neon, either per row (`dd.mono`) or for the whole list (`.kv.code`). A raw monospace fallback in first position is a FAIL.
+6. Second line. A `.sub` line under a value is one sentence, starting in lowercase, and never a second unrelated fact.
+7. Empty value. A field with nothing to report renders `—` in `--dim`, or the words &quot;not recorded&quot; when a bare dash would read as broken. A blank `dd` is a FAIL.
+8. One implementation. List every place the build draws a key-value list by hand instead of through one shared component, with its file and line.
+9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+12. Phone. At 390 by 844 with a touch pointer: The grid keeps its two columns. A long value wraps under its own label rather than the row reflowing to one column. Inside a dialog sheet the list keeps its padding and font size: nothing shrinks below 12.5px.
+13. Accessibility. A `.kv` is a real `dl`, so a screen reader can associate each `dt` with the `dd` that follows it. The denied-state list writes `dt` and `dd` directly inside a `div`, with no `dl` ancestor. That breaks the list semantics the same markup relies on everywhere else. See Findings. The label is `--dim`, which is 3.67:1 on `--panel` in dark and 2.56:1 in light. A label is a word a person reads to understand the row, so it falls short of 4.5:1. See [Colors](../colors.html#findings).
+14. One implementation. The build draws the key-value list from one shared component. List every place that draws it by hand, with its file and line.
+
+## Output
+
+Return one markdown report:
+
+# Key-value list: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+## Copies outside the shared component
+- File and line, and what it draws differently.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. Quote the reference's copy when a label differs. If the build cannot be started or the component is missing, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+<nav class="dx-pn" aria-label="Components"><a href="avatar.html"><span>Previous</span>Avatar</a><a class="nx" href="tool-cell.html"><span>Next</span>Tool cell</a></nav>
+</main>
+</div>
+</body>
+</html>

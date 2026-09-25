@@ -38,7 +38,9 @@
 *{box-sizing:border-box}
 html,body{height:100%}
 body{margin:0;background:var(--ink);color:var(--fg);font-family:var(--font);font-size:14.5px;line-height:1.55;-webkit-font-smoothing:antialiased}
-h1,h2,h3{font-family:var(--font-display);letter-spacing:-.02em;text-wrap:balance;margin:0}
+/* Space Grotesk sets the page h1 only. Every other heading is Geist, which holds its shape at card-title sizes. */
+h1,h2,h3{letter-spacing:-.02em;text-wrap:balance;margin:0}
+h1{font-family:var(--font-display)}
 h1{font-size:26px;font-weight:600}
 h2{font-size:20px;font-weight:600}
 h3{font-size:15px;font-weight:600}
@@ -99,7 +101,7 @@ main{overflow:auto;padding:22px 24px 60px;min-width:0}
 .chip.open{color:var(--st-approval)} .chip.decided{color:var(--st-allowed)} .chip.unbacked{color:var(--st-denied);border-color:var(--st-denied)}
 .chip.lbl{color:var(--body)}
 .stat{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px}
-.stat .v{font-family:var(--font-display);font-size:28px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat .v{font-size:28px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
 .stat .l{font-size:12px;color:var(--muted);margin-top:2px}
 .stat .s{font-size:11.5px;color:var(--dim);font-family:var(--mono);margin-top:4px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:22px}

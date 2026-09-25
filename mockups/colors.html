@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Colors</title>
+<meta name="description" content="How the Oxagen app surface is colored: grounds, text roles, gold, state and kind colors, the approved foreground and ground pairs, and a contrast matrix computed from engine.css.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="docs-kit/fonts.css">
+<link rel="stylesheet" href="src/engine.css">
+<link rel="stylesheet" href="docs-kit/docs.css">
+<script src="docs-kit/docs.js"></script>
+<style>
+.co-stack{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px;margin:0 0 22px}
+.co-l{border-radius:12px;padding:16px;font-size:12px;color:var(--muted);position:relative;min-width:0}
+.co-l>.lab{display:flex;gap:8px;align-items:baseline;margin-bottom:10px}
+.co-l>.lab b{color:var(--fg);font-size:12.5px;font-weight:600}
+.co-l>.lab code{background:none;padding:0;font-size:11px}
+.co-ink{background:var(--ink);border:1px solid var(--rule)}
+.co-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.co-ph{background:var(--panel-h);border-bottom:1px solid var(--border);padding:10px 14px;display:flex;gap:8px;align-items:baseline}
+.co-ph b{color:var(--fg);font-size:12.5px}
+.co-pb{padding:12px 14px;display:grid;gap:10px}
+.co-hl{background:var(--hl);border-radius:7px;padding:7px 10px}
+.co-void{background:var(--void);border:1px solid var(--border);border-radius:9px;padding:9px 11px;font-family:var(--mono);font-size:11px;color:var(--body)}
+.co-side{background:var(--void);border:1px solid var(--border);border-radius:12px;padding:14px;display:grid;gap:6px;align-content:start}
+.co-side .it{padding:6px 9px;border-radius:7px;color:var(--muted);font-size:12.5px}
+.co-side .it.on{background:var(--hl);color:var(--fg)}
+.co-pairs td:nth-child(2),.co-pairs td:nth-child(3){white-space:normal}
+.co-mtx-wrap{margin:0 0 26px}
+.co-mtx-wrap h3{margin:0 0 10px}
+.co-badges{display:grid;gap:10px;margin:0 0 22px}
+.co-badges .rowx{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:14px 16px;border:1px solid var(--border);border-radius:12px}
+.co-badges .rowx.on-ink{background:var(--ink)}
+.co-badges .rowx.on-panel{background:var(--panel)}
+.co-badges .rowx>span.lbl{font-size:12px;color:var(--muted);min-width:90px}
+.co-shape{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:0 0 22px}
+.co-shape>div{padding:14px 16px;border-radius:12px;background:var(--panel);font-size:13px;color:var(--body)}
+.co-shape>div b{display:block;color:var(--fg);font-size:13px;margin-bottom:4px}
+.co-kinds{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:0 0 22px}
+.co-kinds>div{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--panel);min-width:0}
+.co-kinds i{width:4px;align-self:stretch;border-radius:2px;flex:none}
+.co-kinds b{font-size:12.5px;color:var(--fg);font-weight:600;display:block}
+.co-kinds code{background:none;padding:0;font-size:11px;color:var(--muted)}
+.co-kinds span{font-size:12px;color:var(--muted)}
+@media(max-width:720px){.co-stack{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="typography.html">Typography</a>
+    <a href="colors.html" aria-current="page">Colors</a>
+    <a href="prose.html">Prose</a>
+    <a href="components.html">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-hero">
+  <p class="eyebrow">Design reference</p>
+  <h1>Colors</h1>
+  <p class="dx-lead">The app surface is dark first, on obsidian, with a white light theme that carries the same roles. The greys are neutral zinc with no hue, so gold is the only warm value on a screen. Color never carries a state alone: a word or a shape carries it too.</p>
+  <div class="dx-meta">
+    <span><b>Source</b> <code>mockups/src/engine.css</code> lines 1 to 46</span>
+    <span><b>Brand</b> <code>oxagen-branding/assets/tokens.css</code></span>
+    <span><b>Contrast</b> WCAG 2.2, computed on load</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="principles">Principles</h2>
+  <p class="dx-sub">Six rules decide every color on the surface.</p>
+  <ol class="dx-rules">
+    <li><div><b>Tokens only.</b><p>Every color is a <code>var(--token)</code> from <code>engine.css</code>. A hex value in a component is a defect, because it cannot follow the theme.</p></div></li>
+    <li><div><b>Neutral grounds.</b><p>Grounds, borders, and text are zinc greys with no hue. The data and the one action carry the color.</p></div></li>
+    <li><div><b>Gold is identity.</b><p>Gold marks the brand, the first eyebrow, the focus ring, and at most one action per screen. It never carries a state, fills a surface, or highlights a row.</p></div></li>
+    <li><div><b>Every word clears 4.5:1.</b><p>Text a person needs to read or act on clears 4.5:1 on its ground. Large text (24px, or 18.66px at 700) and interface marks clear 3:1.</p></div></li>
+    <li><div><b>State by word and shape.</b><p>A badge carries its word. A verdict card carries its border shape. Color is the third signal, never the only one.</p></div></li>
+    <li><div><b>Both themes, always.</b><p>Every token has a dark and a light value. A component that looks right in one theme only is unfinished.</p></div></li>
+  </ol>
+</section>
+
+<section class="dx-sec">
+  <h2 id="grounds">Grounds</h2>
+  <p class="dx-sub">Five grounds stack from the page up, and two line tokens separate them.</p>
+  <div class="co-stack">
+    <div class="co-l co-ink">
+      <div class="lab"><b>Page</b><code>--ink</code></div>
+      <div class="co-panel">
+        <div class="co-ph"><b>Panel header</b><code style="background:none;padding:0;font-size:11px;color:var(--muted)">--panel-h</code></div>
+        <div class="co-pb">
+          <div style="font-size:12.5px;color:var(--body)">Panel body on <code>--panel</code></div>
+          <div class="co-hl" style="font-size:12.5px;color:var(--fg)">Selected row or chip on <code>--hl</code></div>
+          <div class="co-void">code well on --void</div>
+        </div>
+      </div>
+    </div>
+    <div class="co-side">
+      <div class="co-l" style="padding:0 0 6px"><div class="lab" style="margin:0"><b>Sidebar</b><code>--void</code></div></div>
+      <div class="it on">Agents</div><div class="it">Work</div><div class="it">Spend</div><div class="it">Steering</div>
+    </div>
+  </div>
+  <div class="dx-sw" id="sw-grounds"></div>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Token</th><th>Dark</th><th>Light</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td><code>--ink</code></td><td><code>#09090B</code></td><td><code>#FFFFFF</code></td><td>The page ground, dialog backdrops, and the ground inside inputs and search fields.</td></tr>
+      <tr><td><code>--void</code></td><td><code>#000000</code></td><td><code>#F4F4F5</code></td><td>The sidebar, code wells, the editor, diffs, and the transcript. The deepest ground in dark and a grey well in light.</td></tr>
+      <tr><td><code>--panel</code></td><td><code>#18181B</code></td><td><code>#FFFFFF</code></td><td>Panels, stat boxes, cards, dialogs, drawers, menus, and table cells.</td></tr>
+      <tr><td><code>--panel-h</code></td><td><code>#1F1F23</code></td><td><code>#F4F4F5</code></td><td>The panel header band, the table header band in the reference pages, and a panel's hover.</td></tr>
+      <tr><td><code>--hl</code></td><td><code>#27272A</code></td><td><code>#F4F4F5</code></td><td>Highlight: a selected button or row, a hovered row, inline code, a neutral badge, a count chip.</td></tr>
+      <tr><td><code>--border</code></td><td><code>#27272A</code></td><td><code>#E4E4E7</code></td><td>Hairlines: panel and table borders, dividers, input borders at rest.</td></tr>
+      <tr><td><code>--rule</code></td><td><code>#3F3F46</code></td><td><code>#D4D4D8</code></td><td>The heavier line: hover borders, the phone frame, square markers, and outlines that must read as a boundary.</td></tr>
+    </tbody>
+  </table></div></div>
+  <div class="dx-note"><b>On white, a card is a hairline.</b> <code>--panel</code> and <code>--ink</code> are both white in the light theme, so the border is what separates a panel from the page. Never tint a light-theme card to make it stand out.</div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="text">Text roles</h2>
+  <p class="dx-sub">Four greys carry every word, in falling order of weight.</p>
+  <div class="dx-sw" id="sw-text"></div>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Token</th><th>Dark</th><th>Light</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td><code>--fg</code></td><td><code>#FFFFFF</code></td><td><code>#09090B</code></td><td>Primary: headings, values, table cells, selected tabs, button labels.</td></tr>
+      <tr><td><code>--body</code></td><td><code>#E4E4E7</code></td><td><code>#27272A</code></td><td>Reading text: paragraphs, notes, code blocks, message bodies.</td></tr>
+      <tr><td><code>--muted</code></td><td><code>#A1A1AA</code></td><td><code>#71717A</code></td><td>Secondary: subtext, stat sublines, field labels, unselected tabs, hints a person needs.</td></tr>
+      <tr><td><code>--dim</code></td><td><code>#71717A</code></td><td><code>#A1A1AA</code></td><td>Quietest: placeholders, disabled text, separators, decoration. Never a word a person needs to act.</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="pairs">Approved pairs</h2>
+  <p class="dx-sub">Which foreground may sit on which ground, and for what.</p>
+  <div class="dx-tbl co-pairs"><div class="tw"><table>
+    <thead><tr><th>Foreground</th><th>Approved on</th><th>For</th><th>Not approved</th></tr></thead>
+    <tbody>
+      <tr><td><code>--fg</code></td><td>Every ground, both themes</td><td>Any text</td><td>On <code>--gold</code></td></tr>
+      <tr><td><code>--body</code></td><td>Every ground, both themes</td><td>Any text</td><td>On <code>--gold</code></td></tr>
+      <tr><td><code>--muted</code></td><td>Every ground in dark. <code>--ink</code> and <code>--panel</code> in light.</td><td>Secondary text at any size</td><td>Normal text on <code>--hl</code>, <code>--void</code>, or <code>--panel-h</code> in light (4.40:1)</td></tr>
+      <tr><td><code>--dim</code></td><td>Every ground</td><td>Placeholders, disabled text, decoration, and marks at 3:1 in dark</td><td>Any word a person must read to act, in either theme</td></tr>
+      <tr><td><code>--accent-text</code></td><td>Every ground in dark. <code>--ink</code> and <code>--panel</code> in light.</td><td>The first eyebrow, a gold mark set as text</td><td>Paragraphs, headings, or links. On <code>--hl</code> in light (4.23:1)</td></tr>
+      <tr><td><code>--on-gold</code></td><td><code>--gold</code> and <code>--gold-bright</code></td><td>The label of the one primary action</td><td>Any other ground</td></tr>
+      <tr><td>State tokens</td><td>Their own tint (a badge), <code>--panel</code>, and <code>--ink</code></td><td>Badge words, dots, meters, and bars</td><td><code>--st-failed</code> as small text in dark (3.51:1 on <code>--panel</code>)</td></tr>
+      <tr><td>Kind tokens</td><td>Their own tint (a kind badge), <code>--panel</code>, and <code>--ink</code> in dark</td><td>Kind badges, bars, left rules, legend swatches</td><td><code>--fk-tool</code>, <code>--fk-gov</code>, and <code>--fk-op</code> as text in light (below 3.3:1)</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="matrix">Contrast matrix</h2>
+  <p class="dx-sub">Every text token on every ground, read from engine.css by this browser.</p>
+  <div class="dx-row" style="margin:0 0 14px;gap:14px;font-size:12.5px;color:var(--muted)">
+    <span><span class="dx-cm"><span class="v aa">AA</span></span> 4.5:1 or more, approved for text</span>
+    <span><span class="dx-cm"><span class="v ui">3:1</span></span> 3:1 to 4.5:1, large text and marks only</span>
+    <span><span class="dx-cm"><span class="v no">No</span></span> below 3:1, decoration only</span>
+  </div>
+  <div class="co-mtx-wrap"><h3>Dark theme</h3><div class="dx-tbl"><div class="tw"><table class="dx-cm" id="mtx-dark"></table></div></div></div>
+  <div class="co-mtx-wrap"><h3>Light theme</h3><div class="dx-tbl"><div class="tw"><table class="dx-cm" id="mtx-light"></table></div></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="gold">Gold</h2>
+  <p class="dx-sub">Gold is the brand's identity, and each screen spends it once.</p>
+  <div class="dx-sw" id="sw-gold"></div>
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Gold may mark</span><ul style="margin:0;padding-left:18px;font-size:13px">
+      <li>The two lit cells of the hive, the x of oxagen, and the asterisk of stella</li>
+      <li>The first eyebrow on a page</li>
+      <li>The focus ring (<code>:focus-visible</code>) and a focused input's border</li>
+      <li>One primary action per screen: <code>.btn.primary</code>, with <code>--on-gold</code> text</li>
+    </ul></div>
+    <div class="dx-card"><span class="dx-k">Gold never marks</span><ul style="margin:0;padding-left:18px;font-size:13px">
+      <li>A state, a verdict, or a count</li>
+      <li>A surface fill, a card border, or a table row</li>
+      <li>A paragraph, a heading, or a link</li>
+      <li>A second action on the same screen</li>
+    </ul></div>
+  </div>
+  <div class="dx-dd">
+    <div class="dx-dont"><div class="dx-ex dx-row"><button class="btn primary">Set a budget</button><button class="btn primary">Export report</button></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>Two gold actions. The screen no longer says which one matters.</p></div>
+    <div class="dx-do"><div class="dx-ex dx-row"><button class="btn primary">Set a budget</button><button class="btn">Export report</button></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>One gold action. Every other button is neutral.</p></div>
+  </div>
+  <p>Gold on white is 2.1:1, so gold set as text in the light theme is <code>--gold-deep</code> (4.65:1 on white). <code>--accent-text</code> resolves to the right one in each theme. Use it, and never pick the shade by hand. A gold fill keeps its metal in both themes and takes <code>--on-gold</code> text (9.5:1).</p>
+</section>
+
+<section class="dx-sec">
+  <h2 id="state">State colors</h2>
+  <p class="dx-sub">Seven tokens mark the answer a rule gave or the state a run is in.</p>
+  <div class="dx-sw" id="sw-state"></div>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Token</th><th>Badge</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>--st-allowed</code></td><td><span class="b b-allowed"><span class="d"></span>allowed</span></td><td>A rule allowed the request. A check held. A healthy runtime.</td></tr>
+      <tr><td><code>--st-approval</code></td><td><span class="b b-approval"><span class="d"></span>waiting on Priya</span></td><td>Routed to a person, pending, running, or in flight.</td></tr>
+      <tr><td><code>--st-denied</code></td><td><span class="b b-denied"><span class="d"></span>denied</span></td><td>A rule denied the request. A warning worth reading.</td></tr>
+      <tr><td><code>--st-proven</code></td><td><span class="b b-proven"><span class="d"></span>sealed</span></td><td>A record that is complete and can be checked: a sealed chain, a posted receipt, a published bundle.</td></tr>
+      <tr><td><code>--st-failed</code></td><td><span class="b b-failed"><span class="d"></span>failed</span></td><td>A failure, a broken check, or a destructive action.</td></tr>
+      <tr><td><code>--st-critical</code></td><td><span class="b b-critical"><span class="d"></span>tamper incident</span></td><td>An incident that needs a person now.</td></tr>
+      <tr><td><code>--st-observe</code></td><td><span class="b b-q">recorded</span></td><td>Observe mode: recorded, not enforced. Grey on purpose.</td></tr>
+    </tbody>
+  </table></div></div>
+  <h3>State by shape</h3>
+  <p>Where a whole card or row carries a verdict, the border shape carries it, so the state survives grayscale, print, and either theme.</p>
+  <div class="co-shape">
+    <div style="border:3px double var(--rule)"><b>Double border</b>held, allowed, sealed</div>
+    <div style="border:1px dashed var(--rule)"><b>Dashed border</b>pending, waiting on a person</div>
+    <div style="border:1px solid var(--rule)"><b>Single border</b>broken, denied, failed</div>
+  </div>
+  <h3>Badges on their tint</h3>
+  <p>A state badge sets its word in the state color on an 11% tint of the same color, with a 42% border. The ratios below are the badge word on its tint.</p>
+  <div class="co-badges" id="badge-rows"></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="kinds">Kind colors</h2>
+  <p class="dx-sub">Categorical hues tell frame kinds and context kinds apart, and they never reuse a state hue or gold.</p>
+  <h3>Frame kinds</h3>
+  <div class="co-kinds">
+    <div><i style="background:var(--fk-model)"></i><div><b>Model call</b><code>--fk-model</code></div></div>
+    <div><i style="background:var(--fk-tool)"></i><div><b>Tool call</b><code>--fk-tool</code></div></div>
+    <div><i style="background:var(--fk-gov)"></i><div><b>Governance</b><code>--fk-gov</code></div></div>
+    <div><i style="background:var(--fk-ctx)"></i><div><b>Context</b><code>--fk-ctx</code></div></div>
+    <div><i style="background:var(--fk-op)"></i><div><b>Operator</b><code>--fk-op</code></div></div>
+  </div>
+  <h3>Context record kinds</h3>
+  <div class="dx-row" style="margin:0 0 14px">
+    <span class="kb k-rule">Rule</span><span class="kb k-constraint">Constraint</span><span class="kb k-procedure">Procedure</span><span class="kb k-fact">Fact</span><span class="kb k-memory">Memory</span><span class="kb k-preference">Preference</span><span class="kb k-item">Item</span>
+  </div>
+  <ul>
+    <li>A kind badge carries an icon and its word. Engine rule: an icon badge is a kind, a dot badge is a state.</li>
+    <li>Kind hues draw bars, legend swatches, left rules on records (<code>.rec</code>), and icon tiles. In light, <code>--fk-tool</code>, <code>--fk-gov</code>, and <code>--fk-op</code> fall below 3.3:1 on white, so they never set text there.</li>
+    <li>A steering item that is none of the six kinds takes <code>.k-item</code>, a neutral hue with the same shape.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="effects">Tints, lines, and depth</h2>
+  <p class="dx-sub">Mixed tints and two shadows finish the surface.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Effect</th><th>Recipe</th><th>Use</th></tr></thead>
+    <tbody>
+      <tr><td>Badge tint</td><td class="wrap"><code>color-mix(in srgb, var(--st-x) 11%, transparent)</code>, border at 42%</td><td>State badges. Kind badges use 12% and 45%.</td></tr>
+      <tr><td>Danger hover</td><td class="wrap"><code>color-mix(in srgb, var(--st-failed) 12%, transparent)</code></td><td>The hover of <code>.btn.danger</code></td></tr>
+      <tr><td>Spotlight</td><td><code>--spot</code>: 22% dark, 11% light</td><td>The warm glow at the top of the page</td></tr>
+      <tr><td>Raised shadow</td><td><code>--shadow</code></td><td>Dialogs, drawers, menus, the toast</td></tr>
+      <tr><td>Small shadow</td><td><code>--shadow-sm</code></td><td>A pressed segment, a tooltip</td></tr>
+      <tr><td>Transcript ground</td><td><code>--tx-surface</code>: <code>--void</code> dark, white light</td><td>The run transcript</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="theming">Theming</h2>
+  <p class="dx-sub">Three token blocks set the two themes.</p>
+  <ol>
+    <li><code>:root</code> holds the dark values, the default.</li>
+    <li><code>@media (prefers-color-scheme: light)</code> on <code>:root:not([data-theme="dark"])</code> follows the operating system.</li>
+    <li><code>:root[data-theme="light"]</code> pins light, and <code>data-theme="dark"</code> pins dark. The mockup reads <code>?theme=</code>, and so do these pages.</li>
+  </ol>
+  <p>The two light blocks must stay identical. Today they are. A token added to one and not the other shows the wrong theme to half the people who choose light.</p>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  <p class="dx-sub">Where the mockup departs from these rules today.</p>
+  <div class="dx-find"><h4><span class="b b-denied"><span class="d"></span>contrast</span>Quietest grey on words a person needs</h4><p><code>--dim</code> sets table headers (<code>th</code>) and stat labels (<code>.stat .k</code>), and 155 rules use it as a text color. On <code>--panel</code> it is 3.67:1 in dark and 2.56:1 in light. Table headers and stat labels are words a person reads to act, so they belong on <code>--muted</code> (6.91:1 dark, 4.83:1 light).</p></div>
+  <div class="dx-find"><h4><span class="b b-denied"><span class="d"></span>contrast</span>Failure red as small text in dark</h4><p><code>--st-failed</code> is 3.94:1 on <code>--ink</code> and 3.51:1 on <code>--panel</code> in dark. 20 rules set it as text, <code>.btn.danger</code> among them. The brand kit's destructive red (<code>#D5584D</code> dark, <code>#992F28</code> light) clears 4.5:1 both ways, and <code>engine.css</code> has no <code>--destructive</code> token.</p></div>
+  <div class="dx-find"><h4><span class="b b-denied"><span class="d"></span>contrast</span>Badge words on their tint</h4><p>The 11% tint lifts the ground a badge sits on, so its word loses contrast. On <code>--panel</code> in dark, denied is 4.15:1, critical 3.69:1, and failed 3.21:1. In light, allowed is 4.36:1. Badge words are 11px, so each needs 4.5:1. <a href="#state">State colors</a> computes the current values.</p></div>
+  <div class="dx-find"><h4><span class="b b-denied"><span class="d"></span>contrast</span>Secondary text on light grey bands</h4><p>In light, <code>--muted</code> is 4.40:1 and <code>--accent-text</code> 4.23:1 on <code>--hl</code>, <code>--void</code>, and <code>--panel-h</code>. Subtext inside a shaded panel header falls just short.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>gold</span>Gold beyond identity and one action</h4><p>80 rules in <code>engine.css</code> use gold. Beyond the focus ring, the primary button, and the marks, gold also draws the selected tab's underline, the current nav item and pager page, pressed toggles, unread markers, checkbox accents, search marks, and the left rule of <code>.note</code> and <code>.callout</code>. Each is a state or a highlight by the brand's rule. Moving them to <code>--fg</code> or <code>--rule</code> is a design decision for Mac.</p></div>
+  <div class="dx-find" id="find-hex"><h4><span class="b b-q">note</span>Hex values outside the tokens</h4><p>The engine names a hex value directly in a few places, so those colors do not follow the theme. The debug chrome (<code>#chrome</code>) is one and is shown only under <code>?debug=true</code>. The LOGO artwork carries <code>#D4AF37</code> for the lit cells and the x, which the brand requires.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's color against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Color audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the color of the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/colors.html in the roadmap repo. Read it in full: the principles, grounds, text roles, approved pairs, gold rules, state and kind colors, and findings. Open it in a browser too, since its contrast matrix is computed on load.
+2. mockups/src/engine.css lines 1 to 46: the three token blocks. These values are the spec.
+3. The build's token files (CSS variables, Tailwind theme, or design tokens) and its theme switch.
+4. Routes to sample in both themes, desktop at 1440 by 1000: Work, Agents, one agent, one run with its transcript, Spend, Steering, one dialog, one destructive confirm, the approvals drawer, and an empty and an error state.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check, with evidence: a file and line, or a selector with its computed color and background (getComputedStyle), and the ratio you measured.
+
+1. Token parity. Every token in engine.css exists in the build with the same dark and light values. List any token that is missing, renamed, or different, with both values.
+2. No raw colors. Search the build's components for hex, rgb(), hsl(), and named colors outside the token files. Each hit is a FAIL unless it is brand artwork (the hive cells and the x are #D4AF37 by rule).
+3. Grounds. The page is --ink, the sidebar and code wells are --void, panels and cards are --panel, panel headers are --panel-h, highlights are --hl. In light, a card is separated by its border and is never tinted.
+4. Text roles. Headings and values use --fg, reading text --body, secondary text --muted. --dim appears only on placeholders, disabled text, separators, and decoration. Every other --dim text is a FAIL: list it.
+5. Contrast. For every text element on every sampled route, compute the WCAG ratio of its color against its effective background, blending any translucent layer. Text under 24px (or under 18.66px at 700) must clear 4.5:1. Larger text and interface marks (icons, focus rings, input borders, meter fills) must clear 3:1. List every failure with its selector, colors, ratio, and route, in both themes.
+6. Gold count. On each sampled screen, count gold elements that are not the marks, the focus ring, a focused input, or the first eyebrow. More than one is a FAIL. Gold on a state, a surface, a card border, a row, a paragraph, a heading, or a link is a FAIL.
+7. Gold as text on white. In light, gold text uses the deep shade (#8A7223) through --accent-text. Bright gold text on white is a FAIL.
+8. The primary action. The gold button's label is --on-gold. Its hover is --gold-bright.
+9. State. Every state badge carries its word and uses its own state token on an 11% tint with a 42% border. A state shown by color alone (a colored dot or row with no word) is a FAIL. Verdict cards use border shape: double for held or allowed, dashed for pending, single for broken or denied.
+10. Destructive. Destructive buttons and error text clear 4.5:1 in both themes. The mockup's --st-failed as small text in dark does not (3.51:1 on --panel); report what the build uses and its ratio.
+11. Kinds. Frame kinds and context kinds use the --fk-* and --k-* tokens, never a state hue and never gold. A kind badge has an icon and its word. --fk-tool, --fk-gov, and --fk-op never set text in light.
+12. Theme switching. The build follows the operating system when no theme is chosen, and a chosen theme persists. The two light definitions (media query and attribute) are identical. Switching themes changes no layout and loses no state.
+13. Focus. Every interactive element shows the gold focus ring on keyboard focus in both themes, and the ring clears 3:1 against the ground beside it.
+
+## Output
+
+Return one markdown report:
+
+# Color: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Contrast failures
+| Route | Theme | Selector | Foreground | Background | Ratio | Needs |
+|---|---|---|---|---|---|---|
+
+## Gold count per screen
+| Route | Gold elements | Which |
+|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+Rules: never mark PASS on an assumption. Read the computed style. If the build cannot be started, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+
+</main>
+</div>
+<script>
+/* Reads every token in both themes from engine.css by pinning each theme for one synchronous read,
+   then draws the swatches, the contrast matrix, and the badge ratios from those values. */
+(function(){
+  var GROUNDS=["ink","void","panel","panel-h","hl"];
+  var TEXT=["fg","body","muted","dim","accent-text","gold","gold-deep","st-allowed","st-approval","st-denied","st-proven","st-failed","st-critical","st-observe","k-rule","k-constraint","k-procedure","k-fact","k-memory","k-preference","fk-model","fk-tool","fk-gov","fk-ctx","fk-op"];
+  var ALL=GROUNDS.concat(["border","rule","on-gold","gold-bright"],TEXT);
+  function read(theme){
+    var r=document.documentElement,prev=r.getAttribute("data-theme");
+    r.setAttribute("data-theme",theme);
+    var cs=getComputedStyle(r),o={};
+    ALL.forEach(function(k){o[k]=cs.getPropertyValue("--"+k).trim().toUpperCase()});
+    if(prev===null)r.removeAttribute("data-theme");else r.setAttribute("data-theme",prev);
+    return o;
+  }
+  function rgb(h){h=h.replace("#","");return [0,2,4].map(function(i){return parseInt(h.substr(i,2),16)})}
+  function lum(c){var a=c.map(function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});return 0.2126*a[0]+0.7152*a[1]+0.0722*a[2]}
+  function ratio(a,b){var x=lum(rgb(a)),y=lum(rgb(b));return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05)}
+  function mix(fg,bg,p){var f=rgb(fg),b=rgb(bg);return "#"+f.map(function(v,i){return Math.round(v*p+b[i]*(1-p)).toString(16).padStart(2,"0")}).join("").toUpperCase()}
+  function verdict(r){return r>=4.5?["aa","AA"]:r>=3?["ui","3:1"]:["no","No"]}
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+  function matrix(id,t){
+    var el=document.getElementById(id);if(!el)return;
+    var h='<thead><tr><th>Token</th>'+GROUNDS.map(function(g){return '<th>--'+g+'<br><span style="font-family:var(--mono);font-weight:400;letter-spacing:0">'+t[g]+'</span></th>'}).join("")+'</tr></thead><tbody>';
+    TEXT.forEach(function(k){
+      h+='<tr><td><code>--'+k+'</code> <span class="dx-muted" style="font-family:var(--mono);font-size:11px">'+t[k]+'</span></td>';
+      GROUNDS.forEach(function(g){
+        var r=ratio(t[k],t[g]),v=verdict(r);
+        h+='<td><span class="smp" style="background:'+t[g]+';color:'+t[k]+';box-shadow:inset 0 0 0 1px '+t.border+'">Aa</span><span class="r">'+r.toFixed(2)+'</span><span class="v '+v[0]+'">'+v[1]+'</span></td>';
+      });
+      h+='</tr>';
+    });
+    el.innerHTML=h+'</tbody>';
+  }
+  function swatches(id,keys,d,l,notes){
+    var el=document.getElementById(id);if(!el)return;
+    el.innerHTML=keys.map(function(k){
+      return '<div class="dx-swatch"><div class="chip" style="background:var(--'+k+');color:'+(ratio(d[k],"#FFFFFF")>ratio(d[k],"#09090B")?"#FFFFFF":"#09090B")+'"></div><div class="meta"><b>--'+k+'</b><code>dark '+d[k]+'</code><code>light '+l[k]+'</code>'+(notes&&notes[k]?'<span>'+esc(notes[k])+'</span>':'')+'</div></div>';
+    }).join("");
+  }
+  function badges(d,l){
+    var el=document.getElementById("badge-rows");if(!el)return;
+    var tones=[["allowed","st-allowed"],["approval","st-approval"],["denied","st-denied"],["proven","st-proven"],["failed","st-failed"],["critical","st-critical"]];
+    var html="";
+    [["Dark on panel",d,"panel","on-panel"],["Dark on page",d,"ink","on-ink"],["Light on panel",l,"panel","on-panel"]].forEach(function(row){
+      var t=row[1];
+      html+='<div class="rowx" style="background:'+t[row[2]]+';border-color:'+t.border+'"><span class="lbl" style="color:'+t.muted+'">'+row[0]+'</span>'+tones.map(function(p){
+        var bg=mix(t[p[1]],t[row[2]],p[0]==="critical"?0.12:0.11),r=ratio(t[p[1]],bg),v=verdict(r);
+        return '<span class="dx-cm" style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:'+t.muted+'"><span class="b" style="color:'+t[p[1]]+';background:'+bg+';border-color:'+mix(t[p[1]],t[row[2]],0.42)+'"><span class="d"></span>'+p[0]+'</span><span class="r" style="display:inline;color:'+t.body+'">'+r.toFixed(2)+'</span><span class="v '+v[0]+'" style="margin:0;color:'+t.fg+';border-color:'+t.rule+'">'+v[1]+'</span></span>';
+      }).join("")+'</div>';
+    });
+    el.innerHTML=html;
+  }
+  function draw(){
+    var d=read("dark"),l=read("light");
+    matrix("mtx-dark",d);matrix("mtx-light",l);
+    swatches("sw-grounds",["ink","void","panel","panel-h","hl","border","rule"],d,l,{ink:"Page",void:"Sidebar and code wells",panel:"Panels and cards","panel-h":"Panel header band",hl:"Highlight",border:"Hairline",rule:"Heavier line"});
+    swatches("sw-text",["fg","body","muted","dim"],d,l,{fg:"Primary",body:"Reading text",muted:"Secondary",dim:"Quietest"});
+    swatches("sw-gold",["gold","gold-bright","gold-deep","accent-text","on-gold"],d,l,{gold:"Marks, focus, the one action","gold-bright":"Hover of the gold action","gold-deep":"Gold as text on white","accent-text":"Resolves per theme","on-gold":"Text on a gold fill"});
+    swatches("sw-state",["st-allowed","st-approval","st-denied","st-proven","st-failed","st-critical","st-observe"],d,l);
+    badges(d,l);
+  }
+  document.addEventListener("DOMContentLoaded",draw);
+})();
+</script>
+</body>
+</html>
