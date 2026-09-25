@@ -208,11 +208,11 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 493, 498 to 510, editor 527 to 554</td><td>The rules that draw it</td></tr>
-      <tr><td><code>avatarHtml(av, size, shape, extra, letters)</code> at <code>engine.js:340</code></td><td>The one avatar renderer: reads <code>{kind, icon|text|url, font, tone}</code> off a record and writes the <code>.avx</code> span. <code>letters</code> is the fallback when the record has no avatar.</td></tr>
-      <tr><td><code>personAv(key, size)</code> at <code>engine.js:354</code></td><td>Looks up a person by key and renders them round. 12 calls.</td></tr>
-      <tr><td><code>agentAv(a, size)</code> at <code>engine.js:355</code></td><td>Takes an agent object or key and renders it as a squircle. 7 calls.</td></tr>
-      <tr><td><code>initialsOf(name)</code> at <code>engine.js:334</code></td><td>The first and last word's initials, upper-cased: the fallback letters and the editor's first draft.</td></tr>
-      <tr><td><code>openAvatar(target)</code> at <code>engine.js:573</code></td><td>Opens the one avatar editor for <code>person:&lt;key&gt;</code>, <code>agent:&lt;key&gt;</code>, <code>workspace:&lt;slug&gt;</code>, or <code>org</code>.</td></tr>
+      <tr><td><code>avatarHtml(av, size, shape, extra, letters)</code> at <code>engine.js:344</code></td><td>The one avatar renderer: reads <code>{kind, icon|text|url, font, tone}</code> off a record and writes the <code>.avx</code> span. <code>letters</code> is the fallback when the record has no avatar.</td></tr>
+      <tr><td><code>personAv(key, size)</code> at <code>engine.js:358</code></td><td>Looks up a person by key and renders them round. 12 calls.</td></tr>
+      <tr><td><code>agentAv(a, size)</code> at <code>engine.js:359</code></td><td>Takes an agent object or key and renders it as a squircle. 7 calls.</td></tr>
+      <tr><td><code>initialsOf(name)</code> at <code>engine.js:339</code></td><td>The first and last word's initials, upper-cased: the fallback letters and the editor's first draft.</td></tr>
+      <tr><td><code>openAvatar(target)</code> at <code>engine.js:577</code></td><td>Opens the one avatar editor for <code>person:&lt;key&gt;</code>, <code>agent:&lt;key&gt;</code>, <code>workspace:&lt;slug&gt;</code>, or <code>org</code>.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -240,7 +240,7 @@
 ## Inputs
 
 1. mockups/components/avatar.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 493, 498 to 510, editor 527 to 554. The mockup renders it with avatarHtml(av, size, shape, extra, letters) (engine.js:340), personAv(key, size) (engine.js:354), agentAv(a, size) (engine.js:355), initialsOf(name) (engine.js:334), openAvatar(target) (engine.js:573).
+2. The design source: mockups/src/engine.css lines 493, 498 to 510, editor 527 to 554. The mockup renders it with avatarHtml(av, size, shape, extra, letters) (engine.js:344), personAv(key, size) (engine.js:358), agentAv(a, size) (engine.js:359), initialsOf(name) (engine.js:339), openAvatar(target) (engine.js:577).
 3. The build's implementation: find it by its root selector (.avx) or its name, and list every route that renders it.
 4. Where to see it in the design: Agents, Agent card, Approvals, Organization (people, header, workspaces), Account, Spend (evidence dialog), Work orders (Stages), Avatar editor. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

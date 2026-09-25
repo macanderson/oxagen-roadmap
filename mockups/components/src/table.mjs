@@ -201,9 +201,9 @@ export default {
     ["--st-critical, --st-denied", "Risk rule on critical and high rows"],
   ],
   helpers: [
-    ["rowClick(on, label)", "engine.js:6975", "Makes a row a keyboard button. 17 calls."],
-    ["cardTables()", "engine.js:13924", "Turns every single-header table into labelled cards on a phone."],
-    ["keyLabel(k)", "engine.js:694", "Shows a stored key as its label with the key in a tooltip."],
+    ["rowClick(on, label)", "engine.js:6851", "Makes a row a keyboard button. 17 calls."],
+    ["cardTables()", "engine.js:13609", "Turns every single-header table into labelled cards on a phone."],
+    ["keyLabel(k)", "engine.js:696", "Shows a stored key as its label with the key in a tooltip."],
   ],
   sourceNotes: [
     "Pages write tables as HTML strings, and `listify()` adds the list controls to every one at render. See [List table](list-table.html).",

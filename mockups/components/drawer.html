@@ -70,7 +70,7 @@
     <template data-story="list" data-name="Open drawer">
 <div class="apd-scrim open" style="position:relative;inset:auto;background:none"></div>
 <aside id="apdrawer" class="apd open" role="complementary" aria-label="Approvals" style="position:relative;top:auto;bottom:auto;right:auto;width:100%;max-width:420px;border-left:1px solid var(--border);border-radius:12px;overflow:hidden">
-  <div class="apd-h"><h3>Approvals</h3><span class="b b-approval"><span class="d"></span>4 waiting on you in all workspaces</span>
+  <div class="apd-h"><h2>Approvals</h2><span class="b b-approval"><span class="d"></span>4 waiting on you in all workspaces</span>
     <button class="iconbtn" style="margin-left:auto" aria-label="Close approvals">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
     </button>
@@ -105,7 +105,6 @@
         <span class="b b-allowed" style="flex:none"><span class="d"></span>approved</span>
       </button>
     </div>
-    <div class="note" style="margin-top:14px;font-size:11.5px">Approving allows this exact call once. When the approval expires, the call ends and the agent is told why.</div>
   </div>
 </aside>
     </template>
@@ -115,7 +114,7 @@
     <div class="dx-canvas on-panel"></div>
     <template data-story="detail" data-name="Row selected">
 <aside id="apdrawer" class="apd open" role="complementary" aria-label="Approvals" style="position:relative;top:auto;bottom:auto;right:auto;width:100%;max-width:420px;border-left:1px solid var(--border);border-radius:12px;overflow:hidden">
-  <div class="apd-h"><h3>Approvals</h3><span class="b b-approval"><span class="d"></span>4 waiting on you in all workspaces</span>
+  <div class="apd-h"><h2>Approvals</h2><span class="b b-approval"><span class="d"></span>4 waiting on you in all workspaces</span>
     <button class="iconbtn" style="margin-left:auto" aria-label="Close approvals">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
     </button>
@@ -149,7 +148,7 @@
     <div class="dx-canvas on-panel"></div>
     <template data-story="empty" data-name="Nothing waiting">
 <aside id="apdrawer" class="apd open" role="complementary" aria-label="Approvals" style="position:relative;top:auto;bottom:auto;right:auto;width:100%;max-width:420px;border-left:1px solid var(--border);border-radius:12px;overflow:hidden">
-  <div class="apd-h"><h3>Approvals</h3><span class="b b-q"><span class="d"></span>0 waiting on you in all workspaces</span>
+  <div class="apd-h"><h2>Approvals</h2><span class="b b-q"><span class="d"></span>0 waiting on you in all workspaces</span>
     <button class="iconbtn" style="margin-left:auto" aria-label="Close approvals">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
     </button>
@@ -173,7 +172,7 @@
     <tbody>
       <tr><td>Scrim</td><td><code>.apd-scrim</code></td><td>The fixed backdrop, <code>rgba(0,0,0,.42)</code>, that fades in with <code>.open</code> and closes the drawer on click.</td></tr>
       <tr><td>Panel</td><td><code>.apd</code></td><td>A <code>--panel</code> box 680px wide (<code>min(680px, 100vw - 56px)</code>), pinned to the right edge, full height, with a 1px <code>--border</code> left edge. Phone drops it to full width.</td></tr>
-      <tr><td>Header</td><td><code>.apd-h</code></td><td>The h3 title (14px), the total badge, and the close button, 14px by 16px padding, with a bottom border.</td></tr>
+      <tr><td>Header</td><td><code>.apd-h</code></td><td>The h2 title (14px), the total badge, and the close button, 14px by 16px padding, with a bottom border.</td></tr>
       <tr><td>Body</td><td><code>.apd-b</code></td><td>The rows, 14px by 16px padding. It scrolls on its own when the list is taller than the window.</td></tr>
       <tr><td>List</td><td><code>.apd-list</code></td><td>An 8px grid of rows, one per section (waiting on you, resolved today).</td></tr>
       <tr><td>Row</td><td><code>.apd-row</code></td><td>A full-width button: a 26px icon tile (<code>.g</code>), the title block (<code>.tt</code>), and a clock or a resolved badge, in a <code>--panel</code> card with a 1px <code>--border</code>. Hover lifts the border to <code>--rule</code>.</td></tr>
@@ -263,13 +262,13 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 2072 to 2099, countdown 818 to 831</td><td>The rules that draw it</td></tr>
-      <tr><td><code>apdButton()</code> at <code>engine.js:1687</code></td><td>The topbar trigger, with the live count.</td></tr>
-      <tr><td><code>apdToggle(v)</code> at <code>engine.js:1693</code></td><td>Opens or closes the drawer and clears the selection on close.</td></tr>
-      <tr><td><code>apdRow(a)</code> at <code>engine.js:1696</code></td><td>One approval row, pending or resolved.</td></tr>
-      <tr><td><code>apdInterjectionRow(x)</code> at <code>engine.js:1708</code></td><td>The paused-agent row, with its own Answer button.</td></tr>
-      <tr><td><code>apdBody(a)</code> at <code>engine.js:1714</code></td><td>The list, or the selected approval's card when <code>S.apd.sel</code> is set.</td></tr>
-      <tr><td><code>apdHtml()</code> at <code>engine.js:1728</code></td><td>The scrim and the panel, assembled from <code>apdBody()</code>.</td></tr>
-      <tr><td><code>approvalCard(a)</code> at <code>engine.js:1902</code></td><td>The full card shown for a selected row, shared with the Run page.</td></tr>
+      <tr><td><code>apdButton()</code> at <code>engine.js:1683</code></td><td>The topbar trigger, with the live count.</td></tr>
+      <tr><td><code>apdToggle(v)</code> at <code>engine.js:1689</code></td><td>Opens or closes the drawer and clears the selection on close.</td></tr>
+      <tr><td><code>apdRow(a)</code> at <code>engine.js:1692</code></td><td>One approval row, pending or resolved.</td></tr>
+      <tr><td><code>apdInterjectionRow(x)</code> at <code>engine.js:1704</code></td><td>The paused-agent row, with its own Answer button.</td></tr>
+      <tr><td><code>apdBody(a)</code> at <code>engine.js:1710</code></td><td>The list, or the selected approval's card when <code>S.apd.sel</code> is set.</td></tr>
+      <tr><td><code>apdHtml()</code> at <code>engine.js:1724</code></td><td>The scrim and the panel, assembled from <code>apdBody()</code>.</td></tr>
+      <tr><td><code>approvalCard(a)</code> at <code>engine.js:1896</code></td><td>The full card shown for a selected row, shared with the Run page.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -298,7 +297,7 @@
 ## Inputs
 
 1. mockups/components/drawer.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 2072 to 2099, countdown 818 to 831. The mockup renders it with apdButton() (engine.js:1687), apdToggle(v) (engine.js:1693), apdRow(a) (engine.js:1696), apdInterjectionRow(x) (engine.js:1708), apdBody(a) (engine.js:1714), apdHtml() (engine.js:1728), approvalCard(a) (engine.js:1902).
+2. The design source: mockups/src/engine.css lines 2072 to 2099, countdown 818 to 831. The mockup renders it with apdButton() (engine.js:1683), apdToggle(v) (engine.js:1689), apdRow(a) (engine.js:1692), apdInterjectionRow(x) (engine.js:1704), apdBody(a) (engine.js:1710), apdHtml() (engine.js:1724), approvalCard(a) (engine.js:1896).
 3. The build's implementation: find it by its root selector (.apd) or its name, and list every route that renders it.
 4. Where to see it in the design: every page (topbar). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
