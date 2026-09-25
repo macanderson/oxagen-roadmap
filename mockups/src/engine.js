@@ -16684,15 +16684,15 @@ function tStatusBadge(k){
   return '<span class="b '+b+'"><span class="d"></span>'+h(s.name)+'</span>';
 }
 var READY={
- drafting:{b:"b-q",l:"drafting"},
- draft:{b:"b-approval",l:"draft"},
- changed:{b:"b-denied",l:"changed"},
- ready:{b:"b-allowed",l:"ready"},
- sent:{b:"b-proven",l:"in a work order"},
- accepted:{b:"b-q",l:"accepted"},
- closed:{b:"b-q",l:"closed"}
+ drafting:{b:"b-q",l:"Drafting"},
+ draft:{b:"b-approval",l:"Needs certification"},
+ changed:{b:"b-denied",l:"Changed since certified"},
+ ready:{b:"b-allowed",l:"Ready"},
+ sent:{b:"b-proven",l:"In a work order"},
+ accepted:{b:"b-q",l:"Accepted"},
+ closed:{b:"b-q",l:"Closed"}
 };
-function readyBadge(t){var m=READY[t.ready]||READY.draft;return '<span class="b '+m.b+'" title="readiness"><span class="d"></span>'+h(m.l)+'</span>';}
+function readyBadge(t){var m=READY[t.ready]||READY.draft;return '<span class="b '+m.b+'" title="Readiness"><span class="d"></span>'+h(m.l)+'</span>';}
 /* A person in a provider: the workspace member when mapped, the provider's own handle when not. Nothing
    pretends an unmapped account is a member. */
 function tkPerson(id,opts){
@@ -16700,7 +16700,7 @@ function tkPerson(id,opts){
   if(!p) return '<span class="dim">—</span>';
   if(p.state==="mapped"&&PEOPLE[p.to]) return '<span class="tkp">'+personAv(p.to,20)+'<span>'+h(PEOPLE[p.to].name)+(opts.handle?'<span class="dim mono" style="font-size:11px;margin-left:6px">'+ipLogo(p.kind,11)+' '+h(p.handle)+'</span>':'')+'</span></span>';
   return '<span class="tkp">'+ipLogo(p.kind,14)+'<span class="mono">'+h(p.handle)+'</span>'+
-    (p.state==="bot"||p.state==="requester"?'<span class="b b-q" style="font-size:10px">'+p.state+'</span>':'<span class="b b-q" style="font-size:10px" title="not mapped to a workspace member">not mapped</span>')+'</span>';
+    '<span class="vh"> (</span>'+(p.state==="bot"||p.state==="requester"?'<span class="b b-q" style="font-size:10px">'+p.state+'</span>':'<span class="b b-q" style="font-size:10px" title="Not mapped to a workspace member">not mapped</span>')+'<span class="vh">)</span></span>';
 }
 var DOD_TAGS=["code","test","docs","review"];
 var DOD_SRC={assistant:"oxagen.assistant",operator:"you"};
@@ -16710,7 +16710,7 @@ function stageChain(wf,opts){
   var st=wf.stages.map(function(s,i){
     var a=agent(s.agent);
     var cls=opts.state?opts.state(i):"";
-    return '<div class="stage '+cls+'"><span class="r"><i>'+(i+1)+'</i>'+h(s.role)+'</span>'+
+    return '<div class="stage '+cls+'"><span class="r"><i>'+(i+1)+'</i>'+(s.id?'<span class="id">'+h(s.role)+'</span>':h(s.role))+'</span>'+
       '<span class="ag">'+(a?hxIcon(a.harness,14)+agentAv(a,18)+'<b>'+h(a.name)+'</b>'+tierBadge(a.tier):'<span class="dim">no agent</span>')+'</span>'+
       (opts.sub?'<span class="sub">'+opts.sub(i,s)+'</span>':'<span class="sub">owns '+s.owns.map(tagChip).join(" ")+'</span>')+'</div>';
   });
@@ -16726,23 +16726,24 @@ function pTasks(){
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Tasks","503 issue_index_unavailable");
   if(S.state==="denied") return deniedState("this workspace’s tasks","task.read on "+w.slug);
-  if(S.state==="empty"||!wsProviders().length) return emptyState("No issue provider is connected to this workspace",
+  if(S.state==="empty"||!wsProviders().length) return emptyState("No issue tracker is connected to this workspace",
     "Tasks arrive from an issue tracker or a help desk: GitHub, Linear, Jira, ServiceNow, Salesforce Service Cloud, or Zendesk. Connect one, choose what it imports, and oxagen.assistant drafts a definition of done for every open task it reads.",
-    '<button class="btn primary" onclick="ipzOpen()">Connect an issue provider</button>');
+    '<button class="btn primary" onclick="ipzOpen()">Connect an issue tracker</button>');
 
   var tabs='<div class="tabs" role="tablist">'+
-   [["tasks","Tasks",tkWaiting()],["work-orders","Work orders",woWaiting()],["workflows","Workflows",0],
-    ["providers","Providers",wsProviders().length],["fields","Fields",0],
-    ["people","People",TPEOPLE.filter(function(p){return p.state==="suggested";}).length]]
-   .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/tasks/'+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
+   [["tasks","Tasks",tkWaiting(),plural(tkWaiting(),"task needs certification","tasks need certification")],
+    ["work-orders","Work orders",woWaiting(),plural(woWaiting(),"work order is waiting on you","work orders are waiting on you")],["workflows","Workflows",0],
+    ["providers","Trackers",wsProviders().length,plural(wsProviders().length,"tracker connected","trackers connected")],["fields","Fields",0],
+    ["people","People",TPEOPLE.filter(function(p){return p.state==="suggested";}).length,plural(TPEOPLE.filter(function(p){return p.state==="suggested";}).length,"match needs your confirmation","matches need your confirmation")]]
+   .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/tasks/'+x[0]+'\')">'+x[1]+(x[2]?'<span class="n" title="'+h(x[3])+'">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
   var body=t==="work-orders"?tkWoTab():t==="workflows"?tkWfTab():t==="providers"?tkProvTab():t==="fields"?tkFieldsTab():t==="people"?tkPeopleTab():tkTaskTab();
   var acts=t==="tasks"
-    ?'<button class="btn" onclick="ipzOpen()">Connect an issue provider</button>'+dispatchButton(Object.keys(S.tsel).filter(function(k){return S.tsel[k];}))
+    ?'<button class="btn" onclick="ipzOpen()">Connect an issue tracker</button>'+dispatchButton(Object.keys(S.tsel).filter(function(k){return S.tsel[k];}))
     :t==="workflows"
-    ?'<button class="btn" onclick="ipzOpen()">Connect an issue provider</button><button class="btn primary" onclick="wfzOpen()">New workflow</button>'
-    :'<button class="btn primary" onclick="ipzOpen()">Connect an issue provider</button>';
+    ?'<button class="btn" onclick="ipzOpen()">Connect an issue tracker</button><button class="btn primary" onclick="wfzOpen()">New workflow</button>'
+    :'<button class="btn primary" onclick="ipzOpen()">Connect an issue tracker</button>';
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Tasks</h1>'+
-   '<p>Work from your issue trackers and help desks, the definition of done for each task, and the work orders that send it to agents.</p></div>'+
+   '<p>Tasks from your issue trackers, their definitions of done, and the work orders that send them to agents.</p></div>'+
    '<div class="acts">'+acts+'</div></div>'+tabs+body;
 }
 
@@ -16750,8 +16751,8 @@ function pTasks(){
 function tkSelectable(t){return t.ready==="ready"&&(tStatus(t.status)||{}).cat==="open";}
 function tkWhyNot(t){
   if(t.ready==="ready"&&(tStatus(t.status)||{}).cat==="blocked")return "Blocked upstream. It can be sent when it is open again.";
-  return {drafting:"oxagen.assistant is still drafting its definition of done.",draft:"Its definition of done is a draft. Certify it first.",
-    changed:"The task changed after it was certified. Certify it again first.",sent:"Already in a work order.",accepted:"Accepted and done.",closed:"Closed upstream."}[t.ready]||"Not ready.";
+  return {drafting:"oxagen.assistant is still drafting its definition of done.",draft:"Certify this task’s definition of done to select it.",
+    changed:"The task changed since it was certified. Certify its definition of done again to select it.",sent:"Already in a work order.",accepted:"Accepted and done.",closed:"Closed upstream."}[t.ready]||"Not ready.";
 }
 function tkToggle(id,on){if(on)S.tsel[id]=true;else delete S.tsel[id];render();}
 function tkTaskTab(){
@@ -16762,10 +16763,10 @@ function tkTaskTab(){
       drafting=rows.filter(function(t){return t.ready==="drafting";}).length;
   var changed=rows.filter(function(t){return t.ready==="changed";});
   var nsel=Object.keys(S.tsel).length;
-  var banner=changed.length?'<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
-    '<div class="grow"><b>'+changed.length+' task'+(changed.length>1?'s':'')+' changed after certification</b>'+
-    h(changed[0].num)+' was edited upstream on '+h(changed[0].updatedAt)+'. It left ready until somebody certifies its definition of done again.</div>'+
-    '<button class="btn" onclick="go(\''+taskUrl(changed[0])+'\')">Review it</button></div>':'';
+  var banner=changed.length?'<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none"><span class="d"></span>Changed since certified</span>'+
+    '<div class="grow"><b>'+plural(changed.length,"task")+' changed since certified</b>'+
+    h(changed[0].num)+' was edited in '+h(IP_KIND[changed[0].kind].l)+' on '+h(changed[0].updatedAt)+'. It’s no longer ready. Certify its definition of done again to send it.</div>'+
+    '<button class="btn" onclick="go(\''+taskUrl(changed[0])+'\')">Review changes</button></div>':'';
   var trs=rows.map(function(t){
     var ok=tkSelectable(t), on=!!S.tsel[t.id];
     return '<tr '+rowClick("go('"+taskUrl(t)+"')","Open "+t.num)+(on?' aria-selected="true"':'')+'>'+
@@ -16778,23 +16779,22 @@ function tkTaskTab(){
      '<td>'+readyBadge(t)+'</td>'+
      '<td class="mono dim" style="font-size:11.5px">'+h(t.updatedAt)+'</td></tr>';}).join("");
   return '<div class="grid g4" style="margin-bottom:16px">'+
-     tile("Ready for work",ready,"certified and open")+
-     tile("Drafts waiting on you",drafts,"certify to make them ready",drafts?"var(--st-approval)":null)+
-     tile("In work orders",inwo,"sent to an agent or a workflow")+
-     tile("Being drafted",drafting,"oxagen.assistant is reading them")+'</div>'+
+     tile("Ready",ready,"certified and open")+
+     tile("Needs certification",drafts,"drafts and tasks changed since certified",drafts?"var(--st-approval)":null)+
+     tile("In a work order",inwo,"sent to an agent or a workflow")+
+     tile("Drafting",drafting,"oxagen.assistant is reading them")+'</div>'+
    banner+
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tasks</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Only a ready task can be selected and sent.</p></div>'+
+   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Tasks</h3></div>'+
    '<div class="sp">'+(nsel?'<span class="b b-q">'+nsel+' selected</span><button class="btn sm" onclick="S.tsel={};render()">Clear</button>':'')+'</div></div>'+
-   '<div class="tw"><table><thead><tr><th class="ck"><span class="vh">Select</span></th><th>Task</th><th>Labels</th><th>Status</th><th>Owner</th><th>Readiness</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">oxagen.assistant drafts a definition of done for every task a provider imports. A person certifies it, and the task is ready from that moment. A ready task goes to an agent only inside a work order, and only to an agent you operate.</div></div></div>';
+   '<div class="tw"><table><thead><tr><th class="ck" aria-label="Select task"></th><th>Task</th><th>Labels</th><th>Status</th><th>Owner</th><th>Readiness</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">oxagen.assistant drafts a definition of done for every task a tracker imports. A person certifies it, and the task is ready from that moment. A ready task goes to an agent only inside a work order, and only to an agent you operate.</div></div></div>';
 }
 
 /* ---- the send button: a menu of the agents you operate and the workflows made of them ---- */
 function dispatchButton(ids){
   var n=ids.length;
   return '<div class="rel"><button class="btn primary" id="dspBtn" aria-haspopup="menu" aria-expanded="'+(S.layer==="dispatch")+'"'+(n?'':' disabled title="Select one or more ready tasks"')+
-   ' onclick="event.stopPropagation();S.dsq=\'\';S.dspIds='+h(JSON.stringify(ids))+';toggleLayer(\'dispatch\')">'+icon("agents")+'Create work order and send to agent<span aria-hidden="true" style="margin-left:2px">▾</span></button>'+
+   ' onclick="event.stopPropagation();S.dsq=\'\';S.dspIds='+h(JSON.stringify(ids))+';toggleLayer(\'dispatch\')">'+icon("agents")+'Send to an agent…<span aria-hidden="true" style="margin-left:2px">▾</span></button>'+
    (S.layer==="dispatch"&&n?dispatchMenu(ids):'')+'</div>';
 }
 function dspAgentItem(a){
@@ -16827,13 +16827,13 @@ function woTargetCell(w){
   var a=agent(w.target.id); return a?'<span class="tkp">'+hxIcon(a.harness,14)+agentAv(a,20)+'<span>'+h(a.name)+'</span></span>':h(w.target.id);
 }
 function woStageCell(w){
-  if(w.status==="accepted")return '<span class="dim">done</span>';
+  if(w.status==="accepted")return '<span class="dim">Done</span>';
   if(w.target.kind!=="workflow")return '<span class="dim">1 of 1</span>';
   var wf=wfById(w.target.id); if(!wf)return "";
   return w.stage+' of '+wf.stages.length+' <span class="dim">'+h(wf.stages[w.stage-1].role)+'</span>';
 }
-var WO_ST={"sent":{b:"b-q",l:"sent"},"in progress":{b:"b-approval",l:"in progress"},"waiting on you":{b:"b-approval",l:"waiting on you"},
-  "returned":{b:"b-denied",l:"returned"},"stopped":{b:"b-failed",l:"stopped"},"accepted":{b:"b-allowed",l:"accepted"},"parked":{b:"b-denied",l:"parked for you"}};
+var WO_ST={"sent":{b:"b-q",l:"Sent"},"in progress":{b:"b-approval",l:"In progress"},"waiting on you":{b:"b-approval",l:"Waiting on you"},
+  "returned":{b:"b-denied",l:"Sent back"},"stopped":{b:"b-failed",l:"Stopped"},"accepted":{b:"b-allowed",l:"Accepted"},"parked":{b:"b-denied",l:"Waiting on you"}};
 function woBadge(w){return stBadge(WO_ST[w.status]||WO_ST.sent);}
 function woClaimed(w){var n=0;(w.claims||[]).forEach(function(c){if(c)n++;});return n;}
 function woItems(w){return woItemsFor(w.tasks,w.extra||[]);}
@@ -16863,8 +16863,8 @@ function tkWfTab(){
      '<td><b>'+h(wf.name)+'</b><div class="dim mono" style="font-size:11px">'+h(wf.file)+'</div></td>'+
      '<td>'+wf.stages.map(function(s){var a=agent(s.agent);return '<span class="tkp" style="margin:0 6px 3px 0">'+(a?hxIcon(a.harness,13):"")+'<span style="font-size:12px">'+h(s.role)+'</span></span>';}).join('<span class="dim">→ </span>')+
        '<span class="dim">→ </span><span style="font-size:12px">You</span></td>'+
-     '<td>'+(wf.state==="published"?'<span class="b b-allowed"><span class="d"></span>published</span><div class="dim mono" style="font-size:11px">'+h(wf.commit)+'</div>'
-       :'<span class="b b-approval"><span class="d"></span>pull request open</span><div class="dim mono" style="font-size:11px">'+h(wf.pr)+'</div>')+'</td>'+
+     '<td>'+(wf.state==="published"?'<span class="b b-allowed"><span class="d"></span>Published</span><div class="dim mono" style="font-size:11px">'+h(wf.commit)+'</div>'
+       :'<span class="b b-approval"><span class="d"></span>In review</span><div class="dim mono" style="font-size:11px">'+h(wf.pr)+'</div>')+'</td>'+
      '<td class="num">'+wf.used+'</td></tr>';}).join("");
   return '<div class="split23"><div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Workflows</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">A workflow is a file in .oxagen/workflows that names its stages in order.</p></div></div>'+
@@ -16873,19 +16873,19 @@ function tkWfTab(){
    wzChecks([["1","Each stage is its own run, by its own agent, on the runtime that agent is enrolled on."],
      ["2","A stage owns the definition-of-done items with its tags. Its brief names those items and the handoff it received."],
      ["3","When a stage hands off, oxagen sends the next stage its brief. The handoff note arrives as quoted evidence, never as an instruction."],
-     ["4","A stage may return the work to an earlier stage, up to the number of returns the file allows. After that the work order parks for you in Approvals."],
+     ["4","A stage may send the work back to an earlier stage, up to the number of times the file allows. After that, the work order waits for you in Approvals."],
      ["5","The last stage is always a person. Every item is accepted by you, and every pull request is merged by a person."]])+
    '<div class="note" style="margin-top:10px">Every agent in a workflow must be one you operate. A workflow that names an agent somebody else operates cannot be sent by you.</div></div></div></div>';
 }
 
 /* ---- tab: providers ---- */
-function wbLine(on,l){return '<li><span class="b '+(on?'b-allowed':'b-q')+'" style="flex:none"><span class="d"></span>'+(on?'on':'off')+'</span><span>'+h(l)+'</span></li>';}
+function wbLine(on,l){return '<li><span class="b '+(on?'b-allowed':'b-q')+'" style="flex:none"><span class="d"></span>'+(on?'On':'Off')+'</span><span>'+h(l)+'</span></li>';}
 function tkProvTab(){
   var cards=wsProviders().map(function(p){
     var k=IP_KIND[p.kind];
     return '<div class="panel ipc"><div class="panel-h">'+ipLogo(p.kind,24)+'<div style="flex:1;min-width:0"><h3>'+h(k.l)+'</h3>'+
       '<p class="muted" style="margin:1px 0 0;font-size:12px">'+h(p.accountLabel)+' <b class="mono" style="color:var(--fg)">'+h(p.account)+'</b></p></div>'+
-      '<span class="b '+(p.health==="ok"?'b-allowed':'b-denied')+'"><span class="d"></span>'+(p.health==="ok"?'syncing':'needs attention')+'</span></div>'+
+      '<span class="b '+(p.health==="ok"?'b-allowed':'b-denied')+'"><span class="d"></span>'+(p.health==="ok"?'Connected':'Needs attention')+'</span></div>'+
       '<div class="panel-b"><dl class="kv">'+
       '<dt>Authorization</dt><dd>'+h(p.auth)+'</dd>'+
       '<dt>'+h(p.scopeLabel.charAt(0).toUpperCase()+p.scopeLabel.slice(1))+'</dt><dd>'+p.scope.map(function(s){return '<span class="mono">'+h(s)+'</span>';}).join(", ")+'</dd>'+
@@ -16900,7 +16900,7 @@ function tkProvTab(){
       wbLine(p.writeback.status,"Move the status when a work order starts")+
       wbLine(p.writeback.close,"Close the "+k.unit+" as Done when you accept the work")+'</ul></div></div>'+
       '<div class="panel-b rowacts" style="border-top:1px solid var(--border)">'+
-      '<button class="btn sm" onclick="act(\''+h(k.l)+' sync queued. sync_issue_provider recorded as a governed action.\')">Sync now</button><span class="vh">, </span>'+
+      '<button class="btn sm" onclick="act(\''+h(k.l)+' sync queued. Recorded in Audit as sync_issue_provider.\')">Sync now</button><span class="vh">, </span>'+
       '<button class="btn sm" onclick="ipzOpen(\''+p.kind+'\',\''+p.id+'\')">Edit scope and fields</button><span class="vh">, </span>'+
       '<button class="btn sm danger" style="margin-left:auto" onclick="openDialog(\'ipoff\',\''+p.id+'\')">Disconnect</button></div></div>';
   });
@@ -16911,11 +16911,11 @@ function tkProvTab(){
       '<button class="btn sm" onclick="ipzOpen(\''+k+'\')">Connect</button></div></div></div>';});
   return '<div class="grid g2">'+cards.join("")+avail.join("")+'</div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>How imports work</h3></div><div class="panel-b">'+
-   wzChecks([["events","Each provider sends an event when an issue, incident, case, or ticket changes. oxagen reads it again and updates the task."],
+   wzChecks([["events","Each tracker sends an event when an issue, incident, case, or ticket changes. oxagen reads it again and updates the task."],
      ["reconcile","Every 15 minutes oxagen lists what changed since the last read, so a missed event costs at most 15 minutes."],
      ["fields","oxagen reads the thirteen fields on the Fields tab and nothing else. Custom fields are not read."],
-     ["writes","oxagen writes to a provider only what the switches on its card allow. It never edits a subject or a description, and it never replies to a requester."],
-     ["creates","oxagen creates a status, resolution, or label in a provider only when you choose Create for it. It never renames or deletes one."]])+'</div></div>';
+     ["writes","oxagen writes to a tracker only what the switches on its card allow. It never edits a subject or a description, and it never replies to a requester."],
+     ["creates","oxagen creates a status, resolution, or label in a tracker only when you choose Create for it. It never renames or deletes one."]])+'</div></div>';
 }
 
 /* ---- tab: fields ---- */
@@ -16940,27 +16940,27 @@ function mapCells(m){return tkCols().map(function(k){return '<td class="mono" st
 function tkFieldsTab(){
   var cols=tkCols(), heads=cols.map(function(k){return IP_KIND[k].l;});
   var fr=TK_FIELDS.map(function(f){return '<tr><td><b>'+h(f.f)+'</b></td>'+(f.all?'<td class="mono" style="font-size:11.5px" colspan="'+cols.length+'">'+h(f.all)+'</td>':mapCells(f))+'</tr>';}).join("");
-  var sr=TSTATUS.map(function(s){return '<tr '+rowClick("openDialog('stedit','"+s.key+"')","Edit "+s.name)+'><td>'+tStatusBadge(s.key)+(s.builtin?'':' <span class="b b-q" style="font-size:10px">added</span>')+'</td><td>'+h(s.cat)+'</td>'+mapCells(s.map)+'</tr>';}).join("");
+  var sr=TSTATUS.map(function(s){return '<tr '+rowClick("openDialog('stedit','"+s.key+"')","Edit "+s.name)+'><td>'+tStatusBadge(s.key)+(s.builtin?'':' <span class="b b-q" style="font-size:10px">Added by you</span>')+'</td><td>'+h(s.cat)+'</td>'+mapCells(s.map)+'</tr>';}).join("");
   var rr=TRES.map(function(s){return '<tr '+rowClick("openDialog('resedit','"+s.key+"')","Edit "+s.name)+'><td><b>'+h(s.name)+'</b></td>'+mapCells(s.map)+'</tr>';}).join("");
-  var lr=TLABELS.map(function(l){return '<tr '+rowClick("openDialog('lbledit','"+l.key+"')","Edit "+l.name)+'><td>'+lblChip(l.key)+'</td><td class="mono" style="font-size:11.5px"><span class="swv" style="background:'+h(l.color)+'"></span>'+h(l.color)+'</td><td>'+h(l.group)+'</td>'+mapCells(l.map)+'<td><span class="b b-q" title="arrives after day 1">later</span></td></tr>';}).join("");
+  var lr=TLABELS.map(function(l){return '<tr '+rowClick("openDialog('lbledit','"+l.key+"')","Edit "+l.name)+'><td>'+lblChip(l.key)+'</td><td class="mono" style="font-size:11.5px"><span class="swv" style="background:'+h(l.color)+'"></span>'+h(l.color)+'</td><td>'+h(l.group)+'</td>'+mapCells(l.map)+'<td><span class="dim" title="Coming soon">—</span></td></tr>';}).join("");
   function panel(title,sub,btn,head,rows){
     return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+title+'</h3><p class="muted" style="margin:2px 0 0;font-size:12px">'+sub+'</p></div>'+
       (btn?'<div class="sp">'+btn+'</div>':'')+'</div><div class="tw"><table data-lt="off"><thead><tr>'+head.map(function(x){return '<th>'+x+'</th>';}).join("")+'</tr></thead><tbody>'+rows+'</tbody></table></div></div>';
   }
-  return panel("Task fields","Thirteen fields, read the same way from every provider.","",["Field"].concat(heads),fr)+
+  return panel("Task fields","Thirteen fields, read the same way from every tracker.","",["Field"].concat(heads),fr)+
    panel("Statuses","Every status belongs to one of three categories: open, blocked, or closed.",'<button class="btn sm" onclick="openDialog(\'stedit\',\'new\')">Add status</button>',["Status","Category"].concat(heads),sr)+
    panel("Resolutions","A closed task carries one resolution.",'<button class="btn sm" onclick="openDialog(\'resedit\',\'new\')">Add resolution</button>',["Resolution"].concat(heads),rr)+
-   panel("Labels","A label has a color and a mapping to each provider’s own labels, priorities, types, or tags.",'<button class="btn sm" onclick="openDialog(\'lbledit\',\'new\')">Add label</button>',["Label","Color","Group"].concat(heads,["Definition of done items"]),lr)+
-   '<div class="note">Field settings are workspace settings. Each change is a governed action in Audit and applies to the next read of every task. A value a provider lacks can be created there from its editor. Later, a label carries definition-of-done items that copy into the draft of every task that has it, and those templates live in .oxagen/ as files.</div>';
+   panel("Labels","A label has a color and a mapping to each tracker’s own labels, priorities, types, or tags.",'<button class="btn sm" onclick="openDialog(\'lbledit\',\'new\')">Add label</button>',["Label","Color","Group"].concat(heads,["Definition of done items"]),lr)+
+   '<div class="note">Field settings are workspace settings. Each change is a governed action in Audit and applies to the next read of every task. A value a tracker lacks can be created there from its editor.</div>';
 }
 
 /* ---- tab: people ---- */
-var TP_STATE={mapped:{b:"b-allowed",l:"mapped"},suggested:{b:"b-approval",l:"suggested"},unmapped:{b:"b-q",l:"not mapped"},bot:{b:"b-q",l:"bot"},requester:{b:"b-q",l:"requester"}};
+var TP_STATE={mapped:{b:"b-allowed",l:"Mapped"},suggested:{b:"b-approval",l:"Suggested"},unmapped:{b:"b-q",l:"Not mapped"},bot:{b:"b-q",l:"Bot"},requester:{b:"b-q",l:"Requester"}};
 function tkPeopleTab(){
   var sug=TPEOPLE.filter(function(p){return p.state==="suggested";});
   var banner=sug.length?'<div class="banner" style="margin-bottom:14px"><span class="b b-approval" style="flex:none"><span class="d"></span>'+sug.length+' suggested</span>'+
-    '<div class="grow"><b>'+sug.length+' match'+(sug.length>1?'es wait':' waits')+' on you</b>Each account’s verified email equals a workspace member’s. A match counts only when a person confirms it.</div>'+
-    '<button class="btn" onclick="tpConfirmAll()">Confirm '+(sug.length>1?'all '+sug.length:'it')+'</button></div>':'';
+    '<div class="grow"><b>'+plural(sug.length,"match needs","matches need")+' your confirmation</b>Each account’s verified email matches a workspace member. A match counts only when a person confirms it.</div>'+
+    '<button class="btn" onclick="tpConfirmAll()">Confirm '+plural(sug.length,"match","matches")+'</button></div>':'';
   var trs=TPEOPLE.filter(function(p){return wsProviders().some(function(x){return x.kind===p.kind;});}).map(function(p){
     var st=TP_STATE[p.state];
     return '<tr '+rowClick("openDialog('pmap','"+p.id+"')","Map "+p.handle)+'>'+
@@ -16971,8 +16971,8 @@ function tkPeopleTab(){
      '<td>'+h(p.match||"—")+'</td>'+
      '<td>'+stBadge(st)+'</td></tr>';}).join("");
   return banner+'<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>People</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Accounts in your providers and the workspace member each one is.</p></div></div>'+
-   '<div class="tw"><table><thead><tr><th>Account</th><th>Provider</th><th>Email</th><th>Workspace member</th><th>Match</th><th>State</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Accounts in your trackers and the workspace member each one maps to.</p></div></div>'+
+   '<div class="tw"><table><thead><tr><th>Account</th><th>Tracker</th><th>Email</th><th>Workspace member</th><th>Match</th><th>State</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Mapping says who an account is in oxagen and grants nothing. An account left not mapped still owns and creates tasks under its own handle. Only a signed-in member can certify a definition of done or send a work order, whatever the mapping says.</div></div></div>';
 }
 function tpConfirmAll(){TPEOPLE.forEach(function(p){if(p.state==="suggested"){p.state="mapped";}});render();act("Matches confirmed. map_provider_person recorded once per account.");}
@@ -17000,7 +17000,7 @@ function dodSet(id,i,k,v){var t=taskById(id); if(!t||!t.dod[i])return; t.dod[i][
 function dodDel(id,i){var t=taskById(id); if(!t)return; t.dod.splice(i,1); render();}
 function dodAdd(id){var t=taskById(id); if(!t)return; var v=(el("dodNew")||{}).value||""; v=v.trim(); if(!v){act("Write the item first.");return;}
   t.dod.push({t:v,k:"check",tag:"code",src:"operator"}); render();}
-function dodReopen(id){var t=taskById(id); if(!t)return; t.ready="draft"; closeDialog(); act(t.num+" is a draft again. It is ready when somebody certifies it.");}
+function dodReopen(id){var t=taskById(id); if(!t)return; t.ready="draft"; closeDialog(); act(t.num+" needs certification again. It’s ready when somebody certifies it.");}
 function dodCertify(id){
   var t=taskById(id); if(!t)return;
   t.ready="ready"; t.certifiedBy=TK_ME; t.certifiedAt="2026-09-11 09:16"; t.digest="sha256:"+(t.id.slice(-6)+"7c1e04b9d2").toLowerCase();
@@ -17013,7 +17013,7 @@ DLG_EXT.certify=function(id){
   var p=wsProviders().filter(function(x){return x.kind===t.kind;})[0], w=ws();
   return {t:"Certify the definition of done",s:t.num+" "+t.subject,w:true,
    b:'<ol class="dod-ro">'+t.dod.map(function(d){return '<li><span>'+h(d.t)+'</span> '+tagChip(d.tag)+' <span class="tg">'+h(d.k)+'</span></li>';}).join("")+'</ol>'+
-    '<div class="note" style="margin:14px 0">Certifying records <span class="mono">certify_task_dod</span> with your name, the digest of these '+plural(t.dod.length,"item")+', and the version of the task in '+h(IP_KIND[t.kind].l)+' they were read against. If the task changes upstream, the certification is marked changed and the task leaves ready.</div>'+
+    '<div class="note" style="margin:14px 0">Certifying records <span class="mono">certify_task_dod</span> with your name, the digest of these '+plural(t.dod.length,"item")+', and the version of the task in '+h(IP_KIND[t.kind].l)+' they were read against. If the task changes in '+h(IP_KIND[t.kind].l)+', the certification is marked Changed since certified and the task is no longer ready.</div>'+
     (p&&p.writeback.certify?'<div class="note" style="margin-bottom:14px">oxagen posts the list as a '+h(IP_KIND[t.kind].note)+' on '+h(t.num)+', because the '+h(IP_KIND[t.kind].l)+' connection allows it.</div>':'')+
     (w.governance==="regulated"?'<div class="warn" style="margin-bottom:14px"><b>Regulated workspace.</b> The person who certifies cannot send this task in a work order.</div>':'')+
     '<label class="check"><input type="checkbox" id="certOk" onchange="var b=el(\'certBtn\');if(b)b.disabled=!this.checked"><span class="grow"><span class="n">I read every item</span><span class="d">These items are what done means for this task.</span></span></label>',
@@ -17023,7 +17023,7 @@ DLG_EXT.certify=function(id){
 DLG_EXT.dodreopen=function(id){
   var t=taskById(id); if(!t)return noSuch("Task");
   return {t:"Edit a certified definition of done?",w:false,
-   b:'<p>'+h(t.num)+' leaves ready and returns to draft. It is ready again when somebody certifies it.</p>'+
+   b:'<p>'+h(t.num)+' is no longer ready and goes back to Needs certification. It’s ready again when somebody certifies it.</p>'+
     '<div class="note">Work orders already sent keep the list they were sent with. The certification on '+h(t.certifiedAt||"")+' stays in the task\u2019s history.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it certified</button><button class="btn primary" onclick="dodReopen(\''+t.id+'\')">Edit it</button>'};
 };
@@ -17037,7 +17037,7 @@ function dodRows(t,edit){
      (edit?'<select class="sel-sm" aria-label="Tag of item '+(i+1)+'" onchange="dodSet(\''+t.id+'\','+i+',\'tag\',this.value)">'+DOD_TAGS.map(function(g){return '<option'+(g===d.tag?' selected':'')+'>'+g+'</option>';}).join("")+'</select>'+
        '<select class="sel-sm" aria-label="Kind of item '+(i+1)+'" onchange="dodSet(\''+t.id+'\','+i+',\'k\',this.value)"><option'+(d.k==="check"?' selected':'')+'>check</option><option'+(d.k==="review"?' selected':'')+'>review</option></select>'
       :tagChip(d.tag)+'<span class="tg">'+h(d.k)+'</span>')+
-     '<span class="dim" style="font-size:11px">'+h(src)+'</span></div></div>'+
+     '<span class="dim" style="font-size:11px" title="Where this item came from">'+h(src)+'</span></div></div>'+
      (edit?'<button class="iconbtn" aria-label="Remove item '+(i+1)+'" onclick="dodDel(\''+t.id+'\','+i+')">\u00d7</button>':'')+'</li>';}).join("")+'</ol>';
 }
 function pTask(r){
@@ -17045,15 +17045,15 @@ function pTask(r){
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("This task","503 issue_index_unavailable");
   if(S.state==="denied") return deniedState("this task","task.read on "+w.slug);
-  if(!t) return emptyState("No task has this id",'Nothing in '+h(w.name)+' is called <span class="mono">'+h(r.id)+'</span>. It may belong to a provider that was disconnected.',
+  if(!t) return emptyState("No task has this id",'Nothing in '+h(w.name)+' is called <span class="mono">'+h(r.id)+'</span>. It may belong to a tracker that was disconnected.',
     '<button class="btn primary" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/tasks\')">Back to Tasks</button>');
   var k=IP_KIND[t.kind], edit=tkEditable(t), drafting=t.ready==="drafting"||S.tkDrafting[t.id];
   var prim=drafting?'<button class="btn primary"'+(S.tkDrafting[t.id]?' disabled':'')+' onclick="tkDraftNow(\''+t.id+'\')">Draft it now</button>'
-    :t.ready==="draft"||t.ready==="changed"?'<button class="btn primary"'+(t.dod.length?'':' disabled')+' onclick="openDialog(\'certify\',\''+t.id+'\')">'+(t.ready==="changed"?'Certify again':'Certify definition of done')+'</button>'
-    :t.ready==="ready"?(tkSelectable(t)?dispatchButton([t.id]):'<button class="btn" disabled title="'+h(tkWhyNot(t))+'">Create work order and send to agent</button>')
+    :t.ready==="draft"||t.ready==="changed"?'<button class="btn primary"'+(t.dod.length?'':' disabled')+' onclick="openDialog(\'certify\',\''+t.id+'\')">'+'Certify definition of done'+'</button>'
+    :t.ready==="ready"?(tkSelectable(t)?dispatchButton([t.id]):'<button class="btn" disabled title="'+h(tkWhyNot(t))+'">Send to an agent…</button>')
     :t.wo?'<button class="btn primary" onclick="go(\''+woUrl(woById(t.wo)||{id:t.wo})+'\')">Open the work order</button>':'';
-  var changedBanner=t.ready==="changed"?'<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
-    '<div class="grow"><b>The description changed after certification</b>'+h(PEOPLE[(tPerson(t.updatedBy)||{}).to]?PEOPLE[tPerson(t.updatedBy).to].name:t.updatedBy)+' edited it in '+h(k.l)+' on '+h(t.updatedAt)+'. The certification from '+h(t.certifiedAt)+' no longer matches the task, so it left ready.</div></div>'+
+  var changedBanner=t.ready==="changed"?'<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none"><span class="d"></span>Changed since certified</span>'+
+    '<div class="grow"><b>The description changed after certification</b>'+h(PEOPLE[(tPerson(t.updatedBy)||{}).to]?PEOPLE[tPerson(t.updatedBy).to].name:t.updatedBy)+' edited it in '+h(k.l)+' on '+h(t.updatedAt)+'. The certification from '+h(t.certifiedAt)+' no longer matches the task, so it’s no longer ready.</div></div>'+
     '<div class="grid g2" style="margin-bottom:14px"><div class="panel"><div class="panel-h"><h3>Certified against</h3></div><div class="panel-b"><p class="tk-body">'+h(t.was)+'</p></div></div>'+
     '<div class="panel"><div class="panel-h"><h3>Now</h3></div><div class="panel-b"><p class="tk-body">'+h(t.body)+'</p></div></div></div>':'';
   var dodPanel='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Definition of done</h3>'+
@@ -17066,13 +17066,13 @@ function pTask(r){
     (t.digest&&!edit?'<span class="mono dim" style="font-size:11px">'+h(t.digest)+'</span>':'')+'</div></div>'+
     '<div class="panel-b">'+(drafting?'<div class="row"><span class="ob-spin" aria-hidden="true"></span><span class="muted">Reading the description, the labels and the linked pull requests. Nothing is certified by the assistant.</span></div>'
       :dodRows(t,edit)+(edit?'<div class="row" style="margin-top:12px;flex-wrap:nowrap"><input id="dodNew" class="dod-in" placeholder="Add an item" aria-label="Add an item" style="flex:1" onkeydown="if(event.key===\'Enter\')dodAdd(\''+t.id+'\')"><button class="btn sm" onclick="dodAdd(\''+t.id+'\')">Add item</button></div>':''))+'</div>'+
-    (t.ready==="changed"?'<div class="panel-b" style="border-top:1px solid var(--border)"><div class="row" style="flex-wrap:nowrap"><span class="grow" style="flex:1;font-size:12.5px">oxagen.assistant suggests an item for the new scope: <b>Notes added after an incident closes are exported too</b></span><button class="btn sm" onclick="var t=taskById(\''+t.id+'\');t.dod.push({t:\'Notes added after an incident closes are exported too\',k:\'check\',tag:\'code\',src:\'assistant\'});render()">Add it</button></div></div>':'')+
+    (t.ready==="changed"?'<div class="panel-b" style="border-top:1px solid var(--border)"><div class="row" style="flex-wrap:nowrap"><span class="grow" style="flex:1;font-size:12.5px">oxagen.assistant suggests an item for the new scope: <b>Notes added after an incident closes are exported too</b></span><button class="btn sm" onclick="var t=taskById(\''+t.id+'\');t.dod.push({t:\'Notes added after an incident closes are exported too\',k:\'check\',tag:\'code\',src:\'assistant\'});render()">Add item</button></div></div>':'')+
     '</div>';
   var notes=(t.notes||[]).length?'<div class="panel"><div class="panel-h"><h3>Assistant notes</h3></div><div class="panel-b"><ul class="tk-notes">'+t.notes.map(function(n){return '<li>'+h(n)+'</li>';}).join("")+'</ul></div></div>':'';
   var hist=[["Imported",t.createdAt,"from "+k.l]];
   if(t.dod.length) hist.push(["Definition of done drafted",t.createdAt,"oxagen.assistant"]);
   if(t.certifiedAt) hist.push(["Certified",t.certifiedAt,PEOPLE[t.certifiedBy].name]);
-  if(t.ready==="changed") hist.push(["Changed upstream",t.updatedAt,"left ready"]);
+  if(t.ready==="changed") hist.push(["Changed in "+k.l,t.updatedAt,"No longer ready"]);
   if(t.wo){var wo=woById(t.wo); if(wo)hist.push(["Sent in a work order",wo.sent,wo.id]); if(wo&&wo.accepted)hist.push(["Accepted",wo.accepted,PEOPLE[wo.by].name]);}
   var res=t.resolution?tRes(t.resolution):null;
   return '<div class="phead"><div class="t"><p class="eyebrow">'+ipLogo(t.kind,13)+' <span class="id">'+h(t.num)+'</span></p><h1>'+h(t.subject)+'</h1>'+
@@ -17126,24 +17126,24 @@ function woAccept(id){
   var c=woClose(w);
   closeDialog(); act("Accepted. accept_work_order recorded."+(c?(c.on?" oxagen closes "+c.nums+" in "+c.m.l+" as Done.":" "+c.nums+" stays open in "+c.m.l+", because close on accept is off for that connection."):""),"gold");
 }
-function woStop(id){var w=woById(id); if(!w)return; w.status="stopped"; closeDialog(); act("Stopped. The runtime is told at its next boundary; the tasks go back to ready.");
+function woStop(id){var w=woById(id); if(!w)return; w.status="stopped"; closeDialog(); act("Stopped. The agent stops at its next checkpoint, and the tasks go back to Ready.");
   w.tasks.forEach(function(tid){var t=taskById(tid); if(t&&t.ready==="sent")t.ready="ready";});}
 DLG_EXT.woaccept=function(id){
   var w=woById(id); if(!w)return noSuch("Work order");
   var items=woItems(w);
-  return {t:"Accept the work",s:w.title,w:false,
+  return {t:"Accept all items",s:w.title,w:false,
    b:'<p>You accept '+plural(items.length,"item")+' the agents claimed, with the evidence each one cited.</p>'+
     '<div class="note" style="margin:12px 0">Accepting records <span class="mono">accept_work_order</span> with your name. It does not merge anything. The pull request '+h((w.runs[w.runs.length-1]||{}).pr||"")+' is merged by a person on GitHub.</div>'+
     (function(){var c=woClose(w); if(!c)return "";
       return '<div class="note">'+(c.on?'The '+h(c.m.l)+' connection closes each '+h(c.m.unit)+' as Done, the resolution for work a person accepted.'
         :'The '+h(c.m.l)+' connection has close on accept off, so each '+h(c.m.unit)+' stays open there until somebody closes it. Turned on, it closes each one as Done.')+'</div>';})(),
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="woAccept(\''+w.id+'\')">Accept every item</button>'};
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="woAccept(\''+w.id+'\')">Accept all items</button>'};
 };
 DLG_EXT.wostop=function(id){
   var w=woById(id); if(!w)return noSuch("Work order");
   return {t:"Stop this work order?",w:false,
-   b:'<p>The live run gets a cancel at its next boundary, and no later stage starts.</p><div class="note">Branches and pull requests stay where they are. The tasks go back to ready, and their certified definitions of done are unchanged.</div>',
-   f:'<button class="btn" onclick="closeDialog()">Keep it running</button><button class="btn danger" onclick="woStop(\''+w.id+'\')">Stop it</button>'};
+   b:'<p>The running agent stops at its next checkpoint, and no later stage starts.</p><div class="note">Branches and pull requests stay where they are. The tasks go back to Ready, and their certified definitions of done are unchanged.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Keep it running</button><button class="btn danger" onclick="woStop(\''+w.id+'\')">Stop work order</button>'};
 };
 function runLink(id){return run(id)?'<a class="mono" href="#/'+ORG.slug+'/'+S.ws+'/runs/'+h(id)+'">'+h(id)+'</a>':'<span class="mono">'+h(id)+'</span>';}
 function pWorkOrder(r){
@@ -17154,7 +17154,7 @@ function pWorkOrder(r){
   if(!w) return emptyState("No work order has this id",'Nothing in '+h(ws0.name)+' is called <span class="mono">'+h(r.id)+'</span>.',
     '<button class="btn primary" onclick="go(\'#/'+ORG.slug+'/'+ws0.slug+'/tasks/work-orders\')">Back to work orders</button>');
   var wf=w.target.kind==="workflow"?wfById(w.target.id):null, a=w.target.kind==="agent"?agent(w.target.id):null;
-  if(!wf&&a) wf={stages:[{role:"Work",agent:a.key,owns:DOD_TAGS,onFail:"stop"}],name:a.name};
+  if(!wf&&a) wf={stages:[{role:a.name,id:true,agent:a.key,owns:DOD_TAGS,onFail:"stop"}],name:a.name};
   var items=woItems(w), claimed=woClaimed(w), accepted=(w.claims||[]).filter(function(c){return c&&c.ok;}).length;
   var canAccept=w.status!=="accepted"&&w.status!=="stopped"&&claimed===items.length;
   var last=w.runs[w.runs.length-1]||{};
@@ -17165,23 +17165,23 @@ function pWorkOrder(r){
   };
   var stSub=function(i,s){
     var rs=w.runs.filter(function(x){return x.stage===i+1;}), lr=rs[rs.length-1];
-    if(!lr)return '<span class="dim">waiting</span>';
-    return (lr.state==="live"?'<span class="b b-allowed"><span class="d"></span>live</span> ':'<span class="b b-q">sealed</span> ')+runLink(lr.run)+(rs.length>1?' <span class="dim">'+plural(rs.length,"run")+'</span>':'');
+    if(!lr)return '<span class="dim">Waiting</span>';
+    return (lr.state==="live"?'<span class="b b-allowed"><span class="d"></span>Running</span> ':lr.returned?'<span class="b b-denied">Sent back</span> ':'<span class="b b-q">Done</span> ')+runLink(lr.run)+(rs.length>1?' <span class="dim">'+plural(rs.length,"run")+'</span>':'');
   };
   var rows=items.map(function(it,i){
     var c=(w.claims||[])[i], owner=woOwner(wf,it.tag);
     return '<tr><td>'+h(it.t)+'<div class="meta" style="margin-top:4px">'+tagChip(it.tag)+'</div></td>'+
      '<td>'+it.from.map(function(id){var t=taskById(id);return t?'<span class="mono" style="font-size:11.5px">'+h(t.num.replace(/^a-intel\/platform/,""))+'</span>':"";}).join(" ")+(it.wo?'<span class="dim">work order</span>':'')+'</td>'+
      '<td>'+(owner!=null?h(wf.stages[owner].role):'')+'</td>'+
-     '<td>'+(c&&c.ok?'<span class="b b-allowed"><span class="d"></span>accepted</span>':c?'<span class="b b-approval"><span class="d"></span>claimed</span>':'<span class="b b-q"><span class="d"></span>open</span>')+'</td>'+
+     '<td>'+(c&&c.ok?'<span class="b b-allowed"><span class="d"></span>Accepted</span>':c?'<span class="b b-approval"><span class="d"></span>Claimed</span>':'<span class="b b-q"><span class="d"></span>Open</span>')+'</td>'+
      '<td style="font-size:12px">'+(c?h(c.ev)+'<div class="dim mono" style="font-size:11px">'+h((agent(c.by)||{}).name||c.by)+' '+h(c.run)+'</div>':'<span class="dim">\u2014</span>')+'</td></tr>';}).join("");
   var tgt=w.target.kind==="workflow"?'the '+(wfById(w.target.id)||{}).name+' workflow':(a?a.name:w.target.id);
   return '<div class="phead"><div class="t"><p class="eyebrow mono id">'+h(w.id)+'</p><h1>'+h(w.title)+'</h1>'+
    '<p>Sent by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' to '+h(tgt)+'.</p></div>'+
-   '<div class="acts"><button class="btn" onclick="copyWoPrompt(\''+w.id+'\')" title="Copy the prompt as sent with its references">Copy prompt</button>'+(w.status!=="accepted"&&w.status!=="stopped"?'<button class="btn danger" onclick="openDialog(\'wostop\',\''+w.id+'\')">Stop the work order</button>':'')+
-   '<button class="btn'+(canAccept?' primary':'')+'"'+(canAccept?'':' disabled title="Every item must be claimed first"')+' onclick="openDialog(\'woaccept\',\''+w.id+'\')">Accept the work</button></div></div>'+
+   '<div class="acts"><button class="btn" onclick="copyWoPrompt(\''+w.id+'\')" title="Copy the prompt as sent with its references">Copy prompt</button>'+(w.status!=="accepted"&&w.status!=="stopped"?'<button class="btn danger" onclick="openDialog(\'wostop\',\''+w.id+'\')">Stop work order</button>':'')+
+   '<button class="btn'+(canAccept?' primary':'')+'"'+(canAccept?'':' disabled title="Every item must be claimed first"')+' onclick="openDialog(\'woaccept\',\''+w.id+'\')">Accept all items</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
-    tile("State",'<span style="font-size:17px">'+woBadge(w)+'</span>',w.status==="waiting on you"?"every item is claimed":w.status==="accepted"?"on "+h(w.accepted):"stage "+w.stage+" of "+wf.stages.length)+
+    tile("State",'<span style="font-size:17px">'+woBadge(w)+'</span>',w.status==="waiting on you"?"every item is claimed":w.status==="accepted"?"Accepted on "+h(w.accepted):"stage "+w.stage+" of "+wf.stages.length)+
     tile("Items claimed",claimed+" / "+items.length,"by the agents, with evidence")+
     tile("Items accepted",accepted+" / "+items.length,"by a person")+
     tile("Returns",w.returns+(wf.stages.some(function(s){return s.maxReturns;})?" of "+Math.max.apply(null,wf.stages.map(function(s){return s.maxReturns||0;})):""),"work sent back to an earlier stage")+'</div>'+
@@ -17190,8 +17190,10 @@ function pWorkOrder(r){
     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Definition of done</h3>'+
      '<p class="muted" style="margin:2px 0 0;font-size:12px">'+plural(items.length,"item")+' from '+w.tasks.length+' task'+(w.tasks.length>1?'s':'')+'.</p></div></div>'+
      '<div class="tw"><table data-lt="off"><thead><tr><th>Item</th><th>Task</th><th>Stage</th><th>State</th><th>Evidence</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'+
-    '<div class="panel"><div class="panel-h"><h3>Handoffs</h3></div><div class="panel-b"><ol class="tk-hist">'+w.runs.map(function(x){
-      return '<li><b>'+h(wf.stages[x.stage-1].role)+(x.returned?' returned the work':'')+'</b><span>'+runLink(x.run)+'</span><span class="dim">'+(x.note?h(x.note):'running')+'</span></li>';}).join("")+'</ol>'+
+    '<div class="panel"><div class="panel-h"><h3>Handoffs</h3></div><div class="panel-b"><ol class="tk-hist">'+w.runs.map(function(x,j){
+      /* Each handoff names where the work went: the next run's stage, or you once the last run seals. */
+      var nx=w.runs[j+1], to=nx?wf.stages[nx.stage-1].role:x.state==="live"||w.status==="stopped"?"":"You";
+      return '<li><b>'+h(wf.stages[x.stage-1].role)+(to?' → '+h(to):'')+(x.returned?' (sent back)':'')+'</b><span>'+runLink(x.run)+'</span><span class="dim">'+(x.note?h(x.note):'Running')+'</span></li>';}).join("")+'</ol>'+
      '<div class="note" style="margin-top:10px">A handoff note reaches the next stage as quoted evidence. It is never an instruction to that agent.</div></div></div>'+
    '</div><div>'+
     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Tasks</h3></div><div class="panel-b">'+w.tasks.map(function(id){var t=taskById(id);return t?'<a class="tk-link" href="'+taskUrl(t)+'"><span class="tk-t">'+ipLogo(t.kind,13)+'<span class="mono dim" style="font-size:11.5px">'+h(t.num)+'</span></span><span>'+h(t.subject)+'</span></a>':"";}).join("")+'</div></div>'+
@@ -17210,7 +17212,7 @@ function appUrl(route){return "https://app.oxagen.sh"+route.replace(/^#/,"");}
 function taskWorkOrders(t){return WORKORDERS.filter(function(w){return w.tasks.indexOf(t.id)>=0;});}
 function woTargetWords(w){return w.target.kind==="workflow"?"the "+woTargetName(w.target)+" workflow":woTargetName(w.target);}
 /* Read by an agent, so the state a person sees as "waiting on you" names the person instead. */
-function woStateWords(w){return w.status==="waiting on you"?"waiting on a person to accept":w.status==="parked"?"parked for a person":(WO_ST[w.status]||WO_ST.sent).l;}
+function woStateWords(w){return w.status==="waiting on you"?"waiting on a person to accept":w.status==="parked"?"parked for a person":(WO_ST[w.status]||WO_ST.sent).l.toLowerCase();}
 function taskPromptText(id){
   var t=taskById(id); if(!t)return "";
   var wos=taskWorkOrders(t), L=[];
@@ -17572,7 +17574,7 @@ function ipzSuggest(kind,x,k){var v=x.map[k]||"";
 function ipzCounts(){var z=S.ipz, c=0, a=0;
   IPZ_KINDS.forEach(function(x){Object.keys(z.map[x[0]]).forEach(function(key){if(z.map[x[0]][key]==="__create")c++;}); a+=z.add[x[0]].length;});
   return {create:c,add:a};}
-function ipzSteps(){return ["Provider","Authorize","Scope","Fields","People","Review"];}
+function ipzSteps(){return ["Tracker","Authorize","Scope","Fields","People","Review"];}
 function ipzRail(){
   var st=ipzSteps(),cur=S.ipz.step;
   return '<div class="wz-rail" role="list">'+st.map(function(l,i){var n=i+1,cls=n===cur?"on":n<cur?"done":"";
@@ -17597,7 +17599,7 @@ function ipzBody(){
         return '<button class="wz-card ipz-card'+(z.kind===x?' on':'')+'" aria-pressed="'+(z.kind===x)+'" onclick="ipzPick(\''+x+'\')">'+
          '<span class="ic">'+ipLogo(x,26)+'</span><span class="tx"><b>'+h(c.l)+(have[x]?' <span class="b b-allowed" style="font-size:10px"><span class="d"></span>connected</span>':'')+'</b>'+
          '<span class="d">'+h(c.desc)+'</span></span></button>';}).join("")+'</div>';}
-    return {b:'<p style="margin-bottom:14px">Choose where the tasks come from. You can connect more than one, and more than one account of the same provider.</p>'+
+    return {b:'<p style="margin-bottom:14px">Choose where the tasks come from. You can connect more than one, and more than one account of the same tracker.</p>'+
       '<div class="field"><label>Issue trackers</label>'+cards("tracker")+'</div><div class="field"><label>Help desks</label>'+cards("desk")+'</div>',
       f:'<button class="btn" onclick="S.ipz=null;closeDialog()">Cancel</button><button class="btn primary"'+(z.kind?'':' disabled')+' onclick="ipzGo(2)">Next</button>'};
   }
@@ -17662,7 +17664,7 @@ function ipzBody(){
         return '<tr><td><span class="tkp">'+ipLogo(k,13)+'<span><b class="mono">'+h(p[0])+'</b><div class="dim" style="font-size:11px">'+h(p[1])+'</div></span></span></td>'+
          '<td class="mono" style="font-size:11.5px">'+h(p[2]||"—")+'</td>'+
          '<td>'+(fixed?'<span class="b b-q">'+h(p[4])+'</span> <span class="dim" style="font-size:11px">never mapped</span>':
-          '<select class="sel-sm" aria-label="Member for '+h(p[0])+'" onchange="S.ipz.people[\''+h(p[0])+'\']=this.value;render()"><option value="">not mapped</option>'+
+          '<select class="sel-sm" aria-label="Member for '+h(p[0])+'" onchange="S.ipz.people[\''+h(p[0])+'\']=this.value;render()"><option value="">Not mapped</option>'+
           members.map(function(x){return '<option value="'+x+'"'+(z.people[p[0]]===x?' selected':'')+'>'+h(PEOPLE[x].name)+'</option>';}).join("")+'</select>'+
           (z.people[p[0]]&&p[4]?' <span class="b b-q" style="font-size:10px">'+h(p[4])+'</span>':''))+'</td></tr>';}).join("")+'</tbody></table></div>'+
       '<div class="note" style="margin-top:12px">'+mapped+' mapped, '+(d.people.length-mapped)+' not mapped. Mapping grants nothing. An account left not mapped still appears on its tasks under its own name, and you can map it later on the People tab.'+
@@ -17673,7 +17675,7 @@ function ipzBody(){
   var mappedN=d.people.filter(function(p){return z.people[p[0]];}).length, c=ipzCounts();
   var steps=["oxagen stores the token and reads every task in scope."].concat(c.create?["oxagen creates the "+c.create+" value"+(c.create>1?"s":"")+" you chose in "+m.l+", each one a governed action named create_provider_value."]:[],
     ["oxagen.assistant drafts a definition of done for each open task. Its turns are recorded and never appear in Fleet or Spend.","Every draft waits for a person. No task is ready until somebody certifies it.","Nothing is sent to an agent. A work order is the only way work reaches one."]);
-  return {b:'<dl class="kv" style="margin-bottom:14px"><dt>Provider</dt><dd>'+ipLogo(k,13)+' '+h(m.l)+(d.site?' <span class="mono">'+h(z.site)+'</span>':'')+'</dd>'+
+  return {b:'<dl class="kv" style="margin-bottom:14px"><dt>Tracker</dt><dd>'+ipLogo(k,13)+' '+h(m.l)+(d.site?' <span class="mono">'+h(z.site)+'</span>':'')+'</dd>'+
      '<dt>Authorization</dt><dd>'+h(d.authed)+'</dd>'+
      '<dt>'+h(m.what.charAt(0).toUpperCase()+m.what.slice(1))+'</dt><dd class="mono">'+h(scope.join(", "))+'</dd>'+
      '<dt>Import</dt><dd>'+h(z.filter)+'</dd>'+
@@ -17712,9 +17714,9 @@ function ipzFinish(){
   act(m.l+" connected. connect_issue_provider recorded"+madeL+". Importing "+scope.length+" "+m.what+". Drafts appear as each task is read.","gold");
 }
 DLG_EXT.ipwz=function(){
-  var z=S.ipz; if(!z)return {t:"Connect an issue provider",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
+  var z=S.ipz; if(!z)return {t:"Connect an issue tracker",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var part=ipzBody();
-  return {t:z.edit?"Edit "+IP_KIND[z.kind].l:"Connect an issue provider",s:z.edit?"Scope, fields and the writes it may make":"Import tasks from an issue tracker or a help desk",w:true,
+  return {t:z.edit?"Edit "+IP_KIND[z.kind].l:"Connect an issue tracker",s:z.edit?"Scope, fields and the writes it may make":"Import tasks from an issue tracker or a help desk",w:true,
    b:ipzRail()+part.b,
    f:'<span class="grow mono dim" style="font-size:11px">needs <span style="color:var(--accent-text)">issue_provider.connect</span> on '+h(S.ws)+'</span>'+part.f};
 };
@@ -17727,7 +17729,7 @@ DLG_EXT.ipoff=function(id){
     '<div class="note">Connecting '+h(m.l)+' again reads the same tasks back into the same task ids.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it connected</button><button class="btn danger" onclick="ipOff(\''+p.id+'\')">Disconnect it</button>'};
 };
-function ipOff(id){var i=-1;IPROV.forEach(function(x,j){if(x.id===id)i=j;}); if(i<0)return; var p=IPROV.splice(i,1)[0]; closeDialog(); act(IP_KIND[p.kind].l+" disconnected. disconnect_issue_provider recorded and the token revoked.");}
+function ipOff(id){var i=-1;IPROV.forEach(function(x,j){if(x.id===id)i=j;}); if(i<0)return; var p=IPROV.splice(i,1)[0]; closeDialog(); act(IP_KIND[p.kind].l+" disconnected, and its token revoked. Recorded in Audit as disconnect_issue_provider.");}
 
 /* ---- field editors ---- */
 var LBL_SWATCHES=["#D6455E","#E0803A","#C9A227","#57A97C","#3FA2A2","#3B82F6","#5B93D6","#9D8BE3","#D677B5","#C0453C","#A1A1AA","#71717A"];
@@ -17763,10 +17765,9 @@ DLG_EXT.lbledit=function(key){
     '<div class="field"><label>Color</label><div class="row"><div class="swatches">'+LBL_SWATCHES.map(function(s){return '<button class="sw" data-c="'+s+'" style="background:'+s+'" aria-label="Color '+s+'" aria-pressed="'+(s===c)+'" onclick="lblSw(\''+s+'\')"></button>';}).join("")+'</div>'+
       '<input id="lblHex" class="mono" style="width:110px" value="'+h(c)+'" aria-label="Hex color" oninput="if(/^#[0-9a-f]{6}$/i.test(this.value))lblSw(this.value)">'+
       '<span class="lbl" id="lblPrev" style="--lc:'+h(c)+'"><i aria-hidden="true"></i><span id="lblPrevN">'+h(l.name||"Label")+'</span></span></div>'+
-      '<div class="hint">The color is oxagen’s. oxagen sets a label’s color in a provider once, when it creates the label there, and never changes it after.</div></div>'+
+      '<div class="hint">The color is oxagen’s. oxagen sets a label’s color in a tracker once, when it creates the label there, and never changes it after.</div></div>'+
     '<div class="field"><label>Mapped from</label></div><div class="grid g3">'+mapFields(l.map,"lblm-","label")+'</div>'+
-    '<div class="field"><label>Definition of done items</label><div class="banner"><span class="b b-q" style="flex:none">later</span><div class="grow"><b>A label will carry definition-of-done items</b>'+
-      'When a task has this label, its items copy into the task’s draft before oxagen.assistant adds its own. '+(l.key==="bug"?'Bug would carry “A test reproduces the defect and fails before the fix”.':'')+' The templates will live in .oxagen/dod/labels/ and change by pull request.</div></div></div>',
+    '<div class="field"><label>Definition of done items</label><span class="dim" title="Coming soon">—</span></div>',
    f:'<span class="grow mono dim" style="font-size:11px">needs <span style="color:var(--accent-text)">task_fields.write</span> on '+h(S.ws)+'</span><button class="btn" onclick="closeDialog()">Cancel</button>'+
      '<button class="btn primary" onclick="lblSave(\''+h(l.key)+'\')">'+(key==="new"?'Add label':'Save label')+'</button>'};
 };
@@ -17811,7 +17812,7 @@ DLG_EXT.pmap=function(id){
     (p.match?'<dt>Match</dt><dd>'+h(p.match)+'</dd>':'')+'</dl>'+
     (p.state==="bot"?'<div class="note">This is a bot account. A bot is never mapped to a person, and its tasks show its own handle.</div>':
      p.state==="requester"?'<div class="note">This is a requester, the person who asked for the work. A requester is never mapped to a member, and oxagen shows the requester by name on each task.</div>':
-    '<div class="field"><label for="pmapSel">Workspace member</label><select id="pmapSel"><option value="">not mapped</option>'+members.map(function(k){return '<option value="'+k+'"'+(p.to===k?' selected':'')+'>'+h(PEOPLE[k].name)+'</option>';}).join("")+'</select></div>'+
+    '<div class="field"><label for="pmapSel">Workspace member</label><select id="pmapSel"><option value="">Not mapped</option>'+members.map(function(k){return '<option value="'+k+'"'+(p.to===k?' selected':'')+'>'+h(PEOPLE[k].name)+'</option>';}).join("")+'</select></div>'+
     '<div class="note">Mapping says who this account is in oxagen. It grants nothing: the member’s own roles decide what they may do, and only a signed-in member can certify or send.</div>'),
    f:'<button class="btn" onclick="closeDialog()">'+(fixed?'Close':'Cancel')+'</button>'+(fixed?'':'<button class="btn primary" onclick="pmapSave(\''+p.id+'\')">Save</button>')};
 };
@@ -17834,10 +17835,10 @@ function wfToml(name,stages){
 DLG_EXT.wfview=function(id){
   var wf=wfById(id); if(!wf)return noSuch("Workflow");
   return {t:wf.name,s:wf.desc,w:true,
-   b:stageChain(wf,{sub:function(i,s){return 'owns '+s.owns.map(tagChip).join(" ")+'<br><span class="dim" style="font-size:11px">'+(s.onFail==="stop"?'on failure it stops and asks you':'on failure it returns to stage '+s.onFail.split(":")[1]+', at most '+(s.maxReturns||1)+' times')+'</span>';}})+
+   b:stageChain(wf,{sub:function(i,s){return 'owns '+s.owns.map(tagChip).join(" ")+'<br><span class="dim" style="font-size:11px">'+(s.onFail==="stop"?'If it fails: stop and ask you':'If it fails: send back to '+h((wf.stages[+s.onFail.split(":")[1]-1]||{}).role||"stage "+s.onFail.split(":")[1])+' (up to '+plural(s.maxReturns||1,"time")+')')+'</span>';}})+
     '<div class="field" style="margin-top:16px"><label>'+h(wf.file)+'</label><pre>'+h(wfToml(wf.name,wf.stages))+'</pre></div>'+
     '<div class="note">'+(wf.state==="published"?'Published at '+h(wf.commit)+'. A change to this file is a pull request.':'In '+h(wf.pr)+'. It can be used when it merges.')+'</div>',
-   f:'<button class="btn" onclick="closeDialog()">Close</button><button class="btn" onclick="wfzOpen(\''+wf.id+'\')">Change it</button>'};
+   f:'<button class="btn" onclick="closeDialog()">Close</button><button class="btn" onclick="wfzOpen(\''+wf.id+'\')">Edit workflow</button>'};
 };
 function wfzOpen(fromId){
   var wf=fromId?wfById(fromId):null;
@@ -17874,12 +17875,12 @@ DLG_EXT.wfnew=function(){
       '<span class="sp" style="margin-left:auto;display:flex;gap:4px"><button class="iconbtn" aria-label="Move stage '+(i+1)+' up" onclick="wfMove('+i+',-1)">↑</button><button class="iconbtn" aria-label="Move stage '+(i+1)+' down" onclick="wfMove('+i+',1)">↓</button>'+
       (z.stages.length>1?'<button class="iconbtn" aria-label="Remove stage '+(i+1)+'" onclick="wfDelStage('+i+')">×</button>':'')+'</span></div>'+
       '<div class="row" style="margin-top:8px"><span class="dim" style="font-size:12px">Owns</span>'+DOD_TAGS.map(function(g){return '<label class="tgck"><input type="checkbox"'+(s.owns.indexOf(g)>=0?' checked':'')+' onchange="wfSet('+i+',\'own\',\''+g+':\'+(this.checked?1:0))">'+g+'</label>';}).join("")+
-      '<span class="dim" style="font-size:12px;margin-left:8px">On failure</span><select class="sel-sm" aria-label="On failure of stage '+(i+1)+'" onchange="wfSet('+i+',\'onFail\',this.value)"><option value="stop"'+(s.onFail==="stop"?' selected':'')+'>stop and ask you</option>'+
-      z.stages.slice(0,i).map(function(x,j){return '<option value="return:'+(j+1)+'"'+(s.onFail==="return:"+(j+1)?' selected':'')+'>return to stage '+(j+1)+'</option>';}).join("")+'</select>'+
-      (s.onFail!=="stop"?'<select class="sel-sm" aria-label="Most returns of stage '+(i+1)+'" onchange="wfSet('+i+',\'maxReturns\',+this.value)">'+[1,2,3].map(function(n){return '<option value="'+n+'"'+((s.maxReturns||1)===n?' selected':'')+'>at most '+n+'</option>';}).join("")+'</select>':'')+'</div></div>';
+      '<span class="dim" style="font-size:12px;margin-left:8px">If it fails</span><select class="sel-sm" aria-label="If stage '+(i+1)+' fails" onchange="wfSet('+i+',\'onFail\',this.value)"><option value="stop"'+(s.onFail==="stop"?' selected':'')+'>stop and ask you</option>'+
+      z.stages.slice(0,i).map(function(x,j){return '<option value="return:'+(j+1)+'"'+(s.onFail==="return:"+(j+1)?' selected':'')+'>send back to stage '+(j+1)+'</option>';}).join("")+'</select>'+
+      (s.onFail!=="stop"?'<select class="sel-sm" aria-label="Most returns of stage '+(i+1)+'" onchange="wfSet('+i+',\'maxReturns\',+this.value)">'+[1,2,3].map(function(n){return '<option value="'+n+'"'+((s.maxReturns||1)===n?' selected':'')+'>up to '+plural(n,"time")+'</option>';}).join("")+'</select>':'')+'</div></div>';
   }).join('<div class="wf-arrow" aria-hidden="true">↓</div>');
   var slug=String(z.name||"workflow").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-  return {t:z.from?"Change a workflow":"New workflow",s:"Stages in order, each an agent you operate, and a person last",w:true,
+  return {t:z.from?"Edit workflow":"New workflow",s:"Stages in order, each an agent you operate, and a person last",w:true,
    b:'<div class="field"><div class="lab-row"><label for="wfDesc">In your own words</label><button class="btn wand" onclick="wfWand()" title="Have the assistant draft the stages" aria-label="Have the assistant draft the stages">'+avSvg("wand-sparkles")+'</button></div>'+
      '<textarea id="wfDesc" rows="2" placeholder="A bug fixer passes a fix to a validator, which passes it to a documenter, which passes it to an architect for final review." oninput="S.wfz.desc=this.value">'+h(z.desc)+'</textarea></div>'+
     '<div class="field"><label for="wfName">Name</label><input id="wfName" value="'+h(z.name)+'" onchange="S.wfz.name=this.value;render()"></div>'+

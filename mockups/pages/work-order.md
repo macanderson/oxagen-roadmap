@@ -18,19 +18,19 @@ One work order from the moment it is sent to the moment a person accepts it: whi
 ## What is on the page
 
 **Header**: eyebrow the id in mono, h1 the title, subtext "Sent by <name> on <time> to <agent, or the <name> workflow>."
-Actions: **Copy prompt** (plain), **Stop the work order** (red, while it is not accepted or stopped) and **Accept the work** (gold when every item is claimed and the work order is not accepted; otherwise plain and disabled, titled "Every item must be claimed first").
+Actions: **Copy prompt** (plain), **Stop work order** (red, while it is not accepted or stopped) and **Accept all items** (gold when every item is claimed and the work order is not accepted; otherwise plain and disabled, titled "Every item must be claimed first").
 
 **Copy prompt** copies the prompt exactly as sent, then **References**: the work order id, title, Oxagen link, and prompt digest, each task's number, subject, issue link, and Oxagen task id and link, and the pull request when one exists. The toast reads "Prompt copied, with N tasks."
 
-**Tiles**: State (the state badge; "stage N of M", "every item is claimed", or "on <time>"), Items claimed ("by the agents, with evidence"), Items accepted ("by a person"), Returns ("1 of 2", "work sent back to an earlier stage").
+**Tiles**: State (the state badge; "stage N of M", "every item is claimed", or "Accepted on <time>"), Items claimed ("by the agents, with evidence"), Items accepted ("by a person"), Returns ("1 of 2", "work sent back to an earlier stage").
 
-**Stages**: the chain, one card per stage and a dashed last card for **Accept** by You. Each card: the step number and role, the agent's harness mark, avatar and name, and its latest run (`live` or `sealed`, the run id, and "N runs" when the stage ran more than once), or "waiting". A finished stage is marked done, the current stage is outlined in gold, and the Accept card is outlined when the work waits on you. A single-agent work order has one stage and Accept.
+**Stages**: the chain, one card per stage and a dashed last card for **Accept** by You. Each card: the step number and role, the agent's harness mark, avatar and name, and its latest run (Running, Done, or Sent back, the run id, and "N runs" when the stage ran more than once), or "Waiting". A single-agent stage is named for its agent ("stella CI"). A finished stage is marked done, the current stage is outlined in gold, and the Accept card is outlined when the work waits on you. A single-agent work order has one stage and Accept.
 
 Then two columns.
 
 **Left**
-- **Definition of done**, "N items from N tasks.": Item (text and tag) · Task (the numbers it came from, or "work order") · Stage (the role that owns it) · State (`open`, `claimed`, `accepted`) · Evidence (what the claim cited, with the agent and the run). The table does not page.
-- **Handoffs**: every stage run in order, "<role>" or "<role> returned the work", its run id, and its note, or "running". Note: "A handoff note reaches the next stage as quoted evidence. It is never an instruction to that agent."
+- **Definition of done**, "N items from N tasks.": Item (text and tag) · Task (the numbers it came from, or "work order") · Stage (the role that owns it) · State (Open, Claimed, Accepted) · Evidence (what the claim cited, with the agent and the run). The table does not page.
+- **Handoffs**: every stage run in order, headed "<role> → <next role>", "<role> → <next role> (sent back)", or "<role> → You" for the last, with its run id and its note, or "Running". Note: "A handoff note reaches the next stage as quoted evidence. It is never an instruction to that agent."
 
 **Right**
 - **Tasks**: each task's provider logo, number, and subject, linking to the task.
@@ -39,7 +39,7 @@ Then two columns.
 
 ## Dialogs
 
-- **`woaccept`**: "Accept the work", "You accept N items the agents claimed, with the evidence each one cited." The note that accepting records `accept_work_order` and merges nothing, naming the pull request a person merges on GitHub, and what the connection's close switch does: "The <provider> connection closes each <issue / incident / case / ticket> as Done, the resolution for work a person accepted.", or with the switch off "… stays open there until somebody closes it. Turned on, it closes each one as Done." Footer **Cancel**, **Accept every item** (gold). Accepting marks every item `accepted`, the state `accepted`, and each task `accepted`.
+- **`woaccept`**: "Accept all items", "You accept N items the agents claimed, with the evidence each one cited." The note that accepting records `accept_work_order` and merges nothing, naming the pull request a person merges on GitHub, and what the connection's close switch does: "The <provider> connection closes each <issue / incident / case / ticket> as Done, the resolution for work a person accepted.", or with the switch off "… stays open there until somebody closes it. Turned on, it closes each one as Done." Footer **Cancel**, **Accept every item** (gold). Accepting marks every item `accepted`, the state `accepted`, and each task `accepted`.
 - **`wostop`**: "Stop this work order?", "The live run gets a cancel at its next boundary, and no later stage starts.", and that branches and pull requests stay and the tasks go back to ready with their certifications unchanged. Footer **Keep it running**, **Stop it** (red).
 
 ## Data sources
