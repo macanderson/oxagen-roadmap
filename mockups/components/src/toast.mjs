@@ -8,7 +8,7 @@ export default {
   summary: "One fact, stated in past tense, after an action finishes.",
   lead: "A toast reports what an action did: what was written, what changed, what a decision meant. It appears at the bottom of the screen, states one fact in past tense, and removes itself after 4.2 seconds. Toasts stack, newest at the bottom, so more than one event in quick succession is never lost.",
   root: "#toast",
-  css: "lines 881 to 885, phone 636",
+  css: "lines 888 to 892, phone 643",
   usedOn: ["every page"],
   stories: [
     {
@@ -83,7 +83,7 @@ export default {
   ],
   phone: [
     "The stack caps each row at 368px wide instead of `min(560px, 92vw)`.",
-    "When the phone thumb bar is showing, the stack's bottom offset increases so a toast never sits under it (engine.css 636).",
+    "When the phone thumb bar is showing, the stack's bottom offset increases so a toast never sits under it (engine.css 643).",
   ],
   tokens: [
     ["--panel", "Row ground"],
@@ -98,8 +98,8 @@ export default {
     ["--gold", "Gold tone (see Findings)"],
   ],
   helpers: [
-    ["toast(msg, tone)", "engine.js:1978", "Appends one row to `#toast` and removes it after 4.2 seconds. 17 calls."],
-    ["act(msg, tone)", "engine.js:1977", "Records the message on state and calls `toast()`. Over 200 calls. The usual way a change reports itself."],
+    ["toast(msg, tone)", "engine.js:2036", "Appends one row to `#toast` and removes it after 4.2 seconds. 17 calls."],
+    ["act(msg, tone)", "engine.js:2035", "Records the message on state and calls `toast()`. Over 200 calls. The usual way a change reports itself."],
   ],
   sourceNotes: [
     "The stack container itself, `<div id=\"toast\" role=\"status\" aria-live=\"polite\">`, is written once in the page shell rather than by any function in `engine.js`.",

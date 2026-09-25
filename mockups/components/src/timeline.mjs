@@ -8,7 +8,7 @@ export default {
   summary: "A short sequence of steps, read top to bottom or left to right.",
   lead: "A timeline lays out the steps of a fixed sequence: how a figure was priced, the stages of a workflow, how to apply a fix. The vertical `.chain` reads top to bottom with a rule and a dot per step. The horizontal `.stages` variant, written by `stageChain()`, reads left to right and carries a live state per stage: waiting, on, or done.",
   root: ".chain",
-  css: "lines 312 to 317, 2199 to 2211, 2390 to 2396",
+  css: "lines 312 to 317, 2206 to 2218, 2397 to 2403",
   usedOn: ["Billing", "Spend (evidence and fix dialogs)", "Work orders (Stages)"],
   stories: [
     {
@@ -107,8 +107,8 @@ export default {
     ["--st-approval", "`.stage.again`, a stage sent back for another pass"],
   ],
   helpers: [
-    ["stageChain(wf, opts)", "engine.js:14797", "Writes the `.stages` row from a workflow's stage list, plus a final Accept card. `opts.state(i)` returns each stage's class."],
-    ["stState(i)", "engine.js:15416", "A work order's per-stage state function: `done` once sealed and not returned, `on` while live or next up, empty while queued."],
+    ["stageChain(wf, opts)", "engine.js:14856", "Writes the `.stages` row from a workflow's stage list, plus a final Accept card. `opts.state(i)` returns each stage's class."],
+    ["stState(i)", "engine.js:15475", "A work order's per-stage state function: `done` once sealed and not returned, `on` while live or next up, empty while queued."],
   ],
   sourceNotes: [
     "The vertical `.chain` is written inline in three places: `pBilling()` (engine.js 7923), the evidence dialog's \"How we know\" list (9451), and the fix dialog's \"How to apply it\" list (9495). None goes through a shared helper.",
@@ -116,7 +116,7 @@ export default {
   ],
   findings: [
     { tag: "open", title: "Gold marks every row, not a state", body: "The three inline `.chain` lists (Billing, the evidence dialog, the fix dialog) mark every `<li>` with `.on`, so `li.on::before` (engine.css 316) turns every dot gold. Gold is identity plus one action, never decoration, and a dot that is gold on every row carries no information at all." },
-    { tag: "open", title: "Gold marks the current stage", body: "`.stage.on` (engine.css 2208) tints the current stage's border and glow with `--gold`, while `.stage.done` (2206) correctly uses the `--st-allowed` state token. The same component marks one state with a state token and another with the identity color, so the rule is inconsistent inside a single call to `stageChain()`." },
+    { tag: "open", title: "Gold marks the current stage", body: "`.stage.on` (engine.css 2215) tints the current stage's border and glow with `--gold`, while `.stage.done` (2206) correctly uses the `--st-allowed` state token. The same component marks one state with a state token and another with the identity color, so the rule is inconsistent inside a single call to `stageChain()`." },
     { tag: "note", title: "No shared vertical helper", body: "The three inline `.chain` lists and `stageChain()`'s Accept card are hand-written HTML strings in four places. A `chainList(steps)` helper would draw the vertical variant once." },
   ],
   audit: {

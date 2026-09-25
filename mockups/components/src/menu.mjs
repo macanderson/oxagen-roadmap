@@ -9,7 +9,7 @@ export default {
   summary: "A short list of choices, anchored to the button that opened it.",
   lead: "A menu opens beside the control that owns it: the account button, a dispatch action, an @-mention while typing. It lists items to pick, closes on Escape or a click outside, and never holds a field longer than a search box. A menu with a search field, such as the dispatch menu, narrows its own list as you type.",
   root: ".menu",
-  css: "lines 609 to 615, 2212 to 2220",
+  css: "lines 616 to 622, 2219 to 2227",
   usedOn: ["every page (account menu)", "Work (send to agent)", "Work order (mention list)"],
   stories: [
     {
@@ -120,10 +120,10 @@ export default {
     ["--gold", "Dispatch search field focus border"],
   ],
   helpers: [
-    ["userMenu()", "engine.js:1712", "The account menu: header, four settings items, a divider, theme and sign-out."],
-    ["dispatchMenu(ids)", "engine.js:15087", "The send-to menu shell: header, search field, and `dspList()`."],
-    ["dspList()", "engine.js:15078", "Filters agents you operate and published workflows by the search text and renders both groups."],
-    ["mentListHtml()", "engine.js:15643", "The @-mention list while typing a work item prompt, a listbox rather than a menu (see Findings)."],
+    ["userMenu()", "engine.js:1770", "The account menu: header, four settings items, a divider, theme and sign-out."],
+    ["dispatchMenu(ids)", "engine.js:15146", "The send-to menu shell: header, search field, and `dspList()`."],
+    ["dspList()", "engine.js:15137", "Filters agents you operate and published workflows by the search text and renders both groups."],
+    ["mentListHtml()", "engine.js:15702", "The @-mention list while typing a work item prompt, a listbox rather than a menu (see Findings)."],
   ],
   sourceNotes: [
     "A document-level click handler (engine.js 13936) closes the open layer on any click outside `.rel`, shared by the account and dispatch menus.",
@@ -132,7 +132,7 @@ export default {
   findings: [
     { tag: "open", title: "No arrow-key navigation", body: "Neither `userMenu()` nor `dispatchMenu()` handles `ArrowDown` or `ArrowUp`. Only the command palette (engine.js 9936) supports arrow-key roving focus. The APG menu pattern expects arrow keys to move between items. Here Tab is the only way." },
     { tag: "note", title: "The account menu carries no menu role", body: "`userMenu()`'s shell has no `role=\"menu\"` and its items no `role=\"menuitem\"`, unlike the dispatch menu, which has both. A screen reader announces the dispatch menu as a menu and the account menu as a plain group of buttons." },
-    { tag: "note", title: "A second, near-identical idiom for a filtered list", body: "The @-mention list (`mentListHtml()`, engine.js 15640) uses its own classes, `.ment-list` and `.ment-i` (engine.css 2233 to 2237), styled separately from `.menu` and `.menu-i` though the shape, padding, and hover state are the same. Its `role=\"listbox\"` and `role=\"option\"` are the correct pattern for an autocomplete, but the visual duplication could share `.menu-i`'s rules." },
+    { tag: "note", title: "A second, near-identical idiom for a filtered list", body: "The @-mention list (`mentListHtml()`, engine.js 15640) uses its own classes, `.ment-list` and `.ment-i` (engine.css 2240 to 2244), styled separately from `.menu` and `.menu-i` though the shape, padding, and hover state are the same. Its `role=\"listbox\"` and `role=\"option\"` are the correct pattern for an autocomplete, but the visual duplication could share `.menu-i`'s rules." },
     { tag: "note", title: "Two knob orders under one class", body: "This finding belongs to the switch, not the menu: see [Switch](switch.html#findings)." },
   ],
   audit: {

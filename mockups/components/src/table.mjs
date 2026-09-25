@@ -8,7 +8,7 @@ export default {
   summary: "Rows of records with one column per field, inside a panel.",
   lead: "A table lists records of one kind: agents, runs, tools, work items, budgets. Each row is one record and each column one field. Tables sit inside a panel and scroll sideways inside it, never the page. A row that opens its record is a keyboard button, and a missing value is a dash.",
   root: "table",
-  css: "lines 234 to 245, 1334, 2174 to 2177, 2350, phone 696 to 708",
+  css: "lines 234 to 245, 1341, 2181 to 2184, 2357, phone 703 to 715",
   usedOn: ["Work", "Agents", "Tools", "Spend", "Repositories", "Organization", "Audit"],
   stories: [
     {
@@ -201,9 +201,9 @@ export default {
     ["--st-critical, --st-denied", "Risk rule on critical and high rows"],
   ],
   helpers: [
-    ["rowClick(on, label)", "engine.js:6911", "Makes a row a keyboard button. 17 calls."],
-    ["cardTables()", "engine.js:13854", "Turns every single-header table into labelled cards on a phone."],
-    ["keyLabel(k)", "engine.js:634", "Shows a stored key as its label with the key in a tooltip."],
+    ["rowClick(on, label)", "engine.js:6969", "Makes a row a keyboard button. 17 calls."],
+    ["cardTables()", "engine.js:13913", "Turns every single-header table into labelled cards on a phone."],
+    ["keyLabel(k)", "engine.js:692", "Shows a stored key as its label with the key in a tooltip."],
   ],
   sourceNotes: [
     "Pages write tables as HTML strings, and `listify()` adds the list controls to every one at render. See [List table](list-table.html).",

@@ -42,7 +42,7 @@
   <p class="dx-lead">A button runs an action on the page it sits on: save, deny, open a dialog, close a pull request. The default button is neutral. One button per screen may be the gold primary, and it marks the action the screen exists for. Destructive actions are red, and icon buttons carry a label a screen reader can speak.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.btn</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 135 to 144, icon button 117 to 120, wand 1028 to 1031, solid danger 2121 to 2122, link 1775 to 1776, phone 665 to 666</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673</span>
     <span><b>Used on</b> every page, every dialog, the approvals drawer</span>
   </div>
 </div>
@@ -190,7 +190,7 @@
   
   <ul>
     <li>Buttons grow to 40px tall at 14px, and <code>.sm</code> to 36px at 13px.</li>
-    <li>A dialog footer reverses its order, and each button takes half the width at 46px tall (engine.css 687 to 688).</li>
+    <li>A dialog footer reverses its order, and each button takes half the width at 46px tall (engine.css 694 to 695).</li>
     <li>Icon buttons keep 32px but sit in a 44px hit area in the thumb bar and headers.</li>
   </ul>
 </section>
@@ -218,9 +218,9 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 135 to 144, icon button 117 to 120, wand 1028 to 1031, solid danger 2121 to 2122, link 1775 to 1776, phone 665 to 666</td><td>The rules that draw it</td></tr>
-      <tr><td><code>dialog()</code> at <code>engine.js:9509</code></td><td>Writes a dialog's footer buttons from <code>d.f</code>.</td></tr>
-      <tr><td><code>act(msg, tone)</code> at <code>engine.js:1977</code></td><td>What most buttons call when they finish: a toast in the button's tone.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673</td><td>The rules that draw it</td></tr>
+      <tr><td><code>dialog()</code> at <code>engine.js:9568</code></td><td>Writes a dialog's footer buttons from <code>d.f</code>.</td></tr>
+      <tr><td><code>act(msg, tone)</code> at <code>engine.js:2035</code></td><td>What most buttons call when they finish: a toast in the button's tone.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -248,7 +248,7 @@
 ## Inputs
 
 1. mockups/components/button.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 135 to 144, icon button 117 to 120, wand 1028 to 1031, solid danger 2121 to 2122, link 1775 to 1776, phone 665 to 666. The mockup renders it with dialog() (engine.js:9509), act(msg, tone) (engine.js:1977).
+2. The design source: mockups/src/engine.css lines 135 to 144, icon button 117 to 120, wand 1035 to 1038, solid danger 2128 to 2129, link 1782 to 1783, phone 672 to 673. The mockup renders it with dialog() (engine.js:9568), act(msg, tone) (engine.js:2035).
 3. The build's implementation: find it by its root selector (.btn) or its name, and list every route that renders it.
 4. Where to see it in the design: every page, every dialog, the approvals drawer. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -268,7 +268,7 @@ Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and li
 10. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
 11. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
 12. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
-13. Phone. At 390 by 844 with a touch pointer: Buttons grow to 40px tall at 14px, and `.sm` to 36px at 13px. A dialog footer reverses its order, and each button takes half the width at 46px tall (engine.css 687 to 688). Icon buttons keep 32px but sit in a 44px hit area in the thumb bar and headers.
+13. Phone. At 390 by 844 with a touch pointer: Buttons grow to 40px tall at 14px, and `.sm` to 36px at 13px. A dialog footer reverses its order, and each button takes half the width at 46px tall (engine.css 694 to 695). Icon buttons keep 32px but sit in a 44px hit area in the thumb bar and headers.
 14. Accessibility. Every button is a `button` element with `type=&quot;button&quot;` unless it submits a form. An icon-only button has an `aria-label`. A toggle has `aria-pressed`. A button that opens a panel has `aria-expanded` or `aria-controls`. Focus shows the gold ring (`:focus-visible`, 2px, offset 2px). Disabled buttons cannot take focus, so the reason they are disabled must sit in text nearby, not in a tooltip on the button. Danger text is `--st-failed`, which is 3.51:1 on `--panel` in dark. See Findings.
 15. One implementation. The build draws the button from one shared component. List every place that draws it by hand, with its file and line.
 

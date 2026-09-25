@@ -42,7 +42,7 @@
   <p class="dx-lead">Every page opens with a page header. The eyebrow names where the page sits, the h1 names the page or the record, the subtext says what the page holds, and the actions on the right are what you can do from here. It holds the only Space Grotesk on the page.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.phead</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 56 to 59, 127 to 132, phone 674</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 56 to 59, 127 to 132, phone 681</span>
     <span><b>Used on</b> Work, Agents, Spend, Steering, Tools, Run, Repositories, Organization</span>
   </div>
 </div>
@@ -210,7 +210,7 @@
   <h2 id="phone">Phone</h2>
   
   <ul>
-    <li>The h1 drops to 20px (engine.css 674).</li>
+    <li>The h1 drops to 20px (engine.css 681).</li>
     <li>The actions leave the right edge and take the full width under the title (engine.css 132). Buttons grow to 40px tall.</li>
     <li>A long title wraps. It never truncates.</li>
   </ul>
@@ -237,7 +237,7 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 56 to 59, 127 to 132, phone 674</td><td>The rules that draw it</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 56 to 59, 127 to 132, phone 681</td><td>The rules that draw it</td></tr>
       <tr><td><code>srcHead(o, kindLabel, title, badges, lead, acts)</code> at <code>wedge.js:1017</code></td><td>The header of a Steering source: back link, title, badge row, lead, and actions. It drops a title over 90 characters to 20px.</td></tr>
       <tr><td><code>pWork()</code> at <code>wedge.js:74</code></td><td>A plain page header, written inline, as most pages write theirs.</td></tr>
     </tbody>
@@ -267,7 +267,7 @@
 ## Inputs
 
 1. mockups/components/page-header.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 56 to 59, 127 to 132, phone 674. The mockup renders it with srcHead(o, kindLabel, title, badges, lead, acts) (wedge.js:1017), pWork() (wedge.js:74).
+2. The design source: mockups/src/engine.css lines 56 to 59, 127 to 132, phone 681. The mockup renders it with srcHead(o, kindLabel, title, badges, lead, acts) (wedge.js:1017), pWork() (wedge.js:74).
 3. The build's implementation: find it by its root selector (.phead) or its name, and list every route that renders it.
 4. Where to see it in the design: Work, Agents, Spend, Steering, Tools, Run, Repositories, Organization. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -285,7 +285,7 @@ Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and li
 8. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
 9. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
 10. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
-11. Phone. At 390 by 844 with a touch pointer: The h1 drops to 20px (engine.css 674). The actions leave the right edge and take the full width under the title (engine.css 132). Buttons grow to 40px tall. A long title wraps. It never truncates.
+11. Phone. At 390 by 844 with a touch pointer: The h1 drops to 20px (engine.css 681). The actions leave the right edge and take the full width under the title (engine.css 132). Buttons grow to 40px tall. A long title wraps. It never truncates.
 12. Accessibility. The h1 is the page's only h1, and every other heading on the page sits below it in the outline. The eyebrow is a paragraph, not a heading, so it does not break the outline. A back link in the eyebrow is a real link with a destination. The actions are real buttons with visible text. The eyebrow's `--accent-text` is 8.43:1 on `--panel` in dark and 4.65:1 on white in light.
 13. One implementation. The build draws the page header from one shared component. List every place that draws it by hand, with its file and line.
 

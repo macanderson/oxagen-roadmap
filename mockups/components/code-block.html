@@ -42,7 +42,7 @@
   <p class="dx-lead">A code block shows text a person reads character by character: a tool call's input, a TOML file, a command, a JSON payload. It is set in Monaspace Neon (<code>--mono</code>) on the deepest ground. Inline code marks one identifier inside a sentence. A readout labels a slab of what the model read, and a code pair sets two sources side by side.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>pre, code</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 300 to 304, 359 to 363, 390, 461 to 467, 1532 to 1533</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 300 to 304, 359 to 363, 390, 461 to 467, 1539 to 1540</span>
     <span><b>Used on</b> Run frame detail, Run transcript, Tools schema dialog, Fix dialog, Steering sources, Organization API keys</span>
   </div>
 </div>
@@ -204,11 +204,11 @@ tamper      = <span class="bad">"chain_break at frame 188"</span></pre>
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 300 to 304, 359 to 363, 390, 461 to 467, 1532 to 1533</td><td>The rules that draw it</td></tr>
-      <tr><td><code>frJson(o, ind)</code> at <code>engine.js:3366</code></td><td>Writes a JSON value with <code>.k</code> keys and <code>.s</code> strings.</td></tr>
-      <tr><td><code>frPre(o)</code> at <code>engine.js:3375</code></td><td>Wraps <code>frJson()</code> in a wrapping <code>pre</code> for the frame detail.</td></tr>
-      <tr><td><code>readout(title, right, inner)</code> at <code>engine.js:3731</code></td><td>The labelled slab of what the model read. Two calls, both in frame detail.</td></tr>
-      <tr><td><code>codePair(panes, cls)</code> at <code>engine.js:1337</code></td><td>Two labelled panes. Used by the fix dialog and the schema dialog.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 300 to 304, 359 to 363, 390, 461 to 467, 1539 to 1540</td><td>The rules that draw it</td></tr>
+      <tr><td><code>frJson(o, ind)</code> at <code>engine.js:3424</code></td><td>Writes a JSON value with <code>.k</code> keys and <code>.s</code> strings.</td></tr>
+      <tr><td><code>frPre(o)</code> at <code>engine.js:3433</code></td><td>Wraps <code>frJson()</code> in a wrapping <code>pre</code> for the frame detail.</td></tr>
+      <tr><td><code>readout(title, right, inner)</code> at <code>engine.js:3789</code></td><td>The labelled slab of what the model read. Two calls, both in frame detail.</td></tr>
+      <tr><td><code>codePair(panes, cls)</code> at <code>engine.js:1395</code></td><td>Two labelled panes. Used by the fix dialog and the schema dialog.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -236,7 +236,7 @@ tamper      = <span class="bad">"chain_break at frame 188"</span></pre>
 ## Inputs
 
 1. mockups/components/code-block.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 300 to 304, 359 to 363, 390, 461 to 467, 1532 to 1533. The mockup renders it with frJson(o, ind) (engine.js:3366), frPre(o) (engine.js:3375), readout(title, right, inner) (engine.js:3731), codePair(panes, cls) (engine.js:1337).
+2. The design source: mockups/src/engine.css lines 300 to 304, 359 to 363, 390, 461 to 467, 1539 to 1540. The mockup renders it with frJson(o, ind) (engine.js:3424), frPre(o) (engine.js:3433), readout(title, right, inner) (engine.js:3789), codePair(panes, cls) (engine.js:1395).
 3. The build's implementation: find it by its root selector (pre, code) or its name, and list every route that renders it.
 4. Where to see it in the design: Run frame detail, Run transcript, Tools schema dialog, Fix dialog, Steering sources, Organization API keys. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

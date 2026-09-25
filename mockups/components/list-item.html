@@ -42,7 +42,7 @@
   <p class="dx-lead">A list item is a compact record inside a <code>.lst</code>: a notification, a security method, an active session. It leads with a tone icon, carries a title and one line of detail, and ends in a timestamp or an action. An unread item is a button that marks itself read. A read item is plain text.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.lst</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 551 to 561, 589 to 608</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 558 to 568, 596 to 615</span>
     <span><b>Used on</b> Notifications, Account (Security tab)</span>
   </div>
 </div>
@@ -186,14 +186,14 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 551 to 561, 589 to 608</td><td>The rules that draw it</td></tr>
-      <tr><td><code>notifsBody()</code> at <code>engine.js:1684</code></td><td>Writes the notification list, one <code>.li</code> per entry, unread ones as buttons via <code>notifRead()</code>.</td></tr>
-      <tr><td><code>notifIcon(tone)</code> at <code>engine.js:1677</code></td><td>The tone's icon: a check for allowed, a clock for approval, a confetti mark for gold, a triangle for anything else, including failed and critical.</td></tr>
-      <tr><td><code>accountBody()</code> at <code>engine.js:9833</code></td><td>The Security tab's two <code>.lst</code> lists, with an inline-styled <code>.ic</code> instead of a tone class.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 558 to 568, 596 to 615</td><td>The rules that draw it</td></tr>
+      <tr><td><code>notifsBody()</code> at <code>engine.js:1742</code></td><td>Writes the notification list, one <code>.li</code> per entry, unread ones as buttons via <code>notifRead()</code>.</td></tr>
+      <tr><td><code>notifIcon(tone)</code> at <code>engine.js:1735</code></td><td>The tone's icon: a check for allowed, a clock for approval, a confetti mark for gold, a triangle for anything else, including failed and critical.</td></tr>
+      <tr><td><code>accountBody()</code> at <code>engine.js:9892</code></td><td>The Security tab's two <code>.lst</code> lists, with an inline-styled <code>.ic</code> instead of a tone class.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
-    <li><code>.lst</code> and <code>.li</code> are defined twice in engine.css: once at lines 551 to 561, and again at 589 to 608. The second definition wins the cascade and is the one that actually renders, since it adds <code>:hover</code>, the five <code>.ic.t-*</code> tones, <code>.unread</code>, and <code>[role=button]</code>. The first definition draws nothing a person can see that the second does not already draw.</li>
+    <li><code>.lst</code> and <code>.li</code> are defined twice in engine.css: once at lines 558 to 568, and again at 596 to 615. The second definition wins the cascade and is the one that actually renders, since it adds <code>:hover</code>, the five <code>.ic.t-*</code> tones, <code>.unread</code>, and <code>[role=button]</code>. The first definition draws nothing a person can see that the second does not already draw.</li>
     <li>notifIcon()'s default branch (the triangle) fires for both <code>failed</code> and <code>critical</code> tones, so the two states share one icon shape and differ only by their tint color.</li>
   </ul>
 </section>
@@ -201,8 +201,8 @@
 <section class="dx-sec">
   <h2 id="findings">Findings</h2>
   
-  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Rules defined twice</h4><p><code>.lst</code> and <code>.li</code> (engine.css 551 to 561 and again 589 to 608) are two full definitions of the same classes. The second wins by cascade order, which is also called out on the components index. A build should carry one definition, not rely on source order to pick the right one.</p></div>
-  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold as an unread marker</h4><p><code>.li.unread</code> (engine.css 605) tints the row and its dot with <code>--gold</code>. Unread is a state, not an identity or the one action on the screen, and a busy notification list can carry several unread rows at once, which is more than one gold mark on a screen.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Rules defined twice</h4><p><code>.lst</code> and <code>.li</code> (engine.css 558 to 568 and again 596 to 615) are two full definitions of the same classes. The second wins by cascade order, which is also called out on the components index. A build should carry one definition, not rely on source order to pick the right one.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold as an unread marker</h4><p><code>.li.unread</code> (engine.css 612) tints the row and its dot with <code>--gold</code>. Unread is a state, not an identity or the one action on the screen, and a busy notification list can carry several unread rows at once, which is more than one gold mark on a screen.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>A second icon-tone idiom</h4><p><code>accountBody()</code>'s Security tab (engine.js 9850 to 9853) sets each icon's background and color with an inline <code>style=&quot;background:…;color:…&quot;</code> instead of one of the five <code>.ic.t-*</code> classes the second <code>.li</code> definition already provides. An audit that greps for <code>.ic.t-</code> misses these rows entirely.</p></div>
 </section>
 
@@ -217,7 +217,7 @@
 ## Inputs
 
 1. mockups/components/list-item.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 551 to 561, 589 to 608. The mockup renders it with notifsBody() (engine.js:1684), notifIcon(tone) (engine.js:1677), accountBody() (engine.js:9833).
+2. The design source: mockups/src/engine.css lines 558 to 568, 596 to 615. The mockup renders it with notifsBody() (engine.js:1742), notifIcon(tone) (engine.js:1735), accountBody() (engine.js:9892).
 3. The build's implementation: find it by its root selector (.lst) or its name, and list every route that renders it.
 4. Where to see it in the design: Notifications, Account (Security tab). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

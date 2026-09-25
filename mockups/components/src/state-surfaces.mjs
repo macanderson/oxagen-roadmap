@@ -143,10 +143,10 @@ export default {
     ["--hl, --panel", "Skeleton shimmer"],
   ],
   helpers: [
-    ["skeleton()", "engine.js:851", "The loading state: four stat blocks and a panel of seven rows."],
-    ["emptyState(t, p, acts)", "engine.js:858", "The empty state with a heading, text, and actions."],
-    ["errorState(what, code)", "engine.js:863", "The error state with the control plane's code, Try again, and Open an incident."],
-    ["deniedState(what, need)", "engine.js:872", "The denied state with the permission, Request access, and the facts."],
+    ["skeleton()", "engine.js:909", "The loading state: four stat blocks and a panel of seven rows."],
+    ["emptyState(t, p, acts)", "engine.js:916", "The empty state with a heading, text, and actions."],
+    ["errorState(what, code)", "engine.js:921", "The error state with the control plane's code, Try again, and Open an incident."],
+    ["deniedState(what, need)", "engine.js:930", "The denied state with the permission, Request access, and the facts."],
   ],
   sourceNotes: [
     "Each page renderer branches on `S.state`, which `?state=loaded|empty|loading|error|denied` sets. `mockups/catalog.mjs` records which states each page has.",

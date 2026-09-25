@@ -42,7 +42,7 @@
   <p class="dx-lead">A timeline lays out the steps of a fixed sequence: how a figure was priced, the stages of a workflow, how to apply a fix. The vertical <code>.chain</code> reads top to bottom with a rule and a dot per step. The horizontal <code>.stages</code> variant, written by <code>stageChain()</code>, reads left to right and carries a live state per stage: waiting, on, or done.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.chain</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 312 to 317, 2199 to 2211, 2390 to 2396</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 312 to 317, 2206 to 2218, 2397 to 2403</span>
     <span><b>Used on</b> Billing, Spend (evidence and fix dialogs), Work orders (Stages)</span>
   </div>
 </div>
@@ -180,9 +180,9 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 312 to 317, 2199 to 2211, 2390 to 2396</td><td>The rules that draw it</td></tr>
-      <tr><td><code>stageChain(wf, opts)</code> at <code>engine.js:14797</code></td><td>Writes the <code>.stages</code> row from a workflow's stage list, plus a final Accept card. <code>opts.state(i)</code> returns each stage's class.</td></tr>
-      <tr><td><code>stState(i)</code> at <code>engine.js:15416</code></td><td>A work order's per-stage state function: <code>done</code> once sealed and not returned, <code>on</code> while live or next up, empty while queued.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 312 to 317, 2206 to 2218, 2397 to 2403</td><td>The rules that draw it</td></tr>
+      <tr><td><code>stageChain(wf, opts)</code> at <code>engine.js:14856</code></td><td>Writes the <code>.stages</code> row from a workflow's stage list, plus a final Accept card. <code>opts.state(i)</code> returns each stage's class.</td></tr>
+      <tr><td><code>stState(i)</code> at <code>engine.js:15475</code></td><td>A work order's per-stage state function: <code>done</code> once sealed and not returned, <code>on</code> while live or next up, empty while queued.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -195,7 +195,7 @@
   <h2 id="findings">Findings</h2>
   
   <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold marks every row, not a state</h4><p>The three inline <code>.chain</code> lists (Billing, the evidence dialog, the fix dialog) mark every <code>&lt;li&gt;</code> with <code>.on</code>, so <code>li.on::before</code> (engine.css 316) turns every dot gold. Gold is identity plus one action, never decoration, and a dot that is gold on every row carries no information at all.</p></div>
-  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold marks the current stage</h4><p><code>.stage.on</code> (engine.css 2208) tints the current stage's border and glow with <code>--gold</code>, while <code>.stage.done</code> (2206) correctly uses the <code>--st-allowed</code> state token. The same component marks one state with a state token and another with the identity color, so the rule is inconsistent inside a single call to <code>stageChain()</code>.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Gold marks the current stage</h4><p><code>.stage.on</code> (engine.css 2215) tints the current stage's border and glow with <code>--gold</code>, while <code>.stage.done</code> (2206) correctly uses the <code>--st-allowed</code> state token. The same component marks one state with a state token and another with the identity color, so the rule is inconsistent inside a single call to <code>stageChain()</code>.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>No shared vertical helper</h4><p>The three inline <code>.chain</code> lists and <code>stageChain()</code>'s Accept card are hand-written HTML strings in four places. A <code>chainList(steps)</code> helper would draw the vertical variant once.</p></div>
 </section>
 
@@ -210,7 +210,7 @@
 ## Inputs
 
 1. mockups/components/timeline.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 312 to 317, 2199 to 2211, 2390 to 2396. The mockup renders it with stageChain(wf, opts) (engine.js:14797), stState(i) (engine.js:15416).
+2. The design source: mockups/src/engine.css lines 312 to 317, 2206 to 2218, 2397 to 2403. The mockup renders it with stageChain(wf, opts) (engine.js:14856), stState(i) (engine.js:15475).
 3. The build's implementation: find it by its root selector (.chain) or its name, and list every route that renders it.
 4. Where to see it in the design: Billing, Spend (evidence and fix dialogs), Work orders (Stages). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

@@ -9,7 +9,7 @@ export default {
   summary: "One hover layer, text only, the same content on focus.",
   lead: "A tooltip explains a mark that has no room for its own label: a bar in a chart, a segment in a stacked meter, a step in the run timeline. One node in the whole page shows the text, positioned over the element on hover or keyboard focus, and hides again on mouseleave or blur. A short, static label uses the browser's own `title` attribute instead.",
   root: ".rtip",
-  css: "lines 1429 to 1430",
+  css: "lines 1436 to 1437",
   usedOn: ["Run (instruments, cost and step charts)", "Spend (basis and category charts)"],
   stories: [
     {
@@ -90,9 +90,9 @@ export default {
     ["--mono", "Node type"],
   ],
   helpers: [
-    ["tipAttr(s)", "engine.js:2068", "Writes the `data-tip` attribute and the four event handlers. 16 calls, across the run instruments, the calls panel, the token bars, the step stack, and the Spend charts."],
-    ["rtTip(node, ev)", "engine.js:2069", "Creates `#rtip` once, sets its text from `data-tip`, and positions it above the target, flipping below when it would clip the top of the viewport."],
-    ["rtTipHide()", "engine.js:2079", "Hides `#rtip` on mouseleave or blur."],
+    ["tipAttr(s)", "engine.js:2126", "Writes the `data-tip` attribute and the four event handlers. 16 calls, across the run instruments, the calls panel, the token bars, the step stack, and the Spend charts."],
+    ["rtTip(node, ev)", "engine.js:2127", "Creates `#rtip` once, sets its text from `data-tip`, and positions it above the target, flipping below when it would clip the top of the viewport."],
+    ["rtTipHide()", "engine.js:2137", "Hides `#rtip` on mouseleave or blur."],
   ],
   findings: [
     { tag: "open", title: "No Escape to dismiss", body: "Nothing in `engine.js` calls `rtTipHide()` on Escape. The dialog, the drawer, and the mention list all close on Escape. The tooltip only hides on `mouseleave` or `blur`, so a keyboard reader must tab away to clear it." },

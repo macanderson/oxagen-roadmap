@@ -8,7 +8,7 @@ export default {
   summary: "An on-or-off setting, with the state named in words beside it.",
   lead: "A switch flips one setting on or off: a kill switch, whether a commit opens a pull request, whether skills are on for a workspace. The knob's position and color repeat the state the label already names in words. A kill switch turning on stops real calls, so it never flips on one click: it opens a dialog that states the blast radius and asks for a reason before it takes effect.",
   root: ".ks-sw",
-  css: "lines 729 to 738, commit dialog 1013 to 1017, Skills 1620 to 1623",
+  css: "lines 736 to 745, commit dialog 1020 to 1024, Skills 1627 to 1630",
   usedOn: ["Tools (Kill switches tab)", "Agents (definition editor, commit dialog)", "Steering (fleet steer, Library Skills)"],
   stories: [
     {
@@ -125,21 +125,21 @@ export default {
     ["--border", "Commit dialog wrapper border"],
   ],
   helpers: [
-    ["switchCard(s)", "engine.js:8273", "The kill switch row on the Tools page, with its dynamic on and off label."],
-    ["switchDialog()", "engine.js:8407", "The confirm dialog: blast radius, reason field, and the effect and reversibility copy."],
-    ["doFlip(id)", "engine.js:8427", "Applies the flip after the confirm dialog's action button, and raises the persistent kill banner when a switch turns on."],
-    ["cmSet(k, v)", "engine.js:1394", "Sets a field on the open commit, including the PR toggle's `pr` flag."],
-    ["steerToggleInt()", "engine.js:9161", "Flips the fleet steer's Interrupt delivery mode."],
+    ["switchCard(s)", "engine.js:8332", "The kill switch row on the Tools page, with its dynamic on and off label."],
+    ["switchDialog()", "engine.js:8466", "The confirm dialog: blast radius, reason field, and the effect and reversibility copy."],
+    ["doFlip(id)", "engine.js:8486", "Applies the flip after the confirm dialog's action button, and raises the persistent kill banner when a switch turns on."],
+    ["cmSet(k, v)", "engine.js:1452", "Sets a field on the open commit, including the PR toggle's `pr` flag."],
+    ["steerToggleInt()", "engine.js:9220", "Flips the fleet steer's Interrupt delivery mode."],
   ],
   sourceNotes: [
     "The Skills preview switch appears inside `DLG_EXT.skenable` (engine.js 8701), whose dialog states outright: \"This is a governed action. It writes a file, opens a pull request, and puts your name on both.\"",
-    "`--sk-on` (engine.css 1597) is the same green as `--st-allowed`, defined a second time under its own name for the Skills page.",
+    "`--sk-on` (engine.css 1604) is the same green as `--st-allowed`, defined a second time under its own name for the Skills page.",
   ],
   findings: [
     { tag: "open", title: "The knob and label swap order between switches", body: "The commit dialog's PR toggle writes `<i></i><span class=\"lbl\">PR</span>` (engine.js 1427), knob first. The fleet steer's Interrupt toggle writes `<span class=\"lbl\">Interrupt</span><i></i>` (engine.js 9174), label first. `.ks-sw` sets no explicit order, so DOM order is visual order: one switch shows its knob on the left, the other on the right, for the same component." },
     { tag: "note", title: "Three switch classes for three different jobs", body: "`.ks-sw` (a governed block that always confirms), `.ks-sw.int` (an immediate, reversible toggle), and `.sx-sw` (a read-only preview of a future state) look almost identical but behave nothing alike. The visual similarity between a switch that asks for a reason and one that flips on a click risks a person treating a kill switch as casually as the PR toggle." },
     { tag: "note", title: "A switch that cannot be switched", body: "`.sx-sw` in the Skills dialog is `role=\"switch\"` and `aria-checked=\"true\"` forever. Its `onclick` shows a toast explaining that the pull request is the real control rather than changing state. It reads to a screen reader as an operable switch that never operates." },
-    { tag: "note", title: "A second green token", body: "`--sk-on` (engine.css 1597) duplicates `--st-allowed`'s color under a page-specific name, rather than the Skills page reusing the shared state token." },
+    { tag: "note", title: "A second green token", body: "`--sk-on` (engine.css 1604) duplicates `--st-allowed`'s color under a page-specific name, rather than the Skills page reusing the shared state token." },
   ],
   audit: {
     checks: [

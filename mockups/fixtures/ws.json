@@ -16,6 +16,12 @@
  {
   "slug": "finops",
   "name": "FinOps",
+  "avatar": {
+   "kind": "initials",
+   "text": "FO",
+   "font": "mono",
+   "tone": "gold"
+  },
   "main": "a-intel/finops-agents",
   "branch": "main",
   "linked": [],

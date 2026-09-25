@@ -8,7 +8,7 @@ export default {
   summary: "The small print that explains a rule, a caution, or a fact beside its field.",
   lead: "A note is one or two sentences that explain how the page works, set beside the field or the section it describes. Oxagen writes four weights of it: a quiet note for a rule worth knowing, a warn box for a caution, a banner for a fact that spans the width of a panel, and a callout for a fact that deserves more room. None of the four is an error state. That is a [state surface](state-surfaces.html).",
   root: ".note",
-  css: "lines 323 to 325, 332 to 334, 754, 762",
+  css: "lines 323 to 325, 332 to 334, 761, 769",
   usedOn: ["most pages"],
   stories: [
     {

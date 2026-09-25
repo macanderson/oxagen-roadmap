@@ -42,7 +42,7 @@
   <p class="dx-lead">A menu opens beside the control that owns it: the account button, a dispatch action, an @-mention while typing. It lists items to pick, closes on Escape or a click outside, and never holds a field longer than a search box. A menu with a search field, such as the dispatch menu, narrows its own list as you type.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.menu</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 609 to 615, 2212 to 2220</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 616 to 622, 2219 to 2227</span>
     <span><b>Used on</b> every page (account menu), Work (send to agent), Work order (mention list)</span>
   </div>
 </div>
@@ -191,11 +191,11 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 609 to 615, 2212 to 2220</td><td>The rules that draw it</td></tr>
-      <tr><td><code>userMenu()</code> at <code>engine.js:1712</code></td><td>The account menu: header, four settings items, a divider, theme and sign-out.</td></tr>
-      <tr><td><code>dispatchMenu(ids)</code> at <code>engine.js:15087</code></td><td>The send-to menu shell: header, search field, and <code>dspList()</code>.</td></tr>
-      <tr><td><code>dspList()</code> at <code>engine.js:15078</code></td><td>Filters agents you operate and published workflows by the search text and renders both groups.</td></tr>
-      <tr><td><code>mentListHtml()</code> at <code>engine.js:15643</code></td><td>The @-mention list while typing a work item prompt, a listbox rather than a menu (see Findings).</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 616 to 622, 2219 to 2227</td><td>The rules that draw it</td></tr>
+      <tr><td><code>userMenu()</code> at <code>engine.js:1770</code></td><td>The account menu: header, four settings items, a divider, theme and sign-out.</td></tr>
+      <tr><td><code>dispatchMenu(ids)</code> at <code>engine.js:15146</code></td><td>The send-to menu shell: header, search field, and <code>dspList()</code>.</td></tr>
+      <tr><td><code>dspList()</code> at <code>engine.js:15137</code></td><td>Filters agents you operate and published workflows by the search text and renders both groups.</td></tr>
+      <tr><td><code>mentListHtml()</code> at <code>engine.js:15702</code></td><td>The @-mention list while typing a work item prompt, a listbox rather than a menu (see Findings).</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -209,7 +209,7 @@
   
   <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>No arrow-key navigation</h4><p>Neither <code>userMenu()</code> nor <code>dispatchMenu()</code> handles <code>ArrowDown</code> or <code>ArrowUp</code>. Only the command palette (engine.js 9936) supports arrow-key roving focus. The APG menu pattern expects arrow keys to move between items. Here Tab is the only way.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>The account menu carries no menu role</h4><p><code>userMenu()</code>'s shell has no <code>role=&quot;menu&quot;</code> and its items no <code>role=&quot;menuitem&quot;</code>, unlike the dispatch menu, which has both. A screen reader announces the dispatch menu as a menu and the account menu as a plain group of buttons.</p></div>
-  <div class="dx-find"><h4><span class="b b-q">note</span>A second, near-identical idiom for a filtered list</h4><p>The @-mention list (<code>mentListHtml()</code>, engine.js 15640) uses its own classes, <code>.ment-list</code> and <code>.ment-i</code> (engine.css 2233 to 2237), styled separately from <code>.menu</code> and <code>.menu-i</code> though the shape, padding, and hover state are the same. Its <code>role=&quot;listbox&quot;</code> and <code>role=&quot;option&quot;</code> are the correct pattern for an autocomplete, but the visual duplication could share <code>.menu-i</code>'s rules.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>A second, near-identical idiom for a filtered list</h4><p>The @-mention list (<code>mentListHtml()</code>, engine.js 15640) uses its own classes, <code>.ment-list</code> and <code>.ment-i</code> (engine.css 2240 to 2244), styled separately from <code>.menu</code> and <code>.menu-i</code> though the shape, padding, and hover state are the same. Its <code>role=&quot;listbox&quot;</code> and <code>role=&quot;option&quot;</code> are the correct pattern for an autocomplete, but the visual duplication could share <code>.menu-i</code>'s rules.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>Two knob orders under one class</h4><p>This finding belongs to the switch, not the menu: see <a href="switch.html#findings">Switch</a>.</p></div>
 </section>
 
@@ -224,7 +224,7 @@
 ## Inputs
 
 1. mockups/components/menu.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 609 to 615, 2212 to 2220. The mockup renders it with userMenu() (engine.js:1712), dispatchMenu(ids) (engine.js:15087), dspList() (engine.js:15078), mentListHtml() (engine.js:15643).
+2. The design source: mockups/src/engine.css lines 616 to 622, 2219 to 2227. The mockup renders it with userMenu() (engine.js:1770), dispatchMenu(ids) (engine.js:15146), dspList() (engine.js:15137), mentListHtml() (engine.js:15702).
 3. The build's implementation: find it by its root selector (.menu) or its name, and list every route that renders it.
 4. Where to see it in the design: every page (account menu), Work (send to agent), Work order (mention list). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

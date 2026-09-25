@@ -42,7 +42,7 @@
   <p class="dx-lead">A chip is one item inside a list that would be cramped as a table row and lost as plain text: a role an agent holds, a provenance edge behind a claim, a work item pinned to an order, a tracker label. Every family here renders inline, wraps at the row, and truncates its own label before it breaks anything around it. A chip that can be removed carries a real button, never a click handler on the whole block.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.rl-chip, .sx-chip, .edge, .chip, .lbl, .tg, .tkp, .mref</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 763 and 917 to 924 (chip and chips), 1227 to 1232 (edge), 1343 to 1350 (role chip), 1597 to 1599 and 1637 to 1641 (self-check chip and its tokens), 2162 (person), 2179 to 2182 (label), 2187 to 2188 (dod tag), 2239 to 2241 (mention)</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 770 and 924 to 931 (chip and chips), 1234 to 1239 (edge), 1350 to 1357 (role chip), 1604 to 1606 and 1644 to 1648 (self-check chip and its tokens), 2169 (person), 2186 to 2189 (label), 2194 to 2195 (dod tag), 2246 to 2248 (mention)</span>
     <span><b>Used on</b> Agents, Work, Run (Decision trace, Transcript), Steering</span>
   </div>
 </div>
@@ -235,19 +235,19 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 763 and 917 to 924 (chip and chips), 1227 to 1232 (edge), 1343 to 1350 (role chip), 1597 to 1599 and 1637 to 1641 (self-check chip and its tokens), 2162 (person), 2179 to 2182 (label), 2187 to 2188 (dod tag), 2239 to 2241 (mention)</td><td>The rules that draw it</td></tr>
-      <tr><td><code>agentRoleChips(a)</code> at <code>engine.js:10231</code></td><td>Every role an agent holds, as removable chips joined by <code>SEP</code>, with an Assign role button.</td></tr>
-      <tr><td><code>edgeChip(it)</code> at <code>engine.js:3131</code></td><td>One provenance edge, plus a <code>button.edge</code> per frame it cites.</td></tr>
-      <tr><td><code>lblChip(k)</code> at <code>engine.js:14765</code></td><td>One work-item label, colored from the tracker's own value.</td></tr>
-      <tr><td><code>lblChips(ks)</code> at <code>engine.js:14769</code></td><td>A <code>.lbls</code> row of <code>lblChip()</code>.</td></tr>
-      <tr><td><code>tagChip(t)</code> at <code>engine.js:14796</code></td><td>One DoD tag.</td></tr>
-      <tr><td><code>tkPerson(id, opts)</code> at <code>engine.js:14787</code></td><td>A provider account as a mapped teammate or a raw handle.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 770 and 924 to 931 (chip and chips), 1234 to 1239 (edge), 1350 to 1357 (role chip), 1604 to 1606 and 1644 to 1648 (self-check chip and its tokens), 2169 (person), 2186 to 2189 (label), 2194 to 2195 (dod tag), 2246 to 2248 (mention)</td><td>The rules that draw it</td></tr>
+      <tr><td><code>agentRoleChips(a)</code> at <code>engine.js:10290</code></td><td>Every role an agent holds, as removable chips joined by <code>SEP</code>, with an Assign role button.</td></tr>
+      <tr><td><code>edgeChip(it)</code> at <code>engine.js:3189</code></td><td>One provenance edge, plus a <code>button.edge</code> per frame it cites.</td></tr>
+      <tr><td><code>lblChip(k)</code> at <code>engine.js:14824</code></td><td>One work-item label, colored from the tracker's own value.</td></tr>
+      <tr><td><code>lblChips(ks)</code> at <code>engine.js:14828</code></td><td>A <code>.lbls</code> row of <code>lblChip()</code>.</td></tr>
+      <tr><td><code>tagChip(t)</code> at <code>engine.js:14855</code></td><td>One DoD tag.</td></tr>
+      <tr><td><code>tkPerson(id, opts)</code> at <code>engine.js:14846</code></td><td>A provider account as a mapped teammate or a raw handle.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
-    <li><code>.chips</code> is defined twice (engine.css 763 and 917). The later definition, the input-styled field with a focus ring, wins. <code>.chip</code> is only ever used inside the work order dialog's <code>wo-work items</code> container, which is neither of those two, so it never gets either definition's border, background, or minimum height.</li>
-    <li><code>.rl-tog</code>, the toggle beside a role chip in the CSS (engine.css 1347 to 1350), has no emitter in engine.js or wedge.js.</li>
-    <li>The self-check tokens (<code>--sk-on</code>, <code>--sk-off</code>, <code>--sk-held</code>, <code>--sk-res</code>) live in their own <code>:root</code> block (engine.css 1597), apart from the token blocks <a href="../colors.html">Colors</a> documents.</li>
+    <li><code>.chips</code> is defined twice (engine.css 770 and 924). The later definition, the input-styled field with a focus ring, wins. <code>.chip</code> is only ever used inside the work order dialog's <code>wo-work items</code> container, which is neither of those two, so it never gets either definition's border, background, or minimum height.</li>
+    <li><code>.rl-tog</code>, the toggle beside a role chip in the CSS (engine.css 1354 to 1357), has no emitter in engine.js or wedge.js.</li>
+    <li>The self-check tokens (<code>--sk-on</code>, <code>--sk-off</code>, <code>--sk-held</code>, <code>--sk-res</code>) live in their own <code>:root</code> block (engine.css 1604), apart from the token blocks <a href="../colors.html">Colors</a> documents.</li>
   </ul>
 </section>
 
@@ -271,7 +271,7 @@
 ## Inputs
 
 1. mockups/components/chips.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 763 and 917 to 924 (chip and chips), 1227 to 1232 (edge), 1343 to 1350 (role chip), 1597 to 1599 and 1637 to 1641 (self-check chip and its tokens), 2162 (person), 2179 to 2182 (label), 2187 to 2188 (dod tag), 2239 to 2241 (mention). The mockup renders it with agentRoleChips(a) (engine.js:10231), edgeChip(it) (engine.js:3131), lblChip(k) (engine.js:14765), lblChips(ks) (engine.js:14769), tagChip(t) (engine.js:14796), tkPerson(id, opts) (engine.js:14787).
+2. The design source: mockups/src/engine.css lines 770 and 924 to 931 (chip and chips), 1234 to 1239 (edge), 1350 to 1357 (role chip), 1604 to 1606 and 1644 to 1648 (self-check chip and its tokens), 2169 (person), 2186 to 2189 (label), 2194 to 2195 (dod tag), 2246 to 2248 (mention). The mockup renders it with agentRoleChips(a) (engine.js:10290), edgeChip(it) (engine.js:3189), lblChip(k) (engine.js:14824), lblChips(ks) (engine.js:14828), tagChip(t) (engine.js:14855), tkPerson(id, opts) (engine.js:14846).
 3. The build's implementation: find it by its root selector (.rl-chip, .sx-chip, .edge, .chip, .lbl, .tg, .tkp, .mref) or its name, and list every route that renders it.
 4. Where to see it in the design: Agents, Work, Run (Decision trace, Transcript), Steering. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

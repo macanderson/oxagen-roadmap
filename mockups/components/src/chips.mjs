@@ -9,7 +9,7 @@ export default {
   summary: "Eight small inline blocks that each name one thing inside a list: a role, a check, a provenance edge, a work item, a label, a DoD tag, a person, or a mention.",
   lead: "A chip is one item inside a list that would be cramped as a table row and lost as plain text: a role an agent holds, a provenance edge behind a claim, a work item pinned to an order, a tracker label. Every family here renders inline, wraps at the row, and truncates its own label before it breaks anything around it. A chip that can be removed carries a real button, never a click handler on the whole block.",
   root: ".rl-chip, .sx-chip, .edge, .chip, .lbl, .tg, .tkp, .mref",
-  css: "lines 763 and 917 to 924 (chip and chips), 1227 to 1232 (edge), 1343 to 1350 (role chip), 1597 to 1599 and 1637 to 1641 (self-check chip and its tokens), 2162 (person), 2179 to 2182 (label), 2187 to 2188 (dod tag), 2239 to 2241 (mention)",
+  css: "lines 770 and 924 to 931 (chip and chips), 1234 to 1239 (edge), 1350 to 1357 (role chip), 1604 to 1606 and 1644 to 1648 (self-check chip and its tokens), 2169 (person), 2186 to 2189 (label), 2194 to 2195 (dod tag), 2246 to 2248 (mention)",
   usedOn: ["Agents", "Work", "Run (Decision trace, Transcript)", "Steering"],
   stories: [
     {
@@ -161,17 +161,17 @@ export default {
     ["--st-denied", "Mention chip's not-found state"],
   ],
   helpers: [
-    ["agentRoleChips(a)", "engine.js:10231", "Every role an agent holds, as removable chips joined by `SEP`, with an Assign role button."],
-    ["edgeChip(it)", "engine.js:3131", "One provenance edge, plus a `button.edge` per frame it cites."],
-    ["lblChip(k)", "engine.js:14765", "One work-item label, colored from the tracker's own value."],
-    ["lblChips(ks)", "engine.js:14769", "A `.lbls` row of `lblChip()`."],
-    ["tagChip(t)", "engine.js:14796", "One DoD tag."],
-    ["tkPerson(id, opts)", "engine.js:14787", "A provider account as a mapped teammate or a raw handle."],
+    ["agentRoleChips(a)", "engine.js:10290", "Every role an agent holds, as removable chips joined by `SEP`, with an Assign role button."],
+    ["edgeChip(it)", "engine.js:3189", "One provenance edge, plus a `button.edge` per frame it cites."],
+    ["lblChip(k)", "engine.js:14824", "One work-item label, colored from the tracker's own value."],
+    ["lblChips(ks)", "engine.js:14828", "A `.lbls` row of `lblChip()`."],
+    ["tagChip(t)", "engine.js:14855", "One DoD tag."],
+    ["tkPerson(id, opts)", "engine.js:14846", "A provider account as a mapped teammate or a raw handle."],
   ],
   sourceNotes: [
-    "`.chips` is defined twice (engine.css 763 and 917). The later definition, the input-styled field with a focus ring, wins. `.chip` is only ever used inside the work order dialog's `wo-work items` container, which is neither of those two, so it never gets either definition's border, background, or minimum height.",
-    "`.rl-tog`, the toggle beside a role chip in the CSS (engine.css 1347 to 1350), has no emitter in engine.js or wedge.js.",
-    "The self-check tokens (`--sk-on`, `--sk-off`, `--sk-held`, `--sk-res`) live in their own `:root` block (engine.css 1597), apart from the token blocks [Colors](../colors.html) documents.",
+    "`.chips` is defined twice (engine.css 770 and 924). The later definition, the input-styled field with a focus ring, wins. `.chip` is only ever used inside the work order dialog's `wo-work items` container, which is neither of those two, so it never gets either definition's border, background, or minimum height.",
+    "`.rl-tog`, the toggle beside a role chip in the CSS (engine.css 1354 to 1357), has no emitter in engine.js or wedge.js.",
+    "The self-check tokens (`--sk-on`, `--sk-off`, `--sk-held`, `--sk-res`) live in their own `:root` block (engine.css 1604), apart from the token blocks [Colors](../colors.html) documents.",
   ],
   findings: [
     { tag: "open", title: "Label colors do not follow the theme", body: "`lblChip()` reads a hex straight off the record (`LBL_SWATCHES`, engine.js 16012, and `fixtures/tasks.json`). Of the twelve swatches, nine equal a dark-theme token exactly (P0's `#D6455E` is `--st-critical`, Documentation's `#9D8BE3` is `--k-rule`, and so on), and three (`#E0803A`, `#C9A227`, `#3B82F6`) match no token at all. None of the twelve switches for light." },

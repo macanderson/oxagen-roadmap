@@ -8,7 +8,7 @@ export default {
   summary: "One record's fields, a label and a value per row.",
   lead: "A key-value list reads one record top to bottom: an approval's tool version and digest, an agent's principal and credential, a run's frame hash. Each row is a label and a value, never a table of many records. A value can carry a second line of context, and a missing value reads as a dash.",
   root: ".kv",
-  css: "lines 307 to 309, 550, 2116",
+  css: "lines 307 to 309, 557, 2123",
   usedOn: ["Approvals (approval card)", "Agents (Identity tab)", "Organization (API keys)", "Run (Chain tab, frame detail)", "Spend", "Billing"],
   stories: [
     {
@@ -138,8 +138,8 @@ export default {
     ["--mono", "`.kv.code` values and any `dd.mono`"],
   ],
   helpers: [
-    ["frKv(rows)", "engine.js:3364", "Writes a `dl.kv` from an array of `[label, value]` pairs, dropping any falsy row. About 15 calls, mostly frame detail."],
-    ["kvl(pairs, cls)", "engine.js:9830", "The same shape again: a `dl.kv` from pairs, with an optional extra class. 7 calls, all in the account dialog."],
+    ["frKv(rows)", "engine.js:3422", "Writes a `dl.kv` from an array of `[label, value]` pairs, dropping any falsy row. About 15 calls, mostly frame detail."],
+    ["kvl(pairs, cls)", "engine.js:9889", "The same shape again: a `dl.kv` from pairs, with an optional extra class. 7 calls, all in the account dialog."],
   ],
   sourceNotes: [
     "87 more sites write `<dl class=\"kv\">` or `<div class=\"kv\">` inline as strings, across the approval card, the agent tabs, Organization, Billing, Steering, and every frame-detail reader that does not go through `frKv()`.",

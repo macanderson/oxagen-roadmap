@@ -42,7 +42,7 @@
   <p class="dx-lead">A diff shows what a change does to a file, line by line. The unified form stacks removed and added lines under two line-number columns and fits a narrow panel. The split form puts the base on the left and the draft on the right, so a change reads across. Both are set in Monaspace Neon, and a <code>+</code> or <code>−</code> mark carries each change before the tint does.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.diff</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 976 to 1005</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 983 to 1012</span>
     <span><b>Used on</b> Run transcript, Linked work, Record save dialog, Commit dialog, Agent source</span>
   </div>
 </div>
@@ -146,7 +146,7 @@
   <h2 id="phone">Phone</h2>
   
   <ul>
-    <li>In the phone dialog layer the split form collapses to two columns: the header hides, each side's lines follow each other, a line identical on both sides shows once, and the hatch goes away (engine.css 1001 to 1005).</li>
+    <li>In the phone dialog layer the split form collapses to two columns: the header hides, each side's lines follow each other, a line identical on both sides shows once, and the hatch goes away (engine.css 1008 to 1012).</li>
     <li>The frame scrolls sideways inside itself. The page never does.</li>
   </ul>
 </section>
@@ -175,11 +175,11 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 976 to 1005</td><td>The rules that draw it</td></tr>
-      <tr><td><code>diffLines(a, b)</code> at <code>engine.js:1289</code></td><td>An LCS line diff of two strings into rows marked <code>+</code>, <code>-</code>, or space.</td></tr>
-      <tr><td><code>diffStat(rows)</code> at <code>engine.js:1298</code></td><td>Counts additions and deletions for <code>.dstat</code>.</td></tr>
-      <tr><td><code>diffHtml(rows, ctx)</code> at <code>engine.js:1299</code></td><td>The unified form with <code>ctx</code> lines of context. Transcript, linked work, and the record save dialog.</td></tr>
-      <tr><td><code>diffSplitHtml(rows, ctx, labels)</code> at <code>engine.js:1312</code></td><td>The split form. The commit dialog.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 983 to 1012</td><td>The rules that draw it</td></tr>
+      <tr><td><code>diffLines(a, b)</code> at <code>engine.js:1347</code></td><td>An LCS line diff of two strings into rows marked <code>+</code>, <code>-</code>, or space.</td></tr>
+      <tr><td><code>diffStat(rows)</code> at <code>engine.js:1356</code></td><td>Counts additions and deletions for <code>.dstat</code>.</td></tr>
+      <tr><td><code>diffHtml(rows, ctx)</code> at <code>engine.js:1357</code></td><td>The unified form with <code>ctx</code> lines of context. Transcript, linked work, and the record save dialog.</td></tr>
+      <tr><td><code>diffSplitHtml(rows, ctx, labels)</code> at <code>engine.js:1370</code></td><td>The split form. The commit dialog.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -206,7 +206,7 @@
 ## Inputs
 
 1. mockups/components/diff.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 976 to 1005. The mockup renders it with diffLines(a, b) (engine.js:1289), diffStat(rows) (engine.js:1298), diffHtml(rows, ctx) (engine.js:1299), diffSplitHtml(rows, ctx, labels) (engine.js:1312).
+2. The design source: mockups/src/engine.css lines 983 to 1012. The mockup renders it with diffLines(a, b) (engine.js:1347), diffStat(rows) (engine.js:1356), diffHtml(rows, ctx) (engine.js:1357), diffSplitHtml(rows, ctx, labels) (engine.js:1370).
 3. The build's implementation: find it by its root selector (.diff) or its name, and list every route that renders it.
 4. Where to see it in the design: Run transcript, Linked work, Record save dialog, Commit dialog, Agent source. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -225,7 +225,7 @@ Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and li
 9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
 10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
 11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
-12. Phone. At 390 by 844 with a touch pointer: In the phone dialog layer the split form collapses to two columns: the header hides, each side's lines follow each other, a line identical on both sides shows once, and the hatch goes away (engine.css 1001 to 1005). The frame scrolls sideways inside itself. The page never does.
+12. Phone. At 390 by 844 with a touch pointer: In the phone dialog layer the split form collapses to two columns: the header hides, each side's lines follow each other, a line identical on both sides shows once, and the hatch goes away (engine.css 1008 to 1012). The frame scrolls sideways inside itself. The page never does.
 13. Accessibility. Each line starts with `+`, `-`, or a space, so a screen reader and a copy both carry the change without the tint. Line numbers are `user-select:none`, so a copied hunk holds only the text. The hatch on the empty half is decoration. The empty line number cell says nothing. Line text is `--fg` on the tint, which clears 4.5:1 in both themes.
 14. One implementation. The build draws the diff from one shared component. List every place that draws it by hand, with its file and line.
 

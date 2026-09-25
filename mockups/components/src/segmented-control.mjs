@@ -136,18 +136,18 @@ export default {
     ["--dim", "Count"],
   ],
   helpers: [
-    ["namesToggle()", "engine.js:828", "Labels or API names for tools. The reference `.seg`."],
-    ["catChips(counts, sel, pick, total)", "engine.js:833", "The tool category filter row, `.row.tcs`, with `aria-pressed`."],
+    ["namesToggle()", "engine.js:886", "Labels or API names for tools. The reference `.seg`."],
+    ["catChips(counts, sel, pick, total)", "engine.js:891", "The tool category filter row, `.row.tcs`, with `aria-pressed`."],
   ],
   sourceNotes: [
     "`.seg` is written inline at four more sites: toolbelt presentation (engine.js 4561), toolbelt layout (4607), deployment mode (7799), and the import wizard (12096). The Agents column pick is `.kf` (3961).",
     "Work orders draw their filter as a `.btn.sm.sel` row (`wedge.js` 181), and Backlog draws List and Graph as `span.chips[role=group]` (`wedge.js` 137).",
   ],
   findings: [
-    { tag: "open", title: "Four idioms for one control", body: "`.seg` with `aria-pressed` (five sites), `.btn.sm.sel` rows (seven sites), `span.chips[role=group]` (Backlog), and `.kf` with inline overrides (the Agents panel's Composition and Operations). `.chips` is also the bordered input box of a tag field (engine.css 917), so Backlog's view switch looks like a text input. Build `.seg` only." },
+    { tag: "open", title: "Four idioms for one control", body: "`.seg` with `aria-pressed` (five sites), `.btn.sm.sel` rows (seven sites), `span.chips[role=group]` (Backlog), and `.kf` with inline overrides (the Agents panel's Composition and Operations). `.chips` is also the bordered input box of a tag field (engine.css 924), so Backlog's view switch looks like a text input. Build `.seg` only." },
     { tag: "note", title: "The kind filter row has lost its job", body: "`.kf` was made for Steering's kind filters, which the fleet operations wedge removed. Its one remaining use is the Agents column pick, which is a `.seg`." },
     { tag: "open", title: "No pressed state on the work order filter", body: "`wedge.js` 181 marks the chosen filter with `.sel` and no `aria-pressed`, so a screen reader cannot tell which filter is on." },
-    { tag: "note", title: "Two definitions of .chips", body: "`.chips` is defined at engine.css 763 as a plain row and at 917 as an input box. The later one wins everywhere." },
+    { tag: "note", title: "Two definitions of .chips", body: "`.chips` is defined at engine.css 770 as a plain row and at 924 as an input box. The later one wins everywhere." },
   ],
   audit: {
     checks: [

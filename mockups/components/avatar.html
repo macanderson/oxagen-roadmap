@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Avatar</title>
-<meta name="description" content="The shape that stands for a person or an agent, everywhere a record names one.">
+<meta name="description" content="The shape that stands for a person, an agent, a workspace, or an organization, everywhere a record names one.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
@@ -39,11 +39,11 @@
 <div class="dx-hero">
   <p class="eyebrow">Data display</p>
   <h1>Avatar</h1>
-  <p class="dx-lead">An avatar carries a kind (icon, initials, or photo) and a tone, both stored on the record it represents, never chosen at the point of display. People render round. Agents render as squircles, so the two never read alike at a glance. Every tone comes from the same three-step house scale, so no avatar can carry a color the palette does not already have.</p>
+  <p class="dx-lead">An avatar carries a kind (icon, initials, or photo) and a tone, both stored on the record it represents, never chosen at the point of display. People render round. Agents, workspaces, and organizations render as squircles, so a person never reads like the others at a glance. There are five tones: solid, soft, and line follow the theme, and gold and dark gold are the brand gold in two shades. No avatar can carry a color the palette does not already have. One editor sets the avatar of all four records, as the app's <code>ui/avatar-editor.tsx</code> does.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.avx</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 491, 496 to 506</span>
-    <span><b>Used on</b> Agents, Agent card, Approvals, Organization (people), Account, Spend (evidence dialog), Work orders (Stages)</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 493, 498 to 510, editor 527 to 554</span>
+    <span><b>Used on</b> Agents, Agent card, Approvals, Organization (people, header, workspaces), Account, Spend (evidence dialog), Work orders (Stages), Avatar editor</span>
   </div>
 </div>
 
@@ -71,18 +71,27 @@
     </template>
   </figure>
   <figure class="dx-story" id="story-tones">
-    <figcaption class="dx-story-h"><b>Three tones</b><span>Solid, soft, and line, the only three an avatar may carry, on the triage agent's stethoscope icon.</span></figcaption>
+    <figcaption class="dx-story-h"><b>Five tones</b><span>Solid, soft, line, gold, and dark gold, the only five an avatar may carry, on the triage agent's stethoscope icon.</span></figcaption>
     <div class="dx-canvas"></div>
-    <template data-story="tones" data-name="Three tones">
+    <template data-story="tones" data-name="Five tones">
 <div class="row" style="gap:14px">
   <span class="avx agent ic tn-solid" style="width:36px;height:36px" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></svg></span>
   <span class="avx agent ic tn-soft" style="width:36px;height:36px" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></svg></span>
   <span class="avx agent ic tn-line" style="width:36px;height:36px" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></svg></span>
+  <span class="avx agent ic tn-gold" style="width:36px;height:36px" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></svg></span>
+  <span class="avx agent ic tn-gold-deep" style="width:36px;height:36px" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 2v2"/><path d="M5 2v2"/><path d="M5 3H4a2 2 0 0 0-2 2v4a6 6 0 0 0 12 0V5a2 2 0 0 0-2-2h-1"/><path d="M8 15a6 6 0 0 0 12 0v-3"/><circle cx="20" cy="10" r="2"/></svg></span>
 </div>
     </template>
   </figure>
+  <figure class="dx-story" id="story-workspace">
+    <figcaption class="dx-story-h"><b>Workspace</b><span>The FinOps workspace's stored avatar: mono initials on the gold tone, as a squircle. An organization draws the same way.</span></figcaption>
+    <div class="dx-canvas"></div>
+    <template data-story="workspace" data-name="Workspace">
+<span class="avx agent f-mono tn-gold" style="width:44px;height:44px;font-size:18px" aria-hidden="true">FO</span>
+    </template>
+  </figure>
   <figure class="dx-story" id="story-photo">
-    <figcaption class="dx-story-h"><b>Photo</b><span><code>kind:&quot;photo&quot;</code> renders an <code>img</code>, cropped to the shape's radius, from Dana Okafor's record.</span></figcaption>
+    <figcaption class="dx-story-h"><b>Photo</b><span><code>kind:&quot;photo&quot;</code> renders an <code>img</code>, cropped to the shape's radius, from Dana Okafor's record. The record stores an https link. A link that does not load falls back to the initials on the soft tone.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="photo" data-name="Photo">
 <span class="avx person tn-soft" style="width:44px;height:44px" aria-hidden="true"><img src="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2096%2096%22%3E%3Crect%20width%3D%2296%22%20height%3D%2296%22%20fill%3D%22%23292722%22%2F%3E%3Cpath%20d%3D%22M14%2098c2-24%2016-34%2034-34s32%2010%2034%2034z%22%20fill%3D%22%239B958A%22%2F%3E%3Ccircle%20cx%3D%2248%22%20cy%3D%2238%22%20r%3D%2217%22%20fill%3D%22%23DDD8CD%22%2F%3E%3Cpath%20d%3D%22M31%2036c0-14%208-21%2017-21s17%207%2017%2021c-4-6-9-9-17-9s-13%203-17%209z%22%20fill%3D%22%2310100F%22%2F%3E%3C%2Fsvg%3E" alt=""></span>
@@ -109,13 +118,15 @@
     <tbody>
       <tr><td>Shape</td><td><code>.avx</code></td><td>An inline grid, centered content, 1px border, fixed inline size set by <code>style</code>.</td></tr>
       <tr><td>Person shape</td><td><code>.avx.person</code></td><td>A full circle, <code>border-radius:50%</code>.</td></tr>
-      <tr><td>Agent shape</td><td><code>.avx.agent</code></td><td>A squircle, <code>border-radius:27%</code>.</td></tr>
+      <tr><td>Squircle shape</td><td><code>.avx.agent</code></td><td>A squircle, <code>border-radius:27%</code>, for an agent, a workspace, or an organization.</td></tr>
       <tr><td>Solid tone</td><td><code>.avx.tn-solid</code></td><td><code>--fg</code> fill, <code>--ink</code> glyph: the foreground color as a disc.</td></tr>
       <tr><td>Soft tone</td><td><code>.avx.tn-soft</code></td><td><code>--hl</code> fill, <code>--fg</code> glyph, <code>--border</code> edge: a lifted panel.</td></tr>
       <tr><td>Line tone</td><td><code>.avx.tn-line</code></td><td>Transparent fill, <code>--fg</code> glyph, <code>--rule</code> edge: a hairline outline.</td></tr>
+      <tr><td>Gold tone</td><td><code>.avx.tn-gold</code></td><td><code>--gold</code> fill and edge, <code>--on-gold</code> glyph. The same in both themes.</td></tr>
+      <tr><td>Dark gold tone</td><td><code>.avx.tn-gold-deep</code></td><td><code>--gold-deep</code> fill and edge, <code>--on-gold-deep</code> glyph (white, 4.66:1). The same in both themes.</td></tr>
       <tr><td>Icon glyph</td><td><code>.avx svg</code></td><td>A Lucide icon at 56% of the box, one line weight, drawn in <code>currentColor</code>.</td></tr>
-      <tr><td>Initials glyph</td><td><code>.avx.f-sans</code> / <code>.f-serif</code> / <code>.f-mono</code></td><td>One to three letters, sized down as the string gets longer, in one of three faces.</td></tr>
-      <tr><td>Photo</td><td><code>.avx img</code></td><td>Fills the box, <code>object-fit:cover</code>, cropped to the shape's radius.</td></tr>
+      <tr><td>Initials glyph</td><td><code>.avx.f-sans</code> / <code>.f-serif</code> / <code>.f-mono</code></td><td>One to six letters, upper-cased, in one of three faces. One letter fills half the box and six fill a fifth.</td></tr>
+      <tr><td>Photo</td><td><code>.avx img</code></td><td>Fills the box, <code>object-fit:cover</code>, cropped to the shape's radius. A link that does not load is replaced by the initials on the soft tone.</td></tr>
       <tr><td>Flat circle (legacy)</td><td><code>.avat</code></td><td>A fixed 52px circle with no tone system: <code>--hl</code> fill, <code>--border</code> edge. Has exactly one caller (see Findings).</td></tr>
     </tbody>
   </table></div></div>
@@ -125,16 +136,17 @@
   <h2 id="usage">Usage</h2>
   
   <div class="dx-g2">
-    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Any place a record names a person or an agent: a table row, a card, a chain, an approval.</li><li>A place that needs to tell at a glance whether the actor is a person or an agent, by shape alone.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>Any place a record names a person, an agent, a workspace, or an organization: a table row, a card, a chain, an approval.</li><li>A place that needs to tell at a glance whether the actor is a person, by shape alone.</li></ul></div>
     <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A tool or a provider: use its own logo mark, not an avatar shape.</li><li>A state or an outcome: use a <a href="badge.html">badge</a>, never a colored avatar tone.</li></ul></div>
   </div>
   <div class="dx-dd">
-    <div class="dx-dont"><div class="dx-ex dx-row"><span style="display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#f4b400;color:#111" aria-hidden="true">MB</span></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A free color outside the three tones, and a radius chosen by hand instead of the person/agent rule.</p></div>
+    <div class="dx-dont"><div class="dx-ex dx-row"><span style="display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#f4b400;color:#111" aria-hidden="true">MB</span></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A free color outside the five tones, and a radius chosen by hand instead of the shape rule.</p></div>
     <div class="dx-do"><div class="dx-ex dx-row"><span class="avx person f-sans tn-soft" style="width:32px;height:32px;font-size:12px" aria-hidden="true">MB</span></div><p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>A tone from the house scale and a shape that says &quot;person&quot; before the initials are even read.</p></div>
   </div>
   <ul>
-    <li>Shape follows subject, not context: a person is always round, an agent is always a squircle, wherever it renders.</li>
+    <li>Shape follows subject, not context: a person is always round, and an agent, a workspace, or an organization is always a squircle, wherever it renders.</li>
     <li>Tone, icon, font, and photo are stored on the record and read by <code>avatarHtml()</code>. A page never picks a color for an avatar itself.</li>
+    <li>Every place that sets an avatar opens the one editor, <code>openAvatar()</code>. The record changes the shape, the title, the note, and the Remove hint, and nothing else.</li>
     <li>An avatar beside a name is decorative. The visible text carries the identity, so the avatar itself needs no separate label.</li>
   </ul>
 </section>
@@ -143,7 +155,7 @@
   <h2 id="content">Content</h2>
   
   <ul>
-    <li><b>Initials</b>: one to three characters from the record's own text, never invented at render time.</li>
+    <li><b>Initials</b>: one to six characters from the record's own text, upper-cased, never invented at render time. With no avatar stored, the tile shows the name's initials (first and last word) on the soft tone.</li>
     <li><b>Icon</b>: one glyph from the shared Lucide set, chosen to suggest the agent's job (a rocket for a release manager, a stethoscope for triage), never a literal logo.</li>
     <li><b>Alt text</b>: a photo avatar's <code>img</code> carries <code>alt=&quot;&quot;</code>, since the avatar is decoration next to a visible name.</li>
   </ul>
@@ -155,7 +167,7 @@
   <ul>
     <li>Every avatar, in every kind, renders with <code>aria-hidden=&quot;true&quot;</code>, including a photo. A screen reader relies on the name printed beside it, never on the avatar.</li>
     <li>Tone is never the only signal for anything: it decorates identity, and identity is also carried by the visible initials, icon, or photo, not by color alone.</li>
-    <li>The icon and initials glyphs use <code>currentColor</code>, so they always meet the tone's own contrast pair (<code>--fg</code> on <code>--ink</code>, <code>--fg</code> on <code>--hl</code>, <code>--fg</code> on transparent).</li>
+    <li>The icon and initials glyphs use <code>currentColor</code>, so they always meet the tone's own contrast pair (<code>--ink</code> on <code>--fg</code>, <code>--fg</code> on <code>--hl</code>, <code>--fg</code> on transparent, <code>--on-gold</code> on <code>--gold</code> at 9.5:1, <code>--on-gold-deep</code> on <code>--gold-deep</code> at 4.66:1).</li>
   </ul>
 </section>
 
@@ -179,6 +191,10 @@
       <tr><td><code>--hl</code></td><td>Soft tone fill</td></tr>
       <tr><td><code>--border</code></td><td>Soft tone edge</td></tr>
       <tr><td><code>--rule</code></td><td>Line tone edge</td></tr>
+      <tr><td><code>--gold</code></td><td>Gold tone fill and edge</td></tr>
+      <tr><td><code>--on-gold</code></td><td>Gold tone glyph</td></tr>
+      <tr><td><code>--gold-deep</code></td><td>Dark gold tone fill and edge</td></tr>
+      <tr><td><code>--on-gold-deep</code></td><td>Dark gold tone glyph</td></tr>
       <tr><td><code>--font</code></td><td><code>.f-sans</code> initials</td></tr>
       <tr><td><code>--mono</code></td><td><code>.f-mono</code> initials</td></tr>
     </tbody>
@@ -191,23 +207,25 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 491, 496 to 506</td><td>The rules that draw it</td></tr>
-      <tr><td><code>avatarHtml(av, size, shape, extra)</code> at <code>engine.js:326</code></td><td>The one avatar renderer: reads <code>{kind, icon|text|src, font, tone}</code> off a record and writes the <code>.avx</code> span.</td></tr>
-      <tr><td><code>personAv(key, size)</code> at <code>engine.js:335</code></td><td>Looks up a person by key and renders them round. 11 calls.</td></tr>
-      <tr><td><code>agentAv(a, size)</code> at <code>engine.js:336</code></td><td>Takes an agent object or key and renders it as a squircle. 8 calls.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 493, 498 to 510, editor 527 to 554</td><td>The rules that draw it</td></tr>
+      <tr><td><code>avatarHtml(av, size, shape, extra, letters)</code> at <code>engine.js:339</code></td><td>The one avatar renderer: reads <code>{kind, icon|text|url, font, tone}</code> off a record and writes the <code>.avx</code> span. <code>letters</code> is the fallback when the record has no avatar.</td></tr>
+      <tr><td><code>personAv(key, size)</code> at <code>engine.js:353</code></td><td>Looks up a person by key and renders them round. 12 calls.</td></tr>
+      <tr><td><code>agentAv(a, size)</code> at <code>engine.js:354</code></td><td>Takes an agent object or key and renders it as a squircle. 7 calls.</td></tr>
+      <tr><td><code>initialsOf(name)</code> at <code>engine.js:334</code></td><td>The first and last word's initials, upper-cased: the fallback letters and the editor's first draft.</td></tr>
+      <tr><td><code>openAvatar(target)</code> at <code>engine.js:571</code></td><td>Opens the one avatar editor for <code>person:&lt;key&gt;</code>, <code>agent:&lt;key&gt;</code>, <code>workspace:&lt;slug&gt;</code>, or <code>org</code>.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
-    <li>Rule, in the CSS comment at engine.css 492 to 495: people are round, agents are squircles. Three tones, all from the house scale and nothing else: solid, soft, line. No free color, no gradient.</li>
+    <li>Rule, in the CSS comment at engine.css 494 to 497: people are round, and agents, workspaces, and organizations are squircles. Five tones: solid, soft, and line from the theme, and gold and dark gold from the brand. No free color, no gradient.</li>
     <li><code>.avx.f-serif</code> sets Georgia (with system serif fallbacks), which is the one font family anywhere in the product outside Geist, Space Grotesk, and Monaspace Neon. It is not a departure: it is the operator's own choice of initials font for their avatar, the same way a person picks a photo.</li>
-    <li><code>.avat</code> (engine.css 491) predates the tone system and has exactly one caller, a fallback avatar in the evidence dialog for an agent id the fixtures do not carry a record for (engine.js 9459). That caller overrides <code>.avat</code>'s own circular radius with an inline <code>border-radius:9px</code>, so <code>.avat</code>'s own shape never actually appears on screen.</li>
+    <li><code>.avat</code> (engine.css 493) predates the tone system and has exactly one caller, a fallback avatar in the evidence dialog for an agent id the fixtures do not carry a record for (engine.js 9521). That caller overrides <code>.avat</code>'s own circular radius with an inline <code>border-radius:9px</code>, so <code>.avat</code>'s own shape never actually appears on screen.</li>
   </ul>
 </section>
 
 <section class="dx-sec">
   <h2 id="findings">Findings</h2>
   
-  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>A dead shape with a live caller</h4><p>The components index lists <code>.avat</code> among the rules with no emitter. That is stale: <code>.avat</code> has exactly one caller, the evidence dialog's placeholder avatar for an agent id with no matching record (engine.js 9459). The caller overrides the class's own 52px circular radius with an inline <code>border-radius:9px</code>, so <code>.avat</code>'s own definition still renders nothing a person can see. The index's finding should read &quot;one caller, and it overrides the class&quot; rather than &quot;no emitter&quot;.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>A dead shape with a live caller</h4><p>The components index lists <code>.avat</code> among the rules with no emitter. That is stale: <code>.avat</code> has exactly one caller, the evidence dialog's placeholder avatar for an agent id with no matching record (engine.js 9521). The caller overrides the class's own 52px circular radius with an inline <code>border-radius:9px</code>, so <code>.avat</code>'s own definition still renders nothing a person can see. The index's finding should read &quot;one caller, and it overrides the class&quot; rather than &quot;no emitter&quot;.</p></div>
   <div class="dx-find"><h4><span class="b b-q">note</span>One legacy shape beside the tone system</h4><p><code>.avat</code> is a flat circle with no kind, no tone, and no shape rule, left over from before <code>avatarHtml()</code>. Its one caller could use <code>agentAv()</code> with a fallback record instead, retiring <code>.avat</code> entirely.</p></div>
 </section>
 
@@ -222,28 +240,29 @@
 ## Inputs
 
 1. mockups/components/avatar.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 491, 496 to 506. The mockup renders it with avatarHtml(av, size, shape, extra) (engine.js:326), personAv(key, size) (engine.js:335), agentAv(a, size) (engine.js:336).
+2. The design source: mockups/src/engine.css lines 493, 498 to 510, editor 527 to 554. The mockup renders it with avatarHtml(av, size, shape, extra, letters) (engine.js:339), personAv(key, size) (engine.js:353), agentAv(a, size) (engine.js:354), initialsOf(name) (engine.js:334), openAvatar(target) (engine.js:571).
 3. The build's implementation: find it by its root selector (.avx) or its name, and list every route that renders it.
-4. Where to see it in the design: Agents, Agent card, Approvals, Organization (people), Account, Spend (evidence dialog), Work orders (Stages). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+4. Where to see it in the design: Agents, Agent card, Approvals, Organization (people, header, workspaces), Account, Spend (evidence dialog), Work orders (Stages), Avatar editor. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
 ## Procedure
 
 Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style and text.
 
-1. Shape by subject. Every avatar representing a person is a circle, and every avatar representing an agent is a squircle, with no exception by page or context. Report any avatar whose shape does not match its subject.
-2. Tone. Every avatar's fill, glyph color, and border resolve to one of the three tones (solid, soft, line), each built from `--fg`, `--ink`, `--hl`, `--border`, or `--rule`. A raw hex, an rgba, or a gradient on an avatar is a FAIL.
-3. One implementation. Every avatar is drawn by one shared component that reads `{kind, tone, shape}` off the record. An avatar assembled inline with its own markup is a FAIL. List every hand-drawn copy, including a flat, toneless fallback circle like `.avat`.
-4. Icon set. An icon avatar uses one glyph from the shared icon set, one line weight, in `currentColor`, never a literal brand logo standing in for an agent.
-5. Initials. One to three characters from the record's own name or key, sized down as the string lengthens, never invented or truncated inconsistently between call sites.
-6. Photo. A photo avatar crops to the shape's radius with `object-fit:cover` and carries `alt=&quot;&quot;`, since the name beside it carries the identity.
-7. Accessibility. Every avatar is `aria-hidden` or otherwise excluded from the accessibility tree, and the identity it stands for is always also present as visible text beside it.
-8. Fonts outside the three faces. Report every font family used inside an avatar. Only Geist, Monaspace Neon, and the operator's own initials-font choice (if the build offers one, as Georgia does here) are expected. Anything else is a FAIL.
-9. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
-10. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
-11. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
-12. Phone. At 390 by 844 with a touch pointer: An avatar keeps its stored size on a phone. Nothing about `.avx` has a phone rule of its own. In a card that reflows to a phone width, the avatar stays the same pixel size while the text around it wraps.
-13. Accessibility. Every avatar, in every kind, renders with `aria-hidden=&quot;true&quot;`, including a photo. A screen reader relies on the name printed beside it, never on the avatar. Tone is never the only signal for anything: it decorates identity, and identity is also carried by the visible initials, icon, or photo, not by color alone. The icon and initials glyphs use `currentColor`, so they always meet the tone's own contrast pair (`--fg` on `--ink`, `--fg` on `--hl`, `--fg` on transparent).
-14. One implementation. The build draws the avatar from one shared component. List every place that draws it by hand, with its file and line.
+1. Shape by subject. Every avatar representing a person is a circle, and every avatar representing an agent, a workspace, or an organization is a squircle, with no exception by page or context. Report any avatar whose shape does not match its subject.
+2. Tone. Every avatar's fill, glyph color, and border resolve to one of the five tones (solid, soft, line, gold, dark gold), each built from `--fg`, `--ink`, `--hl`, `--border`, `--rule`, `--gold`, `--on-gold`, `--gold-deep`, or `--on-gold-deep`. A raw hex, an rgba, or a gradient on an avatar is a FAIL.
+3. One editor. Account, the agent page, the Organization header, and each workspace row open the same avatar editor. A second editor built for one record is a FAIL.
+4. One implementation. Every avatar is drawn by one shared component that reads `{kind, tone, shape}` off the record. An avatar assembled inline with its own markup is a FAIL. List every hand-drawn copy, including a flat, toneless fallback circle like `.avat`.
+5. Icon set. An icon avatar uses one glyph from the shared icon set, one line weight, in `currentColor`, never a literal brand logo standing in for an agent.
+6. Initials. One to six characters from the record's own name or key, upper-cased, sized down as the string lengthens, never invented or truncated inconsistently between call sites.
+7. Photo. A photo avatar crops to the shape's radius with `object-fit:cover` and carries `alt=&quot;&quot;`, since the name beside it carries the identity.
+8. Accessibility. Every avatar is `aria-hidden` or otherwise excluded from the accessibility tree, and the identity it stands for is always also present as visible text beside it.
+9. Fonts outside the three faces. Report every font family used inside an avatar. Only Geist, Monaspace Neon, and the operator's own initials-font choice (if the build offers one, as Georgia does here) are expected. Anything else is a FAIL.
+10. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
+11. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
+12. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
+13. Phone. At 390 by 844 with a touch pointer: An avatar keeps its stored size on a phone. Nothing about `.avx` has a phone rule of its own. In a card that reflows to a phone width, the avatar stays the same pixel size while the text around it wraps.
+14. Accessibility. Every avatar, in every kind, renders with `aria-hidden=&quot;true&quot;`, including a photo. A screen reader relies on the name printed beside it, never on the avatar. Tone is never the only signal for anything: it decorates identity, and identity is also carried by the visible initials, icon, or photo, not by color alone. The icon and initials glyphs use `currentColor`, so they always meet the tone's own contrast pair (`--ink` on `--fg`, `--fg` on `--hl`, `--fg` on transparent, `--on-gold` on `--gold` at 9.5:1, `--on-gold-deep` on `--gold-deep` at 4.66:1).
+15. One implementation. The build draws the avatar from one shared component. List every place that draws it by hand, with its file and line.
 
 ## Output
 
