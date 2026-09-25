@@ -9405,7 +9405,7 @@ function spendCostCenters(){
      '<td class="num">'+r.runs.toLocaleString("en-US")+'</td><td class="num">'+usd(fmt2(r.cents/100))+'</td>'+
      '<td class="num">'+(total?(r.cents/total*100).toFixed(1):"0.0")+'%</td></tr>';}).join("")+
    '<tr data-cc-total data-cents="'+total+'" data-runs="'+runs+'"><td><b>Total</b></td><td class="num"><b>'+runs.toLocaleString("en-US")+'</b></td><td class="num"><b>'+usd(fmt2(total/100))+'</b></td><td class="num">100%</td></tr>'+
-   '</tbody></table></div><div class="panel-b"><div class="note">Every run lands on exactly one row, so the rows sum to the runs’ spend. Share is a row’s spend divided by that total. The strip above also counts Oxagen’s own routed work, which no cost center is charged for. The chargeback statement covers every workspace.</div></div></div>';
+   '</tbody></table></div><div class="panel-b"><div class="note">Every run lands on exactly one row, so the rows sum to the runs’ spend. Share is a row’s spend divided by that total. The strip above also counts oxagen’s own routed work, which no cost center is charged for. The chargeback statement covers every workspace.</div></div></div>';
 }
 
 DLG_EXT.ccexport=function(){

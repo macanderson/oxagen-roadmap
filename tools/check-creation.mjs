@@ -1597,6 +1597,52 @@ for (const theme of ["light", "dark"]) {
   await ph.close();
 }
 
+/* ---------------- notifications: selecting one marks it read ----------------
+   The bell's label, the dialog footer and the unread rows must all move together, one at a time. */
+{
+  const { page, errs } = await open("#/a-intel/core-platform");
+  const read = () => page.evaluate(() => ({
+    bell: document.querySelector('[aria-label^="Notifications,"]')?.getAttribute("aria-label") || "",
+    dot: !!document.querySelector('[aria-label^="Notifications,"] .dot'),
+    rows: document.querySelectorAll("#layer .li[data-notif]").length,
+    foot: document.querySelector("#layer .dlg-f .grow")?.textContent || "",
+    focus: document.activeElement?.hasAttribute("data-notif") || false,
+    all: [...document.querySelectorAll("#layer .dlg-f button")].find(b => /Mark all read/.test(b.textContent))?.disabled,
+  }));
+  await page.evaluate(() => openDialog("notifs")); await page.waitForTimeout(120);
+  const a = await read();
+  const n = a.rows;
+  ok(n >= 2, "notifications: the fixture opens with at least two unread, got " + n);
+  ok(a.bell === "Notifications, " + n + " unread" && a.dot, "notifications: the bell names the unread count and shows the dot, got " + a.bell);
+  ok(a.foot === n + " unread · select one to mark it read", "notifications: the footer names the count and how to mark one, got " + a.foot);
+  ok(await page.evaluate(() => [...document.querySelectorAll("#layer .li[data-notif]")].every(e => e.getAttribute("role") === "button" && /^Mark read: /.test(e.getAttribute("aria-label")))),
+    "notifications: every unread item is a button labelled Mark read");
+
+  await page.click("#layer .li[data-notif]"); await page.waitForTimeout(120);
+  const b = await read();
+  ok(b.rows === n - 1, "notifications: a click marks exactly one read, got " + b.rows + " of " + n);
+  ok(b.bell === "Notifications, " + (n - 1) + " unread", "notifications: the bell count drops with it, got " + b.bell);
+  ok(b.foot === (n - 1) + " unread · select one to mark it read", "notifications: the footer count drops with it, got " + b.foot);
+  ok(b.focus, "notifications: focus moves to the next unread item");
+  ok(await page.evaluate(() => [...document.querySelectorAll("#layer .li:not(.unread)")].every(e => !e.hasAttribute("role"))),
+    "notifications: a read item is plain text, not a button");
+
+  await page.keyboard.press("Enter"); await page.waitForTimeout(120);
+  ok((await read()).rows === n - 2, "notifications: Enter on the focused item marks it read");
+
+  await page.evaluate(() => [...document.querySelectorAll("#layer .dlg-f button")].find(b => /Mark all read/.test(b.textContent)).click());
+  await page.waitForTimeout(150);
+  const said = await page.evaluate(() => S.toast || "");
+  ok(/^All notifications marked read\. Audit records who read each one\./.test(said), "notifications: Mark all read says Audit records it, got " + said);
+  const c = await read();
+  ok(c.bell === "Notifications, 0 unread" && !c.dot, "notifications: the bell reads 0 unread with no dot, got " + c.bell);
+  await page.evaluate(() => openDialog("notifs")); await page.waitForTimeout(120);
+  const d = await read();
+  ok(d.foot === "All read" && d.all === true && d.rows === 0, "notifications: the reopened dialog reads All read with Mark all read disabled, got " + JSON.stringify(d));
+  ok(errs.length === 0, "notifications: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
 await browser.close();
 console.log(`${passes} passed, ${fails} failed`);
 process.exit(fails ? 1 : 0);
