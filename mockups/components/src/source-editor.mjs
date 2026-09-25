@@ -153,7 +153,7 @@ export default {
     ["edMount()", "engine.js:1218", "Wires the textarea's events and restores the selection after a render."],
     ["edPaint()", "engine.js:1235", "Repaints the highlighted layer, the gutter, the find marks, and the current line."],
     ["edKey(e)", "engine.js:1266", "Tab and Shift Tab indent, ⌘/ comments, ⌘F finds, ⌘S saves."],
-    ["hlToml(src)", "engine.js:1161", "The TOML highlighter: one regex pass that writes token classes."],
+    ["hlToml(src)", "engine.js:1162", "The TOML highlighter: one regex pass that writes token classes."],
     ["cedHtml(key, path, lang, opts)", "engine.js:11521", "The same editor for other languages, sized for a dialog with `small` or wrapped for prose."],
   ],
   sourceNotes: [

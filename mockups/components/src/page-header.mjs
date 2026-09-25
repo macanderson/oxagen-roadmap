@@ -163,7 +163,7 @@ export default {
   ],
   helpers: [
     ["srcHead(o, kindLabel, title, badges, lead, acts)", "wedge.js:1017", "The header of a Steering source: back link, title, badge row, lead, and actions. It drops a title over 90 characters to 20px."],
-    ["pWork()", "wedge.js:94", "A plain page header, written inline, as most pages write theirs."],
+    ["pWork()", "wedge.js:74", "A plain page header, written inline, as most pages write theirs."],
   ],
   sourceNotes: [
     "No shared helper draws the page header. 18 page functions write `.phead` inline (14 in engine.js, 4 in wedge.js).",

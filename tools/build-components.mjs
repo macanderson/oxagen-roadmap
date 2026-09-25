@@ -260,6 +260,27 @@ ${sec("audit", "Audit prompt", "Paste it into a fresh agent session to audit eve
 ${foot}`;
 }
 
+// A helper row names a function and where it is: ["listify()", "engine.js:13785", …]. The engine moves
+// under every pull request, so a line number goes stale without anyone touching this registry. Each
+// row's line must define or call the function it names, or the build says where it moved.
+const SOURCES = {};
+const sourceLines = (f) => (SOURCES[f] ??= readFileSync(path.join(root, "mockups/src", f), "utf8").split("\n"));
+const lineErrors = [];
+function helperDrift(c) {
+  const out = [];
+  for (const [sig, where] of c.helpers || []) {
+    const m = /^(engine|wedge)\.js:(\d+)$/.exec(where);
+    if (!m) { out.push(`${c.slug}: helper ${sig} has no engine.js:N or wedge.js:N location`); continue; }
+    const name = sig.replace(/\(.*$/, "").trim();
+    const lines = sourceLines(`${m[1]}.js`);
+    if ((lines[+m[2] - 1] || "").includes(name)) continue;
+    const def = new RegExp(`^\\s*(function ${name}\\(|var ${name}\\s*=)`);
+    const at = lines.findIndex((l) => def.test(l));
+    out.push(`${c.slug}: ${name} is not at ${where}${at >= 0 ? `; it is defined at ${m[1]}.js:${at + 1}` : ""}`);
+  }
+  return out;
+}
+
 async function load() {
   const files = readdirSync(SRC).filter((f) => f.endsWith(".mjs") && !f.startsWith("_")).sort();
   const comps = [];
@@ -272,6 +293,7 @@ async function load() {
     if (!c.audit.checks || c.audit.checks.length < 5) throw new Error(`${f}: audit.checks needs at least five component checks`);
     comps.push(c);
   }
+  for (const c of comps) lineErrors.push(...helperDrift(c));
   const cat = (await import(pathToFileURL(path.join(SRC, "_catalog.mjs")).href)).default;
   const order = cat.groups.map((g) => g.name);
   comps.sort((a, b) => order.indexOf(a.group) - order.indexOf(b.group) || (a.order ?? 50) - (b.order ?? 50) || a.name.localeCompare(b.name));
@@ -299,6 +321,12 @@ out.set(MANIFEST, JSON.stringify({
     stories: c.stories.map((s) => ({ id: s.id, name: s.name, canvas: s.canvas || "ink", html: dedent(s.html) })),
   })),
 }, null, 2) + "\n");
+
+if (lineErrors.length) {
+  for (const e of lineErrors) console.log("drift " + e);
+  console.log(`${lineErrors.length} helper locations are stale; fix them in mockups/components/src`);
+  process.exit(1);
+}
 
 // A page in mockups/components/ that no module produced is stale.
 const stale = readdirSync(OUT).filter((f) => f.endsWith(".html") && !out.has(path.join(OUT, f)));
