@@ -18,7 +18,7 @@ Recorded problems with money behind them, and the evidence for each: a cache wri
 
 **Header.** As `work-backlog.md`: eyebrow the workspace name, h1 “Work”, subtext “What the agents work on, and what waits on you.” The Findings tab has no header action.
 
-**Tabs**: Backlog `7` · Work orders `1` · Workflows · Findings `36`, with Findings selected. Its count is the open findings nobody has picked up.
+**Tabs**: Backlog `7` · In progress · Work orders `1` · Workflows · Findings `36`, with Findings selected. Its count is the open findings nobody has picked up.
 
 **Tiles**, four across, one value and one caption each:
 

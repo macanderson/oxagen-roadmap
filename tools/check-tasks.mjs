@@ -2,7 +2,7 @@
 // Walks the Work surface of mockups/missioncontrol.html in headless Chromium, in the order an operator
 // meets it, and asserts what each step must show. The specs are docs/tasks-spec.md and
 // docs/fleet-operations-wedge.md; the pages are mockups/pages/work-backlog.md, work-intake.md,
-// work-item.md, work-orders.md, work-order.md and work-workflows.md. check-mockup.mjs opens every page
+// work-in-progress.md, work-item.md, work-orders.md, work-order.md and work-workflows.md. check-mockup.mjs opens every page
 // in every state; the wizard, the definition of done and the work order are interactions it never
 // reaches.
 //
@@ -28,6 +28,7 @@
 //  12. stages that need the same stage run beside each other, in the file and on the work order
 //  13. a dependency that would close a cycle is refused with the path
 //  14. a send to two agents makes two work orders under one send
+//  15. In progress holds the work items in a work order; the stat cards count both scopes; Labels and Owner filter on several values
 // Every assertion names a string the surface is supposed to render, never a value read back out of
 // the control under test.
 import { mkdirSync } from "node:fs";
@@ -353,7 +354,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
 {
   const { page, errs } = await open(H);
   let t = await text(page);
-  ok(/certified and unblocked/i.test(t), "graph: Ready to send counts unblocked work items");
+  ok(/3 ready to send/.test(await text(page, ".wk-stats")), "graph: Open counts only unblocked ready work items as ready to send");
   ok(/Blocked by/i.test(await text(page, "thead")), "graph: the Backlog carries a Blocked by column");
   const row640 = await text(page, 'tr[aria-label="Open a-intel/platform#640"]');
   ok(/blocked by #612, #618/.test(row640), "graph: a ready work item names its open blockers under its badge");
@@ -427,6 +428,56 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await page.waitForTimeout(150);
   ok(/Send again/.test(await text(page, ".phead")), "send: a stopped work order offers Send again");
   await done(page, errs, "send");
+}
+{
+  /* 15. In progress, the stat cards and the multi-select filters */
+  const { page, errs } = await open(H);
+  const tabs = await text(page, '[role=tablist][aria-label="Work"]');
+  ok(/^Backlog\s*\d*\s*In progress\s*Work orders/.test(tabs.trim()), "progress: In progress is the tab after Backlog");
+  const backlog = await text(page, "tbody");
+  ok(!/#482|#647|#599|#587/.test(backlog), "progress: no work item in a work order is on the Backlog");
+  ok(/1–10 of 15/.test(await text(page, ".lp-n")), "progress: the Backlog holds the 15 work items in no work order");
+  const cards = async () => (await text(page, ".wk-stats .grid"));
+  let c = await cards();
+  ok(/Open 13 3 ready to send/i.test(c) && /In progress 3 3 with a live run/i.test(c) && /In review 1 waiting on a person to accept/i.test(c) && /Pending approvals \d+ calls waiting on an approver/i.test(c), "progress: the four cards count the workspace");
+  await page.click('.wk-stats button:has-text("My work")');
+  await page.waitForTimeout(150);
+  c = await cards();
+  ok(/Open 7 2 ready to send/i.test(c) && /waiting on you to accept/.test(c) && /calls you can approve/.test(c), "progress: My work counts your work items and approvals");
+  ok(await page.locator('.wk-stats button:has-text("My work")').getAttribute("aria-pressed") === "true", "progress: the scope group marks My work pressed");
+  /* the Labels filter lists every label as its chip, and matches any value picked */
+  await page.click('.lt-mb[aria-label^="Filter by Labels"]');
+  await page.waitForTimeout(100);
+  const pop = page.locator(".lt-pop:popover-open");
+  ok((await pop.locator(".lt-o .lbl").count()) === 10, "filters: the Labels list draws each label as its chip");
+  await pop.locator('input[value="p0"]').check();
+  await pop.locator('input[value="chore"]').check();
+  await page.waitForTimeout(100);
+  const rows = await text(page, "tbody");
+  ok(/#633/.test(rows) && /PLAT-219/.test(rows) && !/#612/.test(rows), "filters: a row matches any label picked");
+  ok(/\+1/.test(await text(page, '.lt-mb[aria-label^="Filter by Labels"]')), "filters: the button shows the first pick and +1");
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(100);
+  ok((await page.locator(".lt-pop:popover-open").count()) === 0, "filters: Escape closes the list");
+  /* the Owner filter draws each owner with the avatar, and one member mapped from two accounts is one owner */
+  await page.click('.lt-mb[aria-label^="Filter by Owner"]');
+  await page.waitForTimeout(100);
+  const owners = await text(page, ".lt-pop:popover-open");
+  ok((owners.match(/Marcus Bell/g) || []).length === 1 && /not mapped/.test(owners), "filters: the Owner list names each member once and flags unmapped accounts");
+  ok((await page.locator(".lt-pop:popover-open .lt-o .tkp .avx, .lt-pop:popover-open .lt-o .tkp .ipl").count()) >= 5, "filters: each owner option carries its avatar or provider logo");
+  await page.mouse.click(700, 60);
+  await page.waitForTimeout(100);
+  ok((await page.locator(".lt-pop:popover-open").count()) === 0, "filters: a click outside closes the list");
+  await page.close();
+  /* the In progress tab */
+  const p2 = await open(H + "/in-progress");
+  const t2 = await text(p2.page, "thead");
+  ok(/Work item Labels Owner Work order Sent to State Items claimed Updated/i.test(t2), "progress: the In progress columns in order");
+  const r2 = await p2.page.evaluate(() => [...document.querySelectorAll("#pg tbody tr")].map(r => r.getAttribute("aria-label")).join(" "));
+  ok(/#482/.test(r2) && /#647/.test(r2) && /#599/.test(r2) && /#587/.test(r2) && (r2.match(/Open /g) || []).length === 4, "progress: In progress lists the four work items in a work order");
+  ok(/waiting on you/i.test(await text(p2.page, 'tr[aria-label="Open a-intel/platform#599"]')), "progress: a row shows its work order state");
+  ok((await p2.page.locator('.lt-mb[aria-label^="Filter by Labels"]').count()) === 1 && (await p2.page.locator('.lt-mb[aria-label^="Filter by Owner"]').count()) === 1, "progress: In progress has the Labels and Owner filters");
+  await done(p2.page, [...errs, ...p2.errs], "progress");
 }
 
 await browser.close();
