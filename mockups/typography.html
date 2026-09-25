@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Typography</title>
+<meta name="description" content="The three typefaces of the Oxagen app surface, the type scale the mockup ships, and the rules a build is audited against.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="docs-kit/fonts.css">
+<link rel="stylesheet" href="src/engine.css">
+<link rel="stylesheet" href="docs-kit/docs.css">
+<script src="docs-kit/docs.js"></script>
+<style>
+.ty-face-dsp{font-family:var(--font-display);font-size:44px;line-height:1.1;font-weight:700;letter-spacing:-.02em}
+.ty-face-txt{font-family:var(--font);font-size:30px;line-height:1.2;font-weight:600;letter-spacing:-.01em}
+.ty-face-mono{font-family:var(--mono);font-size:22px;line-height:1.35;font-weight:500}
+.ty-glyphs{margin-top:12px;font-size:15px;color:var(--muted);letter-spacing:.02em}
+.ty-glyphs.m{font-family:var(--mono);font-size:14px}
+.ty-live{display:grid;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:0 0 22px;background:var(--panel)}
+.ty-live>div{display:grid;grid-template-columns:minmax(0,1fr) 300px;border-top:1px solid var(--border)}
+.ty-live>div:first-child{border-top:0}
+.ty-live .smp{padding:16px 20px;background:var(--ink);min-width:0;overflow:hidden}
+.ty-live .smp .stat,.ty-live .smp .panel{max-width:420px}
+.ty-live .m{padding:12px 16px;border-left:1px solid var(--border);font-size:12px;color:var(--muted);display:grid;gap:2px;align-content:center}
+.ty-live .m b{font-size:12.5px;color:var(--fg);font-weight:600}
+.ty-live .m code{background:none;padding:0;font-size:11px}
+.ty-live .m .calc{font-family:var(--mono);font-size:11px;color:var(--body)}
+.ty-live .m .calc.bad{color:var(--st-denied)}
+@media(max-width:720px){.ty-live>div{grid-template-columns:minmax(0,1fr)}.ty-live .m{border-left:0;border-top:1px solid var(--border)}.ty-face-dsp{font-size:34px}}
+</style>
+</head>
+<body>
+<header class="dx-top">
+  <a class="dx-brand" href="components.html"><span class="dx-logo"></span><span class="dx-tag">design reference</span></a>
+  <nav class="dx-nav" aria-label="Reference pages">
+    <a href="typography.html" aria-current="page">Typography</a>
+    <a href="colors.html">Colors</a>
+    <a href="prose.html">Prose</a>
+    <a href="components.html">Components</a>
+  </nav>
+  <div class="dx-tools">
+    <a class="dx-open" href="missioncontrol.html">Open the mockup</a>
+    <div class="dx-seg" role="group" aria-label="Theme">
+      <button type="button" data-theme-set="system">System</button>
+      <button type="button" data-theme-set="dark">Dark</button>
+      <button type="button" data-theme-set="light">Light</button>
+    </div>
+  </div>
+</header>
+<div class="dx-shell">
+<aside class="dx-toc" aria-label="On this page"><p class="dx-toc-h">On this page</p><ol></ol></aside>
+<main class="dx-main" id="main">
+
+<div class="dx-hero">
+  <p class="eyebrow">Design reference</p>
+  <h1>Typography</h1>
+  <p class="dx-lead">The app surface uses three typefaces, and each has one job. Space Grotesk sets the page title. Geist sets everything a person reads. Monaspace Neon sets code, ids, and anything a person copies or compares character by character.</p>
+  <div class="dx-meta">
+    <span><b>Source</b> <code>mockups/src/engine.css</code> lines 16 to 70</span>
+    <span><b>Fonts</b> <code>tools/lib/house-fonts.mjs</code></span>
+    <span><b>Rule set</b> 2026-09-25</span>
+  </div>
+</div>
+
+<section class="dx-sec">
+  <h2 id="rule">The display face rule</h2>
+  <p class="dx-sub">Space Grotesk sets the page h1 in the app surface and nothing else.</p>
+  <ol class="dx-rules">
+    <li><div><b>Space Grotesk sets the page h1 only.</b><p>One per page: the page title in <code>.phead</code>, the record title in <code>.crec-h</code>, and the onboarding step title in <code>.ob-h</code>. It is never set below 20px, including on a phone.</p></div></li>
+    <li><div><b>Geist sets every other heading.</b><p>Section titles (h2), dialog titles, drill headers, card and panel titles (h3), group labels (h4), and table headers. It also sets body text, labels, buttons, tabs, badges, inputs, tooltips, and navigation.</p></div></li>
+    <li><div><b>Monaspace Neon sets code and identifiers.</b><p>Code blocks, inline code, the source editor, diffs, the transcript, commands, file paths, ids, digests, frame kinds, verdict values, and stored keys.</p></div></li>
+    <li><div><b>No fourth typeface.</b><p>The one exception is an operator's own avatar: the avatar editor offers Serif, which sets that monogram in Georgia.</p></div></li>
+  </ol>
+  <p>Space Grotesk has wide, geometric letters. At panel-title sizes (13 to 15px) the counters close up and the words blur, which is what made the table panel titles hard to read. Geist holds its shape down to 10px.</p>
+  <div class="dx-dd">
+    <div class="dx-dont">
+      <div class="dx-ex"><div class="panel"><div class="panel-h"><h3 style="font-family:var(--font-display)">Registered in Core platform</h3></div></div></div>
+      <p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="2" fill="none"/></svg>Avoid</b>A 13.5px panel title in Space Grotesk. This is the defect from the Agents page.</p>
+    </div>
+    <div class="dx-do">
+      <div class="dx-ex"><div class="panel"><div class="panel-h"><h3>Registered in Core platform</h3></div></div></div>
+      <p class="dx-why"><b><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3L13 5" stroke="currentColor" stroke-width="2" fill="none"/></svg>Use</b>The same title in Geist at 13.5px and 600. This is what <code>engine.css</code> draws now.</p>
+    </div>
+  </div>
+  <div class="dx-note"><b>Scope.</b> The brand kit allows Space Grotesk on h1 to h3 for marketing pages, which use a larger scale. The app surface keeps it to h1. The oxagen product app and the brand kit still carry the h1 to h3 rule; see <a href="#findings">Findings</a>.</div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="faces">Typefaces</h2>
+  <p class="dx-sub">Each face is a CSS token, and nothing names a family directly.</p>
+  <div class="dx-spec">
+    <div class="sample"><div class="ty-face-dsp">Agents</div><div class="ty-glyphs" style="font-family:var(--font-display)">Aa Bb Gg Rr 0123456789</div></div>
+    <div class="facts"><b>Space Grotesk</b><span>Display face</span><code>--font-display</code><span>Weights 500, 600, 700</span><span>Google Fonts</span><span>Page h1 only, 20px or larger</span></div>
+  </div>
+  <div class="dx-spec">
+    <div class="sample"><div class="ty-face-txt">Registered in Core platform</div><div class="ty-glyphs" style="font-family:var(--font)">Aa Bb Gg Rr Il1 0123456789 $1,284.50</div></div>
+    <div class="facts"><b>Geist</b><span>Text face</span><code>--font</code><span>Weights 400, 500, 600, 700</span><span>Google Fonts</span><span>Everything read</span></div>
+  </div>
+  <div class="dx-spec">
+    <div class="sample"><div class="ty-face-mono">run_01K5RS7M2E8FJ3QW</div><div class="ty-glyphs m">[rules] deny_tools = ["git_push"] != => 0O Il1</div></div>
+    <div class="facts"><b>Monaspace Neon</b><span>Code face</span><code>--mono</code><span>Variable, 200 to 800</span><span>Vendored, SIL OFL</span><span>Code, ids, commands</span></div>
+  </div>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Token</th><th>Stack</th><th>Loaded from</th></tr></thead>
+    <tbody>
+      <tr><td><code>--font-display</code></td><td class="wrap"><code>"Space Grotesk","Helvetica Neue",Arial,sans-serif</code></td><td>Google Fonts, weights 500 to 700</td></tr>
+      <tr><td><code>--font</code></td><td class="wrap"><code>"Geist",system-ui,-apple-system,"Segoe UI",sans-serif</code></td><td>Google Fonts, weights 400 to 700</td></tr>
+      <tr><td><code>--mono</code></td><td class="wrap"><code>"Monaspace Neon",ui-monospace,"SF Mono",Menlo,Consolas,monospace</code></td><td><code>design/fonts/monaspace-neon-latin-wght.woff2</code>, inlined as a data URI by the build</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="scale">Type scale</h2>
+  <p class="dx-sub">The sizes the mockup ships, one row per role.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Role</th><th>Selector</th><th>Face</th><th>Size</th><th>Weight</th><th>Tracking and case</th><th>Color</th></tr></thead>
+    <tbody>
+      <tr><td>Page title</td><td><code>.phead h1</code></td><td>Space Grotesk</td><td>24px, phone 20px</td><td>700</td><td>−0.015em</td><td><code>--fg</code></td></tr>
+      <tr><td>Record title</td><td><code>.crec-h h1</code></td><td>Space Grotesk</td><td>21px / 1.35, phone 20px</td><td>600</td><td>−0.015em</td><td><code>--fg</code></td></tr>
+      <tr><td>Onboarding title</td><td><code>.ob-h h1</code></td><td>Space Grotesk</td><td>28px / 1.15, phone 23px</td><td>700</td><td>−0.015em</td><td><code>--fg</code></td></tr>
+      <tr><td>Drill header</td><td><code>.drill-head h2</code></td><td>Geist</td><td>22px</td><td>700</td><td>−0.02em</td><td><code>--fg</code></td></tr>
+      <tr><td>Section title</td><td><code>h2</code></td><td>Geist</td><td>18px</td><td>600</td><td>−0.015em</td><td><code>--fg</code></td></tr>
+      <tr><td>Dialog title</td><td><code>.dlg-h h2</code></td><td>Geist</td><td>16px</td><td>600</td><td>−0.015em</td><td><code>--fg</code></td></tr>
+      <tr><td>Card title</td><td><code>h3</code></td><td>Geist</td><td>15px</td><td>600</td><td>−0.015em</td><td><code>--fg</code></td></tr>
+      <tr><td>Panel title</td><td><code>.panel-h h3</code></td><td>Geist</td><td>13.5px</td><td>600</td><td>−0.015em</td><td><code>--fg</code></td></tr>
+      <tr><td>Group label</td><td><code>h4</code></td><td>Geist</td><td>13px</td><td>600</td><td>−0.015em</td><td><code>--fg</code></td></tr>
+      <tr><td>Body</td><td><code>body</code>, <code>p</code></td><td>Geist</td><td>14px / 1.55</td><td>400</td><td>none</td><td><code>--body</code></td></tr>
+      <tr><td>Page subtext</td><td><code>.phead p</code></td><td>Geist</td><td>13px, 70ch wide</td><td>400</td><td>none</td><td><code>--muted</code></td></tr>
+      <tr><td>Table cell</td><td><code>td</code></td><td>Geist</td><td>13px</td><td>400</td><td>none</td><td><code>--fg</code></td></tr>
+      <tr><td>Table header</td><td><code>th</code></td><td>Geist</td><td>10.5px</td><td>600</td><td>0.09em, capitals</td><td><code>--dim</code></td></tr>
+      <tr><td>Stat label</td><td><code>.stat .k</code></td><td>Geist</td><td>10.5px</td><td>600</td><td>0.1em, capitals</td><td><code>--dim</code></td></tr>
+      <tr><td>Stat value</td><td><code>.stat .v</code></td><td>Geist</td><td>23px / 1.15</td><td>700</td><td>−0.02em, tabular figures</td><td><code>--fg</code></td></tr>
+      <tr><td>Stat subline</td><td><code>.stat .s</code></td><td>Geist</td><td>11.5px</td><td>400</td><td>none</td><td><code>--muted</code></td></tr>
+      <tr><td>Hero figure</td><td><code>.sv-amt</code></td><td>Geist</td><td>42px / 1</td><td>700</td><td>−0.03em, tabular figures</td><td><code>--fg</code></td></tr>
+      <tr><td>Eyebrow</td><td><code>.eyebrow</code></td><td>Geist</td><td>12px</td><td>600</td><td>0.14em, capitals</td><td><code>--accent-text</code>, <code>.q</code> <code>--muted</code></td></tr>
+      <tr><td>Button</td><td><code>.btn</code></td><td>Geist</td><td>13px, <code>.sm</code> 12px</td><td>500, primary 600</td><td>none</td><td><code>--fg</code></td></tr>
+      <tr><td>Tab</td><td><code>.tab</code></td><td>Geist</td><td>13px</td><td>500</td><td>none</td><td><code>--muted</code>, selected <code>--fg</code></td></tr>
+      <tr><td>Badge</td><td><code>.b</code></td><td>Geist</td><td>11px / 1.5</td><td>600</td><td>0.02em</td><td>state token</td></tr>
+      <tr><td>Kind badge</td><td><code>.kb</code></td><td>Geist</td><td>11px</td><td>600</td><td>0.05em, capitals</td><td>kind token</td></tr>
+      <tr><td>Field label</td><td><code>.field label</code></td><td>Geist</td><td>12px</td><td>600</td><td>none</td><td><code>--muted</code></td></tr>
+      <tr><td>Input</td><td><code>.field input</code></td><td>Geist</td><td>13px, phone 16px</td><td>400</td><td>none</td><td><code>--fg</code></td></tr>
+      <tr><td>Hint</td><td><code>.field .hint</code></td><td>Geist</td><td>11.5px</td><td>400</td><td>none</td><td><code>--dim</code></td></tr>
+      <tr><td>Note</td><td><code>.note</code></td><td>Geist</td><td>12.5px</td><td>400</td><td>none</td><td><code>--muted</code></td></tr>
+      <tr><td>Inline code</td><td><code>code</code></td><td>Monaspace Neon</td><td>0.9em</td><td>400</td><td>none</td><td>inherits, on <code>--hl</code></td></tr>
+      <tr><td>Inline mono</td><td><code>.mono</code></td><td>Monaspace Neon</td><td>0.92em</td><td>inherits</td><td>none</td><td>inherits</td></tr>
+      <tr><td>Code block</td><td><code>pre</code></td><td>Monaspace Neon</td><td>12px / 1.55</td><td>400</td><td>none</td><td><code>--body</code> on <code>--void</code></td></tr>
+      <tr><td>Source editor</td><td><code>.ed-scroll</code></td><td>Monaspace Neon</td><td>12.5px / 20px</td><td>400</td><td>tab size 2</td><td>syntax tokens on <code>--void</code></td></tr>
+      <tr><td>Diff</td><td><code>.diff</code></td><td>Monaspace Neon</td><td>11.5px / 1.6</td><td>400</td><td>none</td><td>on <code>--void</code></td></tr>
+      <tr><td>Tier badge</td><td><code>.b-tier</code></td><td>Monaspace Neon</td><td>10.5px</td><td>500</td><td>lowercase</td><td>inherits</td></tr>
+      <tr><td>Count and timestamp</td><td><code>.tab .n</code>, <code>.li time</code></td><td>Monaspace Neon</td><td>10 to 10.5px</td><td>400</td><td>none</td><td><code>--dim</code></td></tr>
+    </tbody>
+  </table></div></div>
+  <div class="dx-note info"><b>Scale drift.</b> The brand kit's app scale is 30, 24, 20, and 16px for h1 to h4. The mockup runs denser at 24, 18, 15, and 13px. This page records what the mockup ships; the kit or the mockup changes when Mac picks one.</div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="live">Computed specimens</h2>
+  <p class="dx-sub">Each row is the real engine markup, measured by the browser on load.</p>
+  <div class="ty-live" id="ty-live">
+    <div><div class="smp"><div class="phead"><div class="t"><h1 data-m>Agents</h1><p data-m>Every agent registered in Core platform, with its runtime and owner.</p></div></div></div><div class="m" data-for="0"><b>Page title and subtext</b><code>.phead h1</code><code>.phead p</code></div></div>
+    <div><div class="smp"><h2 data-m>Spend by area</h2></div><div class="m"><b>Section title</b><code>h2</code></div></div>
+    <div><div class="smp"><div class="drill-head"><h2 data-m>a-intel.core.release-manager</h2></div></div><div class="m"><b>Drill header</b><code>.drill-head h2</code></div></div>
+    <div><div class="smp"><div class="panel"><div class="panel-h"><h3 data-m>Registered in Core platform</h3></div></div></div><div class="m"><b>Panel title</b><code>.panel-h h3</code></div></div>
+    <div><div class="smp"><h3 data-m>Repository</h3></div><div class="m"><b>Card title</b><code>h3</code></div></div>
+    <div><div class="smp"><h4 data-m>Toolbelt</h4></div><div class="m"><b>Group label</b><code>h4</code></div></div>
+    <div><div class="smp"><p data-m>The release manager prepares release notes and opens the pull request that cuts the tag.</p></div><div class="m"><b>Body</b><code>p</code></div></div>
+    <div><div class="smp"><div class="stat"><span class="k" data-m>Tokens</span><span class="v" data-m>1.84M</span><span class="s" data-m>62% cache reads</span></div></div><div class="m"><b>Stat box</b><code>.stat .k .v .s</code></div></div>
+    <div><div class="smp"><div class="panel"><div class="tw"><table class="narrow"><thead><tr><th data-m>Agent</th><th>Owner</th></tr></thead><tbody><tr><td data-m>Release manager</td><td>Marcus Bell</td></tr></tbody></table></div></div></div><div class="m"><b>Table header and cell</b><code>th</code><code>td</code></div></div>
+    <div><div class="smp"><p class="eyebrow" data-m>Core platform</p></div><div class="m"><b>Eyebrow</b><code>.eyebrow</code></div></div>
+    <div><div class="smp dx-row"><button class="btn" data-m>Export report</button><button class="btn primary">Set a budget</button><span class="b b-allowed" data-m><span class="d"></span>allowed</span></div><div class="m"><b>Button and badge</b><code>.btn</code><code>.b</code></div></div>
+    <div><div class="smp"><div class="tabs" style="margin:0"><button class="tab" aria-selected="true" data-m>Transcript<span class="n">48</span></button><button class="tab">Cost</button></div></div><div class="m"><b>Tab</b><code>.tab</code></div></div>
+    <div><div class="smp"><p style="margin:0">Pinned to <code data-m>release/2026.09</code> at <span class="mono" data-m>a4c91e2</span></p></div><div class="m"><b>Inline code and mono</b><code>code</code><code>.mono</code></div></div>
+    <div><div class="smp"><pre data-m>[rules]
+deny_tools = ["git_push --force"]
+budget.per_run_usd = 4.00</pre></div><div class="m"><b>Code block</b><code>pre</code></div></div>
+  </div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="headings">Headings</h2>
+  <p class="dx-sub">A page has one h1, and every heading below it names a thing.</p>
+  <div class="dx-tbl"><div class="tw"><table>
+    <thead><tr><th>Level</th><th>Used for</th><th>Face</th><th>Count per page</th></tr></thead>
+    <tbody>
+      <tr><td><code>h1</code></td><td>The page, record, or onboarding step title</td><td>Space Grotesk</td><td>Exactly one</td></tr>
+      <tr><td><code>h2</code></td><td>A section, a dialog, a drill header, an empty or error state</td><td>Geist</td><td>Any</td></tr>
+      <tr><td><code>h3</code></td><td>A panel, a card, a drawer section</td><td>Geist</td><td>Any</td></tr>
+      <tr><td><code>h4</code></td><td>A group inside a panel or a form</td><td>Geist</td><td>Any</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>Headings are sentence case and plain nouns: "Spend by area", "Repository", "Toolbelt". <a href="prose.html#headings">Prose</a> has the full rule.</li>
+    <li>Subtext under a heading is one sentence or nothing, in <code>--muted</code> at 12.5 to 13px.</li>
+    <li>A heading that holds an id is set in mono with <code>class="mono"</code>, and its size drops a step (18 to 20px for an h1).</li>
+    <li>Heading levels follow the document outline. Pick the level for structure, then let the selector set the size.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="text">Body and interface text</h2>
+  <p class="dx-sub">Geist at 13 to 14px carries almost every word on the surface.</p>
+  <ul>
+    <li><b>Body</b> is 14px with a 1.55 line height. Paragraphs stop at 70 to 78 characters (<code>max-width:70ch</code> on page subtext, <code>78ch</code> on record statements).</li>
+    <li><b>Secondary text</b> (subtext, stat sublines, notes) is 11.5 to 13px in <code>--muted</code>.</li>
+    <li><b>Controls</b>: buttons and tabs are 13px at 500; a small button is 12px. A gold primary button is 600.</li>
+    <li><b>Inputs</b> are 13px, and 16px in the phone shell so iOS does not zoom on focus. Touch targets there are 44px tall.</li>
+    <li><b>The floor</b> is 10px, used only for mono counts and timestamps. Nothing a person must read to act is below 11px.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="caps">Capital labels</h2>
+  <p class="dx-sub">Five roles are set in capitals, and CSS does the capitalizing.</p>
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Role</th><th>Selector</th><th>Size and tracking</th></tr></thead>
+    <tbody>
+      <tr><td>Eyebrow</td><td><code>.eyebrow</code></td><td>12px, 0.14em</td></tr>
+      <tr><td>Table header</td><td><code>th</code></td><td>10.5px, 0.09em</td></tr>
+      <tr><td>Stat label</td><td><code>.stat .k</code></td><td>10.5px, 0.1em</td></tr>
+      <tr><td>Kind badge</td><td><code>.kb</code></td><td>11px, 0.05em</td></tr>
+      <tr><td>Group label</td><td><code>.rg&gt;h4</code>, <code>.wo-sec h4</code></td><td>11 to 12px, 0.08 to 0.13em</td></tr>
+    </tbody>
+  </table></div></div>
+  <ul>
+    <li>Write the source in sentence case ("Agent", "Tokens"). <code>text-transform:uppercase</code> sets the capitals, so a screen reader reads a word and a copy keeps its case.</li>
+    <li>An identifier inside a capital label keeps its case: wrap it in <code>.id</code>. <span class="eyebrow id" style="display:inline;margin:0">wo_01K6T9QX</span> stays lowercase.</li>
+    <li>Capitals get positive tracking. Everything else is set at 0 or tighter.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="mono">Monospace</h2>
+  <p class="dx-sub">Monaspace Neon sets the code editor and every source display.</p>
+  <div class="dx-g2">
+    <div class="dx-card"><span class="dx-k">Mockup</span><h3>Confirmed</h3><p><code>--mono</code> is <code>"Monaspace Neon"</code> (<code>engine.css:16</code>). The source editor (<code>.ed-scroll</code>, line 953), <code>pre</code> (298), <code>code</code> (302), diffs (<code>.diff</code>, 974), and the transcript (<code>.tx-*</code>) all read it. The build inlines the font file, so the mockup sets it offline.</p></div>
+    <div class="dx-card"><span class="dx-k">Product app</span><h3>Confirmed</h3><p><code>packages/ui/src/styles/house-fonts.css:14</code> loads Monaspace Neon, <code>globals.css:987</code> maps it to <code>--font-mono</code>, and <code>apps/app/src/ui/code-editor.tsx</code> sets the textarea and its highlighted twin in it.</p></div>
+  </div>
+  <h3>What is set in mono</h3>
+  <ul>
+    <li>Code, commands, terminal output, logs, and diffs.</li>
+    <li>Ids and references: <code>run_01K5RS7M2E8FJ3QW</code>, <code>wo_01K6T9QX</code>, <code>a4c91e2</code>, <code>a-intel/platform#590</code>.</li>
+    <li>File paths, branch names, digests, hashes, and stored keys shown as keys.</li>
+    <li>Frame kinds (<code>tool.call</code>), verdict values (<code>held</code>), and tier names (<code>gateway</code>).</li>
+    <li>Counts in tabs and navigation, and timestamps in lists.</li>
+  </ul>
+  <h3>What stays in Geist</h3>
+  <ul>
+    <li>Money and stat values. They use Geist with <code>font-variant-numeric:tabular-nums</code>, so figures line up without a code face.</li>
+    <li>A stored key shown to a person. The page shows its label ("Observed by gateway") and keeps the key (<code>gateway_observed</code>) in a tooltip.</li>
+  </ul>
+  <h3>Features</h3>
+  <p>Monaspace's texture healing rides the <code>calt</code> feature, and its code ligatures ride <code>liga</code>. Both are on by default in every browser, and nothing in <code>engine.css</code> turns them off. Never set <code>font-variant-ligatures:none</code> on mono text.</p>
+  <h3>Sizes</h3>
+  <p><code>.mono</code> is <code>0.92em</code> and <code>code</code> is <code>0.9em</code>, so inline mono matches the x-height of the Geist around it. Blocks set their own size: <code>pre</code> 12px, the editor 12.5px on a 20px line, diffs 11.5px.</p>
+</section>
+
+<section class="dx-sec">
+  <h2 id="numbers">Figures</h2>
+  <p class="dx-sub">Numbers that are compared line up.</p>
+  <ul>
+    <li>Stat values, table columns of figures, meters, and pagers use tabular figures (<code>.num</code> or <code>font-variant-numeric:tabular-nums</code>).</li>
+    <li>Money goes through <code>usd()</code>: a dollar sign, thousands separators, two decimals, and a true minus sign (−). Counts go through <code>plural()</code>. <a href="prose.html#numbers">Prose</a> has the wording rules.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="weights">Weights</h2>
+  <p class="dx-sub">Four weights are loaded and four are used.</p>
+  <div class="dx-tbl"><div class="tw"><table class="narrow">
+    <thead><tr><th>Weight</th><th>Used for</th></tr></thead>
+    <tbody>
+      <tr><td>400</td><td>Body, table cells, inputs, subtext, code</td></tr>
+      <tr><td>500</td><td>Buttons, tabs, links in navigation, tier badges</td></tr>
+      <tr><td>600</td><td>h2 to h4, panel titles, labels, badges, table headers, the gold button</td></tr>
+      <tr><td>700</td><td>The page h1, stat values, drill headers, hero figures</td></tr>
+    </tbody>
+  </table></div></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="loading">Loading</h2>
+  <p class="dx-sub">Two faces come from Google Fonts and the code face ships with the mockup.</p>
+<pre>&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;
+&lt;link rel="preconnect" href="https://fonts.gstatic.com" crossorigin&gt;
+&lt;link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap"&gt;</pre>
+  <ul class="dx-mt">
+    <li><code>tools/build-mockup.mjs</code> writes that link (the <code>FONT</code> constant) and inlines Monaspace Neon through <code>monoFontFace()</code> in <code>tools/lib/house-fonts.mjs</code>.</li>
+    <li>These reference pages load Monaspace from <code>design/fonts/</code> through <code>docs-kit/fonts.css</code>. The Vercel build keeps that folder.</li>
+    <li>Every face uses <code>font-display:swap</code>. The fallbacks in each stack keep line lengths close while a face loads.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="wordmarks">Wordmarks</h2>
+  <p class="dx-sub">The marks are artwork, and the brand sets them in Space Grotesk.</p>
+  <ul>
+    <li>The oxagen lockup and the stella wordmark are SVG paths (<code>LOGO</code>, <code>stellaWordmark()</code>). They are drawn, so the type rule does not apply to them.</li>
+    <li>Three places set a name as text in the wordmark's face: <code>.stl-ask</code> ("Ask stella*" on the assistant launcher, 13.5px), <code>.stl-name</code> (the name in an assistant message, 12.5px), and <code>.ox-name</code> (oxagen on the launcher's second line, 11px). Mac chose this on 2026-09-21, and <code>tools/check-assistant.mjs</code> asserts it. It is the one open exception below 20px; see <a href="#findings">Findings</a>.</li>
+  </ul>
+</section>
+
+<section class="dx-sec">
+  <h2 id="findings">Findings</h2>
+  <p class="dx-sub">What the 2026-09-25 font audit changed and what it left open.</p>
+  <div class="dx-find"><h4><span class="b b-allowed"><span class="d"></span>fixed</span>Space Grotesk on every h2 and h3</h4><p><code>engine.css:61</code> set <code>h1,h2,h3</code> in the display face, so every panel title (13.5px), card title (15px), section title (18px), and dialog title (16px) rendered in Space Grotesk. The rule is now <code>h1</code> only, in rev1 and in <code>future_state_mockups/</code>. <code>approved-profile-flow/</code> set its card h2 in the display face locally; that is Geist now.</p></div>
+  <div class="dx-find"><h4><span class="b b-allowed"><span class="d"></span>fixed</span>Display face below 20px</h4><p>The record title dropped to 18px on a phone, and a record title over 90 characters dropped to 19px. Both stop at 20px now.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>Text-set wordmarks</h4><p><code>.stl-ask</code>, <code>.stl-name</code>, and <code>.ox-name</code> set names in Space Grotesk at 11 to 13.5px. Moving them to Geist is a one-line change in <code>engine.css</code> plus the four assertions in <code>tools/check-assistant.mjs</code>. It waits on Mac, since the 2026-09-21 decision put them there.</p></div>
+  <div class="dx-find"><h4><span class="b b-approval"><span class="d"></span>open</span>The brand kit and the product app say h1 to h3</h4><p>The <code>oxagen-branding</code> checklist and <code>oxagen/packages/ui/src/styles/globals.css:1022</code> still set h1 to h3 in Space Grotesk. The fix belongs in the brand kit first, then the vendored copies and the app.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>Frozen copies keep the old rule</h4><p><code>mockups/rev-2/</code> is a snapshot that is never edited, and <code>mockups/v2/</code> is shelved. Both keep <code>h1,h2,h3</code> in Space Grotesk and are not the design of rev1.</p></div>
+  <div class="dx-find"><h4><span class="b b-q">note</span>9.5px text</h4><p>Three rules set 9.5px: a finding's avatar initials (<code>.fnd .who .av</code>), the workspace switcher badge, and the debug chrome label. All three are below the 10px floor.</p></div>
+</section>
+
+<section class="dx-sec">
+  <h2 id="audit">Audit prompt</h2>
+  <p class="dx-sub">Paste it into a fresh agent session to audit a build's typography against this page.</p>
+  <div class="dx-prompt" id="prompt-box">
+    <div class="dx-prompt-h"><div class="t"><b>Typography audit</b><span>Fill <code>{{APP_ROOT}}</code>, <code>{{APP_URL}}</code>, and <code>{{DATE}}</code>. The agent reports and fixes nothing.</span></div>
+      <div class="acts"><button type="button" class="btn sm ghost" data-expand="#prompt-box" aria-expanded="false">Show all</button><button type="button" class="btn primary sm" data-copy="#audit-prompt" data-copied="Audit prompt copied">Copy prompt</button></div></div>
+<pre id="audit-prompt">You are auditing the typography of the Oxagen build at {{APP_ROOT}}, served at {{APP_URL}}, against its design reference. Be exact and adversarial: the reference is the spec, and close enough is a fail. Do not summarize what you see. Compare it.
+
+## Inputs
+
+1. mockups/typography.html in the roadmap repo. Read it in full. Its rules, its type scale table, and its monospace section are the spec.
+2. mockups/src/engine.css: lines 1 to 70 (the font tokens and the heading rules), and every rule that sets font-family, font-size, font-weight, letter-spacing, or text-transform.
+3. The build's global stylesheet, its font loading (next/font, @font-face, or a link tag), and its token or Tailwind config.
+4. Routes to sample, desktop at 1440 by 1000: Work, Agents, one agent's Overview, one run, Spend, Steering, one dialog, and the approvals drawer. Then the phone shell at 390 by 844 with a touch pointer.
+
+## Procedure
+
+Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and line in the build, or a DOM selector with its computed style (getComputedStyle: fontFamily, fontSize, fontWeight, lineHeight, letterSpacing, textTransform).
+
+1. Faces loaded. Exactly three families load: Space Grotesk, Geist, and Monaspace Neon. Report each one's source and loaded weights. Any other family in first position of a computed fontFamily is a FAIL, except Georgia on an avatar the operator set to Serif.
+2. Space Grotesk scope. Collect every element whose computed fontFamily starts with Space Grotesk. Each must be the page h1 at 20px or larger, or a wordmark. Every other hit is a FAIL: list its selector, text, size, and route. Panel titles, card titles, section and dialog titles, drill headers, table headers, stat values, tabs, and buttons in Space Grotesk are the known failure.
+3. One h1. Every routed page has exactly one h1, and it is the page, record, or onboarding step title.
+4. Geist scope. h2, h3, h4, body text, labels, buttons, tabs, badges, inputs, table headers and cells, tooltips, and navigation compute to Geist.
+5. Monaspace scope. pre, code, kbd, the source editor, diffs, the transcript, ids (run_, wo_, tsk_), commit hashes, digests, file paths, commands, frame kinds, verdict values, and stored keys shown as keys compute to Monaspace Neon. A fallback family in first position (ui-monospace, SF Mono, Menlo, Consolas, JetBrains Mono, Geist Mono, Courier) is a FAIL.
+6. Code editor. Open a steering source or an agent definition in the editor. The textarea and the highlighted layer beneath it both compute to Monaspace Neon with the same font size, line height, and padding. Type a long line and confirm the caret stays on its glyph. A mismatch is a FAIL.
+7. Ligatures. Nothing sets font-variant-ligatures: none, or a font-feature-settings that drops calt or liga, on monospace text.
+8. Scale. For every row of the type scale table, find the build's equivalent element and compare size, weight, line height, tracking, case, and color token. A size off by more than 0.5px, or any weight, case, or face difference, is a FAIL. Quote both values.
+9. Floor. No text renders below 10px. Nothing a person must read to act renders below 11px. Inputs, selects, and textareas compute to 16px in the phone shell.
+10. Capitals. Headings, buttons, labels, and table headers are sentence case in the source. Capitals come only from text-transform, and only on eyebrows, table headers, stat labels, kind badges, and group labels. An identifier inside a capital label keeps its case.
+11. Figures. Stat values and figure columns use tabular figures, and a column of amounts lines up.
+12. Line length. Body paragraphs stop at about 78 characters.
+13. Weights. Only 400, 500, 600, and 700 are in use. List any other weight with its selector.
+14. Phone shell. The page h1 is 20px, nothing scrolls sideways, and no heading wraps to more than three lines.
+15. Themes. Repeat checks 2, 4, and 5 in the light theme. Typography does not change with the theme.
+
+## Output
+
+Return one markdown report:
+
+# Typography: audit {{DATE}}
+Verdict: PASS or FAIL (n fails, m notes)
+
+| # | Check | Result | Evidence | Fix |
+|---|---|---|---|---|
+
+## Space Grotesk outside the page h1
+| Selector | Text | Size | Route |
+|---|---|---|---|
+
+## Fails, most severe first
+1. What is wrong. Where it is. What the reference shows. The smallest change that fixes it.
+
+Rules: never mark PASS on an assumption. Open the file or read the computed style. If the build cannot be started, stop and report that as the single FAIL.</pre>
+  </div>
+</section>
+
+</main>
+</div>
+<script>
+/* Fills the right column of each computed specimen from the browser's own reading of engine.css,
+   so the numbers on this page are what the mockup renders in this browser. */
+(function(){
+  function face(f){return (f||"").split(",")[0].replace(/["']/g,"").trim()}
+  function fill(){
+    var rows=document.querySelectorAll("#ty-live>div");
+    Array.prototype.forEach.call(rows,function(row){
+      var box=row.querySelector(".m");
+      Array.prototype.forEach.call(box.querySelectorAll(".calc"),function(n){n.remove()});
+      Array.prototype.forEach.call(row.querySelectorAll("[data-m]"),function(el){
+        var cs=getComputedStyle(el),fs=parseFloat(cs.fontSize);
+        var lh=cs.lineHeight==="normal"?"normal":(parseFloat(cs.lineHeight)/fs).toFixed(2);
+        var ls=cs.letterSpacing==="normal"?"0":(parseFloat(cs.letterSpacing)/fs).toFixed(3)+"em";
+        var f=face(cs.fontFamily);
+        var s=document.createElement("span");s.className="calc";
+        var bad=/Space Grotesk/.test(f)&&(el.tagName!=="H1"||fs<20);
+        if(bad)s.classList.add("bad");
+        s.textContent=el.tagName.toLowerCase()+(el.className?"."+String(el.className).split(" ")[0]:"")+": "+f+" "+(+fs.toFixed(2))+"px / "+lh+", "+cs.fontWeight+", "+ls+(cs.textTransform!=="none"?", "+cs.textTransform:"");
+        box.appendChild(s);
+      });
+    });
+  }
+  document.addEventListener("DOMContentLoaded",function(){
+    if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fill);else fill();
+  });
+})();
+</script>
+</body>
+</html>

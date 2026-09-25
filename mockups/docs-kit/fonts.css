@@ -1,0 +1,6 @@
+/* Monaspace Neon, the house code face. It is on no public CDN, so the reference pages load the
+   vendored file from design/fonts, which the Vercel build keeps (.vercelignore). The built mockup
+   inlines the same file as a data URI through tools/lib/house-fonts.mjs. Geist and Space Grotesk
+   load from Google Fonts in each page's head. */
+@font-face{font-family:"Monaspace Neon";font-style:normal;font-weight:200 800;font-display:swap;
+  src:url("../../design/fonts/monaspace-neon-latin-wght.woff2") format("woff2")}

@@ -1,0 +1,224 @@
+/* The chrome of the design reference pages: mockups/typography.html, colors.html, prose.html,
+   components.html and every file in mockups/components/. The components themselves are drawn by
+   mockups/src/engine.css, which each page links first, so a component shown here is the component
+   the mockup ships. Every class in this file starts with dx- so none collides with the engine. */
+
+:root{--dx-top:56px;--dx-toc:212px;--dx-max:1320px}
+html{scroll-padding-top:calc(var(--dx-top) + 20px)}
+body.dx{background:var(--ink);color:var(--body);font-family:var(--font);font-size:14px;line-height:1.55}
+/* Links in the reference prose only. A link inside an example keeps the engine's own style. */
+.dx :where(.dx-sec>p,.dx-sec>ul,.dx-sec>ol,.dx-note,.dx-card,.dx-find,.dx-kv,.dx-meta,.dx-crumb,.dx-lead,.dx-why,.dx-tbl td,.dx-rules) a{color:var(--fg);text-decoration:underline;text-decoration-color:var(--rule);text-underline-offset:3px}
+.dx :where(.dx-sec>p,.dx-sec>ul,.dx-sec>ol,.dx-note,.dx-card,.dx-find,.dx-kv,.dx-meta,.dx-crumb,.dx-lead,.dx-why,.dx-tbl td,.dx-rules) a:hover{text-decoration-color:var(--fg)}
+
+/* ---------- top bar ---------- */
+.dx-top{position:sticky;top:0;z-index:50;height:var(--dx-top);display:flex;align-items:center;gap:22px;
+  padding:0 24px;background:color-mix(in srgb,var(--ink) 90%,transparent);backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--border)}
+.dx-brand{display:flex;align-items:center;gap:12px;flex:none;text-decoration:none!important;color:var(--fg)}
+.dx-logo{display:block;width:120px;height:auto;color:var(--fg)}
+.dx-logo svg{display:block;width:120px;height:auto}
+.dx-brand .dx-tag{font-family:var(--mono);font-size:11px;color:var(--muted);border:1px solid var(--border);
+  border-radius:6px;padding:1px 7px;white-space:nowrap}
+.dx-nav{display:flex;gap:2px;min-width:0;overflow-x:auto;scrollbar-width:none}
+.dx-nav::-webkit-scrollbar{display:none}
+.dx-nav a{padding:7px 11px;border-radius:8px;font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;white-space:nowrap}
+.dx-nav a:hover{color:var(--fg);background:var(--hl)}
+.dx-nav a[aria-current="page"]{color:var(--fg);background:var(--hl)}
+.dx-tools{margin-left:auto;display:flex;align-items:center;gap:10px;flex:none}
+.dx-seg{display:inline-flex;border:1px solid var(--border);border-radius:9px;padding:2px;background:var(--void)}
+.dx-seg button{border:0;background:none;color:var(--muted);font-size:12px;font-weight:500;padding:4px 10px;border-radius:7px;cursor:pointer}
+.dx-seg button:hover{color:var(--fg)}
+.dx-seg button[aria-pressed="true"]{background:var(--panel);color:var(--fg);box-shadow:var(--shadow-sm)}
+.dx-tools .dx-open{font-size:12.5px;color:var(--muted);white-space:nowrap}
+
+/* ---------- page frame ---------- */
+.dx-shell{max-width:var(--dx-max);margin:0 auto;padding:0 24px;display:grid;
+  grid-template-columns:var(--dx-toc) minmax(0,1fr);gap:56px}
+.dx-toc{position:sticky;top:calc(var(--dx-top) + 28px);align-self:start;max-height:calc(100vh - var(--dx-top) - 56px);
+  overflow:auto;padding:28px 0 40px;scrollbar-width:thin}
+.dx-toc .dx-toc-h{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 10px}
+.dx-toc ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--border)}
+.dx-toc li a{display:block;padding:5px 0 5px 14px;margin-left:-1px;border-left:1px solid transparent;font-size:12.5px;
+  color:var(--muted);text-decoration:none;line-height:1.4}
+.dx-toc li a:hover{color:var(--fg)}
+.dx-toc li a[aria-current="true"]{color:var(--fg);border-left-color:var(--fg);font-weight:500}
+.dx-toc .dx-toc-sub a{padding-left:26px;font-size:12px}
+.dx-main{min-width:0;padding-bottom:96px;max-width:1000px}
+
+/* ---------- hero ---------- */
+.dx-crumb{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--muted);margin:32px 0 18px}
+.dx-crumb a{color:var(--muted)}
+.dx-hero{padding:40px 0 30px}
+.dx-crumb+.dx-hero{padding-top:0}
+.dx-hero h1{font-size:34px;line-height:1.12;font-weight:700;letter-spacing:-.02em;margin:0 0 12px;color:var(--fg)}
+.dx-lead{font-size:16px;line-height:1.6;color:var(--body);max-width:68ch;margin:0 0 18px}
+.dx-meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12px;color:var(--muted)}
+.dx-meta b{font-weight:500;color:var(--body)}
+.dx-meta code{font-size:11.5px}
+
+/* ---------- sections ---------- */
+.dx-sec{padding:40px 0 8px;border-top:1px solid var(--border)}
+.dx-sec>h2,.dx-sec h2.dx-h2{font-size:21px;line-height:1.3;font-weight:600;letter-spacing:-.01em;color:var(--fg);margin:0 0 6px}
+.dx-sub{font-size:14px;color:var(--muted);margin:0 0 20px;max-width:72ch}
+/* Reference prose rules reach direct children only, so an example inside a section renders exactly
+   as engine.css draws it. */
+.dx-sec>h3{font-size:15px;font-weight:600;color:var(--fg);margin:28px 0 8px;letter-spacing:-.005em}
+.dx-sec>h3:first-child{margin-top:0}
+.dx-sec>p{max-width:72ch;color:var(--body)}
+.dx-sec>ul,.dx-sec>ol{padding-left:20px;margin:0 0 14px}
+.dx-sec>ul>li,.dx-sec>ol>li{margin:4px 0;max-width:72ch;color:var(--body)}
+.dx-sec>ul>li::marker,.dx-sec>ol>li::marker{color:var(--muted)}
+.dx-block{margin:0 0 22px}
+
+/* ---------- grids and cards ---------- */
+.dx-g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin:0 0 22px}
+.dx-g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin:0 0 22px}
+.dx-g4{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:0 0 22px}
+.dx-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px 18px;min-width:0}
+.dx-card h3,.dx-card h4{margin:0 0 6px;font-size:14px;font-weight:600;color:var(--fg)}
+.dx-card p{font-size:13px;color:var(--body);margin:0 0 8px}
+.dx-card p:last-child{margin-bottom:0}
+.dx-card .dx-k{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 6px;display:block}
+a.dx-card{text-decoration:none;display:block;transition:border-color .15s,background .15s}
+a.dx-card:hover{border-color:var(--rule);background:var(--panel-h)}
+
+/* ---------- reference tables ---------- */
+.dx-tbl{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:0 0 22px}
+.dx-tbl .tw{overflow-x:auto}
+.dx-tbl table{min-width:640px;font-size:13px}
+.dx-tbl table.narrow{min-width:0}
+.dx-tbl th{color:var(--muted);background:var(--panel-h);position:static}
+.dx-tbl td{vertical-align:top;color:var(--body)}
+.dx-tbl tbody tr:last-child td{border-bottom:0}
+.dx-tbl td code,.dx-tbl td .mono{white-space:nowrap}
+.dx-tbl td.wrap code{white-space:normal;overflow-wrap:anywhere}
+.dx-tbl caption{caption-side:top;text-align:left;padding:12px 14px;font-size:13px;font-weight:600;color:var(--fg);border-bottom:1px solid var(--border);background:var(--panel-h)}
+
+/* ---------- live examples ---------- */
+.dx-story{border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:0 0 18px;background:var(--panel)}
+.dx-story-h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:11px 16px;border-bottom:1px solid var(--border);background:var(--panel-h)}
+.dx-story-h b{font-size:13px;font-weight:600;color:var(--fg)}
+.dx-story-h span{font-size:12.5px;color:var(--muted)}
+.dx-story-h code{font-size:11px}
+.dx-canvas{padding:24px;background:var(--ink);min-width:0;overflow-x:auto}
+.dx-canvas.on-panel{background:var(--panel)}
+.dx-canvas.tight{padding:14px}
+.dx-canvas.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.dx-canvas>.panel{max-width:100%}
+.dx-code{border-top:1px solid var(--border)}
+.dx-code summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;padding:9px 16px;font-size:12.5px;color:var(--muted);user-select:none}
+.dx-code summary::-webkit-details-marker{display:none}
+.dx-code summary::before{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+.dx-code[open] summary::before{transform:rotate(45deg)}
+.dx-code summary:hover{color:var(--fg)}
+.dx-code summary .btn{margin-left:auto}
+.dx-code pre{border:0;border-radius:0;border-top:1px solid var(--border);max-height:420px}
+
+/* ---------- guidance ---------- */
+/* State by shape, as the brand draws it: a double border for the approved pattern, a single one for
+   the pattern to avoid. The word says which, so neither depends on colour. */
+.dx-dd{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;margin:0 0 22px}
+.dx-do,.dx-dont{border-radius:12px;background:var(--panel);min-width:0;overflow:hidden}
+.dx-do{border:3px double var(--rule)}
+.dx-dont{border:1px solid var(--rule)}
+.dx-dd .dx-ex{padding:18px;background:var(--ink);border-bottom:1px solid var(--border);min-height:64px;overflow-x:auto}
+.dx-dd .dx-why{padding:12px 16px;font-size:13px;color:var(--body)}
+.dx-dd .dx-why b{display:inline-flex;align-items:center;gap:6px;font-weight:600;margin-right:4px}
+.dx-do .dx-why b{color:var(--st-allowed)}
+.dx-dont .dx-why b{color:var(--st-denied)}
+.dx-why b svg{width:13px;height:13px}
+
+/* numbered rules with square mono markers */
+.dx-rules{list-style:none;padding:0!important;margin:0 0 22px;counter-reset:dxr;display:grid;gap:0;
+  border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--panel)}
+.dx-rules>li{counter-increment:dxr;display:grid;grid-template-columns:28px minmax(0,1fr);gap:14px;padding:13px 16px;
+  margin:0!important;border-top:1px solid var(--border);max-width:none!important}
+.dx-rules>li:first-child{border-top:0}
+.dx-rules>li::before{content:counter(dxr,decimal-leading-zero);font-family:var(--mono);font-size:11px;color:var(--muted);
+  width:28px;height:22px;border:1px solid var(--rule);border-radius:4px;display:grid;place-items:center;margin-top:1px}
+.dx-rules>li b{color:var(--fg);font-weight:600}
+.dx-rules>li p{margin:4px 0 0;font-size:13px;color:var(--body)}
+.dx-rules>li .dx-eg{display:block;margin-top:6px;font-size:12.5px;color:var(--muted)}
+
+/* key and value */
+.dx-kv{display:grid;grid-template-columns:minmax(120px,max-content) minmax(0,1fr);gap:8px 20px;margin:0 0 18px;font-size:13px}
+.dx-kv dt{color:var(--muted)}
+.dx-kv dd{margin:0;color:var(--body);min-width:0;overflow-wrap:anywhere}
+
+/* a note with a left rule */
+.dx-note{border-left:2px solid var(--rule);padding:4px 0 4px 14px;margin:0 0 20px;font-size:13px;color:var(--body);max-width:78ch}
+.dx-note b{color:var(--fg);font-weight:600}
+.dx-note.warn{border-left-color:var(--st-denied)}
+.dx-note.info{border-left-color:var(--st-approval)}
+
+/* findings carried from the audit that wrote these pages */
+.dx-find{border:1px dashed var(--rule);border-radius:12px;padding:14px 16px;margin:0 0 14px;background:var(--panel)}
+.dx-find h4{margin:0 0 6px;font-size:13.5px;font-weight:600;color:var(--fg);display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dx-find p{font-size:13px;margin:0 0 6px}
+.dx-find p:last-child{margin:0}
+
+/* ---------- audit prompt ---------- */
+.dx-prompt{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--panel);margin:0 0 22px}
+.dx-prompt-h{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:13px 16px;border-bottom:1px solid var(--border);background:var(--panel-h)}
+.dx-prompt-h .t{min-width:0;flex:1 1 280px}
+.dx-prompt-h b{display:block;font-size:13.5px;font-weight:600;color:var(--fg)}
+.dx-prompt-h span{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.dx-prompt-h .acts{display:flex;gap:8px;flex:none}
+.dx-prompt pre{border:0;border-radius:0;white-space:pre-wrap;overflow-wrap:anywhere;max-height:460px;overflow:auto;
+  font-size:12px;line-height:1.6;padding:16px 18px;background:var(--void);color:var(--body)}
+.dx-prompt.open pre{max-height:none}
+
+/* ---------- swatches ---------- */
+.dx-sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(176px,1fr));gap:12px;margin:0 0 22px}
+.dx-swatch{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--panel);min-width:0}
+.dx-swatch .chip{height:64px;border-bottom:1px solid var(--border);display:flex;align-items:flex-end;padding:8px 10px;font-size:12px;font-weight:600}
+.dx-swatch .meta{padding:9px 11px;display:grid;gap:2px}
+.dx-swatch .meta b{font-size:12.5px;font-weight:600;color:var(--fg)}
+.dx-swatch .meta code{background:none;padding:0;font-size:11px;color:var(--muted)}
+.dx-swatch .meta span{font-size:12px;color:var(--muted);line-height:1.45}
+
+/* contrast matrix */
+.dx-cm td,.dx-cm th{text-align:center;white-space:nowrap}
+.dx-cm td:first-child,.dx-cm th:first-child{text-align:left}
+.dx-cm .r{font-family:var(--mono);font-size:11.5px;font-variant-numeric:tabular-nums;display:block}
+.dx-cm .v{font-size:10.5px;font-weight:600;letter-spacing:.03em;display:inline-block;margin-top:3px;padding:0 5px;border-radius:4px}
+.dx-cm .v.aa{border:3px double var(--rule);color:var(--fg)}
+.dx-cm .v.ui{border:1px dashed var(--rule);color:var(--body)}
+.dx-cm .v.no{border:1px solid var(--rule);color:var(--muted)}
+.dx-cm .smp{display:inline-block;padding:3px 8px;border-radius:6px;font-size:12px;font-weight:500;margin-bottom:3px}
+
+/* type specimens */
+.dx-spec{display:grid;grid-template-columns:minmax(0,1fr) 240px;gap:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:0 0 14px;background:var(--panel)}
+.dx-spec .sample{padding:22px 22px 20px;background:var(--ink);min-width:0;overflow-wrap:anywhere;color:var(--fg)}
+.dx-spec .facts{padding:16px 18px;border-left:1px solid var(--border);font-size:12px;color:var(--muted);display:grid;gap:4px;align-content:start}
+.dx-spec .facts b{color:var(--fg);font-size:13px;font-weight:600}
+.dx-spec .facts code{font-size:11px}
+
+/* utility */
+.dx-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.dx-mt{margin-top:14px}
+.dx-muted{color:var(--muted)}
+.dx-live{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(12px);opacity:0;pointer-events:none;
+  background:var(--fg);color:var(--ink);font-size:12.5px;font-weight:500;padding:7px 14px;border-radius:9px;box-shadow:var(--shadow);
+  transition:opacity .18s,transform .18s;z-index:90}
+.dx-live.on{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(prefers-reduced-motion:reduce){.dx-live{transition:none}.dx-code summary::before{transition:none}}
+
+/* ---------- narrow screens ---------- */
+@media(max-width:1020px){
+  .dx-shell{grid-template-columns:minmax(0,1fr);gap:0}
+  .dx-toc{display:none}
+  .dx-top .dx-open{display:none}
+}
+@media(max-width:720px){
+  .dx-top{padding:0 16px;gap:12px;height:auto;min-height:var(--dx-top);flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+  .dx-brand .dx-tag{display:none}
+  .dx-nav{order:3;width:100%}
+  .dx-shell{padding:0 16px}
+  .dx-hero h1{font-size:28px}
+  .dx-canvas{padding:16px}
+  .dx-spec{grid-template-columns:minmax(0,1fr)}
+  .dx-spec .facts{border-left:0;border-top:1px solid var(--border)}
+  .dx-kv{grid-template-columns:minmax(0,1fr);gap:2px 0}
+  .dx-kv dd{margin-bottom:8px}
+}
