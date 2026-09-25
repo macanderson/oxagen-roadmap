@@ -145,12 +145,12 @@ A row under the card that jumps between the three installer screens.
 It lets a reviewer or a story open Download, Installing or Connected directly, without waiting for the install to run.
 
 ### Rationale
-This is a mockup-only control. The real installer is a native package, and its screens follow each other as the install runs. The row exists to drive the mockup. The build has no such row.
+The row exists so the path from sign-up to the first frame can be walked in a browser. The shipped app draws the same row under the same card (`apps/app/src/features/onboarding/ui/installer.tsx` in `macanderson/oxagen`, labelled "Installer screen"), so it stays on the page as app UI. The native package has no such row: its screens follow each other as the install runs.
 
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
-| Screen shown | `S.ob.inst` | none | mockup only |
+| Screen shown | `S.ob.inst` | none, client state | live |
 
 ### Logic
 - The row reads "Installer screen" and three buttons: **Download**, **Installing**, **Connected**. The one showing is selected and carries `aria-pressed="true"`.

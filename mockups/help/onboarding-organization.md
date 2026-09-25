@@ -89,3 +89,36 @@ The namespace is fixed at creation and never changes (§5.1). Every agent key st
 - **Loaded**: `a-intel` and the hint.
 - **Error**: the red border and the form's error box.
 - **Mobile**: the field fills the width.
+
+## Onboarding tab
+
+The Onboarding tab of the Account dialog: a launcher for every sign-in and onboarding screen, present in the demo only.
+
+### Purpose
+You open any screen on the path from sign-up to the first frame without leaving the signed-in app or typing a route. A walkthrough starts here, either at **Start from sign-up** or at one screen through its **Open** button.
+
+### Rationale
+These screens sit outside the app shell, so the app has no navigation that reaches them. A new operator meets them through public routes and emailed links, and the shipped product never shows this tab. `accountTabs()` drops the tab under `?product=1`, and the user menu hides its **Onboarding demo** entry there too.
+
+Three passages moved off the tab:
+- The dialog footer, on this tab only: "Demo only. Nothing on these screens writes anything." The footer keeps **Close**.
+- A note: "Clickable demo only. These are the screens a new operator sees before Oxagen opens, sign-up through the first frame. They are reachable from here so a walkthrough can start from the account you are signed in as. Nothing on them writes anything. Exit demo on any screen brings you back here, still signed in."
+- A caption beside the button: "The mockup-state bar still applies: error and denied render each screen's failure."
+
+Two claims in the footer and the note were wrong. **Exit demo** (`obExit`) returns to Work, not to this dialog, and toasts "Onboarding demo closed. Nothing was written." The first-frame step also writes: `obUnlock` pushes the new agent and its smoke run into the in-memory `AGENTS` and `RUNS`, where they stay until the page reloads. Only the W1 scenario takes its writes back (`obScnUndo`). The state switch that now drives each screen's loading, error and denied states is the review island's **State** control.
+
+### Data sources
+| Field | Mockup source | Target store | Status |
+|---|---|---|---|
+| Gate steps | `OB_STEPS` (five rows) | none, static list | mockup only |
+| Other screens | `OB_ALT` (five rows) | none, static list | mockup only |
+
+### Logic
+- **Steps** lists `OB_STEPS` in order and numbers them 1 to 5: Sign up, Verify email, Name the organization, Wrap an agent, Start a run. **Also in the set** lists `OB_ALT` with a dot in place of a number: Log in, Forgot password, Set a new password, Accept an invitation, The installer.
+- Each row's **Open** calls `obGo(id)`. It closes the dialog. For a gate step (`OB_GATE`: organization, wrap, run) it starts a fresh onboarding flow (`obNew()`: mode `onboard`, key slug `release-manager`) unless one is running, then goes to the screen's route through `obHash`.
+- **Start from sign-up** is `obGo('signup')`, the gold action.
+- The user menu's **Onboarding demo** opens the dialog on this tab (`openDialog('account','onboarding')`). The command menu's "Onboarding demo: sign up" and "Onboarding demo: log in" go straight to `#/welcome` and `#/welcome/login`.
+
+### States
+- **Product view** (`?product=1`): the tab is not in the tab list. The body still renders if a caller opens the dialog with the `onboarding` argument.
+- **Mobile**: the rows keep one line each, with **Open** at the right.

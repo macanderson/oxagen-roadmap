@@ -9586,7 +9586,7 @@ function dialog(){
        '<button class="btn" onclick="markAllRead()"'+(notifUnread()?'':' disabled')+'>Mark all read</button>'},
    approve:{t:"Approve this action",w:false,b:approveBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="resolveApproval(S.dlgArg,\'approved\')">Approve this call</button>'},
    deny:{t:"Deny this action",w:false,b:denyBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="resolveApproval(S.dlgArg,\'denied\')">Deny with this reason</button>'},
-   account:{t:"Account",w:false,tabs:accountTabs(),b:accountBody(),f:S.dlgArg==="onboarding"?'<span class="grow">Demo only. Nothing on these screens writes anything.</span><button class="btn" onclick="closeDialog()">Close</button>':'<span class="grow">Changes here run as <span class="mono">set_preferences</span>, a governed action that is audited like any other.</span>'+
+   account:{t:"Account",w:false,tabs:accountTabs(),b:accountBody(),f:S.dlgArg==="onboarding"?'<span class="grow"></span><button class="btn" onclick="closeDialog()">Close</button>':'<span class="grow">Changes here run as <span class="mono">set_preferences</span>, a governed action that is audited like any other.</span>'+
      '<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Saved. set_preferences recorded as a frame.\')">Save</button>'},
    "org-switch":{t:"Switch organization",w:false,b:
      '<div class="field"><input placeholder="Search organizations" aria-label="Search organizations"></div>'+
@@ -10747,7 +10747,7 @@ var OB_STEPS=[
  {id:"verify",lab:"Verify email",sub:"Six-digit code, good for ten minutes"},
  {id:"organization",lab:"Name the organization",sub:"Tenant, namespace and the first workspace"},
  {id:"wrap",lab:"Wrap an agent",sub:"Claude Code, Codex CLI or an SDK agent"},
- {id:"run",lab:"Start a run",sub:"The first frame is what opens oxagen"}];
+ {id:"run",lab:"Start a run",sub:"Wait for the agent’s first frame"}];
 var OB_ALT=[
  {id:"login",lab:"Log in",sub:"Returning operator, then two-factor"},
  {id:"forgot",lab:"Forgot password",sub:"Reset link, good for sixty minutes"},
@@ -10904,11 +10904,10 @@ function obInstaller(){
 function obAccountTab(){
   function row(s,i){return '<div><span class="sn">'+(typeof i==="number"?i+1:"·")+'</span><div class="bd2"><div class="t1">'+h(s.lab)+'</div><div class="t2">'+h(s.sub)+'</div></div>'+
    '<button class="btn sm" onclick="obGo(\''+s.id+'\')">Open</button></div>';}
-  return '<div class="note" style="margin-bottom:16px"><b>Clickable demo only.</b> These are the screens a new operator sees before oxagen opens, sign-up through the first frame. They are reachable from here so a walkthrough can start from the account you are signed in as. Nothing on them writes anything; Exit demo on any screen brings you back here, still signed in.</div>'+
+  return '<div data-help="onboarding-organization/onboarding-tab">'+
    '<div class="field"><label>Steps</label><div class="ob-steps">'+OB_STEPS.map(row).join("")+'</div></div>'+
    '<div class="field"><label>Also in the set</label><div class="ob-steps">'+OB_ALT.map(function(s){return row(s,null);}).join("")+'</div></div>'+
-   '<div class="row"><button class="btn primary" onclick="obGo(\'signup\')">Start from sign-up</button>'+
-   '<span class="dim" style="font-size:12px">The mockup-state bar still applies: error and denied render each screen’s failure.</span></div>';
+   '<div class="row"><button class="btn primary" onclick="obGo(\'signup\')">Start from sign-up</button></div></div>';
 }
 
 /* ---- auth shell and form pieces ---- */
