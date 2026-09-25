@@ -10,6 +10,18 @@ Each row is a directory where someone ran `oxagen init`, linked by one gitignore
 
 A banner once repeated the out-of-step count in a paragraph. The `.oxagen/` cell says it in a word, on the row it is true of, and the count is on the tab.
 
+Two files under `.oxagen/` share a name and do different jobs. `workspace.toml` describes the workspace, is committed, and goes through review. `workspace.json` names the workspace this checkout talks to. It describes one machine, so it is gitignored, nobody commits or reviews it, and it is never the same file in two places. The split keeps a laptop's link out of git, where it would drift between people (`docs/mission-control-spec.md` §10.2). The rest of the tree is `rules/`, `proposals/`, `agents/`, `skills/` and `tools/`.
+
+Everything that touches a directory happens on the machine, because the browser cannot see a filesystem. Four commands do the work:
+- `oxagen init` links the directory. It reads the git remote, matches it to a repository the installation can reach, and writes `.oxagen/workspace.json`. It is idempotent.
+- `oxagen pull` fast-forwards `.oxagen/` to the production branch and re-points the Stella symlinks. It never merges your work.
+- `oxagen status` compares the copy with what is published: the bundle version, the records in force, and anything uncommitted under `.oxagen/`.
+- `oxagen propose` turns a local edit under `.oxagen/` into a proposal. You open and merge its pull request in Oxagen, because both need a role that only a signed-in person holds.
+
+Stella reads the directory through symlinks (`.stella/rules`, `.stella/proposals` and `.stella/agents` into `.oxagen/`), so there is no second copy to drift. Where the Symlinks column reads `missing`, Stella loads nothing (§10.2).
+
+The tab used to carry two panels under the table: Files to review (the tree above, with one comment per file) and Sync (the four commands). Both only taught the layout and the CLI and read nothing from a copy, so they left the page and their content lives here. The `linkdir` dialog still shows the one command a person runs to link a directory.
+
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
@@ -17,6 +29,10 @@ A banner once repeated the out-of-step count in a paragraph. The `.oxagen/` cell
 | Repository, branch, head | `WORKCOPIES[].repo`, `.branch`, `.head` | the same | future-only |
 | `.oxagen/` state, uncommitted count | `.oxagen`, `.dirty`, `WC_STATE` | the same | future-only |
 | Symlinks, bundle, last seen | `.symlinks`, `.bundle`, `.seen` | the same | future-only |
+| `oxagen init` | help copy | `apps/cli/src/commands/init.ts` | shipped |
+| `oxagen pull` | help copy | a CLI command | future-only |
+| `oxagen status` | help copy | `oxagen steering status` (`apps/cli/src/program.ts:598-612`) | partial |
+| `oxagen propose` | help copy | `oxagen context propose --lineage <id>` (`apps/cli/src/program.ts:438-450`) | partial |
 
 ### Logic
 - `wsCopies()` keeps the copies whose repository is one of `wsRepos()`.
@@ -24,70 +40,13 @@ A banner once repeated the out-of-step count in a paragraph. The `.oxagen/` cell
 - Symlinks reads `ok` or `missing`.
 - `rowClick()` makes each row reachable by Tab and opened by Enter or Space, labelled "Open <path> on <machine>". It opens `workcopy`.
 - **Connect a directory** is gold on this tab, and the header's **Add .oxagen/** gives up its gold (`tabPrimary` in `pRepos()`).
+- Where a build names the CLI, it prints the names the CLI ships (`oxagen init`, `oxagen steering status`, `oxagen context propose`) until the design's names exist. It leaves out `oxagen pull` and says `git pull` on the production branch updates `.oxagen/` today.
 
 ### States
 - **Loaded**: four copies in the demo.
 - **Loaded with no copy**: the panel reads "No directory is linked to <workspace> yet.", keeps **Connect a directory** (gold), and adds "Run oxagen init in a directory to link it." The line "You cannot link one by typing a path here, because the browser cannot see your filesystem." moved here. The panel keeps its gold, so the screen always has a primary action.
 - **Build today**: `oxagen init` reports nothing back, so the app shows the empty panel and says no working copy is recorded yet (`apps/app/src/features/repositories/working-copies.tsx:94`).
 - **Mobile**: one card per copy, each cell labelled.
-
-## Files to review
-
-The `.oxagen/` tree as a checkout holds it, with the one committed file and the one gitignored file marked.
-
-### Purpose
-It shows a person which file under `.oxagen/` is theirs to review and which one belongs to their machine alone.
-
-### Rationale
-Two files share a name and do different jobs. `workspace.toml` describes the workspace and goes through review. `workspace.json` names the workspace this checkout talks to. It describes one machine, so nobody commits or reviews it, and it is never the same file in two places. That note moved here from the panel. The split keeps a laptop's link out of git, where it would otherwise drift between people (`docs/mission-control-spec.md` §10.2).
-
-### Data sources
-| Field | Mockup source | Target store | Status |
-|---|---|---|---|
-| The tree and its comments | a constant in `copyTab()` | the `.oxagen/` layout, §10.2 | shipped |
-
-### Logic
-- The tree lists `workspace.toml` ("committed. reviewed. the source of truth."), `workspace.json` ("gitignored · this machine's link"), then `rules/`, `proposals/`, `agents/`, `skills/` and `tools/`.
-- The panel is static. It reads nothing from a copy.
-- The build keeps the code block's comments as they are. The full tree with every path the main repository holds is the Configuration tab's Tree panel.
-
-### States
-- **Loaded**: shown beside Sync.
-- **Loaded with no copy**: not rendered.
-- **Mobile**: stacks under the table. The block scrolls sideways inside itself.
-
-## Sync
-
-The four CLI commands that link a directory and keep it in step, one line each.
-
-### Purpose
-It tells a person which command to run on their machine for each job: link, update, compare, or propose.
-
-### Rationale
-Everything that touches a directory happens on the machine, because the browser cannot see a filesystem. The page can only name the command.
-
-Four lines moved here from the panel.
-- `oxagen init` reads the git remote, matches it to a repository the installation can reach, and writes `.oxagen/workspace.json`. It is idempotent.
-- `oxagen pull` never merges your work.
-- `oxagen propose` hands off to Oxagen: you open and merge its pull request here, because both need a role that only a signed-in person holds.
-- The closing note: Stella reads this directory through symlinks (`.stella/rules`, `.stella/proposals`, `.stella/agents` into `.oxagen/`), so there is no second copy to drift. Where the symlinks read `missing`, Stella loads nothing (§10.2).
-
-### Data sources
-| Field | Mockup source | Target store | Status |
-|---|---|---|---|
-| `oxagen init` | copy in `copyTab()` | `apps/cli/src/commands/init.ts` | shipped |
-| `oxagen pull` | copy | a CLI command | future-only |
-| `oxagen status` | copy | `oxagen steering status` | partial |
-| `oxagen propose` | copy | `oxagen context propose --lineage <id>` | partial |
-
-### Logic
-- Each command prints its one-line job: "Links this directory and writes .oxagen/workspace.json.", "Fast-forwards .oxagen/ to the production branch and re-points the stella symlinks.", "Compares this copy with what is published: the bundle version, the records in force, and anything uncommitted under .oxagen/.", "Turns a local edit under .oxagen/ into a proposal."
-- The build prints the names the CLI ships (`oxagen init`, `oxagen steering status`, `oxagen context propose`) until the design's names exist. It leaves out `oxagen pull` and says `git pull` on the production branch updates `.oxagen/` today.
-
-### States
-- **Loaded**: beside Files to review.
-- **Loaded with no copy**: not rendered.
-- **Mobile**: stacks under Files to review.
 
 ## Directory connection {#dialog/linkdir}
 

@@ -6939,6 +6939,28 @@ var DRIFT={
                   ["[[repos]] a-intel/mobile","role = linked","linked, no .oxagen/","neither"]]
 };
 var DRIFT_PR={"core-platform":"oxpr_01K6T4E5"};
+/* Every committed path under .oxagen/ on a main repository's production branch, as
+   get_repository_tree answers it. Keyed by repository; the count is the Repositories tab's file
+   count. workspace.json is gitignored, so it is never here. */
+var OX_TREE={
+ "a-intel/platform":[".oxagen/workspace.toml",".oxagen/rules/governance.toml",".oxagen/rules/promotions.jsonl",
+   ".oxagen/rules/ctx.platform.changelog-once.toml",".oxagen/agents/release-manager.toml",
+   ".oxagen/skills/customer-escalation-writeup/SKILL.md",".oxagen/skills/release-notes-from-prs/SKILL.md",
+   ".oxagen/skills/rollback-a-bad-release/SKILL.md",".oxagen/skills/safe-db-migration/SKILL.md"]
+};
+/* The paths as an indented tree: a directory once, then its files beneath it. */
+function oxTreeText(paths){
+  var out=[], seen={};
+  paths.forEach(function(p){
+    var parts=p.split("/");
+    for(var i=1;i<parts.length;i++){
+      var key=parts.slice(0,i).join("/");
+      if(!seen[key]){ seen[key]=1; out.push(new Array(i).join("  ")+parts[i-1]+"/"); }
+    }
+    out.push(new Array(parts.length).join("  ")+parts[parts.length-1]);
+  });
+  return out.join("\n");
+}
 function oxState(r){return OX_STATE[r.ox||"governed"]||OX_STATE.governed;}
 /* The repositories this workspace's own record names, main first, then linked, then whatever
    the installation can reach that nobody has bound. Role is the workspace's word, not GitHub's. */
@@ -7067,17 +7089,7 @@ function copyTab(){
   return '<div class="panel"><div class="panel-h"><h3>Working copies</h3>'+
    '<div class="sp"><button class="btn primary" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Directory</th><th>Repository</th><th>Branch</th><th><span class="id">.oxagen/</span></th><th>Symlinks</th><th>Bundle</th><th>Last seen</th></tr></thead>'+
-   '<tbody>'+trows+'</tbody></table></div></div>'+
-   '<div class="grid g2" style="margin-top:14px">'+
-   '<div class="panel"><div class="panel-h"><h3>Files to review</h3></div><div class="panel-b">'+
-   '<pre>.oxagen/\n  workspace.toml     <span class="c"># committed. reviewed. the source of truth.</span>\n'+
-   '  workspace.json     <span class="c"># gitignored · this machine’s link</span>\n'+
-   '  rules/\n  proposals/\n  agents/\n  skills/\n  tools/</pre></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Sync</h3></div><div class="panel-b">'+
-   '<div class="kv"><dt><span class="mono">oxagen init</span></dt><dd>Links this directory and writes <span class="mono">.oxagen/workspace.json</span>.</dd>'+
-   '<dt><span class="mono">oxagen pull</span></dt><dd>Fast-forwards <span class="mono">.oxagen/</span> to the production branch and re-points the stella symlinks.</dd>'+
-   '<dt><span class="mono">oxagen status</span></dt><dd>Compares this copy with what is published: the bundle version, the records in force, and anything uncommitted under <span class="mono">.oxagen/</span>.</dd>'+
-   '<dt><span class="mono">oxagen propose</span></dt><dd>Turns a local edit under <span class="mono">.oxagen/</span> into a proposal.</dd></div></div></div></div>';
+   '<tbody>'+trows+'</tbody></table></div></div>';
 }
 
 /* ---- tab 3: the changes ---- */
@@ -7107,11 +7119,7 @@ function chgTab(){
      '<td class="muted" style="font-size:12px">'+h(p.opened)+'</td></tr>';}).join("");
   return '<div class="panel"><div class="panel-h"><h3>Open pull requests</h3></div>'+
    '<div class="tw"><table><thead><tr><th>Change</th><th>Kind</th><th>Pull request</th><th>Opened by</th><th>State</th><th>Checks</th><th>Opened</th></tr></thead>'+
-   '<tbody>'+trows+'</tbody></table></div></div>'+
-   '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Automatic proposals</h3></div><div class="panel-b">'+
-   '<div class="kv"><dt>Promoter</dt><dd>Groups records across runs by lineage and opens a proposal that cites those runs.</dd>'+
-   '<dt>Reconciler</dt><dd>Compares <span class="mono">.oxagen/workspace.toml</span> with the control plane’s live state and opens one pull request per difference.</dd>'+
-   '<dt>Person</dt><dd>Every creation wizard (agent, tool, skill, and record) ends here.</dd></div></div></div>';
+   '<tbody>'+trows+'</tbody></table></div></div>';
 }
 
 /* Merge is enabled only when every check has reported, none failed, and the pull request is not
@@ -7226,7 +7234,7 @@ function cfgTab(){
      under another workspace would report drift that workspace does not have, and send the
      operator to a reconciliation pull request that is not its own. A workspace with nothing
      recorded says so. */
-  var drift=DRIFT[w.slug]||[], reconcile=DRIFT_PR[w.slug]||null;
+  var drift=DRIFT[w.slug]||[], reconcile=DRIFT_PR[w.slug]||null, tree=OX_TREE[w.main]||null;
   return '<div class="grid g2">'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>.oxagen/workspace.toml</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">On <span class="mono">'+h(w.main)+'</span>'+
@@ -7245,16 +7253,9 @@ function cfgTab(){
    '<div class="grid g2" style="margin-top:14px">'+
    '<div class="panel"><div class="panel-h"><h3>.oxagen/rules/governance.toml</h3></div><div class="panel-b">'+
    '<pre>'+h(oxGovernanceToml("team"))+'</pre></div></div>'+
-   '<div class="panel"><div class="panel-h"><h3>Tree</h3></div><div class="panel-b">'+
-   '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, providers, budgets</span>\n'+
-   '  workspace.json             <span class="c"># gitignored · this machine’s link</span>\n'+
-   '  rules/\n    governance.toml          <span class="c"># mode = team</span>\n'+
-   '    promotions.jsonl         <span class="c"># hash-chained ledger (regulated)</span>\n'+
-   '    ctx.&lt;set&gt;.&lt;slug&gt;.toml     <span class="c"># one published record per lineage</span>\n'+
-   '  proposals/*.toml           <span class="c"># candidates; steer nothing</span>\n'+
-   '  agents/&lt;slug&gt;.toml         <span class="c"># one per agent</span>\n'+
-   '  skills/&lt;name&gt;/SKILL.md     <span class="c"># pinned by version and digest</span>\n'+
-   '  tools/&lt;name&gt;.toml          <span class="c"># manifest, schema, handler beside it</span></pre></div></div></div>';
+   '<div class="panel"><div class="panel-h"><h3>Tree</h3>'+(tree?'<span class="b b-q" style="margin-left:auto">'+plural(tree.length,"file")+'</span>':'')+'</div><div class="panel-b">'+
+   (tree?'<pre>'+h(oxTreeText(tree))+'</pre>':'<p class="muted" style="margin:0">No path under <span class="mono">.oxagen/</span> is recorded for <span class="mono">'+h(w.main)+'</span> yet.</p>')+
+   '</div></div></div>';
 }
 
 /* A Repositories tab's address: the app's path segments (working-copies, configuration). */

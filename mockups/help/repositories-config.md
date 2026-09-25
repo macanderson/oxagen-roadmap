@@ -8,6 +8,8 @@ It shows a person what the workspace declares about itself: its repositories and
 ### Rationale
 The file is the record. Git decides what is in force, so the panel reads the main repository's production branch at the moment of the call and never a cache (`docs/mission-control-spec.md` §10.1). The file lives in the main repository only, because the main repository is where the workspace's steering and configuration are managed in source control.
 
+The Tree panel beside `governance.toml` lists every path under `.oxagen/` at the same head.
+
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
@@ -85,30 +87,51 @@ The moved note also said "You change the mode with a pull request. There is no s
 - `governanceMode` can read `solo`, `team`, `regulated`, `absent` or `invalid`. The build prints `absent` as `team` and `invalid` as blocking.
 
 ### States
-- **Loaded**: the file.
+- **Loaded**: the file, beside Tree.
 - **Mobile**: stacks third.
 
 ## Tree
 
-The `.oxagen/` layout as it sits on disk, one comment per entry.
+Every committed path under `.oxagen/` on the main repository's production branch, as an indented tree, with the file count.
 
 ### Purpose
-It shows a person where each kind of file lives under `.oxagen/`, and which of them steer nothing.
+It shows a person what the main repository actually holds under `.oxagen/`: which records, agents and skills are published, and whether the governance file and the ledger exist. A path missing here is not in force.
 
 ### Rationale
-Every file Oxagen governs sits in one directory with a fixed layout (`docs/mission-control-spec.md` §10.2). Oxagen reads only `.oxagen/`. It does not read `.stella/`, and whatever sits there is invisible to it. That note moved here from the panel. Stella links `.stella/rules`, `.stella/proposals` and `.stella/agents` into `.oxagen/`, so the two never hold separate copies.
+The app lists the real paths under `.oxagen/` at the head (`get_repository_tree` `oxagen.files`; `apps/app/src/features/repositories/configuration.tsx:199-208`), so the panel is record data and stays. The design used to draw a fixed layout with placeholder paths (`ctx.<set>.<slug>.toml`, `agents/<slug>.toml`) and one teaching comment per entry. The panel now lists the paths themselves, and the layout moved here:
+
+```
+.oxagen/
+  workspace.toml             # linked repos, providers, budgets
+  workspace.json             # gitignored, this machine's link
+  rules/
+    governance.toml          # the governance mode
+    promotions.jsonl         # the hash-chained promotion ledger
+    ctx.<set>.<slug>.toml    # one published record per lineage
+  proposals/*.toml           # candidates that steer nothing
+  agents/<slug>.toml         # one per agent
+  skills/<name>/SKILL.md     # pinned by version and digest
+  tools/<name>.toml          # manifest, schema, handler beside it
+```
+
+`workspace.json` never appears in the panel, because it is gitignored and lives only on a machine. Oxagen reads only `.oxagen/`. It does not read `.stella/`, and whatever sits there is invisible to it. Stella links `.stella/rules`, `.stella/proposals` and `.stella/agents` into `.oxagen/`, so the two never hold separate copies (`docs/mission-control-spec.md` §10.2). That note sat under the old panel and moved here. Every file in the tree is a Steering Source or configuration, and the SteeringFrames a source emits appear on its source page (D4).
 
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
-| The tree | a constant in `cfgTab()` | `get_repository_tree` `oxagen.files` | shipped |
-| The comments | design copy | none | shipped as copy |
+| The paths | `OX_TREE[w.main]` | `get_repository_tree` `oxagen.files` | shipped |
+| The file count | `OX_TREE[w.main].length` | the same list | shipped |
 
 ### Logic
-- The entries: `workspace.toml` (linked repos, providers, budgets), `workspace.json` (gitignored, this machine's link), `rules/governance.toml`, `rules/promotions.jsonl` (the hash-chained ledger), `rules/ctx.<set>.<slug>.toml` (one published record per lineage), `proposals/*.toml` (candidates that steer nothing), `agents/<slug>.toml`, `skills/<name>/SKILL.md` (pinned by version and digest), and `tools/<name>.toml`.
-- The mockup prints a fixed tree. The build lists every path under `.oxagen/` at the head, as the app does (`configuration.tsx:199-208`), and keeps the comments as design copy.
-- Every file in the tree is a Steering Source or configuration. The SteeringFrames a source emits appear on its source page, never here (D4).
+1. `cfgTab()` reads `OX_TREE` for the workspace's main repository, never the first row of `wsRepos()`.
+2. `oxTreeText()` prints each directory once, then its files beneath it, indented two spaces per level.
+3. The badge counts the paths. For `a-intel/platform` it reads "9 files", the same count the Repositories tab shows beside Present.
+4. The fixture's nine paths follow the rest of the record: `ctx.platform.changelog-once.toml` from the merged #519, `agents/release-manager.toml` which #521 modifies, and the four skills in `skills.json`.
+5. With no list for the main repository, the panel reads "No path under .oxagen/ is recorded for <repository> yet."
+6. The panel carries no comment beside a path. A build prints the paths as `get_repository_tree` returns them.
 
 ### States
-- **Loaded**: the tree.
+- **Loaded**: the tree and its count, beside `governance.toml`.
+- **No list for the main repository**: the one line above.
+- **No `.oxagen/` on the production branch**: the app says the file is not there yet, as the `workspace.toml` panel does.
 - **Mobile**: stacks last. The block scrolls sideways inside itself.

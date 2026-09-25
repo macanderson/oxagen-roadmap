@@ -54,16 +54,16 @@ Each caption states one fact, as the plain-noun rule asks: the Agents hosted and
 - The Agents cell names at most three agent keys, then "and <n> more", so a host with 28 agents keeps a row of normal height.
 - No note closes the panel. Why the tier belongs to the host is in the component help (`mockups/help/runtimes.md`, Hosts).
 
-**Tier ladder** panel. `tierLadder(null)`: an ordered list labelled "The tier ladder", with no rung marked current, because this page reads no run.
+**Tier ladder** panel. `tierLadder(null)`: an ordered list labelled "The tier ladder", with no rung marked current, because this page reads no run. It draws what the app draws (`apps/app/src/features/runtimes/parts.tsx:329-336`): each rung's name and what it needs.
 
-| Rung | What it needs and earns |
+| Rung | What it needs |
 |---|---|
 | `observe` | "Recorded only. No hook is installed and nothing is delivered." |
 | `harness` | "Hooks installed. Steering is delivered and four hook events can refuse a call. The harness reports spend, and a call goes ahead if its hook fails." |
 | `gateway` | "Model and MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it." |
 | `contained` | "The agent runs in an OS sandbox whose only network exit is the gateway." |
 
-No note sits under the ladder. What each rung may claim is in the component help (`mockups/help/runtimes.md`, Tier ladder).
+No note sits under the ladder. What each rung may claim, and that only `contained` is fully enforced, are in the component help (`mockups/help/runtimes.md`, Tier ladder).
 
 **Dialogs and flows this page opens.** Enroll a runtime starts Register agent (`register-name.md`, `register-wrap.md`, `register-run.md`). It is a flow, and no dialog opens. The empty state's **Show CLI steps** opens `register`, the Register an agent dialog, which carries no CLI path. A build shows the installers that put the CLI on the host's path and the command to run, as the app does (`apps/app/src/features/runtimes/controls.tsx:97`). The error state opens `incident`, and the denied state `request-access`.
 

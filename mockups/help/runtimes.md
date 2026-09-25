@@ -70,6 +70,8 @@ It shows where each agent runs and what that host can enforce. A person finds a 
 ### Rationale
 The tier belongs to the host, not the agent. Two agents on one host get the same tier, and an agent moved to a host with a lower tier gets that lower tier. The tier is computed per run from what was actually routed and is never raised afterward (ADR-095). That note sat under the table.
 
+The Tier column reads one of the four words the Tier ladder panel lists.
+
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
@@ -99,37 +101,38 @@ Loaded only. The list tools filter by kind, model surface and health. On a phone
 
 ## Tier ladder
 
-The four tiers a run can earn, from `observe` to `contained`, with what each needs.
+The four tiers a run can earn, `observe`, `harness`, `gateway` and `contained`, each with what it needs.
 
 ### Purpose
-It gives a person the vocabulary every tier badge on every page uses. They read which rung a host sits on and what the next rung would take.
+It gives a person the vocabulary every tier badge on every page uses. They read which rung a host sits on in the Hosts table and what the next rung would take.
 
 ### Rationale
-Mission-control-spec §7.1 and ADR-095 fix the ladder at four words, computed from what was routed. Only `contained` is fully enforced: all traffic must pass through Oxagen. On `observe`, nothing is delivered and nothing can be blocked. An agent with no runtime still has an identity and a toolbelt, but it receives no steering. That note sat under the ladder.
+Mission-control-spec §7.1 and ADR-095 fix the ladder at four words, computed from what was routed. The app draws the same four rungs on its Runtimes page (`apps/app/src/features/runtimes/parts.tsx:329-336`), so the panel stays as the app draws it: each rung's name and what it needs, and nothing else.
 
 What each rung may claim, per §7.1:
 
-| Tier | May claim |
-|---|---|
-| `observe` | recorded |
-| `harness` | delivered, recorded, client-attested, fail-open |
-| `gateway` | observed metering, enforced budgets on routed traffic |
-| `contained` | enforced, against the machine's operator |
+| Tier | What it needs | What it may claim |
+|---|---|---|
+| `observe` | Recorded only. No hook is installed and nothing is delivered | recorded |
+| `harness` | Hooks installed. Steering is delivered and four hook events can refuse a call. The harness reports spend, and a call goes ahead if its hook fails | delivered, recorded, client-attested, fail-open |
+| `gateway` | Model and MCP traffic goes through the gateway, which meters it and enforces budgets on it | observed metering, enforced budgets on routed traffic |
+| `contained` | The agent runs in an OS sandbox whose only network exit is the gateway | enforced, against the machine's operator |
 
-A control claim always carries its scope: for actions routed through Oxagen.
+Only `contained` is fully enforced: all traffic must pass through Oxagen. On `observe`, nothing is delivered and nothing can be blocked. An agent with no runtime still has an identity and a toolbelt, but it receives no steering. A control claim always carries its scope: for actions routed through Oxagen. That paragraph sat as a note under the ladder and moved here, because it teaches the vocabulary rather than reporting a record.
 
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
 | The four rungs and their text | `TIERS` through `tierLadder(null)` | ADR-095's vocabulary | shipped |
 
-The app draws the same four rungs (`apps/app/src/features/runtimes/parts.tsx:329-336`).
-
 ### Logic
-1. `tierLadder(null)` renders an ordered list labelled "The tier ladder".
+1. `tierLadder(null)` renders an ordered list labelled "The tier ladder", in `TIER_RANK` order.
 2. It marks no rung as current, because this page reads no run. The agent's Runtime tab calls the same helper with the agent's tier and marks that rung.
 3. A rung in `TIER_NA` would show "not yet available". None does in the design.
-4. Each `tierBadge()` elsewhere carries the rung's text as its tooltip.
+4. Each `tierBadge()` elsewhere carries its rung's text as a tooltip, so the Tier column and the Highest tier tile read the same words.
+5. No sentence sits under the ladder. A build keeps it that way: the explanation lives in this section.
 
 ### States
-Loaded only. On a phone the rungs wrap.
+- **Loaded**: the four rungs, none marked.
+- **Empty, loading, error and denied**: not rendered.
+- **Mobile**: the rungs wrap.

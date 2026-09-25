@@ -5,7 +5,7 @@
 | Route | `#/a-intel/core-platform/repositories/config`. The path is unchanged (`fleet-operations-routes.md`, Runtimes and Repositories). The app serves this tab at `/{org}/{ws}/repositories/configuration` (`apps/app/src/features/repositories/view.ts:11-16`) |
 | Scope | workspace |
 | Spec | `docs/fleet-operations-wedge.md`: Unchanged (Repositories keeps its design) and D7 (Steering record). `docs/fleet-operations-ia.md`: Runtimes and Repositories. `docs/fleet-operations-routes.md`: Runtimes and Repositories. `docs/mission-control-spec.md` §10.2 (the `.oxagen/` layout, `workspace.toml` and `governance.toml`) and §10.3 (the lifecycle the governance mode gates) |
-| Design | `mockups/src/engine.js`: `cfgTab()`, `oxWorkspaceToml()`, `oxGovernanceToml()`, `repoByName()`, `repoRecordFor()`, `DRIFT`, `DRIFT_PR`, inside `pRepos()`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| Design | `mockups/src/engine.js`: `cfgTab()`, `oxWorkspaceToml()`, `oxGovernanceToml()`, `repoByName()`, `repoRecordFor()`, `DRIFT`, `DRIFT_PR`, `OX_TREE`, `oxTreeText()`, inside `pRepos()`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded, empty, loading, error, access denied |
 | Storybook | `Oxagen / Repositories / Configuration`: Loaded, Empty, Loading, Error, Access denied, and each state · mobile |
 | Audit | `repositories-config.audit-prompt.md` |
@@ -20,7 +20,7 @@ Show the workspace's configuration as the main repository holds it on the produc
 
 **Header and tabs** as `repositories.md`, with Configuration selected. The tab carries no count. The header's **Add .oxagen/** is the gold action.
 
-Two rows of two panels.
+Two rows of two panels: `workspace.toml` and Drift, then `governance.toml` and Tree.
 
 **`.oxagen/workspace.toml`.** Subtext "On a-intel/platform at a4c91e2", or "On <repository> · not indexed yet" when the head is unknown. The file in full: its two comment lines (what the file is, and that the machine's link is the gitignored `.oxagen/workspace.json`), `schema = "oxagen-workspace/v0.1"`, `org`, `workspace`, one `[[repos]]` table with `name`, `role`, `production_branch` and `issues`, a `[providers]` table naming `github` and `linear` with their transport and downscope, and a `[budget]` table with `monthly_usd` and `per_run_usd`. The panel always shows the workspace's main repository, never the first repository in a list.
 
@@ -38,23 +38,29 @@ With no drift recorded for the workspace, the panel drops the table and reads "T
 
 **`.oxagen/rules/governance.toml`.** The file in full: two comment lines (it is read on the production branch when a pull request is opened and again when it is merged, and a missing file means team), `mode = "team"` and `separation_of_duties = false`. Nothing sits beneath the file. What each mode requires, when the mode is read, and how it changes are in the component help (`mockups/help/repositories-config.md`, `.oxagen/rules/governance.toml`).
 
-**Tree.** `.oxagen/` as it sits on disk, one comment per entry:
+**Tree.** Heading "Tree", with the file count as a badge ("9 files", the count the Repositories tab shows beside Present). Every committed path under `.oxagen/` on the main repository's production branch, as an indented tree, a directory once and its files beneath it, with no comment beside any path:
 
 ```
 .oxagen/
-  workspace.toml             # linked repos, providers, budgets
-  workspace.json             # gitignored · this machine’s link
+  workspace.toml
   rules/
-    governance.toml          # mode = team
-    promotions.jsonl         # hash-chained ledger (regulated)
-    ctx.<set>.<slug>.toml    # one published record per lineage
-  proposals/*.toml           # candidates; steer nothing
-  agents/<slug>.toml         # one per agent
-  skills/<name>/SKILL.md     # pinned by version and digest
-  tools/<name>.toml          # manifest, schema, handler beside it
+    governance.toml
+    promotions.jsonl
+    ctx.platform.changelog-once.toml
+  agents/
+    release-manager.toml
+  skills/
+    customer-escalation-writeup/
+      SKILL.md
+    release-notes-from-prs/
+      SKILL.md
+    rollback-a-bad-release/
+      SKILL.md
+    safe-db-migration/
+      SKILL.md
 ```
 
-No note follows. That Oxagen reads `.oxagen/` and never `.stella/` is in the component help (`mockups/help/repositories-config.md`, Tree).
+With no list for the main repository, the panel reads "No path under .oxagen/ is recorded for <repository> yet." The layout and what each kind of file is, and that Oxagen reads `.oxagen/` and never `.stella/`, are in the component help (`mockups/help/repositories-config.md`, Tree).
 
 **Dialogs this page opens:** none of its own. **See the pull request** moves to Changes, and the header opens the init wizard (specified in `repositories.md`).
 
@@ -69,8 +75,8 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 | `governance.toml` and the mode it declares | `oxGovernanceToml()` | `get_repository_tree`: `governanceToml`, `governanceMode` (`solo`, `team`, `regulated`, `absent`, `invalid`) | `repository.tree.get.ts:40-95`; the app prints the mode and the file (`configuration.tsx:160-176`) | ✅ |
 | What each mode requires | the component help (`mockups/help/repositories-config.md`) | the merge gate | The gate differs from the copy. Under `solo` any workspace member merges, the author included. Under `team` an org Owner or Admin, or a workspace Owner, other than the author merges. Under `regulated` an org Owner or Admin other than the author merges, recorded as the accountable approver (`packages/handlers/src/context.steering.policy.ts:47-78`). No code-owner review is checked | 🟡 |
 | Changing the mode | the component help (`mockups/help/repositories-config.md`) | `set_governance_mode` | Ships, from Organization, Workspaces, Edit workspace: under `solo` it commits the file to the production branch, and under `team` or `regulated` it opens an ordinary pull request a person merges on GitHub. An owner or admin may apply it at once, which emits a `steering.governance_overridden` security event (`packages/oxagen/src/contracts/context.governance_mode.set.ts:1-58`) | ✅ |
-| The hash-chained ledger | the component help and the Tree comment | the promotions ledger | Every merge appends the promotion event to the hash-chained ledger, in every mode (`packages/handlers/src/context.pr.merge.ts:11-14`) | ✅ |
-| Tree | a constant in `cfgTab()` | `get_repository_tree`: `oxagen.files` | Every path under `.oxagen/` at the head ships, and the app lists them (`configuration.tsx:199-208`). The comments are design copy | ✅ |
+| The hash-chained ledger | the component help | the promotions ledger | Every merge appends the promotion event to the hash-chained ledger, in every mode (`packages/handlers/src/context.pr.merge.ts:11-14`) | ✅ |
+| Tree | `OX_TREE[w.main]` through `oxTreeText()` | `get_repository_tree`: `oxagen.files` | Every path under `.oxagen/` at the head ships, and the app lists them (`configuration.tsx:199-208`) | ✅ |
 
 ## Future-only fields
 

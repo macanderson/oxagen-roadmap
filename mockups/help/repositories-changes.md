@@ -8,6 +8,13 @@ It answers what is waiting to change in `.oxagen/`, who opened it, and whether i
 ### Rationale
 Every change to `.oxagen/` arrives as a pull request, and one lifecycle covers every kind. Whoever opened it (a person, the promoter, or the reconciler), the checks, the merge and the publication are the same. That subtitle moved here from the panel. So did the closing note. A change takes effect at its merge commit. While its pull request is open, it steers nothing: it is not in the compiled bundle or the record index, and the bundle version has not moved (`docs/mission-control-spec.md` §10.3). The words are pull request and Steering record (D7). Context PR appears nowhere on screen.
 
+Opened by names one of three openers, and a pull request an automatic opener made needs the same review as one a person made:
+- **The promoter** groups records across runs by lineage and opens a proposal that cites those runs. It applies no threshold. A person reads the cited runs and decides. The promoter picks the scope from where the evidence came (§10.3).
+- **The reconciler** compares `.oxagen/workspace.toml` with the control plane's live state and opens one pull request per difference. Its differences show on Configuration, in Drift. It reports drift and never repairs it: it does not edit live state to match the file, or the file to match live state. A reconciler that silently edited either side would make the file a description of the past, so a person decides which side is right, in the pull request.
+- **A person**: every creation wizard (agent, tool, skill, and record) ends here. None of them saves straight to the database.
+
+The tab used to explain the three openers in an Automatic proposals panel under the list. It only taught what the Opened by column means and counted nothing, so it left the page and its content lives here.
+
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
@@ -15,12 +22,13 @@ Every change to `.oxagen/` arrives as a pull request, and one lifecycle covers e
 | Init, skill and agent pull requests | `OXPRS` kinds `bootstrap`, `skill`, `agent` | `open_init_pr`, `propose_skill`, `propose_agent`, and a list of them | partial |
 | Tool and configuration kinds | `OXPR_KIND.tool`, `OXPRS` kind `config` | tool manifests, the reconciler | future-only |
 | Opened by | `OXPRS[].by`, `.byKind` | the proposal's author | partial |
+| The reconciler as an opener | `OXPRS` kind `config` | the reconciler | future-only |
 | State and checks | `.state`, `.checks`, `PR_STATE` | the proposal's checks as stored | shipped |
 
 ### Logic
 - `chgTab()` reads `wsOxprs()`, the pull requests on this workspace's repositories. With a selection, it renders the pull request instead.
 - **Change** shows the kind's icon, the title, and the branch. `OXPR_KIND` names each kind and its file: `oxagen init` (the tree), Steering record (`.oxagen/rules/<lineage>.toml`), skill, agent, tool, and configuration (`.oxagen/workspace.toml`).
-- **Opened by** names a person, "the promoter" or "the reconciler", with Person or Automatic beneath.
+- **Opened by** names a person, "the promoter" or "the reconciler", with Person or Automatic beneath. A build names the promoter and the reconciler only once the proposal records them. Today the app calls any other opener "another source".
 - **State** maps through `PR_STATE`: open, checks running, checks passed, checks failed, merged, closed.
 - **Checks** is `oxprCiLight()`, one light and "done / total". `ciLight()` blinks blue while any check runs, shows a red cross once one fails (pulsing while others run), stays green when every check passed, and stays grey while all are queued.
 - `rowClick()` sets `S.oxprSel` and renders. Enter and Space open it too.
@@ -31,38 +39,6 @@ Every change to `.oxagen/` arrives as a pull request, and one lifecycle covers e
 - **Empty list in a build**: "Oxagen has no pull request open or merged on this workspace's repositories."
 - **Build today**: lists the kinds it can read and says in one line which kinds have no list yet.
 - **Mobile**: one card per pull request.
-
-## Automatic proposals
-
-The three openers a pull request on this list can come from, one line each.
-
-### Purpose
-It tells a person what the Automatic label in Opened by means, and where a person's own pull requests come from.
-
-### Rationale
-A pull request an agent of Oxagen opened needs the same review as one a person opened. Naming the openers keeps that visible. Passages moved here from the panel.
-- The promoter applies no threshold. A person reads the cited runs and decides.
-- The reconciler does not edit live state to match the file.
-- No creation wizard saves straight to the database.
-- The closing note: the reconciler reports drift and does not repair it. A person decides which side is right, in the pull request. A reconciler that silently edited either side would make the file a description of the past.
-
-### Data sources
-| Field | Mockup source | Target store | Status |
-|---|---|---|---|
-| Promoter | copy in `chgTab()` | the promoter, `list_proposals` | partial |
-| Reconciler | copy | the reconciler | future-only |
-| Person | copy | the record, skill, agent and init wizards | shipped |
-
-### Logic
-- Promoter: "Groups records across runs by lineage and opens a proposal that cites those runs." The promoter picks the scope from where the evidence came (§10.3).
-- Reconciler: "Compares .oxagen/workspace.toml with the control plane's live state and opens one pull request per difference." Its differences show on Configuration, in Drift.
-- Person: "Every creation wizard (agent, tool, skill, and record) ends here."
-- The panel is static. It counts nothing.
-- A build names the promoter and the reconciler as openers only once the proposal records them. Today the app calls any other opener "another source".
-
-### States
-- **Loaded**: shown beneath the list, and hidden while a pull request is open.
-- **Mobile**: stacks under the list.
 
 ## Pull request
 
