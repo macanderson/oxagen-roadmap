@@ -4873,9 +4873,13 @@ function pTools(){
      '<div class="sp"><button class="btn sm primary" onclick="openDialog(\'import\')">Add provider</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Provider</th><th>Transport</th><th class="num">Tools</th><th>Toolbelts</th><th>Agents</th><th>Health</th><th>Connection</th><th>Authorization</th><th>Last import</th><th></th></tr></thead><tbody>'+
      PROVIDERS.map(function(sv){
-      var c=connByServer(sv.id), tb=providerBelts(sv.id), ag=providerAgents(sv.id);
+      var c=connByServer(sv.id), tb=providerBelts(sv.id), ag=providerAgents(sv.id), ln=providerLinks(sv);
       return '<tr '+rowClick("openDialog('server','"+sv.id+"')","Open "+sv.name)+'>'+
-       '<td><b>'+h(sv.system)+'</b><span class="sub">'+h(sv.desc)+'</span></td>'+
+       '<td><div class="pv">'+providerMark(sv,24)+'<div class="pv-t"><b>'+h(sv.system)+'</b><span class="sub">'+h(sv.desc)+'</span>'+
+        (ln.length?'<span class="sub pv-l">'+ln.map(function(l){
+          var host=new URL(l[1]).host.replace(/^www\./,"");
+          return l[0]==="Website"?linkOut(host,l[1],sv.system+" website, "+host):linkOut(l[0],l[1],sv.system+" "+l[0].toLowerCase());}).join(SEP)+'</span>':'')+
+       '</div></div></td>'+
        '<td><span class="b b-q">'+h(sv.transport)+'</span><span class="sub mono" style="font-size:10.5px">'+h(sv.wire)+' · '+h(sv.url)+'</span></td>'+
        '<td class="num">'+sv.tools+'<span class="sub">'+plural(sv.versions,"version")+'</span></td>'+
        '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(SEP):'<span class="dim">—</span>')+'</td>'+
@@ -4997,6 +5001,30 @@ function connByServer(id){var c=serverConns(id);return c.length?c[0]:null;}
 /* A server reached in-process or over a harness hook holds no credential, so it has nothing to
    authorize. Everything else is reached as somebody, and that somebody has to be connected. */
 function needsAuth(sv){return sv.conn!=="none";}
+/* A provider's logomark: the https icon its registry entry names, fetched with no referrer, or the
+   first letter of its system on a tile when there is none or it does not load (the app's
+   ProviderIcon). A provider added by hand has no entry, so it keeps the letter. */
+function providerMark(sv,size){
+  size=size||24;
+  var fb=(String(sv.system||sv.name||"").trim().charAt(0)||"?").toUpperCase(),
+      st="width:"+size+"px;height:"+size+"px;", u=/^https:\/\//.test(sv.icon||"")?sv.icon:"";
+  if(u) return '<span class="avx provider" style="'+st+'" data-l="'+h(fb)+'" aria-hidden="true">'+
+    '<img src="'+h(u)+'" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="avImgFail(this)"></span>';
+  return '<span class="avx provider f-sans" style="'+st+'font-size:'+Math.round(size*avScale(1))+'px" aria-hidden="true">'+h(fb)+'</span>';
+}
+/* The registry entry's links, https only: the website, the docs, and the source repository.
+   Docs is dropped when it is the website or the source, because the registry has no docs field
+   and search_mcp_registry falls back to one of the other two. */
+function providerLinks(sv){
+  var ok=function(u){return /^https:\/\//.test(u||"")?u:"";}, web=ok(sv.website), src=ok(sv.source), docs=ok(sv.docs);
+  if(docs===web||docs===src) docs="";
+  return [["Website",web],["Docs",docs],["Source",src]].filter(function(l){return l[1];});
+}
+function linkOut(text,u,label){
+  return '<a href="'+h(u)+'" target="_blank" rel="noopener noreferrer"'+(label?' aria-label="'+h(label)+'"':'')+
+   ' onclick="event.stopPropagation()">'+h(text)+'</a>';
+}
+function urlText(u){return String(u).replace(/^https:\/\//,"").replace(/\/$/,"");}
 var AUTH_BADGE={connected:["allowed","connected"],expired:["critical","token expired"],"key held":["allowed","key held"],"role assumed":["allowed","role assumed"]};
 function authBadge(sv){
   if(!needsAuth(sv)) return '<span class="b b-q">none needed</span>';
@@ -5087,13 +5115,15 @@ DLG_EXT.server=function(id){
        '<div class="row" style="margin-top:11px"><button class="btn sm primary" onclick="openDialog(\'oauth\',\''+sv.id+'\')">Connect with OAuth</button>'+
        '<button class="btn sm" onclick="openDialog(\'connection\')">Add a key or a role instead</button></div>'
      : '<div class="note">This provider holds no credential, so there is nothing to authorize.</div>';
-  var pbelt=providerBelts(sv.id), pag=providerAgents(sv.id);
-  return {t:sv.system,s:sv.transport+" · "+sv.wire+" · "+sv.url,w:true,
+  var pbelt=providerBelts(sv.id), pag=providerAgents(sv.id), links=providerLinks(sv);
+  return {t:sv.system,mark:providerMark(sv,32),s:sv.transport+" · "+sv.wire+" · "+sv.url,w:true,
    b:(sv.health==="ok"?'':'<div class="warn"><b>This provider is degraded.</b> Calls to it are retried once and then blocked.</div>')+
     (c&&c.authState==="expired"?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Reconnect to bring the '+plural(tv.length,"tool")+' below back into reach.</div>':'')+
     (props.length?'<div class="warn"><b>'+props.length+' schema'+(props.length>1?'s are':' is')+' awaiting approval.</b> '+
       'Until an admin approves, outputs are validated only for size and type.</div>':'')+
     '<dl class="kv"><dt>System</dt><dd>'+h(sv.desc)+'</dd>'+
+    (links.length?links.map(function(l){return '<dt>'+l[0]+'</dt><dd class="pv-url">'+linkOut(urlText(l[1]),l[1])+'</dd>';}).join("")
+      :'<dt>Links</dt><dd class="dim">None recorded</dd>')+
     '<dt>Transport</dt><dd class="mono">'+h(sv.transport)+' · '+h(sv.wire)+'</dd>'+
     '<dt>Registry name</dt><dd class="mono">'+h(sv.name)+'</dd>'+
     '<dt>Schemas</dt><dd>'+h(sv.schemas)+'</dd>'+
@@ -6826,9 +6856,11 @@ function repoByName(n){for(var i=0;i<REPOS.length;i++){if(REPOS[i].n===n)return 
 /* A row that only answers a click is a row a keyboard cannot reach, and this page's own rules
    say it must be operable end to end. The engine's older tables use a bare `class="click"`; these
    three do not, and the helper is here rather than inline so they cannot drift apart. */
+/* Only a key pressed on the row itself opens it. A button or link inside the row keeps its own
+   Enter and Space, where the row's handler would otherwise cancel them and open the row. */
 function rowClick(on,label){
   return 'class="click" tabindex="0" role="button" aria-label="'+h(label)+'"'+
-   ' onclick="'+on+'" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();'+on+'}"';
+   ' onclick="'+on+'" onkeydown="if(event.target===this&&(event.key===\'Enter\'||event.key===\' \')){event.preventDefault();'+on+'}"';
 }
 function stBadge(m){return '<span class="b '+m.b+'"><span class="d"></span>'+h(m.l)+'</span>';}
 
@@ -9512,7 +9544,7 @@ function dialog(){
   if(!d) return '';
   return '<div class="scrim" onclick="if(event.target===this)closeDialog()">'+
    '<div class="dlg'+(d.w?" wide":"")+'" role="dialog" aria-modal="true" aria-label="'+h(d.t)+'">'+
-   '<div class="dlg-h'+(d.s?" sub":"")+'">'+(d.s?'<div class="grow"><h2>'+h(d.t)+'</h2><p>'+h(d.s)+'</p></div>':'<h2>'+h(d.t)+'</h2>')+
+   '<div class="dlg-h'+(d.s?" sub":"")+'">'+(d.mark||'')+(d.s?'<div class="grow"><h2>'+h(d.t)+'</h2><p>'+h(d.s)+'</p></div>':'<h2>'+h(d.t)+'</h2>')+
    '<button class="iconbtn x" onclick="closeDialog()" aria-label="Close">×</button></div>'+
    (d.tabs?'<div class="tabs" role="tablist">'+d.tabs+'</div>':'')+
    '<div class="dlg-b">'+d.b+'</div><div class="dlg-f">'+d.f+'</div></div></div>';
@@ -14049,16 +14081,16 @@ document.addEventListener("click",function(e){
     hubspot:{cred:"oauth → token exchange",eg:"third_party"}, notion:{cred:"oauth → token exchange",eg:"third_party"}, zendesk:{cred:"oauth → token exchange",eg:"third_party"}
   };
   var NEW_SRV=[
-    {id:"jira",name:"jira",system:"Jira",desc:"Issues and service desk tickets in Atlassian Cloud.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.atlassian.com/a-intel",health:"ok",imported:"2026-08-21 10:02 UTC",conn:"Atlassian OAuth · a-intel",schemas:"declared"},
+    {id:"jira",name:"jira",system:"Jira",desc:"Issues and service desk tickets in Atlassian Cloud.",icon:"https://www.atlassian.com/favicon.ico",website:"https://www.atlassian.com/platform/remote-mcp-server",docs:"https://support.atlassian.com/rovo/docs/getting-started-with-the-atlassian-remote-mcp-server/",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.atlassian.com/a-intel",health:"ok",imported:"2026-08-21 10:02 UTC",conn:"Atlassian OAuth · a-intel",schemas:"declared"},
     {id:"datadog",name:"datadog",system:"Datadog",desc:"Monitors, dashboards, and logs for production.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.datadoghq.com",health:"ok",imported:"2026-09-01 07:40 UTC",conn:"Datadog app key · infra",schemas:"declared"},
     {id:"pagerduty",name:"pagerduty",system:"PagerDuty",desc:"On-call schedules and incidents.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.pagerduty.com",health:"ok",imported:"2026-08-11 12:18 UTC",conn:"PagerDuty OAuth · a-intel",schemas:"declared"},
     {id:"salesforce",name:"salesforce",system:"Salesforce",desc:"Accounts, contacts, and opportunities for the growth team.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.salesforce.com/a-intel",health:"ok",imported:"2026-08-30 15:55 UTC",conn:"Salesforce connected app · growth",schemas:"declared"},
     {id:"gdrive",name:"gdrive",system:"Google Drive",desc:"Shared documents and folders in the a-intel workspace.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.google.com/drive",health:"ok",imported:"2026-07-19 09:12 UTC",conn:"Google Workspace OAuth · a-intel",schemas:"declared"},
     {id:"orders-db",name:"orders-db",system:"Orders database",desc:"Read replica of the production orders database.",kind:"HTTP",transport:"http",wire:"https",url:"https://tools.a-intel.internal/pg",health:"ok",imported:"2026-06-02 08:30 UTC",conn:"IAM auth · aintel_prod read replica",schemas:"declared by admin"},
     {id:"kubernetes",name:"kubernetes",system:"Kubernetes",desc:"The prod-east cluster, reached by a local process.",kind:"MCP",transport:"mcp",wire:"stdio",url:"oxagen-run k8s-mcp@2.3.1",health:"degraded",imported:"2026-09-08 18:05 UTC",conn:"short-lived kubeconfig · prod-east",schemas:"2 observed, awaiting approval"},
-    {id:"sentry",name:"sentry",system:"Sentry",desc:"Errors and releases for the mobile apps.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.sentry.dev",health:"ok",imported:"2026-08-26 11:44 UTC",conn:"Sentry org token · mobile",schemas:"declared"},
-    {id:"hubspot",name:"hubspot",system:"HubSpot",desc:"Contacts and email sequences for marketing.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.hubspot.com",health:"ok",imported:"2026-09-03 13:20 UTC",conn:"HubSpot OAuth · growth",schemas:"declared"},
-    {id:"notion",name:"notion",system:"Notion",desc:"Team wiki pages and databases.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.notion.com",health:"ok",imported:"2026-07-28 16:01 UTC",conn:"Notion OAuth · a-intel",schemas:"declared"},
+    {id:"sentry",name:"sentry",system:"Sentry",desc:"Errors and releases for the mobile apps.",icon:"https://sentry.io/favicon.ico",website:"https://sentry.io",docs:"https://docs.sentry.io/product/sentry-mcp/",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.sentry.dev",health:"ok",imported:"2026-08-26 11:44 UTC",conn:"Sentry org token · mobile",schemas:"declared"},
+    {id:"hubspot",name:"hubspot",system:"HubSpot",desc:"Contacts and email sequences for marketing.",icon:"https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png",website:"https://www.hubspot.com",docs:"https://developers.hubspot.com/mcp",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.hubspot.com",health:"ok",imported:"2026-09-03 13:20 UTC",conn:"HubSpot OAuth · growth",schemas:"declared"},
+    {id:"notion",name:"notion",system:"Notion",desc:"Team wiki pages and databases.",icon:"https://www.notion.so/images/favicon.ico",website:"https://www.notion.so",docs:"https://developers.notion.com/docs/mcp",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.notion.com",health:"ok",imported:"2026-07-28 16:01 UTC",conn:"Notion OAuth · a-intel",schemas:"declared"},
     {id:"zendesk",name:"zendesk",system:"Zendesk",desc:"Support tickets and customer replies.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.zendesk.com/a-intel",health:"ok",imported:"2026-08-15 09:48 UTC",conn:"Zendesk OAuth · support",schemas:"declared"}
   ];
   NEW_SRV.forEach(function(s){s.tools=0;s.versions=0;SERVERS.push(s);});

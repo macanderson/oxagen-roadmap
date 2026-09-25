@@ -146,9 +146,9 @@ export default {
     ["--st-failed", "The danger action"],
   ],
   helpers: [
-    ["dialog()", "engine.js:9352", "Builds the scrim, shell, header, tabs, body, and footer from a `{t, s, w, tabs, b, f}` record. The shell markup is at 9662 to 9667."],
-    ["openDialog(kind, arg)", "engine.js:8132", "Opens a dialog by kind and remembers the dialog to return to."],
-    ["closeDialog()", "engine.js:8305", "Closes it, or returns to the dialog it was opened from."],
+    ["dialog()", "engine.js:9384", "Builds the scrim, shell, header, tabs, body, and footer from a `{t, s, w, tabs, b, f}` record. The shell markup is at 9662 to 9667."],
+    ["openDialog(kind, arg)", "engine.js:8164", "Opens a dialog by kind and remembers the dialog to return to."],
+    ["closeDialog()", "engine.js:8337", "Closes it, or returns to the dialog it was opened from."],
     ["DLG_EXT", "engine.js:27", "The registry of dialogs defined outside `dialog()`, such as `budgetedit` and `budgetdel`."],
   ],
   sourceNotes: [

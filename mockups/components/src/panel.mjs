@@ -131,7 +131,7 @@ export default {
   ],
   helpers: [
     ["panel(title, sub, btn, head, rows)", "engine.js:3208", "A local helper inside `tkFieldsTab()` for the Work fields tables. It is the only one."],
-    ["listify()", "engine.js:13589", "Adds the list controls to every table inside a panel after each render."],
+    ["listify()", "engine.js:13621", "Adds the list controls to every table inside a panel after each render."],
   ],
   sourceNotes: [
     "Panels are written inline: 154 `class=\"panel\"` in engine.js and 25 in wedge.js.",

@@ -16,10 +16,14 @@ A connection is the customer's credential to a provider. A person authorizes it,
 
 The caption's second and third sentences and the transport note under the table moved here. The caption keeps its one fact, the two counts.
 
+The logomark, the website, the docs and the source come from the provider's entry in the official MCP Registry (`registry.modelcontextprotocol.io`), or from the 18 vendor servers Oxagen checked by hand. They let you recognize a provider at a glance and reach its own documentation from the row. The registry has no docs field, so Docs appears only where a verified entry names its own docs page. A provider added by hand has no entry, and its row shows its first letter on a tile.
+
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
 | System, description | `PROVIDERS` (`FIXTURES.SERVERS`, grown by `volume()`) | `tools.tool_servers` (#3917) | partial |
+| Logomark | `PROVIDERS[].icon`, `providerMark()` | `list_mcp_servers` `iconUrl` (OAuth providers only, #4327) | partial |
+| Website, Docs, Source | `PROVIDERS[].website`, `.docs`, `.source`, `providerLinks()` | `list_mcp_servers` (#4327) | future |
 | Transport, wire, endpoint | `PROVIDERS[].transport`, `.wire`, `.url` | `mcp.mcp_servers.transport_type` | partial |
 | Tools, versions | `PROVIDERS[].tools`, `.versions` | `list_mcp_servers` `toolCount` | partial |
 | Toolbelts, Agents | `providerBelts()`, `providerAgents()` | derived from toolbelts (#3852) | future |
