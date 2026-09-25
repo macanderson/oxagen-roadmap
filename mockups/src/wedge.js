@@ -77,8 +77,8 @@ function pWork(r){
   if(S.state==="error") return errorState("Work","503 work_index_unavailable");
   if(S.state==="denied") return deniedState("this workspace\u2019s work","work.read on "+w.slug);
   if(S.state==="empty") return emptyState("No work in "+w.name+" yet",
-    "Work arrives from a connected issue provider, from a finding a person picks up, or written here. A run an agent starts on its own is filed under a direct work order.",
-    '<button class="btn primary" onclick="openDialog(\'intake\',\'providers\')">Connect an issue provider</button>');
+    "Work arrives from a connected issue tracker, from a finding a person picks up, or written here. A run an agent starts on its own is filed under a direct work order.",
+    '<button class="btn primary" onclick="openDialog(\'intake\',\'providers\')">Connect an issue tracker</button>');
   fileRuns();
   /* First run (W1): straight after onboarding the workspace holds one run, the smoke session, filed
      under a direct work order. Work opens on it alone. S.firstRun is cleared to see the seeded workspace. */
@@ -1403,7 +1403,7 @@ DLG_EXT.intake=function(){
   var n=wsProviders().length;
   var seg='<div class="kf stg-seg" role="group" aria-label="Intake" style="margin-bottom:14px">'+INTAKE_PARTS.map(function(x){
     return '<button class="btn sm" aria-pressed="'+(part===x[0])+'" onclick="intakePart(\''+x[0]+'\')">'+h(x[1])+'</button>';}).join("")+'</div>';
-  return {t:"Intake",s:n+" issue provider"+(n===1?"":"s")+" connected to "+ws().name+". Each imported issue becomes a work item.",w:true,
+  return {t:"Intake",s:n+" issue tracker"+(n===1?"":"s")+" connected to "+ws().name+". Each imported issue becomes a work item.",w:true,
    b:seg+(part==="fields"?tkFieldsTab():part==="people"?tkPeopleTab():tkProvTab()),
-   f:'<button class="btn" onclick="ipzOpen()">Connect an issue provider</button><button class="btn primary" onclick="closeDialog()">Done</button>'};
+   f:'<button class="btn" onclick="ipzOpen()">Connect an issue tracker</button><button class="btn primary" onclick="closeDialog()">Done</button>'};
 };
