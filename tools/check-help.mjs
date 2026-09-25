@@ -37,7 +37,7 @@ const URL0 = "file://" + FILE;
 // Every dialog kind the sources open, with the argument of its first call.
 const SRC = ["engine.js", "wedge.js"].map((f) => readFileSync(path.join(root, "mockups/src", f), "utf8")).join("\n");
 const KINDS = new Map();
-for (const m of SRC.matchAll(/openDialog\(\\?'([\w-]+)\\?'(?:\s*,\s*\\?'([^'\\]*)\\?')?/g)) if (!KINDS.has(m[1]) || (KINDS.get(m[1]) == null && m[2] != null)) KINDS.set(m[1], m[2] ?? null);
+for (const m of SRC.matchAll(/openDialog\(\\?['"]([\w-]+)\\?['"](?:\s*,\s*\\?['"]([^'"\\]*)\\?['"])?/g)) if (m[1] !== "wz" && (!KINDS.has(m[1]) || (KINDS.get(m[1]) == null && m[2] != null))) KINDS.set(m[1], m[2] ?? null);
 // The dialogs a function of their own opens: the creation wizards, the work order, the tracker
 // connection wizard, the workflow editor, the avatar editor, and a frame.
 const OPENERS = [
