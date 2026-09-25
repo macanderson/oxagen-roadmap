@@ -5763,16 +5763,12 @@ DLG_EXT.ctxpr=function(arg){
   var p=prpById(arg||CTXPR.prp)||prpById(CTXPR.prp), s=prpStats(p.id), open=p.id===CTXPR.prp&&S.ctxpr.st!=="none";
   var mine=p.id===CTXPR.prp;
   return {t:"Open a pull request",s:p.lineage+" · "+p.id,w:true,b:
-   (open?'<div class="callout" style="margin-bottom:14px"><span class="mono">'+h(CTXPR.pr)+'</span> is already open for this concern. One concern, one pull request.</div>':'')+
+   (open?'<div class="callout" style="margin-bottom:14px"><span class="mono">'+h(CTXPR.pr)+'</span> is already open for this concern.</div>':'')+
    '<div class="field"><label>Concern</label><input value="'+h(p.st)+'" aria-label="Concern"><div class="hint">One concern per pull request.</div></div>'+
    '<div class="field"><label>Kind</label><select aria-label="Kind"><option>'+h(p.kind)+' (as proposed)</option><option>rule: a directive that steers behavior</option><option>constraint: a hard boundary that requires or forbids</option><option>procedure: steps in order</option><option>fact: a checkable claim</option><option>memory: a durable recollection</option><option>preference: soft and often unfalsifiable</option></select></div>'+
-   '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace: opens on a-intel/platform</option><option>repository: opens on the linked repo</option></select>'+
-   '<div class="hint">The promoter picks the scope from where the evidence came.</div></div>'+
-   '<div class="field"><label>Constraint effect</label><select aria-label="Constraint effect"><option>forbid</option><option>require</option></select>'+
-   '<div class="hint">A record can never grant authority. These are the only two values.</div></div>'+
-   '<div class="field"><label>Supporting evidence</label><input value="'+h(s.meta.support(s)+(mine?" · fnd_01K5RT6C":""))+'" aria-label="Evidence"></div>'+
-   '<div class="note">Merge is the publication. The '+CTXPR.checks.length+' checks run the same rules as <span class="mono">stella context validate</span>: '+
-   h(CTXPR.checks.map(function(c){return c.n;}).join(", "))+'.</div>',
+   '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace: opens on a-intel/platform</option><option>repository: opens on the linked repo</option></select></div>'+
+   '<div class="field"><label>Constraint effect</label><select aria-label="Constraint effect"><option>forbid</option><option>require</option></select></div>'+
+   '<div class="field"><label>Supporting evidence</label><input value="'+h(s.meta.support(s)+(mine?" · fnd_01K5RT6C":""))+'" aria-label="Evidence"></div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     (open?'<button class="btn primary" onclick="ctxprOpen()">Go to '+h(CTXPR.pr)+'</button>':
      mine?'<button class="btn primary" onclick="ctxprOpen()">Open the pull request</button>':
@@ -5789,7 +5785,13 @@ function prpBadge(p){
   return '<span class="b b-approval"><span class="d"></span>open pull request</span><span class="b b-'+l[0]+'">'+h(l[1])+'</span>';
 }
 function prpDetail(p){
-  var s=prpStats(p.id), m=s.meta, mine=p.id===CTXPR.prp, c=S.ctxpr;
+  var s=prpStats(p.id), mine=p.id===CTXPR.prp, c=S.ctxpr;
+  /* A proposal the promoter measured carries PRP_META. One that only the fixtures name (the six other
+     workspaces' proposals) has none, so its review reads the proposal's own support line and says
+     what was not recorded rather than throwing on a missing field. */
+  var m=Object.assign({recKind:"",tok:stgTokOf(p.st),confidence:null,
+    support:function(){return p.support;},measure:function(){return p.support;},
+    rationale:function(){return "No promoter evidence was recorded for this proposal.";}},s.meta);
   var vcls={kept:"allowed",reverted:"failed","no change":"q",halted:"denied",passed:"allowed",failed:"failed"};
   var rows=s.rows.map(function(r){
     return '<tr><td><span class="mono" style="font-size:12px">'+h(r.run)+'</span><div class="dim" style="font-size:11.5px">'+h(r.agent)+' · '+h(r.date)+'</div></td>'+
@@ -5801,12 +5803,12 @@ function prpDetail(p){
     return '<div class="stat"><span class="k">'+k+'</span><span class="v" style="color:var(--st-'+(ok?"allowed":"approval")+')">'+v+
      (need!=null?' <small>/ '+need+'</small>':'')+'</span><span class="s">'+sub+'</span></div>';
   }
-  var tiles=tile("Supporting runs",s.runs,null,true,m.person?"proposed by a person":"sealed runs, from the rows below")+
-   tile("Distinct agents",s.agents,null,true,"from the rows below")+
-   (m.person?tile("Checks","apply",null,true,"the same six as any record"):tile("Confidence",m.confidence.toFixed(2),null,true,"the promoter's own estimate; a person decides"));
+  var tiles=tile("Supporting runs",s.runs,null,true,m.person?"proposed by a person":"sealed runs")+
+   tile("Distinct agents",s.agents,null,true,"in the supporting runs")+
+   (m.person?tile("Checks","apply",null,true,"the same six as any record"):m.confidence==null?tile("Confidence","—",null,false,"not recorded"):tile("Confidence",m.confidence.toFixed(2),null,true,"the promoter's estimate"));
   var canOpen=mine&&c.st==="none"&&s.met;
   var action=mine&&c.st!=="none"
-   ? '<button class="btn" onclick="S.prpSel=null;S.tab.steering=\'prs\';render()">'+(c.st==="merged"?"Merged in ":"Open ")+h(CTXPR.pr)+'</button>'
+   ? '<button class="btn" onclick="S.prpSel=null;S.prSel=\'ctxpr\';stgTab(\'prs\')">'+(c.st==="merged"?"Merged in ":"Open ")+h(CTXPR.pr)+'</button>'
    : canOpen ? '<button class="btn primary" onclick="openDialog(\'ctxpr\',\''+h(p.id)+'\')">Open a pull request</button>'
    : !mine&&p.pr!=="—" ? '<span class="mono" style="font-size:12px">'+h(p.pr)+' · '+h(p.checks)+'</span>'
    : '<button class="btn" disabled>Open a pull request</button>';
@@ -5827,8 +5829,7 @@ function prpDetail(p){
      '<dt>Reaches</dt><dd>every run in <b>core-platform</b> on a-intel/platform, from its next model call</dd>'+
      '<dt>As</dt><dd>compiled steering in bundle v'+(STEER_BUNDLE.v+(mine&&c.st==="merged"?0:1))+', <span class="mono">'+h(p.force)+'</span> in the stable prefix</dd>'+
      '<dt>Costs</dt><dd class="num"><b>'+m.tok+' steering tokens</b> a turn · '+tokn(stgBundle().tok-(mine&&c.st==="merged"?m.tok:0))+' → '+tokn(stgBundle().tok+(mine&&c.st==="merged"?0:m.tok))+'</dd>'+
-     '<dt>Baseline</dt><dd>'+h(m.measure(s))+(s.keptRate!=null&&s.dups?' · side effects kept on '+per(s.keptRate)+' of runs':'')+'</dd>'+
-     '<dt>Read back as</dt><dd>every run that renders it cites the record in its context frame, so the Run page shows where it landed</dd></dl></div></div></div></div>';
+     '<dt>Baseline</dt><dd>'+h(m.measure(s))+(s.keptRate!=null&&s.dups?' · side effects kept on '+per(s.keptRate)+' of runs':'')+'</dd></dl></div></div></div></div>';
 }
 
 /* ---- the pull request, as a state machine ---- */
@@ -5985,7 +5986,7 @@ function wzRecOpenPr(){
   S.tab.steering="prs"; S.prSel=def.pr;
   recprRun(def);
   if(route().page!=="steering") go(stgHash("prs",w.slug)); else render();
-  act("Branch "+def.branch+" pushed and "+def.pr+" opened. "+def.checks.length+" checks queued; it steers nothing until it merges.","gold");
+  act("Branch "+def.branch+" pushed and "+def.pr+" opened. "+def.checks.length+" checks queued.","gold");
 }
 
 /* The file the pull request carries. The statement is operator text, so it is escaped as TOML —
@@ -6040,7 +6041,7 @@ function recprBody(def){
 }
 function recprDetail(def){
   var st=recprSt(def), r=def.record, n=def.checks.length, l=recprLabel(def), recs=recprRecs(def), many=recs.length>1, tok=recprTok(def);
-  var merged=st.st==="merged", passed=st.st==="passed", failed=st.st==="failed", sb=stgBundle();
+  var merged=st.st==="merged", passed=st.st==="passed", failed=st.st==="failed", closed=st.st==="closed", sb=stgBundle();
   var checks=def.checks.map(function(k,i){
     var s2=i<st.done?"pass":(failed&&i===st.failed)?"fail":(st.st==="checking"&&i===st.done)?"running":"queued";
     return '<tr data-check="'+s2+'"><td style="font-size:12.5px">'+h(k.n)+'<div class="dim" style="font-size:11.5px">'+
@@ -6055,6 +6056,8 @@ function recprDetail(def){
      (many?'<button class="btn primary" onclick="S.prSel=null;stgTab(\'records\')">See them in Records</button>'
       :'<button class="btn primary" onclick="go(\''+crecUrl(r.id)+'\')">Open the record</button>'+
        '<button class="btn" onclick="S.prSel=null;stgTab(\'records\')">See it in Records</button>')+'</div></div>'
+   : closed
+   ? '<div class="panel-b" style="border-top:1px solid var(--border);font-size:12.5px"><b>Closed without merging.</b> <span class="muted">Nothing was published.</span></div>'
    : '<div class="panel-b row" style="border-top:1px solid var(--border);gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:12.5px">'+
      (failed?'<b style="color:var(--st-failed)">A check failed.</b> <span class="muted">Nothing merges and nothing is published. Change the file and open it again.</span>'
       :passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
@@ -6082,8 +6085,7 @@ function recprDetail(def){
      '<dt>2</dt><dd>re-index the record from the merged commit; a hash mismatch blocks delivery</dd>'+
      '<dt>3</dt><dd>bump the bundle v'+sb.v+' → v'+(sb.v+1)+' and re-sign it · '+tokn(sb.tok)+' → '+tokn(sb.tok+tok)+' steering tokens a turn</dd>'+
      '<dt>4</dt><dd>emit steering_published to the audit log</dd>'+
-     '<dt>5</dt><dd>deliver it on the next model call of every run in '+h(ws().name)+'</dd></dl>'+
-     '<div class="note" style="margin-top:12px">Nothing above happens on the way here. The record steers nothing while this pull request is open, which is the whole reason it is a pull request.</div></div></div>';
+     '<dt>5</dt><dd>deliver it on the next model call of every run in '+h(ws().name)+'</dd></dl></div></div>';
   return '<div class="split"><div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Pull request · <span class="mono">'+h(def.pr)+'</span></h3>'+
     '<span class="b b-'+l[0]+'" style="margin-left:auto" data-recpr-state="'+st.st+'"><span class="d"></span>'+h(l[1])+'</span></div><div class="panel-b">'+
@@ -6092,8 +6094,7 @@ function recprDetail(def){
    '<div class="panel"><div class="panel-h"><h3>Pull request body</h3>'+
     '<span class="b b-q" style="margin-left:auto">written by '+h(me().name)+'</span></div>'+
     '<div class="panel-b"><pre>'+h(recprBody(def))+'</pre></div></div></div>'+
-   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Checks</h3>'+
-    '<span class="muted" style="font-size:12px">the same rules as <span class="mono">stella context validate</span></span></div>'+
+   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Checks</h3></div>'+
     '<div class="tw"><table class="narrow"><tbody data-recpr-done="'+st.done+'">'+checks+'</tbody></table></div>'+mergebar+'</div>'+right+'</div></div>';
 }
 
@@ -6127,9 +6128,8 @@ function ctxprTab(){
   if(prSelected()==="recpr") return table+recprDetail(recprCur());
   var c=S.ctxpr, n=CTXPR.checks.length, l=ctxprLabel(), merged=c.st==="merged", passed=c.st==="passed"||merged;
   var p=prpById(CTXPR.prp), s=prpStats(CTXPR.prp), sb=stgBundle();
-  if(c.st==="none") return table+'<div class="panel"><div class="panel-b"><p style="margin:0 0 12px;font-size:13px">'+h(CTXPR.prp)+' is ready and has no pull request yet. It steers nothing until one merges.</p>'+
-   '<button class="btn primary" onclick="openDialog(\'ctxpr\',\''+CTXPR.prp+'\')">Open a pull request</button>'+
-   '<div class="note" style="margin-top:12px">A pull request here is opened by the promoter, out of runs. <button class="lnk" onclick="wzOpen(\'record\')">Writing one yourself</button> opens the same kind of pull request, argued from you rather than from runs.</div></div></div>';
+  if(c.st==="none") return table+'<div class="panel"><div class="panel-b"><p style="margin:0 0 12px;font-size:13px">'+h(CTXPR.prp)+' is ready and has no pull request yet.</p>'+
+   '<button class="btn primary" onclick="openDialog(\'ctxpr\',\''+CTXPR.prp+'\')">Open a pull request</button></div></div>';
 
   var checks=CTXPR.checks.map(function(k,i){
     var st=i<c.done?"pass":(c.st==="checking"&&i===c.done)?"running":"queued";
@@ -6138,6 +6138,8 @@ function ctxprTab(){
   }).join("");
   var mergebar=merged
    ? '<div class="panel-b" style="border-top:1px solid var(--border)"><b style="color:var(--st-proven)">Merged by '+h(me().name)+'</b><div class="dim" style="font-size:12px">'+h(c.mergedAt)+' · squashed into main as '+h(CTXPR.record.commit)+'</div></div>'
+   : c.st==="closed"
+   ? '<div class="panel-b" style="border-top:1px solid var(--border);font-size:12.5px"><b>Closed without merging.</b> <span class="muted">Nothing was published.</span></div>'
    : '<div class="panel-b row" style="border-top:1px solid var(--border);gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px;font-size:12.5px">'+
      (passed?'<b>'+n+' checks passed.</b> <span class="muted">Governance team: '+h(me().name)+' owns <span class="mono">.oxagen/rules/</span>.</span>'
             :'<b>Checks are running.</b> <span class="muted">Merge is blocked until all '+n+' report.</span>')+'</div>'+
@@ -6186,7 +6188,7 @@ function ctxprTab(){
     '[<span class="k">enforcement</span>]\n<span class="k">constraint_effect</span> = <span class="s">"'+h(CTXPR.record.ce)+'"</span>\n<span class="k">blocking</span> = <span class="s">false</span>\n\n'+
     '<span class="k">record_hash</span>  = <span class="s">"'+h(CTXPR.hash)+'"</span></pre></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Pull request body</h3></div><div class="panel-b"><pre>'+h(body)+'</pre></div></div></div>'+
-   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Checks</h3><span class="muted" style="font-size:12px">the same rules as <span class="mono">stella context validate</span></span></div>'+
+   '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Checks</h3></div>'+
     '<div class="tw"><table class="narrow"><tbody data-checks-done="'+c.done+'">'+checks+'</tbody></table></div>'+mergebar+'</div>'+promo+'</div></div>';
 }
 
@@ -6221,7 +6223,7 @@ S.pv={agent:"release-manager",preset:"release-notes",text:null};
 S.libKind="";
 
 function stgOpenCount(){
-  return (S.ctxpr.st!=="none"&&S.ctxpr.st!=="merged"?1:0)+recprOpenCount()+
+  return (S.ctxpr.st!=="none"&&S.ctxpr.st!=="merged"&&S.ctxpr.st!=="closed"?1:0)+recprOpenCount()+
    PROPOSALS.filter(function(q){return q.id!==CTXPR.prp&&q.pr!=="—";}).length;
 }
 function wsGov(w){return (w&&w.governance)||"team";}
@@ -6233,16 +6235,15 @@ function govChip(w){
 }
 function govSet(slug,mode){
   var w=wsBySlug(slug); if(!w) return; var was=wsGov(w); w.governance=mode; closeDialog();
-  act(was===mode?"Governance mode is already "+mode+"; nothing to change.":"Pull request opened on "+w.main+": .oxagen/rules/governance.toml sets mode = "+mode+". It takes effect on merge for everything already in flight; nothing else in Oxagen writes that file.","gold");
+  act(was===mode?"Governance mode is already "+mode+". Nothing to change.":"Pull request opened on "+w.main+": .oxagen/rules/governance.toml sets mode = "+mode+".","gold");
 }
 DLG_EXT.govmode=function(){
   var w=S.dlg==="govmode"?wsBySlug(S.dlgArg):null; if(!w) return {t:"Governance mode",w:false,b:"",f:""};
   var cur=S.govPick||wsGov(w);
   return {t:"Governance mode · "+w.name,s:".oxagen/rules/governance.toml on "+w.main,w:false,
    b:'<div class="wz-pick" style="grid-template-columns:1fr">'+WZ_MODES.map(function(m){var on=cur===m[0];
-      return '<button class="wz-card'+(on?" on":"")+'" onclick="S.govPick=\''+m[0]+'\';render()"><span class="tx"><b>'+h(m[0])+(m[0]===wsGov(w)?' <span class="dim" style="font-weight:400">· now</span>':'')+'</b><span class="d">'+h(m[1])+' '+h(m[2])+'</span></span></button>';}).join("")+'</div>'+
-    '<pre style="margin-top:12px">'+h(oxGovernanceToml(cur))+'</pre>'+
-    '<div class="note" style="margin-top:12px">The mode is read off the file when a pull request is opened and again when it is merged, so raising it takes effect on everything already in flight. Lowering it is an org-owner action with approval, recorded as a security event.</div>',
+      return '<button class="wz-card'+(on?" on":"")+'" onclick="S.govPick=\''+m[0]+'\';render()"><span class="tx"><b>'+h(m[0])+(m[0]===wsGov(w)?' <span class="dim" style="font-weight:400">· now</span>':'')+'</b><span class="d">'+h(m[1])+'</span></span></button>';}).join("")+'</div>'+
+    '<pre style="margin-top:12px">'+h(oxGovernanceToml(cur))+'</pre>',
    f:'<button class="btn" onclick="S.govPick=null;closeDialog()">Cancel</button><button class="btn primary" onclick="var m=S.govPick||\''+h(wsGov(w))+'\';S.govPick=null;govSet(\''+h(w.slug)+'\',m)">Open the pull request</button>'};
 };
 
@@ -6505,16 +6506,15 @@ DLG_EXT.memory=function(id){
 DLG_EXT.memforget=function(id){
   var m=memById(id); if(!m)return noSuch("Memory");
   return {t:"Forget this memory?",w:false,
-   b:'<div class="note">The assembler stops selecting it, and '+h(m.agent||"every agent in scope")+' stops being told it. The runs it was folded from are untouched: every frame stays, and every run that carried it keeps naming the hash it carried.</div>'+
-     (m.recalls30?'<div class="warn">It was recalled '+m.recalls30+' times in the last 30 days. Whatever those runs did with it, they did because of this.</div>':'')+
-     '<div class="note" style="margin-top:10px">Promote is the other answer. If the memory is right, a record makes it binding instead of leaving it to compete.</div>',
+   b:'<div class="note">The assembler stops selecting it, and '+h(m.agent||"every agent in scope")+' stops being told it.</div>'+
+     (m.recalls30?'<div class="warn">It was recalled '+m.recalls30+' times in the last 30 days.</div>':''),
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
      '<button class="btn danger" onclick="memForget(\''+h(m.id)+'\')">Forget it</button>'};
 };
 function memForget(id){
   var m=memById(id), i=MEMORY.indexOf(m); if(i<0)return;
   MEMORY.splice(i,1); closeDialog(); render();
-  act("Forgot "+m.id+". The assembler stops selecting it; every run that carried it is untouched.");
+  act("Forgot "+m.id+".");
 }
 function memPromote(id){
   var m=memById(id); if(!m)return;
@@ -6606,7 +6606,7 @@ DLG_EXT.ontology=function(id){
 DLG_EXT.ontnew=function(){
   return {t:"Define a glossary term",s:"One term, defined the way this workspace uses it",w:false,
    b:ontForm(null,"on")+
-    '<div class="note">Opening this writes <span class="mono">.oxagen/ontology/&lt;term&gt;.toml</span> on '+h(ws().main)+' in a pull request. The note steers nothing until it merges.</div>',
+    '<div class="note">Opening this writes <span class="mono">.oxagen/ontology/&lt;term&gt;.toml</span> on '+h(ws().main)+' in a pull request.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn primary" onclick="ontCreate()">Open the pull request</button>'};
 };
@@ -6624,17 +6624,17 @@ function ontCreate(){
   var p=ontPr(o,"add","An operator wrote a definition for "+f.term+".");
   ONTOLOGY.push(o);
   closeDialog(); render();
-  act("Opened "+p.pr+" for "+f.term+". It steers nothing until it merges.","gold");
+  act("Opened "+p.pr+" for "+f.term+".","gold");
 }
 DLG_EXT.ontedit=function(id){
   var o=ontById(id);
   if(!o)return noSuch("Glossary term");
   if(o.retiring)return {t:o.term+" is being retired",w:false,
-   b:'<div class="note">A pull request removes this note. Close that pull request before you change the definition, or the two write over each other.</div>',
+   b:'<div class="note">A pull request removes this note. Close that pull request before you change the definition.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   return {t:"Edit "+o.term,w:false,
    b:ontForm(o,"oe")+
-    '<div class="note">Saving opens a pull request against <span class="mono">'+h(ontFile(o))+'</span>. The definition in force does not change until it merges.</div>',
+    '<div class="note">Saving opens a pull request against <span class="mono">'+h(ontFile(o))+'</span>.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'+
     '<button class="btn danger" onclick="openDialog(\'ontretire\',\''+h(o.id)+'\')">Retire</button>'+
     '<button class="btn primary" onclick="ontSave(\''+h(o.id)+'\')">Open the pull request</button>'};
@@ -6648,7 +6648,7 @@ function ontSave(id){
   o.token_cost=ontCost(f.body); o.hash=ontHash(f.body);
   var p=ontPr(o,"mod","An operator changed the definition of "+f.term+".");
   closeDialog(); render();
-  act("Opened "+p.pr+" for "+f.term+". The definition in force does not change until it merges.","gold");
+  act("Opened "+p.pr+" for "+f.term+".","gold");
 }
 DLG_EXT.ontretire=function(id){
   var o=ontById(id);
@@ -6657,7 +6657,7 @@ DLG_EXT.ontretire=function(id){
    b:'<div class="note">A pull request removes this note and is waiting on its checks. Open it on the Changes tab.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   return {t:"Retire "+o.term+"?",w:false,
-   b:'<div class="note">A note is a file, so retiring it is a pull request that removes <span class="mono">'+h(ontFile(o))+'</span>. It keeps informing the model until that merges, and the row says so in the meantime.</div>'+
+   b:'<div class="note">Retiring it opens a pull request that removes <span class="mono">'+h(ontFile(o))+'</span>.</div>'+
     '<div class="warn">Once the removal merges, no agent is told that <b>'+h(o.term)+'</b> means what this note says it means.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it</button>'+
     '<button class="btn danger" onclick="ontRetire(\''+h(o.id)+'\')">Open the pull request</button>'};
@@ -6667,7 +6667,7 @@ function ontRetire(id){
   o.retiring=true;
   var p=ontPr(o,"del","An operator retired the definition of "+o.term+".");
   closeDialog(); render();
-  act("Opened "+p.pr+" to remove "+o.term+". It keeps informing the model until that merges.","gold");
+  act("Opened "+p.pr+" to remove "+o.term+".","gold");
 }
 
 /* ---- Gates: the second compilation ---- */
@@ -7104,8 +7104,7 @@ DLG_EXT.closepr=function(arg){
   var m=me();
   return {t:"Close "+pr,s:"without merging",w:false,
    b:'<p style="margin:0 0 10px;font-size:13px">The pull request closes on GitHub and nothing is published. oxagen posts this comment on it:</p>'+
-    '<div class="gh-comment"><p>Closed by '+h(m.name)+' &lt;'+h(m.email)+'&gt;</p><hr><p>Added via oxagen <a href="'+h(url)+'">'+h(url)+'</a></p></div>'+
-    '<div class="note" style="margin-top:12px">Closing is a governed action: it is recorded in Audit with your name, and the branch stays until someone deletes it.</div>',
+    '<div class="gh-comment"><p>Closed by '+h(m.name)+' &lt;'+h(m.email)+'&gt;</p><hr><p>Added via oxagen <a href="'+h(url)+'">'+h(url)+'</a></p></div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger solid" onclick="prClose(\''+h(kind)+'\',\''+h(id)+'\')">Close pull request</button>'};
 };
 function oxprCanMerge(p){
@@ -8503,7 +8502,7 @@ function skCfgFile(){
   '<span class="k">rubric</span>    = <span class="s">"'+h(SK_CFG.reflect.rubric)+'"</span>\n'+
   '<span class="k">sample</span>    = <span class="n">'+SK_CFG.reflect.sample+'</span>\n'+
   '<span class="k">always</span>    = [<span class="s">"failing"</span>, <span class="s">"tampered"</span>]\n'+
-  '<span class="k">use</span>       = <span class="s">"research"</span>               <span class="c"># the only accepted value. See the Reflection tab.</span>\n'+
+  '<span class="k">use</span>       = <span class="s">"research"</span>               <span class="c"># the only accepted value</span>\n'+
   '<span class="k">retain</span>    = <span class="s">"'+h(SK_CFG.reflect.retain)+'"</span>\n'+
   '</pre></div>';
 }
@@ -8668,12 +8667,12 @@ DLG_EXT.skenable=function(){
 };
 DLG_EXT.skcfg=function(){
   return {t:SK_CFG.file, s:"Version "+SK_CFG.ver+", merged as "+SK_CFG.pr+" by "+PEOPLE[SK_CFG.by].name+" on "+SK_CFG.when, w:true,
-   b:skCfgFile()+'<div style="margin-top:14px"><h4 style="margin-bottom:8px">Sources, and what each contributes</h4>'+
+   b:skCfgFile()+'<div style="margin-top:14px"><h4 style="margin-bottom:8px">Sources</h4>'+
      '<div class="sx-skl">'+SK_CFG.sources.map(function(x){
       return '<div class="sx-row'+(x.on?"":" held")+'"><div class="sx-ki">'+icon(x.k==="registry"?"organization":x.k==="market"?"tools":"git")+'</div>'+
        '<div><div class="nm">'+h(x.label)+'</div><div class="st">'+h(x.d)+'</div></div>'+
        '<div class="rt">'+(x.on?skBadge("allowed",plural(x.n,"skill")):skBadge("q","not a source"))+'</div></div>';}).join("")+'</div></div>',
-   f:'<span class="grow mono dim" style="font-size:11px">changing this is a pull request, not a save button</span><button class="btn" onclick="closeDialog()">Close</button>'};
+   f:'<span class="grow"></span><button class="btn" onclick="closeDialog()">Close</button>'};
 };
 DLG_EXT.skill=function(arg){
   var s=skillOf(arg)||SKILLS[0];
@@ -9268,7 +9267,7 @@ function steerRows(rep){
 DLG_EXT.deliveryreport=function(){
   var rep=S.steerReport;
   if(!rep) return {t:"Delivery report",s:"nothing sent yet",w:false,
-    b:'<p class="muted" style="margin:0">No fleet steer has been sent in this session. A report is written the moment one is, with a row for every agent it addressed.</p>',
+    b:'<p class="muted" style="margin:0">No fleet steer has been sent in this session.</p>',
     f:'<button class="btn" onclick="closeDialog()">Close</button><button class="btn primary" onclick="openSteerFleet()">Steer the fleet</button>'};
   var rows=steerRows(rep), n={applied:0,queued:0,undelivered:0}, tok=0, runsHit=0, first=null;
   rows.forEach(function(r){
@@ -9286,15 +9285,13 @@ DLG_EXT.deliveryreport=function(){
   }).join("");
   return {t:n.applied+" applied, "+n.queued+" queued, "+n.undelivered+" undelivered",
    s:"Delivery report · "+rows.length+" recipient"+(rows.length===1?"":"s")+" · sent "+rep.at.slice(0,8)+" · "+(rep.mode==="interrupt"?"interrupt requested":"at the boundary"),w:true,
-   b:'<p class="muted" style="font-size:12.5px;margin:0 0 12px">Every status change is a frame on the recipient’s run. <span class="mono">applied</span> is the only success status: the model request carrying the steer was made, and the row names that frame. '+
-     '<span class="mono">expired</span>, <span class="mono">canceled</span> and <span class="mono">failed</span> count as undelivered.</p>'+
-    '<div class="grid g3" style="margin-bottom:14px">'+
+   b:'<div class="grid g3" style="margin-bottom:14px">'+
      '<div class="stat"><span class="k">Applied</span><span class="v" style="color:var(--st-allowed)">'+n.applied+'</span><span class="s">a model call carried it</span></div>'+
      '<div class="stat"><span class="k">Queued</span><span class="v" style="color:var(--st-approval)">'+n.queued+'</span><span class="s">waiting for a boundary or a run</span></div>'+
      '<div class="stat"><span class="k">Undelivered</span><span class="v" style="color:var(--st-denied)">'+n.undelivered+'</span><span class="s">expired, canceled or failed</span></div></div>'+
     '<div class="note" style="margin-bottom:12px"><span class="mono dim" style="font-size:11px">what was sent · '+h(rep.dig)+' · '+rep.tokens+' tok</span><br>“'+h(rep.text)+'”</div>'+
     '<div class="tw"><table><thead><tr><th>Agent and run</th><th>Status</th><th>Mode used</th><th class="num">Time</th><th>Why</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
-    '<p class="dim" style="font-size:11.5px;margin:10px 0 0">'+(runsHit?tok+' tokens injected across '+runsHit+' run'+(runsHit===1?'':'s')+' · reported by harness':'Nothing injected yet; queued rows update here as each boundary is reached.')+'</p>',
+    '<p class="dim" style="font-size:11.5px;margin:10px 0 0">'+(runsHit?tok+' tokens injected across '+runsHit+' run'+(runsHit===1?'':'s')+' · reported by harness':'Nothing injected yet.')+'</p>',
    f:'<span class="grow"></span><button class="btn" onclick="closeDialog()">Close</button>'+
     (first?'<button class="btn primary" onclick="closeDialog();openFrameIn(\''+h(first.run)+'\','+first.frame+')">Open the run that received it</button>':'')};
 };
@@ -11989,8 +11986,8 @@ function impRow(c){
     ?'Already published as '+impMemLink(c.dup.id)+' ('+pct(c.dup.j)+').'
     :'Repeats <span class="mono">'+h(c.dup.file)+':L'+c.dup.line+'</span> ('+pct(c.dup.j)+').');
   if(c.fold) notes.push(mem
-    ?'Joins '+impMemLink(c.fold.id)+' as a saying ('+pct(c.fold.j)+'). An imported saying never counts as a run.'
-    :'Close to memory '+impMemLink(c.fold.id)+' ('+pct(c.fold.j)+'). As a record it stands alone.');
+    ?'Joins '+impMemLink(c.fold.id)+' as a saying ('+pct(c.fold.j)+').'
+    :'Close to memory '+impMemLink(c.fold.id)+' ('+pct(c.fold.j)+').');
   if(mem&&(c.force==="must"||c.force==="should")) notes.push('A memory caps at may. Keep it a record to hold it at '+h(c.force)+'.');
   var changed=c.kind!==c.inf.kind?' You set it to '+h(c.kind)+'.':'';
   return '<div class="imp-c" data-imp-id="'+id+'" data-imp-st="'+(c.st||"open")+'" data-imp-as="'+c.target+'">'+
@@ -12049,7 +12046,7 @@ function wzImport(){
        table+
        (z.skipped.length?'<div class="field" style="margin-top:14px"><label>Skipped</label>'+impSkipList(z)+'</div>':'')+
        (inc.length?'<div class="note" style="margin-top:14px" data-imp-cost="'+impCost(tok)+'">stella reads '+inc.length+' '+(inc.length===1?'file':'files')+', about '+tok+' tokens. '+
-         'That costs about '+usd(impCost(tok).toFixed(2))+' in usage credits, billed to '+h(ORG.name)+'. Nothing is sent until you choose Parse with stella.</div>'
+         'That costs about '+usd(impCost(tok).toFixed(2))+' in usage credits, billed to '+h(String(ORG.name).replace(/\.$/,""))+'.</div>'
         :'<div class="note" style="margin-top:14px">oxagen skips dependency and build directories, version control, anything that is not Markdown, and any file over '+MD_IMPORT.max_kb+' KB.</div>'),
      f:wzNext("Parse with stella",inc.length>0&&!z.reading,"impParse();")};
   }
@@ -12077,7 +12074,7 @@ function wzImport(){
           '<button class="btn sm" onclick="impAll(\'reject\','+g.fi+')">Reject file</button></div>'+
           g.cands.map(impRow).join("")+'</div>';
        }).join("")+
-       '<div class="note">An undecided line is left out. The Markdown files themselves stay as they are.</div>',
+       '<div class="note">An undecided line is left out.</div>',
      f:wzNext("Review what publishes",n.acc>0)};
   }
   var ids=impLineages(z), recs=impAccepted(z,"record"), mems=impAccepted(z,"memory"), groups=impGroups(recs);
@@ -12085,8 +12082,7 @@ function wzImport(){
   var btn=np&&nm?"Open "+np+" pull "+(np===1?"request":"requests")+" and write "+nm+" "+(nm===1?"memory":"memories")
     :np?"Open "+np+" pull "+(np===1?"request":"requests"):"Write "+nm+" "+(nm===1?"memory":"memories");
   return {t:"Publish", s:"Records open one pull request per source file, and memories are written now.",
-   b:(np?'<p style="margin-bottom:14px">Each pull request runs the same six checks as a record you write by hand. A record steers nothing until its pull request merges.</p>'+
-      groups.map(function(g){
+   b:(np?groups.map(function(g){
        return '<div class="wz-pr" data-imp-pr="'+h(g.file)+'"><div class="wz-pr-h"><span class="b b-q mono">'+h(w.main)+'</span>'+
         '<span class="dim">←</span><span class="b b-approval mono">context/import-'+h(impSlug(g.file))+'</span></div>'+
         wzFiles(g.cands.map(function(c){return ["add",".oxagen/rules/"+ids[c.id]+".toml",'<span class="mono">'+h(impSrc(c))+'</span>'];}))+'</div>';
@@ -12095,7 +12091,7 @@ function wzImport(){
        wzFiles(mems.map(function(c){ var f=impMemForce(c);
          return c.fold?["mod",c.fold.id,'a saying from <span class="mono">'+h(impSrc(c))+'</span>']
           :["add","mem.import."+(impWordsOf(c).slice(0,4).join("-")||"line"),IMP_CLS[c.kind].toLowerCase()+' at '+f+' from <span class="mono">'+h(impSrc(c))+'</span>'];}))+
-       '<div class="hint">Written when you publish, with no pull request. A memory becomes a record only through a proposal that runs earn, and an imported saying never counts as a run.</div></div>':''),
+       '<div class="hint">Written when you publish, with no pull request.</div></div>':''),
    f:'<button class="btn primary" onclick="wzImpPublish()">'+h(btn)+'</button>'};
 }
 
@@ -12141,10 +12137,9 @@ function wzImpPublish(){
   if(prs.length) parts.push("Opened "+prs.length+" pull "+(prs.length===1?"request":"requests")+" for "+nr+" "+(nr===1?"record":"records")+".");
   if(made) parts.push("Wrote "+made+" "+(made===1?"memory":"memories")+".");
   if(joined) parts.push("Added "+joined+" "+(joined===1?"saying":"sayings")+" to existing memories.");
-  if(prs.length) parts.push("The records steer nothing until their pull requests merge.");
   /* Steering reads its tab from the address, so the landing is a navigation even from Steering itself. */
   var land=prs.length?stgHash("prs",w.slug):stgHash("memory",w.slug);
-  if(prs.length){ S.tab.steering="prs"; S.prSel=prs[0].pr; } else { S.libKind="memory"; S.tab.steering="library"; }
+  if(prs.length){ S.tab.steering="prs"; S.prSel=prs[0].pr; } else { S.srcKind="memory"; S.tab.steering="sources"; }
   if(location.hash!==land) go(land); else render();
   act(parts.join(" "),"gold");
 }
@@ -12323,42 +12318,36 @@ var WZ_MODES=[
 function wzInit(){
   var z=S.wz, r=wzInitRepo(), w=ws(), cands=wzInitCandidates();
   if(z.step===1){
-    return {b:'<p style="margin-bottom:14px">oxagen governs the files in a repository and keeps no copy of them. '+
-      'So its first step is to add the directory on a branch, in a pull request that someone reviews.</p>'+
-      '<div class="field"><label for="wzRepo">Repository</label>'+
+    return {b:'<div class="field"><label for="wzRepo">Repository</label>'+
       '<select id="wzRepo" onchange="wzSetR(\'repoName\',this.value)">'+
       cands.map(function(n){var c=repoByName(n);
         return '<option value="'+h(n)+'"'+(n===r.n?' selected':'')+'>'+h(n)+' · '+h(c?c.lang:"")+' · '+h(c?c.visibility:"")+'</option>';}).join("")+
-      '</select><div class="hint">Only repositories the installation can already reach, and only the ones with no <span class="mono">.oxagen/</span> yet. '+
-      'To change a repository that already has one, open a pull request from its page.</div></div>'+
+      '</select><div class="hint">Only repositories the installation can already reach, and only the ones with no <span class="mono">.oxagen/</span> yet.</div></div>'+
       '<div class="wz-pick" style="grid-template-columns:1fr 1fr">'+
-      [["main","Make it the main repository","The workspace’s steering and configuration live here. A workspace has exactly one, and moving it needs an owner and an approval."],
-       ["linked","Link it","Agents work on it. It can hold records that steer only runs on this repository, but no records scoped to the workspace."]]
+      [["main","Make it the main repository","The workspace’s steering and configuration live here. A workspace has exactly one."],
+       ["linked","Link it","Agents work on it. Its records steer only runs on this repository."]]
       .map(function(x){var on=(z.role||"linked")===x[0], is=w.main===r.n;
         return '<button class="wz-card'+(on?" on":"")+'"'+(x[0]==="main"&&is?' disabled':'')+' onclick="wzSetR(\'role\',\''+x[0]+'\')">'+
          '<span class="tx"><b>'+h(x[1])+'</b><span class="d">'+h(x[2])+'</span></span></button>';}).join("")+'</div>'+
       '<div class="note" style="margin-top:14px">'+
       ((z.role||"linked")==="main"
-        ?h(w.main)+' is this workspace’s main repository today. Merging this makes '+h(r.n)+' the main repository instead. That needs an organization owner and an approval, and Audit records it as a security event.'
+        ?h(w.main)+' is this workspace’s main repository today. Merging this makes '+h(r.n)+' the main repository instead.'
         :h(w.main)+' is already this workspace’s main repository, so this one is linked.')+'</div>',
-     t:"Connect repository", s:"adds .oxagen/, the directory every other file needs",
+     t:"Connect repository", s:"Adds .oxagen/ to "+r.n,
      f:wzNext("Next",true)};
   }
   if(z.step===2){
-    return {b:'<p style="margin-bottom:14px">You set two things here. After this, you change either one with a pull request against this repository.</p>'+
-      '<div class="field"><label for="wzBr">Production branch</label>'+
+    return {b:'<div class="field"><label for="wzBr">Production branch</label>'+
       '<select id="wzBr" onchange="wzSetR(\'branch\',this.value)">'+
       [r.branch,"main","release","production"].filter(function(v,i,a){return a.indexOf(v)===i;})
        .map(function(b){return '<option'+(b===(z.branch||r.branch)?' selected':'')+'>'+h(b)+'</option>';}).join("")+
-      '</select><div class="hint">GitHub’s default branch is <span class="mono">'+h(r.branch)+'</span>, which is the suggestion. '+
-      'Only this branch’s commits update the code graph, and records are published only to this branch. If GitHub’s default changes later, oxagen records it and asks you to confirm before the production branch moves.</div></div>'+
+      '</select><div class="hint">GitHub’s default branch is <span class="mono">'+h(r.branch)+'</span>, which is the suggestion.</div></div>'+
       '<div class="field"><label>Governance mode</label>'+
       '<div class="wz-pick" style="grid-template-columns:1fr">'+
       WZ_MODES.map(function(m){var on=(z.mode||"team")===m[0];
         return '<button class="wz-card'+(on?" on":"")+'" onclick="wzSetR(\'mode\',\''+m[0]+'\')">'+
-         '<span class="tx"><b>'+h(m[0])+'</b><span class="d">'+h(m[1])+' '+h(m[2])+'</span></span></button>';}).join("")+'</div>'+
-      '<div class="hint">This is read off <span class="mono">.oxagen/rules/governance.toml</span> when a pull request is opened and again when it is merged, so raising it applies to every open pull request. Nothing else in oxagen writes that file.</div></div>',
-     t:"Connect repository", s:"adds .oxagen/, the directory every other file needs",
+         '<span class="tx"><b>'+h(m[0])+'</b><span class="d">'+h(m[1])+'</span></span></button>';}).join("")+'</div></div>',
+     t:"Connect repository", s:"Adds .oxagen/ to "+r.n,
      f:wzNext("Next",true)};
   }
   if(z.step===3){
@@ -12367,38 +12356,31 @@ function wzInit(){
       ["Checks","write","the check runs on the head commit"],
       ["Metadata","read","mandatory"],
       ["Issues","read","task references, so spend rolls up to an issue"]];
-    return {b:wzDraftNote("What oxagen will be able to do in "+r.n)+
-      '<div class="tw" style="margin-top:14px"><table class="narrow"><thead><tr><th>Permission</th><th>Level</th><th>What it is for</th></tr></thead><tbody>'+
+    return {b:'<div class="field"><label>What oxagen will be able to do in '+h(r.n)+'</label>'+
+      '<div class="tw"><table class="narrow"><thead><tr><th>Permission</th><th>Level</th><th>What it is for</th></tr></thead><tbody>'+
       perms.map(function(x){return '<tr><td><b>'+h(x[0])+'</b></td><td><span class="b '+(x[1].indexOf("write")>=0?'b-approval':'b-q')+'">'+h(x[1])+'</span></td>'+
-        '<td class="muted" style="font-size:12px">'+h(x[2])+'</td></tr>';}).join("")+'</tbody></table></div>'+
-      '<div class="field" style="margin-top:14px"><label>And what it still cannot do</label>'+
-      wzChecks([["push to "+(z.branch||r.branch),"Every write is to a branch. The production branch changes only by a merge somebody performed."],
-        ["merge on its own","Merging gates on a role only a signed-in person holds, under the mode this repository declares."],
-        ["read a secret","The scan refuses a pull request that carries one. Nothing in <span class=\"mono\">.oxagen/</span> holds a credential. The file names a provider, and its credential stays in the vault."],
-        ["grant authority","Nothing in this tree can grant a tool, raise a tier, or lift a budget. A record steers. A toolbelt grants."]])+'</div>',
-     t:"Connect repository", s:"adds .oxagen/, the directory every other file needs",
+        '<td class="muted" style="font-size:12px">'+h(x[2])+'</td></tr>';}).join("")+'</tbody></table></div></div>',
+     t:"Connect repository", s:"Adds .oxagen/ to "+r.n,
      f:wzNext("Draft the files",true)};
   }
   if(z.step===4){
-    return {b:wzDraftNote("The files, drafted for "+r.n)+
-      '<div class="field" style="margin-top:14px"><label>.oxagen/workspace.toml</label>'+
+    return {b:'<div class="field"><label>.oxagen/workspace.toml</label>'+
       '<pre>'+h(oxWorkspaceToml(w,Object.assign({},r,{branch:z.branch||r.branch}),z.mode||"team",z.role||"linked"))+'</pre></div>'+
       '<div class="field"><label>.oxagen/rules/governance.toml</label>'+
-      '<pre>'+h(oxGovernanceToml(z.mode||"team"))+'</pre></div>'+
-      '<div class="note">Every line is yours to change before anybody reviews it. What lands is what the pull request carries, not what this screen drafted.</div>',
-     t:"Connect repository", s:"adds .oxagen/, the directory every other file needs",
+      '<pre>'+h(oxGovernanceToml(z.mode||"team"))+'</pre></div>',
+     t:"Connect repository", s:"Adds .oxagen/ to "+r.n,
      f:wzNext("Next",true)};
   }
   var pr=wzPrStep("Add .oxagen/ to "+r.n,
-    'The pull request puts the directory in <span class="mono">'+h(r.n)+'</span>. Until someone merges it, this repository is ungoverned and nothing here is in force. A reviewer can stop it there.',
+    'The pull request puts the directory in <span class="mono">'+h(r.n)+'</span>.',
     wzInitFiles(),
     [["schema","<span class=\"mono\">workspace.toml</span> parses, and every repository it declares resolves through this installation."],
-     ["layout","No <span class=\"mono\">.oxagen/</span> exists on "+h(z.branch||r.branch)+". Nothing is overwritten, and the check refuses a repository that already has one."],
-     ["governance","<span class=\"mono\">mode = "+h(z.mode||"team")+"</span> is one of the three. A file that parses but names no mode would block every later pull request, so the check refuses it now."],
+     ["layout","No <span class=\"mono\">.oxagen/</span> exists on "+h(z.branch||r.branch)+"."],
+     ["governance","<span class=\"mono\">mode = "+h(z.mode||"team")+"</span> is one of the three."],
      ["secret_pii_scan","No credential, key, email or personal datum in any added file."],
      ["no_authority","Nothing added grants a tool, raises a tier, or lifts a budget."]],
     "Open pull request", "Opened "+r.n+"#118 · Add .oxagen/", r.n);
-  return {b:pr.b, t:pr.t, s:"the directory every other file needs",
+  return {b:pr.b, t:pr.t, s:"Adds .oxagen/ to "+r.n,
    f:'<button class="btn primary" onclick="wzOpenPr(\''+pr.msg.replace(/'/g,"\\'")+'\')">'+h(pr.btn)+'</button>'};
 }
 
@@ -12828,38 +12810,36 @@ function wzSkBundle(name,size){
   z.file={name:name,size:size,ver:ver,from:from,body:body,digest:"sha256:"+sha7(name+body)+sha7(body)+"a4",
     files:["SKILL.md","examples/before.md","examples/after.md","LICENSE"]};
   S.ced=null; render();
-  act("Read "+name+": "+Math.round(size/1024)+" KB, 4 files. Nothing is written until the pull request merges.");
+  act("Read "+name+": "+Math.round(size/1024)+" KB, 4 files.");
 }
 function wzSkill(){
   var z=S.wz,w=ws();
   if(z.step===1){
-    var opts=[["registry","Search the registry","Pin a published version by its digest. It arrives with a publisher, a version and a cited rate somebody measured.","organization"],
-              ["describe","Describe it","Write what the procedure is, in prose. oxagen drafts the SKILL.md and you edit it before anybody reads it.","mirror"],
+    var opts=[["registry","Search the registry","Pin a published version by its digest.","organization"],
+              ["describe","Describe it","Write what the procedure is, in prose. oxagen drafts the SKILL.md.","mirror"],
               ["upload","Upload a bundle","A <span class=\"mono\">.skill</span> or <span class=\"mono\">.zip</span> built elsewhere. Use this to replace a pinned version and bump to the one in the bundle.","package"]];
-    return {t:"Add a skill", s:"A skill is a file with a version and a digest. Three ways to get one; all three merge.",
+    return {t:"Add a skill", s:"Pick where the skill comes from.",
      b:'<div class="wz-opts">'+opts.map(function(o){
         return '<button class="wz-opt'+(z.path===o[0]?" on":"")+'" onclick="wzSetR(\'path\',\''+o[0]+'\')" aria-pressed="'+(z.path===o[0])+'">'+
          '<span class="wz-opt-h"><b>'+h(o[1])+'</b></span><span class="d">'+o[2]+'</span></button>';}).join("")+'</div>'+
-       (skOn(w)?'':'<div class="warn" style="margin-top:12px"><b>Skills are off in '+h(w.name)+'.</b> You can author one and merge it; no agent here will resolve it until <span class="mono">skills.enabled</span> is true, which is its own pull request.</div>')+
-       '<div class="note" style="margin-top:12px">There is no editor here that writes to a database. Whichever way you come in, the last step is a pull request against '+h(w.main)+'.</div>',
+       (skOn(w)?'':'<div class="warn" style="margin-top:12px"><b>Skills are off in '+h(w.name)+'.</b> No agent here resolves a skill until <span class="mono">skills.enabled</span> is true.</div>'),
      f:wzNext("Next",!!z.path)};
   }
   if(z.step===2&&z.path==="registry"){
     return {t:"Find it in the registry", s:"The registry this workspace's config names, plus the marketplace it holds.",
      b:'<div class="field"><label for="wzq">What should it know how to do?</label>'+
        '<input id="wzq" value="'+h(z.q)+'" placeholder="cutting a release, refunding a charge, a safe migration" oninput="wzSkQ(this.value)" aria-label="Search the skill registry"></div>'+
-       '<div id="wzres">'+wzSkResults()+'</div>'+
-       '<div class="note" style="margin-top:12px">Pinning takes the version and the digest, not "latest". A publisher shipping a new version is a digest diff that somebody approves. That is what <span class="mono">market = "hold"</span> means in this workspace.</div>',
+       '<div id="wzres">'+wzSkResults()+'</div>',
      f:wzNext("Read the file",!!z.pick)};
   }
   if(z.step===2&&z.path==="upload"){
     var f=z.file;
-    return {t:"Upload a bundle", s:"A bundle is read, parsed and hashed here. Nothing is stored until it merges.",
+    return {t:"Upload a bundle", s:"Add a new skill, or replace a pinned version.",
      b:'<div class="field"><label>Replaces</label>'+
        '<select aria-label="Replaces" onchange="S.wz.replaces=this.value||null;S.wz.file=null;S.ced=null;render()">'+
        '<option value="">nothing (new skill)</option>'+
        SKILLS.map(function(s){return '<option value="'+h(s.id)+'"'+(z.replaces===s.id?' selected':'')+'>'+h(s.id)+' @'+h(s.ver)+'</option>';}).join("")+
-       '</select><div class="hint">Replacing takes the version out of the bundle and bumps the pinned one to it. The old version stays readable: every run that loaded it named its digest.</div></div>'+
+       '</select></div>'+
        '<div class="field"><label>Bundle</label>'+
        '<div class="wz-drop"><input type="file" accept=".skill,.zip,.md" onchange="wzSkFile(this)" aria-label="Skill bundle">'+
        '<span class="dim">.skill · .zip · SKILL.md</span>'+
@@ -12868,23 +12848,21 @@ function wzSkill(){
          '<dt>File</dt><dd><span class="mono">'+h(f.name)+'</span> · '+Math.round(f.size/1024)+' KB</dd>'+
          '<dt>Contents</dt><dd>'+f.files.map(function(x){return '<span class="b b-q mono" style="font-size:10.5px">'+h(x)+'</span>';}).join(" ")+'</dd>'+
          '<dt>Version</dt><dd>'+(f.from?'<span class="mono">'+h(f.from)+'</span> <span class="dim">→</span> <span class="mono" style="color:var(--st-allowed)">'+h(f.ver)+'</span>':'<span class="mono">'+h(f.ver)+'</span> <span class="dim">first version</span>')+'</dd>'+
-         '<dt>Digest</dt><dd><span class="mono">'+h(f.digest)+'</span><div class="hint" style="margin-top:3px">Recomputed by the checks over the canonical bytes. If it disagrees with the bundle, the check fails and nothing merges.</div></dd>'+
-        '</dl></div>':'<div class="note">Nothing chosen yet. A bundle is read in the browser; it is not uploaded anywhere until the pull request carries it.</div>'),
+         '<dt>Digest</dt><dd><span class="mono">'+h(f.digest)+'</span></dd>'+
+        '</dl></div>':'<div class="note">Nothing chosen yet.</div>'),
      f:wzNext("Read the file",!!f)};
   }
   if(z.step===2){
     var okd=wzDescOk();
-    return {t:"Describe the skill", s:"Procedure, not policy. What to do, in what order, and the one thing never to do.",
+    return {t:"Describe the skill", s:"What to do, in what order, and the one thing never to do.",
      b:wzDesc("How we cut release notes: group merged PRs by surface, read the changelog once, open a PR, and never publish the release.",
-       ["How we cut release notes","How to roll a bad release back","How to run a safe database migration","How to triage a flaky test"],
-       "A skill tells an agent what to <i>do</i>. That is why the whole feature ships off, and why this ends in a pull request rather than a save.")+
-      '<div class="note">Do not write authority into it. “You may merge” in a skill file grants nothing. The toolbelt decides.</div>',
+       ["How we cut release notes","How to roll a bad release back","How to run a safe database migration","How to triage a flaky test"]),
      f:wzNext("Draft the file",okd)};
   }
   if(z.step===3){
     var key=wzSkKey(), src=cedSeed(key,wzSkillBody());
     var fm=/^---\n([\s\S]*?)\n---/.exec(src), nm=fm?/name:\s*(.+)/.exec(fm[1]):null, vr=fm?/version:\s*(.+)/.exec(fm[1]):null;
-    return {t:"The file", s:"This is the whole of it. A skill has no code to run and no credential to hold.",
+    return {t:"The file", s:".oxagen/skills/"+wzSkillSlug()+"/SKILL.md",
      b:(z.path==="describe"?wzDraftNote("A SKILL.md, drafted from what you wrote."):'')+
       '<div class="wz-derived">'+
        (nm?'<span class="b b-q mono">'+h(nm[1].trim())+'</span>':'<span class="b b-denied">no name in the frontmatter</span>')+
@@ -12893,8 +12871,7 @@ function wzSkill(){
        '<span class="b b-q">$'+(wzSkTokens()*0.000003).toFixed(4)+' a turn it is loaded into</span>'+
       '</div>'+
       cedHtml(key,".oxagen/skills/"+wzSkillSlug()+"/SKILL.md","md",{small:true,
-        bar:'<button class="btn sm" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Revert</button>'})+
-      '<div class="note" style="margin-top:12px">Every token in this file is paid for on every turn it is loaded into, by every agent that loads it. That is the whole argument for a searchable toolbelt over a pinned one, and it is why this box shows the price.</div>',
+        bar:'<button class="btn sm" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Revert</button>'}),
      f:wzNext("Open the pull request",!!String(src).trim())};
   }
   var slug=wzSkillSlug(), rep=z.path==="upload"&&z.file&&z.file.from;
@@ -12902,18 +12879,18 @@ function wzSkill(){
   if(z.path==="upload"&&z.file)z.file.files.slice(1).forEach(function(x){files.push(["add",".oxagen/skills/"+slug+"/"+x,"from the bundle"]);});
   if(z.path==="registry")files.push(["mod",".oxagen/skills.toml","pins "+z.pick+"@"+(skrById(z.pick)||{}).ver]);
   var pr2=wzPrStep("Open the pull request",
-    rep?("Merging this bumps <span class=\"mono\">"+h(slug)+"</span> from "+h(z.file.from)+" to "+h(z.file.ver)+" and repins every agent that resolves it. Each agent picks it up at its next run, and a run in flight keeps the old version.")
-      :("Merging this makes <span class=\"mono\">"+h(slug)+"</span> resolvable in "+h(w.name)+". The digest is taken at merge."),
+    rep?("Merging this bumps <span class=\"mono\">"+h(slug)+"</span> from "+h(z.file.from)+" to "+h(z.file.ver)+" and repins every agent that resolves it.")
+      :("Merging this makes <span class=\"mono\">"+h(slug)+"</span> resolvable in "+h(w.name)+"."),
     files,
     [["Frontmatter","<span class=\"mono\">name</span>, <span class=\"mono\">version</span> and <span class=\"mono\">scope</span> are present and the name matches the directory"],
      ["Version","semver, and strictly greater than the version it replaces"],
-     ["Digest","recomputed over the canonical bytes at merge; it is what a run records when it loads this"],
+     ["Digest","recomputed over the canonical bytes at merge"],
      ["Grants","the file names no authority it does not have. A skill cannot raise a tier or add a tool."],
      ["Secret and PII scan","the body and every example are scanned · a literal credential fails the check"],
      ["Load cost",wzSkTokens().toLocaleString()+" tokens, inside this workspace's "+SK_CFG.search.budget.toLocaleString()+"-token search budget"]],
     "Open the pull request",
     w.main+"#525 opened. "+slug+" resolves when it merges"+(rep?", at "+z.file.ver+".":"."));
-  return {t:pr2.t, s:"A skill an agent can find is a skill somebody merged.", b:pr2.b,
+  return {t:pr2.t, s:"skills/"+slug+" on "+w.main, b:pr2.b,
    f:'<button class="btn primary" onclick="wzOpenPr(\''+pr2.msg.replace(/'/g,"\\'")+'\')">'+h(pr2.btn)+'</button>'};
 }
 
@@ -13106,49 +13083,43 @@ function wzRecord(){
         "The release manager opens the release pull request; a person merges it",
         "Cut a release in this order: freeze, dry-run migrations, tag, publish",
         "The checkout e2e suite flaked on Safari through August"],
-       "Say the thing itself, not the reason for it. The reason belongs in the rationale on the pull request, where a reviewer reads it once. In the bundle, every agent would pay for it on every turn.")+
-      '<div class="note">A record steers. It never grants: there is no sentence you can write here that makes a denied call allowed.</div>',
+       "Say the thing itself, not the reason for it."),
      f:wzNext("Pick a kind",ok)};
   }
   if(z.step===2){
-    return {t:"What kind is it?", s:"The kind decides how it is delivered and what the checks assert. It is not a label.",
+    return {t:"What kind is it?", s:"Pick the kind that fits the statement.",
      b:'<div class="wz-kinds">'+Object.keys(KINDS).map(function(k){
         var d=KINDS[k],u=KIND_USE[k];
         return '<button class="wz-kind k-'+k+(z.rkind===k?" on":"")+'" onclick="wzSetR(\'rkind\',\''+k+'\')" aria-pressed="'+(z.rkind===k)+'">'+
          '<span class="kt">'+kindSvg(k)+'</span>'+
          '<span class="tx"><b>'+h(d.l)+'</b><span class="d">'+h(d.d)+'</span>'+
-         '<span class="u">'+h(u.use)+'</span>'+
-         '<span class="n">'+u.never+'</span></span></button>';}).join("")+'</div>'+
-       (z.rkind?'<div class="field" style="margin-top:14px"><label>How a '+h(KINDS[z.rkind].l)+' reaches a run</label>'+
-        '<div class="note">'+KIND_USE[z.rkind].deliver+'</div></div>':''),
+         '<span class="u">'+h(u.use)+'</span></span></button>';}).join("")+'</div>',
      f:wzNext("Write the statement",!!z.rkind)};
   }
   if(z.step===3){
     var key="wz:record", src=cedSeed(key,wzRecStatement());
     var forces=z.rkind==="preference"?["may","info"]:z.rkind==="memory"||z.rkind==="fact"?["info"]:["must","should","may","info"];
     if(forces.indexOf(z.force)<0)z.force=forces[0];
-    return {t:"The statement", s:"This is the record. Everything else about it is metadata.",
+    return {t:"The statement", s:"Write the statement, then set its force and scope.",
      b:cedHtml(key,".oxagen/rules/"+wzRecLineage()+".toml \u00b7 statement","md",{small:true,
         bar:'<span class="b b-q">'+wzRecTok()+' tok</span><button class="btn sm" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Revert</button>'})+
       '<div class="fields" style="margin-top:14px">'+
       '<div class="field"><label for="wzForce">Force</label><select id="wzForce" onchange="wzSetR(\'force\',this.value)" aria-label="Force">'+
-       forces.map(function(x){return '<option'+(z.force===x?' selected':'')+'>'+h(x)+'</option>';}).join("")+'</select>'+
-       '<div class="hint">'+(z.force==="must"||z.force==="should"?"In the stable prefix of every turn in scope. It is paid for whether or not it is relevant.":"Selected by relevance, and dropped first when the window is tight.")+'</div></div>'+
+       forces.map(function(x){return '<option'+(z.force===x?' selected':'')+'>'+h(x)+'</option>';}).join("")+'</select></div>'+
       '<div class="field"><label for="wzScope">Scope</label><select id="wzScope" onchange="wzSetR(\'scope\',this.value)" aria-label="Scope">'+
        ["workspace","repository","agent"].map(function(x){return '<option'+(z.scope===x?' selected':'')+'>'+h(x)+'</option>';}).join("")+'</select>'+
-       '<div class="hint">'+(z.scope==="repository"?"Opens on the linked repository itself. A repository record may narrow what a workspace record allows, never widen it.":z.scope==="agent"?"Reaches one agent\u2019s runs and no other.":"Opens on "+h(w.main)+" and reaches every agent in "+h(w.name)+".")+'</div></div>'+
+       '<div class="hint">'+(z.scope==="repository"?"Opens on the linked repository itself.":z.scope==="agent"?"Reaches one agent\u2019s runs.":"Opens on "+h(w.main)+" and reaches every agent in "+h(w.name)+".")+'</div></div>'+
       '</div>'+
       (wzRecCe()?'<div class="field"><label for="wzCe">Constraint effect</label><select id="wzCe" onchange="wzSetR(\'ce\',this.value)" aria-label="Constraint effect">'+
-        ["forbid","require"].map(function(x){return '<option'+(z.ce===x?' selected':'')+'>'+h(x)+'</option>';}).join("")+'</select>'+
-        '<div class="hint">The only two values there are. A record can never grant authority, so there is no third.</div></div>':'')+
+        ["forbid","require"].map(function(x){return '<option'+(z.ce===x?' selected':'')+'>'+h(x)+'</option>';}).join("")+'</select></div>':'')+
       '<div class="field"><label>How it will read</label>'+wzRecPreview()+'</div>'+
       '<div class="note">Publishing compiles bundle <span class="mono">v'+STEER_BUNDLE.v+'</span> into <span class="mono">v'+(STEER_BUNDLE.v+1)+'</span> and adds '+wzRecTok()+
-      ' tokens to every turn in scope. A request already recorded keeps the version it was sent with, so merging this never changes what an old run carried.</div>',
+      ' tokens to every turn in scope.</div>',
      f:wzNext("Run the checks",!!String(src).trim())};
   }
   if(z.step===4){
     var others=RECORDS.filter(function(x){return x.status==="published";}).length;
-    return {t:"What the checks will assert", s:"Six of them, on the pull request, before anybody can merge it.",
+    return {t:"What the checks will assert", s:"Six checks on the pull request",
      b:wzChecks([
        ["Schema","<span class=\"mono\">context-record/v0.1</span> valid \u00b7 1 file, 1 record, 1 lineage"],
        ["Lineage uniqueness",(function(){var id=wzRecLineage();
@@ -13159,19 +13130,18 @@ function wzRecord(){
        ["Secret and PII scan","the statement, the rationale and the evidence are scanned \u00b7 a name or a key in any of them fails"],
        ["Conflict against active records",others+" published records checked \u00b7 a <span class=\"mono\">forbid</span> that contradicts an active <span class=\"mono\">require</span> on the same subject fails"],
        ["constraint_effect \u2208 {require, forbid}",wzRecCe()?("<span class=\"mono\">"+h(z.ce)+"</span> \u00b7 grants nothing"):"not a constraining kind \u00b7 the field is absent, which is also a pass"]
-     ])+
-      '<div class="note" style="margin-top:14px">The fifth one is the check that earns the others. Two people can each write a sensible record, six weeks apart, that together say a call must happen and must not. This check catches that before either reaches a run.</div>',
+     ]),
      f:wzNext("Open the pull request",true)};
   }
   var pr4=wzPrStep("Open the pull request",
-    "Merging publishes it. Nothing steers until then, and the record is in force from the merge commit, not from when you wrote it.",
+    "Merging publishes it.",
     [["add",".oxagen/rules/"+wzRecLineage()+".toml","the record"]],
     [["Schema","<span class=\"mono\">context-record/v0.1</span>"],["Lineage",h(wzRecLineage())+" is free"],
      ["Hash","recomputed at merge"],["Secrets","statement, rationale and evidence"],
      ["Conflicts","against every published record"],["Effect",wzRecCe()?h(z.ce):"none \u00b7 this kind constrains nothing"]],
     "Open the pull request",
-    w.main+"#527 opened on branch context/"+wzRecLineage()+". It steers nothing until it merges.");
-  return {t:pr4.t, s:"People trust pull requests. That is the whole design.", b:pr4.b,
+    w.main+"#527 opened on branch context/"+wzRecLineage()+".");
+  return {t:pr4.t, s:"context/"+wzRecLineage()+" on "+w.main, b:pr4.b,
    f:'<button class="btn primary" onclick="wzRecOpenPr()">'+h(pr4.btn)+'</button>'};
 }
 
@@ -13206,68 +13176,55 @@ function crecBundleRow(rec){
   return row;
 }
 function crecPanel(rec){
-  var k=rec.kind,u=KIND_USE[k]||KIND_USE.rule,row=crecBundleRow(rec);
+  var k=rec.kind,row=crecBundleRow(rec);
   var rendered=crecNum(rec,"rendered"),cited=crecNum(rec,"cited"),violated=crecNum(rec,"violated");
-  var head='<div class="panel"><div class="panel-h"><h3>'+h(KINDS[k].l)+'</h3>'+kindBadge(k)+'</div><div class="panel-b">';
+  var head='<div class="panel" data-help="kind-panel"><div class="panel-h"><h3>'+h(KINDS[k].l)+'</h3>'+kindBadge(k)+'</div><div class="panel-b">';
   var foot='</div></div>';
-  var deliver='<p class="eyebrow q" style="margin:0 0 6px">How it reaches a run</p><div class="note" style="margin-bottom:14px">'+u.deliver+'</div>';
-  var never='<div class="note" style="margin-top:14px;border-left-color:var(--st-denied)"><b>Limits. </b>'+u.never+'</div>';
 
   if(k==="procedure"){
     var steps=crecSteps(rec.st);
-    return head+deliver+
-     '<p class="eyebrow q" style="margin:0 0 6px">The steps, in order</p>'+
+    return head+
+     '<p class="eyebrow q" style="margin:0 0 6px">Steps</p>'+
      '<ol class="crec-steps">'+steps.map(function(s){return '<li>'+h(s.replace(/^./,function(c){return c.toUpperCase();}))+'</li>';}).join("")+'</ol>'+
-     '<div class="note" style="margin-top:12px">The order is the record. A run that did these in a different order did not follow this procedure, even if every step happened.</div>'+
-     never+foot;
+     foot;
   }
   if(k==="constraint"){
     var forb=rec.ce==="forbid";
     return head+
      '<div class="crec-bound '+(forb?"forbid":"require")+'"><span class="w">'+h(rec.ce||"forbid")+'</span>'+
-      '<span class="d">'+(forb?(rec.grant?"This record carries an enforcement grant, so it compiles to text and to a gate. A call routed through oxagen that crosses this boundary is denied before it is dispatched, with this record cited as the reason. The gate is on Tools › Policy, and its notice is on Steering › Sources."
-                                       :"This record carries no enforcement grant, so it compiles to text. The agent reads the boundary in its stable prefix. Nothing refuses a call because of it until a grant compiles a gate.")
-                              :"A run that has not done this cannot proceed past the point that needs it. The check is on the run, not on the call.")+'</span></div>'+
-     deliver+
-     '<p class="eyebrow q" style="margin:14px 0 6px">Conflicts</p>'+
-     '<div class="note">Every merge re-runs the conflict check across all '+RECORDS.filter(function(x){return x.status==="published";}).length+
-      ' published records. A <span class="mono">forbid</span> that contradicts an active <span class="mono">require</span> on the same subject fails the check, so the two can never both be in force.</div>'+
+      '<span class="d">'+(rec.grant?"Enforcement grant. Its gate is on Tools › Policy.":"No enforcement grant.")+'</span></div>'+
      '<div style="margin-top:14px">'+crecMeter("Runs it was rendered into",rendered,rendered)+
       crecMeter("Runs that cited it",cited,rendered,"var(--st-proven)")+
       crecMeter("Runs that crossed it",violated,rendered,"var(--st-failed)")+'</div>'+
-     never+foot;
+     foot;
   }
   if(k==="fact"){
-    return head+deliver+
-     '<p class="eyebrow q" style="margin:0 0 6px">The claim, and how it is checked</p>'+
+    return head+
+     '<p class="eyebrow q" style="margin:0 0 6px">Claim</p>'+
      '<dl class="kv"><dt>Falsifiable by</dt><dd>anybody who finds a second changelog in this repository, or a <span class="mono">docs/releases</span> that is not generated</dd>'+
      '<dt>valid_from</dt><dd>'+h(rec.pub||"\u2014")+', the merge time of <span class="mono">'+h(rec.commit||"")+'</span></dd>'+
-     '<dt>Last confirmed</dt><dd>'+plural(cited,"run")+' read it and none contradicted it</dd>'+
-     '<dt>Steers</dt><dd>nothing by itself</dd></dl>'+
-     '<div class="note" style="margin-top:12px">A fact that needs to change behavior is a rule that cites it. Keeping the two apart is what lets a fact go stale without silently turning off a rule.</div>'+
-     never+foot;
+     '<dt>Last confirmed</dt><dd>'+plural(cited,"run")+' read it and none contradicted it</dd></dl>'+
+     foot;
   }
   if(k==="memory"){
-    return head+deliver+
+    return head+
      '<p class="eyebrow q" style="margin:0 0 6px">When it happened</p>'+
      '<dl class="kv"><dt>Recorded</dt><dd>'+h(rec.pub||"\u2014")+'</dd>'+
      '<dt>Explains</dt><dd>what an agent is about to see, so it does not read a known flake as a new regression</dd>'+
      '<dt>Selection</dt><dd>By relevance. '+cited+' of '+plural(rendered,"run")+' that carried it used it.</dd>'+
-     '<dt>Decay</dt><dd>none automatic. A memory that stops being true is archived by a pull request, like everything else.</dd></dl>'+
-     never+foot;
+     '<dt>Decay</dt><dd>none automatic</dd></dl>'+
+     foot;
   }
   if(k==="preference"){
-    return head+deliver+
-     '<p class="eyebrow q" style="margin:0 0 6px">Soft, and recorded as soft</p>'+
-     '<div class="note">Nothing here blocks a call. "Violated" on a preference reads as <b>not followed</b>, and a run that did not follow it has not failed. That is why the counter below is grey.</div>'+
+    return head+
      /* cited is not followed, and rendered minus cited is not "did not follow": a run can follow a
         preference without citing it. So the meters keep the record's own three words. */
-     '<div style="margin-top:14px">'+crecMeter("Runs it was rendered into",rendered,rendered)+
+     '<div>'+crecMeter("Runs it was rendered into",rendered,rendered)+
       crecMeter("Runs that cited it",cited,rendered,"var(--st-proven)")+
       crecMeter("Runs that departed from it",violated,rendered)+'</div>'+
-     never+foot;
+     foot;
   }
-  return head+deliver+
+  return head+
    '<p class="eyebrow q" style="margin:0 0 6px">Where it sits</p>'+
    '<dl class="kv"><dt>Force</dt><dd><span class="mono">'+h(rec.force||"should")+'</span>: '+
      (rec.force==="must"||rec.force==="should"?"in the stable prefix, every turn in scope":"selected by relevance")+'</dd>'+
@@ -13278,21 +13235,21 @@ function crecPanel(rec){
    '<div style="margin-top:14px">'+crecMeter("Runs it was rendered into",rendered,rendered)+
     crecMeter("Runs that cited it",cited,rendered,"var(--st-proven)")+
     crecMeter("Runs that went against it",violated,rendered,"var(--st-failed)")+'</div>'+
-   never+foot;
+   foot;
 }
 
 function crecSave(rec){
   S.srcPr={key:crecKey(rec),path:".oxagen/rules/"+rec.id+".toml",id:rec.id,kind:"record",
     title:"Propose a change to this record",
-    lead:"A published record is changed the way it was published: a branch, a pull request, the same six checks, and a merge. Nothing here edits what is in force.",
+    lead:"",
     branch:"context/"+rec.id+".amend",
     checks:[["Schema","<span class=\"mono\">context-record/v0.1</span> still valid after the edit"],
-      ["Lineage","<span class=\"mono\">"+h(rec.id)+"</span> keeps its lineage. An amended record is the same record at a new version."],
+      ["Lineage","<span class=\"mono\">"+h(rec.id)+"</span> keeps its lineage"],
       ["record_hash recomputation","recomputed over the new bytes \u00b7 the old hash stays on every run that carried it"],
       ["Secret and PII scan","the new statement is scanned"],
-      ["Conflict against active records","re-run in full, because the words changed"],
+      ["Conflict against active records","re-run in full"],
       ["constraint_effect","unchanged \u00b7 <span class=\"mono\">"+h(rec.ce||"absent")+"</span>"]],
-    msg:ws().main+"#528 opened. "+rec.id+" changes"+" when it merges; until then every run still gets the words that are in force now."};
+    msg:ws().main+"#528 opened. "+rec.id+" changes when it merges."};
   openDialog("srcpr");
 }
 DLG_EXT.srcpr=function(){
@@ -13300,7 +13257,7 @@ DLG_EXT.srcpr=function(){
   if(!p) return {t:"Propose a change",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var base=S.cedBase[p.key]||"",cur=cedText(p.key),rows=diffLines(base,cur),st=diffStat(rows);
   return {t:p.title, s:p.path, w:true,
-   b:'<p style="margin-bottom:12px">'+p.lead+'</p>'+
+   b:(p.lead?'<p style="margin-bottom:12px">'+p.lead+'</p>':'')+
      '<div class="wz-pr"><div class="wz-pr-h"><span class="b b-q mono">'+h(ws().main)+'</span><span class="dim">\u2190</span>'+
       '<span class="b b-approval mono">'+h(p.branch)+'</span>'+
       '<span class="grow"></span><span class="mono" style="color:var(--st-allowed)">+'+st.add+'</span>'+
@@ -13338,16 +13295,15 @@ function crecPr(rec){
 DLG_EXT.crecarchive=function(id){
   var rec=stgRecord(id); if(!rec)return noSuch("Record");
   if(rec.status==="archived")return {t:rec.id+" is already archived",w:false,
-   b:'<div class="note">It is out of force and kept. Every run it steered still names its hash.</div>',
+   b:'<div class="note">It is out of force.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var pend=S.recPending[rec.id];
   if(pend)return {t:rec.id+" already has a pull request open",w:false,
-   b:'<div class="note">Branch <span class="mono">'+h(pend.branch)+'</span> is waiting on its checks. Land or close that one first, so two changes are never proposed over the same file.</div>',
+   b:'<div class="note">Branch <span class="mono">'+h(pend.branch)+'</span> is waiting on its checks. Land or close that one first.</div>',
    f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   return {t:"Archive "+rec.id+"?",w:false,
-   b:'<div class="note">Archiving is a pull request that sets <span class="mono">status = "archived"</span> on <span class="mono">.oxagen/rules/'+h(rec.id)+'.toml</span>. The file stays, the lineage stays, and the record stops compiling into the bundle when it merges. It is in force until then.</div>'+
-     (rec.ce?'<div class="warn">This record carries <span class="mono">'+h(rec.ce)+'</span>, so it compiles to a gate as well as to text. The gate goes with it, and what it refused today is allowed once this merges.</div>':'')+
-     '<div class="note" style="margin-top:10px">Nothing is deleted. Every run this record steered keeps naming its hash, and a later record may supersede it instead.</div>',
+   b:'<div class="note">Archiving opens a pull request that sets <span class="mono">status = "archived"</span> on <span class="mono">.oxagen/rules/'+h(rec.id)+'.toml</span>.</div>'+
+     (rec.grant?'<div class="warn">This record compiles to a gate. What the gate refuses today is allowed once this merges.</div>':''),
    f:'<button class="btn" onclick="closeDialog()">Keep it in force</button>'+
      '<button class="btn danger" onclick="crecArchive(\''+h(rec.id)+'\')">Open the pull request</button>'};
 };
@@ -13356,7 +13312,7 @@ function crecArchive(id){
   var p=crecPr(rec);
   S.recPending[rec.id]={branch:p.branch,kind:"record"};
   closeDialog(); render();
-  act("Opened "+p.pr+" to archive "+rec.id+". It is in force until that merges.","gold");
+  act("Opened "+p.pr+" to archive "+rec.id+".","gold");
 }
 
 function pRecord(r){
@@ -13376,8 +13332,7 @@ function pRecord(r){
     (arch?'<span class="b b-q">archived</span>':'<span class="b b-allowed"><span class="d"></span>published</span>')+
     (pend?'<span class="b b-approval"><span class="d"></span>'+h(pend.branch)+'</span>':'')+
    '</div>'+
-   '<p style="margin-top:10px">'+h(KINDS[rec.kind].d)+'. '+(arch?'Archived in <span class="mono">'+h(rec.commit||"")+'</span>. No longer in force.':
-     'It is in force because <span class="mono">'+h(rec.commit||"")+'</span> merged, and it stops being in force the same way.')+'</p></div>'+
+   (arch?'<p style="margin-top:10px">Archived in <span class="mono">'+h(rec.commit||"")+'</span>.</p>':'')+'</div>'+
    '<div class="acts"><button class="btn" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Discard edits</button>'+
    (arch?'':'<button class="btn danger" onclick="openDialog(\'crecarchive\',\''+h(rec.id)+'\')">Archive</button>')+
    '<button class="btn primary" onclick="crecSave(stgRecord(\''+h(rec.id)+'\'))">Propose a change</button></div></div>'+
@@ -13385,10 +13340,8 @@ function pRecord(r){
     '<div>'+
      cedHtml(key,".oxagen/rules/"+rec.id+".toml \u00b7 statement","md",
       {label:"Statement",bar:'<span class="b b-q">'+(crecBundleRow(rec)?crecBundleRow(rec).tok+' tok in the bundle':
-       rec.force==="must"||rec.force==="should"?'in the stable prefix':'selected per prompt')+'</span>'})+
-     '<div class="note" style="margin-top:12px">This is the statement and nothing else. The lineage, the force, the scope and the effect are the rest of the file, and each one is changed the same way: a pull request against '+h(w.main)+'.</div>'+
-     '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Lineage</h3>'+
-      '<span class="sp mono dim" style="font-size:11px">Git decides which version is in force</span></div>'+
+       rec.force==="must"||rec.force==="should"?'in the stable prefix':'selected per prompt')+'</span>'}).replace('id="ced"','id="ced" data-help="statement"')+
+     '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Lineage</h3></div>'+
       '<div class="panel-b"><dl class="kv">'+
       '<dt>Lineage</dt><dd><span class="mono">'+h(rec.id)+'</span></dd>'+
       '<dt>File</dt><dd><span class="mono">.oxagen/rules/'+h(rec.id)+'.toml</span> on '+h(w.main)+'</dd>'+
@@ -13419,15 +13372,15 @@ function skSrcSave(id){
   var next=String(s.ver).replace(/^(\d+)\.(\d+)\.(\d+)$/,function(_,a,b,c){return a+"."+b+"."+(+c+1);});
   S.srcPr={key:skSrcKey(s),path:s.path,id:s.id,kind:"skill",
     title:"Propose a change to this skill",
-    lead:"A skill is a file with a digest, and the digest is what a run records when it loads it. Changing the words changes the digest, so this goes through a pull request like everything else.",
+    lead:"",
     branch:"skills/"+s.id.split(".").pop()+"-"+next,
     checks:[["Frontmatter","<span class=\"mono\">name</span> still matches the directory"],
       ["Version","<span class=\"mono\">"+h(s.ver)+"</span> \u2192 <span class=\"mono\">"+h(next)+"</span> \u00b7 a changed body with an unchanged version fails"],
-      ["Digest","recomputed at merge \u00b7 every run that loaded "+h(s.ver)+" keeps naming that digest, not this one"],
+      ["Digest","recomputed at merge"],
       ["Grants","the file still names no authority it does not have"],
       ["Secret and PII scan","the body and every example are scanned"],
       ["Load cost","the new body is inside this workspace\u2019s "+SK_CFG.search.budget.toLocaleString()+"-token search budget"]],
-    msg:ws().main+"#529 opened. "+s.id+" becomes "+next+" when it merges; runs in flight keep "+s.ver+"."};
+    msg:ws().main+"#529 opened. "+s.id+" becomes "+next+" when it merges."};
   openDialog("srcpr");
 }
 function pSkillSource(r){
@@ -13441,12 +13394,11 @@ function pSkillSource(r){
    '<h1 class="mono" style="font-size:18px">'+h(s.id)+'</h1>'+
    '<div class="row" style="margin-top:8px">'+(o?srcStatus(o):'')+'<span class="b b-q mono">'+h(s.srcLabel)+'</span>'+
     '<span class="b b-q mono">@'+h(s.ver)+'</span><span class="b b-q mono">'+h(s.digest.slice(0,18))+'\u2026</span>'+
-    skTier(s.tier)+'<span class="b b-q">'+tok.toLocaleString()+' tok to load</span></div>'+
-   '<p style="margin-top:8px">A bundle: instructions, references and optional entrypoints. Oxagen describes an entrypoint to the agent as a capability and never runs it. The harness runs it, under the policy on the call.</p></div>'+
+    skTier(s.tier)+'<span class="b b-q">'+tok.toLocaleString()+' tok to load</span></div></div>'+
    '<div class="acts"><button class="btn" data-ced-dirty onclick="cedRevert(\''+key+'\')" disabled>Discard edits</button>'+
    '<button class="btn primary" onclick="skSrcSave(\''+h(s.id)+'\')">Propose a change</button></div></div>'+
    '<div class="crec-grid"><div>'+
-   cedHtml(key,s.path,"md",{bar:'<span class="b b-q">'+tok.toLocaleString()+' tok</span>'})+
+   cedHtml(key,s.path,"md",{bar:'<span class="b b-q">'+tok.toLocaleString()+' tok</span>'}).replace('id="ced"','id="ced" data-help="skill-file"')+
    skBundlePanel(s,B)+
    '</div><div>'+srcFramesPanel(o)+srcReachPanel(o)+'</div></div>';
 }

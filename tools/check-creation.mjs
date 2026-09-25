@@ -271,16 +271,17 @@ const shot = async (page, name) => { if (shots) await page.screenshot({ path: pa
 }
 
 /* ---------------- the record page, per kind ---------------- */
-// Each kind's panel carries a heading only that branch emits. Comparing the panel text to itself
+// Each kind's panel carries a label only that branch emits. Comparing the panel text to itself
 // would pass while all six shared one treatment (the per-record numbers differ either way), so the
-// assertion names the phrase and the kind separately.
+// assertion names the phrase and the kind separately. What each kind can never do, and how it
+// reaches a run, is in the component help (mockups/help/steering-source.md), not on the panel.
 const KINDS = {
   rule:       ["ctx.release.notes-format",      "Where it sits"],
-  constraint: ["ctx.release.never-merge",       "Conflicts"],
-  procedure:  ["ctx.platform.release-order",    "The steps, in order"],
-  fact:       ["ctx.platform.changelog-once",   "The claim, and how it is checked"],
+  constraint: ["ctx.release.never-merge",       "Runs that crossed it"],
+  procedure:  ["ctx.platform.release-order",    "Steps"],
+  fact:       ["ctx.platform.changelog-once",   "Falsifiable by"],
   memory:     ["ctx.platform.safari-e2e-flake", "When it happened"],
-  preference: ["ctx.triage.short-labels",       "Soft, and recorded as soft"],
+  preference: ["ctx.triage.short-labels",       "Runs that departed from it"],
 };
 const seen = new Set();
 for (const [kind, [id, signature]] of Object.entries(KINDS)) {
@@ -313,7 +314,7 @@ for (const [kind, [id, signature]] of Object.entries(KINDS)) {
   }));
   ok(r.h1.length > 20, kind + ": the statement is the headline, got " + r.h1.slice(0, 40));
   ok(r.ced && r.gutter >= 1, kind + ": statement editor with a gutter");
-  ok(r.panel.length > 120, kind + ": a kind panel with content, " + r.panel.length + " chars");
+  ok(r.panel.length > 40, kind + ": a kind panel with content, " + r.panel.length + " chars");
   // .eyebrow uppercases, and innerText returns what is rendered, so the comparison is case-blind.
   const panel = r.panel.toLowerCase();
   const has = sig => panel.includes(sig.toLowerCase());
@@ -321,7 +322,7 @@ for (const [kind, [id, signature]] of Object.entries(KINDS)) {
   for (const [other, pair] of Object.entries(KINDS))
     if (other !== kind) ok(!has(pair[1]), kind + ": must not borrow " + other + "'s treatment (" + pair[1] + ")");
   seen.add(signature);
-  ok(has("Limits."), kind + ": says what the kind cannot do, under Limits");
+  ok(!has("Limits.") && !has("How it reaches a run"), kind + ": the panel carries no explainer; the kind's limits are in its component help");
   ok(r.wraps, kind + ": the statement editor wraps — prose that scrolls sideways cannot be read");
   ok(r.noSideScroll, kind + ": the statement editor has no horizontal scroll");
   ok(r.align && r.align.rows >= 1 && r.align.worst <= 1,
@@ -1304,8 +1305,9 @@ for (const theme of ["light", "dark"]) {
   await page.waitForTimeout(220);
   const at = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
   ok(/status = "archived"/.test(at), "records: the confirm names the field it sets, got " + at.slice(0, 200));
-  ok(/in force until/i.test(at), "records: the confirm says it steers runs until the merge");
-  ok(/nothing is deleted/i.test(at), "records: the confirm says the file and the lineage stay");
+  // That the record stays in force until the merge, and that nothing is deleted, is in the dialog's
+  // component help (mockups/help/steering-source.md, Archive a record).
+  ok(/Archiving opens a pull request/.test(at), "records: the confirm says archiving is a pull request, got " + at.slice(0, 200));
 
   const pr = await page.evaluate((i) => {
     const before = OXPRS.length; closeDialog(); crecArchive(i);
@@ -1364,8 +1366,9 @@ for (const theme of ["light", "dark"]) {
   await page.evaluate((i) => { closeDialog(); openDialog("memforget", i); }, mid);
   await page.waitForTimeout(250);
   const ft = await page.evaluate(() => document.querySelector("#layer .dlg").innerText);
-  ok(/every frame stays/.test(ft), "memory: forgetting leaves the runs alone, got " + ft.slice(0, 200));
-  ok(/Promote is the other answer/.test(ft), "memory: the confirm offers the other answer");
+  // What forgetting leaves alone (the runs, their frames, the hashes they carried) and the other
+  // answer, promotion, are in the dialog's component help (mockups/help/steering-source.md).
+  ok(/The assembler stops selecting it/.test(ft), "memory: the confirm says what forgetting does, got " + ft.slice(0, 200));
   const n = await page.evaluate((i) => {
     const before = MEMORY.length; closeDialog(); memForget(i);
     return { before, after: MEMORY.length, rows: document.querySelectorAll("table tbody tr.click").length };

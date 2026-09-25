@@ -70,7 +70,7 @@ On a failure the note "<check> stopped the run." follows, with what the check as
 
 **Dialogs this page opens:** `closepr`, and the init wizard from the header (specified in `repositories.md`).
 
-- **`closepr`**, "Close <pull request>", subtitle "without merging". The lead: "The pull request closes on GitHub and nothing is published. oxagen posts this comment on it:". The comment, previewed as GitHub renders it: "Closed by Marcus Bell <marcus@a-intel.example>", a horizontal rule, then "Added via oxagen" and the full address of this pull request in Oxagen as the link text (`https://app.oxagen.sh/a-intel/core-platform/repositories/changes/<id>`). The note: "Closing is a governed action: it is recorded in Audit with your name, and the branch stays until someone deletes it." Footer: **Cancel**, **Close pull request** (red). Closing reports that the pull request closed without merging and quotes the comment posted.
+- **`closepr`**, "Close <pull request>", subtitle "without merging". The lead: "The pull request closes on GitHub and nothing is published. oxagen posts this comment on it:". The comment, previewed as GitHub renders it: "Closed by Marcus Bell <marcus@a-intel.example>", a horizontal rule, then "Added via oxagen" and the full address of this pull request in Oxagen as the link text (`https://app.oxagen.sh/a-intel/core-platform/repositories/changes/<id>`). No note; that closing is audited is in the dialog's component help (`mockups/help/steering-prs.md`). Footer: **Cancel**, **Close pull request** (red). Closing reports that the pull request closed without merging and quotes the comment posted.
 
 ## Data sources
 
