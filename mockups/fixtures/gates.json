@@ -63,7 +63,7 @@
   "ws": "finops",
   "agent": "invoice-bot",
   "applies": "a-intel.finops.invoice-bot",
-  "body": "Mandate mnd_7K2ETQ4: payments to aws and github only, $250.00 a call at most, and anything above $100.00 parks for approval.",
+  "body": "Mandate mnd_7K2ETQ4: payments to aws and github only. A call above the $250.00 auto-approve limit parks for approval.",
   "token_cost": 36,
   "outcome": "require_approval",
   "edit": "mandate",

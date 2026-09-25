@@ -25,7 +25,7 @@ Put every decision that waits on a person in one place that opens from every pag
 **The list**, the drawer's first view.
 
 - The eyebrow "17 waiting on you".
-- Interjections first, one row per run Oxagen holds for an answer: the glyph, "Interjection · release-manager is paused", the sentence "It started in `a-intel/edge-proxy`, which no workspace owns. Skills are on in Core platform, so there is a config to resolve and nothing to resolve it against. Nothing has been charged since 09:14:02Z; at 30 minutes it times out to `deny`.", and "Answer it" (gold), which closes the drawer and opens the held run (`run-interjection.md`). The row is a pointer; the answer is given on the run.
+- Interjections first, one row per run Oxagen holds for an answer: the glyph, "release-manager is paused and needs a decision", the sentence "It’s working in `a-intel/edge-proxy`, which isn’t linked to any workspace, so there’s no skill configuration to apply. No cost since 09:14. If nobody answers within 30 min, the request is denied.", and "Answer" (gold), which closes the drawer and opens the held run (`run-interjection.md`). The row is a pointer; the answer is given on the run.
 - Then one row per pending approval across the organization, soonest expiry first (the order `list_approvals` returns; the mockup keeps its fixture order). Each row is a button (aria-label "Open approval <id>") with:
   - the shield glyph;
   - the title: the amount, currency and tool ("$2,450.00 USD · stripe__create_payment@4"), or the tool alone ("github__create_release@2");
@@ -35,14 +35,14 @@ Put every decision that waits on a person in one place that opens from every pag
   - on the right, the countdown in m:ss, in warning ink under two minutes.
   - A row whose risk is critical, or whose side effect is irreversible, or which is tainted, carries the critical border.
 - Then the eyebrow "1 resolved today" and one row per approval resolved today, with its outcome ("approved", "denied", "expired") in place of the countdown. A resolved row opens its card too.
-- Under the lists, the note: "A resolution mints a single-use approval token bound to the call digest, the agent, the run, and an expiry. It cannot be replayed on a second call. On expiry the call ends and the reason reaches the model."
-- With nothing waiting: "Nothing is waiting on a human." and "A call parks here when policy returns approve. Denials never park; they end the call and are free."
+- Under the lists, the note: "Approving allows this exact call once. When the approval expires, the call ends and the agent is told why."
+- With nothing waiting: "Nothing is waiting on you." and "A call parks here when policy returns approve. A denied call never parks. It ends at once and costs nothing."
 
 The demo record lists 1 interjection and 16 pending approvals from six workspaces (Core platform, FinOps, Data platform, Mobile, Growth and Security), and 1 resolved today.
 
 **The card**, the drawer's second view: "‹ All approvals" above the full approval card for the row picked. It is the same card a run's parked approval shows.
 
-- The head: the eyebrow "Approval required" (or "Approval approved", "Approval denied", "Approval expired"), the amount with its currency or the tool, the compact agent card, the tool and counterparty ("stripe__create_payment@4 → vendor:aws") with the task under it, and the badges: risk, `side_effect <value>`, "tainted", `egress <value>`, and the tier the approval recorded. On the right: "times out in" and the countdown (or "resolved" and a dash), "parked 09:31:08Z · timeout 10m", and "on expiry the call ends and the reason reaches the model".
+- The head: the eyebrow "Approval required" (or "Approval approved", "Approval denied", "Approval expired"), the amount with its currency or the tool, the compact agent card, the tool and counterparty ("stripe__create_payment@4 → vendor:aws") with the task under it, and the badges: risk, `side_effect <value>`, "tainted", `egress <value>`, and the tier the approval recorded. On the right: "times out in" and the countdown (or "resolved" and a dash), "parked 09:31:08Z · timeout 10m", and "When it expires, the call ends and the agent is told why.".
 - The four-hop chain, numbered: 1 Operator (the name, the role in the workspace, the task), 2 Agent (the key, the harness and tier, the run id), 3 Action (the tool's label and id, the amount and counterparty, risk, side effect and egress), 4 Rule ("4 rules required approval", the policy and the mandate, the rule that parked it).
 - Remaining authority, when a mandate backs the call: a bar of settled, reserved by this call, and remaining, "of $5,000.00 USD", with the legend "settled $1,284.60 (25.7%)", "reserved by this call $2,450.00 (49.0%)" and "remaining $1,265.40".
 - Two columns. Mandate (Mandate, a link to the agent's Delegation; Granted by; Purpose; Per call; Approval above; Valid to), or Grant when no mandate backs it (Operator; Policy, with when and by whom it was activated; Rule; Tier, with one line on what that tier means for this call). Then The call (Tool version, Input digest, Idempotency, "Amount (µUSD)" when an amount leads, Requested, and Run, a link to the run).
@@ -53,7 +53,7 @@ The demo record lists 1 interjection and 16 pending approvals from six workspace
 
 **Dialogs the drawer opens:**
 
-- `approve`: "Approve this action", the call's badges and tool, "The exact call you are approving" (the tool version, the input digest and the idempotency key), a Reason field that reaches the model as the permission decision reason, a line that the token is single-use and bound to the call digest, the agent, the run and an expiry, and "Cancel" and "Approve and mint the token" (gold).
+- `approve`: "Approve this action", the call's badges and tool, "The exact call you are approving" (the tool version, the input digest and the idempotency key), a Reason field labelled "Reason (the agent is told it)", the note "Approving allows this exact call once.", and "Cancel" and "Approve this call" (gold).
 - `deny`: "Deny this action", a Reason field the model reads, a line that deny, approve and expiry are all frames and that a denial ends the call and costs nothing, and "Cancel" and "Deny with this reason" (danger).
 - `receipt`: the receipt of a resolved approval, from "Open receipt".
 
@@ -126,5 +126,5 @@ Loaded only. This change designs the loaded state. The build uses the shell's st
 - Every enforcement claim states the tier. The card's tier is the one the approval recorded, and "routed through Oxagen" appears only for calls that were.
 - Headers are rollups of the rows beneath them: the button's count, the header's "N waiting" and "N waiting on you" are the rows listed, and "N resolved today" is its rows.
 - Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
-- Exactly one gold action per screen: "Answer it" in the list while an interjection waits, "Approve" on the card, or the open dialog's primary.
+- Exactly one gold action per screen: "Answer" in the list while an interjection waits, "Approve" on the card, or the open dialog's primary.
 - A future-only field is marked in the design and renders as not recorded in a build until its contract ships.

@@ -39,13 +39,13 @@
    "k": "a-intel.core.stella-ci",
    "runs": 486,
    "spend": "1,104.70",
-   "trend": "-8%"
+   "trend": "−8%"
   },
   {
    "k": "a-intel.core.release-manager",
    "runs": 212,
    "spend": "612.48",
-   "trend": "-3%"
+   "trend": "−3%"
   },
   {
    "k": "a-intel.core.triage",
@@ -63,7 +63,7 @@
    "k": "a-intel.core.docs-writer",
    "runs": 64,
    "spend": "71.09",
-   "trend": "-1%"
+   "trend": "−1%"
   }
  ],
  "byModel": [
@@ -188,7 +188,7 @@
    "note": "\u2014"
   },
   {
-   "t": "(no tool call)",
+   "t": "No tool (reasoning and replies)",
    "s": "model",
    "calls": 0,
    "runs": 4218,
@@ -379,8 +379,8 @@
   {
    "scope": "agent \u00b7 a-intel.core.triage",
    "period": "per run",
-   "limit": "0.40",
-   "used": "0.29",
+   "limit": "1.00",
+   "used": "0.94",
    "mode": "hard"
   }
  ]

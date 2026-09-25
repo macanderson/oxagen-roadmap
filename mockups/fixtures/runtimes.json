@@ -87,7 +87,7 @@
   "kind": "workstation",
   "ws": "core-platform",
   "os": "macOS 15.6 · arm64",
-  "harness": "Custom (SDK-wrapped)",
+  "harness": "Other (SDK-wrapped)",
   "harnessV": "0.4.0",
   "model": "provider direct",
   "tier": "harness",

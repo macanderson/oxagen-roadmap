@@ -49,8 +49,8 @@ The demo record holds 37 findings of nine kinds: Unpaged results, Refetching a s
 
 Opened by **Evidence**, by the address `?finding=<id>`, and from a work item’s **Open the finding**. Title “Evidence · Duplicate tool calls”. Subtitle “fnd_01K5RHD7B · agent · last 30 days · basis client_attested”.
 
-- Four figures: **At stake** (“$2,398.16”, “measured minus counterfactual”), **Confidence** (“High”, the trend “+11% over 30 days”), **Signal** (“12 steps”, “identical input digests per run · baseline 1 step”), **Evidence** (“1,313 runs · 6,007 model calls”, “client_attested · every run sealed”).
-- **Recent runs where money was wasted**: Run · Task · Started · Cost · Wasted · What was wasted, then a total row: “3 most recent of 1,313 runs”, the cost total, the wasted total, and “45% of what these runs cost”. A row closes the dialog and opens the run.
+- Four figures: **At stake** (“$2,398.16”, “measured cost minus the estimated cost without the issue”), **Confidence** (“High”, the trend “+11% over 30 days”), **Signal** (“12 steps”, “identical input digests per run · baseline 1 step”), **Evidence** (“1,313 runs · 6,007 model calls”, “client_attested · every run sealed”).
+- **Recent runs with unproductive spend**: Run · Task · Started · Cost · Unproductive · What was wasted, then a total row: “3 most recent of 1,313 runs”, the cost total, the wasted total, and “45% of what these runs cost”. A row closes the dialog and opens the run.
 - **How we know**: the method, step by step (Measured, Re-read, Never used, Counterfactual), then “Counterfactual: <the alternative>. The saving is the difference, priced at what each call paid.”
 - **Who is involved**: the operator (avatar, name, “workspace.owner · core-platform · operator on every run below”, and one line on the pattern) and the agent’s card (harness, belt, runs and spend over 30 days).
 - Footer: “Every run above is a sealed record. Open one to read the frames the arithmetic came from.”, **Close**, **Fix** (gold; opens the Fix dialog).

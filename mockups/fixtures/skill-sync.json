@@ -39,6 +39,6 @@
   "skills": 0,
   "files": 0,
   "checkouts": 0,
-  "note": "The repository carries no .oxagen/ tree, so there is nothing to sync into it. Bind it on Repositories."
+  "note": "The repository carries no .oxagen/ tree, so there is nothing to sync into it. Add .oxagen/ on Repositories."
  }
 ]

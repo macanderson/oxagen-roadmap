@@ -97,7 +97,7 @@ still renders.
 
 The live release run's `steering.compiled` band is 1,340 tokens, and its `steering.manifest` frame
 renders the same 1,340: compile header 38, three gate notices 92 (33 + 31 + 28), four `must` and
-`should` records 783, and two `info` records 427 in the volatile selection. The volatile budget is
+`should` records 783, and two `info` records 427 in the per-prompt selection. The volatile budget is
 430, so nothing else fits. Change a gate notice's `token_cost`, a bundle rule's `tok`, or the budget
 and the two numbers on the Run page stop agreeing.
 

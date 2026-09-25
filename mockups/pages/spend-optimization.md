@@ -37,7 +37,7 @@ Show where this workspace's money bought nothing and what would change it. Four 
 
 The six amounts sum to the Wasted tile, $3,591.92. A run can show more than one cause.
 
-**Runs with waste.** One card per run, seven in the design. Each card: the run id (a link to the run), "<agent> · <operator> · <started>", "$<wasted> wasted of $<cost>", badges naming what the frames show (such as "chain break", "retry loop ×3", "context bloat +1,900 tok", "idle while parked", "halted turn 1"), a bar of the wasted share, the work order's title and what was wasted, "<frames> frames · <steps> steps · cache <N>% · <model>", **Open the run** and **Show the frames**. A note closes the panel. It says that wasted is a claim about frames and not about outcomes, names the four patterns it covers (a repeated call, a cold prefix, a turn spent waiting, and a chain that broke), and says that work a person accepted is never counted.
+**Runs with unproductive spend.** One card per run, seven in the design. Each card: the run id (a link to the run), "<agent> · <operator> · <started>", "$<wasted> wasted of $<cost>", badges naming what the frames show (such as "chain break", "retry loop ×3", "context bloat +1,900 tok", "idle while parked", "halted turn 1"), a bar of the wasted share, the work order's title and what was wasted, "<frames> frames · <steps> steps · cache <N>% · <model>", **Open the run** and **Show the frames**. A note closes the panel. It says that unproductive spend means the frames show the tokens bought nothing, names the four patterns it covers (a repeated call, a cold prefix, a turn spent waiting, and a chain that broke), and says that work a person accepted is never counted.
 
 ### Tokens and cache
 

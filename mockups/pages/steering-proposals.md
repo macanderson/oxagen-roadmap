@@ -109,7 +109,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 | If it publishes: Reaches and As | `PRP_META`, `stgBundle()` | Scope, force and the next steering version | The scope and force ship with the proposal; `get_context_pr` `onMerge.bundleVersion` gives the version after the merge (`context.pr.open.ts:68-80`) | ✅ |
 | If it publishes: Costs and Baseline | `PRP_META[].tok`, `measure()` | Tokens a turn, before and after, and the baseline measure | None | ❌ |
 | The proposal a memory made (`prp_01K5RX1N`): one row per saying, the fold that raised it | `PROPOSALS`, `MEMORY[].sayings` and `proposedAs`, `PRP_META` | A saying per run on the memory, and the fold that raises a proposal at the setting | None. `list_memory_promotions` (`packages/oxagen/src/contracts/agent.memory_promotion.list.ts:11`) lists promotions and does not name the sayings behind one | ❌ |
-| The authors "the promoter", "findings job" and "reflector" | `PROPOSALS[].from` | Jobs that raise proposals from runs and findings | None of the jobs is built (ADR-061). A proposal today comes from `propose_record` (`context.proposal.create.ts:12`) or an agent's `record_proposal` append (`append_record`, `context.records.append.ts:28`) | ❌ |
+| The authors "the promoter", "findings job" and "post-run review" | `PROPOSALS[].from` | Jobs that raise proposals from runs and findings | None of the jobs is built (ADR-061). A proposal today comes from `propose_record` (`context.proposal.create.ts:12`) or an agent's `record_proposal` append (`append_record`, `context.records.append.ts:28`) | ❌ |
 
 ## Future-only fields
 
