@@ -81,7 +81,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/Create values in Jira/.test(d) && /manage:jira-configuration/.test(d), "wizard: creating values asks for the Jira admin scope");
   ok(/every write appears under the account that authorizes/.test(d), "wizard: says Jira writes carry the authorizing account");
   ok(/What it still cannot do/.test(d), "wizard: says what the token still cannot do");
-  ok(/credential store/.test(d), "wizard: says where the token is kept");
+  ok(!/credential store/.test(d), "wizard: where the token is kept lives in component help, not on the step");
   ok(await footBtn(page, "Next").isDisabled(), "wizard: Next waits for authorization");
   await page.click("text=Authorize with Atlassian");
   await page.waitForTimeout(900);
@@ -120,7 +120,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await page.fill("#layer .lt-q", "Jira");
   await page.waitForTimeout(100);
   t = await dlgText(page);
-  ok(/Automation for Jira/.test(t) && /not mapped/.test(t), "people: the new accounts are listed, one not mapped");
+  ok(/Automation for Jira/.test(t) && /not mapped/i.test(t), "people: the new accounts are listed, one not mapped");
   await done(page, errs, "connect");
 }
 
@@ -146,7 +146,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok((await page.locator("#layer .dlg option", { hasText: /^Create “/ }).count()) === 0, "help desk: nothing to create once creation is off");
   await footBtn(page, "Next").click();
   d = await dlgText(page);
-  ok(/requester/.test(d) && /never maps one/.test(d), "help desk: a requester is never mapped");
+  ok(/requester/.test(d) && /never mapped/.test(d), "help desk: a requester is never mapped");
   await footBtn(page, "Next").click();
   await footBtn(page, "Connect ServiceNow").click();
   await page.waitForTimeout(200);
@@ -277,7 +277,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/Open/.test(t) && /Blocked/.test(t) && /Closed/.test(t), "fields: the three status categories");
   await page.click("#layer .dlg >> text=New Feature >> nth=0");
   const d = await dlgText(page);
-  ok(/A label will carry definition-of-done items/.test(d), "label: says labels will carry definition-of-done items");
+  ok(/Mapped from/.test(d) && !/A label will carry definition-of-done items/.test(d), "label: the editor maps the label, and the later definition-of-done templates live in component help");
   await page.click('button[aria-label="Color #9D8BE3"]');
   await footBtn(page, "Save label").click();
   ok(/#9D8BE3/.test(await dlgText(page)), "label: the colour is saved, back in Intake");
@@ -353,7 +353,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   const x640 = await page.locator('.wg-card[aria-label="Open a-intel/platform#640"]').evaluate(e => parseInt(e.style.left, 10));
   const x612 = await page.locator('.wg-card[aria-label="Open a-intel/platform#612"]').evaluate(e => parseInt(e.style.left, 10));
   ok(x612 === 0 && x640 > x612, "graph: #612 sits in layer 0 and #640 in the layer after it");
-  ok(/Unblocked tasks sit in layer 0/.test(await text(page)), "graph: the Graph view says what a layer is");
+  ok(!/Unblocked tasks sit in layer 0/.test(await text(page)), "graph: the layer legend lives in component help, not under the drawing");
   await shot(page, "09-graph");
   /* 10. queueing a blocked work item */
   await page.click(".panel-h >> text=List");
@@ -361,7 +361,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   await page.click("#dspBtn");
   await page.click(".dsp-i >> nth=0");
   let d = await dlgText(page);
-  ok(/1 of 1 task is blocked/.test(d) && /Expires/.test(d), "queue: the dialog says the work item is blocked and offers an expiry");
+  ok(/1 of 1 work item is blocked/.test(d) && /Expires/.test(d), "queue: the dialog says the work item is blocked and offers an expiry");
   ok(/Queue until unblocked/.test(await text(page, "#woSend")), "queue: the footer reads Queue until unblocked");
   await page.click("#layer .dlg input[type=checkbox] >> nth=-1");
   await page.click("#woSend");

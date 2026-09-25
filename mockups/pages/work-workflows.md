@@ -16,13 +16,15 @@ The workflows a work order can be sent to, and how to write a new one. A workflo
 
 ## What is on the page
 
-**Header.** As `work-backlog.md`: eyebrow the workspace name, h1 “Work”, subtext “What the agents work on, and what waits on you.” On Workflows the action is **New workflow** (gold; opens the builder).
+Component help for this tab lives in `mockups/help/work-workflows.md`.
+
+**Header.** As `work-backlog.md`: eyebrow the workspace name and h1 “Work”, with no subtext. The explanation is in `mockups/help/work-backlog.md`, Header. On Workflows the action is **New workflow** (gold; opens the builder).
 
 **Tabs**: Backlog `7` · Work orders `1` · Workflows · Findings `36`, with Workflows selected. Workflows carries no count.
 
 The tab body is two panels side by side, the first two thirds wide. The mockup outlines the whole body as future-only.
 
-**Workflows panel.** Heading “Workflows”, subtext “A workflow is a file in .oxagen/workflows that names its stages in order.” The shared list bar: a search field and Rows, with a pager (“1–3 of 3”). Columns, in order:
+**Workflows panel.** Heading “Workflows”, with no subtext. The explanation is in `mockups/help/work-workflows.md`, Workflows. The shared list bar: a search field and Rows, with a pager (“1–3 of 3”). Columns, in order:
 
 | Column | Content |
 |---|---|
@@ -47,7 +49,7 @@ A row opens the workflow’s dialog, `wfview`. The demo record holds three:
 4. “A stage may return the work to an earlier stage, up to the number of returns the file allows. After that the work order parks for you in Approvals.”
 5. “The last stage is always a person. Every item is accepted by you, and every pull request is merged by a person.”
 
-Then the note: “Every agent in a workflow must be one you operate. A workflow that names an agent somebody else operates cannot be sent by you.”
+No note sits under the five facts. The rule that every agent in a workflow is one you operate is in `mockups/help/work-workflows.md`, How a workflow runs. The panel itself is explanatory and stays for now, pending the lead’s decision.
 
 ### The workflow dialog (`wfview`)
 
@@ -68,11 +70,11 @@ on_fail = "stop"
 by = "operator"   # the last stage is always a person
 ```
 
-The note: “Published at a4c91e2. A change to this file is a pull request.”, or for a workflow in review “In a-intel/platform#526. It can be used when it merges.” Footer **Close**, **Change it** (opens the builder on this workflow).
+The note: “Published at a4c91e2.”, or for a workflow in review “In a-intel/platform#526. It can be used when it merges.” That a change is a pull request is in `mockups/help/work-workflows.md`, Workflow dialog. Footer **Close**, **Change it** (opens the builder on this workflow).
 
 ### The workflow builder (`wfnew`)
 
-Title “New workflow”, or “Change a workflow” from **Change it**. Subtitle “Stages in order, each an agent you operate, and a person last”.
+Title “New workflow”, or “Change a workflow” from **Change it**, with no subtitle. The explanation is in `mockups/help/work-workflows.md`, Workflow builder.
 
 - **In your own words**: a two-line text area with the placeholder “A bug fixer passes a fix to a validator, which passes it to a documenter, which passes it to an architect for final review.”, and the wand (`aria-label` “Have the assistant draft the stages”).
 - **Name**: a text field.
@@ -80,13 +82,13 @@ Title “New workflow”, or “Change a workflow” from **Change it**. Subtitl
 - The fixed last stage: its number, **Accept**, your avatar, and “You accept every item. This stage cannot be removed.”
 - **Add a stage**.
 - The file as it will be committed, under its path (`.oxagen/workflows/<slug>.toml`, or `workflow.toml` before the workflow has a name).
-- The note: “A workflow is a file. It exists when the pull request merges, and a reviewer can stop it there.”
+- No note under the file. That a workflow exists when its pull request merges is in `mockups/help/work-workflows.md`, Workflow builder.
 
 Footer “needs `context.propose` on core-platform”, **Cancel**, **Open pull request** (gold; disabled without a name).
 
-A new builder starts with one stage: Fix, Bug fixer, owning code and test, stopping on failure. The wand reads the roles in the order the sentence names them: the placeholder’s sentence gives Fix (Bug fixer, owns code, stops), Validate (Validator, owns test, returns to stage 1 at most 2 times), Document (Documenter, owns docs, stops) and Review (Architect, owns review, returns to stage 1 at most once), and names the workflow “Fix, validate, document, review” when the name is empty. It toasts in gold “oxagen.assistant drafted 4 stages from your sentence. Read them before anybody reviews them.” With no sentence it toasts “Write a sentence first. The assistant turns it into stages; it does not decide what the workflow is.” With no role it knows: “No role the assistant knows appears in that sentence. Add the stages by hand.”
+A new builder starts with one stage: Fix, Bug fixer, owning code and test, stopping on failure. The wand reads the roles in the order the sentence names them: the placeholder’s sentence gives Fix (Bug fixer, owns code, stops), Validate (Validator, owns test, returns to stage 1 at most 2 times), Document (Documenter, owns docs, stops) and Review (Architect, owns review, returns to stage 1 at most once), and names the workflow “Fix, validate, document, review” when the name is empty. It toasts in gold “oxagen.assistant drafted 4 stages from your sentence.” With no sentence it toasts “Write a sentence first.” With no role it knows: “No role the assistant knows appears in that sentence. Add the stages by hand.”
 
-**Open pull request** adds the workflow to the list as `pull request open` with its number, and toasts in gold “a-intel/platform#527 opened: add .oxagen/workflows/<slug>.toml. It can be used when it merges.”
+**Open pull request** adds the workflow to the list as `pull request open` with its number, and toasts in gold “a-intel/platform#527 opened: add .oxagen/workflows/<slug>.toml.”
 
 **Where a workflow is used.** A published workflow appears in the send menu and the work order dialog of `work-backlog.md`, with its stages’ harness marks, and a work order sent to it shows its stage chain on `work-order.md`.
 

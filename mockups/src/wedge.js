@@ -77,7 +77,7 @@ function pWork(r){
   if(S.state==="error") return errorState("Work","503 work_index_unavailable");
   if(S.state==="denied") return deniedState("this workspace\u2019s work","work.read on "+w.slug);
   if(S.state==="empty") return emptyState("No work in "+w.name+" yet",
-    "Work arrives from a connected issue tracker, from a finding a person picks up, or written here. A run an agent starts on its own is filed under a direct work order.",
+    "Work arrives from a connected issue tracker, from a finding a person picks up, or written here.",
     '<button class="btn primary" onclick="openDialog(\'intake\',\'providers\')">Connect an issue tracker</button>');
   fileRuns();
   /* First run (W1): straight after onboarding the workspace holds one run, the smoke session, filed
@@ -92,7 +92,7 @@ function pWork(r){
     :t==="workflows"?'<button class="btn primary" onclick="wfzOpen()">New workflow</button>':'';
   var body=t==="orders"?workOrdersTab(fr):t==="workflows"?'<div'+fut("workflows")+'>'+tkWfTab()+'</div>':t==="findings"?findingsTab():backlogTab();
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Work</h1>'+
-   '<p>What the agents work on, and what waits on you.</p></div><div class="acts">'+acts+'</div></div>'+
+   '</div><div class="acts">'+acts+'</div></div>'+
    obFirstBanners(w,fr)+(fr?obOfferCard(fr):'')+tabs+body;
 }
 
@@ -110,7 +110,7 @@ function backlogTab(){
   var parked=wsRunCounts(S.ws).parked;
   var changed=rows.filter(function(t){return t.ready==="changed";});
   var nsel=Object.keys(S.tsel).length;
-  var banner=changed.length?'<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
+  var banner=changed.length?'<div class="banner" style="margin-bottom:14px" data-help="changed-banner"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
     '<div class="grow"><b>'+changed.length+' work item'+(changed.length>1?'s':'')+' changed after certification</b>'+
     h(changed[0].num)+' was edited upstream on '+h(changed[0].updatedAt)+'. It is no longer ready. Certify its definition of done again to send it.</div>'+
     '<button class="btn" onclick="go(\''+taskUrl(changed[0])+'\')">Review changes</button></div>':'';
@@ -138,7 +138,7 @@ function backlogTab(){
    '<div class="sp">'+(nsel?'<span class="b b-q">'+nsel+' selected</span><button class="btn sm" onclick="S.tsel={};render()">Clear</button>':'')+
      '<span class="chips" role="group" aria-label="View"'+fut("dependencies")+'><button class="btn sm'+(S.tkView!=="graph"?' sel':'')+'" aria-pressed="'+(S.tkView!=="graph")+'" onclick="tkView(\'list\')">List</button><button class="btn sm'+(S.tkView==="graph"?' sel':'')+'" aria-pressed="'+(S.tkView==="graph")+'" onclick="tkView(\'graph\')">Graph</button></span></div></div>'+
    (S.tkView==="graph"?tkGraph(rows):'<div class="tw"><table><thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th>Labels</th><th>Status</th><th>Blocked by</th><th>Owner</th><th>Readiness</th><th>Work order</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>')+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">oxagen.assistant drafts a definition of done for every work item a provider imports or a finding opens. A person certifies it, and the item is ready from that moment. A ready item goes to an agent only inside a work order, and only to an agent you operate.</div></div></div>';
+   '</div>';
 }
 /* A work item written in Oxagen, or opened from a finding, carries the Oxagen mark where a provider item carries its provider's. */
 function wiLogo(t,size){
@@ -181,11 +181,10 @@ function workOrdersTab(fr){
      '<td><span class="tkp">'+personAv(w.by,20)+'<span>'+h((PEOPLE[w.by]||{}).name||w.by)+'</span></span><div class="dim mono" style="font-size:11px">'+h(w.sent)+'</div></td></tr>';}).join("");
   var chips=[["all","All"],["dispatched","Dispatched"],["direct","Direct"],["live","Live"]].map(function(x){
     return '<button class="btn sm'+(f===x[0]?' sel':'')+'" onclick="S.woFilter=\''+x[0]+'\';render()">'+x[1]+' <span class="dim">'+n[x[0]]+'</span></button>';}).join("");
-  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Work orders</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Every run belongs to one. A run started outside oxagen gets a direct work order.</p></div>'+
+  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Work orders</h3></div>'+
    '<div class="sp">'+chips+'</div></div>'+
    '<div class="tw"><table><thead><tr><th>Work order</th><th>Work items</th><th>Sent to</th><th>Latest run</th><th class="num">Items claimed</th><th>State</th><th class="num">Spend</th><th>Sent by</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">An agent claims an item with evidence, and a person accepts it. A work order is done when you accept every item, and nothing merges without a person. A direct work order has no definition of done until you attach it to a backlog item.</div></div></div>';
+   '</div>';
 }
 
 /* ---- Findings: a recorded problem with money behind it becomes work ---- */
@@ -206,9 +205,8 @@ function findingsTab(){
      tile("At stake",usd(fmt2(total)),(total/spendN*100).toFixed(1)+'% of '+usd(fmt2(spendN))+' this month')+
      tile("Findings",FINDINGS.length,FINDINGS.length-picked+' open \u00b7 '+picked+' in work')+
      tile("Evidence","every one","opens to the runs it cites")+
-     tile("Basis","measured","measured cost minus the estimated cost without the issue, at the price each call paid")+'</div>'+
-   '<div class="grid" style="gap:10px">'+cards+'</div>'+
-   '<div class="note" style="margin-top:14px">A finding becomes work when a person picks it up: Create work item opens a backlog item with the finding as its source and a drafted definition of done. Fix records the change directly when no agent needs to do it.</div>';
+     tile("Basis","measured","at the price each call paid")+'</div>'+
+   '<div class="grid" style="gap:10px" data-help="findings">'+cards+'</div>';
 }
 function findingToWork(id){
   var f=findingById(id); if(!f) return;
@@ -468,17 +466,16 @@ function woRunsPanel(w,wf){
      '<td class="num">'+(R?usd(R.cost)+'<div class="dim mono" style="font-size:10px">'+h(R.basis)+'</div>':'<span class="dim">—</span>')+'</td>'+
      '<td class="mono dim" style="font-size:11px">'+(R?h(runDay(R)):'')+'</td></tr>';}).join("");
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Runs</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+rs.length+' run'+(rs.length===1?'':'s')+'. Each is a child record of this work order.</p></div></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+rs.length+' run'+(rs.length===1?'':'s')+'.</p></div></div>'+
    (rs.length?'<div class="tw"><table data-lt="off"><thead><tr><th>Run</th><th>Stage</th><th>Agent</th><th>Status</th><th>Tier</th><th class="num">Cost</th><th>Started</th></tr></thead><tbody>'+trs+'</tbody></table></div>'
      :'<div class="panel-b"><p class="muted" style="margin:0">No run yet. The runtime starts the first one with <span class="mono">oxagen work start '+h(w.id)+'</span>.</p></div>')+'</div>';
 }
 function woFramesPanel(w){
   var L=woFrames(w);
   if(!L.length) return '';
-  return '<div class="panel"'+fut("work order frames")+'><div class="panel-h"><div style="flex:1;min-width:0"><h3>SteeringFrames from this send</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">What the send put in front of the agent, each with this work order as its source.</p></div></div>'+
+  return '<div class="panel"'+fut("work order frames")+'><div class="panel-h"><h3>SteeringFrames from this send</h3></div>'+
    '<div class="panel-b"><ul class="fr-list">'+L.map(function(f){return '<li>'+ftBadge(f.type)+'<span>'+h(f.type==="invocation"?"The brief as sent, "+tokn(f.tok)+" tokens":f.body)+'</span><span class="mono dim" style="font-size:10.5px">'+h(f.hash.slice(0,19))+'</span></li>';}).join("")+'</ul>'+
-   '<div class="note" style="margin-top:10px">Provenance on every frame: <span class="mono">'+h(w.id)+'</span> and the brief digest <span class="mono">'+h(w.digest||"")+'</span>. A sent brief cannot change, so these frames cannot either.</div></div></div>';
+   '<div class="note" style="margin-top:10px">Provenance on every frame: <span class="mono">'+h(w.id)+'</span> and the brief digest <span class="mono">'+h(w.digest||"")+'</span>.</div></div></div>';
 }
 function wiOrdersPanel(t){
   var L=WORKORDERS.filter(function(w){return w.tasks.indexOf(t.id)>=0;});
@@ -486,7 +483,7 @@ function wiOrdersPanel(t){
    (L.length?L.map(function(w){
      return '<div class="wi-wo"><a class="mono" href="'+woUrl(w)+'">'+h(w.id)+'</a> '+woBadge(w)+'<div class="dim" style="font-size:12px;margin-top:3px">'+h(w.title)+'</div>'+
        (w.runs||[]).map(function(x){return '<div class="row" style="gap:6px;margin-top:4px;font-size:12px"><span class="dim">run</span>'+runLink(x.run)+(x.state==="live"?' <span class="b b-allowed"><span class="d"></span>live</span>':'')+'</div>';}).join("")+'</div>';}).join("")
-     :'<p class="muted" style="margin:0;font-size:12.5px">Not sent yet. A certified item goes to an agent inside a work order.</p>')+'</div></div>';
+     :'<p class="muted" style="margin:0;font-size:12.5px">Not sent yet.</p>')+'</div></div>';
 }
 
 /* ---- run tabs navigate, so a tab has an address ---- */
@@ -1407,7 +1404,7 @@ DLG_EXT.intake=function(){
   var n=wsProviders().length;
   var seg='<div class="kf stg-seg" role="group" aria-label="Intake" style="margin-bottom:14px">'+INTAKE_PARTS.map(function(x){
     return '<button class="btn sm" aria-pressed="'+(part===x[0])+'" onclick="intakePart(\''+x[0]+'\')">'+h(x[1])+'</button>';}).join("")+'</div>';
-  return {t:"Intake",s:n+" issue tracker"+(n===1?"":"s")+" connected to "+ws().name+". Each imported issue becomes a work item.",w:true,
+  return {t:"Intake",s:n+" issue tracker"+(n===1?"":"s")+" connected to "+ws().name+".",w:true,
    b:seg+(part==="fields"?tkFieldsTab():part==="people"?tkPeopleTab():tkProvTab()),
    f:'<button class="btn" onclick="ipzOpen()">Connect an issue tracker</button><button class="btn primary" onclick="closeDialog()">Done</button>'};
 };

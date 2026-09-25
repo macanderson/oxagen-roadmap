@@ -16,11 +16,13 @@ Every work order in the workspace, the ones a person sent and the ones Oxagen op
 
 ## What is on the page
 
-**Header.** As `work-backlog.md`: eyebrow the workspace name, h1 “Work”, subtext “What the agents work on, and what waits on you.” The Work orders tab has no header action.
+Component help for this tab lives in `mockups/help/work-orders.md`.
+
+**Header.** As `work-backlog.md`: eyebrow the workspace name and h1 “Work”, with no subtext. The explanation is in `mockups/help/work-backlog.md`, Header. The Work orders tab has no header action.
 
 **Tabs**: Backlog `7` · Work orders `1` · Workflows · Findings `36`, with Work orders selected. Its count is the work orders waiting on you to accept.
 
-**Work orders panel.** Heading “Work orders”, subtext “Every run belongs to one. A run started outside Oxagen gets a direct work order.” Filter chips in the panel header, each with its count, the chosen one marked: **All** `282` · **Dispatched** `4` · **Direct** `278` · **Live** `7`. Live keeps the work orders with a live run. The shared list bar: a search field (“Search this list”), a State facet (“All · State”, over the states present), Rows (5, 10, 25, 50, All), and a pager (“1–10 of 282”). Rows sort newest first, by when the work order was sent or opened.
+**Work orders panel.** Heading “Work orders”, with no subtext. The explanation is in `mockups/help/work-orders.md`, Work orders. Filter chips in the panel header, each with its count, the chosen one marked: **All** `282` · **Dispatched** `4` · **Direct** `278` · **Live** `7`. Live keeps the work orders with a live run. The shared list bar: a search field (“Search this list”), a State facet (“All · State”, over the states present), Rows (5, 10, 25, 50, All), and a pager (“1–10 of 282”). Rows sort newest first, by when the work order was sent or opened.
 
 Columns, in order:
 
@@ -39,7 +41,7 @@ A row opens the work order (`work-order.md`). The run link opens the run without
 
 The demo record holds 282: four dispatched and 278 direct. The dispatched ones are `wo_01K5RS7M4N` “Cut 4.11.0 release notes” (Release manager, in progress, 3 / 4, $4.13), `wo_01K6T9QX` “Same-minute migration stamps” (the Fix, validate, document, review workflow, in progress, 4 runs, 2 / 4), `wo_01K6TA2M` “pnpm 10.18” (Stella CI, waiting on you, 3 / 3) and `wo_01K6RZ41` “Expired approvals in the count” (Bug fixer, accepted, 2 / 2). Each direct one holds one recorded run, titled from it: `wo_01K5RQ4B9C7XTN2P` “Bring #482 up to the release-notes contract” (Stella CI, closed, $2.87).
 
-**Note** under the table: “An agent claims an item with evidence, and a person accepts it. A work order is done when you accept every item, and nothing merges without a person. A direct work order has no definition of done until you attach it to a backlog item.”
+No note sits under the table. How claims, acceptance and direct work orders work is in `mockups/help/work-orders.md`, Work orders.
 
 ### The first run
 
