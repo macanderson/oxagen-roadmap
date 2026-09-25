@@ -11,7 +11,7 @@
 //
 // The flows, in order:
 //   1. connect Jira through the six-step wizard from Intake, create one value in Jira, leave one account
-//      not mapped, and see it under Providers
+//      not mapped, and see it under Trackers
 //  1b. connect ServiceNow with creation off, and see its column under Fields
 //   2. draft a definition of done with the assistant, edit it, and certify it
 //   3. a certified work item that changes upstream leaves ready
@@ -68,7 +68,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
   ok(/GitHub/.test(t) && /Linear/.test(t), "providers: GitHub and Linear are connected");
   ok(/Jira/.test(t) && /Connect/.test(t), "providers: Jira is offered");
   ok((await page.locator(".ipl svg").count()) >= 3, "providers: every provider shows its logo as an SVG");
-  await page.click("#layer .dlg-f >> text=Connect an issue provider");
+  await page.click("#layer .dlg-f >> text=Connect an issue tracker");
   let d = await dlgText(page);
   ok(/Tracker Authorize Scope Fields People Review/.test(d.replace(/[0-9]/g, "").replace(/\s+/g, " ")) || (await page.locator(".wz-st").count()) === 6, "wizard: six steps");
   ok((await page.locator(".ipz-card").count()) === 6, "wizard: six providers to choose from");
@@ -127,7 +127,7 @@ const done = async (page, errs, name) => { ok(errs.length === 0, `${name}: no Ja
 /* 1b. connecting a help desk */
 {
   const { page, errs } = await open(INTAKE + "providers");
-  await page.click("#layer .dlg-f >> text=Connect an issue provider");
+  await page.click("#layer .dlg-f >> text=Connect an issue tracker");
   await page.click(".ipz-card >> text=ServiceNow");
   await footBtn(page, "Next").click();
   let d = await dlgText(page);

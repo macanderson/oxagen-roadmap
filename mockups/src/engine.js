@@ -739,7 +739,7 @@ var TOOLMETA={
  github__get_commit:["Get commit","read"], claude_code__Edit:["Edit file","file"],
  claude_code__WebFetch:["Fetch a web page","read"], expand_graph:["Expand the graph","read"],
  append_record:["Append record","record"], open_context_pr:["Open a pull request","vcs"],
- send_message:["Send message","message"], search_tools:["Search the belt","read"],
+ send_message:["Send message","message"], search_tools:["Search the toolbelt","read"],
  load_tools:["Load tool definitions","read"], okta__deactivate_user:["Deactivate user","access"]
 };
 /* The first row of a tool call leads with the tool's short name and its arguments: a harness-native
@@ -1202,7 +1202,7 @@ function pAgentSource(r){
    '<div class="row" style="margin-top:8px"><span class="b b-q mono">'+h(w.main)+'</span>'+
    (pend?'<span class="b b-approval"><span class="d"></span>'+h(pend.branch)+'</span>':'<span class="b b-q mono">'+h(w.branch)+' @ '+h(a.commit)+'</span>')+
    '<span class="b b-q">source of truth</span><span class="b b-q mono">'+h(a.key)+'</span></div>'+
-   '<p style="margin-top:8px">The agent definition is this file. Saving opens a pull request against the main repo. Nothing is written to Postgres.</p></div>'+
+   '<p style="margin-top:8px">The agent definition is this file. Saving opens a pull request against the main repo. Nothing is written to oxagen’s database.</p></div>'+
    '<div class="acts"><button class="btn" id="edDiscard" onclick="edDiscard()"'+(dirty?'':' disabled')+'>Discard</button>'+
    '<button class="btn primary" id="edSave" onclick="edSave()">Save</button></div></div>'+tabs+
    '<div class="panel ed" id="ed">'+
@@ -3909,7 +3909,7 @@ function pAgents(){
   if(S.state==="error") return errorState("Agents","503 iam_principals_unavailable");
   if(S.state==="denied") return deniedState("the agents in this workspace","agent.read on core-platform");
   if(S.state==="empty") return emptyState("No agent registered in "+w.name,
-    "An agent's identity lives in Postgres. Its definition is a file in <span class=\"mono\">.oxagen/agents/</span> in the main repo. Registering one opens a pull request. Nothing is written to Postgres first.",
+    "An agent's identity lives in oxagen’s database. Its definition is a file in <span class=\"mono\">.oxagen/agents/</span> in the main repo. Registering one opens a pull request. Nothing is written to the database first.",
     '<button class="btn primary" onclick="regStart()">Register agent</button>'+
     '<button class="btn" onclick="openDialog(\'register\')">Show the CLI path</button>');
 
@@ -4337,7 +4337,7 @@ function aIdentity(a,r){
     '<dt>Runtime</dt><dd class="mono">'+h(a.host||"not enrolled")+
      '<span class="sub">'+(a.enrolled?'its device key countersigns this agent\'s checkpoints':'nothing signs its checkpoints yet')+'</span></dd>'+
     '<dt>Delegation</dt><dd>subagents narrow, never widen'+
-     '<span class="sub">a subagent\'s effective permission is this agent\'s grants ∩ the invoking human\'s grants</span></dd>'+
+     '<span class="sub">a subagent may do only what both this agent and the invoking person are granted</span></dd>'+
     '<dt>Tamper incidents</dt><dd>'+(tamperCount(a)
       ?'<span class="b b-critical"><span class="d"></span>'+tamperCount(a)+' · '+keyLabel(agentTamper(a)[0].kind)+'</span> '+
        '<button class="btn sm ghost" onclick="S.tab.agent=\'activity\';go(\'#/'+ORG.slug+'/'+S.ws+'/agents/'+sl+'/activity\')">Read them</button>'
@@ -4563,7 +4563,7 @@ function aToolbelt(a,r){
     '<button class="btn sm" aria-pressed="'+(mode==="full")+'" onclick="S.beltMode=\'full\';render()">All tools sent</button></div></div>'+
    '<div class="panel-b" style="display:grid;gap:12px">'+
    (mode==="searchable"
-    ? '<div class="note"><b>Searchable belt.</b> The request carries two meta-tools plus the tools pinned as '+
+    ? '<div class="note"><b>Searchable.</b> The request carries two meta-tools plus the tools pinned as '+
       'always-present: '+pinned.length+' definitions instead of '+total+'. Both meta-tools are themselves governed calls '+
       'recorded as frames, so the record shows what the model looked for and what it was shown.</div>'+
       '<pre><span class="c">// the tools block of the next model request, verbatim</span>\n[\n'+
@@ -4579,7 +4579,7 @@ function aToolbelt(a,r){
       (total>FULL_BELT_LIMIT
        ? 'At '+total+' tools this belt is over the workspace limit of '+FULL_BELT_LIMIT+'. This is the view a smaller belt gets, shown here for comparison.'
        : 'At '+total+' tools it is under the limit of '+FULL_BELT_LIMIT+', which is how this agent actually runs.')+
-      ' The tool-definition token count is measured on every model call, and the findings job flags belts wider than the agent uses.</div>'+
+      ' The tool-definition token count is measured on every model call, and the findings job flags toolbelts wider than the agent uses.</div>'+
       '<pre><span class="c">// '+total+' definitions · '+(total*323).toLocaleString()+' tokens of tool definitions</span>\n[\n'+
       belt.filter(function(x){return !x.meta;}).slice(0,6).map(function(x){
        return '  { <span class="k">"name"</span>: <span class="s">"'+h(x.n)+'"</span>, <span class="k">"input_schema"</span>: { <span class="c">/* '+h(x.dig)+' */</span> },\n'+
@@ -4969,7 +4969,7 @@ function pTools(){
      '<div class="panel"><div class="panel-h"><h3>Where a version lives</h3></div>'+
      '<div class="panel-b"><dl class="kv">'+
       '<dt>Store</dt><dd>One stored version holding the rules, the tests and the version string. A policy version is not a Steering record and never reaches a model.</dd>'+
-      '<dt>In regulated mode</dt><dd>The rules are a file in <span class="mono">.oxagen/policy/</span> in the main repo, and a change is a pull request. Postgres holds the compiled copy the gateway reads.</dd>'+
+      '<dt>In regulated mode</dt><dd>The rules are a file in <span class="mono">.oxagen/policy/</span> in the main repo, and a change is a pull request. oxagen’s database holds the compiled copy the gateway reads.</dd>'+
       '<dt>Compiled from</dt><dd>The rules you write here, plus the enforcement grants on each agent and the role grants on each operator. A rule can read those, so you do not restate a grant as a rule.</dd>'+
       '<dt>Who reads it</dt><dd>The gateway, on every tool call, before the call leaves. No model is in the decision path, so the same call and the same version always decide the same way.</dd>'+
       '<dt>What it writes</dt><dd>One <span class="mono">policy.decision</span> frame per call, naming the version and the rules that fired. The Decision trace reads the decision back without re-running it.</dd>'+
@@ -6832,7 +6832,7 @@ function rtDetail(rt){
    plane actually has. Nothing on this page writes a row and nothing here merges. */
 
 var OXPR_KIND={
- bootstrap:{l:"Oxagen init", d:"the .oxagen/ tree itself",        i:"repo"},
+ bootstrap:{l:"oxagen init", d:"the .oxagen/ tree itself",        i:"repo"},
  record:   {l:"Steering record", d:".oxagen/rules/<lineage>.toml", i:"steering"},
  skill:    {l:"skill",       d:".oxagen/skills/<name>/SKILL.md",  i:"skills"},
  agent:    {l:"agent",       d:".oxagen/agents/<slug>.toml",      i:"agents"},
@@ -6951,7 +6951,7 @@ function repoTab(){
    '<div class="grow"><b>A run on '+h(unbound.map(function(r){return r.n;}).join(", "))+' is steered by the main repo and by nothing of its own.</b> '+
    'Repository-scoped records live in that repository, so until it has a <span class="mono">.oxagen/</span> tree there is nowhere to put one, '+
    'and a record that tried would have to claim workspace scope, which the checks refuse.</div>'+
-   '<button class="btn" onclick="wzOpen(\'init\',\''+h(unbound[0].n)+'\')">Add Oxagen</button></div>':'';
+   '<button class="btn" onclick="wzOpen(\'init\',\''+h(unbound[0].n)+'\')">Add .oxagen/</button></div>':'';
 
   var trows=rows.map(function(r){
     var st=oxState(r), avail=r.role==="available";
@@ -8120,7 +8120,7 @@ function auditReceipts(){
      '<td class="num mono" style="font-size:12px">'+h(r.amount)+'</td><td class="mono" style="font-size:11.5px">'+h(r.effect)+'</td><td>'+tierBadge(r.tier)+'</td></tr>';}).join("");
   var chips=["stripe","harness","observe","deny","a-intel.finops.invoice-bot","pi_3QaL8f2Xk"];
   return '<div class="panel"><div class="panel-h"><h3>Receipt search</h3><span class="muted" style="font-size:12.5px">One signed record per tool call</span>'+
-   '<div class="sp">'+auditStore("postgres frames + object storage bodies")+'</div></div>'+
+   '<div class="sp">'+auditStore("frames in the database, bodies in object storage")+'</div></div>'+
    '<div class="panel-b" style="border-bottom:1px solid var(--border)"><div class="row"><div class="field" style="margin:0;flex:1;min-width:200px">'+
    '<input id="rq" value="'+h(S.rq||"")+'" placeholder="agent key, tool, external effect id, call digest, receipt id" aria-label="Search receipts" onkeydown="if(event.key===\'Enter\'){S.rq=this.value;render();}"></div>'+
    '<button class="btn" onclick="S.rq=el(\'rq\').value;render()">Search</button></div>'+
@@ -9103,7 +9103,7 @@ SCENARIOS["the-account"]={title:"Whose account it is", ws:"core-platform",
   {say:"Notifications map to frame kinds and audit events, never to something invented for a bell.",
    route:function(o){return {page:"work",org:o,ws:"core-platform",tab:"backlog"};},
    act:["Open notifications","openDialog('notifs')"]},
-  {say:"The command menu is <span class=\"mono\">search_tools</span>. Search “run” and it returns the actions and the belt tools inside your grants, with their hazards. Nothing outside the belt.",
+  {say:"The command menu is <span class=\"mono\">search_tools</span>. Search “run” and it returns the actions and the toolbelt tools inside your grants, with their hazards. Nothing outside the belt.",
    note:"Try a tool that is not on the belt, such as delete repository: nothing matches, which is also what stops a prompt injection from naming it.",
    route:function(o){return {page:"work",org:o,ws:"core-platform",tab:"backlog"};},
    setup:function(){S.cmdq="run";S.cmdSel=0;S.cmdCaret=null;},
@@ -10533,7 +10533,7 @@ function regName(){
     '<div class="hint">Picks the installer on the next step. It can be changed there.</div></div>'+
    '<div class="field"><label>Model class</label><select aria-label="Model class" onchange="S.reg.tier=this.value">'+opts(["complex","light"],r.tier)+'</select>'+
     '<div class="hint">The harness calls the model with its own key. The tier is recorded on every frame.</div></div></div>'+
-   '<div class="note">Continue creates a one-time enrollment token for <span class="mono regKeyLive">'+h(key)+'</span>. Nothing is written to Postgres and no PR opens until the agent first connects. That first session then opens the pull request that adds the definition file.</div>'+
+   '<div class="note">Continue creates a one-time enrollment token for <span class="mono regKeyLive">'+h(key)+'</span>. Nothing is written to the database and no PR opens until the agent first connects. That first session then opens the pull request that adds the definition file.</div>'+
    '</div></div>'+
    '<div class="reg-foot">'+regCancelBtn()+'<div class="sp"><button class="btn primary" onclick="regNav(\'wrap\')">Continue</button></div></div>';
 }
@@ -10608,7 +10608,7 @@ function regRun(){
   var head=ob?'<div><p class="eyebrow">Step 3 of 3</p><h1>Start a run</h1>'+
    '<p class="reg-lead">The operator console opens the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen, and lands you on Work looking at your own run.</p></div>'
    :'<div><p class="eyebrow">Step 3 of 3</p><h1>Wait for the first frame</h1>'+
-   '<p class="reg-lead">Registration completes the moment the first frame from <span class="mono">'+h(key)+'</span> reaches Oxagen and lands you on Work looking at its run.</p></div>';
+   '<p class="reg-lead">Registration completes the moment the first frame from <span class="mono">'+h(key)+'</span> reaches oxagen and lands you on Work looking at its run.</p></div>';
   if(S.state==="error") return head+
    '<div class="reg-card"><div class="reg-err"><h2>The collector cannot reach oxagen</h2>'+
    '<p>The host <span class="mono">'+REG_HOST+'</span> enrolled, but every request to <span class="mono">https://ingest.oxagen.com/v1</span> has been refused for 94 seconds (<span class="mono">ECONNREFUSED</span>, 6 attempts). No frame has arrived, so registration will not complete.</p>'+
@@ -11345,8 +11345,8 @@ function asstSheet(){
    '<div class="asst-b">'+
    '<div class="msg op"><div class="who">'+h(me().name)+'</div><div class="bub">Triage is burning money on tool definitions. Narrow its toolbelt to what it actually used in the last 30 days, and tell me what you changed.</div></div>'+
    '<div class="msg"><div class="who">'+stellaName()+' <span class="b b-q" style="font-size:9.5px"><span class="id">run_01K5RT9X4M2</span> · oxagen’s run</span></div><div class="bub">'+
-   '<p style="margin:0 0 10px">I read the finding and the belt. 34 of the 52 tools on <span class="mono">a-intel.core.triage</span> were never called in 1,340 runs. '+
-   'Narrowing the belt is a change to the agent definition, so it is a pull request, not a write to Postgres. I opened one.</p>'+
+   '<p style="margin:0 0 10px">I read the finding and the toolbelt. 34 of the 52 tools on <span class="mono">a-intel.core.triage</span> were never called in 1,340 runs. '+
+   'Narrowing the toolbelt is a change to the agent definition, so it is a pull request, not a database write. I opened one.</p>'+
    '<div class="act-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_context_pr</code></div>'+
    '<dl class="kv" style="font-size:11.5px"><dt>Pull request</dt><dd><a href="#">a-intel/platform#521</a></dd>'+
    '<dt>File</dt><dd class="mono" style="font-size:11px">.oxagen/agents/triage.toml</dd>'+
@@ -15154,18 +15154,18 @@ function tkProvTab(){
       '<button class="btn sm" onclick="ipzOpen(\''+k+'\')">Connect</button></div></div></div>';});
   return '<div class="grid g2">'+cards.join("")+avail.join("")+'</div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>How imports work</h3></div><div class="panel-b">'+
-   wzChecks([["events","Each provider sends an event when an issue, incident, case, or ticket changes. Oxagen reads it again and updates the work item."],
-     ["reconcile","Every 15 minutes Oxagen lists what changed since the last read, so a missed event costs at most 15 minutes."],
-     ["fields","Oxagen reads the thirteen fields on the Fields tab and nothing else. Custom fields are not read."],
-     ["writes","Oxagen writes to a provider only what the switches on its card allow. It never edits a subject or a description, and it never replies to a requester."],
-     ["creates","Oxagen creates a status, resolution, or label in a provider only when you choose Create for it. It never renames or deletes one."]])+'</div></div>';
+   wzChecks([["events","Each provider sends an event when an issue, incident, case, or ticket changes. oxagen reads it again and updates the work item."],
+     ["reconcile","Every 15 minutes oxagen lists what changed since the last read, so a missed event costs at most 15 minutes."],
+     ["fields","oxagen reads the thirteen fields on the Fields tab and nothing else. Custom fields are not read."],
+     ["writes","oxagen writes to a provider only what the switches on its card allow. It never edits a subject or a description, and it never replies to a requester."],
+     ["creates","oxagen creates a status, resolution, or label in a provider only when you choose Create for it. It never renames or deletes one."]])+'</div></div>';
 }
 
 /* ---- tab: fields ---- */
 /* Where each of the thirteen fields comes from, per provider. The tab shows a column for each connected
    provider, so a workspace with one help desk reads one column, not six. */
 var TK_FIELDS=[
- {f:"Work item id",all:"tsk_ ULID, minted by Oxagen"},
+ {f:"Work item id",all:"tsk_ ULID, minted by oxagen"},
  {f:"Number",github:"owner/repo#number",linear:"identifier, PLAT-231",jira:"key, OPS-88",servicenow:"number, INC0012345",salesforce:"CaseNumber, 00001026",zendesk:"id, #4821"},
  {f:"Subject",github:"title",linear:"title",jira:"summary",servicenow:"short_description",salesforce:"Subject",zendesk:"subject"},
  {f:"Description",github:"body",linear:"description",jira:"description, converted to Markdown",servicenow:"description",salesforce:"Description",zendesk:"the first comment"},
@@ -15193,7 +15193,7 @@ function tkFieldsTab(){
   return panel("Work item fields","Thirteen fields, read the same way from every provider.","",["Field"].concat(heads),fr)+
    panel("Statuses","Every status belongs to one of three categories: open, blocked, or closed.",'<button class="btn sm" onclick="openDialog(\'stedit\',\'new\')">Add status</button>',["Status","Category"].concat(heads),sr)+
    panel("Resolutions","A closed work item carries one resolution.",'<button class="btn sm" onclick="openDialog(\'resedit\',\'new\')">Add resolution</button>',["Resolution"].concat(heads),rr)+
-   panel("Labels","A label has a colour and a mapping to each provider’s own labels, priorities, types, or tags.",'<button class="btn sm" onclick="openDialog(\'lbledit\',\'new\')">Add label</button>',["Label","Colour","Group"].concat(heads,["Definition of done items"]),lr)+
+   panel("Labels","A label has a color and a mapping to each provider’s own labels, priorities, types, or tags.",'<button class="btn sm" onclick="openDialog(\'lbledit\',\'new\')">Add label</button>',["Label","Colour","Group"].concat(heads,["Definition of done items"]),lr)+
    '<div class="note">Field settings are workspace settings. Each change is a governed action in Audit and applies to the next read of every work item. A value a provider lacks can be created there from its editor. Later, a label carries definition-of-done items that copy into the draft of every work item that has it, and those templates live in .oxagen/ as files.</div>';
 }
 
@@ -15216,7 +15216,7 @@ function tkPeopleTab(){
   return banner+'<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>People</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">Accounts in your providers and the workspace member each one is.</p></div></div>'+
    '<div class="tw"><table><thead><tr><th>Account</th><th>Provider</th><th>Email</th><th>Workspace member</th><th>Match</th><th>State</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Mapping says who an account is in Oxagen and grants nothing. An account left not mapped still owns and creates work items under its own handle. Only a signed-in member can certify a definition of done or send a work order, whatever the mapping says.</div></div></div>';
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Mapping says who an account is in oxagen and grants nothing. An account left not mapped still owns and creates work items under its own handle. Only a signed-in member can certify a definition of done or send a work order, whatever the mapping says.</div></div></div>';
 }
 function tpConfirmAll(){TPEOPLE.forEach(function(p){if(p.state==="suggested"){p.state="mapped";}});render();act("Matches confirmed. map_provider_person recorded once per account.");}
 
@@ -15320,7 +15320,7 @@ function pTask(r){
   if(tkBlockers(t).length&&!tkGraphBlocked(t)) hist.push(["Unblocked",t.updatedAt,"every blocker is done"]);
   if(t.wo){var wo=woById(t.wo); if(wo&&wo.status==="queued")hist.push(["Queued in a work order",wo.sent,wo.id]); else if(wo)hist.push(["Sent in a work order",wo.released||wo.sent,wo.id]); if(wo&&wo.accepted)hist.push(["Accepted",wo.accepted,PEOPLE[wo.by].name]);}
   var res=t.resolution?tRes(t.resolution):null;
-  return '<div class="phead"><div class="t"><p class="eyebrow">'+wiLogo(t,13)+' '+h(t.num)+'</p><h1>'+h(t.subject)+'</h1>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+wiLogo(t,13)+' <span class="id">'+h(t.num)+'</span></p><h1>'+h(t.subject)+'</h1>'+
    '<p>'+(own?(t.finding?'Written in Oxagen from finding <span class="mono">'+h(t.finding)+'</span>':'Written in Oxagen'):'Imported from '+h(k.l))+'. Updated '+h(t.updatedAt)+'.'+(t.ready==="ready"&&tkGraphBlocked(t)?' Blocked by '+h(tkOpenBlockers(t).map(function(b){return tkNum(b.task);}).join(" and "))+'.':'')+'</p></div>'+
    '<div class="acts"><button class="btn" onclick="copyTaskPrompt(\''+t.id+'\')" title="Copy the work item and its work orders as text">Copy prompt</button>'+
    (own?(t.finding?'<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/work/findings?finding='+h(t.finding)+'\')">Open the finding</button>':'')
@@ -15434,7 +15434,7 @@ function pWorkOrder(r){
      '<td style="font-size:12px">'+(c?h(c.ev)+'<div class="dim mono" style="font-size:11px">'+h((agent(c.by)||{}).name||c.by)+' '+h(c.run)+'</div>':'<span class="dim">\u2014</span>')+'</td></tr>';}).join("");
   var tgt=w.target.kind==="workflow"?'the '+(wfById(w.target.id)||{}).name+' workflow':(a?a.name:w.target.id);
   var sp=woSpend(w), open=w.status!=="accepted"&&w.status!=="stopped"&&w.status!=="closed";
-  return '<div class="phead"><div class="t"><p class="eyebrow"><span class="mono">'+h(w.id)+'</span> '+woKindBadge(w)+'</p><h1>'+h(w.title)+'</h1>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow"><span class="mono id">'+h(w.id)+'</span> '+woKindBadge(w)+'</p><h1>'+h(w.title)+'</h1>'+
    (direct?'<p>Oxagen opened it on '+h(w.sent)+' for a run '+h((PEOPLE[w.by]||{}).name||w.by)+' started outside Oxagen'+(w.ref?', titled from its task reference <span class="mono">'+h(w.ref)+'</span>':'')+'.</p>'
      :w.status==="queued"?'<p>Queued by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' for '+h(tgt)+'. It is sent when '+h(woWaitsOnText(w))+' is done, or expires on '+h(w.expires||"")+'.'+woSubMore(w)+'</p>'
      :'<p>Sent by '+h(PEOPLE[w.by].name)+' on '+h(w.sent)+' to '+h(tgt)+'.'+woSubMore(w)+'</p>')+'</div>'+

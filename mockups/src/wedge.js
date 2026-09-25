@@ -65,7 +65,7 @@ function wsRunCounts(wslug){
 function woSpend(w){var s=0;woRuns(w).forEach(function(o){if(o.R)s+=parseFloat(o.R.cost)||0;});return s;}
 function woKindBadge(w){
   return w.kind==="direct"
-    ?'<span class="b b-q" title="Oxagen opened it for a run started outside Oxagen"'+fut("direct work orders")+'>direct</span>'
+    ?'<span class="b b-q" title="oxagen opened it for a run started outside oxagen"'+fut("direct work orders")+'>direct</span>'
     :'<span class="b b-q" title="A person sent it from Work">dispatched</span>';
 }
 
@@ -77,8 +77,8 @@ function pWork(r){
   if(S.state==="error") return errorState("Work","503 work_index_unavailable");
   if(S.state==="denied") return deniedState("this workspace\u2019s work","work.read on "+w.slug);
   if(S.state==="empty") return emptyState("No work in "+w.name+" yet",
-    "Work arrives from a connected issue provider, from a finding a person picks up, or written here. A run an agent starts on its own is filed under a direct work order.",
-    '<button class="btn primary" onclick="openDialog(\'intake\',\'providers\')">Connect an issue provider</button>');
+    "Work arrives from a connected issue tracker, from a finding a person picks up, or written here. A run an agent starts on its own is filed under a direct work order.",
+    '<button class="btn primary" onclick="openDialog(\'intake\',\'providers\')">Connect an issue tracker</button>');
   fileRuns();
   /* First run (W1): straight after onboarding the workspace holds one run, the smoke session, filed
      under a direct work order. Work opens on it alone. S.firstRun is cleared to see the seeded workspace. */
@@ -142,7 +142,7 @@ function backlogTab(){
 function wiLogo(t,size){
   if(t.kind!=="oxagen") return ipLogo(t.kind,size);
   size=size||15;
-  return '<span class="ipl" title="Written in Oxagen"><svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" role="img" aria-label="Oxagen"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/></svg></span>';
+  return '<span class="ipl" title="Written in oxagen"><svg width="'+size+'" height="'+size+'" viewBox="0 0 24 24" role="img" aria-label="oxagen"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12" r="2.6" fill="currentColor"/></svg></span>';
 }
 
 /* ---- Work orders: dispatched and direct ---- */
@@ -180,7 +180,7 @@ function workOrdersTab(fr){
   var chips=[["all","All"],["dispatched","Dispatched"],["direct","Direct"],["live","Live"]].map(function(x){
     return '<button class="btn sm'+(f===x[0]?' sel':'')+'" onclick="S.woFilter=\''+x[0]+'\';render()">'+x[1]+' <span class="dim">'+n[x[0]]+'</span></button>';}).join("");
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Work orders</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Every run belongs to one. A run started outside Oxagen gets a direct work order.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Every run belongs to one. A run started outside oxagen gets a direct work order.</p></div>'+
    '<div class="sp">'+chips+'</div></div>'+
    '<div class="tw"><table><thead><tr><th>Work order</th><th>Work items</th><th>Sent to</th><th>Latest run</th><th class="num">Items claimed</th><th>State</th><th class="num">Spend</th><th>Sent by</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">An agent claims an item with evidence, and a person accepts it. A work order is done when you accept every item, and nothing merges without a person. A direct work order has no definition of done until you attach it to a backlog item.</div></div></div>';
@@ -230,7 +230,7 @@ var FT=[
  {id:"procedure",d:"How to do something"},
  {id:"context",d:"A fact the agent needs"},
  {id:"invocation",d:"What the agent was asked to do, and by whom"},
- {id:"capability",d:"A callable the agent may use, described. Oxagen never runs it"}];
+ {id:"capability",d:"A callable the agent may use, described. oxagen never runs it"}];
 var FT_ORDER={}, FT_DESC={}; FT.forEach(function(x,i){FT_ORDER[x.id]=i;FT_DESC[x.id]=x.d;});
 function ftBadge(t){return '<span class="ft ft-'+h(t)+'" title="'+h(FT_DESC[t]||"")+'">'+h(t)+'</span>';}
 /* The source kinds, with the page that manages each (D4: a frame links to its source, never the reverse). */
@@ -253,10 +253,10 @@ var REC_TYPE={rule:"constraint",constraint:"constraint",procedure:"procedure",fa
 var POINTS=[
  ["session_start","Session start","the stable prefix, delivered in the signed bundle"],
  ["prompt","Prompt","the brief the run started with"],
- ["prompt_submit","Prompt submit","the volatile selection, picked for this prompt"],
+ ["prompt_submit","Prompt submit","the per-prompt selection, picked for this prompt"],
  ["model_request","Model request","added at the gateway, between turns"],
  ["files","Checkout files","synced into the checkout, loaded by the harness"],
- ["tools","Tool list","the tool definitions the belt shows the model"]];
+ ["tools","Tool list","the tool definitions the toolbelt shows the model"]];
 var POINT_LABEL={}; POINTS.forEach(function(p){POINT_LABEL[p[0]]=p[1];});
 /* A harness's own tools (Bash in Claude Code, a shell in Codex CLI) are not frames: Oxagen did not put them there. */
 var HARNESS_TOOL_RE=/^(claude_code|codex_cli|codex|cursor|stella)__/;
@@ -582,8 +582,8 @@ function decisionTrace(R){
   var manifests=L.filter(function(f){return f.kind==="steering.manifest"||f.kind==="context.assembled";}).length||1;
   var intro='<div class="dt-read"><div><b>Read from the record.</b> '+tokn(R.frames)+' frames, '+manifests+' steering manifest'+(manifests===1?'':'s')+
     (wo&&wo.kind==="dispatched"?', and the send of <a class="mono" href="'+woUrl(wo)+'">'+h(wo.id)+'</a>':'')+'. Tier '+tierBadge(R.tier)+': '+
-    (R.tier==="observe"?'recorded, not enforced.':'calls routed through Oxagen were checked and recorded.')+'</div>'+
-    '<div class="dim">Oxagen has no access to the model’s hidden reasoning. Thinking a provider returns is in the Transcript, labelled as the provider’s text.</div></div>';
+    (R.tier==="observe"?'recorded, not enforced.':'calls routed through oxagen were checked and recorded.')+'</div>'+
+    '<div class="dim">oxagen has no access to the model’s hidden reasoning. Thinking a provider returns is in the Transcript, labeled as the provider’s text.</div></div>';
 
   /* 1. Envelope, by injection point, and 2. what was excluded: the Compiler's own renderers */
   var s1=dtSection(1,"Envelope",ftLead(E.sel,"run","SteeringFrames")+" reached this run, by where they entered.",
@@ -608,7 +608,7 @@ function decisionTrace(R){
       (SOURCES.withheld||[]).map(function(x){return '<li><span class="b b-denied">withheld</span><span class="mono">'+h(x.id+"@"+x.ver)+'</span><span class="dim">'+h(x.reason)+'. The agent was told the count and the reason, never the name.</span></li>';}).join("")+
       res.loaded.map(function(x){return '<li><span class="b b-allowed">loaded</span><span class="mono">'+h(x.id+"@"+x.ver)+'</span><span class="dim">'+h(runClock(R,x.t))+' · '+h(x.how)+'</span></li>';}).join("")+
      '</ul></div>':'';
-  var s3=dtSection(3,"Choices","The belt offered "+capN+" tool"+(capN===1?"":"s")+" from Oxagen, and the harness adds its own. Each call below with the rule's answer.",
+  var s3=dtSection(3,"Choices","The toolbelt offered "+capN+" tool"+(capN===1?"":"s")+" from oxagen, and the harness adds its own. Each call below with the rule's answer.",
     (rows?'<div class="tw"><table data-lt="off"><thead><tr><th>At</th><th>Call</th><th>Answer</th><th>Decided by</th><th>Frame</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
       :'<p class="muted" style="margin:0;font-size:12.5px">No call is in view for this run. Its frames are in the Transcript.</p>')+skill,null,null);
 
@@ -630,7 +630,7 @@ function decisionTrace(R){
   /* 6. Self-reported uncertainty, only when the agent reported it in a structured field */
   var s6="";
   if(doubts.length){
-    s6=dtSection(6,"Self-reported uncertainty","Quoted from the agent’s own report. Oxagen does not estimate confidence.",
+    s6=dtSection(6,"Self-reported uncertainty","Quoted from the agent’s own report. oxagen does not estimate confidence.",
       doubts.map(function(d){return '<blockquote class="dt-quote"><p>'+h(d.q)+'</p><footer><span class="mono">oxagen__report_status</span> · '+h(d.at)+' · <span class="mono">'+h(d.ref)+'</span></footer></blockquote>';}).join(""),
       null,"report_status");
   }
@@ -952,7 +952,7 @@ DLG_EXT.newsrc=function(){
   var cards=[
    ["Steering record","A rule, constraint, procedure, fact or preference in .oxagen/rules/. It publishes when its pull request merges.","closeDialog();wzOpen('record')","Write one"],
    ["Document","Name a document, such as docs/VISION.md or an ADR, in .oxagen/sources.toml, and say which sections emit which frame types.","openDialog('srcreg')","Register one"],
-   ["Skill","A folder under .oxagen/skills/ with skill.toml, SKILL.md, references and optional entrypoints. Oxagen describes an entrypoint and never runs it.","closeDialog();wzOpen('skill')","Add one"],
+   ["Skill","A folder under .oxagen/skills/ with skill.toml, SKILL.md, references and optional entrypoints. oxagen describes an entrypoint and never runs it.","closeDialog();wzOpen('skill')","Add one"],
    ["Glossary term","One term the way this workspace uses it, in .oxagen/ontology/.","openDialog('ontnew')","Define one"]];
   return {t:"New source",s:"Every source changes by a pull request against "+w.main,w:true,
    b:'<div class="wz-pick" style="grid-template-columns:1fr">'+cards.map(function(c){
@@ -964,7 +964,7 @@ DLG_EXT.srcreg=function(){
   var R=SOURCES.registration||{};
   var toml='[[source]]\nid = "ADR-034"\nkind = "adr"\npath = "docs/adr/ADR-034-release-freeze.md"\n\n  [[source.section]]\n  heading = "Decision"\n  emits = "procedure"\n  force = "should"\n\n  [[source.section]]\n  heading = "Invariants"\n  emits = "invariant"\n  enforced_by = "gate.never-merge"';
   return {t:"Register a document",s:R.path+" on "+R.repo,w:true,
-   b:'<p style="margin:0 0 10px">A document emits frames only from the sections this file names. Oxagen reads the declared structure and never asks a model what a document means.</p>'+
+   b:'<p style="margin:0 0 10px">A document emits frames only from the sections this file names. oxagen reads the declared structure and never asks a model what a document means.</p>'+
     '<pre'+fut(".oxagen/sources.toml")+'>'+h(toml)+'</pre>'+
     '<div class="note" style="margin-top:10px">Last changed by <span class="mono">'+h(R.pr||"")+'</span>, merged '+h(R.merged||"")+'. An invariant needs a section the ADR declares as its invariants, and a superseded ADR emits nothing.</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Pull request opened on \'+ws().main+\' to register ADR-034. It emits nothing until that merges.\',\'gold\')">Open the pull request</button>'};
@@ -1133,7 +1133,7 @@ function spendRows(by){
       '<td class="num">'+(t?tokn(t.perRun):'—')+'</td>','<td class="num">'+(t?per(t.cacheRate):'—')+'</td>',
       '<td><span class="b b-'+(a.trend.charAt(0)==="-"?"allowed":"approval")+'">'+h(a.trend)+'</span></td>']};});
   if(by==="model") return spendModelRows().map(function(m){var k=spendKeyOf(m.m,m.tier);
-    return {key:m.m,usd:n$(m.spend),cells:['<span class="tkey" style="font-size:12px">'+h(m.m)+'</span>'+(m.route?'<div class="dim" style="font-size:11px">Oxagen’s own work · '+h(m.provider)+'</div>':''),
+    return {key:m.m,usd:n$(m.spend),cells:['<span class="tkey" style="font-size:12px">'+h(m.m)+'</span>'+(m.route?'<div class="dim" style="font-size:11px">oxagen’s own work · '+h(m.provider)+'</div>':''),
       '<td class="mono" style="font-size:11.5px">'+(k?h(k.id):'—')+'</td>','<td class="num">'+(m.calls!=null?Number(m.calls).toLocaleString():'—')+'</td>',
       '<td class="num">'+(m.cache==null?'<span class="dim">—</span>':per(m.cache))+'</td>']};});
   if(by==="tool") return SPEND.byTool.filter(function(t){return t.perCall!==null;}).map(function(t){
@@ -1224,7 +1224,7 @@ function spendBudgets(){
      '<div class="dim" style="font-size:11px">'+per(u)+'</div></td>'+
      '<td class="num" style="white-space:nowrap"><button class="btn sm" onclick="openDialog(\'budgetedit\',\''+i+'\')">Edit</button> '+
      '<button class="btn sm danger" onclick="openDialog(\'budgetdel\',\''+i+'\')">Remove</button></td></tr>';}).join("")+
-   '</tbody></table></div><div class="panel-b"><div class="note">A hard budget is checked at each hook boundary, from a running counter fed by the usage each harness reports. A breach is a <span class="mono">policy.decision</span> frame and a pause, never a silent stop. A soft budget sends a notice.</div></div></div>';
+   '</tbody></table></div><div class="panel-b"><div class="note">A hard budget is checked at each checkpoint, from a running counter fed by the usage each harness reports. A breach is a <span class="mono">policy.decision</span> frame and a pause, never a silent stop. A soft budget sends a notice.</div></div></div>';
 }
 /* ---- Optimization ---- */
 /* A prompt habit is read off the recorded turns of an operator's runs. It is written as a rule the
@@ -1261,7 +1261,7 @@ function spendOptimization(){
        '<button class="btn sm" onclick="act(\'Rule shared with '+h(x.name)+'. It quotes the turns it was read from.\')">Share with '+h(x.name.split(" ")[0])+'</button></div></article>';}).join("")+'</div>'
      :'<div class="panel-b"><p class="muted" style="margin:0">No prompt habit stands out in this workspace’s recorded turns.</p></div>')+'</div>';
   var part=S.spendPart||"waste";
-  var seg='<div class="kf stg-seg" role="group" aria-label="Optimization">'+[["waste","Wasted spend"],["tokens","Tokens and cache"],["agents","Agents",recs.length],["habits","Operator habits",habits.length]].map(function(x){
+  var seg='<div class="kf stg-seg" role="group" aria-label="Optimization">'+[["waste","Unproductive spend"],["tokens","Tokens and cache"],["agents","Agents",recs.length],["habits","Operator habits",habits.length]].map(function(x){
     return '<button class="btn sm" aria-pressed="'+(part===x[0])+'" onclick="spendPartGo(\''+x[0]+'\')">'+h(x[1])+(x[2]!=null?' <span class="dim">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
   return seg+(part==="tokens"?spendTokens(WT):part==="agents"?recHtml:part==="habits"?habHtml:spendWaste("body"));
 }
@@ -1279,7 +1279,7 @@ function pSpend(){
   var tabs='<div class="tabs" role="tablist">'+[["overview","Overview"],["budgets","Budgets",SPEND.budgets.length],["optimization","Optimization"]].map(function(x){
     return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="spendView(\''+x[0]+'\')">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
   var strip='<div class="grid g4" style="margin-bottom:16px">'+
-   '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(spendMonthTotal()))+'</span><span class="s"><span class="basis">gateway_observed</span> + <span class="basis">client_attested</span> · USD</span></div>'+
+   '<div class="stat"><span class="k">Spend</span><span class="v">'+usd(fmt2(spendMonthTotal()))+'</span><span class="s">'+basisChip("gateway_observed")+' + '+basisChip("client_attested")+' · USD</span></div>'+
    '<div class="stat"><span class="k">Tokens</span><span class="v">'+tokn(WT.total)+'</span><span class="s">'+per(WT.cacheRate)+' served from cache</span></div>'+
    '<div class="stat"><span class="k">Observed by the gateway</span><span class="v">'+per(WT.observed)+'</span><span class="s">of tokens counted by the proxy</span></div>'+
    '<div class="stat click" onclick="spendView(\'optimization\')"><span class="k">Wasted</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s">'+wasteShareText()+' of spend · Optimization</span></div></div>';
@@ -1372,7 +1372,7 @@ function permDelegation(a){
            '<td>'+(x.rcp?receiptLink(x.rcp):'<span class="dim">—</span>')+'</td></tr>';}).join("")+'</tbody></table></div>'
        :'<button class="lnk" style="font-size:12px;margin-top:8px" onclick="go(\''+base+'?delegation='+encodeURIComponent(m.id)+'\')">Show the ledger</button>')+
       '</div>';}).join("")+
-   '<div class="panel-b"><div class="note">A mandate is the only thing that lets this agent move money. Every draw reserves, then settles or releases. Its tools appear on the belt gated <span class="mono">mandate + approval</span>, never plain <span class="mono">allowed</span>.</div></div></div>';
+   '<div class="panel-b"><div class="note">A mandate is the only thing that lets this agent move money. Every draw reserves, then settles or releases. Its tools appear on the toolbelt gated <span class="mono">mandate + approval</span>, never plain <span class="mono">allowed</span>.</div></div></div>';
 }
 
 /* ---- Activity: the work orders this agent worked ---- */
@@ -1396,14 +1396,14 @@ function actWork(a){
 /* ============================== Intake ==============================
    The Providers, Fields and People tabs of the old Tasks page, as one dialog on Backlog. It opens on
    the part its address names: #/…/work?intake=fields. */
-var INTAKE_PARTS=[["providers","Providers"],["fields","Fields"],["people","People"]];
+var INTAKE_PARTS=[["providers","Trackers"],["fields","Fields"],["people","People"]];
 function intakePart(x){ S.dlgArg=x; render(); }
 DLG_EXT.intake=function(){
   var part=INTAKE_PARTS.some(function(x){return x[0]===S.dlgArg;})?S.dlgArg:"providers";
   var n=wsProviders().length;
   var seg='<div class="kf stg-seg" role="group" aria-label="Intake" style="margin-bottom:14px">'+INTAKE_PARTS.map(function(x){
     return '<button class="btn sm" aria-pressed="'+(part===x[0])+'" onclick="intakePart(\''+x[0]+'\')">'+h(x[1])+'</button>';}).join("")+'</div>';
-  return {t:"Intake",s:n+" issue provider"+(n===1?"":"s")+" connected to "+ws().name+". Each imported issue becomes a work item.",w:true,
+  return {t:"Intake",s:n+" issue tracker"+(n===1?"":"s")+" connected to "+ws().name+". Each imported issue becomes a work item.",w:true,
    b:seg+(part==="fields"?tkFieldsTab():part==="people"?tkPeopleTab():tkProvTab()),
-   f:'<button class="btn" onclick="ipzOpen()">Connect an issue provider</button><button class="btn primary" onclick="closeDialog()">Done</button>'};
+   f:'<button class="btn" onclick="ipzOpen()">Connect an issue tracker</button><button class="btn primary" onclick="closeDialog()">Done</button>'};
 };
