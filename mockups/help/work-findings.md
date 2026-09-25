@@ -80,7 +80,7 @@ A finding is a claim about money, so it arrives with its evidence and not with a
 | Signal, baseline, trend, each run's task, cost and waste, the method, who | `EVIDENCE[]` | `get_finding_evidence` | none |
 
 ### Logic
-1. `evidenceDlg()` builds only while `S.dlg` is `evidence`, because the dialog map is built on every render. With no finding it shows "No finding selected."
+1. `evidenceDlg()` builds only while `S.dlg` is `evidence`, because the dialog map is built on every render. With no finding it shows "No finding selected." The title names the finding in plain words, "Evidence for duplicate tool calls" (`fndKindLc()` lowers the kind's first letter), and the subtitle holds the id, level, window and basis.
 2. The four figures are At stake, Confidence with `e.trend`, Signal (`e.measured`, `e.signal`, baseline `e.baseline`) and Evidence (`f.frames`, the basis, "every run sealed").
 3. The runs table lists `e.runs` and a total row: "N most recent of <runs>", the cost total, the unproductive total, and its share of cost.
 4. How we know lists `e.method`, then "Counterfactual: <e.counterfactual>."
@@ -108,7 +108,7 @@ The kind picks the shape, so no model rates the fix. Duplicate tool calls is a b
 | The pull request | `FIX[kind]` `shape` `pr` | a proposal from the finding, then `open_context_pr` (`context.pr.open.ts:96`) | partial |
 
 ### Logic
-1. `fixDlg()` builds only while `S.dlg` is `fix`, and reads `FIX[f.kind]`. Duplicate tool calls has `shape` `pr`. The eight other kinds are articles.
+1. `fixDlg()` builds only while `S.dlg` is `fix`, and reads `FIX[f.kind]`. Duplicate tool calls has `shape` `pr`. The eight other kinds are articles. Both shapes title the dialog "Fix for <kind>" ("Fix for duplicate tool calls"). The pull request's subtitle reads "Pull request for <subject> · <saving> at stake", and an article's subtitle is the article's own title. The titles once read "Fix · …" and "Evidence · …", and a label carries no mid-dot.
 2. The pull request shape shows "Branch <branch> · one concern per PR", the record file `.oxagen/rules/<lineage>.toml` with the finding as evidence, an Evidence column with the link, and six checks marked "on push". Its footer names the repository and `x.pr`, and **Open the pull request** (gold) toasts the branch and the pull request.
 3. The article shape shows Why this costs money, the before and after code (`codePair()`), How to apply it, and three figures: What you save, Evidence, and Where the fix lives ("workspace config" for a workspace finding, "the agent's own code" otherwise). Its footer says Oxagen records the change as a definition change, and the gold action toasts `x.done`.
 4. The evidence link reopens `evidence` on the same finding.

@@ -290,7 +290,7 @@ Disconnecting revokes the token at the provider and deletes it from the credenti
 2. Title "Disconnect <provider>?". The body says Oxagen stops reading the provider and revokes its token there. The note counts the imported work items that stay, with their last-read values, marked disconnected.
 3. Footer: **Keep it connected** and **Disconnect it** (red). No action is gold, because the primary is destructive.
 4. `ipOff()` removes the connection, closes the dialog (which returns to Intake on Trackers through `S.dlgBack`), and toasts "<provider> disconnected, and its token revoked. Recorded in Audit as disconnect_issue_provider."
-5. The mockup drops the connection row, so `wsTasks()` stops listing that provider's work items on Backlog. The build must keep those items, marked disconnected, with their certifications and work orders.
+5. `ipOff()` marks each of that provider's work items `disconnected` with the connection id. `wsTasks()` keeps a disconnected item, so it stays on Backlog with the `disconnected` badge (`tkDiscBadge()`) and its certification and work orders.
 
 ### States
 Opens only from a connected card. `issue_provider.connect` gates the action server-side. On a phone it is a bottom sheet with full-width footer buttons.

@@ -9502,13 +9502,15 @@ DLG_EXT.deliveryreport=function(){
 })();
 
 /* ---- Spend finding dialogs: Evidence and Fix. Both are guarded on S.dlg because the D map is built eagerly. ---- */
+/* A finding's kind inside a sentence: "Evidence for duplicate tool calls". */
+function fndKindLc(f){return f.kind.charAt(0).toLowerCase()+f.kind.slice(1);}
 function findingById(id){for(var i=0;i<FINDINGS.length;i++){if(FINDINGS[i].id===id)return FINDINGS[i];}return null;}
 function evidenceDlg(){
   var f=S.dlg==="evidence"?findingById(S.dlgArg):null, e=f&&EVIDENCE[f.id];
   if(!f||!e) return {t:"Evidence",w:true,b:'<p class="muted" style="margin:0">No finding selected.</p>',f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var p=PEOPLE[e.who.operator], a=null; for(var i=0;i<AGENTS.length;i++){if(AGENTS[i].key===e.who.agent)a=AGENTS[i];}
   var wasted=e.runs.reduce(function(s,r){return s+parseFloat(r[4]);},0), cost=e.runs.reduce(function(s,r){return s+parseFloat(r[3]);},0);
-  return {t:"Evidence · "+f.kind,w:true,s:f.id+" · "+f.level+" · "+f.window+" · basis "+e.basis,
+  return {t:"Evidence for "+fndKindLc(f),w:true,s:f.id+" · "+f.level+" · "+f.window+" · basis "+e.basis,
    b:'<div class="ev-claim">'+
      '<div class="stat"><span class="k">At stake</span><span class="v">'+usd(fmt2(n$(f.save)))+'</span><span class="s">measured cost minus the estimated cost without the issue</span></div>'+
      '<div class="stat"><span class="k">Confidence</span><span class="v" style="text-transform:capitalize">'+h(e.confidence)+'</span><span class="s">'+h(e.trend)+'</span></div>'+
@@ -9538,7 +9540,7 @@ function fixDlg(){
   if(!f||!x) return {t:"Fix",w:true,b:'<p class="muted" style="margin:0">No finding selected.</p>',f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var evLink='<a href="#" onclick="event.preventDefault();openDialog(\'evidence\',\''+h(f.id)+'\')">'+h(f.frames)+'</a>';
   if(x.shape==="pr"){
-    return {t:"Fix · Open a pull request",w:true,s:f.kind+" on "+f.subject+" · "+usd(f.save)+" at stake",
+    return {t:"Fix for "+fndKindLc(f),w:true,s:"Pull request for "+f.subject+" · "+usd(f.save)+" at stake",
      b:'<p class="eyebrow q">Branch <span class="mono">'+h(x.branch)+'</span> · one concern per PR</p>'+
        '<pre><span class="c"># .oxagen/rules/'+h(x.lineage)+'.toml</span>\n'+
        '<span class="k">schema</span>       = <span class="s">"context-record/v0.1"</span>\n'+
@@ -9557,7 +9559,7 @@ function fixDlg(){
      f:'<span class="grow">Opens on <span class="mono">a-intel/platform</span> as '+h(x.pr)+' · team mode, a code-owner review is required.</span>'+
        '<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Branch '+h(x.branch)+' pushed and '+h(x.pr)+' opened with '+h(f.id)+' as supporting evidence.\')">Open the pull request</button>'};
   }
-  return {t:"Fix · "+x.title,w:true,s:"Help article · "+f.kind+" · chosen by the finding kind",
+  return {t:"Fix for "+fndKindLc(f),w:true,s:x.title,
    b:'<p class="eyebrow q">Why this costs money</p><p style="margin:0 0 14px;font-size:13px;color:var(--body)">'+h(x.why)+'</p>'+
      codePair([{lab:"What your agent does today",sp:x.before.lang,code:x.before.code},
                {lab:"The fix",sp:x.after.lang,code:x.after.code}])+
@@ -14920,7 +14922,9 @@ function tPerson(id){for(var i=0;i<TPEOPLE.length;i++){if(TPEOPLE[i].id===id)ret
 function wsProviders(){return IPROV.filter(function(p){return p.ws===S.ws;});}
 /* A work item from a connected provider, or one written in Oxagen from a finding (kind "oxagen"). */
 function wsTasks(){var kinds={oxagen:1};wsProviders().forEach(function(p){kinds[p.kind]=1;});
-  return S.ws==="core-platform"?TASKS.filter(function(t){return kinds[t.kind];}):[];}
+  return S.ws==="core-platform"?TASKS.filter(function(t){return kinds[t.kind]||t.disconnected;}):[];}
+/* A work item whose provider was disconnected keeps its last-read values and says so (tasks-spec §5.5). */
+function tkDiscBadge(t){return t.disconnected?' <span class="b b-q" title="Values as last read">disconnected</span>':'';}
 function wsWorkOrders(){return WORKORDERS.filter(function(w){return w.ws===S.ws;});}
 /* An agent you may send work to is one you are the registered operator of, in this workspace. */
 function myAgents(){
@@ -14994,8 +14998,8 @@ function hxRow(wf){return '<span class="row" style="gap:4px;flex-wrap:nowrap">'+
    and its source: provider, read from the tracker, or oxagen, added here by a person. Unblocked means every
    blocker is accepted in Oxagen or closed as Done in the provider, and nothing else (spec §5.2). The
    provider's blocked status category is a different thing and keeps its own column. */
-function tkBlockers(t){return (t.blockedBy||[]).map(function(b){var x=taskById(b.id);return x?{task:x,src:b.src,by:b.by,at:b.at}:null;}).filter(Boolean);}
-function tkBlocks(t){return TASKS.filter(function(x){return (x.blockedBy||[]).some(function(b){return b.id===t.id;});});}
+function tkBlockers(t){return (t.blockedBy||[]).filter(function(b){return !b.removed;}).map(function(b){var x=taskById(b.id);return x?{task:x,src:b.src,by:b.by,at:b.at}:null;}).filter(Boolean);}
+function tkBlocks(t){return TASKS.filter(function(x){return (x.blockedBy||[]).some(function(b){return b.id===t.id&&!b.removed;});});}
 function tkDone(t){return t.ready==="accepted"||((tStatus(t.status)||{}).cat==="closed"&&t.resolution==="done");}
 function tkClosedNotDone(t){return (tStatus(t.status)||{}).cat==="closed"&&t.resolution!=="done";}
 function tkOpenBlockers(t){return tkBlockers(t).filter(function(b){return !tkDone(b.task);});}
@@ -15082,13 +15086,13 @@ function tkDepsPanel(t){
   var body;
   if(!bs.length&&!bl.length) body='<p class="muted" style="margin:0;font-size:12.5px">None. This work item waits on nothing, and nothing waits on it.</p>';
   else body='<h4 class="tk-dep-h">Blocked by</h4>'+(bs.length?bs.map(function(b){return row(b.task,b);}).join(""):'<p class="dim" style="margin:0 0 6px;font-size:12px">none</p>')+
-    '<h4 class="tk-dep-h">Blocks</h4>'+(bl.length?bl.map(function(x){var e=(x.blockedBy||[]).filter(function(b){return b.id===t.id;})[0]||{};return row(x,{src:e.src,by:e.by,at:e.at,dir:"blocks"});}).join(""):'<p class="dim" style="margin:0;font-size:12px">none</p>');
-  if(t.outsideLinks) body+='<p class="dim" style="margin:8px 0 0;font-size:12px">'+t.outsideLinks+' link to an issue outside the scope of this connection.</p>';
+    '<h4 class="tk-dep-h">Blocks</h4>'+(bl.length?bl.map(function(x){var e=(x.blockedBy||[]).filter(function(b){return b.id===t.id&&!b.removed;})[0]||{};return row(x,{src:e.src,by:e.by,at:e.at,dir:"blocks"});}).join(""):'<p class="dim" style="margin:0;font-size:12px">none</p>');
+  if(t.outsideLinks) body+='<p class="dim" style="margin:8px 0 0;font-size:12px">'+plural(t.outsideLinks,"link")+' to an issue outside the scope of this connection.</p>';
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Dependencies</h3><button class="btn sm" style="margin-left:auto" onclick="S.tkl=null;openDialog(\'tklink\',\''+t.id+'\')">Add a dependency</button></div><div class="panel-b">'+body+'</div></div>';
 }
 function tkUnlink(tid,xid,dir){
   var blocked=dir==="blocks"?taskById(xid):taskById(tid), blocker=dir==="blocks"?tid:xid;
-  if(blocked)blocked.blockedBy=(blocked.blockedBy||[]).filter(function(b){return b.id!==blocker;});
+  if(blocked)(blocked.blockedBy||[]).forEach(function(b){if(b.id===blocker&&!b.removed)b.removed={by:TK_ME,at:"2026-09-11 11:42"};});
   act("Dependency removed. unlink_tasks recorded."); render();
 }
 function tklQ(v){var z=S.tkl; if(!z)return; z.q=v; z.pick=null; var el=document.getElementById("tklList"); if(el)el.innerHTML=tklList();}
@@ -15123,8 +15127,8 @@ DLG_EXT.tklink=function(id){
 function tkLinkAdd(id){
   var t=taskById(id), z=S.tkl, pick=z&&z.pick?taskById(z.pick):null; if(!t||!pick)return;
   var blocked=z.dir==="by"?t:pick, blocker=z.dir==="by"?pick:t;
-  blocked.blockedBy=(blocked.blockedBy||[]).filter(function(b){return b.id!==blocker.id;});
-  blocked.blockedBy.push({id:blocker.id,src:"oxagen",by:TK_ME,at:"2026-09-11 11:40"});
+  blocked.blockedBy=blocked.blockedBy||[];
+  if(!blocked.blockedBy.some(function(b){return b.id===blocker.id&&!b.removed;})) blocked.blockedBy.push({id:blocker.id,src:"oxagen",by:TK_ME,at:"2026-09-11 11:40"});
   S.tkl=null; S.dlg=null; S.dlgArg=null; act("Dependency added. link_tasks recorded.","gold"); render();
 }
 /* Work orders on the graph: what a queued one waits on, the order its tasks come in, and its send. */
@@ -15247,10 +15251,12 @@ function dspWfItem(wf){
   return '<button class="menu-i dsp-i" role="menuitem" onclick="woOpen({kind:\'workflow\',id:\''+h(wf.id)+'\'})">'+hxRow(wf)+
    '<span class="tx"><b>'+h(wf.name)+'</b><span>'+wf.stages.length+' stages then you</span></span></button>';
 }
+/* A workflow you may send to: published, and every stage an agent you operate. */
+function wfSendable(wf){return wf.state==="published"&&wf.stages.every(function(s){var a=agent(s.agent);return a&&a.operator===TK_ME;});}
 function dspList(){
   var q=String(S.dsq||"").toLowerCase();
   var ag=myAgents().filter(function(a){return !q||(a.name+" "+a.harnessLabel).toLowerCase().indexOf(q)>=0;});
-  var wf=WORKFLOWS.filter(function(x){return x.state==="published"&&(!q||x.name.toLowerCase().indexOf(q)>=0);});
+  var wf=WORKFLOWS.filter(function(x){return wfSendable(x)&&(!q||x.name.toLowerCase().indexOf(q)>=0);});
   return '<div class="menu-l">Agents you operate</div>'+(ag.length?ag.slice(0,12).map(dspAgentItem).join(""):'<div class="menu-e">No agent you operate matches.</div>')+
     (ag.length>12?'<div class="menu-e">'+(ag.length-12)+' more. Type to narrow.</div>':'')+
     '<div class="menu-l">Workflows</div>'+(wf.length?wf.map(dspWfItem).join(""):'<div class="menu-e">No published workflow matches.</div>');
@@ -15401,7 +15407,7 @@ function dodSet(id,i,k,v){var t=taskById(id); if(!t||!t.dod[i])return; t.dod[i][
 function dodDel(id,i){var t=taskById(id); if(!t)return; t.dod.splice(i,1); render();}
 function dodAdd(id){var t=taskById(id); if(!t)return; var v=(el("dodNew")||{}).value||""; v=v.trim(); if(!v){act("Write the item first.");return;}
   t.dod.push({t:v,k:"check",tag:"code",src:"operator"}); render();}
-function dodReopen(id){var t=taskById(id); if(!t)return; t.ready="draft"; closeDialog(); act(t.num+" needs certification again. It’s ready when somebody certifies it.");}
+function dodReopen(id){var t=taskById(id); if(!t)return; t.ready="draft"; closeDialog(); act(t.num+" is a draft again. It is ready when somebody certifies it.");}
 function dodCertify(id){
   var t=taskById(id); if(!t)return;
   t.ready="ready"; t.certifiedBy=TK_ME; t.certifiedAt="2026-09-11 09:16"; t.digest="sha256:"+(t.id.slice(-6)+"7c1e04b9d2").toLowerCase();
@@ -15449,7 +15455,7 @@ function pTask(r){
     '<button class="btn primary" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/work\')">Back to Work</button>');
   var k=IP_KIND[t.kind]||{l:"Oxagen",unit:"work item"}, own=t.kind==="oxagen", edit=tkEditable(t), drafting=t.ready==="drafting"||S.tkDrafting[t.id];
   var prim=drafting?'<button class="btn primary"'+(S.tkDrafting[t.id]?' disabled':'')+' onclick="tkDraftNow(\''+t.id+'\')">Draft it now</button>'
-    :t.ready==="draft"||t.ready==="changed"?'<button class="btn primary"'+(t.dod.length?'':' disabled')+' onclick="openDialog(\'certify\',\''+t.id+'\')">'+'Certify definition of done'+'</button>'
+    :t.ready==="draft"||t.ready==="changed"?'<button class="btn primary"'+(t.dod.length?'':' disabled')+' onclick="openDialog(\'certify\',\''+t.id+'\')">'+(t.ready==="changed"?'Certify again':'Certify definition of done')+'</button>'
     :t.ready==="ready"?(tkQueuedWo(t)?'<button class="btn primary" onclick="go(\''+woUrl(tkQueuedWo(t))+'\')">Open the work order</button>':tkSelectable(t)?dispatchButton([t.id]):'<button class="btn" disabled title="'+h(tkWhyNot(t))+'">Send to an agent…</button>')
     :t.wo?'<button class="btn primary" onclick="go(\''+woUrl(woById(t.wo)||{id:t.wo})+'\')">Open the work order</button>':'';
   var changedBanner=t.ready==="changed"?'<div class="banner" style="margin-bottom:14px" data-help="changed-banner"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
@@ -15466,18 +15472,19 @@ function pTask(r){
     (t.digest&&!edit?'<span class="mono dim" style="font-size:11px">'+h(t.digest)+'</span>':'')+'</div></div>'+
     '<div class="panel-b">'+(drafting?'<div class="row"><span class="ob-spin" aria-hidden="true"></span><span class="muted">Reading the description, the labels and the linked pull requests.</span></div>'
       :dodRows(t,edit)+(edit?'<div class="row" style="margin-top:12px;flex-wrap:nowrap"><input id="dodNew" class="dod-in" placeholder="Add an item" aria-label="Add an item" style="flex:1" onkeydown="if(event.key===\'Enter\')dodAdd(\''+t.id+'\')"><button class="btn sm" onclick="dodAdd(\''+t.id+'\')">Add item</button></div>':''))+'</div>'+
-    (t.ready==="changed"?'<div class="panel-b" style="border-top:1px solid var(--border)"><div class="row" style="flex-wrap:nowrap"><span class="grow" style="flex:1;font-size:12.5px">oxagen.assistant suggests an item for the new scope: <b>Notes added after an incident closes are exported too</b></span><button class="btn sm" onclick="var t=taskById(\''+t.id+'\');t.dod.push({t:\'Notes added after an incident closes are exported too\',k:\'check\',tag:\'code\',src:\'assistant\'});render()">Add item</button></div></div>':'')+
+    (t.ready==="changed"?'<div class="panel-b" style="border-top:1px solid var(--border)"><div class="row" style="flex-wrap:nowrap"><span class="grow" style="flex:1;font-size:12.5px">oxagen.assistant suggests an item for the new scope: <b>Notes added after an incident closes are exported too</b></span><button class="btn sm" onclick="var t=taskById(\''+t.id+'\');t.dod.push({t:\'Notes added after an incident closes are exported too\',k:\'check\',tag:\'code\',src:\'assistant\'});render()">Add it</button></div></div>':'')+
     '</div>';
   var notes=(t.notes||[]).length?'<div class="panel"><div class="panel-h"><h3>Assistant notes</h3></div><div class="panel-b"><ul class="tk-notes">'+t.notes.map(function(n){return '<li>'+h(n)+'</li>';}).join("")+'</ul></div></div>':'';
   var hist=[[own?"Written":"Imported",t.createdAt,own?(t.finding?"from finding "+t.finding:"in oxagen"):"from "+k.l]];
   if(t.dod.length) hist.push(["Definition of done drafted",t.createdAt,"oxagen.assistant"]);
   if(t.certifiedAt) hist.push(["Certified",t.certifiedAt,PEOPLE[t.certifiedBy].name]);
   if(t.ready==="changed") hist.push(["Changed in "+k.l,t.updatedAt,"No longer ready"]);
-  tkBlockers(t).forEach(function(b){if(b.src==="oxagen")hist.push(["Dependency added",b.at,(PEOPLE[b.by]||{}).name||b.by]);});
+  (t.blockedBy||[]).forEach(function(b){if(b.src==="oxagen")hist.push(["Dependency added",b.at,(PEOPLE[b.by]||{}).name||b.by]);
+    if(b.removed)hist.push(["Dependency removed",b.removed.at,(PEOPLE[b.removed.by]||{}).name||b.removed.by]);});
   if(tkBlockers(t).length&&!tkGraphBlocked(t)) hist.push(["Unblocked",t.updatedAt,"every blocker is done"]);
   if(t.wo){var wo=woById(t.wo); if(wo&&wo.status==="queued")hist.push(["Queued in a work order",wo.sent,wo.id]); else if(wo)hist.push(["Sent in a work order",wo.released||wo.sent,wo.id]); if(wo&&wo.accepted)hist.push(["Accepted",wo.accepted,PEOPLE[wo.by].name]);}
   var res=t.resolution?tRes(t.resolution):null;
-  return '<div class="phead"><div class="t"><p class="eyebrow">'+wiLogo(t,13)+' <span class="id">'+h(t.num)+'</span></p><h1>'+h(t.subject)+'</h1>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+wiLogo(t,13)+' <span class="id">'+h(t.num)+'</span>'+tkDiscBadge(t)+'</p><h1>'+h(t.subject)+'</h1>'+
    '<p>'+(own?(t.finding?'Written in Oxagen from finding <span class="mono">'+h(t.finding)+'</span>':'Written in Oxagen'):'Imported from '+h(k.l))+'. Updated '+h(t.updatedAt)+'.'+(t.ready==="ready"&&tkGraphBlocked(t)?' Blocked by '+h(tkOpenBlockers(t).map(function(b){return tkNum(b.task);}).join(" and "))+'.':'')+'</p></div>'+
    '<div class="acts"><button class="btn" onclick="copyTaskPrompt(\''+t.id+'\')" title="Copy the work item and its work orders as text">Copy prompt</button>'+
    (own?(t.finding?'<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+w.slug+'/work/findings?finding='+h(t.finding)+'\')">Open the finding</button>':'')
@@ -15539,13 +15546,13 @@ DLG_EXT.woaccept=function(id){
   var sibNote=sibs.length?'<div class="note" style="margin-top:8px">Accepting stops '+sibs.map(function(x){return '<span class="mono">'+h(x.id)+'</span>';}).join(" and ")+', which '+(sibs.length>1?'carry':'carries')+' the same work items.</div>':'';
   var w=woById(id); if(!w)return noSuch("Work order");
   var items=woItems(w);
-  return {t:"Accept all items",s:w.title,w:false,
+  return {t:"Accept the work",s:w.title,w:false,
    b:'<p>You accept '+plural(items.length,"item")+' the agents claimed, with the evidence each one cited.</p>'+
     (function(){var pr=(w.runs[w.runs.length-1]||{}).pr; return '<div class="note" style="margin:12px 0">Accepting merges nothing.'+(pr?' A person merges '+h(pr)+' on GitHub.':'')+'</div>';})()+
     (function(){var c=woClose(w); if(!c)return "";
       return '<div class="note">'+(c.on?'The '+h(c.m.l)+' connection closes each '+h(c.m.unit)+' as Done.'
         :'The '+h(c.m.l)+' connection has close on accept off, so each '+h(c.m.unit)+' stays open there.')+'</div>'+sibNote;})(),
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="woAccept(\''+w.id+'\')">Accept all items</button>'};
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="woAccept(\''+w.id+'\')">Accept every item</button>'};
 };
 DLG_EXT.wostop=function(id){
   var w=woById(id); if(!w)return noSuch("Work order");
@@ -15614,8 +15621,9 @@ function pWorkOrder(r){
      '<p class="muted" style="margin:2px 0 0;font-size:12px">'+items.length+' items from '+w.tasks.length+' work item'+(w.tasks.length>1?'s':'')+'.</p></div></div>'+
      '<div class="tw"><table data-lt="off"><thead><tr><th>Item</th><th>Work item</th><th>Stage</th><th>State</th><th>Evidence</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>'
      :'<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Definition of done</h3></div><div class="panel-b"><p class="muted" style="margin:0">None.</p></div></div>')+
-    '<div class="panel"><div class="panel-h"><h3>Handoffs</h3></div><div class="panel-b"><ol class="tk-hist">'+w.runs.map(function(x){
-      return '<li><b>'+h(wf.stages[x.stage-1].role)+(x.returned?' sent the work back':'')+'</b><span>'+runLink(x.run)+'</span><span class="dim">'+(x.note?h(x.note):'Running')+'</span></li>';}).join("")+'</ol></div></div>'+
+    (direct?'':'<div class="panel"><div class="panel-h"><h3>Handoffs</h3></div><div class="panel-b"><ol class="tk-hist">'+w.runs.map(function(x){
+      var R=run(x.run), live=R?runStatus(R)==="live":x.state==="live";
+      return '<li><b>'+h(wf.stages[x.stage-1].role)+(x.returned?' sent the work back':'')+'</b><span>'+runLink(x.run)+'</span><span class="dim">'+(x.note?h(x.note):live?'Running':'No note')+'</span></li>';}).join("")+'</ol></div></div>')+
    '</div><div>'+
     (direct?'':woOrderPanel(w)+woSendPanel(w))+
     '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Work items</h3></div><div class="panel-b">'+(w.tasks.length?w.tasks.map(function(id){var t=taskById(id);return t?'<a class="tk-link" href="'+taskUrl(t)+'"><span class="tk-t">'+wiLogo(t,13)+'<span class="mono dim" style="font-size:11.5px">'+h(t.num)+'</span></span><span>'+h(t.subject)+'</span></a>':"";}).join("")
@@ -15839,7 +15847,7 @@ DLG_EXT.wo=function(){
   /* The agent's toolbelt names the repositories it can write to. A work order narrows that; it never widens it. */
   var grant={"a-intel/platform":1,"a-intel/billing":1};
   var opts=myAgents().map(function(a){return '<option value="agent:'+h(a.key)+'"'+(z.target.kind==="agent"&&z.target.id===a.key?' selected':'')+'>'+h(a.name)+' ('+h(a.harnessLabel)+')</option>';}).join("")+
-    '<optgroup label="Workflows">'+WORKFLOWS.filter(function(x){return x.state==="published";}).map(function(x){return '<option value="workflow:'+h(x.id)+'"'+(z.target.kind==="workflow"&&z.target.id===x.id?' selected':'')+'>'+h(x.name)+'</option>';}).join("")+'</optgroup>';
+    '<optgroup label="Workflows">'+WORKFLOWS.filter(wfSendable).map(function(x){return '<option value="workflow:'+h(x.id)+'"'+(z.target.kind==="workflow"&&z.target.id===x.id?' selected':'')+'>'+h(x.name)+'</option>';}).join("")+'</optgroup>';
   var who=wf?stageChain(wf):'<div class="wo-agent">'+hxIcon(first.harness,20)+agentAv(first,34)+'<div class="tx"><b>'+h(first.name)+'</b><span>'+h(first.harnessLabel)+' on '+h(first.host||"its runtime")+'</span></div>'+tierBadge(first.tier)+
     '<span class="b b-q" style="margin-left:auto">operator: you</span></div>';
   var nrep=woRepoList().length;
@@ -16136,6 +16144,8 @@ function ipzFinish(){
     create:!d.createPerm||z.create,writeback:Object.assign({},z.wb)});
   d.people.forEach(function(p){var id=k.slice(0,3)+":"+p[0]; if(tPerson(id))return; var fixed=p[4]==="bot"||p[4]==="requester";
     TPEOPLE.push({id:id,kind:k,handle:p[0],name:p[1],email:p[2]||null,to:fixed?null:z.people[p[0]]||null,match:!fixed&&z.people[p[0]]?(p[4]||"by hand"):null,state:fixed?p[4]:z.people[p[0]]?"mapped":"unmapped"});});
+  /* connecting the same provider again reads its work items back into the same ids */
+  TASKS.forEach(function(t){if(t.kind===k)delete t.disconnected;});
   /* back to Intake, where the new provider's card now sits */
   S.ipz=null; S.dlgBack=null; S.dlg="intake"; S.dlgArg="providers";
   if(route().page!=="work") go("#/"+ORG.slug+"/"+S.ws+"/work"); else render();
@@ -16156,7 +16166,8 @@ DLG_EXT.ipoff=function(id){
     '<div class="note" style="margin-top:12px">The '+n+' work items it imported stay, with the values last read and marked disconnected.</div>',
    f:'<button class="btn" onclick="closeDialog()">Keep it connected</button><button class="btn danger" onclick="ipOff(\''+p.id+'\')">Disconnect it</button>'};
 };
-function ipOff(id){var i=-1;IPROV.forEach(function(x,j){if(x.id===id)i=j;}); if(i<0)return; var p=IPROV.splice(i,1)[0]; closeDialog(); act(IP_KIND[p.kind].l+" disconnected, and its token revoked. Recorded in Audit as disconnect_issue_provider.");}
+function ipOff(id){var i=-1;IPROV.forEach(function(x,j){if(x.id===id)i=j;}); if(i<0)return; var p=IPROV.splice(i,1)[0];
+  TASKS.forEach(function(t){if(t.kind===p.kind)t.disconnected=p.id;}); closeDialog(); act(IP_KIND[p.kind].l+" disconnected, and its token revoked. Recorded in Audit as disconnect_issue_provider.");}
 
 /* ---- field editors ---- */
 var LBL_SWATCHES=["#D6455E","#E0803A","#C9A227","#57A97C","#3FA2A2","#3B82F6","#5B93D6","#9D8BE3","#D677B5","#C0453C","#A1A1AA","#71717A"];
@@ -16252,7 +16263,8 @@ function wfToml(name,stages){
   stages.forEach(function(s,i){
     L.push('[[stage]]'); L.push('role = "'+s.role+'"'); L.push('agent = "'+s.agent+'"'); L.push('owns = ['+s.owns.map(function(o){return '"'+o+'"';}).join(", ")+']');
     if(s.needs&&s.needs.length) L.push('needs = ['+s.needs.map(function(o){return '"'+o+'"';}).join(", ")+']');
-    var rt=s.onFail!=="stop"?(s.returnTo?'"'+s.returnTo+'"':s.onFail.split(":")[1]):null;
+    /* v0.1 returns to a stage number (tasks-spec §10.1); v0.2 names the role (work-graph-spec §8.1) */
+    var back=s.onFail!=="stop"?+s.onFail.split(":")[1]:0, rt=!back?null:v2?'"'+(s.returnTo||(stages[back-1]||{}).role||"stage "+back)+'"':back;
     L.push('on_fail = "'+(s.onFail==="stop"?"stop":"return")+'"'+(s.onFail!=="stop"?'\nreturn_to = '+rt+'\nmax_returns = '+(s.maxReturns||1):''));
     L.push('');
   });

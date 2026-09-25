@@ -41,7 +41,7 @@ How a workflow runs, once a work order is sent to it:
 9. When a stage hands off with `hand_off_work_order`, Oxagen sends the next stage its brief with the handoff note quoted as evidence. A stage that needs two stages receives both notes, each with its stage and run.
 10. A stage may send the work back with `return_work_order` to the stage the file names, at most `max_returns` times (1 to 3). Past that the work order parks for you in Approvals.
 11. `[accept]` is fixed. The last stage is always a person: you accept every item, and a person merges every pull request.
-12. The builder lists only `myAgents()`. The mockup's send menu (`dspList()`) lists every published workflow and does not check who operates its agents. A build leaves out a workflow that names an agent somebody else operates.
+12. The builder lists only `myAgents()`. The send menu (`dspList()`) and the work order dialog list only the workflows `wfSendable()` accepts: published, with every stage an agent you operate. A build does the same and leaves out a workflow that names an agent somebody else operates.
 
 ### States
 Loaded only. The tab shares the page's loading, error and denied panels. A workspace with no workflow shows the table with no rows and **New workflow**. On a phone the table becomes labelled cards and the stages wrap inside their cell.
@@ -68,7 +68,7 @@ The chain is drawn from the file and from nothing else, so the page never shows 
 ### Logic
 1. `DLG_EXT.wfview(id)` returns `noSuch("Workflow")` for an unknown id. The title is the name and the subtitle `wf.desc`.
 2. `stageChain()` draws one card per stage in `wfDepths()` columns, each with its number, role, harness mark, avatar, name and `tierBadge()`, "owns" with tag chips, and "If it fails: stop and ask you" or "If it fails: send back to <role> (up to N times)". A card that needs two stages adds "after Validate and Document". The chain ends with the Accept card, "a person accepts every item".
-3. `wfToml()` rebuilds the TOML from the stages. It writes `oxagen-workflow/v0.2` when any stage has `needs`, and v0.1 otherwise. For a fixture stage whose `onFail` is `return:1`, it prints `return_to = 1`. Under v0.2, `return_to` names a role, so a build shows the committed file, where it reads `"Fix"`.
+3. `wfToml()` rebuilds the TOML from the stages. It writes `oxagen-workflow/v0.2` when any stage has `needs`, and v0.1 otherwise. A return names its role under v0.2 (`return_to = "Fix"`, `work-graph-spec.md` §8.1) and its stage number under v0.1 (`return_to = 1`, `tasks-spec.md` §10.1), so the preview is valid under either schema.
 4. The note reads "Published at a4c91e2." or "In a-intel/platform#526. It can be used when it merges."
 5. **Edit workflow** calls `wfzOpen(id)`. The page spec names it **Change it**.
 
