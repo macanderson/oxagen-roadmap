@@ -953,7 +953,7 @@ for (const theme of ["light", "dark"]) {
     "funding: Funding source then Model routes, got " + fheads.join(" ~ "));
   const ftxt = await page.evaluate(() =>
     [...document.querySelectorAll(".panel")].map((x) => x.innerText).join("\n"));
-  ok(/client_attested/.test(ftxt), "funding: the Total row names its basis");
+  ok(/reported by harness|observed by gateway/i.test(ftxt), "funding: the Total row names its basis");
   ok(/Rotate/.test(ftxt) && /Revoke/.test(ftxt), "funding: the held key carries rotate and revoke");
 
   await page.evaluate(() => orgTab("plane"));

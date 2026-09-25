@@ -7979,15 +7979,15 @@ var OXPR_KIND={
  config:   {l:"configuration", d:".oxagen/workspace.toml",        i:"org"}
 };
 var OX_STATE={
- governed:{b:"b-allowed", l:"governed"},
- unbound: {b:"b-q",       l:"no .oxagen/"},
- drift:   {b:"b-approval",l:"drift"}
+ governed:{b:"b-allowed", l:"Present"},
+ unbound: {b:"b-q",       l:"No .oxagen/"},
+ drift:   {b:"b-approval",l:"Drift"}
 };
 var WC_STATE={
  "in-sync":     {b:"b-allowed",  l:"in sync"},
  behind:        {b:"b-approval", l:"behind"},
  uncommitted:   {b:"b-approval", l:"uncommitted"},
- unbound:       {b:"b-q",        l:"unbound"}
+ unbound:       {b:"b-q",        l:"not linked"}
 };
 var PR_STATE={
  open:           {b:"b-q",        l:"open"},
@@ -8023,7 +8023,7 @@ function oxState(r){return OX_STATE[r.ox||"governed"]||OX_STATE.governed;}
    call site: a workspace's main repo always exists, whether or not anybody has indexed it. */
 function repoRecordFor(name,w){
   return {n:name,role:"main",branch:w.branch,head:w.head||null,indexed:"\u2014",
-    issues:"enabled",events:"\u2014",symbols:0,drift:"\u2014",
+    issues:"enabled",events:"\u2014",symbols:null,drift:"\u2014",
     ox:"governed",oxCommit:w.head||null,oxFiles:0,lang:"",visibility:"private",pushed:""};
 }
 function wsRepos(){
@@ -8086,10 +8086,9 @@ function repoTab(){
   var w=ws(), rows=wsRepos();
   var unbound=rows.filter(function(r){return (r.ox||"governed")==="unbound"&&r.role!=="available";});
   var banner=unbound.length?'<div class="banner"><span class="b b-approval" style="flex:none"><span class="d"></span>'+
-   unbound.length+' linked repositor'+(unbound.length>1?'ies carry':'y carries')+' no .oxagen/</span>'+
-   '<div class="grow"><b>A run on '+h(unbound.map(function(r){return r.n;}).join(", "))+' is steered by the main repo and by nothing of its own.</b> '+
-   'Repository-scoped records live in that repository, so until it has a <span class="mono">.oxagen/</span> tree there is nowhere to put one — '+
-   'and a record that tried would have to claim workspace scope, which the checks refuse.</div>'+
+   plural(unbound.length,"linked repository","linked repositories")+(unbound.length>1?' have':' has')+' no .oxagen/</span>'+
+   '<div class="grow"><b>Runs on '+h(unbound.map(function(r){return r.n;}).join(", "))+' get steering from the main repository only.</b> '+
+   'Records scoped to a repository live in that repository, so '+(unbound.length>1?'each one':h(unbound[0].n))+' needs its own <span class="mono">.oxagen/</span> tree before it can hold any.</div>'+
    '<button class="btn" onclick="wzOpen(\'init\',\''+h(unbound[0].n)+'\')">Add .oxagen/</button></div>':'';
 
   var trows=rows.map(function(r){
@@ -8097,22 +8096,22 @@ function repoTab(){
     return '<tr '+rowClick("openDialog('repo','"+h(r.n)+"')","Open "+r.n)+'>'+
      '<td><span class="row-ic">'+icon("repo")+'</span><b class="mono">'+h(r.n)+'</b>'+
        (repoMeta(r)?'<div class="dim" style="font-size:11px;margin-top:2px">'+h(repoMeta(r))+'</div>':'')+'</td>'+
-     '<td>'+(r.role==="main"?'<span class="b b-proven">main</span>':r.role==="linked"?'<span class="b b-q">linked</span>':'<span class="b b-q" style="opacity:.7">not linked</span>')+'</td>'+
-     '<td><span class="mono">'+h(r.branch)+'</span><div class="dim mono" style="font-size:11px">'+h(r.head)+'</div></td>'+
-     '<td>'+stBadge(st)+(r.oxFiles?'<div class="dim mono" style="font-size:11px;margin-top:2px">'+plural(r.oxFiles,"file")+'</div>':'')+'</td>'+
+     '<td>'+(r.role==="main"?'<span class="b b-proven">Main repository</span>':r.role==="linked"?'<span class="b b-q">Linked</span>':'<span class="b b-q" style="opacity:.7">Not linked</span>')+'</td>'+
+     '<td><span class="mono">'+h(r.branch)+'</span><div class="dim mono" style="font-size:11px">'+(r.head?h(r.head):'—')+'</div></td>'+
+     '<td data-v="'+h(st.l)+'">'+stBadge({b:st.b,l:st.l+(st===OX_STATE.governed&&r.oxFiles?' · '+plural(r.oxFiles,"file"):'')})+'</td>'+
      '<td class="muted" style="font-size:12px">'+h(avail?"—":r.events)+'</td>'+
-     '<td class="num">'+(avail?'<span class="dim">—</span>':r.symbols.toLocaleString())+'</td>'+
+     '<td class="num">'+(avail||r.symbols==null?'<span class="dim">—</span>':r.symbols.toLocaleString())+'</td>'+
      '<td>'+(st===OX_STATE.governed
-        ?'<span class="dim" style="font-size:11.5px">nothing waiting</span>'
+        ?'<span class="dim" style="font-size:11.5px">No action needed</span>'
         :'<button class="btn sm" onclick="event.stopPropagation();wzOpen(\'init\',\''+h(r.n)+'\')">Add .oxagen/</button>')+'</td></tr>';}).join("");
 
   return banner+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Repositories</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">One main repo, any number of linked. The main repo holds the workspace’s steering and configuration; a linked repo may hold records that steer only runs on it.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">The main repository holds the workspace’s steering and configuration, and each linked repository can hold records for its own runs.</p></div>'+
    '<div class="sp"><button class="btn sm" onclick="wzOpen(\'init\')">Add .oxagen/</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Repository</th><th>Role</th><th>Production branch</th><th>.oxagen/</th><th>Events</th><th class="num">Symbols</th><th></th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Changing which repository is <span class="mono">main</span> is an organization-owner action with approval, and it lands in the audit record as a security event. The production branch never moves on its own: when GitHub’s default branch changes, the App records it and prompts, and the binding stays where it is until somebody confirms.</div></div></div>';
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Changing the main repository needs an organization owner and an approval, and Audit records it as a security event. When GitHub’s default branch changes, the GitHub App records the change, and the production branch stays put until someone confirms the move.</div></div></div>';
 }
 
 /* ---- tab 2: the working copies ---- */
@@ -8122,9 +8121,9 @@ function copyTab(){
      the screen with no primary action and no way to link its first directory — which is the one
      thing this tab exists to do. */
   if(!rows.length) return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">No directory on anybody’s disk is linked to '+h(w.name)+' yet.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">No directory is linked to '+h(w.name)+' yet.</p></div>'+
    '<div class="sp"><button class="btn primary" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
-   '<div class="panel-b"><div class="note">A directory is linked by running <span class="mono">oxagen init</span> in it. Nothing here is linked by a person typing a path: the browser cannot see a filesystem, and a path typed into a form proves nothing about what is at it.</div></div></div>';
+   '<div class="panel-b"><div class="note">Run <span class="mono">oxagen init</span> in a directory to link it. You cannot link one by typing a path here, because the browser cannot see your filesystem.</div></div></div>';
   var stale=rows.filter(function(c){return c.oxagen!=="in-sync";});
   var trows=rows.map(function(c){
     var st=WC_STATE[c.oxagen]||WC_STATE.unbound;
@@ -8141,7 +8140,7 @@ function copyTab(){
   /* The banner that used to sit here said in a paragraph what the .oxagen/ column says in a
      word, on the row of the copy it is true of. The count is already on the tab. */
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Working copies</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">The same <span class="mono">.oxagen/</span> tree on a machine. Each is a directory somebody ran <span class="mono">oxagen init</span> in; the enrollment is the machine’s, and the link is one gitignored file.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Each row is a directory where someone ran <span class="mono">oxagen init</span>, linked by one gitignored file.</p></div>'+
    '<div class="sp"><button class="btn primary" onclick="openDialog(\'linkdir\')">Connect a directory</button></div></div>'+
    '<div class="tw"><table><thead><tr><th>Directory</th><th>Repository</th><th>Branch</th><th>.oxagen/</th><th>Symlinks</th><th>Bundle</th><th>Last seen</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div></div>'+
@@ -8150,13 +8149,13 @@ function copyTab(){
    '<pre>.oxagen/\n  workspace.toml     <span class="c"># committed. reviewed. the source of truth.</span>\n'+
    '  workspace.json     <span class="c"># gitignored · this machine’s link</span>\n'+
    '  rules/\n  proposals/\n  agents/\n  skills/\n  tools/</pre>'+
-   '<div class="note" style="margin-top:12px">The committed file says what the workspace is. The gitignored one says which workspace <em>this checkout</em> is talking to, which is a fact about a laptop and not about the product — so it is never reviewed, never merged, and never the same file in two places.</div></div></div>'+
+   '<div class="note" style="margin-top:12px"><span class="mono">workspace.toml</span> describes the workspace and goes through review. <span class="mono">workspace.json</span> names the workspace <em>this checkout</em> talks to. It describes one machine, so nobody commits or reviews it.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Sync</h3></div><div class="panel-b">'+
    '<div class="kv"><dt><span class="mono">oxagen init</span></dt><dd>Links this directory. Reads the git remote, matches it to a repository the installation can reach, and writes <span class="mono">.oxagen/workspace.json</span>. Idempotent.</dd>'+
    '<dt><span class="mono">oxagen pull</span></dt><dd>Fast-forwards <span class="mono">.oxagen/</span> to the production branch and re-points the stella symlinks. It never merges your work.</dd>'+
-   '<dt><span class="mono">oxagen status</span></dt><dd>What this copy has against what is published: the bundle version, the records in force, and anything uncommitted under <span class="mono">.oxagen/</span>.</dd>'+
-   '<dt><span class="mono">oxagen propose</span></dt><dd>Turns a local edit under <span class="mono">.oxagen/</span> into a proposal. Opening and merging its pull request happen here, because both gate on a role only a signed-in person holds.</dd></div>'+
-   '<div class="note" style="margin-top:12px">stella symlinks into this directory rather than copying it, so there is no second copy that could drift. A copy whose symlinks read <span class="mono">missing</span> is one where stella will load nothing.</div></div></div></div>';
+   '<dt><span class="mono">oxagen status</span></dt><dd>Compares this copy with what is published: the bundle version, the records in force, and anything uncommitted under <span class="mono">.oxagen/</span>.</dd>'+
+   '<dt><span class="mono">oxagen propose</span></dt><dd>Turns a local edit under <span class="mono">.oxagen/</span> into a proposal. You open and merge its pull request here, because both need a role that only a signed-in person holds.</dd></div>'+
+   '<div class="note" style="margin-top:12px">stella reads this directory through symlinks, so there is no second copy to drift. Where the symlinks read <span class="mono">missing</span>, stella loads nothing.</div></div></div></div>';
 }
 
 /* ---- tab 3: the changes ---- */
@@ -8180,20 +8179,20 @@ function chgTab(){
      '<td><span class="b b-q">'+h(k.l)+'</span></td>'+
      '<td class="mono" style="font-size:12px">'+h(p.pr)+'</td>'+
      '<td>'+(p.byKind==="person"?h(p.by):'<span class="mono">'+h(p.by)+'</span>')+
-       '<div class="dim" style="font-size:11px">'+h(p.byKind==="person"?"a person":p.byKind)+'</div></td>'+
+       '<div class="dim" style="font-size:11px">'+(p.byKind==="person"?"Person":"Automatic")+'</div></td>'+
      '<td>'+stBadge(st)+'</td>'+
      '<td>'+oxprCiLight(p)+'</td>'+
      '<td class="muted" style="font-size:12px">'+h(p.opened)+'</td></tr>';}).join("");
-  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Open Context PRs</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Four kinds of file and one lifecycle. Whoever opened it — a person, the promoter, or the reconciler — the checks, the merge and the publication are the same.</p></div></div>'+
+  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Context PRs</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Every change to <span class="mono">.oxagen/</span> goes through the same checks, merge, and publication, whether a person, the promoter, or the reconciler opened it.</p></div></div>'+
    '<div class="tw"><table><thead><tr><th>Change</th><th>Kind</th><th>Pull request</th><th>Opened by</th><th>State</th><th>Checks</th><th>Opened</th></tr></thead>'+
    '<tbody>'+trows+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A change is in force from the merge commit, not from when it was written. While a pull request is open the thing it carries steers nothing: it is not in the compiled bundle, not in the record index, and the bundle version has not moved.</div></div></div>'+
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A change takes effect at its merge commit. While its pull request is open, it steers nothing: it is not in the compiled bundle or the record index, and the bundle version has not moved.</div></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Automatic proposals</h3></div><div class="panel-b">'+
-   '<div class="kv"><dt>the promoter</dt><dd>Aggregates records across runs by lineage and opens a proposal with the runs it cites. There is no threshold; a person reads the support and decides.</dd>'+
-   '<dt>the reconciler</dt><dd>Reads <span class="mono">.oxagen/workspace.toml</span> against what the control plane has, and opens one pull request per real difference. It never edits live state to match the file.</dd>'+
-   '<dt>a person</dt><dd>Every creation wizard — agent, tool, skill, record — ends here. None of them has a Save button that ends in a database.</dd></div>'+
-   '<div class="note" style="margin-top:12px">Drift is reported, never repaired in place. A reconciler that silently edited either side would make the file a description of the past and the product unreviewable — the pull request is the only place a person can say which of the two was right.</div></div></div>';
+   '<div class="kv"><dt>Promoter</dt><dd>Groups records across runs by lineage and opens a proposal that cites those runs. There is no threshold. A person reads the cited runs and decides.</dd>'+
+   '<dt>Reconciler</dt><dd>Compares <span class="mono">.oxagen/workspace.toml</span> with the control plane’s live state and opens one pull request per difference. It does not edit live state to match the file.</dd>'+
+   '<dt>Person</dt><dd>Every creation wizard (agent, tool, skill, and record) ends here. None of them saves straight to the database.</dd></div>'+
+   '<div class="note" style="margin-top:12px">The reconciler reports drift and does not repair it. A person decides which side is right, in the pull request.</div></div></div>';
 }
 
 /* Merge is enabled only when every check has reported, none failed, and the pull request is not
@@ -8321,16 +8320,16 @@ function cfgTab(){
    (repo.head?' at <span class="mono">'+h(repo.head)+'</span>':' \u00b7 <span class="dim">not indexed yet</span>')+'</p></div></div>'+
    '<div class="panel-b"><pre>'+h(oxWorkspaceToml(w,repo,"team","main"))+'</pre></div></div>'+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Drift</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">The file against what the control plane has. Reported, never repaired in place.</p></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">The file compared with the control plane’s live state.</p></div>'+
    (reconcile?'<div class="sp"><button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+h(w.slug)+'/repositories/changes\');S.oxprSel=\''+h(reconcile)+'\';render()">See the pull request</button></div>':'')+'</div>'+
    (drift.length
-     ?'<div class="tw"><table class="narrow"><thead><tr><th>Declared</th><th>In the file</th><th>Live</th><th>Right</th></tr></thead><tbody>'+
+     ?'<div class="tw"><table class="narrow"><thead><tr><th>Declared</th><th>In the file</th><th>Live</th><th>Resolution</th></tr></thead><tbody>'+
       drift.map(function(d){return '<tr><td class="mono" style="font-size:11.5px">'+h(d[0])+'</td>'+
         '<td class="muted" style="font-size:12px">'+h(d[1])+'</td><td class="muted" style="font-size:12px">'+h(d[2])+'</td>'+
-        '<td>'+(d[3]==="the file"?'<span class="b b-q">the file</span>':'<span class="b b-approval">a person decides</span>')+'</td></tr>';}).join("")+
+        '<td>'+(d[3]==="the file"?'<span class="b b-q">Use the file</span>':'<span class="b b-approval">A person decides</span>')+'</td></tr>';}).join("")+
       '</tbody></table></div>'+
-      '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Two of these the reconciler can argue for, because it read both sides. The third it cannot: a repository with no <span class="mono">.oxagen/</span> is a decision about scope, not a difference between two records, so it waits for a person.</div></div>'
-     :'<div class="panel-b"><div class="note">The reconciler last read <span class="mono">'+h(w.main)+'</span> against the control plane and found nothing between them. Drift is reported here, never repaired in place — so an empty table is the reconciler saying the file and the live state agree, not that nobody looked.</div></div>')+
+      '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">Where the reconciler read both sides, it proposes the file’s value. A linked repository with no <span class="mono">.oxagen/</span> is a scope decision, so it waits for a person.</div></div>'
+     :'<div class="panel-b"><div class="note">The reconciler last compared <span class="mono">'+h(w.main)+'</span> with the control plane and found no drift.</div></div>')+
    '</div></div>'+
    '<div class="grid g2" style="margin-top:14px">'+
    '<div class="panel"><div class="panel-h"><h3>.oxagen/rules/governance.toml</h3></div><div class="panel-b">'+
@@ -8338,7 +8337,7 @@ function cfgTab(){
    '<div class="kv" style="margin-top:12px"><dt><span class="mono">solo</span></dt><dd>The author may merge their own.</dd>'+
    '<dt><span class="mono">team</span></dt><dd>A code-owner review is required. This is what a missing file means.</dd>'+
    '<dt><span class="mono">regulated</span></dt><dd>A named approver from a role must approve, and the promotion ledger is hash-chained.</dd></div>'+
-   '<div class="note" style="margin-top:12px">The mode is read on the production branch when a pull request is opened and again when it is merged — so raising it takes effect on everything still open, and it is changed by a pull request like everything else, never by a settings screen. A file that exists but names no mode refuses both, rather than quietly falling back to <span class="mono">team</span>.</div></div></div>'+
+   '<div class="note" style="margin-top:12px">oxagen reads the mode from the production branch when a pull request opens and again when it merges, so raising it applies to every open pull request. You change the mode with a pull request. There is no setting for it. A file that names no mode blocks both steps and does not fall back to <span class="mono">team</span>.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Tree</h3></div><div class="panel-b">'+
    '<pre>.oxagen/\n  workspace.toml             <span class="c"># linked repos, providers, budgets</span>\n'+
    '  workspace.json             <span class="c"># gitignored · this machine’s link</span>\n'+
@@ -8349,7 +8348,7 @@ function cfgTab(){
    '  agents/&lt;slug&gt;.toml         <span class="c"># one per agent</span>\n'+
    '  skills/&lt;name&gt;/SKILL.md     <span class="c"># pinned by version and digest</span>\n'+
    '  tools/&lt;name&gt;.toml          <span class="c"># manifest, schema, handler beside it</span></pre>'+
-   '<div class="note" style="margin-top:12px">oxagen reads <span class="mono">.oxagen/</span> and nothing else. Whatever sits under <span class="mono">.stella/</span> is invisible to it, and it never looks.</div></div></div></div>';
+   '<div class="note" style="margin-top:12px">oxagen reads only <span class="mono">.oxagen/</span>. It does not read <span class="mono">.stella/</span>.</div></div></div></div>';
 }
 
 function pRepos(){
@@ -8358,16 +8357,17 @@ function pRepos(){
   if(S.state==="error") return errorState("Repositories","503 installation_unreachable");
   if(S.state==="denied") return deniedState("this workspace’s repositories","repository.read on "+w.slug);
   if(S.state==="empty") return emptyState("This workspace has no repository yet",
-    "A workspace without a main repo cannot exist, so this state is the moment between creating one and binding it. The main repo is where steering and configuration are managed in source control — until it is bound, there is nowhere for a record to be published to.",
-    '<button class="btn primary" onclick="wzOpen(\'init\')">Add .oxagen/</button>');
+    "Every workspace needs a main repository. It keeps steering and configuration in source control, and until you connect one, a record has nowhere to be published.",
+    '<button class="btn primary" onclick="wzOpen(\'init\')">Connect repository</button>');
 
   var open=oxprOpen().length, stale=wsCopies().filter(function(c){return c.oxagen!=="in-sync";}).length;
+  var bound=wsRepos().filter(function(r){return r.role!=="available";}).length;
   var tabs='<div class="tabs" role="tablist">'+
-   [["repos","Repositories",wsRepos().filter(function(r){return r.role!=="available";}).length],
-    ["copies","Working copies",stale],
-    ["changes","Changes",open],
+   [["repos","Repositories",bound,plural(bound,"connected repository","connected repositories")],
+    ["copies","Working copies",stale,plural(stale,"working copy","working copies")+" out of sync"],
+    ["changes","Changes",open,plural(open,"open change")],
     ["config","Configuration",0]]
-   .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="S.tab.repositories=\''+x[0]+'\';S.oxprSel=null;render()">'+x[1]+(x[2]?'<span class="n">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
+   .map(function(x){return '<button class="tab" role="tab" aria-selected="'+(t===x[0])+'" onclick="S.tab.repositories=\''+x[0]+'\';S.oxprSel=null;render()">'+x[1]+(x[2]?'<span class="vh"> </span><span class="n" title="'+h(x[3])+'">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
 
   var body=t==="copies"?copyTab():t==="changes"?chgTab():t==="config"?cfgTab():repoTab();
   /* the page header gives up the gold when the tab below holds the one primary action */
@@ -13429,7 +13429,7 @@ var CREATE={
    file:".oxagen/skills/&lt;name&gt;/SKILL.md",need:"skills.admin"},
  record:{l:"Context record",d:"One statement that steers every agent it reaches.",i:"steering",
    file:".oxagen/rules/&lt;lineage&gt;.toml",need:"steering.write"},
- init:{l:"oxagen directory",d:"The .oxagen/ tree in a repository that has none. The one the other four need first.",i:"repo",
+ init:{l:"Repository",d:"Adds the .oxagen/ tree to a repository that has none. The other four need it first.",i:"repo",
    file:".oxagen/ &lt;in a repository&gt;",need:"repository.admin"}
 };
 
@@ -13442,7 +13442,7 @@ DLG_EXT.create=function(){
       '<span class="tx"><b>'+h(c.l)+'</b><span class="d">'+h(c.d)+'</span>'+
       '<span class="fp mono">'+c.file+'</span></span></button>';}).join("")+'</div>'+
     '<div class="note" style="margin-top:14px">None of these writes a row. Each one ends on a pull request against '+h(w.main)+
-    ', and the thing exists when somebody merges it — which is also the only place a reviewer can stop it.</div>',
+    '. The thing exists once someone merges it, and a reviewer can stop it there.</div>',
   f:'<span class="grow mono dim" style="font-size:11px">'+h(w.name)+' · '+h(w.main)+'</span><button class="btn" onclick="closeDialog()">Close</button>'};
 };
 
@@ -13603,13 +13603,13 @@ DLG_EXT.linkdir=function(){
    b:'<p style="margin-bottom:14px">Run this in the directory you want linked. It reads the git remote, matches it against the repositories this installation can reach, and writes the one gitignored file that says which workspace this checkout talks to.</p>'+
      '<div class="field"><label>In the directory</label>'+
      '<pre>oxagen init --org ' + h(ORG.slug) + ' --workspace ' + h(w.slug) + '\n\n<span class="c"># Pairing code: 4QF2-91KD  ·  expires in 9:41</span></pre>'+
-     '<div class="hint">The code authorises the pairing once. What identifies the copy afterwards is the machine’s enrollment, so a code that leaks after it is spent links nothing.</div></div>'+
+     '<div class="hint">The code works for one pairing. After that, the machine’s enrollment identifies the copy, so a used code links nothing.</div></div>'+
      '<div class="field"><label>What it writes, and what it does not</label>'+
-     wzChecks([["writes",'<span class="mono">.oxagen/workspace.json</span> — org, workspace, path, machine. Gitignored, never reviewed, never merged.'],
-       ["links",'<span class="mono">.stella/rules</span>, <span class="mono">.stella/proposals</span> and <span class="mono">.stella/agents</span> as symlinks into <span class="mono">.oxagen/</span>, so there is no second copy that could drift.'],
+     wzChecks([["writes",'<span class="mono">.oxagen/workspace.json</span>, with the org, workspace, path, and machine. It is gitignored, so nobody reviews or merges it.'],
+       ["links",'<span class="mono">.stella/rules</span>, <span class="mono">.stella/proposals</span> and <span class="mono">.stella/agents</span> as symlinks into <span class="mono">.oxagen/</span>, so there is no second copy to drift.'],
        ["does not write",'anything under <span class="mono">.oxagen/</span> that is committed. If the repository has no <span class="mono">.oxagen/</span> tree at all, it says so and offers the pull request that adds one.'],
-       ["does not read",'your working tree. oxagen reads <span class="mono">.oxagen/</span> and nothing else; what a run needs from the rest of the repository reaches it as frames, at the hooks.']])+'</div>'+
-     '<div class="note">Linking a directory grants nothing. A person’s roles decide what they may do here, and an agent’s mandate decides what it may do there; a laptop is not a principal.</div>',
+       ["does not read",'your working tree. oxagen reads only <span class="mono">.oxagen/</span>. What a run needs from the rest of the repository reaches oxagen as frames, through the hooks.']])+'</div>'+
+     '<div class="note">Linking a directory grants nothing. A person’s roles decide what they can do here, and an agent’s mandate decides what it can do. A laptop is not a principal.</div>',
    f:'<span class="grow mono dim" style="font-size:11px">'+h(ORG.slug)+' · '+h(w.slug)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn primary" onclick="act(\'Waiting for a directory to pair…\',\'gold\')">Copy command</button>'};
@@ -13631,7 +13631,7 @@ DLG_EXT.copyoff=function(id){
 function copyDisconnect(id){
   var c=copyById(id), i=WORKCOPIES.indexOf(c); if(i<0)return;
   WORKCOPIES.splice(i,1); closeDialog(); render();
-  act(c.path+" on "+c.machine+" disconnected. The directory is untouched; oxagen init links it back.");
+  act(c.path+" on "+c.machine+" disconnected. The directory is untouched. Run oxagen init there to link it again.");
 }
 
 DLG_EXT.workcopy=function(){
@@ -13646,15 +13646,15 @@ DLG_EXT.workcopy=function(){
      '<dt>Symlinks</dt><dd>'+(sym?'<span class="b b-allowed"><span class="d"></span>ok</span>':'<span class="b b-approval"><span class="d"></span>missing</span>')+'</dd>'+
      '<dt>Bundle</dt><dd><span class="mono">'+h(c.bundle)+'</span>'+(c.bundle!=="v"+STEER_BUNDLE.v?' <span class="dim">· published is v'+STEER_BUNDLE.v+'</span>':'')+'</dd>'+
      '<dt>Last seen</dt><dd>'+h(c.seen)+'</dd></div>'+
-     (ok&&sym?'<div class="note" style="margin-top:14px">This copy holds what is published. Nothing is waiting.</div>'
+     (ok&&sym?'<div class="note" style="margin-top:14px">This copy matches what is published. No action needed.</div>'
       :'<div class="note" style="margin-top:14px;border-left-color:var(--st-approval)">'+
        (sym?'':'<b>stella will load nothing here.</b> The symlinks under <span class="mono">.stella/</span> are absent, so its loader has no rules directory to read. <span class="mono">oxagen init</span> re-creates them. ')+
-       (c.oxagen==="behind"?'This copy is behind the production branch, so the person reading it is reading rules that are no longer in force. It does not change what a run is steered by: steering reaches a run from the merged commit, in the signed bundle.'
-        :c.oxagen==="uncommitted"?'There are edits under <span class="mono">.oxagen/</span> that no pull request carries. They steer nothing — not here, and not in a run — until one does.':'')+'</div>')+
+       (c.oxagen==="behind"?'This copy is behind the production branch, so whoever reads it sees rules that are no longer in force. Runs are not affected: steering reaches a run from the merged commit, in the signed bundle.'
+        :c.oxagen==="uncommitted"?'There are edits under <span class="mono">.oxagen/</span> that no pull request carries. They steer nothing, here or in a run, until a pull request carries them.':'')+'</div>')+
      (c.dirty?'<div class="field" style="margin-top:14px"><label>Uncommitted under .oxagen/</label>'+
        wzFiles([["mod",".oxagen/rules/ctx.mobile.release-train.toml","statement edited locally"],
                 ["add",".oxagen/agents/screenshot-bot.toml","never committed"]])+
-       '<div class="hint">Turning these into a pull request is <span class="mono">oxagen propose</span>. Opening and merging it happen in oxagen, because both gate on a role only a signed-in person holds.</div></div>':''),
+       '<div class="hint">Turning these into a pull request is <span class="mono">oxagen propose</span>. You open and merge it in oxagen, because both need a role that only a signed-in person holds.</div></div>':''),
    f:'<span class="grow mono dim" style="font-size:11px">'+h(c.id)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
      '<button class="btn danger" onclick="openDialog(\'copyoff\',\''+h(c.id)+'\')">Disconnect</button>'+
@@ -13669,7 +13669,7 @@ DLG_EXT.repounlink=function(n){
   if(!r||n===w.main)return noSuch("Repository");
   var copies=WORKCOPIES.filter(function(c){return c.repo===n;}).length;
   return {t:"Unlink "+n+" from "+w.name+"?",w:false,
-   b:'<div class="note">Its issues and events stop reaching this workspace, and a run can no longer bind to it here. The repository is untouched: nothing is deleted, no branch moves, and <span class="mono">.oxagen/</span> stays where it is.</div>'+
+   b:'<div class="note">Its issues and events stop reaching this workspace, and new runs here can no longer use it. The repository is untouched: nothing is deleted, no branch moves, and <span class="mono">.oxagen/</span> stays where it is.</div>'+
      ((r.ox||"governed")==="governed"?'<div class="warn">Records published in this repository stop steering runs in '+h(w.name)+' the moment this is written. Runs already recorded keep naming the hashes they carried.</div>':'')+
      (copies?'<div class="warn">'+copies+' working cop'+(copies>1?'ies are':'y is')+' linked through it. '+(copies>1?'They stop':'It stops')+' appearing on the Working copies tab.</div>':''),
    f:'<button class="btn" onclick="closeDialog()">Keep it linked</button>'+
@@ -13681,14 +13681,14 @@ function repoLink(n){
   if(w.linked.indexOf(n)<0)w.linked.push(n);
   r.role="linked";
   closeDialog(); render();
-  act(n+" linked to "+w.name+". Its issues and events reach this workspace, and a run may bind to it.","gold");
+  act(n+" linked to "+w.name+". Its issues and events reach this workspace, and runs here can use it.","gold");
 }
 function repoUnlink(n){
   var w=ws(), r=repoByName(n); if(!r||n===w.main)return;
   var i=(w.linked||[]).indexOf(n); if(i>=0)w.linked.splice(i,1);
   r.role="available";
   closeDialog(); render();
-  act(n+" unlinked from "+w.name+". Runs already recorded keep naming it; nothing new binds to it here.");
+  act(n+" unlinked from "+w.name+". Runs already recorded still name it. New runs here cannot use it.");
 }
 
 /* ---- one repository ---- */
@@ -13700,21 +13700,21 @@ DLG_EXT.repo=function(){
   if(!r) return {t:"Repository",w:false,b:"",f:'<button class="btn" onclick="closeDialog()">Close</button>'};
   var w=ws(), st=oxState(r), gov=(r.ox||"governed")==="governed", avail=r.role==="available";
   var copies=WORKCOPIES.filter(function(c){return c.repo===r.n;});
-  return {t:r.n, s:(r.n===w.main?"main repo":avail?"not linked to this workspace":"linked repo")+" · "+r.lang, w:false,
-   b:'<div class="kv"><dt>Production branch</dt><dd><span class="mono">'+h(r.branch)+'</span> at <span class="mono">'+h(r.head)+'</span></dd>'+
+  return {t:r.n, s:[r.n===w.main?"main repository":avail?"not linked to this workspace":"linked repository",r.lang].filter(function(x){return x;}).join(" · "), w:false,
+   b:'<div class="kv"><dt>Production branch</dt><dd><span class="mono">'+h(r.branch)+'</span>'+(r.head?' at <span class="mono">'+h(r.head)+'</span>':'')+'</dd>'+
      '<dt>Visibility</dt><dd>'+h(r.visibility)+'</dd>'+
-     '<dt>.oxagen/</dt><dd>'+stBadge(st)+(gov?' <span class="dim">· '+plural(r.oxFiles,"file")+' at <span class="mono">'+h(r.oxCommit)+'</span></span>':'')+'</dd>'+
+     '<dt>.oxagen/</dt><dd>'+stBadge(st)+(gov&&r.oxFiles?' <span class="dim">· '+plural(r.oxFiles,"file")+(r.oxCommit?' at <span class="mono">'+h(r.oxCommit)+'</span>':'')+'</span>':'')+'</dd>'+
      '<dt>Issues</dt><dd>'+h(r.issues)+'</dd>'+
      '<dt>Events</dt><dd>'+h(r.events)+'</dd>'+
-     '<dt>Code graph</dt><dd>'+(avail?'<span class="dim">not indexed</span>':r.symbols.toLocaleString()+' symbols · indexed '+h(r.indexed))+'</dd>'+
+     '<dt>Code graph</dt><dd>'+(avail||r.symbols==null?'<span class="dim">Not indexed</span>':plural(r.symbols,"symbol")+' · indexed '+h(r.indexed))+'</dd>'+
      '<dt>Data layer</dt><dd>'+h(r.drift)+'</dd>'+
-     '<dt>Working copies</dt><dd>'+(copies.length?copies.length+' on '+copies.length+' machine'+(copies.length>1?'s':''):'<span class="dim">none</span>')+'</dd></div>'+
+     '<dt>Working copies</dt><dd>'+(copies.length?copies.length+' on '+plural(copies.length,"machine"):'<span class="dim">None</span>')+'</dd></div>'+
      (gov?'<div class="field" style="margin-top:14px"><label>Records published here</label>'+
        '<div class="note">Scope is <span class="mono">'+(r.n===w.main?'workspace':'repository')+'</span>. '+
-       (r.n===w.main?'These steer every run in '+h(w.name)+'.':'These steer only runs whose repository binding is this one. A record here may narrow what a workspace record allows; it may never widen it, and one that claimed workspace scope would fail the checks.')+'</div></div>'
+       (r.n===w.main?'These steer every run in '+h(w.name)+'.':'These steer only runs on this repository. A record here can narrow what a workspace record allows but cannot widen it. One that claims workspace scope fails the checks.')+'</div></div>'
       :'<div class="note" style="margin-top:14px;border-left-color:var(--st-approval)"><b>No <span class="mono">.oxagen/</span> here.</b> '+
-       (avail?'This repository is not linked to '+h(w.name)+' either. Adding oxagen to it is what links it.'
-        :'Runs on this repository are steered by '+h(w.main)+' and by nothing of its own. There is nowhere to publish a repository-scoped record until the tree exists.')+'</div>'),
+       (avail?'This repository is not linked to '+h(w.name)+' either. Adding <span class="mono">.oxagen/</span> links it.'
+        :'Runs on this repository get steering from '+h(w.main)+' only. A record scoped to this repository has nowhere to go until the tree exists.')+'</div>'),
    f:'<span class="grow mono dim" style="font-size:11px">'+h(r.n)+'</span>'+
      '<button class="btn" onclick="closeDialog()">Close</button>'+
      (r.n===w.main?''
@@ -13760,42 +13760,42 @@ var WZ_MODES=[
 function wzInit(){
   var z=S.wz, r=wzInitRepo(), w=ws(), cands=wzInitCandidates();
   if(z.step===1){
-    return {b:'<p style="margin-bottom:14px">oxagen governs the files in a repository; it does not keep a copy of them. '+
-      'So the first thing it does in a repository is put the directory there — on a branch, in a pull request, which somebody reads.</p>'+
+    return {b:'<p style="margin-bottom:14px">oxagen governs the files in a repository and keeps no copy of them. '+
+      'So its first step is to add the directory on a branch, in a pull request that someone reviews.</p>'+
       '<div class="field"><label for="wzRepo">Repository</label>'+
       '<select id="wzRepo" onchange="wzSetR(\'repoName\',this.value)">'+
       cands.map(function(n){var c=repoByName(n);
         return '<option value="'+h(n)+'"'+(n===r.n?' selected':'')+'>'+h(n)+' · '+h(c?c.lang:"")+' · '+h(c?c.visibility:"")+'</option>';}).join("")+
       '</select><div class="hint">Only repositories the installation can already reach, and only the ones with no <span class="mono">.oxagen/</span> yet. '+
-      'A repository that has one is already governed; changing it is an ordinary pull request from the page it belongs to.</div></div>'+
+      'To change a repository that already has one, open a pull request from its page.</div></div>'+
       '<div class="wz-pick" style="grid-template-columns:1fr 1fr">'+
-      [["main","Make it the main repo","The workspace’s steering and configuration live here. Exactly one per workspace, and moving it is an owner action with approval."],
-       ["linked","Link it","Its agents work on it. It may carry records that steer only runs on this repository, and never records that claim the workspace."]]
+      [["main","Make it the main repository","The workspace’s steering and configuration live here. A workspace has exactly one, and moving it needs an owner and an approval."],
+       ["linked","Link it","Agents work on it. It can hold records that steer only runs on this repository, but no records scoped to the workspace."]]
       .map(function(x){var on=(z.role||"linked")===x[0], is=w.main===r.n;
         return '<button class="wz-card'+(on?" on":"")+'"'+(x[0]==="main"&&is?' disabled':'')+' onclick="wzSetR(\'role\',\''+x[0]+'\')">'+
          '<span class="tx"><b>'+h(x[1])+'</b><span class="d">'+h(x[2])+'</span></span></button>';}).join("")+'</div>'+
       '<div class="note" style="margin-top:14px">'+
       ((z.role||"linked")==="main"
-        ?h(w.main)+' is this workspace’s main repo today. Merging this makes '+h(r.n)+' the main repo instead — an organization-owner action with approval, recorded as a security event, and the one change on this page a reviewer cannot undo by closing the pull request.'
-        :h(w.main)+' is already this workspace’s main repo, so this one is linked.')+'</div>',
-     t:"Add .oxagen/", s:"the directory every other file needs",
+        ?h(w.main)+' is this workspace’s main repository today. Merging this makes '+h(r.n)+' the main repository instead. That needs an organization owner and an approval, and Audit records it as a security event.'
+        :h(w.main)+' is already this workspace’s main repository, so this one is linked.')+'</div>',
+     t:"Connect repository", s:"adds .oxagen/, the directory every other file needs",
      f:wzNext("Next",true)};
   }
   if(z.step===2){
-    return {b:'<p style="margin-bottom:14px">Two things are decided once here, and both are then changed the way everything else is — by a pull request against this repository.</p>'+
+    return {b:'<p style="margin-bottom:14px">You set two things here. After this, you change either one with a pull request against this repository.</p>'+
       '<div class="field"><label for="wzBr">Production branch</label>'+
       '<select id="wzBr" onchange="wzSetR(\'branch\',this.value)">'+
       [r.branch,"main","release","production"].filter(function(v,i,a){return a.indexOf(v)===i;})
        .map(function(b){return '<option'+(b===(z.branch||r.branch)?' selected':'')+'>'+h(b)+'</option>';}).join("")+
-      '</select><div class="hint">GitHub’s default branch is <span class="mono">'+h(r.branch)+'</span>, which is the suggestion and not the decision. '+
-      'This is the only branch whose commits update the code graph, and the only one a record is published to. If GitHub’s default changes later, oxagen records it and prompts; the binding never moves on its own.</div></div>'+
+      '</select><div class="hint">GitHub’s default branch is <span class="mono">'+h(r.branch)+'</span>, which is the suggestion. '+
+      'Only this branch’s commits update the code graph, and records are published only to this branch. If GitHub’s default changes later, oxagen records it and asks you to confirm before the production branch moves.</div></div>'+
       '<div class="field"><label>Governance mode</label>'+
       '<div class="wz-pick" style="grid-template-columns:1fr">'+
       WZ_MODES.map(function(m){var on=(z.mode||"team")===m[0];
         return '<button class="wz-card'+(on?" on":"")+'" onclick="wzSetR(\'mode\',\''+m[0]+'\')">'+
          '<span class="tx"><b>'+h(m[0])+'</b><span class="d">'+h(m[1])+' '+h(m[2])+'</span></span></button>';}).join("")+'</div>'+
-      '<div class="hint">This is read off <span class="mono">.oxagen/rules/governance.toml</span> when a pull request is opened and again when it is merged, so raising it takes effect on everything already in flight. Nothing else in oxagen writes that file.</div></div>',
-     t:"Add .oxagen/", s:"the directory every other file needs",
+      '<div class="hint">This is read off <span class="mono">.oxagen/rules/governance.toml</span> when a pull request is opened and again when it is merged, so raising it applies to every open pull request. Nothing else in oxagen writes that file.</div></div>',
+     t:"Connect repository", s:"adds .oxagen/, the directory every other file needs",
      f:wzNext("Next",true)};
   }
   if(z.step===3){
@@ -13811,9 +13811,9 @@ function wzInit(){
       '<div class="field" style="margin-top:14px"><label>And what it still cannot do</label>'+
       wzChecks([["push to "+(z.branch||r.branch),"Every write is to a branch. The production branch changes only by a merge somebody performed."],
         ["merge on its own","Merging gates on a role only a signed-in person holds, under the mode this repository declares."],
-        ["read a secret","The scan refuses a pull request that carries one. Nothing in <span class=\"mono\">.oxagen/</span> holds a credential; a provider is named there and its credential lives in the vault."],
-        ["grant authority","Nothing in this tree can grant a tool, raise a tier or lift a budget. A record steers; a toolbelt grants."]])+'</div>',
-     t:"Add .oxagen/", s:"the directory every other file needs",
+        ["read a secret","The scan refuses a pull request that carries one. Nothing in <span class=\"mono\">.oxagen/</span> holds a credential. The file names a provider, and its credential stays in the vault."],
+        ["grant authority","Nothing in this tree can grant a tool, raise a tier, or lift a budget. A record steers. A toolbelt grants."]])+'</div>',
+     t:"Connect repository", s:"adds .oxagen/, the directory every other file needs",
      f:wzNext("Draft the files",true)};
   }
   if(z.step===4){
@@ -13823,17 +13823,17 @@ function wzInit(){
       '<div class="field"><label>.oxagen/rules/governance.toml</label>'+
       '<pre>'+h(oxGovernanceToml(z.mode||"team"))+'</pre></div>'+
       '<div class="note">Every line is yours to change before anybody reviews it. What lands is what the pull request carries, not what this screen drafted.</div>',
-     t:"Add .oxagen/", s:"the directory every other file needs",
+     t:"Connect repository", s:"adds .oxagen/, the directory every other file needs",
      f:wzNext("Next",true)};
   }
   var pr=wzPrStep("Add .oxagen/ to "+r.n,
-    'The pull request puts the directory in <span class="mono">'+h(r.n)+'</span>. Until somebody merges it, this repository is ungoverned and nothing here is in force — which is also the only place a reviewer can stop it.',
+    'The pull request puts the directory in <span class="mono">'+h(r.n)+'</span>. Until someone merges it, this repository is ungoverned and nothing here is in force. A reviewer can stop it there.',
     wzInitFiles(),
     [["schema","<span class=\"mono\">workspace.toml</span> parses, and every repository it declares resolves through this installation."],
-     ["layout","No <span class=\"mono\">.oxagen/</span> exists on "+h(z.branch||r.branch)+". Nothing is overwritten, and a repository that already has one is refused rather than merged into."],
-     ["governance","<span class=\"mono\">mode = "+h(z.mode||"team")+"</span> is one of the three. A file that parses but names no mode would refuse every later pull request, so it is refused now."],
+     ["layout","No <span class=\"mono\">.oxagen/</span> exists on "+h(z.branch||r.branch)+". Nothing is overwritten, and the check refuses a repository that already has one."],
+     ["governance","<span class=\"mono\">mode = "+h(z.mode||"team")+"</span> is one of the three. A file that parses but names no mode would block every later pull request, so the check refuses it now."],
      ["secret_pii_scan","No credential, key, email or personal datum in any added file."],
-     ["no_authority","Nothing added grants a tool, raises a tier or lifts a budget."]],
+     ["no_authority","Nothing added grants a tool, raises a tier, or lifts a budget."]],
     "Open pull request", "Opened "+r.n+"#118 · Add .oxagen/", r.n);
   return {b:pr.b, t:pr.t, s:"the directory every other file needs",
    f:'<button class="btn primary" onclick="wzOpenPr(\''+pr.msg.replace(/'/g,"\\'")+'\')">'+h(pr.btn)+'</button>'};
