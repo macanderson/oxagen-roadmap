@@ -50,7 +50,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 - **empty**: same as Organization: "This organization has no workspaces". Action: **Create a workspace** (gold).
 - **loading**: the shell stays; the page body is replaced by the skeleton (four tile blocks and a panel of seven rows), so you keep your bearings.
 - **error**: "Organization could not be loaded". The control plane answered `503 control_plane_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
-- **access denied**: "You cannot see this organization's settings". Your roles on the organization do not include `org.admin` (members, funding, and the data plane are owner-only). An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it. Actions: **Request access** (opens `request-access`), **Back to Fleet**. Below: *Signed in as* (name, role), *Needed* (the permission), *Decided by* (`pol_v41`, deny wins over every allow).
+- **access denied**: "You cannot see this organization's settings". Your roles on the organization do not include `org.admin`. An organization owner can grant it; the grant is a governed action and lands in the audit record with your name on it. Actions: **Request access** (opens `request-access`), **Back to Fleet**. Below: *Signed in as* (name, role), *Needed* (the permission), *Decided by* (`pol_v41`, deny wins over every allow).
 
 ## Mobile
 

@@ -8979,7 +8979,7 @@ function pOrganization(){
   var t=tab("organization","people");
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Organization","503 control_plane_unavailable");
-  if(S.state==="denied") return deniedState("this organization’s settings","org.admin. Members, funding, and the data plane are owner-only.");
+  if(S.state==="denied") return deniedState("this organization’s settings","org.admin");
   if(S.state==="empty") return emptyState("This organization has no workspaces",
     "A workspace owns one main repo, one steering set, a set of agents, tool grants, and budgets. A workspace without a main repo cannot exist.",
     '<button class="btn primary" onclick="openDialog(\'newws\')">Create a workspace</button>');
@@ -9271,10 +9271,13 @@ DLG_EXT.member=function(p){
 };
 
 /* ============================== Billing ============================== */
+/* Retained evidence has one figure, BILLING.retainedGb, read by Billing and by Audit › Retention alike. */
+function retainedGbText(){return (Number(BILLING.retainedGb)||0).toLocaleString("en-US",{minimumFractionDigits:1,maximumFractionDigits:1})+" GB";}
 function pBilling(){
   if(S.state==="loading") return skeleton();
   if(S.state==="error") return errorState("Billing","502 stripe_unreachable");
-  if(S.state==="denied") return deniedState("billing","org.billing — plan and invoices are readable only by a finance role");
+  if(S.state==="denied") return deniedState("billing","org.billing");
+  var gaIncl=BILLING.includedGau||250000, gaUsed=BILLING.used!=null?BILLING.used:BILLING.billable+gaIncl;
   if(S.state==="empty") return emptyState("Nothing billable yet",
     "You pay per governed action: a call oxagen decided, delivered and recorded. The free tier has every governance feature on, an included monthly allowance, thirty days of evidence and three seats.",
     '<button class="btn" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'\')">Back to Fleet</button>');
@@ -9284,41 +9287,41 @@ function pBilling(){
    '<div class="acts"><button class="btn primary" onclick="openDialog(\'plan\')">Change plan</button></div></div>'+
    '<div class="grid g4" style="margin-bottom:16px">'+
    '<div class="stat"><span class="k">Plan</span><span class="v" style="font-size:19px">'+h(BILLING.plan)+'</span><span class="s">monthly, cancel any time</span></div>'+
-   '<div class="stat"><span class="k">Governed actions this period</span><span class="v">'+BILLING.billable.toLocaleString()+'</span><span class="s">above the included allowance · '+h(BILLING.tier2)+'</span></div>'+
-   '<div class="stat"><span class="k">Retained evidence</span><span class="v" style="font-size:19px">41.2 GB</span><span class="s">13 months included</span></div>'+
+   '<div class="stat"><span class="k">Governed actions this period</span><span class="v">'+ic0(gaUsed)+'</span><span class="s">'+ic0(BILLING.billable)+' above the '+ic0(gaIncl)+' included</span></div>'+
+   '<div class="stat"><span class="k">Retained evidence</span><span class="v" style="font-size:19px">'+retainedGbText()+'</span><span class="s">13 months included</span></div>'+
    '<div class="stat"><span class="k">Due '+h(BILLING.next)+'</span><span class="v">'+usd(BILLING.total)+'</span><span class="s">USD · after the onboarding discount</span></div></div>'+
    '<div class="split"><div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>This period</h3>'+
     '</div><div class="tw"><table>'+
     '<thead><tr><th>Line</th><th>Basis</th><th class="num">Amount</th></tr></thead><tbody>'+
-    '<tr><td>Governed actions 1 – '+BILLING.billable.toLocaleString()+'</td><td class="dim">'+h(BILLING.tier2)+'</td><td class="num">'+usd(BILLING.amount)+'</td></tr>'+
-    '<tr><td>Tokens</td><td class="dim">reported at zero · the customer\u2019s own model spend is on Spend</td><td class="num">$0.00</td></tr>'+
+    '<tr><td>Governed actions · '+ic0(gaUsed)+' used</td><td class="dim">'+h(BILLING.tier2)+'</td><td class="num">'+usd(BILLING.amount)+'</td></tr>'+
+    '<tr><td>Tokens</td><td class="dim">Not priced. Your own model spend is on Spend.</td><td class="num">$0.00</td></tr>'+
     '<tr><td>Evidence retention</td><td class="dim">'+h(BILLING.retention)+'</td><td class="num">$0.00</td></tr>'+
-    '<tr><td>Onboarding discount</td><td class="dim">'+h(BILLING.discount)+'</td><td class="num" style="color:var(--st-proven)">'+h(BILLING.discountAmount)+'</td></tr>'+
-    '<tr><td><b>Total</b></td><td class="dim">rounded to cents once, half-even</td><td class="num"><b>'+usd(BILLING.total)+' USD</b></td></tr>'+
+    '<tr><td>Onboarding discount</td><td class="dim">'+h(BILLING.discount)+'</td><td class="num" style="color:var(--st-proven)">'+usd(BILLING.discountAmount)+'</td></tr>'+
+    '<tr><td><b>Total</b></td><td class="dim"></td><td class="num"><b>'+usd(BILLING.total)+' USD</b></td></tr>'+
     '</tbody></table></div></div>'+
    '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Meters</h3></div><div class="tw"><table>'+
     '<thead><tr><th>Meter</th><th class="num">This period</th><th>Note</th></tr></thead><tbody>'+
     BILLING.meters.map(function(m){return '<tr><td>'+h(m.m)+'</td><td class="num">'+h(m.v)+'</td>'+
      '<td class="dim" style="font-size:11.5px">'+h(m.note)+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><div class="note">One priced meter: the governed action, a call oxagen decided, delivered and recorded. Runs, tokens and retained evidence are reported so the price can move later without rewriting the meter.</div></div></div>'+
+    '</tbody></table></div><div class="panel-b"><div class="note">Only governed actions are priced. A governed action is a call oxagen decided, delivered and recorded. Runs, tokens and retained evidence are reported and not priced.</div></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Invoices</h3></div><div class="tw"><table>'+
     '<thead><tr><th>Invoice</th><th>Period</th><th class="num">Governed actions</th><th class="num">Amount</th><th>Status</th><th>Paid</th><th></th></tr></thead><tbody>'+
     BILLING.invoices.map(function(i){return '<tr><td class="mono">'+h(i.n)+'</td><td>'+h(i.p)+'</td>'+
      '<td class="num">'+i.runs.toLocaleString()+'</td><td class="num">'+usd(i.amt)+'</td>'+
-     '<td><span class="b b-allowed"><span class="d"></span>'+h(i.st)+'</span></td><td>'+h(i.d)+'</td>'+
+     '<td><span class="b b-allowed"><span class="d"></span>'+h(i.st.charAt(0).toUpperCase()+i.st.slice(1))+'</span></td><td>'+(i.st==="open"?'<span class="dim">Not paid</span>':h(i.d))+'</td>'+
      '<td><a href="#">Open in Stripe ↗</a></td></tr>';}).join("")+
     '</tbody></table></div></div></div>'+
    '<div><div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Price list</h3></div><div class="tw"><table class="narrow"><tbody>'+
-    [["Free","every governance feature, an included monthly allowance, 30 days of evidence, 3 seats"],["Governed actions, blocks of 10,000","$30.00 per block at the published rate"],["Negotiated agreement","the same four figures, per organization"],
-     ["Invoice billing","never capped · overage invoiced at the contracted rate at period end"],["Evidence retention","13 months included on paid plans, then $0.10 per GB-month"],
-     ["Tokens oxagen buys for you","at cost, no markup, capped"],["Enterprise, annual","from $60,000 per year"]]
+    [["Free","Every governance feature, an included monthly allowance, 30 days of evidence and 3 seats"],["Governed actions, blocks of 10,000","$30.00 per block at the published rate"],["Negotiated agreement","Custom pricing per organization"],
+     ["Invoice billing","Never capped. Overage is invoiced at the contracted rate at period end."],["Evidence retention","13 months included on paid plans, then $0.10 per GB-month"],
+     ["Tokens oxagen buys for you","At cost, no markup, capped"],["Enterprise, annual","From $60,000 per year"]]
     .map(function(p){return '<tr><td style="font-size:12.5px">'+h(p[0])+'</td><td class="num mono" style="font-size:11.5px">'+h(p[1])+'</td></tr>';}).join("")+
-    '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">No credits, no resellers, and no revenue dashboard. The free tier is the whole product, limited by retention and seats, never by features or volume. Upgrading is a governance decision, not a volume accident.</p></div></div>'+
+    '</tbody></table></div><div class="panel-b"><p class="muted" style="font-size:12px;margin:0">Every plan has every governance feature. Plans differ in evidence retention, seats and the included monthly allowance.</p></div></div>'+
    '<div class="panel"><div class="panel-h"><h3>Billable units</h3></div><div class="panel-b">'+
     '<ul class="chain"><li class="on"><span class="h">Priced</span><div>A governed action: a call oxagen decided, delivered and recorded, with its receipt in the chain.</div></li>'+
-    '<li class="on"><span class="h">Reported</span><div>Sealed runs, tokens by class, retained evidence: secondary meters, never priced.</div></li>'+
-    '<li class="on"><span class="h">Free</span><div>Denials, runs oxagen halted before a model call, runs of the in-app agent. You never pay for oxagen saying no.</div></li></ul></div></div></div></div>';
+    '<li class="on"><span class="h">Reported</span><div>Sealed runs, tokens by class and retained evidence. Reported, never priced.</div></li>'+
+    '<li class="on"><span class="h">Free</span><div>Denials, runs oxagen halted before a model call, and runs of the in-app agent.</div></li></ul></div></div></div></div>';
 }
 
 /* ============================== Audit ============================== */
@@ -9410,7 +9413,7 @@ var KEYS=[
 var RETENTION_TIERS=[
  ["Ledger","Database","runs, attempts, seals, attestation, counts, cost, tier, gaps","forever","412k runs"],
  ["Frames","Database","frame rows with digests, cost, policy decisions","hot window · 13 months","2.6M frames"],
- ["Bodies and segments","Object storage, write-once","encrypted bodies; per-seal archive segment, Merkle root, attestation","7 years","41 GB"],
+ ["Bodies and segments","Object storage, write-once","encrypted bodies; per-seal archive segment, Merkle root, attestation","7 years",retainedGbText()],
  ["Control-plane audit","Database","admin actions, IAM changes, repo bindings, plane changes, key rotations","7 years","118k events"]
 ];
 
@@ -9566,7 +9569,7 @@ function auditRetention(){
      ["Hot window","13 months, then frame rows are compacted into the segment. Bodies are never moved."],
      ["Replay of a compacted run","reads the segment, not the hot table. Same bytes, same grade."],
      ["Workspace opt-down",WS.map(function(w){return w.slug+" "+(w.retention||"content_exact");}).join(" · "),1],
-     ["Cold storage cost","41 GB · $0.04 per month. The hot table, not the archive, is what needs a window."]])+'</div></div>'+
+     ["Storage price",retainedGbText()+". Included for 13 months, then $0.10 per GB-month (about "+usd((Number(BILLING.retainedGb)||0)*0.1)+" a month)."]])+'</div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Archive tiers</h3><span style="margin-left:auto">'+auditStore("three stores, one policy")+'</span></div>'+
    '<div class="tw"><table><thead><tr><th>Tier</th><th>Where</th><th>What it holds</th><th>Retention</th><th class="num">Held today</th></tr></thead><tbody>'+tiers+'</tbody></table></div></div>'+
    '<div class="panel" style="margin-top:14px"><div class="panel-h"><h3>Redaction</h3><span class="muted" style="font-size:12.5px">before write, never after</span></div>'+
@@ -11449,9 +11452,9 @@ function dialog(){
      '<div class="warn">Revocation ends the service principal’s access at the next call. Runs it started keep their records.</div>',
      f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn danger" onclick="apikeyRevoke('+kki+')">Revoke</button>'},
    plan:{t:"Change plan",w:false,b:
-     '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team — usage-based, monthly, cancel any time</option><option>Enterprise — annual, committed use at 20–30% off, from $60,000</option></select></div>'+
+     '<div class="field"><label>Plan</label><select aria-label="Plan"><option>Team (usage-based, monthly, cancel any time)</option><option>Enterprise (annual, committed use at 20–30% off, from $60,000)</option></select></div>'+
      '<div class="note">The free tier is in every plan: an included monthly allowance of governed actions and every governance feature on. Enterprise adds a dedicated data plane or behind-the-firewall deployment, and support with an SLA.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Plan change staged in Stripe. oxagen holds the meter; Stripe holds the plan.\')">Change plan</button>'},
+     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Plan change staged in Stripe. Stripe holds the plan and the invoices; oxagen counts the governed actions.\')">Change plan</button>'},
    /* ---- audit dialogs (W10 port) — bodies are built by guarded functions in the Audit section ---- */
    receipt:{t:receiptDlgTitle(),s:receiptDlgSub(),w:true,b:receiptDlgBody(),f:receiptDlgFoot()},
    incidentview:{t:incidentDlgTitle(),s:incidentDlgSub(),w:true,b:incidentDlgBody(),f:incidentDlgFoot()},
@@ -15786,12 +15789,12 @@ document.addEventListener("click",function(e){
   });
   /* Governed actions are the unit (ADR-055): the included allowance first, then blocks of 10,000 at $30. */
   var included=BILLING.includedGau||250000, gauTot=SPEND.actions, billable=Math.max(0,gauTot-included), blocks=Math.ceil(billable/10000), amount=blocks*30, disc=amount*0.2;
-  BILLING.runsUsed=runsTot; BILLING.billable=billable; BILLING.tier2=ic(blocks)+" blocks × $30.00 · "+ic(included)+" included"; BILLING.amount=mc(amount); BILLING.discountAmount="-"+mc(disc); BILLING.total=mc(amount-disc);
-  BILLING.retention="13 months included · "+(spendTot/420).toFixed(1)+" GB · $0.00";
+  BILLING.runsUsed=runsTot; BILLING.used=gauTot; BILLING.includedGau=included; BILLING.billable=billable; BILLING.tier2=ic(blocks)+" blocks × $30.00 · "+ic(included)+" included"; BILLING.amount=mc(amount); BILLING.discountAmount="-"+mc(disc); BILLING.total=mc(amount-disc);
+  BILLING.retention=retainedGbText()+" held · 13 months included";
   BILLING.invoices=[]; var mon=["August","July","June","May","April","March","February","January"], base=runsTot*0.93;
-  mon.forEach(function(m,i){var runs=Math.round(base*Math.pow(0.91,i)*rf(0.97,1.03)),gau=Math.round(runs*14.7),bill=Math.ceil(Math.max(0,gau-included)/10000)*30*0.8;BILLING.invoices.push({n:"INV-2026-"+pad(8-i),p:m+" 2026",runs:gau,amt:mc(bill),st:i===0&&rnd()<0.3?"open":"paid",d:"2026-"+pad(9-i)+"-01"});});
-  BILLING.meters=[{m:"Governed actions",v:ic(SPEND.actions),note:"the billable unit · "+ic(included)+" included this month"},{m:"Sealed runs with at least one model call",v:ic(runsTot),note:"reported, not priced"},{m:"Retained evidence",v:(spendTot/420).toFixed(1)+" GB",note:"13 months included"},
-    {m:"Runs oxagen halted before any model call",v:ic(Math.round(runsTot*0.009)),note:"free"},{m:"Runs of the in-app agent",v:ic(Math.round(runsTot*0.03)),note:"free"}];
+  mon.forEach(function(m,i){var runs=Math.round(base*Math.pow(0.91,i)*rf(0.97,1.03)),gau=Math.round(runs*14.7),bill=Math.ceil(Math.max(0,gau-included)/10000)*30*0.8;/* rf() and rnd() still run for every month so the seeded data after this stays put; the organization converted in March, so February and January have no invoice. */if(i<6)BILLING.invoices.push({n:"INV-2026-"+pad(8-i),p:m+" 2026",runs:gau,amt:mc(bill),st:i===0&&rnd()<0.3?"open":"paid",d:"2026-"+pad(9-i)+"-01"});});
+  BILLING.meters=[{m:"Governed actions",v:ic(SPEND.actions),note:"Priced · "+ic(included)+" included this month"},{m:"Sealed runs with at least one model call",v:ic(runsTot),note:"Reported, not priced"},{m:"Retained evidence",v:retainedGbText(),note:"Reported · 13 months included"},
+    {m:"Runs oxagen halted before any model call",v:ic(Math.round(runsTot*0.009)),note:"Free"},{m:"Runs of the in-app agent",v:ic(Math.round(runsTot*0.03)),note:"Free"}];
   SWITCHES.forEach(function(s){
     if(s.id==="ks_org")s.stops=plural(AGENTS.length,"agent")+" · "+ic(TOOLS.length)+" tool versions";
     if(s.id==="ks_ws")s.stops=plural((WS[0].agents-7),"agent")+" · "+ic(Math.round(TOOLS.length*0.38))+" tool versions";
