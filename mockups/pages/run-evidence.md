@@ -51,7 +51,7 @@ A direct work order has no items, and the panel is absent.
 
 The demo run lists `a-intel/platform#482` (task, stated), `#480` (referenced, closed, observed), `#471` and `#465` (inferred). With none: "No issue is linked to this session." The panel has no note under the table. Why a session touches more than one issue, and what relation, edge and status each say, is in the component help (Issues).
 
-**Linked work.** Eyebrow "Linked work" and a legend of three edge chips, each with its count: "observed 3", "stated 0" and "inferred 2" on the demo run. Each chip's tooltip carries its meaning ("Written by Oxagen from a tool call routed through it", "Carried by the task", "Proposed by a light model that read the frames"). The full account is in the component help (Linked work). Two panels, each with a count:
+**Linked work.** Eyebrow "Linked work" and the legend the app draws (`apps/app/src/features/run/linked-work.tsx`): "observed" recorded by Oxagen from the run's frames, "stated" carried by the run's task reference, and "inferred" proposed by a model that read the frames, then the inferred count, "2 of 5 rows." on the demo run ("None of <N> rows." with none). The full account is in the component help (Linked work). Two panels, each with a count:
 
 - Repositories: one row per repository, a link to the forge, with its ref and note and its edge chip (`a-intel/platform`, "a4c91e2 · main · read; branch release/4.11.0-notes pushed · main untouched", observed, frame 5, frame 7). Empty: "No repository was touched."
 - Pull requests and artifacts: one row per branch, release, pull request or file, each reference a link to the forge where it has one, with its state and edge chip. Empty: "Nothing produced yet."

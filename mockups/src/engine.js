@@ -528,6 +528,7 @@ function runOutputs(R){
     (reads?'<button class="ro-link" onclick="roToggleReads()">'+(S.ro.reads?"Hide reads":"Show reads")+'</button>':'')+
    '</div>'+
    '<ol class="ro-spine'+(live?" ro-live":"")+'">'+body+'</ol>'+
+   '<p class="ro-foot">In frame order.</p>'+
    '</section>';
 }
 
@@ -3201,9 +3202,9 @@ function linkedWork(R){
    g.files.map(function(f){var rows=txDiffRows(f.before,f.after),st=diffStat(rows);return '<details><summary><span class="p">'+h(f.path)+'</span>'+(f.note?'<span class="dim" style="font-size:11px;flex:none">'+h(f.note)+'</span>':'')+'<span class="dstat"><b class="a">+'+st.add+'</b> <b class="d">−'+st.del+'</b></span></summary>'+diffHtml(rows,3)+'</details>';}).join("")+'</div></div>':'';
   return '<section aria-label="Linked work">'+
    '<div class="lw-note" data-help="linked-work"><p class="eyebrow q" style="margin:0">Linked work</p>'+
-    '<span><span class="edge observed" title="Written by Oxagen from a tool call routed through it">observed</span> '+obs+'</span>'+
-    '<span><span class="edge stated" title="Carried by the task">stated</span> '+(g.repos.length+g.artifacts.length-obs-inf)+'</span>'+
-    '<span><span class="edge inferred" title="Proposed by a light model that read the frames">inferred</span> '+inf+'</span></div>'+
+    '<span><span class="edge observed">observed</span> recorded by oxagen from the run’s frames</span>'+
+    '<span><span class="edge stated">stated</span> carried by the run’s task reference</span>'+
+    '<span><span class="edge inferred">inferred</span> proposed by a model that read the frames. '+(inf||"None")+' of '+plural(g.repos.length+g.artifacts.length,"row")+'.</span></div>'+
    '<div class="lw">'+panel("Repositories",repos,"No repository was touched.")+panel("Pull requests and artifacts",arts,"Nothing produced yet.")+'</div>'+files+'</section>';
 }
 
