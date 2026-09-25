@@ -1,5 +1,40 @@
 # Runtime
 
+## Page header {#runtime/header}
+
+The header on one host's page: the workspace name, the Runtimes title, and **Enroll a runtime**, the same header the host list carries.
+
+### Purpose
+It keeps a person inside Runtimes while they read one host, and it keeps the one way to add a host within reach. The host itself is named by the breadcrumb ("Anderson Intelligence Corp. / Core platform / Runtimes / mbell-mbp-16") and by the Host panel's title, so the header does not repeat it.
+
+### Rationale
+A runtime is a record page under the Runtimes list, not a tab of it, so the design gives it no header of its own: `pRuntimes(r)` builds one header and prepends it to the list, to a host, and to the empty state. Keeping the list's title makes the route read as a place in Runtimes, and **← All runtimes**, the row under the header, is the way back.
+
+The header carries no subtext. The list's subtitle, "The hosts your agents run on, and the enforcement tier each one supports.", described the page to a reviewer and moved to the list's own help (`runtimes/header`). Nothing on a host's page enrolls it: enrollment is an installer run on the host itself, so **Enroll a runtime** starts Register agent, whose Wrap step shows the command (mission-control-spec §7.1).
+
+### Data sources
+| Field | Mockup source | Target store | Status |
+|---|---|---|---|
+| Eyebrow | `ws().name` | the workspace | shipped |
+| Title | the constant "Runtimes" | none | shipped |
+| Enroll a runtime | `openDialog('wrap')`, which starts Register agent (`regStart()`) | `create_enrollment_token`, then `enroll_host` | shipped |
+| The host in the breadcrumb | the route's runtime id through `rtById()` | the enrollment's public id (`tch_…`) | partial (#3816) |
+
+In the app the route segment is the enrollment's public id, because an enrollment is the row the record holds, and an id the list does not hold answers 404 (`apps/app/src/features/runtimes/runtime.tsx:1-6`).
+
+### Logic
+1. `pRuntimes(r)` reads `r.id`. With an id it finds the host through `rtById()` and renders the header, then `rtDetail(rt)`.
+2. An id the workspace does not hold renders the header over "No runtime here", which names the id, with **All runtimes**.
+3. **Enroll a runtime** is the one gold action on the page. It opens Register agent at "Name the agent" (`#/a-intel/core-platform/register`).
+4. On a host that is not enrolled (`ci-runner-08`), the Enroll this host panel draws a second gold **Enroll a runtime**. A build keeps one gold action on the screen.
+5. Creating an enrollment token needs `runtime.enroll`, an org Owner or Admin. The token is then the host's single-use credential for `enroll_host`.
+
+### States
+- **Loaded**: the header, then **← All runtimes** and the host's panels.
+- **Loading, error and denied**: the shell's panels replace the page body, header included. Error names `503 collector_unreachable`, and denied names `runtime.read on core-platform`.
+- **No such host**: the header stays over "No runtime here".
+- **Mobile**: the action sits under the title, and the current crumb is the host name in mono.
+
 ## Host
 
 One host's facts: what it is, who owns it, the harness, the collector, the hooks, the model surface, the tier, and the last checkpoint.
