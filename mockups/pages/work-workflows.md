@@ -18,7 +18,7 @@ The workflows a work order can be sent to, and how to write a new one. A workflo
 
 **Header.** As `work-backlog.md`: eyebrow the workspace name, h1 “Work”, subtext “What the agents work on, and what waits on you.” On Workflows the action is **New workflow** (gold; opens the builder).
 
-**Tabs**: Backlog `7` · Work orders `1` · Workflows · Findings `36`, with Workflows selected. Workflows carries no count.
+**Tabs**: Backlog `7` · In progress · Work orders `1` · Workflows · Findings `36`, with Workflows selected. Workflows carries no count.
 
 The tab body is two panels side by side, the first two thirds wide. The mockup outlines the whole body as future-only.
 

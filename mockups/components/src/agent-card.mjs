@@ -90,7 +90,7 @@ export default {
     ["--dim", "List and compact layouts' second line"],
   ],
   helpers: [
-    ["hxIcon(harness, size, alone)", "engine.js:14911", "The harness mark, found by key or by label. `alone` adds `role=\"img\"` and an `aria-label` when no text beside the mark names the harness."],
+    ["hxIcon(harness, size, alone)", "engine.js:14985", "The harness mark, found by key or by label. `alone` adds `role=\"img\"` and an `aria-label` when no text beside the mark names the harness."],
     ["agentCard(a, o)", "engine.js:10055", "The one function that draws an agent identity. `o.layout` picks list, compact, or detail. 17 calls."],
   ],
   sourceNotes: [

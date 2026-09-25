@@ -923,6 +923,26 @@ th.sortable[aria-sort="descending"]::after{content:"↓";color:var(--gold)}
 .lt-none{padding:18px 16px;color:var(--dim);font-size:12.5px;text-align:center}
 #viewport.phone .lt .lt-q{flex-basis:100%}
 #viewport.phone .lt .lt-rows{margin-left:0}
+/* A multi-select filter: a button that shows the first pick as the table draws it, and a popover of checkboxes */
+.lt .lt-mb{display:inline-flex;align-items:center;gap:6px;max-width:220px;min-height:28px;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:3px 26px 3px 8px;font-size:12px;color:var(--fg);font-family:var(--font);position:relative;cursor:pointer;transition:border-color .12s}
+.lt .lt-mb::after{content:"";position:absolute;right:10px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:translateY(-70%) rotate(45deg)}
+.lt .lt-mb:focus-visible,.lt .lt-mb[aria-expanded="true"]{border-color:var(--gold);outline:none}
+.lt .lt-mb[data-on]{border-color:color-mix(in srgb,var(--gold) 55%,var(--border))}
+.lt .lt-mb .lt-mv{display:inline-flex;min-width:0;overflow:hidden}
+.lt .lt-mb .lt-mv .tkp{gap:5px}
+.lt .lt-mb .lt-mn{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.lt-pop{inset:auto;margin:0;position:fixed;min-width:220px;max-width:min(300px,calc(100vw - 16px));max-height:min(440px,70vh);overflow:auto;padding:6px;background:var(--panel);color:var(--fg);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow)}
+.lt-o{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12.5px}
+.lt-o:hover{background:var(--hl)}
+.lt-o input{width:15px;height:15px;margin:0;accent-color:var(--gold);flex:none}
+.lt-o .lt-ov{flex:1;min-width:0;display:flex}
+.lt-o .lt-on{font-family:var(--mono);font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+.lt-pf{display:flex;justify-content:flex-end;padding:6px 4px 2px;margin-top:4px;border-top:1px solid var(--border)}
+#viewport.phone .lt .lt-mb{min-height:44px;font-size:16px}
+#viewport.phone .lt-o{min-height:44px}
+/* Work: the scope toggle over the four stat cards */
+.wk-stats{margin-bottom:16px}
+.wk-stats>.seg{margin-bottom:10px}
 /* ---- definition form (the file is the record; the form is a view of it) ---- */
 .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--ink);border:1px solid var(--border);border-radius:9px;padding:6px 8px;min-height:38px;transition:border-color .15s}
 .chips:focus-within{border-color:var(--gold)}
@@ -2176,6 +2196,7 @@ a.b.lk:hover *,button.b.lk:hover *{text-decoration:none}
 .hxn>.hx{vertical-align:0;margin-top:.15em}
 .tkp{display:inline-flex;align-items:center;gap:7px;min-width:0;vertical-align:middle}
 .tk-t{display:inline-flex;align-items:center;gap:6px}
+.tk-t .mono{white-space:nowrap}
 .tk-s{font-weight:500;color:var(--fg);margin-top:2px;overflow-wrap:anywhere}
 .tk-body{margin:0;white-space:pre-wrap;font-size:13px;color:var(--body)}
 .tk-link{display:flex;flex-direction:column;gap:2px;padding:7px 0;border-top:1px solid var(--border);color:var(--body);font-size:12.5px}

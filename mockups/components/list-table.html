@@ -42,7 +42,7 @@
   <p class="dx-lead">Every list in the product gets the same controls: a search box, up to three filters, sortable columns, a rows-per-page select, and a pager. Pages write a plain table, and the engine's <code>listify()</code> adds the controls after each render, so no page writes its own and no list shows two search boxes. This is the table panel in the screenshot that started this reference: the Agents list.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.lt, .lp</code></span>
-    <span><b>CSS</b> <code>engine.css</code> lines 896 to 922</span>
+    <span><b>CSS</b> <code>engine.css</code> lines 898 to 942</span>
     <span><b>Used on</b> Agents, Work orders, Backlog, Tools, Spend budgets, Repositories, Runtimes, Audit, Organization</span>
   </div>
 </div>
@@ -78,6 +78,28 @@
     </tbody>
   </table></div>
   <div class="lp"><span class="lp-n">1–10 of 23 (page 1 of 3)</span><span class="lp-pg"><button class="btn sm" data-p="prev" aria-label="Previous page" disabled>‹</button><button class="btn sm" data-p="1" aria-label="Page 1 of 3" aria-current="page">1</button><button class="btn sm" data-p="2" aria-label="Page 2 of 3">2</button><button class="btn sm" data-p="3" aria-label="Page 3 of 3">3</button><button class="btn sm" data-p="next" aria-label="Next page">›</button></span></div>
+</div>
+    </template>
+  </figure>
+  <figure class="dx-story" id="story-multi">
+    <figcaption class="dx-story-h"><b>Multi-select filter</b><span>A column whose header carries <code>data-facet=&quot;multi&quot;</code> filters on every value in its cells. The button shows the first pick as the table draws it and +N, and the list opens in the top layer. Here it is drawn open in place.</span></figcaption>
+    <div class="dx-canvas on-panel"></div>
+    <template data-story="multi" data-name="Multi-select filter">
+<div class="panel">
+  <div class="lt">
+    <input class="lt-q" type="search" placeholder="Search this list" aria-label="Search this list" value="">
+    <span class="lt-m" data-k="2"><button type="button" class="lt-mb" aria-haspopup="true" aria-expanded="true" data-on aria-label="Filter by Labels, 2 selected"><span class="lt-mv"><span class="lbl" style="--lc:#E0803A" data-fv="p1" data-fo="1"><i aria-hidden="true"></i>P1</span></span><span class="lt-mn">+1</span></button></span>
+    <select class="lt-f" data-k="3" aria-label="Filter by Status"><option value="">Any status</option><option value="Open">Open</option><option value="Blocked">Blocked</option></select>
+    <span class="lt-m" data-k="5"><button type="button" class="lt-mb" aria-haspopup="true" aria-expanded="false" aria-label="Filter by Owner"><span class="lt-mt">Any owner</span></button></span>
+    <label class="lt-rows">Rows<select class="lt-per" aria-label="Rows per page"><option value="10" selected>10</option></select></label>
+  </div>
+  <div class="lt-pop" role="group" aria-label="Labels" style="position:static;margin:10px 12px 12px">
+    <label class="lt-o"><input type="checkbox" value="p0"><span class="lt-ov"><span class="lbl" style="--lc:#D6455E" data-fv="p0" data-fo="0"><i aria-hidden="true"></i>P0</span></span><span class="lt-on">1</span></label>
+    <label class="lt-o"><input type="checkbox" value="p1" checked><span class="lt-ov"><span class="lbl" style="--lc:#E0803A" data-fv="p1" data-fo="1"><i aria-hidden="true"></i>P1</span></span><span class="lt-on">3</span></label>
+    <label class="lt-o"><input type="checkbox" value="bug" checked><span class="lt-ov"><span class="lbl" style="--lc:#C0453C" data-fv="bug" data-fo="4"><i aria-hidden="true"></i>Bug</span></span><span class="lt-on">7</span></label>
+    <label class="lt-o"><input type="checkbox" value="chore"><span class="lt-ov"><span class="lbl" style="--lc:#A1A1AA" data-fv="chore" data-fo="9"><i aria-hidden="true"></i>Chore</span></span><span class="lt-on">1</span></label>
+    <div class="lt-pf"><button type="button" class="btn sm" data-clear>Clear</button></div>
+  </div>
 </div>
     </template>
   </figure>
@@ -133,6 +155,8 @@
       <tr><td>Control bar</td><td><code>.lt</code></td><td>A wrapping row on <code>--panel</code> under the panel header, 9px by 12px padding, with a <code>--border</code> underline.</td></tr>
       <tr><td>Search</td><td><code>.lt .lt-q</code></td><td>A <code>type=search</code> input on <code>--ink</code>, 12.5px, growing from 200px. Its border turns gold on focus.</td></tr>
       <tr><td>Filter</td><td><code>.lt select.lt-f</code></td><td>A select per filtered column, labelled &quot;Filter by&quot; the column. Its first option reads &quot;Any&quot; and the column name.</td></tr>
+      <tr><td>Multi-select filter</td><td><code>.lt .lt-mb</code></td><td>A button styled as a filter select. It reads &quot;Any&quot; and the column name, or shows the first pick as the table draws it with &quot;+N&quot; in mono. With a pick, its border takes gold at 55%.</td></tr>
+      <tr><td>Filter list</td><td><code>.lt-pop</code>, <code>.lt-o</code></td><td>A popover in the top layer, on <code>--panel</code> with a <code>--rule</code> border and the shadow. One row per value: a checkbox, the value as the table draws it, and its row count in <code>--dim</code> mono. <b>Clear</b> sits under a <code>--border</code> rule.</td></tr>
       <tr><td>Sort</td><td><code>.lt .lt-sort</code></td><td>A Sort select, only on card lists, which have no headers to click.</td></tr>
       <tr><td>Rows</td><td><code>.lt .lt-rows</code></td><td>Rows per page: 5, 10, 25, 50, or All. Default 10. It sits at the right end of the bar.</td></tr>
       <tr><td>Sortable header</td><td><code>th.sortable</code></td><td>A header with a ↕ mark in <code>--rule</code>. Sorted, it shows ↑ or ↓ in gold and its text turns <code>--fg</code>.</td></tr>
@@ -157,6 +181,8 @@
   <ul>
     <li><b>Filters are chosen, not written.</b> A column earns a filter when it holds 2 to 8 distinct short values (28 characters or fewer) across at least 4 rows, and the values are not unique per row. At most three per list, and columns whose names match status, state, tier, kind, role, risk, or a similar word come first.</li>
     <li><b>Sorting</b> cycles ascending, descending, and back to the page's order. A column is numeric when 60% of its filled cells are numbers, so a column of counts with a few dashes still sorts as numbers.</li>
+    <li><b>Several values.</b> <code>data-facet=&quot;multi&quot;</code> on a header filters that column on every element in a cell that carries <code>data-fv</code>, and each option is that element as the table draws it. <code>data-fo</code> orders the options, and the rest sort by name. A row matches any value picked. The bar then holds four filters at most, in column order. <code>lblChip()</code> and <code>tkPerson()</code> carry <code>data-fv</code>, and two accounts mapped to one member share it.</li>
+    <li><b>Opting a column out.</b> <code>data-facet=&quot;off&quot;</code> on a header keeps an automatic filter off that column.</li>
     <li><b>Cell values.</b> A cell may carry <code>data-v</code> to override its sort and filter value. A cell's filter value is its first readable text, skipping avatar initials, a status dot, and the second line.</li>
     <li><b>Selection.</b> A row the address selects (<code>aria-selected=&quot;true&quot;</code>) opens on its own page once, and paging stays yours after that.</li>
     <li><b>State per list.</b> Search, filters, sort, rows, and page are kept per list until the page reloads.</li>
@@ -169,6 +195,7 @@
   
   <ul>
     <li><b>Search placeholder</b>: &quot;Search this list&quot;, or the page's own wording when a page field was absorbed (&quot;Search findings&quot;).</li>
+    <li><b>Multi-select face</b>: &quot;Any labels&quot;, &quot;Any owner&quot;, or the first pick and &quot;+N&quot;. Its <code>aria-label</code> adds the count: &quot;Filter by Labels, 2 selected&quot;.</li>
     <li><b>Filter first option</b>: &quot;Any&quot; and the column name in lowercase: &quot;Any health&quot;, &quot;Any runtime&quot;. Option text is sentence case, and provider ids read as the provider's name (&quot;GitHub&quot;).</li>
     <li><b>Stored keys</b> in a filter show their label from <code>KEY_LABEL</code>, such as &quot;Observed by gateway&quot;.</li>
     <li><b>Range</b>: <code>1–10 of 23 (page 1 of 3)</code>. The en dash here is a range in data, and the page count shows only when there is more than one page. Thousands take separators: <code>41–50 of 1,703</code>.</li>
@@ -181,6 +208,7 @@
   
   <ul>
     <li>The search has an <code>aria-label</code> equal to its placeholder, each filter has &quot;Filter by&quot; and the column name, and the rows select has &quot;Rows per page&quot;.</li>
+    <li>A multi-select filter is a <code>button</code> with <code>aria-haspopup</code> and <code>aria-expanded</code>. Its list is a <code>role=&quot;group&quot;</code> of labelled checkboxes, reached by Tab, and Escape or a click outside closes it.</li>
     <li>Each sortable header is focusable and sorts on Enter or Space. Its <code>aria-sort</code> reads ascending, descending, or none.</li>
     <li>The mockup puts <code>role=&quot;button&quot;</code> on the <code>th</code> itself, which replaces its column header role, and <code>aria-sort</code> is only valid on a column header. A build should keep the <code>th</code> and put a <code>button</code> inside it. See Findings.</li>
     <li>Each pager button is labelled with its page and the total (&quot;Page 2 of 3&quot;), and the current one has <code>aria-current=&quot;page&quot;</code>. Previous and next are disabled at the ends.</li>
@@ -195,6 +223,7 @@
     <li>The search takes the full width of the bar, and the rows select stops pushing right.</li>
     <li>Tables become labelled cards (<code>cardTables()</code>). The bar and pager stay above and below the cards.</li>
     <li>Controls take the phone sizes: inputs and selects at 16px, pager buttons 36px tall.</li>
+    <li>A multi-select filter is 44px tall with 16px text, and each row in its list is 44px tall.</li>
   </ul>
 </section>
 
@@ -222,13 +251,16 @@
   <div class="dx-tbl"><div class="tw"><table>
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
-      <tr><td><code>mockups/src/engine.css</code> lines 896 to 922</td><td>The rules that draw it</td></tr>
-      <tr><td><code>listify()</code> at <code>engine.js:13858</code></td><td>After every render, runs <code>ltTable()</code> on each table in the page and the dialog layer, and <code>ltCards()</code> on each card list.</td></tr>
-      <tr><td><code>ltTable(table, prefix)</code> at <code>engine.js:13758</code></td><td>Reads the table, picks filters, makes headers sortable, and inserts the bar and pager.</td></tr>
-      <tr><td><code>ltBar(st, opts, apply)</code> at <code>engine.js:13706</code></td><td>Writes the control bar: search, filters, an optional Sort, and Rows.</td></tr>
+      <tr><td><code>mockups/src/engine.css</code> lines 898 to 942</td><td>The rules that draw it</td></tr>
+      <tr><td><code>listify()</code> at <code>engine.js:13932</code></td><td>After every render, runs <code>ltTable()</code> on each table in the page and the dialog layer, and <code>ltCards()</code> on each card list.</td></tr>
+      <tr><td><code>ltTable(table, prefix)</code> at <code>engine.js:13827</code></td><td>Reads the table, picks filters, makes headers sortable, and inserts the bar and pager.</td></tr>
+      <tr><td><code>ltBar(st, opts, apply)</code> at <code>engine.js:13753</code></td><td>Writes the control bar: search, filters, an optional Sort, and Rows.</td></tr>
+      <tr><td><code>ltMultiFacets(cols, rows, vals)</code> at <code>engine.js:13797</code></td><td>Reads each <code>data-facet=&quot;multi&quot;</code> column's <code>data-fv</code> values into options with their row counts.</td></tr>
+      <tr><td><code>ltMulti(st, f)</code> at <code>engine.js:13714</code></td><td>Writes a multi-select filter: the button and its popover list.</td></tr>
+      <tr><td><code>ltMultiWire(m, st, f, apply)</code> at <code>engine.js:13724</code></td><td>Places the list under its button, closes it on scroll, and applies each pick.</td></tr>
       <tr><td><code>ltPager(st, total, onPage)</code> at <code>engine.js:13681</code></td><td>Writes the range and the page buttons, with ellipses past seven pages.</td></tr>
-      <tr><td><code>ltCards(cfg)</code> at <code>engine.js:13827</code></td><td>The same bar and pager for card lists, configured in <code>LT_CARDS</code>.</td></tr>
-      <tr><td><code>cardTables()</code> at <code>engine.js:13924</code></td><td>Turns tables into labelled cards in the phone shell.</td></tr>
+      <tr><td><code>ltCards(cfg)</code> at <code>engine.js:13901</code></td><td>The same bar and pager for card lists, configured in <code>LT_CARDS</code>.</td></tr>
+      <tr><td><code>cardTables()</code> at <code>engine.js:13998</code></td><td>Turns tables into labelled cards in the phone shell.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -258,7 +290,7 @@
 ## Inputs
 
 1. mockups/components/list-table.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 896 to 922. The mockup renders it with listify() (engine.js:13858), ltTable(table, prefix) (engine.js:13758), ltBar(st, opts, apply) (engine.js:13706), ltPager(st, total, onPage) (engine.js:13681), ltCards(cfg) (engine.js:13827), cardTables() (engine.js:13924).
+2. The design source: mockups/src/engine.css lines 898 to 942. The mockup renders it with listify() (engine.js:13932), ltTable(table, prefix) (engine.js:13827), ltBar(st, opts, apply) (engine.js:13753), ltMultiFacets(cols, rows, vals) (engine.js:13797), ltMulti(st, f) (engine.js:13714), ltMultiWire(m, st, f, apply) (engine.js:13724), ltPager(st, total, onPage) (engine.js:13681), ltCards(cfg) (engine.js:13901), cardTables() (engine.js:13998).
 3. The build's implementation: find it by its root selector (.lt, .lp) or its name, and list every route that renders it.
 4. Where to see it in the design: Agents, Work orders, Backlog, Tools, Spend budgets, Repositories, Runtimes, Audit, Organization. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
@@ -278,8 +310,8 @@ Record PASS, FAIL, or N/A for every check. Cite evidence for each: a file and li
 10. Tokens. Every color, border, radius, and shadow in the build's version resolves to the tokens listed in the Tokens section of the reference page. A raw hex, rgb, or named color is a FAIL.
 11. Type. Text computes to Geist and ids, keys, and code compute to Monaspace Neon, at the sizes and weights the reference page's examples render. Space Grotesk anywhere in the component is a FAIL.
 12. Themes. Repeat every visual check in the light theme. A part that loses its border, its contrast, or its meaning in one theme is a FAIL.
-13. Phone. At 390 by 844 with a touch pointer: The search takes the full width of the bar, and the rows select stops pushing right. Tables become labelled cards (`cardTables()`). The bar and pager stay above and below the cards. Controls take the phone sizes: inputs and selects at 16px, pager buttons 36px tall.
-14. Accessibility. The search has an `aria-label` equal to its placeholder, each filter has &quot;Filter by&quot; and the column name, and the rows select has &quot;Rows per page&quot;. Each sortable header is focusable and sorts on Enter or Space. Its `aria-sort` reads ascending, descending, or none. The mockup puts `role=&quot;button&quot;` on the `th` itself, which replaces its column header role, and `aria-sort` is only valid on a column header. A build should keep the `th` and put a `button` inside it. See Findings. Each pager button is labelled with its page and the total (&quot;Page 2 of 3&quot;), and the current one has `aria-current=&quot;page&quot;`. Previous and next are disabled at the ends. The range text is plain text a screen reader reaches. A build should also announce the new range after a search or a filter, such as through a polite live region.
+13. Phone. At 390 by 844 with a touch pointer: The search takes the full width of the bar, and the rows select stops pushing right. Tables become labelled cards (`cardTables()`). The bar and pager stay above and below the cards. Controls take the phone sizes: inputs and selects at 16px, pager buttons 36px tall. A multi-select filter is 44px tall with 16px text, and each row in its list is 44px tall.
+14. Accessibility. The search has an `aria-label` equal to its placeholder, each filter has &quot;Filter by&quot; and the column name, and the rows select has &quot;Rows per page&quot;. A multi-select filter is a `button` with `aria-haspopup` and `aria-expanded`. Its list is a `role=&quot;group&quot;` of labelled checkboxes, reached by Tab, and Escape or a click outside closes it. Each sortable header is focusable and sorts on Enter or Space. Its `aria-sort` reads ascending, descending, or none. The mockup puts `role=&quot;button&quot;` on the `th` itself, which replaces its column header role, and `aria-sort` is only valid on a column header. A build should keep the `th` and put a `button` inside it. See Findings. Each pager button is labelled with its page and the total (&quot;Page 2 of 3&quot;), and the current one has `aria-current=&quot;page&quot;`. Previous and next are disabled at the ends. The range text is plain text a screen reader reaches. A build should also announce the new range after a search or a filter, such as through a polite live region.
 15. One implementation. The build draws the list table from one shared component. List every place that draws it by hand, with its file and line.
 
 ## Output

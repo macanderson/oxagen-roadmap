@@ -30,7 +30,7 @@ navigation and the unique views, `docs/fleet-operations-routes.md` the old route
 land, and `docs/fleet-operations-collapse.md` what was deleted or merged. Where the sections below
 this one describe an earlier state, this section wins.
 
-- **Work is primary.** The workspace opens on Work: Backlog, Work orders, Workflows and Findings. A
+- **Work is primary.** The workspace opens on Work: Backlog, In progress, Work orders, Workflows and Findings. A
   run is a child record of one work order. A run started outside Oxagen is filed under a direct work
   order. The Fleet page and the Tasks page are gone; their tiles moved to Agents and Work, and
   Providers, Fields and People are the Intake dialog on Backlog.

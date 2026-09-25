@@ -202,7 +202,7 @@ export default {
   ],
   helpers: [
     ["rowClick(on, label)", "engine.js:6975", "Makes a row a keyboard button. 17 calls."],
-    ["cardTables()", "engine.js:13924", "Turns every single-header table into labelled cards on a phone."],
+    ["cardTables()", "engine.js:13998", "Turns every single-header table into labelled cards on a phone."],
     ["keyLabel(k)", "engine.js:694", "Shows a stored key as its label with the key in a tooltip."],
   ],
   sourceNotes: [

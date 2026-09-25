@@ -936,6 +936,26 @@ th.sortable[aria-sort="descending"]::after{content:"↓";color:var(--gold)}
 .lt-none{padding:18px 16px;color:var(--dim);font-size:12.5px;text-align:center}
 #viewport.phone .lt .lt-q{flex-basis:100%}
 #viewport.phone .lt .lt-rows{margin-left:0}
+/* A multi-select filter: a button that shows the first pick as the table draws it, and a popover of checkboxes */
+.lt .lt-mb{display:inline-flex;align-items:center;gap:6px;max-width:220px;min-height:28px;background:var(--ink);border:1px solid var(--border);border-radius:8px;padding:3px 26px 3px 8px;font-size:12px;color:var(--fg);font-family:var(--font);position:relative;cursor:pointer;transition:border-color .12s}
+.lt .lt-mb::after{content:"";position:absolute;right:10px;top:50%;width:6px;height:6px;border-right:1.5px solid var(--muted);border-bottom:1.5px solid var(--muted);transform:translateY(-70%) rotate(45deg)}
+.lt .lt-mb:focus-visible,.lt .lt-mb[aria-expanded="true"]{border-color:var(--gold);outline:none}
+.lt .lt-mb[data-on]{border-color:color-mix(in srgb,var(--gold) 55%,var(--border))}
+.lt .lt-mb .lt-mv{display:inline-flex;min-width:0;overflow:hidden}
+.lt .lt-mb .lt-mv .tkp{gap:5px}
+.lt .lt-mb .lt-mn{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.lt-pop{inset:auto;margin:0;position:fixed;min-width:220px;max-width:min(300px,calc(100vw - 16px));max-height:min(440px,70vh);overflow:auto;padding:6px;background:var(--panel);color:var(--fg);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow)}
+.lt-o{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:8px;cursor:pointer;font-size:12.5px}
+.lt-o:hover{background:var(--hl)}
+.lt-o input{width:15px;height:15px;margin:0;accent-color:var(--gold);flex:none}
+.lt-o .lt-ov{flex:1;min-width:0;display:flex}
+.lt-o .lt-on{font-family:var(--mono);font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums}
+.lt-pf{display:flex;justify-content:flex-end;padding:6px 4px 2px;margin-top:4px;border-top:1px solid var(--border)}
+#viewport.phone .lt .lt-mb{min-height:44px;font-size:16px}
+#viewport.phone .lt-o{min-height:44px}
+/* Work: the scope toggle over the four stat cards */
+.wk-stats{margin-bottom:16px}
+.wk-stats>.seg{margin-bottom:10px}
 /* ---- definition form (the file is the record; the form is a view of it) ---- */
 .chips{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--ink);border:1px solid var(--border);border-radius:9px;padding:6px 8px;min-height:38px;transition:border-color .15s}
 .chips:focus-within{border-color:var(--gold)}
@@ -2189,6 +2209,7 @@ a.b.lk:hover *,button.b.lk:hover *{text-decoration:none}
 .hxn>.hx{vertical-align:0;margin-top:.15em}
 .tkp{display:inline-flex;align-items:center;gap:7px;min-width:0;vertical-align:middle}
 .tk-t{display:inline-flex;align-items:center;gap:6px}
+.tk-t .mono{white-space:nowrap}
 .tk-s{font-weight:500;color:var(--fg);margin-top:2px;overflow-wrap:anywhere}
 .tk-body{margin:0;white-space:pre-wrap;font-size:13px;color:var(--body)}
 .tk-link{display:flex;flex-direction:column;gap:2px;padding:7px 0;border-top:1px solid var(--border);color:var(--body);font-size:12.5px}
@@ -3468,7 +3489,7 @@ function route(){
   if(sec==="work"){
     if(p[3]==="items"&&p[4]) return {page:"workitem",org:org,ws:w,id:decodeURIComponent(p[4])};
     if(p[3]==="orders"&&p[4]) return {page:"workorder",org:org,ws:w,id:decodeURIComponent(p[4])};
-    var wt=({orders:"orders",workflows:"workflows",findings:"findings"})[p[3]]||"backlog";
+    var wt=({"in-progress":"in-progress",orders:"orders",workflows:"workflows",findings:"findings"})[p[3]]||"backlog";
     S.tab.work=wt;
     if(HQ.get("intake")) hashDialog("intake",HQ.get("intake"));
     if(wt==="findings"&&HQ.get("finding")) hashDialog("evidence",HQ.get("finding"));
@@ -16153,16 +16174,65 @@ function optText(t){
   if(!/^[a-z][a-z ]*$/.test(t)||/^(oxagen|stella)\b/.test(t)) return t;
   return t.charAt(0).toUpperCase()+t.slice(1);
 }
+function ltAny(label){return "Any "+(/^[A-Z][a-z]/.test(label)?label.charAt(0).toLowerCase()+label.slice(1):label);}
+/* The face of a multi-select filter: "Any labels", or the first pick as the table draws it and "+N". */
+function ltMultiFace(f,sel){
+  if(!sel.length) return '<span class="lt-mt">'+h(ltAny(f.label))+'</span>';
+  var first=f.opts.filter(function(o){return o.v===sel[0];})[0];
+  return (first?'<span class="lt-mv">'+first.html+'</span>':'')+(sel.length>1?'<span class="lt-mn">+'+(sel.length-1)+'</span>':'');
+}
+var LT_MN=0;
+function ltMulti(st,f){
+  var sel=st.f[f.key]=Array.isArray(st.f[f.key])?st.f[f.key]:[], id="ltm-"+(++LT_MN);
+  return '<span class="lt-m" data-k="'+h(f.key)+'"><button type="button" class="lt-mb" popovertarget="'+id+'" aria-haspopup="true" aria-expanded="false"'+(sel.length?' data-on':'')+
+     ' aria-label="Filter by '+h(f.label)+(sel.length?', '+sel.length+' selected':'')+'">'+ltMultiFace(f,sel)+'</button>'+
+   '<div class="lt-pop" id="'+id+'" popover role="group" aria-label="'+h(f.label)+'">'+
+   f.opts.map(function(o){return '<label class="lt-o"><input type="checkbox" value="'+h(o.v)+'"'+(sel.indexOf(o.v)>=0?' checked':'')+'><span class="lt-ov">'+o.html+'</span><span class="lt-on">'+o.n+'</span></label>';}).join("")+
+   '<div class="lt-pf"><button type="button" class="btn sm" data-clear'+(sel.length?'':' disabled')+'>Clear</button></div></div></span>';
+}
+/* A multi-select filter opens under its button. The popover sits in the top layer, so a panel that
+   clips its overflow cannot cut it off, and a click outside or Escape closes it. */
+function ltMultiWire(m,st,f,apply){
+  var btn=m.querySelector(".lt-mb"), pop=m.querySelector(".lt-pop");
+  function sync(){
+    var sel=st.f[f.key];
+    btn.innerHTML=ltMultiFace(f,sel);
+    btn.toggleAttribute("data-on",sel.length>0);
+    btn.setAttribute("aria-label","Filter by "+f.label+(sel.length?", "+sel.length+" selected":""));
+    pop.querySelector("[data-clear]").disabled=!sel.length;
+  }
+  function onScroll(e){ if(!pop.contains(e.target)) pop.hidePopover(); }
+  pop.addEventListener("toggle",function(e){
+    var open=e.newState==="open";
+    btn.setAttribute("aria-expanded",String(open));
+    if(open){
+      var r=btn.getBoundingClientRect();
+      pop.style.top=Math.round(r.bottom+4)+"px";
+      pop.style.left=Math.round(Math.max(8,Math.min(r.left,innerWidth-pop.offsetWidth-8)))+"px";
+      document.addEventListener("scroll",onScroll,true);
+    } else document.removeEventListener("scroll",onScroll,true);
+  });
+  pop.addEventListener("change",function(){
+    st.f[f.key]=[].slice.call(pop.querySelectorAll("input:checked")).map(function(i){return i.value;});
+    st.page=1; sync(); apply();
+  });
+  pop.querySelector("[data-clear]").addEventListener("click",function(){
+    pop.querySelectorAll("input:checked").forEach(function(i){i.checked=false;});
+    st.f[f.key]=[]; st.page=1; sync(); apply();
+  });
+}
 function ltBar(st,opts,apply){
   var html='<div class="lt"><input class="lt-q" type="search" placeholder="'+h(opts.ph)+'" aria-label="'+h(opts.ph)+'" value="'+h(st.q)+'">';
   (opts.filters||[]).forEach(function(f){
-    html+='<select class="lt-f" data-k="'+h(f.key)+'" aria-label="Filter by '+h(f.label)+'"><option value="">Any '+h(/^[A-Z][a-z]/.test(f.label)?f.label.charAt(0).toLowerCase()+f.label.slice(1):f.label)+'</option>'+
+    if(f.multi){ html+=ltMulti(st,f); return; }
+    html+='<select class="lt-f" data-k="'+h(f.key)+'" aria-label="Filter by '+h(f.label)+'"><option value="">'+h(ltAny(f.label))+'</option>'+
       f.values.map(function(v){var t=keyText(v);return '<option value="'+h(v)+'"'+(st.f[f.key]===v?' selected':'')+'>'+h(optText(t))+'</option>';}).join("")+'</select>';});
   if(opts.sorts){ html+='<label class="lt-sort">Sort<select class="lt-s">'+opts.sorts.map(function(s,i){return '<option value="'+i+'"'+((st.sort==null?0:st.sort)===i?' selected':'')+'>'+h(s.label)+'</option>';}).join("")+'</select></label>'; }
   html+='<label class="lt-rows">Rows<select class="lt-per" aria-label="Rows per page">'+LT_PER.map(function(p){return '<option value="'+p+'"'+(st.per===p?' selected':'')+'>'+(p||"All")+'</option>';}).join("")+'</select></label></div>';
   var bar=ltEl(html);
   bar.querySelector(".lt-q").addEventListener("input",function(e){st.q=e.target.value;st.page=1;apply();});
   bar.querySelectorAll(".lt-f").forEach(function(s){s.addEventListener("change",function(e){st.f[s.getAttribute("data-k")]=e.target.value;st.page=1;apply();});});
+  (opts.filters||[]).forEach(function(f){ if(f.multi) ltMultiWire(bar.querySelector('.lt-m[data-k="'+f.key+'"]'),st,f,apply); });
   var ss=bar.querySelector(".lt-s"); if(ss)ss.addEventListener("change",function(e){st.sort=+e.target.value;st.page=1;apply();});
   bar.querySelector(".lt-per").addEventListener("change",function(e){st.per=+e.target.value;st.page=1;apply();});
   return bar;
@@ -16185,11 +16255,31 @@ function ltLead(n){
 }
 function ltFacets(cols,vals,rows){
   if(rows<4)return [];
-  var c=cols.filter(function(col){ if(!col.name||col.num)return false;
+  var c=cols.filter(function(col){ if(!col.name||col.num||col.multi||col.off)return false;
     var set={},n=0,ok=true; vals.forEach(function(v){var t=v[col.i].f; if(!t)return; if(t.length>28)ok=false; if(/^\d{4}-\d\d-\d\d/.test(t))ok=false; if(!set[t]){set[t]=1;n++;}});
     if(!ok||n<2||n>8||n>=rows)return false; col.values=Object.keys(set).sort(); return true;});
   c.sort(function(a,b){var pa=LT_FACET.test(a.name)?0:1,pb=LT_FACET.test(b.name)?0:1; return pa-pb||a.values.length-b.values.length;});
   return c.slice(0,3).map(function(col){return {key:String(col.i),label:col.name,values:col.values};});
+}
+/* A column whose header carries data-facet="multi" filters on every value in a cell, where the
+   facets above read only the first. Each value is an element carrying data-fv, and its option shows
+   that element as the table draws it: a label in its color, an owner with an avatar. data-fo orders
+   the options where the fixture has an order; the rest sort by name. A row matches any value picked. */
+function ltMultiFacets(cols,rows,vals){
+  return cols.filter(function(col){return col.multi;}).map(function(col){
+    var by={}, opts=[];
+    rows.forEach(function(r,i){
+      var seen={}, mine=[];
+      [].slice.call(r.cells[col.i]?r.cells[col.i].querySelectorAll("[data-fv]"):[]).forEach(function(e){
+        var v=e.getAttribute("data-fv"); if(seen[v])return; seen[v]=1; mine.push(v);
+        if(!by[v]){ var fo=e.getAttribute("data-fo"); by[v]={v:v,html:e.outerHTML,t:ltCellText(e),o:fo==null?null:+fo,n:0}; opts.push(by[v]); }
+        by[v].n++;
+      });
+      vals[i][col.i].m=mine;
+    });
+    opts.sort(function(a,b){ if(a.o!=null&&b.o!=null)return a.o-b.o; if(a.o!=null||b.o!=null)return a.o!=null?-1:1; return a.t.localeCompare(b.t,undefined,{sensitivity:"base"}); });
+    return opts.length>1?{key:String(col.i),label:col.name,multi:true,opts:opts}:null;
+  }).filter(Boolean);
 }
 
 /* A cell's text as it reads on screen. textContent runs adjacent elements together ("platformmbell",
@@ -16211,7 +16301,8 @@ function ltTable(table,prefix){
   var tbody=table.tBodies[0], rows=[].slice.call(tbody.rows);
   var ths=[].slice.call(table.tHead.rows[0].cells);
   if(ths.some(function(t){return t.colSpan>1;}))return;
-  var cols=ths.map(function(th,i){return {i:i,name:th.textContent.trim(),num:th.classList.contains("num")};});
+  /* data-facet on a header: "multi" filters on every value in the cell, "off" keeps the column out of the filters */
+  var cols=ths.map(function(th,i){var fa=th.getAttribute("data-facet");return {i:i,name:th.textContent.trim(),num:th.classList.contains("num"),multi:fa==="multi",off:fa==="off"};});
   var sig=cols.map(function(c){return c.name;}).join("/");
   var st=ltState(prefix,sig);
   /* A cell may name its own value in data-v, for sorting and filtering, where its text carries a
@@ -16221,7 +16312,9 @@ function ltTable(table,prefix){
   /* a dash is an empty cell, so a column of counts with a few dashes still reads as numbers */
   cols.forEach(function(c){ if(c.num)return; var k=0,tot=0; vals.forEach(function(v){var t=v[c.i].t; if(t&&t!=="—"&&t!=="-"){tot++; if(v[c.i].n!=null)k++;}}); if(tot&&k/tot>=.6)c.num=true; });
   var texts=rows.map(function(r){return r.textContent.replace(/\s+/g," ").toLowerCase();});
-  var facets=ltFacets(cols,vals,rows.length);
+  var facets=ltFacets(cols,vals,rows.length), multis=ltMultiFacets(cols,rows,vals);
+  /* with a multi-select filter the bar holds four filters at most, in column order */
+  if(multis.length) facets=facets.slice(0,Math.max(0,4-multis.length)).concat(multis).sort(function(a,b){return a.key-b.key;});
   var tw=table.closest(".tw")||table, host=tw.parentNode, ph="Search this list";
   /* A page-level search box sitting directly above the table becomes the list's
      search, so no list ever shows two. */
@@ -16241,7 +16334,9 @@ function ltTable(table,prefix){
     var q=st.q.trim().toLowerCase();
     var idx=rows.map(function(_,i){return i;}).filter(function(i){
       if(q&&texts[i].indexOf(q)<0)return false;
-      for(var k in st.f){ if(st.f[k]&&vals[i][+k]&&vals[i][+k].f!==st.f[k])return false; } return true; });
+      for(var k in st.f){ var fk=st.f[k], v=vals[i][+k]; if(!v)continue;
+        if(Array.isArray(fk)){ if(fk.length&&!(v.m||[]).some(function(x){return fk.indexOf(x)>=0;}))return false; }
+        else if(fk&&v.f!==fk)return false; } return true; });
     if(st.sort!=null&&cols[st.sort]){var c=cols[st.sort]; idx.sort(function(a,b){return ltCmp(vals[a][c.i],vals[b][c.i],c.num,st.dir)||(a-b);});}
     var total=idx.length, per=st.per||total||1, pages=Math.max(1,Math.ceil(total/per)); if(st.page>pages)st.page=pages;
     /* a row the address selected opens on its own page, once per selection, so paging stays the reader's */
@@ -17398,9 +17493,10 @@ function tkWaiting(){return wsTasks().filter(function(t){return t.ready==="draft
 function woWaiting(){return wsWorkOrders().filter(function(w){return w.status==="waiting on you";}).length;}
 
 /* ---- small renderers ---- */
+/* data-fv and data-fo let a list filter on every chip in a cell, in the order Intake sets */
 function lblChip(k){
   var l=tLabel(k); if(!l)return "";
-  return '<span class="lbl" style="--lc:'+h(l.color)+'"><i aria-hidden="true"></i>'+h(l.name)+'</span>';
+  return '<span class="lbl" style="--lc:'+h(l.color)+'" data-fv="'+h(l.key)+'" data-fo="'+TLABELS.indexOf(l)+'"><i aria-hidden="true"></i>'+h(l.name)+'</span>';
 }
 function lblChips(ks){return '<span class="lbls">'+(ks||[]).map(lblChip).join("")+'</span>';}
 function tStatusBadge(k){
@@ -17423,8 +17519,9 @@ function readyBadge(t){var m=READY[t.ready]||READY.draft;return '<span class="b 
 function tkPerson(id,opts){
   var p=tPerson(id); opts=opts||{};
   if(!p) return '<span class="dim">—</span>';
-  if(p.state==="mapped"&&PEOPLE[p.to]) return '<span class="tkp">'+personAv(p.to,20)+'<span>'+h(PEOPLE[p.to].name)+(opts.handle?'<span class="dim mono" style="font-size:11px;margin-left:6px">'+ipLogo(p.kind,11)+' '+h(p.handle)+'</span>':'')+'</span></span>';
-  return '<span class="tkp">'+ipLogo(p.kind,14)+'<span class="mono">'+h(p.handle)+'</span>'+
+  /* data-fv names the member, so two accounts mapped to one person filter as that person */
+  if(p.state==="mapped"&&PEOPLE[p.to]) return '<span class="tkp" data-fv="'+h(p.to)+'">'+personAv(p.to,20)+'<span>'+h(PEOPLE[p.to].name)+(opts.handle?'<span class="dim mono" style="font-size:11px;margin-left:6px">'+ipLogo(p.kind,11)+' '+h(p.handle)+'</span>':'')+'</span></span>';
+  return '<span class="tkp" data-fv="'+h(p.id)+'">'+ipLogo(p.kind,14)+'<span class="mono">'+h(p.handle)+'</span>'+
     '<span class="vh"> (</span>'+(p.state==="bot"||p.state==="requester"?'<span class="b b-q" style="font-size:10px">'+p.state+'</span>':'<span class="b b-q" style="font-size:10px" title="Not mapped to a workspace member">not mapped</span>')+'<span class="vh">)</span></span>';
 }
 var DOD_TAGS=["code","test","docs","review"];
@@ -18894,7 +18991,7 @@ function woKindBadge(w){
 }
 
 /* ============================== Work ============================== */
-var WORK_TABS=[["backlog","Backlog"],["orders","Work orders"],["workflows","Workflows"],["findings","Findings"]];
+var WORK_TABS=[["backlog","Backlog"],["in-progress","In progress"],["orders","Work orders"],["workflows","Workflows"],["findings","Findings"]];
 function pWork(r){
   var w=ws(), t=r&&r.tab||S.tab.work||"backlog";
   if(S.state==="loading") return skeleton();
@@ -18914,24 +19011,55 @@ function pWork(r){
   var sel=Object.keys(S.tsel).filter(function(k){return S.tsel[k];});
   var acts=t==="backlog"?'<button class="btn" onclick="openDialog(\'intake\',\'providers\')">Intake</button>'+dispatchButton(sel)
     :t==="workflows"?'<button class="btn primary" onclick="wfzOpen()">New workflow</button>':'';
-  var body=t==="orders"?workOrdersTab(fr):t==="workflows"?'<div'+fut("workflows")+'>'+tkWfTab()+'</div>':t==="findings"?findingsTab():backlogTab();
+  var body=t==="orders"?workOrdersTab(fr):t==="in-progress"?inProgressTab():t==="workflows"?'<div'+fut("workflows")+'>'+tkWfTab()+'</div>':t==="findings"?findingsTab():backlogTab();
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Work</h1>'+
    '<p>What the agents work on, and what waits on you.</p></div><div class="acts">'+acts+'</div></div>'+
-   obFirstBanners(w,fr)+(fr?obOfferCard(fr):'')+tabs+body;
+   obFirstBanners(w,fr)+(fr?obOfferCard(fr):workStats())+tabs+body;
+}
+
+/* ---- Work stats: four rollups of the rows under the tabs, for the workspace or for you ----
+   My work is a work item you own, a work order you sent, and an approval that names you as an
+   approver. A work order waits on the person who sent it to accept, so In review follows the sender. */
+function wiMine(t){var p=tPerson(t.owner),w=woOf(t);return !!(p&&p.state==="mapped"&&p.to===TK_ME)||!!(w&&w.by===TK_ME);}
+function wiOpen(t){return t.ready!=="sent"&&t.ready!=="accepted"&&t.ready!=="closed";}
+function wiInReview(t){var w=woOf(t);return t.ready==="sent"&&!!w&&w.status==="waiting on you";}
+function apMine(a){var me=PEOPLE[TK_ME];return !!me&&String(a.approvers||"").indexOf(me.name)>=0;}
+function workStats(){
+  /* a workspace with no tracker and no work item shows the Backlog's connect panel instead */
+  if(!wsTasks().length&&!wsProviders().length) return '';
+  var mine=S.workScope==="mine";
+  var rows=wsTasks().filter(function(t){return !mine||wiMine(t);});
+  var open=rows.filter(wiOpen), ready=open.filter(function(t){return t.ready==="ready"&&!tkGraphBlocked(t);}).length;
+  var prog=rows.filter(function(t){return t.ready==="sent"&&!wiInReview(t);}), review=rows.filter(wiInReview).length;
+  var live=prog.filter(function(t){var w=woOf(t);return w&&woLive(w);}).length;
+  var aps=APPROVALS.filter(function(a){return a.ws===S.ws&&apState(a.id).status==="pending"&&(!mine||apMine(a));}).length;
+  function card(k,v,s,on,label,why,col){
+    return '<button class="stat click" onclick="'+on+'" aria-label="'+h(label)+'"'+(why?fut(why):'')+'><span class="k">'+k+'</span>'+
+      '<span class="v"'+(col?' style="color:'+col+'"':'')+'>'+v+'</span><span class="s">'+s+'</span></button>';
+  }
+  return '<div class="wk-stats"><div class="seg" role="group" aria-label="Scope">'+
+     '<button class="btn sm" aria-pressed="'+!mine+'" onclick="S.workScope=\'all\';render()">All work</button>'+
+     '<button class="btn sm" aria-pressed="'+mine+'" onclick="S.workScope=\'mine\';render()">My work</button></div>'+
+   '<div class="grid g4">'+
+     card("Open",open.length,ready+" ready to send","go(\'"+workHash("backlog")+"\')","Open the Backlog","work items")+
+     card("In progress",prog.length,live+" with a live run","go(\'"+workHash("in-progress")+"\')","Open the work items in progress","work items and work orders")+
+     card("In review",review,mine?"waiting on you to accept":"waiting on a person to accept","go(\'"+workHash("in-progress")+"\')","Open the work items in review","work items and work orders")+
+     card("Pending approvals",aps,mine?"calls you can approve":"calls waiting on an approver","apdToggle(true)","Open the approvals",null,aps?"var(--st-approval)":null)+
+   '</div></div>';
 }
 
 /* ---- Backlog: every open work item ---- */
 function woOf(t){return t.wo?woById(t.wo):null;}
+/* The work order a work item is in, as a link, with live beside it while one of its runs is live. */
+function woCell(wo){
+  return wo?'<a class="mono" style="font-size:11.5px" href="'+woUrl(wo)+'" onclick="event.stopPropagation()">'+h(wo.id)+'</a>'+(woLive(wo)?' <span class="b b-allowed"><span class="d"></span>live</span>':''):'<span class="dim">\u2014</span>';
+}
+/* A work item in a work order has left the Backlog: it is on In progress until a person accepts it. */
 function backlogTab(){
-  var rows=wsTasks();
-  if(!rows.length&&!wsProviders().length) return '<div class="panel">'+emptyState("No issue tracker is connected to this workspace",
+  var all=wsTasks(), rows=all.filter(function(t){return t.ready!=="sent";});
+  if(!all.length&&!wsProviders().length) return '<div class="panel">'+emptyState("No issue tracker is connected to this workspace",
     "Connect one to import its issues as work items, or write a work item here.",
     '<button class="btn primary" onclick="openDialog(\'intake\',\'providers\')">Connect an issue tracker</button>')+'</div>';
-  var ready=rows.filter(function(t){return t.ready==="ready"&&!tkGraphBlocked(t);}).length,
-      drafts=rows.filter(function(t){return t.ready==="draft"||t.ready==="changed";}).length,
-      inwo=rows.filter(function(t){return t.ready==="sent";}).length;
-  var orders=wsWorkOrders(), live=orders.filter(woLive), toAccept=woWaiting();
-  var parked=wsRunCounts(S.ws).parked;
   var changed=rows.filter(function(t){return t.ready==="changed";});
   var nsel=Object.keys(S.tsel).length;
   var banner=changed.length?'<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
@@ -18949,20 +19077,33 @@ function backlogTab(){
      '<td'+fut("dependencies")+'>'+tkBlockedByCell(t)+'</td>'+
      '<td>'+tkPerson(t.owner)+'</td>'+
      '<td>'+readyBadge(t)+tkReadySub(t)+'</td>'+
-     '<td'+fut("work orders")+'>'+(wo?'<a class="mono" style="font-size:11.5px" href="'+woUrl(wo)+'" onclick="event.stopPropagation()">'+h(wo.id)+'</a>'+(woLive(wo)?' <span class="b b-allowed"><span class="d"></span>live</span>':''):'<span class="dim">\u2014</span>')+'</td>'+
+     '<td'+fut("work orders")+'>'+woCell(wo)+'</td>'+
      '<td class="mono dim" style="font-size:11.5px">'+h(t.updatedAt)+'</td></tr>';}).join("");
-  return '<div class="grid g4" style="margin-bottom:16px"'+fut("work items and work orders")+'>'+
-     tile("Ready to send",ready,"certified and unblocked")+
-     tile("Waiting on you",drafts+toAccept,drafts+" to certify \u00b7 "+toAccept+" to accept",(drafts+toAccept)?"var(--st-approval)":null)+
-     tile("In work orders",inwo,"sent to an agent or a workflow")+
-     '<button class="stat click" onclick="go(\''+workHash("orders")+'\')" aria-label="Open the work orders with a live run"><span class="k">Live work orders</span><span class="v">'+live.length+'</span>'+
-      '<span class="s">work orders with a live run'+(parked?' \u00b7 '+parked+' parked on a person':'')+'</span></button></div>'+
-   banner+
+  return banner+
    '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Backlog</h3></div>'+
    '<div class="sp">'+(nsel?'<span class="b b-q">'+nsel+' selected</span><button class="btn sm" onclick="S.tsel={};render()">Clear</button>':'')+
      '<span class="chips" role="group" aria-label="View"'+fut("dependencies")+'><button class="btn sm'+(S.tkView!=="graph"?' sel':'')+'" aria-pressed="'+(S.tkView!=="graph")+'" onclick="tkView(\'list\')">List</button><button class="btn sm'+(S.tkView==="graph"?' sel':'')+'" aria-pressed="'+(S.tkView==="graph")+'" onclick="tkView(\'graph\')">Graph</button></span></div></div>'+
-   (S.tkView==="graph"?tkGraph(rows):'<div class="tw"><table><thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th>Labels</th><th>Status</th><th>Blocked by</th><th>Owner</th><th>Readiness</th><th>Work order</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>')+
+   (S.tkView==="graph"?tkGraph(all):'<div class="tw"><table><thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th data-facet="multi">Labels</th><th>Status</th><th>Blocked by</th><th data-facet="multi">Owner</th><th>Readiness</th><th data-facet="off">Work order</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>')+
    '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">oxagen.assistant drafts a definition of done for every work item a provider imports or a finding opens. A person certifies it, and the item is ready from that moment. A ready item goes to an agent only inside a work order, and only to an agent you operate.</div></div></div>';
+}
+/* ---- In progress: every work item in a work order, with where it went and how far it got ---- */
+function inProgressTab(){
+  var rows=wsTasks().filter(function(t){return t.ready==="sent";});
+  var trs=rows.map(function(t){
+    var wo=woOf(t), items=wo?woItems(wo).length:0;
+    return '<tr '+rowClick("go('"+taskUrl(t)+"')","Open "+t.num)+'>'+
+     '<td><span class="tk-t">'+wiLogo(t,14)+'<span class="mono dim" style="font-size:11.5px">'+h(t.num)+'</span></span><div class="tk-s">'+h(t.subject)+'</div></td>'+
+     '<td>'+lblChips(t.labels)+'</td>'+
+     '<td>'+tkPerson(t.owner)+'</td>'+
+     '<td'+fut("work orders")+'>'+woCell(wo)+'</td>'+
+     '<td'+fut("work orders")+'>'+(wo?woTargetCell(wo):'<span class="dim">\u2014</span>')+'</td>'+
+     '<td'+fut("work orders")+'>'+(wo?woBadge(wo):'<span class="dim">\u2014</span>')+'</td>'+
+     '<td class="num"'+fut("work orders")+'>'+(items?woClaimed(wo)+' / '+items:'<span class="dim">\u2014</span>')+'</td>'+
+     '<td class="mono dim" style="font-size:11.5px">'+h(t.updatedAt)+'</td></tr>';}).join("");
+  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>In progress</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">Work items sent to an agent or a workflow in a work order.</p></div></div>'+
+   '<div class="tw"><table><thead><tr><th>Work item</th><th data-facet="multi">Labels</th><th data-facet="multi">Owner</th><th>Work order</th><th>Sent to</th><th>State</th><th class="num">Items claimed</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
+   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">A work item stays here until you accept every item of its work order. It then returns to the Backlog as Accepted.</div></div></div>';
 }
 /* A work item written in Oxagen, or opened from a finding, carries the Oxagen mark where a provider item carries its provider's. */
 function wiLogo(t,size){

@@ -18,7 +18,8 @@ export const PAGES = [
   // this change added or redesigned is designed loaded only; `future` marks a view with future-only
   // fields, which gets a second story with ?future=1 outlining them. `drawer` opens a global drawer.
   { id: "work-backlog",      title: "Backlog",                     group: "Work",         hash: `#/${ORG}/core-platform/work`,                             states: ["loaded"], future: true },
-  { id: "work-intake",       title: "Intake",                      group: "Work",         hash: `#/${ORG}/core-platform/work?intake=providers`,            states: ["loaded"] },
+  { id: "work-in-progress",  title: "In progress",                 group: "Work",         hash: `#/${ORG}/core-platform/work/in-progress`,                 states: ["loaded"], future: true },
+  { id: "work-intake",       title: "Intake",                     group: "Work",         hash: `#/${ORG}/core-platform/work?intake=providers`,            states: ["loaded"] },
   { id: "work-item",         title: "Work item",                   group: "Work",         hash: `#/${ORG}/core-platform/work/items/tsk_01K5RS482Q`,        states: ["loaded"], future: true },
   { id: "work-orders",       title: "Work orders",                 group: "Work",         hash: `#/${ORG}/core-platform/work/orders`,                      states: ["loaded"], future: true },
   { id: "work-order",        title: "Work order",                  group: "Work",         hash: `#/${ORG}/core-platform/work/orders/wo_01K5RS7M4N`,        states: ["loaded"], future: true },
