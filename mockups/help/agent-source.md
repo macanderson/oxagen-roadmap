@@ -71,3 +71,68 @@ One file defines the agent, so one editor edits it, and it edits the file as tex
 ### States
 
 The editor draws only in the loaded state. On a phone the editor fills the width, long lines scroll inside it, the find field drops under the path, the status line wraps, and the textarea's text is 16 px so the page does not zoom.
+
+## Tab bar {#agent-source/tabs}
+
+The eight agent tabs, drawn on the Source page with Definition selected.
+
+### Purpose
+The strip keeps the agent's other tabs one click away while you edit its file. Definition is selected, because the Source page is where the Definition tab lands.
+
+### Rationale
+The Source page is its own route (`#/<org>/<ws>/agents/<slug>/source`), and the review island treats it as a record page, so its tab bar carries its own key instead of falling back to `agent/tabs`. The strip is the same one every agent tab draws, and its full specification is in `mockups/help/agent.md`, Tab bar. The Definition in git tab and its form are cut (the Cuts table in `docs/fleet-operations-wedge.md`), so this editor is the one place the file is edited, and the old `/definition` address lands here with a 308 in the app.
+
+### Data sources
+| Field | Mockup source | Target store | Status |
+|---|---|---|---|
+| Tab list | `IAM_TABS` | The route table of the agent page | live |
+| Selected tab | fixed: Definition | The route segment `source` | live |
+| Tab counts | none on this page | The same reads the agent tabs use (`get_agent_toolbelt`, `list_mandates`, `list_incidents`) | partial |
+
+### Logic
+1. `pAgentSource()` draws `IAM_TABS` with `aria-selected` true on `definition`.
+2. Each tab sets `S.tab.agent` and goes to `#/<org>/<ws>/agents/<slug>/<tab>`. Overview goes to the bare agent address.
+3. The Definition tab goes to `/definition`, which the router rewrites to `/source` (`hashRewrite`), so it reloads this page.
+4. This page draws no counts on Toolbelt, Permissions and Activity. The agent tabs draw them. A build shows the same counts here.
+5. The strip is `role=tablist`, and each tab is `role=tab` with `aria-selected`.
+
+### States
+The loading, error and denied states replace the tab bar with the page body. On a phone the strip scrolls in its own row and keeps Definition in view.
+
+## Commit this change {#dialog/commit}
+<!-- open: openCommit('triage','editor') -->
+
+The dialog that commits the edited definition to a branch of the main repository and, with its switch on, opens a pull request.
+
+### Purpose
+It answers "where does this change go, what does it say, and what will review it". You pick the branch, read or rewrite the drafted summary and description, choose whether to open a pull request, check the diff, and commit. **Save** on the Source page and ⌘S in the editor open it.
+
+### Rationale
+The definition file in git is the record, and the identity lives in Postgres (ADR-057 in `macanderson/oxagen`). So a change to an agent is a commit and a pull request, never a write to the database. The repository is fixed: it is the main repository linked to the workspace, and every agent definition in the workspace lives there, so the dialog shows it and offers no choice. The branch is a choice, so a person can stack a change onto an open pull request or start a new one.
+
+The drafted summary and description are a starting point. What you commit is what you wrote. With the switch on, the pull request goes against the base branch, titled from the summary. Governance mode `team` asks the code owners of `.oxagen/agents/` to review it, and the merge is the change. With the switch off, the commit goes to the branch only. Nothing changes for the running agent until someone opens and merges a pull request, and your coding agent can pick the branch up from the repository. The principal, the roles and the toolbelt update when the pull request merges. Until then the running definition stays at its commit, and its `definition_digest` does not change. These sentences sat in the dialog as hints and a closing note. They moved here.
+
+### Data sources
+| Field | Mockup source | Target store | Status |
+|---|---|---|---|
+| Path, diff stat, origin | `S.cm`, `diffLines()`, `diffStat()` | The draft against the file at the base | live |
+| Repository and base | `w.main`, `w.branch`, `a.commit` | The workspace's main repository and the definition's commit | partial |
+| Branches | `BRANCHES` | `list_branches` (`repo.branch.list.ts:5`) | live |
+| Summary, description, Redraft | `draftCommit()` | No capability drafts a commit message | future |
+| Change kind and areas | `draftCommit()` over `defChanges()` | Derived from the parsed diff | partial |
+| Risk callout | `draftCommit().risk` | The checks on the pull request | partial |
+| Governance mode | fixed `team` | The workspace's governance mode | partial |
+| Commit and pull request | `commitConfirm()`, `S.defPending` | `commit_agent_definition` (`agent.definition.commit.ts:46`) | live |
+
+### Logic
+1. `openCommit(slug, from)` drafts the change with `draftCommit()` and stores it in `S.cm`. When the agent has a pending branch with no pull request and the draft is unchanged, the dialog opens in pull-request-only mode on that branch.
+2. `draftCommit()` reads the field changes (`defChanges()`), names an area for each (model routing, budget, toolbelt, side effects, instructions, metadata, harness), and writes one line per change. The title follows the change: "Move <slug> to the light tier", "Lower <slug> per-run budget to $X", or "Update <slug>: <areas>". The kind is `widens authority` when a change adds a tool, removes a deny, or adds `irreversible`, then `formatting`, `cosmetic` or `behavioral`. The branch name is `agent/<slug>/<title words>`.
+3. The draft line names the drafting model (`z-ai/glm-flash-latest`, the light model class), its tokens, its cost and its latency. **Redraft** reruns `draftCommit()`.
+4. The Branch select opens on **+ New branch**, then lists this agent's open change and the repository's branches with their pull requests. A new branch reads "Cut from <base> @ <commit>." An existing branch shows how far it is ahead, who pushed last, and whether a pull request already covers it.
+5. A risky change shows a callout: the checks hold the merge for a code-owner review, and for an active mandate when the change adds `irreversible`.
+6. The switch reads "Against <base>, titled from the summary." on and "Push the commit to the branch only." off. A branch whose pull request is open shows "<pr> already covers this branch" instead, and the commit updates that pull request. Pull-request-only mode shows "Opens the pull request for <branch>".
+7. The primary button reads **Commit and open the pull request**, **Commit to the branch**, or **Open the pull request**, and stays disabled until the branch and the summary are filled.
+8. `commitConfirm()` moves the base to the draft, records the pending branch in `S.defPending`, adds a new branch to `BRANCHES`, and toasts "Committed +N −M to <branch> on <repo> · <pr> opened". The Source header then shows the pending branch until it merges. A build calls `commit_agent_definition`, which refuses the default branch, a file whose `schema` is not `agent-definition/v0.1`, and a `slug` that is not the agent's.
+
+### States
+The mockup opens the dialog on a file that does not parse. A build shows the parse error in the editor and disables Save, so an invalid file never reaches the dialog. On a phone the dialog rises as a bottom sheet with full-width footer buttons, and the split diff falls back to one column.

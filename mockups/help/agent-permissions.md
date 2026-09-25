@@ -96,11 +96,11 @@ A mandate is the only thing that lets this agent move money. Nothing in a grant,
 3. Position shows settled, reserved and left, over a bar of settled and reserved against the period limit. Settled plus reserved plus remaining equals the period limit. A reservation reads reserved until a receipt settles or releases it, and every amount carries USD.
 4. `mandateFrame(m)` builds the frame body from the purpose, the period limit, the tools, the end date, and the auto-approve limit. The row carries `data-future`. The mockup draws it on an ended mandate too. A build leaves it out, because an ended mandate emits no frame.
 5. The ledger shows on the block `S.delegationSel` names, read from `?delegation=<id>`, or on an agent's only mandate. Any other block shows **Show the ledger**, which writes the query.
-6. The decision order for a financial call from an agent with no mandate: the call arrives with its amount. The financial class is read from the tool version's declared `amount_path`. The mandate lookup finds none for this agent key. The gate denies it with `no_mandate`. The ledger is unchanged and no credential is minted. The check runs before any credential is minted and before anything is sent to a provider, whether or not the tool is on the toolbelt.
+6. For an agent with no mandate, `iamChain()` draws the four steps the gate takes on a financial call, as the shipped app draws them (labelled "How a financial call from this agent is decided"). The call is a tool call whose version declares a financial class. The financial class is read from the tool version's declared consequence tags. The mandate lookup finds none for this agent key. The gate denies the call with `no_mandate`, the ledger is unchanged, and no credential is minted. The check runs before any credential is minted and before anything is sent to a provider, whether or not the tool is on the toolbelt. The chain names no amount. An earlier mockup drew it around a made-up $1,204.18 payment.
 7. The `Mandates held` branch of `permMandates` is a table that `permDelegation` never reaches.
 
 ### States
-No mandate: heading "No mandate", badge "cannot move money", and **Request a mandate**, which opens `mandate`. The mockup offers Change limits and Revoke on an ended mandate. A build offers both on active mandates only. On a phone each block's columns stack and the ledger becomes cards.
+No mandate: heading "No mandate", badge "cannot move money", the four-step chain, and **Request a mandate**, which opens `mandate`. The mockup offers Change limits and Revoke on an ended mandate. A build offers both on active mandates only. On a phone each block's columns stack and the ledger becomes cards.
 
 ## Grant a mandate {#dialog/mandate}
 

@@ -5,7 +5,7 @@
 | Route | `#/a-intel/finops/agents/invoice-bot/permissions`, and `…/permissions?delegation=mnd_7K2ETQ4` to open the Delegation section on one mandate. Old routes that land here: `…/agents/<agent>/budgets` and `…/agents/<agent>/mandates` in place; the mockup's `#/:org/:ws/agents/<agent>/mandates/<mandate>` becomes `…/permissions?delegation=<mandate>` in place; the app's `/{org}/{ws}/mandates/{mandate}` answers a lookup 308 to `/{org}/{ws}/agents/{agent}/permissions?delegation={mandate}`, and `routes.mandate` retires. The mandate page is cut |
 | Scope | workspace |
 | Spec | `docs/fleet-operations-wedge.md`: D11 (a mandate is a Steering Source that emits delegation frames, managed on this tab; there is no mandate page), D5 and the Frame types row for `delegation` (never cut; the gate also enforces it), the Emissions row for Mandate, D17, and the Cuts row for the Mandate page. `docs/fleet-operations-ia.md` (Agents) and `docs/fleet-operations-routes.md` (Agents, Tools). ADR-059 in `macanderson/oxagen` for mandates, consequence roles and the ledger. The agent header and the tab bar are specified in `agent.md` |
-| Design | `mockups/src/wedge.js` → `aPermissions()`, `permDelegation()` and `mandateFrame()`; `mockups/src/engine.js` → `permRoles()`, `permBudgets()`, `permMandates()` (the no-mandate panel), `iamWire()`, `iamMoney()`, `receiptLink()`, and the dialogs `assignrole`, `budget`, `mandateedit`, `mandaterevoke`, `receipt` and `mandate`; built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| Design | `mockups/src/wedge.js` → `aPermissions()`, `permDelegation()` and `mandateFrame()`; `mockups/src/engine.js` → `permRoles()`, `permBudgets()`, `permMandates()` (the no-mandate panel), `iamWire()`, `iamMoney()`, `iamChain()`, `receiptLink()`, and the dialogs `assignrole`, `budget`, `mandateedit`, `mandaterevoke`, `receipt` and `mandate`; built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
 | Storybook | `Oxagen / Agents / Permissions`: Loaded, Loaded · mobile, and Loaded · future-only fields marked |
 | Audit | `agent-permissions.audit-prompt.md` |
@@ -69,7 +69,7 @@ State is a dot and a word: settled, reserved or released. A receipt id opens the
 
 No note closes the section. The ledger mechanics (reserve, then settle or release) and how a mandate's tools are gated on the toolbelt are in the component help (`mockups/help/agent-permissions.md`, Delegation).
 
-**No mandate.** An agent that holds no mandate shows one panel in place of Delegation: the heading “No mandate”, no subtext, the badge “cannot move money”, and **Request a mandate**, which opens `mandate`. The panel draws no paragraph and no worked example. The order in which the gate denies a financial call from an agent with no mandate is in the component help (`mockups/help/agent-permissions.md`, Delegation). The demo shows it on `#/a-intel/core-platform/agents/triage/permissions`.
+**No mandate.** An agent that holds no mandate shows one panel in place of Delegation: the heading “No mandate”, no subtext, the badge “cannot move money”, and **Request a mandate**, which opens `mandate`. The panel draws no paragraph. It draws the four-step chain the shipped app draws, an ordered list labelled “How a financial call from this agent is decided”: Call (“a tool call whose version declares a financial class”), Financial class (“read from the tool version’s declared consequence tags”), Mandate lookup (“none for a-intel.core.triage”) and Decision (“Blocked · no_mandate · mandate ledger unchanged · no credential minted”). The chain names no amount. Why the gate decides in that order is in the component help (`mockups/help/agent-permissions.md`, Delegation). The demo shows it on `#/a-intel/core-platform/agents/triage/permissions`.
 
 **Dialogs this tab opens.**
 
@@ -109,7 +109,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 | Change limits | `mandateedit` | `update_mandate_limits` on an active mandate | `mandate.limits.update.ts:59` | ✅ |
 | Revoke | `mandaterevoke` | `revoke_mandate` with a reason | `mandate.revoke.ts:10`; it refuses a mandate that has already ended | ✅ |
 | Request a mandate | `mandate` | `request_mandate`, a draft a person with the consequence role grants | `mandate.request.ts:9`; `grant_mandate` (`mandate.grant.ts:16`) | ✅ |
-| No-mandate decision order (component help only; the page no longer draws it) | `mockups/help/agent-permissions.md`, Delegation | The gate's denial when no mandate covers a financial call | The mandate gate decides at dispatch (ADR-059). The chain's example call is illustrative | 🟡 |
+| No-mandate chain | `iamChain()` in `permMandates()` | The gate's denial when no mandate covers a financial call | The mandate gate decides at dispatch (ADR-059). The app draws the same four steps (`agents.json` `chain`) | 🟡 |
 
 ## Future-only fields
 

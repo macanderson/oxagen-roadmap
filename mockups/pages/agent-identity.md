@@ -34,7 +34,7 @@ The agent header and the tab bar are as `agent.md` specifies, with Identity sele
 | Lifecycle state | The status badge (“enrolled”) | none |
 | First frame | “2026-04-18 09:51:33Z” | none |
 
-**Credentials.** The panel has no subtext. The header badge reads “run token only”. Five pairs: API key “Not held”, OAuth token “Not held”, Cloud role “Not held”, GitHub token “Not held”, Run token “Held”. No paragraph follows the pairs: what the run token can reach and how the broker mints each call's secret are in the component help (`mockups/help/agent-identity.md`, Credentials). **Open providers** opens Tools › Providers.
+**Credentials.** The panel has no subtext. The header badge reads “run token only”. Five pairs: API key “Not held”, OAuth token “Not held”, Cloud role “Not held”, GitHub token “Not held”, Run token “Held · works only with oxagen”. No paragraph follows the pairs: what the run token can reach and how the broker mints each call's secret are in the component help (`mockups/help/agent-identity.md`, Credentials). **Open providers** opens Tools › Providers.
 
 **Run credential.** The panel has no subtext. Its explanation, and the sub-lines the Key and Run tokens rows no longer carry, are in the component help (`mockups/help/agent-identity.md`, Run credential). Rows:
 
@@ -56,7 +56,7 @@ Actions under the rows: **Edit identity** (opens `identity`) and **Revoke creden
 | Accountable human | “Marcus Bell · workspace.owner · core-platform” | none |
 | Workspace | “Core platform core-platform” | none |
 | Runtime | `mbp-01`, “a host outside this workspace”, or “not enrolled” | none |
-| Delegation ceiling | `max_hops 2`, the same value Permissions › Budgets shows | none |
+| Delegation | “subagents narrow, never widen”, as the shipped app draws it | none. “a subagent may do only what both this agent and the invoking person are granted” is in the component help (`mockups/help/agent-identity.md`, Trust relationships) |
 | Tamper incidents | A badge “1 · Hooks removed” with **Read them** (opens Activity), or a badge “0”. The mockup draws the badge critical although Triage's incident is resolved; a build colours it by the open count | none |
 
 **Open its permissions** under the rows opens the Permissions tab.
@@ -86,7 +86,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Contract paths are under
 | Key, issued, last used | `a.cred`, `a.issued`, `a.lastUsed` | `get_agent` `credentials`: `prefix`, `createdAt`, `lastUsedAt` | `agent.get.ts:26-38` | ✅ |
 | Host device key | `a.devKey` | `get_agent` `hosts[].deviceKeyFingerprint` | `agent.get.ts:53-73` | ✅ |
 | Accountable human, workspace, runtime | `PEOPLE`, `ws()`, `a.host` | `get_agent` `identity.operatorId` and `hosts`; the member's role | `agent.get.ts:130`, `:141` | ✅ |
-| Delegation ceiling | fixed text (`max_hops 2`) | The delegation ceiling: agent grants intersected with the human's | `assign_agent_role` rejects a role above the assigner's grants (`agent.role.assign.ts:26-30`); `get_agent_toolbelt` `basis.humanCeiling` (`agent.toolbelt.get.ts:130-134`) | ✅ |
+| Delegation | fixed text | The delegation ceiling: agent grants intersected with the human's | `assign_agent_role` rejects a role above the assigner's grants (`agent.role.assign.ts:26-30`); `get_agent_toolbelt` `basis.humanCeiling` (`agent.toolbelt.get.ts:130-134`) | ✅ |
 | Cost center | `FIXTURES.COST_CENTERS` (`agents`, `workspaces`) via `ccOfAgent()` | `get_agent` `identity.costCenter`, then the workspace's label; `set_cost_center` with `target: agent` | `agent.get.ts:135-136` returns the agent's own label, null when it inherits. The inherited label is on the workspace (`workspace.workspaces.cost_center`), and `set_cost_center` writes either (`cost_center.set.ts:38-47`, ADR-142) | ✅ |
 | Tamper incidents | `agentTamper(a)` | `list_incidents` for the agent | `tacho.incident.list.ts:66`; tamper kinds (`tacho.incident.list.ts:35-42`) | ✅ |
 | Edit identity | `identity` | A governed change of the agent's operator, approved by the new operator; `assign_agent_role` for the roles | No capability changes an agent's operator. Roles: `agent.role.assign.ts:26` | ❌ |
