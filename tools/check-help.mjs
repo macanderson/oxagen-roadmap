@@ -9,6 +9,7 @@
 //   node tools/check-help.mjs --dialogs        # drawers and dialogs only
 //   node tools/check-help.mjs --list           # print every key found and where, not only the missing ones
 //
+// `wrap` is not a dialog: openDialog('wrap') starts the Register agent gate, a page.
 // A dialog is opened by the first `openDialog('<kind>'[, '<arg>'])` the sources carry for it, on the
 // route the catalog lists first for the workspace. A dialog that needs state that call does not set
 // renders nothing and is reported as not opened, which is not a failure. A help section no view
@@ -37,7 +38,7 @@ const URL0 = "file://" + FILE;
 // Every dialog kind the sources open, with the argument of its first call.
 const SRC = ["engine.js", "wedge.js"].map((f) => readFileSync(path.join(root, "mockups/src", f), "utf8")).join("\n");
 const KINDS = new Map();
-for (const m of SRC.matchAll(/openDialog\(\\?['"]([\w-]+)\\?['"](?:\s*,\s*\\?['"]([^'"\\]*)\\?['"])?/g)) if (m[1] !== "wz" && (!KINDS.has(m[1]) || (KINDS.get(m[1]) == null && m[2] != null))) KINDS.set(m[1], m[2] ?? null);
+for (const m of SRC.matchAll(/openDialog\(\\?['"]([\w-]+)\\?['"](?:\s*,\s*\\?['"]([^'"\\]*)\\?['"])?/g)) if (m[1] !== "wz" && m[1] !== "wrap" && (!KINDS.has(m[1]) || (KINDS.get(m[1]) == null && m[2] != null))) KINDS.set(m[1], m[2] ?? null);
 // The dialogs a function of their own opens: the creation wizards, the work order, the tracker
 // connection wizard, the workflow editor, the avatar editor, and a frame.
 const OPENERS = [

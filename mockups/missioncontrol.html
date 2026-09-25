@@ -7284,10 +7284,7 @@ function permMandates(a){
     '<td class="num">'+usd(m.perCall)+'</td><td class="num">'+usd(m.perPeriod)+'</td>'+
     '<td class="num" style="color:var(--st-approval)">'+usd(m.remaining)+'</td><td>'+h(m.to)+'</td>'+
     '<td><span class="b b-allowed"><span class="d"></span>'+h(m.status)+'</span></td></tr>';}).join("")+
-   '</tbody></table></div>'+
-   '<div class="panel-b"><div class="note">A mandate is the only thing that lets this agent move money, and it is spent '+
-   'against a ledger: every draw reserves, then settles or releases. Its tools appear on the toolbelt gated '+
-   '<span class="mono">mandate + approval</span> rather than <span class="mono">allowed</span>.</div></div></div>';
+   '</tbody></table></div></div>';
 }
 
 /* ══════════════════════════════ Activity ══════════════════════════════
@@ -8956,39 +8953,6 @@ function memAsmCell(m,wslug){
   return m.supersededBy?'<span class="b b-q">superseded</span><span class="sub">by '+stgItemLinkById(wslug,m.supersededBy)+'</span>'
     :m.yieldsTo?'<span class="b b-approval"><span class="d"></span>yields</span><span class="sub">to '+stgItemLinkById(wslug,m.yieldsTo)+', a published must</span>'
     :'<span class="b b-allowed"><span class="d"></span>competes</span>';
-}
-function stgMemoryAgg(L){
-  var runs={}, steers=0, notes=0, imports=0, recalls=0, cls={}, folded=0;
-  L.forEach(function(m){recalls+=m.recalls30||0; cls[m.cls]=(cls[m.cls]||0)+1;
-    String(m.provenance||"").split(/\s*·\s*/).forEach(function(p){if(/^run_/.test(p))runs[p]=1;});
-    memSayings(m).forEach(function(x){folded++; if(x.file){imports++;return;} runs[x.run]=1; if(/operator steer/.test(x.by))steers++; else notes++;});});
-  return {runs:Object.keys(runs).length,steers:steers,notes:notes,imports:imports,recalls:recalls,cls:cls,folded:folded};
-}
-function stgMemoryTab(w){
-  var L=stgMemory(w.slug), G=stgMemoryAgg(L);
-  var F=S.memFold;
-  var rows=L.map(function(m){
-    var st=memAsmCell(m,w.slug), n=memSayings(m).length;
-    return '<tr '+rowClick("openDialog('memory','"+h(m.id)+"')","Open "+m.id)+'><td><b style="font-weight:500">'+h(m.body)+'</b><span class="sub mono">'+h(m.id)+' · '+h(m.provenance)+'</span></td>'+
-     '<td data-mem-fold="'+h(memFoldOf(m).st)+'"><span class="num">'+n+'</span> <span class="dim">of '+F.sayings+'</span><span class="sub">'+memFoldSub(m)+'</span></td>'+
-     '<td><span class="b b-q mono">'+h(m.cls)+'</span></td><td>'+forceBadge(m.force)+'</td>'+
-     '<td>'+h(m.scope)+(m.agent?'<span class="sub mono">'+h(m.agent)+'</span>':'')+'</td>'+
-     '<td class="mono" style="font-size:11.5px">'+h(m.lastRecalled)+'<span class="sub">'+m.recalls30+' recalls in 30 days</span></td>'+
-     '<td class="num">'+tokn(m.token_cost)+' tok</td><td>'+st+'</td></tr>';}).join("");
-  var agg='<div class="grid g4" style="margin-bottom:14px">'+
-   '<div class="stat"><span class="k">Memories</span><span class="v">'+L.length+'</span><span class="s" data-mem-folded="'+G.folded+'">folded from '+G.folded+' sayings</span></div>'+
-   '<div class="stat"><span class="k">Sources</span><span class="v">'+G.runs+' <small>'+(G.runs===1?"run":"runs")+'</small></span><span class="s" data-mem-imports="'+G.imports+'">'+G.steers+' operator steers'+(G.imports?', ':' and ')+G.notes+' reflections'+(G.imports?', and '+G.imports+' imported saying'+(G.imports===1?'':'s'):'')+'</span></div>'+
-   '<div class="stat"><span class="k">Recalled 30d</span><span class="v">'+G.recalls.toLocaleString()+'</span><span class="s">'+tokn(L.reduce(function(n,m){return n+(m.token_cost||0)*(m.recalls30||0);},0))+' tokens delivered</span></div>'+
-   '<div class="stat"><span class="k">By class</span><span class="v" style="font-size:15px;padding-top:6px">'+(Object.keys(G.cls).length?Object.keys(G.cls).map(function(k){return '<span class="mono">'+h(k)+'</span> '+G.cls[k];}).join(' · '):'0')+'</span><span class="s">a memory that reads as a rule is proposed as a record</span></div></div>';
-  return agg+'<div class="note" style="margin-bottom:14px"><b>A published must beats recalled memory.</b> Memory is what an agent’s own runs left behind. It is recalled, never published, so it competes only in the per-prompt selection, as <span class="mono">may</span> or <span class="mono">info</span>, and it gives way wherever a published record says otherwise. To make a memory binding, promote it: a proposal, a pull request, a merge.</div>'+
-   '<div class="panel"><div class="panel-h"><h3>Recalled memory</h3><span class="b b-q" style="margin-left:auto">'+L.length+'</span></div>'+
-   '<div class="panel-b mem-fold" style="border-bottom:1px solid var(--border)"><label for="memFoldN">A memory becomes a proposal at</label>'+
-     '<select id="memFoldN" onchange="S.memFold.sayings=+this.value;render()">'+[2,3,4,5].map(function(v){return '<option'+(v===F.sayings?' selected':'')+'>'+v+'</option>';}).join("")+'</select>'+
-     '<label for="memFoldR">sayings from</label><select id="memFoldR" onchange="S.memFold.runs=+this.value;render()">'+[1,2,3].map(function(v){return '<option'+(v===F.runs?' selected':'')+'>'+v+'</option>';}).join("")+'</select>'+
-     '<span>runs.</span><span class="dim">A workspace setting. The promoter reads it on every pass.</span></div>'+
-   '<div class="tw"><table><thead><tr><th>Memory</th><th>Sayings</th><th>Class</th><th>Force</th><th>Scope</th><th>Last recalled</th><th>Token cost</th><th>In the assembler</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
-   '<div class="panel-b"><div class="row"><button class="btn sm" onclick="S.pv.preset=\'merge-green\';S.pv.text=null;stgTab(\'compiler\')">See one yield in the compiler</button>'+
-   '<span class="dim" style="font-size:12px">Recall used to reach only the in-app agent, capped at six items. It now goes through the same assembler as every other source.</span></div></div></div>';
 }
 
 /* ---- one memory. The tab told you to promote a memory and no row offered it, and nothing
@@ -11181,8 +11145,7 @@ DLG_EXT.skenable=function(){
      '<button class="sx-sw" role="switch" aria-checked="true" aria-label="Enabled" onclick="act(\'The switch is the outcome, not the control. The pull request is the control.\',\'gold\')"><i></i></button></div>'+
     '<div class="field"><label>What this writes</label>'+skCfgFile()+'</div>'+
     '<div class="field"><label>What happens to runs already in flight</label>'+
-     '<div class="note">Nothing. A run resolves its config once, at the start. The runs in flight right now finish without skills; '+
-     'the next run each agent starts picks this up.</div></div>'+
+     '<div class="note">Nothing. Each agent\u2019s next run picks this up.</div></div>'+
     '<div class="note">Every agent in '+h(w.name)+' gains <span class="mono">search_skills</span> and nothing else. '+
      'No tool is granted, no tier changes, no budget moves.</div>',
    f:'<span class="grow mono dim" style="font-size:11px">opens a pull request against '+h(w.main)+'</span>'+
@@ -12008,16 +11971,6 @@ function dialog(){
      f:steerFoot(false)},
    steerfleet:{t:"Steer the fleet",w:false,b:steerFleetBody(),f:steerFoot(true)},
    mandate:{t:"Grant a mandate",w:true,b:mandateBody(),f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Mandate granted.\')">Grant the mandate</button>'},
-   ctxpr:{t:"Open a pull request",w:true,b:
-     '<div class="field"><label>Concern</label><input value="Do not re-read CHANGELOG.md more than once in a run" aria-label="Concern"><div class="hint">One concern per pull request.</div></div>'+
-     '<div class="field"><label>Kind</label><select aria-label="Kind"><option>rule: a directive that steers behavior</option><option>constraint: a hard boundary that requires or forbids</option><option>procedure: steps in order</option><option>fact: a checkable claim</option><option>memory: a durable recollection</option><option>preference: soft and often unfalsifiable</option></select></div>'+
-     '<div class="field"><label>Scope</label><select aria-label="Scope"><option>workspace: opens on a-intel/platform</option><option>repository: opens on the linked repo</option></select>'+
-     '<div class="hint">The promoter picks the scope from where the evidence came.</div></div>'+
-     '<div class="field"><label>Constraint effect</label><select aria-label="Constraint effect"><option>forbid</option><option>require</option></select>'+
-     '<div class="hint">A record can never grant authority. These are the only two values.</div></div>'+
-     '<div class="field"><label>Supporting evidence</label><input value="682 duplicate tool calls across 212 runs · fnd_01K5RT6C" aria-label="Evidence"></div>'+
-     '<div class="note">Merge is the publication. The checks recompute the record hash, scan for secrets and PII, and fail a <span class="mono">forbid</span> that conflicts with an active <span class="mono">require</span> on the same subject.</div>',
-     f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Branch context/ctx.release.no-reread-changelog pushed and a-intel/platform#519 opened.\')">Open the pull request</button>'},
    commit:{t:"Commit this change",w:true,b:commitBody(),f:commitFoot()},
    roleedit:S.dlg==="roleedit"?roleEditDlg():{t:"Role",w:true,b:"",f:""},
    roledel:roleDelDlg(),

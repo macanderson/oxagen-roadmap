@@ -107,8 +107,8 @@ export default {
     ["--st-approval", "`.stage.again`, a stage sent back for another pass"],
   ],
   helpers: [
-    ["stageChain(wf, opts)", "engine.js:14751", "Writes the `.stages` row from a workflow's stage list, plus a final Accept card. `opts.state(i)` returns each stage's class."],
-    ["stState(i)", "engine.js:15353", "A work order's per-stage state function: `done` once sealed and not returned, `on` while live or next up, empty while queued."],
+    ["stageChain(wf, opts)", "engine.js:14704", "Writes the `.stages` row from a workflow's stage list, plus a final Accept card. `opts.state(i)` returns each stage's class."],
+    ["stState(i)", "engine.js:15306", "A work order's per-stage state function: `done` once sealed and not returned, `on` while live or next up, empty while queued."],
   ],
   sourceNotes: [
     "The vertical `.chain` is written inline in three places: `pBilling()` (engine.js 7923), the evidence dialog's \"How we know\" list (9451), and the fix dialog's \"How to apply it\" list (9495). None goes through a shared helper.",
