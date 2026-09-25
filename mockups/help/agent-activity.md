@@ -118,4 +118,4 @@ The incidents here, the Activity tab count, the Overview's Tamper incidents stat
 5. `agentTamper()` matches the scope by prefix, so `backlog-groomer-us` takes on the incidents of `backlog-groomer`. A build counts the incidents recorded against the agent itself.
 
 ### States
-With none: "No tamper incident recorded", "Nothing has been detected on this agent in the retention window.", the badge "clean · 90 days", and **Open the incident register**. The demo incident names Claude Code on `mbp-01`, which runs Codex CLI; the fixture names the wrong harness.
+With none: "No tamper incident recorded", "Nothing has been detected on this agent in the retention window.", the badge "clean · 90 days", and **Open the incident register**. The demo incident names Claude Code on `mbp-01`, which runs Codex CLI. The fixture names the wrong harness.

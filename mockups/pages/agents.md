@@ -18,9 +18,9 @@ Agents replaces the population half of the Fleet page (D3). Runs are listed unde
 
 ## What is on the page
 
-With component help off, the page carries no explainer text; each part's specification is in `mockups/help/agents.md`.
+With component help off, the page carries no explainer text. Each part's specification is in `mockups/help/agents.md`.
 
-**Header.** Eyebrow: the workspace name (“Core platform”). h1 “Agents”. The header has no subtext; its explanation is in the component help (`mockups/help/agents.md`, Page header). Actions, in this order:
+**Header.** Eyebrow: the workspace name (“Core platform”). h1 “Agents”. The header has no subtext. Its explanation is in the component help (`mockups/help/agents.md`, Page header). Actions, in this order:
 
 - **Steer agents…** opens the `steerfleet` dialog.
 - **Write a new agent…** opens the agent wizard (`wzOpen('agent')`), for an agent that does not exist yet.
@@ -37,7 +37,7 @@ With component help off, the page carries no explainer text; each part's specifi
 
 On the demo record the tiles read 9, 8, 79% and 0.
 
-**Registered in Core platform** panel. The heading names the workspace, so the panel carries the fixed help key `data-help="registered-agents"`. The panel has no subtext in either column set; what each set shows is in the component help (`mockups/help/agents.md`, Registered agents). The panel header carries, on the right:
+**Registered in Core platform** panel. The heading names the workspace, so the panel carries the fixed help key `data-help="registered-agents"`. The panel has no subtext in either column set. What each set shows is in the component help (`mockups/help/agents.md`, Registered agents). The panel header carries, on the right:
 
 - **Columns**: a two-button group (`role=group`, `aria-label` “Columns”), **Composition** (the default) and **Operations**, each with `aria-pressed`. It writes `S.agentView` and re-renders. It is session state, not a route segment, so a link to the page always opens on Composition.
 - The mono line `.oxagen/agents/ @ a4c91e2`: the directory the definitions live in, at the commit of the listed agents.

@@ -28,7 +28,7 @@ The agent page replaced eight tabs of mechanism that never said what the agent w
 
 ### Logic
 
-1. `pAgent(r)` finds the agent whose key ends in the route's slug (`a.key.split(".").pop()`). No match draws "Agent not found" over the empty state "No agent named <slug>", "It may have been retired, or it belongs to another workspace.", and **Open Agents**. The page spec says an unknown slug falls back to the first agent; the renderer draws the not-found state instead.
+1. `pAgent(r)` finds the agent whose key ends in the route's slug (`a.key.split(".").pop()`). No match draws "Agent not found" over the empty state "No agent named <slug>", "It may have been retired, or it belongs to another workspace.", and **Open Agents**. The page spec says an unknown slug falls back to the first agent. The renderer draws the not-found state instead.
 2. When the agent differs from the last one drawn (`S.beltFor`), the header resets the toolbelt search, the presentation override and the category filter, so one agent's query never shows under another's name.
 3. The status badge is a dot and a word. The mockup tones it `b-allowed` for every status. A build tones it by status, so a suspended or retired agent never reads green.
 4. `tierBadge()` tones the tier (`observe` neutral, `harness` amber, `gateway` green, `contained` proven) and puts the tier's ladder text in its `title`.

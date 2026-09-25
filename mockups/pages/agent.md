@@ -18,7 +18,7 @@ This spec owns the agent header and the tab bar, which every tab shares, and the
 
 ## What is on the page
 
-With component help off, the page carries no explainer text; each part's specification is in `mockups/help/agent.md`, which also holds the header and the tab bar every agent tab shares.
+With component help off, the page carries no explainer text. Each part's specification is in `mockups/help/agent.md`, which also holds the header and the tab bar every agent tab shares.
 
 **Header.** Eyebrow “Agent”. The h1 is the agent card in its detail layout: the avatar, the agent key in mono (“a-intel.core.triage”), and the harness mark and label (“Codex CLI”). Under it one row of badges: the lifecycle status as a dot and a word (“enrolled”), the tier as recorded (“gateway”), and “operator Marcus Bell”. Then the agent's description (“Labels incoming issues, reproduces where it can, and opens a proposal when it cannot.”). Actions, in this order, none of them gold:
 
@@ -55,7 +55,7 @@ Older addresses still land on the tab that absorbed them: `…/enrollment` on Ru
 
 The other items the rules can raise are Keep the prefix stable (**Open steering**), Page the tool results (**Propose a record**), Lower the context budget (**Open the compiler**), Route classification-shaped work to a light model (**Edit the definition**) and Stop the retry storms (**Open incidents**). With none: “Nothing to change. Every share is inside the workspace norm and the cache holds.” The foot of the panel links “Optimization for this workspace →” to Spend › Optimization (`#/a-intel/core-platform/spend/optimization`). The items are the same ones Spend › Optimization lists for this agent.
 
-**Composition.** No subtext; the panel's explanation is in the component help (`mockups/help/agent.md`, Composition). The badge is the agent's health (`tamper`, `not enrolled`, `observe` or `healthy`, as on the roster). Six rows; Steering, Toolbelt and Runtime carry a sub-line, and every row but Owner has a button to the tab that owns it (**Open**, **Open toolbelt**, **Open runtime** or **Open permissions**):
+**Composition.** No subtext. The panel's explanation is in the component help (`mockups/help/agent.md`, Composition). The badge is the agent's health (`tamper`, `not enrolled`, `observe` or `healthy`, as on the roster). Six rows. Steering, Toolbelt and Runtime carry a sub-line, and every row but Owner has a button to the tab that owns it (**Open**, **Open toolbelt**, **Open runtime** or **Open permissions**):
 
 | Row | Value | Sub-line |
 |---|---|---|
@@ -68,9 +68,9 @@ The other items the rules can raise are Keep the prefix stable (**Open steering*
 
 The Steering row still counts the rev1 assembler's items, while the Steering tab counts SteeringFrames: 14 items here against 45 SteeringFrames there for Triage. A build shows the Steering tab's count of SteeringFrames and their tokens.
 
-**Last 30 days.** No subtext. **Open activity** in the header opens the Activity tab. Four stats: Runs (“1,340”, “last at 2026-09-11 14:19:02”), Spend (“$402.11” over its basis, “Observed by gateway”), Tokens (“124,910,766” over “83% cache read over input”) and Tamper incidents (“1”, in the critical colour when not zero, over the health reason). The mockup's reason reads “1 open incident” although Triage's only incident is resolved; a build counts every recorded incident and says how many are open. No note closes the panel. That this rollup is the one the Agents table reads, and what tool definitions cost on each call, are in the component help (`mockups/help/agent.md`, Last 30 days).
+**Last 30 days.** No subtext. **Open activity** in the header opens the Activity tab. Four stats: Runs (“1,340”, “last at 2026-09-11 14:19:02”), Spend (“$402.11” over its basis, “Observed by gateway”), Tokens (“124,910,766” over “83% cache read over input”) and Tamper incidents (“1”, in the critical colour when not zero, over the health reason). The mockup's reason reads “1 open incident” although Triage's only incident is resolved. A build counts every recorded incident and says how many are open. No note closes the panel. That this rollup is the one the Agents table reads, and what tool definitions cost on each call, are in the component help (`mockups/help/agent.md`, Last 30 days).
 
-**Definition.** No subtext; where the source of truth lives is in the component help (`mockups/help/agent.md`, Definition). **Open definition** in the header opens the Definition tab (the mockup goes through the old `/definition` address, which lands there). Rows: Path (`.oxagen/agents/triage.toml`), Repo (`a-intel/platform @ main`), Commit (`a4c91e2`), `definition_digest` (`sha256:73ad0e15f8c9b224`), and Generated beside it (`.claude/agents/triage.md`, with no sub-line).
+**Definition.** No subtext. Where the source of truth lives is in the component help (`mockups/help/agent.md`, Definition). **Open definition** in the header opens the Definition tab (the mockup goes through the old `/definition` address, which lands there). Rows: Path (`.oxagen/agents/triage.toml`), Repo (`a-intel/platform @ main`), Commit (`a4c91e2`), `definition_digest` (`sha256:73ad0e15f8c9b224`), and Generated beside it (`.claude/agents/triage.md`, with no sub-line).
 
 **Dialogs this page opens.**
 

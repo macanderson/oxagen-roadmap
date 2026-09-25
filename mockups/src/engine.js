@@ -4269,11 +4269,6 @@ function iamPairs(pairs){
   return '<div class="iamw">'+pairs.map(function(p){
     return '<span class="t">'+h(p[0])+'<i>'+h(p[1])+'</i></span>';}).join("")+'</div>';
 }
-function iamChain(steps){
-  return '<ul class="iamc">'+steps.map(function(s,i){
-   return '<li><span class="n">'+(i+1)+'</span><div style="min-width:0"><span class="l">'+h(s[0])+
-    '</span><div class="v">'+s[1]+'</div></div></li>';}).join("")+'</ul>';
-}
 function activePolicy(){
   for(var i=0;i<POLICIES.length;i++){if(POLICIES[i].state==="active")return POLICIES[i].v;}
   return "pol_v41";
@@ -13062,7 +13057,7 @@ function wzAgent(){
   var z=S.wz,w=ws();
   if(z.step===1){
     var ok=wzDescOk();
-    return {t:"Create an agent", s:"What should it be for? One job, said plainly.",
+    return {t:"Create an agent", s:"What should it be for?",
      b:wzDesc("Watch the performance budget on every pull request, and comment with the regression when a page gets slower.",
        ["Watch the performance budget on every pull request","Keep the changelog in step with what merged",
         "Reconcile invoices against purchase orders","Triage new issues and label them"],
@@ -13114,8 +13109,8 @@ function wzAgent(){
     return {t:"The toolbelt", s:"What the definition asks for.",
      b:rows+
       '<div class="note" style="margin-top:10px">'+(picked.length?
-        (parks.length?'<b>'+parks.length+' of these park for a person.</b> '+parks.map(function(x){return '<span class="mono">'+h(x)+'</span>';}).join(", ")+
-          ' wait for an approver.'
+        (parks.length?'<b>'+plural(parks.length,"of these parks for a person","of these park for a person")+'.</b> '+parks.map(function(x){return '<span class="mono">'+h(x)+'</span>';}).join(", ")+
+          ' wait'+(parks.length===1?'s':'')+' for an approver.'
          :'<b>Nothing on this toolbelt parks.</b>')
         :'Nothing picked. The definition falls back to <span class="mono">search_graph</span> and <span class="mono">recall_context</span>.')+'</div>',
      f:wzNext("Open the pull request",true,"wzAgentSync();")};

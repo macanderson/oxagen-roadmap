@@ -27,7 +27,7 @@ The registry holds 703 tool versions from 19 providers, and Triage's model is sh
 ### Logic
 1. `grantReach` is `min(verCount(), max(width, round(verCount() × 0.62)))`. It is a stand-in. `basis.roleGrants` counts role-grant rows, and a build must label that figure as grants, not versions reachable, until the read returns versions.
 2. The delegation ceiling shows the operator's name from `PEOPLE[a.operator]`.
-3. The policy bundle is the version whose state is `active` in `POLICIES`, falling back to `pol_v41`. The toolbelt read does not carry it today; a host reports `bundleVersionServed` (`agent.get.ts:53-73`).
+3. The policy bundle is the version whose state is `active` in `POLICIES`, falling back to `pol_v41`. The toolbelt read does not carry it today. A host reports `bundleVersionServed` (`agent.get.ts:53-73`).
 4. Kill switches counts the switches flipped in `S.switches`. Flipping one on Tools › Kill switches changes this count on the next render.
 5. The output term is `plural(beltTotal(a), "tool version")`. It equals the Toolbelt tab count, the Model view width, and the M in "N of M shown" on Per-tool decision rules.
 

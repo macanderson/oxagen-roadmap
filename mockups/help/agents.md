@@ -29,7 +29,7 @@ Register agent is the one gold action on the screen. Write a new agent… and Re
 - Each action is a governed write recorded in Audit. `dispatch_command` admits org Owner or Admin and workspace Owner or Member. `propose_agent` and `register_agent` admit org Owner or Admin. A build gates each on the server, not only by hiding the button.
 
 ### States
-The catalog designs the loaded state only. In the mockup, loading renders `skeleton()`, error renders `errorState("Agents","503 iam_principals_unavailable")`, and denied renders `deniedState()` naming `agent.read on core-platform`; each replaces the header with the page body. On a phone the three actions wrap under the h1, and Register agent stays the one gold button.
+The catalog designs the loaded state only. In the mockup, loading renders `skeleton()`, error renders `errorState("Agents","503 iam_principals_unavailable")`, and denied renders `deniedState()` naming `agent.read on core-platform`. Each replaces the header with the page body. On a phone the three actions wrap under the h1, and Register agent stays the one gold button.
 
 ## Tiles {#agents/tiles}
 
@@ -39,7 +39,7 @@ Four tiles give the fleet in four numbers: live runs, what waits on you, spend a
 Before the roster, the tiles answer the four questions a person brings to the population: is anything running, what needs me, how does spend stand against the budget, and which agents hold delegated authority. Three tiles open the place where you act on their number: Work orders, the Approvals drawer, and Spend › Budgets.
 
 ### Rationale
-These are the tiles the Fleet page held, rewritten for the population when Fleet retired (D3; `fleet-tiles.tsx` moves to the Agents tiles in `docs/fleet-operations-collapse.md`). Each tile is a rollup of records a build can read, so an auditor can recount it, and a tile reads the same count as the page it opens. Live runs and Work read one count, and Waiting on you counts the same approvals the drawer lists.
+These are the tiles the Fleet page held, rewritten for the population when Fleet retired (D3, and `fleet-tiles.tsx` moves to the Agents tiles in `docs/fleet-operations-collapse.md`). Each tile is a rollup of records a build can read, so an auditor can recount it, and a tile reads the same count as the page it opens. Live runs and Work read one count, and Waiting on you counts the same approvals the drawer lists.
 
 No tile scores a person or an agent (D15). Delegations held opens nothing, because a mandate is a Steering Source managed on the agent's Permissions tab and there is no mandate page (D11 and the Cuts table).
 
@@ -99,7 +99,7 @@ A toolbelt is not a permission. It says what an agent can see. Its roles, mandat
 - **Toolbelt** reads "N tools" over "N toolbelts · All tools sent" or "· Searchable", with "from role grants" when no named toolbelt is assigned.
 - **Health** is one badge from `agentHealth()`, first match wins: Tamper while a tamper incident is recorded, Not enrolled with no host, Observe on the `observe` tier, Healthy otherwise. The mockup counts resolved incidents as open, and `agentTamper()` matches an incident's scope by prefix, so `schema-guard-eu` takes on the incidents of `schema-guard`. A build counts open incidents recorded against the agent itself.
 - Status and Health agree: an agent above `observe` is `enrolled`, and an `observe` agent reads `registered` and Not enrolled.
-- **Row actions**: Edit (the Source tab; the mockup opens the Overview), Roles (`assignrole`), Retire (`delagent`). A click elsewhere on the row opens the agent.
+- **Row actions**: Edit (the Source tab, where the mockup opens the Overview), Roles (`assignrole`), Retire (`delagent`). A click elsewhere on the row opens the agent.
 - `listify()` adds search, sortable headers with `aria-sort`, facets from the columns in view, Rows (10 by default) and a pager.
 
 ### States

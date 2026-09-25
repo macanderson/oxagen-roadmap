@@ -18,7 +18,7 @@ The Compiler, this tab and a run's Decision trace read one resolver, so for the 
 
 ## What is on the page
 
-With component help off, the page carries no explainer text; each part's specification is in `mockups/help/agent-steering.md`.
+With component help off, the page carries no explainer text. Each part's specification is in `mockups/help/agent-steering.md`.
 
 The agent header and the tab bar are as `agent.md` specifies, with Steering selected. The body is three numbered sections.
 

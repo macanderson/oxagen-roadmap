@@ -56,14 +56,14 @@ On the `harness` tier the hard limit is checked at each checkpoint against the s
 | Delegation ceiling | fixed text | A subagent hop limit | future |
 
 ### Logic
-1. `permBudgets(a)` draws two meters. The per-run bar is the highest run this month over the per-run limit; it turns critical above 80%. The caption names the basis: price book 2026-09 at the provider's list rate.
+1. `permBudgets(a)` draws two meters. The per-run bar is the highest run this month over the per-run limit. It turns critical above 80%. The caption names the basis: price book 2026-09 at the provider's list rate.
 2. The per-day bar is spent today over the day limit. It reads allowed up to 50%, approval above 50%, and critical above 80%. The caption reads "resets 00:00 UTC · mode hard · currency USD".
 3. Mode reads `TIER_RANK[a.tier]`. At rank 2 or above (`gateway`, `contained`) it says the proxy blocks the call before it is sent. Below that it says the limit is checked at each checkpoint against reported spend and is fail-open.
 4. On a breach: `pause` at the next checkpoint, a `policy.decision` frame, and the operator notified.
 5. Delegation ceiling is `max_hops 2`. A subagent inherits this ceiling and may only lower it.
 
 ### States
-The page has the loaded state only. A build reads the ceilings from the definition and today's spend from `get_spend`; until a per-agent ceiling read exists it renders them as not recorded. `set_spend_budget` takes org and workspace scopes only, so a per-agent ceiling is changed by a pull request on the definition. The mockup's `budget` dialog names `a-intel.core.triage` from every agent's tab, which is a defect the spec records.
+The page has the loaded state only. A build reads the ceilings from the definition and today's spend from `get_spend`. Until a per-agent ceiling read exists, it renders them as not recorded. `set_spend_budget` takes org and workspace scopes only, so a per-agent ceiling is changed by a pull request on the definition. The mockup's `budget` dialog names `a-intel.core.triage` from every agent's tab, which is a defect the spec records.
 
 ## Delegation
 
@@ -94,13 +94,13 @@ A mandate is the only thing that lets this agent move money. Nothing in a grant,
 1. `permDelegation(a)` in `wedge.js` filters `MANDATES` to this agent. With none it returns `permMandates(a)`, the No mandate panel. All three variants carry `data-help="delegation"`.
 2. The header badge counts the active mandates. Each mandate is one block: id, status dot and word, purpose, **Change limits** (`mandateedit`), and **Revoke** (`mandaterevoke`).
 3. Position shows settled, reserved and left, over a bar of settled and reserved against the period limit. Settled plus reserved plus remaining equals the period limit. A reservation reads reserved until a receipt settles or releases it, and every amount carries USD.
-4. `mandateFrame(m)` builds the frame body from the purpose, the period limit, the tools, the end date, and the auto-approve limit. The row carries `data-future`. The mockup draws it on an ended mandate too; a build leaves it out, because an ended mandate emits no frame.
+4. `mandateFrame(m)` builds the frame body from the purpose, the period limit, the tools, the end date, and the auto-approve limit. The row carries `data-future`. The mockup draws it on an ended mandate too. A build leaves it out, because an ended mandate emits no frame.
 5. The ledger shows on the block `S.delegationSel` names, read from `?delegation=<id>`, or on an agent's only mandate. Any other block shows **Show the ledger**, which writes the query.
-6. The decision order for a financial call from an agent with no mandate: the call arrives with its amount; the financial class is read from the tool version's declared `amount_path`; the mandate lookup finds none for this agent key; the gate denies it with `no_mandate`. The ledger is unchanged and no credential is minted. The check runs before any credential is minted and before anything is sent to a provider, whether or not the tool is on the toolbelt.
+6. The decision order for a financial call from an agent with no mandate: the call arrives with its amount. The financial class is read from the tool version's declared `amount_path`. The mandate lookup finds none for this agent key. The gate denies it with `no_mandate`. The ledger is unchanged and no credential is minted. The check runs before any credential is minted and before anything is sent to a provider, whether or not the tool is on the toolbelt.
 7. The `Mandates held` branch of `permMandates` is a table that `permDelegation` never reaches.
 
 ### States
-No mandate: heading "No mandate", badge "cannot move money", and **Request a mandate**, which opens `mandate`. The mockup offers Change limits and Revoke on an ended mandate; a build offers both on active mandates only. On a phone each block's columns stack and the ledger becomes cards.
+No mandate: heading "No mandate", badge "cannot move money", and **Request a mandate**, which opens `mandate`. The mockup offers Change limits and Revoke on an ended mandate. A build offers both on active mandates only. On a phone each block's columns stack and the ledger becomes cards.
 
 ## Grant a mandate {#dialog/mandate}
 

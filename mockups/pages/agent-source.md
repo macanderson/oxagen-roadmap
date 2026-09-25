@@ -18,9 +18,9 @@ The instructions in this file reach the agent as a `procedure` SteeringFrame, li
 
 ## What is on the page
 
-With component help off, the page carries no explainer text; each part's specification is in `mockups/help/agent-source.md` (Page header and Editor), and the tab bar's is in `mockups/help/agent.md`.
+With component help off, the page carries no explainer text. Each part's specification is in `mockups/help/agent-source.md` (Page header and Editor), and the tab bar's is in `mockups/help/agent.md`.
 
-**Header.** The eyebrow reads “Agent · Source”, with Agent a link to the agent's Overview. The h1 is the path in mono: `.oxagen/agents/release-manager.toml`. Chips: the main repository (`a-intel/platform`), the branch at its commit (`main @ a4c91e2`, or the pending branch as a badge when a commit sits on a branch that has not merged), “source of truth”, and the agent key (`a-intel.core.release-manager`). The header has no subtext; that the file is the definition and that Save opens a pull request, never a database write, is in the component help (`mockups/help/agent-source.md`, Page header). Actions, in this order:
+**Header.** The eyebrow reads “Agent · Source”, with Agent a link to the agent's Overview. The h1 is the path in mono: `.oxagen/agents/release-manager.toml`. Chips: the main repository (`a-intel/platform`), the branch at its commit (`main @ a4c91e2`, or the pending branch as a badge when a commit sits on a branch that has not merged), “source of truth”, and the agent key (`a-intel.core.release-manager`). The header has no subtext. That the file is the definition and that Save opens a pull request, never a database write, is in the component help (`mockups/help/agent-source.md`, Page header). Actions, in this order:
 
 - **Discard** returns the draft to the base. It is disabled while the draft is unchanged.
 - **Save** (gold) opens the commit dialog.

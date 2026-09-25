@@ -45,7 +45,7 @@ The hook binary fails closed against its cached bundle. That is a property of th
 
 ### States
 - **Loaded**: the demo shows Triage on `mbp-01`, `gateway`, degraded, with 2 telemetry gaps.
-- **No host enrolled**: the tab shows one panel instead of three, "No runtime is enrolled" with "Runs are recorded at the `observe` tier." On that tier nothing is delivered and nothing can be refused. **Enroll a runtime** is the gold action and **Show CLI steps** opens `register`. The mockup's Enroll a runtime opens `wrap`; a build opens the Register agent gate. `register` shows a pull request, not CLI steps; a build shows the enrollment command for this agent. The demo is `#/a-intel/core-platform/agents/pr-reviewer/runtime`.
+- **No host enrolled**: the tab shows one panel instead of three, "No runtime is enrolled" with "Runs are recorded at the `observe` tier." On that tier nothing is delivered and nothing can be refused. **Enroll a runtime** is the gold action and **Show CLI steps** opens `register`. The mockup's Enroll a runtime opens `wrap`. A build opens the Register agent gate. `register` shows a pull request, not CLI steps. A build shows the enrollment command for this agent. The demo is `#/a-intel/core-platform/agents/pr-reviewer/runtime`.
 - **Loading, error, denied**: the agent page replaces the body (`agent/header`).
 - **Mobile**: the health badge and Open the runtime wrap under the heading.
 

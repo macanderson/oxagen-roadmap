@@ -16,7 +16,7 @@ The only tool list the agent's model is ever shown, and how it was computed. The
 
 ## What is on the page
 
-With component help off, the page carries no explainer text; each part's specification is in `mockups/help/agent-toolbelt.md`.
+With component help off, the page carries no explainer text. Each part's specification is in `mockups/help/agent-toolbelt.md`.
 
 The agent header and the tab bar are as `agent.md` specifies, with Toolbelt selected and its count (52) equal to the toolbelt's width. The body is five panels.
 
@@ -24,7 +24,7 @@ The agent header and the tab bar are as `agent.md` specifies, with Toolbelt sele
 
 **Model view.** The subtext states the toolbelt's width against the workspace's limit and the presentation it earns: “52 tools · Searchable (over the limit of 40).” A toolbelt at or under the limit reads “N tools · All tools sent (under the limit of 40).” A two-button group labelled “Toolbelt presentation”, **Searchable** and **All tools sent**, each with `aria-pressed`. The group previews a presentation; it changes nothing about how the agent runs and resets when another agent opens.
 
-- Searchable: the tools block of the next model request, verbatim, with no note above it, headed “// the tools block of the next model request, verbatim”: `search_tools`, `load_tools` and the pinned tools, each with its description and a machine-readable trailer (“[oxagen] risk=low approval=never ceiling=the index covers the toolbelt only schema=sha256:aa01f3…”). Nothing follows the block. What the two meta-tools do, how many definitions the request carries, and what the trailer is for are in the component help (`mockups/help/agent-toolbelt.md`, Model view). The mockup's block pins `github__merge_pull_request`, which the definition denies and the Steering tab excludes as `overridden_by_gate`; a build leaves a denied tool out of the block.
+- Searchable: the tools block of the next model request, verbatim, with no note above it, headed “// the tools block of the next model request, verbatim”: `search_tools`, `load_tools` and the pinned tools, each with its description and a machine-readable trailer (“[oxagen] risk=low approval=never ceiling=the index covers the toolbelt only schema=sha256:aa01f3…”). Nothing follows the block. What the two meta-tools do, how many definitions the request carries, and what the trailer is for are in the component help (`mockups/help/agent-toolbelt.md`, Model view). The mockup's block pins `github__merge_pull_request`, which the definition denies and the Steering tab excludes as `overridden_by_gate`. A build leaves a denied tool out of the block.
 - All tools sent: the block, with no note above it. Why a toolbelt over the limit shows this view for comparison is in the component help (`mockups/help/agent-toolbelt.md`, Model view). The block is headed “// 52 definitions · 16,796 tokens of tool definitions” and lists the first six definitions with their input schema digest and trailer, then “… 46 more”.
 
 **Toolbelt search.** The panel has no subtext. Its explanation is in the component help (`mockups/help/agent-toolbelt.md`, Toolbelt search). A field written as a call, `search_tools(` … `)`, with the placeholder “release notes” and **Run** (Enter runs too). “Try:” and five example queries: pull request, Steering record, stripe payment, delete repository, graph.

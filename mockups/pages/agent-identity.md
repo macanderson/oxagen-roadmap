@@ -16,7 +16,7 @@ Who the agent is, and the one property most of the threat model rests on: the ag
 
 ## What is on the page
 
-With component help off, the page carries no explainer text; each part's specification is in `mockups/help/agent-identity.md`.
+With component help off, the page carries no explainer text. Each part's specification is in `mockups/help/agent-identity.md`.
 
 The agent header and the tab bar are as `agent.md` specifies, with Identity selected. The body is four panels in two rows.
 

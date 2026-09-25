@@ -16,11 +16,11 @@ Where the agent runs and the tier its hooks earn. The tab answers which host the
 
 ## What is on the page
 
-With component help off, the page carries no explainer text; each part's specification is in `mockups/help/agent-runtime.md`.
+With component help off, the page carries no explainer text. Each part's specification is in `mockups/help/agent-runtime.md`.
 
 The agent header and the tab bar are as `agent.md` specifies, with Runtime selected. For an agent with an enrolled host, the body is three panels.
 
-**Host.** Rows carry a sub-line only where it is data; the explanations the Harness, Device key, Hooks written, Model proxy, oxagen MCP endpoint and Settings rows used to carry are in the component help (`mockups/help/agent-runtime.md`, Host). The header carries the host's health badge (“degraded”) and **Open the runtime**, which opens `#/a-intel/core-platform/runtimes/mbp-01`. Rows:
+**Host.** Rows carry a sub-line only where it is data. The explanations the Harness, Device key, Hooks written, Model proxy, oxagen MCP endpoint and Settings rows used to carry are in the component help (`mockups/help/agent-runtime.md`, Host). The header carries the host's health badge (“degraded”) and **Open the runtime**, which opens `#/a-intel/core-platform/runtimes/mbp-01`. Rows:
 
 | Row | Value | Sub-line |
 |---|---|---|
@@ -38,14 +38,14 @@ The agent header and the tab bar are as `agent.md` specifies, with Runtime selec
 | Last checkpoint | “seq 88,412 · 2026-09-11 08:41:02Z · chain intact” | none |
 | Note | The runtime's note, when it has one: “The collector is a minor version behind and reported two telemetry gaps in the last 24 hours.” | none |
 
-**What this tier delivers.** The panel has no subtext; how the tier is computed is in the component help (`mockups/help/agent-runtime.md`, What this tier delivers). **All runtimes** in the header opens Runtimes. The body starts with the tier ladder, an ordered list (`aria-label` “The tier ladder”) with the agent's rung marked “this agent”:
+**What this tier delivers.** The panel has no subtext. How the tier is computed is in the component help (`mockups/help/agent-runtime.md`, What this tier delivers). **All runtimes** in the header opens Runtimes. The body starts with the tier ladder, an ordered list (`aria-label` “The tier ladder”) with the agent's rung marked “this agent”:
 
 1. `observe`: “Recorded only. No hook is installed and nothing is delivered.”
 2. `harness`: “Hooks installed. Steering is delivered and four hook events can refuse a call. The harness reports spend, and a call goes ahead if its hook fails.”
 3. `gateway`: “Model and MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it.”
 4. `contained`: “The agent runs in an OS sandbox whose only network exit is the gateway.”
 
-Then six rows whose answer follows the agent's tier. Each answer is a terse fact; the long form of each (who counts the tokens, which credential a call carries, what fail-open means, how a shared budget reserves) is in the component help (`mockups/help/agent-runtime.md`, What this tier delivers):
+Then six rows whose answer follows the agent's tier. Each answer is a terse fact. The long form of each (who counts the tokens, which credential a call carries, what fail-open means, how a shared budget reserves) is in the component help (`mockups/help/agent-runtime.md`, What this tier delivers):
 
 | Row | `observe` | `harness` | `gateway` and `contained` |
 |---|---|---|---|
@@ -58,7 +58,7 @@ Then six rows whose answer follows the agent's tier. Each answer is a terse fact
 
 No note closes the panel. The note “Only contained is fully enforced” is gone, and with it the conflict it had with the `gateway` rung and the Budgets answer. The rule a build keeps is the wedge's: enforced only for calls routed through Oxagen, with the tier stated.
 
-**Unenroll this host from the CLI.** A code block: `oxagen agent unenroll --host mbp-01 \` over `  --restore-settings`. No note follows it; what happens when hooks are stripped by hand is in the component help (`mockups/help/agent-runtime.md`, Unenroll this host from the CLI). Actions: **Run a test session** (a toast: “Test session queued.”) and **Unenroll** (danger; opens `unenroll`).
+**Unenroll this host from the CLI.** A code block: `oxagen agent unenroll --host mbp-01 \` over `  --restore-settings`. No note follows it. What happens when hooks are stripped by hand is in the component help (`mockups/help/agent-runtime.md`, Unenroll this host from the CLI). Actions: **Run a test session** (a toast: “Test session queued.”) and **Unenroll** (danger; opens `unenroll`).
 
 **No host enrolled.** For an agent with no enrolled host, the body is one panel instead: “No runtime is enrolled”, “Runs are recorded at the observe tier.” (what the observe tier withholds is in the component help, `mockups/help/agent-runtime.md`, Host), **Enroll a runtime** (gold; opens the Register agent gate at `#/a-intel/core-platform/register`) and **Show CLI steps** (opens `register`). The demo shows it on `#/a-intel/core-platform/agents/pr-reviewer/runtime`.
 
