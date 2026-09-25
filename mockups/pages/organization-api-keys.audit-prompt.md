@@ -24,8 +24,8 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 3. **Summary tiles.** None on this page; fail if the build added decorative ones.
 4. **Sections, tabs and tables.** For each item below, the build has it, with the same tab labels, the same panel headings, and every table column named in the spec, in that order. Missing or renamed columns are FAILs; extra columns are noted.
    - The seven Organization tabs, with API keys selected.
-   - API keys: the caption "each key is a service principal with its own grants", the badge "postgres · iam + vault", Create key; Name, Principal, Grants, Created by, Last used, Actions 30d, Expires (with the state badge active, expires in N days or never used); Rotate, Revoke; the note.
-   - Surfaces this reaches: the badge "one agent tool contract", the paragraph, the four CLI lines.
+   - API keys: the caption "Each key is a service principal with its own grants", Create key; Name, Principal, Grants, Created by, Last used, Actions 30d, Expires (with the state badge Active, Expires in N days or Never used); Rotate, Revoke; the note.
+   - Surfaces this reaches: the paragraph, the four CLI lines.
 5. **Actions and dialogs.** Every button in the spec exists, opens what the spec says (`apikey`, `rotatekey`, `revokekey`, `invite`, `newws`), and each write is a governed action: it passes IAM, produces an audit event, and shows a receipt or reference. The secret is shown once at creation and rotation. A stub must say what the product would do; a control that silently does nothing is a FAIL.
 6. **Data sources.** For each row of the spec's data-source table, find the adapter or query in the build that feeds it. ✅ rows must be wired to the named store; 🟡 rows must be wired for the fields that exist and render `NotBacked` (an honest "not recorded yet", never a zero) for the rest; ❌ rows must render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
 7. **States.** Force each state and compare copy and controls with the design file:

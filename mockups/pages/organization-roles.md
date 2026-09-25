@@ -21,7 +21,7 @@ Actions: **Invite** (opens `invite`), **Create a workspace** (gold; opens `newws
 
 **Tabs**: the seven Organization tabs, with **Roles** selected.
 
-- **Roles**: panel "Roles" with the badge "postgres · iam" and **Create role** (small, gold; opens `roleedit` empty); filters Kind (agent, human, service), Scope (organization, repository, workspace), Origin (built-in, or creator and date), Rows; columns Role (id and description), Kind, Scope, Permissions (chips, "+N more" past four), Held by ("N people", "N agents", "N keys", or "nobody"), Origin ("built-in", or who created it and when); per row **View** (built-in) or **Edit** (opens `roleedit`), **Duplicate** (opens `roleedit` as a copy), **Delete** (opens `roledel`; disabled for a built-in role, "Built-in roles cannot be deleted", or for one with holders, "Reassign the N holders first"); a note that a role is a permission set and can widen what an agent may ask for, never what its operator may.
+- **Roles**: panel "Roles" with the badge "postgres · iam" and **Create role** (small, gold; opens `roleedit` empty); filters Kind (agent, human, service), Scope (organization, repository, workspace), Origin (built-in, or creator and date), Rows; columns Role (id and description), Kind, Scope, Permissions (chips, "+N more" past four), Held by ("N people", "N agents", "N keys", or "Not assigned"), Origin ("built-in", or who created it and when); per row **View** (built-in) or **Edit** (opens `roleedit`), **Duplicate** (opens `roleedit` as a copy), and for a custom role only **Delete** (opens `roledel`; disabled while anyone holds it, "Reassign N holders first"); a built-in role shows View and Duplicate only; the note "An agent can only do what its roles, its operator's permissions, the policy and the kill switches all allow."
 
 **Dialogs this page opens:** `roleedit` (Role name, Description, Kind, Scope, the permission matrix over `PERMS` with a selected count, a banner naming the holders, a note that saving is a governed action; a built-in role is read-only with **Duplicate as custom**; **Create role** or **Save changes**), `roledel` (**Delete role**, disabled while anyone holds it), plus `invite` and `newws` from the header.
 
@@ -41,8 +41,8 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 - A role can never grant more than the delegation ceiling of the person assigning it. `org.*` is the only wildcard and only `org.owner` carries it.
 - Built-in roles are read-only; Duplicate is the path to a custom one. Names are immutable; duplicate the role to rename it.
-- Saving a role is a governed action: it passes IAM, writes an audit record, and bills as one action. Every holder's effective permission is recomputed at its next call; nothing in flight is cut.
-- Deleting keeps the role's definition and every grant it carried in the audit record. A role cannot be deleted out from under a holder.
+- Saving a role is recorded in Audit and counts as one governed action. Each holder gets the new permissions at its next call. Nothing in flight is cut.
+- Deleting keeps the role's definition and every grant it carried in the audit record. You cannot delete a role while anyone holds it.
 - Custom roles are on for every tier (2026-09-15, maintainer decision).
 
 ## States
