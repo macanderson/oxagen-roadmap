@@ -16,7 +16,9 @@ Recorded problems with money behind them, and the evidence for each: a cache wri
 
 ## What is on the page
 
-**Header.** As `work-backlog.md`: eyebrow the workspace name, h1 “Work”, subtext “What the agents work on, and what waits on you.” The Findings tab has no header action.
+Component help for this tab lives in `mockups/help/work-findings.md`.
+
+**Header.** As `work-backlog.md`: eyebrow the workspace name and h1 “Work”, with no subtext. The explanation is in `mockups/help/work-backlog.md`, Header. The Findings tab has no header action.
 
 **Tabs**: Backlog `7` · Work orders `1` · Workflows · Findings `36`, with Findings selected. Its count is the open findings nobody has picked up.
 
@@ -27,7 +29,7 @@ Recorded problems with money behind them, and the evidence for each: a cache wri
 | At stake | $30,682.11 | “7.0% of $439,705.21 this month” |
 | Findings | 37 | “36 open · 1 in work” |
 | Evidence | every one | “opens to the runs it cites” |
-| Basis | measured | “measured cost minus the estimated cost without the issue, at the price each call paid” |
+| Basis | measured | “at the price each call paid”. The derivation is in `mockups/help/work-findings.md`, Tiles |
 
 **The list.** The shared list bar: a search field (“Search findings”), facets Level (“Any level”: agent, operator, tool, workspace) and Confidence (“Any confidence”: high, medium), **Sort** (Rank; Savings, high first; Savings, low first; Finding A–Z), Rows (5, 10, 25, 50, All), and a pager (“1–10 of 37 (page 1 of 4)”). One card per finding, ranked by the money at stake:
 
@@ -41,26 +43,26 @@ Recorded problems with money behind them, and the evidence for each: a cache wri
 
 The demo record holds 37 findings of nine kinds: Unpaged results, Refetching a stable list, Duplicate tool calls, Unproductive tail, Wrong model class, Repeated shell commands, Tool-list bloat, Cache misses after a stable prefix changed, and Cache writes never read. One is in work: `fnd_01K5RT2A` (Tool-list bloat on triage, $188.40) became WI-14.
 
-**Note** under the list: “A finding becomes work when a person picks it up: Create work item opens a backlog item with the finding as its source and a drafted definition of done. Fix records the change directly when no agent needs to do it.”
+No note sits under the list. How a finding becomes work is in `mockups/help/work-findings.md`, Findings.
 
 **Create work item** opens a work item written in Oxagen: the next number (“WI-15”), the finding’s fix as its subject, “Picked up from finding fnd_01K5RGZ9J. <why>” as its description, the labels P2 and Improvement, and readiness `drafting`. The tab stays open, the card turns to **In work · WI-15**, and a gold toast reads “Work item WI-15 opened from fnd_01K5RGZ9J. oxagen.assistant is drafting its definition of done.” The work item page (`work-item.md`) shows **Open the finding**, which comes back here with the evidence open.
 
 ### The Evidence dialog (`evidence`)
 
-Opened by **Evidence**, by the address `?finding=<id>`, and from a work item’s **Open the finding**. Title “Evidence · Duplicate tool calls”. Subtitle “fnd_01K5RHD7B · agent · last 30 days · basis client_attested”.
+Opened by **Evidence**, by the address `?finding=<id>`, and from a work item’s **Open the finding**. Title “Evidence for duplicate tool calls”. Subtitle “fnd_01K5RHD7B · agent · last 30 days · basis client_attested”.
 
 - Four figures: **At stake** (“$2,398.16”, “measured cost minus the estimated cost without the issue”), **Confidence** (“High”, the trend “+11% over 30 days”), **Signal** (“12 steps”, “identical input digests per run · baseline 1 step”), **Evidence** (“1,313 runs · 6,007 model calls”, “client_attested · every run sealed”).
 - **Recent runs with unproductive spend**: Run · Task · Started · Cost · Unproductive · What was wasted, then a total row: “3 most recent of 1,313 runs”, the cost total, the unproductive total, and “45% of what these runs cost”. A row closes the dialog and opens the run.
-- **How we know**: the method, step by step (Measured, Re-read, Never used, Counterfactual), then “Counterfactual: <the alternative>. The saving is the difference, priced at what each call paid.”
+- **How we know**: the method, step by step (Measured, Re-read, Never used, Counterfactual), then “Counterfactual: <the alternative>.” The arithmetic is in `mockups/help/work-findings.md`, Evidence dialog.
 - **Who is involved**: the operator (avatar, name, “workspace.owner · core-platform · operator on every run below”, and one line on the pattern) and the agent’s card (harness, toolbelt, runs and spend over 30 days).
-- Footer: “Every run above is a sealed record. Open one to read the frames the arithmetic came from.”, **Close**, **Fix** (gold; opens the Fix dialog).
+- Footer: **Close** and **Fix** (gold; opens the Fix dialog), with no sentence beside them.
 
 ### The Fix dialog (`fix`)
 
 Chosen by the finding’s kind. Two shapes:
 
-- **A pull request** (Duplicate tool calls). Title “Fix · Open a pull request”, subtitle “Duplicate tool calls on a-intel.core.status-poster-us · $2398.16 at stake”. An eyebrow naming the branch (`context/ctx.release.no-reread-changelog`) and “one concern per PR · the agent reads this on its next run”. The Steering record file it adds (`.oxagen/rules/ctx.release.no-reread-changelog.toml`: schema, lineage, kind `rule`, workspace scope, the statement “Do not re-read CHANGELOG.md more than once in a run; cache the first read.”, strength `should`, `constraint_effect = "forbid"`, and the finding, its runs and its saving as evidence). **Why a pull request**, a paragraph ending with a link to the evidence. **Checks that will run**: Schema, Lineage uniqueness, record_hash recomputation, Secret and PII scan, Conflict against active records, and `constraint_effect ∈ {require, forbid}`, each “on push”. The note: “Merge is the publication. Until then the record steers nothing; after it, the Spend page shows the repeat reads disappearing on the next a-intel.core.status-poster-us run.” Footer “Opens on a-intel/platform as a-intel/platform#519 · team mode, a code-owner review is required.”, **Cancel**, **Open the pull request** (gold). It toasts “Branch context/ctx.release.no-reread-changelog pushed and a-intel/platform#519 opened with fnd_01K5RHD7B as supporting evidence.”
-- **A help article** (every other kind). Title “Fix · <the article>” (Unpaged results: “Fix · Why a month of line items should never enter the context window”), subtitle “Help article · Unpaged results · chosen by the finding kind”. **Why this costs money**; the pair **What your agent does today** and **The fix**, as code; **How to apply it**, the steps; three figures: **What you save** (“$3981.89”, “per 30 days on <subject>”), **Evidence** (a link to the evidence dialog, “high confidence”), **Where the fix lives** (“the agent’s own code” or “workspace config”, “oxagen cannot change it for you; it can show you exactly where”). Footer “oxagen records the change as a definition change when you apply it, so the saving is attributable on Spend.”, **Close**, and the kind’s action (gold; Unpaged results: **Request grouped totals**).
+- **A pull request** (Duplicate tool calls). Title “Fix for duplicate tool calls”, subtitle “Pull request for a-intel.core.status-poster-us · $2,398.16 at stake”. An eyebrow naming the branch (`context/ctx.release.no-reread-changelog`) and “one concern per PR”. The Steering record file it adds (`.oxagen/rules/ctx.release.no-reread-changelog.toml`: schema, lineage, kind `rule`, workspace scope, the statement “Do not re-read CHANGELOG.md more than once in a run; cache the first read.”, strength `should`, `constraint_effect = "forbid"`, and the finding, its runs and its saving as evidence). **Evidence**, the link to the evidence dialog. Why a pull request is in `mockups/help/work-findings.md`, Fix dialog. **Checks that will run**: Schema, Lineage uniqueness, record_hash recomputation, Secret and PII scan, Conflict against active records, and `constraint_effect ∈ {require, forbid}`, each “on push”. No note under the checks. Footer “Opens on a-intel/platform as a-intel/platform#519 · team mode, a code-owner review is required.”, **Cancel**, **Open the pull request** (gold). It toasts “Branch context/ctx.release.no-reread-changelog pushed and a-intel/platform#519 opened with fnd_01K5RHD7B as supporting evidence.”
+- **A help article** (every other kind). Title “Fix for <kind>” (Unpaged results: “Fix for unpaged results”), subtitle the article’s title (“Why a month of line items should never enter the context window”). **Why this costs money**; the pair **What your agent does today** and **The fix**, as code; **How to apply it**, the steps; three figures: **What you save** (“$3981.89”, “per 30 days on <subject>”), **Evidence** (a link to the evidence dialog, “high confidence”), **Where the fix lives** (“the agent’s own code” or “workspace config”, with no caption). Footer “oxagen records the change as a definition change when you apply it.”, **Close**, and the kind’s action (gold; Unpaged results: **Request grouped totals**).
 
 **Shell.** The sidebar with Work lit and its count. Breadcrumbs “Anderson Intelligence Corp. / Core platform / Work”. ⌘K, notifications, the Approvals button with the organization’s count, and the avatar.
 

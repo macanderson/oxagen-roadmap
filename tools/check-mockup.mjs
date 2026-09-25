@@ -91,7 +91,9 @@ async function checkView(url, { state, mobile, shellPage, drawer, future, tag })
   ok(!r.chrome && r.product, `${tag}: PRODUCT view without the #chrome bar`);
   ok(r.island && r.hq === 0, `${tag}: the review island is on screen and component help is off (${r.hq} ?)`);
   ok(!r.scen && !r.exitDemo && !r.navScenarios, `${tag}: no scenario rail, Scenarios nav item or onboarding-demo copy`);
-  ok(r.len > 40, `${tag}: renders something (${r.len} chars)`);
+  // A gate step's loading state on a phone is the shell, the rail's numbers and a skeleton: no
+  // sentence, and still not a blank page.
+  ok(r.len > 40 || r.skeleton, `${tag}: renders something (${r.len} chars${r.skeleton ? " and a skeleton" : ""})`);
   if (state) ok(r.state === state, `${tag}: S.state pinned to ${state} (is ${r.state})`);
   if (mobile != null) {
     ok(r.mobileFlag === mobile, `${tag}: S.mobile pinned to ${mobile} (is ${r.mobileFlag})`);

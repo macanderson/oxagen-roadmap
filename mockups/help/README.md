@@ -35,11 +35,12 @@ or the build fails.
 | The open Approvals or Stella drawer | `approvals-drawer/drawer`, `stella-drawer/drawer` |
 | The open dialog | `dialog/<S.dlg>`, and `dialog/wz-<kind>` for a creation wizard |
 
-`<page>` is the catalog id of the view on screen. A tab of a page falls back to its family when its
-own key has no section: `agent-toolbelt/header` opens `agent/header` if `agent-toolbelt.md` has no
-Page header section. The families are `agent`, `run`, `tools`, `steering`, `spend`, `repositories`,
-`organization`, `work-backlog`, `register-name`, `onboarding-organization`, and `runtimes` for
-`runtime`.
+`<page>` is the catalog id of the view on screen. A tab falls back to the first tab of its page when
+its own key has no section: `agent-toolbelt/header` opens `agent/header` if `agent-toolbelt.md` has
+no Page header section. The tab families are the agent tabs (`agent`), the run tabs (`run`), Tools
+(`tools`), the Steering tabs (`steering`), Spend (`spend`), Repositories (`repositories`),
+Organization (`organization`), and the Work tabs (`work-backlog`). A record page (a work item, a
+work order, a source, a runtime) has no fallback, so a part it lacks a section for shows as missing.
 
 A heading whose text changes with the record (`Registered in Core platform`) needs a fixed key: put
 `data-help="registered-agents"` on the panel in `mockups/src`. So does a part the rules above do not

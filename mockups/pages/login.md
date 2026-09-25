@@ -36,7 +36,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 ## Functionality
 
-- Submit (`obGo('two-factor')`) goes to Two-factor. Google and GitHub (`obSignedIn`) sign in directly and land on Work with the toast “Signed in as Marcus Bell. The session is recorded like any other governed action.”
+- Submit (`obGo('two-factor')`) goes to Two-factor. Google and GitHub (`obSignedIn`) sign in directly and land on Work with the toast “Signed in as Marcus Bell.”
 - Show and Hide toggle the password field between `password` and `text`.
 - Forgot password? goes to `forgot-password.md`. Create an account goes to sign-up. Accept it goes to `accept-invitation.md`.
 

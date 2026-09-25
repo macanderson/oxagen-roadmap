@@ -42,14 +42,16 @@ function islPageId(r,under){
   return null;
 }
 /* A tab of a page shares its header and tab bar with the page it belongs to, so a key that is not
-   written for the tab falls back to the family's first page. */
-function islFamily(id){
-  if(!id) return null;
-  var m=/^(agent|run|tools|steering|spend|repositories|organization|work|register|onboarding)(-|$)/.exec(id);
-  if(!m) return id==="runtime"?"runtimes":id;
-  return ({agent:"agent",run:"run",tools:"tools",steering:"steering",spend:"spend",repositories:"repositories",
-    organization:"organization",work:"work-backlog",register:"register-name",onboarding:"onboarding-organization"})[m[1]];
-}
+   written for the tab falls back to the family's first tab. Only tabs fall back: a record page (a
+   work item, a work order, a source, a runtime) has parts of its own, and a miss there must show. */
+var ISL_FAMILY={"agent-identity":"agent","agent-steering":"agent","agent-toolbelt":"agent","agent-runtime":"agent",
+  "agent-permissions":"agent","agent-activity":"agent","run-transcript":"run","run-cost":"run","run-evidence":"run",
+  "run-memories":"run","tools-toolbelts":"tools","tools-providers":"tools","tools-policy":"tools","tools-switches":"tools",
+  "steering-assignments":"steering","steering-compiler":"steering","steering-proposals":"steering","steering-prs":"steering",
+  "spend-budgets":"spend","spend-optimization":"spend","repositories-copies":"repositories","repositories-changes":"repositories",
+  "repositories-config":"repositories","organization-api-keys":"organization","organization-roles":"organization",
+  "work-orders":"work-backlog","work-workflows":"work-backlog","work-findings":"work-backlog"};
+function islFamily(id){return ISL_FAMILY[id]||null;}
 function islSlug(s){return String(s||"").toLowerCase().replace(/&/g," and ").replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"");}
 function islHelp(key){
   var H=REVIEW.help;
@@ -76,12 +78,15 @@ function islTargets(){
   function headOf(x){return x.querySelector(":scope > .panel-h h3, :scope > .panel-h h2, :scope > .t > h1, :scope > .dlg-h h2, :scope > .dlg-h .grow > h2, :scope > h1, :scope > h2, :scope > h3");}
   var app=el("app"), layer=el("layer");
   /* an explicit key wins everywhere, including inside dialogs and drawers */
-  document.querySelectorAll("#app [data-help], #layer [data-help], #apdrawer [data-help], #asst [data-help]").forEach(function(x){add(x,ownKey(x.getAttribute("data-help")),headOf(x));});
+  /* a closed drawer is still in the DOM, inert: its parts get no ? until it opens */
+  document.querySelectorAll("#app [data-help], #layer [data-help], #asst.open [data-help]").forEach(function(x){
+    var dr=x.closest("#apdrawer"); if(dr&&!dr.classList.contains("open")) return;
+    add(x,ownKey(x.getAttribute("data-help")),headOf(x));});
   /* the shell */
   var side=document.querySelector("#app .side"); if(side) add(side,"shell/sidebar",null);
   var top=document.querySelector("#app .top"); if(top) add(top,"shell/top-bar",null);
   var mn=document.querySelector("#app .mnav"); if(mn) add(mn,"shell/thumb-bar",null);
-  var apd=document.querySelector("#apdrawer.open"); if(apd) add(apd,"approvals-drawer/drawer",apd.querySelector("h2"));
+  var apd=document.querySelector("#apdrawer.open"); if(apd) add(apd,"approvals-drawer/drawer",apd.querySelector("h2, h3"));
   var asst=document.querySelector("#asst.open"); if(asst) add(asst,"stella-drawer/drawer",null);
   /* the page */
   var pg=document.querySelector("#pg")||app;
@@ -106,7 +111,7 @@ function islTargets(){
 
 function islScan(){
   ISL.scanQ=false;
-  if(!ISL.help){ document.querySelectorAll(".hq").forEach(function(b){b.remove();}); document.querySelectorAll(".hq-host").forEach(function(x){x.classList.remove("hq-host");}); return; }
+  if(!ISL.help){ document.querySelectorAll(".hq").forEach(function(b){b.remove();}); document.querySelectorAll(".hq-host").forEach(function(x){x.classList.remove("hq-host","hq-rel");}); return; }
   var ts=islTargets(), live=[];
   ts.forEach(function(t){
     var elm=t[0], key=t[1], hd=t[2], found=islHelp(key);
@@ -115,7 +120,10 @@ function islScan(){
     if(!b){
       b=document.createElement("button");
       b.type="button"; b.className="hq"+(hd?"":" abs");
-      if(!hd&&!elm.classList.contains("hq-host")) elm.classList.add("hq-host");
+      /* a corner ? needs a positioned host; a fixed or sticky host (a drawer, the top bar) already is */
+      if(!hd&&!elm.classList.contains("hq-host")){ elm.classList.add("hq-host"); if(getComputedStyle(elm).position==="static") elm.classList.add("hq-rel"); }
+      /* a corner ? straddles the host's corner, clear of the host's own buttons, unless the host clips */
+      if(!hd) b.classList.toggle("in",getComputedStyle(elm).overflow!=="visible");
       host.appendChild(b);
     }
     b.setAttribute("data-key",key);

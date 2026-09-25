@@ -40,7 +40,7 @@ The table's columns: Tool · Category · Decision · Hazard · Egress · Financi
 
 **Dialogs this tab opens.**
 
-- `tool`, titled with the tool's id: its label, id and provider, category, hazard, side effect, decision, egress and financial class, its description, then Schema digest, Schema origin, Credential (“github_app → installation token”, “The agent never sees it.”), Price, and the input schema.
+- `tool`, titled with the tool's id: its label, id and provider, category, hazard, side effect, decision, egress and financial class, its description, then Schema digest, Schema origin, Credential (“github_app → installation token”), Price, and the input schema.
 - `toolcats`, titled “Tool categories”: “A category says what a tool acts on. It is orthogonal to the hazard (how bad a wrong call is) and to the gate (what this toolbelt decided). Ordered from least to most consequential.”, then each category with its meaning and example tools.
 
 ## Data sources

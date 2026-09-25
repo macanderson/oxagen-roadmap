@@ -77,7 +77,7 @@ function pWork(r){
   if(S.state==="error") return errorState("Work","503 work_index_unavailable");
   if(S.state==="denied") return deniedState("this workspace\u2019s work","work.read on "+w.slug);
   if(S.state==="empty") return emptyState("No work in "+w.name+" yet",
-    "Work arrives from a connected issue tracker, from a finding a person picks up, or written here. A run an agent starts on its own is filed under a direct work order.",
+    "Work arrives from a connected issue tracker, from a finding a person picks up, or written here.",
     '<button class="btn primary" onclick="openDialog(\'intake\',\'providers\')">Connect an issue tracker</button>');
   fileRuns();
   /* First run (W1): straight after onboarding the workspace holds one run, the smoke session, filed
@@ -92,7 +92,7 @@ function pWork(r){
     :t==="workflows"?'<button class="btn primary" onclick="wfzOpen()">New workflow</button>':'';
   var body=t==="orders"?workOrdersTab(fr):t==="workflows"?'<div'+fut("workflows")+'>'+tkWfTab()+'</div>':t==="findings"?findingsTab():backlogTab();
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Work</h1>'+
-   '<p>What the agents work on, and what waits on you.</p></div><div class="acts">'+acts+'</div></div>'+
+   '</div><div class="acts">'+acts+'</div></div>'+
    obFirstBanners(w,fr)+(fr?obOfferCard(fr):'')+tabs+body;
 }
 
@@ -110,7 +110,7 @@ function backlogTab(){
   var parked=wsRunCounts(S.ws).parked;
   var changed=rows.filter(function(t){return t.ready==="changed";});
   var nsel=Object.keys(S.tsel).length;
-  var banner=changed.length?'<div class="banner" style="margin-bottom:14px"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
+  var banner=changed.length?'<div class="banner" style="margin-bottom:14px" data-help="changed-banner"><span class="b b-denied" style="flex:none"><span class="d"></span>changed</span>'+
     '<div class="grow"><b>'+changed.length+' work item'+(changed.length>1?'s':'')+' changed after certification</b>'+
     h(changed[0].num)+' was edited upstream on '+h(changed[0].updatedAt)+'. It is no longer ready. Certify its definition of done again to send it.</div>'+
     '<button class="btn" onclick="go(\''+taskUrl(changed[0])+'\')">Review changes</button></div>':'';
@@ -119,7 +119,7 @@ function backlogTab(){
     return '<tr '+rowClick("go('"+taskUrl(t)+"')","Open "+t.num)+(on?' aria-selected="true"':'')+'>'+
      '<td class="ck" onclick="event.stopPropagation()"><input type="checkbox" aria-label="Select '+h(t.num)+'"'+(on?' checked':'')+(ok?'':' disabled title="'+h(tkWhyNot(t))+'"')+
        ' onclick="event.stopPropagation()" onchange="tkToggle(\''+t.id+'\',this.checked)"></td>'+
-     '<td><span class="tk-t">'+wiLogo(t,14)+'<span class="mono dim" style="font-size:11.5px">'+h(t.num)+'</span></span><div class="tk-s">'+h(t.subject)+'</div></td>'+
+     '<td><span class="tk-t">'+wiLogo(t,14)+'<span class="mono dim" style="font-size:11.5px">'+h(t.num)+'</span>'+tkDiscBadge(t)+'</span><div class="tk-s">'+h(t.subject)+'</div></td>'+
      '<td>'+lblChips(t.labels)+'</td>'+
      '<td>'+tStatusBadge(t.status)+'</td>'+
      '<td'+fut("dependencies")+'>'+tkBlockedByCell(t)+'</td>'+
@@ -138,7 +138,7 @@ function backlogTab(){
    '<div class="sp">'+(nsel?'<span class="b b-q">'+nsel+' selected</span><button class="btn sm" onclick="S.tsel={};render()">Clear</button>':'')+
      '<span class="chips" role="group" aria-label="View"'+fut("dependencies")+'><button class="btn sm'+(S.tkView!=="graph"?' sel':'')+'" aria-pressed="'+(S.tkView!=="graph")+'" onclick="tkView(\'list\')">List</button><button class="btn sm'+(S.tkView==="graph"?' sel':'')+'" aria-pressed="'+(S.tkView==="graph")+'" onclick="tkView(\'graph\')">Graph</button></span></div></div>'+
    (S.tkView==="graph"?tkGraph(rows):'<div class="tw"><table><thead><tr><th class="ck"><span class="vh">Select</span></th><th>Work item</th><th>Labels</th><th>Status</th><th>Blocked by</th><th>Owner</th><th>Readiness</th><th>Work order</th><th>Updated</th></tr></thead><tbody>'+trs+'</tbody></table></div>')+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">oxagen.assistant drafts a definition of done for every work item a provider imports or a finding opens. A person certifies it, and the item is ready from that moment. A ready item goes to an agent only inside a work order, and only to an agent you operate.</div></div></div>';
+   '</div>';
 }
 /* A work item written in Oxagen, or opened from a finding, carries the Oxagen mark where a provider item carries its provider's. */
 function wiLogo(t,size){
@@ -181,11 +181,10 @@ function workOrdersTab(fr){
      '<td><span class="tkp">'+personAv(w.by,20)+'<span>'+h((PEOPLE[w.by]||{}).name||w.by)+'</span></span><div class="dim mono" style="font-size:11px">'+h(w.sent)+'</div></td></tr>';}).join("");
   var chips=[["all","All"],["dispatched","Dispatched"],["direct","Direct"],["live","Live"]].map(function(x){
     return '<button class="btn sm'+(f===x[0]?' sel':'')+'" onclick="S.woFilter=\''+x[0]+'\';render()">'+x[1]+' <span class="dim">'+n[x[0]]+'</span></button>';}).join("");
-  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Work orders</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Every run belongs to one. A run started outside oxagen gets a direct work order.</p></div>'+
+  return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Work orders</h3></div>'+
    '<div class="sp">'+chips+'</div></div>'+
    '<div class="tw"><table><thead><tr><th>Work order</th><th>Work items</th><th>Sent to</th><th>Latest run</th><th class="num">Items claimed</th><th>State</th><th class="num">Spend</th><th>Sent by</th></tr></thead><tbody>'+trs+'</tbody></table></div>'+
-   '<div class="panel-b" style="border-top:1px solid var(--border)"><div class="note">An agent claims an item with evidence, and a person accepts it. A work order is done when you accept every item, and nothing merges without a person. A direct work order has no definition of done until you attach it to a backlog item.</div></div></div>';
+   '</div>';
 }
 
 /* ---- Findings: a recorded problem with money behind it becomes work ---- */
@@ -206,9 +205,8 @@ function findingsTab(){
      tile("At stake",usd(fmt2(total)),(total/spendN*100).toFixed(1)+'% of '+usd(fmt2(spendN))+' this month')+
      tile("Findings",FINDINGS.length,FINDINGS.length-picked+' open \u00b7 '+picked+' in work')+
      tile("Evidence","every one","opens to the runs it cites")+
-     tile("Basis","measured","measured cost minus the estimated cost without the issue, at the price each call paid")+'</div>'+
-   '<div class="grid" style="gap:10px">'+cards+'</div>'+
-   '<div class="note" style="margin-top:14px">A finding becomes work when a person picks it up: Create work item opens a backlog item with the finding as its source and a drafted definition of done. Fix records the change directly when no agent needs to do it.</div>';
+     tile("Basis","measured","at the price each call paid")+'</div>'+
+   '<div class="grid" style="gap:10px" data-help="findings">'+cards+'</div>';
 }
 function findingToWork(id){
   var f=findingById(id); if(!f) return;
@@ -468,17 +466,16 @@ function woRunsPanel(w,wf){
      '<td class="num">'+(R?usd(R.cost)+'<div class="dim mono" style="font-size:10px">'+h(R.basis)+'</div>':'<span class="dim">—</span>')+'</td>'+
      '<td class="mono dim" style="font-size:11px">'+(R?h(runDay(R)):'')+'</td></tr>';}).join("");
   return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Runs</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+rs.length+' run'+(rs.length===1?'':'s')+'. Each is a child record of this work order.</p></div></div>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+rs.length+' run'+(rs.length===1?'':'s')+'.</p></div></div>'+
    (rs.length?'<div class="tw"><table data-lt="off"><thead><tr><th>Run</th><th>Stage</th><th>Agent</th><th>Status</th><th>Tier</th><th class="num">Cost</th><th>Started</th></tr></thead><tbody>'+trs+'</tbody></table></div>'
      :'<div class="panel-b"><p class="muted" style="margin:0">No run yet. The runtime starts the first one with <span class="mono">oxagen work start '+h(w.id)+'</span>.</p></div>')+'</div>';
 }
 function woFramesPanel(w){
   var L=woFrames(w);
   if(!L.length) return '';
-  return '<div class="panel"'+fut("work order frames")+'><div class="panel-h"><div style="flex:1;min-width:0"><h3>SteeringFrames from this send</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">What the send put in front of the agent, each with this work order as its source.</p></div></div>'+
+  return '<div class="panel"'+fut("work order frames")+'><div class="panel-h"><h3>SteeringFrames from this send</h3></div>'+
    '<div class="panel-b"><ul class="fr-list">'+L.map(function(f){return '<li>'+ftBadge(f.type)+'<span>'+h(f.type==="invocation"?"The brief as sent, "+tokn(f.tok)+" tokens":f.body)+'</span><span class="mono dim" style="font-size:10.5px">'+h(f.hash.slice(0,19))+'</span></li>';}).join("")+'</ul>'+
-   '<div class="note" style="margin-top:10px">Provenance on every frame: <span class="mono">'+h(w.id)+'</span> and the brief digest <span class="mono">'+h(w.digest||"")+'</span>. A sent brief cannot change, so these frames cannot either.</div></div></div>';
+   '<div class="note" style="margin-top:10px">Provenance on every frame: <span class="mono">'+h(w.id)+'</span> and the brief digest <span class="mono">'+h(w.digest||"")+'</span>.</div></div></div>';
 }
 function wiOrdersPanel(t){
   var L=WORKORDERS.filter(function(w){return w.tasks.indexOf(t.id)>=0;});
@@ -486,7 +483,7 @@ function wiOrdersPanel(t){
    (L.length?L.map(function(w){
      return '<div class="wi-wo"><a class="mono" href="'+woUrl(w)+'">'+h(w.id)+'</a> '+woBadge(w)+'<div class="dim" style="font-size:12px;margin-top:3px">'+h(w.title)+'</div>'+
        (w.runs||[]).map(function(x){return '<div class="row" style="gap:6px;margin-top:4px;font-size:12px"><span class="dim">run</span>'+runLink(x.run)+(x.state==="live"?' <span class="b b-allowed"><span class="d"></span>live</span>':'')+'</div>';}).join("")+'</div>';}).join("")
-     :'<p class="muted" style="margin:0;font-size:12.5px">Not sent yet. A certified item goes to an agent inside a work order.</p>')+'</div></div>';
+     :'<p class="muted" style="margin:0;font-size:12.5px">Not sent yet.</p>')+'</div></div>';
 }
 
 /* ---- run tabs navigate, so a tab has an address ---- */
@@ -576,23 +573,22 @@ function planDiff(prev,cur){
   return cur.map(function(x){var p=was[x[0]];return {text:x[0],st:x[1],change:p==null?"added":p!==x[1]?"now "+x[1].replace("_"," "):""};});
 }
 var ANSWER={allowed:["b-allowed","allowed"],routed:["b-approval","routed to a person"],denied:["b-denied","denied"]};
+/* the section's help key is the slug of its title (dt-sec is not a .panel, so the island needs it named) */
 function dtSection(n,title,sub,inner,right,futWhy){
-  return '<section class="dt-sec"'+(futWhy?fut(futWhy):'')+'><div class="dt-h"><span class="dt-n">'+n+'</span><div style="min-width:0;flex:1"><h3>'+h(title)+'</h3>'+
+  return '<section class="dt-sec" data-help="'+h(String(title).toLowerCase().replace(/[^a-z0-9]+/g,"-"))+'"'+(futWhy?fut(futWhy):'')+'><div class="dt-h"><span class="dt-n">'+n+'</span><div style="min-width:0;flex:1"><h3>'+h(title)+'</h3>'+
     (sub?'<p>'+sub+'</p>':'')+'</div>'+(right?'<div class="sp">'+right+'</div>':'')+'</div>'+inner+'</section>';
 }
 function decisionTrace(R){
   var E=runEnvelope(R), wo=runParent(R), ch=runChoices(R), plan=runPlan(R), doubts=runDoubts(R);
   var res=(SOURCES.resolutions||{})[R.id]||null, L=runFrames(R), a=agent(R.agent);
   var manifests=L.filter(function(f){return f.kind==="steering.manifest"||f.kind==="context.assembled";}).length||1;
-  var intro='<div class="dt-read"><div><b>Read from the record.</b> '+tokn(R.frames)+' frames, '+manifests+' steering manifest'+(manifests===1?'':'s')+
-    (wo&&wo.kind==="dispatched"?', and the send of <a class="mono" href="'+woUrl(wo)+'">'+h(wo.id)+'</a>':'')+'. Tier '+tierBadge(R.tier)+': '+
-    (R.tier==="observe"?'recorded, not enforced.':'calls routed through oxagen were checked and recorded.')+'</div>'+
-    '<div class="dim">oxagen has no access to the model’s hidden reasoning. Thinking a provider returns is in the Transcript, labeled as the provider’s text.</div></div>';
+  var intro='<div class="dt-read" data-help="trace-record"><div>'+tokn(R.frames)+' frames, '+manifests+' steering manifest'+(manifests===1?'':'s')+
+    (wo&&wo.kind==="dispatched"?', and the send of <a class="mono" href="'+woUrl(wo)+'">'+h(wo.id)+'</a>':'')+'. Tier '+tierBadge(R.tier)+'.</div></div>';
 
   /* 1. Envelope, by injection point, and 2. what was excluded: the Compiler's own renderers */
-  var s1=dtSection(1,"Envelope",ftLead(E.sel,"run","SteeringFrames")+" reached this run, by where they entered.",
+  var s1=dtSection(1,"Envelope",ftLead(E.sel,"run","SteeringFrames")+" reached this run.",
     envelopeHtml(E,"run"),null,"frame types and per-frame provenance");
-  var s2=dtSection(2,"Exclusions",ftLead(E.cut,"run","resolved")+" and not delivered, each with its reason.",
+  var s2=dtSection(2,"Exclusions",ftLead(E.cut,"run","SteeringFrames")+" excluded.",
     exclusionsHtml(E,"run"),null,null);
 
   /* 3. Choices */
@@ -606,19 +602,19 @@ function decisionTrace(R){
        (c.parked?'<div class="dim mono" style="font-size:11px;margin-top:3px">'+h(c.parked.ap)+' · waiting</div>':'')+'</td>'+
      '<td class="mono" style="font-size:11.5px">'+h(c.by)+'</td>'+
      '<td>'+(c.fr!=null?'<button class="lnk mono" style="font-size:11.5px" onclick="openFrame('+c.fr+')">frame '+c.fr+'</button>':'<span class="dim">—</span>')+'</td></tr>';}).join("");
-  var skill=res?'<div class="dt-skill"'+fut("skill resolution frames")+'><div class="dt-point-h"><b>Skills</b><span class="dim">'+h(res.config)+'</span></div>'+
+  var skill=res?'<div class="dt-skill" data-help="skills"'+fut("skill resolution frames")+'><div class="dt-point-h"><b>Skills</b><span class="dim">'+h(res.config)+'</span></div>'+
      '<ul class="fr-list">'+
       res.synced.map(function(x){return '<li><span class="b b-q">synced</span><span class="mono">'+h(x)+'</span><span class="dim">in the checkout</span></li>';}).join("")+
-      (SOURCES.withheld||[]).map(function(x){return '<li><span class="b b-denied">withheld</span><span class="mono">'+h(x.id+"@"+x.ver)+'</span><span class="dim">'+h(x.reason)+'. The agent was told the count and the reason, never the name.</span></li>';}).join("")+
+      (SOURCES.withheld||[]).map(function(x){return '<li><span class="b b-denied">withheld</span><span class="mono">'+h(x.id+"@"+x.ver)+'</span><span class="dim">'+h(x.reason)+'</span></li>';}).join("")+
       res.loaded.map(function(x){return '<li><span class="b b-allowed">loaded</span><span class="mono">'+h(x.id+"@"+x.ver)+'</span><span class="dim">'+h(runClock(R,x.t))+' · '+h(x.how)+'</span></li>';}).join("")+
      '</ul></div>':'';
-  var s3=dtSection(3,"Choices","The toolbelt offered "+capN+" tool"+(capN===1?"":"s")+" from oxagen, and the harness adds its own. Each call below with the rule's answer.",
+  var s3=dtSection(3,"Choices",plural(capN,"tool")+" on the toolbelt, "+plural(ch.length,"call")+".",
     (rows?'<div class="tw"><table data-lt="off"><thead><tr><th>At</th><th>Call</th><th>Answer</th><th>Decided by</th><th>Frame</th></tr></thead><tbody>'+rows+'</tbody></table></div>'
       :'<p class="muted" style="margin:0;font-size:12.5px">No call is in view for this run. Its frames are in the Transcript.</p>')+skill,null,null);
 
   /* 4. Frames */
   var c=fkCounts(L);
-  var s4=dtSection(4,"Frames",tokn(R.frames)+" recorded, "+L.length+" in view. Each opens the frame it names.",
+  var s4=dtSection(4,"Frames",tokn(R.frames)+" recorded, "+L.length+" in view.",
     runTimeline(R)+'<div class="dt-fk">'+FK_ORDER.map(function(k){return c[k]?'<span class="dt-fkc fk-'+k+'"><i></i>'+h(FK_LABEL[k])+' <b>'+c[k]+'</b></span>':'';}).join("")+
     '<button class="btn sm" style="margin-left:auto" onclick="runTab(\'transcript\')">Open the transcript</button></div>',null,null);
 
@@ -634,7 +630,7 @@ function decisionTrace(R){
   /* 6. Self-reported uncertainty, only when the agent reported it in a structured field */
   var s6="";
   if(doubts.length){
-    s6=dtSection(6,"Self-reported uncertainty","Quoted from the agent’s own report. oxagen does not estimate confidence.",
+    s6=dtSection(6,"Self-reported uncertainty",null,
       doubts.map(function(d){return '<blockquote class="dt-quote"><p>'+h(d.q)+'</p><footer><span class="mono">oxagen__report_status</span> · '+h(d.at)+' · <span class="mono">'+h(d.ref)+'</span></footer></blockquote>';}).join(""),
       null,"report_status");
   }
@@ -644,7 +640,7 @@ function decisionTrace(R){
   var items=wo?woItems(wo):[], claimed=wo?woClaimed(wo):0;
   var pend=APPROVALS.filter(function(x){return x.run===R.id&&apState(x.id).status==="pending";});
   var outs=(R.outputs||[]).filter(roDurable);
-  var s7=dtSection(7,"Evidence","What supports the outcome so far.",
+  var s7=dtSection(7,"Evidence",null,
     '<dl class="kv dt-ev">'+
      '<dt>Outputs</dt><dd>'+(outs.length?outs.map(function(o){return '<span class="mono" style="font-size:12px">'+h(o.name)+'</span> <span class="dim">'+h(o.state)+'</span>';}).join('<br>'):'<span class="dim">none recorded</span>')+'</dd>'+
      '<dt>Definition of done</dt><dd'+fut("work orders")+'>'+(items.length?claimed+' of '+items.length+' claimed by the agent · '+(wo.claims||[]).filter(function(c){return c&&c.ok;}).length+' accepted by a person':'<span class="dim">none: a direct work order</span>')+'</dd>'+
@@ -660,12 +656,12 @@ function runEvidence(R,compacted){
   var wo=runParent(R), items=wo?woItems(wo):[];
   var done=APPROVALS.filter(function(x){return x.run===R.id;});
   var dod=items.length?'<div class="panel" style="margin-bottom:14px"'+fut("work orders")+'><div class="panel-h"><div style="flex:1;min-width:0"><h3>Definition of done</h3>'+
-     '<p class="muted" style="margin:2px 0 0;font-size:12px">From <a class="mono" href="'+woUrl(wo)+'">'+h(wo.id)+'</a>. A claim is the agent’s word. An acceptance is a person’s.</p></div></div>'+
+     '<p class="muted" style="margin:2px 0 0;font-size:12px">From <a class="mono" href="'+woUrl(wo)+'">'+h(wo.id)+'</a></p></div></div>'+
      '<div class="tw"><table data-lt="off"><thead><tr><th>Item</th><th>State</th><th>Evidence</th></tr></thead><tbody>'+items.map(function(it,i){var c=(wo.claims||[])[i];
        return '<tr><td>'+h(it.t)+'</td><td>'+(c&&c.ok?'<span class="b b-allowed"><span class="d"></span>accepted</span>':c?'<span class="b b-approval"><span class="d"></span>claimed</span>':'<span class="b b-q"><span class="d"></span>open</span>')+'</td>'+
          '<td style="font-size:12px">'+(c?h(c.ev):'<span class="dim">—</span>')+'</td></tr>';}).join("")+'</tbody></table></div></div>':'';
   var ap=done.length?'<div class="panel" style="margin-bottom:14px"><div class="panel-h"><h3>Approvals</h3></div><div class="panel-b">'+done.map(approvalCardSm).join("")+'</div></div>':'';
-  var seg=compacted&&!S.seg[R.id]?'<div class="warn" style="margin-bottom:14px"><b>Compacted.</b> Frame nodes for this run left the graph after the thirteen-month hot window. The archive segment holds the same bytes, written once at seal.</div>':'';
+  var seg=compacted&&!S.seg[R.id]?'<div class="warn" style="margin-bottom:14px"><b>Compacted.</b> This run is read from its archive segment.</div>':'';
   return seg+dod+ap+issuesTab(R)+linkedWork(R)+chainTab(R);
 }
 
@@ -804,7 +800,7 @@ function scopeCell(o){
 function stgSourcesTab(w){
   var all=steeringSources(w.slug), k=S.srcKind||"", L=k?all.filter(function(o){return o.g===k;}):all, A=wsAgentsOf(w.slug);
   var cnt={}; all.forEach(function(o){cnt[o.g]=(cnt[o.g]||0)+1;});
-  var chips='<div class="kf stg-seg" role="group" aria-label="Source kind">'+SRC_FILTERS.filter(function(x){return !x[0]||cnt[x[0]];}).map(function(x){
+  var chips='<div class="kf stg-seg" role="group" aria-label="Source kind" data-help="kind-filter">'+SRC_FILTERS.filter(function(x){return !x[0]||cnt[x[0]];}).map(function(x){
     return '<button class="btn sm" aria-pressed="'+(k===x[0])+'" onclick="srcKindPick(\''+x[0]+'\')">'+h(x[1])+' <span class="dim">'+(x[0]?cnt[x[0]]:all.length)+'</span></button>';}).join("")+'</div>';
   var em={}, silent=0; L.forEach(function(o){ if(!o.emitN) silent++; Object.keys(o.emits).forEach(function(t){em[t]=(em[t]||0)+o.emits[t];}); });
   var strip='<div class="ft-strip" style="margin:0">'+FT.map(function(x){return em[x.id]?'<span class="ft-n">'+ftBadge(x.id)+'<b>'+em[x.id]+'</b></span>':'';}).join("")+'</div>';
@@ -820,9 +816,9 @@ function stgSourcesTab(w){
      '<td class="num">'+(o.emitN?n.toLocaleString():'<span class="dim">0</span>')+'</td>'+
      '<td style="font-size:12px">'+(o.home==="Steering"?'<span class="dim">Steering</span>':'<a href="'+o.href+'" onclick="event.stopPropagation()">'+h(o.home)+'</a>')+'</td></tr>';}).join("");
   return chips+
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+h(k?SRC_FILTERS.filter(function(x){return x[0]===k;})[0][1]:"All sources")+'</h3>'+
+   '<div class="panel" data-help="source-list"><div class="panel-h"><div style="flex:1;min-width:0"><h3>'+h(k?SRC_FILTERS.filter(function(x){return x[0]===k;})[0][1]:"All sources")+'</h3>'+
      '<p class="muted" style="margin:2px 0 0;font-size:12px">'+L.length+' source'+(L.length===1?'':'s')+(silent?', '+silent+' emitting nothing':'')+
-     '. Agents counts the agents in '+h(w.name)+' each source can reach by its scope.</p></div><div'+fut("frame types")+'>'+strip+'</div></div>'+
+     '.</p></div><div'+fut("frame types")+'>'+strip+'</div></div>'+
    '<div class="tw"><table><thead><tr><th>Source</th><th'+fut("frame types")+'>Emits</th><th>Scope</th><th>Version</th><th>Status</th><th class="num">Agents</th><th>Managed in</th></tr></thead><tbody>'+
    rows+'</tbody></table></div></div>';
 }
@@ -852,11 +848,9 @@ function stgAssignmentsTab(w){
     return '<tr><td>'+agentCard(a,{layout:"list",sub:"",sz:22})+'</td><td>'+tierBadge(a.tier)+(obs?'<div class="dim" style="font-size:11px">assembled, not delivered</div>':'')+'</td>'+
      '<td class="num">'+mine.length+'</td><td'+fut("frame types")+'>'+typeCountStrip(typeCounts(mine))+'</td>'+
      '<td><a href="#/'+ORG.slug+'/'+w.slug+'/steering/compiler/'+encodeURIComponent(slug)+'">Compiler</a></td></tr>';}).join("");
-  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>By scope</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Frames each scope can emit, and the agents in '+h(w.name)+' it reaches. A narrower scope narrows a wider one and never widens it.</p></div></div>'+
+  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>By scope</h3></div></div>'+
     '<div class="tw"><table data-lt="off"><thead><tr><th>Scope</th><th class="num">Sources</th><th>Frames by type</th><th class="num">Agents</th></tr></thead><tbody>'+byScope+'</tbody></table></div></div>'+
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>By agent</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">What each agent is eligible for before budget. The Compiler shows what one brief selects.</p></div></div>'+
+   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>By agent</h3></div></div>'+
     '<div class="tw"><table><thead><tr><th>Agent</th><th>Tier</th><th class="num">Sources</th><th>Frames by type</th><th>Resolve</th></tr></thead><tbody>'+agRows+'</tbody></table></div></div>';
 }
 
@@ -884,9 +878,9 @@ function pvAgent(slug){ S.pv.agent=slug; var A=stgAgent(slug); if(S.pv.text==nul
 function pvInput(v){ S.pv.text=v; var o=el("pvOut"); if(o){ o.innerHTML=compilerOut(); listify(); if(isPhone()) cardTables(); } }
 function compilerOut(){
   var E=resolveEnvelope(S.pv.agent,pvPrompt(),{});
-  return '<div class="dt"><section class="dt-sec"'+fut("frame types and per-frame provenance")+'><div class="dt-h"><span class="dt-n">1</span><div style="min-width:0;flex:1"><h3>Envelope</h3>'+
+  return '<div class="dt"><section class="dt-sec" data-help="envelope"'+fut("frame types and per-frame provenance")+'><div class="dt-h"><span class="dt-n">1</span><div style="min-width:0;flex:1"><h3>Envelope</h3>'+
      '<p>'+ftLead(E.sel,"cmp","SteeringFrames")+' for <span class="mono">'+h(E.slug)+'</span> in <span class="mono">'+h(E.repo)+'</span>.</p></div></div>'+envelopeHtml(E,"cmp")+'</section>'+
-   '<section class="dt-sec"'+fut("a capability that resolves without delivering (#3879)")+'><div class="dt-h"><span class="dt-n">2</span><div style="min-width:0;flex:1"><h3>Exclusions</h3>'+
+   '<section class="dt-sec" data-help="exclusions"'+fut("a capability that resolves without delivering (#3879)")+'><div class="dt-h"><span class="dt-n">2</span><div style="min-width:0;flex:1"><h3>Exclusions</h3>'+
      '<p>'+ftLead(E.cut,"cmp","resolved")+' and not delivered, each with its reason.</p></div></div>'+exclusionsHtml(E,"cmp")+'</section></div>';
 }
 function stgCompilerTab(w){
@@ -895,12 +889,11 @@ function stgCompilerTab(w){
   var cur=agentBySlug(S.pv.agent);
   if(!cur||cur.ws!==w.slug){ S.pv.agent=L[0].slug; S.pv.text=null; S.pv.preset=L[0].prompt||null; }
   var A=stgAgent(S.pv.agent), chips=STG_PREVIEW.prompts.filter(function(p){return (p.ws||"core-platform")===w.slug;});
-  return '<div class="panel pad" style="margin-bottom:14px"><div class="stg-pv">'+
+  return '<div class="panel pad" style="margin-bottom:14px" data-help="inputs"><div class="stg-pv">'+
    '<div class="field" style="margin:0"><label for="pvSel">Agent</label><select id="pvSel" onchange="pvAgent(this.value)">'+L.map(function(x){
      return '<option value="'+h(x.slug)+'"'+(x.slug===S.pv.agent?' selected':'')+'>'+h(x.a.name)+' · '+h(x.a.harnessLabel)+'</option>';}).join("")+'</select>'+
     '<div class="hint">Tier: '+tierBadge(A.a.tier)+' · Repository: <span class="mono">'+h(A.repo)+'</span></div></div>'+
-   '<div class="field" style="margin:0"><label for="pvText">Brief</label><textarea id="pvText" rows="2" oninput="pvInput(this.value)" placeholder="What a work order would send">'+h(pvPrompt())+'</textarea>'+
-    '<div class="hint">Sends nothing. Nothing here reaches an agent.</div></div></div>'+
+   '<div class="field" style="margin:0"><label for="pvText">Brief</label><textarea id="pvText" rows="2" oninput="pvInput(this.value)" placeholder="What a work order would send">'+h(pvPrompt())+'</textarea></div></div>'+
    (chips.length?'<div class="kf" role="group" aria-label="Pick a brief" style="padding:10px 0 0;border:0">'+chips.map(function(p){
      return '<button class="btn sm" aria-pressed="'+(S.pv.text==null&&S.pv.preset===p.id)+'" onclick="pvPreset(\''+p.id+'\')">'+h(p.text)+'</button>';}).join("")+'</div>':'')+'</div>'+
    '<div id="pvOut">'+compilerOut()+'</div>';
@@ -909,15 +902,13 @@ function stgCompilerTab(w){
 /* ---- Proposals and their pull requests ---- */
 function stgProposalsTab(w,t){
   var openPRs=stgOpenCount();
-  var seg='<div class="kf stg-seg" role="group" aria-label="Proposals or pull requests">'+
+  var seg='<div class="kf stg-seg" role="group" aria-label="Proposals or pull requests" data-help="steering-proposals/view-switch">'+
    '<button class="btn sm" aria-pressed="'+(t==="proposals")+'" onclick="stgTab(\'proposals\')">Proposals <span class="dim">'+PROPOSALS.length+'</span></button>'+
-   '<button class="btn sm" aria-pressed="'+(t==="prs")+'" onclick="stgTab(\'prs\')">Pull requests <span class="dim">'+openPRs+'</span></button>'+
-   '<span class="dim" style="font-size:12px;margin-left:6px;align-self:center">A proposal becomes a pull request. A merge publishes it.</span></div>';
+   '<button class="btn sm" aria-pressed="'+(t==="prs")+'" onclick="stgTab(\'prs\')">Pull requests <span class="dim">'+openPRs+'</span></button></div>';
   if(t==="prs") return seg+ctxprTab();
   var sel=S.prpSel&&prpById(S.prpSel);
   if(sel) return seg+prpDetail(sel);
-  return seg+'<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Proposals</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Candidates from memory, findings, steers and people. A proposal steers nothing until its pull request merges.</p></div></div>'+
+  return seg+'<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Proposals</h3></div></div>'+
    '<div class="recs">'+PROPOSALS.map(function(p){
      var s=prpStats(p.id);
      return recordCard({kind:p.kind,force:p.force,st:p.st,scope:"workspace",id:p.lineage},{
@@ -947,31 +938,29 @@ function pSteering(){
       "A source becomes one by being merged into "+h(w.main)+", or recorded by a governed write. Nothing saved here is a source until then.",newSourceBtn(true))
     :t==="assignments"?stgAssignmentsTab(w):t==="compiler"?stgCompilerTab(w):t==="sources"?stgSourcesTab(w):stgProposalsTab(w,t);
   return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Steering</h1>'+
-   '<p>Every source that can steer an agent here, and the frames it emits.</p></div>'+
+   '</div>'+
    '<div class="acts">'+govChip(w)+(SK_ON[w.slug]?'<button class="btn sm gov-chip" onclick="openDialog(\'skcfg\')" title="How skills resolve in this workspace, settings version '+h(SK_CFG.ver)+'">Skills settings</button>':'')+
     '<button class="btn" onclick="wzOpen(\'import\')">Import Markdown</button>'+newSourceBtn(t!=="prs")+'</div></div>'+tabs+body;
 }
 DLG_EXT.newsrc=function(){
   var w=ws();
   var cards=[
-   ["Steering record","A rule, constraint, procedure, fact or preference in .oxagen/rules/. It publishes when its pull request merges.","closeDialog();wzOpen('record')","Write one"],
+   ["Steering record","A rule, constraint, procedure, fact or preference in .oxagen/rules/.","closeDialog();wzOpen('record')","Write one"],
    ["Document","Name a document, such as docs/VISION.md or an ADR, in .oxagen/sources.toml, and say which sections emit which frame types.","openDialog('srcreg')","Register one"],
-   ["Skill","A folder under .oxagen/skills/ with skill.toml, SKILL.md, references and optional entrypoints. oxagen describes an entrypoint and never runs it.","closeDialog();wzOpen('skill')","Add one"],
+   ["Skill","A folder under .oxagen/skills/ with skill.toml, SKILL.md, references and optional entrypoints.","closeDialog();wzOpen('skill')","Add one"],
    ["Glossary term","One term the way this workspace uses it, in .oxagen/ontology/.","openDialog('ontnew')","Define one"]];
   return {t:"New source",s:"Every source changes by a pull request against "+w.main,w:true,
    b:'<div class="wz-pick" style="grid-template-columns:1fr">'+cards.map(function(c){
-     return '<button class="wz-card" onclick="'+c[2]+'"><span class="tx"><b>'+h(c[0])+'</b><span class="d">'+h(c[1])+'</span></span><span class="b b-q">'+h(c[3])+'</span></button>';}).join("")+'</div>'+
-    '<div class="note" style="margin-top:12px">An agent appends memory, and Import Markdown writes it from a file. A memory becomes a Steering record only through a proposal. Policy, mandates and toolbelts are managed in Tools and on the agent’s Permissions tab.</div>',
+     return '<button class="wz-card" onclick="'+c[2]+'"><span class="tx"><b>'+h(c[0])+'</b><span class="d">'+h(c[1])+'</span></span><span class="b b-q">'+h(c[3])+'</span></button>';}).join("")+'</div>',
    f:'<button class="btn" onclick="closeDialog()">Cancel</button>'};
 };
 DLG_EXT.srcreg=function(){
   var R=SOURCES.registration||{};
   var toml='[[source]]\nid = "ADR-034"\nkind = "adr"\npath = "docs/adr/ADR-034-release-freeze.md"\n\n  [[source.section]]\n  heading = "Decision"\n  emits = "procedure"\n  force = "should"\n\n  [[source.section]]\n  heading = "Invariants"\n  emits = "invariant"\n  enforced_by = "gate.never-merge"';
   return {t:"Register a document",s:R.path+" on "+R.repo,w:true,
-   b:'<p style="margin:0 0 10px">A document emits frames only from the sections this file names. oxagen reads the declared structure and never asks a model what a document means.</p>'+
-    '<pre'+fut(".oxagen/sources.toml")+'>'+h(toml)+'</pre>'+
-    '<div class="note" style="margin-top:10px">Last changed by <span class="mono">'+h(R.pr||"")+'</span>, merged '+h(R.merged||"")+'. An invariant needs a section the ADR declares as its invariants, and a superseded ADR emits nothing.</div>',
-   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Pull request opened on \'+ws().main+\' to register ADR-034. It emits nothing until that merges.\',\'gold\')">Open the pull request</button>'};
+   b:'<pre'+fut(".oxagen/sources.toml")+'>'+h(toml)+'</pre>'+
+    '<div class="note" style="margin-top:10px">Last changed by <span class="mono">'+h(R.pr||"")+'</span>, merged '+h(R.merged||"")+'.</div>',
+   f:'<button class="btn" onclick="closeDialog()">Cancel</button><button class="btn primary" onclick="closeDialog();act(\'Pull request opened on \'+ws().main+\' to register ADR-034.\',\'gold\')">Open the pull request</button>'};
 };
 
 /* ---- one source ----
@@ -1001,8 +990,8 @@ function srcFramesOf(o){
 }
 function srcFramesPanel(o){
   var L=srcFramesOf(o);
-  return '<div class="panel" style="margin-bottom:14px"'+fut("frame types and per-frame provenance")+'><div class="panel-h"><div style="flex:1;min-width:0"><h3>Frames it emits</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+(L.length?L.length+' at this version. The same source at the same version always emits these frames, with these hashes.':'None. '+h(o&&o.why?o.why:'It emits nothing at this version.'))+'</p></div></div>'+
+  return '<div class="panel" style="margin-bottom:14px" data-help="steering-source/frames-it-emits"'+fut("frame types and per-frame provenance")+'><div class="panel-h"><div style="flex:1;min-width:0"><h3>Frames it emits</h3>'+
+   '<p class="muted" style="margin:2px 0 0;font-size:12px">'+(L.length?L.length+' at this version.':'None. '+h(o&&o.why?o.why:'It emits nothing at this version.'))+'</p></div></div>'+
    (L.length?'<ul class="sf-list">'+L.map(function(f){
      return '<li><div class="sf-h">'+ftBadge(f.type)+forceBadge(f.force)+'<span class="dim">'+h(POINT_LABEL[f.point]||f.point)+'</span>'+
        (f.tok?'<span class="sp mono dim">'+tokn(f.tok)+' tok</span>':'<span class="sp mono dim">descriptor</span>')+'</div>'+
@@ -1011,7 +1000,7 @@ function srcFramesPanel(o){
 }
 function srcReachPanel(o){
   var A=o?wsAgentsOf(S.ws).filter(o.reach):[], first=A.slice(0,5);
-  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Agents it reaches</h3>'+
+  return '<div class="panel" style="margin-bottom:14px" data-help="steering-source/agents-it-reaches"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Agents it reaches</h3>'+
    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+(o&&o.emitN?A.length+' in '+h(ws().name)+' by its scope, '+h(o.scope)+'.':'None while it emits nothing.')+'</p></div></div>'+
    (o&&o.emitN&&first.length?'<div class="panel-b" style="display:grid;gap:8px">'+first.map(function(a){
      return '<div class="row" style="justify-content:space-between;gap:8px">'+agentCard(a,{layout:"list",sub:"",sz:22,link:true})+
@@ -1041,8 +1030,7 @@ function pSource(r){
 function pDocSource(o){
   var w=ws(), d=docsFor(w.slug).filter(function(x){return x.id===o.id;})[0], R=SOURCES.registration||{};
   var sup=d.status==="superseded";
-  var secs='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Sections</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">What <span class="mono">'+h(R.path)+'</span> says each section emits. A section it does not name emits nothing.</p></div></div>'+
+  var secs='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Sections</h3></div></div>'+
    '<div class="tw"><table data-lt="off"><thead><tr><th>Section</th><th>Emits</th><th>Force</th><th>Text</th></tr></thead><tbody>'+
    d.sections.map(function(x){return '<tr><td><b style="font-weight:500">'+h(x.h)+'</b></td><td>'+(x.emits&&!sup?ftBadge(x.emits):'<span class="dim">nothing</span>')+
      (x.enforcedBy?'<div class="dim" style="font-size:11px;margin-top:3px">enforced by '+h(x.enforcedBy)+'</div>':'')+'</td>'+
@@ -1057,17 +1045,15 @@ function pDocSource(o){
    '</dl></div></div>';
   var badges=srcStatus(o)+'<span class="b b-q mono">'+h(d.id)+'</span><span class="b b-q mono">@'+h(d.commit)+'</span><span class="b b-q">repository <span class="mono">'+h(d.repo)+'</span></span>';
   return '<div'+fut("vision and ADR sources")+'>'+srcHead(o,SRC_KIND[d.kind].l,d.title,badges,
-    sup?'Superseded by '+h(d.supersededBy)+', so it emits nothing. Runs that received its frames before still name them.':'An '+(d.kind==="adr"?'accepted ADR':'registered document')+' emits frames only from the sections the registration names.',
-    '<button class="btn" onclick="act(\'Opened '+h(d.path)+' on '+h(d.repo)+'. A change is a pull request.\')">Open the file</button>')+
+    sup?'Superseded by '+h(d.supersededBy)+'.':'',
+    '<button class="btn" onclick="act(\'Opened '+h(d.path)+' on '+h(d.repo)+'.\')">Open the file</button>')+
    '<div class="crec-grid"><div>'+secs+hist+'</div><div>'+srcFramesPanel(o)+srcReachPanel(o)+'</div></div></div>';
 }
 function pItemSource(o){
   var w=ws(), lab=(SRC_KIND[o.kind]||{l:o.kind}).l, m=o.g==="memory"?MEMORY.filter(function(x){return x.id===o.id;})[0]:null;
   var badges=srcStatus(o)+(o.force?forceBadge(o.force):'')+'<span class="b b-q">'+h(o.scope)+'</span><span class="b b-q mono">'+h(o.version)+'</span>'+
     (o.hash?'<span class="b b-q mono">'+h(shortHash(o.hash))+'</span>':'');
-  var lead=o.g==="memory"?(/ · import by /.test(m.provenance||"")?'Imported from a Markdown file.':'Appended by an agent’s run.')+' It competes as context at force <span class="mono">'+h(o.force)+'</span> and never above <span class="mono">may</span>. It becomes a Steering record only through a proposal.'
-    :o.g==="glossary"?'A term the way this workspace uses it. It changes by a pull request against '+h(w.main)+'.'
-    :'Workspace settings. It reaches every agent in '+h(w.name)+' as a procedure at force <span class="mono">should</span>.';
+  var lead='';
   var acts=o.g==="memory"?'<button class="btn" onclick="openDialog(\'memforget\',\''+h(o.id)+'\')">Forget</button>'+
       /* A memory the fold already proposed has its proposal. A second one would argue the same record twice. */
       (m.proposedAs?'<button class="btn primary" onclick="memOpenProposal(\''+h(m.proposedAs)+'\')">Open the proposal</button>'
@@ -1087,8 +1073,8 @@ function pSkillWithheld(id){
   var o=srcRowOf("skill",id,S.ws), x=(SOURCES.withheld||[]).filter(function(y){return y.id===id;})[0];
   if(!o||!x) return emptyState("No skill here","Nothing in this workspace is named "+h(id)+".",'<button class="btn" onclick="go(\''+stgHash("sources")+'\')">Back to Sources</button>');
   return srcHead(o,"Skill",id,srcStatus(o)+'<span class="b b-q mono">@'+h(x.ver)+'</span><span class="b b-q mono">'+h(x.reason)+'</span>',
-    h(x.why)+' A withheld skill emits nothing. The agent is told how many skills were withheld and why, never which.',
-    x.reason==="unapproved_digest"?'<button class="btn primary" onclick="act(\'Approval requested for '+h(id)+'@'+h(x.ver)+'. It stays withheld until a person approves its digest.\',\'gold\')">Request approval</button>':'')+
+    h(x.why),
+    x.reason==="unapproved_digest"?'<button class="btn primary" onclick="act(\'Approval requested for '+h(id)+'@'+h(x.ver)+'.\',\'gold\')">Request approval</button>':'')+
    '<div class="crec-grid"><div>'+srcFramesPanel(o)+'</div><div>'+srcReachPanel(o)+'</div></div>';
 }
 
@@ -1119,8 +1105,7 @@ function spendDays(total){
 }
 function spendDayChart(total){
   var D=spendDays(total), mx=Math.max.apply(null,D.map(function(d){return d.usd;}));
-  return '<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>September by day</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">From the daily rollup, rebuilt from frames. Weekends run lighter.</p></div>'+
+  return '<div class="panel" data-help="month-by-day" style="margin-bottom:14px"><div class="panel-h"><h3>September by day</h3>'+
    '<span class="sp mono dim" style="font-size:11px">'+fmt$(total)+' to date</span></div>'+
    '<div class="panel-b"><div class="sp-days" role="img" aria-label="Spend by day, 1 to 11 September">'+D.map(function(d){
      return '<i style="height:'+Math.max(4,Math.round(d.usd/mx*100))+'%"'+tipAttr("Sep "+d.day+" · "+fmt$(d.usd))+'></i>';}).join("")+'</div>'+
@@ -1177,8 +1162,7 @@ function spendSide(by,key){
     kv='<dt>Role</dt><dd class="mono">'+h(p.role||"")+'</dd><dt>Agents</dt><dd>'+o.agents+' operated, '+mine.length+' in view</dd><dt>Runs</dt><dd>'+o.runs.toLocaleString()+'</dd>'+
       '<dt>Spend</dt><dd>'+usd(o.spend)+'</dd><dt>Budget</dt><dd>'+per(o.used)+' of '+usd(o.budget)+'</dd>'+
       '<dt>Bounded tasks</dt><dd'+fut("work orders")+'>'+(wos.length?wos.length+' work order'+(wos.length===1?'':'s')+' sent, '+acc+' item'+(acc===1?'':'s')+' accepted'+(acc?', '+fmt$(wsp/acc)+' per accepted item':''):'none sent in view')+'</dd>';
-    foot='<p class="muted" style="margin:0 0 8px;font-size:12px">The record, not a grade. Habits and the rules they suggest are on Optimization.</p>'+
-      '<button class="btn sm" onclick="spendPartGo(\'habits\')">Open the habits</button>'; }
+    foot='<button class="btn sm" onclick="spendPartGo(\'habits\')">Open the habits</button>'; }
   else if(by==="agent"){ var a=agent(key), t=agentTok(key), ag=SPEND.byAgent.filter(function(x){return x.k===key;})[0], rec=a?coachAgent(a):[];
     head=agentCard(a||key,{layout:"compact",key:key}); title="";
     kv='<dt>Runs</dt><dd>'+ag.runs.toLocaleString()+'</dd><dt>Spend</dt><dd>'+usd(ag.spend)+', '+h(ag.trend)+' on last month</dd>'+
@@ -1201,18 +1185,15 @@ function spendSide(by,key){
     kv='<dt>Work order</dt><dd><a class="mono" href="'+woUrl(w)+'">'+h(w.id)+'</a> '+woKindBadge(w)+'</dd><dt>Sent by</dt><dd>'+h((PEOPLE[w.by]||{name:w.by}).name)+'</dd>'+
       '<dt>Runs</dt><dd>'+(rs.length?rs.map(function(x){return runLink(x.run);}).join("<br>"):'none')+'</dd><dt>Spend</dt><dd>'+fmt$(row.usd)+(w.cap?' of a '+usd(w.cap)+' cap':'')+'</dd>';
     foot='<button class="btn sm" onclick="go(woUrl(woById(\''+h(key)+'\')))">Open the work order</button>'; }
-  return '<aside class="panel sp-side" aria-label="'+h(title||key)+'"><div class="panel-h"><div style="flex:1;min-width:0">'+(head||'<h3>'+h(title)+'</h3>')+'</div>'+
+  return '<aside class="panel sp-side" data-help="side-panel" aria-label="'+h(title||key)+'"><div class="panel-h"><div style="flex:1;min-width:0">'+(head||'<h3>'+h(title)+'</h3>')+'</div>'+
     '<button class="btn sm" onclick="spendKey(null)" aria-label="Close">Close</button></div>'+
     '<div class="panel-b"><dl class="kv">'+kv+'</dl>'+(foot?'<div style="margin-top:12px">'+foot+'</div>':'')+'</div></aside>';
 }
 function spendOverview(){
   var by=S.spendBy||"work", key=S.spendKey, total=spendMonthTotal();
-  var seg='<div class="kf stg-seg" role="group" aria-label="Group by"><span class="dim" style="font-size:12px;align-self:center;margin-right:4px">Group by</span>'+
+  var seg='<div class="kf stg-seg" role="group" aria-label="Group by" data-help="group-by"><span class="dim" style="font-size:12px;align-self:center;margin-right:4px">Group by</span>'+
    SPEND_BY.map(function(x){return '<button class="btn sm" aria-pressed="'+(by===x[0])+'" onclick="spendBy(\''+x[0]+'\')">'+h(x[1])+'</button>';}).join("")+'</div>';
-  var note=by==="work"?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="muted" style="margin:0;font-size:12px">'+WORKORDERS.length.toLocaleString()+' work orders in view, most of them direct: a run started from an operator’s own terminal. The rest of the month’s runs roll up the same way.</p></div>'
-    :by==="cost_center"?'<div class="panel-b" style="border-top:1px solid var(--border)"><p class="muted" style="margin:0;font-size:12px">A run with no label is charged to <span class="mono">~none</span>, so the centers sum to the month (ADR-142).</p></div>':'';
-  var table='<div class="panel"'+(by==="work"?fut("work orders"):'')+'><div class="panel-h"><div style="flex:1;min-width:0"><h3>By '+h(SPEND_BY.filter(function(x){return x[0]===by;})[0][1].toLowerCase())+'</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">Select a row to open it here. There is no drill page.</p></div></div>'+spendTable(by)+note+'</div>';
+  var table='<div class="panel" data-help="grouped-table"'+(by==="work"?fut("work orders"):'')+'><div class="panel-h"><h3>By '+h(SPEND_BY.filter(function(x){return x[0]===by;})[0][1].toLowerCase())+'</h3></div>'+spendTable(by)+'</div>';
   return spendDayChart(total)+seg+(key?'<div class="sp-cols"><div style="min-width:0">'+table+'</div>'+spendSide(by,key)+'</div>':table);
 }
 function spendBudgets(){
@@ -1228,7 +1209,7 @@ function spendBudgets(){
      '<div class="dim" style="font-size:11px">'+per(u)+'</div></td>'+
      '<td class="num" style="white-space:nowrap"><button class="btn sm" onclick="openDialog(\'budgetedit\',\''+i+'\')">Edit</button> '+
      '<button class="btn sm danger" onclick="openDialog(\'budgetdel\',\''+i+'\')">Remove</button></td></tr>';}).join("")+
-   '</tbody></table></div><div class="panel-b"><div class="note">A hard budget is checked at each checkpoint, from a running counter fed by the usage each harness reports. A breach is a <span class="mono">policy.decision</span> frame and a pause, never a silent stop. A soft budget sends a notice.</div></div></div>';
+   '</tbody></table></div></div>';
 }
 /* ---- Optimization ---- */
 /* A prompt habit is read off the recorded turns of an operator's runs. It is written as a rule the
@@ -1250,13 +1231,12 @@ function spendOptimization(){
   var recs=[]; mine.forEach(function(a){coachAgent(a).forEach(function(c){recs.push({a:a,c:c});});});
   recs.sort(function(x,y){return y.c.usd-x.c.usd;});
   var recHtml='<div class="panel" style="margin-bottom:14px"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Recommendations for agents</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+recs.length+' across '+mine.length+' agents in '+h(w.name)+'. Each names the signal it came from and the change that moves it.</p></div></div>'+
+    '<p class="muted" style="margin:2px 0 0;font-size:12px">'+recs.length+' across '+mine.length+' agents in '+h(w.name)+'.</p></div></div>'+
     '<div class="tw"><table><thead><tr><th>Agent</th><th>Recommendation</th><th>The record</th><th class="num">A month</th><th></th></tr></thead><tbody>'+
     recs.map(function(x){return '<tr><td>'+agentCard(x.a,{sub:"",sz:22,link:true})+'</td><td><b style="font-weight:500">'+h(x.c.title)+'</b><div class="dim" style="font-size:11.5px;max-width:52ch">'+h(x.c.say)+'</div></td>'+
       '<td class="mono dim" style="font-size:11px;max-width:30ch">'+x.c.signal+'</td><td class="num">'+(x.c.usd?fmt$(x.c.usd):'<span class="dim">—</span>')+'</td>'+
       '<td><button class="btn sm" onclick="'+x.c.act[1]+'">'+h(x.c.act[0])+'</button></td></tr>';}).join("")+'</tbody></table></div></div>';
-  var habHtml='<div class="panel" style="margin-bottom:14px" id="habits"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Operator habits</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Read from the recorded turns and written as rules to adopt. Listed by name. The record shows what happened. It never grades the person.</p></div></div>'+
+  var habHtml='<div class="panel" style="margin-bottom:14px" id="habits"><div class="panel-h"><h3>Operator habits</h3></div>'+
     (habits.length?'<div class="hab-list">'+habits.map(function(x){
       return '<article class="hab"><div class="hab-h"><b>'+h(x.name)+'</b><span class="dim">'+h(x.habit)+'</span></div>'+
        '<p class="mono dim hab-rec">'+x.record+(x.usd?' · '+fmt$(x.usd)+' in the record':'')+'</p>'+
@@ -1265,7 +1245,7 @@ function spendOptimization(){
        '<button class="btn sm" onclick="act(\'Rule shared with '+h(x.name)+'. It quotes the turns it was read from.\')">Share with '+h(x.name.split(" ")[0])+'</button></div></article>';}).join("")+'</div>'
      :'<div class="panel-b"><p class="muted" style="margin:0">No prompt habit stands out in this workspace’s recorded turns.</p></div>')+'</div>';
   var part=S.spendPart||"waste";
-  var seg='<div class="kf stg-seg" role="group" aria-label="Optimization">'+[["waste","Unproductive spend"],["tokens","Tokens and cache"],["agents","Recommendations",recs.length],["habits","Operator habits",habits.length]].map(function(x){
+  var seg='<div class="kf stg-seg" role="group" aria-label="Optimization" data-help="parts">'+[["waste","Unproductive spend"],["tokens","Tokens and cache"],["agents","Recommendations",recs.length],["habits","Operator habits",habits.length]].map(function(x){
     return '<button class="btn sm" aria-pressed="'+(part===x[0])+'" onclick="spendPartGo(\''+x[0]+'\')">'+h(x[1])+(x[2]!=null?' <span class="dim">'+x[2]+'</span>':'')+'</button>';}).join("")+'</div>';
   return seg+(part==="tokens"?spendTokens(WT):part==="agents"?recHtml:part==="habits"?habHtml:spendWaste("body"));
 }
@@ -1288,8 +1268,7 @@ function pSpend(){
    '<div class="stat"><span class="k">Observed by the gateway</span><span class="v">'+per(WT.observed)+'</span><span class="s">of tokens counted by the proxy</span></div>'+
    '<div class="stat click" onclick="spendView(\'optimization\')"><span class="k">Unproductive spend</span><span class="v" style="color:var(--st-critical)">'+usd(SPEND.wasteTotal)+'</span><span class="s">'+wasteShareText()+' of spend · Optimization</span></div></div>';
   var body=t==="budgets"?spendBudgets():t==="optimization"?spendOptimization():spendOverview();
-  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Spend</h1>'+
-   '<p>What the tokens bought, with the basis on every number.</p></div>'+
+  return '<div class="phead"><div class="t"><p class="eyebrow">'+h(w.name)+'</p><h1>Spend</h1></div>'+
    '<div class="acts"><button class="btn" onclick="openDialog(\'spendexport\')">Export report</button>'+
    '<button class="btn primary" onclick="openDialog(\'budget\')">Set a budget</button></div></div>'+strip+tabs+body;
 }
@@ -1405,7 +1384,7 @@ DLG_EXT.intake=function(){
   var n=wsProviders().length;
   var seg='<div class="kf stg-seg" role="group" aria-label="Intake" style="margin-bottom:14px">'+INTAKE_PARTS.map(function(x){
     return '<button class="btn sm" aria-pressed="'+(part===x[0])+'" onclick="intakePart(\''+x[0]+'\')">'+h(x[1])+'</button>';}).join("")+'</div>';
-  return {t:"Intake",s:n+" issue tracker"+(n===1?"":"s")+" connected to "+ws().name+". Each imported issue becomes a work item.",w:true,
+  return {t:"Intake",s:n+" issue tracker"+(n===1?"":"s")+" connected to "+ws().name+".",w:true,
    b:seg+(part==="fields"?tkFieldsTab():part==="people"?tkPeopleTab():tkProvTab()),
    f:'<button class="btn" onclick="ipzOpen()">Connect an issue tracker</button><button class="btn primary" onclick="closeDialog()">Done</button>'};
 };

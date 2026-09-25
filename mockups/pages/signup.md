@@ -21,7 +21,7 @@ Actions: **Create account** (gold, full width, `type=submit`)
 
 - Sign up with: **Continue with Google** · **Continue with GitHub** (each with its glyph), then a rule reading “or”.
 - Form: **Name** (`#ob-name`, `autocomplete=name`) · **Work email** (`#ob-email`, `type=email`, `autocomplete=email`) · **Password** (`#ob-pw`, `autocomplete=new-password`, **Show** / **Hide** toggle, a four-segment strength meter, and the requirement list “✓ at least 12 characters · ✓ one symbol · ✓ one digit”, each ticking as the value meets it).
-- Terms line under the button: “By creating an account you agree to the Oxagen terms and privacy notice. Oxagen never stores your model provider keys in plain text, and never returns them once saved.”
+- Terms line under the button: “By creating an account you agree to the oxagen Terms and Privacy Notice.” How Oxagen stores model provider keys is in the component help (`mockups/help/signup.md`, Sign-up form).
 - Footer: “Already have an account? **Log in**”.
 - Tags under the footer: “included monthly allowance” · “no token markup” · “SOC 2 evidence built in”.
 
