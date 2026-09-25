@@ -249,6 +249,7 @@ An organization is the tenant: it owns a key-encryption key, a database partitio
 ### Logic
 1. The search field filters the list in a build. The mockup has one organization, marked current.
 2. Selecting the current organization closes the dialog.
+3. `list_orgs` reads only your own memberships, so the list holds no organization you do not belong to. It runs before any organization is chosen, which is why the CLI's `oxagen login` calls it first.
 
 ### States
 Loaded only.
@@ -269,7 +270,7 @@ Everything under Workspace in the sidebar is scoped to one workspace, so the swi
 | Name, main repository, branch, agent count | `WS` | `list_workspaces` (`workspace.list.ts`) | partial |
 
 ### Logic
-1. One row per workspace. The current one carries "current".
+1. One row per workspace you can use. The current one carries "current". `list_workspaces` checks that you belong to the organization before it lists anything, and answers a non-member with an error.
 2. Selecting a row sets `S.ws` and goes to the workspace root, which opens Work.
 3. Create a workspace opens `newws` (Organization help).
 
