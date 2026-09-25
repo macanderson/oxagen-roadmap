@@ -61,10 +61,10 @@ The only tool list the model is ever shown, and the assignment that produced it.
 
 ### Runtime
 
-- When no host is enrolled, the tab is the empty state “No runtime is enrolled for this agent”, with **Wrap it** (the Register Agent gate) and **Show the CLI path** (opens `register`).
+- When no host is enrolled, the tab is the empty state “No runtime is enrolled”, with **Enroll a runtime** (the Register agent gate) and **Show CLI steps** (opens `register`).
 - **Host**, read from the runtime record so this page and Runtimes cannot disagree: Runtime · Harness · Device key · Collector · Hook binary · Hooks written · Model proxy · Oxagen MCP endpoint · Settings · Tier earned · First frame · Last checkpoint, plus the runtime's note when it has one. The health badge and **Open the runtime** sit in the header.
 - **What this tier delivers**: the tier ladder with this agent's rung marked, then Model calls, Tool calls over MCP, Harness-native tools, Budgets, Steering, and Credentials held by this agent (`none`). Each answer changes with the tier. **All runtimes** in the header.
-- **Rollback**: the `oxagen agent unenroll` command, the note that hand-stripped hooks record `hooks_removed` and drop the tier to `observe`, **Run a smoke session**, and **Unenroll** (danger).
+- **Unenroll this host from the CLI**: the `oxagen agent unenroll` command, the note that hand-stripped hooks record Hooks removed (`hooks_removed` in the tooltip) and drop the tier to `observe`, **Run a test session**, and **Unenroll** (danger).
 
 ### Permissions
 

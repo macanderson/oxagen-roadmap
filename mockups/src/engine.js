@@ -5197,22 +5197,20 @@ function aRuntime(a,r){
     '<div class="panel-b">'+tierLadder(a.tier)+'<dl class="kv" style="margin-top:14px">'+
     '<dt>Model calls</dt><dd>'+(TIER_RANK[a.tier]>=2?'routed through the loopback proxy on the host. Tokens are counted from the bytes that pass through it and the run token is the only credential the call carries. Spend is '+basisChip("gateway_observed")+'.':'not routed through oxagen. The harness calls its provider with its own key and reports usage. Spend is '+basisChip("client_attested")+'.')+'</dd>'+
     '<dt>Tool calls over MCP</dt><dd>'+(TIER_RANK[a.tier]>=2?'every provider the harness reaches over MCP is reached through the gateway and decided by oxagen.':a.tier==="harness"?'the providers registered with oxagen are routed through oxagen, which decides each call. Any other MCP tool the harness holds is not.':'recorded only')+'</dd>'+
-    '<dt>Harness-native tools</dt><dd>'+(a.tier==="contained"?'the four blocking hook events can refuse, and the sandbox refuses a write to the settings file, the hook entries or the hook binary':TIER_RANK[a.tier]>=1?'the four blocking hook events can refuse: client-attested and fail-open':'recorded only')+'</dd>'+
+    '<dt>Harness-native tools</dt><dd>'+(a.tier==="contained"?'the four blocking hook events can refuse, and the sandbox refuses a write to the settings file, the hook entries or the hook binary':TIER_RANK[a.tier]>=1?'the four blocking hook events can refuse. The result is reported by the harness, and a failed hook lets the call through (fail-open)':'recorded only')+'</dd>'+
     '<dt>Budgets</dt><dd>'+(TIER_RANK[a.tier]>=2?'enforced before the call: a run budget by the proxy, a shared budget by a reservation on the control plane':'a recorded number and a notice in steering, never a stop')+'</dd>'+
     '<dt>Steering</dt><dd>'+(TIER_RANK[a.tier]>=1?'delivered at SessionStart and UserPromptSubmit, and as files in the checkout':'not delivered: no hook is installed')+'</dd>'+
     '<dt>Credentials held by this agent</dt><dd><b style="color:var(--st-allowed)">none</b></dd>'+
     '</dl>'+
-    '<div class="note" style="margin-top:13px">The tier is computed per run from what was actually routed and rendered verbatim. '+
-    'No report can say a stronger word than the tier allows, and only <span class="mono">contained</span> earns the word enforced.</div></div></div>'+
+    '<div class="note" style="margin-top:13px">Only <span class="mono">contained</span> is fully enforced: all traffic must pass through oxagen.</div></div></div>'+
 
-   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Rollback</h3>'+
-    '<p class="muted" style="margin:2px 0 0;font-size:12px">Shown beside the installer from the first screen, and never hidden afterwards.</p></div></div>'+
+   '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Unenroll this host from the CLI</h3></div></div>'+
     '<div class="panel-b">'+
     '<pre>oxagen agent unenroll --host '+h(a.host||"this")+' \\\n  --restore-settings</pre>'+
     '<div class="note" style="margin-top:12px">If hooks are stripped by hand instead, the next run records '+
-    '<span class="mono">hooks_removed</span> and the tier falls to <span class="mono">observe</span>. It is never upgraded after the fact.</div>'+
+    keyLabel("hooks_removed")+' and the tier falls to <span class="mono">observe</span>. It is never upgraded after the fact.</div>'+
     '<div class="row" style="margin-top:14px">'+
-    '<button class="btn" onclick="act(\'Smoke session queued. One turn, recorded like any other run.\')">Run a smoke session</button>'+
+    '<button class="btn" onclick="act(\'Test session queued. One turn, recorded like any other run.\')">Run a test session</button>'+
     '<button class="btn danger" onclick="openDialog(\'unenroll\',\''+a.key+'\')">Unenroll</button></div>'+
     '</div></div></div></div>';
 }
@@ -5222,14 +5220,14 @@ function aRuntime(a,r){
 function aRuntimeHost(a){
   var rt=agentRuntime(a), deg=rt&&rt.health!=="ok";
   return '<div class="panel"><div class="panel-h"><div style="flex:1;min-width:0"><h3>Host</h3>'+
-   '<p class="muted" style="margin:2px 0 0;font-size:12px">One click produced a signed installer with a one-time enrollment token embedded. Nothing was pasted.</p></div>'+
+   '</div>'+
    '<span class="b b-'+(deg?"approval":"allowed")+'" style="margin-left:auto"><span class="d"></span>'+h(rt?rt.health:"connected")+'</span>'+
    '<button class="btn sm" onclick="go(\'#/'+ORG.slug+'/'+S.ws+'/runtimes/'+h((rt&&rt.id)||a.host||"")+'\')">Open the runtime</button></div>'+
    '<div class="panel-b"><dl class="kv">'+
    '<dt>Runtime</dt><dd class="mono">'+h((rt&&rt.name)||a.host||"—")+
     (rt?'<span class="sub">'+h(rt.kind+' · '+rt.os+' · started by '+rt.started)+'</span>':'')+'</dd>'+
    '<dt>Harness</dt><dd>'+h((rt&&rt.harness)||a.harnessLabel)+' <span class="mono dim">'+
-    h((rt&&rt.harnessV)||a.harnessV||"—")+'</span><span class="sub">the runtime is shared; every agent on it is seen through the same hooks</span></dd>'+
+    h((rt&&rt.harnessV)||a.harnessV||"—")+'</span><span class="sub">the runtime is shared. Every agent on it is seen through the same hooks.</span></dd>'+
    '<dt>Device key</dt><dd class="mono">'+h(a.devKey||"—")+'<span class="sub">signs checkpoints; oxagen countersigns at ingest</span></dd>'+
    '<dt>Collector</dt><dd class="mono">oxagend '+h((rt&&rt.collector)||a.collector||"1.6.2")+
     '<span class="sub">'+(rt&&rt.gaps?h(rt.gaps+' telemetry gap'+(rt.gaps>1?'s':'')+' in the last 24h')
@@ -5238,11 +5236,10 @@ function aRuntimeHost(a){
    '<dt>Hooks written</dt><dd class="mono" style="font-size:11.5px">'+
     h((rt&&rt.hooks)||"SessionStart, UserPromptSubmit, PreToolUse, PermissionRequest, Stop")+
     '<span class="sub" style="font-family:var(--font)">'+(rt&&rt.hookCount<5?'Fewer than five events are wired, so some calls are recorded rather than decided.':'Five run as command hooks. The first four can refuse.')+'</span></dd>'+
-   '<dt>Model proxy</dt><dd>'+((TIER_RANK[a.tier]||0)>=2?'loopback proxy on the host<span class="sub">every model call leaves through it; tokens are counted from the bytes that pass.</span>':'not routed<span class="sub">model traffic goes from the harness to its provider. Routing it is the gateway tier.</span>')+'</dd>'+
+   '<dt>Model proxy</dt><dd>'+((TIER_RANK[a.tier]||0)>=2?'loopback proxy on the host<span class="sub">every model call leaves through it. Tokens are counted from the bytes that pass.</span>':'not routed<span class="sub">model traffic goes from the harness to its provider. Routing it is the gateway tier.</span>')+'</dd>'+
    '<dt>oxagen MCP endpoint</dt><dd class="mono">mcp.oxagen.com/w/'+h(S.ws)+'<span class="sub">providers registered here are routed through oxagen, which decides each call</span></dd>'+
    '<dt>Settings</dt><dd>'+h((rt&&rt.settings)||"user settings")+'<span class="sub">an enterprise managed enrollment writes locked settings instead</span></dd>'+
-   '<dt>Tier earned</dt><dd>'+tierBadge(a.tier)+
-    '<span class="sub">Computed per run from what was actually routed. The UI cannot render a stronger word than the tier allows.</span></dd>'+
+   '<dt>Tier earned</dt><dd>'+tierBadge(a.tier)+'</dd>'+
    '<dt>First frame</dt><dd class="mono">'+h(a.firstFrame||"—")+'</dd>'+
    '<dt>Last checkpoint</dt><dd class="mono">'+h((rt&&rt.checkpoint)||("seq 41,208 · "+(a.lastUsed||"—")))+' · chain intact</dd>'+
    (rt&&rt.note?'<dt>Note</dt><dd>'+h(rt.note)+'</dd>':'')+
