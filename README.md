@@ -108,28 +108,36 @@ Everything a URL of it pins is read at runtime, so there is one file where there
 | `?product=1&state=loaded&mobile=0` | the product, pinned to the loaded state and the desktop shell |
 | `?product=1&state=loaded&mobile=1` | the same in the mobile shell: a five-slot thumb bar, a More sheet, dialogs as bottom sheets, list tables as cards |
 | `?state=empty#/a-intel/core-platform/tools` | one page in one state; the states are `loaded`, `empty`, `loading`, `error`, `denied` |
-| `#/a-intel/core-platform/scenarios/flight-recorder/1` | a guided scenario (the W flows) on step 1 |
-| `#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P/cost` | a run tab by hash: `transcript`, `player`, `cost`, `policy`, `context`, `chain` |
-| `#/a-intel/core-platform/steering/compiler/release-manager` | a Steering tab by hash: `library`, `assignments`, `gates`, `proposals[/prs]`, `compiler[/<agent>]`; a library shelf is its own segment, `records`, `skills[/<view>]`, `memory`, `ontology` |
-| `#/a-intel/core-platform/skills` | an old route: Skills is a shelf of the Steering library, and this still resolves to `…/steering/skills` |
+| `#/a-intel/core-platform/scenarios/money-asked/1` | a guided scenario (the W flows) on step 1 |
+| `#/a-intel/core-platform/work` | Work, the workspace root: a tab by hash, `orders`, `workflows`, `findings`; one record is `items/<id>` or `orders/<id>`; `?intake=providers` opens the Intake dialog |
+| `#/a-intel/core-platform/runs/run_01K5RQ4B9C7XTN2P/cost` | a run tab by hash: the Decision trace is the bare path, then `transcript`, `cost`, `evidence`; the old `player`, `policy` and `context` land on the Decision trace and `chain` on Evidence |
+| `#/a-intel/core-platform/steering/compiler/release-manager` | a Steering area by hash: Sources is the bare path (`?kind=` filters it), then `sources/<kind>/<id>`, `assignments`, `compiler[/<agent>]`, `proposals[/prs]` |
+| `#/a-intel/core-platform/skills` | an old route: it lands on Sources filtered to skills; `docs/fleet-operations-routes.md` lists every old route and where it lands |
 | `#/a-intel/core-platform/runtimes/mbell-mbp-16` | one enrolled host, with the agents on it and the tier its seam earns |
 | `?theme=dark` | pinned theme |
+| `?future=1` | outlines every field the platform does not record yet, marked future-only on the page |
+| `?drawer=approvals`, `?drawer=stella` | the page with the Approvals or the Stella drawer open |
 
 The onboarding screens live at `#/welcome…` and are reachable from the Account dialog's Onboarding
 tab, the user menu, and ⌘K. Nothing on them writes anything.
 
 ## What the mockups depict
 
-Every phase of the steering and gateway plan (0 to 5), shipped. Steering is the hub: five tabs
-(Library, Assignments, Gates, Proposals, Compiler), one assembler where every item
-competes, and a `steering.manifest` frame on every run. The tier ladder is complete: `observe`,
-`harness`, `gateway`, `contained`. Most agents run `gateway` with `gateway_observed` metering and
-enforced budgets; Stella CI runs `contained`. Token accounting follows the spec's cost record
-(§12.6) on every run, agent, operator and workspace, and coaching for agents and operators derives
-from it. Approvals live in a drawer opened from the topbar on every page. The governance mode is a
-workspace setting on the Steering header. Not in the design: the witness runner, proof, the
-definition of done, agent scores, proven spend. `mockups/README.md` lists the changes from the first
-mockup; `mockups/pages/` is the spec of every page.
+The fleet operations wedge (`docs/fleet-operations-wedge.md`) on top of every phase of the steering
+and gateway plan (0 to 5), shipped. Work is the workspace root: work items, work orders, workflows and
+findings, with every run filed under a work order as its child execution record. Every runtime input
+an agent receives is a SteeringFrame resolved from a Steering Source (a Steering record, a document, a
+skill, an agent definition, an instruction, a glossary term, a memory, a policy, a mandate or a
+toolbelt), with its source, version and hash. One resolver builds the Compiler, the agent's Steering
+tab and the run's Decision trace. The tier ladder is complete: `observe`, `harness`, `gateway`,
+`contained`. Most agents run `gateway` with `gateway_observed` metering and enforced budgets; Stella
+CI runs `contained`. Token accounting follows the spec's cost record (§12.6), and Spend groups it by
+work order, operator, agent, model, tool and cost center. Operator habits come from the recorded turns
+and read as rules to adopt, with no score or rank. Approvals live in a drawer opened from the topbar
+on every page. The governance mode is a workspace setting on the Steering header. Not in the design:
+the witness runner, proof, the definition of done, agent scores, proven spend, and what the wedge cut
+(`docs/fleet-operations-collapse.md`). `mockups/README.md` lists the changes from the first mockup;
+`mockups/pages/` is the spec of every page.
 
 ## The catalog
 
@@ -152,21 +160,20 @@ and states exist is `mockups/catalog.mjs`, which the stories, the checker and th
 | W1 | Sixty seconds to governed | `sixty-seconds-to-governed` |
 | W2 | Stop it. Steer it. | `stop-it-steer-it` |
 | W3 | Money asked, a human answered | `money-asked` |
-| W4 | The flight recorder | `flight-recorder` |
 | W6 | It learned, you approved, it changed | `learned-approved-changed` |
 | W8 | Every dollar, every operator | `every-dollar-every-operator` |
 | W9 | The toolbelt, governed | `toolbelt-governed` |
 | W10 | The CIO's console | `cio-console` |
 | W11 | Whose account it is | `the-account` |
-| W13 | In the loop: skills ship off, the search is the config, and an unbound repository stops the loop to ask a person | `in-the-loop` |
 
 W7 (the ontology) and the assistant half of W11 were cut by the scope review of 2026-09-14
-(`docs/scope-review.md`); W12 was a coverage audit, now `tools/check-mockup.mjs`. W6 walks Steering:
-Records, Proposals, the pull request, the merge, Preview, and the `steering.manifest` frame on the
-run. W13 is the Skills tab of Steering (`#/a-intel/<ws>/steering/skills`; Skills moved under Steering
-on 2026-09-18), its off-by-default gate and the interjected run (`docs/w13-in-the-loop-scenario.md`,
-spec §10.6). W5 and W14 (proof and the definition of done) exist only in the future-state mockup. A scenario is `SCENARIOS["id"]` in `mockups/src/engine.js`
-and a row in `mockups/catalog.mjs`. `docs/videos-mockup-narrated.md` has the narrated walkthroughs.
+(`docs/scope-review.md`); W12 was a coverage audit, now `tools/check-mockup.mjs`. The fleet operations
+wedge retired W4 (the flight recorder walked the frame player, fork replay and bisect) and W13 (in the
+loop walked the skills console); the interjection W13 ended on stays in the Approvals drawer. W6 walks
+Steering: Sources, the pull request, the Compiler, and the Decision trace on the run. W5 and W14
+(proof and the definition of done) exist only in the future-state mockup. A scenario is
+`SCENARIOS["id"]` in `mockups/src/engine.js` and a row in `mockups/catalog.mjs`.
+`docs/videos-mockup-narrated.md` has the narrated walkthroughs.
 
 ## The documents
 
@@ -179,9 +186,10 @@ a contents rail per document; a section has a link (`#spec/8-6-definition-of-don
 - `witness-spec.md`: Witness, outcome verification (future state, not in rev1)
 - `desktop-spec.md`: the Oxagen Desktop installer
 - `implementation-plan.md`: how the pages become the Next.js `apps/app` in the oxagen monorepo
+- `fleet-operations-wedge.md`: the design authority for Work, SteeringFrames, the Decision trace and what was cut, with `fleet-operations-ia.md` (navigation and the unique views), `fleet-operations-routes.md` (every old route and where it lands) and `fleet-operations-collapse.md` (the deletion list)
 - `scope-review.md`: the review of 2026-09-14, what it cut and where each cut landed
 - `demo-mockup-prompts.md`, `consolidation.md`, `feedback-mockups.md`, `videos-mockup-narrated.md`, `w13-in-the-loop-scenario.md`: how the mockups were made and reviewed
-- `agent-portability-atlas.md`: an inventory of how Claude Code, Cursor and Codex store agents, skills and memory on disk — where the schemas match, where they don't, and the gap in Oxagen's own agent/skill/memory capabilities against delivering any of the three in another harness's native format. [Interactive version.](https://claude.ai/artifact/YYawKKCKLASpWHcegLyXpC)
+- `agent-portability-atlas.md`: an inventory of how Claude Code, Cursor and Codex store agents, skills and memory on disk: where the schemas match, where they don't, and the gap in Oxagen's own agent/skill/memory capabilities against delivering any of the three in another harness's native format. [Interactive version.](https://claude.ai/artifact/YYawKKCKLASpWHcegLyXpC)
 
 The desktop spec is also carried in the oxagen monorepo at `docs/specs/oxagen-desktop/spec.md`, and
 that copy is canonical and newer. No build step joins them, so a change is made in both by hand, in
@@ -213,7 +221,7 @@ assistant and record checks. `tools/README.md` says what each checks and what to
 
 ## Creating things
 
-Four things an operator creates — an agent, a tool, a skill and a context record — and one shape
+Four things an operator creates (an agent, a tool, a skill and a Steering record) and one shape
 for all four, because all four are a file in a repository: describe it, Oxagen drafts the file, you
 read the file, a pull request publishes it. Nothing in it writes a row. `docs/creation-spec.md` is
 the spec; the wizards are `DLG_EXT.wz` in `mockups/src/engine.js` and reached from `Create` in ⌘K
@@ -221,19 +229,22 @@ and from each page's own action. The tool wizard matches a description against t
 Oxagen can already reach (`mockups/fixtures/mcp-catalog.json`) and offers to import before it offers
 to generate a handler in TypeScript, Python, Go or Rust. The skill wizard searches the registry
 (`mockups/fixtures/skill-registry.json`), drafts from prose, or takes a `.skill` bundle that
-replaces a pinned version. Two pages carry the editing half: `record` (a published record, presented
-by its kind, with its statement in a real editor) and `skill-source`.
+replaces a pinned version. Two pages carry the editing half: `steering-source` (a published Steering
+record, presented by its kind, with its statement in a real editor) and `steering-source-skill` (a
+skill's bundle and its `SKILL.md`).
 
-## Tasks and work orders
+## Work
 
 Work arrives from GitHub, Linear and Jira and leaves for an agent only in a work order.
-`docs/tasks-spec.md` is the spec. A six-step wizard connects a provider and maps its accounts to
-members, leaving any not mapped. `oxagen.assistant` drafts a definition of done for every task and a
-person certifies it, which makes the task ready. A work order sends ready tasks to an agent the sender
-operates: the merged definition of done, an editable prompt with `@` mentions, and confirmed
-repositories. Workflows chain agents and end with a person. The pages are `tasks`, `tasks-providers`,
-`task` and `work-order` in `mockups/pages/`, each with its audit prompt, and
-`node tools/check-tasks.mjs` walks every flow.
+`docs/tasks-spec.md` is the spec, written when Work was called Tasks. The Intake dialog on Work
+connects a provider in six steps and maps its accounts to members, leaving any not mapped.
+`oxagen.assistant` drafts a definition of done for every work item and a person certifies it, which
+makes the item ready. A work order sends ready items to an agent the sender operates: the merged
+definition of done, an editable prompt with `@` mentions, and confirmed repositories. A run started
+outside Work is filed under a direct work order. Workflows chain agents and end with a person. The
+pages are `work-backlog`, `work-intake`, `work-item`, `work-orders`, `work-order`, `work-workflows` and
+`work-findings` in `mockups/pages/`, each with its audit prompt, and `node tools/check-tasks.mjs`
+walks every flow.
 
 
 ## Docs site

@@ -62,8 +62,8 @@ Record PASS / FAIL / N/A per check with evidence (file:line, selector + text, or
 4. Sidebar: organization switcher and workspace switcher at the top; Workspace nav Work, Agents,
    Tools, Steering, Runtimes, Spend, Repositories; Organization nav Organization, Billing, Audit; the footer
    (agent count, data plane, connection); the assistant launcher at the foot of the sidebar.
-5. Nav counts appear only where something waits on a person: Work (drafts and changed
-   certifications, and work orders waiting on you), Tools (observed schemas waiting on an admin),
+5. Nav counts appear only where something waits on a person: Work (work items whose definition
+   of done is a draft or changed, and work orders waiting on you), Tools (observed schemas waiting on an admin),
    Steering (proposals and open record pull requests), Runtimes (hosts that are not healthy),
    Repositories (Oxagen's open pull requests), Audit (open critical incidents). Any other count is
    a FAIL.
@@ -146,7 +146,7 @@ Verdict: PASS | FAIL (n fails, m notes)
 1. …
 
 ## Per-page reports
-- fleet: PASS/FAIL (link)
+- work-backlog: PASS/FAIL (link)
 - …
 ```
 

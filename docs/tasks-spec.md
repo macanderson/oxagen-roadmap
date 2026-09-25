@@ -2,13 +2,13 @@
 
 | | |
 |---|---|
-| **Status** | Spec v1, for design review. No code is written against it yet. |
+| **Status** | Spec v1, for design review. No code is written against it yet. The fleet operations wedge renamed Tasks to Work and moved Providers, Fields and People into the Intake dialog (`fleet-operations-wedge.md`). This spec keeps the words it was written in: a task is a work item, and the Tasks page is Work. |
 | **Date** | 2026-09-24 |
 | **Owner** | Mac Anderson |
-| **Source** | `mockups/src/engine.js` (the Tasks section: `pTasks`, `pTask`, `pWorkOrder`, `DLG_EXT.ipwz`, `DLG_EXT.wo`, `DLG_EXT.certify`, `DLG_EXT.wfnew`), `mockups/fixtures/tasks.json`, rendered in `mockups/missioncontrol.html` |
+| **Source** | `mockups/src/wedge.js` (`pWork`, `backlogTab`, `findingsTab`, `DLG_EXT.intake`) and `mockups/src/engine.js` (`pTask`, `pWorkOrder`, `DLG_EXT.ipwz`, `DLG_EXT.wo`, `DLG_EXT.certify`, `DLG_EXT.wfnew`), `mockups/fixtures/tasks.json`, rendered in `mockups/missioncontrol.html` |
 | **Builds on** | ADR-043 (Oxagen governs agents, it does not run them), ADR-096 (the launcher may contain the process), ADR-101 (four first-class harnesses), ADR-157 (ARP carries an operator-authored brief), ADR-053 (the assistant), ADR-052 (the governed action is the billable unit) |
 | **Related** | `creation-spec.md` (every definition is a file, and a wizard ends on a pull request), `dod-spec.md` (the run dod, a different object), `mission-control-spec.md` §1 (the operator), §7.6 (agent messages are quoted evidence), §11.2 (connectors) |
-| **Pages** | `mockups/pages/tasks.md`, `tasks-providers.md`, `task.md`, `work-order.md`, each with its audit prompt |
+| **Pages** | `mockups/pages/work-backlog.md`, `work-intake.md`, `work-item.md`, `work-orders.md`, `work-order.md`, `work-workflows.md`, `work-findings.md`, each with its audit prompt |
 | **Check** | `node tools/check-tasks.mjs` walks every flow below in the built mockup |
 
 ## 1. The situation
