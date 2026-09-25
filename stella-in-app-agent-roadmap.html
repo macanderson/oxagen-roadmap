@@ -1,0 +1,473 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>stella in-app agent roadmap</title>
+<meta name="description" content="Specs and Claude Code workflow prompts that take the in-app stella from a read-mostly flyout to the capability roadmap's app-capable agent, at parity with stella in the terminal.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
+<style>
+
+/* Tokens: the house engine.css palette, dark first (ADR-132). */
+:root{
+  color-scheme: dark;
+  --ink:#09090B; --panel:#18181B; --panel-h:#1F1F23; --border:#27272A; --rule:#3F3F46;
+  --fg:#FFFFFF; --body:#E4E4E7; --muted:#A1A1AA; --dim:#71717A;
+  --gold:#D4AF37; --gold-bright:#F1CE65; --gold-deep:#8A7223; --accent-text:#F1CE65; --on-gold:#09090B;
+  --gold-wash:rgba(212,175,55,.10);
+  --allowed:#57A97C; --approval:#5B93D6; --denied:#C66A4A; --proven:#3FA2A2; --failed:#C0453C; --critical:#D6455E;
+  --f-model:#3987E5; --f-tool:#D95926; --f-gov:#199E70; --f-ctx:#9085E9;
+  --code-bg:#0E0E11; --mark-bg:rgba(144,133,233,.24);
+  --shadow:0 14px 36px rgba(0,0,0,.5);
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    color-scheme: light;
+    --ink:#FFFFFF; --panel:#F4F4F5; --panel-h:#ECECEE; --border:#E4E4E7; --rule:#D4D4D8;
+    --fg:#09090B; --body:#27272A; --muted:#71717A; --dim:#85858E;
+    --gold:#C9A227; --gold-bright:#8A7223; --gold-deep:#B8942A; --accent-text:#8A7223; --on-gold:#09090B;
+    --gold-wash:rgba(212,175,55,.13);
+    --allowed:#2F7D52; --approval:#2E6BA8; --denied:#9B4526; --proven:#287878; --failed:#992F28; --critical:#B3304A;
+    --f-model:#2A6FC4; --f-tool:#B8481A; --f-gov:#13805A; --f-ctx:#6E62C9;
+    --code-bg:#FAFAFA; --mark-bg:rgba(110,98,201,.16);
+    --shadow:0 12px 30px rgba(9,9,11,.10);
+  }
+}
+:root[data-theme="light"]{
+  color-scheme: light;
+  --ink:#FFFFFF; --panel:#F4F4F5; --panel-h:#ECECEE; --border:#E4E4E7; --rule:#D4D4D8;
+  --fg:#09090B; --body:#27272A; --muted:#71717A; --dim:#85858E;
+  --gold:#C9A227; --gold-bright:#8A7223; --gold-deep:#B8942A; --accent-text:#8A7223; --on-gold:#09090B;
+  --gold-wash:rgba(212,175,55,.13);
+  --allowed:#2F7D52; --approval:#2E6BA8; --denied:#9B4526; --proven:#287878; --failed:#992F28; --critical:#B3304A;
+  --f-model:#2A6FC4; --f-tool:#B8481A; --f-gov:#13805A; --f-ctx:#6E62C9;
+  --code-bg:#FAFAFA; --mark-bg:rgba(110,98,201,.16);
+  --shadow:0 12px 30px rgba(9,9,11,.10);
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%; scroll-behavior:smooth; scroll-padding-top:20px}
+body{margin:0; background:var(--ink); color:var(--body); font:15px/1.6 "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; padding-inline:16px; padding-block:0 120px}
+.wrap{max-width:1200px; margin-inline:auto}
+h1,h2,h3,h4{font-family:"Space Grotesk","Geist",ui-sans-serif,system-ui,sans-serif; color:var(--fg); text-wrap:balance; letter-spacing:-.01em; line-height:1.2; font-weight:600}
+h1{font-size:clamp(34px,6vw,56px); margin:10px 0 14px; letter-spacing:-.02em}
+h2{font-size:clamp(24px,3.4vw,31px); margin:4px 0 8px}
+h3{font-size:18px; margin:30px 0 8px}
+h4{font-size:15px; margin:18px 0 6px}
+p{margin:0 0 12px; max-width:74ch}
+ul,ol{margin:0 0 12px; padding-left:20px; max-width:78ch}
+li{margin-bottom:4px}
+code,pre,.mono,kbd{font-family:"Geist Mono",ui-monospace,SFMono-Regular,Menlo,monospace}
+:not(pre)>code{font-size:.86em; background:var(--panel); border:1px solid var(--border); border-radius:5px; padding:1px 5px; color:var(--fg); overflow-wrap:anywhere}
+kbd{font-size:.82em; border:1px solid var(--rule); border-bottom-width:2px; border-radius:5px; padding:0 5px; background:var(--panel); color:var(--fg)}
+a{color:var(--accent-text); text-decoration-thickness:1px; text-underline-offset:3px}
+strong{color:var(--fg); font-weight:600}
+.eyebrow{display:block; font:500 11px/1.2 "Geist Mono",ui-monospace,monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-text)}
+.lead{font-size:18px; line-height:1.55; max-width:70ch}
+.meta{color:var(--muted); font-size:13px}
+.sub{color:var(--muted); margin-bottom:22px}
+.small{font-size:13px; color:var(--muted); margin:8px 0 0}
+.num{font-variant-numeric:tabular-nums}
+
+/* Top bar and hero */
+.topbar{display:flex; align-items:center; justify-content:space-between; gap:12px; padding-block:18px; border-bottom:1px solid var(--border)}
+.mark{font:600 16px "Space Grotesk",system-ui,sans-serif; color:var(--fg); letter-spacing:-.01em}
+.mark b{color:var(--gold)}
+.btn{font:500 13px/1 "Geist",system-ui,sans-serif; color:var(--fg); background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:8px 12px; cursor:pointer; white-space:nowrap}
+.btn:hover{background:var(--panel-h); border-color:var(--rule)}
+.btn:focus-visible,.chip:focus-visible,.rec input:focus-visible,summary:focus-visible,select:focus-visible,.search:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+.btn.gold{background:var(--gold); color:var(--on-gold); border-color:var(--gold); font-weight:600}
+.btn.gold:hover{filter:brightness(1.08)}
+.hero{padding-block:36px 40px}
+.src{margin-top:14px; color:var(--muted); font-size:13px}
+.facts{display:grid; grid-template-columns:repeat(auto-fill,minmax(148px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:12px; overflow:hidden; margin:28px 0 0; padding:0}
+.fact{background:var(--panel); padding:14px 16px; margin:0}
+.fact dt{font:500 10.5px/1.3 "Geist Mono",monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--muted)}
+.fact dd{margin:6px 0 0; font:600 22px/1.1 "Space Grotesk",system-ui,sans-serif; color:var(--fg); font-variant-numeric:tabular-nums}
+.fact dd small{display:block; margin-top:4px; font:400 12px/1.35 "Geist",system-ui,sans-serif; color:var(--muted)}
+.toc{display:flex; flex-wrap:wrap; gap:8px; margin-top:22px}
+.toc a{font:500 13px/1 "Geist",system-ui,sans-serif; color:var(--body); text-decoration:none; border:1px solid var(--border); border-radius:999px; padding:7px 12px; background:var(--panel)}
+.toc a:hover{border-color:var(--gold); color:var(--fg)}
+.toc a span{color:var(--dim); font-family:"Geist Mono",monospace; margin-right:6px; font-size:11px}
+
+/* Sections */
+section{padding-block:56px 8px; border-top:1px solid var(--border); margin-top:40px}
+.cols{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin:14px 0}
+.card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px 16px}
+.card h4{margin-top:0}
+.card p:last-child,.card ul:last-child{margin-bottom:0}
+.note{border-left:3px solid var(--gold); background:var(--gold-wash); padding:10px 14px; border-radius:0 8px 8px 0; margin:14px 0; max-width:84ch}
+.note.warn{border-left-color:var(--denied); background:color-mix(in srgb, var(--denied) 11%, transparent)}
+.note p:last-child{margin-bottom:0}
+.tag{display:inline-block; font:500 10.5px/1.5 "Geist Mono",monospace; letter-spacing:.06em; text-transform:uppercase; border:1px solid var(--rule); border-radius:4px; padding:0 6px; color:var(--muted); white-space:nowrap}
+.tag.gold{border-color:var(--gold-deep); color:var(--accent-text)}
+.tag.model{border-color:color-mix(in srgb, var(--f-model) 60%, transparent); color:var(--f-model)}
+.tag.tool{border-color:color-mix(in srgb, var(--f-tool) 60%, transparent); color:var(--f-tool)}
+.tag.gov{border-color:color-mix(in srgb, var(--f-gov) 60%, transparent); color:var(--f-gov)}
+.tag.ctx{border-color:color-mix(in srgb, var(--f-ctx) 60%, transparent); color:var(--f-ctx)}
+
+/* Tables */
+.tscroll{overflow-x:auto; border:1px solid var(--border); border-radius:10px; margin:12px 0 20px; background:var(--ink)}
+table{border-collapse:collapse; width:100%; font-size:14px}
+th{font:500 10.5px/1.3 "Geist Mono",monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); text-align:left; background:var(--panel); padding:10px 12px; border-bottom:1px solid var(--border); white-space:nowrap}
+td{padding:9px 12px; border-bottom:1px solid var(--border); vertical-align:top}
+tbody tr:last-child td{border-bottom:0}
+td.nw,td code{white-space:nowrap}
+td.wrap code{white-space:normal}
+.k{color:var(--fg); font-weight:500}
+
+/* Diagram */
+.diagram{overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--panel); margin:16px 0}
+.diagram svg{display:block; min-width:900px; width:100%; height:auto}
+.dg-box{fill:var(--ink); stroke:var(--rule)}
+.dg-box.gold{stroke:var(--gold)}
+.dg-title{fill:var(--fg); font:600 13px "Space Grotesk",system-ui,sans-serif}
+.dg-sub{fill:var(--muted); font:400 10.5px "Geist Mono",monospace}
+.dg-life{stroke:var(--rule); stroke-dasharray:3 5}
+.dg-msg{fill:none; stroke-width:1.5}
+.dg-lbl{font:500 11.5px "Geist Mono",monospace; paint-order:stroke; stroke:var(--panel); stroke-width:5px; stroke-linejoin:round}
+.c-ctx{stroke:var(--f-ctx)} .t-ctx{fill:var(--f-ctx)}
+.c-model{stroke:var(--f-model)} .t-model{fill:var(--f-model)}
+.c-tool{stroke:var(--f-tool)} .t-tool{fill:var(--f-tool)}
+.c-gov{stroke:var(--f-gov)} .t-gov{fill:var(--f-gov)}
+.c-mut{stroke:var(--muted)} .t-mut{fill:var(--body)}
+.dash{stroke-dasharray:5 4}
+.dg-loop{fill:none; stroke:var(--gold-deep); stroke-dasharray:6 4}
+.dg-looptab{fill:var(--gold)}
+.dg-looptxt{fill:var(--on-gold); font:600 11px "Geist Mono",monospace}
+.legend{display:flex; flex-wrap:wrap; gap:14px; font-size:12.5px; color:var(--muted); margin-top:-4px}
+.legend i{display:inline-block; width:18px; height:2px; vertical-align:middle; margin-right:6px}
+
+/* Pipeline */
+.steps{list-style:none; padding:0; margin:16px 0; display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; counter-reset:s; max-width:none}
+.steps li{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px 16px; counter-increment:s; margin:0}
+.steps li>b{display:flex; align-items:center; gap:8px; color:var(--fg); margin-bottom:6px; font-family:"Space Grotesk",system-ui,sans-serif; font-size:15.5px}
+.steps li>b::before{content:counter(s); font:600 11px "Geist Mono",monospace; color:var(--on-gold); background:var(--gold); border-radius:999px; width:22px; height:22px; display:inline-grid; place-items:center; flex:none}
+.steps li p{font-size:14px; margin:0 0 6px}
+.steps .meta{font-family:"Geist Mono",monospace; font-size:11.5px}
+
+/* Prompt render */
+.promptgrid{display:grid; grid-template-columns:minmax(0,1.55fr) minmax(0,1fr); gap:18px; align-items:start; margin-top:16px}
+@media (max-width:900px){.promptgrid{grid-template-columns:minmax(0,1fr)}}
+.pblock{background:var(--code-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:14px}
+.pblock-h{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; padding:8px 14px; border-bottom:1px solid var(--border); background:var(--panel); font:500 10.5px/1.4 "Geist Mono",monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+.pblock pre{margin:0; padding:14px 16px; white-space:pre-wrap; overflow-wrap:anywhere; font-size:12.5px; line-height:1.62; color:var(--body)}
+.pblock pre .sep{color:var(--dim)}
+mark.ex{background:var(--mark-bg); color:var(--fg); border-radius:3px; padding:0 2px}
+.pin{display:inline-grid; place-items:center; min-width:18px; height:18px; padding:0 4px; border-radius:999px; background:var(--gold); color:var(--on-gold); font:600 10px/1 "Geist Mono",monospace; vertical-align:1px; margin-inline:3px}
+.annos{position:sticky; top:16px; display:grid; gap:10px}
+@media (max-width:900px){.annos{position:static}}
+.anno{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px 14px; font-size:14px}
+.anno .pin{margin-left:0; margin-right:6px}
+.anno p{margin:6px 0 0}
+
+/* Tool belt */
+.belt{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin:14px 0}
+.tray{border:1px solid var(--border); border-radius:10px; padding:12px 14px; background:var(--panel)}
+.tray.gold{border-color:var(--gold-deep)}
+.tray h4{margin:0 0 8px; display:flex; justify-content:space-between; gap:8px; align-items:baseline}
+.tray h4 span{font:500 11px "Geist Mono",monospace; color:var(--muted)}
+.pills{display:flex; flex-wrap:wrap; gap:6px}
+.pill{font:500 12px/1.2 "Geist Mono",monospace; border:1px solid var(--rule); background:var(--ink); color:var(--fg); border-radius:6px; padding:4px 7px}
+.pill.w{border-color:color-mix(in srgb, var(--f-tool) 55%, transparent)}
+.gates{display:grid; gap:10px; margin:14px 0}
+.gate{display:grid; grid-template-columns:76px minmax(0,1fr); gap:12px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px 14px}
+.gate .lv{font:600 12px "Geist Mono",monospace; color:var(--accent-text)}
+.gate .lv small{display:block; color:var(--muted); font-weight:400; margin-top:4px; font-size:11px}
+.chain{display:flex; flex-wrap:wrap; gap:6px 4px; align-items:center; font:500 12px/1.3 "Geist Mono",monospace}
+.chain span{border:1px solid var(--rule); border-radius:5px; padding:3px 6px; background:var(--ink); color:var(--fg)}
+.chain em{font-style:normal; color:var(--dim)}
+@media (max-width:520px){.gate{grid-template-columns:minmax(0,1fr)}}
+
+/* Tool explorer */
+.filters{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:14px 0 8px}
+.search{flex:1 1 240px; min-width:0; background:var(--panel); border:1px solid var(--border); border-radius:8px; padding:9px 12px; color:var(--fg); font:14px "Geist",system-ui,sans-serif}
+.search::placeholder{color:var(--dim)}
+select{background:var(--panel); color:var(--fg); border:1px solid var(--border); border-radius:8px; padding:8px 10px; font:13px "Geist",system-ui,sans-serif; max-width:100%}
+.chip{font:500 12px/1 "Geist Mono",monospace; border:1px solid var(--border); background:var(--panel); color:var(--body); border-radius:999px; padding:7px 11px; cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--gold); color:var(--fg); background:var(--gold-wash)}
+.stats{display:flex; flex-wrap:wrap; gap:6px; margin:6px 0 4px}
+.stat{font:500 12px "Geist Mono",monospace; color:var(--muted); border:1px solid var(--border); border-radius:6px; padding:3px 8px}
+.stat b{color:var(--fg); font-weight:600}
+#toolWrap{max-height:620px; overflow:auto}
+#toolWrap th{position:sticky; top:0; z-index:1}
+.risk{display:inline-block; min-width:22px; text-align:center; font:600 11px/1.6 "Geist Mono",monospace; border-radius:4px; border:1px solid}
+.risk.H{color:var(--critical); border-color:color-mix(in srgb, var(--critical) 50%, transparent)}
+.risk.M{color:var(--gold-bright); border-color:color-mix(in srgb, var(--gold) 50%, transparent)}
+.risk.L{color:var(--allowed); border-color:color-mix(in srgb, var(--allowed) 50%, transparent)}
+.yes{color:var(--approval); font-weight:600}
+.no{color:var(--dim)}
+.rw{font:500 12px "Geist Mono",monospace}
+.rw.RO{color:var(--allowed)} .rw.W{color:var(--f-tool)} .rw.Wx{color:var(--denied)}
+.tname{font:500 13px "Geist Mono",monospace; color:var(--fg); white-space:nowrap}
+.dot{display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--gold); margin-left:6px; vertical-align:1px}
+.flag{font:500 10px "Geist Mono",monospace; color:var(--muted); margin-left:6px}
+td.desc{min-width:260px}
+.empty{padding:22px; text-align:center; color:var(--muted)}
+
+/* Flyout mock */
+.flymock{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,360px); gap:0; border:1px solid var(--border); border-radius:12px; overflow:hidden; margin:16px 0; background:var(--panel)}
+@media (max-width:760px){.flymock{grid-template-columns:minmax(0,1fr)} .fm-page{display:none}}
+.fm-page{background:var(--ink); padding:16px; display:grid; grid-template-columns:150px minmax(0,1fr); gap:12px; min-height:360px}
+.fm-side{border-right:1px solid var(--border); padding-right:12px; display:flex; flex-direction:column; justify-content:space-between; font-size:12.5px; color:var(--muted)}
+.fm-side ul{list-style:none; padding:0; margin:0}
+.fm-side li{padding:3px 0}
+.fm-launch{border:1px solid var(--gold); border-radius:8px; padding:8px 10px; background:var(--panel); display:flex; align-items:center; gap:8px}
+.fm-launch svg{width:28px; height:28px; flex:none}
+.fm-launch b{color:var(--fg); font-family:"Space Grotesk",system-ui,sans-serif; font-size:14px}
+.fm-launch b i{color:var(--gold); font-style:normal}
+.fm-launch small{display:block; color:var(--muted); font-size:11px}
+.fm-body{display:grid; gap:8px; align-content:start}
+.fm-bar{height:10px; border-radius:4px; background:var(--panel)}
+.fm-panel{border-left:1px solid var(--border); display:flex; flex-direction:column; min-height:360px}
+.fm-head{display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-bottom:1px solid var(--border); font:600 14px "Space Grotesk",system-ui,sans-serif; color:var(--fg)}
+.fm-head i{color:var(--gold); font-style:normal}
+.fm-log{flex:1; padding:14px; display:grid; gap:10px; align-content:start; font-size:13px}
+.fm-user{justify-self:end; max-width:85%; background:var(--panel-h); border:1px solid var(--border); border-radius:10px; padding:8px 10px; color:var(--fg)}
+.fm-reply{max-width:100%; color:var(--body)}
+.fm-reply .meta{display:block; margin-top:6px; font-size:11.5px}
+.fm-comp{border-top:1px solid var(--border); padding:10px 12px; display:flex; gap:8px; align-items:flex-end}
+.fm-comp div{flex:1; min-height:44px; border:1px solid var(--border); border-radius:8px; padding:8px; color:var(--dim); font-size:12.5px; background:var(--ink)}
+.fm-comp span{background:var(--gold); color:var(--on-gold); border-radius:7px; padding:7px 10px; font:600 12px "Geist",system-ui,sans-serif}
+
+/* ADRs */
+.adrgroup{display:grid; gap:10px; margin:12px 0 24px}
+.adr{display:grid; grid-template-columns:86px minmax(0,1fr); gap:12px; background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:12px 14px}
+.adr .id{font:600 13px "Geist Mono",monospace; color:var(--accent-text)}
+.adr .id small{display:block; font-weight:400; color:var(--muted); font-size:11px; margin-top:3px}
+.adr b{color:var(--fg); font-weight:600}
+.adr p{margin:4px 0 0; font-size:14px}
+@media (max-width:520px){.adr{grid-template-columns:minmax(0,1fr)}}
+
+/* Recommendations */
+.recs{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,460px); gap:24px; align-items:start; margin-top:18px}
+@media (max-width:1020px){.recs{grid-template-columns:minmax(0,1fr)}}
+.reclist{display:grid; gap:12px}
+.band{margin:18px 0 2px; font:500 11px "Geist Mono",monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); display:flex; align-items:center; gap:10px}
+.band:first-child{margin-top:0}
+.band::after{content:""; flex:1; height:1px; background:var(--border)}
+.rec{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px; transition:border-color .15s}
+.rec:has(input:checked){border-color:color-mix(in srgb, var(--gold) 60%, var(--border))}
+.rec-top{display:grid; grid-template-columns:auto minmax(0,1fr); gap:12px; cursor:pointer}
+.rec input{width:18px; height:18px; accent-color:var(--gold); margin:3px 0 0; cursor:pointer}
+.rec h3{margin:0; font-size:16.5px}
+.rec .rid{font:600 11px "Geist Mono",monospace; color:var(--accent-text); margin-right:6px}
+.rec .tags{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0 6px}
+.rec p{font-size:14px; margin:0 0 6px}
+.rec .files{font:400 12px/1.55 "Geist Mono",monospace; color:var(--muted); overflow-wrap:anywhere; margin:0}
+.rec details{margin:10px 0 0}
+.rec summary{cursor:pointer; font:500 12px "Geist Mono",monospace; color:var(--accent-text); list-style:none; display:inline-flex; gap:6px; align-items:center}
+.rec summary::-webkit-details-marker{display:none}
+.rec summary::before{content:"+"; display:inline-grid; place-items:center; width:16px; height:16px; border:1px solid var(--gold-deep); border-radius:4px; font-size:12px; line-height:1}
+.rec details[open] summary::before{content:"\2212"}
+.rec details pre{margin:8px 0 0; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px; white-space:pre-wrap; overflow-wrap:anywhere; font-size:12px; line-height:1.6; color:var(--body)}
+.rectools{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-top:12px}
+.composer{position:sticky; top:16px; background:var(--panel); border:1px solid var(--gold-deep); border-radius:12px; display:flex; flex-direction:column; max-height:calc(100vh - 32px); box-shadow:var(--shadow)}
+@media (max-width:1020px){.composer{position:static; max-height:none}}
+.composer-h{padding:14px 16px 12px; border-bottom:1px solid var(--border); display:grid; gap:10px}
+.composer-h h3{margin:0; font-size:17px}
+.composer-row{display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between}
+.count{font:600 13px "Geist Mono",monospace; color:var(--fg)}
+.count span{color:var(--muted); font-weight:400}
+.composer pre{flex:1 1 auto; overflow:auto; margin:0; padding:14px 16px; white-space:pre-wrap; overflow-wrap:anywhere; font-size:12px; line-height:1.6; background:var(--code-bg); color:var(--body); min-height:220px}
+@media (max-width:1020px){.composer pre{max-height:70vh}}
+.composer-f{padding:12px 16px; border-top:1px solid var(--border); display:flex; flex-wrap:wrap; gap:8px; align-items:center; justify-content:space-between}
+.copied{font:500 12px "Geist Mono",monospace; color:var(--allowed); min-height:1em}
+.jump{position:fixed; left:50%; transform:translateX(-50%); bottom:calc(14px + env(safe-area-inset-bottom, 0px)); z-index:5; display:none; gap:10px; align-items:center; background:var(--panel); border:1px solid var(--gold-deep); border-radius:999px; padding:8px 8px 8px 16px; box-shadow:var(--shadow); font:500 13px "Geist Mono",monospace; color:var(--fg); max-width:calc(100% - 32px)}
+.jump .count{white-space:nowrap}
+.jump a{background:var(--gold); color:var(--on-gold); text-decoration:none; border-radius:999px; padding:6px 12px; font:600 12.5px "Geist",system-ui,sans-serif; white-space:nowrap}
+@media (max-width:1020px){.jump.on{display:flex}}
+footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); color:var(--muted); font-size:13px}
+
+/* Roadmap additions */
+.st{display:inline-block; font:500 10.5px/1.5 "Geist Mono",monospace; letter-spacing:.04em; border:1px solid var(--rule); border-radius:4px; padding:0 6px; white-space:nowrap}
+.st.eng{color:var(--allowed); border-color:color-mix(in srgb, var(--allowed) 55%, transparent)}
+.st.host{color:var(--f-model); border-color:color-mix(in srgb, var(--f-model) 55%, transparent)}
+.st.box{color:var(--f-tool); border-color:color-mix(in srgb, var(--f-tool) 55%, transparent)}
+.st.done{color:var(--muted); border-style:dashed}
+.phases{display:grid; gap:12px; margin:16px 0}
+.phase{display:grid; grid-template-columns:96px minmax(0,1fr); gap:14px; background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px 16px}
+.phase .pid{font:600 12px "Geist Mono",monospace; color:var(--accent-text)}
+.phase .pid small{display:block; color:var(--muted); font-weight:400; margin-top:4px; font-size:11px}
+.phase h3{margin:0 0 4px; font-size:17px}
+.phase p{margin:0 0 6px; font-size:14px}
+.phase .exit{font-size:13px; color:var(--muted)}
+.chips{display:flex; flex-wrap:wrap; gap:6px; margin-top:8px}
+.chips a{font:500 11.5px/1 "Geist Mono",monospace; color:var(--fg); text-decoration:none; border:1px solid var(--rule); border-radius:6px; padding:5px 7px; background:var(--ink)}
+.chips a:hover{border-color:var(--gold)}
+.chips a.dec{border-style:dashed}
+@media (max-width:520px){.phase{grid-template-columns:minmax(0,1fr)}}
+.ctl{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:12px; margin:14px 0}
+.ctl .card b.n{display:inline-grid; place-items:center; width:22px; height:22px; border-radius:999px; background:var(--gold); color:var(--on-gold); font:600 11px "Geist Mono",monospace; margin-right:8px}
+pre.obj{background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:12px 14px; overflow-x:auto; font-size:12.5px; line-height:1.6; color:var(--body); margin:10px 0 16px}
+.rec .deps{font:400 12px/1.55 "Geist Mono",monospace; color:var(--muted); margin:0 0 6px}
+.rec .deps b{color:var(--body); font-weight:500}
+.rec ul.done{font-size:13.5px; margin:6px 0 0}
+.filterbar{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin:14px 0 4px}
+.rec[hidden]{display:none}
+.band[hidden]{display:none}
+.tdone td{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="topbar">
+  <span class="mark">oxagen <b>*</b> roadmap</span>
+  <button class="btn" id="themeBtn" type="button">Theme</button>
+</header>
+
+<div class="hero">
+  <span class="eyebrow">Build spec for the in-app agent</span>
+  <h1>stella in-app agent roadmap</h1>
+  <p class="lead">You ask stella a question from any workspace page, and today it reads the record and answers in up to 12 steps with no shell, no files, and no way to make a chart or stage a change. stella in the terminal plans, runs code, edits files, delegates to children, and works for hours. This spec closes that gap inside the capability roadmap's four abilities (understand, make sense, make, act), and every effect still passes Oxagen's gates.</p>
+  <p class="src">Read from <code>macanderson/oxagen</code> at <code>39487400a</code> and <code>macanderson/stella</code> at <code>0.9.437</code> on 2026-09-25. The vision is <code>docs/in-app-agent-capability-expansion-spec.md</code> in this repository, and it wins wherever the earlier <em>stella in-app agent</em> page disagrees. Paths and issue numbers are checked. Line numbers drift, so each prompt re-reads main first.</p>
+  <dl class="facts">
+    <div class="fact"><dt>Engine pin</dt><dd>0.9.414<small>Stella main is 0.9.437</small></dd></div>
+    <div class="fact"><dt>Steps per turn</dt><dd>12<small>target set per turn kind</small></dd></div>
+    <div class="fact"><dt>Tools shown</dt><dd>7 + 2<small>pins plus search and load</small></dd></div>
+    <div class="fact"><dt>App actions</dt><dd>205 of 390<small>on the agent surface (#4180)</small></dd></div>
+    <div class="fact"><dt>Sandbox</dt><dd>None<small>target: one contained session per thread</small></dd></div>
+    <div class="fact"><dt>Sub-agents</dt><dd>Off<small>the engine has them; Oxagen sends none</small></dd></div>
+    <div class="fact"><dt>Artifacts</dt><dd>None<small>target: versioned and cited</small></dd></div>
+    <div class="fact"><dt>Specs</dt><dd id="specCount">39<small>each with a workflow prompt</small></dd></div>
+  </dl>
+  <nav class="toc" aria-label="On this page">
+    <a href="#overview"><span>01</span>Overview</a>
+    <a href="#baseline"><span>02</span>Baseline</a>
+    <a href="#parity"><span>03</span>Parity</a>
+    <a href="#containment"><span>04</span>Containment</a>
+    <a href="#architecture"><span>05</span>Architecture</a>
+    <a href="#contracts"><span>06</span>Contracts</a>
+    <a href="#decisions"><span>07</span>Decisions</a>
+    <a href="#phases"><span>08</span>Phases</a>
+    <a href="#workflows"><span>09</span>Workflows</a>
+    <a href="#specs"><span>10</span>Specs</a>
+  </nav>
+</div>
+
+<section id="overview">
+  <span class="eyebrow">01</span>
+  <h2>Overview</h2>
+  <p class="sub">What the in-app agent becomes, and the rules it keeps.</p>
+  <div class="cols">
+    <div class="card">
+      <h4>Target</h4>
+      <p>stella in the app does what stella in the terminal does, plus what the capability roadmap asks for that the terminal lacks: evidence-linked answers, deterministic charts, durable artifacts, action plans applied by digest, and distribution with receipts.</p>
+    </div>
+    <div class="card">
+      <h4>Parity definition</h4>
+      <p>A 30-task bench (S05) runs each task through both agents on the same model. The in-app verdict rate lands within 5 points of the terminal's, and steps and cost land within 1.25 times. Pass rate alone saturates, so steps, cost, and interventions are scored too.</p>
+    </div>
+    <div class="card">
+      <h4>Source of the sandbox</h4>
+      <p>Neither source document asks for a sandbox. It comes from the parity goal and from the maintainer's decision on 2026-09-25 that stella gets contained sessions. Section 04 has the design, and D1 records it as an ADR.</p>
+    </div>
+  </div>
+  <h3>Rules that hold in every phase</h3>
+  <ul>
+    <li><strong>The engine holds no authority.</strong> stella-serve never calls a model or runs a tool. <code>STELLA_SERVE_TOOLS</code> accepts only <code>remote</code> (<code>crates/stella-serve/README.md</code>). Every model call and tool call comes back to Oxagen.</li>
+    <li><strong>Every effect is a contract.</strong> A file write, a shell command, a chart render, and a pull request each run through <code>kernel.invoke()</code> with IAM, entitlement, approval, and metering, and each leaves a frame on the turn's run.</li>
+    <li><strong>No runtime grows back.</strong> ADR-043 deleted Oxagen's sandbox, sub-agent, web, and artifact packages because Stella owns them. The tools here are Stella's own code, and sub-agents run inside the engine. Oxagen adds gates, a driver, and stores.</li>
+    <li><strong>No key enters the agent.</strong> A GitHub installation token never enters the engine or the sandbox (ADR-151). Clones come through a short-lived archive URL or a host proxy, and commits are written host-side.</li>
+    <li><strong>Any agent can call the new families.</strong> Oxagen governs Claude Code and Codex too. Each new family ships on the <code>agent</code>, <code>api</code>, and <code>mcp</code> surfaces, so stella is the first caller and not the only one.</li>
+    <li><strong>AWS only.</strong> Nothing on the path depends on Vercel, and the app host has no Docker. Production artifact storage moves off the Vercel Blob driver in <code>@oxagen/storage</code>.</li>
+  </ul>
+</section>
+
+<section id="baseline">
+  <span class="eyebrow">02</span>
+  <h2>Baseline</h2>
+  <p class="sub">What shipped since the 2026-09-24 review, and the defects still open.</p>
+  <p>All 26 recommendations of the earlier page have merged or have a follow-up issue. This roadmap starts from that state, so none of them appears as a spec here.</p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Area</th><th>Shipped</th><th>PR</th></tr></thead>
+    <tbody>
+      <tr><td>Governance</td><td>A run cannot approve its own parked write; secret writes need approval; a parked call records as parked; every agent-surface contract declares <code>mutates</code>; a kill switch keeps a tool off the belt</td><td class="nw">#4198, #4185, #4196, #4199, #4189</td></tr>
+      <tr><td>Tools and prompt</td><td>Pins are <code>list_runs</code>, <code>get_run</code>, <code>get_run_cost</code>, <code>get_spend</code>, <code>list_approvals</code>, <code>list_agents</code>, <code>search_graph</code>; the prompt describes the current product; the page label reaches the turn</td><td class="nw">#4187, #4188, #4190</td></tr>
+      <tr><td>Context</td><td>Steering goes through the one assembler and records what it kept and cut; dropped history is summarised and recorded</td><td class="nw">#4197, #4195</td></tr>
+      <tr><td>Flyout</td><td>Streamed replies, Stop, tool calls under each reply, cost per reply, reply feedback, approvals in the thread, threads kept across reloads, Enter to send, suggested questions, engine state before the first question</td><td class="nw">#4204, #4258, #4256, #4210, #4206, #4213, #4207, #4193, #4186, #4191</td></tr>
+      <tr><td>Engine and record</td><td>Goal-shaped turns judged on another tier (ADR-177); abandoned runs sealed; a 15-turn replay set; one source for the engine version</td><td class="nw">#4208, #4192, #4247, #4183</td></tr>
+    </tbody>
+  </table></div>
+  <p>Open defects that bear on new power. S04 fixes them in one PR before any write-capable family lands.</p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Issue</th><th>What it says</th></tr></thead>
+    <tbody>
+      <tr><td class="nw">#4245 P1</td><td>stella treats permission, credit, and budget refusals as failures, not denials</td></tr>
+      <tr><td class="nw">#3973</td><td>The flyout says stella could not be reached for every kind of failure</td></tr>
+      <tr><td class="nw">#4218, #4219</td><td>Kill switches stop stella differently in its tool list, calls, and approvals; the run records a permission limit its calls are never held to</td></tr>
+      <tr><td class="nw">#4226</td><td>A call fails instead of waiting when a rule requires approval</td></tr>
+      <tr><td class="nw">#4227, #4228</td><td>A late-finishing turn leaves its run abandoned; the turn budget misses the cost of summarising history</td></tr>
+      <tr><td class="nw">#4222, #4223, #4229</td><td>A 20-second stall pulling run events; older workspaces show outdated tools; Steering Delivery omits stella's turns</td></tr>
+      <tr><td class="nw">#3303, #3314</td><td>Workspace instructions reach the turn unchecked; a direct provider key ignores reasoning effort and tool limits</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="parity">
+  <span class="eyebrow">03</span>
+  <h2>Parity</h2>
+  <p class="sub">Each capability of stella in the terminal, where it stands in the app, and the spec that brings it.</p>
+  <p>Stella's catalog has 22 tools (<code>docs/tools/README.md</code> in the stella repository). stella-serve already runs judged goal rounds, read-only sub-agents, sessions, compaction, steering, pause, and checkpoints. Oxagen sends none of those fields today (<code>packages/agent/src</code> sets <code>maxSteps</code> and nothing else).</p>
+  <p class="legend"><span><span class="st eng">engine</span> stella-serve has it; Oxagen sets a field</span> <span><span class="st host">host</span> Oxagen adds a contract</span> <span><span class="st box">sandbox</span> runs in a contained session</span></p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Terminal capability</th><th>In the app today</th><th>Path</th><th>How it arrives</th><th>Spec</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Long agent loop</td><td>12 steps, stateless turns, last 50 turns resent</td><td><span class="st eng">engine</span></td><td>Engine sessions, step ceilings per turn kind</td><td class="nw">D2, S03</td></tr>
+      <tr><td class="k">Compaction</td><td>Host summary of dropped turns (#4195)</td><td><span class="st eng">engine</span></td><td><code>compaction_budget_tokens</code> and <code>summarize_keep_recent</code> on each turn</td><td class="nw">S03</td></tr>
+      <tr><td class="k">Crash resume</td><td>A crashed turn is sealed abandoned</td><td><span class="st eng">engine</span></td><td><code>GET /v1/sessions/{id}/checkpoint</code>, once the binary can store one</td><td class="nw">S03</td></tr>
+      <tr><td class="k">Judged goal rounds</td><td>Rule drafting only (ADR-177)</td><td><span class="st eng">engine</span></td><td>Goals on task turns, verdicts on the run</td><td class="nw">S27</td></tr>
+      <tr><td class="k"><code>delegate</code></td><td>Off</td><td><span class="st eng">engine</span></td><td><code>sub_agents</code> block within caps; child calls return to the gates</td><td class="nw">D2, S27</td></tr>
+      <tr><td class="k">Steer and pause</td><td>Stop only (#4258)</td><td><span class="st eng">engine</span></td><td><code>/steer</code>, <code>/pause</code>, <code>/resume</code> from the flyout</td><td class="nw">S27</td></tr>
+      <tr><td class="k"><code>read_file</code>, <code>write_file</code>, <code>edit_file</code>, <code>delete_file</code></td><td>None</td><td><span class="st box">sandbox</span></td><td>Stella's schemas and code, run by the tool host</td><td class="nw">S20, S21, S22</td></tr>
+      <tr><td class="k"><code>bash</code></td><td>None</td><td><span class="st box">sandbox</span></td><td>Same, with no network inside the session</td><td class="nw">S22</td></tr>
+      <tr><td class="k"><code>search</code>, <code>get_environment</code></td><td><code>search_graph</code> over the workspace graph</td><td><span class="st box">sandbox</span></td><td>Code search over a checked-out repository</td><td class="nw">S22, S23</td></tr>
+      <tr><td class="k"><code>save_state</code>, <code>get_state</code>, <code>list_state</code>, <code>delete_state</code></td><td>None</td><td><span class="st host">host</span></td><td>Per-thread scratch; needs no sandbox</td><td class="nw">S14</td></tr>
+      <tr><td class="k"><code>issue</code>, <code>pull_request</code>, <code>watch_ci</code></td><td>Read-only <code>repo.*</code> views</td><td><span class="st host">host</span></td><td>Host-side GitHub writes (ADR-151), merge with a named reason (#4178)</td><td class="nw">S23</td></tr>
+      <tr><td class="k"><code>ask_question</code></td><td>None</td><td><span class="st host">host</span></td><td>A question card in the thread that the turn waits on</td><td class="nw">S41</td></tr>
+      <tr><td class="k"><code>task_create</code>, <code>task_assign</code>, <code>task_start</code>, <code>task_complete</code>, <code>task_cancel</code>, <code>task_list</code></td><td>None</td><td><span class="st host">host</span></td><td>Work items and governed workflow steps</td><td class="nw">S42, S43</td></tr>
+      <tr><td class="k">Skills</td><td><code>list_skills</code> not on the agent surface (#4180)</td><td><span class="st host">host</span></td><td>Skills listed and loaded through the assembler</td><td class="nw">S10</td></tr>
+      <tr><td class="k">Memory and recall</td><td>Six memories through the assembler</td><td><span class="st host">host</span></td><td>Unchanged, plus Markdown attachments into memories (#4179)</td><td class="nw">S14</td></tr>
+      <tr><td class="k">MCP servers</td><td>Workspace MCP tools with first-use consent</td><td><span class="st done">shipped</span></td><td>No change</td><td class="nw">none</td></tr>
+      <tr><td class="k">Plan before acting</td><td>Writes park one at a time</td><td><span class="st host">host</span></td><td>Action plans applied by digest</td><td class="nw">S40, S41</td></tr>
+    </tbody>
+  </table></div>
+  <p class="small">Beyond the terminal: charts (S26), metrics (S25), artifacts (S30 to S33), action plans (S40), and distribution (S50) come from the capability roadmap and have no terminal equivalent.</p>
+</section>
+
+<section id="containment">
+  <span class="eyebrow">04</span>
+  <h2>Containment</h2>
+  <p class="sub">How a stella session earns the <code>contained</code> tier.</p>
+  <p><code>contained</code> is the top of the tier ladder (ADR-095: <code>observe</code>, <code>harness</code>, <code>gateway</code>, <code>contained</code>) and the only tier that earns "enforced" against the machine's operator. It is built for Claude Code and Codex as <code>tacho run --contained</code> with the Docker profile <code>oxagen-linux-docker-v1</code> (ADR-152, <code>packages/tacho/src/contained/</code>). A sandbox alone does not earn it. ADR-096 requires three controls, and the control plane computes the tier from a launch receipt and the run's record. A launcher never labels its own run.</p>
+  <div class="ctl">
+    <div class="card"><h4><b class="n">1</b>Egress</h4><p>Customer harness: every model and MCP request goes through the gateway or fails. stella session: nothing leaves the microVM. The engine runs outside it, so there is no model route and no MCP route. The one channel is the tool host's socket to Oxagen. A repository arrives as an archive the host fetched.</p></div>
+    <div class="card"><h4><b class="n">2</b>Filesystem policy</h4><p>Customer harness: the workspace is writable and the hook config is read-only. stella session: the session workspace is the only writable path. The tool host binary and its config are read-only, and no credential file enters.</p></div>
+    <div class="card"><h4><b class="n">3</b>Integrity at launch</h4><p>Customer harness: a digest of the hook configuration is recorded. stella session: the image digest and the tool host digest are recorded on a launch receipt before the first tool call, the way <code>register_contained_launch</code> records one today.</p></div>
+  </div>
+  <h3>Why a stella session is stricter than a wrapped harness</h3>
+  <p>In a wrapped harness the agent's own tools run inside the sandbox, so a hook is the only thing that can refuse them. ADR-096 pins the hooks read-only to close that gap. stella's tools never run on their own. The engine asks, Oxagen gates the call through <code>kernel.invoke()</code>, and only then does Oxagen send it into the session. Refusal happens before the sandbox sees anything. The sandbox then bounds what an allowed call can reach.</p>
+  <h3>Profile</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>Item</th><th><code>oxagen-linux-docker-v1</code> (built)</th><th>stella session profile (proposed)</th></tr></thead>
+    <tbody>
+      <tr><td class="k">Runs</td><td>Claude Code or Codex in a customer's CI</td><td>Stella's tool host, one per thread</td></tr>
+      <tr><td class="k">Boundary</td><td>Docker container, host kernel shared</td><td>A microVM per session with its own kernel: an ECS task on Fargate, or Firecracker on metal hosts (D1)</td></tr>
+      <tr><td class="k">Why the boundary differs</td><td>One customer's runner, their own code</td><td>Model-written code for many tenants on Oxagen's hosts, where prompt injection is the attacker</td></tr>
+      <tr><td class="k">Network</td><td><code>--network none</code> plus a four-route bridge</td><td>None; one socket to the host</td></tr>
+      <tr><td class="k">Starts</td><td>When CI launches the run</td><td>On the first code tool of a thread; a thread with no code tool starts none</td></tr>
+      <tr><td class="k">Ends</td><td>With the run</td><td>Idle limit (10 minutes proposed), thread cap (2 hours proposed), or the workspace kill switch</td></tr>
+      <tr><td class="k">Tier</td><td>Computed at ingest from receipt plus chain</td><td>Computed from receipt plus the turn's run frames, by the same rule</td></tr>
+    </tbody>
+  </table></div>
+  <div class="note warn"><p><strong>Limits.</strong> ADR-152 states what the tier does not cover, and the stella profile inherits the same limits. Enforcement holds against the agent and every process it starts, not against whoever administers the host. For stella that administrator is Oxagen's own operations. The receipt is a launcher attestation with no hardware signature. A microVM holds against a stronger escape than a container does. Neither boundary changes what a host administrator can do.</p></div>
+</section>
+
+<!-- NEXT -->
+
+</div>
+</body>
+</html>
