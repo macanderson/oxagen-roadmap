@@ -5,7 +5,7 @@
 | Route | `#/a-intel/core-platform/runtimes`. Unchanged by the fleet operations wedge (`fleet-operations-routes.md`, Runtimes and Repositories). One host is `runtime.md` |
 | Scope | workspace |
 | Spec | `docs/fleet-operations-wedge.md`: Navigation, Unchanged (Runtimes keeps its design) and D17. `docs/fleet-operations-ia.md`: Workspace navigation (the Runtimes count) and Runtimes and Repositories. `docs/mission-control-spec.md` §7.1 (the tiers). ADR-095 (the tier ladder is four words, computed from what was routed) and ADR-078 (wrapped and connected) in `macanderson/oxagen` |
-| Design | `mockups/src/engine.js` → `pRuntimes(r)` (the list, when the route names no runtime), with `rtAgents()`, `rtHealth()`, `tierBadge()`, `tierLadder()`, `TIERS` and `TIER_RANK`. Enroll a runtime calls `openDialog('wrap')`, which starts Register agent (`regStart()`). Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
+| Design | `mockups/src/engine.js` → `pRuntimes(r)` (the list, when the route names no runtime), with `rtAgents()`, `rtHealth()`, `tierBadge()`, `TIERS` and `TIER_RANK`. Enroll a runtime calls `openDialog('wrap')`, which starts Register agent (`regStart()`). Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded, empty, loading, error, access denied |
 | Storybook | `Oxagen / Runtimes / Runtimes`: Loaded, Empty, Loading, Error and Access denied, and the same five as mobile stories. The catalog gives this view no `future` flag, so it has no future-only story |
 | Audit | `runtimes.audit-prompt.md` |
@@ -14,7 +14,7 @@
 
 The hosts agents run on, and the tier each host's hooks earn. A runtime is a workstation, a CI runner or a hosted container. Several agents can run on one host through one set of hooks, so a runtime is an object of its own and not a field on an agent.
 
-What a runtime earns is the tier, and the tier bounds every claim Oxagen makes about a run, so the ladder lives here. Nothing on this page enrolls a host. Enrollment is an installer run on the host itself, and Enroll a runtime starts Register agent, whose Wrap step shows the command.
+What a runtime earns is the tier, and the tier bounds every claim Oxagen makes about a run, so the tier words are defined in this page's component help. Nothing on this page enrolls a host. Enrollment is an installer run on the host itself, and Enroll a runtime starts Register agent, whose Wrap step shows the command.
 
 The fleet operations wedge left this page's design alone. Its strings changed where the rest of the product's did: the phone's thumb bar and the denied state's Back to Work.
 
@@ -54,16 +54,7 @@ Each caption states one fact, as the plain-noun rule asks: the Agents hosted and
 - The Agents cell names at most three agent keys, then "and <n> more", so a host with 28 agents keeps a row of normal height.
 - No note closes the panel. Why the tier belongs to the host is in the component help (`mockups/help/runtimes.md`, Hosts).
 
-**Tier ladder** panel. `tierLadder(null)`: an ordered list labelled "The tier ladder", with no rung marked current, because this page reads no run.
-
-| Rung | What it needs and earns |
-|---|---|
-| `observe` | "Recorded only. No hook is installed and nothing is delivered." |
-| `harness` | "Hooks installed. Steering is delivered and four hook events can refuse a call. The harness reports spend, and a call goes ahead if its hook fails." |
-| `gateway` | "Model and MCP traffic goes through the gateway. The gateway meters it and enforces budgets on it." |
-| `contained` | "The agent runs in an OS sandbox whose only network exit is the gateway." |
-
-No note sits under the ladder. What each rung may claim is in the component help (`mockups/help/runtimes.md`, Tier ladder).
+No tier ladder panel follows. The four rungs, what each needs and what each may claim are in the component help (`mockups/help/runtimes.md`, Hosts), because a legend that only teaches is not product copy. The app draws the four rungs today (`apps/app/src/features/runtimes/parts.tsx:329-336`), and each `tierBadge()` carries its rung's text as a tooltip.
 
 **Dialogs and flows this page opens.** Enroll a runtime starts Register agent (`register-name.md`, `register-wrap.md`, `register-run.md`). It is a flow, and no dialog opens. The empty state's **Show CLI steps** opens `register`, the Register an agent dialog, which carries no CLI path. A build shows the installers that put the CLI on the host's path and the command to run, as the app does (`apps/app/src/features/runtimes/controls.tsx:97`). The error state opens `incident`, and the denied state `request-access`.
 
@@ -86,7 +77,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Backing checked against 
 | Health | `RUNTIMES[].health`, `rtHealth()` | healthy or degraded from the gaps, not enrolled from the enrollment | Not enrolled is judged from `status`, `revokedAt` and `expiresAt` (`parts.tsx:188`, `:224`). Healthy and degraded depend on the gap count, #3818 | 🟡 |
 | Last checkpoint | `RUNTIMES[].checkpoint` | the chain's last checkpoint per host | Checkpoints are per session (`tacho.checkpoints`, `tacho.ts:875-905`). Gap #3817 | ❌ |
 | Stat tiles | counts over `RUNTIMES` | counts over host rows | Runtimes and Highest tier wait on #3816 and #3817, and Health on #3818. Agents hosted counts the distinct agent keys on live enrollments (`apps/app/src/features/runtimes/runtimes.tsx:75`) | 🟡 Agents hosted only |
-| The tier ladder | `TIERS` | the tier vocabulary | ADR-095's four words. The app draws the same four rungs (`parts.tsx:329-336`) | ✅ |
+| The tier words (badge tooltips and component help) | `TIERS` | the tier vocabulary | ADR-095's four words. The app draws the same four rungs (`parts.tsx:329-336`) | ✅ |
 | Enroll a runtime | `regStart()` | the Register agent flow | `create_enrollment_token` and `enroll_host` (`packages/oxagen/src/contracts/tacho.enrollment_token.create.ts:30`, `tacho.host.enroll.ts:27`). The app's Enroll a runtime links Register agent at its first step (`apps/app/src/features/runtimes/controls.tsx:34-52`) | ✅ |
 
 ## Future-only fields
@@ -124,7 +115,7 @@ From `pRuntimes()`:
 
 At 390 × 844 the top bar collapses to the hamburger, the current crumb ("Runtimes"), search, notifications, the approvals button and the avatar. The thumb bar holds Work (8), Agents, Tools, Spend and More (3). Runtimes lives in More, so More is the lit slot on this page. The More sheet lists Steering, Runtimes (2, in the hot colour), Repositories, Organization, Billing, Audit, Ask Stella, Search, Notifications, Account, Switch organization and Switch workspace.
 
-The four tiles sit two to a row. The hosts table becomes a stack of cards, each cell labelled with its column header, and the ladder wraps. Every dialog rises from the bottom edge as a sheet. Touch targets are at least 44 px, inputs are 16 px, and the page never scrolls sideways.
+The four tiles sit two to a row. The hosts table becomes a stack of cards, each cell labelled with its column header. Every dialog rises from the bottom edge as a sheet. Touch targets are at least 44 px, inputs are 16 px, and the page never scrolls sideways.
 
 ## Permissions
 

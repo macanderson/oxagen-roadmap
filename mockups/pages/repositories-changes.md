@@ -44,13 +44,7 @@ Columns, in order: Change · Kind · Pull request · Opened by · State · Check
 
 No note closes the panel. That a change steers nothing until its merge commit is in the component help (`mockups/help/repositories-changes.md`, Open pull requests).
 
-**Automatic proposals panel.** Three openers, each with one line:
-
-- Promoter: "Groups records across runs by lineage and opens a proposal that cites those runs."
-- Reconciler: "Compares .oxagen/workspace.toml with the control plane’s live state and opens one pull request per difference."
-- Person: "Every creation wizard (agent, tool, skill, and record) ends here."
-
-No note follows. Why there is no threshold, why drift is reported and never repaired in place, and why no wizard saves to the database are in the component help (`mockups/help/repositories-changes.md`, Automatic proposals).
+No panel follows the list. What each opener does (the promoter, the reconciler and a person) is in the component help (`mockups/help/repositories-changes.md`, Open pull requests). The design drew it as an Automatic proposals panel that only taught what Opened by means.
 
 ### One pull request
 

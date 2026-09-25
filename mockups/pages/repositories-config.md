@@ -20,7 +20,7 @@ Show the workspace's configuration as the main repository holds it on the produc
 
 **Header and tabs** as `repositories.md`, with Configuration selected. The tab carries no count. The header's **Add .oxagen/** is the gold action.
 
-Two rows of two panels.
+A row of two panels, `workspace.toml` and Drift, then `governance.toml` at full width.
 
 **`.oxagen/workspace.toml`.** Subtext "On a-intel/platform at a4c91e2", or "On <repository> · not indexed yet" when the head is unknown. The file in full: its two comment lines (what the file is, and that the machine's link is the gitignored `.oxagen/workspace.json`), `schema = "oxagen-workspace/v0.1"`, `org`, `workspace`, one `[[repos]]` table with `name`, `role`, `production_branch` and `issues`, a `[providers]` table naming `github` and `linear` with their transport and downscope, and a `[budget]` table with `monthly_usd` and `per_run_usd`. The panel always shows the workspace's main repository, never the first repository in a list.
 
@@ -38,23 +38,7 @@ With no drift recorded for the workspace, the panel drops the table and reads "T
 
 **`.oxagen/rules/governance.toml`.** The file in full: two comment lines (it is read on the production branch when a pull request is opened and again when it is merged, and a missing file means team), `mode = "team"` and `separation_of_duties = false`. Nothing sits beneath the file. What each mode requires, when the mode is read, and how it changes are in the component help (`mockups/help/repositories-config.md`, `.oxagen/rules/governance.toml`).
 
-**Tree.** `.oxagen/` as it sits on disk, one comment per entry:
-
-```
-.oxagen/
-  workspace.toml             # linked repos, providers, budgets
-  workspace.json             # gitignored · this machine’s link
-  rules/
-    governance.toml          # mode = team
-    promotions.jsonl         # hash-chained ledger (regulated)
-    ctx.<set>.<slug>.toml    # one published record per lineage
-  proposals/*.toml           # candidates; steer nothing
-  agents/<slug>.toml         # one per agent
-  skills/<name>/SKILL.md     # pinned by version and digest
-  tools/<name>.toml          # manifest, schema, handler beside it
-```
-
-No note follows. That Oxagen reads `.oxagen/` and never `.stella/` is in the component help (`mockups/help/repositories-config.md`, Tree).
+No Tree panel follows. The `.oxagen/` layout, and that Oxagen reads `.oxagen/` and never `.stella/`, are in the component help (`mockups/help/repositories-config.md`, `.oxagen/workspace.toml`). The design drew a fixed tree with placeholder paths that only taught. `governance.toml` takes the second row at full width.
 
 **Dialogs this page opens:** none of its own. **See the pull request** moves to Changes, and the header opens the init wizard (specified in `repositories.md`).
 
@@ -69,8 +53,8 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 | `governance.toml` and the mode it declares | `oxGovernanceToml()` | `get_repository_tree`: `governanceToml`, `governanceMode` (`solo`, `team`, `regulated`, `absent`, `invalid`) | `repository.tree.get.ts:40-95`; the app prints the mode and the file (`configuration.tsx:160-176`) | ✅ |
 | What each mode requires | the component help (`mockups/help/repositories-config.md`) | the merge gate | The gate differs from the copy. Under `solo` any workspace member merges, the author included. Under `team` an org Owner or Admin, or a workspace Owner, other than the author merges. Under `regulated` an org Owner or Admin other than the author merges, recorded as the accountable approver (`packages/handlers/src/context.steering.policy.ts:47-78`). No code-owner review is checked | 🟡 |
 | Changing the mode | the component help (`mockups/help/repositories-config.md`) | `set_governance_mode` | Ships, from Organization, Workspaces, Edit workspace: under `solo` it commits the file to the production branch, and under `team` or `regulated` it opens an ordinary pull request a person merges on GitHub. An owner or admin may apply it at once, which emits a `steering.governance_overridden` security event (`packages/oxagen/src/contracts/context.governance_mode.set.ts:1-58`) | ✅ |
-| The hash-chained ledger | the component help and the Tree comment | the promotions ledger | Every merge appends the promotion event to the hash-chained ledger, in every mode (`packages/handlers/src/context.pr.merge.ts:11-14`) | ✅ |
-| Tree | a constant in `cfgTab()` | `get_repository_tree`: `oxagen.files` | Every path under `.oxagen/` at the head ships, and the app lists them (`configuration.tsx:199-208`). The comments are design copy | ✅ |
+| The hash-chained ledger | the component help | the promotions ledger | Every merge appends the promotion event to the hash-chained ledger, in every mode (`packages/handlers/src/context.pr.merge.ts:11-14`) | ✅ |
+| Every path under `.oxagen/` | none (the design's Tree panel left the page) | `get_repository_tree`: `oxagen.files` | Every path under `.oxagen/` at the head ships, and the app lists them (`configuration.tsx:199-208`). That list is record data, and a build may show it | ✅ |
 
 ## Future-only fields
 
@@ -91,7 +75,7 @@ The catalog lists all five. The header, tabs and state panels are the Repositori
 
 ## Mobile
 
-The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More holds Steering, Runtimes, Repositories (5), Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The tab strip scrolls within itself, and Configuration is its last tab. The two rows of panels stack into one column: `workspace.toml`, Drift, `governance.toml`, Tree. Each file block scrolls sideways inside itself, and the page never does at 390 px. The Drift table becomes one card per row, each cell labelled with its column.
+The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More holds Steering, Runtimes, Repositories (5), Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The tab strip scrolls within itself, and Configuration is its last tab. The panels stack into one column: `workspace.toml`, Drift, `governance.toml`. Each file block scrolls sideways inside itself, and the page never does at 390 px. The Drift table becomes one card per row, each cell labelled with its column.
 
 ## Permissions
 

@@ -40,29 +40,7 @@ Columns, in order: Directory · Repository · Branch · `.oxagen/` · Symlinks �
 
 With no copy linked, the panel reads "No directory is linked to Core platform yet.", keeps **Connect a directory** (gold), and adds the line "Run oxagen init in a directory to link it."
 
-**Files to review.** The tree:
-
-```
-.oxagen/
-  workspace.toml     # committed. reviewed. the source of truth.
-  workspace.json     # gitignored · this machine’s link
-  rules/
-  proposals/
-  agents/
-  skills/
-  tools/
-```
-
-No note sits beneath. Why the committed file and the gitignored one are never the same file is in the component help (`mockups/help/repositories-copies.md`, Files to review).
-
-**Sync.** Four commands, each with one line:
-
-- `oxagen init`: "Links this directory and writes .oxagen/workspace.json."
-- `oxagen pull`: "Fast-forwards .oxagen/ to the production branch and re-points the stella symlinks."
-- `oxagen status`: "Compares this copy with what is published: the bundle version, the records in force, and anything uncommitted under .oxagen/."
-- `oxagen propose`: "Turns a local edit under .oxagen/ into a proposal."
-
-No note follows. How each command behaves, and how Stella reads the directory through symlinks, is in the component help (`mockups/help/repositories-copies.md`, Sync).
+No panel follows the table. The `.oxagen/` layout (which file is committed and which is this machine's link) and the four CLI commands (`oxagen init`, `oxagen pull`, `oxagen status`, `oxagen propose`) are in the component help (`mockups/help/repositories-copies.md`, Working copies). The design drew them as two panels, Files to review and Sync, that only taught and read nothing from a copy.
 
 **Dialogs this page opens:** `linkdir`, `workcopy` and `copyoff`, and the init wizard from the header (specified in `repositories.md`).
 
@@ -109,7 +87,7 @@ The catalog lists all five. The header, tabs and state panels are the Repositori
 
 ## Mobile
 
-The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More holds Steering, Runtimes, Repositories (5), Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The tab strip scrolls within itself. The table becomes one card per copy, each cell labelled with its column. Files to review and Sync stack beneath the table, and the tree keeps its own horizontal scroll inside its block. The three dialogs rise from the bottom edge as sheets with full-width footer buttons. The page never scrolls sideways at 390 px.
+The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More holds Steering, Runtimes, Repositories (5), Organization, Billing, Audit, Stella, search, notifications, the account and both switchers. The tab strip scrolls within itself. The table becomes one card per copy, each cell labelled with its column. The three dialogs rise from the bottom edge as sheets with full-width footer buttons. The page never scrolls sideways at 390 px.
 
 ## Permissions
 
