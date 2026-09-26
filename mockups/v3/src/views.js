@@ -539,7 +539,7 @@ function steeringPrView(id) {
   }
   var head = '<div class="shead"><div class="t"><p class="eyebrow">Steering PR #' + pr.n + "</p><h1>" + h(pr.title) + "</h1>" + meta + '</div><div class="acts">' + acts + "</div></div>";
   var main = (pr.summary ? '<p class="pr-sum">' + mdi(pr.summary) + "</p>" : "");
-  if (pr.state === "merged") main += '<div class="banner"><div class="grow"><b>Published as version ' + pr.version + "</b>oxagen squash-merged it at the checked commit " + when(pr.merged) + ". Revert opens a steering PR that undoes it, with the same checks and review.</div></div><pre class="trailers">' + h((pr.trailers || []).join("\n")) + "</pre>";
+  if (pr.state === "merged") main += '<div class="banner"><div class="grow"><b>Published as version ' + pr.version + "</b>oxagen squash-merged it at the checked commit " + when(pr.merged) + '. Revert opens a steering PR that undoes it, with the same checks and review.</div></div><pre class="trailers">' + h((pr.trailers || []).join("\n")) + "</pre>";
   if (pr.kind === "memory") main += memoryCards(pr);
   if (pr.server && pr.diff) main += surfaceDiff(pr, true);
   if (pr.record) main += '<div class="panel"><div class="panel-h"><h3>Record</h3><span class="sp">' + kindBadge(pr.record.kind) + ' <span class="muted mono">' + h(pr.record.force) + '</span> <span class="muted">' + num(pr.record.tok) + ' tokens</span></span></div><div class="panel-b"><div class="readout"><div class="rh"><span class="mono">' + h(pr.record.path) + '</span></div><pre>' + h(pr.record.body) + "</pre></div></div></div>";
