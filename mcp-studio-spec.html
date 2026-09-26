@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MCP Studio</title>
-<meta name="description" content="How Oxagen stores every MCP server that gives tools to wrapped agents, connected or built from an OpenAPI, GraphQL, or gRPC definition, with imported tools, risk classification, and parallel build prompts.">
+<meta name="description" content="How Oxagen stores every MCP server that gives tools to wrapped agents, with imported tools, risk classification, a build tracker, a comparison with Kong, and parallel build prompts.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
@@ -187,21 +187,111 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
 .chip.write{border-color:var(--approval); color:var(--approval)}
 .chip.irr{border-color:var(--denied); color:var(--denied)}
 .chip.on{border-color:var(--gold); color:var(--accent-text)}
+
+/* App shell: sidebar navigation and views. */
+[hidden]{display:none!important}
+body{padding-inline:0}
+.app{display:grid; grid-template-columns:252px minmax(0,1fr); max-width:1440px; margin-inline:auto}
+.side{position:sticky; top:env(safe-area-inset-top,0px); align-self:start; height:100vh; overflow-y:auto; border-right:1px solid var(--border); padding:22px 14px 48px; background:var(--ink)}
+.side .brand{display:block; font:600 15px/1.3 "Space Grotesk","Geist",system-ui,sans-serif; color:var(--fg); text-decoration:none; padding:0 10px 4px}
+.side .brand b{color:var(--gold); font-weight:600}
+.side .sub{display:block; font:500 11px/1.3 "Monaspace Neon",ui-monospace,monospace; color:var(--muted); padding:0 10px}
+.side .grp{font:500 10.5px/1.3 "Monaspace Neon",ui-monospace,monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:22px 10px 6px}
+.side nav a{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; border-radius:7px; color:var(--body); text-decoration:none; font-size:14px; line-height:1.3}
+.side nav a:hover{background:var(--panel); color:var(--fg)}
+.side nav a:focus-visible{outline:2px solid var(--gold); outline-offset:1px}
+.side nav a[aria-current="page"]{background:var(--gold-wash); color:var(--fg); font-weight:600}
+.side nav a .cnt{font:500 11px/1 "Monaspace Neon",ui-monospace,monospace; color:var(--muted); font-variant-numeric:tabular-nums}
+.side .secwrap summary{list-style:none; cursor:pointer; font:500 10.5px/1.3 "Monaspace Neon",ui-monospace,monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:22px 10px 6px}
+.side .secwrap summary::-webkit-details-marker{display:none}
+.side .secs a{font-size:13px; padding:4px 10px; color:var(--muted)}
+.side .secs a.on{color:var(--fg); background:var(--panel)}
+.side .ext{font-size:13px}
+.main{min-width:0; padding-inline:28px}
+.main .wrap{max-width:980px}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:static; height:auto; border-right:0; border-bottom:1px solid var(--border); padding:14px 16px}
+  .side .views{display:flex; flex-wrap:wrap; gap:6px}
+  .side .views a{border:1px solid var(--border)}
+  .main{padding-inline:16px}
+}
+
+/* Prompt cards */
+.pcard{border:1px solid var(--border); border-radius:10px; background:var(--panel); margin:10px 0 14px; overflow:hidden}
+.pcard-head{display:flex; flex-wrap:wrap; align-items:center; gap:10px 12px; padding:10px 12px}
+.lane-id{font:600 12px/1 "Monaspace Neon",ui-monospace,monospace; color:var(--accent-text); border:1px solid var(--gold-deep); border-radius:5px; padding:4px 6px; min-width:36px; text-align:center}
+.pcard-title{flex:1 1 220px; color:var(--fg); font-weight:600; font-size:14.5px}
+.cp,.cpw{font:600 12.5px/1 "Geist",system-ui,sans-serif; color:var(--on-gold); background:var(--gold); border:1px solid var(--gold); border-radius:7px; padding:8px 12px; cursor:pointer; white-space:nowrap}
+.cp:hover,.cpw:hover{background:var(--gold-bright); border-color:var(--gold-bright)}
+.cp:focus-visible,.cpw:focus-visible{outline:2px solid var(--fg); outline-offset:2px}
+.cpw{background:transparent; color:var(--accent-text)}
+.cpw:hover{color:var(--on-gold)}
+.pcard-body{border-top:1px solid var(--border); background:var(--code-bg)}
+.pcard-body summary{cursor:pointer; padding:8px 12px; font:500 12.5px/1.3 "Geist",system-ui,sans-serif; color:var(--muted)}
+.pcard-body summary:hover{color:var(--fg)}
+.pcard-body pre{max-height:520px; overflow:auto; border-top:1px solid var(--border)}
+.wave-copy{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:6px 0 4px; color:var(--muted); font-size:13px}
+
+/* Progress view */
+.tsum{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin:18px 0 10px}
+.tsum div{background:var(--panel); padding:12px 14px}
+.tsum b{display:block; font:600 24px/1.1 "Space Grotesk",system-ui,sans-serif; color:var(--fg); font-variant-numeric:tabular-nums}
+.tsum span{font:500 10.5px/1.3 "Monaspace Neon",monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+.tbar{display:flex; height:10px; border-radius:5px; overflow:hidden; background:var(--panel-h); margin:4px 0 8px}
+.tbar i{display:block; height:100%}
+.tmeta{color:var(--muted); font-size:13px; margin:0 0 18px}
+.lanes{display:grid; gap:8px; margin:8px 0 22px}
+.lane{border:1px solid var(--border); border-radius:10px; background:var(--panel)}
+.lane>summary{list-style:none; cursor:pointer; display:grid; grid-template-columns:48px minmax(0,1.6fr) 118px minmax(0,1fr) 96px; gap:10px; align-items:center; padding:10px 12px}
+.lane>summary::-webkit-details-marker{display:none}
+.lane>summary:focus-visible{outline:2px solid var(--gold); outline-offset:1px; border-radius:10px}
+.lane .ln{color:var(--fg); font-weight:600; font-size:14px}
+.lane .links{font-size:13px; color:var(--muted); display:flex; gap:10px; flex-wrap:wrap}
+.lane .val{font:500 12px/1.2 "Monaspace Neon",monospace; color:var(--muted); text-align:right; font-variant-numeric:tabular-nums}
+.pill{display:inline-block; font:500 11px/1.6 "Monaspace Neon",monospace; border-radius:999px; padding:1px 9px; border:1px solid var(--rule); color:var(--muted); white-space:nowrap; justify-self:start}
+.pill.in_progress{border-color:var(--gold); color:var(--accent-text)}
+.pill.in_review{border-color:var(--approval); color:var(--approval)}
+.pill.merged{border-color:var(--allowed); color:var(--allowed)}
+.pill.validated{border-color:var(--allowed); background:var(--allowed); color:var(--ink)}
+.pill.failed{border-color:var(--critical); color:var(--critical)}
+.lane .detail{border-top:1px solid var(--border); padding:10px 14px 14px}
+.crit{list-style:none; padding:0; margin:0; display:grid; gap:8px; max-width:none}
+.crit li{display:grid; grid-template-columns:22px minmax(0,1fr); gap:8px; margin:0; font-size:13.5px}
+.crit .mk{font:600 13px/1.4 "Monaspace Neon",monospace}
+.crit .pass{color:var(--allowed)} .crit .fail{color:var(--critical)} .crit .unchecked{color:var(--dim)}
+.crit .ev{display:block; color:var(--muted); font-size:12.5px; margin-top:2px; overflow-wrap:anywhere}
+.lane .note{color:var(--muted); font-size:13px; margin:10px 0 0}
+@media (max-width:700px){
+  .lane>summary{grid-template-columns:44px minmax(0,1fr) auto; grid-template-areas:"id name val" "id pill pill" "id links links"}
+  .lane>summary .lid{grid-area:id} .lane>summary .ln{grid-area:name} .lane>summary .pill{grid-area:pill} .lane>summary .links{grid-area:links} .lane>summary .val{grid-area:val}
+}
+
+/* Comparison view */
+.edge{display:inline-block; font:600 11px/1.6 "Monaspace Neon",monospace; border-radius:4px; padding:0 7px; white-space:nowrap}
+.edge.ox{background:var(--gold-wash); color:var(--accent-text); border:1px solid var(--gold-deep)}
+.edge.kong{border:1px solid var(--approval); color:var(--approval)}
+.edge.par{border:1px solid var(--rule); color:var(--muted)}
+.ostat{display:block; font:500 10.5px/1.5 "Monaspace Neon",monospace; letter-spacing:.06em; text-transform:uppercase; margin-bottom:3px}
+.ostat.today{color:var(--allowed)} .ostat.spec{color:var(--accent-text)} .ostat.dir{color:var(--muted)}
+.kstat{display:block; font:500 10.5px/1.5 "Monaspace Neon",monospace; letter-spacing:.06em; text-transform:uppercase; margin-bottom:3px}
+.kstat.ships{color:var(--approval)} .kstat.partial{color:var(--muted)} .kstat.none{color:var(--dim)}
+.matrix td{font-size:13.5px}
+.matrix td:first-child{color:var(--fg); font-weight:600; min-width:160px}
+.matrix .grp td{background:var(--panel); font:500 10.5px/1.3 "Monaspace Neon",monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:500}
+.srcs{font-size:13px; color:var(--muted)}
+.srcs li{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
-<div class="wrap">
-<header class="topbar">
-  <span class="mark">oxagen <b>/</b> mcp studio</span>
-  <span class="muted mono" style="font-size:12px">mcp-server/v1</span>
-</header>
-
+<div class="app"><aside class="side" aria-label="Page navigation"><a class="brand" href="#spec">oxagen <b>/</b> mcp studio</a><span class="sub">Draft of 2026-09-26</span><div class="grp">Views</div><nav class="views" aria-label="Views"><a href="#spec" data-view="spec">Spec</a><a href="#progress" data-view="progress">Progress <span class="cnt" id="nav-progress-count">0/23</span></a></nav><details class="secwrap" open><summary>Sections</summary><nav class="secs" aria-label="Sections"><a href="#flow">Flow</a><a href="#decisions">Decisions</a><a href="#storage">Storage</a><a href="#server">Server file</a><a href="#tools">Tools file</a><a href="#risk">Risk</a><a href="#lock">Lock file</a><a href="#lifecycle">Lifecycle</a><a href="#sources">Sources</a><a href="#mapping">Mapping</a><a href="#names">Names</a><a href="#large">Large servers</a><a href="#checks">Tool checks</a><a href="#auth">Auth</a><a href="#network">Network</a><a href="#call">Call path</a><a href="#sync">Sync</a><a href="#testing">Testing</a><a href="#spend">Spend</a><a href="#screens">Screens</a><a href="#feedback">Feedback</a><a href="#migration">Migration</a><a href="#alternatives">Alternatives</a><a href="#open">Open questions</a><a href="#build">Build prompts</a></nav></details><div class="grp">Related</div><nav aria-label="Related pages"><a class="ext" href="https://claude.ai/artifact/P12CrkUBPm4o4viMv2mSJc" target="_blank" rel="noopener">Steering repo spec</a><a class="ext" href="https://claude.ai/artifact/K12EGALijFzN66AfFPKefS" target="_blank" rel="noopener">Steering records v1</a></nav></aside><main class="main"><div data-view-root="spec" id="spec"><div class="wrap">
 <div class="hero">
   <span class="eyebrow">Specification</span>
   <h1>MCP Studio</h1>
   <p class="lead">Your agents reach tools through MCP servers from several places: servers you connect by URL, servers from the MCP registry, local commands, and APIs that have an OpenAPI, GraphQL, or gRPC definition but no MCP server. MCP Studio adds a server from any of them, lists every tool it offers, and lets you import the tools agents may call, with a risk classification on each. Every server is stored the same way, in one folder in the steering repo, reviewed by steering PR, and served by the cloud gateway with the workspace's credentials, policies, and budgets.</p>
   <dl class="facts">
     <div class="fact"><dt>Status</dt><dd>Draft, for review</dd></div>
+    <div class="fact"><dt>Build</dt><dd><a href="#progress" id="hero-build">0 of 23 lanes merged</a></dd></div>
     <div class="fact"><dt>Date</dt><dd>2026-09-26</dd></div>
     <div class="fact"><dt>Owner</dt><dd>Mac Anderson</dd></div>
     <div class="fact"><dt>Covers</dt><dd>Every MCP server that gives tools to a wrapped agent</dd></div>
@@ -213,9 +303,6 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
     <span class="item"><span class="st c">Today</span> the code at <code>main</code> does this</span>
     <span class="item"><span class="st p">Proposed</span> needs the maintainer's yes</span>
   </div>
-  <nav class="toc" aria-label="Sections">
-    <a href="#flow">Flow</a><a href="#decisions">Decisions</a><a href="#storage">Storage</a><a href="#server">Server file</a><a href="#tools">Tools file</a><a href="#risk">Risk</a><a href="#lock">Lock file</a><a href="#lifecycle">Lifecycle</a><a href="#sources">Sources</a><a href="#mapping">Mapping</a><a href="#names">Names</a><a href="#large">Large servers</a><a href="#checks">Tool checks</a><a href="#auth">Auth</a><a href="#network">Network</a><a href="#call">Call path</a><a href="#sync">Sync</a><a href="#testing">Testing</a><a href="#spend">Spend</a><a href="#screens">Screens</a><a href="#feedback">Feedback</a><a href="#migration">Migration</a><a href="#alternatives">Alternatives</a><a href="#open">Open questions</a><a href="#build">Build prompts</a>
-  </nav>
 </div>
 
 <section id="flow">
@@ -1004,8 +1091,19 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
 <section id="build">
   <span class="eyebrow">Build</span>
   <h2>Build prompts</h2>
-  <p>Eighteen lanes in three waves, run beside the steering repo's lanes. M0 starts once the steering repo's S0 has merged, because it imports S0's names. Every wave 1 lane then starts at once and fills one module behind a signature M0 fixes. Each prompt stands alone.</p>
+  <h3>Plan</h3>
+  <ol class="steps">
+    <li><div><strong>Design.</strong><p>U1 adds MCP Studio to the v3 mockup. Mac reviews it before any build lane starts, and a design change lands in this spec first.</p></div></li>
+    <li><div><strong>Contract.</strong><p>The steering repo's S0 lands, then M0 fixes every shared type and signature.</p></div></li>
+    <li><div><strong>Wave 1.</strong><p>Fourteen lanes run at once, each in paths no other lane touches. M9 builds the screens from the merged mockup.</p></div></li>
+    <li><div><strong>Wave 2.</strong><p>Serving and search, replay and selection tests, and the live test.</p></div></li>
+    <li><div><strong>Validation.</strong><p>After each merge, a refresh checks the lane's Done when criteria against the code and CI and records the evidence in <a href="#progress">Progress</a>.</p></div></li>
+  </ol>
+  <p>Nineteen lanes: one design lane, then three build waves beside the steering repo's lanes. Each prompt stands alone. Copy it into a fresh agent with no other context.</p>
   <div class="waves">
+    <div class="wave"><h4>Design <small>first</small></h4><ul>
+      <li><strong>U1</strong> MCP Studio in the v3 mockup</li>
+    </ul></div>
     <div class="wave"><h4>Wave 0 <small>after S0</small></h4><ul>
       <li><strong>M0</strong> Contract, operation model, fixtures</li>
     </ul></div>
@@ -1034,6 +1132,7 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
   <div class="tscroll"><table>
     <thead><tr><th>Lane</th><th>Owns</th><th>Needs merged</th></tr></thead>
     <tbody>
+      <tr><td>U1</td><td class="wrap">In <code>macanderson/oxagen-roadmap</code>: <code>mockups/v3/src/</code>, <code>mockups/v3/fixtures/</code>, <code>mockups/v3/stories/</code>, <code>mockups/v3/README.md</code>, the built <code>mockups/v3/index.html</code>, and a CI workflow for the v3 checks</td><td>Nothing</td></tr>
       <tr><td>M0</td><td class="wrap"><code>packages/mcp-studio/</code> skeleton, <code>src/contract/</code>, <code>fixtures/</code></td><td>S0</td></tr>
       <tr><td>M1</td><td class="wrap"><code>packages/mcp-studio/src/openapi/</code></td><td>M0</td></tr>
       <tr><td>M2</td><td class="wrap"><code>packages/mcp-studio/src/graphql/</code></td><td>M0</td></tr>
@@ -1043,7 +1142,7 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
       <tr><td>M6</td><td class="wrap"><code>packages/mcp-studio/src/execute/</code> except <code>execute/grpc/</code></td><td>M0</td></tr>
       <tr><td>M7</td><td class="wrap"><code>packages/mcp-studio/src/execute/grpc/</code></td><td>M0</td></tr>
       <tr><td>M8</td><td class="wrap"><code>packages/handlers/src/mcp-studio/credentials/</code>, the OAuth callback route, a new operator token table in its own schema file</td><td>M0</td></tr>
-      <tr><td>M9</td><td class="wrap"><code>apps/app/src/features/mcp-studio/</code> and its route</td><td>M0</td></tr>
+      <tr><td>M9</td><td class="wrap"><code>apps/app/src/features/mcp-studio/</code> and its route</td><td>M0, U1</td></tr>
       <tr><td>M10</td><td class="wrap"><code>packages/handlers/src/mcp-studio/discovery/</code>, the discovery and sync jobs, push routing for definition paths</td><td>M0</td></tr>
       <tr><td>M11</td><td class="wrap"><code>packages/handlers/src/mcp-studio/import/</code></td><td>M0</td></tr>
       <tr><td>M12</td><td class="wrap"><code>apps/relay/</code>, <code>packages/relay-broker/</code>, the Helm chart</td><td>M0</td></tr>
@@ -1056,21 +1155,26 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
   </table></div>
 
   <h3>Coordinator</h3>
-  <figure class="code prompt"><figcaption><span class="path">Coordinator prompt</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">You coordinate the build of MCP Studio and the MCP server storage layer in
+  <article class="pcard" data-wave="coord" id="prompt-all"><div class="pcard-head"><span class="lane-id">All</span><span class="pcard-title">Coordinator</span><button type="button" class="cp" aria-label="Copy the All prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">You coordinate the build of MCP Studio and the MCP server storage layer in
 macanderson/oxagen. The spec is mcp-studio-spec.html in macanderson/oxagen-roadmap.
-Its Build prompts section holds one prompt per lane, M0 to M17. It depends on the
-steering repo build (steering-repo-spec.html, lanes S0 to S11), which another
-coordinator may run.
+Its Build prompts section holds one prompt per lane: U1, then M0 to M17. It
+depends on the steering repo build (steering-repo-spec.html, lanes S0 to S11),
+which another coordinator may run.
 
-1. Wait until S0 has merged. Start one agent with the M0 prompt. Wait until its
+1. Start one agent with the U1 prompt. When its PR is ready, ask Mac to review
+   the mockup, and wait until it merges. If the review changed the design,
+   update mcp-studio-spec.html to match in one PR before going on.
+2. Wait until S0 has merged. Start one agent with the M0 prompt. Wait until its
    PR merges.
-2. Start fourteen agents at once with the M1 to M14 prompts, one lane each.
-3. When a lane reports that the contract is wrong, stop the lanes it affects,
+3. Start fourteen agents at once with the M1 to M14 prompts, one lane each.
+4. When a lane reports that the contract is wrong, stop the lanes it affects,
    fix the contract in one PR, and restart them after it merges.
-4. Start M15 when S5, M4, M6, M7, M13, and M14 have merged. Start M16 when S4, M4,
+5. Start M15 when S5, M4, M6, M7, M13, and M14 have merged. Start M16 when S4, M4,
    and M6 have merged. Start M17 when wave 1 and M15 have merged.
-5. Report each lane's issue, PR, and state (pending, merged, or failed) in one
-   table. Pending is pending. A cancelled or skipped required job is not a pass.
+6. After each merge, run the Refresh prompt on the page's Progress view, so the
+   lane's Done when criteria are checked and the evidence is recorded.
+7. Report each lane's issue, PR, and state in one table. Pending is pending. A
+   cancelled or skipped required job is not a pass.
 
 Rules for every lane
 - The spec is mcp-studio-spec.html in macanderson/oxagen-roadmap. The Shared contract section of steering-repo-spec.html is fixed: use its names exactly. If the contract is wrong, stop and say so in the PR body. Do not work around it.
@@ -1078,6 +1182,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1095,10 +1201,108 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
+
+  <h3>Design</h3>
+  <article class="pcard" data-wave="design" id="prompt-u1"><div class="pcard-head"><span class="lane-id">U1</span><span class="pcard-title">MCP Studio in the v3 mockup</span><button type="button" class="cp" aria-label="Copy the U1 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane U1. MCP Studio in the v3 mockup
+
+Goal
+Add MCP Studio to mockups/v3 so Mac can review the whole experience before any
+build lane starts. The merged mockup is the design lane M9 builds.
+
+Repository
+This lane works in macanderson/oxagen-roadmap. Where the rules below say
+macanderson/oxagen, read macanderson/oxagen-roadmap, and create the worktree
+under ~/Projects/.worktrees/oxagen-roadmap/.
+
+Read first
+- mcp-studio-spec.html in this repository: Flow, Storage model, Server file,
+  Tools file, Risk classification, Lock file, Tool lifecycle, Sources, Large
+  servers, Network paths, Sync, Try it and tests, Studio screens, and Agent
+  feedback.
+- mockups/v3/README.md: the six areas, the rule that no area has more than one
+  row of tabs, the commands, and the data boundary.
+- mockups/v3/src/views.js (VIEWS.servers and the Import MCP servers dialog),
+  src/data.js, fixtures/servers.json, and stories/v3.stories.js.
+
+You own
+- mockups/v3/src/, mockups/v3/fixtures/, mockups/v3/stories/v3.stories.js,
+  mockups/v3/README.md, and the built mockups/v3/index.html
+- One new CI workflow for the v3 checks (step 8)
+
+Do
+1. Keep the six areas. MCP Studio lives in the MCP servers area, with no new
+   navigation item.
+2. Add server: Connect by URL, From the registry, Local command, and From a
+   definition (OpenAPI, GraphQL, or gRPC). Each ends in a discovery result that
+   lists what the source offers.
+3. A server page with the Tools, Connection, Try it, and Changes tabs. Tools
+   lists available and imported tools with risk, side effect, egress, impacts,
+   and definition tokens. Suggested values read as suggestions until a person
+   confirms them, and a running total counts against the definition budget. The
+   tool panel shows the classification, the description with Draft, hidden and
+   fixed inputs, what the result returns, what the server says, and agent
+   feedback.
+4. Changes shows the steering PR a review opens: the tool surface diff, the
+   checks, and Open steering PR. Include a sync PR where an upstream
+   description changed while the locked one is still served, and a breaking
+   change that withholds a tool.
+5. Show these states: search mode on a large server; a local server with its
+   machine groups and its three errors; a server behind a relay, and a relay
+   that is down; the off switch on a server and on one tool, with who and when;
+   an operator who has not connected an operator OAuth account; and the
+   workspace embedding provider (oxagen, custom, or keyword).
+6. Fixtures: extend servers.json so each source type appears at least once
+   (remote, registry, local, openapi, graphql, grpc), including the spec's
+   stripe and billing examples. Classifications use the spec's vocabulary.
+7. v3 shows Allow, Ask, or Off on each tool today. Follow the spec: Off is the
+   off switch, and an approval comes from policy reading the classification.
+   Show where each approval comes from. Wherever the mockup and the spec
+   disagree, follow the spec and list each disagreement in the PR body.
+8. This repository has no CI job for the v3 checks, and local test runs are not
+   allowed. Add a workflow that runs npm run check:v3 on pull requests, with
+   the Chromium the headless walk needs, and get it green.
+9. Rebuild index.html with node tools/build-mockup-v3.mjs, a file generator
+   the rules allow. Add the new views to the Storybook stories, and to the
+   README's areas and sources tables.
+
+Done when
+- Every screen in the spec's Studio screens section and every state in step 5
+  opens in the mockup, in both themes and at phone width, with no sideways
+  scroll.
+- The v3 checks pass in CI.
+- The PR body lists each place the mockup and the spec disagree, and the PR is
+  ready for Mac's review.
+
+Rules for every lane
+- The spec is mcp-studio-spec.html in macanderson/oxagen-roadmap. The Shared contract section of steering-repo-spec.html is fixed: use its names exactly. If the contract is wrong, stop and say so in the PR body. Do not work around it.
+- Work in macanderson/oxagen. Create the worktree with:
+  git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
+- Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
+- Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
+- Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
+- A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
+- Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
+- New code and copy say "steering record" and "steering PR" (#4325).
+
+## Local execution
+
+Mac set this on 2026-09-26 for every repository on this machine. Local builds, test runs, dev servers, and git hooks ran the laptop out of memory and killed agent runs partway through, and every killed run costs money. CI is the only place code is built, checked, or tested.
+
+- Do not run the gate, a build, a typecheck, a lint, or any test, not even one test file. Push the branch and read the CI result. Read a failed job with `gh run view --job &lt;id&gt; --log-failed`.
+- Do not start a dev server: no `next dev`, `next start`, `pnpm dev`, a server under `cargo run`, or anything else that listens on a port.
+- Do not start Docker or Colima, and do not run anything that needs them.
+- Do not run Biome in any form.
+- Git hooks are off on this machine. `LEFTHOOK=0` and `HUSKY=0` are set for every shell (`~/.zshenv`) and every Claude Code session (`~/.claude/settings.json`). oxagen's installed hooks are renamed `*.disabled`, and stella's `core.hooksPath` is unset. Do not reinstall a hook, turn one back on, or run a hook's commands by hand.
+- Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
+- Put this rule, word for word, in the prompt of every subagent you start.
+
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
   <h3>Wave 0</h3>
-  <figure class="code prompt"><figcaption><span class="path">M0 Contract, operation model, fixtures</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M0. MCP server storage contract, the operation model, and fixtures
+  <article class="pcard" data-wave="w0" id="prompt-m0"><div class="pcard-head"><span class="lane-id">M0</span><span class="pcard-title">Contract, operation model, fixtures</span><button type="button" class="cp" aria-label="Copy the M0 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M0. MCP server storage contract, the operation model, and fixtures
 
 Goal
 Fix every file schema, type, and function signature the MCP lanes share, so
@@ -1156,6 +1360,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1173,10 +1379,11 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
   <h3>Wave 1</h3>
-  <figure class="code prompt"><figcaption><span class="path">M1 OpenAPI import</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M1. OpenAPI import
+  <div class="wave-copy"><button type="button" class="cpw" data-wave="w1">Copy all 14 wave 1 prompts</button><span>Each prompt goes to its own agent.</span></div>
+  <article class="pcard" data-wave="w1" id="prompt-m1"><div class="pcard-head"><span class="lane-id">M1</span><span class="pcard-title">OpenAPI import</span><button type="button" class="cp" aria-label="Copy the M1 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M1. OpenAPI import
 
 Goal
 Any OpenAPI 3.1, 3.0, or Swagger 2.0 document, in YAML or JSON, in one file or
@@ -1210,6 +1417,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1227,9 +1436,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M2 GraphQL import</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M2. GraphQL import
+  <article class="pcard" data-wave="w1" id="prompt-m2"><div class="pcard-head"><span class="lane-id">M2</span><span class="pcard-title">GraphQL import</span><button type="button" class="cp" aria-label="Copy the M2 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M2. GraphQL import
 
 Goal
 A GraphQL schema, from an SDL file or an introspection result, becomes
@@ -1264,6 +1473,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1281,9 +1492,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M3 gRPC import</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M3. gRPC import
+  <article class="pcard" data-wave="w1" id="prompt-m3"><div class="pcard-head"><span class="lane-id">M3</span><span class="pcard-title">gRPC import</span><button type="button" class="cp" aria-label="Copy the M3 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M3. gRPC import
 
 Goal
 A set of .proto files, or what server reflection returns, becomes UpstreamTool
@@ -1318,6 +1529,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1335,9 +1548,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M4 Compile and lock</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M4. Compile effective definitions, write the lock, diff, and suggest
+  <article class="pcard" data-wave="w1" id="prompt-m4"><div class="pcard-head"><span class="lane-id">M4</span><span class="pcard-title">Compile and lock</span><button type="button" class="cp" aria-label="Copy the M4 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M4. Compile effective definitions, write the lock, diff, and suggest
 
 Goal
 For any source, compile(upstream tools, tools.toml) returns the effective tool
@@ -1383,6 +1596,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1400,9 +1615,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M5 Tool checks</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M5. Tool checks
+  <article class="pcard" data-wave="w1" id="prompt-m5"><div class="pcard-head"><span class="lane-id">M5</span><span class="pcard-title">Tool checks</span><button type="button" class="cp" aria-label="Copy the M5 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M5. Tool checks
 
 Goal
 lint(server folder) returns every finding in the spec's Tool checks table, each
@@ -1432,6 +1647,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1449,9 +1666,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M6 Executor</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M6. The executor for MCP, HTTP, and GraphQL
+  <article class="pcard" data-wave="w1" id="prompt-m6"><div class="pcard-head"><span class="lane-id">M6</span><span class="pcard-title">Executor</span><button type="button" class="cp" aria-label="Copy the M6 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M6. The executor for MCP, HTTP, and GraphQL
 
 Goal
 execute(tool, args, environment, CredentialSource, Transport) performs steps 3
@@ -1497,6 +1714,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1514,9 +1733,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M7 gRPC client</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M7. A dynamic gRPC client
+  <article class="pcard" data-wave="w1" id="prompt-m7"><div class="pcard-head"><span class="lane-id">M7</span><span class="pcard-title">gRPC client</span><button type="button" class="cp" aria-label="Copy the M7 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M7. A dynamic gRPC client
 
 Goal
 The grpc Sender calls any unary or server-streaming method from its
@@ -1552,6 +1771,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1569,9 +1790,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M8 Credentials and operator OAuth</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M8. Credentials and operator OAuth
+  <article class="pcard" data-wave="w1" id="prompt-m8"><div class="pcard-head"><span class="lane-id">M8</span><span class="pcard-title">Credentials and operator OAuth</span><button type="button" class="cp" aria-label="Copy the M8 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M8. Credentials and operator OAuth
 
 Goal
 A CredentialSource that resolves oxagen:credential/&lt;name&gt; for every mode in the
@@ -1612,6 +1833,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1629,19 +1852,20 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M9 Studio screens</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M9. Studio screens
+  <article class="pcard" data-wave="w1" id="prompt-m9"><div class="pcard-head"><span class="lane-id">M9</span><span class="pcard-title">Studio screens</span><button type="button" class="cp" aria-label="Copy the M9 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M9. Studio screens
 
 Goal
-Add server with four choices, and per server the Tools, Connection, Try it,
-and Changes tabs from the spec's Studio screens section, in the MCP servers
-area.
+Build the MCP Studio screens as the merged v3 mockup shows them: Add server
+with four choices, and per server the Tools, Connection, Try it, and Changes
+tabs, in the MCP servers area.
 
 Read first
 - mcp-studio-spec.html: Studio screens (the sketch), Tools file, Risk
   classification, Tool checks, Try it and tests, Agent feedback.
-- mockups/v3/ in oxagen-roadmap: the MCP servers area and its design.
+- mockups/v3/ in oxagen-roadmap: the MCP Studio screens lane U1 added. They
+  are the design to build. Match them, and raise any gap in the PR body.
 - Find the MCP servers route with rg -l "servers" "apps/app/src/app/[org]/[ws]".
 
 You own
@@ -1680,6 +1904,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1697,9 +1923,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M10 Discovery and sync</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M10. Discovery and sync
+  <article class="pcard" data-wave="w1" id="prompt-m10"><div class="pcard-head"><span class="lane-id">M10</span><span class="pcard-title">Discovery and sync</span><button type="button" class="cp" aria-label="Copy the M10 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M10. Discovery and sync
 
 Goal
 Every server's available tools are current in mcp.tool_snapshots, and a change
@@ -1742,6 +1968,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1759,9 +1987,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M11 Import PRs</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M11. Studio's edits become a server folder in a steering PR
+  <article class="pcard" data-wave="w1" id="prompt-m11"><div class="pcard-head"><span class="lane-id">M11</span><span class="pcard-title">Import PRs</span><button type="button" class="cp" aria-label="Copy the M11 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M11. Studio's edits become a server folder in a steering PR
 
 Goal
 Adding a server, importing tools, classifying them, and shaping them in Studio
@@ -1797,6 +2025,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1814,9 +2044,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M12 Relay</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M12. The relay for servers and APIs in a private network
+  <article class="pcard" data-wave="w1" id="prompt-m12"><div class="pcard-head"><span class="lane-id">M12</span><span class="pcard-title">Relay</span><button type="button" class="cp" aria-label="Copy the M12 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M12. The relay for servers and APIs in a private network
 
 Goal
 A customer runs the relay inside its network. It dials out to Oxagen, sends
@@ -1862,6 +2092,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1879,9 +2111,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M13 Registry projection and migration</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M13. Rebuild the tool registry from the steering repo, and move today's servers
+  <article class="pcard" data-wave="w1" id="prompt-m13"><div class="pcard-head"><span class="lane-id">M13</span><span class="pcard-title">Registry projection and migration</span><button type="button" class="cp" aria-label="Copy the M13 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M13. Rebuild the tool registry from the steering repo, and move today's servers
 
 Goal
 Publish writes mcp.mcp_servers, agent.tools, and agent.tool_versions from the
@@ -1939,6 +2171,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1956,9 +2190,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M14 Local servers</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M14. Local servers
+  <article class="pcard" data-wave="w1" id="prompt-m14"><div class="pcard-head"><span class="lane-id">M14</span><span class="pcard-title">Local servers</span><button type="button" class="cp" aria-label="Copy the M14 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M14. Local servers
 
 Goal
 The local gateway runs a local server's tools only on machines a steering PR
@@ -2007,6 +2241,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -2024,10 +2260,11 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
   <h3>Wave 2</h3>
-  <figure class="code prompt"><figcaption><span class="path">M15 Serving and search mode</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M15. Serve every server's tools to wrapped agents, and the search index
+  <div class="wave-copy"><button type="button" class="cpw" data-wave="w2">Copy all 3 wave 2 prompts</button><span>Each prompt goes to its own agent.</span></div>
+  <article class="pcard" data-wave="w2" id="prompt-m15"><div class="pcard-head"><span class="lane-id">M15</span><span class="pcard-title">Serving and search mode</span><button type="button" class="cp" aria-label="Copy the M15 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M15. Serve every server's tools to wrapped agents, and the search index
 
 Goal
 An agent's MCP connection lists its toolbelt's tools from the published bundle,
@@ -2082,6 +2319,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -2099,9 +2338,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M16 Replay and selection tests</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M16. Replay recorded calls in the PR, and selection tests on request
+  <article class="pcard" data-wave="w2" id="prompt-m16"><div class="pcard-head"><span class="lane-id">M16</span><span class="pcard-title">Replay and selection tests</span><button type="button" class="cp" aria-label="Copy the M16 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M16. Replay recorded calls in the PR, and selection tests on request
 
 Goal
 The compile check replays each server's tests/calls.jsonl with no network, and
@@ -2134,6 +2373,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -2151,9 +2392,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">M17 Live test</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M17. Live test with sample servers
+  <article class="pcard" data-wave="w2" id="prompt-m17"><div class="pcard-head"><span class="lane-id">M17</span><span class="pcard-title">Live test</span><button type="button" class="cp" aria-label="Copy the M17 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M17. Live test with sample servers
 
 Goal
 One CI job connects a sample MCP server and imports a sample OpenAPI, GraphQL,
@@ -2190,6 +2431,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -2207,13 +2450,74 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 </section>
 
 <footer>MCP Studio v1. Draft for review, 2026-09-26. Decided items come from Mac's instructions of 2026-09-25 and 2026-09-26, including the comments on this page. Items marked Today describe <code>macanderson/oxagen</code> at <code>main</code> on 2026-09-26.</footer>
 </div>
+</div><div data-view-root="progress" id="progress" hidden><div class="wrap">
+<div class="hero">
+  <span class="eyebrow">Build</span>
+  <h1>Progress</h1>
+  <p class="lead">Every lane of the MCP Studio build, the steering repo lanes it waits on, and whether each lane met its Done when criteria. Status comes from GitHub and CI when someone asks Claude to refresh the tracker.</p>
+</div>
+<section id="tracker-section" style="border-top:0;margin-top:0;padding-top:8px">
+  <div id="tracker" aria-live="polite"></div>
+  <script type="application/json" id="tracker-plan">{"groups": [{"name": "Design", "lanes": [{"id": "U1", "name": "MCP Studio in the v3 mockup", "criteria": ["Every screen in the spec's Studio screens section and every state in step 5 opens in the mockup, in both themes and at phone width, with no sideways scroll.", "The v3 checks pass in CI.", "The PR body lists each place the mockup and the spec disagree, and the PR is ready for Mac's review."], "repo": "macanderson/oxagen-roadmap"}]}, {"name": "Steering repo lanes MCP Studio waits on", "lanes": [{"id": "S0", "name": "Contract, paths, fixtures", "criteria": ["CI is green, and every path constant listed above imports from paths.ts.", "Every schema id in the contract has a zod schema, a type, and a JSON Schema."], "repo": "macanderson/oxagen"}, {"id": "S4", "name": "Checks", "criteria": ["Every rule has a failing fixture from S0 and a test that expects its message.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "S5", "name": "Publish and delivery", "criteria": ["Golden tests on S0's fixture repo pin the rendered block byte for byte.", "A test proves the block is identical across two requests of one version.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "S11", "name": "Live test", "criteria": ["The job passes twice in a row in CI."], "repo": "macanderson/oxagen"}]}, {"name": "Wave 0", "lanes": [{"id": "M0", "name": "Contract, operation model, fixtures", "criteria": ["Every module has its signature and every contract schema has a type and a JSON Schema.", "CI is green."], "repo": "macanderson/oxagen"}]}, {"name": "Wave 1", "lanes": [{"id": "M1", "name": "OpenAPI import", "criteria": ["Every OpenAPI fixture imports, and golden tests pin each result.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M2", "name": "GraphQL import", "criteria": ["The GraphQL fixture imports, and golden tests pin the tools and their selection sets.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M3", "name": "gRPC import", "criteria": ["The proto fixture imports, and golden tests pin every schema.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M4", "name": "Compile and lock", "criteria": ["The stripe and billing fixtures compile and lock to M0's expected files byte for byte. Golden tests cover every diff class and every suggestion row.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M5", "name": "Tool checks", "criteria": ["Every rule has a fixture that triggers it and a test that expects its message.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M6", "name": "Executor", "criteria": ["Tests against a fake Transport cover each kind, every retry rule, and every refusal.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M7", "name": "gRPC client", "criteria": ["Tests against an in-process gRPC server from M0's proto fixture cover a unary call, a collected stream, each retry rule, and a deadline.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M8", "name": "Credentials and operator OAuth", "criteria": ["Tests cover every mode, refresh, expiry, revocation, and the missing token.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M9", "name": "Studio screens", "criteria": ["Component tests cover each screen with the stripe and billing fixtures, an empty server, and a 600-tool server.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M10", "name": "Discovery and sync", "criteria": ["Tests cover each source, each trigger, an unchanged discovery (no PR), a description change, and a breaking change.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M11", "name": "Import PRs", "criteria": ["Tests cover a first import from each source, a reclassification, a removal, and the refusal.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M12", "name": "Relay", "criteria": ["Tests cover each refusal, fail-closed behavior, reconnects, timeouts, and a gRPC call through an in-process broker.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M13", "name": "Registry projection and migration", "criteria": ["Tests cover projection of each change (add, reclassify, new version, remove), the reader filter, and migration of a workspace with classified and unclassified tools.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M14", "name": "Local servers", "criteria": ["Tests cover a machine outside the group, a digest mismatch, an expired and a replayed envelope, an unreachable cloud gateway, and a successful call.", "CI is green."], "repo": "macanderson/oxagen"}]}, {"name": "Wave 2", "lanes": [{"id": "M15", "name": "Serving and search mode", "criteria": ["Tests cover listing, a call from each source in each mode, the off switch, a withheld tool, a denial, an approval, and search ranking against a fake embedder.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M16", "name": "Replay and selection tests", "criteria": ["Tests cover a matching replay, a changed shape, a changed request, a stale lock, and a selection run against a fake model.", "CI is green."], "repo": "macanderson/oxagen"}, {"id": "M17", "name": "Live test", "criteria": ["The job passes twice in a row in CI."], "repo": "macanderson/oxagen"}]}]}</script>
+</section>
+<section id="refresh">
+  <span class="eyebrow">Refresh</span>
+  <h2>Refreshing the tracker</h2>
+  <p>Ask Claude to refresh the MCP Studio tracker, or paste this prompt into any Claude Code session. A refresh reads each lane's issue, pull request, and CI, checks every merged lane against its Done when criteria, and records the evidence here. It changes status only, never the spec.</p>
+  <article class="pcard" data-wave="refresh" id="prompt-refresh"><div class="pcard-head"><span class="lane-id">All</span><span class="pcard-title">Refresh the tracker</span><button type="button" class="cp" aria-label="Copy the refresh prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Refresh the MCP Studio build tracker.
 
+The tracker is the Progress view of the artifact
+https://claude.ai/artifact/6p3eUwf6Snaf6UonhUBsoa (mcp-studio-spec.html in
+macanderson/oxagen-roadmap). Its status lives in the page's database: one
+document per lane in the collection lanes (lanes/U1, lanes/S0, lanes/M4, and so
+on) and one document, meta/refresh. Write them with the ArtifactData tool. Never
+republish the page to change status.
 
+For every lane the Progress view lists:
+1. Find the lane's issue and pull request with gh. Their titles start with the
+   lane id in brackets, such as [M4]. U1 lives in macanderson/oxagen-roadmap,
+   and every other lane in macanderson/oxagen.
+2. Set state: not_started (no issue), in_progress (an issue and no pull
+   request), in_review (a pull request is open), merged, validated (merged,
+   and every criterion passed), or failed (closed without merging, or a
+   criterion failed).
+3. Set ci from the required checks on the pull request's head commit: pass,
+   fail, pending, or none. A cancelled or skipped required job is not a pass.
+4. For a merged lane, check each Done when criterion, in the order the page
+   lists them, against the merged code and its CI run. Record pass or fail
+   with evidence: a file path and line, a test name, or a CI run URL. Leave a
+   criterion unchecked when you find no evidence. Never mark one passed
+   without evidence.
+5. Write every lane document in one batch, in this shape:
+   { "state": "...", "issue": { "number": 0, "url": "..." },
+     "pr": { "number": 0, "url": "..." }, "ci": "...",
+     "criteria": [ { "status": "pass", "evidence": "...", "url": "..." } ],
+     "note": "...", "updated": "&lt;ISO time&gt;" }
+   Leave out issue, pr, or url when there is none.
+6. Write meta/refresh as { "at": "&lt;ISO time&gt;", "summary": "&lt;one sentence on
+   what changed since the last refresh&gt;" }.
+
+Do not run builds or tests locally. Read CI instead.
+</code></pre></details></article>
+  <div class="tscroll"><table>
+    <thead><tr><th>State</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill">Not started</span></td><td class="wrap">No issue yet</td></tr>
+      <tr><td><span class="pill in_progress">In progress</span></td><td class="wrap">An issue, and no pull request yet</td></tr>
+      <tr><td><span class="pill in_review">In review</span></td><td class="wrap">A pull request is open</td></tr>
+      <tr><td><span class="pill merged">Merged</span></td><td class="wrap">The pull request merged. Criteria may still be unchecked.</td></tr>
+      <tr><td><span class="pill validated">Validated</span></td><td class="wrap">Merged, and every Done when criterion passed with evidence</td></tr>
+      <tr><td><span class="pill failed">Failed</span></td><td class="wrap">The pull request closed without merging, or a criterion failed</td></tr>
+    </tbody>
+  </table></div>
+</section>
+<footer>23 lanes. The plan comes from the Done when section of each build prompt, so a changed prompt changes its criteria here.</footer>
+</div></div></main></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>
 (function () {
@@ -2255,6 +2559,206 @@ This overrides any repository file that still allows a local test file, a local 
     });
   });
 })();
+</script>
+<script>
+(function () {
+  "use strict";
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  /* ---------- Views and the sidebar ---------- */
+  var VIEWS = {};
+  document.querySelectorAll("[data-view-root]").forEach(function (el) { VIEWS[el.getAttribute("data-view-root")] = el; });
+  var secWrap = document.querySelector(".side .secwrap");
+
+  function route() {
+    var id = decodeURIComponent((location.hash || "").slice(1));
+    var view = VIEWS[id] ? id : "spec";
+    Object.keys(VIEWS).forEach(function (k) { VIEWS[k].hidden = k !== view; });
+    document.querySelectorAll(".side a[data-view]").forEach(function (a) {
+      if (a.getAttribute("data-view") === view) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    });
+    if (secWrap) secWrap.hidden = view !== "spec";
+    if (view === "spec" && id && id !== "spec") {
+      var t = document.getElementById(id);
+      if (t) t.scrollIntoView();
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }
+  window.addEventListener("hashchange", route);
+  route();
+
+  if (secWrap && window.matchMedia && window.matchMedia("(max-width: 900px)").matches) secWrap.removeAttribute("open");
+
+  var secLinks = Array.prototype.slice.call(document.querySelectorAll(".side .secs a"));
+  if ("IntersectionObserver" in window && secLinks.length) {
+    var byId = {};
+    secLinks.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        secLinks.forEach(function (a) { a.classList.remove("on"); });
+        var a = byId[e.target.id];
+        if (a) a.classList.add("on");
+      });
+    }, { rootMargin: "0px 0px -70% 0px" });
+    Object.keys(byId).forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
+  }
+
+  /* ---------- Copying prompts ---------- */
+  function flash(btn, text) {
+    var label = btn.getAttribute("data-label") || btn.textContent;
+    btn.setAttribute("data-label", label);
+    btn.textContent = text;
+    setTimeout(function () { btn.textContent = label; }, 1500);
+  }
+  function selectNode(node) {
+    var r = document.createRange();
+    r.selectNodeContents(node);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+  function copy(text, btn, onFail) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { flash(btn, "Copied"); }, onFail);
+    } else {
+      onFail();
+    }
+  }
+  document.addEventListener("click", function (ev) {
+    var btn = ev.target.closest(".cp");
+    if (btn) {
+      var card = btn.closest(".pcard");
+      var code = card && card.querySelector("pre code");
+      if (!code) return;
+      copy(code.textContent, btn, function () {
+        var d = card.querySelector("details");
+        if (d) d.open = true;
+        selectNode(code);
+        flash(btn, "Selected, press Copy");
+      });
+      return;
+    }
+    var wbtn = ev.target.closest(".cpw");
+    if (wbtn) {
+      var wave = wbtn.getAttribute("data-wave");
+      var cards = document.querySelectorAll('.pcard[data-wave="' + wave + '"]');
+      var parts = [];
+      cards.forEach(function (c) { var k = c.querySelector("pre code"); if (k) parts.push(k.textContent); });
+      copy(parts.join("\n\n----------\n\n"), wbtn, function () { flash(wbtn, "Copy each prompt below"); });
+    }
+  });
+
+  /* ---------- Build tracker ---------- */
+  var planEl = document.getElementById("tracker-plan");
+  var root = document.getElementById("tracker");
+  if (!planEl || !root) return;
+  var PLAN = JSON.parse(planEl.textContent);
+  var STATES = ["validated", "merged", "in_review", "in_progress", "failed", "not_started"];
+  var LABEL = { not_started: "Not started", in_progress: "In progress", in_review: "In review", merged: "Merged", validated: "Validated", failed: "Failed" };
+  var COLOR = { validated: "var(--allowed)", merged: "var(--allowed)", in_review: "var(--approval)", in_progress: "var(--gold)", failed: "var(--critical)", not_started: "var(--rule)" };
+  var CI = { pass: "CI passing", fail: "CI failing", pending: "CI pending", none: "" };
+  var live = {};
+  var meta = null;
+  var liveOn = false;
+  var openLanes = {};
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return esc(iso);
+    return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+
+  function laneState(l) { var r = live[l.id]; return r && LABEL[r.state] ? r.state : "not_started"; }
+
+  function render() {
+    var lanes = [];
+    PLAN.groups.forEach(function (g) { g.lanes.forEach(function (l) { lanes.push(l); }); });
+    var counts = {};
+    STATES.forEach(function (s) { counts[s] = 0; });
+    lanes.forEach(function (l) { counts[laneState(l)]++; });
+    var done = counts.merged + counts.validated;
+    var total = lanes.length;
+
+    var hero = document.getElementById("hero-build");
+    if (hero) hero.textContent = done + " of " + total + " lanes merged";
+    var nav = document.getElementById("nav-progress-count");
+    if (nav) nav.textContent = done + "/" + total;
+
+    var html = '<div class="tsum">' +
+      '<div><b>' + total + '</b><span>Lanes</span></div>' +
+      '<div><b>' + counts.in_progress + '</b><span>In progress</span></div>' +
+      '<div><b>' + counts.in_review + '</b><span>In review</span></div>' +
+      '<div><b>' + done + '</b><span>Merged</span></div>' +
+      '<div><b>' + counts.validated + '</b><span>Validated</span></div>' +
+      '<div><b>' + counts.failed + '</b><span>Failed</span></div></div>';
+    html += '<div class="tbar" role="img" aria-label="' + done + ' of ' + total + ' lanes merged">';
+    STATES.forEach(function (s) { if (counts[s]) html += '<i style="width:' + (100 * counts[s] / total) + "%;background:" + COLOR[s] + '"></i>'; });
+    html += "</div>";
+    if (meta && meta.at) html += '<p class="tmeta">Last refreshed ' + when(meta.at) + (meta.summary ? ". " + esc(meta.summary) : "") + "</p>";
+    else if (liveOn) html += '<p class="tmeta">Not refreshed yet.</p>';
+    else html += '<p class="tmeta">This copy shows the plan. The published page shows live status.</p>';
+
+    PLAN.groups.forEach(function (g) {
+      html += '<h3>' + esc(g.name) + '</h3><div class="lanes">';
+      g.lanes.forEach(function (l) {
+        var r = live[l.id] || {};
+        var st = laneState(l);
+        var crit = l.criteria.map(function (c, i) { var x = (r.criteria || [])[i] || {}; return { text: c, status: x.status || "unchecked", evidence: x.evidence || "", url: x.url || "" }; });
+        var passed = crit.filter(function (c) { return c.status === "pass"; }).length;
+        var links = [];
+        if (r.issue && r.issue.url) links.push('<a href="' + esc(r.issue.url) + '">Issue #' + esc(r.issue.number) + "</a>");
+        if (r.pr && r.pr.url) links.push('<a href="' + esc(r.pr.url) + '">PR #' + esc(r.pr.number) + "</a>");
+        if (r.ci && CI[r.ci]) links.push("<span>" + CI[r.ci] + "</span>");
+        if (!links.length) links.push("<span>" + esc(l.repo) + "</span>");
+        html += '<details class="lane" data-lane="' + esc(l.id) + '"' + (openLanes[l.id] ? " open" : "") + ">" +
+          '<summary><span class="lane-id lid">' + esc(l.id) + '</span><span class="ln">' + esc(l.name) + "</span>" +
+          '<span class="pill ' + st + '">' + LABEL[st] + "</span>" +
+          '<span class="links">' + links.join("") + "</span>" +
+          '<span class="val">' + passed + " of " + crit.length + " checked</span></summary>" +
+          '<div class="detail"><ol class="crit">' + crit.map(function (c) {
+            var mk = c.status === "pass" ? "✓" : c.status === "fail" ? "✗" : "○";
+            var ev = c.evidence ? '<span class="ev">' + (c.url ? '<a href="' + esc(c.url) + '">' + esc(c.evidence) + "</a>" : esc(c.evidence)) + "</span>" : "";
+            return '<li><span class="mk ' + c.status + '" aria-label="' + c.status + '">' + mk + "</span><span>" + esc(c.text) + ev + "</span></li>";
+          }).join("") + "</ol>" +
+          (r.note ? '<p class="note">' + esc(r.note) + "</p>" : "") +
+          (r.updated ? '<p class="note">Updated ' + when(r.updated) + "</p>" : "") +
+          "</div></details>";
+      });
+      html += "</div>";
+    });
+    root.innerHTML = html;
+    root.querySelectorAll("details.lane").forEach(function (d) {
+      d.addEventListener("toggle", function () { openLanes[d.getAttribute("data-lane")] = d.open; });
+    });
+  }
+  render();
+
+  (async function () {
+    var c = window.claude;
+    if (!c || typeof c.use !== "function") return;
+    var db = null;
+    try { db = await c.use("db"); } catch (e) { db = null; }
+    if (!db) return;
+    liveOn = true;
+    render();
+    db.collection("lanes").onSnapshot(function (snap) {
+      var next = {};
+      snap.docs.forEach(function (d) { if (d.exists) next[d.id] = d.data(); });
+      live = next;
+      render();
+    }, function () { liveOn = false; render(); });
+    db.doc("meta/refresh").onSnapshot(function (d) { meta = d.exists ? d.data() : null; render(); }, function () {});
+  })();
+})();
+
 </script>
 </body>
 </html>

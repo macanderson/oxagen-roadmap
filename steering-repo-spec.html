@@ -187,15 +187,104 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
 .chip.write{border-color:var(--approval); color:var(--approval)}
 .chip.irr{border-color:var(--denied); color:var(--denied)}
 .chip.on{border-color:var(--gold); color:var(--accent-text)}
+
+/* App shell: sidebar navigation and views. */
+[hidden]{display:none!important}
+body{padding-inline:0}
+.app{display:grid; grid-template-columns:252px minmax(0,1fr); max-width:1440px; margin-inline:auto}
+.side{position:sticky; top:env(safe-area-inset-top,0px); align-self:start; height:100vh; overflow-y:auto; border-right:1px solid var(--border); padding:22px 14px 48px; background:var(--ink)}
+.side .brand{display:block; font:600 15px/1.3 "Space Grotesk","Geist",system-ui,sans-serif; color:var(--fg); text-decoration:none; padding:0 10px 4px}
+.side .brand b{color:var(--gold); font-weight:600}
+.side .sub{display:block; font:500 11px/1.3 "Monaspace Neon",ui-monospace,monospace; color:var(--muted); padding:0 10px}
+.side .grp{font:500 10.5px/1.3 "Monaspace Neon",ui-monospace,monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:22px 10px 6px}
+.side nav a{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:7px 10px; border-radius:7px; color:var(--body); text-decoration:none; font-size:14px; line-height:1.3}
+.side nav a:hover{background:var(--panel); color:var(--fg)}
+.side nav a:focus-visible{outline:2px solid var(--gold); outline-offset:1px}
+.side nav a[aria-current="page"]{background:var(--gold-wash); color:var(--fg); font-weight:600}
+.side nav a .cnt{font:500 11px/1 "Monaspace Neon",ui-monospace,monospace; color:var(--muted); font-variant-numeric:tabular-nums}
+.side .secwrap summary{list-style:none; cursor:pointer; font:500 10.5px/1.3 "Monaspace Neon",ui-monospace,monospace; letter-spacing:.12em; text-transform:uppercase; color:var(--muted); margin:22px 10px 6px}
+.side .secwrap summary::-webkit-details-marker{display:none}
+.side .secs a{font-size:13px; padding:4px 10px; color:var(--muted)}
+.side .secs a.on{color:var(--fg); background:var(--panel)}
+.side .ext{font-size:13px}
+.main{min-width:0; padding-inline:28px}
+.main .wrap{max-width:980px}
+@media (max-width:900px){
+  .app{grid-template-columns:1fr}
+  .side{position:static; height:auto; border-right:0; border-bottom:1px solid var(--border); padding:14px 16px}
+  .side .views{display:flex; flex-wrap:wrap; gap:6px}
+  .side .views a{border:1px solid var(--border)}
+  .main{padding-inline:16px}
+}
+
+/* Prompt cards */
+.pcard{border:1px solid var(--border); border-radius:10px; background:var(--panel); margin:10px 0 14px; overflow:hidden}
+.pcard-head{display:flex; flex-wrap:wrap; align-items:center; gap:10px 12px; padding:10px 12px}
+.lane-id{font:600 12px/1 "Monaspace Neon",ui-monospace,monospace; color:var(--accent-text); border:1px solid var(--gold-deep); border-radius:5px; padding:4px 6px; min-width:36px; text-align:center}
+.pcard-title{flex:1 1 220px; color:var(--fg); font-weight:600; font-size:14.5px}
+.cp,.cpw{font:600 12.5px/1 "Geist",system-ui,sans-serif; color:var(--on-gold); background:var(--gold); border:1px solid var(--gold); border-radius:7px; padding:8px 12px; cursor:pointer; white-space:nowrap}
+.cp:hover,.cpw:hover{background:var(--gold-bright); border-color:var(--gold-bright)}
+.cp:focus-visible,.cpw:focus-visible{outline:2px solid var(--fg); outline-offset:2px}
+.cpw{background:transparent; color:var(--accent-text)}
+.cpw:hover{color:var(--on-gold)}
+.pcard-body{border-top:1px solid var(--border); background:var(--code-bg)}
+.pcard-body summary{cursor:pointer; padding:8px 12px; font:500 12.5px/1.3 "Geist",system-ui,sans-serif; color:var(--muted)}
+.pcard-body summary:hover{color:var(--fg)}
+.pcard-body pre{max-height:520px; overflow:auto; border-top:1px solid var(--border)}
+.wave-copy{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin:6px 0 4px; color:var(--muted); font-size:13px}
+
+/* Progress view */
+.tsum{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:1px; background:var(--border); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin:18px 0 10px}
+.tsum div{background:var(--panel); padding:12px 14px}
+.tsum b{display:block; font:600 24px/1.1 "Space Grotesk",system-ui,sans-serif; color:var(--fg); font-variant-numeric:tabular-nums}
+.tsum span{font:500 10.5px/1.3 "Monaspace Neon",monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+.tbar{display:flex; height:10px; border-radius:5px; overflow:hidden; background:var(--panel-h); margin:4px 0 8px}
+.tbar i{display:block; height:100%}
+.tmeta{color:var(--muted); font-size:13px; margin:0 0 18px}
+.lanes{display:grid; gap:8px; margin:8px 0 22px}
+.lane{border:1px solid var(--border); border-radius:10px; background:var(--panel)}
+.lane>summary{list-style:none; cursor:pointer; display:grid; grid-template-columns:48px minmax(0,1.6fr) 118px minmax(0,1fr) 96px; gap:10px; align-items:center; padding:10px 12px}
+.lane>summary::-webkit-details-marker{display:none}
+.lane>summary:focus-visible{outline:2px solid var(--gold); outline-offset:1px; border-radius:10px}
+.lane .ln{color:var(--fg); font-weight:600; font-size:14px}
+.lane .links{font-size:13px; color:var(--muted); display:flex; gap:10px; flex-wrap:wrap}
+.lane .val{font:500 12px/1.2 "Monaspace Neon",monospace; color:var(--muted); text-align:right; font-variant-numeric:tabular-nums}
+.pill{display:inline-block; font:500 11px/1.6 "Monaspace Neon",monospace; border-radius:999px; padding:1px 9px; border:1px solid var(--rule); color:var(--muted); white-space:nowrap; justify-self:start}
+.pill.in_progress{border-color:var(--gold); color:var(--accent-text)}
+.pill.in_review{border-color:var(--approval); color:var(--approval)}
+.pill.merged{border-color:var(--allowed); color:var(--allowed)}
+.pill.validated{border-color:var(--allowed); background:var(--allowed); color:var(--ink)}
+.pill.failed{border-color:var(--critical); color:var(--critical)}
+.lane .detail{border-top:1px solid var(--border); padding:10px 14px 14px}
+.crit{list-style:none; padding:0; margin:0; display:grid; gap:8px; max-width:none}
+.crit li{display:grid; grid-template-columns:22px minmax(0,1fr); gap:8px; margin:0; font-size:13.5px}
+.crit .mk{font:600 13px/1.4 "Monaspace Neon",monospace}
+.crit .pass{color:var(--allowed)} .crit .fail{color:var(--critical)} .crit .unchecked{color:var(--dim)}
+.crit .ev{display:block; color:var(--muted); font-size:12.5px; margin-top:2px; overflow-wrap:anywhere}
+.lane .note{color:var(--muted); font-size:13px; margin:10px 0 0}
+@media (max-width:700px){
+  .lane>summary{grid-template-columns:44px minmax(0,1fr) auto; grid-template-areas:"id name val" "id pill pill" "id links links"}
+  .lane>summary .lid{grid-area:id} .lane>summary .ln{grid-area:name} .lane>summary .pill{grid-area:pill} .lane>summary .links{grid-area:links} .lane>summary .val{grid-area:val}
+}
+
+/* Comparison view */
+.edge{display:inline-block; font:600 11px/1.6 "Monaspace Neon",monospace; border-radius:4px; padding:0 7px; white-space:nowrap}
+.edge.ox{background:var(--gold-wash); color:var(--accent-text); border:1px solid var(--gold-deep)}
+.edge.kong{border:1px solid var(--approval); color:var(--approval)}
+.edge.par{border:1px solid var(--rule); color:var(--muted)}
+.ostat{display:block; font:500 10.5px/1.5 "Monaspace Neon",monospace; letter-spacing:.06em; text-transform:uppercase; margin-bottom:3px}
+.ostat.today{color:var(--allowed)} .ostat.spec{color:var(--accent-text)} .ostat.dir{color:var(--muted)}
+.kstat{display:block; font:500 10.5px/1.5 "Monaspace Neon",monospace; letter-spacing:.06em; text-transform:uppercase; margin-bottom:3px}
+.kstat.ships{color:var(--approval)} .kstat.partial{color:var(--muted)} .kstat.none{color:var(--dim)}
+.matrix td{font-size:13.5px}
+.matrix td:first-child{color:var(--fg); font-weight:600; min-width:160px}
+.matrix .grp td{background:var(--panel); font:500 10.5px/1.3 "Monaspace Neon",monospace; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); font-weight:500}
+.srcs{font-size:13px; color:var(--muted)}
+.srcs li{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
-<div class="wrap">
-<header class="topbar">
-  <span class="mark">oxagen <b>/</b> steering repo</span>
-  <span class="muted mono" style="font-size:12px">steering-repo/v1</span>
-</header>
-
+<div class="app"><aside class="side" aria-label="Page navigation"><a class="brand" href="#spec">oxagen <b>/</b> steering repo</a><span class="sub">Draft of 2026-09-26</span><div class="grp">Views</div><nav class="views" aria-label="Views"><a href="#spec" data-view="spec">Spec</a></nav><details class="secwrap" open><summary>Sections</summary><nav class="secs" aria-label="Sections"><a href="#changes">Changes</a><a href="#decisions">Decisions</a><a href="#layout">Layout</a><a href="#formats">Formats</a><a href="#records">Records</a><a href="#placement">Placement</a><a href="#servers">Servers</a><a href="#agents">Agents</a><a href="#policy">Policy</a><a href="#scope">Scope</a><a href="#provisioning">Provisioning</a><a href="#settings">Settings</a><a href="#drift">Drift</a><a href="#steering-pr">Steering PR</a><a href="#memory">Memory</a><a href="#scale">Scale</a><a href="#tokens">Tokens</a><a href="#agent-use">Agent use</a><a href="#contract">Contract</a><a href="#migration">Migration</a><a href="#open">Open questions</a><a href="#build">Build prompts</a></nav></details><div class="grp">Related</div><nav aria-label="Related pages"><a class="ext" href="https://claude.ai/artifact/6p3eUwf6Snaf6UonhUBsoa" target="_blank" rel="noopener">MCP Studio and build progress</a><a class="ext" href="https://claude.ai/artifact/K12EGALijFzN66AfFPKefS" target="_blank" rel="noopener">Steering records v1</a></nav></aside><main class="main"><div data-view-root="spec" id="spec"><div class="wrap">
 <div class="hero">
   <span class="eyebrow">Specification</span>
   <h1>Steering repo</h1>
@@ -213,9 +302,6 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
     <span class="item"><span class="st c">Today</span> the code at <code>main</code> does this</span>
     <span class="item"><span class="st p">Proposed</span> needs the maintainer's yes</span>
   </div>
-  <nav class="toc" aria-label="Sections">
-    <a href="#changes">Changes</a><a href="#decisions">Decisions</a><a href="#layout">Layout</a><a href="#formats">Formats</a><a href="#records">Records</a><a href="#placement">Placement</a><a href="#servers">Servers</a><a href="#agents">Agents</a><a href="#policy">Policy</a><a href="#scope">Scope</a><a href="#provisioning">Provisioning</a><a href="#settings">Settings</a><a href="#drift">Drift</a><a href="#steering-pr">Steering PR</a><a href="#memory">Memory</a><a href="#scale">Scale</a><a href="#tokens">Tokens</a><a href="#agent-use">Agent use</a><a href="#contract">Contract</a><a href="#migration">Migration</a><a href="#open">Open questions</a><a href="#build">Build prompts</a>
-  </nav>
 </div>
 
 <section id="changes">
@@ -1008,7 +1094,7 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
   <p>Two lanes may both add a line to a shared index file, such as the schema barrel or the job registry. When they conflict there, keep both lines.</p>
 
   <h3>Coordinator</h3>
-  <figure class="code prompt"><figcaption><span class="path">Coordinator prompt</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">You coordinate the build of the steering repo in macanderson/oxagen. The spec is
+  <article class="pcard" data-wave="coord" id="prompt-all"><div class="pcard-head"><span class="lane-id">All</span><span class="pcard-title">Coordinator</span><button type="button" class="cp" aria-label="Copy the All prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">You coordinate the build of the steering repo in macanderson/oxagen. The spec is
 steering-repo-spec.html in macanderson/oxagen-roadmap. Its Build prompts section
 holds one prompt per lane, S0 to S11.
 
@@ -1028,6 +1114,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1045,10 +1133,10 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
   <h3>Wave 0</h3>
-  <figure class="code prompt"><figcaption><span class="path">S0 Contract, paths, fixtures</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane S0. Contract, paths, and fixtures for the steering repo
+  <article class="pcard" data-wave="w0" id="prompt-s0"><div class="pcard-head"><span class="lane-id">S0</span><span class="pcard-title">Contract, paths, fixtures</span><button type="button" class="cp" aria-label="Copy the S0 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S0. Contract, paths, and fixtures for the steering repo
 
 Goal
 Put the spec's Shared contract into code so eight lanes can build against it at
@@ -1112,6 +1200,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1129,10 +1219,11 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
   <h3>Wave 1</h3>
-  <figure class="code prompt"><figcaption><span class="path">S1 Provisioning</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane S1. Provision a steering repo when a workspace is created
+  <div class="wave-copy"><button type="button" class="cpw" data-wave="w1">Copy all 8 wave 1 prompts</button><span>Each prompt goes to its own agent.</span></div>
+  <article class="pcard" data-wave="w1" id="prompt-s1"><div class="pcard-head"><span class="lane-id">S1</span><span class="pcard-title">Provisioning</span><button type="button" class="cp" aria-label="Copy the S1 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S1. Provision a steering repo when a workspace is created
 
 Goal
 Creating a workspace creates its private steering repo, seeds it, applies the
@@ -1183,6 +1274,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1200,9 +1293,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">S2 Drift</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane S2. Detect settings drift and fail every pull request loudly
+  <article class="pcard" data-wave="w1" id="prompt-s2"><div class="pcard-head"><span class="lane-id">S2</span><span class="pcard-title">Drift</span><button type="button" class="cp" aria-label="Copy the S2 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S2. Detect settings drift and fail every pull request loudly
 
 Goal
 Within seconds of a settings change, a steering repo's health leaves healthy,
@@ -1250,6 +1343,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1267,9 +1362,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">S3 Steering PR pipeline</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane S3. One required check, a merge queue, stamping, and deployments
+  <article class="pcard" data-wave="w1" id="prompt-s3"><div class="pcard-head"><span class="lane-id">S3</span><span class="pcard-title">Steering PR pipeline</span><button type="button" class="cp" aria-label="Copy the S3 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S3. One required check, a merge queue, stamping, and deployments
 
 Goal
 Oxagen is the only merger of a steering repo. It merges one pull request at a
@@ -1316,6 +1411,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1333,9 +1430,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">S4 Checks</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane S4. The checks, as a pure package the server and the CLI share
+  <article class="pcard" data-wave="w1" id="prompt-s4"><div class="pcard-head"><span class="lane-id">S4</span><span class="pcard-title">Checks</span><button type="button" class="cp" aria-label="Copy the S4 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S4. The checks, as a pure package the server and the CLI share
 
 Goal
 Every check in the spec's Steering PR table runs from one pure package that
@@ -1376,6 +1473,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1393,9 +1492,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">S5 Publish and delivery</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane S5. Publish a version and deliver it at its token cost
+  <article class="pcard" data-wave="w1" id="prompt-s5"><div class="pcard-head"><span class="lane-id">S5</span><span class="pcard-title">Publish and delivery</span><button type="button" class="cp" aria-label="Copy the S5 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S5. Publish a version and deliver it at its token cost
 
 Goal
 A merge produces the next published version as a bundle/v1 within 30 seconds,
@@ -1440,6 +1539,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1457,9 +1558,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">S6 Memory and reflection</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane S6. Memory candidates, reflections, the curator, and memory PRs
+  <article class="pcard" data-wave="w1" id="prompt-s6"><div class="pcard-head"><span class="lane-id">S6</span><span class="pcard-title">Memory and reflection</span><button type="button" class="cp" aria-label="Copy the S6 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S6. Memory candidates, reflections, the curator, and memory PRs
 
 Goal
 Agents write candidates and reflections to Oxagen. A curator turns the strong
@@ -1510,6 +1611,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1527,9 +1630,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">S7 App screens</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane S7. The app with no repository picker, repo health, and memory review
+  <article class="pcard" data-wave="w1" id="prompt-s7"><div class="pcard-head"><span class="lane-id">S7</span><span class="pcard-title">App screens</span><button type="button" class="cp" aria-label="Copy the S7 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S7. The app with no repository picker, repo health, and memory review
 
 Goal
 A person creates a workspace by typing a name. The workspace shows its steering
@@ -1572,6 +1675,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1589,9 +1694,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">S8 Binding and linking</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane S8. The steering role, many workspaces per code repository, and linking by PR
+  <article class="pcard" data-wave="w1" id="prompt-s8"><div class="pcard-head"><span class="lane-id">S8</span><span class="pcard-title">Binding and linking</span><button type="button" class="cp" aria-label="Copy the S8 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S8. The steering role, many workspaces per code repository, and linking by PR
 
 Goal
 The main role becomes steering. A code repository can be linked to any number
@@ -1638,6 +1743,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1655,10 +1762,11 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
   <h3>Wave 2</h3>
-  <figure class="code prompt"><figcaption><span class="path">S9 oxagen check CLI</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane S9. oxagen check
+  <div class="wave-copy"><button type="button" class="cpw" data-wave="w2">Copy all 3 wave 2 prompts</button><span>Each prompt goes to its own agent.</span></div>
+  <article class="pcard" data-wave="w2" id="prompt-s9"><div class="pcard-head"><span class="lane-id">S9</span><span class="pcard-title">oxagen check CLI</span><button type="button" class="cp" aria-label="Copy the S9 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S9. oxagen check
 
 Goal
 An agent or a person runs the pull request's checks on a clone before pushing.
@@ -1686,6 +1794,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1703,9 +1813,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">S10 Migration and docs</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane S10. Move existing workspaces and update the docs
+  <article class="pcard" data-wave="w2" id="prompt-s10"><div class="pcard-head"><span class="lane-id">S10</span><span class="pcard-title">Migration and docs</span><button type="button" class="cp" aria-label="Copy the S10 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S10. Move existing workspaces and update the docs
 
 Goal
 Every existing workspace ends with a provisioned steering repo that holds its
@@ -1739,6 +1849,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1756,9 +1868,9 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 
-  <figure class="code prompt"><figcaption><span class="path">S11 Live test</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane S11. Live test on a GitHub test organization
+  <article class="pcard" data-wave="w2" id="prompt-s11"><div class="pcard-head"><span class="lane-id">S11</span><span class="pcard-title">Live test</span><button type="button" class="cp" aria-label="Copy the S11 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S11. Live test on a GitHub test organization
 
 Goal
 One CI job proves the whole path against real GitHub: create a workspace, get
@@ -1790,6 +1902,8 @@ Rules for every lane
   git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
 - Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
 - Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
 - Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
 - A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
 - Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
@@ -1807,13 +1921,12 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article>
 </section>
 
 <footer>Steering repo v1. Draft for review, 2026-09-26. Decided items come from Mac's instructions of 2026-09-25 and 2026-09-26. Items marked Today describe <code>macanderson/oxagen</code> at <code>main</code> on 2026-09-26.</footer>
 </div>
-
-
+</div></main></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>
 (function () {
@@ -1855,6 +1968,206 @@ This overrides any repository file that still allows a local test file, a local 
     });
   });
 })();
+</script>
+<script>
+(function () {
+  "use strict";
+
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  /* ---------- Views and the sidebar ---------- */
+  var VIEWS = {};
+  document.querySelectorAll("[data-view-root]").forEach(function (el) { VIEWS[el.getAttribute("data-view-root")] = el; });
+  var secWrap = document.querySelector(".side .secwrap");
+
+  function route() {
+    var id = decodeURIComponent((location.hash || "").slice(1));
+    var view = VIEWS[id] ? id : "spec";
+    Object.keys(VIEWS).forEach(function (k) { VIEWS[k].hidden = k !== view; });
+    document.querySelectorAll(".side a[data-view]").forEach(function (a) {
+      if (a.getAttribute("data-view") === view) a.setAttribute("aria-current", "page");
+      else a.removeAttribute("aria-current");
+    });
+    if (secWrap) secWrap.hidden = view !== "spec";
+    if (view === "spec" && id && id !== "spec") {
+      var t = document.getElementById(id);
+      if (t) t.scrollIntoView();
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }
+  window.addEventListener("hashchange", route);
+  route();
+
+  if (secWrap && window.matchMedia && window.matchMedia("(max-width: 900px)").matches) secWrap.removeAttribute("open");
+
+  var secLinks = Array.prototype.slice.call(document.querySelectorAll(".side .secs a"));
+  if ("IntersectionObserver" in window && secLinks.length) {
+    var byId = {};
+    secLinks.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting) return;
+        secLinks.forEach(function (a) { a.classList.remove("on"); });
+        var a = byId[e.target.id];
+        if (a) a.classList.add("on");
+      });
+    }, { rootMargin: "0px 0px -70% 0px" });
+    Object.keys(byId).forEach(function (id) { var el = document.getElementById(id); if (el) io.observe(el); });
+  }
+
+  /* ---------- Copying prompts ---------- */
+  function flash(btn, text) {
+    var label = btn.getAttribute("data-label") || btn.textContent;
+    btn.setAttribute("data-label", label);
+    btn.textContent = text;
+    setTimeout(function () { btn.textContent = label; }, 1500);
+  }
+  function selectNode(node) {
+    var r = document.createRange();
+    r.selectNodeContents(node);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+  function copy(text, btn, onFail) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () { flash(btn, "Copied"); }, onFail);
+    } else {
+      onFail();
+    }
+  }
+  document.addEventListener("click", function (ev) {
+    var btn = ev.target.closest(".cp");
+    if (btn) {
+      var card = btn.closest(".pcard");
+      var code = card && card.querySelector("pre code");
+      if (!code) return;
+      copy(code.textContent, btn, function () {
+        var d = card.querySelector("details");
+        if (d) d.open = true;
+        selectNode(code);
+        flash(btn, "Selected, press Copy");
+      });
+      return;
+    }
+    var wbtn = ev.target.closest(".cpw");
+    if (wbtn) {
+      var wave = wbtn.getAttribute("data-wave");
+      var cards = document.querySelectorAll('.pcard[data-wave="' + wave + '"]');
+      var parts = [];
+      cards.forEach(function (c) { var k = c.querySelector("pre code"); if (k) parts.push(k.textContent); });
+      copy(parts.join("\n\n----------\n\n"), wbtn, function () { flash(wbtn, "Copy each prompt below"); });
+    }
+  });
+
+  /* ---------- Build tracker ---------- */
+  var planEl = document.getElementById("tracker-plan");
+  var root = document.getElementById("tracker");
+  if (!planEl || !root) return;
+  var PLAN = JSON.parse(planEl.textContent);
+  var STATES = ["validated", "merged", "in_review", "in_progress", "failed", "not_started"];
+  var LABEL = { not_started: "Not started", in_progress: "In progress", in_review: "In review", merged: "Merged", validated: "Validated", failed: "Failed" };
+  var COLOR = { validated: "var(--allowed)", merged: "var(--allowed)", in_review: "var(--approval)", in_progress: "var(--gold)", failed: "var(--critical)", not_started: "var(--rule)" };
+  var CI = { pass: "CI passing", fail: "CI failing", pending: "CI pending", none: "" };
+  var live = {};
+  var meta = null;
+  var liveOn = false;
+  var openLanes = {};
+
+  function when(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return esc(iso);
+    return d.toLocaleString(undefined, { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
+  }
+
+  function laneState(l) { var r = live[l.id]; return r && LABEL[r.state] ? r.state : "not_started"; }
+
+  function render() {
+    var lanes = [];
+    PLAN.groups.forEach(function (g) { g.lanes.forEach(function (l) { lanes.push(l); }); });
+    var counts = {};
+    STATES.forEach(function (s) { counts[s] = 0; });
+    lanes.forEach(function (l) { counts[laneState(l)]++; });
+    var done = counts.merged + counts.validated;
+    var total = lanes.length;
+
+    var hero = document.getElementById("hero-build");
+    if (hero) hero.textContent = done + " of " + total + " lanes merged";
+    var nav = document.getElementById("nav-progress-count");
+    if (nav) nav.textContent = done + "/" + total;
+
+    var html = '<div class="tsum">' +
+      '<div><b>' + total + '</b><span>Lanes</span></div>' +
+      '<div><b>' + counts.in_progress + '</b><span>In progress</span></div>' +
+      '<div><b>' + counts.in_review + '</b><span>In review</span></div>' +
+      '<div><b>' + done + '</b><span>Merged</span></div>' +
+      '<div><b>' + counts.validated + '</b><span>Validated</span></div>' +
+      '<div><b>' + counts.failed + '</b><span>Failed</span></div></div>';
+    html += '<div class="tbar" role="img" aria-label="' + done + ' of ' + total + ' lanes merged">';
+    STATES.forEach(function (s) { if (counts[s]) html += '<i style="width:' + (100 * counts[s] / total) + "%;background:" + COLOR[s] + '"></i>'; });
+    html += "</div>";
+    if (meta && meta.at) html += '<p class="tmeta">Last refreshed ' + when(meta.at) + (meta.summary ? ". " + esc(meta.summary) : "") + "</p>";
+    else if (liveOn) html += '<p class="tmeta">Not refreshed yet.</p>';
+    else html += '<p class="tmeta">This copy shows the plan. The published page shows live status.</p>';
+
+    PLAN.groups.forEach(function (g) {
+      html += '<h3>' + esc(g.name) + '</h3><div class="lanes">';
+      g.lanes.forEach(function (l) {
+        var r = live[l.id] || {};
+        var st = laneState(l);
+        var crit = l.criteria.map(function (c, i) { var x = (r.criteria || [])[i] || {}; return { text: c, status: x.status || "unchecked", evidence: x.evidence || "", url: x.url || "" }; });
+        var passed = crit.filter(function (c) { return c.status === "pass"; }).length;
+        var links = [];
+        if (r.issue && r.issue.url) links.push('<a href="' + esc(r.issue.url) + '">Issue #' + esc(r.issue.number) + "</a>");
+        if (r.pr && r.pr.url) links.push('<a href="' + esc(r.pr.url) + '">PR #' + esc(r.pr.number) + "</a>");
+        if (r.ci && CI[r.ci]) links.push("<span>" + CI[r.ci] + "</span>");
+        if (!links.length) links.push("<span>" + esc(l.repo) + "</span>");
+        html += '<details class="lane" data-lane="' + esc(l.id) + '"' + (openLanes[l.id] ? " open" : "") + ">" +
+          '<summary><span class="lane-id lid">' + esc(l.id) + '</span><span class="ln">' + esc(l.name) + "</span>" +
+          '<span class="pill ' + st + '">' + LABEL[st] + "</span>" +
+          '<span class="links">' + links.join("") + "</span>" +
+          '<span class="val">' + passed + " of " + crit.length + " checked</span></summary>" +
+          '<div class="detail"><ol class="crit">' + crit.map(function (c) {
+            var mk = c.status === "pass" ? "✓" : c.status === "fail" ? "✗" : "○";
+            var ev = c.evidence ? '<span class="ev">' + (c.url ? '<a href="' + esc(c.url) + '">' + esc(c.evidence) + "</a>" : esc(c.evidence)) + "</span>" : "";
+            return '<li><span class="mk ' + c.status + '" aria-label="' + c.status + '">' + mk + "</span><span>" + esc(c.text) + ev + "</span></li>";
+          }).join("") + "</ol>" +
+          (r.note ? '<p class="note">' + esc(r.note) + "</p>" : "") +
+          (r.updated ? '<p class="note">Updated ' + when(r.updated) + "</p>" : "") +
+          "</div></details>";
+      });
+      html += "</div>";
+    });
+    root.innerHTML = html;
+    root.querySelectorAll("details.lane").forEach(function (d) {
+      d.addEventListener("toggle", function () { openLanes[d.getAttribute("data-lane")] = d.open; });
+    });
+  }
+  render();
+
+  (async function () {
+    var c = window.claude;
+    if (!c || typeof c.use !== "function") return;
+    var db = null;
+    try { db = await c.use("db"); } catch (e) { db = null; }
+    if (!db) return;
+    liveOn = true;
+    render();
+    db.collection("lanes").onSnapshot(function (snap) {
+      var next = {};
+      snap.docs.forEach(function (d) { if (d.exists) next[d.id] = d.data(); });
+      live = next;
+      render();
+    }, function () { liveOn = false; render(); });
+    db.doc("meta/refresh").onSnapshot(function (d) { meta = d.exists ? d.data() : null; render(); }, function () {});
+  })();
+})();
+
 </script>
 </body>
 </html>
