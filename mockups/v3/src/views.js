@@ -1287,15 +1287,21 @@ DIALOGS.embeddings = function (arg, d) {
   var opts = [["oxagen", "oxagen", "The default. " + e.vendor + " " + e.model + " on oxagen's key. oxagen absorbs the cost."], ["custom", "Your endpoint", "Your own URL, model, and key. You pay for your embeddings."], ["keyword", "Keyword", "Keyword matching. Nothing is sent to any embedding provider."]];
   return { title: "Search ranking", sub: "How a server in search mode ranks its tools, set in <code>workspace.toml</code> by steering PR.",
     body: opts.map(function (o) { return '<label class="check"><input type="radio" name="emb" value="' + o[0] + '" data-change="emb-pick"' + (d.pick === o[0] ? " checked" : "") + '><span class="grow"><span class="n">' + h(o[1]) + (o[0] === e.provider ? ' <span class="b b-q">Current</span>' : "") + '</span><span class="d">' + h(o[2]) + "</span></span></label>"; }).join("") +
-      (d.pick === "custom" ? '<div class="fields"><div class="field"><label for="emb-url">URL</label><input id="emb-url" value="' + h(e.custom.url) + '"></div><div class="field"><label for="emb-model">Model</label><input id="emb-model" value="' + h(e.custom.model) + '"></div></div><div class="field"><label for="emb-key">Key</label><input id="emb-key" type="password" placeholder="Paste the key"><div class="hint">It goes to oxagen\'s vault as <code>' + h(e.custom.credential) + "</code>, never into the repository.</div></div>" : "") +
+      (d.pick === "custom" ? '<div class="fields"><div class="field"><label for="emb-url">URL</label><input id="emb-url" data-input="emb-url" value="' + h(d.url != null ? d.url : e.custom.url) + '"></div><div class="field"><label for="emb-model">Model</label><input id="emb-model" data-input="emb-model" value="' + h(d.model != null ? d.model : e.custom.model) + '"></div></div><div class="field"><label for="emb-key">Key</label><input id="emb-key" type="password" placeholder="Paste the key"><div class="hint">It goes to oxagen\'s vault as <code>' + h(e.custom.credential) + "</code>, never into the repository.</div></div>" : "") +
       '<p class="muted small">Changing the model or the endpoint re-embeds every search entry in the workspace.</p>',
     foot: '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="emb-go"' + (d.pick === e.provider ? " disabled" : "") + ">Open steering PR</button>" };
 };
 ACTS["emb-pick"] = function (el) { S.dialog.pick = el.value; renderLayer(); };
+/* What the person types survives a redraw of the dialog, and the steering PR carries it. */
+ACTS["emb-url"] = function (el) { S.dialog.url = el.value; };
+ACTS["emb-model"] = function (el) { S.dialog.model = el.value; };
 ACTS["emb-go"] = function () {
-  var pick = S.dialog.pick, e = F.SERVERS.embeddings, n = nextPrNumber();
-  var diff = pick === "custom" ? "+[embeddings]\n+provider = \"custom\"\n+url = \"" + e.custom.url + "\"\n+model = \"" + e.custom.model + "\"\n+credential = \"" + e.custom.credential + "\"" : "+[embeddings]\n+provider = \"" + pick + "\"";
-  S.newPrs.push({ n: n, kind: "workspace", state: "open", title: "Rank search mode with " + (pick === "custom" ? "our endpoint" : pick), branch: "workspace/embeddings-" + pick, by: ME, via: "web", opened: F.ORG.now, approvals: [],
+  var d = S.dialog, pick = d.pick, e = F.SERVERS.embeddings, n = nextPrNumber();
+  var field = function (id, typed, dflt) { var el = document.getElementById(id); return String(el ? el.value : typed != null ? typed : dflt).trim(); };
+  var url = pick === "custom" ? field("emb-url", d.url, e.custom.url) : "", model = pick === "custom" ? field("emb-model", d.model, e.custom.model) : "";
+  if (pick === "custom" && (!url || !model)) { toast("Enter the URL and the model of your endpoint."); return; }
+  var diff = pick === "custom" ? "+[embeddings]\n+provider = \"custom\"\n+url = \"" + url + "\"\n+model = \"" + model + "\"\n+credential = \"" + e.custom.credential + "\"" : "+[embeddings]\n+provider = \"" + pick + "\"";
+  S.newPrs.push({ n: n, kind: "workspace", state: "open", title: "Rank search mode with " + (pick === "custom" ? model : pick), branch: "workspace/embeddings-" + pick, by: ME, via: "web", opened: F.ORG.now, approvals: [],
     summary: "Changes how search mode ranks tools. oxagen re-embeds every search entry when it merges.",
     files: [{ path: "workspace.toml", diff: diff }],
     checks: [{ id: "schema", r: "pass" }, { id: "references", r: "pass" }, { id: "owned", r: "pass" }] });
