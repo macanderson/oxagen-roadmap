@@ -234,3 +234,11 @@ jobs:
           console.log(`${failures ? "FAIL" : "ok  "} steering repo and MCP Studio walk: ${passes} checks passed, ${failures} failed`);
           process.exit(failures ? 1 : 0);
           EOF
+      - name: Keep the screenshots for review
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: v3-screens
+          path: ${{ runner.temp }}/v3-shots
+          retention-days: 14
+          if-no-files-found: ignore
