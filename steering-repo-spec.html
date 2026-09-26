@@ -429,7 +429,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
     <li><strong>Built-in tools.</strong> Cedar decides a harness's own tools too, in one vocabulary for every harness: <code>builtin__shell</code> is Claude Code's <code>Bash</code> and Codex's <code>shell</code>. The pre-tool hook asks for the decision. <span class="st d">Decided</span> for one vocabulary, <span class="st p">Proposed</span> for the names. See <a href="#builtins">Built-in tools</a>.</li>
     <li><strong>Separation.</strong> Teams that must not share tools use separate workspaces. <span class="st d">Decided</span></li>
     <li><strong>Subagents.</strong> A Cedar policy on the skill a subagent runs limits it, such as a reviewer that may only read. See <a href="#subagents">Subagents</a>. <span class="st p">Proposed</span></li>
-    <li><strong>Context size.</strong> A server over the definition budget runs in search mode, so an agent sees three tools for it instead of every definition. <span class="st p">Proposed</span></li>
+    <li><strong>Context size.</strong> Studio suggests search mode for a server whose definitions pass its budget, and an agent then sees three tools for that server instead of every definition. The <code>budget</code> check warns when the workspace's direct-mode total grows too large. See <a href="#finding-tools">Finding tools</a>. <span class="st p">Proposed</span></li>
   </ul>
   <h3>Waits</h3>
   <ul>
@@ -941,7 +941,7 @@ impacts = ["moves_money"]</code></pre></figure>
   <p>Day one, every agent in a workspace gets the workspace's imported tools and its harness's built-in tools. Cedar policies narrow what an agent may call. Named toolbelts wait until customers ask. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
   <ul>
     <li><strong>Separation.</strong> Teams that must not share tools work in separate workspaces, each with its own steering repo and imported tools. One code repository can be linked to many workspaces, so both teams still work on the same code. <span class="st d">Decided</span> (Mac, 2026-09-26)</li>
-    <li><strong>Cost.</strong> A run pays for its tool definitions on every request. A server over the definition budget runs in search mode, so the agent sees three tools for it (<code>search</code>, <code>describe</code>, and <code>call</code>) and finds the rest on demand (MCP Studio).</li>
+    <li><strong>Cost.</strong> A run pays for its tool definitions on every request. A server in search mode gives the agent three tools (<code>search</code>, <code>describe</code>, and <code>call</code>) and the agent finds the rest on demand. See <a href="#finding-tools">Finding tools</a>.</li>
     <li><strong>Later.</strong> <code>tools/toolbelts/</code> holds named toolbelts: tool names across servers, server prefixes such as <code>billing__*</code>, and an optional <code>side_effects</code> filter, picked per agent in its file or per run by Send To. <span class="st p">Proposed</span></li>
   </ul>
   <details><summary>Named toolbelt format, for later</summary>
@@ -1438,7 +1438,53 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
       <tr><td><code>reflect</code></td><td class="wrap">Stores the run's reflection, a memory with grades</td></tr>
     </tbody>
   </table></div>
-  <p><strong>Finding tools.</strong> A server in direct mode puts every imported tool in the agent's tool list as <code>&lt;server&gt;__&lt;tool&gt;</code>, so the agent searches for nothing. A server in search mode, the default for a server over the definition budget, gives the agent three tools instead: <code>&lt;server&gt;__search</code> returns up to 10 of its tools as one line each, <code>&lt;server&gt;__describe</code> returns one tool's input schema, and <code>&lt;server&gt;__call</code> runs it (MCP Studio). Cedar decides the real tool either way, and finding a tool grants nothing.</p>
+  <h3 id="finding-tools">Finding tools</h3>
+  <p>An agent reaches Oxagen-managed tools through its MCP connection to the gateway, which serves the workspace's published tools. What the agent sees for each server depends on the server's exposure mode, set in <code>tools/servers/&lt;name&gt;/server.toml</code>. <span class="st d">Decided</span> for the two modes (MCP Studio)</p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Mode</th><th>The agent sees</th><th>Cost on every request</th><th>When</th></tr></thead>
+    <tbody>
+      <tr><td><code>direct</code></td><td class="wrap">Each imported tool as <code>&lt;server&gt;__&lt;tool&gt;</code>, such as <code>billing__create_refund</code></td><td class="wrap">The sum of the tool definitions, about 250 tokens each</td><td class="wrap">The definitions fit the server's <code>definition_budget</code>, 8,000 tokens by default, about 40 tools</td></tr>
+      <tr><td><code>search</code></td><td class="wrap">Three tools: <code>&lt;server&gt;__search</code>, <code>&lt;server&gt;__describe</code>, and <code>&lt;server&gt;__call</code></td><td class="wrap">About 900 tokens, plus what the agent looks up</td><td class="wrap">Studio suggests it when the definitions pass the budget. A person sets it in the server's steering PR</td></tr>
+    </tbody>
+  </table></div>
+  <figure class="code"><figcaption><span class="path">tools/servers/billing/server.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">[exposure]
+mode = "search"                  # direct or search
+definition_budget = 8000         # tokens for every tool definition together</code></pre></figure>
+
+  <h4>The three search tools</h4>
+  <p>The tool list stays the same all session, so the provider's prompt cache stays warm. The agent finds a tool, reads its schema, then calls it. <span class="st d">Decided</span> for the three tools, <span class="st p">Proposed</span> for the input and output shapes below.</p>
+  <figure class="code"><figcaption><span class="path">A search-mode lookup against billing</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">billing__search {"query": "refund part of a charge", "limit": 10}
+  create_refund   Refund all or part of a charge. Amount in cents.   write, high
+  get_refund      Read one refund by its id.                         read, low
+  list_refunds    List the refunds of one charge.                    read, low
+
+billing__describe {"tool": "create_refund"}
+  {"name": "billing__create_refund",
+   "description": "Refund all or part of a charge. Amount in cents.",
+   "input_schema": {"type": "object", "required": ["charge", "amount"], "properties": {...}}}
+
+billing__call {"tool": "create_refund", "arguments": {"charge": "ch_3Q", "amount": 1200}}
+  the tool's result, or a refusal that names the rule</code></pre></figure>
+  <ul>
+    <li><strong>Search.</strong> Takes a query in plain words and an optional limit of up to 10. It returns one line per tool: the name after the prefix, the description's first sentence, and the side effect and risk from <code>tools.toml</code>, so the agent sees a write tool as a write before it calls one. <span class="st p">Proposed</span></li>
+    <li><strong>Describe.</strong> Takes one tool name and returns its full definition, the same one a direct-mode server would list. <span class="st p">Proposed</span></li>
+    <li><strong>Call.</strong> Takes a tool name and its arguments. The gateway decides it as the real tool: <code>billing__call</code> with <code>create_refund</code> is <code>billing__create_refund</code> to Cedar, to approvals, and to spend. <span class="st d">Decided</span> (MCP Studio)</li>
+    <li><strong>Ranking.</strong> Search ranks by embeddings of each tool's one-line entry, with Voyage AI's <code>voyage-4-large</code> on Oxagen's key unless <code>[embeddings]</code> in <code>workspace.toml</code> names another provider or keyword ranking. Publish embeds only entries whose content changed. When the provider fails, search falls back to keywords. <span class="st d">Decided</span> (MCP Studio)</li>
+    <li><strong>Metering.</strong> Each search, describe, and call is one governed action. <span class="st d">Decided</span> (MCP Studio)</li>
+  </ul>
+
+  <h4>What finding grants</h4>
+  <p>Nothing. Finding a tool, in the list or by search, grants no right to call it. Cedar decides every call. On day one every agent holds every imported tool, so a search returns a tool a policy forbids the agent, and the call comes back refused with the rule's reason. Hiding such a tool is a later step (Day one, Holes).</p>
+
+  <h4>Records and mentions</h4>
+  <ul>
+    <li><strong><code>tools</code> field.</strong> A record's <code>tools</code> target matches by tool name, so it works the same in both modes. On day one every agent holds every imported tool, so the target matches whenever the tool is imported. It narrows once named toolbelts arrive.</li>
+    <li><strong><code>@tool:</code> mentions.</strong> A search-mode tool is absent from the agent's list, so a mention of it would name a tool the agent cannot see. Publish renders each mention for the tool's current mode: <code>billing__calculate_refund_amount</code> in direct mode, and "call <code>billing__call</code> with tool <code>calculate_refund_amount</code>" in search mode. A mode change then needs no edit to any record. <span class="st p">Proposed</span></li>
+    <li><strong><code>steering_search</code>.</strong> Finds records and skills only. Tools come from the tool list or a server's own search tool.</li>
+  </ul>
+
+  <h4>Workspace total</h4>
+  <p>Each server's budget bounds that server alone. Since every agent gets every imported tool on day one, the direct-mode definitions of all servers add up on every request. The <code>budget</code> check also totals them and warns past <code>[tools] definition_budget</code> in <code>workspace.toml</code>, 20,000 tokens by default, naming the largest servers to switch to search mode. It only warns, like the always-on budget, and a workspace never has to set it. <span class="st p">Proposed</span></p>
   <p class="muted">The names follow the rename in #4325. Today's tools are <code>propose_record</code>, <code>open_context_pr</code>, and <code>merge_context_pr</code>.</p>
 </section>
 

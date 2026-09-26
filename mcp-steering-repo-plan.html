@@ -1006,6 +1006,9 @@ Do
    check. The budget check only warns and never fails a steering PR,
    because a steering PR is how a budget changes. Report the largest
    records and both ways out: raise the budget in the PR, or cut records.
+   It also totals the direct-mode tool definitions of every server and
+   warns past [tools] definition_budget in workspace.toml (20,000 tokens
+   when unset), naming the largest servers to move to search mode.
 4. The schema check warns above 800 files in one folder, above 120 words in
    an always-on body, and above 500 lines in a SKILL.md.
 5. Every failure carries file, line, field, expected, and fix. Provide a
@@ -1075,7 +1078,9 @@ Do
    MCP Studio&#x27;s project() (lane M13) so the tool registry follows the merge.
    Store it, then switch the workspace&#x27;s published version in one write.
    Refuse when S2&#x27;s health is not healthy.
-2. Render: frontmatter never reaches the model. Always-on records as
+2. Render: frontmatter never reaches the model. Render each @tool: mention
+   for the tool&#x27;s exposure mode: the tool&#x27;s name in direct mode, and
+   &lt;server&gt;__call with the tool&#x27;s name in search mode. Always-on records as
    &quot;### label&quot; and body, sorted by lineage, before anything that varies per
    request. Other records and skills as index lines.
 3. steering_search and steering_read, registered as MCP tools.
@@ -2407,8 +2412,12 @@ Do
    path. Then call M6&#x27;s execute with M8&#x27;s CredentialSource and the Transport
    the environment names: cloud, M12&#x27;s relay, or M14&#x27;s local transport. On day
    one the environment is the server&#x27;s sandbox.
-3. Search mode: search returns only tools in the toolbelt, describe returns
-   one input schema, and call is decided as the underlying tool.
+3. Search mode: search takes a query and a limit of up to 10, and returns
+   one line per tool in the toolbelt: the name after the prefix, the
+   description&#x27;s first sentence, and the side effect and risk. describe
+   returns one tool&#x27;s full definition. call takes a tool name and arguments
+   and is decided as the underlying tool. Follow the shapes in the steering
+   repo spec&#x27;s Finding tools.
 4. The search index: on publish, embed each changed one-line entry, keyed by
    content hash and model, through a queue that batches calls. Use the
    workspace&#x27;s [embeddings] url, model, and credential when its provider is
