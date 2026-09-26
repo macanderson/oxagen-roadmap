@@ -229,6 +229,65 @@ jobs:
               ok(/Discovery result/.test(await page.innerText(".dlg-h")) && (await page.$$(".dlg tbody tr")).length > 3, `add server: ${src} does not end in a discovery result`);
             }
           });
+          // The steering PR a flow just opened.
+          const openedPr = () => page.evaluate(() => { const pr = prBy(+String(S.id).replace(/^pr-/, "")); return pr && { kind: pr.kind, record: pr.record || null, files: (pr.files || []).map((f) => ({ path: f.path || f, diff: f.diff || "" })) }; });
+          const waitPr = (not) => page.waitForFunction((x) => S.area === "steering" && /^pr-/.test(S.id) && S.id !== x, not || "", { timeout: 5000 });
+          // New steering record: the agent picked in Applies to reaches the record.
+          await flow("audience", async () => {
+            await open(page, "steering", "&theme=dark");
+            await page.click('[data-act="newsteer"]');
+            await page.fill("#ns-text", "Tag releases from the release branch only.");
+            await page.selectOption("#ns-to", "release-manager");
+            await page.click('[data-act="newsteer-go"]');
+            await waitPr();
+            const pr = await openedPr();
+            ok(pr.record && JSON.stringify(pr.record.agents) === '["release-manager"]' && /\nagents:\n  - release-manager\n/.test(pr.record.body), "audience: the record lost the agent picked in Applies to");
+            ok(/for Release manager/.test(await page.innerText(".pr-sum")), "audience: the steering PR does not name the agent");
+            await copyCheck(page, "audience steering PR");
+          });
+          // Import: each dialog opens a steering PR and applies nothing until it merges.
+          await flow("import", async () => {
+            await open(page, "work", "&state=empty&theme=dark");
+            await page.click('[data-act="steerimport"]');
+            await page.click('[data-act="steerimport-go"]');
+            await waitPr();
+            ok((await openedPr()).kind === "import" && !(await page.evaluate(() => S.imported.steering)), "import: Import steering applied the records before its steering PR merged");
+            await copyCheck(page, "import steering PR");
+            await page.evaluate(() => go("steering", null));
+            ok(/Import in review/.test(await page.innerText("#app")), "import: the Steering page does not link the open import PR");
+            await page.evaluate(() => go("steering", "pr-" + S.importPr.steering));
+            await page.click('[data-act="pr-merge"]');
+            ok(await page.evaluate(() => S.imported.steering), "import: merging the import PR did not apply it");
+            await open(page, "work", "&state=empty&theme=dark");
+            await page.click('[data-act="serverimport"]');
+            await page.click('[data-act="serverimport-go"]');
+            await waitPr();
+            const sp = await openedPr();
+            ok(sp.kind === "import" && sp.files.some((f) => f.path === "servers/github/server.toml") && !(await page.evaluate(() => S.imported.servers)), "import: Import MCP servers applied the servers before its steering PR merged");
+            ok(sp.files.every((f) => !/ghp_|sk_live|password=/.test(f.diff)), "import: a key reached a server file");
+            await copyCheck(page, "import servers PR");
+          });
+          // Revert on #57 builds the inverse of its change.
+          await flow("revert", async () => {
+            await open(page, "steering/pr-57", "&theme=dark");
+            await page.click('[data-act="pr-revert"]');
+            await waitPr("pr-57");
+            const d = (await openedPr()).files.map((f) => f.diff).join("\n");
+            ok(/^\+Release notes group changes by author\.$/m.test(d) && /^-Release notes group changes by surface, not by author\.$/m.test(d), "revert: the revert of #57 does not restore the old line");
+            ok(!/^[+-]--/m.test(d), "revert: the revert rewrites the frontmatter delimiters");
+            await copyCheck(page, "revert steering PR");
+          });
+          // Search ranking: the endpoint the person typed reaches the steering PR.
+          await flow("ranking", async () => {
+            await open(page, "servers?dialog=embeddings", "&theme=dark");
+            await page.click('input[name="emb"][value="custom"]');
+            await page.fill("#emb-url", "https://vectors.a-intel.com/v1/embed");
+            await page.fill("#emb-model", "nomic-embed-text-v2");
+            await page.click('[data-act="emb-go"]');
+            await waitPr();
+            const d = (await openedPr()).files[0].diff;
+            ok(/url = "https:\/\/vectors\.a-intel\.com\/v1\/embed"/.test(d) && /model = "nomic-embed-text-v2"/.test(d), "ranking: the steering PR dropped the endpoint the person typed");
+          });
           await browser.close();
           for (const e of errors) { failures++; console.error("FAIL " + e); }
           console.log(`${failures ? "FAIL" : "ok  "} steering repo and MCP Studio walk: ${passes} checks passed, ${failures} failed`);
