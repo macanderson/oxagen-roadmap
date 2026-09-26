@@ -331,7 +331,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
     <tbody>
       <tr><td><code>AGENTS.md</code> <code>CLAUDE.md</code></td><td>How to write a record in this repo, for an agent that opens it</td><td>Markdown</td><td>Oxagen</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>README.md</code></td><td>What the repo is, who reviews it, and the settings Oxagen holds</td><td>Markdown</td><td>Oxagen</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>workspace.toml</code></td><td>Linked code repositories and the workspace budget</td><td>TOML</td><td>People, by steering PR</td><td><span class="st c">Today</span> written by the init PR, read by nothing</td></tr>
+      <tr><td><code>workspace.toml</code></td><td>Linked code repositories and the workspace budget</td><td>TOML</td><td>People, by steering PR</td><td><span class="st c">Today</span> written by the init PR and displayed, reconciled by nothing</td></tr>
       <tr><td><code>steering/</code></td><td>Steering records and skills</td><td>Markdown with YAML frontmatter</td><td>People, agents, the curator</td><td><span class="st p">Proposed</span> in v1</td></tr>
       <tr><td><code>steering/governance.toml</code></td><td>Governance mode, reviewer groups, memory settings</td><td>TOML</td><td>People</td><td><span class="st c">Today</span> at <code>.oxagen/rules/governance.toml</code></td></tr>
       <tr><td><code>steering/promotions/</code></td><td>The hash-chained ledger of merged records</td><td>JSON Lines</td><td>Oxagen</td><td><span class="st p">Proposed</span> one file a month</td></tr>
@@ -964,7 +964,7 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
 <section id="build">
   <span class="eyebrow">Build</span>
   <h2>Build prompts</h2>
-  <p>Eleven lanes in three waves. Wave 0 is one small lane that fixes the contract in code. Every wave 1 lane then starts at once, owns a set of paths no other lane touches, and codes against the contract. Wave 2 needs wave 1's code. Each prompt stands alone: paste it into a fresh agent with no other context.</p>
+  <p>Twelve lanes in three waves. Wave 0 is one small lane that fixes the contract in code. Every wave 1 lane then starts at once, owns a set of paths no other lane touches, and codes against the contract. Wave 2 needs wave 1's code. Each prompt stands alone: paste it into a fresh agent with no other context.</p>
   <div class="waves">
     <div class="wave"><h4>Wave 0 <small>1 lane</small></h4><ul>
       <li><strong>S0</strong> Contract, paths, fixtures</li>

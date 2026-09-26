@@ -310,6 +310,21 @@ credential = "oxagen:credential/billing-oauth-client"
 [exposure]
 mode = "direct"                           # direct or catalog
 definition_budget = 8000                  # tokens for every tool definition together</code></pre></figure>
+  <div class="tscroll"><table>
+    <thead><tr><th>api.toml key</th><th>Rule</th></tr></thead>
+    <tbody>
+      <tr><td><code>name</code></td><td class="wrap">The server name and tool prefix, <code>^[a-z][a-z0-9_]{0,23}$</code>. It matches the folder name and is unique across <code>servers/</code> and <code>apis/</code>.</td></tr>
+      <tr><td><code>label</code>, <code>description</code></td><td class="wrap">The name on every surface, and one sentence about the API</td></tr>
+      <tr><td><code>source.type</code></td><td class="wrap"><code>repository</code> with <code>repo</code>, <code>path</code>, and <code>ref</code>. <code>url</code> with <code>url</code> and an optional <code>credential</code>. <code>upload</code> with nothing else.</td></tr>
+      <tr><td><code>source.sync</code></td><td class="wrap"><code>on-change</code> (repository only), <code>daily</code>, or <code>manual</code></td></tr>
+      <tr><td><code>environments.&lt;name&gt;</code></td><td class="wrap">One table per environment with <code>base_url</code> (HTTPS only) and <code>network</code> (<code>cloud</code> or <code>relay:&lt;name&gt;</code>). At least one.</td></tr>
+      <tr><td><code>auth.scheme</code></td><td class="wrap">A key of <code>components.securitySchemes</code>, or <code>none</code></td></tr>
+      <tr><td><code>auth.mode</code></td><td class="wrap"><code>service</code> or <code>operator-oauth</code></td></tr>
+      <tr><td><code>auth.credential</code></td><td class="wrap"><code>oxagen:credential/&lt;name&gt;</code>. Required unless the scheme is <code>none</code>.</td></tr>
+      <tr><td><code>exposure.mode</code></td><td class="wrap"><code>direct</code> or <code>catalog</code></td></tr>
+      <tr><td><code>exposure.definition_budget</code></td><td class="wrap">Tokens for every tool definition together, 8,000 by default</td></tr>
+    </tbody>
+  </table></div>
   <figure class="code"><figcaption><span class="path">apis/billing/tools.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/api-tools/v1.json
 schema = "api-tools/v1"
 
