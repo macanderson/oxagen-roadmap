@@ -315,9 +315,9 @@ body{padding-inline:0}
     <li><span class="st d">Decided</span> <strong>A code repository can belong to many workspaces.</strong></li>
     <li><span class="st d">Decided</span> <strong>Oxagen holds the settings.</strong> Oxagen sets the branch and merge rules so it can always merge from the web app. When someone changes them, every pull request fails at once and Oxagen warns the workspace.</li>
     <li><span class="st d">Decided</span> <strong>Pull requests stay the only way in.</strong> A change to configuration or steering takes effect only through a merged pull request.</li>
-    <li><span class="st p">Proposed</span> <strong>A new name.</strong> The main repository becomes the <strong>steering repo</strong>, to match steering records and the steering PR.</li>
-    <li><span class="st p">Proposed</span> <strong>New folders.</strong> <code>servers/</code> for every MCP server and its imported tools, <code>policy/</code>, and <code>steering/memory/</code>, and <code>proposals/</code> goes.</li>
-    <li><span class="st p">Proposed</span> <strong>Three new record fields</strong> (<code>repos</code>, <code>tools</code>, and <code>description</code> on every kind), and a token budget on always-on records.</li>
+    <li><span class="st d">Decided</span> <strong>A new name.</strong> The main repository becomes the <strong>steering repo</strong>, to match steering records and the steering PR.</li>
+    <li><span class="st d">Decided</span> <strong>New folders.</strong> <code>servers/</code> for every MCP server and its imported tools, <code>policy/</code>, and <code>steering/memory/</code>, and <code>proposals/</code> goes.</li>
+    <li><span class="st d">Decided</span> <strong>Three new record fields</strong> (<code>repos</code>, <code>tools</code>, and <code>description</code> on every kind), and an optional token budget on always-on records. A workspace that sets no budget inherits Oxagen's default.</li>
   </ul>
 </section>
 
@@ -334,6 +334,10 @@ body{padding-inline:0}
         <li>Oxagen sets the branch and merge rules. A changed setting fails every pull request at once, and Oxagen warns the customer. (Mac, 2026-09-26)</li>
         <li>Pull requests are how configuration and steering changes are reviewed. (Mac, 2026-09-26)</li>
         <li>From v1: the name steering record, Markdown with YAML frontmatter and <code>.md</code>, the kinds, no agent persona, and the Steering section. (Mac, 2026-09-25)</li>
+        <li>The name steering repo. (Mac, 2026-09-26)</li>
+        <li>The folders <code>servers/</code>, with one folder per MCP server whatever its source, <code>policy/</code>, and <code>steering/memory/</code>. <code>proposals/</code> goes. (Mac, 2026-09-26)</li>
+        <li>The record fields <code>repos</code>, <code>tools</code>, and <code>description</code> on every kind. (Mac, 2026-09-26)</li>
+        <li>An optional always-on token budget. A workspace that sets none inherits Oxagen's default, and a workspace can turn the check off. (Mac, 2026-09-26)</li>
       </ul>
     </div>
     <div class="card">
@@ -349,11 +353,9 @@ body{padding-inline:0}
     <div class="card">
       <h4><span class="st p">Proposed</span></h4>
       <ul>
-        <li>The name steering repo, and the repository name <code>oxagen-&lt;workspace&gt;</code>.</li>
+        <li>The repository name <code>oxagen-&lt;workspace&gt;</code>.</li>
         <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>.</li>
-        <li>The folders <code>servers/</code>, <code>policy/</code>, and <code>steering/memory/</code>, with one folder per MCP server whatever its source.</li>
-        <li>The fields <code>repos</code>, <code>tools</code>, and <code>description</code> on every kind.</li>
-        <li>An always-on token budget checked on every steering PR.</li>
+        <li>Oxagen's default budget only warns. A budget the workspace sets fails a steering PR that goes over it.</li>
         <li>Reflections and memory candidates kept in Oxagen, and promoted memories written by a batched memory PR.</li>
       </ul>
     </div>
@@ -423,13 +425,13 @@ body{padding-inline:0}
       <tr><td><code>steering/</code></td><td>Steering records and skills</td><td>Markdown with YAML frontmatter</td><td>People, agents, the curator</td><td><span class="st p">Proposed</span> in v1</td></tr>
       <tr><td><code>steering/governance.toml</code></td><td>Governance mode, reviewer groups, memory settings</td><td>TOML</td><td>People</td><td><span class="st c">Today</span> at <code>.oxagen/rules/governance.toml</code></td></tr>
       <tr><td><code>steering/promotions/</code></td><td>The hash-chained ledger of merged records</td><td>JSON Lines</td><td>Oxagen</td><td><span class="st p">Proposed</span> one file a month</td></tr>
-      <tr><td><code>steering/memory/</code></td><td>Memories a memory PR promoted</td><td>Markdown with YAML frontmatter</td><td>The curator</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>steering/memory/</code></td><td>Memories a memory PR promoted</td><td>Markdown with YAML frontmatter</td><td>The curator</td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>agents/</code></td><td>Agent definitions</td><td>TOML</td><td>People, by steering PR</td><td><span class="st c">Today</span> <code>agent-definition/v0.1</code></td></tr>
-      <tr><td><code>servers/</code></td><td class="wrap">Every MCP server agents reach, connected or built from a definition, with its imported tools and their risk classification</td><td>TOML, a JSON lock, the vendored definition</td><td>MCP Studio and people, by steering PR</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>policy/</code></td><td>Cedar policies and their tests</td><td>Cedar, JSON Lines</td><td>People</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>servers/</code></td><td class="wrap">Every MCP server agents reach, connected or built from a definition, with its imported tools and their risk classification</td><td>TOML, a JSON lock, the vendored definition</td><td>MCP Studio and people, by steering PR</td><td><span class="st d">Decided</span></td></tr>
+      <tr><td><code>policy/</code></td><td>Cedar policies and their tests</td><td>Cedar, JSON Lines</td><td>People</td><td><span class="st d">Decided</span></td></tr>
     </tbody>
   </table></div>
-  <div class="note"><p><strong><code>proposals/</code> goes.</strong> A proposal is an open steering PR. A candidate that is not ready to become one, such as an agent's memory candidate, waits in Oxagen and never lands in the repository as a file that steers nothing. <span class="st p">Proposed</span></p></div>
+  <div class="note"><p><strong><code>proposals/</code> goes.</strong> A proposal is an open steering PR. A candidate that is not ready to become one, such as an agent's memory candidate, waits in Oxagen and never lands in the repository as a file that steers nothing. <span class="st d">Decided</span></p></div>
   <p class="muted">Code checkouts keep their machine-local, gitignored <code>.oxagen/workspace.json</code> and <code>.oxagen/settings.json</code>. This spec does not move them.</p>
 </section>
 
@@ -458,7 +460,7 @@ body{padding-inline:0}
 <section id="records">
   <span class="eyebrow">Records</span>
   <h2>Record changes</h2>
-  <p>Three fields join the v1 frontmatter before v1 ships, so the schema stays <code>steering-record/v1</code>. Targets combine: a record reaches a model request only when every target it names matches. <span class="st p">Proposed</span></p>
+  <p>Three fields join the v1 frontmatter before v1 ships, so the schema stays <code>steering-record/v1</code>. Targets combine: a record reaches a model request only when every target it names matches. <span class="st d">Decided</span></p>
   <div class="tscroll"><table>
     <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Rule</th></tr></thead>
     <tbody>
@@ -797,7 +799,7 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
       <tr><td><code>authority</code></td><td class="wrap">A record tries to grant authority</td><td><span class="st c">Today</span></td></tr>
       <tr><td><code>settings</code></td><td class="wrap">The repository settings differ from the prescribed ones</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>references</code></td><td class="wrap">A named tool, record, repository, credential, or skill file does not exist</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>budget</code></td><td class="wrap">The change pushes an agent's always-on steering over its token budget. See <a href="#tokens">Tokens</a></td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>budget</code></td><td class="wrap">The change pushes an agent's always-on steering over a budget the workspace set. Over Oxagen's default, it warns and passes. See <a href="#tokens">Tokens</a></td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>compile</code></td><td class="wrap">A server folder does not compile to tools, its lock does not match, a Cedar policy does not validate, or a policy test fails</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>owned</code></td><td class="wrap">The change edits a file Oxagen writes: <code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>README.md</code>, <code>policy/schema.cedarschema</code>, a <code>tools.lock.json</code>, or the ledger</td><td><span class="st p">Proposed</span></td></tr>
     </tbody>
@@ -861,6 +863,9 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
 schema = "governance/v1"
 mode = "team"                        # solo, team, or regulated
 
+[steering]
+always_on_tokens = 4000              # a number or "off". Unset inherits Oxagen's default, which only warns.
+
 [memory]
 recall_candidates = "same-agent"     # off, same-agent, or workspace
 min_runs = 2                         # distinct runs before a candidate is proposed
@@ -906,7 +911,7 @@ group = "billing-leads"</code></pre></figure>
     <thead><tr><th>Mechanism</th><th>What it does</th></tr></thead>
     <tbody>
       <tr><td>Frontmatter stays home</td><td class="wrap">Delivery sends a heading with the label and the body. The frontmatter, often 150 tokens with its hash, is for Oxagen and never reaches the model.</td></tr>
-      <tr><td>Always-on budget</td><td class="wrap">Every agent has a budget for the records that reach every request (<code>must</code> and <code>should</code> with <code>load: always</code>), 4,000 tokens by default. The <code>budget</code> check fails a steering PR that pushes any agent over it, for each repository the change reaches.</td></tr>
+      <tr><td>Always-on budget</td><td class="wrap">A limit on the records that reach every request (<code>must</code> and <code>should</code> with <code>load: always</code>), per agent and repository. It is optional: a workspace that sets nothing inherits Oxagen's default of 4,000 tokens, and the check only warns against it. A budget the workspace sets in <code>governance.toml</code> fails a steering PR that goes over it, and <code>"off"</code> turns the check off.</td></tr>
       <tr><td>Index lines</td><td class="wrap"><code>may</code> and <code>info</code> records and skills reach a request as one line each: label, description, and reference, about 25 tokens. The agent reads a body with <code>steering_read</code> or by an @-mention.</td></tr>
       <tr><td>Stable order</td><td class="wrap">The always-on block is sorted by lineage, placed before anything that changes per request, and changes only on publish. Provider prompt caching then bills it at the cache-read price after the first request.</td></tr>
       <tr><td>Targets</td><td class="wrap"><code>repos</code>, <code>applies_to</code>, and <code>tools</code> keep a record out of runs it does not concern.</td></tr>
@@ -934,7 +939,7 @@ Read any of these with steering_read when it fits the task.
 - Refund: What a refund is at a-intel, its states, and the tools that change it. (a-intel.domain.refund)</code></pre></figure>
   <figure class="code"><figcaption><span class="path">Oxagen steering check, budget</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Oxagen steering  ✗ budget
   always-on steering for release-manager on github.com/a-intel/platform
-  before 3,410 tokens   after 4,260 tokens   budget 4,000
+  before 3,410 tokens   after 4,260 tokens   budget 4,000 (steering/governance.toml)
 
   largest always-on records
     1,020  a-intel.platform.release-steps     procedure, must
@@ -1455,7 +1460,10 @@ Do
 2. Add settings (reads S2's health), references, budget, compile, and owned.
 3. budget: count tokens for each changed record, then for each agent and
    repository the change reaches, compare the always-on total before and
-   after with the budget. Report the largest records and the fix.
+   after with the budget. The budget is steering.always_on_tokens in
+   governance.toml. Over a budget the workspace set, fail. Unset, compare
+   with Oxagen's default and only warn. "off" skips the check. Report the
+   largest records and the fix.
 4. The schema check warns above 800 files in one folder, above 120 words in
    an always-on body, and above 500 lines in a SKILL.md.
 5. Every failure carries file, line, field, expected, and fix. Provide a
