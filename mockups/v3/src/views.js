@@ -498,7 +498,8 @@ function steeringRepoTab() {
     return '<button class="li linkish" data-act="steeritem" data-id="' + i.id + '">' + kindBadge(i.kind) + '<span class="bd2"><span class="t1">' + h(recLabel(i)) + '</span><span class="t2 mono">' + h(i.lineage) + '</span></span><span class="muted num">' + num(i.tok) + " tok</span></button>";
   }).join("");
   var versions = REPO.versions.map(function (v) {
-    return '<a class="li" href="' + href("steering", "pr-" + v.pr) + '" data-go="steering|pr-' + v.pr + '"><span class="mono muted">v' + v.v + '</span><span class="bd2"><span class="t1">' + h(v.what) + '</span><span class="t2">Steering PR #' + v.pr + ", " + when(v.at) + "</span></span></a>";
+    var inner = '<span class="mono muted">v' + v.v + '</span><span class="bd2"><span class="t1">' + h(v.what) + '</span><span class="t2">Steering PR #' + v.pr + ", " + when(v.at) + "</span></span>";
+    return prBy(v.pr) ? '<a class="li" href="' + href("steering", "pr-" + v.pr) + '" data-go="steering|pr-' + v.pr + '">' + inner + "</a>" : '<div class="li">' + inner + "</div>";
   }).join("");
   return '<div class="grid g2">' +
     '<div class="panel"><div class="panel-h"><h3>Steering repo</h3><span class="sp">' + healthBadge() + '</span></div><div class="panel-b"><dl class="kv">' +
@@ -1277,10 +1278,10 @@ function discoveryResult(d, back) {
   var rows, total, head;
   if (sv) {
     total = sv.tools.length;
-    rows = sv.tools.slice(0, 12).map(function (t) { return '<tr><td class="mono">' + h(t.n) + '</td><td><span class="sugg">' + h(t.side_effect) + '</span></td><td><span class="sugg">' + h(t.risk) + '</span></td><td class="num">' + num(t.tok) + "</td></tr>"; }).join("");
+    rows = sv.tools.slice(0, 12).map(function (t) { return '<tr><td class="mono">' + h(t.n) + '</td><td><span class="sugg">' + h(t.side_effect) + '</span></td><td><span class="sugg">' + h(t.risk) + '</span></td><td class="num mh">' + num(t.tok) + "</td></tr>"; }).join("");
   } else {
     total = c.offers;
-    rows = c.sample.map(function (s) { var r = s[1] === "read" ? "low" : s[1] === "write" ? "medium" : "high"; return '<tr><td class="mono">' + h(s[0]) + '</td><td><span class="sugg">' + h(s[1]) + '</span></td><td><span class="sugg">' + r + '</span></td><td class="num">' + num(160 + s[0].length * 9) + "</td></tr>"; }).join("");
+    rows = c.sample.map(function (s) { var r = s[1] === "read" ? "low" : s[1] === "write" ? "medium" : "high"; return '<tr><td class="mono">' + h(s[0]) + '</td><td><span class="sugg">' + h(s[1]) + '</span></td><td><span class="sugg">' + r + '</span></td><td class="num mh">' + num(160 + s[0].length * 9) + "</td></tr>"; }).join("");
   }
   var word = d.src === "definition" ? { openapi: "operation", graphql: "root field", grpc: "method" }[d.fmt] : "tool";
   head = d.src === "definition" ? "Compiled <code>" + h(sv.source.path) + "</code> at <code>" + h(sv.source.commit) + "</code>" : d.src === "local" ? "<code>mbell-mbp-16</code> in <code>dev-laptops</code> ran the command and reported <code>tools/list</code>" : "The gateway called <code>tools/list</code>";
@@ -1288,7 +1289,7 @@ function discoveryResult(d, back) {
   var big = sv && sv.generate ? '<div class="note">The imported definitions would pass the ' + num(sv.exposure.definition_budget) + "-token budget, so Studio suggests search mode.</div>" : "";
   return { title: "Discovery result", wide: true, sub: head + ".",
     body: '<p><b>' + plural(total, word) + "</b> offered. Studio suggests a classification for each from the server's annotations or the method. Grey values are suggestions.</p>" +
-      '<div class="tw"><table class="narrow"><thead><tr><th>Name</th><th>Side effect</th><th>Risk</th><th class="num">Tokens</th></tr></thead><tbody>' + rows + "</tbody></table></div>" + (total > 12 && sv ? '<p class="muted small">And ' + plural(total - 12, "more " + word) + ".</p>" : "") + nots + big +
+      '<div class="tw"><table class="narrow"><thead><tr><th>Name</th><th>Side effect</th><th>Risk</th><th class="num mh">Tokens</th></tr></thead><tbody>' + rows + "</tbody></table></div>" + (total > 12 && sv ? '<p class="muted small">And ' + plural(total - 12, "more " + word) + ".</p>" : "") + nots + big +
       '<p class="muted small">Nothing is imported yet. What discovery found stays in oxagen, not in the repository, and no agent sees it until a steering PR imports it.</p>',
     foot: back + (sv ? '<button class="btn primary" data-act="as-open" data-id="' + id + '">Import tools</button>' : '<button class="btn primary" data-act="stub" data-what="Importing from ' + h(c.name) + '">Import tools</button>') };
 }

@@ -1057,3 +1057,4 @@ td.ckc input{accent-color:var(--gold)}
 .b-up{color:var(--st-approval)}
 .stack>*{margin-bottom:0}
 .stack>.tsum{margin-bottom:0}
+#layer.phone .mh{display:none}
