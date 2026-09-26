@@ -230,7 +230,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
     <li><span class="st d">Decided</span> <strong>Oxagen holds the settings.</strong> Oxagen sets the branch and merge rules so it can always merge from the web app. When someone changes them, every pull request fails at once and Oxagen warns the workspace.</li>
     <li><span class="st d">Decided</span> <strong>Pull requests stay the only way in.</strong> A change to configuration or steering takes effect only through a merged pull request.</li>
     <li><span class="st p">Proposed</span> <strong>A new name.</strong> The main repository becomes the <strong>steering repo</strong>, to match steering records and the steering PR.</li>
-    <li><span class="st p">Proposed</span> <strong>New folders.</strong> <code>servers/</code>, <code>apis/</code>, <code>policy/</code>, and <code>steering/memory/</code>, and <code>proposals/</code> goes.</li>
+    <li><span class="st p">Proposed</span> <strong>New folders.</strong> <code>servers/</code> for every MCP server and its imported tools, <code>policy/</code>, and <code>steering/memory/</code>, and <code>proposals/</code> goes.</li>
     <li><span class="st p">Proposed</span> <strong>Three new record fields</strong> (<code>repos</code>, <code>tools</code>, and <code>description</code> on every kind), and a token budget on always-on records.</li>
   </ul>
 </section>
@@ -265,7 +265,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
       <ul>
         <li>The name steering repo, and the repository name <code>oxagen-&lt;workspace&gt;</code>.</li>
         <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>.</li>
-        <li>The folders <code>servers/</code>, <code>apis/</code>, <code>policy/</code>, and <code>steering/memory/</code>.</li>
+        <li>The folders <code>servers/</code>, <code>policy/</code>, and <code>steering/memory/</code>, with one folder per MCP server whatever its source.</li>
         <li>The fields <code>repos</code>, <code>tools</code>, and <code>description</code> on every kind.</li>
         <li>An always-on token budget checked on every steering PR.</li>
         <li>Reflections and memory candidates kept in Oxagen, and promoted memories written by a batched memory PR.</li>
@@ -312,14 +312,16 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
 │           └── a-intel.platform.ci-cache-key.md
 ├── agents/
 │   └── release-manager.toml
-├── servers/
-│   ├── stripe.toml                            a remote MCP server
-│   └── linear.toml
-├── apis/
-│   └── billing/                               an MCP Studio server
-│       ├── api.toml
+├── servers/                                   one folder per MCP server
+│   ├── stripe/                                connected by URL
+│   │   ├── server.toml
+│   │   ├── tools.toml                         imported tools and their risk
+│   │   └── tools.lock.json                    written by Oxagen
+│   └── billing/                               built from an OpenAPI document
+│       ├── server.toml
 │       ├── openapi.yaml
 │       ├── tools.toml
+│       ├── tools.lock.json
 │       └── tests/calls.jsonl
 └── policy/
     ├── schema.cedarschema                     written by Oxagen
@@ -337,8 +339,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
       <tr><td><code>steering/promotions/</code></td><td>The hash-chained ledger of merged records</td><td>JSON Lines</td><td>Oxagen</td><td><span class="st p">Proposed</span> one file a month</td></tr>
       <tr><td><code>steering/memory/</code></td><td>Memories a memory PR promoted</td><td>Markdown with YAML frontmatter</td><td>The curator</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>agents/</code></td><td>Agent definitions</td><td>TOML</td><td>People, by steering PR</td><td><span class="st c">Today</span> <code>agent-definition/v0.1</code></td></tr>
-      <tr><td><code>servers/</code></td><td>MCP servers the cloud gateway reaches</td><td>TOML</td><td>People, by steering PR</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>apis/</code></td><td>MCP servers built from OpenAPI documents</td><td>TOML, OpenAPI, JSON Lines</td><td>MCP Studio, people</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>servers/</code></td><td class="wrap">Every MCP server agents reach, connected or built from OpenAPI, with its imported tools and their risk classification</td><td>TOML, a JSON lock, OpenAPI</td><td>MCP Studio and people, by steering PR</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>policy/</code></td><td>Cedar policies and their tests</td><td>Cedar, JSON Lines</td><td>People</td><td><span class="st p">Proposed</span></td></tr>
     </tbody>
   </table></div>
@@ -427,8 +428,9 @@ into smaller refunds to stay under the limit.</code></pre></figure>
       <tr><td>Memories</td><td>Oxagen, then <code>steering/memory/**</code></td><td><code>memory</code></td><td>When relevant. See <a href="#memory">Memory</a></td></tr>
       <tr><td>Reflections</td><td>Oxagen only</td><td><code>reflection/v1</code> JSON</td><td>Never. They produce memory candidates</td></tr>
       <tr><td>Proposals</td><td>Open steering PRs</td><td>None</td><td>Never</td></tr>
-      <tr><td>MCP servers</td><td><code>servers/&lt;name&gt;.toml</code></td><td><code>mcp-server/v1</code></td><td>Tool definitions through the cloud gateway</td></tr>
-      <tr><td>HTTP APIs as MCP servers</td><td><code>apis/&lt;name&gt;/</code></td><td>See MCP Studio</td><td>Tool definitions through the cloud gateway</td></tr>
+      <tr><td>MCP servers</td><td><code>servers/&lt;name&gt;/</code></td><td><code>mcp-server/v1</code>, <code>mcp-tools/v1</code>, and a lock</td><td>Imported tool definitions through the cloud gateway</td></tr>
+      <tr><td>Tool risk categories</td><td><code>servers/&lt;name&gt;/tools.toml</code></td><td>Today's classification: risk, side effect, egress, consequence tags</td><td>Cedar policies read it, and the agent sees annotations derived from it</td></tr>
+      <tr><td>HTTP APIs as MCP servers</td><td><code>servers/&lt;name&gt;/</code> with an OpenAPI source</td><td>The same files plus the document</td><td>Imported tool definitions through the cloud gateway</td></tr>
       <tr><td>Toolbelts</td><td><code>agents/&lt;slug&gt;.toml</code></td><td>The <code>tools</code> list</td><td>Only listed tools are visible to the agent</td></tr>
       <tr><td>Agent identities</td><td><code>agents/&lt;slug&gt;.toml</code>, with keys and enrollment in Oxagen</td><td>TOML</td><td>Not delivered</td></tr>
     </tbody>
@@ -493,42 +495,31 @@ Before you build a control, read its page in `components/`. Start with
 <section id="servers">
   <span class="eyebrow">Tools</span>
   <h2>Tool servers</h2>
-  <p>One file per MCP server. It names the server, how the cloud gateway reaches it, which credential the gateway uses, and which tools agents may see. The secret itself never enters the repository: the file names a credential, and Oxagen's vault holds it. <span class="st p">Proposed</span></p>
-  <figure class="code"><figcaption><span class="path">servers/stripe.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/mcp-server/v1.json
-schema = "mcp-server/v1"
-name = "stripe"
-label = "Stripe"
-description = "Payments, refunds, and invoices in the a-intel Stripe account."
-
-[transport]
-type = "http"                     # http, or stdio for a local server
-url = "https://mcp.stripe.com"
-
-[auth]
-type = "oauth"                    # none, bearer, header, oauth, operator-oauth
-credential = "oxagen:credential/stripe-production"
-
-[[tools]]
-name = "list_charges"
-version = 2
-risk = "read"
-
-[[tools]]
-name = "create_refund"
-version = 3
-risk = "irreversible"
-description = "Refund part or all of a captured charge. The amount is in cents."</code></pre></figure>
+  <p>Every MCP server agents reach has one folder under <code>servers/</code>, whether a person connected it by URL, picked it from the MCP registry, runs it as a local command, or built it from an OpenAPI document. The folder names where the tools come from, which of them are imported, how each is classified by risk, and the definitions a person reviewed. Secrets never enter the repository: <code>server.toml</code> names a credential, and Oxagen's vault holds it. MCP Studio (<code>mcp-studio-spec.html</code>) specifies the files, the classification, the lock, and the tables publish rebuilds from them. <span class="st p">Proposed</span></p>
   <div class="tscroll"><table>
-    <thead><tr><th>Field</th><th>Rule</th></tr></thead>
+    <thead><tr><th>File</th><th>Holds</th><th>Written by</th></tr></thead>
     <tbody>
-      <tr><td><code>name</code></td><td class="wrap">The prefix of every tool name: <code>^[a-z][a-z0-9_]{0,23}$</code>. Unique in the workspace across <code>servers/</code> and <code>apis/</code>.</td></tr>
-      <tr><td><code>transport</code></td><td class="wrap"><code>http</code> with a <code>url</code>, reached by the cloud gateway. <code>stdio</code> with a <code>command</code>, run by the local gateway on the agent's machine, which takes no credential from Oxagen, because no MCP credential may sit on an enrolled machine.</td></tr>
-      <tr><td><code>auth</code></td><td class="wrap"><code>credential</code> is <code>oxagen:credential/&lt;name&gt;</code>. <code>operator-oauth</code> uses the token of the person who operates the run, so the server's own permissions apply to that person.</td></tr>
-      <tr><td><code>network</code></td><td class="wrap"><code>cloud</code> by default, or <code>relay:&lt;name&gt;</code> for a server inside a private network. See MCP Studio.</td></tr>
-      <tr><td><code>tools</code></td><td class="wrap">Only listed tools reach agents. A tool the server adds does nothing until a steering PR lists it. <code>version</code> pins the definition Oxagen snapshotted (<code>mcp.tool_snapshots</code>, today). When the server changes a listed tool, the gateway withholds it and Oxagen opens a steering PR with the difference. <code>risk</code> is <code>read</code>, <code>write</code>, <code>destructive</code>, or <code>irreversible</code>, and Cedar policies read it. <code>description</code> replaces the server's own, usually with a shorter one.</td></tr>
+      <tr><td><code>server.toml</code></td><td class="wrap">Source, auth mode and credential reference, environments, network route, exposure mode, and sync schedule (<code>mcp-server/v1</code>)</td><td class="wrap">Studio and people</td></tr>
+      <tr><td><code>tools.toml</code></td><td class="wrap">The imported tools. Each has its risk, side effect, egress, and consequence tags, in the vocabulary Oxagen uses today, plus description and input and result shaping (<code>mcp-tools/v1</code>). A tool the server offers and this file does not list is visible to no agent.</td><td class="wrap">Studio and people</td></tr>
+      <tr><td><code>tools.lock.json</code></td><td class="wrap">Each imported tool's upstream definition as a person reviewed it, with its version and hashes (<code>mcp-tools-lock/v1</code>). The gateway serves only locked definitions.</td><td class="wrap">Oxagen only</td></tr>
+      <tr><td><code>openapi.yaml</code>, <code>tests/</code></td><td class="wrap">The vendored document of an OpenAPI server, and recorded calls and selection tests for any server</td><td class="wrap">Studio and people</td></tr>
     </tbody>
   </table></div>
-  <p>A server built from an OpenAPI document lives in <code>apis/&lt;name&gt;/</code> instead. Its files are specified in MCP Studio.</p>
+  <figure class="code"><figcaption><span class="path">servers/stripe/tools.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/mcp-tools/v1.json
+schema = "mcp-tools/v1"
+
+[tools.list_charges]
+risk = "low"
+side_effect = "read"
+egress = "third_party"
+
+[tools.create_refund]
+description = "Refund part or all of a captured charge. The amount is in cents."
+risk = "high"
+side_effect = "irreversible"
+egress = "third_party"
+consequence_tags = ["moves_money"]</code></pre></figure>
+  <p>Available tools that nobody imported stay in Oxagen (<code>mcp.tool_snapshots</code>), so the repository grows with what agents may call, never with the size of a server. Turning a server or a tool off is instant and needs no pull request, because a kill switch cannot wait for review.</p>
 </section>
 
 <section id="agents">
@@ -691,7 +682,7 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
   <h2>Steering PR flow</h2>
   <p>v1's flow stands: open, check, review, merge, publish, retire. These steps change it so Oxagen is the only merger and every merge is checked against the <code>main</code> it lands on.</p>
   <ol class="steps">
-    <li><div><strong>Open.</strong><p>From the web app, an agent's MCP tool, MCP Studio, the curator, or a clone. The branch starts with the top-level folder it changes: <code>steering/</code>, <code>memory/</code>, <code>agents/</code>, <code>servers/</code>, <code>apis/</code>, <code>policy/</code>, or <code>workspace/</code>. A person's steering PR holds one record, as in v1. A memory PR and an MCP Studio PR hold many files. <span class="st p">Proposed</span></p></div></li>
+    <li><div><strong>Open.</strong><p>From the web app, an agent's MCP tool, MCP Studio, the curator, or a clone. The branch starts with the top-level folder it changes: <code>steering/</code>, <code>memory/</code>, <code>agents/</code>, <code>servers/</code>, <code>policy/</code>, or <code>workspace/</code>. A person's steering PR holds one record, as in v1. A memory PR and a server PR hold many files. <span class="st p">Proposed</span></p></div></li>
     <li><div><strong>Check.</strong><p>Oxagen runs the checks below and posts one required check, <code>Oxagen steering</code>, with each result inside it. <span class="st p">Proposed</span></p></div></li>
     <li><div><strong>Review.</strong><p>By governance mode, as in v1. A reviewer approves in Oxagen or with a GitHub or GitLab review from an account linked to an Oxagen member. <code>governance.toml</code> can route folders to reviewer groups. <span class="st p">Proposed</span></p></div></li>
     <li><div><strong>Queue.</strong><p>Merge, or auto-merge once approved, puts the pull request in the repository's queue. Oxagen merges one at a time. When <code>main</code> moves, the next pull request is brought up to date and checked again, so the budget and conflict checks judge the <code>main</code> it will land on. <span class="st p">Proposed</span></p></div></li>
@@ -712,8 +703,8 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
       <tr><td><code>settings</code></td><td class="wrap">The repository settings differ from the prescribed ones</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>references</code></td><td class="wrap">A named tool, record, repository, credential, or skill file does not exist</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>budget</code></td><td class="wrap">The change pushes an agent's always-on steering over its token budget. See <a href="#tokens">Tokens</a></td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>compile</code></td><td class="wrap">A server or API does not compile to tools, a Cedar policy does not validate, or a policy test fails</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>owned</code></td><td class="wrap">The change edits a file Oxagen writes: <code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>README.md</code>, <code>policy/schema.cedarschema</code>, or the ledger</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>compile</code></td><td class="wrap">A server folder does not compile to tools, its lock does not match, a Cedar policy does not validate, or a policy test fails</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>owned</code></td><td class="wrap">The change edits a file Oxagen writes: <code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>README.md</code>, <code>policy/schema.cedarschema</code>, a <code>tools.lock.json</code>, or the ledger</td><td><span class="st p">Proposed</span></td></tr>
     </tbody>
   </table></div>
 </section>
@@ -783,7 +774,7 @@ retire_after_days = 180
 auto_merge = false                   # allowed in solo mode only
 
 [[reviewers]]
-paths = ["steering/billing/**", "apis/billing/**"]
+paths = ["steering/billing/**", "servers/billing/**"]
 group = "billing-leads"</code></pre></figure>
   <p><code>recall_candidates</code> decides whether a candidate steers anything before a person reviews it. The default lets an agent recall its own candidates at force <code>info</code> and nothing else. <code>regulated</code> mode forces <code>off</code>. The in-app agent never receives workspace memories (Mac, 2026-09-25).</p>
 </section>
@@ -797,8 +788,8 @@ group = "billing-leads"</code></pre></figure>
     <tbody>
       <tr><td>Active records</td><td class="num">20,000</td><td class="wrap">One file per record, indexed by Oxagen at publish</td></tr>
       <tr><td>Files in one folder</td><td class="num">1,000</td><td class="wrap">The GitHub and GitLab web views truncate a folder at 1,000 entries. The curator shards <code>steering/memory/</code> by repository and area, and the <code>schema</code> check warns at 800.</td></tr>
-      <tr><td>Tool servers</td><td class="num">300</td><td class="wrap">One file or folder per server</td></tr>
-      <tr><td>Tools exposed</td><td class="num">5,000</td><td class="wrap">Toolbelts and MCP Studio's catalog mode keep each agent's list short</td></tr>
+      <tr><td>Tool servers</td><td class="num">300</td><td class="wrap">One folder per server</td></tr>
+      <tr><td>Tools exposed</td><td class="num">5,000</td><td class="wrap">Toolbelts, imports, and MCP Studio's search mode keep each agent's list short</td></tr>
       <tr><td>Merges a day</td><td class="num">200</td><td class="wrap">The merge queue, and batched memory PRs</td></tr>
       <tr><td>Checks, p95</td><td class="num">60 s</td><td class="wrap">For 50 changed files. Only changed files are parsed, and cross-file checks run against Oxagen's index of the published version.</td></tr>
       <tr><td>Merge to live, p95</td><td class="num">30 s</td><td class="wrap">Publishing recompiles only files whose blob SHA changed</td></tr>
@@ -807,7 +798,7 @@ group = "billing-leads"</code></pre></figure>
   </table></div>
   <ul>
     <li><strong>Few conflicts.</strong> Two people changing different things never edit the same file. Only Oxagen writes the ledger and the stamps, at the head of the queue.</li>
-    <li><strong>Delegated review.</strong> Reviewer groups by folder let a billing team own <code>steering/billing/</code> and <code>apis/billing/</code> without seeing every other change.</li>
+    <li><strong>Delegated review.</strong> Reviewer groups by folder let a billing team own <code>steering/billing/</code> and <code>servers/billing/</code> without seeing every other change.</li>
     <li><strong>Many workspaces.</strong> Organization records live once in <code>&lt;org&gt;/oxagen</code> and never get copied into 40 steering repos.</li>
   </ul>
 </section>
@@ -827,7 +818,7 @@ group = "billing-leads"</code></pre></figure>
       <tr><td>Short statements</td><td class="wrap">The <code>schema</code> check warns when an always-on body passes 120 words, or a <code>SKILL.md</code> passes 500 lines. A skill's detail belongs in the files it links.</td></tr>
       <tr><td>Near duplicates</td><td class="wrap">The <code>conflicts</code> check flags a new record that says what an active one already says.</td></tr>
       <tr><td>Visible cost</td><td class="wrap">Every check run lists each changed record's token count and each agent's always-on total before and after. The Steering page prices each record from real requests.</td></tr>
-      <tr><td>Tools</td><td class="wrap">Only listed tools are visible, descriptions can be replaced with shorter ones, and large APIs use catalog mode (MCP Studio).</td></tr>
+      <tr><td>Tools</td><td class="wrap">Only listed tools are visible, descriptions can be replaced with shorter ones, and large servers use search mode (MCP Studio).</td></tr>
     </tbody>
   </table></div>
   <figure class="code"><figcaption><span class="path">What the model receives</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="markdown">## Workspace rules
@@ -885,7 +876,8 @@ publishes it when a steering PR merges. Nothing here takes effect before that.
 
 ## Do not edit
 
-AGENTS.md, CLAUDE.md, README.md, policy/schema.cedarschema, steering/promotions/.</code></pre></figure>
+AGENTS.md, CLAUDE.md, README.md, policy/schema.cedarschema, steering/promotions/,
+servers/*/tools.lock.json.</code></pre></figure>
   <figure class="code"><figcaption><span class="path">oxagen check</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">$ oxagen check steering/billing
 steering/billing/a-intel.billing.refunds-over-100.md:6
   force: "must!" is not one of must, should, may, info.
@@ -915,14 +907,16 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
     <thead><tr><th>Name</th><th>Value</th></tr></thead>
     <tbody>
       <tr><td>Steering repo</td><td class="wrap"><code>&lt;org&gt;/oxagen-&lt;workspace-slug&gt;</code>, then <code>-2</code> on a clash. Organization repo <code>&lt;org&gt;/oxagen</code>.</td></tr>
-      <tr><td>Top-level paths</td><td class="wrap"><code>AGENTS.md</code> <code>CLAUDE.md</code> <code>README.md</code> <code>.gitattributes</code> <code>workspace.toml</code> <code>steering/</code> <code>steering/governance.toml</code> <code>steering/promotions/&lt;yyyy-mm&gt;.jsonl</code> <code>steering/skills/</code> <code>steering/memory/</code> <code>agents/</code> <code>servers/</code> <code>apis/</code> <code>policy/</code></td></tr>
-      <tr><td>Schema ids</td><td class="wrap"><code>steering-record/v1</code> <code>workspace/v1</code> <code>governance/v1</code> <code>agent-definition/v1</code> <code>mcp-server/v1</code> <code>api-source/v1</code> <code>api-tools/v1</code> <code>tool-manifest/v1</code> <code>reflection/v1</code> <code>promotion/v1</code> <code>bundle/v1</code>, each at <code>https://oxagen.sh/schemas/&lt;id&gt;.json</code></td></tr>
+      <tr><td>Top-level paths</td><td class="wrap"><code>AGENTS.md</code> <code>CLAUDE.md</code> <code>README.md</code> <code>.gitattributes</code> <code>workspace.toml</code> <code>steering/</code> <code>steering/governance.toml</code> <code>steering/promotions/&lt;yyyy-mm&gt;.jsonl</code> <code>steering/skills/</code> <code>steering/memory/</code> <code>agents/</code> <code>servers/&lt;name&gt;/</code> <code>policy/</code></td></tr>
+      <tr><td>Schema ids</td><td class="wrap"><code>steering-record/v1</code> <code>workspace/v1</code> <code>governance/v1</code> <code>agent-definition/v1</code> <code>mcp-server/v1</code> <code>mcp-tools/v1</code> <code>mcp-tools-lock/v1</code> <code>tool-manifest/v1</code> <code>reflection/v1</code> <code>promotion/v1</code> <code>bundle/v1</code>, each at <code>https://oxagen.sh/schemas/&lt;id&gt;.json</code></td></tr>
       <tr><td>Tool name</td><td class="wrap"><code>&lt;server&gt;__&lt;tool&gt;</code>. Server <code>^[a-z][a-z0-9_]{0,23}$</code>, tool <code>^[a-z][a-z0-9_]*$</code>, 64 characters at most in all. A pinned reference adds <code>@&lt;version&gt;</code>.</td></tr>
       <tr><td>Credential reference</td><td class="wrap"><code>oxagen:credential/&lt;name&gt;</code>, name <code>^[a-z0-9][a-z0-9-]{0,62}$</code></td></tr>
       <tr><td>Repository reference</td><td class="wrap"><code>&lt;host&gt;/&lt;owner&gt;/&lt;name&gt;</code>, lowercase</td></tr>
       <tr><td>Record reference</td><td class="wrap"><code>@record:&lt;lineage&gt;</code> in a body, the lineage alone in a field</td></tr>
+      <tr><td>Server folder</td><td class="wrap"><code>servers/&lt;name&gt;/</code> with <code>server.toml</code>, <code>tools.toml</code>, and <code>tools.lock.json</code> for every source, plus <code>openapi.yaml</code> and <code>tests/</code> where they apply</td></tr>
+      <tr><td>Tool classification</td><td class="wrap"><code>risk</code> <code>side_effect</code> <code>egress</code> required, <code>consequence_tags</code> <code>measures</code> <code>data_classes</code> optional, in the values of <code>packages/oxagen/src/contracts/tool.classification.ts</code></td></tr>
       <tr><td>Required check</td><td class="wrap"><code>Oxagen steering</code>, posted by the Oxagen app only</td></tr>
-      <tr><td>Branch prefix</td><td class="wrap">The top-level folder the change touches: <code>steering/</code> <code>memory/</code> <code>agents/</code> <code>servers/</code> <code>apis/</code> <code>policy/</code> <code>workspace/</code></td></tr>
+      <tr><td>Branch prefix</td><td class="wrap">The top-level folder the change touches: <code>steering/</code> <code>memory/</code> <code>agents/</code> <code>servers/</code> <code>policy/</code> <code>workspace/</code></td></tr>
       <tr><td>Environment</td><td class="wrap"><code>steering</code></td></tr>
       <tr><td>Published version</td><td class="wrap">An integer per workspace that rises by one on each publish</td></tr>
       <tr><td>Bundle</td><td class="wrap"><code>bundle/v1</code>: what the cloud gateway and session start read for a published version. It holds the record index with token counts, the rendered always-on blocks per agent, the Cedar policy set, and the tool manifest.</td></tr>
@@ -1078,7 +1072,7 @@ Do
    mcp-config/src/resolve.ts:46 alone: they name the machine-local folder in a
    code checkout.
 2. Zod schemas and TypeScript types for workspace/v1, governance/v1,
-   agent-definition/v1 (v0.1's fields plus skills), mcp-server/v1,
+   agent-definition/v1 (v0.1's fields plus skills),
    reflection/v1, promotion/v1, bundle/v1, repo health, and the three new
    steering-record/v1 fields (repos, tools, description on every kind).
 3. A generator that writes each schema as JSON Schema to
@@ -1289,7 +1283,7 @@ Do
 1. Post one check named Oxagen steering. Put each check's result inside it.
    Call S4's runChecks() for the results; until S4 merges, call today's six.
 2. Branch names start with the top-level folder they change. Allow many files
-   in one pull request for memory/ and apis/ branches.
+   in one pull request for memory/ and servers/ branches.
 3. The merge queue: one merge at a time per repository. When main moves, bring
    the next branch up to date and check it again before merging.
 4. At the head of the queue, push one stamp commit that writes id and hash
@@ -1414,7 +1408,9 @@ You own
 Do
 1. publish(repo, sha): build the bundle incrementally by blob SHA: the record
    index with token counts, the always-on block per agent, the Cedar policy
-   set when policy/ exists, and the tool manifest from servers/ and apis/.
+   set when policy/ exists, and the tool manifest from servers/ (MCP Studio's
+   compile(), lane M2. Until it merges, skip servers with a warning.). Then call
+   MCP Studio's project() (lane M10) so the tool registry follows the merge.
    Store it, then switch the workspace's published version in one write.
    Refuse when S2's health is not healthy.
 2. Render: frontmatter never reaches the model. Always-on records as
