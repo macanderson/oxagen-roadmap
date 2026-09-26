@@ -429,7 +429,7 @@ into smaller refunds to stay under the limit.</code></pre></figure>
       <tr><td>Reflections</td><td>Oxagen only</td><td><code>reflection/v1</code> JSON</td><td>Never. They produce memory candidates</td></tr>
       <tr><td>Proposals</td><td>Open steering PRs</td><td>None</td><td>Never</td></tr>
       <tr><td>MCP servers</td><td><code>servers/&lt;name&gt;/</code></td><td><code>mcp-server/v1</code>, <code>mcp-tools/v1</code>, and a lock</td><td>Imported tool definitions through the cloud gateway</td></tr>
-      <tr><td>Tool risk categories</td><td><code>servers/&lt;name&gt;/tools.toml</code></td><td>Today's classification: risk, side effect, egress, consequence tags</td><td>Cedar policies read it, and the agent sees annotations derived from it</td></tr>
+      <tr><td>Tool risk categories</td><td><code>servers/&lt;name&gt;/tools.toml</code></td><td>Today's classification: risk, side effect, egress, impacts</td><td>Cedar policies read it, and the agent sees annotations derived from it</td></tr>
       <tr><td>APIs as MCP servers</td><td><code>servers/&lt;name&gt;/</code> with an OpenAPI, GraphQL, or gRPC source</td><td>The same files plus the definition</td><td>Imported tool definitions through the cloud gateway</td></tr>
       <tr><td>Toolbelts</td><td><code>agents/&lt;slug&gt;.toml</code></td><td>The <code>tools</code> list</td><td>Only listed tools are visible to the agent</td></tr>
       <tr><td>Agent identities</td><td><code>agents/&lt;slug&gt;.toml</code>, with keys and enrollment in Oxagen</td><td>TOML</td><td>Not delivered</td></tr>
@@ -500,7 +500,7 @@ Before you build a control, read its page in `components/`. Start with
     <thead><tr><th>File</th><th>Holds</th><th>Written by</th></tr></thead>
     <tbody>
       <tr><td><code>server.toml</code></td><td class="wrap">Source, auth mode and credential reference, environments, network route, exposure mode, and sync schedule (<code>mcp-server/v1</code>)</td><td class="wrap">Studio and people</td></tr>
-      <tr><td><code>tools.toml</code></td><td class="wrap">The imported tools. Each has its risk, side effect, egress, and consequence tags, in the vocabulary Oxagen uses today, plus description and input and result shaping (<code>mcp-tools/v1</code>). A tool the server offers and this file does not list is visible to no agent.</td><td class="wrap">Studio and people</td></tr>
+      <tr><td><code>tools.toml</code></td><td class="wrap">The imported tools. Each has its risk, side effect, egress, and impacts, in the vocabulary Oxagen uses today, plus description and input and result shaping (<code>mcp-tools/v1</code>). A tool the server offers and this file does not list is visible to no agent.</td><td class="wrap">Studio and people</td></tr>
       <tr><td><code>tools.lock.json</code></td><td class="wrap">Each imported tool's upstream definition as a person reviewed it, with its version and hashes (<code>mcp-tools-lock/v1</code>). The gateway serves only locked definitions.</td><td class="wrap">Oxagen only</td></tr>
       <tr><td><code>openapi.yaml</code>, <code>schema.graphql</code>, <code>proto/</code>, <code>tests/</code></td><td class="wrap">The vendored definition of a server built from one, and recorded calls and selection tests for any server</td><td class="wrap">Studio and people</td></tr>
     </tbody>
@@ -518,7 +518,7 @@ description = "Refund part or all of a captured charge. The amount is in cents."
 risk = "high"
 side_effect = "irreversible"
 egress = "third_party"
-consequence_tags = ["moves_money"]</code></pre></figure>
+impacts = ["moves_money"]</code></pre></figure>
   <p>Available tools that nobody imported stay in Oxagen (<code>mcp.tool_snapshots</code>), so the repository grows with what agents may call, never with the size of a server. Turning a server or a tool off is instant and needs no pull request, because a kill switch cannot wait for review.</p>
 </section>
 
@@ -923,7 +923,7 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
       <tr><td>Repository reference</td><td class="wrap"><code>&lt;host&gt;/&lt;owner&gt;/&lt;name&gt;</code>, lowercase</td></tr>
       <tr><td>Record reference</td><td class="wrap"><code>@record:&lt;lineage&gt;</code> in a body, the lineage alone in a field</td></tr>
       <tr><td>Server folder</td><td class="wrap"><code>servers/&lt;name&gt;/</code> with <code>server.toml</code>, <code>tools.toml</code>, and <code>tools.lock.json</code> for every source, plus the vendored definition (<code>openapi.yaml</code>, <code>schema.graphql</code>, or <code>proto/</code>) and <code>tests/</code> where they apply</td></tr>
-      <tr><td>Tool classification</td><td class="wrap"><code>risk</code> <code>side_effect</code> <code>egress</code> required, <code>consequence_tags</code> <code>measures</code> <code>data_classes</code> optional, in the values of <code>packages/oxagen/src/contracts/tool.classification.ts</code></td></tr>
+      <tr><td>Tool classification</td><td class="wrap"><code>risk</code> <code>side_effect</code> <code>egress</code> required, <code>impacts</code> <code>measures</code> <code>data_classes</code> optional, in the values of <code>packages/oxagen/src/contracts/tool.classification.ts</code></td></tr>
       <tr><td>Required check</td><td class="wrap"><code>Oxagen steering</code>, posted by the Oxagen app only</td></tr>
       <tr><td>Branch prefix</td><td class="wrap">The top-level folder the change touches: <code>steering/</code> <code>memory/</code> <code>agents/</code> <code>servers/</code> <code>policy/</code> <code>workspace/</code></td></tr>
       <tr><td>Environment</td><td class="wrap"><code>steering</code></td></tr>

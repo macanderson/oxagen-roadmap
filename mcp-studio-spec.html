@@ -225,7 +225,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
   <div class="pipe">
     <div><b>1 Add</b><span>Pick a source</span><small>A URL, the MCP registry, a local command, or an OpenAPI, GraphQL, or gRPC definition</small></div>
     <div><b>2 Discover</b><span>List every tool</span><small>Stored in Oxagen, not the repository</small></div>
-    <div><b>3 Import</b><span>Choose and classify</span><small>Risk, side effect, egress, consequences, and shaping per tool</small></div>
+    <div><b>3 Import</b><span>Choose and classify</span><small>Risk, side effect, egress, impacts, and shaping per tool</small></div>
     <div><b>4 Review</b><span>Open a steering PR</span><small>One folder, the tool surface diff, and the checks</small></div>
     <div><b>5 Publish</b><span>Merge</span><small>The registry tables and the bundle follow the merged files</small></div>
     <div><b>6 Serve</b><span>The cloud gateway</span><small>One MCP endpoint every harness already points at</small></div>
@@ -252,7 +252,8 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
         <li>An agent's calls go to a server's sandbox environment unless the agent's definition names another. The choice is set per agent. (Mac, 2026-09-26)</li>
         <li>gRPC server-streaming methods are tools on day 1, each returning one bounded result. Client and bidirectional streams are never tools. (Picked for durability at Mac's request, 2026-09-26)</li>
         <li>A local server runs only on machine groups a steering PR names, only from the package the lock pins, and only on a call the cloud gateway decided and signed. The local gateway fails closed, and there is no offline mode. (Picked for durability at Mac's request, 2026-09-26)</li>
-        <li>One classification vocabulary everywhere, the code's. <code>consequence_tags</code> joins the agent policy spec's <code>Tool</code> type and <code>financial_class</code> leaves it. (Picked for durability at Mac's request, 2026-09-26)</li>
+        <li>One classification vocabulary everywhere, the code's. <code>impacts</code> joins the agent policy spec's <code>Tool</code> type and <code>financial_class</code> leaves it. (Picked for durability at Mac's request, 2026-09-26)</li>
+        <li>The list of labels such as <code>moves_money</code> is called <code>impacts</code>. The code's <code>consequence_tags</code> is renamed to match. (Mac, 2026-09-26)</li>
         <li>Private networks are reached through the relay on day 1. The relay acts only on envelopes the cloud gateway signed, and it ships as a container image and a Helm chart. (Mac, 2026-09-26)</li>
         <li>A customer that keeps its own credential in the relay needs the Enterprise plan, and the website advertises it that way. (Mac, 2026-09-26)</li>
         <li>Drafting a description with the in-app agent bills as in-app agent spend on the Billing page. (Mac, 2026-09-26)</li>
@@ -262,7 +263,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
       <h4><span class="st c">Today</span></h4>
       <ul>
         <li><code>import_tools</code> (<code>tool.import.ts</code>) publishes picked tools from a server's pinned snapshots into <code>agent.tools</code> and <code>agent.tool_versions</code>. An unclassified import lands as risk <code>high</code> and not read-only.</li>
-        <li>The classification vocabulary: risk grade <code>low</code> to <code>critical</code>, side effect <code>read</code>, <code>write</code>, or <code>irreversible</code>, egress <code>local</code>, <code>org_tenant</code>, or <code>third_party</code>, consequence tags, measures, and data classes (<code>contracts/tool.classification.ts</code>).</li>
+        <li>The classification vocabulary: risk grade <code>low</code> to <code>critical</code>, side effect <code>read</code>, <code>write</code>, or <code>irreversible</code>, egress <code>local</code>, <code>org_tenant</code>, or <code>third_party</code>, consequence tags (renamed impacts here), measures, and data classes (<code>contracts/tool.classification.ts</code>).</li>
         <li><code>mcp.mcp_servers</code> holds servers with transport <code>streamable-http</code>, <code>sse</code>, or <code>stdio</code>. <code>mcp.tool_snapshots</code> holds every descriptor a server returned. <code>mcp.credentials</code> holds secrets, envelope-encrypted with a KMS key.</li>
         <li>No OpenAPI, GraphQL, or gRPC code exists. No customer agent receives a toolbelt yet.</li>
       </ul>
@@ -457,7 +458,7 @@ description = "Refund part or all of a captured charge. The amount is in cents."
 risk = "high"
 side_effect = "irreversible"
 egress = "third_party"
-consequence_tags = ["moves_money"]</code></pre></figure>
+impacts = ["moves_money"]</code></pre></figure>
   <figure class="code"><figcaption><span class="path">servers/billing/tools.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/mcp-tools/v1.json
 schema = "mcp-tools/v1"
 
@@ -475,7 +476,7 @@ description = "Refund part or all of a captured charge. amount is in cents and d
 risk = "high"
 side_effect = "irreversible"
 egress = "org_tenant"
-consequence_tags = ["moves_money"]
+impacts = ["moves_money"]
 hide = ["X-Request-Source"]
 fixed = { "X-Request-Source" = "oxagen" }
 idempotency_header = "Idempotency-Key"</code></pre></figure>
@@ -485,7 +486,7 @@ idempotency_header = "Idempotency-Key"</code></pre></figure>
       <tr><td><code>upstream</code></td><td>MCP</td><td class="wrap">The server's own tool name. Defaults to the table key.</td></tr>
       <tr><td><code>operation</code></td><td>openapi</td><td class="wrap">The <code>operationId</code>, or <code>"POST /refunds/{id}/cancel"</code> when the operation has none. Required.</td></tr>
       <tr><td><code>risk</code>, <code>side_effect</code>, <code>egress</code></td><td>all</td><td class="wrap">Required. See <a href="#risk">Risk classification</a>.</td></tr>
-      <tr><td><code>consequence_tags</code>, <code>measures</code>, <code>data_classes</code></td><td>all</td><td class="wrap">Optional, in today's classification shapes</td></tr>
+      <tr><td><code>impacts</code>, <code>measures</code>, <code>data_classes</code></td><td>all</td><td class="wrap">Optional, in today's classification shapes</td></tr>
       <tr><td><code>description</code></td><td>all</td><td class="wrap">Replaces the source's description. At most 1,024 characters. Studio can draft one with the in-app agent, billed as in-app agent spend on the Billing page.</td></tr>
       <tr><td><code>hide</code>, <code>fixed</code>, <code>defaults</code>, <code>rename</code></td><td>all</td><td class="wrap">Input shaping. Hidden inputs leave the schema, fixed ones go on every call, defaults fill what the model leaves out, and renamed ones map back on the call.</td></tr>
       <tr><td><code>select</code>, <code>redact</code>, <code>max_result_bytes</code></td><td>all</td><td class="wrap">Result shaping on structured results, and on text results that parse as JSON. Other text results take only the size cap.</td></tr>
@@ -509,7 +510,7 @@ idempotency_header = "Idempotency-Key"</code></pre></figure>
       <tr><td><code>risk</code></td><td class="wrap"><code>low</code>, <code>medium</code>, <code>high</code>, <code>critical</code></td><td>yes</td></tr>
       <tr><td><code>side_effect</code></td><td class="wrap"><code>read</code>, <code>write</code>, <code>irreversible</code></td><td>yes</td></tr>
       <tr><td><code>egress</code></td><td class="wrap"><code>local</code>, <code>org_tenant</code>, <code>third_party</code></td><td>yes</td></tr>
-      <tr><td><code>consequence_tags</code></td><td class="wrap">Snake case, at most 32. The starter set: <code>moves_money</code>, <code>destroys_data</code>, <code>alters_production</code>, <code>communicates_externally</code>, <code>changes_access</code>, <code>changes_entitlement</code>.</td><td>no</td></tr>
+      <tr><td><code>impacts</code></td><td class="wrap">What a call can do. Snake case, at most 32. The starter set: <code>moves_money</code>, <code>destroys_data</code>, <code>alters_production</code>, <code>communicates_externally</code>, <code>changes_access</code>, <code>changes_entitlement</code>.</td><td>no</td></tr>
       <tr><td><code>measures</code></td><td class="wrap">Named paths into the input with a type: <code>money</code> (with <code>currency_path</code>), <code>count</code>, <code>identifier</code>, <code>environment</code>, <code>table</code>, or <code>text</code></td><td>no</td></tr>
       <tr><td><code>data_classes</code></td><td class="wrap">Up to 64 names of data the tool touches</td><td>no</td></tr>
     </tbody>
@@ -517,7 +518,7 @@ idempotency_header = "Idempotency-Key"</code></pre></figure>
   <h3>Suggestions</h3>
   <p>Studio fills in a suggestion for each imported tool. A person confirms or changes it before the steering PR opens, and a tool without <code>risk</code>, <code>side_effect</code>, and <code>egress</code> fails the <code>schema</code> check. A server's annotations are its author's hints. The MCP specification tells clients to treat them as untrusted, so Studio never applies one without a person.</p>
   <div class="tscroll"><table>
-    <thead><tr><th>Signal</th><th>Side effect</th><th>Risk</th><th>Tags</th></tr></thead>
+    <thead><tr><th>Signal</th><th>Side effect</th><th>Risk</th><th>Impacts</th></tr></thead>
     <tbody>
       <tr><td class="wrap"><code>readOnlyHint: true</code>, <code>GET</code> and <code>HEAD</code>, a GraphQL query, or a gRPC method marked <code>NO_SIDE_EFFECTS</code></td><td><code>read</code></td><td><code>low</code></td><td></td></tr>
       <tr><td class="wrap"><code>destructiveHint: false</code>, <code>POST</code>, <code>PUT</code>, and <code>PATCH</code>, a GraphQL mutation, or a gRPC method marked <code>IDEMPOTENT</code></td><td><code>write</code></td><td><code>medium</code></td><td></td></tr>
@@ -533,13 +534,13 @@ idempotency_header = "Idempotency-Key"</code></pre></figure>
     <li><strong>Policies read it.</strong> Cedar sees <code>context.tool.risk</code>, <code>side_effect</code>, and <code>egress</code> (agent policy spec), so a rule such as <code>irreversible.approval</code> covers every imported tool with no rule written per tool.</li>
     <li><strong>Reviewers see it.</strong> The steering PR lists every tool whose classification changed, and <code>governance.toml</code> can route <code>servers/**</code> to a reviewer group.</li>
   </ul>
-  <figure class="code"><figcaption><span class="path">policy/data.cedar</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">// A tool tagged destroys_data parks for approval, on any server.
+  <figure class="code"><figcaption><span class="path">policy/data.cedar</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">// A tool with the destroys_data impact parks for approval, on any server.
 @id("destroys-data.approval")
 @decision("require_approval")
 forbid (principal, action, resource)
-when { context.tool.consequence_tags.contains("destroys_data") }
+when { context.tool.impacts.contains("destroys_data") }
 unless { context.approval.granted };</code></pre></figure>
-  <p class="muted"><code>consequence_tags</code> joins the agent policy spec's <code>Tool</code> type and replaces its <code>financial_class</code>, so Cedar, the repository, and the code share one vocabulary. The policy spec's egress values move to the code's as well. Issue #141 tracks that page.</p>
+  <p class="muted"><code>impacts</code> joins the agent policy spec's <code>Tool</code> type and replaces its <code>financial_class</code>, so Cedar, the repository, and the code share one vocabulary. The policy spec's egress values move to the code's as well. Issue #141 tracks that page.</p>
 </section>
 
 <section id="lock">
@@ -948,7 +949,7 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
       </div>
       <div>
         <div class="field"><label>Tool</label><div><code>stripe__create_refund</code> version 3</div></div>
-        <div class="field"><label>Classification</label><div>Risk high. Side effect irreversible. Egress third_party. Tags moves_money.</div></div>
+        <div class="field"><label>Classification</label><div>Risk high. Side effect irreversible. Egress third_party. Impacts moves_money.</div></div>
         <div class="field"><label>Description</label><div>Refund part or all of a captured charge. The amount is in cents.</div></div>
         <div class="field"><label>Server says</label><div>destructiveHint true. "Create a refund for a charge."</div></div>
         <div class="field"><label>Agent feedback</label><div>2 runs sent dollars, not cents, before this description.</div></div>
@@ -984,7 +985,7 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
       <tr><td>Keep connected servers in Oxagen's tables and only Studio servers in the repository</td><td class="wrap">Two ways to store the same thing, two review paths, and a toolbelt that spans both. Every server in one shape means one check, one publish, and one diff.</td></tr>
       <tr><td>Store every available tool in the repository</td><td class="wrap">The repository would grow with the server, and each server update would touch files no one imported. Available tools are discovery data and stay in <code>mcp.tool_snapshots</code>.</td></tr>
       <tr><td>Trust the server's live definitions</td><td class="wrap">A server could change what the model reads with no review. The lock file is the defense.</td></tr>
-      <tr><td>Use the server's annotations as the classification</td><td class="wrap">The MCP specification calls them untrusted hints, and they have no field for egress or consequences</td></tr>
+      <tr><td>Use the server's annotations as the classification</td><td class="wrap">The MCP specification calls them untrusted hints, and they have no field for egress or impacts</td></tr>
       <tr><td>Run a private-network server on the agent's machine with its credential there</td><td class="wrap">Anything that can read a credential can call the API without the gateway, so no off switch could stop it. The relay covers private networks instead.</td></tr>
       <tr><td>Short-lived tokens bound to a key on the agent's machine, minted per session</td><td class="wrap">Misuse is bounded by the token's lifetime, not stopped at once. The API has to accept such tokens, and a person with admin rights on the machine can get around it. Kept as a later option.</td></tr>
       <tr><td>Generate server code per definition and deploy it</td><td class="wrap">A deploy per API, code to patch, a credential in every deployment, and drift between the document and the code. The interpreter needs no deploy and goes live on merge.</td></tr>
@@ -1119,7 +1120,8 @@ You own
 Do
 1. src/contract/: zod schemas and types for mcp-server/v1 (server.toml, every
    source type), mcp-tools/v1 (tools.toml, classification keys in snake case
-   mapped to today's camelCase classification), mcp-tools-lock/v1,
+   mapped to today's camelCase classification, with impacts mapped to
+   consequenceTags until M13 renames it), mcp-tools-lock/v1,
    tool-manifest/v1, and the relay envelope (signature, expiry, nonce, and
    the exact method, host, and path or gRPC service and method), and the local
    call envelope (tool version, a hash of the arguments, a nonce, and an expiry).
@@ -1898,6 +1900,7 @@ Read first
 
 You own
 - packages/database/src/schema/mcp.ts and agent.ts changes, and one migration
+- packages/oxagen/src/contracts/tool.classification.ts (the impacts rename)
 - packages/handlers/src/lib/tool-registry.ts
 - packages/handlers/src/tool.import.ts and the agent.mcp.register handlers
 - packages/agent/src/runtime/materialize-tools.ts (the filter only)
@@ -1907,6 +1910,9 @@ Do
 1. Schema: mcp.mcp_servers.transport_type also accepts openapi, graphql, and
    grpc. Add an origin column (steering or legacy), and a name column on
    mcp.credentials, unique per workspace. Backfill names from existing rows.
+   Rename consequence tags to impacts: the consequence_tags column, the
+   consequenceTags key in the classification, and CONSEQUENCE_TAG_STARTER_SET
+   (to IMPACT_STARTER_SET), with every reader updated in the same PR.
 2. project(publishedVersion): for each server folder, upsert its server row
    with origin steering, upsert one agent.tools row per imported tool (slug
    &lt;server&gt;__&lt;tool&gt;), write a new tool_versions row through publishTool when
