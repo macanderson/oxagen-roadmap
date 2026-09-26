@@ -247,10 +247,11 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
         <li>Oxagen bills governed actions only. (Mac, 2026-09-25)</li>
         <li>Every use of Oxagen to steer, govern, or provide a tool is a governed action. That includes each tool call, each search and describe call in search mode, and each Try it call. (Mac, 2026-09-26)</li>
         <li>OpenAPI, GraphQL, and gRPC definitions are all sources on day 1. (Mac, 2026-09-26)</li>
-        <li>Search mode ranks tools with embeddings. By default Oxagen embeds with Voyage AI's <code>voyage-3-large</code> on its own shared key, held in AWS, and absorbs the cost. A workspace can set its own embedding URL, model, and key. (Mac, 2026-09-26)</li>
+        <li>Search mode ranks tools with embeddings. By default Oxagen embeds with Voyage AI's <code>voyage-4-large</code> on its own shared key, held in AWS, and absorbs the cost. A workspace can set its own embedding URL, model, and key, and a workspace that declines Voyage and sets no provider of its own gets keyword ranking. (Mac, 2026-09-26)</li>
         <li>The off switch acts at once with no pull request. (Mac, 2026-09-26)</li>
         <li>An agent's calls go to a server's sandbox environment unless the agent's definition names another. The choice is set per agent. (Mac, 2026-09-26)</li>
         <li>gRPC server-streaming methods are tools on day 1, each returning one bounded result. Client and bidirectional streams are never tools. (Picked for durability at Mac's request, 2026-09-26)</li>
+        <li>A local server runs only on machine groups a steering PR names, only from the package the lock pins, and only on a call the cloud gateway decided and signed. The local gateway fails closed, and there is no offline mode. (Picked for durability at Mac's request, 2026-09-26)</li>
         <li>One classification vocabulary everywhere, the code's. <code>consequence_tags</code> joins the agent policy spec's <code>Tool</code> type and <code>financial_class</code> leaves it. (Picked for durability at Mac's request, 2026-09-26)</li>
         <li>Private networks are reached through the relay on day 1. The relay acts only on envelopes the cloud gateway signed, and it ships as a container image and a Helm chart. (Mac, 2026-09-26)</li>
         <li>A customer that keeps its own credential in the relay needs the Enterprise plan, and the website advertises it that way. (Mac, 2026-09-26)</li>
@@ -422,6 +423,7 @@ schedule = "on-change"</code></pre></figure>
       <tr><td><code>source.url</code>, <code>source.transport</code></td><td>remote</td><td class="wrap">The MCP endpoint, and <code>http</code> (streamable HTTP) or <code>sse</code>, which today's connect flow still offers</td></tr>
       <tr><td><code>source.registry</code>, <code>source.server</code>, <code>source.version</code></td><td>registry</td><td class="wrap">The registry URL, the server's registry name such as <code>io.github.github/github-mcp-server</code>, and the version. The catalog entry supplies the endpoint or the package.</td></tr>
       <tr><td><code>source.command</code>, <code>source.args</code>, <code>source.env</code></td><td>local</td><td class="wrap">The command the local gateway runs, and the names of environment variables it passes from the agent's machine. Values never enter the repository.</td></tr>
+      <tr><td><code>source.machines</code></td><td>local</td><td class="wrap">The machine groups that may run the server. Empty by default, so a local server runs nowhere until a steering PR names a group.</td></tr>
       <tr><td><code>source.from</code>, <code>repo</code>, <code>path</code>, <code>ref</code>, <code>url</code></td><td>openapi, graphql, grpc</td><td class="wrap">Where the definition comes from: <code>repository</code> with <code>repo</code>, <code>path</code>, and <code>ref</code>, <code>url</code>, or <code>upload</code>. GraphQL also takes <code>introspection</code> and gRPC takes <code>reflection</code>, which read it from the first environment's endpoint.</td></tr>
       <tr><td><code>source.network</code></td><td>all but local</td><td class="wrap"><code>cloud</code> by default, or <code>relay:&lt;name&gt;</code></td></tr>
       <tr><td><code>auth.mode</code></td><td>all but local</td><td class="wrap"><code>none</code>, <code>service</code> (one credential for every run), or <code>operator-oauth</code> (the token of the person who operates the run)</td></tr>
@@ -577,6 +579,7 @@ unless { context.approval.granted };</code></pre></figure>
     <li><strong>Written by Oxagen only.</strong> Studio writes it into the steering PR it opens. When a person edits <code>tools.toml</code> by hand, the stamp commit recomputes <code>definition_hash</code> and <code>version</code>. The <code>owned</code> check refuses a hand edit.</li>
     <li><strong>Upstream moves only in a sync PR.</strong> Oxagen replaces a tool's <code>upstream</code> only in a pull request that shows the change.</li>
     <li><strong>Every source has one.</strong> For a server built from a definition, <code>upstream</code> is the tool compiled from it before <code>tools.toml</code> applies, so a definition change shows as a change per tool instead of a long schema diff.</li>
+    <li><strong>Local servers pin the code.</strong> For a <code>local</code> server the lock also records the resolved package: name, version, and a digest of the package or binary. The local gateway refuses to start a command whose digest does not match, so the review covers the code that runs, not only its name.</li>
     <li><strong>Diffs stay readable.</strong> Keys are sorted and indented two spaces, so a pull request shows each changed field on its own line. Limit 5 MB.</li>
     <li><strong>Hashes.</strong> <code>upstream_hash</code> is SHA-256 over the RFC 8785 canonical form of <code>upstream</code>, as record hashes are computed. <code>definition_hash</code> covers the effective name, description, and schemas, and <code>version</code> rises by one when it changes.</li>
   </ul>
@@ -607,13 +610,31 @@ unless { context.approval.granted };</code></pre></figure>
     <tbody>
       <tr><td><code>remote</code></td><td class="wrap">The gateway calls <code>tools/list</code> with the service credential, or the importing person's token</td><td class="wrap">The cloud gateway, or a relay</td><td><span class="st c">Today</span> as a connected server</td></tr>
       <tr><td><code>registry</code></td><td class="wrap">As <code>remote</code> or <code>local</code>, from the catalog entry's endpoint or package</td><td class="wrap">As its entry says</td><td><span class="st c">Today</span> for the catalog</td></tr>
-      <tr><td><code>local</code></td><td class="wrap">The local gateway runs the command on an enrolled machine and reports <code>tools/list</code></td><td class="wrap">The local gateway, after the cloud gateway decides the call</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>local</code></td><td class="wrap">The local gateway runs the command on a machine in a named group and reports <code>tools/list</code></td><td class="wrap">The local gateway, on a call the cloud gateway signed</td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>openapi</code></td><td class="wrap">Compiling the document lists its operations</td><td class="wrap">The cloud gateway, or a relay</td><td><span class="st d">Decided</span> for day 1</td></tr>
       <tr><td><code>graphql</code></td><td class="wrap">Compiling the schema lists its root fields. The schema comes from a file or an introspection query.</td><td class="wrap">The cloud gateway, or a relay</td><td><span class="st d">Decided</span> for day 1</td></tr>
       <tr><td><code>grpc</code></td><td class="wrap">Compiling the protos lists their methods. The protos come from files or server reflection.</td><td class="wrap">The cloud gateway, or a relay that carries HTTP/2</td><td><span class="st d">Decided</span> for day 1</td></tr>
     </tbody>
   </table></div>
   <p>A <code>local</code> server receives no credential from Oxagen, because no MCP credential may sit on an enrolled machine. It reads what the machine already has, named in <code>source.env</code>. The off switch stops the gateway's route to it, but an agent with a shell can run the same program itself. A local server therefore suits tools whose effect stays on the machine, and a server that reaches a system on a network belongs behind a relay.</p>
+  <h3>Local servers</h3>
+  <p>The cloud gateway decides every call to a local server, so there is one policy engine, the off switch stays instant, and every governed action is recorded. The cost is one round trip per call, small beside a model call. <span class="st d">Decided</span></p>
+  <ul>
+    <li><strong>Machines.</strong> An admin puts enrolled machines into named groups in Oxagen. A machine runs a local server only when its group is in <code>source.machines</code>.</li>
+    <li><strong>Pinned code.</strong> The lock records the package's name, version, and digest. The local gateway refuses to start anything else.</li>
+    <li><strong>Signed calls.</strong> The local gateway runs a call only on an envelope the cloud gateway signed, bound to the tool version, a hash of the arguments, a nonce, and an expiry a few seconds out. It keeps no cached decisions and no policy engine of its own, and it fails closed when it cannot reach the cloud gateway.</li>
+    <li><strong>Results.</strong> A result passes the local gateway's sensitive-data screen, then returns through the cloud gateway, so shaping, redaction, the record, and metering each have one implementation.</li>
+    <li><strong>Discovery.</strong> A machine in the group reports <code>tools/list</code>, and the sync PR names the machine that reported.</li>
+    <li><strong>No offline mode.</strong> If one is ever needed, it can come later as short-lived signed grants for read-only tools.</li>
+  </ul>
+  <div class="tscroll"><table>
+    <thead><tr><th>Error</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>This machine is not in group <code>dev-laptops</code>.</td><td class="wrap">Ask a workspace admin to add it.</td></tr>
+      <tr><td>The package digest does not match the lock.</td><td class="wrap">Reinstall the locked version, or run the sync if the package changed on purpose.</td></tr>
+      <tr><td>Oxagen's cloud gateway cannot be reached.</td><td class="wrap">Local tools stay off until it is back. Check the network, then retry.</td></tr>
+    </tbody>
+  </table></div>
   <h3>Definition import</h3>
   <ul>
     <li><strong>OpenAPI.</strong> OpenAPI 3.1 and 3.0 in YAML or JSON. Swagger 2.0 is converted to 3.0 at compile time, and the original stays in the folder so a sync diff compares like with like.</li>
@@ -729,13 +750,22 @@ unless { context.approval.granted };</code></pre></figure>
     <li><strong>Policy sees the real tool.</strong> The gateway decides <code>billing__call</code> with <code>tool: "create_refund"</code> as <code>billing__create_refund</code>. Cedar rules, toolbelt grants, classification, approvals, and spend attribution work the same in both modes.</li>
     <li><strong>Search shows only what the agent may call.</strong> Visibility is permission, so a search never returns a tool outside the agent's toolbelt.</li>
     <li><strong>The tool list never changes mid-session.</strong> A fixed list keeps the provider's prompt cache warm. Tool lists that grow during a session break the cache and depend on each harness handling list changes.</li>
-    <li><strong>Ranking.</strong> <code>search</code> ranks with embeddings of each tool's one-line entry. By default Oxagen embeds with Voyage AI's <code>voyage-3-large</code> on its own shared key and absorbs the cost. A workspace can set its own embedding endpoint, model, and key. <span class="st d">Decided</span></li>
+    <li><strong>Ranking.</strong> <code>search</code> ranks with embeddings of each tool's one-line entry. By default Oxagen embeds with Voyage AI's <code>voyage-4-large</code> on its own shared key and absorbs the cost. A workspace can set its own embedding endpoint, model, and key, or decline embeddings and rank by keyword. <span class="st d">Decided</span></li>
     <li><strong>Only changes are embedded.</strong> Publish embeds entries whose content hash changed, through a queue that batches them, so one large import cannot use up a shared rate limit. When the endpoint fails, search falls back to keyword matching.</li>
     <li><strong>Studio recommends a mode.</strong> When the imported definitions pass <code>definition_budget</code>, Studio suggests <code>search</code>. The names <code>search</code>, <code>describe</code>, and <code>call</code> are reserved in a server that uses it.</li>
   </ul>
   <h3>Embedding endpoint</h3>
-  <p>A workspace that sets nothing uses Oxagen's default. One that sets <code>[embeddings]</code> in <code>workspace.toml</code> uses its own endpoint, model, and key, by steering PR like any configuration.</p>
+  <p><code>[embeddings]</code> in <code>workspace.toml</code> chooses the provider, and it changes by steering PR like any configuration. <span class="st d">Decided</span></p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Provider</th><th>Ranking</th></tr></thead>
+    <tbody>
+      <tr><td><code>oxagen</code></td><td class="wrap">The default when nothing is set. Voyage AI's <code>voyage-4-large</code> on Oxagen's key.</td></tr>
+      <tr><td><code>custom</code></td><td class="wrap">The workspace's own endpoint, model, and key</td></tr>
+      <tr><td><code>keyword</code></td><td class="wrap">Keyword matching. Nothing is sent to any embedding provider. For a workspace that declines Voyage and has no provider of its own.</td></tr>
+    </tbody>
+  </table></div>
   <figure class="code"><figcaption><span class="path">workspace.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">[embeddings]
+provider = "custom"                          # oxagen (the default), custom, or keyword
 url = "https://embeddings.a-intel.com/v1/embeddings"
 model = "bge-large-en-v1.5"
 credential = "oxagen:credential/embeddings"</code></pre></figure>
@@ -772,6 +802,7 @@ credential = "oxagen:credential/embeddings"</code></pre></figure>
       <tr><td>A list field with no paging arguments</td><td>graphql</td><td>warning</td><td class="wrap">One result can fill the context</td></tr>
       <tr><td>A <code>google.protobuf.Any</code> field</td><td>grpc</td><td>warning</td><td class="wrap">Its type is known only at run time</td></tr>
       <tr><td>A server-streaming method imported without <code>max_items</code></td><td>grpc</td><td>warning</td><td class="wrap">A stream that never ends would run to its deadline on every call</td></tr>
+      <tr><td>A local server with no <code>source.machines</code></td><td>local</td><td>info</td><td class="wrap">It runs nowhere until a steering PR names a group</td></tr>
       <tr><td>A method with no <code>idempotency_level</code></td><td>grpc</td><td>info</td><td class="wrap">The suggestion falls back to <code>write</code> and <code>high</code></td></tr>
     </tbody>
   </table></div>
@@ -801,7 +832,7 @@ credential = "oxagen:credential/embeddings"</code></pre></figure>
     <tbody>
       <tr><td><code>cloud</code></td><td class="wrap">Servers and APIs on the internet</td><td class="wrap">The cloud gateway calls from published egress addresses, so the server can allow them</td></tr>
       <tr><td><code>relay:&lt;name&gt;</code></td><td class="wrap">Servers and APIs inside a private network</td><td class="wrap">The customer runs the Oxagen relay inside the network. It opens one outbound TLS connection to Oxagen, so no inbound port and no firewall change are needed. It sends only requests the cloud gateway signed after deciding them, and returns the responses.</td></tr>
-      <tr><td>Local</td><td class="wrap">A <code>local</code> server</td><td class="wrap">The local gateway on the agent's machine runs it, after the cloud gateway decides the call</td></tr>
+      <tr><td>Local</td><td class="wrap">A <code>local</code> server</td><td class="wrap">The local gateway on the agent's machine runs it, on an envelope the cloud gateway signed. See Local servers.</td></tr>
       <tr><td>Self-hosted gateway</td><td class="wrap">Customers who run the cloud gateway themselves</td><td class="wrap">The gateway is already inside the network (ADR-187)</td></tr>
     </tbody>
   </table></div>
@@ -842,7 +873,7 @@ credential = "oxagen:credential/embeddings"</code></pre></figure>
     <li><div><strong>Decide.</strong><p>Toolbelt grant, Cedar rules with the tool's classification, and budget. An approval parks the call and asks the operator.</p></div></li>
     <li><div><strong>Shape the input.</strong><p>Fixed values and defaults added, renamed inputs mapped back to the upstream names.</p></div></li>
     <li><div><strong>Authenticate.</strong><p>The credential from the vault for the agent's environment, or the operator's token.</p></div></li>
-    <li><div><strong>Send.</strong><p>An MCP source receives <code>tools/call</code> with the upstream name. An OpenAPI source receives the HTTP request built from the operation, with an idempotency key where configured. A GraphQL source receives one <code>POST</code> with the stored selection set and the arguments as variables. A gRPC source receives the call from a client that encodes and decodes from the descriptors, with no generated code. A local source runs on the agent's machine. Every send has a 30-second deadline by default.</p></div></li>
+    <li><div><strong>Send.</strong><p>An MCP source receives <code>tools/call</code> with the upstream name. An OpenAPI source receives the HTTP request built from the operation, with an idempotency key where configured. A GraphQL source receives one <code>POST</code> with the stored selection set and the arguments as variables. A gRPC source receives the call from a client that encodes and decodes from the descriptors, with no generated code. A local source runs on the agent's machine when the local gateway receives the signed envelope, and its result returns through the cloud gateway. Every send has a 30-second deadline by default.</p></div></li>
     <li><div><strong>Retry.</strong><p>OpenAPI <code>GET</code>, <code>HEAD</code>, <code>PUT</code>, <code>DELETE</code>, and a <code>POST</code> with an idempotency key retry on 429, 502, 503, and 504, up to 3 times. A GraphQL query retries as a <code>GET</code> does, and a mutation never retries. A gRPC call retries on <code>UNAVAILABLE</code> only when its method is marked <code>NO_SIDE_EFFECTS</code> or <code>IDEMPOTENT</code>. An MCP call retries only when the transport failed before the server received it.</p></div></li>
     <li><div><strong>Shape the result.</strong><p><code>select</code>, <code>redact</code>, and the size cap, then <code>structuredContent</code> and text.</p></div></li>
     <li><div><strong>Record.</strong><p>The decision, status, latency, bytes, and the arguments and result as the workspace's retention setting allows. Meter the call as a governed action.</p></div></li>
@@ -966,21 +997,18 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
 <section id="open">
   <span class="eyebrow">Open questions</span>
   <h2>Open questions</h2>
-  <ol>
-    <li><strong>Default embedding model.</strong> <code>voyage-3-large</code>, as written here, or <code>voyage-4-large</code>, which Voyage released in January 2026. Either change re-embeds every workspace on the default.</li>
-    <li><strong>Local servers.</strong> Which machines may run one, and whether the local gateway waits for the cloud gateway's decision on every call.</li>
-  </ol>
+  <p>None. Every question raised on this page has an answer above.</p>
 </section>
 
 <section id="build">
   <span class="eyebrow">Build</span>
   <h2>Build prompts</h2>
-  <p>Seventeen lanes in three waves, run beside the steering repo's lanes. M0 starts once the steering repo's S0 has merged, because it imports S0's names. Every wave 1 lane then starts at once and fills one module behind a signature M0 fixes. Each prompt stands alone.</p>
+  <p>Eighteen lanes in three waves, run beside the steering repo's lanes. M0 starts once the steering repo's S0 has merged, because it imports S0's names. Every wave 1 lane then starts at once and fills one module behind a signature M0 fixes. Each prompt stands alone.</p>
   <div class="waves">
     <div class="wave"><h4>Wave 0 <small>after S0</small></h4><ul>
       <li><strong>M0</strong> Contract, operation model, fixtures</li>
     </ul></div>
-    <div class="wave"><h4>Wave 1 <small>13 lanes in parallel</small></h4><ul>
+    <div class="wave"><h4>Wave 1 <small>14 lanes in parallel</small></h4><ul>
       <li><strong>M1</strong> OpenAPI import</li>
       <li><strong>M2</strong> GraphQL import</li>
       <li><strong>M3</strong> gRPC import</li>
@@ -994,11 +1022,12 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
       <li><strong>M11</strong> Import PRs</li>
       <li><strong>M12</strong> Relay</li>
       <li><strong>M13</strong> Registry projection and migration</li>
+      <li><strong>M14</strong> Local servers</li>
     </ul></div>
     <div class="wave"><h4>Wave 2 <small>3 lanes</small></h4><ul>
-      <li><strong>M14</strong> Serving and search mode</li>
-      <li><strong>M15</strong> Replay and selection tests</li>
-      <li><strong>M16</strong> Live test</li>
+      <li><strong>M15</strong> Serving and search mode</li>
+      <li><strong>M16</strong> Replay and selection tests</li>
+      <li><strong>M17</strong> Live test</li>
     </ul></div>
   </div>
   <div class="tscroll"><table>
@@ -1018,26 +1047,27 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
       <tr><td>M11</td><td class="wrap"><code>packages/handlers/src/mcp-studio/import/</code></td><td>M0</td></tr>
       <tr><td>M12</td><td class="wrap"><code>apps/relay/</code>, <code>packages/relay-broker/</code>, the Helm chart</td><td>M0</td></tr>
       <tr><td>M13</td><td class="wrap"><code>schema/mcp.ts</code> and <code>schema/agent.ts</code> changes with one migration, <code>lib/tool-registry.ts</code>, <code>tool.import.ts</code>, <code>agent.mcp.register*.ts</code>, <code>materialize-tools.ts</code>, the migration PR</td><td>M0</td></tr>
-      <tr><td>M14</td><td class="wrap"><code>apps/mcp/src/servers/</code>, the search index</td><td>S5, M4, M6, M7, M13</td></tr>
-      <tr><td>M15</td><td class="wrap"><code>packages/mcp-studio/src/replay/</code>, <code>src/selection/</code>, the servers part of the <code>compile</code> check</td><td>S4, M4, M6</td></tr>
-      <tr><td>M16</td><td class="wrap">A live test suite with sample servers in CI</td><td>All of wave 1, M14</td></tr>
+      <tr><td>M14</td><td class="wrap"><code>packages/tacho/src/collector/local-servers/</code>, <code>packages/handlers/src/mcp-studio/local-calls/</code>, a machine group table in its own schema file</td><td>M0</td></tr>
+      <tr><td>M15</td><td class="wrap"><code>apps/mcp/src/servers/</code>, the search index</td><td>S5, M4, M6, M7, M13, M14</td></tr>
+      <tr><td>M16</td><td class="wrap"><code>packages/mcp-studio/src/replay/</code>, <code>src/selection/</code>, the servers part of the <code>compile</code> check</td><td>S4, M4, M6</td></tr>
+      <tr><td>M17</td><td class="wrap">A live test suite with sample servers in CI</td><td>All of wave 1, M15</td></tr>
     </tbody>
   </table></div>
 
   <h3>Coordinator</h3>
   <figure class="code prompt"><figcaption><span class="path">Coordinator prompt</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">You coordinate the build of MCP Studio and the MCP server storage layer in
 macanderson/oxagen. The spec is mcp-studio-spec.html in macanderson/oxagen-roadmap.
-Its Build prompts section holds one prompt per lane, M0 to M16. It depends on the
+Its Build prompts section holds one prompt per lane, M0 to M17. It depends on the
 steering repo build (steering-repo-spec.html, lanes S0 to S11), which another
 coordinator may run.
 
 1. Wait until S0 has merged. Start one agent with the M0 prompt. Wait until its
    PR merges.
-2. Start thirteen agents at once with the M1 to M13 prompts, one lane each.
+2. Start fourteen agents at once with the M1 to M14 prompts, one lane each.
 3. When a lane reports that the contract is wrong, stop the lanes it affects,
    fix the contract in one PR, and restart them after it merges.
-4. Start M14 when S5, M4, M6, M7, and M13 have merged. Start M15 when S4, M4,
-   and M6 have merged. Start M16 when wave 1 and M14 have merged.
+4. Start M15 when S5, M4, M6, M7, M13, and M14 have merged. Start M16 when S4, M4,
+   and M6 have merged. Start M17 when wave 1 and M15 have merged.
 5. Report each lane's issue, PR, and state (pending, merged, or failed) in one
    table. Pending is pending. A cancelled or skipped required job is not a pass.
 
@@ -1071,7 +1101,7 @@ This overrides any repository file that still allows a local test file, a local 
 
 Goal
 Fix every file schema, type, and function signature the MCP lanes share, so
-thirteen lanes can fill their modules at once. No behavior yet.
+fourteen lanes can fill their modules at once. No behavior yet.
 
 Read first
 - mcp-studio-spec.html: Storage model, Server file, Tools file, Risk
@@ -1091,7 +1121,8 @@ Do
    source type), mcp-tools/v1 (tools.toml, classification keys in snake case
    mapped to today's camelCase classification), mcp-tools-lock/v1,
    tool-manifest/v1, and the relay envelope (signature, expiry, nonce, and
-   the exact method, host, and path or gRPC service and method).
+   the exact method, host, and path or gRPC service and method), and the local
+   call envelope (tool version, a hash of the arguments, a nonce, and an expiry).
 2. A format-neutral operation model: UpstreamTool with name, description,
    input and output JSON Schema, annotations or classification hints, and a
    request template that is a tagged union of mcp, http, graphql, and grpc.
@@ -1921,8 +1952,76 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
+  <figure class="code prompt"><figcaption><span class="path">M14 Local servers</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M14. Local servers
+
+Goal
+The local gateway runs a local server's tools only on machines a steering PR
+named, only from the package the lock pins, and only on a call the cloud
+gateway decided and signed.
+
+Read first
+- mcp-studio-spec.html: Sources (Local servers), Lock file, Call path,
+  Network paths.
+- packages/tacho/src/collector/mcp-gateway.ts (the local gateway today),
+  packages/tacho/src/cli/enroll.ts (enrollment).
+- packages/mcp-studio/src/contract/ (the local call envelope, from M0).
+
+You own
+- packages/tacho/src/collector/local-servers/ (new)
+- packages/handlers/src/mcp-studio/local-calls/ (new: signing on the Oxagen side)
+- A machine group table in its own schema file, with its migration, and the
+  handlers that add and remove machines
+
+Do
+1. Machine groups: an admin puts enrolled machines into named groups. A
+   machine runs a local server only when its group is in source.machines.
+2. Pinned code: resolve the command to a package and version, compute its
+   digest, and refuse to start it when the digest differs from the lock.
+3. Every call: the cloud gateway signs an envelope bound to the tool version,
+   a hash of the arguments, a nonce, and an expiry a few seconds out. The
+   local gateway runs the call only on a valid envelope, keeps no cached
+   decisions and no policy of its own, and fails closed when the cloud gateway
+   is unreachable. No offline mode.
+4. Results: run the local gateway's sensitive-data screen where it exists,
+   then send the result to the cloud gateway, which shapes, records, and
+   meters it.
+5. Discovery: report tools/list from a machine in the group to M10's
+   discovery, naming the machine.
+6. Errors name the fix, as the spec's Local servers table lists them.
+7. Expose the local path as a Transport for M15.
+
+Done when
+- Tests cover a machine outside the group, a digest mismatch, an expired and a
+  replayed envelope, an unreachable cloud gateway, and a successful call.
+- CI is green.
+
+Rules for every lane
+- The spec is mcp-studio-spec.html in macanderson/oxagen-roadmap. The Shared contract section of steering-repo-spec.html is fixed: use its names exactly. If the contract is wrong, stop and say so in the PR body. Do not work around it.
+- Work in macanderson/oxagen. Create the worktree with:
+  git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
+- Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
+- Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+- Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
+- A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
+- Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
+- New code and copy say "steering record" and "steering PR" (#4325).
+
+## Local execution
+
+Mac set this on 2026-09-26 for every repository on this machine. Local builds, test runs, dev servers, and git hooks ran the laptop out of memory and killed agent runs partway through, and every killed run costs money. CI is the only place code is built, checked, or tested.
+
+- Do not run the gate, a build, a typecheck, a lint, or any test, not even one test file. Push the branch and read the CI result. Read a failed job with `gh run view --job &lt;id&gt; --log-failed`.
+- Do not start a dev server: no `next dev`, `next start`, `pnpm dev`, a server under `cargo run`, or anything else that listens on a port.
+- Do not start Docker or Colima, and do not run anything that needs them.
+- Do not run Biome in any form.
+- Git hooks are off on this machine. `LEFTHOOK=0` and `HUSKY=0` are set for every shell (`~/.zshenv`) and every Claude Code session (`~/.claude/settings.json`). oxagen's installed hooks are renamed `*.disabled`, and stella's `core.hooksPath` is unset. Do not reinstall a hook, turn one back on, or run a hook's commands by hand.
+- Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
+- Put this rule, word for word, in the prompt of every subagent you start.
+
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+
   <h3>Wave 2</h3>
-  <figure class="code prompt"><figcaption><span class="path">M14 Serving and search mode</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M14. Serve every server's tools to wrapped agents, and the search index
+  <figure class="code prompt"><figcaption><span class="path">M15 Serving and search mode</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M15. Serve every server's tools to wrapped agents, and the search index
 
 Goal
 An agent's MCP connection lists its toolbelt's tools from the published bundle,
@@ -1949,18 +2048,20 @@ Do
    grant, the classification, and the decision rules in packages/rules (Cedar
    when its evaluator lands). Park for approval through the existing approval
    path. Then call M6's execute with M8's CredentialSource and the Transport
-   the environment names: cloud, M12's relay, or the local gateway. The
+   the environment names: cloud, M12's relay, or M14's local transport. The
    environment is the one the agent's definition names for the server, or
    else the server's sandbox.
 3. Search mode: search returns only tools in the toolbelt, describe returns
    one input schema, and call is decided as the underlying tool.
 4. The search index: on publish, embed each changed one-line entry, keyed by
    content hash and model, through a queue that batches calls. Use the
-   workspace's [embeddings] url, model, and credential when workspace.toml
-   sets them. Otherwise use Voyage AI's voyage-3-large on Oxagen's key, which
+   workspace's [embeddings] url, model, and credential when its provider is
+   custom. When nothing is set (provider oxagen), use voyage-4-large on Oxagen's
+   key, which
    is stored in AWS: find how the API reads its other AWS-held secrets and
-   read it the same way. Never log a key. Re-embed a workspace when its model
-   or endpoint changes. Fall back to keyword ranking when the endpoint fails.
+   read it the same way. Never log a key. provider = "keyword" embeds nothing
+   and ranks by keyword. Re-embed a workspace when its provider, model, or
+   endpoint changes. Fall back to keyword ranking when the endpoint fails.
 5. Meter as a governed action every call, search, describe, and Try it call,
    including calls that policy denies or parks.
 
@@ -1994,7 +2095,7 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M15 Replay and selection tests</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M15. Replay recorded calls in the PR, and selection tests on request
+  <figure class="code prompt"><figcaption><span class="path">M16 Replay and selection tests</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M16. Replay recorded calls in the PR, and selection tests on request
 
 Goal
 The compile check replays each server's tests/calls.jsonl with no network, and
@@ -2046,7 +2147,7 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M16 Live test</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M16. Live test with sample servers
+  <figure class="code prompt"><figcaption><span class="path">M17 Live test</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M17. Live test with sample servers
 
 Goal
 One CI job connects a sample MCP server and imports a sample OpenAPI, GraphQL,
