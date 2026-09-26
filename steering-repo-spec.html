@@ -380,7 +380,8 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
         <li>Oxagen assumes operators follow the conduct rules of their job, and adds no controls aimed at an operator who breaks them. (Mac, 2026-09-26)</li>
         <li>Rules can @mention a skill or a tool. (Mac, 2026-09-26)</li>
         <li>Built-in tools share one Cedar vocabulary across every harness. (Mac, 2026-09-26)</li>
-        <li>Names use hyphens for slugs and record names, and snake_case for API, field, and key names. Nothing Oxagen names uses camelCase. (Mac, 2026-09-26)</li>
+        <li>Properties, fields, and keys use snake_case. File names, folder names, and record slugs use hyphens. Neither uses camelCase, and function names in code may. (Mac, 2026-09-26)</li>
+        <li>The managed-block markers, the token efficiency design, and the scale targets. A workspace never has to set a budget. (Mac, 2026-09-26)</li>
         <li>The provisioning steps, the name Oxagen Steering, and the drift design: signals, states, and effects. (Mac, 2026-09-26)</li>
         <li>The steering PR steps Open, Check, Stamp, and Publish. (Mac, 2026-09-26)</li>
         <li>Approve and Merge buttons in the web app. In <code>solo</code> mode a steering PR has no approval step and a merge counts as approved. In every other mode it needs an approval and a merge. The workspace owner, in any mode, may merge as in <code>solo</code> mode. (Mac, 2026-09-26)</li>
@@ -410,7 +411,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
     <div class="card">
       <h4><span class="st p">Proposed</span></h4>
       <ul>
-        <li>The details below that no Decided item names: the settings table beyond the required check, the scale targets, the build lanes, the Cedar policy on a subagent's skill, the @mention syntax, and function tools.</li>
+        <li>The details below that no Decided item names: the settings table beyond the required check, the build lanes, the Cedar policy on a subagent's skill, the @mention syntax, and function tools.</li>
       </ul>
     </div>
   </div>
@@ -1014,7 +1015,7 @@ when {
   <span class="eyebrow">Policy</span>
   <h2>Policies</h2>
   <p>Cedar policies live in <code>policy/</code>, one file per group of related rules, each with a tests file beside it. Oxagen writes <code>policy/schema.cedarschema</code> from the workspace's tools and the files in <code>agents/</code>, and compiles the grant from the workspace's imported tools and each harness's built-in tools, so no one writes a grant as a rule and every policy narrows. The format, the schema, and the tests follow the agent policy spec (<code>oxagen-agent-policy-spec.html</code>, PR 127). <span class="st p">Proposed</span></p>
-  <p>Today no Cedar evaluator exists. Decision rules are a zod engine in <code>packages/rules</code> that reads the <code>decisionRules</code> key of <code>workspaces.settings</code> in Postgres, a camelCase name the naming rule retires. <span class="st c">Today</span> Lane S12 builds the evaluator for the gateway and for the pre-tool hook. <span class="st p">Proposed</span></p>
+  <p>Today no Cedar evaluator exists. Decision rules are a zod engine in <code>packages/rules</code> that reads the <code>decisionRules</code> key of <code>workspaces.settings</code> in Postgres, a camelCase key the naming rule retires. <span class="st c">Today</span> Lane S12 builds the evaluator for the gateway and for the pre-tool hook. <span class="st p">Proposed</span></p>
   <figure class="code"><figcaption><span class="path">policy/money.tests.jsonl</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="json">{"name":"refund under limit","principal":"a-intel.finops.invoice-bot","tool":"billing__create_refund@3","context":{"args":{"amount":12000}},"expect":"allow"}
 {"name":"refund over limit","principal":"a-intel.finops.invoice-bot","tool":"billing__create_refund@3","context":{"args":{"amount":64000}},"expect":"require_approval"}</code></pre></figure>
   <h3 id="builtins">Built-in tools</h3>
@@ -1315,7 +1316,7 @@ group = "billing-leads"</code></pre></figure>
 <section id="scale">
   <span class="eyebrow">Scale</span>
   <h2>Scale</h2>
-  <p>Design targets for one workspace. Each has a mechanism behind it. <span class="st p">Proposed</span></p>
+  <p>Design targets for one workspace. Each has a mechanism behind it. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
   <div class="tscroll"><table>
     <thead><tr><th>Measure</th><th class="num">Target</th><th>Mechanism</th></tr></thead>
     <tbody>
@@ -1339,7 +1340,7 @@ group = "billing-leads"</code></pre></figure>
 <section id="tokens">
   <span class="eyebrow">Tokens</span>
   <h2>Token efficiency</h2>
-  <p>An always-on record is paid on every model request of every run it reaches. The design keeps that set small and byte-stable so it caches, and makes everything else load on demand. <span class="st p">Proposed</span></p>
+  <p>An always-on record is paid on every model request of every run it reaches. The design keeps that set small and byte-stable so it caches, and makes everything else load on demand. A workspace never has to set a budget. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
   <div class="tscroll"><table>
     <thead><tr><th>Mechanism</th><th>What it does</th></tr></thead>
     <tbody>
@@ -1396,7 +1397,7 @@ Read any of these with steering_read when it fits the task.
     <li><strong>No clone needed.</strong> Oxagen's MCP tools read and propose without git.</li>
   </ul>
   <h3>Managed blocks</h3>
-  <p>Oxagen's text in <code>AGENTS.md</code>, <code>CLAUDE.md</code>, and <code>README.md</code> sits between two markers, and the first marker carries a hash of the text between them. People may write anything outside the block. The <code>owned</code> check recomputes the hash on every steering PR and fails a PR that edits or removes the block, and the web app shows Drift detected in <code>AGENTS.md</code> on that PR, with Restore block, which pushes a commit that puts the block back. Only Oxagen merges into <code>main</code>, so drift lives in an open pull request and never reaches the published version. <span class="st d">Decided</span> for the block and the warning, <span class="st p">Proposed</span> for the marker format.</p>
+  <p>Oxagen's text in <code>AGENTS.md</code>, <code>CLAUDE.md</code>, and <code>README.md</code> sits between two markers, and the first marker carries a hash of the text between them. People may write anything outside the block. The <code>owned</code> check recomputes the hash on every steering PR and fails a PR that edits or removes the block, and the web app shows Drift detected in <code>AGENTS.md</code> on that PR, with Restore block, which pushes a commit that puts the block back. Only Oxagen merges into <code>main</code>, so drift lives in an open pull request and never reaches the published version. <span class="st d">Decided</span> for the block, the warning, and the marker format (Mac, 2026-09-26).</p>
   <figure class="code"><figcaption><span class="path">AGENTS.md, first lines</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="markdown">&lt;!-- oxagen:begin managed sha256:4c1f09a7e2b3d58c --&gt;
 # a-intel/oxagen-core-platform
 
@@ -1450,7 +1451,7 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
       <tr><td>Steering repo</td><td class="wrap"><code>&lt;org&gt;/oxagen-&lt;workspace-slug&gt;</code>, then <code>-2</code> on a clash. Organization repo <code>&lt;org&gt;/oxagen</code>.</td></tr>
       <tr><td>Top-level paths</td><td class="wrap"><code>AGENTS.md</code> <code>CLAUDE.md</code> <code>README.md</code> <code>.gitattributes</code> <code>workspace.toml</code> <code>agents/</code> <code>steering/</code> <code>steering/governance.toml</code> <code>steering/promotions/&lt;period&gt;.jsonl</code>, then <code>&lt;period&gt;.002.jsonl</code> past the line cap <code>steering/skills/</code> <code>steering/memory/</code> <code>tools/servers/&lt;name&gt;/</code> <code>tools/toolbelts/</code> <code>policy/</code></td></tr>
       <tr><td>Schema ids</td><td class="wrap"><code>steering-record/v1</code> <code>workspace/v1</code> <code>agent/v1</code> <code>governance/v1</code> <code>toolbelt/v1</code> <code>mcp-server/v1</code> <code>mcp-tools/v1</code> <code>mcp-tools-lock/v1</code> <code>tool-manifest/v1</code> <code>reflection/v1</code> <code>promotion/v1</code> <code>bundle/v1</code>, each at <code>https://oxagen.sh/schemas/&lt;id&gt;.json</code></td></tr>
-      <tr><td>Naming</td><td class="wrap">Hyphens for slugs and record names, such as <code>refunds-over-100</code>. snake_case for API, field, and key names, such as <code>always_on_tokens</code>. Nothing Oxagen names uses camelCase. A name a standard fixes, such as MCP's <code>inputSchema</code>, keeps the standard's spelling. <span class="st d">Decided</span> (Mac, 2026-09-26)</td></tr>
+      <tr><td>Naming</td><td class="wrap">snake_case for properties, fields, and keys, such as <code>always_on_tokens</code>. Hyphens for file names, folder names, and record slugs, such as <code>refunds-over-100.md</code>. Neither uses camelCase. Function names in code follow the language, so <code>withTenantDb</code> stays. A name a standard fixes, such as MCP's <code>inputSchema</code>, keeps the standard's spelling. <span class="st d">Decided</span> (Mac, 2026-09-26)</td></tr>
       <tr><td>Tool name</td><td class="wrap"><code>&lt;server&gt;__&lt;tool&gt;</code>. Built-in tools are <code>builtin__&lt;name&gt;</code>, and <code>builtin</code> is reserved. Server <code>^[a-z][a-z0-9_]{0,23}$</code>, tool <code>^[a-z][a-z0-9_]*$</code>, 64 characters at most in all. A pinned reference adds <code>@&lt;version&gt;</code>.</td></tr>
       <tr><td>Credential reference</td><td class="wrap"><code>oxagen:credential/&lt;name&gt;</code>, name <code>^[a-z0-9][a-z0-9-]{0,62}$</code></td></tr>
       <tr><td>Repository reference</td><td class="wrap"><code>&lt;host&gt;/&lt;owner&gt;/&lt;name&gt;</code>, lowercase</td></tr>
