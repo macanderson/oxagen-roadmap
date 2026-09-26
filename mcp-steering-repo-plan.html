@@ -1379,7 +1379,9 @@ Do
    for a built-in tool, such as builtin__shell for Claude Code&#x27;s Bash and
    Codex&#x27;s shell. Write the map for every harness Oxagen supports, and decide
    an unmapped built-in tool as builtin__shell. The context is the agent policy spec&#x27;s Call type, plus
-   context.skill when the harness names the skill a subagent runs.
+   context.skill when the harness names the skill a subagent runs. When it
+   does not, decide the call as the main agent&#x27;s, and record which harnesses
+   never name the skill so the Skills screen can warn.
 3. The grant: every agent is granted the workspace&#x27;s imported tools and its
    harness&#x27;s built-in tools. Compile that grant into a permit, so every
    policy a person writes narrows it.

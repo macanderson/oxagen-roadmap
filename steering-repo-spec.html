@@ -387,6 +387,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
         <li>Approve and Merge buttons in the web app. In <code>solo</code> mode a steering PR has no approval step and a merge counts as approved. In every other mode it needs an approval and a merge. The workspace owner, in any mode, may merge as in <code>solo</code> mode, and so may a member whose custom role grants that one permission. Organization admins get it only through such a role. (Mac, 2026-09-26)</li>
         <li>Every published version gets the next number for its workspace, so an auditor can tell which version steered a run. (Mac, 2026-09-26)</li>
         <li>Oxagen marks the pull requests it played a part in with a badge from the brand kit. (Mac, 2026-09-26)</li>
+        <li>A subagent's skill limit holds only on a harness that says which skill made each tool call. Elsewhere the call gets the main agent's rules, and the Skills screen warns per harness. (Mac, 2026-09-26)</li>
         <li>Function tools run in a sandbox in Oxagen's cloud. Code on a customer's own infrastructure is a REST endpoint connected as a server, through the relay when it is private. (Mac, 2026-09-26)</li>
         <li>The code repository check warns by default. <code>[code_checks] block_merge</code> in <code>workspace.toml</code>, off by default, makes a finding fail the check. (Mac, 2026-09-26)</li>
         <li>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first and creates the workspace with its repository in one automated flow. The 14-day grace period of ADR-065 goes. (Mac, 2026-09-26)</li>
@@ -444,7 +445,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
     <li><strong>No Cedar evaluator exists.</strong> Decision rules run in the zod engine in <code>packages/rules</code>, and no lane built an evaluator until this change. Lane S12 builds it for the gateway and the pre-tool hook, and every item above depends on it.</li>
     <li><strong>The hook decides on the machine.</strong> Built-in tools never reach the gateway, so the compiled policies ride in the signed host bundle, and the hook evaluates them there. Offline, it decides from the cached bundle, as the hook does today.</li>
     <li><strong>A forbidden tool stays in the list.</strong> An agent sees every workspace tool, including one a policy forbids it, and the call is refused with the rule's reason. Hiding such a tool needs the gateway to test each tool for the agent when a run starts. <span class="st p">Proposed</span> for later.</li>
-    <li><strong>Subagent calls.</strong> A harness that does not say which skill made a call gets the parent agent's decision. See Open questions.</li>
+    <li><strong>Subagent calls.</strong> A helper's limit holds only on a harness that says which skill made each call. Elsewhere the call gets the main agent's rules, and the Skills screen warns. <span class="st d">Decided</span> (Mac, 2026-09-26)</li>
     <li><strong>New agents.</strong> A policy names an agent by its file, so an agent enrolled before its file merges runs under the workspace's policies alone.</li>
     <li><strong>Many workspaces.</strong> A person on two teams switches workspace, and each workspace's runs and spend are its own. Records both teams need go in the organization repo, <code>&lt;org&gt;/oxagen</code>.</li>
   </ol>
@@ -1002,7 +1003,7 @@ unless { principal == Agent::"a-intel.core.release-bot" };</code></pre></figure>
     <li><strong>The skill in context.</strong> When the harness says which skill a subagent runs, the hook or the gateway adds it to the request as <code>context.skill</code>.</li>
     <li><strong>Read only by class.</strong> A policy forbids any call whose side effect is not <code>read</code> for that skill, so a new write tool never slips in. Built-in tools carry a classification too, so the same rule covers <code>builtin__write_file</code> and <code>builtin__shell</code>.</li>
     <li><strong>What the model sees.</strong> When a harness has its own tool list for a subagent, such as the <code>tools</code> field of a Claude Code subagent, Oxagen can fill it when it delivers the skill. The list trims what the model sees, and Cedar decides the call.</li>
-    <li><strong>Knowing the caller.</strong> A harness that does not say which skill made a call gets the parent agent's decision. See Open questions.</li>
+    <li><strong>Knowing the caller.</strong> A skill's limit holds only on a harness that says which skill made each tool call. On a harness that does not say, the call is checked against the main agent's rules, and the Skills screen warns, harness by harness, where the limit does not hold. <span class="st d">Decided</span> (Mac, 2026-09-26)</li>
     <li><strong>Later.</strong> A skill's own <code>toolbelt</code> field, with named toolbelts.</li>
   </ul>
   <figure class="code"><figcaption><span class="path">policy/review.cedar</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">// The code reviewer skill reads and writes nothing.
@@ -1545,7 +1546,6 @@ billing__call {"tool": "create_refund", "arguments": {"charge": "ch_3Q", "amount
     <li>How Oxagen Steering reaches a steering repo it creates: an organization owner's user token that adds each new repository to the installation (recommended), or an installation on all repositories. See Provisioning.</li>
     <li>Checks on linked code repositories: posted by the Oxagen app with no committed files (recommended), or a CI workflow committed to each repository, which reverses the decision that code repositories hold no committed Oxagen files.</li>
     <li>Which language function tools support first. Recommended: TypeScript. See Function tools.</li>
-    <li>Helper limits on harnesses that stay silent. An agent can hand part of a job to a helper, a subagent that follows a skill such as a code reviewer. A policy on that skill can limit the helper, for example to reading only. The limit works only when the harness tells Oxagen which skill made each tool call. Some harnesses do not say, so the helper's call looks like the main agent's and gets the main agent's rules. Recommended: allow it, and show on the Skills screen that the helper's limit does not hold on that harness. The other choice: do not hand that skill to that harness at all. See Subagents.</li>
   </ol>
 </section>
 
