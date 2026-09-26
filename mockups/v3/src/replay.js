@@ -65,13 +65,15 @@ function rpState(vt, blocks) {
   return "working";
 }
 function rpCostAt(vt) {
-  var total = 0, by = {}, n = 0;
+  var total = 0, by = {}, n = 0, tk = 0;
   RP.led.reqs.forEach(function (q) {
     if (RP.reqVt[q.n] == null || RP.reqVt[q.n] > vt + 1e-6) return;
-    n++; total += q.cost.total;
+    n++; total += q.cost.total; tk += q.out;
+    for (var r in q.read) tk += q.read[r];
+    for (var w in q.write) tk += q.write[w];
     for (var k in q.cost.by) by[k] = (by[k] || 0) + q.cost.by[k];
   });
-  return { total: total, by: by, n: n };
+  return { total: total, by: by, n: n, tokens: tk };
 }
 /* Recorded seconds since the session started, at replay time vt. */
 function rpRecorded(vt) {
@@ -196,7 +198,7 @@ var CC = {
   answered: function () { return ""; },
   end: function () { return ""; },
   footer: function (st, info) {
-    var spin = st === "working" ? '<div class="cc-spinner"><span class="cc-sg">✻</span> <span class="cc-verb">' + VERBS[info.req % VERBS.length] + '…</span> <span class="cc-dim">(' + dur(info.elapsed) + " · ↓ " + tok(info.out) + " tokens · esc to interrupt)</span></div>" : "";
+    var spin = st === "working" ? '<div class="cc-spinner"><span class="cc-sg" aria-hidden="true"></span><span class="cc-verb">' + VERBS[info.req % VERBS.length] + '…</span> <span class="cc-dim">(' + dur(info.elapsed) + " · ↓ " + tok(info.out) + " tokens · esc to interrupt)</span></div>" : "";
     if (st === "asking") return "";
     return spin + '<div class="cc-input"><div class="cc-rule"></div><div class="cc-in"><span class="cc-pr">&gt;</span> <span class="cc-cursor"></span></div><div class="cc-rule"></div><div class="cc-dim cc-hint">  ? for shortcuts</div></div>';
   },
@@ -427,7 +429,8 @@ function rpRail(cost) {
   var v = document.getElementById("rp-cost"); if (v) v.textContent = money(c);
   var cap = document.getElementById("rp-cap"); if (cap) cap.style.width = Math.min(100, c / RP.T.cap * 100) + "%";
   var so = document.getElementById("rp-so"); if (so) so.textContent = atEnd ? (isLive(s) ? "So far, live" : "Whole session") : "At " + dur(rpRecorded(RP.vt)) + " in the replay";
-  var rq = document.getElementById("rp-reqs"); if (rq) rq.textContent = plural(atEnd ? RP.led.reqs.length : cost.n, "model request");
+  var rq = document.getElementById("rp-reqs"); if (rq) rq.textContent = plural(atEnd ? RP.led.reqs.length : cost.n, "model request") + ", " + tok(atEnd ? s.tokens : cost.tokens) + " tokens";
+  var ch = document.getElementById("rp-changes"); if (ch) { var html = changesFor(RP.T, atEnd ? null : RP.vt); if (ch.innerHTML !== html) ch.innerHTML = html; }
   document.querySelectorAll("#rp-chart [data-n]").forEach(function (bar) { bar.classList.toggle("on", RP.reqVt[+bar.getAttribute("data-n")] <= RP.vt + 1e-6); });
   var where = document.getElementById("rp-where");
   if (where) where.innerHTML = whereRows(atEnd ? s.cost.by : cost.by, s.harness, atEnd ? s.cost.total : cost.total);

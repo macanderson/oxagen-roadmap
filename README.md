@@ -17,6 +17,7 @@ mockups/fixtures/*.json       the demo record, one file per collection (README.m
 mockups/pages/<page>.md       the spec of every page, and beside each an audit prompt for a build of it
 mockups/stories/              the Storybook catalog: every page × state × shell, every scenario
 mockups/future_state_mockups/ the first mockup (witness runner, proof, definition of done, scores): kept, not a target
+mockups/v3/                   a smaller design for finding the wedge: six areas and a transcript replay per harness (its README says what it cuts)
 docs/missioncontrol-docs.html the documents page: every docs/*.md, one file
 docs/*.md                     the spec, the DoD spec, the witness spec, the desktop spec, the plan, the scope review, the mockup records
 badges/                       the verification badge for pull requests and branches, one SVG per state and theme

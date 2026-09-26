@@ -5,10 +5,12 @@
 import { buildMockup } from "../tools/build-mockup.mjs";
 
 import { buildMockupFuture } from "../tools/build-mockup-future.mjs";
+import { buildMockupV3 } from "../tools/build-mockup-v3.mjs";
 
 const ROUTES = {
   "/missioncontrol.html": buildMockup,
   "/future_state_mockups/missioncontrol.html": buildMockupFuture,
+  "/v3/index.html": buildMockupV3,
 };
 
 export function mockupMiddleware(req, res, next) {

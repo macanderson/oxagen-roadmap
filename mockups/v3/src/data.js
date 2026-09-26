@@ -227,7 +227,7 @@ function workItems() {
   return F.WORK.map(function (w) {
     var c = {}; for (var k in w) c[k] = w[k];
     if (S.sent[w.key]) { c.state = "running"; c.agent = S.sent[w.key].agent; c.session = S.sent[w.key].session.id; }
-    if (w.session && S.answered[w.session] && S.answered[w.session].verdict === "approve") { c.state = "review"; c.release = "v4.11.0"; }
+    if (w.session && S.answered[w.session]) { c.state = "review"; if (S.answered[w.session].verdict === "approve") c.release = "v4.11.0"; else c.held = "v4.11.0"; }
     return c;
   });
 }

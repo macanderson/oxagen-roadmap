@@ -201,6 +201,14 @@ const money = await page.evaluate(() => {
 ok(Math.abs(money.total - money.all) < 1e-9, "spend: the month total is not the sum of its sessions");
 for (const [k, sum] of money.groups) ok(Math.round(sum * 100) === Math.round(money.total * 100), `spend: grouping ${k} sums to ${sum}, not ${money.total}`);
 
+// Steering: the items' costs sum to the steering cost the header states.
+const steer = await page.evaluate(() => {
+  const items = steeringItems().reduce((t, i) => t + steeringStats(i).cost, 0);
+  const total = sessions().reduce((t, s) => { let c = 0; for (const k in s.cost.by) if (k === "steering" || /^skill:/.test(k)) c += s.cost.by[k]; return t + c; }, 0);
+  return { items, total };
+});
+ok(Math.abs(steer.items - steer.total) < 1e-9, `steering: the items sum to ${steer.items}, not the header's ${steer.total}`);
+
 // The first run: every view renders its empty state.
 for (const [name, hash] of Object.entries(VIEWS)) {
   if (name.startsWith("session-")) continue;

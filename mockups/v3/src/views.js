@@ -99,7 +99,7 @@ VIEWS.work = function () {
   } else if (S.workTab === "running" || S.workTab === "review") {
     rows = list.map(function (w) {
       var s = sessionBy(w.session), a = agentBy(w.agent);
-      var third = S.workTab === "running" ? statusBadge(s) : (w.release ? badge("b-allowed", "Draft release " + w.release, true) : '<span class="prc">' + g("pr", 13) + '<span class="mono">' + h(w.pr) + "</span> " + badge(w.checks === "passing" ? "b-allowed" : "b-approval", w.checks === "passing" ? "Checks passing" : "Checks running", true) + "</span>");
+      var third = S.workTab === "running" ? statusBadge(s) : (w.release ? badge("b-allowed", "Draft release " + w.release, true) : w.held ? badge("b-approval", "Release " + w.held + " held", true) : '<span class="prc">' + g("pr", 13) + '<span class="mono">' + h(w.pr) + "</span> " + badge(w.checks === "passing" ? "b-allowed" : "b-approval", w.checks === "passing" ? "Checks passing" : "Checks running", true) + "</span>");
       return '<tr class="click" data-go="sessions|' + h(w.session) + '"><td>' + wiCell(w) + "</td><td class=\"mh\">" + agentCell(a) + "</td><td>" + third + '</td><td class="num">' + money(s.cost.total) + '</td><td class="muted nowrap mh">' + when(s.started) + "</td></tr>";
     });
     rows = '<table><thead><tr><th>Work item</th><th class="mh">Agent</th><th>' + (S.workTab === "running" ? "Status" : "Result") + '</th><th class="num">Cost</th><th class="mh">Started</th></tr></thead><tbody>' + rows.join("") + "</tbody></table>";
@@ -167,10 +167,11 @@ ACTS["send-item"] = function (el) { S.dialog.arg = el.value; S.dialog.agent = nu
 ACTS["send-go"] = function (el) {
   var w = workBy(el.getAttribute("data-key")), a = agentBy(S.dialog.agent || suggestAgent(w));
   var note = (document.getElementById("send-note") || {}).value || "";
+  var capIn = parseFloat(((document.getElementById("send-cap") || {}).value || "").replace(/[^0-9.]/g, ""));
   var id = "ses_01K5S" + Math.random().toString(36).slice(2, 12).toUpperCase().padEnd(10, "0");
   var h0 = HARNESSES[a.harness];
   var T = { id: id, title: w.title, harness: a.harness, harnessV: a.harnessV, model: a.model, modelLabel: modelLabel(a.model), agent: a.key, person: ME, wi: w.key,
-    host: a.host, cwd: "~/src/platform", started: F.ORG.now, status: "running", basis: a.harness === "cursor" ? "harness" : "gateway", cap: a.cap,
+    host: a.host, cwd: "~/src/platform", started: F.ORG.now, status: "running", basis: a.harness === "cursor" ? "harness" : "gateway", cap: capIn > 0 ? capIn : a.cap,
     events: [
       { t: 0, k: "prompt", by: ME, via: "work", tok: 60 + Math.round(w.body.length / 4), text: w.key + ": " + w.title + "\n\n" + w.body + (note ? "\n\n" + note : "") },
       { t: 5.8, k: "req", n: 1, out: 140 },
@@ -276,7 +277,7 @@ function sessionView(id) {
     } };
 }
 function sessionRail(s, T) {
-  var a = agentBy(s.agent), chart = "";
+  var a = agentBy(s.agent), chart = "", cap = T ? T.cap : a.cap;
   if (T) {
     var max = RP.led.reqs.reduce(function (m, q) { return Math.max(m, q.cost.total); }, 0) || 1;
     chart = '<div class="panel pad"><div class="rl-h"><h3>Cost by request</h3><span class="muted">' + plural(RP.led.reqs.length, "request") + '</span></div><div class="reqchart" id="rp-chart">' + RP.led.reqs.map(function (q) {
@@ -284,19 +285,21 @@ function sessionRail(s, T) {
     }).join("") + "</div></div>";
   }
   var basis = s.basis === "harness" ? "Reported by " + hxLabel(a.harness) + ". Its model calls do not pass through the oxagen gateway." : "Metered by the oxagen gateway, at list price.";
-  var changes = T ? changesFor(T) : "";
+  var changes = T ? '<div class="panel pad"><div class="rl-h"><h3>Changes</h3></div><div id="rp-changes">' + changesFor(T, null) + "</div></div>" : "";
   return '<aside class="srail">' +
     '<div class="panel pad costcard"><div class="rl-h"><h3>Cost</h3><span class="muted" id="rp-so">' + (isLive(s) ? "So far, live" : "Whole session") + '</span></div><div class="big num" id="rp-cost">' + money(s.cost.total) + "</div>" +
-      '<div class="capbar"><i id="rp-cap" style="width:' + Math.min(100, s.cost.total / (a.cap || 1) * 100) + '%"></i></div><div class="muted small">' + (a.cap ? "The session stops at " + money(a.cap) + "." : "") + '</div><div class="muted small"><span id="rp-reqs">' + plural(s.req, "model request") + "</span>, " + tok(s.tokens) + " tokens</div>" +
+      '<div class="capbar"><i id="rp-cap" style="width:' + Math.min(100, s.cost.total / (cap || 1) * 100) + '%"></i></div><div class="muted small">' + (cap ? "The session stops at " + money(cap) + "." : "") + '</div><div class="muted small"><span id="rp-reqs">' + plural(s.req, "model request") + ", " + tok(s.tokens) + " tokens</span></div>" +
       '<div class="basis">' + h(basis) + "</div></div>" + chart +
     '<div class="panel pad"><div class="rl-h"><h3>Where it went</h3></div><div id="rp-where">' + whereRows(s.cost.by, a.harness, s.cost.total) + "</div></div>" +
     changes + "</aside>";
 }
-function changesFor(T) {
+/* What the session changed, as of replay time vt (null for the whole session). */
+function changesFor(T, vt) {
   var ev = transcriptEvents(T), files = {}, order = [], out = [], res = {};
-  ev.forEach(function (e) { if (e.k === "res") res[e.id] = e; });
+  var seen = function (e) { return vt == null || RP.sid !== T.id || RP.vts[RP.ev.indexOf(e)] <= vt + 1e-6; };
+  ev.forEach(function (e) { if (e.k === "res" && seen(e)) res[e.id] = e; });
   ev.forEach(function (e) {
-    if (e.k !== "call") return;
+    if (e.k !== "call" || !seen(e)) return;
     var t = e.tool;
     if (t.kind === "write" || t.kind === "edit") {
       if (!files[t.path]) { files[t.path] = { add: 0, del: 0, isNew: t.kind === "write" }; order.push(t.path); }
@@ -307,8 +310,7 @@ function changesFor(T) {
     if (t.kind === "mcp" && t.name === "create_release") out.push('<div class="chg">' + g("tag", 14) + ' <span class="mono">' + h(t.args.tag_name) + '</span><span class="muted">' + (res[e.id] ? (res[e.id].ok ? "draft created" : "not created") : "waiting on you") + "</span></div>");
   });
   var fl = order.map(function (p) { var f = files[p]; return '<div class="chg">' + g("file", 14) + ' <span class="mono">' + h(p) + '</span><span class="add">+' + f.add + "</span>" + (f.del ? '<span class="del">-' + f.del + "</span>" : "") + "</div>"; }).join("");
-  if (!fl && !out.length) return "";
-  return '<div class="panel pad"><div class="rl-h"><h3>Changes</h3></div>' + fl + out.join("") + "</div>";
+  return fl + out.join("") || '<p class="muted small">Nothing changed yet.</p>';
 }
 ACTS.steer = function () { openDialog("steer", S.id); };
 DIALOGS.steer = function (id) {

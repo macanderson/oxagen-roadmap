@@ -191,7 +191,7 @@ function renderLayer() {
   if (S.dialog && DIALOGS[S.dialog.name]) {
     var d = DIALOGS[S.dialog.name](S.dialog.arg, S.dialog);
     el.innerHTML = '<div class="scrim" data-act="scrim"><div class="dlg ' + (d.wide ? "wide" : "") + '" role="dialog" aria-modal="true" aria-label="' + h(d.title) + '">' +
-      '<div class="dlg-h sub"><div class="grow"><h2>' + h(d.title) + "</h2>" + (d.sub ? "<p>" + d.sub + "</p>" : "") + "</div>" +
+      '<div class="dlg-h hs"><div class="grow"><h2>' + h(d.title) + "</h2>" + (d.sub ? "<p>" + d.sub + "</p>" : "") + "</div>" +
       '<button class="iconbtn x" data-act="close" aria-label="Close">' + g("x") + "</button></div>" +
       '<div class="dlg-b">' + d.body + "</div>" + (d.foot ? '<div class="dlg-f">' + d.foot + "</div>" : "") + "</div></div>";
     var f = el.querySelector("[autofocus]"); if (f) f.focus();

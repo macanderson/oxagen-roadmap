@@ -24,6 +24,14 @@ chrome (the scenario rail, the scenario nav item, the onboarding demo entry poin
 appears only under `?debug=true`. `?product=1` is the old spelling of the same default and still
 works.
 
+## v3 (2026-09-25)
+
+`mockups/v3/` is a separate, smaller design, built as a target for finding the wedge: Work, Sessions,
+Agents, Steering, MCP servers and Spend, with a session transcript that replays the way its harness
+showed it and the cost of every model request beside it. It clones this mockup's design system and
+demo record and changes nothing here. `mockups/v3/README.md` lists what it cuts and where each rev1
+concept went. `node tools/build-mockup-v3.mjs` builds it and `node tools/check-mockup-v3.mjs` walks it.
+
 ## The review island
 
 A floating toolbar on every page (`mockups/src/island.js`). Drag it anywhere. Select it to see the
