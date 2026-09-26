@@ -342,6 +342,10 @@ body{padding-inline:0}
         <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>. (Mac, 2026-09-26)</li>
         <li>Reflections and memory candidates stay in Oxagen, and promoted memories arrive by a batched memory PR. (Mac, 2026-09-26)</li>
         <li>The four file formats: Markdown with YAML frontmatter, TOML, JSON Lines, and each standard's own format. (Mac, 2026-09-26)</li>
+        <li>A run receives its agent's workspace records, repository records whose <code>repos</code> names its working repository, and organization records. A narrower record only narrows. (Mac, 2026-09-26)</li>
+        <li>Linking a code repository is a steering PR that adds it to <code>workspace.toml</code>. (Mac, 2026-09-26)</li>
+        <li>Code repositories hold no committed Oxagen files. Skills reach a harness at session start from outside the repository. (Mac, 2026-09-26)</li>
+        <li>Oxagen creates <code>&lt;org&gt;/oxagen</code> for organization records, and every workspace inherits them. (Mac, 2026-09-26)</li>
       </ul>
     </div>
     <div class="card">
@@ -655,10 +659,10 @@ required = true</code></pre></figure>
   <ul>
     <li><span class="st d">Decided</span> <strong>The agent's workspace governs the run.</strong> A session's workspace already comes from its host's enrollment, so the code follows this today. This replaces the 2026-09-25 rule that scope comes from the origin checkout.</li>
     <li><span class="st d">Decided</span> <strong>A code repository can be linked to many workspaces.</strong> The binding role <code>main</code> becomes <code>steering</code>. A steering repo belongs to exactly one workspace and is never linked. The exclusivity index and trigger stay, now on <code>steering</code>.</li>
-    <li><span class="st p">Proposed</span> <strong>What a run receives.</strong> Workspace records from its agent's steering repo, repository records whose <code>repos</code> names the run's working repository, and organization records. A narrower record may narrow what a wider one allows. It never widens it (v1).</li>
-    <li><span class="st p">Proposed</span> <strong>Linking is a steering PR.</strong> The Link button opens a steering PR that adds the repository to <code>workspace.toml</code>. The binding follows the merge.</li>
-    <li><span class="st p">Proposed</span> <strong>Code repositories hold no committed Oxagen files.</strong> A repository in two workspaces cannot hold two sets of skills, so v1's delivery route that writes <code>.claude/skills/</code> and <code>.cursor/rules/</code> into the code repository goes. Skills reach the harness at session start, in a location outside the repository, and records reach it through the cloud gateway.</li>
-    <li><span class="st p">Proposed</span> <strong>Organization records.</strong> Oxagen creates <code>&lt;org&gt;/oxagen</code> with the organization for <code>scope: organization</code> records. Every workspace inherits them, so a rule shared by 40 workspaces is written once.</li>
+    <li><span class="st d">Decided</span> <strong>What a run receives.</strong> Workspace records from its agent's steering repo, repository records whose <code>repos</code> names the run's working repository, and organization records. A narrower record may narrow what a wider one allows. It never widens it (v1).</li>
+    <li><span class="st d">Decided</span> <strong>Linking is a steering PR.</strong> The Link button opens a steering PR that adds the repository to <code>workspace.toml</code>. The binding follows the merge.</li>
+    <li><span class="st d">Decided</span> <strong>Code repositories hold no committed Oxagen files.</strong> A repository in two workspaces cannot hold two sets of skills, so v1's delivery route that writes <code>.claude/skills/</code> and <code>.cursor/rules/</code> into the code repository goes. Skills reach the harness at session start, in a location outside the repository, and records reach it through the cloud gateway.</li>
+    <li><span class="st d">Decided</span> <strong>Organization records.</strong> Oxagen creates <code>&lt;org&gt;/oxagen</code> with the organization for <code>scope: organization</code> records. Every workspace inherits them, so a rule shared by 40 workspaces is written once.</li>
   </ul>
   <figure class="code"><figcaption><span class="path">workspace.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/workspace/v1.json
 schema = "workspace/v1"
@@ -692,6 +696,7 @@ per_month_micros = 12000000000                # $12,000.00
     <li><div><strong>Publish version 1.</strong><p>Oxagen builds the published version from the first commit and records a deployment to the <code>steering</code> environment.</p></div></li>
     <li><div><strong>Open the workspace.</strong><p>The target is 15 seconds from Create to an open workspace. When a step fails, the workspace shows which step and a Retry button. Every step is safe to repeat.</p></div></li>
   </ol>
+  <p>Creating an organization runs the same steps for <code>&lt;org&gt;/oxagen</code>, the repository for organization records, with the same settings and no <code>workspace.toml</code>. <span class="st d">Decided</span> for the repository, <span class="st p">Proposed</span> for the steps.</p>
   <div class="tscroll"><table>
     <thead><tr><th>GitHub App permission</th><th>Access</th><th>Why</th><th>Today</th></tr></thead>
     <tbody>
@@ -1047,9 +1052,7 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
     <li>Administration write on the GitHub App, or a second app that holds only the provisioning permissions.</li>
     <li>While a repository is drifted, runs keep the last published version (proposed here), or runs stop until it is repaired.</li>
     <li>Whether an unreviewed memory candidate steers anything: the same agent only (proposed here), the whole workspace, or nothing until a memory PR merges.</li>
-    <li>The organization steering repo for <code>scope: organization</code> records.</li>
-    <li>Cursor reads rules only from files in the repository and from its own dashboard. A code repository in two workspaces can hold one set.</li>
-    <li>Linking a code repository by steering PR (proposed here), or by a direct action as today.</li>
+    <li>How Cursor receives steering now that code repositories hold no committed Oxagen files. Cursor reads rules from files in the repository and from its own dashboard, and its model calls do not pass the cloud gateway.</li>
     <li>Actions and CI disabled in the steering repo.</li>
     <li>What <code>agents/</code> holds if the agent entity goes.</li>
     <li>A run on a code repository that is not linked to its agent's workspace: refuse it, or allow it and charge its cost to the workspace.</li>
@@ -1267,7 +1270,9 @@ Do
    starts the provision job, and returns. The job runs steps 1 to 5 of the
    spec's Provisioning list, records which step failed, and retries from it.
 4. Bind the new repository with role steering (S0's migration allows it).
-5. Update the GitHub App setup doc: Administration write and Deployments write,
+5. Creating an organization runs the same steps for &lt;org&gt;/oxagen, the
+   repository for organization records, with no workspace.toml.
+6. Update the GitHub App setup doc: Administration write and Deployments write,
    and why. Keep the second-app fallback in the doc as an option.
 
 Done when
@@ -1537,6 +1542,10 @@ Do
    request. Other records and skills as index lines.
 3. steering_search and steering_read, registered as MCP tools.
 4. Each request's manifest names the published version and what was added.
+5. Session start: put the run's skills where its harness reads skills, outside
+   the code repository, and remove them when the session ends. Code
+   repositories get no committed Oxagen files. Record the location you chose
+   for each harness in the PR body.
 
 Done when
 - Golden tests on S0's fixture repo pin the rendered block byte for byte.
