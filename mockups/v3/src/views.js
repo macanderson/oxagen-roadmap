@@ -32,7 +32,7 @@ function shell(view) {
   return '<div class="app">' +
     '<aside class="side"><div class="side-top"><div class="brandmark">' + LOGO + "</div>" +
       '<button class="switcher" data-act="stub" data-what="Switching organizations"><span class="av">' + h(ORG.initial) + '</span><span class="tx"><b>' + h(ORG.name) + "</b><span>" + h(ORG.slug) + "</span></span></button>" +
-      '<button class="switcher" data-act="workspaces"><span class="av ws">CP</span><span class="tx"><b>' + h(WS.name) + "</b><span>" + h(REPO.name) + "</span></span></button></div>" +
+      '<button class="switcher" data-act="workspaces"><span class="av ws">CP</span><span class="tx"><b>' + h(WS.name) + "</b><span>" + h(REPO.name.split("/")[1]) + "</span></span></button></div>" +
       '<nav aria-label="Workspace">' + nav + "</nav>" +
       '<div class="side-foot"><button class="userbtn" data-act="account">' + personAv(ME, 26) + '<span class="tx"><b>' + h(me.name) + "</b><span>" + h(me.role) + "</span></span></button></div></aside>" +
     '<div class="main"><header class="top"><div class="crumbs">' + crumbs + '</div><span class="sp"></span>' +
@@ -419,7 +419,7 @@ VIEWS.steering = function () {
   var open = allPrs().filter(function (p) { return p.state !== "merged"; }).length;
   var tabs = tabRow("steertab", S.steerTab, [["records", "Records", steeringItems().length], ["prs", "Steering PRs", open], ["repo", "Repository"]]);
   var body = S.steerTab === "prs" ? steeringPrList() : S.steerTab === "repo" ? steeringRepoTab() : steeringRecords();
-  return { crumb: [["Steering"]], html: head + tabs + body };
+  return { crumb: [["Steering"]], html: head + tabs + '<div class="stack">' + body + "</div>" };
 };
 ACTS.steertab = function (el) { S.steerTab = el.getAttribute("data-tab"); render(); };
 
@@ -591,7 +591,7 @@ function filesPanel(pr) {
 }
 /* The memory PR: each memory with the sessions it came from, and Drop. */
 function memoryCards(pr) {
-  return '<div class="panel"><div class="panel-h"><h3>Memories</h3><span class="sp muted">A merged memory becomes a record under <code>steering/memory/</code>.</span></div>' + pr.memories.map(function (m) {
+  return '<div class="panel"><div class="panel-h"><h3>Memories</h3><span class="hnote">A merged memory becomes a record under <code>steering/memory/</code>.</span></div>' + pr.memories.map(function (m) {
     var k = pr.n + "." + m.id, dropped = !!S.dropped[k], a = agentBy(m.agent), c = m.contradicts ? steeringItems().filter(function (i) { return i.id === m.contradicts; })[0] : null;
     var ev = m.evidence.map(function (e) {
       var s = sessionBy(e.s);
@@ -759,11 +759,11 @@ DIALOGS.newworkspace = function (arg, d) {
   var list = steps.map(function (s, i) {
     var st = i < d.at ? "done" : i === d.at ? (d.failed ? "failed" : "running") : "wait";
     var ic = st === "done" ? g("check", 13) : st === "failed" ? g("x", 13) : st === "running" ? '<span class="spin"></span>' : String(i + 1);
-    return '<div class="pv-step st-' + st + '"><span class="pv-i">' + ic + '</span><div class="grow"><b>' + h(s.t) + '</b><span class="sub">' + (s.k === "create" ? "<code>" + h(repo) + "</code>, private" : md(s.d)) + "</span>" +
+    return '<div class="prov-step st-' + st + '"><span class="prov-i">' + ic + '</span><div class="grow"><b>' + h(s.t) + '</b><span class="sub">' + (s.k === "create" ? "<code>" + h(repo) + "</code>, private" : md(s.d)) + "</span>" +
       (st === "failed" ? '<div class="warn small">' + md(s.error) + " " + h(s.fix) + "</div>" : "") + "</div></div>";
   }).join("");
   return { title: done ? d.ws + " is ready" : d.failed ? "Setting up " + d.ws + " stopped" : "Setting up " + d.ws, sub: done ? "Its steering repo is published at version 1." : "The target is 15 seconds from Create to an open workspace.",
-    body: '<div class="pv">' + list + "</div>",
+    body: '<div class="prov">' + list + "</div>",
     foot: d.failed ? '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="nws-retry">Retry</button>' :
       done ? '<button class="btn primary" data-act="nws-open">Open the workspace</button>' : '<span class="grow">Step ' + (d.at + 1) + " of " + steps.length + '</span><button class="btn" data-act="close">Run in the background</button>' };
 };
@@ -843,6 +843,7 @@ function serverPage(id) {
     banners += '<div class="banner failb"><div class="grow"><b>Relay <code>' + h(r.name) + "</code> is down since " + when(r.r.since) + "</b>Calls to " + h(sv.name) + " in " + h(envs.join(" and ")) + " fail closed until it reconnects. The relay sends nothing while its connection to oxagen is down.</div></div>";
   });
   if (sv.authcfg.mode === "operator-oauth" && !operatorLinked(sv, viewer()) && !(S.opLinked || {})[id]) banners += opBanner(sv);
+  if (sv.errors && sv.errors.length && S.srvTab !== "connection") banners += '<div class="banner"><div class="grow"><b>' + plural(sv.errors.length, "machine") + " reported an error in the last day</b>" + sv.errors.map(function (e) { return "<code>" + h(e.machine) + "</code>"; }).join(", ") + '. The Connection tab lists each error and its fix.</div><button class="btn sm" data-act="srvtab" data-tab="connection">Open Connection</button></div>';
   if (sv.syncPr && prBy(sv.syncPr) && prBy(sv.syncPr).state !== "merged") {
     var sp = prBy(sv.syncPr), wh = sv.tools.filter(withheld);
     banners += '<div class="banner"><div class="grow"><b>Sync PR #' + sp.n + " is open</b>" + (wh.length ? plural(wh.length, "tool") + " withheld until it merges: " + wh.map(function (t) { return "<code>" + h(toolName(id, t.n)) + "</code>"; }).join(", ") + "." : "The upstream definition changed. The gateway serves the locked one until it merges.") +
@@ -853,7 +854,7 @@ function serverPage(id) {
   }
   var tabs = tabRow("srvtab", S.srvTab, [["tools", "Tools", sv.tools.filter(function (t) { return importedNow(id, t); }).length], ["connection", "Connection"], ["try", "Try it"], ["changes", "Changes", n || null]]);
   var body = S.srvTab === "connection" ? connectionTab(sv) : S.srvTab === "try" ? tryTab(sv) : S.srvTab === "changes" ? changesTab(sv) : toolsTab(sv);
-  return { crumb: [["MCP servers", "servers"], [sv.name]], html: head + banners + tabs + body };
+  return { crumb: [["MCP servers", "servers"], [sv.name]], html: head + banners + tabs + '<div class="stack">' + body + "</div>" };
 }
 function opBanner(sv) {
   return '<div class="banner"><div class="grow"><b>You have not connected your ' + h(sv.name) + " account</b>" + h(sv.name) + " uses operator OAuth, so a call uses the token of the person who operates the session. Sessions you operate get this result on every call: <code>Connect your " + h(sv.name) + ' account in oxagen, then retry.</code></div><button class="btn sm primary" data-act="op-link" data-id="' + sv.id + '">Connect your account</button></div>';
@@ -892,18 +893,18 @@ function toolsTab(sv) {
     (tools.length > 30 ? '<input class="sel tq" type="search" placeholder="Find a tool" aria-label="Find a tool" value="' + h(S.toolQ) + '" data-change="toolq">' : "") + '<span class="sp muted">' + plural(list.length, "tool") + "</span></div>";
   var rows = shown.map(function (t) {
     var k = id + "." + t.n, c = classOf(id, t), on = importedNow(id, t), off = toolOffBy(id, t), rules = approvalFor(id, t);
-    var flags = (off ? " " + badge("b-q", "Off", true) : "") + (withheld(t) ? " " + badge("b-denied", "Withheld", true) : "") + (t.fresh ? " " + badge("b-approval", "New") : "") + (t.deprecated ? " " + badge("b-q", "Deprecated") : "") +
+    var flags = (off ? " " + badge("b-q", "Off", true) : "") + (withheld(t) ? " " + badge("b-denied", "Withheld", true) : "") + (t.fresh ? " " + badge("b-approval", "New") : "") + ((t.upstreamNew || (t.sync && !t.sync.breaking)) && sv.syncPr ? " " + badge("b-approval", "Upstream changed") : "") + (t.deprecated ? " " + badge("b-q", "Deprecated") : "") +
       (stagedOp(id, "import", t.n) ? " " + badge("b-approval", "Importing") : "") + (stagedOp(id, "remove", t.n) ? " " + badge("b-denied", "Removing") : "");
     return '<tr class="click' + (on ? "" : " avail") + '" data-act="tool" data-k="' + h(k) + '">' +
       (builtin ? "" : '<td class="ckc"><input type="checkbox" data-change="tool-import" data-k="' + h(k) + '"' + (on ? " checked" : "") + ' aria-label="Import ' + h(t.n) + '"></td>') +
       '<td><span class="mono tn">' + h(t.n) + "</span>" + flags + '<span class="sub">' + h(off ? "Off since " + when(off.at) + ", " + personName(off.by) : t.d) + "</span></td>" +
-      "<td>" + cval(c.risk, c.confirmed) + "</td><td>" + cval(c.side_effect, c.confirmed) + '</td><td class="mh">' + cval(c.egress, c.confirmed) + "</td>" +
+      "<td>" + cval(c.risk, c.confirmed) + '</td><td class="mh">' + cval(c.side_effect, c.confirmed) + '</td><td class="mh">' + cval(c.egress, c.confirmed) + "</td>" +
       '<td class="mh">' + (c.impacts.length ? c.impacts.map(function (x) { return c.confirmed ? '<span class="chip mono">' + h(x) + "</span>" : '<span class="chip mono sugg">' + h(x) + "</span>"; }).join(" ") : '<span class="muted">None</span>') + "</td>" +
       '<td class="mh">' + (rules.length ? '<span class="apv">' + h(approvalLabel(rules)) + '</span><span class="sub mono">' + h(rules.map(function (r) { return r.id; }).join(", ")) + "</span>" : '<span class="muted">None</span>') + "</td>" +
       '<td class="num">' + num(t.tok) + "</td></tr>";
   }).join("");
   var more = list.length > shown.length ? '<div class="more"><button class="btn" data-act="toolmore">Show ' + Math.min(40, list.length - shown.length) + ' more</button><span class="muted">' + num(shown.length) + " of " + num(list.length) + "</span></div>" : "";
-  return summary + bar + '<div class="panel"><div class="tw"><table class="tools"><thead><tr>' + (builtin ? "" : '<th class="ckc"><span class="sr">Import</span></th>') + '<th>Tool</th><th>Risk</th><th>Side effect</th><th class="mh">Egress</th><th class="mh">Impacts</th><th class="mh">Approval</th><th class="num">Tokens</th></tr></thead><tbody>' +
+  return summary + bar + '<div class="panel"><div class="tw"><table class="tools"><thead><tr>' + (builtin ? "" : '<th class="ckc"><span class="sr">Import</span></th>') + '<th>Tool</th><th>Risk</th><th class="mh">Side effect</th><th class="mh">Egress</th><th class="mh">Impacts</th><th class="mh">Approval</th><th class="num">Tokens</th></tr></thead><tbody>' +
     (rows || '<tr><td colspan="8" class="muted">No tool matches.</td></tr>') + "</tbody></table></div>" + more + "</div>" +
     '<p class="muted small foot">An approval comes from a policy in <code>policy/</code> reading the tool\'s classification. Off stops a tool at once, with no steering PR.</p>';
 }

@@ -540,7 +540,7 @@
     "id": "refund.over-limit",
     "impact": "moves_money",
     "cond": "over $100",
-    "when": "the tool moves money and the amount is over 10000 cents"
+    "when": "the tool moves money and the amount is over 10,000 cents"
    }
   ]
  },
@@ -1006,17 +1006,17 @@
   }
  ],
  "checkNames": {
-  "schema": "A file does not match its JSON Schema.",
-  "lineage": "Two files share a lineage.",
-  "hash": "A stamped id or hash does not match the content.",
-  "secrets": "A secret or personal data appears in a file.",
-  "conflicts": "An active record requires what this one forbids.",
-  "authority": "A record tries to grant authority.",
-  "settings": "The repository settings differ from the prescribed ones.",
-  "references": "A named tool, record, repository, credential, or skill file does not exist.",
-  "budget": "The change pushes an agent's always-on steering over a budget.",
-  "compile": "A server folder does not compile, its lock does not match, or a policy test fails.",
-  "owned": "The change edits a file oxagen writes."
+  "schema": "Fails when a file does not match its JSON Schema.",
+  "lineage": "Fails when two files share a lineage.",
+  "hash": "Fails when a stamped id or hash does not match the content.",
+  "secrets": "Fails when a secret or personal data appears in a file.",
+  "conflicts": "Fails when an active record requires what this one forbids.",
+  "authority": "Fails when a record tries to grant authority.",
+  "settings": "Fails when the repository settings differ from the prescribed ones.",
+  "references": "Fails when a named tool, record, repository, credential, or skill file does not exist.",
+  "budget": "Fails when the change pushes an agent's always-on steering over a budget.",
+  "compile": "Fails when a server folder does not compile, its lock does not match, or a policy test fails.",
+  "owned": "Fails when the change edits a file oxagen writes."
  },
  "provision": {
   "steps": [

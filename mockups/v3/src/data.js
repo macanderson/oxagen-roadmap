@@ -344,7 +344,7 @@ function approvalFor(sid, t) {
 function approvalLabel(rules) {
   if (!rules.length) return "None";
   var always = rules.filter(function (r) { return !r.cond; });
-  return always.length ? "Asks a person" : "Asks " + rules[0].cond;
+  return always.length ? "Asks a person" : "Asks a person " + rules[0].cond;
 }
 
 /* Definition tokens per request: the imported tools that are on, or the three search tools. */
