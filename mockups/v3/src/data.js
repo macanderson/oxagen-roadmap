@@ -424,7 +424,7 @@ function budgetRows(rec) {
     var a = agentBy(k), list = alwaysOn(a), before = list.reduce(function (t, i) { return t + i.tok; }, 0);
     var after = before + (rec.force === "must" || rec.force === "should" ? rec.tok : 0) - (list.some(function (i) { return i.lineage === rec.lineage; }) ? rec.tok : 0);
     return { agent: a, repo: "github.com/a-intel/platform", before: before, after: after, budget: budget, set: !!set, over: after > budget,
-      largest: list.map(function (i) { return { lineage: i.lineage, label: i.label || i.title, kind: i.kind, force: i.force, tok: i.tok }; })
+      largest: list.filter(function (i) { return i.lineage !== rec.lineage; }).map(function (i) { return { lineage: i.lineage, label: i.label || i.title, kind: i.kind, force: i.force, tok: i.tok }; })
         .concat([{ lineage: rec.lineage, label: rec.label, kind: rec.kind, force: rec.force, tok: rec.tok, fresh: true }])
         .sort(function (x, y) { return y.tok - x.tok; }).slice(0, 4) };
   });

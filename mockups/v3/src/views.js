@@ -504,7 +504,7 @@ function steeringRepoTab() {
     '<div class="panel"><div class="panel-h"><h3>Steering repo</h3><span class="sp">' + healthBadge() + '</span></div><div class="panel-b"><dl class="kv">' +
       "<dt>Repository</dt><dd>" + repoLink(REPO.name, REPO.url) + "</dd><dt>Created</dt><dd>" + h(REPO.created) + ", with the workspace</dd>" +
       "<dt>Published version</dt><dd>" + REPO.version + "</dd><dt>Required check</dt><dd><code>Oxagen steering</code>, posted by the oxagen app only</dd>" +
-      "<dt>Merges</dt><dd>Only oxagen updates <code>main</code>, one steering PR at a time</dd><dt>Environment</dt><dd><code>steering</code></dd></dl></div></div>' +
+      "<dt>Merges</dt><dd>Only oxagen updates <code>main</code>, one steering PR at a time</dd><dt>Environment</dt><dd><code>steering</code></dd></dl></div></div>" +
     '<div class="panel"><div class="panel-h"><h3>Governance</h3></div><div class="panel-b"><dl class="kv">' +
       "<dt>Mode</dt><dd>" + h(gov.mode === "team" ? "Team: one approval from a member other than the author" : gov.mode) + "</dd>" +
       "<dt>Reviewer groups</dt><dd>" + gov.reviewers.map(function (r) { return "<code>" + h(r.group) + "</code> reviews " + r.paths.map(function (p) { return "<code>" + h(p) + "</code>"; }).join(" and "); }).join("<br>") + "</dd>" +
@@ -548,7 +548,7 @@ function checksPanel(pr) {
   var roll = prCheckRollup(pr), rb = CHECK_BADGE[roll];
   var rows = (pr.checks || []).map(function (c) {
     var b = CHECK_BADGE[c.r], extra = "";
-    if (c.id === "budget" && pr.record) extra = budgetDetail(pr.record);
+    if (c.id === "budget" && pr.record && pr.state !== "merged") extra = budgetDetail(pr.record);
     return '<div class="ck"><span class="ck-n mono">' + h(c.id) + "</span>" + badge(b[0], b[1]) + '<div class="grow"><span class="muted small">' + md(c.note || STEERING.checkNames[c.id] || "") + "</span>" + extra + "</div></div>";
   }).join("");
   if (S.health !== "healthy" && pr.state !== "merged") rows = '<div class="ck"><span class="ck-n mono">settings</span>' + badge("b-failed", "Failed") + '<div class="grow"><span class="muted small">The repository settings differ from the prescribed ones. oxagen will not merge or publish until they match.</span></div></div>' + rows;
