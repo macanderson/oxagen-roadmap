@@ -384,8 +384,8 @@ function marginFor(b) {
 
 /* What oxagen handed the session before its first prompt. */
 function bannerMargin() {
-  var a = agentBy(RP.T.agent), st = Ledger.steeringFor(a, LEDGER_F);
-  return '<span class="mg-note">oxagen delivered ' + plural(st.length, "steering item") + " and " + plural(a.servers.length, "MCP server") + "</span>";
+  var a = agentBy(RP.T.agent), n = RP.T.steeringCount != null ? RP.T.steeringCount : Ledger.steeringFor(a, LEDGER_F).length;
+  return '<span class="mg-note">oxagen delivered ' + plural(n, "steering item") + " and " + plural(a.servers.length, "MCP server") + "</span>";
 }
 
 /* ---- drawing ---- */

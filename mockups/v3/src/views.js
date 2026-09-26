@@ -187,6 +187,10 @@ ACTS["send-go"] = function (el) {
       { t: 6.1, k: "say", text: "I'll read the work item and the code it points at first." },
       { t: 6.3, k: "call", id: "n1", tool: { kind: "mcp", server: a.servers.indexOf("linear") >= 0 && w.src === "linear" ? "linear" : "github", name: w.src === "linear" && a.servers.indexOf("linear") >= 0 ? "get_issue" : "get_issue", args: { id: w.key } } },
     ] };
+  // The steering this session starts with, fixed at send time: the recorded set plus items added here.
+  var next = steeringNext(a);
+  T.steeringCount = next.length;
+  T.extraSteering = next.filter(function (i) { return i.fresh; }).reduce(function (t, i) { return t + i.tok; }, 0);
   S.sentTranscripts = S.sentTranscripts || {};
   S.sentTranscripts[id] = T;
   S.sent[w.key] = { agent: a.key, session: null };

@@ -294,6 +294,23 @@ const steer = await page.evaluate(() => {
 });
 ok(Math.abs(steer.items - steer.total) < 1e-9, `steering: the items sum to ${steer.items}, not the header's ${steer.total}`);
 
+// A session sent after suggestions are added starts with the steering the Send dialog promised.
+await open(page, `${BASE}/steering`, "&theme=dark");
+for (const b of await page.$$('[data-act="sug-add"]')) await page.click('[data-act="sug-add"]');
+await page.evaluate(() => go("work", null));
+await page.click('tr [data-act="send"]');
+await page.waitForSelector(".dlg");
+await page.click('[data-act="send-agent"][data-agent="triage"]');
+await page.click('[data-act="send-go"]');
+await page.waitForFunction(() => S.area === "sessions" && S.id && S.id.indexOf("ses_01K5S") === 0, null, { timeout: 10000 });
+const sent = await page.evaluate(() => {
+  const T = transcriptBy(S.id), a = agentBy(T.agent);
+  const got = transcriptSteps(T, transcriptEvents(T)).filter((s) => s.add && s.add[0] === "steering").reduce((t, s) => t + s.add[1], 0);
+  const want = steeringNext(a).reduce((t, i) => t + i.tok, 0);
+  return { got, want, banner: /delivered 11 steering items/.test(document.getElementById("rp-body").innerText) };
+});
+ok(sent.got === sent.want && sent.banner, `send: the session starts with ${sent.got} steering tokens, the dialog promised ${sent.want} (banner ${sent.banner})`);
+
 // The first run: every view renders its empty state.
 for (const [name, hash] of Object.entries(VIEWS)) {
   if (name.startsWith("session-")) continue;

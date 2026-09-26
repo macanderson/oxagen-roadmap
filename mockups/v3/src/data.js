@@ -19,6 +19,8 @@ function toolMode(serverId, t) { var k = serverId + "." + t.n; return S.toolMode
 /* ---- transcripts: events → ledger steps → requests ---- */
 function transcriptSteps(T, events) {
   var agent = agentBy(T.agent), steps = Ledger.context0(agent, LEDGER_F).map(function (c) { return { add: c }; });
+  // A session sent from this page also carries the steering items added here before it started.
+  if (T.extraSteering) steps.push({ add: ["steering", T.extraSteering] });
   var calls = {};
   events.forEach(function (e) {
     if (e.k === "call") calls[e.id] = e;
