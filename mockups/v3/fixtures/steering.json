@@ -874,7 +874,7 @@
      "release-manager"
     ],
     "path": "steering/platform/a-intel.platform.release-steps.md",
-    "body": "---\nschema: steering-record/v1\nlineage: a-intel.platform.release-steps\nlabel: Release steps\ndescription: Cut a release: tag, changelog, draft release, then hand off.\nkind: procedure\nforce: must\nscope: workspace\nstatus: active\norigin: inferred\nprovenance:\n  source: session\n  uri: oxagen:session/ses_01K54K9NEWDQ9ATA\n---\n\n## Before you tag\n1. Read the milestone for the release and list every merged pull request.\n2. Run pnpm release:lint on the notes before you commit them.\n...\n(1,940 words in all)"
+    "body": "---\nschema: steering-record/v1\nlineage: a-intel.platform.release-steps\nlabel: Release steps\ndescription: Cut a release: tag, changelog, draft release, then hand off.\nkind: procedure\nforce: must\nscope: workspace\nagents:\n  - release-manager\nstatus: active\norigin: inferred\nprovenance:\n  source: session\n  uri: oxagen:session/ses_01K54K9NEWDQ9ATA\n---\n\n## Before you tag\n1. Read the milestone for the release and list every merged pull request.\n2. Run pnpm release:lint on the notes before you commit them.\n...\n(1,940 words in all)"
    },
    "checks": [
     {

@@ -647,7 +647,7 @@ DRAWERS.steeritem = function (id) {
     it.kind === "memory" ? "## Memories\n\n- " + it.text + "\n\n(recalled when relevant: at most 5 memories and 800 tokens a request)" :
     "## Workspace rules\n\n### " + recLabel(it) + "\n" + text;
   var fm = "---\nschema: steering-record/v1\nlineage: " + it.lineage + "\nlabel: " + recLabel(it) + "\nkind: " + it.kind + "\nforce: " + it.force + (it.effect ? "\neffect: " + it.effect : "") + "\nscope: " + it.scope +
-    (it.repos ? "\nrepos:\n" + it.repos.map(function (r) { return "  - " + r; }).join("\n") : "") + "\nstatus: active\n---";
+    (it.repos ? "\nrepos:\n" + it.repos.map(function (r) { return "  - " + r; }).join("\n") : "") + (it.agents && it.agents !== "all" ? "\n" + agentsLines(it.agents).join("\n") : "") + "\nstatus: active\n---";
   var org = it.scope === "organization";
   return { title: recLabel(it),
     head: '<div class="grow">' + kindBadge(it.kind) + " <span class=\"muted mono small\">" + h(it.force) + "</span><h2>" + h(recLabel(it)) + "</h2></div>",
@@ -677,18 +677,31 @@ DIALOGS.newsteer = function () {
     body: '<div class="fields"><div class="field"><label for="ns-kind">Kind</label><select id="ns-kind">' + Object.keys(KINDS).filter(function (k) { return k !== "skill"; }).map(function (k) { return "<option>" + h(KINDS[k]) + "</option>"; }).join("") + '</select></div>' +
       '<div class="field"><label for="ns-force">Force</label><select id="ns-force"><option>must</option><option>should</option><option>may</option><option>info</option></select><div class="hint">must and should reach every request. may and info load when they fit.</div></div></div>' +
       '<div class="field"><label for="ns-text">Body</label><textarea id="ns-text" rows="3" autofocus placeholder="Run pnpm release:lint before you commit release notes."></textarea></div>' +
-      '<div class="field"><label for="ns-to">Applies to</label><select id="ns-to"><option>Every agent</option>' + AGENTS.map(function (a) { return "<option>" + h(a.name) + "</option>"; }).join("") + "</select></div>",
+      '<div class="field"><label for="ns-to">Applies to</label><select id="ns-to"><option value="all">Every agent</option>' + AGENTS.map(function (a) { return '<option value="' + h(a.key) + '">' + h(a.name) + "</option>"; }).join("") + "</select></div>",
     foot: '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="newsteer-go">Open steering PR</button>' };
 };
+/* A label is 1 to 36 characters: the body's first words. */
+function labelFrom(text) {
+  var out = "";
+  String(text).replace(/\.$/, "").split(/\s+/).some(function (w) { if ((out ? out.length + 1 : 0) + w.length > 36) return true; out += (out ? " " : "") + w; return false; });
+  return out || String(text).slice(0, 36);
+}
+/* The audience travels with the record: agents lists the agents it steers, and "all" leaves the
+   field out. steering-repo-spec.html defines no agent field yet, so the mockup proposes this one. */
+function agentsLines(agents) { return agents === "all" ? [] : ["agents:"].concat(agents.map(function (k) { return "  - " + k; })); }
 ACTS["newsteer-go"] = function () {
   var n = nextPrNumber(), text = (document.getElementById("ns-text") || {}).value || "Run pnpm release:lint before you commit release notes.";
   var kindName = (document.getElementById("ns-kind") || {}).value || "Business rule", force = (document.getElementById("ns-force") || {}).value || "must";
+  var to = (document.getElementById("ns-to") || {}).value || "all", agents = to === "all" || !agentBy(to) ? "all" : [to];
   var kind = Object.keys(KINDS).filter(function (k) { return KINDS[k] === kindName; })[0] || "business-rule";
-  var lineage = "a-intel.platform." + slugify(text).split("-").slice(0, 4).join("-");
+  var lineage = "a-intel.platform." + slugify(text).split("-").slice(0, 4).join("-"), label = labelFrom(text);
+  var body = ["---", "schema: steering-record/v1", "lineage: " + lineage, "label: " + label, "kind: " + kind, "force: " + force, "scope: workspace"].concat(agentsLines(agents), ["status: active", "origin: user", "---", "", text]).join("\n");
+  var rec = { lineage: lineage, label: label, kind: kind, force: force, scope: "workspace", tok: Math.round((label.length + text.length) / 4) + 8, agents: agents, path: "steering/platform/" + lineage + ".md", body: body };
+  var rows = budgetRows(rec), over = rows.some(function (r) { return r.over; });
   S.newPrs.push({ n: n, kind: "record", state: "open", title: text.length > 60 ? text.slice(0, 57) + "..." : text, branch: "steering/" + lineage.split(".").slice(2).join("-"), by: ME, via: "web", opened: F.ORG.now, approvals: [],
-    summary: "Adds one record. oxagen writes its id and hash when it merges.",
-    files: [{ path: "steering/platform/" + lineage + ".md", diff: ["---", "schema: steering-record/v1", "lineage: " + lineage, "kind: " + kind, "force: " + force, "scope: workspace", "status: active", "origin: user", "---", "", text].map(function (l) { return "+" + l; }).join("\n") }],
-    checks: [{ id: "schema", r: "pass" }, { id: "lineage", r: "pass" }, { id: "secrets", r: "pass" }, { id: "conflicts", r: "pass" }, { id: "authority", r: "pass" }, { id: "budget", r: "pass" }, { id: "owned", r: "pass" }] });
+    summary: "Adds one record for " + (agents === "all" ? "every agent" : agentBy(to).name) + ". oxagen writes its id and hash when it merges.",
+    record: rec,
+    checks: [{ id: "schema", r: "pass" }, { id: "lineage", r: "pass" }, { id: "secrets", r: "pass" }, { id: "conflicts", r: "pass" }, { id: "authority", r: "pass" }, { id: "budget", r: over ? (rows[0].set ? "fail" : "warn") : "pass" }, { id: "owned", r: "pass" }] });
   closeDialog(); go("steering", "pr-" + n); toast("Opened steering PR #" + n + ".");
 };
 ACTS.steerimport = function () { openDialog("steerimport"); };
