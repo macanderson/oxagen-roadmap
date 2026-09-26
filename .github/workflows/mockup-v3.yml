@@ -232,18 +232,23 @@ jobs:
           // The steering PR a flow just opened.
           const openedPr = () => page.evaluate(() => { const pr = prBy(+String(S.id).replace(/^pr-/, "")); return pr && { kind: pr.kind, record: pr.record || null, files: (pr.files || []).map((f) => ({ path: f.path || f, diff: f.diff || "" })) }; });
           const waitPr = (not) => page.waitForFunction((x) => S.area === "steering" && /^pr-/.test(S.id) && S.id !== x, not || "", { timeout: 5000 });
-          // New steering record: the agent picked in Applies to reaches the record.
-          await flow("audience", async () => {
+          // New steering record: Applies to sets the contract's targets (repos, tools, applies_to), and the
+          // budget check runs per code repository. The record writes no agents field.
+          await flow("targets", async () => {
             await open(page, "steering", "&theme=dark");
             await page.click('[data-act="newsteer"]');
-            await page.fill("#ns-text", "Tag releases from the release branch only.");
-            await page.selectOption("#ns-to", "release-manager");
+            await page.fill("#ns-text", "Refund only through billing__create_refund.");
+            await page.check('input[name="ns-repo"][value="github.com/a-intel/billing-service"]');
+            await page.fill("#ns-tools", "billing__create_refund");
+            await page.fill("#ns-paths", "services/refunds/**");
             await page.click('[data-act="newsteer-go"]');
             await waitPr();
             const pr = await openedPr();
-            ok(pr.record && JSON.stringify(pr.record.agents) === '["release-manager"]' && /\nagents:\n  - release-manager\n/.test(pr.record.body), "audience: the record lost the agent picked in Applies to");
-            ok(/for Release manager/.test(await page.innerText(".pr-sum")), "audience: the steering PR does not name the agent");
-            await copyCheck(page, "audience steering PR");
+            const body = (pr.record && pr.record.body) || "";
+            ok(/\nscope: repository\nrepos:\n  - github\.com\/a-intel\/billing-service\ntools:\n  - billing__create_refund\napplies_to:\n  - "services\/refunds\/\*\*"\n/.test(body), "targets: the record lost the targets picked in Applies to");
+            ok(!/\nagents:/.test(body), "targets: the record writes an agents field the contract does not have");
+            ok(/github\.com\/a-intel\/billing-service/.test(await page.innerText(".budget")), "targets: the budget check does not run for the record's repository");
+            await copyCheck(page, "targets steering PR");
           });
           // Import: each dialog opens a steering PR and applies nothing until it merges.
           await flow("import", async () => {

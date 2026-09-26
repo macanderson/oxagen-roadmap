@@ -566,17 +566,17 @@ function checksPanel(pr) {
   return '<div class="panel"><div class="panel-h"><h3>Checks</h3><span class="sp"><code>Oxagen steering</code> ' + badge(rb[0], roll === "warn" ? "Passed with warnings" : rb[1], true) + "</span></div>" + rows +
     (findings ? '<div class="panel-h sub-h"><h3>Tool checks</h3></div>' + findings : "") + "</div>";
 }
-/* The budget check: per agent, the always-on steering before and after, the budget and where it
-   comes from, and the largest always-on records with their token counts. */
+/* The budget check: per code repository, the always-on steering before and after, the budget and
+   where it comes from, and the largest always-on records with their token counts. It only warns. */
 function budgetDetail(rec) {
   return budgetRows(rec).map(function (r) {
-    var line = r.over ? (r.set ? "Over the workspace budget. The check fails." : "Over oxagen's default of " + num(r.budget) + " tokens. The default only warns, so the check passes.") : "Under the budget.";
-    return '<div class="budget"><div class="bd-h"><b>' + h(r.agent.name) + '</b> <span class="mono muted">' + h(r.repo) + '</span></div><div class="bd-n"><span>Before <b class="num">' + num(r.before) + '</b></span><span>After <b class="num">' + num(r.after) + '</b></span><span>Budget <b class="num">' + num(r.budget) + "</b> " + (r.set ? "<code>steering/governance.toml</code>" : "oxagen's default") + "</span></div>" +
+    var line = !r.adds ? "The record names a target or loads when it fits, so it adds nothing to the always-on total." : r.over ? (r.set ? "Over the workspace budget. The check warns and passes." : "Over oxagen's default of " + num(r.budget) + " tokens. The default only warns, so the check passes.") : "Under the budget.";
+    return '<div class="budget"><div class="bd-h"><b>Always-on steering</b> <span class="mono muted">' + h(r.repo) + '</span></div><div class="bd-n"><span>Before <b class="num">' + num(r.before) + '</b></span><span>After <b class="num">' + num(r.after) + '</b></span><span>Budget <b class="num">' + num(r.budget) + "</b> " + (r.set ? "<code>steering/governance.toml</code>" : "oxagen's default") + "</span></div>" +
       '<div class="capbar' + (r.over ? " over" : "") + '"><i style="width:' + Math.min(100, r.after / r.budget * 100).toFixed(1) + '%"></i></div><p class="small">' + h(line) + "</p>" +
       '<table class="narrow mini"><thead><tr><th class="num">Tokens</th><th>Largest always-on records</th><th class="mh">Kind</th></tr></thead><tbody>' + r.largest.map(function (x) {
         return '<tr><td class="num">' + num(x.tok) + '</td><td class="mono">' + h(x.lineage) + (x.fresh ? ' <span class="b b-approval">This PR</span>' : "") + '</td><td class="mh">' + h(kindLabel(x.kind)) + ", " + h(x.force) + "</td></tr>";
       }).join("") + "</tbody></table>" +
-      (r.over ? '<p class="small muted">Fix: shorten the record, set <code>force: may</code> so it loads when it fits, or narrow it with <code>repos</code>, <code>applies_to</code>, or <code>tools</code>. Set <code>always_on_tokens</code> in <code>steering/governance.toml</code> to make the check fail.</p>' : "") + "</div>";
+      (r.over ? '<p class="small muted">To keep this cost, merge as is, or raise <code>always_on_tokens</code> in this PR. To cut it, shorten a record, set <code>force: may</code> so it loads when it fits, or narrow it with <code>repos</code>, <code>applies_to</code>, or <code>tools</code>.</p>' : "") + "</div>";
   }).join("");
 }
 function reviewPanel(pr) {
@@ -711,7 +711,7 @@ DRAWERS.steeritem = function (id) {
     it.kind === "memory" ? "## Memories\n\n- " + it.text + "\n\n(recalled when relevant: at most 5 memories and 800 tokens a request)" :
     "## Workspace rules\n\n### " + recLabel(it) + "\n" + text;
   var fm = "---\nschema: steering-record/v1\nlineage: " + it.lineage + "\nlabel: " + recLabel(it) + "\nkind: " + it.kind + "\nforce: " + it.force + (it.effect ? "\neffect: " + it.effect : "") + "\nscope: " + it.scope +
-    (it.repos ? "\nrepos:\n" + it.repos.map(function (r) { return "  - " + r; }).join("\n") : "") + (it.agents && it.agents !== "all" ? "\n" + agentsLines(it.agents).join("\n") : "") + "\nstatus: active\n---";
+    [].concat(yamlList("repos", it.repos), yamlList("tools", it.tools), yamlList("applies_to", it.applies_to)).map(function (l) { return "\n" + l; }).join("") + "\nstatus: active\n---";
   var org = it.scope === "organization";
   return { title: recLabel(it),
     head: '<div class="grow">' + kindBadge(it.kind) + " <span class=\"muted mono small\">" + h(it.force) + "</span><h2>" + h(recLabel(it)) + "</h2></div>",
@@ -737,11 +737,14 @@ ACTS["rec-pr"] = function (el) {
 };
 ACTS.newsteer = function () { openDialog("newsteer"); };
 DIALOGS.newsteer = function () {
-  return { title: "New steering record", sub: "Every agent it applies to gets it at its next session after the steering PR merges.",
+  return { title: "New steering record", sub: "It reaches the runs it targets once its steering PR merges.",
     body: '<div class="fields"><div class="field"><label for="ns-kind">Kind</label><select id="ns-kind">' + Object.keys(KINDS).filter(function (k) { return k !== "skill"; }).map(function (k) { return "<option>" + h(KINDS[k]) + "</option>"; }).join("") + '</select></div>' +
       '<div class="field"><label for="ns-force">Force</label><select id="ns-force"><option>must</option><option>should</option><option>may</option><option>info</option></select><div class="hint">must and should reach every request. may and info load when they fit.</div></div></div>' +
       '<div class="field"><label for="ns-text">Body</label><textarea id="ns-text" rows="3" autofocus placeholder="Run pnpm release:lint before you commit release notes."></textarea></div>' +
-      '<div class="field"><label for="ns-to">Applies to</label><select id="ns-to"><option value="all">Every agent</option>' + AGENTS.map(function (a) { return '<option value="' + h(a.key) + '">' + h(a.name) + "</option>"; }).join("") + "</select></div>",
+      '<h3 class="sec">Applies to</h3><p class="muted small">It reaches every run unless a target below narrows it.</p>' +
+      '<div class="field"><label>Repositories</label><div class="agpick">' + REPO.linked.map(function (r) { return '<label class="check"><input type="checkbox" name="ns-repo" value="' + h(r.url) + '"><span class="grow"><span class="n mono">' + h(r.url) + "</span></span></label>"; }).join("") + '</div><div class="hint">None ticked reaches every linked repository.</div></div>' +
+      '<div class="fields"><div class="field"><label for="ns-tools">Tools</label><input id="ns-tools" class="mono" placeholder="billing__create_refund, stripe__*"><div class="hint">It reaches a request only when the run holds a match.</div></div>' +
+      '<div class="field"><label for="ns-paths">Paths</label><input id="ns-paths" class="mono" placeholder="packages/api/**"><div class="hint">It reaches a turn that touches a match.</div></div></div>',
     foot: '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="newsteer-go">Open steering PR</button>' };
 };
 /* A label is 1 to 36 characters: the body's first words. */
@@ -750,22 +753,30 @@ function labelFrom(text) {
   String(text).replace(/\.$/, "").split(/\s+/).some(function (w) { if ((out ? out.length + 1 : 0) + w.length > 36) return true; out += (out ? " " : "") + w; return false; });
   return out || String(text).slice(0, 36);
 }
-/* The audience travels with the record: agents lists the agents it steers, and "all" leaves the
-   field out. steering-repo-spec.html defines no agent field yet, so the mockup proposes this one. */
-function agentsLines(agents) { return agents === "all" ? [] : ["agents:"].concat(agents.map(function (k) { return "  - " + k; })); }
+/* A record's targets are the steering-record/v1 fields repos, tools, and applies_to (path globs).
+   A glob or a wildcard is quoted, as the spec's examples write it. */
+function yamlList(name, arr) {
+  if (!arr || !arr.length) return [];
+  return [name + ":"].concat(arr.map(function (x) { return "  - " + (/[*?{}\[\]]/.test(x) || name === "applies_to" ? '"' + x + '"' : x); }));
+}
+function orList(a) { return a.length < 3 ? a.join(" or ") : a.slice(0, -1).join(", ") + ", or " + a[a.length - 1]; }
+function listField(id) { return ((document.getElementById(id) || {}).value || "").split(",").map(function (x) { return x.trim(); }).filter(Boolean); }
 ACTS["newsteer-go"] = function () {
   var n = nextPrNumber(), text = (document.getElementById("ns-text") || {}).value || "Run pnpm release:lint before you commit release notes.";
   var kindName = (document.getElementById("ns-kind") || {}).value || "Business rule", force = (document.getElementById("ns-force") || {}).value || "must";
-  var to = (document.getElementById("ns-to") || {}).value || "all", agents = to === "all" || !agentBy(to) ? "all" : [to];
+  var repos = Array.prototype.slice.call(document.querySelectorAll('input[name="ns-repo"]:checked')).map(function (el) { return el.value; });
+  var tools = listField("ns-tools"), paths = listField("ns-paths"), scope = repos.length ? "repository" : "workspace";
+  var code = function (x) { return "`" + x + "`"; };
+  var reach = [repos.length ? "its repository is " + orList(repos.map(code)) : "", tools.length ? "it holds " + orList(tools.map(code)) : "", paths.length ? "it touches " + orList(paths.map(code)) : ""].filter(Boolean);
   var kind = Object.keys(KINDS).filter(function (k) { return KINDS[k] === kindName; })[0] || "business-rule";
   var lineage = "a-intel.platform." + slugify(text).split("-").slice(0, 4).join("-"), label = labelFrom(text);
-  var body = ["---", "schema: steering-record/v1", "lineage: " + lineage, "label: " + label, "kind: " + kind, "force: " + force, "scope: workspace"].concat(agentsLines(agents), ["status: active", "origin: user", "---", "", text]).join("\n");
-  var rec = { lineage: lineage, label: label, kind: kind, force: force, scope: "workspace", tok: Math.round((label.length + text.length) / 4) + 8, agents: agents, path: "steering/platform/" + lineage + ".md", body: body };
-  var rows = budgetRows(rec), over = rows.some(function (r) { return r.over; });
+  var body = ["---", "schema: steering-record/v1", "lineage: " + lineage, "label: " + label, "kind: " + kind, "force: " + force, "scope: " + scope].concat(yamlList("repos", repos), yamlList("tools", tools), yamlList("applies_to", paths), ["status: active", "origin: user", "---", "", text]).join("\n");
+  var rec = { lineage: lineage, label: label, kind: kind, force: force, scope: scope, repos: repos.length ? repos : null, tools: tools, applies_to: paths, tok: Math.round((label.length + text.length) / 4) + 8, path: "steering/platform/" + lineage + ".md", body: body };
+  var over = budgetRows(rec).some(function (r) { return r.over; });
   S.newPrs.push({ n: n, kind: "record", state: "open", title: text.length > 60 ? text.slice(0, 57) + "..." : text, branch: "steering/" + lineage.split(".").slice(2).join("-"), by: ME, via: "web", opened: F.ORG.now, approvals: [],
-    summary: "Adds one record for " + (agents === "all" ? "every agent" : agentBy(to).name) + ". oxagen writes its id and hash when it merges.",
+    summary: "Adds one record. It reaches " + (reach.length ? "a run only when " + reach.join(" and ") : "every run in the workspace") + ". oxagen writes its id and hash when it merges.",
     record: rec,
-    checks: [{ id: "schema", r: "pass" }, { id: "lineage", r: "pass" }, { id: "secrets", r: "pass" }, { id: "conflicts", r: "pass" }, { id: "authority", r: "pass" }, { id: "budget", r: over ? (rows[0].set ? "fail" : "warn") : "pass" }, { id: "owned", r: "pass" }] });
+    checks: [{ id: "schema", r: "pass" }, { id: "lineage", r: "pass" }, { id: "secrets", r: "pass" }, { id: "conflicts", r: "pass" }, { id: "authority", r: "pass" }, { id: "budget", r: over ? "warn" : "pass" }, { id: "owned", r: "pass" }] });
   closeDialog(); go("steering", "pr-" + n); toast("Opened steering PR #" + n + ".");
 };
 ACTS.steerimport = function () { openDialog("steerimport"); };

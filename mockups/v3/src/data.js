@@ -418,20 +418,23 @@ function firstRun() { return S.empty && !S.imported.steering; }
 function govMode() { return firstRun() ? "solo" : REPO.governance.mode; }
 function prVisible(n) { return !firstRun() || S.newPrs.some(function (p) { return p.n === n; }); }
 
-/* The budget check: each agent's always-on steering (must and should records that load every
-   request) before and after the change, against the workspace's budget or oxagen's default. */
-function alwaysOn(agent) {
-  return Ledger.steeringFor(agent, LEDGER_F).filter(function (i) { return i.force === "must" || i.force === "should"; });
-}
+/* The budget check (steering-repo-spec.html, Tokens): per code repository, the always-on steering
+   before and after the change, against the workspace's budget or oxagen's default. Always-on means
+   must or should with no applies_to or tools target, since a target keeps a record out of runs it
+   does not concern. The check warns and never fails. */
+function hasTargets(i) { return !!((i.applies_to && i.applies_to.length) || (i.tools && i.tools.length)); }
+function isAlwaysOn(i) { return (i.force === "must" || i.force === "should") && i.kind !== "skill" && i.kind !== "memory" && !hasTargets(i); }
+function reachesRepo(i, repo) { return i.scope === "repository" ? (i.repos || []).indexOf(repo) >= 0 : true; }
+function alwaysOnIn(repo) { return steeringItems().filter(function (i) { return isAlwaysOn(i) && reachesRepo(i, repo); }); }
 function budgetRows(rec) {
-  var set = REPO.governance.always_on_tokens, budget = set || REPO.governance.defaultBudget;
-  var agents = rec.agents === "all" ? AGENTS.map(function (a) { return a.key; }) : rec.agents;
-  return agents.map(function (k) {
-    var a = agentBy(k), list = alwaysOn(a), before = list.reduce(function (t, i) { return t + i.tok; }, 0);
-    var after = before + (rec.force === "must" || rec.force === "should" ? rec.tok : 0) - (list.some(function (i) { return i.lineage === rec.lineage; }) ? rec.tok : 0);
-    return { agent: a, repo: "github.com/a-intel/platform", before: before, after: after, budget: budget, set: !!set, over: after > budget,
+  var set = REPO.governance.always_on_tokens, budget = set || REPO.governance.defaultBudget, adds = isAlwaysOn(rec);
+  var repos = rec.scope === "repository" && rec.repos && rec.repos.length ? rec.repos : REPO.linked.map(function (r) { return r.url; });
+  return repos.map(function (repo) {
+    var list = alwaysOnIn(repo), before = list.reduce(function (t, i) { return t + i.tok; }, 0);
+    var old = list.filter(function (i) { return i.lineage === rec.lineage; })[0], after = before - (old ? old.tok : 0) + (adds ? rec.tok : 0);
+    return { repo: repo, before: before, after: after, budget: budget, set: !!set, over: after > budget, adds: adds,
       largest: list.filter(function (i) { return i.lineage !== rec.lineage; }).map(function (i) { return { lineage: i.lineage, label: i.label || i.title, kind: i.kind, force: i.force, tok: i.tok }; })
-        .concat([{ lineage: rec.lineage, label: rec.label, kind: rec.kind, force: rec.force, tok: rec.tok, fresh: true }])
+        .concat(adds ? [{ lineage: rec.lineage, label: rec.label, kind: rec.kind, force: rec.force, tok: rec.tok, fresh: true }] : [])
         .sort(function (x, y) { return y.tok - x.tok; }).slice(0, 4) };
   });
 }
