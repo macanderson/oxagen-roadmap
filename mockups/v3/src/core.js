@@ -26,7 +26,7 @@ var S = {
   // URL (?health=drifted, ?as=amara) switch them.
   health: "healthy", viewer: null, steerTab: "records", srvTab: "tools",
   staged: {}, toolOff: {}, srvOff: {}, cls: {}, descs: {}, drafts: {}, dropped: {}, approved: {}, queue: [62],
-  newPrs: [], pendingAgents: {}, toolFilter: "all", toolQ: "", toolShow: 40, tryRun: {}, tryTool: {}, tryEnv: {},
+  newPrs: [], noReview: {}, pendingAgents: {}, toolFilter: "all", toolQ: "", toolShow: 40, tryRun: {}, tryTool: {}, tryEnv: {},
 };
 var HEALTH = ["healthy", "drifted", "disconnected", "diverged"];
 

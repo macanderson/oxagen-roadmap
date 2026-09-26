@@ -535,7 +535,7 @@ function steeringPrView(id) {
   if (st === "merged") acts += '<button class="btn" data-act="pr-revert" data-n="' + pr.n + '">Revert</button>';
   else {
     if (govMode() !== "solo" && canApprove(pr) && apv.indexOf(me) < 0) acts += '<button class="btn" data-act="pr-approve" data-n="' + pr.n + '">Approve</button>';
-    if (st !== "queued") acts += '<button class="btn primary" data-act="pr-merge" data-n="' + pr.n + '"' + (apv.length || govMode() === "solo" ? "" : " disabled") + ">" + (pr.kind === "memory" ? "Merge " + plural(pr.memories.filter(function (m) { return !S.dropped[pr.n + "." + m.id]; }).length, "memory", "memories") : "Merge") + "</button>";
+    if (st !== "queued") acts += '<button class="btn primary" data-act="pr-merge" data-n="' + pr.n + '"' + (apv.length || govMode() === "solo" || canMergeWithoutReview(me) ? "" : " disabled") + ">" + (pr.kind === "memory" ? "Merge " + plural(pr.memories.filter(function (m) { return !S.dropped[pr.n + "." + m.id]; }).length, "memory", "memories") : "Merge") + "</button>";
   }
   var head = '<div class="shead"><div class="t"><p class="eyebrow">Steering PR #' + pr.n + "</p><h1>" + h(pr.title) + "</h1>" + meta + '</div><div class="acts">' + acts + "</div></div>";
   var main = (pr.summary ? '<p class="pr-sum">' + mdi(pr.summary) + "</p>" : "");
@@ -585,7 +585,9 @@ function reviewPanel(pr) {
   var need = groups.length ? "One approval from " + groups.map(function (gr) { return "<code>" + h(gr.group) + "</code> (" + h(gr.members.map(personName).join(" or ")) + ")"; }).join(" and ") + "." : "One approval from a workspace member other than the author.";
   return '<div class="panel pad"><div class="rl-h"><h3>Review</h3><span class="muted">' + h(gov.mode === "team" ? "Team mode" : gov.mode) + '</span></div><p class="small">' + need + "</p>" +
     (apv.length ? '<div class="lst">' + apv.map(function (p) { return '<div class="li">' + personAv(p, 22) + '<span class="bd2"><span class="t1">' + h(personName(p)) + '</span><span class="t2">Approved in oxagen</span></span></div>'; }).join("") + "</div>" : '<p class="muted small">No approval yet.</p>') +
-    (pr.state !== "merged" && !canApprove(pr) && pr.by !== viewer() ? '<p class="muted small">You are not in the group that reviews this path.</p>' : "") + "</div>";
+    (pr.state !== "merged" && !canApprove(pr) && pr.by !== viewer() ? '<p class="muted small">You are not in the group that reviews this path.</p>' : "") +
+    (S.noReview[pr.n] ? '<p class="small">' + h(personName(S.noReview[pr.n])) + " merges it without review. The merge commit records it.</p>" :
+      pr.state !== "merged" && !apv.length && canMergeWithoutReview(viewer()) ? '<p class="small muted">As the workspace owner, you can merge without review. The required check still has to pass, and the merge commit records you.</p>' : "") + "</div>";
 }
 function queuePanel(pr) {
   if (pr.state === "merged") return "";
@@ -619,8 +621,10 @@ ACTS["pr-approve"] = function (el) { S.approved[+el.getAttribute("data-n")] = vi
 ACTS["pr-merge"] = function (el) {
   var n = +el.getAttribute("data-n");
   if (govMode() === "solo") { mergeFirstRun(prBy(n)); return; }
+  var bare = !prApprovals(prBy(n)).length;
+  if (bare) S.noReview[n] = viewer();
   if (S.queue.indexOf(n) < 0) S.queue.push(n);
-  toast("In the merge queue at position " + (S.queue.indexOf(n) + 1) + ". oxagen merges it when it reaches the front and its checks pass on the new main.");
+  toast("In the merge queue at position " + (S.queue.indexOf(n) + 1) + ". oxagen merges it when it reaches the front and its checks pass on the new main." + (bare ? " It merges without review, and the merge commit records you." : ""));
   render();
 };
 /* The first run: a new workspace in solo mode with an empty queue. The steering PR merges at once,

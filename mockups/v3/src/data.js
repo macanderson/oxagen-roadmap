@@ -439,6 +439,9 @@ function budgetRows(rec) {
 /* ---- the steering repo ---- */
 function isWsAdmin(who) { var r = (PEOPLE[who] || {}).role; return r === "Workspace owner" || r === "Organization owner"; }
 function isOrgAdmin(who) { return (PEOPLE[who] || {}).role === "Organization owner"; }
+/* The workspace owner may merge a steering PR without an approval in any mode (steering-repo-spec.html,
+   Review). A custom role can grant the same merge_without_review permission. The demo has none. */
+function canMergeWithoutReview(who) { return (PEOPLE[who] || {}).role === "Workspace owner"; }
 function orgAdmin() { for (var k in PEOPLE) if (isOrgAdmin(k)) return k; return null; }
 function slugify(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "workspace"; }
 /* A new workspace's steering repo: oxagen-<slug>, then -2, -3 on a clash. */
