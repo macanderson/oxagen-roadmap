@@ -410,7 +410,13 @@ function authorLabel(pr) {
   if (a) return a.name + " with steering_propose";
   return personName(pr.by);
 }
-var PR_KIND = { record: "Record", memory: "Memory", server: "Server", workspace: "Workspace", agent: "Agent", revert: "Revert" };
+var PR_KIND = { record: "Record", memory: "Memory", server: "Server", workspace: "Workspace", agent: "Agent", revert: "Revert", import: "Import" };
+/* The first run is a new workspace. Its steering repo starts in solo mode (steering-repo-spec.html,
+   Write the first commit), so a steering PR needs no approval and merges when Merge is pressed.
+   The demo workspace's own PRs stay out of it until the steering import merges. */
+function firstRun() { return S.empty && !S.imported.steering; }
+function govMode() { return firstRun() ? "solo" : REPO.governance.mode; }
+function prVisible(n) { return !firstRun() || S.newPrs.some(function (p) { return p.n === n; }); }
 
 /* The budget check: each agent's always-on steering (must and should records that load every
    request) before and after the change, against the workspace's budget or oxagen's default. */

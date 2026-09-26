@@ -342,6 +342,7 @@
   ],
   "conflicts": [
    {
+    "kind": "code-rule",
     "a": {
      "text": "Use pnpm for every script.",
      "file": "CLAUDE.md"
@@ -352,6 +353,7 @@
     }
    },
    {
+    "kind": "procedure",
     "a": {
      "text": "Squash-merge pull requests.",
      "file": "CLAUDE.md"
