@@ -1431,13 +1431,14 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
   <div class="tscroll"><table>
     <thead><tr><th>MCP tool</th><th>Does</th></tr></thead>
     <tbody>
-      <tr><td><code>steering_search</code></td><td class="wrap">Returns index lines that match a query, a kind, or a repository</td></tr>
+      <tr><td><code>steering_search</code></td><td class="wrap">Returns index lines for records and skills that match a query, a kind, or a repository. It finds no tools</td></tr>
       <tr><td><code>steering_read</code></td><td class="wrap">Returns one record's body, or a file from a skill folder</td></tr>
       <tr><td><code>steering_propose</code></td><td class="wrap">Opens a steering PR from files, a title, the rationale, and evidence frames</td></tr>
       <tr><td><code>remember</code></td><td class="wrap">Writes a memory with its evidence</td></tr>
       <tr><td><code>reflect</code></td><td class="wrap">Stores the run's reflection, a memory with grades</td></tr>
     </tbody>
   </table></div>
+  <p><strong>Finding tools.</strong> A server in direct mode puts every imported tool in the agent's tool list as <code>&lt;server&gt;__&lt;tool&gt;</code>, so the agent searches for nothing. A server in search mode, the default for a server over the definition budget, gives the agent three tools instead: <code>&lt;server&gt;__search</code> returns up to 10 of its tools as one line each, <code>&lt;server&gt;__describe</code> returns one tool's input schema, and <code>&lt;server&gt;__call</code> runs it (MCP Studio). Cedar decides the real tool either way, and finding a tool grants nothing.</p>
   <p class="muted">The names follow the rename in #4325. Today's tools are <code>propose_record</code>, <code>open_context_pr</code>, and <code>merge_context_pr</code>.</p>
 </section>
 
