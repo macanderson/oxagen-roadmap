@@ -13,6 +13,7 @@ stella-backlog-batches.html   the stella backlog on 2026-09-25: 486 open issues 
 steering-repo-spec.html       the steering repo Oxagen creates for each workspace: layout, formats, settings, drift, memory
 mcp-studio-spec.html          MCP Studio: storage for every MCP server agents use, and an Oxagen and Kong comparison
 mcp-steering-repo-plan.html   one build plan for both specs: build order, 31 lane prompts, and a progress tracker; the target UI is mockups/v3
+supported-harnesses.html      the 20 most used agent harnesses and frameworks, plus stella: what Oxagen supports in each and the highest tier each can reach
 roadmap/app.html              the app: the pages, the Claude drawer, the GitHub wiring, the shared store
 roadmap/data.json             the roadmap content: surfaces, witness, dod, decisions, milestones, the catalog, the issue triage snapshot
 mockups/missioncontrol.html   the master: every page, dialog, auth screen and guided scenario, self-contained, open from disk
