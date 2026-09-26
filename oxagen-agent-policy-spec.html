@@ -1,0 +1,738 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Example agent policies in Cedar, with every decision computed by Cedar's evaluator against the proposed schema.">
+<title>Agent policy spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Tokens: the oxagen house palette, dark first, with the white theme intact. */
+:root{
+  color-scheme:dark;
+  --ink:#09090B; --panel:#18181B; --hl:#27272A; --border:#27272A; --rule:#3F3F46; --code:#0E0E11;
+  --fg:#FFFFFF; --body:#E4E4E7; --muted:#A1A1AA; --dim:#71717A;
+  --gold:#D4AF37; --accent-text:#D4AF37;
+  --allowed:#57A97C; --approval:#5B93D6; --denied:#C66A4A;
+  --tk-c:#8B8B94; --tk-a:#C4A6F2; --tk-s:#7CC4A0; --tk-t:#6FB3E8; --tk-k:#E8A96F; --tk-n:#E8D06F;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    color-scheme:light;
+    --ink:#FFFFFF; --panel:#FFFFFF; --hl:#F4F4F5; --border:#E4E4E7; --rule:#D4D4D8; --code:#FAFAFA;
+    --fg:#09090B; --body:#27272A; --muted:#71717A; --dim:#A1A1AA;
+    --accent-text:#8A7223;
+    --allowed:#2F7D52; --approval:#2E6BA8; --denied:#9B4526;
+    --tk-c:#6B6B73; --tk-a:#6E4BB0; --tk-s:#2F7D52; --tk-t:#2E6BA8; --tk-k:#A5531A; --tk-n:#8A6A00;
+  }
+}
+:root[data-theme="light"]{
+  color-scheme:light;
+  --ink:#FFFFFF; --panel:#FFFFFF; --hl:#F4F4F5; --border:#E4E4E7; --rule:#D4D4D8; --code:#FAFAFA;
+  --fg:#09090B; --body:#27272A; --muted:#71717A; --dim:#A1A1AA;
+  --accent-text:#8A7223;
+  --allowed:#2F7D52; --approval:#2E6BA8; --denied:#9B4526;
+  --tk-c:#6B6B73; --tk-a:#6E4BB0; --tk-s:#2F7D52; --tk-t:#2E6BA8; --tk-k:#A5531A; --tk-n:#8A6A00;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:64px}
+body{margin:0;background:var(--ink);color:var(--body);font:15px/1.6 "Geist",system-ui,-apple-system,"Segoe UI",sans-serif;padding-inline:16px;padding-block:0 96px}
+.wrap{max-width:1120px;margin-inline:auto}
+h1,h2,h3{font-family:"Space Grotesk","Geist",system-ui,sans-serif;color:var(--fg);text-wrap:balance;line-height:1.2;font-weight:600;margin:0}
+h1{font-size:clamp(32px,5vw,46px);letter-spacing:-.02em;font-weight:700}
+h2{font-size:clamp(24px,3.2vw,28px);letter-spacing:-.01em}
+h3{font-size:20px}
+p{margin:0;max-width:72ch}
+a{color:inherit;text-decoration-color:var(--rule);text-underline-offset:3px}
+a:hover{text-decoration-color:currentColor}
+a:focus-visible{outline:2px solid var(--gold);outline-offset:2px;border-radius:3px}
+code,pre{font-family:"Monaspace Neon","Geist Mono",ui-monospace,"SF Mono",Menlo,monospace;font-feature-settings:"calt","liga"}
+code{font-size:.88em}
+.quiet{color:var(--muted)}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.eyebrow.first{color:var(--accent-text)}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:20px;border-bottom:1px solid var(--border)}
+.wm{font-family:"Space Grotesk","Geist",sans-serif;font-weight:700;font-size:22px;color:var(--fg);letter-spacing:-.02em}
+.wm b{color:var(--gold);font-weight:700}
+.tag{font-family:"Geist Mono",ui-monospace,monospace;font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:2px 8px}
+.hero{display:grid;gap:14px;padding-block:44px 28px}
+.lead{font-size:17px;color:var(--body)}
+.note{border-left:2px solid var(--rule);padding:4px 0 4px 14px;color:var(--muted);font-size:14px;max-width:80ch}
+.note b{color:var(--body);font-weight:600}
+.meta{font-size:13px;color:var(--muted)}
+nav.sub{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--ink);border-bottom:1px solid var(--border);margin-inline:-16px;padding:10px 16px;overflow-x:auto;scrollbar-width:thin}
+nav.sub ol{display:flex;gap:6px;list-style:none;margin:0 auto;padding:0;max-width:1120px;white-space:nowrap}
+nav.sub a{display:inline-block;font-size:13px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:999px;border:1px solid transparent}
+nav.sub a:hover{color:var(--fg);border-color:var(--border)}
+section{display:grid;gap:16px;padding-block:44px;border-top:1px solid var(--border)}
+section:first-of-type{border-top:0}
+.sec-h{display:grid;gap:6px}
+ol.steps{margin:0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:s;max-width:80ch}
+ol.steps li{display:grid;grid-template-columns:28px 1fr;gap:10px;align-items:start}
+ol.steps li::before{counter-increment:s;content:counter(s);font-family:"Geist Mono",monospace;font-size:12px;width:24px;height:24px;display:grid;place-items:center;border:1px solid var(--rule);border-radius:4px;color:var(--fg);margin-top:1px}
+.shapes{display:flex;flex-wrap:wrap;gap:10px;align-items:center;font-size:14px}
+.code{background:var(--code);border:1px solid var(--border);border-radius:10px;overflow-x:auto}
+.code pre{margin:0;padding:14px 16px;font-size:13px;line-height:1.6;color:var(--body);tab-size:2}
+.code .c{color:var(--tk-c);font-style:italic}.code .a{color:var(--tk-a)}.code .s{color:var(--tk-s)}.code .t{color:var(--tk-t)}.code .k{color:var(--tk-k)}.code .n{color:var(--tk-n)}
+.tbl{border:1px solid var(--border);border-radius:10px;overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;font-variant-numeric:tabular-nums}
+th{background:var(--hl);color:var(--muted);font-weight:500;font-size:12px;text-align:left;padding:8px 12px;white-space:nowrap}
+td{padding:9px 12px;border-top:1px solid var(--border);vertical-align:top}
+td code{color:var(--fg)}
+td .agent{display:block;font-family:"Geist Mono",ui-monospace,monospace;font-size:11.5px;color:var(--muted);margin-top:2px}
+.fields td:first-child{white-space:nowrap}
+/* A decision reads as a word and a border shape: allowed double, approval dashed, denied single. */
+.dec{display:inline-block;white-space:nowrap;font-size:12.5px;font-weight:500;line-height:1;padding:5px 9px;border-radius:6px}
+.dec-allow{border:3px double var(--allowed);color:var(--allowed);padding:3px 7px}
+.dec-approval{border:1px dashed var(--approval);color:var(--approval)}
+.dec-deny{border:1px solid var(--denied);color:var(--denied)}
+.grid{display:grid;gap:16px}
+.ex{display:grid;gap:12px;padding:20px;border:1px solid var(--border);border-radius:12px;background:var(--panel);min-width:0}
+.ex p{color:var(--body)}
+.ex .with{font-size:13.5px;color:var(--muted)}
+.err{display:grid;gap:6px;border:1px solid var(--denied);border-radius:10px;padding:12px 14px}
+.err-k{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--denied);font-weight:500}
+.err code{color:var(--body);white-space:pre-wrap;word-break:break-word}
+footer{border-top:1px solid var(--border);padding-block:28px;color:var(--muted);font-size:13.5px;display:grid;gap:8px}
+@media (min-width:980px){.grid.two{grid-template-columns:1fr 1fr}}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top"><span class="wm">o<b>x</b>agen</span><span class="tag">policy spec</span></header>
+<div class="hero">
+  <p class="eyebrow first">Tool policy</p>
+  <h1>Agent policy spec</h1>
+  <p class="lead">A policy decides each tool call an agent asks for: allowed, denied, or parked until a person approves it. The rules are written in Cedar, and the gateway evaluates the active version for every call routed through Oxagen, with no model in the decision. On the harness tier the hook refuses a call and fails open. On the observe tier nothing is refused, and the call is recorded.</p>
+  <p class="note"><b>Status: proposed.</b> §6.12 of the mission control spec decides that tool policy is Cedar, deterministic, versioned, and tested, and ADR 0004 says why Cedar. The schema, the <code>@decision</code> annotation, the way Oxagen reads a denial, and the toolbelt grant below are proposed in <a href="https://github.com/macanderson/oxagen-roadmap/pull/127">PR 127</a> and on this page. None of them is decided.</p>
+  <p class="meta">26 examples and 59 tests. Every decision on this page was computed by Cedar 4.13.0 (language 4.5) through <code>@cedar-policy/cedar-wasm</code>, with every rule validated against the schema in strict mode. Reviewed 2026-09-25. Built by <code>tools/build-policy-spec.mjs</code>.</p>
+</div>
+<nav class="sub" aria-label="Sections"><ol><li><a href="#decision">How a call is decided</a></li><li><a href="#schema">Schema</a></li><li><a href="#access">Access</a></li><li><a href="#approval">Approval</a></li><li><a href="#limits">Hard limits</a></li><li><a href="#money">Money</a></li><li><a href="#data">Data</a></li><li><a href="#code">Code</a></li><li><a href="#production">Production</a></li><li><a href="#budget">Budget and rate</a></li><li><a href="#versions">Tool versions</a></li><li><a href="#avoid">Patterns to avoid</a></li></ol></nav>
+
+<section id="decision">
+  <div class="sec-h"><p class="eyebrow">Evaluation</p><h2>How a call is decided</h2></div>
+  <ol class="steps">
+    <li><p>The gateway builds a request for the call. The principal is the agent, the action is the tool, the resource is what the call acts on, and the context holds the call's facts.</p></li>
+    <li><p>Cedar evaluates every rule in the active version. A <code>forbid</code> that applies wins over every <code>permit</code>. When no rule permits the call, Cedar denies it.</p></li>
+    <li><p>When Cedar denies a call, it names the rules that decided. If every one of them carries <code>@decision("require_approval")</code>, the gateway parks the call for a person. Otherwise the call is denied.</p></li>
+    <li><p>When a person approves, the gateway asks again with <code>context.approval.granted</code> set to true. The approval rules stop applying, and the call runs only if a rule permits it. An approval never grants what no rule permits, and it never lifts a <code>forbid</code> that has no <code>unless</code> for it.</p></li>
+  </ol>
+  <div class="shapes"><span>Each decision reads as a word and a shape:</span><span class="dec dec-allow">allow</span><span class="dec dec-approval">require approval</span><span class="dec dec-deny">deny</span></div>
+  <p>Every test on this page runs against the rule it illustrates plus the toolbelt grant, a permit Oxagen compiles from each agent's toolbelt. §6.12 says a version compiles from the rules written for it, the enforcement grants on each agent, and the role grants on each operator, so a grant is never written again as a rule.</p>
+  <div class="code"><pre><code><span class="c">// Compiled from each agent's toolbelt. Nobody writes this rule by hand.</span>
+<span class="a">@id</span>(<span class="s">&quot;grant.toolbelt&quot;</span>)
+<span class="k">permit</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">principal</span>.toolbelt.contains(<span class="k">context</span>.tool.name) };</code></pre></div>
+  <div class="tbl"><table><thead><tr><th>Agent</th><th>Workspace</th><th>Toolbelt</th></tr></thead><tbody>
+  <tr><td><code>a-intel.core.release-manager</code></td><td><code>core-platform</code></td><td><code>github__get_file_contents</code>, <code>github__create_issue_comment</code>, <code>github__create_pull_request</code>, <code>github__create_release</code>, <code>github__delete_branch</code>, <code>github__delete_repository</code>, <code>slack__post_message</code>, <code>slack__upload_file</code>, <code>claude_code__Edit</code>, <code>claude_code__Bash</code>, <code>kubernetes__get_logs</code>, <code>kubernetes__delete_pod</code>, <code>linear__update_issue</code></td></tr>
+<tr><td><code>a-intel.core.stella-ci</code></td><td><code>core-platform</code></td><td><code>github__get_file_contents</code>, <code>github__create_pull_request</code>, <code>github__delete_branch</code>, <code>claude_code__Bash</code>, <code>claude_code__Edit</code>, <code>claude_code__WebFetch</code>, <code>snowflake__run_query</code></td></tr>
+<tr><td><code>a-intel.core.triage</code></td><td><code>core-platform</code></td><td><code>github__get_file_contents</code>, <code>github__create_issue_comment</code>, <code>linear__update_issue</code>, <code>zendesk__update_ticket</code>, <code>slack__post_message</code>, <code>slack__upload_file</code></td></tr>
+<tr><td><code>a-intel.core.docs-writer</code></td><td><code>core-platform</code></td><td><code>github__get_file_contents</code>, <code>github__create_pull_request</code>, <code>claude_code__Edit</code>, <code>claude_code__WebFetch</code></td></tr>
+<tr><td><code>a-intel.core.cost-analyst</code></td><td><code>core-platform</code></td><td><code>aws_billing__purchase_savings_plan</code>, <code>stripe__list_prices</code></td></tr>
+<tr><td><code>a-intel.finops.invoice-bot</code></td><td><code>finops</code></td><td><code>stripe__list_prices</code>, <code>stripe__create_payment</code>, <code>stripe__create_refund</code>, <code>aws_billing__purchase_savings_plan</code></td></tr>
+  </tbody></table></div>
+</section>
+
+<section id="schema">
+  <div class="sec-h"><p class="eyebrow">Proposed</p><h2>Schema</h2><p>The shape of the request for one tool call. Validation against it catches a misspelled path, a missing <code>has</code>, or an undeclared tool before a version is saved.</p></div>
+  <div class="tbl fields"><table><thead><tr><th>Context</th><th>Type</th><th>What fills it</th></tr></thead><tbody>
+  <tr><td><code>context.tool</code></td><td>Tool</td><td>The tool version and the registry's classification of it: risk, side effect, egress and financial class.</td></tr>
+<tr><td><code>context.args</code></td><td>Args</td><td>The call's arguments by name. Only the ones the call carries are present.</td></tr>
+<tr><td><code>context.taint</code></td><td>record</td><td>Whether any input to the call came from an untrusted source, and which sources.</td></tr>
+<tr><td><code>context.time</code></td><td>record</td><td>The gateway's clock, in UTC, when the call arrives.</td></tr>
+<tr><td><code>context.rate</code></td><td>record</td><td>How many calls of this tool the agent made in the last hour and the last minute.</td></tr>
+<tr><td><code>context.run</code></td><td>record</td><td>The tools already called in this run, and the objects already read in it.</td></tr>
+<tr><td><code>context.operator</code></td><td>record</td><td>The role of the operator the run works for.</td></tr>
+<tr><td><code>context.tier</code></td><td>String</td><td>The enforcement tier computed for the run: observe, harness, gateway or contained.</td></tr>
+<tr><td><code>context.budget</code></td><td>record</td><td>What the run's budget has left, in cents.</td></tr>
+<tr><td><code>context.mandate</code></td><td>record, optional</td><td>What the mandate the call draws on has left, when the call draws on one.</td></tr>
+<tr><td><code>context.approval</code></td><td>record</td><td>Whether a person approved this call, and how many people did. The gateway sets it when it asks again after an approval.</td></tr>
+  </tbody></table></div>
+  <div class="code"><pre><code><span class="c">// The request Oxagen's gateway builds for one tool call.</span>
+<span class="k">entity</span> <span class="t">Workspace</span>;
+
+<span class="c">// An agent belongs to one workspace. Its toolbelt lists the tools it is granted.</span>
+<span class="k">entity</span> <span class="t">Agent</span> <span class="k">in</span> [<span class="t">Workspace</span>] {
+  toolbelt: <span class="t">Set</span>&lt;<span class="t">String</span>&gt;
+};
+
+<span class="c">// What a call acts on: a repository, a connection, a cluster.</span>
+<span class="k">entity</span> <span class="t">Target</span>;
+
+<span class="c">// The tool version, as the registry classifies it.</span>
+<span class="k">type</span> <span class="t">Tool</span> = {
+  name: <span class="t">String</span>,
+  version: <span class="t">String</span>,
+  risk: <span class="t">String</span>,
+  side_effect: <span class="t">String</span>,
+  egress: <span class="t">String</span>,
+  financial_class: <span class="t">String</span>
+};
+
+<span class="c">// The call's own arguments. Each is optional, so a rule tests it with has first.</span>
+<span class="k">type</span> <span class="t">Args</span> = {
+  amount_cents?: <span class="t">Long</span>,
+  counterparty?: <span class="t">String</span>,
+  repository?: <span class="t">String</span>,
+  branch?: <span class="t">String</span>,
+  path?: <span class="t">String</span>,
+  channel?: <span class="t">String</span>,
+  recipient_domain?: <span class="t">String</span>,
+  cluster?: <span class="t">String</span>,
+  schema?: <span class="t">String</span>,
+  fields?: <span class="t">Set</span>&lt;<span class="t">String</span>&gt;
+};
+
+<span class="k">type</span> <span class="t">Call</span> = {
+  tool: <span class="t">Tool</span>,
+  args: <span class="t">Args</span>,
+  taint: { tainted: <span class="t">Bool</span>, sources: <span class="t">Set</span>&lt;<span class="t">String</span>&gt; },
+  time: { hour_utc: <span class="t">Long</span>, weekday: <span class="t">Bool</span> },
+  rate: { calls_last_hour: <span class="t">Long</span>, calls_last_minute: <span class="t">Long</span> },
+  run: { prior_calls: <span class="t">Set</span>&lt;<span class="t">String</span>&gt;, prior_reads: <span class="t">Set</span>&lt;<span class="t">String</span>&gt; },
+  operator: { role: <span class="t">String</span> },
+  tier: <span class="t">String</span>,
+  budget: { remaining_cents: <span class="t">Long</span> },
+  mandate?: { remaining_cents: <span class="t">Long</span> },
+  approval: { granted: <span class="t">Bool</span>, approvers: <span class="t">Long</span> }
+};
+
+<span class="c">// One action per tool name.</span>
+<span class="k">action</span> <span class="s">&quot;github__get_file_contents&quot;</span>,
+       <span class="s">&quot;github__create_issue_comment&quot;</span>,
+       <span class="s">&quot;github__create_pull_request&quot;</span>,
+       <span class="s">&quot;github__create_release&quot;</span>,
+       <span class="s">&quot;github__delete_branch&quot;</span>,
+       <span class="s">&quot;github__delete_repository&quot;</span>,
+       <span class="s">&quot;stripe__list_prices&quot;</span>,
+       <span class="s">&quot;stripe__create_payment&quot;</span>,
+       <span class="s">&quot;stripe__create_refund&quot;</span>,
+       <span class="s">&quot;aws_billing__purchase_savings_plan&quot;</span>,
+       <span class="s">&quot;slack__post_message&quot;</span>,
+       <span class="s">&quot;slack__upload_file&quot;</span>,
+       <span class="s">&quot;snowflake__run_query&quot;</span>,
+       <span class="s">&quot;claude_code__Bash&quot;</span>,
+       <span class="s">&quot;claude_code__Edit&quot;</span>,
+       <span class="s">&quot;claude_code__WebFetch&quot;</span>,
+       <span class="s">&quot;linear__update_issue&quot;</span>,
+       <span class="s">&quot;zendesk__update_ticket&quot;</span>,
+       <span class="s">&quot;kubernetes__get_logs&quot;</span>,
+       <span class="s">&quot;kubernetes__delete_pod&quot;</span>
+  <span class="k">appliesTo</span> {
+    <span class="k">principal</span>: <span class="t">Agent</span>,
+    <span class="k">resource</span>: <span class="t">Target</span>,
+    <span class="k">context</span>: <span class="t">Call</span>
+  };</code></pre></div>
+</section>
+
+<section id="access">
+  <div class="sec-h"><p class="eyebrow">Examples</p><h2>Access</h2></div>
+  <div class="grid"><article class="ex" id="reads.open">
+<h3>Open reads</h3>
+<p>Every agent may call a read-only tool of low or medium risk, whether or not its toolbelt lists the tool.</p>
+<div class="code"><pre><code><span class="c">// Every agent may call a read-only tool of low or medium risk.</span>
+<span class="a">@id</span>(<span class="s">&quot;reads.open&quot;</span>)
+<span class="k">permit</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> {
+  <span class="k">context</span>.tool.side_effect == <span class="s">&quot;read&quot;</span> &amp;&amp;
+  <span class="k">context</span>.tool.risk != <span class="s">&quot;high&quot;</span>
+};</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>kubernetes__get_logs@2</code><span class="agent">a-intel.core.triage</span></td><td>not on the toolbelt</td><td><code>allow</code></td><td><code>reads.open</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>snowflake__run_query@2</code><span class="agent">a-intel.core.triage</span></td><td>a high-risk read, not on the toolbelt</td><td><code>deny</code></td><td><span class="quiet">no rule permits it</span></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="reads.high-risk-routed">
+<h3>High-risk reads</h3>
+<p>A high-risk read runs only when the call is routed through the gateway.</p>
+<div class="code"><pre><code><span class="c">// A high-risk read runs only when the call is routed through the gateway.</span>
+<span class="a">@id</span>(<span class="s">&quot;reads.high-risk-routed&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> {
+  <span class="k">context</span>.tool.side_effect == <span class="s">&quot;read&quot;</span> &amp;&amp;
+  <span class="k">context</span>.tool.risk == <span class="s">&quot;high&quot;</span>
+}
+<span class="k">unless</span> { [<span class="s">&quot;gateway&quot;</span>, <span class="s">&quot;contained&quot;</span>].contains(<span class="k">context</span>.tier) };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>snowflake__run_query@2</code><span class="agent">a-intel.core.stella-ci</span></td><td>tier harness</td><td><code>deny</code></td><td><code>reads.high-risk-routed</code></td><td><span class="dec dec-deny">deny</span></td></tr>
+<tr><td><code>snowflake__run_query@2</code><span class="agent">a-intel.core.stella-ci</span></td><td>tier gateway</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr></tbody></table></div>
+</article></div>
+</section>
+
+<section id="approval">
+  <div class="sec-h"><p class="eyebrow">Examples</p><h2>Approval</h2></div>
+  <div class="grid"><article class="ex" id="irreversible.approval">
+<h3>Irreversible calls</h3>
+<p>Every irreversible call parks for a person's approval.</p>
+<div class="code"><pre><code><span class="c">// Every irreversible call parks for a person's approval.</span>
+<span class="a">@id</span>(<span class="s">&quot;irreversible.approval&quot;</span>)
+<span class="a">@decision</span>(<span class="s">&quot;require_approval&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.tool.side_effect == <span class="s">&quot;irreversible&quot;</span> }
+<span class="k">unless</span> { <span class="k">context</span>.approval.granted };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>github__create_release@2</code><span class="agent">a-intel.core.release-manager</span></td><td>not approved</td><td><code>deny</code></td><td><code>irreversible.approval</code></td><td><span class="dec dec-approval">require approval</span></td></tr>
+<tr><td><code>github__create_release@2</code><span class="agent">a-intel.core.release-manager</span></td><td>approved</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>github__create_release@2</code><span class="agent">a-intel.core.triage</span></td><td>approved, not on the toolbelt</td><td><code>deny</code></td><td><span class="quiet">no rule permits it</span></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="slack.external-approval">
+<h3>Shared external channels</h3>
+<p>A Slack post or upload to a channel shared with another company parks for approval.</p>
+<div class="code"><pre><code><span class="c">// A post or upload to a shared external Slack channel parks for approval.</span>
+<span class="a">@id</span>(<span class="s">&quot;slack.external-approval&quot;</span>)
+<span class="a">@decision</span>(<span class="s">&quot;require_approval&quot;</span>)
+<span class="k">forbid</span> (
+  <span class="k">principal</span>,
+  <span class="k">action</span> <span class="k">in</span> [<span class="t">Action</span>::<span class="s">&quot;slack__post_message&quot;</span>, <span class="t">Action</span>::<span class="s">&quot;slack__upload_file&quot;</span>],
+  <span class="k">resource</span>
+)
+<span class="k">when</span> { <span class="k">context</span>.args <span class="k">has</span> channel &amp;&amp; <span class="k">context</span>.args.channel <span class="k">like</span> <span class="s">&quot;ext-*&quot;</span> }
+<span class="k">unless</span> { <span class="k">context</span>.approval.granted };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>slack__post_message@2</code><span class="agent">a-intel.core.release-manager</span></td><td>channel #releases</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>slack__post_message@2</code><span class="agent">a-intel.core.release-manager</span></td><td>channel ext-acme</td><td><code>deny</code></td><td><code>slack.external-approval</code></td><td><span class="dec dec-approval">require approval</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="payments.two-approvers">
+<h3>Two approvers above $1,000</h3>
+<p>A call that moves more than $1,000 needs two people to approve it.</p>
+<div class="code"><pre><code><span class="c">// A call that moves more than $1,000 needs two approvers.</span>
+<span class="a">@id</span>(<span class="s">&quot;payments.two-approvers&quot;</span>)
+<span class="a">@decision</span>(<span class="s">&quot;require_approval&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> {
+  <span class="k">context</span>.tool.financial_class == <span class="s">&quot;moves_funds&quot;</span> &amp;&amp;
+  <span class="k">context</span>.args <span class="k">has</span> amount_cents &amp;&amp;
+  <span class="k">context</span>.args.amount_cents &gt; <span class="n">100000</span>
+}
+<span class="k">unless</span> { <span class="k">context</span>.approval.granted &amp;&amp; <span class="k">context</span>.approval.approvers &gt;= <span class="n">2</span> };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>stripe__create_payment@5</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>$2,450.00, one approver</td><td><code>deny</code></td><td><code>payments.two-approvers</code></td><td><span class="dec dec-approval">require approval</span></td></tr>
+<tr><td><code>stripe__create_payment@5</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>$2,450.00, two approvers</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>stripe__create_payment@5</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>$640.00</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr></tbody></table></div>
+</article></div>
+</section>
+
+<section id="limits">
+  <div class="sec-h"><p class="eyebrow">Examples</p><h2>Hard limits</h2></div>
+  <div class="grid"><article class="ex" id="repo.delete-never">
+<h3>Repository deletes</h3>
+<p>No agent deletes a repository, with or without approval.</p>
+<div class="code"><pre><code><span class="c">// No agent deletes a repository. A person does it.</span>
+<span class="a">@id</span>(<span class="s">&quot;repo.delete-never&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;github__delete_repository&quot;</span>, <span class="k">resource</span>);</code></pre></div>
+<p class="with">Tested beside <a href="#irreversible.approval"><code>irreversible.approval</code></a> and the toolbelt grant.</p>
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>github__delete_repository@1</code><span class="agent">a-intel.core.release-manager</span></td><td>not approved</td><td><code>deny</code></td><td><code>irreversible.approval</code> <code>repo.delete-never</code></td><td><span class="dec dec-deny">deny</span></td></tr>
+<tr><td><code>github__delete_repository@1</code><span class="agent">a-intel.core.release-manager</span></td><td>approved</td><td><code>deny</code></td><td><code>repo.delete-never</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article></div>
+</section>
+
+<section id="money">
+  <div class="sec-h"><p class="eyebrow">Examples</p><h2>Money</h2></div>
+  <div class="grid"><article class="ex" id="refund.over-500">
+<h3>Refunds above $500</h3>
+<p>A refund above $500 parks for approval.</p>
+<div class="code"><pre><code><span class="c">// A refund above $500 parks for approval.</span>
+<span class="a">@id</span>(<span class="s">&quot;refund.over-500&quot;</span>)
+<span class="a">@decision</span>(<span class="s">&quot;require_approval&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;stripe__create_refund&quot;</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.args <span class="k">has</span> amount_cents &amp;&amp; <span class="k">context</span>.args.amount_cents &gt; <span class="n">50000</span> }
+<span class="k">unless</span> { <span class="k">context</span>.approval.granted };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>stripe__create_refund@3</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>$120.00</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>stripe__create_refund@3</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>$720.00</td><td><code>deny</code></td><td><code>refund.over-500</code></td><td><span class="dec dec-approval">require approval</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="payment.vendor-list">
+<h3>Known counterparties</h3>
+<p>A payment goes only to a counterparty on the vendor list.</p>
+<div class="code"><pre><code><span class="c">// A payment goes only to a counterparty on the vendor list.</span>
+<span class="a">@id</span>(<span class="s">&quot;payment.vendor-list&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;stripe__create_payment&quot;</span>, <span class="k">resource</span>)
+<span class="k">unless</span> { <span class="k">context</span>.args <span class="k">has</span> counterparty &amp;&amp; <span class="k">context</span>.args.counterparty <span class="k">like</span> <span class="s">&quot;vendor:*&quot;</span> };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>stripe__create_payment@5</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>counterparty vendor:aws</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>stripe__create_payment@5</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>counterparty acct:unknown</td><td><code>deny</code></td><td><code>payment.vendor-list</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="payment.quote-first">
+<h3>Quote before payment</h3>
+<p>A payment is denied unless the same run already priced it.</p>
+<div class="code"><pre><code><span class="c">// A payment is denied unless the same run already priced it.</span>
+<span class="a">@id</span>(<span class="s">&quot;payment.quote-first&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;stripe__create_payment&quot;</span>, <span class="k">resource</span>)
+<span class="k">unless</span> { <span class="k">context</span>.run.prior_calls.contains(<span class="s">&quot;stripe__list_prices&quot;</span>) };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>stripe__create_payment@5</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>stripe__list_prices called earlier in the run</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>stripe__create_payment@5</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>no price lookup in the run</td><td><code>deny</code></td><td><code>payment.quote-first</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="money.business-hours">
+<h3>Business hours for money</h3>
+<p>Money moves only on a weekday between 09:00 and 17:00 UTC.</p>
+<div class="code"><pre><code><span class="c">// Money moves only on a weekday between 09:00 and 17:00 UTC.</span>
+<span class="a">@id</span>(<span class="s">&quot;money.business-hours&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.tool.financial_class == <span class="s">&quot;moves_funds&quot;</span> }
+<span class="k">unless</span> {
+  <span class="k">context</span>.time.weekday &amp;&amp;
+  <span class="k">context</span>.time.hour_utc &gt;= <span class="n">9</span> &amp;&amp;
+  <span class="k">context</span>.time.hour_utc &lt; <span class="n">17</span>
+};</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>stripe__create_refund@3</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>Tuesday 11:00 UTC</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>stripe__create_refund@3</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>Saturday 11:00 UTC</td><td><code>deny</code></td><td><code>money.business-hours</code></td><td><span class="dec dec-deny">deny</span></td></tr>
+<tr><td><code>stripe__create_refund@3</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>Tuesday 18:00 UTC</td><td><code>deny</code></td><td><code>money.business-hours</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="mandate.remaining">
+<h3>Mandate balance</h3>
+<p>A payment larger than what is left on its mandate is denied.</p>
+<div class="code"><pre><code><span class="c">// A payment larger than what is left on its mandate is denied.</span>
+<span class="a">@id</span>(<span class="s">&quot;mandate.remaining&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> {
+  <span class="k">context</span>.tool.financial_class == <span class="s">&quot;moves_funds&quot;</span> &amp;&amp;
+  <span class="k">context</span> <span class="k">has</span> mandate &amp;&amp;
+  <span class="k">context</span>.args <span class="k">has</span> amount_cents &amp;&amp;
+  <span class="k">context</span>.args.amount_cents &gt; <span class="k">context</span>.mandate.remaining_cents
+};</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>stripe__create_payment@5</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>$200.00, $250.00 left on the mandate</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>stripe__create_payment@5</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>$900.00, $250.00 left on the mandate</td><td><code>deny</code></td><td><code>mandate.remaining</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="spend.finops-only">
+<h3>Committed spend</h3>
+<p>Only an agent in the finops workspace may call a tool that commits spend.</p>
+<div class="code"><pre><code><span class="c">// Only an agent in finops may call a tool that commits spend.</span>
+<span class="a">@id</span>(<span class="s">&quot;spend.finops-only&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.tool.financial_class == <span class="s">&quot;commits_spend&quot;</span> }
+<span class="k">unless</span> { <span class="k">principal</span> <span class="k">in</span> <span class="t">Workspace</span>::<span class="s">&quot;finops&quot;</span> };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>aws_billing__purchase_savings_plan@2</code><span class="agent">a-intel.finops.invoice-bot</span></td><td>workspace finops</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>aws_billing__purchase_savings_plan@2</code><span class="agent">a-intel.core.cost-analyst</span></td><td>workspace core-platform</td><td><code>deny</code></td><td><code>spend.finops-only</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article></div>
+</section>
+
+<section id="data">
+  <div class="sec-h"><p class="eyebrow">Examples</p><h2>Data</h2></div>
+  <div class="grid"><article class="ex" id="taint.shell">
+<h3>Web content and the shell</h3>
+<p>Content fetched from the web may not reach a shell command.</p>
+<div class="code"><pre><code><span class="c">// Content fetched from the web may not reach a shell command.</span>
+<span class="a">@id</span>(<span class="s">&quot;taint.shell&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;claude_code__Bash&quot;</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.taint.sources.contains(<span class="s">&quot;web&quot;</span>) };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>claude_code__Bash@2.1</code><span class="agent">a-intel.core.stella-ci</span></td><td>no tainted input</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>claude_code__Bash@2.1</code><span class="agent">a-intel.core.stella-ci</span></td><td>input from a web page</td><td><code>deny</code></td><td><code>taint.shell</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="taint.write-approval">
+<h3>Tainted writes</h3>
+<p>Any write made with tainted input parks for approval.</p>
+<div class="code"><pre><code><span class="c">// Any write made with tainted input parks for approval.</span>
+<span class="a">@id</span>(<span class="s">&quot;taint.write-approval&quot;</span>)
+<span class="a">@decision</span>(<span class="s">&quot;require_approval&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.taint.tainted &amp;&amp; <span class="k">context</span>.tool.side_effect != <span class="s">&quot;read&quot;</span> }
+<span class="k">unless</span> { <span class="k">context</span>.approval.granted };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>linear__update_issue@3</code><span class="agent">a-intel.core.triage</span></td><td>no tainted input</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>linear__update_issue@3</code><span class="agent">a-intel.core.triage</span></td><td>input from a tool result</td><td><code>deny</code></td><td><code>taint.write-approval</code></td><td><span class="dec dec-approval">require approval</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="taint.recipients">
+<h3>Tainted recipients</h3>
+<p>A call with tainted input may not send anything to a domain outside a-intel.</p>
+<div class="code"><pre><code><span class="c">// A call with tainted input may not send anything outside a-intel.</span>
+<span class="a">@id</span>(<span class="s">&quot;taint.recipients&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> {
+  <span class="k">context</span>.taint.tainted &amp;&amp;
+  <span class="k">context</span>.args <span class="k">has</span> recipient_domain &amp;&amp;
+  ![<span class="s">&quot;a-intel.com&quot;</span>, <span class="s">&quot;a-intel.example&quot;</span>].contains(<span class="k">context</span>.args.recipient_domain)
+};</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>slack__upload_file@1</code><span class="agent">a-intel.core.triage</span></td><td>tainted, recipient a-intel.com</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>slack__upload_file@1</code><span class="agent">a-intel.core.triage</span></td><td>tainted, recipient partner.io</td><td><code>deny</code></td><td><code>taint.recipients</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="pii.no-write">
+<h3>Customer PII fields</h3>
+<p>A support tool may read a customer's contact fields and may not write them.</p>
+<div class="code"><pre><code><span class="c">// A support tool may not write a customer's contact fields.</span>
+<span class="a">@id</span>(<span class="s">&quot;pii.no-write&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;zendesk__update_ticket&quot;</span>, <span class="k">resource</span>)
+<span class="k">when</span> {
+  <span class="k">context</span>.args <span class="k">has</span> fields &amp;&amp;
+  <span class="k">context</span>.args.fields.containsAny([<span class="s">&quot;email&quot;</span>, <span class="s">&quot;phone&quot;</span>, <span class="s">&quot;address&quot;</span>])
+};</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>zendesk__update_ticket@3</code><span class="agent">a-intel.core.triage</span></td><td>fields status and priority</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>zendesk__update_ticket@3</code><span class="agent">a-intel.core.triage</span></td><td>fields status and email</td><td><code>deny</code></td><td><code>pii.no-write</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="warehouse.raw-pii">
+<h3>Raw PII schema</h3>
+<p>A warehouse query may not read the raw_pii schema.</p>
+<div class="code"><pre><code><span class="c">// A warehouse query may not read the raw_pii schema.</span>
+<span class="a">@id</span>(<span class="s">&quot;warehouse.raw-pii&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;snowflake__run_query&quot;</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.args <span class="k">has</span> schema &amp;&amp; <span class="k">context</span>.args.schema == <span class="s">&quot;raw_pii&quot;</span> };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>snowflake__run_query@2</code><span class="agent">a-intel.core.stella-ci</span></td><td>schema analytics</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>snowflake__run_query@2</code><span class="agent">a-intel.core.stella-ci</span></td><td>schema raw_pii</td><td><code>deny</code></td><td><code>warehouse.raw-pii</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article></div>
+</section>
+
+<section id="code">
+  <div class="sec-h"><p class="eyebrow">Examples</p><h2>Code</h2></div>
+  <div class="grid"><article class="ex" id="pr.own-org">
+<h3>Pull requests in a-intel</h3>
+<p>A pull request may target only a repository that belongs to a-intel.</p>
+<div class="code"><pre><code><span class="c">// A pull request may target only a repository in a-intel.</span>
+<span class="a">@id</span>(<span class="s">&quot;pr.own-org&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;github__create_pull_request&quot;</span>, <span class="k">resource</span>)
+<span class="k">unless</span> { <span class="k">context</span>.args <span class="k">has</span> repository &amp;&amp; <span class="k">context</span>.args.repository <span class="k">like</span> <span class="s">&quot;a-intel/*&quot;</span> };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>github__create_pull_request@3</code><span class="agent">a-intel.core.stella-ci</span></td><td>repository a-intel/platform</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>github__create_pull_request@3</code><span class="agent">a-intel.core.stella-ci</span></td><td>repository octo/fork</td><td><code>deny</code></td><td><code>pr.own-org</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="workflows.approval">
+<h3>Workflow files</h3>
+<p>A change to a CI workflow file parks for approval.</p>
+<div class="code"><pre><code><span class="c">// A change to a CI workflow file parks for approval.</span>
+<span class="a">@id</span>(<span class="s">&quot;workflows.approval&quot;</span>)
+<span class="a">@decision</span>(<span class="s">&quot;require_approval&quot;</span>)
+<span class="k">forbid</span> (
+  <span class="k">principal</span>,
+  <span class="k">action</span> <span class="k">in</span> [<span class="t">Action</span>::<span class="s">&quot;claude_code__Edit&quot;</span>, <span class="t">Action</span>::<span class="s">&quot;github__create_pull_request&quot;</span>],
+  <span class="k">resource</span>
+)
+<span class="k">when</span> { <span class="k">context</span>.args <span class="k">has</span> path &amp;&amp; <span class="k">context</span>.args.path <span class="k">like</span> <span class="s">&quot;.github/workflows/*&quot;</span> }
+<span class="k">unless</span> { <span class="k">context</span>.approval.granted };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>claude_code__Edit@2.1</code><span class="agent">a-intel.core.stella-ci</span></td><td>path src/index.ts</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>claude_code__Edit@2.1</code><span class="agent">a-intel.core.stella-ci</span></td><td>path .github/workflows/ci.yml</td><td><code>deny</code></td><td><code>workflows.approval</code></td><td><span class="dec dec-approval">require approval</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="docs-writer.docs-only">
+<h3>The docs writer's paths</h3>
+<p>The docs writer edits files under docs/ and nowhere else.</p>
+<div class="code"><pre><code><span class="c">// The docs writer edits files under docs/ and nowhere else.</span>
+<span class="a">@id</span>(<span class="s">&quot;docs-writer.docs-only&quot;</span>)
+<span class="k">forbid</span> (
+  <span class="k">principal</span> == <span class="t">Agent</span>::<span class="s">&quot;a-intel.core.docs-writer&quot;</span>,
+  <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;claude_code__Edit&quot;</span>,
+  <span class="k">resource</span>
+)
+<span class="k">unless</span> { <span class="k">context</span>.args <span class="k">has</span> path &amp;&amp; <span class="k">context</span>.args.path <span class="k">like</span> <span class="s">&quot;docs/*&quot;</span> };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>claude_code__Edit@2.1</code><span class="agent">a-intel.core.docs-writer</span></td><td>path docs/policy.md</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>claude_code__Edit@2.1</code><span class="agent">a-intel.core.docs-writer</span></td><td>path src/index.ts</td><td><code>deny</code></td><td><code>docs-writer.docs-only</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="branch.read-before-delete">
+<h3>Read before delete</h3>
+<p>A branch delete needs a read of the same branch earlier in the run.</p>
+<div class="code"><pre><code><span class="c">// A branch delete needs a read of the same branch earlier in the run.</span>
+<span class="a">@id</span>(<span class="s">&quot;branch.read-before-delete&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;github__delete_branch&quot;</span>, <span class="k">resource</span>)
+<span class="k">unless</span> {
+  <span class="k">context</span>.args <span class="k">has</span> branch &amp;&amp;
+  <span class="k">context</span>.run.prior_reads.contains(<span class="k">context</span>.args.branch)
+};</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>github__delete_branch@1</code><span class="agent">a-intel.core.stella-ci</span></td><td>branch agent/fix-482, read earlier in the run</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>github__delete_branch@1</code><span class="agent">a-intel.core.stella-ci</span></td><td>branch agent/fix-482, never read</td><td><code>deny</code></td><td><code>branch.read-before-delete</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="mobile.release-branch">
+<h3>Mobile releases</h3>
+<p>A release of a-intel/mobile is cut only from the release branch.</p>
+<div class="code"><pre><code><span class="c">// A release of a-intel/mobile is cut only from the release branch.</span>
+<span class="a">@id</span>(<span class="s">&quot;mobile.release-branch&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;github__create_release&quot;</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.args <span class="k">has</span> repository &amp;&amp; <span class="k">context</span>.args.repository == <span class="s">&quot;a-intel/mobile&quot;</span> }
+<span class="k">unless</span> { <span class="k">context</span>.args <span class="k">has</span> branch &amp;&amp; <span class="k">context</span>.args.branch == <span class="s">&quot;release&quot;</span> };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>github__create_release@2</code><span class="agent">a-intel.core.release-manager</span></td><td>a-intel/mobile, branch release</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>github__create_release@2</code><span class="agent">a-intel.core.release-manager</span></td><td>a-intel/mobile, branch main</td><td><code>deny</code></td><td><code>mobile.release-branch</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article></div>
+</section>
+
+<section id="production">
+  <div class="sec-h"><p class="eyebrow">Examples</p><h2>Production</h2></div>
+  <div class="grid"><article class="ex" id="prod.sre">
+<h3>Production cluster</h3>
+<p>A call against prod-east needs an operator with the sre role.</p>
+<div class="code"><pre><code><span class="c">// A call against prod-east needs an operator with the sre role.</span>
+<span class="a">@id</span>(<span class="s">&quot;prod.sre&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.args <span class="k">has</span> cluster &amp;&amp; <span class="k">context</span>.args.cluster == <span class="s">&quot;prod-east&quot;</span> }
+<span class="k">unless</span> { <span class="k">context</span>.operator.role == <span class="s">&quot;sre&quot;</span> };</code></pre></div>
+<p class="with">Tested beside <a href="#irreversible.approval"><code>irreversible.approval</code></a> and the toolbelt grant.</p>
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>kubernetes__delete_pod@2</code><span class="agent">a-intel.core.release-manager</span></td><td>prod-east, operator a developer</td><td><code>deny</code></td><td><code>irreversible.approval</code> <code>prod.sre</code></td><td><span class="dec dec-deny">deny</span></td></tr>
+<tr><td><code>kubernetes__delete_pod@2</code><span class="agent">a-intel.core.release-manager</span></td><td>prod-east, operator an sre</td><td><code>deny</code></td><td><code>irreversible.approval</code></td><td><span class="dec dec-approval">require approval</span></td></tr>
+<tr><td><code>kubernetes__delete_pod@2</code><span class="agent">a-intel.core.release-manager</span></td><td>prod-east, operator an sre, approved</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr></tbody></table></div>
+</article></div>
+</section>
+
+<section id="budget">
+  <div class="sec-h"><p class="eyebrow">Examples</p><h2>Budget and rate</h2></div>
+  <div class="grid"><article class="ex" id="budget.low-read-only">
+<h3>Low budget</h3>
+<p>A run with less than $1 of budget left may only read.</p>
+<div class="code"><pre><code><span class="c">// A run with less than $1 of budget left may only read.</span>
+<span class="a">@id</span>(<span class="s">&quot;budget.low-read-only&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> {
+  <span class="k">context</span>.budget.remaining_cents &lt; <span class="n">100</span> &amp;&amp;
+  <span class="k">context</span>.tool.side_effect != <span class="s">&quot;read&quot;</span>
+};</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>linear__update_issue@3</code><span class="agent">a-intel.core.triage</span></td><td>$12.00 left</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>linear__update_issue@3</code><span class="agent">a-intel.core.triage</span></td><td>$0.40 left</td><td><code>deny</code></td><td><code>budget.low-read-only</code></td><td><span class="dec dec-deny">deny</span></td></tr>
+<tr><td><code>github__get_file_contents@2</code><span class="agent">a-intel.core.triage</span></td><td>$0.40 left, a read</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr></tbody></table></div>
+</article>
+<article class="ex" id="slack.rate">
+<h3>Slack post rate</h3>
+<p>No agent posts to Slack more than 20 times in an hour.</p>
+<div class="code"><pre><code><span class="c">// No agent posts to Slack more than 20 times in an hour.</span>
+<span class="a">@id</span>(<span class="s">&quot;slack.rate&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;slack__post_message&quot;</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.rate.calls_last_hour &gt;= <span class="n">20</span> };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>slack__post_message@2</code><span class="agent">a-intel.core.triage</span></td><td>19 posts in the last hour</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr>
+<tr><td><code>slack__post_message@2</code><span class="agent">a-intel.core.triage</span></td><td>20 posts in the last hour</td><td><code>deny</code></td><td><code>slack.rate</code></td><td><span class="dec dec-deny">deny</span></td></tr></tbody></table></div>
+</article></div>
+</section>
+
+<section id="versions">
+  <div class="sec-h"><p class="eyebrow">Examples</p><h2>Tool versions</h2></div>
+  <div class="grid"><article class="ex" id="tool.version-hold">
+<h3>A held tool version</h3>
+<p>One version of a tool is held until its schema change is reviewed. Other versions run.</p>
+<div class="code"><pre><code><span class="c">// Hold github__create_pull_request@3 until its schema change is reviewed.</span>
+<span class="a">@id</span>(<span class="s">&quot;tool.version-hold&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;github__create_pull_request&quot;</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.tool.version == <span class="s">&quot;3&quot;</span> };</code></pre></div>
+
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>github__create_pull_request@3</code><span class="agent">a-intel.core.stella-ci</span></td><td>version 3</td><td><code>deny</code></td><td><code>tool.version-hold</code></td><td><span class="dec dec-deny">deny</span></td></tr>
+<tr><td><code>github__create_pull_request@4</code><span class="agent">a-intel.core.stella-ci</span></td><td>version 4</td><td><code>allow</code></td><td><code>grant.toolbelt</code></td><td><span class="dec dec-allow">allow</span></td></tr></tbody></table></div>
+</article></div>
+</section>
+
+<section id="avoid">
+  <div class="sec-h"><p class="eyebrow">Mistakes</p><h2>Patterns to avoid</h2><p>Each problem below is shown by Cedar itself: the parser, the validator, or a decision the author did not mean.</p></div>
+  <div class="grid"><article class="ex" id="avoid.no-has">
+<h3>An optional argument read without has</h3>
+<p>An argument a call may not carry has to be tested with has before it is read. The validator refuses the rule otherwise.</p>
+<div class="code"><pre><code><span class="a">@id</span>(<span class="s">&quot;avoid.no-has&quot;</span>)
+<span class="a">@decision</span>(<span class="s">&quot;require_approval&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;stripe__create_refund&quot;</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.args.amount_cents &gt; <span class="n">50000</span> }
+<span class="k">unless</span> { <span class="k">context</span>.approval.granted };</code></pre></div>
+<div class="err"><span class="err-k">Validation error</span><code>for policy `avoid.no-has`, unable to guarantee safety of access to optional attribute `args.amount_cents` in context for Action::&quot;stripe__create_refund&quot;</code></div>
+<p class="with">Written correctly in <a href="#refund.over-500">Refunds above $500</a>.</p>
+</article>
+<article class="ex" id="avoid.unknown-path">
+<h3>A context path the schema does not hold</h3>
+<p>A misspelled path is a validation error, so the rule never reaches a version.</p>
+<div class="code"><pre><code><span class="a">@id</span>(<span class="s">&quot;avoid.unknown-path&quot;</span>)
+<span class="a">@decision</span>(<span class="s">&quot;require_approval&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.tool.side_efect == <span class="s">&quot;irreversible&quot;</span> }
+<span class="k">unless</span> { <span class="k">context</span>.approval.granted };</code></pre></div>
+<div class="err"><span class="err-k">Validation error</span><code>for policy `avoid.unknown-path`, attribute `tool.side_efect` in context for Action::&quot;github__create_release&quot; not found</code></div>
+<p class="with">Written correctly in <a href="#irreversible.approval">Irreversible calls</a>.</p>
+</article>
+<article class="ex" id="avoid.third-effect">
+<h3>An effect Cedar does not have</h3>
+<p>Cedar has two effects, permit and forbid. A rule that needs a person is a forbid with @decision(&quot;require_approval&quot;).</p>
+<div class="code"><pre><code><span class="a">@id</span>(<span class="s">&quot;avoid.third-effect&quot;</span>)
+<span class="k">permit</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.tool.side_effect == <span class="s">&quot;irreversible&quot;</span> }
+advice <span class="s">&quot;require_approval&quot;</span>;</code></pre></div>
+<div class="err"><span class="err-k">Parse error</span><code>failed to parse policy with id `avoid.third-effect` from string: unexpected token `&quot;require_approval&quot;`</code></div>
+<p class="with">Written correctly in <a href="#irreversible.approval">Irreversible calls</a>.</p>
+</article>
+<article class="ex" id="avoid.no-unless">
+<h3>An approval rule with no unless</h3>
+<p>Without unless { context.approval.granted }, the rule still applies after a person approves, so the call never runs.</p>
+<div class="code"><pre><code><span class="a">@id</span>(<span class="s">&quot;avoid.no-unless&quot;</span>)
+<span class="a">@decision</span>(<span class="s">&quot;require_approval&quot;</span>)
+<span class="k">forbid</span> (<span class="k">principal</span>, <span class="k">action</span>, <span class="k">resource</span>)
+<span class="k">when</span> { <span class="k">context</span>.tool.side_effect == <span class="s">&quot;irreversible&quot;</span> };</code></pre></div>
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>github__create_release@2</code><span class="agent">a-intel.core.release-manager</span></td><td>approved</td><td><code>deny</code></td><td><code>avoid.no-unless</code></td><td><span class="dec dec-approval">require approval</span></td></tr></tbody></table></div>
+<p class="with">Written correctly in <a href="#irreversible.approval">Irreversible calls</a>.</p>
+</article>
+<article class="ex" id="avoid.restated-grant">
+<h3>A grant restated as a rule</h3>
+<p>A permit that repeats a toolbelt grant outlives the grant. The toolbelt below no longer lists the tool, and the rule still allows the call.</p>
+<div class="code"><pre><code><span class="a">@id</span>(<span class="s">&quot;avoid.restated-grant&quot;</span>)
+<span class="k">permit</span> (
+  <span class="k">principal</span> == <span class="t">Agent</span>::<span class="s">&quot;a-intel.core.triage&quot;</span>,
+  <span class="k">action</span> == <span class="t">Action</span>::<span class="s">&quot;github__create_release&quot;</span>,
+  <span class="k">resource</span>
+);</code></pre></div>
+<div class="tbl"><table>
+<thead><tr><th>Call</th><th>Facts</th><th>Cedar</th><th>Decided by</th><th>Oxagen</th></tr></thead>
+<tbody><tr><td><code>github__create_release@2</code><span class="agent">a-intel.core.triage</span></td><td>not on the toolbelt</td><td><code>allow</code></td><td><code>avoid.restated-grant</code></td><td><span class="dec dec-allow">allow</span></td></tr></tbody></table></div>
+
+</article></div>
+</section>
+
+<footer>
+  <p>Sources: <code>docs/mission-control-spec.md</code> §6.12, <code>docs/oxagen/specs/tacho/design/adr-0004-tacho-policy-engine-cedar.md</code>, <code>docs/oxagen/specs/tacho/design/approval-tokens.md</code>, and PR 127 in this repository.</p>
+  <p>To change an example, edit <code>tools/build-policy-spec.mjs</code> and run it. The build refuses a rule that does not validate and a test whose decision differs from the one it expects.</p>
+</footer>
+</div>
+</body>
+</html>
