@@ -388,7 +388,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
         <li>Every published version gets the next number for its workspace, so an auditor can tell which version steered a run. (Mac, 2026-09-26)</li>
         <li>Oxagen marks the pull requests it played a part in with a badge from the brand kit. (Mac, 2026-09-26)</li>
         <li>A subagent's skill limit holds only on a harness that says which skill made each tool call. Elsewhere the call gets the main agent's rules, and the Skills screen warns per harness. (Mac, 2026-09-26)</li>
-        <li>Function tools run in a sandbox in Oxagen's cloud. Code on a customer's own infrastructure is a REST endpoint connected as a server, through the relay when it is private. (Mac, 2026-09-26)</li>
+        <li>Function tools run in a sandbox in Oxagen's cloud, and TypeScript is the first language they support. Code on a customer's own infrastructure is a REST endpoint connected as a server, through the relay when it is private. (Mac, 2026-09-26)</li>
         <li>The code repository check warns by default. <code>[code_checks] block_merge</code> in <code>workspace.toml</code>, off by default, makes a finding fail the check. (Mac, 2026-09-26)</li>
         <li>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first and creates the workspace with its repository in one automated flow. The 14-day grace period of ADR-065 goes. (Mac, 2026-09-26)</li>
         <li>The repository name <code>oxagen-&lt;workspace&gt;</code>. (Mac, 2026-09-26)</li>
@@ -940,7 +940,7 @@ impacts = ["moves_money"]</code></pre></figure>
   <p>Available tools that nobody imported stay in Oxagen (<code>mcp.tool_snapshots</code>), so the repository grows with what agents may call, never with the size of a server. Turning a server or a tool off is instant and needs no pull request, because a kill switch cannot wait for review.</p>
   <h3>Function tools</h3>
   <p>A rule can point an agent at a deterministic function, such as <code>calculate_refund_amount</code>, instead of leaving arithmetic to the model. A function tool would be a server folder with a <code>functions</code> source beside the URL and OpenAPI sources, so it gets the same classification, lock, and Cedar decisions as any other tool. <span class="st p">Proposed</span></p>
-  <p>Function code runs in a sandbox in Oxagen's cloud. A customer that wants the code on its own infrastructure builds a REST endpoint instead and connects it as a server from its OpenAPI document. When the endpoint sits behind a private network, MCP Studio's relay reaches it. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
+  <p>Function code runs in a sandbox in Oxagen's cloud, and TypeScript is the first language it supports. A customer that wants the code on its own infrastructure builds a REST endpoint instead and connects it as a server from its OpenAPI document. When the endpoint sits behind a private network, MCP Studio's relay reaches it. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
   <h3>Toolbelts</h3>
   <p>Day one, every agent in a workspace gets the workspace's imported tools and its harness's built-in tools. Cedar policies narrow what an agent may call. Named toolbelts wait until customers ask. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
   <ul>
@@ -1545,7 +1545,6 @@ billing__call {"tool": "create_refund", "arguments": {"charge": "ch_3Q", "amount
   <ol>
     <li>How Oxagen Steering reaches a steering repo it creates: an organization owner's user token that adds each new repository to the installation (recommended), or an installation on all repositories. See Provisioning.</li>
     <li>Checks on linked code repositories: posted by the Oxagen app with no committed files (recommended), or a CI workflow committed to each repository, which reverses the decision that code repositories hold no committed Oxagen files.</li>
-    <li>Which language function tools support first. Recommended: TypeScript. See Function tools.</li>
   </ol>
 </section>
 
