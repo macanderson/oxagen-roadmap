@@ -389,6 +389,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
         <li>Oxagen marks the pull requests it played a part in with a badge from the brand kit. (Mac, 2026-09-26)</li>
         <li>A subagent's skill limit holds only on a harness that says which skill made each tool call. Elsewhere the call gets the main agent's rules, and the Skills screen warns per harness. (Mac, 2026-09-26)</li>
         <li>Function tools run in a sandbox in Oxagen's cloud, and TypeScript is the first language they support. Code on a customer's own infrastructure is a REST endpoint connected as a server, through the relay when it is private. (Mac, 2026-09-26)</li>
+        <li>An organization owner authorizes Oxagen Steering once, and Oxagen uses that token only to add each new steering repo to the app's installation. (Mac, 2026-09-26)</li>
         <li>The Oxagen app posts the code repository check, and no workflow file is committed to the code repository. (Mac, 2026-09-26)</li>
         <li>The code repository check warns by default. <code>[code_checks] block_merge</code> in <code>workspace.toml</code>, off by default, makes a finding fail the check. (Mac, 2026-09-26)</li>
         <li>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first and creates the workspace with its repository in one automated flow. The 14-day grace period of ADR-065 goes. (Mac, 2026-09-26)</li>
@@ -1143,7 +1144,9 @@ block_merge = false                           # true: a finding fails the Oxagen
       <tr><td>Deployments</td><td>write</td><td class="wrap">Record each publish as a deployment, part of admin on the steering repo</td><td>no</td><td class="good">yes</td></tr>
     </tbody>
   </table></div>
-  <div class="note"><p><strong>Open question.</strong> GitHub does not add a repository an app creates to an installation limited to selected repositories. Adding it takes a person's user access token (<code>PUT /user/installations/{id}/repositories/{repo}</code>). So either an organization owner authorizes Oxagen Steering once, and Oxagen uses that token to create each steering repo and add it to the installation (recommended), or Oxagen Steering is installed on all repositories, which gives it admin everywhere and undoes the split.</p></div>
+  <h3>Reaching a new repository</h3>
+  <p>GitHub does not add a repository an app creates to an installation limited to selected repositories. Adding it takes a person's user access token (<code>PUT /user/installations/{id}/repositories/{repo}</code>). So an organization owner authorizes Oxagen Steering once during onboarding, and Oxagen uses that token only to add each new steering repo to the installation. Oxagen Steering then holds admin on the repositories Oxagen creates and nowhere else. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
+  <p>When that owner leaves the organization or revokes the token, creating a workspace stops at this step, and the web app shows a banner with Re-authorize for any other owner. Existing workspaces keep working. The token is stored like any other credential and never reaches the repository. <span class="st p">Proposed</span></p>
   <p>On GitLab, provisioning needs a group access token with the <code>api</code> scope and the Maintainer role. Today Oxagen holds project access tokens only (#3762). Group access tokens need GitLab Premium on GitLab.com. Build verifies the tier rules for self-managed GitLab.</p>
 </section>
 
@@ -1543,9 +1546,7 @@ billing__call {"tool": "create_refund", "arguments": {"charge": "ch_3Q", "amount
 <section id="open">
   <span class="eyebrow">Open questions</span>
   <h2>Open questions</h2>
-  <ol>
-    <li>How Oxagen Steering reaches a steering repo it creates: an organization owner's user token that adds each new repository to the installation (recommended), or an installation on all repositories. See Provisioning.</li>
-  </ol>
+  <p>None. Every question raised on this page has an answer above.</p>
 </section>
 
 <section id="build">

@@ -779,10 +779,11 @@ Do
    templates, apply both rulesets (the check pinned to Oxagen Steering,
    restrict updates with it as the only bypass), squash only, delete head
    branches, Actions off, and the steering environment. Read everything back
-   and compare with settings-baseline.ts. How the app reaches a repository it
-   just created is an open question in the spec&#x27;s Provisioning section: build
-   what the spec says when you start, and if it is still open, ask before
-   building that step.
+   and compare with settings-baseline.ts. Add the new repository to Oxagen
+   Steering&#x27;s installation with the organization owner&#x27;s user token that
+   onboarding stored (PUT /user/installations/{id}/repositories/{repo}). When
+   the token is missing or revoked, stop at that step and raise the
+   Re-authorize banner for the organization&#x27;s owners.
 2. GitLab: the same with a group access token: create the project, protect
    main (push: no one, merge: the Oxagen bot), squash required, pipelines must
    succeed, CI/CD off.
