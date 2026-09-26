@@ -372,7 +372,7 @@ function operatorLinked(sv, who) { return !sv.operators || sv.operators[who] !==
 function allPrs() {
   var out = STEERING.prs.concat(S.newPrs);
   if (S.health === "diverged" && !out.some(function (p) { return p.n === REPO.health.diverged.revertPr; })) {
-    out = out.concat([{ n: REPO.health.diverged.revertPr, kind: "revert", state: "open", title: "Revert main to published version " + REPO.version, branch: "workspace/revert-" + REPO.health.diverged.commit,
+    out = out.concat([{ n: REPO.health.diverged.revertPr, kind: "revert", state: "open", title: "Revert main to published version " + REPO.version, branch: "steering/revert-" + REPO.health.diverged.commit,
       by: "oxagen", via: "drift", opened: REPO.health.diverged.since, approvals: [],
       summary: "`main` holds commit `" + REPO.health.diverged.commit + "`, which oxagen did not merge. This PR puts `main` back at the last published commit.",
       files: [{ path: "steering/billing/a-intel.billing.refunds-over-100.md", diff: "-Refunds over $250 need a person's approval before you call\n+Refunds over $100 need a person's approval before you call\n `billing__create_refund`. Ask in the run and wait." }],

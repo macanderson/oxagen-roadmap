@@ -48,6 +48,8 @@ jobs:
         run: npm run check:v3
       - name: Walk the steering repo and MCP Studio screens
         if: ${{ !cancelled() }}
+        env:
+          SHOTS: ${{ runner.temp }}/v3-shots
         run: |
           node --input-type=module - <<'EOF'
           // Opens every steering repo and MCP Studio screen and state (lane U1) in headless Chromium, in both
@@ -55,7 +57,7 @@ jobs:
           // dialog or drawer that does not open, copy that breaks the house rules, or a flow that stops short.
           import os from "node:os";
           import path from "node:path";
-          import { writeFileSync } from "node:fs";
+          import { mkdirSync, writeFileSync } from "node:fs";
           import { pathToFileURL } from "node:url";
           const root = process.cwd();
           const load = (p) => import(pathToFileURL(path.join(root, p)).href);
@@ -64,6 +66,9 @@ jobs:
           const FILE = path.join(os.tmpdir(), "walk-v3-studio.html");
           writeFileSync(FILE, buildMockupV3());
           const URL0 = "file://" + FILE;
+          // SHOTS names a folder for a screenshot of each screen, desktop dark and phone light, for review.
+          const SHOTS = process.env.SHOTS || "";
+          if (SHOTS) mkdirSync(SHOTS, { recursive: true });
           const B = "/a-intel/core-platform/";
           const ROUTES = [
             ["steering", ".repocard"], ["steering?tab=prs", "#app table"], ["steering?tab=repo", "#app table"],
@@ -134,6 +139,7 @@ jobs:
                 ok(m.tabs <= 1, `${label}: ${m.tabs} rows of tabs`);
                 ok(m.theme === theme && m.phone === (shell === "phone"), `${label}: the ${shell} ${theme} shell did not apply`);
                 if (shell === "desktop") await copyCheck(page, label);
+                if (SHOTS && ((shell === "desktop" && theme === "dark") || (shell === "phone" && theme === "light"))) await page.screenshot({ path: path.join(SHOTS, `${route.replace(/[^a-z0-9]+/gi, "-")}-${shell}-${theme}.png`), fullPage: shell === "desktop" });
               }
               await page.close();
             }
@@ -228,3 +234,11 @@ jobs:
           console.log(`${failures ? "FAIL" : "ok  "} steering repo and MCP Studio walk: ${passes} checks passed, ${failures} failed`);
           process.exit(failures ? 1 : 0);
           EOF
+      - name: Keep the screenshots for review
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: v3-screens
+          path: ${{ runner.temp }}/v3-shots
+          retention-days: 14
+          if-no-files-found: ignore
