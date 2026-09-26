@@ -866,7 +866,7 @@ Do
 7. Code repository checks: on every pull request in a linked code repository,
    post the Oxagen check the spec&#x27;s Code repository checks section describes,
    warning only. Flag instruction files that contradict or repeat steering,
-   and hand memory-like writes to S6 as candidates. The spec leaves open
+   and hand memory-like writes to S6 as memories. The spec leaves open
    whether this runs from the app or from a committed workflow: build what it
    says when you start, and if it is still open, ask first.
 8. Badges: add the badge block and the oxagen label to each pull request a
@@ -1122,11 +1122,11 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
 - Put this rule, word for word, in the prompt of every subagent you start.
 
-This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article><article class="pcard" data-wave="w1s" id="prompt-s6"><div class="pcard-head"><span class="lane-id">S6</span><span class="pcard-title">Memory and reflection</span><button type="button" class="cp" aria-label="Copy the S6 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S6. Memory candidates, reflections, the curator, and memory PRs
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article><article class="pcard" data-wave="w1s" id="prompt-s6"><div class="pcard-head"><span class="lane-id">S6</span><span class="pcard-title">Memory and reflection</span><button type="button" class="cp" aria-label="Copy the S6 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S6. Memories, reflections, the curator, and memory PRs
 
 Goal
-Agents write candidates and reflections to Oxagen. A curator turns the strong
-ones into one memory PR a day. Merged memories are recalled by relevance and
+Agents write memories to Oxagen, and a reflection is one of them. A curator
+turns what is worth keeping into one memory PR a day. Keep the design simple. Merged memories are recalled by relevance and
 retired when stale or contradicted.
 
 Read first
@@ -1139,33 +1139,35 @@ You own
 - packages/handlers/src/agent.memory.* and packages/handlers/src/memory/ (new)
 - packages/oxagen/src/contracts/ entries for remember and reflect
 - packages/inngest-functions/src/functions/run.reflect.ts, memory.curate.ts (new)
-- New tables for candidates, reflections, and rejections, with a migration
+- New tables for memories and rejections, with a migration
 - The tacho Stop hook handling (find it under packages/tacho/src)
 - packages/tacho/src/collector/memory-capture/ (new)
 
 Do
-1. Decide the store for candidates and reflections (Postgres beside today&#x27;s
+1. Decide the store for memories and reflections (Postgres beside today&#x27;s
    Neo4j nodes, or Neo4j) and record the choice in an ADR in the PR.
-2. remember writes a candidate with evidence frames. reflect stores a
-   reflection/v1 and one candidate per lesson.
+2. remember writes a memory with evidence frames. reflect stores a
+   reflection/v1: a memory with grades for the work and the tools. Show tool
+   grades to the server&#x27;s owner. They never steer anything.
 3. Claude Code: the Stop hook blocks the first stop once, only when the run
    shows a signal (failed tool call, correction, retry loop, policy denial),
    and asks the agent to call reflect. Other harnesses: run.reflect writes
    the reflection from the run&#x27;s digest.
-4. The curator, daily or at 20 waiting candidates: merge duplicates, count
-   distinct runs, drop what an active record says, flag contradictions, and
-   open one memory/&lt;date&gt; PR through S3&#x27;s open path with at most batch_size
-   files under steering/memory/, sharded by repository and area.
+4. The curator, daily or at 20 waiting memories: keep what is worth keeping,
+   merge duplicates, drop what an active record says, and open one
+   memory/&lt;date&gt; PR through S3&#x27;s open path with at most batch_size
+   files, sharded by repository and area. A kept item lands as a memory under
+   steering/memory/, or as a rule or a fact where that fits better.
 5. Dropping a memory in review records a rejection. The curator does not
    propose it again without new evidence.
 6. recall(request): up to 5 memories, 800 tokens at most, within scope, by
-   relevance. Honor recall_candidates. Never for the in-app agent.
+   relevance. Honor recall_unreviewed. Never for the in-app agent.
 7. Retirement: propose archiving a memory that a reflection contradicts or no
    run recalled in retire_after_days.
-8. Memories written outside a run: accept candidates from S2&#x27;s code
+8. Memories written outside a run: accept memories from S2&#x27;s code
    repository check, and add a reader to the local gateway that watches each
    harness&#x27;s known memory locations on the machine, such as Claude Code&#x27;s
-   memory directory, and sends new entries as candidates with their source.
+   memory directory, and sends new entries as memories with their source.
 
 Done when
 - Tests cover capture, curation, the PR contents, rejection, recall limits,

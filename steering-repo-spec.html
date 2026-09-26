@@ -365,7 +365,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
         <li>The budget check never blocks a steering PR, because a steering PR is how a budget changes. It warns and shows the cost. (Mac, 2026-09-26)</li>
         <li>While a steering repo's settings have drifted, runs keep the last published version. (Mac, 2026-09-26)</li>
         <li>Two GitHub apps. Oxagen keeps its write, pull request, and issue permissions on code repositories. Oxagen Steering has the same permissions plus full admin, and acts on the steering repos Oxagen creates. (Mac, 2026-09-26)</li>
-        <li>An unreviewed memory candidate steers only the agent that wrote it. (Mac, 2026-09-26)</li>
+        <li>An unreviewed memory, a reflection included, steers only the agent that wrote it. (Mac, 2026-09-26)</li>
         <li>GitHub Actions and GitLab CI are off in every steering repo. (Mac, 2026-09-26)</li>
         <li>Oxagen supports each first-class harness (Claude Code, Cursor, Codex, and stella) as fully as that harness allows. (Mac, 2026-09-26)</li>
         <li>Cursor gets steering through Oxagen's MCP server, plus one rule in Cursor's dashboard that tells it to read steering there. (Mac, 2026-09-26)</li>
@@ -390,7 +390,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
         <li>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first and creates the workspace with its repository in one automated flow. The 14-day grace period of ADR-065 goes. (Mac, 2026-09-26)</li>
         <li>The repository name <code>oxagen-&lt;workspace&gt;</code>. (Mac, 2026-09-26)</li>
         <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>. (Mac, 2026-09-26)</li>
-        <li>Reflections and memory candidates stay in Oxagen, and promoted memories arrive by a batched memory PR. (Mac, 2026-09-26)</li>
+        <li>A reflection is a memory that also grades the work and the tools the agent was given. There is no separate memory candidate. Memories stay in Oxagen, and the curator promotes what is worth keeping by a batched memory PR, as a memory, a rule, or a fact. Most memories never reach a PR. (Mac, 2026-09-26)</li>
         <li>The four file formats: Markdown with YAML frontmatter, TOML, JSON Lines, and each standard's own format. (Mac, 2026-09-26)</li>
         <li>A run receives its agent's workspace records, repository records whose <code>repos</code> names its working repository, and organization records. A narrower record only narrows. (Mac, 2026-09-26)</li>
         <li>Linking a code repository is a steering PR that adds it to <code>workspace.toml</code>. (Mac, 2026-09-26)</li>
@@ -523,7 +523,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
       <tr><td><code>policy/</code></td><td>Cedar policies and their tests</td><td>Cedar, JSON Lines</td><td>People</td><td><span class="st d">Decided</span></td></tr>
     </tbody>
   </table></div>
-  <div class="note"><p><strong><code>proposals/</code> goes.</strong> A proposal is an open steering PR. A candidate that is not ready to become one, such as an agent's memory candidate, waits in Oxagen and never lands in the repository as a file that steers nothing. <span class="st d">Decided</span></p></div>
+  <div class="note"><p><strong><code>proposals/</code> goes.</strong> A proposal is an open steering PR. An unreviewed memory waits in Oxagen and never lands in the repository as a file that steers nothing. <span class="st d">Decided</span></p></div>
   <p class="muted">Code checkouts keep their machine-local, gitignored <code>.oxagen/workspace.json</code> and <code>.oxagen/settings.json</code>. This spec does not move them.</p>
 </section>
 
@@ -613,8 +613,7 @@ into smaller refunds to stay under the limit.</code></pre></figure>
       <tr><td>Brand identity</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td>A <code>skill</code> with its files, plus one short <code>preference</code></td><td>The preference on every request, the skill on demand</td></tr>
       <tr><td>Design system</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td>A <code>skill</code> with <code>tokens.json</code> and one file per component</td><td>On demand</td></tr>
       <tr><td>Skills</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td><code>skill</code></td><td>The index line on every request, the body on demand</td></tr>
-      <tr><td>Memories</td><td>Oxagen, then <code>steering/memory/**</code></td><td><code>memory</code></td><td>When relevant. An unreviewed memory reaches only the agent that wrote it. See <a href="#memory">Memory</a></td></tr>
-      <tr><td>Reflections</td><td>Oxagen only</td><td><code>reflection/v1</code> JSON</td><td>The reflection itself never. Each lesson in it is an unreviewed memory, and the curator batches lessons into the next memory PR, which is the proposal</td></tr>
+      <tr><td>Memories and reflections</td><td>Oxagen, then <code>steering/memory/**</code> for what a memory PR promotes</td><td><code>memory</code>. A reflection is a memory stored as <code>reflection/v1</code> JSON</td><td>When relevant. An unreviewed one reaches only the agent that wrote it. See <a href="#memory">Memory</a></td></tr>
       <tr><td>Proposals</td><td>Open steering PRs</td><td>None</td><td>Never</td></tr>
       <tr><td>MCP servers</td><td><code>tools/servers/&lt;name&gt;/</code></td><td><code>mcp-server/v1</code>, <code>mcp-tools/v1</code>, and a lock</td><td>Imported tool definitions through the cloud gateway</td></tr>
       <tr><td>Tool risk categories</td><td><code>tools/servers/&lt;name&gt;/tools.toml</code></td><td>Today's classification: risk, side effect, egress, impacts</td><td>Cedar policies read it, and the agent sees annotations derived from it</td></tr>
@@ -835,12 +834,13 @@ risk = "high"
 side_effect = "irreversible"
 egress = "org_tenant"
 impacts = ["moves_money"]
-idempotency_header = "Idempotency-Key"</code></pre></figure></div></dialog><dialog id="ex-reflection" class="exdlg" aria-labelledby="ex-reflection-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-reflection-t">Reflection</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">An agent&#x27;s account of one run. Stays in Oxagen and produces memory candidates.</p><figure class="code"><figcaption><span class="path">reflection/v1, as Oxagen stores it</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="json">{
+idempotency_header = "Idempotency-Key"</code></pre></figure></div></dialog><dialog id="ex-reflection" class="exdlg" aria-labelledby="ex-reflection-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-reflection-t">Reflection</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">A memory the agent writes at the end of a run, with grades for the work and its tools. It stays in Oxagen.</p><figure class="code"><figcaption><span class="path">reflection/v1, as Oxagen stores it</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="json">{
   "schema": "reflection/v1",
   "run": "run_01K5QK7D",
   "agent": "a-intel.core.release-manager",
   "outcome": "completed",
   "summary": "Released 4.2.0 after the first CI run failed on a stale dependency cache.",
+  "grades": { "work": 4, "tools": { "github__create_release": 5 } },
   "lessons": [
     {
       "statement": "The CI cache key hashes pnpm-lock.yaml. Update the lockfile with any dependency change.",
@@ -1078,10 +1078,10 @@ per_month_micros = 12000000000                # $12,000.00
     <thead><tr><th>Check</th><th>What it does</th></tr></thead>
     <tbody>
       <tr><td>Instruction files</td><td class="wrap">Reads the harness instruction files a pull request changes: <code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>GEMINI.md</code>, <code>.cursor/rules/</code>, <code>.github/copilot-instructions.md</code>, and the like. It flags text that contradicts or repeats a steering record, shows Drift detected in <code>CLAUDE.md</code> in <code>a-intel/platform</code> in the web app, and offers Promote to steering, which opens a steering PR with that text as records.</td></tr>
-      <tr><td>Memory capture</td><td class="wrap">Finds what agents wrote down in the diff, such as notes added to <code>CLAUDE.md</code> or a new rule file, and turns each into a memory candidate with the pull request as evidence. Candidates then follow the memory lifecycle.</td></tr>
+      <tr><td>Memory capture</td><td class="wrap">Finds what agents wrote down in the diff, such as notes added to <code>CLAUDE.md</code> or a new rule file, and records each as a memory with the pull request as evidence. It then follows the memory lifecycle.</td></tr>
     </tbody>
   </table></div>
-  <p>Some harnesses keep memories on the machine, such as Claude Code's memory directory, where no repository sees them. The local gateway on an enrolled machine reads each harness's known memory locations and sends new entries to Oxagen as memory candidates. <span class="st p">Proposed</span></p>
+  <p>Some harnesses keep memories on the machine, such as Claude Code's memory directory, where no repository sees them. The local gateway on an enrolled machine reads each harness's known memory locations and sends new entries to Oxagen as memories. <span class="st p">Proposed</span></p>
   <p>The check warns and never blocks a merge by default, because a code repository's branch rules belong to the customer. <span class="st p">Proposed</span></p>
 </section>
 
@@ -1245,9 +1245,8 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
   <h3>Lifecycle</h3>
   <ol class="steps">
     <li><div><strong>Observe.</strong><p>A frame in the run shows something worth keeping: a failed tool call, a person's correction, a retry loop, or a policy denial.</p></div></li>
-    <li><div><strong>Capture.</strong><p>The agent calls <code>remember</code> during the run, or its reflection lists a lesson at the end. Either writes a <strong>candidate</strong> to Oxagen with the frame as evidence. Memories agents write elsewhere arrive too: the code repository check finds them in pull requests, and the local gateway reads each harness's memory locations on the machine.</p></div></li>
-    <li><div><strong>Curate.</strong><p>Once a day, or when 20 candidates wait, the curator merges duplicates, counts the distinct runs behind each, drops what an active record already says, and flags what contradicts one.</p></div></li>
-    <li><div><strong>Propose.</strong><p>The curator writes the strongest candidates as memory records on a <code>memory/&lt;date&gt;</code> branch and opens one memory PR.</p></div></li>
+    <li><div><strong>Capture.</strong><p>The agent calls <code>remember</code> during the run, or writes a reflection at the end. Both are memories, stored in Oxagen with the frame as evidence. Memories agents write elsewhere arrive too: the code repository check finds them in pull requests, and the local gateway reads each harness's memory locations on the machine.</p></div></li>
+    <li><div><strong>Propose.</strong><p>Once a day, or when 20 memories wait, the curator keeps what is worth keeping, merges duplicates, drops what an active record already says, and opens one memory PR on a <code>memory/&lt;date&gt;</code> branch. A kept item lands as a memory, or as a rule or a fact when that fits better. Most memories never reach a PR.</p></div></li>
     <li><div><strong>Review.</strong><p>A reviewer merges the PR or drops single memories from it. Oxagen pushes a commit that removes a dropped file and records the rejection, so the same lesson returns only with new evidence.</p></div></li>
     <li><div><strong>Publish.</strong><p>A merged memory is a steering record of kind <code>memory</code> under <code>steering/memory/</code>, recalled for every agent it targets.</p></div></li>
     <li><div><strong>Recall.</strong><p>The cloud gateway adds up to five relevant memories to a request, 800 tokens at most, and lists them in the request's manifest.</p></div></li>
@@ -1255,7 +1254,8 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
   </ol>
 
   <h3>Reflection</h3>
-  <p>A reflection is the agent's own account of a run, written in its last turn while the whole run is still in its context and in the provider's prompt cache. It costs one short turn. It runs only when the run showed a signal worth learning from, so a clean run pays nothing.</p>
+  <p>A reflection is a memory. <span class="st d">Decided</span> (Mac, 2026-09-26) What sets it apart is what it holds: the agent's grades for the work and for the tools it was given, and any lessons worth promoting. Tool grades stay in Oxagen as a signal for the server's owner and never steer anything, since agents rarely grade themselves well.</p>
+  <p>The agent writes it in its last turn, while the whole run is still in its context and in the provider's prompt cache. It costs one short turn. It runs only when the run showed a signal worth learning from, so a clean run pays nothing.</p>
   <div class="tscroll"><table>
     <thead><tr><th>Harness</th><th>How the reflection starts</th></tr></thead>
     <tbody>
@@ -1270,6 +1270,7 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
   "agent": "a-intel.core.release-manager",
   "outcome": "completed",
   "summary": "Released 4.2.0 after the first CI run failed on a stale dependency cache.",
+  "grades": { "work": 3, "tools": { "billing__create_refund@3": 2 } },
   "lessons": [
     {
       "statement": "The CI cache key hashes pnpm-lock.yaml. Update the lockfile with any dependency change, or CI restores a stale cache and typecheck fails.",
@@ -1301,8 +1302,7 @@ rotate = "month"                     # day, week, month, or year
 max_lines = 10000                    # a new file starts here even mid-period
 
 [memory]
-recall_candidates = "same-agent"     # same-agent, or off
-min_runs = 2                         # distinct runs before a candidate is proposed
+recall_unreviewed = "same-agent"     # same-agent, or off
 batch_size = 20                      # memories per memory PR
 retire_after_days = 180
 auto_merge = false                   # allowed in solo mode only
@@ -1310,7 +1310,7 @@ auto_merge = false                   # allowed in solo mode only
 [[reviewers]]
 paths = ["steering/billing/**", "tools/servers/billing/**"]
 group = "billing-leads"</code></pre></figure>
-  <p><code>recall_candidates</code> decides whether a candidate steers anything before a person reviews it. An unreviewed candidate steers only the agent that wrote it, at force <code>info</code> (Mac, 2026-09-26). <code>off</code> stops even that. <code>regulated</code> mode forces <code>off</code>. The in-app agent never receives workspace memories (Mac, 2026-09-25).</p>
+  <p><code>recall_unreviewed</code> decides whether an unreviewed memory steers anything before a person reviews it. It steers only the agent that wrote it, at force <code>info</code> (Mac, 2026-09-26). <code>off</code> stops even that. <code>regulated</code> mode forces <code>off</code>. The in-app agent never receives workspace memories (Mac, 2026-09-25).</p>
 </section>
 
 <section id="scale">
@@ -1434,8 +1434,8 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
       <tr><td><code>steering_search</code></td><td class="wrap">Returns index lines that match a query, a kind, or a repository</td></tr>
       <tr><td><code>steering_read</code></td><td class="wrap">Returns one record's body, or a file from a skill folder</td></tr>
       <tr><td><code>steering_propose</code></td><td class="wrap">Opens a steering PR from files, a title, the rationale, and evidence frames</td></tr>
-      <tr><td><code>remember</code></td><td class="wrap">Writes a memory candidate with its evidence</td></tr>
-      <tr><td><code>reflect</code></td><td class="wrap">Stores the run's reflection</td></tr>
+      <tr><td><code>remember</code></td><td class="wrap">Writes a memory with its evidence</td></tr>
+      <tr><td><code>reflect</code></td><td class="wrap">Stores the run's reflection, a memory with grades</td></tr>
     </tbody>
   </table></div>
   <p class="muted">The names follow the rename in #4325. Today's tools are <code>propose_record</code>, <code>open_context_pr</code>, and <code>merge_context_pr</code>.</p>
