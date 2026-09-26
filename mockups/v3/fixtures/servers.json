@@ -1189,6 +1189,11 @@
      "tool": "list_disputes"
     },
     {
+     "op": "classify",
+     "tool": "list_disputes",
+     "confirmed": true
+    },
+    {
      "op": "describe",
      "tool": "list_charges",
      "text": "List one customer's charges, newest first. Amounts are in cents."

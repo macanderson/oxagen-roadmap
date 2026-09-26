@@ -305,7 +305,12 @@ function withheld(t) { return !!(t.sync && t.sync.breaking); }
 /* Staged changes: what Review turns into one steering PR on servers/<name>/. A server can arrive
    with changes already staged (fixtures pending). */
 function staged(sid) {
-  if (!S.staged[sid]) { var sv = serverBy(sid); S.staged[sid] = ((sv && sv.pending) || []).map(function (o) { var c = {}; for (var k in o) c[k] = o[k]; return c; }); }
+  if (!S.staged[sid]) {
+    var sv = serverBy(sid);
+    S.staged[sid] = ((sv && sv.pending) || []).map(function (o) { var c = {}; for (var k in o) c[k] = o[k]; return c; });
+    // A staged classify carries what the person confirmed.
+    S.staged[sid].forEach(function (o) { if (o.op === "classify" && !S.cls[sid + "." + o.tool]) S.cls[sid + "." + o.tool] = { confirmed: !!o.confirmed }; });
+  }
   return S.staged[sid];
 }
 function stagedOp(sid, op, n) { var l = staged(sid); for (var i = 0; i < l.length; i++) if (l[i].op === op && l[i].tool === n) return l[i]; return null; }

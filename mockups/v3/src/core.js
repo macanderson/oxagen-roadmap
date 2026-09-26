@@ -262,7 +262,8 @@ document.addEventListener("click", function (ev) {
   var act = el.getAttribute("data-act");
   if (act === "scrim") { if (ev.target === el) closeDialog(); return; }
   if (act === "close") { closeDialog(); return; }
-  if (ACTS[act]) { ev.preventDefault(); ACTS[act](el, ev); }
+  // A form control inside a clickable row keeps its own click, so a checkbox still toggles.
+  if (ACTS[act]) { if (!ev.target.closest("input, select, textarea, label")) ev.preventDefault(); ACTS[act](el, ev); }
 });
 document.addEventListener("change", function (ev) {
   var el = ev.target.closest("[data-change]");

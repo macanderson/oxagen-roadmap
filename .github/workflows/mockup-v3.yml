@@ -1,7 +1,9 @@
 # The v3 mockup checks (mockups/v3/README.md, Commands). Local test runs are not allowed on the
-# maintainer's machine, so this job is the only place the headless walk runs.
+# maintainer's machine, so this job is the only place the headless walks run.
 #
 #   npm run check:v3   the sessions fixture, the built page, and the headless walk in Chromium
+#   the second walk    every steering repo and MCP Studio screen and state (lane U1, issue #144).
+#                      It belongs in tools/check-mockup-v3.mjs, which is outside U1's paths.
 name: mockup-v3
 on:
   pull_request:
@@ -35,5 +37,176 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Install Chromium for the headless walk
         run: npx playwright install --with-deps chromium --only-shell
+      - name: Parse the page script
+        # A syntax error stops the page before its first render, and the walk then reports only a
+        # timeout. node --check names the line.
+        run: |
+          node tools/build-mockup-v3.mjs --out "$RUNNER_TEMP/v3.html"
+          node -e 'const s=require("fs").readFileSync(process.argv[1],"utf8").split("<script>");require("fs").writeFileSync(process.argv[2],s[s.length-1].split("</script>")[0])' "$RUNNER_TEMP/v3.html" "$RUNNER_TEMP/v3.js"
+          node --check "$RUNNER_TEMP/v3.js"
       - name: Check v3
         run: npm run check:v3
+      - name: Walk the steering repo and MCP Studio screens
+        if: ${{ !cancelled() }}
+        run: |
+          node --input-type=module - <<'EOF'
+          // Opens every steering repo and MCP Studio screen and state (lane U1) in headless Chromium, in both
+          // themes, desktop and phone. It fails on a script error, sideways scroll, a second row of tabs, a
+          // dialog or drawer that does not open, copy that breaks the house rules, or a flow that stops short.
+          import os from "node:os";
+          import path from "node:path";
+          import { writeFileSync } from "node:fs";
+          import { pathToFileURL } from "node:url";
+          const root = process.cwd();
+          const load = (p) => import(pathToFileURL(path.join(root, p)).href);
+          const { buildMockupV3 } = await load("tools/build-mockup-v3.mjs");
+          const { launchChromium } = await load("tools/lib/playwright.mjs");
+          const FILE = path.join(os.tmpdir(), "walk-v3-studio.html");
+          writeFileSync(FILE, buildMockupV3());
+          const URL0 = "file://" + FILE;
+          const B = "/a-intel/core-platform/";
+          const ROUTES = [
+            ["steering", ".repocard"], ["steering?tab=prs", "#app table"], ["steering?tab=repo", "#app table"],
+            ["steering/pr-58", ".budget"], ["steering/pr-57", ".trailers"], ["steering/pr-59", ".mem"], ["steering/pr-61", ".tsd"], ["steering/pr-62", ".tsd"],
+            ["steering/pr-60?health=diverged", ".health-b"], ["steering?tab=repo&dialog=linkrepo", ".dlg"],
+            ["steering?health=drifted", ".health-b"], ["work?health=drifted&as=amara", ".health-b"], ["sessions?health=disconnected", ".health-b"],
+            ["work?dialog=newworkspace", ".dlg"], ["work?dialog=newworkspace&prov=failed", '[data-act="nws-retry"]'], ["work?dialog=newworkspace&prov=done", '[data-act="nws-open"]'],
+            ["servers", ".rank"], ["servers?dialog=addserver", ".srcpick"], ["servers?dialog=addserver&src=url", ".dlg"], ["servers?dialog=addserver&src=registry", ".catalog"],
+            ["servers?dialog=addserver&src=local", ".dlg"], ["servers?dialog=addserver&src=definition", ".dlg"],
+            ["servers?dialog=addserver&src=registry&pick=slack&phase=result", ".dlg table"], ["servers?dialog=addserver&src=definition&fmt=openapi&phase=result", ".dlg table"],
+            ["servers?dialog=addserver&src=definition&fmt=graphql&phase=result", ".dlg table"], ["servers?dialog=addserver&src=definition&fmt=grpc&phase=result", ".dlg table"],
+            ["servers?dialog=embeddings", ".dlg"],
+            ["servers/stripe", "table.tools"], ["servers/stripe?tool=create_refund", ".drawer"], ["servers/stripe?tool=delete_customer", ".drawer .sugg"],
+            ["servers/stripe?tab=connection", ".kv"], ["servers/stripe?tab=try&run=1", ".tryg"], ["servers/stripe?tab=changes", ".tsd"],
+            ["servers/billing", ".banner"], ["servers/billing?tab=connection", ".kv"], ["servers/billing?tab=changes", ".tsd"], ["servers/billing?tool=create_refund", ".drawer"],
+            ["servers/crm", ".tsum"], ["servers/crm?tool=search_deals", ".drawer pre"], ["servers/warehouse?tab=connection", ".kv"], ["servers/ledger?tab=connection", ".relay"],
+            ["servers/ledger?tab=try&run=1", ".panel"], ["servers/notion", ".offb"], ["servers/github?tool=merge_pull_request", ".offrow"], ["servers/oxagen", "table.tools"],
+          ];
+          const SHELLS = { desktop: { width: 1440, height: 1000 }, phone: { width: 400, height: 860 } };
+          const COPY = [
+            ["empty value", /\bundefined\b|\bNaN\b|\bnull\b/], ["em or en dash", /[—–]/], ["mid-dot", /·/], ["brand case", /Oxagen|Stella|Mission Control/],
+            ["plural", /\b1 (sessions|requests|items|agents|servers|tools|loads|suggestions|conflicts|keys|entries|work items|records|changes|files|approvals|memories|operations|methods)\b/],
+            ["thousands separator", /\$\d{4,}\.\d{2}/],
+          ];
+          let passes = 0, failures = 0;
+          const ok = (c, what) => { if (c) passes++; else { failures++; console.error("FAIL " + what); } };
+          const errors = [];
+          const browser = await launchChromium(root);
+          async function open(page, route, q = "") {
+            await page.goto("about:blank");
+            await page.goto(`${URL0}?island=0${q}#${B}${route}`);
+            try { await page.waitForFunction(() => document.querySelector("#app h1, #app h2"), null, { timeout: 15000 }); }
+            catch (e) { for (const x of errors) console.error("FAIL " + x); throw new Error(`${route}: no heading after 15 seconds`); }
+            await page.waitForTimeout(120);
+          }
+          function watch(page, label) {
+            page.on("pageerror", (e) => errors.push(`${label}: ${e.message}`));
+            page.on("console", (m) => { if (m.type() === "error") errors.push(`${label}: console ${m.text()}`); });
+          }
+          async function copyCheck(page, label) {
+            const text = await page.evaluate(() => {
+              const off = document.createElement("style");
+              off.textContent = ".tc, pre, code, .pill, textarea, select { display: none !important; }";
+              document.head.appendChild(off);
+              const t = document.body.innerText;
+              off.remove();
+              return t;
+            });
+            for (const [name, re] of COPY) { const m = text.match(re); ok(!m, `${label}: copy rule "${name}" matched ${JSON.stringify(m && text.slice(Math.max(0, m.index - 50), m.index + 50))}`); }
+          }
+          for (const [shell, vp] of Object.entries(SHELLS)) {
+            for (const theme of ["dark", "light"]) {
+              const page = await browser.newPage({ viewport: vp });
+              watch(page, `${shell}/${theme}`);
+              for (const [route, sel] of ROUTES) {
+                const label = `${route} ${shell} ${theme}`;
+                await open(page, route, `&theme=${theme}`);
+                const m = await page.evaluate((s) => {
+                  const layer = document.querySelector(".dlg, .drawer-b");
+                  return { sw: document.documentElement.scrollWidth, cw: document.documentElement.clientWidth, sel: !!document.querySelector(s), tabs: document.querySelectorAll("#app .tabs").length,
+                    lw: layer ? layer.scrollWidth - layer.clientWidth : 0, theme: document.documentElement.getAttribute("data-theme"), phone: document.getElementById("viewport").classList.contains("phone") };
+                }, sel);
+                ok(m.sel, `${label}: ${sel} is not on screen`);
+                ok(m.sw <= m.cw + 1, `${label}: the page scrolls sideways (${m.sw} > ${m.cw})`);
+                ok(m.lw <= 1, `${label}: the dialog or drawer scrolls sideways by ${m.lw}px`);
+                ok(m.tabs <= 1, `${label}: ${m.tabs} rows of tabs`);
+                ok(m.theme === theme && m.phone === (shell === "phone"), `${label}: the ${shell} ${theme} shell did not apply`);
+                if (shell === "desktop") await copyCheck(page, label);
+              }
+              await page.close();
+            }
+          }
+          const page = await browser.newPage({ viewport: SHELLS.desktop });
+          watch(page, "flows");
+          // Provisioning: a name only, the failed step with Retry, then an open workspace.
+          await open(page, "work?dialog=newworkspace", "&theme=dark");
+          ok((await page.$$(".dlg input")).length === 1, "provision: the first step asks for more than a name");
+          await page.fill("#nws-name", "Payments ops");
+          await page.click('[data-act="nws-go"]');
+          await page.waitForSelector('[data-act="nws-retry"]', { timeout: 15000 });
+          ok(/Apply the settings/.test(await page.innerText(".pv-step.st-failed")), "provision: the failed step is not Apply the settings");
+          await page.click('[data-act="nws-retry"]');
+          await page.waitForSelector('[data-act="nws-open"]', { timeout: 15000 });
+          ok(/a-intel\/oxagen-payments-ops/.test(await page.innerText(".dlg")), "provision: the steering repo is not a-intel/oxagen-payments-ops");
+          // Health: the banner on every page, Repair settings for an admin, and none for a member.
+          for (const area of ["work", "sessions", "agents", "steering", "servers", "spend"]) {
+            await open(page, `${area}?health=drifted`, "&theme=dark");
+            ok(await page.$(".health-b"), `health: no banner on ${area}`);
+          }
+          ok(await page.$('.health-b [data-act="repair"]'), "health: an admin sees no Repair settings");
+          await page.click('.health-b [data-act="repair"]');
+          ok(!(await page.$(".health-b")), "health: Repair settings left the banner up");
+          await open(page, "work?health=drifted&as=amara", "&theme=dark");
+          ok(!(await page.$('.health-b [data-act="repair"]')), "health: a member sees Repair settings");
+          await open(page, "steering/pr-58?health=drifted", "&theme=dark");
+          ok(/Failed/.test(await page.innerText(".panel .ck")), "health: a drifted repo does not fail the open steering PR");
+          // The budget check warns and passes against oxagen's default.
+          await open(page, "steering/pr-58", "&theme=dark");
+          ok(/only warns, so the check passes/.test(await page.innerText(".budget")), "budget: the warn-only default is not stated");
+          ok((await page.$$(".budget table.mini tbody tr")).length >= 2, "budget: no per-record token counts");
+          await page.click('[data-act="pr-approve"]');
+          await page.click('[data-act="pr-merge"]');
+          ok(/Position 2/.test(await page.innerText(".prside")), "queue: #58 is not second behind #62");
+          // Memory PR: Drop one memory.
+          await open(page, "steering/pr-59", "&theme=dark");
+          ok((await page.$$(".mem .lst a.li")).length >= 8, "memory: the evidence sessions are missing");
+          await page.click('[data-act="mem-drop"]');
+          ok((await page.$$(".mem.dropped")).length === 1 && /Merge 3 memories/.test(await page.innerText(".shead")), "memory: Drop did not drop one memory");
+          // Linking a repository opens a steering PR on workspace.toml.
+          await open(page, "steering?tab=repo", "&theme=dark");
+          await page.click('[data-act="linkrepo"]');
+          await page.click('[data-act="linkrepo-go"]');
+          ok(/workspace\.toml/.test(await page.innerText("#app")) && /Link github\.com\/a-intel\/mobile/.test(await page.innerText("#app h1")), "link: no steering PR on workspace.toml");
+          // Studio: import a tool, confirm its suggestion, and open the steering PR.
+          await open(page, "servers/stripe", "&theme=dark");
+          ok(/Review 2 changes/.test(await page.innerText(".shead")), "studio: stripe does not show its 2 staged changes");
+          await page.click('input[data-k="stripe.create_customer"]');
+          ok(await page.evaluate(() => !!stagedOp("stripe", "import", "create_customer")), "studio: ticking create_customer staged no import");
+          await page.evaluate(() => { S.srvTab = "changes"; render(); });
+          ok(await page.$('[data-act="changes-pr"][disabled]'), "studio: an unconfirmed suggestion does not block the steering PR");
+          await page.evaluate(() => openDrawer("tool", "stripe.create_customer"));
+          await page.click('[data-act="cls-confirm"]');
+          await page.evaluate(() => closeDialog());
+          await page.click('[data-act="changes-pr"]');
+          await page.waitForFunction(() => S.area === "steering" && /^pr-/.test(S.id), null, { timeout: 5000 });
+          ok(/stripe__create_customer/.test(await page.innerText(".tsd")), "studio: the steering PR does not list the imported tool");
+          // The off switch on a tool and on a server, with who and when.
+          await open(page, "servers/stripe?tool=list_charges", "&theme=dark");
+          await page.click('[data-act="tool-off"]');
+          ok(/Since .*Marcus Bell/.test(await page.innerText(".offrow")), "off: the tool does not say who turned it off and when");
+          await open(page, "servers/notion", "&theme=dark");
+          ok(/Priya Natarajan/.test(await page.innerText(".offb")), "off: the server does not say who turned it off");
+          await page.click('[data-act="srv-on"]');
+          ok(!(await page.$(".offb")), "off: Turn on left the server off");
+          // Add server: every source ends in a discovery result.
+          for (const src of ["url", "registry", "local", "definition"]) {
+            await open(page, "servers?dialog=addserver", "&theme=dark");
+            await page.click(`[data-act="as-src"][data-src="${src}"]`);
+            await page.click('[data-act="as-discover"]');
+            ok(/Discovery result/.test(await page.innerText(".dlg-h")) && (await page.$$(".dlg tbody tr")).length > 3, `add server: ${src} does not end in a discovery result`);
+          }
+          await browser.close();
+          for (const e of errors) { failures++; console.error("FAIL " + e); }
+          console.log(`${failures ? "FAIL" : "ok  "} steering repo and MCP Studio walk: ${passes} checks passed, ${failures} failed`);
+          process.exit(failures ? 1 : 0);
+          EOF
