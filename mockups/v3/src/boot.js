@@ -4,7 +4,9 @@
 (function () {
   var saved = null;
   try { saved = localStorage.getItem("v3-theme"); } catch (e) { /* storage blocked */ }
-  setTheme(BOOT.theme || saved || null);
+  // A host that stamps data-theme on the root keeps it unless the URL or a saved choice says otherwise.
+  if (BOOT.theme || saved) setTheme(BOOT.theme || saved);
+  else S.theme = document.documentElement.getAttribute("data-theme") || null;
   var mq = null;
   try { mq = matchMedia("(max-width: 760px)"); } catch (e) { /* no matchMedia */ }
   S.preview = BOOT.phone && !(mq && mq.matches);
