@@ -398,7 +398,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
     <div class="card">
       <h4><span class="st p">Proposed</span></h4>
       <ul>
-        <li>The details below that no Decided item names: the settings table beyond the required check, the drift sweep, the scale targets, and the build lanes.</li>
+        <li>The details below that no Decided item names: the settings table beyond the required check, the drift sweep, the scale targets, the build lanes, and a skill's toolbelt for subagents.</li>
       </ul>
     </div>
   </div>
@@ -510,6 +510,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
     <tbody>
       <tr><td><code>repos</code></td><td>list</td><td>when <code>scope</code> is <code>repository</code></td><td class="wrap">Code repositories as <code>&lt;host&gt;/&lt;owner&gt;/&lt;name&gt;</code>, such as <code>github.com/a-intel/platform</code>. The record reaches a run only when its working repository is on the list. This replaces v1's rule that repository records live in the code repository.</td></tr>
       <tr><td><code>tools</code></td><td>list</td><td>no</td><td class="wrap">Tool names such as <code>billing__create_refund</code>, or a server prefix such as <code>billing__*</code>. The record reaches a request only when the run's toolbelt holds a match.</td></tr>
+      <tr><td><code>toolbelt</code></td><td>string</td><td>no</td><td class="wrap">Skills only. <span class="st p">Proposed</span> A toolbelt in <code>tools/toolbelts/</code>. When a harness runs the skill as a subagent, the subagent may call only tools in both its parent run's toolbelt and this one. <code>tools</code> decides when a record is delivered, and <code>toolbelt</code> decides what a subagent may call. See <a href="#subagents">Subagents</a>.</td></tr>
       <tr><td><code>description</code></td><td>string</td><td>skills</td><td class="wrap">Allowed on every kind. One sentence, at most 200 characters, or 1,024 for a skill. It becomes the record's line in the index an agent reads before it asks for a body.</td></tr>
     </tbody>
   </table></div>
@@ -557,15 +558,15 @@ into smaller refunds to stay under the limit.</code></pre></figure>
       <tr><td>Brand identity</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td>A <code>skill</code> with its files, plus one short <code>preference</code></td><td>The preference on every request, the skill on demand</td></tr>
       <tr><td>Design system</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td>A <code>skill</code> with <code>tokens.json</code> and one file per component</td><td>On demand</td></tr>
       <tr><td>Skills</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td><code>skill</code></td><td>The index line on every request, the body on demand</td></tr>
-      <tr><td>Memories</td><td>Oxagen, then <code>steering/memory/**</code></td><td><code>memory</code></td><td>When relevant. See <a href="#memory">Memory</a></td></tr>
-      <tr><td>Reflections</td><td>Oxagen only</td><td><code>reflection/v1</code> JSON</td><td>Never. They produce memory candidates</td></tr>
+      <tr><td>Memories</td><td>Oxagen, then <code>steering/memory/**</code></td><td><code>memory</code></td><td>When relevant. An unreviewed memory reaches only the agent that wrote it. See <a href="#memory">Memory</a></td></tr>
+      <tr><td>Reflections</td><td>Oxagen only</td><td><code>reflection/v1</code> JSON</td><td>The reflection itself never. Each lesson in it is an unreviewed memory, and the curator batches lessons into the next memory PR, which is the proposal</td></tr>
       <tr><td>Proposals</td><td>Open steering PRs</td><td>None</td><td>Never</td></tr>
       <tr><td>MCP servers</td><td><code>tools/servers/&lt;name&gt;/</code></td><td><code>mcp-server/v1</code>, <code>mcp-tools/v1</code>, and a lock</td><td>Imported tool definitions through the cloud gateway</td></tr>
       <tr><td>Tool risk categories</td><td><code>tools/servers/&lt;name&gt;/tools.toml</code></td><td>Today's classification: risk, side effect, egress, impacts</td><td>Cedar policies read it, and the agent sees annotations derived from it</td></tr>
       <tr><td>APIs as MCP servers</td><td><code>tools/servers/&lt;name&gt;/</code> with an OpenAPI, GraphQL, or gRPC source</td><td>The same files plus the definition</td><td>Imported tool definitions through the cloud gateway</td></tr>
       <tr><td>Toolbelts</td><td><code>tools/toolbelts/&lt;name&gt;.toml</code></td><td><code>toolbelt/v1</code></td><td>A run sees and may call only its toolbelt's tools. Policy adds conditions.</td></tr>
       <tr><td>Agents</td><td>Oxagen: an operator, a runtime, and a harness, registered at enrollment</td><td>Nothing in the repository</td><td>Not delivered</td></tr>
-      <tr><td>Subagent instructions</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td><code>skill</code></td><td>The index line on every request, the body on demand</td></tr>
+      <tr><td>Subagent instructions</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td><code>skill</code>, with an optional <code>toolbelt</code></td><td>The index line on every request, the body on demand. The subagent may call only tools in both its parent's toolbelt and the skill's. See <a href="#subagents">Subagents</a></td></tr>
     </tbody>
   </table></div>
 
@@ -895,6 +896,7 @@ tools = [
   <ul>
     <li><strong>Entries.</strong> A tool's full name, or a server prefix such as <code>billing__*</code> for every imported tool of that server. The <code>references</code> check fails an entry that names no imported tool.</li>
     <li><strong>Which toolbelt a run gets.</strong> The workspace default in <code>workspace.toml</code>, another one picked by Send To for one run, or an agent's own choice once the per-agent settings question lands. <span class="st p">Proposed</span></li>
+    <li><strong>Selection by side effect.</strong> An optional <code>side_effects</code> list, such as <code>["read"]</code>, keeps only the listed tools whose side effect in <code>tools.toml</code> is on it. A read-only toolbelt then needs no hand-kept list, and a new write tool on a listed server never enters it. <span class="st p">Proposed</span></li>
     <li><strong>Cost.</strong> A run pays for its toolbelt's tool definitions on every request, so a narrow toolbelt is a cheap one. A server in search mode counts as its three tools.</li>
   </ul>
 </section>
@@ -916,6 +918,25 @@ tools = [
     </tbody>
   </table></div>
   <div class="note"><p><strong>Open question.</strong> Where per-agent settings live, such as the environment an agent uses in production. On the agent's registration in Oxagen, they change at once and are recorded but get no review. In <code>workspace.toml</code>, keyed by the agent's registration, they go through a steering PR like any configuration. Recommended: <code>workspace.toml</code>, since pull requests are how configuration changes.</p></div>
+  <h3 id="subagents">Subagents</h3>
+  <p>A subagent often needs fewer tools than the run that starts it, such as a reviewer that may read code and write nothing. A skill carries that limit. <span class="st p">Proposed</span></p>
+  <ul>
+    <li><strong>The skill names a toolbelt.</strong> Its <code>toolbelt</code> field points at a file in <code>tools/toolbelts/</code>.</li>
+    <li><strong>Narrowing only.</strong> A subagent's tool call passes only when the tool is in both its parent run's toolbelt and the skill's. A subagent never reaches a tool its parent cannot.</li>
+    <li><strong>Read only by class.</strong> A toolbelt with <code>side_effects = ["read"]</code> keeps the tools that <code>tools.toml</code> classifies as read. A Cedar policy that forbids write and irreversible calls from a subagent can back it up once a Cedar evaluator exists. Today decision rules run in <code>packages/rules</code>.</li>
+    <li><strong>What the model sees.</strong> When a harness has its own tool list for a subagent, such as the <code>tools</code> field of a Claude Code subagent, Oxagen fills it from the toolbelt when it delivers the skill. That list trims what the model sees. The hook or the gateway decides the call.</li>
+    <li><strong>Knowing the caller.</strong> The hook or the gateway has to know that a subagent made the call and which skill it runs. Harnesses differ here. See Open questions.</li>
+  </ul>
+  <figure class="code"><figcaption><span class="path">tools/toolbelts/review-readonly.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/toolbelt/v1.json
+schema = "toolbelt/v1"
+name = "review-readonly"
+label = "Read-only review"
+description = "Read code, pull requests, and issues. Write nothing."
+tools = [
+  "github__*",
+  "linear__*",
+]
+side_effects = ["read"]         # keeps only tools classified read in tools.toml</code></pre></figure>
 </section>
 
 <section id="policy">
@@ -1363,6 +1384,7 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
     <li>Checks on linked code repositories: posted by the Oxagen app with no committed files (recommended), or a CI workflow committed to each repository, which reverses the decision that code repositories hold no committed Oxagen files.</li>
     <li>Whether a customer can opt in to the code repository check blocking a merge. By default it only warns.</li>
     <li>Where per-agent settings live, such as an agent's toolbelt and the environment it uses: on the agent's registration in Oxagen, or in <code>workspace.toml</code> through a steering PR (recommended). See Agents.</li>
+    <li>What a subagent's toolbelt does on a harness that does not say which subagent made a tool call: the call gets the parent's toolbelt and the Skills screen marks the skill's toolbelt as not enforced on that harness (recommended), or Oxagen does not deliver a skill with a toolbelt to that harness. See Subagents.</li>
   </ol>
 </section>
 
