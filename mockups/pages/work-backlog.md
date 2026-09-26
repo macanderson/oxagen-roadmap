@@ -125,7 +125,7 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Checked against `macande
 | Published workflows in the menu | `WORKFLOWS` state `published` | `.oxagen/workflows/*.toml` | none. ADR-043 removed the old `workflow.*` capabilities | ❌ |
 | Merged definition of done | `woItemsFor()` over `TASKS[].dod` | `tasks.dod_items`, `tasks.work_order_items` | none | ❌ |
 | Drafted brief | `woDraftPrompt()` | `create_work_order` (drafted by `oxagen.assistant`) | `ask_assistant` exists (`packages/oxagen/src/contracts/assistant.ask.ts:61`). Nothing drafts a brief | ❌ |
-| Mentions of Steering records | `RECORDS` | `list_records`; the mention grammar | Records and their statements ship (`packages/oxagen/src/contracts/context.records.list.ts:17`, `context.steering.shared.ts:215`), with no token cost. The grammar has no record or work item type (`packages/ai/src/prompts/mentions.ts:32-42`) | 🟡 |
+| Mentions of Steering records | `RECORDS` | `list_records`; the mention grammar | Records and their statements ship (`packages/oxagen/src/contracts/steering.records.list.ts:17`, `context.steering.shared.ts:215`), with no token cost. The grammar has no record or work item type (`packages/ai/src/prompts/mentions.ts:32-42`) | 🟡 |
 | Mentions of agent profiles | `AGENTS` in the workspace | the mention grammar’s `agent` type | `agent` is a mention type (`packages/ai/src/prompts/mentions.ts:37`) | ✅ |
 | Repositories and the toolbelt refusal | `wsRepos()`, the `grant` constant in `DLG_EXT.wo` | the workspace’s bindings and the agent’s toolbelt | The main and linked repositories ship (`list_repositories`, `packages/oxagen/src/contracts/repository.list.ts:44`; `ingestion.repository_binding_heads`, `packages/database/src/schema/ingestion.ts:542`). No toolbelt names the repositories an agent may write | 🟡 |
 | Spend cap and the per-run budget hint | `S.wo.cap`, `AGENTS[].budget` | `tasks.work_orders` cap; a per-run budget | `set_spend_budget` sets an organization or workspace ceiling only (`packages/oxagen/src/contracts/billing.budget.set.ts:55`) | ❌ |
@@ -185,7 +185,7 @@ The design names these. None exists in `packages/iam` today.
 - The work order record and its send (`create_work_order`, `send_work_order`, `list_work_orders`), and delivery to the agent’s runtime (§9.6)
 - A work order id on the run record beside `taskRef` (wedge spec, Open decisions 5), so `live` and the live count on In progress read runs by work order
 - The workflow file schema (`.oxagen/workflows/*.toml`) and its ADR (`tasks-spec.md` §17.2)
-- `context_record` and `task` types in the mention grammar (§17.6), and a token cost on a Steering record
+- `steering_record` and `task` types in the mention grammar (§17.6), and a token cost on a Steering record
 - The repositories an agent’s toolbelt may write, and a per-run budget per agent
 
 - A dependency between two work items, read from the provider or added by a person, and the derived blocked reason (`docs/work-graph-spec.md` §4, §5)

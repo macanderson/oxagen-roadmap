@@ -21,7 +21,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 
 1. **Route and shell.** The build serves the route. Steering is lit in the sidebar. There is no Skills nav entry. The breadcrumb ends on Steering.
 2. **Hub header and tabs.** h1 “Steering”. Seven tabs in this order: Records, Skills, Memory, Ontology, Policy, Proposals, Preview. This tab is selected. Each tab is a URL segment, and reloading the URL lands on the same tab.
-3. **One gold action.** Write a context record in the hub header is the one gold action.
+3. **One gold action.** Write a steering record in the hub header is the one gold action.
 4. **Sections and tables.** The build has each item below with the same headings and every column named, in that order.
    - Entity and term definitions table: Term · Kind · Definition · Force · About · Token cost · File.
    - Where these are indexed: Today (the Postgres registry), Later (the graph, Phase 3, Postgres kept as fallback), Not here (no engine, no connectors).

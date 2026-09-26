@@ -800,7 +800,7 @@ var TOOLMETA={
  github__delete_branch:["Delete branch","vcs"], github__create_issue_comment:["Create issue comment","record"],
  github__get_commit:["Get commit","read"], claude_code__Edit:["Edit file","file"],
  claude_code__WebFetch:["Fetch a web page","read"], expand_graph:["Expand the graph","read"],
- append_record:["Append record","record"], open_context_pr:["Open a pull request","vcs"],
+ append_record:["Append record","record"], open_steering_pr:["Open a pull request","vcs"],
  send_message:["Send message","message"], search_tools:["Search the toolbelt","read"],
  load_tools:["Load tool definitions","read"], okta__deactivate_user:["Deactivate user","access"]
 };
@@ -1543,7 +1543,7 @@ function icon(n){
    cons:'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M9 12h6"/>'};
   return '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">'+(p[n]||'')+'</svg>';
 }
-/* The six record kinds of context-record/v0.1. Icon + hue per kind; the statement is always the headline. */
+/* The six record kinds of steering-record/v0.1. Icon + hue per kind; the statement is always the headline. */
 var KINDS={
  rule:{l:"rule",d:"A directive that steers behavior",i:'<path d="M4 12h14M13 7l5 5-5 5"/>'},
  constraint:{l:"constraint",d:"A hard boundary: require or forbid",i:'<path d="M12 3l8 3.5v5c0 4.6-3.2 8.6-8 9.5-4.8-.9-8-4.9-8-9.5v-5z"/><path d="M9 12h6"/>'},
@@ -4065,7 +4065,7 @@ var BELT=[
   dec:"allow",rule:"grant:agent.graph.read",pinned:true,scope:"scope: workspace + repository"},
  {id:"append_record@2",d:"Append a Steering record to a lineage.",
   dec:"allow",rule:"agent tool default",scope:"kinds: finding, convention"},
- {id:"open_context_pr@1",d:"Open a pull request on the main repo from a proposal.",
+ {id:"open_steering_pr@1",d:"Open a pull request on the main repo from a proposal.",
   dec:"allow",rule:"grant:agent.repo.write #11",scope:"repo: a-intel/platform"},
  {id:"send_message@1",d:"Message another agent in this workspace, or a run.",
   dec:"allow",rule:"agent tool default",scope:"@agent only (no @all)"},
@@ -4871,9 +4871,13 @@ function pTools(){
      '<div class="sp"><button class="btn sm primary" onclick="openDialog(\'import\')">Add provider</button></div></div>'+
      '<div class="tw"><table><thead><tr><th>Provider</th><th>Transport</th><th class="num">Tools</th><th>Toolbelts</th><th>Agents</th><th>Health</th><th>Connection</th><th>Authorization</th><th>Last import</th><th></th></tr></thead><tbody>'+
      PROVIDERS.map(function(sv){
-      var c=connByServer(sv.id), tb=providerBelts(sv.id), ag=providerAgents(sv.id);
+      var c=connByServer(sv.id), tb=providerBelts(sv.id), ag=providerAgents(sv.id), ln=providerLinks(sv);
       return '<tr '+rowClick("openDialog('server','"+sv.id+"')","Open "+sv.name)+'>'+
-       '<td><b>'+h(sv.system)+'</b><span class="sub">'+h(sv.desc)+'</span></td>'+
+       '<td><div class="pv">'+providerMark(sv,24)+'<div class="pv-t"><b>'+h(sv.system)+'</b><span class="sub">'+h(sv.desc)+'</span>'+
+        (ln.length?'<span class="sub pv-l">'+ln.map(function(l){
+          var host=new URL(l[1]).host.replace(/^www\./,"");
+          return l[0]==="Website"?linkOut(host,l[1],sv.system+" website, "+host):linkOut(l[0],l[1],sv.system+" "+l[0].toLowerCase());}).join(SEP)+'</span>':'')+
+       '</div></div></td>'+
        '<td><span class="b b-q">'+h(sv.transport)+'</span><span class="sub mono" style="font-size:10.5px">'+h(sv.wire)+' · '+h(sv.url)+'</span></td>'+
        '<td class="num">'+sv.tools+'<span class="sub">'+plural(sv.versions,"version")+'</span></td>'+
        '<td>'+(tb.length?tb.map(function(b){return '<span class="b b-q" style="font-size:10.5px">'+h(b.name)+'</span>';}).join(SEP):'<span class="dim">—</span>')+'</td>'+
@@ -4995,6 +4999,30 @@ function connByServer(id){var c=serverConns(id);return c.length?c[0]:null;}
 /* A server reached in-process or over a harness hook holds no credential, so it has nothing to
    authorize. Everything else is reached as somebody, and that somebody has to be connected. */
 function needsAuth(sv){return sv.conn!=="none";}
+/* A provider's logomark: the https icon its registry entry names, fetched with no referrer, or the
+   first letter of its system on a tile when there is none or it does not load (the app's
+   ProviderIcon). A provider added by hand has no entry, so it keeps the letter. */
+function providerMark(sv,size){
+  size=size||24;
+  var fb=(String(sv.system||sv.name||"").trim().charAt(0)||"?").toUpperCase(),
+      st="width:"+size+"px;height:"+size+"px;", u=/^https:\/\//.test(sv.icon||"")?sv.icon:"";
+  if(u) return '<span class="avx provider" style="'+st+'" data-l="'+h(fb)+'" aria-hidden="true">'+
+    '<img src="'+h(u)+'" alt="" referrerpolicy="no-referrer" loading="lazy" decoding="async" onerror="avImgFail(this)"></span>';
+  return '<span class="avx provider f-sans" style="'+st+'font-size:'+Math.round(size*avScale(1))+'px" aria-hidden="true">'+h(fb)+'</span>';
+}
+/* The registry entry's links, https only: the website, the docs, and the source repository.
+   Docs is dropped when it is the website or the source, because the registry has no docs field
+   and search_mcp_registry falls back to one of the other two. */
+function providerLinks(sv){
+  var ok=function(u){return /^https:\/\//.test(u||"")?u:"";}, web=ok(sv.website), src=ok(sv.source), docs=ok(sv.docs);
+  if(docs===web||docs===src) docs="";
+  return [["Website",web],["Docs",docs],["Source",src]].filter(function(l){return l[1];});
+}
+function linkOut(text,u,label){
+  return '<a href="'+h(u)+'" target="_blank" rel="noopener noreferrer"'+(label?' aria-label="'+h(label)+'"':'')+
+   ' onclick="event.stopPropagation()">'+h(text)+'</a>';
+}
+function urlText(u){return String(u).replace(/^https:\/\//,"").replace(/\/$/,"");}
 var AUTH_BADGE={connected:["allowed","connected"],expired:["critical","token expired"],"key held":["allowed","key held"],"role assumed":["allowed","role assumed"]};
 function authBadge(sv){
   if(!needsAuth(sv)) return '<span class="b b-q">none needed</span>';
@@ -5085,13 +5113,15 @@ DLG_EXT.server=function(id){
        '<div class="row" style="margin-top:11px"><button class="btn sm primary" onclick="openDialog(\'oauth\',\''+sv.id+'\')">Connect with OAuth</button>'+
        '<button class="btn sm" onclick="openDialog(\'connection\')">Add a key or a role instead</button></div>'
      : '<div class="note">This provider holds no credential, so there is nothing to authorize.</div>';
-  var pbelt=providerBelts(sv.id), pag=providerAgents(sv.id);
-  return {t:sv.system,s:sv.transport+" · "+sv.wire+" · "+sv.url,w:true,
+  var pbelt=providerBelts(sv.id), pag=providerAgents(sv.id), links=providerLinks(sv);
+  return {t:sv.system,mark:providerMark(sv,32),s:sv.transport+" · "+sv.wire+" · "+sv.url,w:true,
    b:(sv.health==="ok"?'':'<div class="warn"><b>This provider is degraded.</b> Calls to it are retried once and then blocked.</div>')+
     (c&&c.authState==="expired"?'<div class="warn"><b>The token expired '+h(c.tokenExp)+'.</b> Reconnect to bring the '+plural(tv.length,"tool")+' below back into reach.</div>':'')+
     (props.length?'<div class="warn"><b>'+props.length+' schema'+(props.length>1?'s are':' is')+' awaiting approval.</b> '+
       'Until an admin approves, outputs are validated only for size and type.</div>':'')+
     '<dl class="kv"><dt>System</dt><dd>'+h(sv.desc)+'</dd>'+
+    (links.length?links.map(function(l){return '<dt>'+l[0]+'</dt><dd class="pv-url">'+linkOut(urlText(l[1]),l[1])+'</dd>';}).join("")
+      :'<dt>Links</dt><dd class="dim">None recorded</dd>')+
     '<dt>Transport</dt><dd class="mono">'+h(sv.transport)+' · '+h(sv.wire)+'</dd>'+
     '<dt>Registry name</dt><dd class="mono">'+h(sv.name)+'</dd>'+
     '<dt>Schemas</dt><dd>'+h(sv.schemas)+'</dd>'+
@@ -5572,7 +5602,7 @@ function prpById(id){for(var i=0;i<PROPOSALS.length;i++){if(PROPOSALS[i].id===id
 var CTXPR={prp:"prp_01K5RU4A", pr:"a-intel/platform#519", branch:"context/ctx.release.no-reread-changelog",
  base:"a4c91e2", head:"7d2e91a", promo:"rec_01K5RW2P7QH4", evt:"evt_01K5RW2Q8", hash:"sha256:9a41c0e7bd238f45",
  checks:[
-  {n:"Schema",ms:900,ok:"context-record/v0.1 valid · 1 file, 1 record, 1 lineage"},
+  {n:"Schema",ms:900,ok:"steering-record/v0.1 valid · 1 file, 1 record, 1 lineage"},
   {n:"Lineage uniqueness",ms:700,ok:"no published record holds ctx.release.no-reread-changelog; this proposal is its only holder"},
   {n:"record_hash recomputation",ms:600,ok:"recomputed over the canonical bytes · sha256:9a41c0e7bd238f45 matches the file"},
   {n:"Secret and PII scan",ms:900,ok:"statement, rationale and evidence scanned · 0 findings"},
@@ -5865,7 +5895,7 @@ function recprChecks(def){
   return [
    {n:"Schema",ms:900,
     test:function(){return recs.every(function(r){return !!tomlOf(recprFileText(def,r));});},
-    ok:"context-record/v0.1 valid · "+(one?"1 file, 1 record, 1 lineage":n+" files, "+n+" records, "+n+" lineages"),
+    ok:"steering-record/v0.1 valid · "+(one?"1 file, 1 record, 1 lineage":n+" files, "+n+" records, "+n+" lineages"),
     bad:one?"the record file does not parse as TOML":"a record file does not parse as TOML"},
    {n:"Lineage uniqueness",ms:700,
     /* A real check, not a sentence, and it is re-run at merge because another pull request can
@@ -5924,7 +5954,7 @@ function wzRecOpenPr(){
 function recprFileText(def,rec){
   var r=rec||def.record, multi=/\n/.test(r.st);
   return '# .oxagen/rules/'+r.id+'.toml\n'+
-   'schema = "context-record/v0.1"\n'+
+   'schema = "steering-record/v0.1"\n'+
    'lineage_id = '+tomlStr(r.id)+'\n'+
    'kind = '+tomlStr(r.kind)+'\n'+
    'sharing_scope = '+tomlStr(r.scope)+'\n'+
@@ -6107,7 +6137,7 @@ function ctxprTab(){
     '<span class="b b-'+l[0]+'" style="margin-left:auto" data-ctxpr-state="'+c.st+'"><span class="d"></span>'+h(l[1])+'</span></div><div class="panel-b">'+
     '<p class="eyebrow q">Branch <span class="mono">'+h(CTXPR.branch)+'</span> · base main · '+h(CTXPR.base)+' · one concern per PR</p>'+
     '<pre><span class="c"># .oxagen/rules/'+h(CTXPR.record.id)+'.toml</span>\n'+
-    '<span class="k">schema</span>       = <span class="s">"context-record/v0.1"</span>\n'+
+    '<span class="k">schema</span>       = <span class="s">"steering-record/v0.1"</span>\n'+
     '<span class="k">lineage_id</span>   = <span class="s">"'+h(CTXPR.record.id)+'"</span>\n'+
     '<span class="k">kind</span>         = <span class="s">"'+h(CTXPR.record.kind)+'"</span>\n'+
     '<span class="k">sharing_scope</span>= <span class="s">"workspace"</span>\n'+
@@ -6824,9 +6854,11 @@ function repoByName(n){for(var i=0;i<REPOS.length;i++){if(REPOS[i].n===n)return 
 /* A row that only answers a click is a row a keyboard cannot reach, and this page's own rules
    say it must be operable end to end. The engine's older tables use a bare `class="click"`; these
    three do not, and the helper is here rather than inline so they cannot drift apart. */
+/* Only a key pressed on the row itself opens it. A button or link inside the row keeps its own
+   Enter and Space, where the row's handler would otherwise cancel them and open the row. */
 function rowClick(on,label){
   return 'class="click" tabindex="0" role="button" aria-label="'+h(label)+'"'+
-   ' onclick="'+on+'" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();'+on+'}"';
+   ' onclick="'+on+'" onkeydown="if(event.target===this&&(event.key===\'Enter\'||event.key===\' \')){event.preventDefault();'+on+'}"';
 }
 function stBadge(m){return '<span class="b '+m.b+'"><span class="d"></span>'+h(m.l)+'</span>';}
 
@@ -9316,7 +9348,7 @@ function fixDlg(){
     return {t:"Fix for "+fndKindLc(f),w:true,s:"Pull request for "+f.subject+" · "+usd(f.save)+" at stake",
      b:'<p class="eyebrow q">Branch <span class="mono">'+h(x.branch)+'</span> · one concern per PR</p>'+
        '<pre><span class="c"># .oxagen/rules/'+h(x.lineage)+'.toml</span>\n'+
-       '<span class="k">schema</span>       = <span class="s">"context-record/v0.1"</span>\n'+
+       '<span class="k">schema</span>       = <span class="s">"steering-record/v0.1"</span>\n'+
        '<span class="k">lineage_id</span>   = <span class="s">"'+h(x.lineage)+'"</span>\n'+
        '<span class="k">kind</span>         = <span class="s">"'+h(x.kind)+'"</span>\n'+
        '<span class="k">sharing_scope</span>= <span class="s">"workspace"</span>\n'+
@@ -9510,7 +9542,7 @@ function dialog(){
   if(!d) return '';
   return '<div class="scrim" onclick="if(event.target===this)closeDialog()">'+
    '<div class="dlg'+(d.w?" wide":"")+'" role="dialog" aria-modal="true" aria-label="'+h(d.t)+'">'+
-   '<div class="dlg-h'+(d.s?" sub":"")+'">'+(d.s?'<div class="grow"><h2>'+h(d.t)+'</h2><p>'+h(d.s)+'</p></div>':'<h2>'+h(d.t)+'</h2>')+
+   '<div class="dlg-h'+(d.s?" sub":"")+'">'+(d.mark||'')+(d.s?'<div class="grow"><h2>'+h(d.t)+'</h2><p>'+h(d.s)+'</p></div>':'<h2>'+h(d.t)+'</h2>')+
    '<button class="iconbtn x" onclick="closeDialog()" aria-label="Close">×</button></div>'+
    (d.tabs?'<div class="tabs" role="tablist">'+d.tabs+'</div>':'')+
    '<div class="dlg-b">'+d.b+'</div><div class="dlg-f">'+d.f+'</div></div></div>';
@@ -11140,7 +11172,7 @@ function asstSheet(){
    '<div class="msg"><div class="who">'+stellaName()+' <span class="b b-q" style="font-size:9.5px"><span class="id">run_01K5RT9X4M2</span> · oxagen’s run</span></div><div class="bub">'+
    '<p style="margin:0 0 10px">I read the finding and the toolbelt. 34 of the 52 tools on <span class="mono">a-intel.core.triage</span> were never called in 1,340 runs. '+
    'Narrowing the toolbelt is a change to the agent definition, so it is a pull request, not a database write. I opened one.</p>'+
-   '<div class="act-card" data-help="stella-drawer/action-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_context_pr</code></div>'+
+   '<div class="act-card" data-help="stella-drawer/action-card"><div class="t"><span class="b b-allowed"><span class="d"></span>action</span><code>open_steering_pr</code></div>'+
    '<dl class="kv" style="font-size:11.5px"><dt>Pull request</dt><dd><a href="#">a-intel/platform#521</a></dd>'+
    '<dt>File</dt><dd class="mono" style="font-size:11px">.oxagen/agents/triage.toml</dd>'+
    '<dt>Change</dt><dd>tools narrowed 52 → 18</dd>'+
@@ -11177,7 +11209,7 @@ function asstSheet(){
    Oxagen, never to the tenant: it is not one of your runs and it never appears in Work.
 
    Namespaces here: ced* the code editor, wz* the wizard, mcp* the server catalogue, skr* the skill
-   registry, crec* the context-record page. */
+   registry, crec* the steering-record page. */
 
 var MCP_CATALOG=FIXTURES.MCP_CATALOG;
 var SKILL_REGISTRY=FIXTURES.SKILL_REGISTRY;
@@ -13001,7 +13033,7 @@ function wzRecord(){
     var others=RECORDS.filter(function(x){return x.status==="published";}).length;
     return {t:"What the checks will assert", s:"Six checks on the pull request",
      b:wzChecks([
-       ["Schema","<span class=\"mono\">context-record/v0.1</span> valid \u00b7 1 file, 1 record, 1 lineage"],
+       ["Schema","<span class=\"mono\">steering-record/v0.1</span> valid \u00b7 1 file, 1 record, 1 lineage"],
        ["Lineage uniqueness",(function(){var id=wzRecLineage();
          return RECORDS.some(function(r){return r.status==="published"&&r.id===id;})
           ?'<span style="color:var(--st-failed)"><b>'+h(id)+' is already published.</b></span> This check will fail and nothing will merge. Amend the published record instead of opening a second one under its id.'
@@ -13016,7 +13048,7 @@ function wzRecord(){
   var pr4=wzPrStep("Open the pull request",
     "Merging publishes it.",
     [["add",".oxagen/rules/"+wzRecLineage()+".toml","the record"]],
-    [["Schema","<span class=\"mono\">context-record/v0.1</span>"],["Lineage",h(wzRecLineage())+" is free"],
+    [["Schema","<span class=\"mono\">steering-record/v0.1</span>"],["Lineage",h(wzRecLineage())+" is free"],
      ["Hash","recomputed at merge"],["Secrets","statement, rationale and evidence"],
      ["Conflicts","against every published record"],["Effect",wzRecCe()?h(z.ce):"none \u00b7 this kind constrains nothing"]],
     "Open the pull request",
@@ -13123,7 +13155,7 @@ function crecSave(rec){
     title:"Propose a change to this record",
     lead:"",
     branch:"context/"+rec.id+".amend",
-    checks:[["Schema","<span class=\"mono\">context-record/v0.1</span> still valid after the edit"],
+    checks:[["Schema","<span class=\"mono\">steering-record/v0.1</span> still valid after the edit"],
       ["Lineage","<span class=\"mono\">"+h(rec.id)+"</span> keeps its lineage"],
       ["record_hash recomputation","recomputed over the new bytes \u00b7 the old hash stays on every run that carried it"],
       ["Secret and PII scan","the new statement is scanned"],
@@ -13165,7 +13197,7 @@ function crecPr(rec){
    opened:"just now",state:"checks_running",
    trigger:"An operator archived "+rec.id+".",
    files:[["mod",".oxagen/rules/"+rec.id+".toml",'status = "archived"']],
-   checks:[["schema","pass","context-record/v0.1 still valid with the new status."],
+   checks:[["schema","pass","steering-record/v0.1 still valid with the new status."],
     ["lineage","pass",h(rec.id)+" keeps its lineage. An archived record is the same record, out of force."],
     ["dependent_records","pass","No published record in "+h(w.name)+" cites this one as the reason it narrows."],
     ["bundle_recompilation","pass","The bundle loses "+(crecBundleRow(rec)?crecBundleRow(rec).tok+" tokens":"nothing, because it was not compiled")+" at v"+(STEER_BUNDLE.v+1)+"."]]};
@@ -13227,7 +13259,7 @@ function pRecord(r){
       '<dt>File</dt><dd><span class="mono">.oxagen/rules/'+h(rec.id)+'.toml</span> on '+h(w.main)+'</dd>'+
       '<dt>Published by</dt><dd><span class="mono">'+h(rec.commit||"\u2014")+'</span> on '+h(rec.pub||"\u2014")+'</dd>'+
       '<dt>Effect</dt><dd>'+h(rec.effect||"never rendered")+'</dd>'+
-      '<dt>Schema</dt><dd><span class="mono">context-record/v0.1</span></dd>'+
+      '<dt>Schema</dt><dd><span class="mono">steering-record/v0.1</span></dd>'+
       '</dl></div></div>'+
     '</div>'+
     '<div>'+crecPanel(rec)+srcFramesPanel(srcRowOf("record",rec.id,w.slug))+srcReachPanel(srcRowOf("record",rec.id,w.slug))+
@@ -14022,7 +14054,7 @@ document.addEventListener("click",function(e){
     "aws-billing":["get_forecast","list_budgets","update_budget","get_reservation_coverage","list_savings_plans","get_anomalies","get_rightsizing","tag_resource"],
     slack:["get_channel","list_users","get_user","send_dm","update_message","delete_message","add_reaction","pin_message","create_channel","archive_channel","set_topic","search_messages"],
     snowflake:["list_tables","describe_table","list_schemas","get_query_history","cancel_query","create_stage"],
-    oxagen:["expand_entity","recall_context","get_run","list_runs","read_frame","list_frames","propose_record","open_context_pr","get_agent","list_agents","get_policy","list_receipts","get_receipt","export_bundle","verify_bundle","get_budget","set_preferences","list_mandates","draw_mandate","search_tools","describe_tool","request_approval","check_approval","score_candidates","compose_context","summarize_run","reflect_run","promote_finding","list_findings","get_spend","list_switches","read_switch","enqueue_export"],
+    oxagen:["expand_entity","recall_context","get_run","list_runs","read_frame","list_frames","propose_record","open_steering_pr","get_agent","list_agents","get_policy","list_receipts","get_receipt","export_bundle","verify_bundle","get_budget","set_preferences","list_mandates","draw_mandate","search_tools","describe_tool","request_approval","check_approval","score_candidates","compose_context","summarize_run","reflect_run","promote_finding","list_findings","get_spend","list_switches","read_switch","enqueue_export"],
     harness:["Read","Edit","Write","Glob","Grep","WebFetch","WebSearch","Agent","NotebookEdit","apply_patch","shell","update_plan","view_image","exec","file_write","file_read","git_commit","git_diff"],
     jira:["create_issue","get_issue","search_issues","update_issue","transition_issue","add_comment","list_boards","get_sprint","list_sprints","assign_issue","link_issues","add_attachment","list_projects","get_project","create_version","list_components","add_watcher","get_changelog","list_filters","run_filter","bulk_update","delete_issue","create_epic","list_epics","get_worklog","add_worklog"],
     datadog:["list_monitors","get_monitor","mute_monitor","unmute_monitor","create_monitor","query_metrics","search_logs","list_incidents","get_incident","create_incident","list_dashboards","get_dashboard","list_slos","get_slo","list_services","get_service","post_event"],
@@ -14045,16 +14077,16 @@ document.addEventListener("click",function(e){
     hubspot:{cred:"oauth → token exchange",eg:"third_party"}, notion:{cred:"oauth → token exchange",eg:"third_party"}, zendesk:{cred:"oauth → token exchange",eg:"third_party"}
   };
   var NEW_SRV=[
-    {id:"jira",name:"jira",system:"Jira",desc:"Issues and service desk tickets in Atlassian Cloud.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.atlassian.com/a-intel",health:"ok",imported:"2026-08-21 10:02 UTC",conn:"Atlassian OAuth · a-intel",schemas:"declared"},
+    {id:"jira",name:"jira",system:"Jira",desc:"Issues and service desk tickets in Atlassian Cloud.",icon:"https://www.atlassian.com/favicon.ico",website:"https://www.atlassian.com/platform/remote-mcp-server",docs:"https://support.atlassian.com/rovo/docs/getting-started-with-the-atlassian-remote-mcp-server/",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.atlassian.com/a-intel",health:"ok",imported:"2026-08-21 10:02 UTC",conn:"Atlassian OAuth · a-intel",schemas:"declared"},
     {id:"datadog",name:"datadog",system:"Datadog",desc:"Monitors, dashboards, and logs for production.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.datadoghq.com",health:"ok",imported:"2026-09-01 07:40 UTC",conn:"Datadog app key · infra",schemas:"declared"},
     {id:"pagerduty",name:"pagerduty",system:"PagerDuty",desc:"On-call schedules and incidents.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.pagerduty.com",health:"ok",imported:"2026-08-11 12:18 UTC",conn:"PagerDuty OAuth · a-intel",schemas:"declared"},
     {id:"salesforce",name:"salesforce",system:"Salesforce",desc:"Accounts, contacts, and opportunities for the growth team.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.salesforce.com/a-intel",health:"ok",imported:"2026-08-30 15:55 UTC",conn:"Salesforce connected app · growth",schemas:"declared"},
     {id:"gdrive",name:"gdrive",system:"Google Drive",desc:"Shared documents and folders in the a-intel workspace.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.google.com/drive",health:"ok",imported:"2026-07-19 09:12 UTC",conn:"Google Workspace OAuth · a-intel",schemas:"declared"},
     {id:"orders-db",name:"orders-db",system:"Orders database",desc:"Read replica of the production orders database.",kind:"HTTP",transport:"http",wire:"https",url:"https://tools.a-intel.internal/pg",health:"ok",imported:"2026-06-02 08:30 UTC",conn:"IAM auth · aintel_prod read replica",schemas:"declared by admin"},
     {id:"kubernetes",name:"kubernetes",system:"Kubernetes",desc:"The prod-east cluster, reached by a local process.",kind:"MCP",transport:"mcp",wire:"stdio",url:"oxagen-run k8s-mcp@2.3.1",health:"degraded",imported:"2026-09-08 18:05 UTC",conn:"short-lived kubeconfig · prod-east",schemas:"2 observed, awaiting approval"},
-    {id:"sentry",name:"sentry",system:"Sentry",desc:"Errors and releases for the mobile apps.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.sentry.dev",health:"ok",imported:"2026-08-26 11:44 UTC",conn:"Sentry org token · mobile",schemas:"declared"},
-    {id:"hubspot",name:"hubspot",system:"HubSpot",desc:"Contacts and email sequences for marketing.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.hubspot.com",health:"ok",imported:"2026-09-03 13:20 UTC",conn:"HubSpot OAuth · growth",schemas:"declared"},
-    {id:"notion",name:"notion",system:"Notion",desc:"Team wiki pages and databases.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.notion.com",health:"ok",imported:"2026-07-28 16:01 UTC",conn:"Notion OAuth · a-intel",schemas:"declared"},
+    {id:"sentry",name:"sentry",system:"Sentry",desc:"Errors and releases for the mobile apps.",icon:"https://sentry.io/favicon.ico",website:"https://sentry.io",docs:"https://docs.sentry.io/product/sentry-mcp/",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.sentry.dev",health:"ok",imported:"2026-08-26 11:44 UTC",conn:"Sentry org token · mobile",schemas:"declared"},
+    {id:"hubspot",name:"hubspot",system:"HubSpot",desc:"Contacts and email sequences for marketing.",icon:"https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png",website:"https://www.hubspot.com",docs:"https://developers.hubspot.com/mcp",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.hubspot.com",health:"ok",imported:"2026-09-03 13:20 UTC",conn:"HubSpot OAuth · growth",schemas:"declared"},
+    {id:"notion",name:"notion",system:"Notion",desc:"Team wiki pages and databases.",icon:"https://www.notion.so/images/favicon.ico",website:"https://www.notion.so",docs:"https://developers.notion.com/docs/mcp",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.notion.com",health:"ok",imported:"2026-07-28 16:01 UTC",conn:"Notion OAuth · a-intel",schemas:"declared"},
     {id:"zendesk",name:"zendesk",system:"Zendesk",desc:"Support tickets and customer replies.",kind:"MCP",transport:"mcp",wire:"streamable-http",url:"https://mcp.zendesk.com/a-intel",health:"ok",imported:"2026-08-15 09:48 UTC",conn:"Zendesk OAuth · support",schemas:"declared"}
   ];
   NEW_SRV.forEach(function(s){s.tools=0;s.versions=0;SERVERS.push(s);});
@@ -14251,7 +14283,7 @@ document.addEventListener("click",function(e){
   var EV=[["approval.requested",10,"agent"],["approval.resolved",9,"human"],["run.sealed",26,"agent"],["run.halted",4,"agent"],["tool_call.denied",6,"agent"],
     ["budget.breached",2,"agent"],["agent.registered",3,"human"],["agent.retired",1,"human"],["role.assigned",3,"human"],["role.revoked",1,"human"],["api_key.created",1,"human"],["api_key.revoked",1,"human"],
     ["invitation.sent",2,"human"],["invitation.accepted",2,"human"],["connection.reviewed",2,"human"],["credential.granted",8,"service"],["export.created",2,"human"],["export.downloaded",1,"human"],
-    ["steering_published",3,"human"],["context_pr.opened",3,"service"],["kill_switch.flipped",1,"human"],["kill_switch.cleared",1,"human"],
+    ["steering_published",3,"human"],["steering_pr.opened",3,"service"],["kill_switch.flipped",1,"human"],["kill_switch.cleared",1,"human"],
     ["schema.proposed",2,"service"],["schema.approved",1,"human"],["session.signed_in",6,"human"],["preferences.set",2,"human"]];
   var evW=EV.map(function(e){return [e,e[1]];});
   var humans=Object.keys(PEOPLE).map(function(k){return PEOPLE[k].name;}), svcs=["svc_terraform","svc_ci","svc_finops_export","svc_archive","verifier","gateway","policy engine"];
@@ -14279,7 +14311,7 @@ document.addEventListener("click",function(e){
       case "export.created": return "exp_01K5R"+ulid(4)+" · "+pick(["receipt export","evidence bundle"])+" · "+pick(allWs);
       case "export.downloaded": return "exp_01K5R"+ulid(4)+" · signature verified";
       case "steering_published": return pick(RECORDS).id+" · "+pick(REPOS).n+"#"+ri(300,1900)+" merged";
-      case "context_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+plural(ri(3,40),"run")+" in support";
+      case "steering_pr.opened": return pick(REPOS).n+"#"+ri(300,1900)+" · proposed by the promoter · "+plural(ri(3,40),"run")+" in support";
       case "kill_switch.flipped": return pick(["tool version "+t.n+"@"+t.v,"agent "+r.agent,"provider kubernetes"])+" · "+pick(["schema regression","runaway retries","operator request"]);
       case "kill_switch.cleared": return "provider kubernetes · schema approved";
       case "schema.proposed": return t.n+"@"+t.v+" · output schema observed, not declared";
@@ -14361,7 +14393,7 @@ document.addEventListener("click",function(e){
     {kind:"run.sealed",tone:"allowed",unread:false,t:"15:30",title:"Run sealed · "+genRuns[3].id,body:genRuns[3].task+" sealed: "+plural(genRuns[3].frames,"frame")+", "+usd(genRuns[3].cost)+" "+keyText(genRuns[3].basis).toLowerCase()+"."},
     {kind:"budget.breached",tone:"failed",unread:false,t:"14:52",title:"Hard budget reached · "+fin[0].key,body:usd(fin[0].budget)+" per run reached at turn 5. The run was paused at the next checkpoint."},
     {kind:"repository.indexed",tone:"allowed",unread:false,t:"14:20",title:"Code graph current · a-intel/data-platform",body:"Push "+hex(7)+" to main indexed in 58 s. 41 files re-parsed, 190 symbols versioned."},
-    {kind:"context_pr.opened",tone:"gold",unread:false,t:"11:48",title:"Pull request opened · a-intel/support-console#188",body:"The promoter proposed a rule on lineage ctx.support.reply-in-customers-language, supported by 212 tickets."});
+    {kind:"steering_pr.opened",tone:"gold",unread:false,t:"11:48",title:"Pull request opened · a-intel/support-console#188",body:"The promoter proposed a rule on lineage ctx.support.reply-in-customers-language, supported by 212 tickets."});
 
   /* ---------- spend, billing, the numbers every page quotes ---------- */
   var spendTot=0,runsTot=0,ratioW=0; AGENTS.forEach(function(a){spendTot+=num$(a.spend30);runsTot+=a.runs30;ratioW+=num$(a.spend30)*(a.ratio||0);});

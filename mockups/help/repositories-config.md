@@ -71,7 +71,7 @@ The mode legend moved here from the panel.
 - `team`: a code-owner review is required. This is what a missing file means.
 - `regulated`: a named approver from a role must approve, and the promotion ledger is hash-chained.
 
-The shipped gate differs from that legend, and the build states the gate. Under `solo` any workspace member merges, the author included. Under `team` an org Owner or Admin, or a workspace Owner, other than the author merges. Under `regulated` an org Owner or Admin other than the author merges, recorded as the accountable approver. No code-owner review is checked, and every merge appends to the hash-chained ledger in every mode (`packages/handlers/src/context.steering.policy.ts:47-78`, `context.pr.merge.ts:11-14`).
+The shipped gate differs from that legend, and the build states the gate. Under `solo` any workspace member merges, the author included. Under `team` an org Owner or Admin, or a workspace Owner, other than the author merges. Under `regulated` an org Owner or Admin other than the author merges, recorded as the accountable approver. No code-owner review is checked, and every merge appends to the hash-chained ledger in every mode (`packages/handlers/src/context.steering.policy.ts:47-78`, `steering.pr.merge.ts:11-14`).
 
 The moved note also said "You change the mode with a pull request. There is no setting for it." The second sentence is wrong. `set_governance_mode` ships from Organization, Workspaces, Edit workspace. Under `solo` it commits the file. Under `team` or `regulated` it opens a pull request. An owner or admin may apply it at once, which emits a `steering.governance_overridden` security event.
 

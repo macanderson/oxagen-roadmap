@@ -43,7 +43,7 @@
   <div class="dx-meta">
     <span><b>Root</b> <code>.ci</code></span>
     <span><b>CSS</b> <code>engine.css</code> lines 2135 to 2145</span>
-    <span><b>Used on</b> Repositories (Changes table), Steering (Context PRs)</span>
+    <span><b>Used on</b> Repositories (Changes table), Steering (Steering PRs)</span>
   </div>
 </div>
 
@@ -106,7 +106,7 @@
   <h2 id="usage">Usage</h2>
   
   <div class="dx-g2">
-    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A pull request or a proposed change with a set of automated checks: the Repositories Changes table, a Context PR.</li><li>Any place that needs one glance at whether checks are done, passing, or blocked, without opening the list.</li></ul></div>
+    <div class="dx-card"><span class="dx-k">Use it for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A pull request or a proposed change with a set of automated checks: the Repositories Changes table, a Steering PR.</li><li>Any place that needs one glance at whether checks are done, passing, or blocked, without opening the list.</li></ul></div>
     <div class="dx-card"><span class="dx-k">Use something else for</span><ul style="margin:0;padding-left:18px;font-size:13px"><li>A single pass or fail with no in-between: use a <a href="badge.html">badge</a>.</li><li>The checks themselves, once opened: list each one with its own name and result in a table.</li></ul></div>
   </div>
   <div class="dx-dd">
@@ -172,10 +172,10 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 2135 to 2145</td><td>The rules that draw it</td></tr>
-      <tr><td><code>ciLight(c, label)</code> at <code>engine.js:6973</code></td><td>Picks the state from a counts object and writes the dot, title, and count. An optional label appends a <code>.dim</code> caption.</td></tr>
-      <tr><td><code>ciCounts(list)</code> at <code>engine.js:6963</code></td><td>Tallies an array of per-check states into <code>{pass, fail, running, queued, total, done}</code>.</td></tr>
-      <tr><td><code>ciFromSt(def, st)</code> at <code>engine.js:6968</code></td><td>Builds a plausible per-check state list from a change's overall status, for fixture data with no real per-check log.</td></tr>
-      <tr><td><code>oxprCiLight(p)</code> at <code>engine.js:6979</code></td><td>The Repositories Changes table's own wrapper: counts a proposal's checks and calls <code>ciLight()</code>.</td></tr>
+      <tr><td><code>ciLight(c, label)</code> at <code>engine.js:7005</code></td><td>Picks the state from a counts object and writes the dot, title, and count. An optional label appends a <code>.dim</code> caption.</td></tr>
+      <tr><td><code>ciCounts(list)</code> at <code>engine.js:6995</code></td><td>Tallies an array of per-check states into <code>{pass, fail, running, queued, total, done}</code>.</td></tr>
+      <tr><td><code>ciFromSt(def, st)</code> at <code>engine.js:7000</code></td><td>Builds a plausible per-check state list from a change's overall status, for fixture data with no real per-check log.</td></tr>
+      <tr><td><code>oxprCiLight(p)</code> at <code>engine.js:7011</code></td><td>The Repositories Changes table's own wrapper: counts a proposal's checks and calls <code>ciLight()</code>.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -201,9 +201,9 @@
 ## Inputs
 
 1. mockups/components/ci-light.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 2135 to 2145. The mockup renders it with ciLight(c, label) (engine.js:6973), ciCounts(list) (engine.js:6963), ciFromSt(def, st) (engine.js:6968), oxprCiLight(p) (engine.js:6979).
+2. The design source: mockups/src/engine.css lines 2135 to 2145. The mockup renders it with ciLight(c, label) (engine.js:7005), ciCounts(list) (engine.js:6995), ciFromSt(def, st) (engine.js:7000), oxprCiLight(p) (engine.js:7011).
 3. The build's implementation: find it by its root selector (.ci) or its name, and list every route that renders it.
-4. Where to see it in the design: Repositories (Changes table), Steering (Context PRs). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
+4. Where to see it in the design: Repositories (Changes table), Steering (Steering PRs). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 
 ## Procedure
 

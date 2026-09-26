@@ -12,10 +12,10 @@ The requirements served at localhost:3310 come from `oxagen-roadmap/mockups/page
 | Run pending and resolved approval history | Run Approvals | The mock has inconsistent approval placement. Retain the full tab until reviewed. |
 | Run artifact and file evidence | Run side column | Layout only; absent evidence remains distinct from no work. |
 | Generated name and summary, workspace enrichment switch, harness identity | Run header and summary | Recent explicit user additions remain in place. |
-| Published context records and record-kind filter | Steering Library Records | The All shelf can expose current records and observed skills, but cannot claim an exhaustive unified registry. |
+| Published steering records and record-kind filter | Steering Library Records | The All shelf can expose current records and observed skills, but cannot claim an exhaustive unified registry. |
 | Observed skill inventory, configuration search, configuration versions | Steering Library Skills | Current inventory reports harness observations, not the mock's authored skill and repository-sync catalog. |
 | Freshness auto-sync and stale-prompt refusal | Steering Freshness | Retain both switches and their recorded repository/version metadata. |
-| Candidate proposals, Context PR checks, dismiss/open/merge actions | Steering Proposals, with Candidates and Context PRs sections | Retain all existing state transitions. |
+| Candidate proposals, Steering PR checks, dismiss/open/merge actions | Steering Proposals, with Candidates and Steering PRs sections | Retain all existing state transitions. |
 | Steering delivery counts per run and records never included (#3748, added on main after this inventory) | Steering Delivery | Kept as its own section at `/steering/deliveries`. The legacy `?tab=deliveries` link redirects there. |
 | Full record statement, source editor, kind panel, lineage, related records | Record | Already substantially matches the reference. Keep the new label separate from statement content. |
 

@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/core-platform/steering/proposals/prs`. Old route: `/steering/prs`, resolved in place to `/steering/proposals/prs` (`docs/fleet-operations-routes.md`, Steering). The mockup rewrites `#/:org/:ws/steering/prs` in place |
 | Scope | workspace |
-| Spec | `docs/fleet-operations-wedge.md`: D7 (Steering record), the vocabulary rows Steering record and Proposal, and the Steering section Shipped today (proposals and their pull requests ship through `list_proposals`, `get_context_pr`, `open_context_pr` and `merge_context_pr`). `docs/fleet-operations-ia.md` (Steering, Pull requests: "Open Steering record pull requests with their six checks", primary action "Merge, when every check passed"). ADR-061 in `macanderson/oxagen` |
+| Spec | `docs/fleet-operations-wedge.md`: D7 (Steering record), the vocabulary rows Steering record and Proposal, and the Steering section Shipped today (proposals and their pull requests ship through `list_proposals`, `get_steering_pr`, `open_steering_pr` and `merge_steering_pr`). `docs/fleet-operations-ia.md` (Steering, Pull requests: "Open Steering record pull requests with their six checks", primary action "Merge, when every check passed"). ADR-061 in `macanderson/oxagen` |
 | Design | `mockups/src/wedge.js`: `stgProposalsTab`, inside `pSteering`; `mockups/src/engine.js`: `ctxprTab`, `prTable`, `recprDetail`, `recprRecs`, `recprChecks`, `recprFile`, `recprFileText`, `recprBody`, `wzImpPublish`, `prLabel`, `prRun`, `prRecheck`, `ctxprMerge`, `recprMerge`, `recprDiscard`, `ciLight`, `ciFromSt`, `DLG_EXT.closepr`, `prClose`. Built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded |
 | Storybook | `Oxagen / Steering / Pull requests`: Loaded, and Loaded · mobile |
@@ -62,7 +62,7 @@ Left column:
 
 ```toml
 # .oxagen/rules/ctx.release.no-reread-changelog.toml
-schema       = "context-record/v0.1"
+schema       = "steering-record/v0.1"
 lineage_id   = "ctx.release.no-reread-changelog"
 kind         = "rule"
 sharing_scope= "workspace"
@@ -89,14 +89,14 @@ Right column:
 
 | Check | Result when it passes |
 |---|---|
-| Schema | "context-record/v0.1 valid · 1 file, 1 record, 1 lineage" |
+| Schema | "steering-record/v0.1 valid · 1 file, 1 record, 1 lineage" |
 | Lineage uniqueness | "no published record holds ctx.release.no-reread-changelog; this proposal is its only holder" |
 | record_hash recomputation | "recomputed over the canonical bytes · sha256:9a41c0e7bd238f45 matches the file" |
 | Secret and PII scan | "statement, rationale and evidence scanned · 0 findings" |
 | Conflict against active records | "59 published records checked · no require on CHANGELOG.md reads" |
 | Constraint is require or forbid | "constraint forbid · grants nothing" |
 
-- An import pull request with several records runs the same six, worded for the set: Schema "context-record/v0.1 valid · 9 files, 9 records, 9 lineages", Lineage uniqueness "no published record or open pull request holds any of these 9 lineages", record_hash recomputation "recomputed over the canonical bytes of 9 files · each matches its record_hash", and the constraint check "<c> of <n> carry a constraint, each require or forbid · grants nothing", or "no constraining kind · the field is absent, which is also a pass".
+- An import pull request with several records runs the same six, worded for the set: Schema "steering-record/v0.1 valid · 9 files, 9 records, 9 lineages", Lineage uniqueness "no published record or open pull request holds any of these 9 lineages", record_hash recomputation "recomputed over the canonical bytes of 9 files · each matches its record_hash", and the constraint check "<c> of <n> carry a constraint, each require or forbid · grants nothing", or "no constraining kind · the field is absent, which is also a pass".
 - The merge bar, under the checks:
   - checks running: "Checks are running. Merge is blocked until all 6 report.";
   - all passed: "6 checks passed. Governance mode team.";
@@ -128,19 +128,19 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 |---|---|---|---|---|
 | The rows | `CTXPR`, `RECPRS`, `PROPOSALS[].pr` | The proposals with a pull request | `list_proposals` `pr` (number, url, provider, repository, branch), `status` and `checks` (`packages/oxagen/src/contracts/context.proposal.list.ts:12`, `context.steering.shared.ts:207-246`) | ✅ |
 | Opened by | `prTable()` | Who opened the pull request | None. `source` names who raised the proposal; nothing records who opened its pull request | 🟡 |
-| The checks light and state badge | `ciLight()`, `ciFromSt()`, `prLabel()` | The six checks' states | `get_context_pr` `checks`, each with name, status (pending, running, passed, failed), summary, details URL and times (`context.pr.get.ts:9`, `context.steering.shared.ts:107-133`) | ✅ |
-| Governance badge and the reviewer line | `wsGov()` | The mode read off `governance.toml` | `get_context_pr` `governanceMode` and `onMerge.review` (`context.pr.open.ts:33`, `:68-80`) | ✅ |
+| The checks light and state badge | `ciLight()`, `ciFromSt()`, `prLabel()` | The six checks' states | `get_steering_pr` `checks`, each with name, status (pending, running, passed, failed), summary, details URL and times (`steering.pr.get.ts:9`, `context.steering.shared.ts:107-133`) | ✅ |
+| Governance badge and the reviewer line | `wsGov()` | The mode read off `governance.toml` | `get_steering_pr` `governanceMode` and `onMerge.review` (`steering.pr.open.ts:33`, `:68-80`) | ✅ |
 | The code owner named in the merge bar | the signed-in person | The repository's code owners | None (#3882) | ❌ |
-| Branch, base and head | `CTXPR.branch`, `base`, `head` | The pull request | `get_context_pr` `pr` `branch`, `baseRef`, `headSha` and `path` (`context.pr.open.ts:34-50`) | ✅ |
-| The record file | `recprFileText()`, the TOML in `ctxprTab()` | The file on the branch | `get_context_pr` `record` carries every field the file declares and its hash (`context.pr.open.ts:52-63`); the file's bytes are not read from GitHub (#3882) | 🟡 |
-| Pull request body | `recprBody()`, the body in `ctxprTab()` | The body as opened | `get_context_pr` `body` (`context.pr.open.ts:65`) | ✅ |
+| Branch, base and head | `CTXPR.branch`, `base`, `head` | The pull request | `get_steering_pr` `pr` `branch`, `baseRef`, `headSha` and `path` (`steering.pr.open.ts:34-50`) | ✅ |
+| The record file | `recprFileText()`, the TOML in `ctxprTab()` | The file on the branch | `get_steering_pr` `record` carries every field the file declares and its hash (`steering.pr.open.ts:52-63`); the file's bytes are not read from GitHub (#3882) | 🟡 |
+| Pull request body | `recprBody()`, the body in `ctxprTab()` | The body as opened | `get_steering_pr` `body` (`steering.pr.open.ts:65`) | ✅ |
 | The supporting-run table inside the body | `PRP_SUPPORT` | Each cited run's outcome | None (#3881) | ❌ |
-| Merge pull request | `ctxprMerge()`, `recprMerge()`, `prRecheck()` | Refused until every check passed, and until the caller is a reviewer the mode allows | `merge_context_pr` (`context.pr.merge.ts:14`): under `team` an Owner or Admin other than the author merges, under `regulated` an organization Owner or Admin other than the author, under `solo` any member | ✅ |
-| Merge effects: publish, re-index, version, audit | the five rows | What merge will do | `get_context_pr` `onMerge` (`publishes`, `bundleVersion`, `review`), and `merge_context_pr` emits `steering.published` | ✅ |
+| Merge pull request | `ctxprMerge()`, `recprMerge()`, `prRecheck()` | Refused until every check passed, and until the caller is a reviewer the mode allows | `merge_steering_pr` (`steering.pr.merge.ts:14`): under `team` an Owner or Admin other than the author merges, under `regulated` an organization Owner or Admin other than the author, under `solo` any member | ✅ |
+| Merge effects: publish, re-index, version, audit | the five rows | What merge will do | `get_steering_pr` `onMerge` (`publishes`, `bundleVersion`, `review`), and `merge_steering_pr` emits `steering.published` | ✅ |
 | Merge effects: steering tokens a turn | `stgBundle().tok` | The bundle's tokens before and after | None | ❌ |
-| promotion_event | `CTXPR.promo`, `evt`, `hash`, `S.ctxpr.mergedAt` | The ledger's promotion event | `get_context_pr` `merged` (commit, time, merged by, promotion event id, record id; `context.pr.open.ts:81-90`) and `merge_context_pr`'s `promotionEvent` (id, sequence, chain digest) and `bundleVersion` before and after | ✅ |
-| promotion_event: tokens per turn, and the ledger row | `ctxprTab()` | Token deltas; which ledger was written | Token deltas: none. The ledger: `merge_context_pr` appends to the hash-chained promotions ledger on every merge (`context.pr.merge.ts:1-9`), so "not written · regulated mode only" is not what ships | 🟡 |
-| Import pull requests | `RECPRS[]` with `src` and `records`, written by `wzImpPublish()` | A pull request carrying a record file for each record accepted out of one Markdown file | None. `open_context_pr` opens a pull request for one proposal with "the single record file under .oxagen/rules/" (`packages/oxagen/src/contracts/context.pr.open.ts:99`) | ❌ |
+| promotion_event | `CTXPR.promo`, `evt`, `hash`, `S.ctxpr.mergedAt` | The ledger's promotion event | `get_steering_pr` `merged` (commit, time, merged by, promotion event id, record id; `steering.pr.open.ts:81-90`) and `merge_steering_pr`'s `promotionEvent` (id, sequence, chain digest) and `bundleVersion` before and after | ✅ |
+| promotion_event: tokens per turn, and the ledger row | `ctxprTab()` | Token deltas; which ledger was written | Token deltas: none. The ledger: `merge_steering_pr` appends to the hash-chained promotions ledger on every merge (`steering.pr.merge.ts:1-9`), so "not written · regulated mode only" is not what ships | 🟡 |
+| Import pull requests | `RECPRS[]` with `src` and `records`, written by `wzImpPublish()` | A pull request carrying a record file for each record accepted out of one Markdown file | None. `open_steering_pr` opens a pull request for one proposal with "the single record file under .oxagen/rules/" (`packages/oxagen/src/contracts/steering.pr.open.ts:99`) | ❌ |
 | Close pull request | `DLG_EXT.closepr`, `prClose()`, `recprDiscard()` | Close without merging | `dismiss_proposal` rejects the proposal with a reason, closes its pull request and deletes its branch (`context.proposal.dismiss.ts:1-3`, `:10`). The comment Oxagen posts is not written (#3882) | 🟡 |
 
 ## Future-only fields
@@ -154,7 +154,7 @@ The mockup marks no field on this view with `data-future`, and the catalog gives
 - Merge re-runs every check that has a predicate. A check that passed and no longer does blocks the merge: "A check that passed no longer does. <pull request> is blocked and nothing was published."
 - Merging publishes the record, writes the promotion event, re-indexes from the merged commit, bumps and re-signs the bundle, and audits `steering_published`. It reports "Merged a-intel/platform#519. promotion_event written, bundle v41 → v42 signed, steering_published audited."
 - While a pull request is open, its record steers nothing: it is not in Sources, not in the compiled bundle and not in the audit log, and the bundle version has not moved.
-- Merge follows the governance mode. Under `team` the author of a record is never its approver, so a person's own pull request waits for another Owner or Admin. The mockup lets Marcus Bell merge the pull request he opened and records him as author and approver; a build refuses that merge, as `merge_context_pr` does.
+- Merge follows the governance mode. Under `team` the author of a record is never its approver, so a person's own pull request waits for another Owner or Admin. The mockup lets Marcus Bell merge the pull request he opened and records him as author and approver; a build refuses that merge, as `merge_steering_pr` does.
 - Closing an unmerged pull request publishes nothing and says so. The row then reads "closed", the Pull requests count and the Proposals tab count fall by one, and the detail offers neither Close nor Merge. The detail's bar reads "Closed without merging. Nothing was published." A merged pull request cannot be closed: "It is merged. Taking a published record back out of force is its own pull request."
 - Several pull requests a person opened may be open at once, each with its own state, file and checks.
 
@@ -168,9 +168,9 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 
 ## Permissions
 
-- Read: the Steering read, `steering.read on core-platform` in the mockup's denied panel. `list_proposals` and `get_context_pr` allow an organization Owner or Admin and a workspace Owner, Member or Viewer.
+- Read: the Steering read, `steering.read on core-platform` in the mockup's denied panel. `list_proposals` and `get_steering_pr` allow an organization Owner or Admin and a workspace Owner, Member or Viewer.
 - Writes, each a governed action recorded in Audit:
-  - Merge pull request: `merge_context_pr`, an organization Owner or Admin, or a workspace Owner or Member, and the caller must be a reviewer the governance mode allows. An agent that calls it waits for approval.
+  - Merge pull request: `merge_steering_pr`, an organization Owner or Admin, or a workspace Owner or Member, and the caller must be a reviewer the governance mode allows. An agent that calls it waits for approval.
   - Close pull request: `dismiss_proposal`, an organization Owner or Admin, or a workspace Owner.
 
 ## Backend gaps this page depends on
@@ -189,7 +189,7 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 - A Steering Source and a SteeringFrame are never shown as each other, and a frame (a recorded event) and a SteeringFrame (a resolved input) never share a name on screen.
 - Every enforcement claim states the tier. "Enforced" only for calls routed through Oxagen.
 - Headers are rollups of the rows beneath them: the Pull requests count is the open rows, and the checks light is the checks listed.
-- The vocabulary holds: Steering record and pull request. No "context record" and no "Context PR" in the view's copy.
+- The vocabulary holds: Steering record and pull request. No older name for either in the view's copy.
 - Plain nouns. A heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. The mockup's heading "Pull request · a-intel/platform#519" and the branch line under it carry mid-dots; those are design defects, not patterns to copy.
 - Exactly one gold action per screen: Merge pull request once every check passed, Open the record after a person's merge, or See them in Records after an import with several records merges. While checks run, the view has no gold.
 - A future-only field renders as not recorded in a build until its contract ships.

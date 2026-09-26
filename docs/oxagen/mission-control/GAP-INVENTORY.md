@@ -127,7 +127,7 @@ Feature: `apps/app/src/features/steering/`. Tabs: `records` \| `proposals` \| `p
 |---|---|---|
 | Records | **Built** | `list_records` |
 | Proposals | **Built** | dismiss |
-| Context PRs | **Built** | open / merge |
+| Steering PRs | **Built** | open / merge |
 | Skills tab | **Missing** | Phase 2 hub |
 | Memory tab | **Missing** | Phase 2 |
 | Ontology tab (notes, not the engine) | **Missing** | Phase 2 |

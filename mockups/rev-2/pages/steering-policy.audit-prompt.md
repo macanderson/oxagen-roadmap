@@ -21,7 +21,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 
 1. **Route and shell.** The build serves the route. Steering is lit in the sidebar. There is no Skills nav entry. The breadcrumb ends on Steering. The top bar has the Approvals button left of the avatar with the organization-wide waiting count; it opens the drawer `#apdrawer`, a selected row shows the approval card with Approve and Deny, and Escape closes it. No assistant button in the top bar.
 2. **Hub header, chip, and tabs.** Eyebrow is the workspace name, h1 “Steering”, the one-sentence subtext, the governance chip “Governance: <mode>”. Seven tabs in this order: Records, Skills, Memory, Ontology, Policy, Proposals, Preview, with counts. This tab is selected. Each tab is a URL segment, and reloading the URL lands on the same tab.
-3. **One gold action.** Write a context record in the hub header is the one gold action. The chip is not gold; no Edited on button is gold.
+3. **One gold action.** Write a steering record in the hub header is the one gold action. The chip is not gold; no Edited on button is gold.
 4. **Sections and tables.** The build has each item below with the same headings and every column named, in that order.
    - Text compilation and Gate compilation, side by side, with the copy the spec quotes.
    - Gate notices with its badge: Gate · Outcome · Applies to · Gate notice · Notice cost · Edited on; filters Outcome and Edited on; Rows; pager.

@@ -1,4 +1,4 @@
-# Audit prompt — Context record
+# Audit prompt — Steering record
 
 Copy everything below the line into a fresh agent session. Fill the two placeholders. The agent
 audits the built page against this design and reports a verdict per check; it does not fix anything
@@ -6,7 +6,7 @@ unless told to in a second turn.
 
 ---
 
-You are auditing the **Context record** page of Oxagen (`#/a-intel/core-platform/steering/records/<lineage>`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
+You are auditing the **Steering record** page of Oxagen (`#/a-intel/core-platform/steering/records/<lineage>`) for conformance to its design. Be exact and adversarial: the design is the spec, and “close enough” is a fail. Do not summarise what you see; compare it.
 
 ## Inputs
 
@@ -47,7 +47,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 Return a single markdown report:
 
 ```
-# Context record — audit {{DATE}}
+# Steering record — audit {{DATE}}
 Verdict: PASS | FAIL (n fails, m notes)
 
 | # | Check | Result | Evidence | Fix |

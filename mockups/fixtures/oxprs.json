@@ -96,7 +96,7 @@
    [
     "schema",
     "pass",
-    "context-record/v0.1; one [[record]]; every required member present."
+    "steering-record/v0.1; one [[record]]; every required member present."
    ],
    [
     "lineage_uniqueness",
@@ -293,7 +293,7 @@
    [
     "schema",
     "pass",
-    "context-record/v0.1."
+    "steering-record/v0.1."
    ],
    [
     "lineage_uniqueness",

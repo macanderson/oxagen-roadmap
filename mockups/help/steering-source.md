@@ -76,7 +76,7 @@ Git decides which version of a record is in force. A lineage is one record acros
 | Published by | `RECORDS[].commit`, `pub` | `get_record` provenance | shipped |
 | Effect: rendered and cited | `RECORDS[].effect` | `get_record` `effect` from `context_use` appends | shipped |
 | Effect: violated | `RECORDS[].effect` | A rollup of runs that went against the record (#3868) | future-only |
-| Schema | `context-record/v0.1` | The record schema version | shipped |
+| Schema | `steering-record/v0.1` | The record schema version | shipped |
 
 ### Logic
 1. Rows, in order: Lineage, File (with the main repository), Published by ("<commit> on <date>"), Effect and Schema.
@@ -310,7 +310,7 @@ Archiving is not a delete. The file stays, the lineage stays, and the record sto
 | Record | `stgRecord(id)` | `get_record` | shipped |
 | Grant | `RECORDS[].grant` | The enforcement grant | shipped |
 | Pending change | `S.recPending` | `list_proposals` by lineage | shipped |
-| Archive pull request | `crecPr()` into `OXPRS` | No archive pull request today. `promote_context_record` with `retire` appends to the ledger | partial |
+| Archive pull request | `crecPr()` into `OXPRS` | No archive pull request today. `promote_steering_record` with `retire` appends to the ledger | partial |
 
 ### Logic
 1. An archived record: "<lineage> is already archived" and "It is out of force.", with Close.
@@ -336,7 +336,7 @@ A published record changes the way it was published: a branch, a pull request, t
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
 | Diff | `diffLines(S.cedBase[key], cedText(key))` | The pull request's diff | shipped |
-| Record change | `crecSave()` | `revise_context_record` on `context/<lineage>` | shipped |
+| Record change | `crecSave()` | `revise_steering_record` on `context/<lineage>` | shipped |
 | Skill change | `skSrcSave()` | `propose_skill` | partial |
 | Checks | `S.srcPr.checks` | The record and skill checks | shipped |
 

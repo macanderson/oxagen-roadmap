@@ -36,7 +36,7 @@
     ],
     "propose_record": [
       {
-        "source": "promote_context_record",
+        "source": "promote_steering_record",
         "fields": [
           "policy_version"
         ]

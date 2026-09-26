@@ -139,7 +139,7 @@ export default {
   ],
   helpers: [
     ["frKv(rows)", "engine.js:3414", "Writes a `dl.kv` from an array of `[label, value]` pairs, dropping any falsy row. About 15 calls, mostly frame detail."],
-    ["kvl(pairs, cls)", "engine.js:9644", "The same shape again: a `dl.kv` from pairs, with an optional extra class. 7 calls, all in the account dialog."],
+    ["kvl(pairs, cls)", "engine.js:9676", "The same shape again: a `dl.kv` from pairs, with an optional extra class. 7 calls, all in the account dialog."],
   ],
   sourceNotes: [
     "87 more sites write `<dl class=\"kv\">` or `<div class=\"kv\">` inline as strings, across the approval card, the agent tabs, Organization, Billing, Steering, and every frame-detail reader that does not go through `frKv()`.",

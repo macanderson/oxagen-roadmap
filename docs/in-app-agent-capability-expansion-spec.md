@@ -147,7 +147,7 @@ backend subsystem that happens to implement it.
 | Query | Search, filter, join, aggregate, compare and retrieve source spans | Read/compute |
 | Analyze | Calculate metrics, detect trends, classify themes, map dependencies, identify risks and state assumptions | Read/compute |
 | Visualize | Render charts, graphs, timelines, matrices, tables and diagrams from a reproducible data spec | Read/compute |
-| Create | Produce artifacts, save drafts, create context records, create work plans and prepare exports | Draft/write |
+| Create | Produce artifacts, save drafts, create steering records, create work plans and prepare exports | Draft/write |
 | Change | Edit, link, assign, update status, create tasks, modify records or invoke connected-system actions | Mutating |
 | Govern | Request approval, explain required consent, record decisions, cite sources and expose audit state | Controlled write |
 | Distribute | Export, publish, share or deliver an artifact to approved destinations | High-impact write |
@@ -194,7 +194,7 @@ visible before execution.
 | Family | Candidate tools | Purpose |
 |---|---|---|
 | Plan | `draft_action_plan`, `preview_action_plan`, `diff_action_plan` | Stage one or more changes without applying them |
-| Mutate | `create_work_item`, `update_work_item`, `link_records`, `assign_work`, `update_context_record` | Apply approved changes through connected-system adapters |
+| Mutate | `create_work_item`, `update_work_item`, `link_records`, `assign_work`, `update_steering_record` | Apply approved changes through connected-system adapters |
 | Workflow | `start_workflow`, `pause_workflow`, `resume_workflow`, `request_human_decision` | Coordinate bounded multi-step work with explicit human stops |
 | Distribution | `export_to_destination`, `publish_artifact`, `share_artifact`, `schedule_delivery` | Send approved outputs to allowed repositories, drives, email, chat or presentation surfaces |
 | Audit | `get_action_receipt`, `get_artifact_receipt`, `revoke_action`, `list_pending_approvals` | Make effects, provenance and reversibility visible |
@@ -306,7 +306,7 @@ system.
 |---|---|---|
 | C0 — read | Search, inspect, summarize, calculate, render | Execute within existing read grants; cite scope |
 | C1 — draft | Create a private artifact, prepare a plan, generate a proposed diff | Execute and save as draft; never publish or mutate external state |
-| C2 — reversible change | Edit a task, link records, update a draft, save a context record | Show the exact diff and affected resources; require approval unless the user has pre-authorized the operation |
+| C2 — reversible change | Edit a task, link records, update a draft, save a steering record | Show the exact diff and affected resources; require approval unless the user has pre-authorized the operation |
 | C3 — consequential change | Assign work, change status, start a workflow, publish or distribute | Named approval, destination and receipt required |
 | C4 — high-impact | Financial, access, deletion, production, broad external distribution | Explicit confirmation immediately before execution, with policy and rollback details |
 
@@ -425,7 +425,7 @@ criteria are the commitment until capacity and integration sequencing are agreed
 **Deliverables**
 
 - action-plan drafting and exact diffs;
-- create/edit/link/assign/status operations for initial work-item and context-record surfaces;
+- create/edit/link/assign/status operations for initial work-item and steering-record surfaces;
 - approval UI and conversational approval handoff;
 - idempotent adapters and receipts;
 - verification after mutation and rollback for supported reversible changes;

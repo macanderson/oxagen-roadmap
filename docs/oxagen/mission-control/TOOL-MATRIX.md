@@ -111,11 +111,11 @@ Regenerate with `docs/oxagen/mission-control/scripts/build-matrix.mjs`.
 |---|---|---|---|---|
 | `append_record` | INHERIT | `write_memory`, `save_memory`, `attach_memory_evidence`, `cite_memory`, `cite_reference` | low | deny |
 | `get_record` | NEW | none | none | none |
-| `list_records` | INHERIT | `list_context_records`, `list_memories`, `list_memory_citations`, `get_citation_stats` | low | deny |
+| `list_records` | INHERIT | `list_steering_records`, `list_memories`, `list_memory_citations`, `get_citation_stats` | low | deny |
 | `retract_record` | INHERIT | `delete_memory`, `demote_memory` | medium | deny |
 | `recall_context` | INHERIT | `recall_memory` | low | deny |
-| `propose_record` | INHERIT | `promote_memory`, `promote_context_record`, `suggest_promotion_rationales` | high | deny |
-| `open_context_pr` | INHERIT | `publish_context_record` | high | deny |
+| `propose_record` | INHERIT | `promote_memory`, `promote_steering_record`, `suggest_promotion_rationales` | high | deny |
+| `open_steering_pr` | INHERIT | `publish_steering_record` | high | deny |
 | `list_proposals` | INHERIT | `list_memory_promotions` | low | deny |
 | `dismiss_proposal` | INHERIT | `dismiss_memory_promotion` | low | deny |
 

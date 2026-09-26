@@ -26,8 +26,8 @@ export default {
             <div class="mono dim" style="font-size:11px;margin-top:3px">budget.breached</div></div>
             <time>15:21</time></div>
           <div class="li"><span class="ic t-gold"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="5" r="2.5"/><circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="8" r="2.5"/><path d="M6 7.5v9M18 10.5c0 4-12 2-12 6"/></svg></span>
-            <div class="bd2"><div class="t1">Context PR opened · a-intel/platform#519</div><div class="t2">The promoter proposed a rule on lineage ctx.release.no-reread-changelog. Supported by 682 duplicate tool calls across 212 runs.</div>
-            <div class="mono dim" style="font-size:11px;margin-top:3px">context_pr.opened</div></div>
+            <div class="bd2"><div class="t1">Steering PR opened · a-intel/platform#519</div><div class="t2">The promoter proposed a rule on lineage ctx.release.no-reread-changelog. Supported by 682 duplicate tool calls across 212 runs.</div>
+            <div class="mono dim" style="font-size:11px;margin-top:3px">steering_pr.opened</div></div>
             <time>13:02</time></div>
           <div class="li"><span class="ic t-allowed"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></span>
             <div class="bd2"><div class="t1">Run sealed · run_01K5YX2D6R</div><div class="t2">a-intel.core.stella-ci sealed a-intel/platform#1887: 212 frames, 38,400 tokens, $2.41 observed by gateway.</div>
@@ -114,7 +114,7 @@ export default {
   helpers: [
     ["notifsBody()", "engine.js:1739", "Writes the notification list, one `.li` per entry, unread ones as buttons via `notifRead()`."],
     ["notifIcon(tone)", "engine.js:1732", "The tone's icon: a check for allowed, a clock for approval, a confetti mark for gold, a triangle for anything else, including failed and critical."],
-    ["accountBody()", "engine.js:9647", "The Security tab's two `.lst` lists, with an inline-styled `.ic` instead of a tone class."],
+    ["accountBody()", "engine.js:9679", "The Security tab's two `.lst` lists, with an inline-styled `.ic` instead of a tone class."],
   ],
   sourceNotes: [
     "`.lst` and `.li` are defined twice in engine.css: once at lines 558 to 568, and again at 596 to 615. The second definition wins the cascade and is the one that actually renders, since it adds `:hover`, the five `.ic.t-*` tones, `.unread`, and `[role=button]`. The first definition draws nothing a person can see that the second does not already draw.",

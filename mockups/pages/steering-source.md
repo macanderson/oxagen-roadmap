@@ -51,7 +51,7 @@ Left column:
 
 - **The statement editor.** The shared source editor over the statement and nothing else. Its path label reads ".oxagen/rules/ctx.release.notes-format.toml · statement", its change state "unchanged", and its bar "214 tok in the bundle" (or "in the stable prefix"). It has a line-number gutter, markdown highlighting, the current-line band, **Find ⌘F** with a match count, and a status line: "Ln 1, Col 91", "Statement", "1 line · 90 chars", "LF", "UTF-8", and the key hints.
 - No note under it. That the editor holds the statement only is in its component help (`mockups/help/steering-source.md`, Statement).
-- **Lineage** panel, with no caption. Rows: Lineage (`ctx.release.notes-format`), File (".oxagen/rules/ctx.release.notes-format.toml on a-intel/platform"), Published by ("a4c91e2 on 2026-09-04"), Effect ("rendered 212 · cited 188 · violated 3", or "never rendered") and Schema (`context-record/v0.1`).
+- **Lineage** panel, with no caption. Rows: Lineage (`ctx.release.notes-format`), File (".oxagen/rules/ctx.release.notes-format.toml on a-intel/platform"), Published by ("a4c91e2 on 2026-09-04"), Effect ("rendered 212 · cited 188 · violated 3", or "never rendered") and Schema (`steering-record/v0.1`).
 
 Right column, first **the kind panel**. It is headed with the kind's name and its badge, and shows only the record's own data. How each kind reaches a run and what it can never do are in the component help (`mockups/help/steering-source.md`, Kind panel). Each of the six kinds has its own panel:
 
@@ -132,7 +132,7 @@ A policy source, a mandate, a toolbelt and an agent definition are managed on To
 
 - No lead. The primary action names what it does.
 - The change: the main repository and the branch ("a-intel/platform ← context/ctx.release.notes-format.amend"), the added and removed line counts, and the line diff of the statement, or "Nothing changed yet."
-- "What the checks will assert": Schema ("context-record/v0.1 still valid after the edit"), Lineage ("ctx.release.notes-format keeps its lineage"), record_hash recomputation ("recomputed over the new bytes · the old hash stays on every run that carried it"), Secret and PII scan ("the new statement is scanned"), Conflict against active records ("re-run in full") and constraint_effect ("unchanged · require").
+- "What the checks will assert": Schema ("steering-record/v0.1 still valid after the edit"), Lineage ("ctx.release.notes-format keeps its lineage"), record_hash recomputation ("recomputed over the new bytes · the old hash stays on every run that carried it"), Secret and PII scan ("the new statement is scanned"), Conflict against active records ("re-run in full") and constraint_effect ("unchanged · require").
 - Footer: Cancel and **Open the pull request** (gold; disabled while nothing changed). Opening reports "a-intel/platform#528 opened. ctx.release.notes-format changes when it merges." The header gains the branch badge and the Sources row gains "pull request open". The record in force does not change until the merge.
 
 **`crecarchive`**, "Archive <lineage>?".
@@ -161,25 +161,25 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. A fixture is not evidenc
 
 | Element | Mockup collection | Target store or contract | Backing today in `macanderson/oxagen` | Status |
 |---|---|---|---|---|
-| A record's statement, kind, force, effect, scope, status, commit and path | `RECORDS` via `stgRecord()` | `.oxagen/rules/<lineage>.toml` on the main repository, indexed in `agent.context_records` | `get_record` (`packages/oxagen/src/contracts/context.records.get.ts:127`), whose record is `publishedRecordSchema` (`context.steering.shared.ts:250-280`). It reads the file first and says whether the file or the registry answered (`context.records.get.ts:25`, `:79`) | ✅ |
-| Published by (the commit and its author) | `RECORDS[].commit`, `pub` | The commit that published the file | `get_record` `provenance` (`context.records.get.ts:36-49`, `:80`) | ✅ |
-| Effect: rendered and cited | `RECORDS[].effect` via `crecNum()` | Distinct runs that rendered and cited the lineage | `get_record` `effect` (`context.records.get.ts:55-64`), counted from `context_use` and `context_use_feedback` appends (`packages/handlers/src/context.steering.store.ts:645`). Null when the workspace records no context use, which renders "not recorded", never 0 | ✅ |
+| A record's statement, kind, force, effect, scope, status, commit and path | `RECORDS` via `stgRecord()` | `.oxagen/rules/<lineage>.toml` on the main repository, indexed in `agent.steering_records` | `get_record` (`packages/oxagen/src/contracts/steering.records.get.ts:127`), whose record is `publishedRecordSchema` (`context.steering.shared.ts:250-280`). It reads the file first and says whether the file or the registry answered (`steering.records.get.ts:25`, `:79`) | ✅ |
+| Published by (the commit and its author) | `RECORDS[].commit`, `pub` | The commit that published the file | `get_record` `provenance` (`steering.records.get.ts:36-49`, `:80`) | ✅ |
+| Effect: rendered and cited | `RECORDS[].effect` via `crecNum()` | Distinct runs that rendered and cited the lineage | `get_record` `effect` (`steering.records.get.ts:55-64`), counted from `context_use` and `context_use_feedback` appends (`packages/handlers/src/context.steering.store.ts:645`). Null when the workspace records no context use, which renders "not recorded", never 0 | ✅ |
 | Effect: violated, and the third meter | `RECORDS[].effect` | A rollup of runs that went against the record | None (#3868) | ❌ |
-| Bundle share ("214 tok in the bundle", "v41 · 214 of 1,340 tokens") | `STEER_BUNDLE`, `stgBundle()`, `crecBundleRow()` | The compiled bundle's row for the record | Each `steering.manifest` item carries its tokens (`packages/tacho/src/wire.ts:643-654`) and a merge reports the steering version (`context.pr.merge.ts:14`), but no read returns one record's row in the bundle in force | 🟡 |
-| The kind panel's figures ("59 published records", "96 runs read it") | `RECORDS`, `rec.effect` | `list_records` total, `get_record` effect | `list_records` (`context.records.list.ts:17`); `get_record` effect | ✅ |
+| Bundle share ("214 tok in the bundle", "v41 · 214 of 1,340 tokens") | `STEER_BUNDLE`, `stgBundle()`, `crecBundleRow()` | The compiled bundle's row for the record | Each `steering.manifest` item carries its tokens (`packages/tacho/src/wire.ts:643-654`) and a merge reports the steering version (`steering.pr.merge.ts:14`), but no read returns one record's row in the bundle in force | 🟡 |
+| The kind panel's figures ("59 published records", "96 runs read it") | `RECORDS`, `rec.effect` | `list_records` total, `get_record` effect | `list_records` (`steering.records.list.ts:17`); `get_record` effect | ✅ |
 | A fact's "Falsifiable by" and a memory record's "Explains" | Fixed strings in `crecPanel` | A field on the record | None. The record schema has no such field | ❌ |
-| Related records | `RECORDS` of the same kind | `list_records` filtered by kind | `list_records` `kind` input (`context.records.list.ts:40`) | ✅ |
+| Related records | `RECORDS` of the same kind | `list_records` filtered by kind | `list_records` `kind` input (`steering.records.list.ts:40`) | ✅ |
 | The branch badge and "pull request open" | `S.recPending` | The proposal open on the lineage | `list_proposals` by `lineageId` with status `pr_open` (`context.proposal.list.ts:12`) | ✅ |
-| Propose a change | `crecSave()`, `DLG_EXT.srcpr`, `srcPrOpen()` | A proposal with the new statement and its pull request | `revise_context_record` (`context.record.revise.ts:24`) opens it on `context/<lineage>`, not the mockup's `.amend` branch, and runs the six checks (`context.steering.shared.ts:107-116`) | ✅ |
-| Archive | `DLG_EXT.crecarchive`, `crecArchive()` | A pull request that sets the status to archived | `promote_context_record` with the action `retire` appends to the promotions ledger (`context.record.promote.ts:5`, `:28`). No capability opens an archive pull request | 🟡 |
-| A record's versions | none on the page | Every version of the lineage | `get_record` `versions` (`context.records.get.ts:82`). The page does not render them | ✅ |
+| Propose a change | `crecSave()`, `DLG_EXT.srcpr`, `srcPrOpen()` | A proposal with the new statement and its pull request | `revise_steering_record` (`steering.record.revise.ts:24`) opens it on `context/<lineage>`, not the mockup's `.amend` branch, and runs the six checks (`context.steering.shared.ts:107-116`) | ✅ |
+| Archive | `DLG_EXT.crecarchive`, `crecArchive()` | A pull request that sets the status to archived | `promote_steering_record` with the action `retire` appends to the promotions ledger (`steering.record.promote.ts:5`, `:28`). No capability opens an archive pull request | 🟡 |
+| A record's versions | none on the page | Every version of the lineage | `get_record` `versions` (`steering.records.get.ts:82`). The page does not render them | ✅ |
 | Documents: title, status, sections, registration | `SOURCES.documents`, `SOURCES.registration` | `.oxagen/sources.toml` and the documents it names | None | ❌ |
 | A memory's body | `MEMORY` | `:AgentMemory` | `list_memories` `lesson` (`agent.memory.list.ts:25`, `agent.memory.model.ts:98`) | ✅ |
 | A memory's status, force, scope, hash, run, recall count and yield | `MEMORY[]` | The memory adapter | None. `list_memories` carries a class, a kind, a citation count and a creation time, and none of these (#3904) | ❌ |
 | A memory's sayings, fold line and imported provenance | `MEMORY[].sayings`, `memSaysList()`, `memFoldLine()` | A saying per run or import on the memory, and the fold setting | None. No contract stores a saying or counts runs toward a fold (`run-memories.md`) | ❌ |
 | Open the proposal | `MEMORY[].proposedAs`, `memOpenProposal()` | The proposal the fold raised | `list_memory_promotions` (`agent.memory_promotion.list.ts:11`) lists promotions and does not name the fold that raised one | 🟡 |
 | Forget | `DLG_EXT.memforget`, `memForget()` | Stop the assembler selecting the memory | `delete_memory` removes the node and its edges (`agent.memory.delete.ts:14`). No run records a memory's hash today, so the dialog's promise about carried hashes has nothing behind it yet | 🟡 |
-| Propose as a Steering record | `memPromote()`, the record wizard | A proposal, then its pull request | `propose_record` (`context.proposal.create.ts:12`) and `open_context_pr` (`context.pr.open.ts:96`) | ✅ |
+| Propose as a Steering record | `memPromote()`, the record wizard | A proposal, then its pull request | `propose_record` (`context.proposal.create.ts:12`) and `open_steering_pr` (`steering.pr.open.ts:96`) | ✅ |
 | Glossary term, its file and its edit | `ONTOLOGY`, `DLG_EXT.ontedit`, `DLG_EXT.ontretire` | `.oxagen/ontology/*.toml` | None | ❌ |
 | Workspace instructions text | `STEERING_PREVIEW.instructions` | Workspace settings | `get_prompt_settings` `additionalInstructions` (`prompt.settings.read.ts:15`, `:33`) | ✅ |
 | The instructions' status, force, scope, version, hash and reach | `STEERING_PREVIEW.instructions` | An instruction source in the assembler | The text reaches the in-app agent only, with no manifest item (`packages/agent/src/runtime/workspace-instructions.ts:1-30`, #3296) | ❌ |
@@ -219,10 +219,10 @@ The thumb bar holds Work, Agents, Tools, Spend and More, with More lit. More hol
 
 - Read: the mockup's denied panel names `steering.read on core-platform`. `get_record` and `list_records` allow an organization Owner or Admin and a workspace Owner, Member or Viewer.
 - Writes, each a governed action recorded in Audit:
-  - Propose a change: `revise_context_record`, an organization Owner or Admin, or a workspace Owner or Member.
-  - Archive: today `promote_context_record` with `retire`, an organization Owner or Admin, or a workspace Owner or Admin.
+  - Propose a change: `revise_steering_record`, an organization Owner or Admin, or a workspace Owner or Member.
+  - Archive: today `promote_steering_record` with `retire`, an organization Owner or Admin, or a workspace Owner or Admin.
   - Forget: `delete_memory`, an organization Owner or Admin, or a workspace Owner or Member.
-  - Propose as a Steering record: `propose_record` and `open_context_pr`, an organization Owner or Admin, or a workspace Owner or Member.
+  - Propose as a Steering record: `propose_record` and `open_steering_pr`, an organization Owner or Admin, or a workspace Owner or Member.
 
 ## Backend gaps this page depends on
 

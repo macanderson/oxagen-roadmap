@@ -169,7 +169,7 @@ export default {
     ["--accent-text", "Link button (see Findings)"],
   ],
   helpers: [
-    ["dialog()", "engine.js:9350", "Writes a dialog's footer buttons from `d.f`."],
+    ["dialog()", "engine.js:9382", "Writes a dialog's footer buttons from `d.f`."],
     ["act(msg, tone)", "engine.js:2031", "What most buttons call when they finish: a toast in the button's tone."],
     ["copiedState(btn)", "engine.js:2465", "Swaps a button to the copied state for 1.6s. `copyText()` calls it once the clipboard accepts."],
   ],

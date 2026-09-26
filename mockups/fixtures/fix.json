@@ -86,7 +86,7 @@
    "Urgent records can still publish now, from the record's PR, with the cost shown before you confirm."
   ],
   "action": "Set publication windows",
-  "done": "Publication windows set to 00:00Z and 12:00Z. Merged records now queue for the next window; the change is a Context PR on a-intel/platform."
+  "done": "Publication windows set to 00:00Z and 12:00Z. Merged records now queue for the next window; the change is a Steering PR on a-intel/platform."
  },
  "Tool-list bloat": {
   "shape": "article",

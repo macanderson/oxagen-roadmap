@@ -32,7 +32,7 @@ export const PAGES = [
   { id: "steering-proposals",title: "Steering · Proposals",        group: "Workspace",    hash: `#/${ORG}/core-platform/steering/proposals`,               states: ALL },
   { id: "steering-preview",  title: "Steering · Preview",          group: "Workspace",    hash: `#/${ORG}/core-platform/steering/preview/release-manager`, states: ALL },
   { id: "repositories",      title: "Repositories",                group: "Workspace",    hash: `#/${ORG}/core-platform/repositories`,                     states: ALL },
-  { id: "record",            title: "Context record",              group: "Workspace",    hash: `#/${ORG}/core-platform/steering/records/ctx.release.never-merge`, states: NO_EMPTY },
+  { id: "record",            title: "Steering record",              group: "Workspace",    hash: `#/${ORG}/core-platform/steering/records/ctx.release.never-merge`, states: NO_EMPTY },
   { id: "spend",             title: "Spend",                       group: "Workspace",    hash: `#/${ORG}/core-platform/spend`,                            states: ALL },
   // skills (W13), now the Skills tab of Steering: sync, resolution, the seat in the loop, reflection;
   // the off-by-default gate; the interjected run. The old #/:org/:ws/skills… routes still resolve.

@@ -20,7 +20,7 @@ Step 1 of 3 of Register Agent: reserve the agent key. The key is reserved now an
 Actions: **Cancel** · **Continue** (gold)
 
 - Fields: Slug (→ “The agent key becomes `<org>.<ws>.<slug>`”), Workspace, Harness (“picks the installer on the next step”), Model tier (“routed through the model proxy; the tier is recorded on every frame”).
-- Caption: Continue mints a one-time enrollment token; nothing is written to Postgres and no PR is opened until the first frame arrives; the smoke session then opens the Context PR that adds the definition file.
+- Caption: Continue mints a one-time enrollment token; nothing is written to Postgres and no PR is opened until the first frame arrives; the smoke session then opens the Steering PR that adds the definition file.
 
 
 **Shell.** No sidebar or top bar: the brandmark, then a centred card; the phone layout is the same card at full width.

@@ -20,7 +20,7 @@ The page that makes the competition visible. Pick an agent and a prompt, and see
 
 **The seven tabs, in this order:** Records (N published) · Skills (N in scope) · Memory (N) · Ontology (N) · Policy (N gates) · Proposals (N candidates plus open pull requests) · Preview. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. The hash is read on load and on `hashchange`; a tab changed by code writes the hash back with `replaceState`, so every view is a link. The bare route `#/:org/:ws/steering` is Records.
 
-Header action: **Write a context record** (gold; opens the record wizard: describe, kind, statement, checks, pull request).
+Header action: **Write a steering record** (gold; opens the record wizard: describe, kind, statement, checks, pull request).
 
 - **Controls.** *Agent*: a select of the workspace's agents, each option “name · harness · tier”; under it the tier badge and the repository the agent works in. Changing the agent updates the URL segment. *Prompt*: a textarea the operator types in; the result repaints on every keystroke and the caret stays put. Under the controls, six prompt chips (“Cut the 4.11.0 release notes”, “CI is green, merge the release pull request”, “Label the flaky checkout e2e test on Safari”, “Plan the ledger entries migration for billing”, “Tighten the CLI reference style guide”, “Pay the September AWS invoice”), `aria-pressed` on the one in use.
 - An agent on the `observe` tier shows a warning first: **Nothing below reaches this agent today.** Its runs are recorded and no hook is installed, so Oxagen has no injection point. The result is what the assembler would deliver on the `harness` tier.
@@ -40,7 +40,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 | Element | Mockup collection | Target store | Backing today (repo) | Status |
 |---|---|---|---|---|
-| Items | `RECORDS`, `STEER_BUNDLE`, `SKILLS`, `MEMORY`, `ONTOLOGY`, `GATES`, `STEERING_PREVIEW.instructions` | the assembler's source adapters behind the registry port | `packages/context-provider` (`packWithinBudget`) has no production importer today | ❌ |
+| Items | `RECORDS`, `STEER_BUNDLE`, `SKILLS`, `MEMORY`, `ONTOLOGY`, `GATES`, `STEERING_PREVIEW.instructions` | the assembler's source adapters behind the registry port | `packages/steering-provider` (`packWithinBudget`) has no production importer today | ❌ |
 | Agents, prompts, and budgets | `STEERING_PREVIEW` (`agents`, `prompts`, `budget`) | the agent registry; the budget in the signed bundle | none | ❌ |
 | Sync state | `SKILL_SYNC` | per-repository sync status | none | ❌ |
 
@@ -54,7 +54,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: the hub header and the seven tabs stay, and the tab body is “Nothing to preview yet”. No item is published in this workspace, so the assembler has nothing to select from. Action: **Write a context record**.
+- **empty**: the hub header and the seven tabs stay, and the tab body is “Nothing to preview yet”. No item is published in this workspace, so the assembler has nothing to select from. Action: **Write a steering record**.
 - **loading**: the shell stays; the page body, hub header included, is replaced by the skeleton (four tile blocks and a panel of seven rows).
 - **error**: “Steering could not be loaded”, `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen. Actions: **Try again**, **Open an incident**; a trace id, region and timestamp line.
 - **access denied**: “You cannot see this workspace’s steering”. The roles the signed-in person holds on the organization do not include `steering.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).

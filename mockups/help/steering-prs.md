@@ -13,8 +13,8 @@ A Steering record is a file under `.oxagen/rules/` on the main repository, and i
 |---|---|---|---|
 | Rows | `RECPRS`, `CTXPR`, `PROPOSALS[].pr` | `list_proposals` `pr`, `status`, `checks` | shipped |
 | Opened by | `prTable()` ("the promoter", or `me().name`) | Who opened the pull request | partial |
-| Checks light and state badge | `ciLight(ciFromSt())`, `prLabel()` | `get_context_pr` `checks` | shipped |
-| Governance badge | `govLabel(ws())` | `get_context_pr` `governanceMode` | shipped |
+| Checks light and state badge | `ciLight(ciFromSt())`, `prLabel()` | `get_steering_pr` `checks` | shipped |
+| Governance badge | `govLabel(ws())` | `get_steering_pr` `governanceMode` | shipped |
 | Import rows | `RECPRS[]` with `src` and `records`, from `wzImpPublish()` | A pull request carrying several record files | future-only |
 
 ### Logic
@@ -42,9 +42,9 @@ The file is the record, so the panel shows the file, highlighted with the same T
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
-| Branch, base, head | `def.branch`, `def.base`, `CTXPR` | `get_context_pr` `pr` | shipped |
-| The record file | `recprFileText()`, `recprFile()`, the TOML in `ctxprTab()` | `get_context_pr` `record`, and the bytes from GitHub (#3882) | partial |
-| State badge | `prLabel()` | `get_context_pr` `checks` | shipped |
+| Branch, base, head | `def.branch`, `def.base`, `CTXPR` | `get_steering_pr` `pr` | shipped |
+| The record file | `recprFileText()`, `recprFile()`, the TOML in `ctxprTab()` | `get_steering_pr` `record`, and the bytes from GitHub (#3882) | partial |
+| State badge | `prLabel()` | `get_steering_pr` `checks` | shipped |
 
 ### Logic
 - The heading is "Pull request · <number>" with the state badge at the right (`data-recpr-state` or `data-ctxpr-state`).
@@ -71,7 +71,7 @@ The body is where the argument lives. The record file holds only the statement, 
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
-| Body | `recprBody(def)`, the body in `ctxprTab()` | `get_context_pr` `body` | shipped |
+| Body | `recprBody(def)`, the body in `ctxprTab()` | `get_steering_pr` `body` | shipped |
 | Supporting-run table in the promoter's body | `PRP_SUPPORT` first three rows | Each cited run's outcome (#3881) | future-only |
 | Tokens a turn | `recprTok()`, `PRP_META[].tok` | Tokens before and after | future-only |
 
@@ -97,8 +97,8 @@ The checks run the same rules as `stella context validate` (`docs/mission-contro
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
-| Checks and results | `recprChecks(def)`, `CTXPR.checks` | `get_context_pr` `checks` | shipped |
-| Merge | `recprMerge()`, `ctxprMerge()` | `merge_context_pr` | shipped |
+| Checks and results | `recprChecks(def)`, `CTXPR.checks` | `get_steering_pr` `checks` | shipped |
+| Merge | `recprMerge()`, `ctxprMerge()` | `merge_steering_pr` | shipped |
 | Code owner in the merge bar | `me().name` | The repository's code owners (#3882) | future-only |
 
 ### Logic
@@ -110,7 +110,7 @@ The checks run the same rules as `stella context validate` (`docs/mission-contro
 - Merge re-runs every predicate with `prRecheck()`. A check that passed and no longer does blocks the merge: "A check that passed no longer does. <number> is blocked and nothing was published."
 - The merge bar reads "Checks are running. Merge is blocked until all 6 report." while checks run, "6 checks passed. Governance mode team." once they pass (the mode's name from `govLabel()`, with no claim about who owns `.oxagen/rules/`), and "A check failed. Nothing merges and nothing is published. Change the file and open it again." Then **Close pull request** and **Merge pull request**, gold only once every check passed.
 - After the merge the bar reads "Merged by <name>" with the time and "squashed into main as <commit>", plus **Open the record** and **See it in Records** for a person's, or **See them in Records** for an import with several records.
-- Under `team`, a build refuses a merge by the record's author, as `merge_context_pr` does. The mockup lets the author merge.
+- Under `team`, a build refuses a merge by the record's author, as `merge_steering_pr` does. The mockup lets the author merge.
 
 ### States
 Queued, running, passed, failed, merged and closed. A closed pull request's bar reads "Closed without merging. Nothing was published." and offers neither Close nor Merge.
@@ -128,7 +128,7 @@ Nothing in the list happens on the way here. The record steers nothing while its
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
-| Publish, re-index, version, audit | the five rows | `get_context_pr` `onMerge`, `merge_context_pr` | shipped |
+| Publish, re-index, version, audit | the five rows | `get_steering_pr` `onMerge`, `merge_steering_pr` | shipped |
 | Bundle version | `stgBundle().v` | `onMerge.bundleVersion` | shipped |
 | Steering tokens a turn | `stgBundle().tok`, `recprTok()` | Tokens before and after | future-only |
 
@@ -160,8 +160,8 @@ Merge triggers a `promotion_event` with the status change, the lineage, the appr
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
-| record_id, lineage_id, from → to, approver, pr_url, commit_sha, merged_at | `CTXPR`, `def`, `S.ctxpr.mergedAt` | `get_context_pr` `merged`, `merge_context_pr` `promotionEvent` | shipped |
-| bundle and digest | `stgBundle()`, `steerDigestOf()` | `merge_context_pr` `bundleVersion` | shipped |
+| record_id, lineage_id, from → to, approver, pr_url, commit_sha, merged_at | `CTXPR`, `def`, `S.ctxpr.mergedAt` | `get_steering_pr` `merged`, `merge_steering_pr` `promotionEvent` | shipped |
+| bundle and digest | `stgBundle()`, `steerDigestOf()` | `merge_steering_pr` `bundleVersion` | shipped |
 | tokens per turn | `stgBundle().tok` | Token deltas | future-only |
 | ledger | fixed text | The promotions ledger | partial |
 
@@ -169,7 +169,7 @@ Merge triggers a `promotion_event` with the status change, the lineage, the appr
 - `prSet(def, st, "merged")` calls `prPublish()`. It pushes the records into `RECORDS`, bumps `STEER_BUNDLE.v` once, adds each rule with `since` set to the new version, fills a missing digest with `steerDigestOf(v)`, and audits `steering_published` ("<lineage> · <number> merged as <commit> · bundle v41 → v42").
 - The panel (`data-promo-bundle`) lists record_id, lineage_id ("9 lineages · …" for an import), from → to ("proposed → published", or "authored → published" with an author row for a person's), approver, pr_url, commit_sha, merged_at, re-indexed, bundle ("v41 → v42 · <digest>"), tokens per turn, audit and ledger.
 - The promoter's panel adds **See it in run_01K5RS7M2E8FJ3QW**, and both add **Audit log**.
-- The ledger row reads "promotions.jsonl not written · regulated mode only". `merge_context_pr` appends to the hash-chained ledger on every merge, so a build shows the entry it wrote.
+- The ledger row reads "promotions.jsonl not written · regulated mode only". `merge_steering_pr` appends to the hash-chained ledger on every merge, so a build shows the entry it wrote.
 - The toast: "Merged <number>. promotion_event written, bundle v41 → v42 signed, steering_published audited."
 
 ### States

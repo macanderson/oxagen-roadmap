@@ -39,7 +39,7 @@
 <div class="dx-hero">
   <p class="eyebrow">Data display</p>
   <h1>Typed badges</h1>
-  <p class="dx-lead">A typed badge names what a thing is inside a closed list: a context record's kind, a SteeringFrame's type, a tool's category, its hazard, or the gate a rule put in front of it. None of these five ever changes on its own, so none of them is a <a href="badge.html">badge</a>'s dot and word for a state. Engine rule: an icon badge is a kind, a dot badge is a state, and kind hues never reuse a state hue or gold.</p>
+  <p class="dx-lead">A typed badge names what a thing is inside a closed list: a steering record's kind, a SteeringFrame's type, a tool's category, its hazard, or the gate a rule put in front of it. None of these five ever changes on its own, so none of them is a <a href="badge.html">badge</a>'s dot and word for a state. Engine rule: an icon badge is a kind, a dot badge is a state, and kind hues never reuse a state hue or gold.</p>
   <div class="dx-meta">
     <span><b>Root</b> <code>.kb, .ft, .tcb, .hz, .gt</code></span>
     <span><b>CSS</b> <code>engine.css</code> lines 196 to 207 (kind), 264 to 265 (tool category), 266 to 270 (hazard), 271 to 276 (gate), wedge.js 234 to 236 and 2269 to 2276 (frame type)</span>
@@ -51,7 +51,7 @@
   <h2 id="examples">Examples</h2>
   <p class="dx-sub">Each example is the engine's own markup, drawn by engine.css. Open Markup to copy it.</p>
   <figure class="dx-story" id="story-kind">
-    <figcaption class="dx-story-h"><b>Kind badge</b><span>The six context-record kinds, each with its own hue and icon. <code>kindGlyph()</code> draws the same icon with no word, for a tight column.</span></figcaption>
+    <figcaption class="dx-story-h"><b>Kind badge</b><span>The six steering-record kinds, each with its own hue and icon. <code>kindGlyph()</code> draws the same icon with no word, for a tight column.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="kind" data-name="Kind badge">
 <div class="row" style="gap:8px;flex-wrap:wrap;align-items:center">
@@ -67,7 +67,7 @@
     </template>
   </figure>
   <figure class="dx-story" id="story-frame-type">
-    <figcaption class="dx-story-h"><b>Frame type</b><span>Eight SteeringFrame types, lowercase and monospace. Four (<code>invariant</code>, <code>constraint</code>, <code>procedure</code>, <code>context</code>) reuse a context-record hue. The rest have a hue of their own.</span></figcaption>
+    <figcaption class="dx-story-h"><b>Frame type</b><span>Eight SteeringFrame types, lowercase and monospace. Four (<code>invariant</code>, <code>constraint</code>, <code>procedure</code>, <code>context</code>) reuse a steering-record hue. The rest have a hue of their own.</span></figcaption>
     <div class="dx-canvas"></div>
     <template data-story="frame-type" data-name="Frame type">
 <div class="ft-strip">
@@ -129,7 +129,7 @@
       <tr><td>Kind hue</td><td><code>.k-rule</code>, <code>.k-constraint</code>, <code>.k-procedure</code>, <code>.k-fact</code>, <code>.k-memory</code>, <code>.k-preference</code></td><td>Sets <code>--kc</code>. Drives the kind badge, the kind glyph, and <code>.rec</code>'s left rule and icon tile on <a href="record-card.html">Record card</a>.</td></tr>
       <tr><td>Kind glyph</td><td><code>.kg</code></td><td>The same icon with no word, for a table cell or a caption line.</td></tr>
       <tr><td>Frame type badge</td><td><code>.ft</code></td><td>A lowercase monospace word with a small square mark (<code>::before</code>) in <code>currentColor</code>, never an icon. The square keeps a type from reading as a state, which draws a round dot.</td></tr>
-      <tr><td>Frame type hue</td><td><code>.ft-goal</code>, <code>.ft-invariant</code>, <code>.ft-constraint</code>, <code>.ft-delegation</code>, <code>.ft-procedure</code>, <code>.ft-context</code>, <code>.ft-invocation</code>, <code>.ft-capability</code></td><td>Sets <code>--fc</code>. Four share a context-record hue. The other four take <code>--fk-model</code>, <code>--fk-gov</code>, <code>--fk-op</code>, and <code>--fk-tool</code>.</td></tr>
+      <tr><td>Frame type hue</td><td><code>.ft-goal</code>, <code>.ft-invariant</code>, <code>.ft-constraint</code>, <code>.ft-delegation</code>, <code>.ft-procedure</code>, <code>.ft-context</code>, <code>.ft-invocation</code>, <code>.ft-capability</code></td><td>Sets <code>--fc</code>. Four share a steering-record hue. The other four take <code>--fk-model</code>, <code>--fk-gov</code>, <code>--fk-op</code>, and <code>--fk-tool</code>.</td></tr>
       <tr><td>Frame type strip</td><td><code>.ft-strip</code>, <code>.ft-n</code></td><td>Counts by type, wrapped in a flex row. <code>typeStrip()</code> makes each entry a filter button when given a view.</td></tr>
       <tr><td>Tool category badge</td><td><code>.tcb</code></td><td>An SVG icon at 12px and a two-word label, colored <code>--body</code> on <code>--hl</code> with a <code>--rule</code> border. Never colored by the category.</td></tr>
       <tr><td>Hazard risk mark</td><td><code>.hz.hz-low</code>, <code>.hz-medium</code>, <code>.hz-high</code>, <code>.hz-critical</code></td><td>A shape (circle, diamond, triangle, filled triangle) plus the risk word, in a state hue.</td></tr>
@@ -225,7 +225,7 @@
     </tbody>
   </table></div></div>
   <ul>
-    <li>The six context-record kinds and their icons live in <code>KINDS</code> (engine.js:707). <code>kindBadge()</code> falls back to <code>KINDS.rule</code> for any kind it does not recognize.</li>
+    <li>The six steering-record kinds and their icons live in <code>KINDS</code> (engine.js:707). <code>kindBadge()</code> falls back to <code>KINDS.rule</code> for any kind it does not recognize.</li>
     <li>The eight frame types and their descriptions live in <code>FT</code> (wedge.js:224 to 233).</li>
     <li>The ten tool categories and their icons live in <code>TCAT</code> (engine.js:701). <code>toolMeta()</code> classifies any tool name the table does not list, by its verb.</li>
   </ul>
