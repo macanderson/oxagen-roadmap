@@ -290,6 +290,20 @@ body{padding-inline:0}
 .seq td:first-child{color:var(--fg); font-weight:600; white-space:nowrap}
 .answer{border:1px solid var(--gold-deep); background:var(--gold-wash); border-radius:10px; padding:14px 16px; margin:14px 0 18px; max-width:84ch}
 .answer p{margin:0; color:var(--fg); font-size:16px; line-height:1.55}
+
+/* Example dialogs */
+.ex-buttons{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 18px}
+.exbtn{font:500 12.5px/1 "Monaspace Neon",ui-monospace,monospace; color:var(--fg); background:var(--panel); border:1px solid var(--border); border-radius:7px; padding:8px 11px; cursor:pointer}
+.exbtn:hover{border-color:var(--gold)}
+.exbtn:focus-visible,.exclose:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+dialog.exdlg{padding:0; border:1px solid var(--rule); border-radius:12px; background:var(--ink); color:var(--body); width:min(800px, calc(100vw - 32px)); max-height:calc(100vh - 48px); overflow:auto}
+dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
+.exdlg-in{padding:16px 18px 4px}
+.exdlg-head{display:flex; justify-content:space-between; align-items:center; gap:12px}
+.exdlg-head h4{margin:0; font-size:17px}
+.exdlg-sub{color:var(--muted); font-size:14px; margin:6px 0 0}
+.exclose{font:500 12.5px/1 "Geist",system-ui,sans-serif; color:var(--body); background:transparent; border:1px solid var(--border); border-radius:7px; padding:7px 11px; cursor:pointer}
+.exclose:hover{border-color:var(--rule); color:var(--fg)}
 </style>
 </head>
 <body>
@@ -1294,6 +1308,27 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
       var parts = [];
       cards.forEach(function (c) { var k = c.querySelector("pre code"); if (k) parts.push(k.textContent); });
       copy(parts.join("\n\n----------\n\n"), wbtn, function () { flash(wbtn, "Copy each prompt below"); });
+    }
+  });
+
+  /* ---------- Example dialogs ---------- */
+  document.addEventListener("click", function (ev) {
+    var open = ev.target.closest(".exbtn");
+    if (open) {
+      var d = document.getElementById(open.getAttribute("data-dialog"));
+      if (d && typeof d.showModal === "function") d.showModal();
+      else if (d) d.setAttribute("open", "");
+      return;
+    }
+    var shut = ev.target.closest(".exclose");
+    if (shut) {
+      var dd = shut.closest("dialog");
+      if (dd && typeof dd.close === "function") dd.close();
+      else if (dd) dd.removeAttribute("open");
+      return;
+    }
+    if (ev.target.tagName === "DIALOG" && ev.target.classList.contains("exdlg") && typeof ev.target.close === "function") {
+      ev.target.close();
     }
   });
 

@@ -290,6 +290,20 @@ body{padding-inline:0}
 .seq td:first-child{color:var(--fg); font-weight:600; white-space:nowrap}
 .answer{border:1px solid var(--gold-deep); background:var(--gold-wash); border-radius:10px; padding:14px 16px; margin:14px 0 18px; max-width:84ch}
 .answer p{margin:0; color:var(--fg); font-size:16px; line-height:1.55}
+
+/* Example dialogs */
+.ex-buttons{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 18px}
+.exbtn{font:500 12.5px/1 "Monaspace Neon",ui-monospace,monospace; color:var(--fg); background:var(--panel); border:1px solid var(--border); border-radius:7px; padding:8px 11px; cursor:pointer}
+.exbtn:hover{border-color:var(--gold)}
+.exbtn:focus-visible,.exclose:focus-visible{outline:2px solid var(--gold); outline-offset:2px}
+dialog.exdlg{padding:0; border:1px solid var(--rule); border-radius:12px; background:var(--ink); color:var(--body); width:min(800px, calc(100vw - 32px)); max-height:calc(100vh - 48px); overflow:auto}
+dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
+.exdlg-in{padding:16px 18px 4px}
+.exdlg-head{display:flex; justify-content:space-between; align-items:center; gap:12px}
+.exdlg-head h4{margin:0; font-size:17px}
+.exdlg-sub{color:var(--muted); font-size:14px; margin:6px 0 0}
+.exclose{font:500 12.5px/1 "Geist",system-ui,sans-serif; color:var(--body); background:transparent; border:1px solid var(--border); border-radius:7px; padding:7px 11px; cursor:pointer}
+.exclose:hover{border-color:var(--rule); color:var(--fg)}
 </style>
 </head>
 <body>
@@ -549,6 +563,231 @@ into smaller refunds to stay under the limit.</code></pre></figure>
     </tbody>
   </table></div>
 
+  <div class="note"><p><strong>Records and policies.</strong> A record tells the model what to do. A Cedar policy decides a tool call whatever the model does, and a record never grants authority. When the gateway can decide a rule from a tool call and its inputs alone, the rule gets a policy, and a record explains it to the agent so it asks first instead of hitting the wall. Other rules, such as how to prorate or when to escalate, stay records only. <span class="st p">Proposed</span></p></div>
+  <h3>Example records</h3>
+  <p>One example of each kind, all from the a-intel workspace. Each opens in a window.</p>
+  <div class="ex-buttons"><button type="button" class="exbtn" data-dialog="ex-business-rule">Business rule</button><button type="button" class="exbtn" data-dialog="ex-code-rule">Code rule</button><button type="button" class="exbtn" data-dialog="ex-constraint">Constraint</button><button type="button" class="exbtn" data-dialog="ex-procedure">Procedure</button><button type="button" class="exbtn" data-dialog="ex-fact">Fact</button><button type="button" class="exbtn" data-dialog="ex-ontology">Ontology entry</button><button type="button" class="exbtn" data-dialog="ex-preference">Style preference</button><button type="button" class="exbtn" data-dialog="ex-skill">Skill</button><button type="button" class="exbtn" data-dialog="ex-memory">Memory</button><button type="button" class="exbtn" data-dialog="ex-policy">Cedar policy</button><button type="button" class="exbtn" data-dialog="ex-tools">Imported tool</button><button type="button" class="exbtn" data-dialog="ex-reflection">Reflection</button></div>
+  <dialog id="ex-business-rule" class="exdlg" aria-labelledby="ex-business-rule-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-business-rule-t">Business rule</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">A rule of the business the agent must follow. Reaches every request at must.</p><figure class="code"><figcaption><span class="path">steering/billing/a-intel.billing.refunds-over-100.md</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="md">---
+schema: steering-record/v1
+lineage: a-intel.billing.refunds-over-100
+label: Refunds over $100
+description: Refunds above $100 wait for a person's approval in the run.
+kind: business-rule
+force: must
+scope: repository
+repos:
+  - github.com/a-intel/billing-service
+tools:
+  - billing__create_refund
+status: active
+origin: user
+provenance:
+  source: proposal
+  uri: oxagen:proposal/prp_01K5RW2P
+---
+
+Refunds over $100 need a person's approval before you call
+`billing__create_refund`. Ask in the run and wait. Do not split one refund
+into smaller refunds to stay under the limit.</code></pre></figure></div></dialog><dialog id="ex-code-rule" class="exdlg" aria-labelledby="ex-code-rule-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-code-rule-t">Code rule</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">A rule about how code is written. Loads when the run touches a matching file.</p><figure class="code"><figcaption><span class="path">steering/platform/a-intel.platform.tenant-queries.md</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="md">---
+schema: steering-record/v1
+lineage: a-intel.platform.tenant-queries
+label: Tenant queries use withTenantDb
+description: Every tenant table query goes through withTenantDb.
+kind: code-rule
+force: must
+scope: repository
+repos:
+  - github.com/a-intel/platform
+applies_to:
+  - "packages/handlers/**/*.ts"
+  - "packages/database/src/**"
+load: match
+status: active
+origin: inferred
+provenance:
+  source: run
+  uri: frame:run_01K5R8QZ/412
+---
+
+Every query that reads or writes a tenant table goes through
+`withTenantDb(ctx, fn)`. Never call `db()` directly in a handler.
+
+```ts
+await withTenantDb(ctx, (tx) =&gt; tx.select().from(runs).where(eq(runs.id, id)));
+```</code></pre></figure></div></dialog><dialog id="ex-constraint" class="exdlg" aria-labelledby="ex-constraint-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-constraint-t">Constraint</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">A gate with an effect of require or forbid. Never grants authority.</p><figure class="code"><figcaption><span class="path">steering/platform/a-intel.platform.no-push-to-main.md</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="md">---
+schema: steering-record/v1
+lineage: a-intel.platform.no-push-to-main
+label: Never push to main
+description: Work reaches main only through a pull request.
+kind: constraint
+effect: forbid
+force: must
+scope: workspace
+status: active
+origin: user
+provenance:
+  source: proposal
+  uri: oxagen:proposal/prp_01K5V0AB
+---
+
+Do not push to `main` or force-push any shared branch. Open a pull request
+from a branch named for the work.</code></pre></figure></div></dialog><dialog id="ex-procedure" class="exdlg" aria-labelledby="ex-procedure-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-procedure-t">Procedure</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">Steps to follow for a task. Reaches a request when the task fits.</p><figure class="code"><figcaption><span class="path">steering/platform/a-intel.platform.release-steps.md</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="md">---
+schema: steering-record/v1
+lineage: a-intel.platform.release-steps
+label: Release steps
+description: How to cut a release of the platform service.
+kind: procedure
+force: should
+scope: repository
+repos:
+  - github.com/a-intel/platform
+load: relevant
+status: active
+origin: user
+provenance:
+  source: proposal
+  uri: oxagen:proposal/prp_01K5W1CE
+---
+
+1. Merge every pull request labeled for the release.
+2. Run `pnpm changeset version` and commit the changelog.
+3. Tag the commit `vX.Y.Z` and push the tag.
+4. Call `github__create_release` with the changelog section as the body.</code></pre></figure></div></dialog><dialog id="ex-fact" class="exdlg" aria-labelledby="ex-fact-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-fact-t">Fact</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">Something true about the work. Loads when it fits the request.</p><figure class="code"><figcaption><span class="path">steering/platform/a-intel.platform.production-branch.md</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="md">---
+schema: steering-record/v1
+lineage: a-intel.platform.production-branch
+label: Production deploys from main
+description: Which branch deploys to production, and when.
+kind: fact
+force: info
+scope: repository
+repos:
+  - github.com/a-intel/platform
+load: relevant
+status: active
+origin: user
+provenance:
+  source: import
+  uri: oxagen:import/claude-md/platform
+---
+
+`main` deploys to production on every merge, through the `deploy` workflow.
+Staging deploys from `staging` on the same schedule.</code></pre></figure></div></dialog><dialog id="ex-ontology" class="exdlg" aria-labelledby="ex-ontology-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-ontology-t">Ontology entry</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">A fact that defines one entity or term. Definitions only.</p><figure class="code"><figcaption><span class="path">steering/domain/a-intel.domain.refund.md</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="md">---
+schema: steering-record/v1
+lineage: a-intel.domain.refund
+label: Refund
+description: What a refund is at a-intel, its states, and the tools that change it.
+kind: fact
+force: info
+scope: workspace
+tools:
+  - billing__*
+load: relevant
+status: active
+origin: user
+provenance:
+  source: proposal
+  uri: oxagen:proposal/prp_01K5Y1QA
+---
+
+A refund returns money against one captured charge. Amounts are integers in
+cents.
+
+States: `pending`, `succeeded`, `failed`, `canceled`. Only `pending` can be
+canceled, with `billing__cancel_refund`.
+
+A refund belongs to one charge (`billing__get_charge`) and one customer.</code></pre></figure></div></dialog><dialog id="ex-preference" class="exdlg" aria-labelledby="ex-preference-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-preference-t">Style preference</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">How the team likes things written or built.</p><figure class="code"><figcaption><span class="path">steering/platform/a-intel.platform.headings-sentence-case.md</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="md">---
+schema: steering-record/v1
+lineage: a-intel.platform.headings-sentence-case
+label: Sentence case headings
+description: Headings, buttons, and labels use sentence case.
+kind: preference
+force: should
+scope: workspace
+status: active
+origin: user
+provenance:
+  source: proposal
+  uri: oxagen:proposal/prp_01K5T3MX
+---
+
+Write every heading, button, label, and table header in sentence case.
+Capitalize only the first word and proper nouns: "Run cost", not "Run Cost".</code></pre></figure></div></dialog><dialog id="ex-skill" class="exdlg" aria-labelledby="ex-skill-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-skill-t">Skill</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">A packaged capability with its own files. The index line always, the body on demand.</p><figure class="code"><figcaption><span class="path">steering/skills/a-intel.platform.write-migration/SKILL.md</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="md">---
+schema: steering-record/v1
+lineage: a-intel.platform.write-migration
+label: Write a database migration
+kind: skill
+name: write-migration
+description: Write and check an Atlas migration for a schema change in packages/database.
+force: may
+scope: repository
+repos:
+  - github.com/a-intel/platform
+load: relevant
+status: active
+origin: user
+provenance:
+  source: proposal
+  uri: oxagen:proposal/prp_01K5W9CD
+---
+
+# Write a database migration
+
+1. Change the schema in `packages/database/src/schema/`.
+2. Run `pnpm db:diff &lt;name&gt;` to generate the migration.
+3. Start from @template.sql for the row-level security block.
+4. Add the `schema` label to the pull request. Migrations apply on merge.</code></pre></figure></div></dialog><dialog id="ex-memory" class="exdlg" aria-labelledby="ex-memory-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-memory-t">Memory</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">Something an agent learned in a run, promoted by a memory PR.</p><figure class="code"><figcaption><span class="path">steering/memory/platform/a-intel.platform.ci-cache-key.md</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="md">---
+schema: steering-record/v1
+lineage: a-intel.platform.ci-cache-key
+label: CI cache key includes the lockfile
+description: A dependency change without a lockfile update breaks CI.
+kind: memory
+force: info
+scope: repository
+repos:
+  - github.com/a-intel/platform
+applies_to:
+  - "pnpm-lock.yaml"
+  - ".github/workflows/**"
+load: match
+status: active
+origin: inferred
+provenance:
+  source: run
+  uri: frame:run_01K5QK7D/88
+---
+
+The CI cache key hashes `pnpm-lock.yaml`. A run that changes dependencies
+without updating the lockfile restores a stale cache and fails typecheck.</code></pre></figure></div></dialog><dialog id="ex-policy" class="exdlg" aria-labelledby="ex-policy-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-policy-t">Cedar policy</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">Never sent to the model. The gateway decides each tool call with it.</p><figure class="code"><figcaption><span class="path">policy/money.cedar</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">// Refunds above $100 park for a person's approval.
+// The record a-intel.billing.refunds-over-100 tells the agent why.
+@id("refund.over-100")
+@decision("require_approval")
+forbid (principal, action == Action::"billing__create_refund", resource)
+when { context.args has amount &amp;&amp; context.args.amount &gt; 10000 }
+unless { context.approval.granted };</code></pre></figure></div></dialog><dialog id="ex-tools" class="exdlg" aria-labelledby="ex-tools-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-tools-t">Imported tool</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">One tool an MCP server offers, imported with its risk classification.</p><figure class="code"><figcaption><span class="path">servers/billing/tools.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/mcp-tools/v1.json
+schema = "mcp-tools/v1"
+
+[tools.create_refund]
+operation = "createRefund"
+description = "Refund part or all of a captured charge. amount is in cents and defaults to the whole charge."
+risk = "high"
+side_effect = "irreversible"
+egress = "org_tenant"
+impacts = ["moves_money"]
+idempotency_header = "Idempotency-Key"</code></pre></figure></div></dialog><dialog id="ex-reflection" class="exdlg" aria-labelledby="ex-reflection-t"><div class="exdlg-in"><div class="exdlg-head"><h4 id="ex-reflection-t">Reflection</h4><button type="button" class="exclose">Close</button></div><p class="exdlg-sub">An agent&#x27;s account of one run. Stays in Oxagen and produces memory candidates.</p><figure class="code"><figcaption><span class="path">reflection/v1, as Oxagen stores it</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="json">{
+  "schema": "reflection/v1",
+  "run": "run_01K5QK7D",
+  "agent": "a-intel.core.release-manager",
+  "outcome": "completed",
+  "summary": "Released 4.2.0 after the first CI run failed on a stale dependency cache.",
+  "lessons": [
+    {
+      "statement": "The CI cache key hashes pnpm-lock.yaml. Update the lockfile with any dependency change.",
+      "kind": "memory",
+      "repos": ["github.com/a-intel/platform"],
+      "evidence": ["frame:run_01K5QK7D/88"]
+    }
+  ]
+}</code></pre></figure></div></dialog>
   <h3>Ontology entry</h3>
   <p>An entity is a <code>fact</code> with a short definition, its states, and the tools that touch it. <code>tools</code> keeps it out of runs that cannot call those tools.</p>
   <figure class="code"><figcaption><span class="path">steering/domain/a-intel.domain.refund.md</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="md">---
@@ -1250,6 +1489,27 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
       var parts = [];
       cards.forEach(function (c) { var k = c.querySelector("pre code"); if (k) parts.push(k.textContent); });
       copy(parts.join("\n\n----------\n\n"), wbtn, function () { flash(wbtn, "Copy each prompt below"); });
+    }
+  });
+
+  /* ---------- Example dialogs ---------- */
+  document.addEventListener("click", function (ev) {
+    var open = ev.target.closest(".exbtn");
+    if (open) {
+      var d = document.getElementById(open.getAttribute("data-dialog"));
+      if (d && typeof d.showModal === "function") d.showModal();
+      else if (d) d.setAttribute("open", "");
+      return;
+    }
+    var shut = ev.target.closest(".exclose");
+    if (shut) {
+      var dd = shut.closest("dialog");
+      if (dd && typeof dd.close === "function") dd.close();
+      else if (dd) dd.removeAttribute("open");
+      return;
+    }
+    if (ev.target.tagName === "DIALOG" && ev.target.classList.contains("exdlg") && typeof ev.target.close === "function") {
+      ev.target.close();
     }
   });
 
