@@ -111,7 +111,7 @@ depended on proof: it is what the frames show bought nothing, so it stays with o
 - The workspace governance mode (`solo`, `team`, `regulated`) is a setting: a chip on the Steering
   header opens a dialog that shows the three modes and the `governance.toml` it would write, the
   Edit workspace dialog carries the same select, and the Organization workspaces table reads it
-  off the workspace. Changing it opens a Context PR; nothing else writes that file.
+  off the workspace. Changing it opens a Steering PR; nothing else writes that file.
 
 - The Run page leads with the generated summary, then one row of stat boxes (Tokens, Prompts,
   Cost, Wasted, Wall clock, Cache hit), then the tabs (Transcript open by default, Issues, Governed
@@ -129,12 +129,12 @@ depended on proof: it is what the frames show bought nothing, so it stays with o
   certifies it. This is the task's definition of done, a list a person certifies and accepts. It is
   not the run dod removed above, and none of that one's verdict words apply. Ready tasks go to an
   agent the sender operates in a work order: the merged definition of done, an editable prompt with
-  `@` mentions of context records and agent profiles, and confirmed repositories. Workflows chain
+  `@` mentions of steering records and agent profiles, and confirmed repositories. Workflows chain
   agents (fix, validate, document, review) and end with a person. `tools/check-tasks.mjs` walks it.
 - Markdown import (2026-09-24, `pages/steering.md`): **Import Markdown** on the Steering header,
   in the Create chooser, and in ⌘K opens a three-step wizard (Files, Review, Publish). oxagen reads
   CLAUDE.md, AGENTS.md, and any Markdown file into candidate lines. You accept each one as a record
-  or a memory. Records open one Context PR per source file, listed on `pages/steering-prs.md`.
+  or a memory. Records open one Steering PR per source file, listed on `pages/steering-prs.md`.
   Memories are written at publish, steer at `may` or `info`, and join a memory that already says
   the same thing. An imported saying counts toward a memory's sayings and never toward its runs.
 - Run memories (2026-09-24, `pages/run-memories.md`): the Run page has five tabs, and Memories

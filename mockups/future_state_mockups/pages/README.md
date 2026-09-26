@@ -31,7 +31,7 @@ and `skill-source.md` are the Skills tab, which has no nav entry of its own any 
 Phase 2 of the steering and gateway plan as shipped: agents sit on the `observe` or `harness` tier,
 and `gateway` and `contained` appear only as tiers not yet available.
 
-The five creation wizards (agent, tool, skill, context record, and the `.oxagen/` directory
+The five creation wizards (agent, tool, skill, steering record, and the `.oxagen/` directory
 itself) are dialogs rather than pages, so they have no `<page>.md`; their spec is
 `docs/creation-spec.md`, and the three pages they end at — `record`, `skill-source` and
 `repositories` — are specified here.

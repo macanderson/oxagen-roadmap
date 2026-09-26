@@ -12,9 +12,9 @@
   {
    "id": "tb_repo_contributor",
    "name": "Repository contributor",
-   "desc": "Propose changes: open a pull request, comment on one, and open a Context PR.",
+   "desc": "Propose changes: open a pull request, comment on one, and open a Steering PR.",
    "owner": "platform",
-   "tools": ["github__create_pull_request@3", "github__create_issue_comment@2", "open_context_pr@1"],
+   "tools": ["github__create_pull_request@3", "github__create_issue_comment@2", "open_steering_pr@1"],
    "updated": "2026-09-02 09:22 UTC",
    "by": "marcus"
   },

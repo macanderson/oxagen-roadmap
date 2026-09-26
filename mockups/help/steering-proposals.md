@@ -38,7 +38,7 @@ Proposals come from four places: an agent's memory, a finding, an operator's ste
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
-| Kind, force, statement, lineage | `PROPOSALS` (`fixtures/proposals.json` plus six pushed in `engine.js`) | `agent.context_proposals` via `list_proposals` | shipped |
+| Kind, force, statement, lineage | `PROPOSALS` (`fixtures/proposals.json` plus six pushed in `engine.js`) | `agent.steering_proposals` via `list_proposals` | shipped |
 | State badge | `PROPOSALS[].state`, `prpBadge()` | Proposal `status` | shipped |
 | Checks badge | `PROPOSALS[].checks`, `S.ctxpr` | `checks` passed of total | shipped |
 | "from <source>" | `PROPOSALS[].from` | `source` | shipped |
@@ -51,7 +51,7 @@ Proposals come from four places: an agent's memory, a finding, an operator's ste
 - **Review** sets `S.prpSel` and re-renders. The address stays `/steering/proposals`.
 - The shared list controls (Sort, Rows, pager) come from `listify()`.
 - The card's scope is fixed to "workspace". The mockup lists every proposal in the organization. A build lists this workspace's only.
-- Fixture defects a build does not copy: the third card's "open Context PR", and checks counted out of 5, 7 and 4 where every record pull request runs six.
+- Fixture defects a build does not copy: the third card's "open Steering PR", and checks counted out of 5, 7 and 4 where every record pull request runs six.
 
 ### States
 Loaded only. On a phone each card stacks its badges over the statement and wraps its meta line.
@@ -181,8 +181,8 @@ One concern is one pull request, so the panel offers to open one only while the 
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
-| Target, Branch, File | fixed to `a-intel/platform`, derived from `p.lineage` | `get_context_pr` repository, branch, path | shipped |
-| Governance | `govGate(ws())` over `GOV_GATE` | `get_context_pr` `governanceMode` and the merge gate | shipped |
+| Target, Branch, File | fixed to `a-intel/platform`, derived from `p.lineage` | `get_steering_pr` repository, branch, path | shipped |
+| Governance | `govGate(ws())` over `GOV_GATE` | `get_steering_pr` `governanceMode` and the merge gate | shipped |
 | Action state | `S.ctxpr`, `PROPOSALS[].pr` and `checks` | Proposal `status` and `pr` | shipped |
 
 ### Logic
@@ -192,7 +192,7 @@ The action, in order:
 3. Another proposal with a pull request: its number and checks in mono ("a-intel/platform#520 · 5 / 6 · conflict check running").
 4. A candidate with no path in the design: a disabled **Open a pull request**.
 
-The mockup fixes Target. Governance reads `govGate()`: the mode and who merges under it, "team: an org Owner or Admin, or a workspace Owner, other than the author merges", the same words the shipped app's pull request panel uses. It claims no code-owner review, which no shipped gate runs. A build reads both from `get_context_pr`.
+The mockup fixes Target. Governance reads `govGate()`: the mode and who merges under it, "team: an org Owner or Admin, or a workspace Owner, other than the author merges", the same words the shipped app's pull request panel uses. It claims no code-owner review, which no shipped gate runs. A build reads both from `get_steering_pr`.
 
 ### States
 Loaded only. While the header's New source is gold, case 1 puts a second gold on the screen. A build keeps one.
@@ -211,7 +211,7 @@ A published record costs tokens on every turn in scope, so the price belongs bes
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
 | Reaches | fixed text | Proposal scope | shipped |
-| As (bundle version, force) | `STEER_BUNDLE.v`, `p.force` | `get_context_pr` `onMerge.bundleVersion` | shipped |
+| As (bundle version, force) | `STEER_BUNDLE.v`, `p.force` | `get_steering_pr` `onMerge.bundleVersion` | shipped |
 | Costs | `PRP_META[id].tok`, `stgBundle().tok` | Tokens a turn before and after | future-only |
 | Baseline | `PRP_META[id].measure(s)`, `prpStats().keptRate` | The baseline measure | future-only |
 
@@ -240,11 +240,11 @@ One concern per pull request, so the dialog shows a callout and offers **Go to**
 |---|---|---|---|
 | Concern, kind, force | `PROPOSALS[]` | Proposal fields | shipped |
 | Supporting evidence | `PRP_META[id].support(s)`, finding id | `support` | partial |
-| Open | `ctxprOpen()`, `prRun()` | `open_context_pr` | shipped |
+| Open | `ctxprOpen()`, `prRun()` | `open_steering_pr` | shipped |
 
 ### Logic
 - `DLG_EXT.ctxpr(id)` shows the callout "a-intel/platform#519 is already open for this concern." while `S.ctxpr.st` is not `none`.
-- Fields restate the proposal. `open_context_pr` takes the proposal id alone, so editing a field changes nothing in the mockup or in the contract.
+- Fields restate the proposal. `open_steering_pr` takes the proposal id alone, so editing a field changes nothing in the mockup or in the contract.
 - Footer: Cancel, and **Go to a-intel/platform#519** when open, **Open the pull request** for the promoter's proposal, or, for any other, a close with the toast "Branch context/<lineage> pushed and a pull request opened on a-intel/platform."
 - `ctxprOpen()` sets the Pull requests view, calls `prRun(CTXPR, S.ctxpr, …)` and toasts "Branch context/ctx.release.no-reread-changelog pushed and a-intel/platform#519 opened. 6 checks queued."
 - The Constraint effect field shows for every kind. The contract refuses an effect on anything but a constraint.

@@ -205,7 +205,7 @@ The other kinds have no card, because they change somewhere else. An agent appen
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
 | Subtitle's repository | `ws().main` | The workspace's main repository | shipped |
-| Steering record card | `wzOpen('record')` | `propose_record`, `open_context_pr` | shipped |
+| Steering record card | `wzOpen('record')` | `propose_record`, `open_steering_pr` | shipped |
 | Document card | `openDialog('srcreg')` | `.oxagen/sources.toml` | future-only |
 | Skill card | `wzOpen('skill')` | `propose_skill` | partial |
 | Glossary term card | `openDialog('ontnew')` | `.oxagen/ontology/*.toml` | future-only |
@@ -321,7 +321,7 @@ The import is the one exception to the rule that every source changes by a pull 
 | Memories and sayings | `wzImpPublish()` into `MEMORY` | The memory index | future-only |
 | Audit event | `auditEvent("steering_imported", …)` | Audit | future-only |
 
-`open_context_pr` opens a pull request for one record file only (`steering-prs.md`), and no contract takes an imported memory or saying.
+`open_steering_pr` opens a pull request for one record file only (`steering-prs.md`), and no contract takes an imported memory or saying.
 
 ### Logic
 `wzOpen('import')` opens it from Import Markdown on every Steering tab and from ⌘K Create. `wzSteps()` returns Files, Review and Publish. The footer names `CREATE.import.need`, "needs steering.write · memory.write on <workspace>".
@@ -362,8 +362,8 @@ What each kind can never do, and how it reaches a run (`KIND_USE`):
 | Lineage | `wzRecLineage()` | `lineage_id` in `.oxagen/rules/<lineage>.toml` | shipped |
 | Scope `agent` | `wzRecord()` step 3 | `sharing_scope` | future-only |
 | Token estimate | `wzRecTok()`, characters divided by 3.3 | The adapter's token cost | partial |
-| Six checks | `recprChecks()` | The checks `open_context_pr` runs | shipped |
-| Pull request | `wzRecOpenPr()` into `RECPRS` | `propose_record`, then `open_context_pr` | shipped |
+| Six checks | `recprChecks()` | The checks `open_steering_pr` runs | shipped |
+| Pull request | `wzRecOpenPr()` into `RECPRS` | `propose_record`, then `open_steering_pr` | shipped |
 
 ### Logic
 `wzOpen('record')` opens it from New source › Write one and ⌘K Create. A memory's Propose as a Steering record calls `memPromote()`, which seeds the description with the memory's body. `wzSteps()` returns Describe, Kind, Statement, Checks and Pull request. The footer names "needs steering.write on <workspace>".

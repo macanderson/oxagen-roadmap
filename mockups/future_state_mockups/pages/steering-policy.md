@@ -20,7 +20,7 @@ The gates, shown as the second compilation. A gate is deterministic, never budge
 
 **The seven tabs, in this order:** Records (N published) · Skills (N in scope) · Memory (N) · Ontology (N) · Policy (N gates) · Proposals (N candidates plus open pull requests) · Preview. Each tab is a URL segment, `#/:org/:ws/steering/<tab>`. The hash is read on load and on `hashchange`; a tab changed by code writes the hash back with `replaceState`, so every view is a link. The bare route `#/:org/:ws/steering` is Records.
 
-Header action: **Write a context record** (gold; opens the record wizard: describe, kind, statement, checks, pull request).
+Header action: **Write a steering record** (gold; opens the record wizard: describe, kind, statement, checks, pull request).
 
 - Two panels side by side. **The first compilation: text**: every item compiles to text the model reads; text is advisory, ranked, budgeted, and may be dropped. **The second compilation: gates**: an item with an enforcement grant also compiles to a gate; a gate is deterministic, never budgeted, never ranked, and it answers when the index is down.
 - **Gates, and the notice each one puts into steering** table: Gate (its kind, `decision rule`, `mandate`, or `kill switch`, with its source: a policy rule id, a mandate id, a switch id, or the record whose grant compiled it) · Outcome (the same gate badge Tools renders: needs approval, denied, kill switch) · Applies to · Gate notice (the one line, with the notice's item id) · Notice cost (tokens) · Edited on (a button).

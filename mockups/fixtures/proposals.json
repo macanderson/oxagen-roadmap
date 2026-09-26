@@ -7,7 +7,7 @@
   "from": "findings job · fnd_01K5RT6C",
   "st": "Do not re-read CHANGELOG.md more than once in a run; cache the first read.",
   "support": "682 duplicate tool calls across 212 runs",
-  "state": "open Context PR",
+  "state": "open Steering PR",
   "pr": "a-intel/platform#519",
   "checks": "6 / 6 pass"
  },
@@ -31,7 +31,7 @@
   "from": "Marcus Bell",
   "st": "Migrations run in filename order; never renumber a merged migration.",
   "support": "3 data-layer drift findings",
-  "state": "open Context PR",
+  "state": "open Steering PR",
   "pr": "a-intel/platform#520",
   "checks": "5 / 6 · conflict check running"
  },

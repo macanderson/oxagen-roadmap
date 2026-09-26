@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Spec v1, for build, rev 1 scope. Amended 2026-09-24 by the fleet operations wedge (`fleet-operations-wedge.md`): a context record is a Steering record, skills are a kind on Steering › Sources, and the editing pages are the Steering source pages |
+| **Status** | Spec v1, for build, rev 1 scope. Amended 2026-09-24 by the fleet operations wedge (`fleet-operations-wedge.md`): records are Steering records, skills are a kind on Steering › Sources, and the editing pages are the Steering source pages |
 | **Date** | 2026-09-15 |
 | **Owner** | Mac Anderson |
 | **Source** | `mockups/src/engine.js` → `DLG_EXT.create`, `DLG_EXT.wz`, `wzTool`, `wzSkill`, `wzAgent`, `wzRecord`, `wzImport`, `wzImpPublish`, `pRecord`, `pSkillSource`; rendered in `mockups/missioncontrol.html` |

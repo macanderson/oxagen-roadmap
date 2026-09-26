@@ -571,7 +571,7 @@ h2,h3,h4,.mark,.fact dd,.steps li>b,.dg-title,.fm-launch b,.fm-head{font-family:
     <tbody>
       <tr><td class="k nw">C0 read</td><td>Search, inspect, calculate, render a chart</td><td>Runs within existing read grants and cites its scope</td><td><code>mutates: false</code></td></tr>
       <tr><td class="k nw">C1 draft</td><td>A private artifact, an action plan, any change inside the contained session</td><td>Runs and saves as a draft. Changes nothing outside Oxagen or the session.</td><td><code>mutates: true</code>, no approval</td></tr>
-      <tr><td class="k nw">C2 reversible</td><td>Edit a work item, link records, update a context record</td><td>Shows the exact diff. Waits for approval unless a pre-authorization rule matches.</td><td><code>requiresApproval: true</code> unless pre-authorized</td></tr>
+      <tr><td class="k nw">C2 reversible</td><td>Edit a work item, link records, update a steering record</td><td>Shows the exact diff. Waits for approval unless a pre-authorization rule matches.</td><td><code>requiresApproval: true</code> unless pre-authorized</td></tr>
       <tr><td class="k nw">C3 consequential</td><td>Assign work, change status, open or merge a pull request, start a workflow, publish</td><td>Named approval, destination, and receipt</td><td><code>requiresApproval: true</code></td></tr>
       <tr><td class="k nw">C4 high impact</td><td>Access, secrets, deletion, production, broad external distribution</td><td>Confirmation immediately before execution, with the rollback path</td><td><code>requiresApproval: true</code> and a second confirmation</td></tr>
     </tbody>
@@ -611,7 +611,7 @@ launchReceipt = { profile, sessionId, imageDigest, toolHostDigest, configDigest,
   <div class="adrgroup">
     <div class="adr"><span class="id">D1<small>Phase 0</small></span><div><b>Contained sessions for stella</b><p>Decided on 2026-09-25: stella gets a sandbox. The ADR amends ADR-043 Decision 2, ADR-053 section 1, and <code>docs/VISION.md</code> drift test 6, adds the tier rule for <code>arun_</code> runs to ADR-095, and records the profile. Recommendation: an ECS task on Fargate per thread for the first profile, since it gives each session its own kernel with no metal fleet to run. Firecracker on metal hosts is the second profile if start time or cost demands it. Refs #4176.</p></div></div>
     <div class="adr"><span class="id">D2<small>Phase 0</small></span><div><b>Sub-agents and long turns</b><p>stella-serve runs read-only children under operator caps and holds sessions with checkpoints. ADR-043 retired Oxagen's own fan-out (ADR-010). The ADR sets the caps (children per turn, steps per child, steps per turn kind, wall time), how child calls bill and record, and how a turn outlives the flyout under ADR-092.</p></div></div>
-    <div class="adr"><span class="id">D3<small>Phase 0</small></span><div><b>Workspace Context names</b><p>The capability spec proposes <code>query_context</code> and <code>get_context_entity</code>. Oxagen's <code>context.*</code> family already means steering records, and ADR-137 calls standing decisions "workspace context records". Recommendation: a <code>workspace_context.*</code> family with agent names such as <code>query_workspace_context</code>, and <code>search_graph</code> plus the ontology tools kept as aliases for one migration cycle.</p></div></div>
+    <div class="adr"><span class="id">D3<small>Phase 0</small></span><div><b>Workspace Context names</b><p>The capability spec proposes <code>query_context</code> and <code>get_context_entity</code>. Oxagen's <code>context.*</code> family already means steering records, and ADR-137 calls standing decisions "workspace steering records". Recommendation: a <code>workspace_context.*</code> family with agent names such as <code>query_workspace_context</code>, and <code>search_graph</code> plus the ontology tools kept as aliases for one migration cycle.</p></div></div>
     <div class="adr"><span class="id">D4<small>Phase 2</small></span><div><b>Where analysis runs</b><p>Open decision 2 of the capability spec. Recommendation: both, in sequence. A governed read writes a snapshot with its provenance into the contained session, and analysis code runs over snapshots only. The session never queries a live store.</p></div></div>
   </div>
   <div class="tscroll"><table>
@@ -928,7 +928,7 @@ return results.map((r, i) => {
     {
       id: "D3", phase: 0, kind: "decision", repo: "oxagen", slug: "workspace-context-names-adr",
       title: "Workspace Context names", planes: ["observe", "query"],
-      why: "The capability spec retires ontology as the product term and proposes query_context and get_context_entity. Oxagen's context.* family already means steering records, and ADR-137 calls standing decisions workspace context records. The proposed names would collide.",
+      why: "The capability spec retires ontology as the product term and proposes query_context and get_context_entity. Oxagen's context.* family already means steering records, and ADR-137 calls standing decisions workspace steering records. The proposed names would collide.",
       refs: "ADR-137, packages/oxagen/src/contracts/context.*, graph.*, and ontology.*, and section 4 of docs/in-app-agent-capability-expansion-spec.md in macanderson/oxagen-roadmap",
       issues: [], deps: [],
       goal: "An ADR that names the Workspace Context tool family without colliding with context.*, keeps search_graph and the ontology tools as aliases for one migration cycle, and settles open decision 6 of the capability spec.",
@@ -1135,9 +1135,9 @@ return results.map((r, i) => {
       id: "S12", phase: 1, kind: "build", repo: "oxagen", slug: "workspace-search",
       title: "Workspace search and source spans", planes: ["query"],
       why: "stella cannot find a record it has no tool for, and it cannot say how fresh an answer is.",
-      refs: "run.*, repo.*, repository.tree.get, connection.*, integration.*, graph.*, context.records.* contracts",
+      refs: "run.*, repo.*, repository.tree.get, connection.*, integration.*, graph.*, steering.records.* contracts",
       issues: [], deps: ["S02"],
-      goal: "search_workspace across runs, repositories, connections, context records, and the graph, plus get_source_record and get_source_span, each with freshness and partial-result markers.",
+      goal: "search_workspace across runs, repositories, connections, steering records, and the graph, plus get_source_record and get_source_span, each with freshness and partial-result markers.",
       readers: [
         "Which read contracts exist per source, which are on the agent surface, and how does each bound its query by workspace?",
         "How do connections and integrations sync (connection.*, integration.sync), and what does each record carry for observed time and permissions?"
@@ -1180,7 +1180,7 @@ return results.map((r, i) => {
       why: "stella in the terminal keeps notes with save_state and reads files it was handed. Neither needs a sandbox. conversation.attachment.add and conversation.files.list already exist.",
       refs: "in ~/Projects/stella, docs/tools/save_state.toml, get_state.toml, list_state.toml, delete_state.toml, read_file.toml, and packages/oxagen/src/contracts/conversation.attachment.add.ts, conversation.files.list.ts",
       issues: ["Closes #4179"], deps: ["S01"],
-      goal: "Per-thread save_state, get_state, list_state, and delete_state with Stella's schemas, read_file over a thread's attachments, and Markdown attachments turned into memories or context records after the person confirms.",
+      goal: "Per-thread save_state, get_state, list_state, and delete_state with Stella's schemas, read_file over a thread's attachments, and Markdown attachments turned into memories or steering records after the person confirms.",
       readers: [
         "What do conversation.attachment.add and conversation.files.list store, where, and with what size limits?",
         "What schemas does Stella declare for the four state tools and read_file (docs/tools/*.toml in ~/Projects/stella)?"
@@ -1188,7 +1188,7 @@ return results.map((r, i) => {
       units: [
         "Scratch state contracts with Stella's schemas, stored per thread with a size cap",
         "read_file over the thread's attachments with Stella's schema",
-        "Markdown attachment in the composer, turned into memories or context records after confirmation (#4179)"
+        "Markdown attachment in the composer, turned into memories or steering records after confirmation (#4179)"
       ],
       done: [
         "The four state tools and read_file accept Stella's inputs unchanged",
@@ -1576,12 +1576,12 @@ return results.map((r, i) => {
       id: "S42", phase: 4, kind: "build", repo: "oxagen", slug: "mutation-adapters",
       title: "Mutation adapters", planes: ["change"],
       why: "Plans need adapters that write to the systems people use, each idempotent and reversible where the system allows.",
-      refs: "the S13 providers, context.record.* contracts, S40 contracts",
+      refs: "the S13 providers, steering.record.* contracts, S40 contracts",
       issues: [], deps: ["S40", "S13"],
-      goal: "create_work_item, update_work_item, link_records, assign_work, and update_context_record through the connected issue providers and context records, each idempotent by request id and applied only through a plan.",
+      goal: "create_work_item, update_work_item, link_records, assign_work, and update_steering_record through the connected issue providers and steering records, each idempotent by request id and applied only through a plan.",
       readers: [
         "Which providers from S13 accept writes, and with what credentials held where?",
-        "What does context.record.revise and context.record.publish do, and which is reversible?"
+        "What does steering.record.revise and steering.record.publish do, and which is reversible?"
       ],
       units: [
         "The five adapters behind S40",

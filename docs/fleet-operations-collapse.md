@@ -26,7 +26,7 @@ This list has two halves. The first is what this change deletes or merges in thi
 | Steering Library and its shelves | Merge | Sources, with a kind filter |
 | Steering › Memory and Steering › Ontology | Merge | Source kinds `memory` and `glossary` on Sources. Promotion is a proposal |
 | Steering › Gates | Move | Tools › Policy, and constraint frames on Sources |
-| Context record page | Rename | Steering source page, kind `record` |
+| The record page | Rename | Steering source page, kind `record` |
 | Spend tabs Tokens, Coaching, By operator, By agent, By model, By tool, Wasted spend | Merge | Overview (grouping) and Optimization |
 | Spend drill pages | Delete | The Overview side panel |
 | Operator coaching severity and ranking | Delete | Operator habits as rules to adopt, with no rank |

@@ -21,7 +21,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 
 1. **Route and shell.** The build serves the route with and without the agent segment. Steering is lit in the sidebar. There is no Skills nav entry. The breadcrumb ends on Steering. The top bar has the Approvals button left of the avatar with the organization-wide waiting count; it opens the drawer `#apdrawer`, a selected row shows the approval card with Approve and Deny, and Escape closes it. No assistant button in the top bar.
 2. **Hub header, chip, and tabs.** Eyebrow is the workspace name, h1 “Steering”, the one-sentence subtext, the governance chip “Governance: <mode>”. Seven tabs in this order: Records, Skills, Memory, Ontology, Policy, Proposals, Preview, with counts and none on Preview. This tab is selected. Each tab is a URL segment, and reloading the URL lands on the same tab and agent.
-3. **One gold action.** Write a context record in the hub header is the one gold action. The chip is not gold; no prompt chip is gold.
+3. **One gold action.** Write a steering record in the hub header is the one gold action. The chip is not gold; no prompt chip is gold.
 4. **Sections and tables.** The build has each item below with the same headings and every column named, in that order.
    - Controls: Agent select with “name · harness · tier” options and the tier line under it, Prompt textarea, six prompt chips with the copy the spec quotes.
    - The delivery warning where the spec says it renders, verbatim.
@@ -33,7 +33,7 @@ Work through every check. For each, record PASS, FAIL, or N/A (with why). Cite e
 6. **Actions.** Changing the agent changes the URL and the selection. Typing changes the selection without losing the caret. The same inputs give the same selection every time. Every item id links to where it is authored; a skill path opens the `skill` dialog.
 7. **Data sources.** For each row of the spec’s data-source table, find the adapter or query in the build that feeds it. ✅ rows are wired to the named store; 🟡 rows are wired for the fields that exist and render `NotBacked` for the rest; ❌ rows render `NotBacked` with the milestone named. A fixture reaching production is a FAIL.
 8. **States.** Force each state and compare copy and controls with the design:
-   - **empty** (`state=empty`): the hub header, chip, and tabs stay; the body is “Nothing to preview yet” with its sentences and Write a context record.
+   - **empty** (`state=empty`): the hub header, chip, and tabs stay; the body is “Nothing to preview yet” with its sentences and Write a steering record.
    - **loading** (`state=loading`): the shell stays and the body is the skeleton; no data, no zeros, no stale rows.
    - **error** (`state=error`): “Steering could not be loaded”, `503 record_index_unavailable`, Try again, Open an incident, and the trace line.
    - **access denied** (`state=denied`): “You cannot see this workspace’s steering”, naming `steering.read on core-platform`, with Request access and Back to Fleet.

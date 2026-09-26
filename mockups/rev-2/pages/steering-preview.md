@@ -16,7 +16,7 @@ The page that makes the competition visible. Pick an agent and a prompt, and see
 
 ## What is on the page
 
-**Hub header.** Eyebrow: the workspace name, h1 “Steering”, subtext “Everything that can steer an agent in this workspace competes in one assembler.” Actions: the governance chip **Governance: team** and **Write a context record** (gold; opens the record wizard). The chip and its `govmode` dialog are specified in `steering.md`.
+**Hub header.** Eyebrow: the workspace name, h1 “Steering”, subtext “Everything that can steer an agent in this workspace competes in one assembler.” Actions: the governance chip **Governance: team** and **Write a steering record** (gold; opens the record wizard). The chip and its `govmode` dialog are specified in `steering.md`.
 
 **The seven tabs, in this order:** Records (59) · Skills (6) · Memory (6) · Ontology (4) · Policy (6) · Proposals (15) · Preview. Each tab is a URL segment; Preview's segment carries the agent, `/steering/preview/<agent>`. Preview is selected.
 
@@ -40,7 +40,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 
 | Element | Mockup collection | Target store | Backing today (repo) | Status |
 |---|---|---|---|---|
-| Items | `RECORDS`, `STEER_BUNDLE`, `SKILLS`, `MEMORY`, `ONTOLOGY`, `GATES`, `STEERING_PREVIEW.instructions`, read into one shape by `stgItems()` | the assembler's source adapters behind the registry port | `packages/context-provider` (`packWithinBudget`) has no production importer today | ❌ |
+| Items | `RECORDS`, `STEER_BUNDLE`, `SKILLS`, `MEMORY`, `ONTOLOGY`, `GATES`, `STEERING_PREVIEW.instructions`, read into one shape by `stgItems()` | the assembler's source adapters behind the registry port | `packages/steering-provider` (`packWithinBudget`) has no production importer today | ❌ |
 | Agents, prompts, and budgets | `STEERING_PREVIEW` (`agents`, `prompts`, `budget`) | the agent registry; the budget in the signed bundle | none | ❌ |
 | Sync state | `SKILL_SYNC` | per-repository sync status | none | ❌ |
 | Token figures | `assembleSteering().tok` (`header`, `gates`, `prefix`, `volatile`, `total`) | `cost.run_totals` `steering_tokens` and `context_frame_tokens` on a run | 🟡 ClickHouse `token_usage` | 🟡 |
@@ -56,7 +56,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 ## States
 
 - **loaded**: the tab as described above, on the demo record (Anderson Intelligence Corp., `a-intel` / `core-platform`, operator Marcus Bell).
-- **empty**: the hub header, the chip, and the seven tabs stay; the header holds no gold. The body is “Nothing to preview yet”: “No item is published in this workspace, so the assembler has nothing to select from. Publish a record and this tab shows what an agent would receive.” Action: **Write a context record** (gold). A workspace with no preview agent renders “No agent in this workspace is set up for preview.”
+- **empty**: the hub header, the chip, and the seven tabs stay; the header holds no gold. The body is “Nothing to preview yet”: “No item is published in this workspace, so the assembler has nothing to select from. Publish a record and this tab shows what an agent would receive.” Action: **Write a steering record** (gold). A workspace with no preview agent renders “No agent in this workspace is set up for preview.”
 - **loading**: the shell stays; the page body, hub header included, is replaced by the skeleton (four tile blocks and a panel of seven rows).
 - **error**: “Steering could not be loaded”. “The control plane answered `503 record_index_unavailable`. Nothing was changed. Runs kept recording while this page was down. Frames are written by the collector on each host, not by Oxagen.” Actions: **Try again**, **Open an incident**; the trace line.
 - **access denied**: “You cannot see this workspace’s steering”, naming `steering.read on core-platform`. Actions: **Request access**, **Back to Fleet**. Below: *Signed in as*, *Needed*, *Decided by* (`pol_v41` · deny wins over every allow).

@@ -4,7 +4,7 @@
 |---|---|
 | Route | `#/a-intel/core-platform/repositories[/<tab>]` |
 | Scope | workspace |
-| Spec | §10 (the repository, steering and Context PRs); §11.2 (GitHub: events in, code graph up to date); Appendix F |
+| Spec | §10 (the repository, steering and Steering PRs); §11.2 (GitHub: events in, code graph up to date); Appendix F |
 | Design | `mockups/src/engine.js` → `pRepos()`, `repoTab()`, `copyTab()`, `chgTab()`, `cfgTab()`, `oxprDetail()`, `wzInit()`, `DLG_EXT.linkdir`, `DLG_EXT.workcopy`, `DLG_EXT.repo`, built into `mockups/missioncontrol.html` by `tools/build-mockup.mjs` |
 | States | loaded · empty · loading · error · access denied |
 | Storybook | `Oxagen / … / repositories`: one story per state, desktop and mobile (`npm run storybook`); the URL is `mockups/missioncontrol.html?product=1&state=<state>&mobile=<0\|1>#<route>` |
@@ -47,7 +47,7 @@ The same `.oxagen/` tree on a machine. Columns: Directory · Repository · Branc
 
 Every pull request Oxagen has open, across every kind of file. Columns: Change · Kind · Pull request · Opened by · State · Checks · Opened.
 
-- **Kind** is one of `Oxagen init`, `context record`, `skill`, `agent`, `tool`, `configuration`. Four kinds of file and one lifecycle: whoever opened it, the checks, the merge and the publication are the same, and only the body differs.
+- **Kind** is one of `Oxagen init`, `steering record`, `skill`, `agent`, `tool`, `configuration`. Four kinds of file and one lifecycle: whoever opened it, the checks, the merge and the publication are the same, and only the body differs.
 - **Opened by** names a person, **the promoter** or **the reconciler**, and the row says which. A promoter argues from runs; a person argues from the person; the reconciler argues from two records it read.
 - Selecting a row shows the pull request: the files it carries, why it exists, the checks with each one's own result text, and either **What merge will do** (five numbered consequences) or, once merged, what the merge did. **A check can fail, and a failed check stops the run where it stopped** — the failing row says why, the checks behind it stay queued, merge is disabled and nothing is published. A check that can only report "pass" is not a check.
 - **Merge pull request** is disabled until every check reports and is a no-op if called anyway. **Close without merging** discards the branch and publishes nothing; a merged one cannot be closed, because taking something back out of force is its own pull request.
@@ -81,7 +81,7 @@ Legend: ✅ backed today · 🟡 partial · ❌ no store (fixture in dev, `NotBa
 | Repositories, role, production branch | `REPOS` | `repositories` + the link row per workspace | `ingestion.repository_bindings`, `repository_binding_heads`; `bind_main_repository` binds main only | 🟡 |
 | `.oxagen/` presence, file count, commit | `REPOS.ox` | read from the production branch through the App | nothing reads it; `.oxagen/` exists only where a record was written | ❌ |
 | Working copies | `WORKCOPIES` | a working-copy row per enrolled machine | `oxagen init` writes `.oxagen/workspace.json` locally and reports nothing back | ❌ |
-| Changes (context records) | `OXPRS` (kind `record`) | `PROPOSES`, `PROMOTED_BY` | `open_context_pr` / `merge_context_pr` / `get_context_pr`, six checks, promotions ledger | ✅ |
+| Changes (steering records) | `OXPRS` (kind `record`) | `PROPOSES`, `PROMOTED_BY` | `open_steering_pr` / `merge_steering_pr` / `get_steering_pr`, six checks, promotions ledger | ✅ |
 | Changes (agent definitions) | `OXPRS` (kind `agent`) | the same lifecycle | `commit_agent_definition` opens one; **nothing merges it** | 🟡 |
 | Changes (skills, tools, config, init) | `OXPRS` | the same lifecycle | none — no skill sync, `.oxagen/tools/` documented unbuilt (ADR-072), no reconciler, no init | ❌ |
 | Governance mode | fixture | `.oxagen/rules/governance.toml` | read by `context.steering.policy.ts`; **nothing writes it** | 🟡 |
@@ -117,7 +117,7 @@ Top bar collapses to hamburger · current crumb · search glyph · notifications
 - `.oxagen/` presence read from the production branch — nothing reads it today
 - A working-copy record: `oxagen init` writes locally and reports nothing back
 - Writing `governance.toml` — it is read on every open and merge and written by nothing
-- A merge capability for agent-definition pull requests, to match `merge_context_pr`
+- A merge capability for agent-definition pull requests, to match `merge_steering_pr`
 - Skill and tool pull-request paths (`.oxagen/tools/` is documented unbuilt, ADR-072)
 - The reconciler, and the drift record it reads
 - GitHub App permissions: the documented set is read-only, and this page's lifecycle writes

@@ -6,7 +6,7 @@ The list of every pull request Oxagen has open on this workspace's repositories,
 It answers what is waiting to change in `.oxagen/`, who opened it, and whether its checks let it merge. A row opens that pull request.
 
 ### Rationale
-Every change to `.oxagen/` arrives as a pull request, and one lifecycle covers every kind. Whoever opened it (a person, the promoter, or the reconciler), the checks, the merge and the publication are the same. That subtitle moved here from the panel. So did the closing note. A change takes effect at its merge commit. While its pull request is open, it steers nothing: it is not in the compiled bundle or the record index, and the bundle version has not moved (`docs/mission-control-spec.md` §10.3). The words are pull request and Steering record (D7). Context PR appears nowhere on screen.
+Every change to `.oxagen/` arrives as a pull request, and one lifecycle covers every kind. Whoever opened it (a person, the promoter, or the reconciler), the checks, the merge and the publication are the same. That subtitle moved here from the panel. So did the closing note. A change takes effect at its merge commit. While its pull request is open, it steers nothing: it is not in the compiled bundle or the record index, and the bundle version has not moved (`docs/mission-control-spec.md` §10.3). The words are pull request and Steering record (D7).
 
 Opened by names one of three openers, and a pull request an automatic opener made needs the same review as one a person made:
 - **The promoter** groups records across runs by lineage and opens a proposal that cites those runs. It applies no threshold. A person reads the cited runs and decides. The promoter picks the scope from where the evidence came (§10.3).
@@ -18,7 +18,7 @@ The tab used to explain the three openers in an Automatic proposals panel under 
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
-| Steering record pull requests | `OXPRS` kind `record` | `list_proposals`, `get_context_pr` | shipped |
+| Steering record pull requests | `OXPRS` kind `record` | `list_proposals`, `get_steering_pr` | shipped |
 | Init, skill and agent pull requests | `OXPRS` kinds `bootstrap`, `skill`, `agent` | `open_init_pr`, `propose_skill`, `propose_agent`, and a list of them | partial |
 | Tool and configuration kinds | `OXPR_KIND.tool`, `OXPRS` kind `config` | tool manifests, the reconciler | future-only |
 | Opened by | `OXPRS[].by`, `.byKind` | the proposal's author | partial |
@@ -60,11 +60,11 @@ The change is in force from that commit, not from the moment someone clicked. Th
 ### Data sources
 | Field | Mockup source | Target store | Status |
 |---|---|---|---|
-| Kind, pull request, branch, opened by | `OXPRS` via `selectedOxpr()` | `get_context_pr` | shipped |
+| Kind, pull request, branch, opened by | `OXPRS` via `selectedOxpr()` | `get_steering_pr` | shipped |
 | Why | `.trigger` | the proposal's reason | partial |
 | Files | `.files`, `wzFiles()` | the pull request's diff | shipped |
 | Checks | `.checks` | the stored check runs | shipped |
-| Merge | `oxprMerge()` | `merge_context_pr` | shipped for Steering records |
+| Merge | `oxprMerge()` | `merge_steering_pr` | shipped for Steering records |
 | Close | `openDialog('closepr')` | `dismiss_proposal` | partial |
 
 ### Logic

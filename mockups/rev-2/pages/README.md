@@ -43,7 +43,7 @@ proven spend.
 the Skills tab, which has no nav entry of its own (the old `#/:org/:ws/skills…` routes still resolve).
 The other five tabs have a spec each.
 
-The five creation wizards (agent, tool, skill, context record, and the `.oxagen/` directory itself)
+The five creation wizards (agent, tool, skill, steering record, and the `.oxagen/` directory itself)
 are dialogs rather than pages, so they have no `<page>.md`; their spec is `docs/creation-spec.md`, and
 the three pages they end at (`record`, `skill-source` and `repositories`) are specified here.
 

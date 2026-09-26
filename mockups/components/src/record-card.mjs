@@ -1,11 +1,11 @@
-// Record card: one context record, statement first. See tools/build-components.mjs for the shape
+// Record card: one steering record, statement first. See tools/build-components.mjs for the shape
 // of this module. The kind badge and its hues are shared with typed-badges.mjs.
 export default {
   slug: "record-card",
   name: "Record card",
   group: "Data display",
   order: 75,
-  summary: "One context record: its statement first, its kind second, and its scope, id, and publish facts last.",
+  summary: "One steering record: its statement first, its kind second, and its scope, id, and publish facts last.",
   lead: "A record card is one steering record in a list: a rule, a constraint, a procedure, a fact, a memory, or a preference. The statement is the record. Everything else, the kind badge, the scope, the force, is the second thing a reader sees, drawn smaller and never ahead of the sentence itself.",
   root: ".rec",
   css: "lines 208 to 224 (recs, rec, kt, rm, r-top, r-st, r-meta, archived, kf), the shared kind hues at 196 to 207 (see [Typed badges](typed-badges.html))",
@@ -131,7 +131,7 @@ export default {
     ["--dim", "Meta line facts (see Findings)"],
   ],
   helpers: [
-    ["recordCard(r, x)", "engine.js:1570", "The one function that draws a context record. `x.right` replaces the status badge and `x.meta` prepends a fact to the meta line. 4 calls."],
+    ["recordCard(r, x)", "engine.js:1570", "The one function that draws a steering record. `x.right` replaces the status badge and `x.meta` prepends a fact to the meta line. 4 calls."],
   ],
   sourceNotes: [
     "The four call sites are Steering's proposals list (wedge.js:919 and engine.js:5816), the compiler wizard's live preview (engine.js:13201), and a record's own page's related-records panel (engine.js:13511). All four supply their own `x.right`.",
