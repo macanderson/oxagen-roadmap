@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MCP Studio</title>
-<meta name="description" content="How Oxagen stores every MCP server that gives tools to wrapped agents, connected or built from an OpenAPI document, with imported tools, risk classification, and parallel build prompts.">
+<meta name="description" content="How Oxagen stores every MCP server that gives tools to wrapped agents, connected or built from an OpenAPI, GraphQL, or gRPC definition, with imported tools, risk classification, and parallel build prompts.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap">
@@ -199,7 +199,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
 <div class="hero">
   <span class="eyebrow">Specification</span>
   <h1>MCP Studio</h1>
-  <p class="lead">Your agents reach tools through MCP servers from three places: servers you connect by URL, servers from the MCP registry, and HTTP APIs that have an OpenAPI document but no MCP server. MCP Studio adds a server from any of them, lists every tool it offers, and lets you import the tools agents may call, with a risk classification on each. Every server is stored the same way, in one folder in the steering repo, reviewed by steering PR, and served by the cloud gateway with the workspace's credentials, policies, and budgets.</p>
+  <p class="lead">Your agents reach tools through MCP servers from several places: servers you connect by URL, servers from the MCP registry, local commands, and APIs that have an OpenAPI, GraphQL, or gRPC definition but no MCP server. MCP Studio adds a server from any of them, lists every tool it offers, and lets you import the tools agents may call, with a risk classification on each. Every server is stored the same way, in one folder in the steering repo, reviewed by steering PR, and served by the cloud gateway with the workspace's credentials, policies, and budgets.</p>
   <dl class="facts">
     <div class="fact"><dt>Status</dt><dd>Draft, for review</dd></div>
     <div class="fact"><dt>Date</dt><dd>2026-09-26</dd></div>
@@ -214,16 +214,16 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
     <span class="item"><span class="st p">Proposed</span> needs the maintainer's yes</span>
   </div>
   <nav class="toc" aria-label="Sections">
-    <a href="#flow">Flow</a><a href="#decisions">Decisions</a><a href="#storage">Storage</a><a href="#server">Server file</a><a href="#tools">Tools file</a><a href="#risk">Risk</a><a href="#lock">Lock file</a><a href="#lifecycle">Lifecycle</a><a href="#sources">Sources</a><a href="#mapping">OpenAPI mapping</a><a href="#names">Names</a><a href="#large">Large servers</a><a href="#checks">Tool checks</a><a href="#auth">Auth</a><a href="#network">Network</a><a href="#call">Call path</a><a href="#sync">Sync</a><a href="#testing">Testing</a><a href="#spend">Spend</a><a href="#screens">Screens</a><a href="#feedback">Feedback</a><a href="#migration">Migration</a><a href="#alternatives">Alternatives</a><a href="#open">Open questions</a><a href="#build">Build prompts</a>
+    <a href="#flow">Flow</a><a href="#decisions">Decisions</a><a href="#storage">Storage</a><a href="#server">Server file</a><a href="#tools">Tools file</a><a href="#risk">Risk</a><a href="#lock">Lock file</a><a href="#lifecycle">Lifecycle</a><a href="#sources">Sources</a><a href="#mapping">Mapping</a><a href="#names">Names</a><a href="#large">Large servers</a><a href="#checks">Tool checks</a><a href="#auth">Auth</a><a href="#network">Network</a><a href="#call">Call path</a><a href="#sync">Sync</a><a href="#testing">Testing</a><a href="#spend">Spend</a><a href="#screens">Screens</a><a href="#feedback">Feedback</a><a href="#migration">Migration</a><a href="#alternatives">Alternatives</a><a href="#open">Open questions</a><a href="#build">Build prompts</a>
   </nav>
 </div>
 
 <section id="flow">
   <span class="eyebrow">Flow</span>
   <h2>How it works</h2>
-  <p>Only step 1 differs by source. From step 2 on, a connected server, a registry server, and an OpenAPI document follow the same path through the same files and the same tables. No code is generated and nothing is deployed. <span class="st p">Proposed</span></p>
+  <p>Only step 1 differs by source. From step 2 on, every source follows the same path through the same files and the same tables. No code is generated and nothing is deployed. <span class="st p">Proposed</span></p>
   <div class="pipe">
-    <div><b>1 Add</b><span>Pick a source</span><small>A URL, the MCP registry, a local command, or an OpenAPI document</small></div>
+    <div><b>1 Add</b><span>Pick a source</span><small>A URL, the MCP registry, a local command, or an OpenAPI, GraphQL, or gRPC definition</small></div>
     <div><b>2 Discover</b><span>List every tool</span><small>Stored in Oxagen, not the repository</small></div>
     <div><b>3 Import</b><span>Choose and classify</span><small>Risk, side effect, egress, consequences, and shaping per tool</small></div>
     <div><b>4 Review</b><span>Open a steering PR</span><small>One folder, the tool surface diff, and the checks</small></div>
@@ -245,6 +245,12 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
         <li>The cloud gateway holds the vendor keys and MCP credentials. No MCP credential sits on an enrolled machine. (Mac, 2026-09-25, ADR-187)</li>
         <li>The toolbelt never reaches the in-app agent. (Mac, 2026-09-25)</li>
         <li>Oxagen bills governed actions only. (Mac, 2026-09-25)</li>
+        <li>Every use of Oxagen to steer, govern, or provide a tool is a governed action. That includes each tool call, each search and describe call in search mode, and each Try it call. (Mac, 2026-09-26)</li>
+        <li>OpenAPI, GraphQL, and gRPC definitions are all sources on day 1. (Mac, 2026-09-26)</li>
+        <li>Search mode ranks tools with embeddings made on Oxagen's own Voyage AI key, held in AWS. Oxagen absorbs the cost. (Mac, 2026-09-26)</li>
+        <li>Private networks are reached through the relay on day 1. The relay acts only on envelopes the cloud gateway signed, and it ships as a container image and a Helm chart. (Mac, 2026-09-26)</li>
+        <li>A customer that keeps its own credential in the relay needs the Enterprise plan, and the website advertises it that way. (Mac, 2026-09-26)</li>
+        <li>Drafting a description with the in-app agent bills as in-app agent spend on the Billing page. (Mac, 2026-09-26)</li>
       </ul>
     </div>
     <div class="card">
@@ -253,7 +259,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
         <li><code>import_tools</code> (<code>tool.import.ts</code>) publishes picked tools from a server's pinned snapshots into <code>agent.tools</code> and <code>agent.tool_versions</code>. An unclassified import lands as risk <code>high</code> and not read-only.</li>
         <li>The classification vocabulary: risk grade <code>low</code> to <code>critical</code>, side effect <code>read</code>, <code>write</code>, or <code>irreversible</code>, egress <code>local</code>, <code>org_tenant</code>, or <code>third_party</code>, consequence tags, measures, and data classes (<code>contracts/tool.classification.ts</code>).</li>
         <li><code>mcp.mcp_servers</code> holds servers with transport <code>streamable-http</code>, <code>sse</code>, or <code>stdio</code>. <code>mcp.tool_snapshots</code> holds every descriptor a server returned. <code>mcp.credentials</code> holds secrets, envelope-encrypted with a KMS key.</li>
-        <li>No OpenAPI code exists. No customer agent receives a toolbelt yet.</li>
+        <li>No OpenAPI, GraphQL, or gRPC code exists. No customer agent receives a toolbelt yet.</li>
       </ul>
     </div>
     <div class="card">
@@ -264,7 +270,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
         <li>A lock file pins each imported tool's upstream definition, so a server cannot change what the model reads without a steering PR.</li>
         <li>The agent sees annotations derived from the classification, not the ones the server sent.</li>
         <li>Two exposure modes, <code>direct</code> and <code>search</code>, for any server.</li>
-        <li>A relay for servers and APIs inside a private network.</li>
+        <li>A format-neutral operation model, so compile, checks, policy, sync, and serving treat every definition format the same.</li>
       </ul>
     </div>
   </div>
@@ -276,7 +282,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
   <p>The repository decides which servers exist, which of their tools agents can see, and how each tool is classified and shaped. Oxagen's tables hold what a repository cannot: secrets, what each server offers, health, the compiled form, and the off switch. Publish rewrites the registry rows from the merged files, so a row never disagrees with the repository. <span class="st p">Proposed</span></p>
 
   <h3>Server folder</h3>
-  <p>Every server has the same three files. An OpenAPI server adds its document, and any server can add tests.</p>
+  <p>Every server has the same three files. A server built from a definition adds it: <code>openapi.yaml</code>, <code>schema.graphql</code>, or <code>proto/</code>. Any server can add tests.</p>
   <figure class="code"><figcaption><span class="path">servers/</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">servers/
 ├── stripe/                     connected by URL
 │   ├── server.toml             source, auth, environments, exposure
@@ -288,6 +294,16 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
 │   └── tools.lock.json
 ├── warehouse/                  a local command, run by the local gateway
 │   ├── server.toml
+│   ├── tools.toml
+│   └── tools.lock.json
+├── crm/                        built from a GraphQL schema
+│   ├── server.toml
+│   ├── schema.graphql
+│   ├── tools.toml
+│   └── tools.lock.json
+├── ledger/                     built from gRPC protos
+│   ├── server.toml
+│   ├── proto/ledger/v1/ledger.proto
 │   ├── tools.toml
 │   └── tools.lock.json
 └── billing/                    built from an OpenAPI document
@@ -306,7 +322,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
     <thead><tr><th>Store</th><th>Holds</th><th>Written by</th><th>Status</th></tr></thead>
     <tbody>
       <tr><td><code>servers/&lt;name&gt;/</code> in the steering repo</td><td class="wrap">Which servers exist and how to reach them, which tools are imported, each tool's classification and shaping, and the pinned upstream definitions</td><td class="wrap">Studio and people, by steering PR</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>mcp.mcp_servers</code></td><td class="wrap">One row per server folder, with health and the last discovery. <code>transport_type</code> gains <code>openapi</code>, and an <code>origin</code> column marks rows that came from the steering repo.</td><td class="wrap">Publish, and the health job</td><td><span class="st c">Today</span> with two changes</td></tr>
+      <tr><td><code>mcp.mcp_servers</code></td><td class="wrap">One row per server folder, with health and the last discovery. <code>transport_type</code> gains <code>openapi</code>, <code>graphql</code>, and <code>grpc</code>, and an <code>origin</code> column marks rows that came from the steering repo.</td><td class="wrap">Publish, and the health job</td><td><span class="st c">Today</span> with two changes</td></tr>
       <tr><td><code>mcp.tool_snapshots</code></td><td class="wrap">Every tool each discovery saw, imported or not, with its raw definition. Studio's list of available tools reads it.</td><td class="wrap">The discovery job</td><td><span class="st c">Today</span></td></tr>
       <tr><td><code>agent.tools</code> and <code>agent.tool_versions</code></td><td class="wrap">One row per imported tool and one per locked version. <code>active_version_id</code> points at the locked one. The classification columns come from <code>tools.toml</code>.</td><td class="wrap">Publish, through <code>publishTool</code> in <code>lib/tool-registry.ts</code></td><td><span class="st c">Today</span></td></tr>
       <tr><td><code>mcp.credentials</code></td><td class="wrap">Secrets, envelope-encrypted with a KMS key. A credential reference in <code>server.toml</code> names one.</td><td class="wrap">The Connection screen, never a pull request</td><td><span class="st c">Today</span> with a <code>name</code> column added</td></tr>
@@ -346,11 +362,13 @@ transport = "http"                         # http or sse
 
 [auth]
 mode = "service"                           # none, service, or operator-oauth
-scheme = "oauth"                           # oauth, bearer, or header
-credential = "oxagen:credential/stripe-live"
+scheme = "oauth"                           # oauth, bearer, basic, or header
 
 [environments.test]
 credential = "oxagen:credential/stripe-test"
+
+[environments.live]
+credential = "oxagen:credential/stripe-live"
 
 [exposure]
 mode = "direct"                            # direct or search
@@ -394,18 +412,18 @@ schedule = "on-change"</code></pre></figure>
     <tbody>
       <tr><td><code>name</code></td><td>all</td><td class="wrap">Matches the folder name, <code>^[a-z][a-z0-9_]{0,23}$</code>, unique in the workspace</td></tr>
       <tr><td><code>label</code>, <code>description</code></td><td>all</td><td class="wrap">The server's name on every surface, and one sentence about it</td></tr>
-      <tr><td><code>source.type</code></td><td>all</td><td class="wrap"><code>remote</code>, <code>registry</code>, <code>local</code>, or <code>openapi</code></td></tr>
+      <tr><td><code>source.type</code></td><td>all</td><td class="wrap"><code>remote</code>, <code>registry</code>, <code>local</code>, <code>openapi</code>, <code>graphql</code>, or <code>grpc</code></td></tr>
       <tr><td><code>source.url</code>, <code>source.transport</code></td><td>remote</td><td class="wrap">The MCP endpoint, and <code>http</code> (streamable HTTP) or <code>sse</code>, which today's connect flow still offers</td></tr>
       <tr><td><code>source.registry</code>, <code>source.server</code>, <code>source.version</code></td><td>registry</td><td class="wrap">The registry URL, the server's registry name such as <code>io.github.github/github-mcp-server</code>, and the version. The catalog entry supplies the endpoint or the package.</td></tr>
       <tr><td><code>source.command</code>, <code>source.args</code>, <code>source.env</code></td><td>local</td><td class="wrap">The command the local gateway runs, and the names of environment variables it passes from the agent's machine. Values never enter the repository.</td></tr>
-      <tr><td><code>source.from</code>, <code>repo</code>, <code>path</code>, <code>ref</code>, <code>url</code></td><td>openapi</td><td class="wrap">Where the document comes from. <code>upload</code> needs no other key.</td></tr>
-      <tr><td><code>source.network</code></td><td>remote, registry, openapi</td><td class="wrap"><code>cloud</code> by default, or <code>relay:&lt;name&gt;</code></td></tr>
+      <tr><td><code>source.from</code>, <code>repo</code>, <code>path</code>, <code>ref</code>, <code>url</code></td><td>openapi, graphql, grpc</td><td class="wrap">Where the definition comes from: <code>repository</code> with <code>repo</code>, <code>path</code>, and <code>ref</code>, <code>url</code>, or <code>upload</code>. GraphQL also takes <code>introspection</code> and gRPC takes <code>reflection</code>, which read it from the first environment's endpoint.</td></tr>
+      <tr><td><code>source.network</code></td><td>all but local</td><td class="wrap"><code>cloud</code> by default, or <code>relay:&lt;name&gt;</code></td></tr>
       <tr><td><code>auth.mode</code></td><td>all but local</td><td class="wrap"><code>none</code>, <code>service</code> (one credential for every run), or <code>operator-oauth</code> (the token of the person who operates the run)</td></tr>
-      <tr><td><code>auth.scheme</code></td><td>all but local</td><td class="wrap">For MCP: <code>oauth</code>, <code>bearer</code>, or <code>header</code> with <code>auth.header</code>. For OpenAPI: a key of <code>components.securitySchemes</code>.</td></tr>
-      <tr><td><code>auth.credential</code></td><td>all but local</td><td class="wrap"><code>oxagen:credential/&lt;name&gt;</code>. Required unless the mode is <code>none</code>.</td></tr>
-      <tr><td><code>environments.&lt;name&gt;</code></td><td>all but local</td><td class="wrap">Overrides <code>url</code>, <code>network</code>, and <code>credential</code>. An OpenAPI server needs one. A server with none has one environment, <code>default</code>.</td></tr>
+      <tr><td><code>auth.scheme</code></td><td>all but local</td><td class="wrap">For OpenAPI: a key of <code>components.securitySchemes</code>. For every other source: <code>oauth</code>, <code>bearer</code>, <code>basic</code>, or <code>header</code> with <code>auth.header</code>. gRPC sends it as call metadata.</td></tr>
+      <tr><td><code>auth.credential</code></td><td>all but local</td><td class="wrap"><code>oxagen:credential/&lt;name&gt;</code>. Required unless the mode is <code>none</code> or every environment names one.</td></tr>
+      <tr><td><code>environments.&lt;name&gt;</code></td><td>all but local</td><td class="wrap">Overrides <code>url</code>, <code>network</code>, and <code>credential</code>. A server built from a definition needs one, since its <code>url</code> is the endpoint. A server with none has one environment, <code>default</code>. Which one an agent uses is an open question.</td></tr>
       <tr><td><code>exposure.mode</code>, <code>exposure.definition_budget</code></td><td>all</td><td class="wrap">See <a href="#large">Large servers</a>. The budget defaults to 8,000 tokens.</td></tr>
-      <tr><td><code>sync.schedule</code></td><td>all</td><td class="wrap"><code>on-change</code> (an OpenAPI document in a linked repository), <code>daily</code>, or <code>manual</code></td></tr>
+      <tr><td><code>sync.schedule</code></td><td>all</td><td class="wrap"><code>on-change</code> (a definition in a linked repository), <code>daily</code>, or <code>manual</code></td></tr>
     </tbody>
   </table></div>
 </section>
@@ -460,10 +478,15 @@ idempotency_header = "Idempotency-Key"</code></pre></figure>
       <tr><td><code>operation</code></td><td>openapi</td><td class="wrap">The <code>operationId</code>, or <code>"POST /refunds/{id}/cancel"</code> when the operation has none. Required.</td></tr>
       <tr><td><code>risk</code>, <code>side_effect</code>, <code>egress</code></td><td>all</td><td class="wrap">Required. See <a href="#risk">Risk classification</a>.</td></tr>
       <tr><td><code>consequence_tags</code>, <code>measures</code>, <code>data_classes</code></td><td>all</td><td class="wrap">Optional, in today's classification shapes</td></tr>
-      <tr><td><code>description</code></td><td>all</td><td class="wrap">Replaces the source's description. At most 1,024 characters.</td></tr>
+      <tr><td><code>description</code></td><td>all</td><td class="wrap">Replaces the source's description. At most 1,024 characters. Studio can draft one with the in-app agent, billed as in-app agent spend on the Billing page.</td></tr>
       <tr><td><code>hide</code>, <code>fixed</code>, <code>defaults</code>, <code>rename</code></td><td>all</td><td class="wrap">Input shaping. Hidden inputs leave the schema, fixed ones go on every call, defaults fill what the model leaves out, and renamed ones map back on the call.</td></tr>
       <tr><td><code>select</code>, <code>redact</code>, <code>max_result_bytes</code></td><td>all</td><td class="wrap">Result shaping on structured results, and on text results that parse as JSON. Other text results take only the size cap.</td></tr>
-      <tr><td><code>paginate</code>, <code>max_items</code>, <code>idempotency_header</code></td><td>openapi</td><td class="wrap">HTTP details the executor needs</td></tr>
+      <tr><td><code>field</code></td><td>graphql</td><td class="wrap">The root field, such as <code>Mutation.createRefund</code>. Required.</td></tr>
+      <tr><td><code>selection</code></td><td>graphql</td><td class="wrap">The selection set sent with every call. Studio generates one to depth 2 that stops at connections, and a person can edit it. <code>select</code> then trims the result.</td></tr>
+      <tr><td><code>method</code></td><td>grpc</td><td class="wrap">The full method name, such as <code>a_intel.ledger.v1.Ledger/PostEntry</code>. Required.</td></tr>
+      <tr><td><code>deadline_ms</code></td><td>grpc</td><td class="wrap">The call's deadline, 30,000 by default</td></tr>
+      <tr><td><code>paginate</code>, <code>max_items</code></td><td>openapi, graphql, grpc</td><td class="wrap"><code>cursor</code>, <code>page</code>, or <code>offset</code> for OpenAPI, and <code>connection</code> for GraphQL. <code>max_items</code> caps auto paging and a gRPC server stream.</td></tr>
+      <tr><td><code>idempotency_header</code></td><td>openapi</td><td class="wrap">The header that carries an idempotency key on a <code>POST</code></td></tr>
     </tbody>
   </table></div>
 </section>
@@ -488,10 +511,10 @@ idempotency_header = "Idempotency-Key"</code></pre></figure>
   <div class="tscroll"><table>
     <thead><tr><th>Signal</th><th>Side effect</th><th>Risk</th><th>Tags</th></tr></thead>
     <tbody>
-      <tr><td class="wrap"><code>readOnlyHint: true</code>, or <code>GET</code> and <code>HEAD</code></td><td><code>read</code></td><td><code>low</code></td><td></td></tr>
-      <tr><td class="wrap"><code>destructiveHint: false</code>, or <code>POST</code>, <code>PUT</code>, and <code>PATCH</code></td><td><code>write</code></td><td><code>medium</code></td><td></td></tr>
+      <tr><td class="wrap"><code>readOnlyHint: true</code>, <code>GET</code> and <code>HEAD</code>, a GraphQL query, or a gRPC method marked <code>NO_SIDE_EFFECTS</code></td><td><code>read</code></td><td><code>low</code></td><td></td></tr>
+      <tr><td class="wrap"><code>destructiveHint: false</code>, <code>POST</code>, <code>PUT</code>, and <code>PATCH</code>, a GraphQL mutation, or a gRPC method marked <code>IDEMPOTENT</code></td><td><code>write</code></td><td><code>medium</code></td><td></td></tr>
       <tr><td class="wrap"><code>destructiveHint: true</code>, or <code>DELETE</code></td><td><code>irreversible</code></td><td><code>high</code></td><td><code>destroys_data</code></td></tr>
-      <tr><td class="wrap">No annotations</td><td><code>write</code></td><td><code>high</code></td><td class="wrap">The fail-safe <code>import_tools</code> uses today</td></tr>
+      <tr><td class="wrap">No annotations, or a gRPC method with no idempotency level</td><td><code>write</code></td><td><code>high</code></td><td class="wrap">The fail-safe <code>import_tools</code> uses today</td></tr>
     </tbody>
   </table></div>
   <p>Egress is suggested from how the server is reached: <code>local</code> for a local command, <code>org_tenant</code> through a relay or when <code>openWorldHint</code> is <code>false</code>, and <code>third_party</code> otherwise.</p>
@@ -547,7 +570,7 @@ unless { context.approval.granted };</code></pre></figure>
   <ul>
     <li><strong>Written by Oxagen only.</strong> Studio writes it into the steering PR it opens. When a person edits <code>tools.toml</code> by hand, the stamp commit recomputes <code>definition_hash</code> and <code>version</code>. The <code>owned</code> check refuses a hand edit.</li>
     <li><strong>Upstream moves only in a sync PR.</strong> Oxagen replaces a tool's <code>upstream</code> only in a pull request that shows the change.</li>
-    <li><strong>Every source has one.</strong> For an OpenAPI server, <code>upstream</code> is the definition compiled from the document before <code>tools.toml</code> applies, so a document change shows as a change per tool instead of a long YAML diff.</li>
+    <li><strong>Every source has one.</strong> For a server built from a definition, <code>upstream</code> is the tool compiled from it before <code>tools.toml</code> applies, so a definition change shows as a change per tool instead of a long schema diff.</li>
     <li><strong>Diffs stay readable.</strong> Keys are sorted and indented two spaces, so a pull request shows each changed field on its own line. Limit 5 MB.</li>
     <li><strong>Hashes.</strong> <code>upstream_hash</code> is SHA-256 over the RFC 8785 canonical form of <code>upstream</code>, as record hashes are computed. <code>definition_hash</code> covers the effective name, description, and schemas, and <code>version</code> rises by one when it changes.</li>
   </ul>
@@ -579,23 +602,39 @@ unless { context.approval.granted };</code></pre></figure>
       <tr><td><code>remote</code></td><td class="wrap">The gateway calls <code>tools/list</code> with the service credential, or the importing person's token</td><td class="wrap">The cloud gateway, or a relay</td><td><span class="st c">Today</span> as a connected server</td></tr>
       <tr><td><code>registry</code></td><td class="wrap">As <code>remote</code> or <code>local</code>, from the catalog entry's endpoint or package</td><td class="wrap">As its entry says</td><td><span class="st c">Today</span> for the catalog</td></tr>
       <tr><td><code>local</code></td><td class="wrap">The local gateway runs the command on an enrolled machine and reports <code>tools/list</code></td><td class="wrap">The local gateway, after the cloud gateway decides the call</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>openapi</code></td><td class="wrap">Compiling the document lists its operations</td><td class="wrap">The cloud gateway, or a relay</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>openapi</code></td><td class="wrap">Compiling the document lists its operations</td><td class="wrap">The cloud gateway, or a relay</td><td><span class="st d">Decided</span> for day 1</td></tr>
+      <tr><td><code>graphql</code></td><td class="wrap">Compiling the schema lists its root fields. The schema comes from a file or an introspection query.</td><td class="wrap">The cloud gateway, or a relay</td><td><span class="st d">Decided</span> for day 1</td></tr>
+      <tr><td><code>grpc</code></td><td class="wrap">Compiling the protos lists their methods. The protos come from files or server reflection.</td><td class="wrap">The cloud gateway, or a relay that carries HTTP/2</td><td><span class="st d">Decided</span> for day 1</td></tr>
     </tbody>
   </table></div>
-  <p>A <code>local</code> server receives no credential from Oxagen, because no MCP credential may sit on an enrolled machine. It reads what the machine already has, named in <code>source.env</code>.</p>
-  <h3>OpenAPI import</h3>
+  <p>A <code>local</code> server receives no credential from Oxagen, because no MCP credential may sit on an enrolled machine. It reads what the machine already has, named in <code>source.env</code>. The off switch stops the gateway's route to it, but an agent with a shell can run the same program itself. A local server therefore suits tools whose effect stays on the machine, and a server that reaches a system on a network belongs behind a relay.</p>
+  <h3>Definition import</h3>
   <ul>
-    <li><strong>Formats.</strong> OpenAPI 3.1 and 3.0 in YAML or JSON. Swagger 2.0 is converted to 3.0 at compile time, and the original stays in the folder so a sync diff compares like with like.</li>
+    <li><strong>OpenAPI.</strong> OpenAPI 3.1 and 3.0 in YAML or JSON. Swagger 2.0 is converted to 3.0 at compile time, and the original stays in the folder so a sync diff compares like with like.</li>
     <li><strong>Many files.</strong> A document split across files with external <code>$ref</code>s is bundled into one file on import.</li>
     <li><strong>Normalize at compile, never in the file.</strong> Resolve <code>$ref</code>, merge path-level and operation-level parameters, turn 3.0 <code>nullable</code> into 3.1 type lists, and apply <code>overlay.yaml</code> when it exists.</li>
-    <li><strong>Refused.</strong> Documents over 25 MB. Webhooks and callbacks are listed but never become tools.</li>
+    <li><strong>GraphQL.</strong> An SDL file, or an introspection query through the network route. Production servers often turn introspection off, so a file in a linked repository is the usual source.</li>
+    <li><strong>gRPC.</strong> The <code>.proto</code> files with their imports, or server reflection. Oxagen writes what reflection returns to <code>proto/</code> as <code>.proto</code> text, so a person can review it.</li>
+    <li><strong>Refused.</strong> Definitions over 25 MB. OpenAPI webhooks and callbacks, GraphQL subscriptions, and gRPC client and bidirectional streams are listed but never become tools.</li>
   </ul>
+  <h3>Build cost by format</h3>
+  <p>An estimate of the day-1 work each format adds, in build lanes. <span class="st p">Proposed</span></p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Format</th><th>Adds</th><th>Estimate</th></tr></thead>
+    <tbody>
+      <tr><td>All</td><td class="wrap">A format-neutral operation model in M0, so compile, checks, policy, sync, and serving treat every format the same</td><td class="wrap">Small, and it lands before wave 1 starts</td></tr>
+      <tr><td>OpenAPI</td><td class="wrap">Import (M1) and the HTTP branch of the executor (M6)</td><td class="wrap">One lane</td></tr>
+      <tr><td>GraphQL</td><td class="wrap">Import with selection-set generation (M2) and a GraphQL branch in the executor (M6)</td><td class="wrap">About two lanes</td></tr>
+      <tr><td>gRPC</td><td class="wrap">Import with the proto3 JSON mapping (M3), a dynamic gRPC client (M7), and HTTP/2 in the relay (M12)</td><td class="wrap">About three lanes, plus the relay work</td></tr>
+    </tbody>
+  </table></div>
 </section>
 
 <section id="mapping">
-  <span class="eyebrow">OpenAPI</span>
-  <h2>OpenAPI mapping</h2>
-  <p>How one OpenAPI operation becomes the <code>upstream</code> definition of one tool. <code>tools.toml</code> then applies to it as to any server's tool. <span class="st p">Proposed</span></p>
+  <span class="eyebrow">Mapping</span>
+  <h2>Mapping</h2>
+  <p>How each operation in a definition becomes the <code>upstream</code> definition of one tool. <code>tools.toml</code> then applies to it as to any server's tool. <span class="st p">Proposed</span></p>
+  <h3>OpenAPI</h3>
   <div class="tscroll"><table>
     <thead><tr><th>OpenAPI</th><th>Tool definition</th></tr></thead>
     <tbody>
@@ -634,6 +673,33 @@ unless { context.approval.granted };</code></pre></figure>
   },
   "annotations": { "readOnlyHint": false, "destructiveHint": true, "openWorldHint": false }
 }</code></pre></figure>
+  <h3>GraphQL</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>GraphQL</th><th>Tool definition</th></tr></thead>
+    <tbody>
+      <tr><td>A <code>Query</code> or <code>Mutation</code> root field</td><td class="wrap">One tool. <code>createRefund</code> suggests the name <code>create_refund</code>.</td></tr>
+      <tr><td>Arguments and input types</td><td class="wrap"><code>inputSchema</code>, with non-null as required, enums as <code>enum</code>, and custom scalars as strings unless the schema describes them</td></tr>
+      <tr><td>The return type</td><td class="wrap"><code>outputSchema</code> of the selection set in <code>tools.toml</code></td></tr>
+      <tr><td>Connections with <code>edges</code> and <code>pageInfo</code></td><td class="wrap"><code>paginate = "connection"</code></td></tr>
+      <tr><td>The field's description, and <code>@deprecated</code></td><td class="wrap"><code>description</code>, and a warning</td></tr>
+      <tr><td>A <code>Subscription</code> field</td><td class="wrap">Listed, never a tool</td></tr>
+      <tr><td>A response with an <code>errors</code> array</td><td class="wrap">A result with <code>isError: true</code> and the messages, even when the status is 200</td></tr>
+    </tbody>
+  </table></div>
+  <h3>gRPC</h3>
+  <div class="tscroll"><table>
+    <thead><tr><th>gRPC</th><th>Tool definition</th></tr></thead>
+    <tbody>
+      <tr><td>A unary method</td><td class="wrap">One tool. <code>PostEntry</code> suggests the name <code>post_entry</code>.</td></tr>
+      <tr><td>A server-streaming method</td><td class="wrap">One tool whose result collects up to <code>max_items</code> messages. See Open questions.</td></tr>
+      <tr><td>A client-streaming or bidirectional method</td><td class="wrap">Listed, never a tool</td></tr>
+      <tr><td>The request message</td><td class="wrap"><code>inputSchema</code> by the proto3 JSON mapping: 64-bit integers as strings, <code>oneof</code> as <code>oneOf</code>, enums by name, and well-known types such as <code>Timestamp</code> in their JSON forms</td></tr>
+      <tr><td>The response message</td><td class="wrap"><code>outputSchema</code> by the same mapping</td></tr>
+      <tr><td>The method's leading comment</td><td class="wrap"><code>description</code></td></tr>
+      <tr><td><code>idempotency_level</code></td><td class="wrap">The classification suggestion</td></tr>
+      <tr><td>A status other than <code>OK</code></td><td class="wrap">A result with <code>isError: true</code>, the status code, and the message</td></tr>
+    </tbody>
+  </table></div>
 </section>
 
 <section id="names">
@@ -657,6 +723,7 @@ unless { context.approval.granted };</code></pre></figure>
     <li><strong>Policy sees the real tool.</strong> The gateway decides <code>billing__call</code> with <code>tool: "create_refund"</code> as <code>billing__create_refund</code>. Cedar rules, toolbelt grants, classification, approvals, and spend attribution work the same in both modes.</li>
     <li><strong>Search shows only what the agent may call.</strong> Visibility is permission, so a search never returns a tool outside the agent's toolbelt.</li>
     <li><strong>The tool list never changes mid-session.</strong> A fixed list keeps the provider's prompt cache warm. Tool lists that grow during a session break the cache and depend on each harness handling list changes.</li>
+    <li><strong>Ranking.</strong> <code>search</code> ranks with embeddings of each tool's one-line entry, made on Oxagen's Voyage AI key (Mac, 2026-09-26). Publish embeds only entries whose content hash changed, through a queue that batches them, so one large import cannot use up the key's shared rate limit.</li>
     <li><strong>Studio recommends a mode.</strong> When the imported definitions pass <code>definition_budget</code>, Studio suggests <code>search</code>. The names <code>search</code>, <code>describe</code>, and <code>call</code> are reserved in a server that uses it.</li>
   </ul>
 </section>
@@ -680,8 +747,12 @@ unless { context.approval.granted };</code></pre></figure>
       <tr><td>No 2xx JSON schema</td><td>openapi</td><td>warning</td><td class="wrap">No <code>outputSchema</code>, so results are text only</td></tr>
       <tr><td>An array response with no paging and no <code>select</code></td><td>openapi</td><td>warning</td><td class="wrap">One result can fill the context</td></tr>
       <tr><td><code>oneOf</code> with no discriminator</td><td>openapi</td><td>warning</td><td class="wrap">The model guesses the branch</td></tr>
-      <tr><td>A deprecated operation imported</td><td>openapi</td><td>warning</td><td class="wrap">It may go away</td></tr>
+      <tr><td>A deprecated operation imported</td><td>openapi, graphql</td><td>warning</td><td class="wrap">It may go away</td></tr>
       <tr><td>A recursive schema</td><td>openapi</td><td>info</td><td class="wrap">Cut at depth 4, with a note</td></tr>
+      <tr><td>A selection set deeper than 3 levels</td><td>graphql</td><td>warning</td><td class="wrap">Large results and slow queries</td></tr>
+      <tr><td>A list field with no paging arguments</td><td>graphql</td><td>warning</td><td class="wrap">One result can fill the context</td></tr>
+      <tr><td>A <code>google.protobuf.Any</code> field</td><td>grpc</td><td>warning</td><td class="wrap">Its type is known only at run time</td></tr>
+      <tr><td>A method with no <code>idempotency_level</code></td><td>grpc</td><td>info</td><td class="wrap">The suggestion falls back to <code>write</code> and <code>high</code></td></tr>
     </tbody>
   </table></div>
 </section>
@@ -698,25 +769,45 @@ unless { context.approval.granted };</code></pre></figure>
       <tr><td><code>operator-oauth</code></td><td class="wrap">Each operator connects once. A call uses the token of the person who operates the run, so the server's own permissions apply to that person. Works for MCP servers that use OAuth and for OpenAPI <code>oauth2</code> authorization code and <code>openIdConnect</code>.</td></tr>
     </tbody>
   </table></div>
-  <p>OpenAPI <code>mutualTLS</code> runs through a relay, which keeps the client certificate inside the customer's network. Signed requests such as AWS SigV4 come later. When an operator has not connected an account, the call returns <code>isError</code> with "Connect your Billing API account in Oxagen, then retry," and the link.</p>
+  <p>Mutual TLS, common on gRPC services and named <code>mutualTLS</code> in OpenAPI, runs through a relay, which keeps the client certificate inside the customer's network. Signed requests such as AWS SigV4 come later. When an operator has not connected an account, the call returns <code>isError</code> with "Connect your Billing API account in Oxagen, then retry," and the link.</p>
 </section>
 
 <section id="network">
   <span class="eyebrow">Network</span>
   <h2>Network paths</h2>
+  <p>Oxagen can stop an agent only while the agent has no credential it could use without the gateway. A credential on the agent's machine could be read and used directly, so private networks are reached through the relay instead. <span class="st d">Decided</span></p>
   <div class="tscroll"><table>
     <thead><tr><th>Route</th><th>For</th><th>How</th></tr></thead>
     <tbody>
       <tr><td><code>cloud</code></td><td class="wrap">Servers and APIs on the internet</td><td class="wrap">The cloud gateway calls from published egress addresses, so the server can allow them</td></tr>
-      <tr><td><code>relay:&lt;name&gt;</code></td><td class="wrap">Servers and APIs inside a private network</td><td class="wrap">The customer runs the Oxagen relay, a small container, inside the network. It opens one outbound TLS connection to Oxagen and receives signed call envelopes. No inbound port opens. The gateway decides policy and adds the credential. The relay sends the request and returns the response.</td></tr>
+      <tr><td><code>relay:&lt;name&gt;</code></td><td class="wrap">Servers and APIs inside a private network</td><td class="wrap">The customer runs the Oxagen relay inside the network. It opens one outbound TLS connection to Oxagen, so no inbound port and no firewall change are needed. It sends only requests the cloud gateway signed after deciding them, and returns the responses.</td></tr>
       <tr><td>Local</td><td class="wrap">A <code>local</code> server</td><td class="wrap">The local gateway on the agent's machine runs it, after the cloud gateway decides the call</td></tr>
       <tr><td>Self-hosted gateway</td><td class="wrap">Customers who run the cloud gateway themselves</td><td class="wrap">The gateway is already inside the network (ADR-187)</td></tr>
     </tbody>
   </table></div>
+
+  <h3>Relay rules</h3>
+  <p>These rules make the relay a hard stop: when the cloud gateway stops signing, nothing can make the relay act.</p>
+  <ul>
+    <li><strong>Signed envelopes.</strong> Each envelope carries the cloud gateway's signature, an expiry a few seconds out, a nonce, and the exact method, host, and path, or the exact gRPC service and method.</li>
+    <li><strong>Refusals.</strong> The relay refuses an envelope that is unsigned, expired, replayed, or aimed at a host its local allowlist does not name.</li>
+    <li><strong>Fails closed.</strong> When the connection to Oxagen drops, the relay sends nothing until it reconnects.</li>
+    <li><strong>Protocols.</strong> HTTP/1.1, HTTP/2 including gRPC, and MCP streamable HTTP.</li>
+  </ul>
+
+  <h3>Relay placement</h3>
+  <p>Run the relay on infrastructure the agent cannot reach, such as a cluster or a VM. For a small setup on one machine, run it as a separate OS user or container with its own secret store. That is weaker, but the agent process still has no direct path to the credential.</p>
+
+  <h3>Relay packaging</h3>
+  <p>The relay ships as a container image and as a Helm chart that deploys it. <span class="st d">Decided</span></p>
+
+  <h3>Customer-held credentials</h3>
+  <p>A customer that will not give Oxagen a credential can keep it in the relay, which adds it to the request after checking the envelope. This needs the Enterprise plan and some setup, and the website advertises it as an Enterprise feature. Every other plan uses a credential in Oxagen's vault. <span class="st d">Decided</span></p>
+
+  <h3>Host rules</h3>
   <ul>
     <li><strong>Fixed hosts.</strong> Hosts come from the reviewed <code>server.toml</code>. Path parameters are percent-encoded. A redirect to another host is refused.</li>
     <li><strong>No private addresses from the cloud.</strong> The <code>cloud</code> route refuses private, loopback, and link-local addresses. A private server goes through a relay.</li>
-    <li><strong>Customer-held credentials.</strong> A customer that will not give Oxagen a credential can keep it in the relay, which adds it to the request.</li>
   </ul>
 </section>
 
@@ -731,8 +822,8 @@ unless { context.approval.granted };</code></pre></figure>
     <li><div><strong>Decide.</strong><p>Toolbelt grant, Cedar rules with the tool's classification, and budget. An approval parks the call and asks the operator.</p></div></li>
     <li><div><strong>Shape the input.</strong><p>Fixed values and defaults added, renamed inputs mapped back to the upstream names.</p></div></li>
     <li><div><strong>Authenticate.</strong><p>The credential from the vault for the agent's environment, or the operator's token.</p></div></li>
-    <li><div><strong>Send.</strong><p>An MCP source receives <code>tools/call</code> with the upstream name. An OpenAPI source receives the HTTP request built from the operation, with an idempotency key where configured. A local source runs on the agent's machine. Every send times out at 30 seconds by default.</p></div></li>
-    <li><div><strong>Retry.</strong><p>OpenAPI <code>GET</code>, <code>HEAD</code>, <code>PUT</code>, <code>DELETE</code>, and a <code>POST</code> with an idempotency key retry on 429, 502, 503, and 504, up to 3 times. An MCP call retries only when the transport failed before the server received it.</p></div></li>
+    <li><div><strong>Send.</strong><p>An MCP source receives <code>tools/call</code> with the upstream name. An OpenAPI source receives the HTTP request built from the operation, with an idempotency key where configured. A GraphQL source receives one <code>POST</code> with the stored selection set and the arguments as variables. A gRPC source receives the call from a client that encodes and decodes from the descriptors, with no generated code. A local source runs on the agent's machine. Every send has a 30-second deadline by default.</p></div></li>
+    <li><div><strong>Retry.</strong><p>OpenAPI <code>GET</code>, <code>HEAD</code>, <code>PUT</code>, <code>DELETE</code>, and a <code>POST</code> with an idempotency key retry on 429, 502, 503, and 504, up to 3 times. A GraphQL query retries as a <code>GET</code> does, and a mutation never retries. A gRPC call retries on <code>UNAVAILABLE</code> only when its method is marked <code>NO_SIDE_EFFECTS</code> or <code>IDEMPOTENT</code>. An MCP call retries only when the transport failed before the server received it.</p></div></li>
     <li><div><strong>Shape the result.</strong><p><code>select</code>, <code>redact</code>, and the size cap, then <code>structuredContent</code> and text.</p></div></li>
     <li><div><strong>Record.</strong><p>The decision, status, latency, bytes, and the arguments and result as the workspace's retention setting allows. Meter the call as a governed action.</p></div></li>
   </ol>
@@ -741,7 +832,7 @@ unless { context.approval.granted };</code></pre></figure>
 <section id="sync">
   <span class="eyebrow">Sync</span>
   <h2>Sync</h2>
-  <p>Discovery runs on the server's schedule, on an MCP server's <code>notifications/tools/list_changed</code>, and on a push that changes an OpenAPI document in a linked repository. It writes every tool it sees to <code>mcp.tool_snapshots</code>. When an imported tool's upstream definition differs from the lock, Oxagen opens one sync PR for the server with the new lock and a tool surface diff. New tools are listed and left unimported. A changed input schema is marked breaking, and the tool stays withheld until the PR merges. <span class="st p">Proposed</span></p>
+  <p>Discovery runs on the server's schedule, on an MCP server's <code>notifications/tools/list_changed</code>, and on a push that changes a definition in a linked repository. GraphQL introspection and gRPC reflection run on the schedule. It writes every tool it sees to <code>mcp.tool_snapshots</code>. When an imported tool's upstream definition differs from the lock, Oxagen opens one sync PR for the server with the new lock and a tool surface diff. New tools are listed and left unimported. A changed input schema is marked breaking, and the tool stays withheld until the PR merges. <span class="st p">Proposed</span></p>
   <figure class="code"><figcaption><span class="path">Tool surface diff in the sync PR</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">servers/billing  openapi.yaml changed at a-intel/billing-service@4be91d2
 
   + list_disputes            new operation, not imported
@@ -768,7 +859,7 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
   <ul>
     <li><strong>Try it.</strong> Call any imported tool from Studio in an environment, with your own credential and under the same policy an agent meets. Studio shows what went upstream, the raw result, and the shaped result the model would receive.</li>
     <li><strong>Save as a test.</strong> One click writes the call to <code>tests/calls.jsonl</code>: the arguments, the recorded response, and the shaped result.</li>
-    <li><strong>Replay in the PR.</strong> The <code>compile</code> check replays every recorded call with no network: the shaped result must match, and for an OpenAPI server the built request must match too.</li>
+    <li><strong>Replay in the PR.</strong> The <code>compile</code> check replays every recorded call with no network: the shaped result must match, and for a server built from a definition the built request must match too.</li>
     <li><strong>Selection tests.</strong> Each line of <code>tests/selection.jsonl</code> holds a task and the tool that fits it. On request, Studio asks a model on the workspace's route to pick from the server's tools and reports how often it picked right. It never runs on its own, because it spends model tokens.</li>
   </ul>
   <figure class="code"><figcaption><span class="path">servers/billing/tests/selection.jsonl</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="json">{"task":"Give the customer back $40 of charge ch_3P9 because it was billed twice.","expect":"billing__create_refund"}
@@ -780,12 +871,14 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
   <span class="eyebrow">Spend</span>
   <h2>Spend</h2>
   <p>The spend ledger charges each server for what it adds to a request: its tool definitions on every request that carries them, and its results on the requests that follow a call. Studio shows the definition cost before the steering PR opens and each tool's average result size from real calls after. A server whose tools are imported and never called shows that cost plainly. <span class="st p">Proposed</span></p>
+  <p>Every use of Oxagen to steer, govern, or provide a tool is a governed action. Each tool call, each search and describe call in search mode, and each Try it call is metered as one. <span class="st d">Decided</span></p>
+  <p>Embedding search entries costs Oxagen the Voyage AI price of the changed entries on each publish. A full embed of a 1,500-tool server is under 500,000 tokens, which is cents at Voyage's list prices, and a search query is about 20 tokens. Oxagen absorbs it. The cost falls on publish and the revenue on calls, so a server that is published and rarely called costs a little and earns little.</p>
 </section>
 
 <section id="screens">
   <span class="eyebrow">Screens</span>
   <h2>Studio screens</h2>
-  <p>Studio lives in the MCP servers area. Add server offers four sources: Connect by URL, From the registry, Local command, and From OpenAPI. Each server then has four tabs: Tools, Connection, Try it, and Changes. Review opens the steering PR. <span class="st p">Proposed</span></p>
+  <p>Studio lives in the MCP servers area. Add server offers four choices: Connect by URL, From the registry, Local command, and From a definition, which takes an OpenAPI, GraphQL, or gRPC definition. Each server then has four tabs: Tools, Connection, Try it, and Changes. Review opens the steering PR. <span class="st p">Proposed</span></p>
   <div class="mock" role="img" aria-label="Sketch of a server's Tools tab with the tool panel open">
     <div class="mock-bar"><span class="crumb">MCP servers / <b>Stripe</b> / Tools</span><span style="display:flex;gap:8px"><span class="mock-btn">Try it</span><span class="mock-btn primary">Review 2 changes</span></span></div>
     <div class="mock-body">
@@ -841,7 +934,9 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
       <tr><td>Store every available tool in the repository</td><td class="wrap">The repository would grow with the server, and each server update would touch files no one imported. Available tools are discovery data and stay in <code>mcp.tool_snapshots</code>.</td></tr>
       <tr><td>Trust the server's live definitions</td><td class="wrap">A server could change what the model reads with no review. The lock file is the defense.</td></tr>
       <tr><td>Use the server's annotations as the classification</td><td class="wrap">The MCP specification calls them untrusted hints, and they have no field for egress or consequences</td></tr>
-      <tr><td>Generate server code per OpenAPI document and deploy it</td><td class="wrap">A deploy per API, code to patch, a credential in every deployment, and drift between the document and the code. The interpreter needs no deploy and goes live on merge.</td></tr>
+      <tr><td>Run a private-network server on the agent's machine with its credential there</td><td class="wrap">Anything that can read a credential can call the API without the gateway, so no off switch could stop it. The relay covers private networks instead.</td></tr>
+      <tr><td>Short-lived tokens bound to a key on the agent's machine, minted per session</td><td class="wrap">Misuse is bounded by the token's lifetime, not stopped at once. The API has to accept such tokens, and a person with admin rights on the machine can get around it. Kept as a later option.</td></tr>
+      <tr><td>Generate server code per definition and deploy it</td><td class="wrap">A deploy per API, code to patch, a credential in every deployment, and drift between the document and the code. The interpreter needs no deploy and goes live on merge.</td></tr>
       <tr><td>OpenAPI Overlay as the curation file</td><td class="wrap">A standard, but its targets are long JSONPath strings such as <code>$.paths['/v2/refunds'].post</code> that break when a path changes, and it covers OpenAPI sources only. Studio reads an overlay as optional input.</td></tr>
       <tr><td>Toolsets that grow the tool list mid-session</td><td class="wrap">They break the prompt cache and depend on each harness handling list changes. Search mode keeps three fixed tools.</td></tr>
     </tbody>
@@ -853,41 +948,46 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
   <h2>Open questions</h2>
   <ol>
     <li>The off switch acting at once with no pull request (proposed here), or through an expedited steering PR.</li>
-    <li>Whether a tool call counts as a governed action for billing.</li>
+    <li><strong>Default environment.</strong> A server can list more than one environment. The billing example has <code>sandbox</code> and <code>production</code>, and the gateway has to pick one for each call. Two parts need an answer:
+      <ul>
+        <li>The default when nobody chooses. <code>sandbox</code> is safe but does nothing real until someone switches it. <code>production</code> is useful at once, but a new agent can move real money on its first run.</li>
+        <li>Where the choice is set: on the agent, so all its calls to a server use one environment, or on each tool, so one agent could read production and still refund in sandbox.</li>
+      </ul>
+      Proposed: an agent uses the first environment listed, and Studio lists the sandbox or test environment first. The choice is set per agent in <code>agents/&lt;slug&gt;.toml</code>, so production is an explicit choice reviewed in a steering PR.</li>
+    <li>gRPC streaming on day 1: unary methods only, or server streaming too, collected up to <code>max_items</code> (proposed here). Client and bidirectional streams stay out either way.</li>
+    <li>A keyword search fallback for workspaces that do not accept Voyage AI as a subprocessor, since the embeddings send tool descriptions to Voyage.</li>
     <li><code>consequence_tags</code> in the agent policy spec's <code>Tool</code> type, and whether its <code>financial_class</code> becomes a field or stays the <code>moves_money</code> tag.</li>
-    <li>Drafting descriptions and classifications with the in-app agent, billed as in-app agent spend on the Billing page.</li>
     <li>Local servers: which machines may run one, and whether the local gateway waits for the cloud gateway's decision on every call.</li>
-    <li>The relay's packaging: a container image, a Helm chart, or both.</li>
-    <li>Search by keyword, or by embeddings at a small cost per publish.</li>
-    <li>An agent's default environment: the first one listed, or set per agent.</li>
-    <li>GraphQL and gRPC as later sources.</li>
   </ol>
 </section>
 
 <section id="build">
   <span class="eyebrow">Build</span>
   <h2>Build prompts</h2>
-  <p>Fourteen lanes in three waves, run beside the steering repo's lanes. M0 starts once the steering repo's S0 has merged, because it imports S0's names. Every wave 1 lane then starts at once and fills one module behind a signature M0 fixes. Each prompt stands alone.</p>
+  <p>Seventeen lanes in three waves, run beside the steering repo's lanes. M0 starts once the steering repo's S0 has merged, because it imports S0's names. Every wave 1 lane then starts at once and fills one module behind a signature M0 fixes. Each prompt stands alone.</p>
   <div class="waves">
     <div class="wave"><h4>Wave 0 <small>after S0</small></h4><ul>
-      <li><strong>M0</strong> Contract, module signatures, fixtures</li>
+      <li><strong>M0</strong> Contract, operation model, fixtures</li>
     </ul></div>
-    <div class="wave"><h4>Wave 1 <small>10 lanes in parallel</small></h4><ul>
+    <div class="wave"><h4>Wave 1 <small>13 lanes in parallel</small></h4><ul>
       <li><strong>M1</strong> OpenAPI import</li>
-      <li><strong>M2</strong> Compile and lock</li>
-      <li><strong>M3</strong> Tool checks</li>
-      <li><strong>M4</strong> Executor</li>
-      <li><strong>M5</strong> Credentials and operator OAuth</li>
-      <li><strong>M6</strong> Studio screens</li>
-      <li><strong>M7</strong> Discovery and sync</li>
-      <li><strong>M8</strong> Import PRs</li>
-      <li><strong>M9</strong> Relay</li>
-      <li><strong>M10</strong> Registry projection and migration</li>
+      <li><strong>M2</strong> GraphQL import</li>
+      <li><strong>M3</strong> gRPC import</li>
+      <li><strong>M4</strong> Compile and lock</li>
+      <li><strong>M5</strong> Tool checks</li>
+      <li><strong>M6</strong> Executor</li>
+      <li><strong>M7</strong> gRPC client</li>
+      <li><strong>M8</strong> Credentials and operator OAuth</li>
+      <li><strong>M9</strong> Studio screens</li>
+      <li><strong>M10</strong> Discovery and sync</li>
+      <li><strong>M11</strong> Import PRs</li>
+      <li><strong>M12</strong> Relay</li>
+      <li><strong>M13</strong> Registry projection and migration</li>
     </ul></div>
     <div class="wave"><h4>Wave 2 <small>3 lanes</small></h4><ul>
-      <li><strong>M11</strong> Serving and search mode</li>
-      <li><strong>M12</strong> Replay and selection tests</li>
-      <li><strong>M13</strong> Live test</li>
+      <li><strong>M14</strong> Serving and search mode</li>
+      <li><strong>M15</strong> Replay and selection tests</li>
+      <li><strong>M16</strong> Live test</li>
     </ul></div>
   </div>
   <div class="tscroll"><table>
@@ -895,35 +995,38 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
     <tbody>
       <tr><td>M0</td><td class="wrap"><code>packages/mcp-studio/</code> skeleton, <code>src/contract/</code>, <code>fixtures/</code></td><td>S0</td></tr>
       <tr><td>M1</td><td class="wrap"><code>packages/mcp-studio/src/openapi/</code></td><td>M0</td></tr>
-      <tr><td>M2</td><td class="wrap"><code>packages/mcp-studio/src/compile/</code>, <code>src/lock/</code>, <code>src/diff/</code></td><td>M0</td></tr>
-      <tr><td>M3</td><td class="wrap"><code>packages/mcp-studio/src/lint/</code></td><td>M0</td></tr>
-      <tr><td>M4</td><td class="wrap"><code>packages/mcp-studio/src/execute/</code></td><td>M0</td></tr>
-      <tr><td>M5</td><td class="wrap"><code>packages/handlers/src/mcp-studio/credentials/</code>, the OAuth callback route, a new operator token table in its own schema file</td><td>M0</td></tr>
-      <tr><td>M6</td><td class="wrap"><code>apps/app/src/features/mcp-studio/</code> and its route</td><td>M0</td></tr>
-      <tr><td>M7</td><td class="wrap"><code>packages/handlers/src/mcp-studio/discovery/</code>, the discovery and sync jobs, push routing for document paths</td><td>M0</td></tr>
-      <tr><td>M8</td><td class="wrap"><code>packages/handlers/src/mcp-studio/import/</code></td><td>M0</td></tr>
-      <tr><td>M9</td><td class="wrap"><code>apps/relay/</code>, <code>packages/relay-broker/</code></td><td>M0</td></tr>
-      <tr><td>M10</td><td class="wrap"><code>schema/mcp.ts</code> and <code>schema/agent.ts</code> changes with one migration, <code>lib/tool-registry.ts</code>, <code>tool.import.ts</code>, <code>agent.mcp.register*.ts</code>, <code>materialize-tools.ts</code>, the migration PR</td><td>M0</td></tr>
-      <tr><td>M11</td><td class="wrap"><code>apps/mcp/src/servers/</code></td><td>S5, M2, M4, M10</td></tr>
-      <tr><td>M12</td><td class="wrap"><code>packages/mcp-studio/src/replay/</code>, <code>src/selection/</code>, the servers part of the <code>compile</code> check</td><td>S4, M2, M4</td></tr>
-      <tr><td>M13</td><td class="wrap">A live test suite with a sample MCP server and a sample API in CI</td><td>All of wave 1, M11</td></tr>
+      <tr><td>M2</td><td class="wrap"><code>packages/mcp-studio/src/graphql/</code></td><td>M0</td></tr>
+      <tr><td>M3</td><td class="wrap"><code>packages/mcp-studio/src/grpc/</code></td><td>M0</td></tr>
+      <tr><td>M4</td><td class="wrap"><code>packages/mcp-studio/src/compile/</code>, <code>src/lock/</code>, <code>src/diff/</code>, <code>src/suggest/</code></td><td>M0</td></tr>
+      <tr><td>M5</td><td class="wrap"><code>packages/mcp-studio/src/lint/</code></td><td>M0</td></tr>
+      <tr><td>M6</td><td class="wrap"><code>packages/mcp-studio/src/execute/</code> except <code>execute/grpc/</code></td><td>M0</td></tr>
+      <tr><td>M7</td><td class="wrap"><code>packages/mcp-studio/src/execute/grpc/</code></td><td>M0</td></tr>
+      <tr><td>M8</td><td class="wrap"><code>packages/handlers/src/mcp-studio/credentials/</code>, the OAuth callback route, a new operator token table in its own schema file</td><td>M0</td></tr>
+      <tr><td>M9</td><td class="wrap"><code>apps/app/src/features/mcp-studio/</code> and its route</td><td>M0</td></tr>
+      <tr><td>M10</td><td class="wrap"><code>packages/handlers/src/mcp-studio/discovery/</code>, the discovery and sync jobs, push routing for definition paths</td><td>M0</td></tr>
+      <tr><td>M11</td><td class="wrap"><code>packages/handlers/src/mcp-studio/import/</code></td><td>M0</td></tr>
+      <tr><td>M12</td><td class="wrap"><code>apps/relay/</code>, <code>packages/relay-broker/</code>, the Helm chart</td><td>M0</td></tr>
+      <tr><td>M13</td><td class="wrap"><code>schema/mcp.ts</code> and <code>schema/agent.ts</code> changes with one migration, <code>lib/tool-registry.ts</code>, <code>tool.import.ts</code>, <code>agent.mcp.register*.ts</code>, <code>materialize-tools.ts</code>, the migration PR</td><td>M0</td></tr>
+      <tr><td>M14</td><td class="wrap"><code>apps/mcp/src/servers/</code>, the search index</td><td>S5, M4, M6, M7, M13</td></tr>
+      <tr><td>M15</td><td class="wrap"><code>packages/mcp-studio/src/replay/</code>, <code>src/selection/</code>, the servers part of the <code>compile</code> check</td><td>S4, M4, M6</td></tr>
+      <tr><td>M16</td><td class="wrap">A live test suite with sample servers in CI</td><td>All of wave 1, M14</td></tr>
     </tbody>
   </table></div>
 
   <h3>Coordinator</h3>
   <figure class="code prompt"><figcaption><span class="path">Coordinator prompt</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">You coordinate the build of MCP Studio and the MCP server storage layer in
 macanderson/oxagen. The spec is mcp-studio-spec.html in macanderson/oxagen-roadmap.
-Its Build prompts section holds one prompt per lane, M0 to M13. It depends on the
+Its Build prompts section holds one prompt per lane, M0 to M16. It depends on the
 steering repo build (steering-repo-spec.html, lanes S0 to S11), which another
 coordinator may run.
 
 1. Wait until S0 has merged. Start one agent with the M0 prompt. Wait until its
    PR merges.
-2. Start ten agents at once with the M1 to M10 prompts, one lane each.
+2. Start thirteen agents at once with the M1 to M13 prompts, one lane each.
 3. When a lane reports that the contract is wrong, stop the lanes it affects,
    fix the contract in one PR, and restart them after it merges.
-4. Start M11 when S5, M2, M4, and M10 have merged. Start M12 when S4, M2, and
-   M4 have merged. Start M13 when wave 1 and M11 have merged.
+4. Start M14 when S5, M4, M6, M7, and M13 have merged. Start M15 when S4, M4,
+   and M6 have merged. Start M16 when wave 1 and M14 have merged.
 5. Report each lane's issue, PR, and state (pending, merged, or failed) in one
    table. Pending is pending. A cancelled or skipped required job is not a pass.
 
@@ -953,15 +1056,16 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
   <h3>Wave 0</h3>
-  <figure class="code prompt"><figcaption><span class="path">M0 Contract, module signatures, fixtures</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M0. MCP server storage contract, module signatures, and fixtures
+  <figure class="code prompt"><figcaption><span class="path">M0 Contract, operation model, fixtures</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M0. MCP server storage contract, the operation model, and fixtures
 
 Goal
-Fix every file schema, type, and function signature the MCP lanes share, so ten
-lanes can fill their modules at once. No behavior yet.
+Fix every file schema, type, and function signature the MCP lanes share, so
+thirteen lanes can fill their modules at once. No behavior yet.
 
 Read first
 - mcp-studio-spec.html: Storage model, Server file, Tools file, Risk
-  classification, Lock file, Tool names, Large servers, Call path.
+  classification, Lock file, Sources, Mapping, Tool names, Large servers,
+  Call path, Network paths.
 - steering-repo-spec.html: Shared contract.
 - packages/oxagen/src/steering-repo/ (from S0): toolName, credentialRef,
   countTokens, bundle/v1.
@@ -972,27 +1076,31 @@ You own
 - packages/mcp-studio/ (new package)
 
 Do
-1. src/contract/: zod schemas and types for mcp-server/v1 (server.toml),
-   mcp-tools/v1 (tools.toml, classification keys in snake case mapped to
-   today's camelCase classification), mcp-tools-lock/v1 (tools.lock.json),
-   tool-manifest/v1 (the compiled tools of one server, as bundle/v1 holds
-   them), and the relay envelope.
-2. A generator that writes each schema as JSON Schema to
+1. src/contract/: zod schemas and types for mcp-server/v1 (server.toml, every
+   source type), mcp-tools/v1 (tools.toml, classification keys in snake case
+   mapped to today's camelCase classification), mcp-tools-lock/v1,
+   tool-manifest/v1, and the relay envelope (signature, expiry, nonce, and
+   the exact method, host, and path or gRPC service and method).
+2. A format-neutral operation model: UpstreamTool with name, description,
+   input and output JSON Schema, annotations or classification hints, and a
+   request template that is a tagged union of mcp, http, graphql, and grpc.
+   Everything after import reads only this model.
+3. A generator that writes each schema as JSON Schema to
    packages/mcp-studio/schemas/&lt;id&gt;.json with $id https://oxagen.sh/schemas/&lt;id&gt;.json.
-3. One folder per module with its exported signature and a body that throws
-   "not built": openapi/ (document to UpstreamTool[]), compile/ (UpstreamTool[]
-   plus tools.toml to effective definitions), lock/ (write and verify
-   tools.lock.json), diff/ (two locks to a SurfaceDiff), lint/ (a server
-   folder to Finding[]), suggest/ (an UpstreamTool to a classification
-   suggestion), execute/ (a call, a CredentialSource, and a Transport to a
-   tool result). Define UpstreamTool, CredentialSource, and Transport.
-4. fixtures/: a recorded tools/list from a remote MCP server with annotations,
-   one tool with no annotations, and one tool named with a hyphen; a registry
-   catalog entry; a small OpenAPI 3.0 document; a 3.1 document with oneOf and
-   a discriminator; a Swagger 2.0 document; a document with 600 operations;
-   one with a recursive schema; one split across files. Add the spec's stripe
-   and billing server folders with the lock files they should produce.
-5. Tests that every fixture parses against the contract schemas.
+4. One folder per module with its exported signature and a body that throws
+   "not built": openapi/, graphql/, and grpc/ (definition to UpstreamTool[]),
+   compile/, lock/, diff/, suggest/, lint/, and execute/ with one Sender
+   interface per request template kind (execute/grpc/ holds the grpc one).
+   Define CredentialSource and Transport.
+5. fixtures/: a recorded tools/list from a remote MCP server with
+   annotations, one tool with none, and one named with a hyphen; a registry
+   catalog entry; OpenAPI 3.0, 3.1 with oneOf and a discriminator, Swagger 2.0,
+   600 operations, recursive, and multi-file documents; a GraphQL SDL with
+   queries, mutations, a subscription, and a connection; a proto package
+   with unary, server-streaming, and bidirectional methods, an Any field,
+   and idempotency levels. Add the spec's stripe and billing server folders
+   with the lock files they should produce.
+6. Tests that every fixture parses against the contract schemas.
 
 Done when
 - Every module has its signature and every contract schema has a type and a
@@ -1024,15 +1132,14 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
   <h3>Wave 1</h3>
-  <figure class="code prompt"><figcaption><span class="path">M1 OpenAPI import</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M1. OpenAPI import and normalize
+  <figure class="code prompt"><figcaption><span class="path">M1 OpenAPI import</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M1. OpenAPI import
 
 Goal
 Any OpenAPI 3.1, 3.0, or Swagger 2.0 document, in YAML or JSON, in one file or
-many, becomes a list of UpstreamTool definitions, one per operation, as the
-spec's OpenAPI mapping describes.
+many, becomes UpstreamTool definitions as the spec's Mapping (OpenAPI) says.
 
 Read first
-- mcp-studio-spec.html: Sources (OpenAPI import), OpenAPI mapping, Tool names.
+- mcp-studio-spec.html: Sources (Definition import), Mapping, Tool names.
 - packages/mcp-studio/src/contract/ and src/openapi/ (from M0).
 
 You own
@@ -1041,18 +1148,16 @@ You own
 Do
 1. Pick a maintained parser and converter for dereferencing, validation, and
    Swagger 2.0 conversion. Record the choice and the reason in the PR body.
-2. Bundle external $refs into one document on import. Refuse documents over
-   25 MB with a message that says the size and the limit.
+2. Bundle external $refs into one document. Refuse documents over 25 MB with
+   a message that says the size and the limit.
 3. Normalize: resolve $ref (cut recursive schemas at depth 4 with a note),
    merge path-level and operation-level parameters, turn 3.0 nullable into 3.1
    type lists, and apply overlay.yaml (OpenAPI Overlay 1.0) when given.
-4. Map each operation to an UpstreamTool with the request template the
-   executor needs (method, path, parameter locations, body placement) and the
-   suggested name from operationId or method and path.
-5. List webhooks and callbacks, and mark them as never tools.
+4. Map each operation to an UpstreamTool with an http request template and the
+   suggested name. List webhooks and callbacks as never tools.
 
 Done when
-- Every M0 OpenAPI fixture imports, and golden tests pin each result.
+- Every OpenAPI fixture imports, and golden tests pin each result.
 - CI is green.
 
 Rules for every lane
@@ -1080,36 +1185,147 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M2 Compile and lock</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M2. Compile effective definitions, write the lock, and diff two locks
+  <figure class="code prompt"><figcaption><span class="path">M2 GraphQL import</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M2. GraphQL import
+
+Goal
+A GraphQL schema, from an SDL file or an introspection result, becomes
+UpstreamTool definitions as the spec's Mapping (GraphQL) says, each with a
+generated selection set.
+
+Read first
+- mcp-studio-spec.html: Sources (Definition import), Mapping (GraphQL), Tools
+  file (field, selection, paginate).
+- packages/mcp-studio/src/contract/ and src/graphql/ (from M0).
+
+You own
+- packages/mcp-studio/src/graphql/
+
+Do
+1. Parse SDL, or turn an introspection result into a schema.
+2. One UpstreamTool per Query and Mutation root field, with a graphql request
+   template. Arguments and input types become JSON Schema: non-null as
+   required, enums as enum, custom scalars as strings unless described.
+3. Generate a selection set to depth 2 that stops at connections and picks
+   scalar fields first. Build outputSchema from it. Detect connections (edges
+   and pageInfo) and suggest paginate = "connection".
+4. List subscriptions as never tools. Carry descriptions and @deprecated.
+
+Done when
+- The GraphQL fixture imports, and golden tests pin the tools and their
+  selection sets. CI is green.
+
+Rules for every lane
+- The spec is mcp-studio-spec.html in macanderson/oxagen-roadmap. The Shared contract section of steering-repo-spec.html is fixed: use its names exactly. If the contract is wrong, stop and say so in the PR body. Do not work around it.
+- Work in macanderson/oxagen. Create the worktree with:
+  git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
+- Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
+- Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+- Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
+- A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
+- Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
+- New code and copy say "steering record" and "steering PR" (#4325).
+
+## Local execution
+
+Mac set this on 2026-09-26 for every repository on this machine. Local builds, test runs, dev servers, and git hooks ran the laptop out of memory and killed agent runs partway through, and every killed run costs money. CI is the only place code is built, checked, or tested.
+
+- Do not run the gate, a build, a typecheck, a lint, or any test, not even one test file. Push the branch and read the CI result. Read a failed job with `gh run view --job &lt;id&gt; --log-failed`.
+- Do not start a dev server: no `next dev`, `next start`, `pnpm dev`, a server under `cargo run`, or anything else that listens on a port.
+- Do not start Docker or Colima, and do not run anything that needs them.
+- Do not run Biome in any form.
+- Git hooks are off on this machine. `LEFTHOOK=0` and `HUSKY=0` are set for every shell (`~/.zshenv`) and every Claude Code session (`~/.claude/settings.json`). oxagen's installed hooks are renamed `*.disabled`, and stella's `core.hooksPath` is unset. Do not reinstall a hook, turn one back on, or run a hook's commands by hand.
+- Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
+- Put this rule, word for word, in the prompt of every subagent you start.
+
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+
+  <figure class="code prompt"><figcaption><span class="path">M3 gRPC import</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M3. gRPC import
+
+Goal
+A set of .proto files, or what server reflection returns, becomes UpstreamTool
+definitions as the spec's Mapping (gRPC) says.
+
+Read first
+- mcp-studio-spec.html: Sources (Definition import), Mapping (gRPC), Risk
+  classification (the idempotency_level suggestions).
+- packages/mcp-studio/src/contract/ and src/grpc/ (from M0).
+
+You own
+- packages/mcp-studio/src/grpc/
+
+Do
+1. Parse .proto files with their imports into descriptors without running
+   protoc. Pick a maintained library and record why in the PR body.
+2. From a reflection result, write the files back as .proto text for
+   proto/, so a person can review them.
+3. One UpstreamTool per unary and server-streaming method, with a grpc
+   request template. List client and bidirectional streams as never tools.
+4. Request and response messages become JSON Schema by the proto3 JSON
+   mapping: 64-bit integers as strings, oneof as oneOf, enums by name, and
+   well-known types in their JSON forms. Carry leading comments as the
+   description and idempotency_level as a classification hint.
+
+Done when
+- The proto fixture imports, and golden tests pin every schema. CI is green.
+
+Rules for every lane
+- The spec is mcp-studio-spec.html in macanderson/oxagen-roadmap. The Shared contract section of steering-repo-spec.html is fixed: use its names exactly. If the contract is wrong, stop and say so in the PR body. Do not work around it.
+- Work in macanderson/oxagen. Create the worktree with:
+  git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
+- Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
+- Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+- Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
+- A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
+- Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
+- New code and copy say "steering record" and "steering PR" (#4325).
+
+## Local execution
+
+Mac set this on 2026-09-26 for every repository on this machine. Local builds, test runs, dev servers, and git hooks ran the laptop out of memory and killed agent runs partway through, and every killed run costs money. CI is the only place code is built, checked, or tested.
+
+- Do not run the gate, a build, a typecheck, a lint, or any test, not even one test file. Push the branch and read the CI result. Read a failed job with `gh run view --job &lt;id&gt; --log-failed`.
+- Do not start a dev server: no `next dev`, `next start`, `pnpm dev`, a server under `cargo run`, or anything else that listens on a port.
+- Do not start Docker or Colima, and do not run anything that needs them.
+- Do not run Biome in any form.
+- Git hooks are off on this machine. `LEFTHOOK=0` and `HUSKY=0` are set for every shell (`~/.zshenv`) and every Claude Code session (`~/.claude/settings.json`). oxagen's installed hooks are renamed `*.disabled`, and stella's `core.hooksPath` is unset. Do not reinstall a hook, turn one back on, or run a hook's commands by hand.
+- Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
+- Put this rule, word for word, in the prompt of every subagent you start.
+
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+
+  <figure class="code prompt"><figcaption><span class="path">M4 Compile and lock</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M4. Compile effective definitions, write the lock, diff, and suggest
 
 Goal
 For any source, compile(upstream tools, tools.toml) returns the effective tool
-definitions the agent sees, lock() writes tools.lock.json, and diff() returns
-the tool surface diff with breaking changes marked.
+definitions the agent sees, lock() writes tools.lock.json, diff() returns the
+tool surface diff with breaking changes marked, and suggest() returns the
+classification suggestion.
 
 Read first
-- mcp-studio-spec.html: Tools file, Risk classification (the annotation
-  rule), Lock file, Tool names, Large servers, Sync.
-- packages/mcp-studio/src/contract/, src/compile/, src/lock/, src/diff/.
+- mcp-studio-spec.html: Tools file, Risk classification, Lock file, Tool
+  names, Large servers, Sync.
+- packages/mcp-studio/src/contract/, src/compile/, src/lock/, src/diff/,
+  src/suggest/.
 
 You own
 - packages/mcp-studio/src/compile/, src/lock/, src/diff/, src/suggest/
 
 Do
-1. compile: for each tool in tools.toml, find its upstream by upstream or
-   operation, apply description, hide, fixed, defaults, rename, and derive
-   annotations from the classification (never from upstream). Prefix names
-   with toolName(). Fail on a collision or a name over 64 characters.
+1. compile: for each tool in tools.toml, find its upstream by upstream,
+   operation, field, or method. Apply description, hide, fixed, defaults,
+   rename, and a GraphQL selection. Derive annotations from the
+   classification, never from upstream. Prefix names with toolName(). Fail on
+   a collision or a name over 64 characters.
 2. Search mode: emit &lt;server&gt;__search, &lt;server&gt;__describe, and &lt;server&gt;__call,
    and keep every imported tool in the manifest behind them.
 3. lock: sorted keys, two-space indent. upstream_hash is SHA-256 over the RFC
    8785 canonical form of upstream. definition_hash covers the effective name,
    description, and input and output schemas. version rises by one when
    definition_hash changes. Classification is outside both hashes.
-4. diff: compare two locks and mark breaking changes: a removed tool, a new
-   required input, a narrowed type, or a removed field that select names.
-5. suggest: the classification suggestion from annotations or the method, as
-   the spec's Suggestions table gives, with egress from the source and network.
+4. diff: a removed tool, a new required input, a narrowed type, or a removed
+   field that select names is breaking.
+5. suggest: the spec's Suggestions table, with egress from the source and
+   network.
 6. Count each definition's tokens with countTokens().
 
 Done when
@@ -1142,7 +1358,7 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M3 Tool checks</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M3. Tool checks
+  <figure class="code prompt"><figcaption><span class="path">M5 Tool checks</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M5. Tool checks
 
 Goal
 lint(server folder) returns every finding in the spec's Tool checks table, each
@@ -1191,41 +1407,45 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M4 Executor</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M4. The executor
+  <figure class="code prompt"><figcaption><span class="path">M6 Executor</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M6. The executor for MCP, HTTP, and GraphQL
 
 Goal
 execute(tool, args, environment, CredentialSource, Transport) performs steps 3
-and 5 to 9 of the spec's Call path for MCP and OpenAPI sources and returns an
-MCP tool result.
+and 5 to 9 of the spec's Call path and returns an MCP tool result. It sends
+MCP, HTTP, and GraphQL calls itself and hands gRPC calls to M7's Sender.
 
 Read first
-- mcp-studio-spec.html: Call path, Tools file (shaping keys), OpenAPI mapping
+- mcp-studio-spec.html: Call path, Tools file (shaping keys), Mapping
   (errors), Network paths (host rules).
 - packages/mcp-studio/src/contract/ and src/execute/ (from M0).
 
 You own
-- packages/mcp-studio/src/execute/
+- packages/mcp-studio/src/execute/, except src/execute/grpc/
 
 Do
 1. Validate the arguments against the effective input schema. Return isError
    with the schema error when they fail.
 2. Shape the input: fixed values, defaults, and renamed inputs mapped back.
-3. MCP source: send tools/call with the upstream name through Transport.
-   Retry only when the transport failed before the server received the call.
-4. OpenAPI source: build the request from the template: base URL for the
-   environment, percent-encoded path parameters, query, headers, body, and the
-   idempotency key. Retry GET, HEAD, PUT, DELETE, and keyed POST on 429, 502,
-   503, and 504, up to 3 times, after Retry-After. Map a non-2xx status to
-   isError with RFC 9457 title and detail when present.
-5. Ask CredentialSource for the credential and apply it by scheme. Refuse a
+3. MCP: tools/call with the upstream name. Retry only when the transport
+   failed before the server received the call.
+4. HTTP: build the request from the template, with percent-encoded path
+   parameters and the idempotency key. Retry GET, HEAD, PUT, DELETE, and
+   keyed POST on 429, 502, 503, and 504, up to 3 times, after Retry-After.
+   Map a non-2xx status to isError with RFC 9457 title and detail.
+5. GraphQL: one POST with the stored selection set and the arguments as
+   variables. An errors array is isError even on 200. Queries retry as GET
+   does, mutations never.
+6. gRPC: call the grpc Sender through M0's interface. Until M7 merges it
+   throws "not built".
+7. Ask CredentialSource for the credential and apply it by scheme. Refuse a
    redirect to another host. The cloud Transport refuses private, loopback,
-   and link-local addresses. Time out at 30 seconds by default.
-6. Shape the result: select, redact, the size cap with a paging note, and auto
+   and link-local addresses. Deadline 30 seconds by default.
+8. Shape the result: select, redact, the size cap with a paging note, and auto
    paging up to max_items. Return structuredContent and a text rendering.
 
 Done when
-- Tests against a fake Transport cover both sources, every retry rule, and
-  every refusal. CI is green.
+- Tests against a fake Transport cover each kind, every retry rule, and every
+  refusal. CI is green.
 
 Rules for every lane
 - The spec is mcp-studio-spec.html in macanderson/oxagen-roadmap. The Shared contract section of steering-repo-spec.html is fixed: use its names exactly. If the contract is wrong, stop and say so in the PR body. Do not work around it.
@@ -1252,7 +1472,61 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M5 Credentials and operator OAuth</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M5. Credentials and operator OAuth
+  <figure class="code prompt"><figcaption><span class="path">M7 gRPC client</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M7. A dynamic gRPC client
+
+Goal
+The grpc Sender calls any unary or server-streaming method from its
+descriptors, with no generated code, and returns JSON by the proto3 JSON
+mapping.
+
+Read first
+- mcp-studio-spec.html: Mapping (gRPC), Call path, Network paths.
+- packages/mcp-studio/src/contract/ and the Sender interface in src/execute/.
+
+You own
+- packages/mcp-studio/src/execute/grpc/
+
+Do
+1. Encode the request from JSON and decode the response to JSON with the
+   method's descriptors. Pick a maintained library and record why.
+2. HTTP/2 with TLS by default. Send the credential as call metadata. Apply
+   deadline_ms, 30,000 by default.
+3. Collect a server stream up to max_items, then cancel the stream.
+4. Map a non-OK status to isError with the code and the message. Retry
+   UNAVAILABLE up to 3 times only for methods marked NO_SIDE_EFFECTS or
+   IDEMPOTENT.
+5. Send through Transport, so M12's relay can carry the call.
+
+Done when
+- Tests against an in-process gRPC server from M0's proto fixture cover a
+  unary call, a collected stream, each retry rule, and a deadline. CI is green.
+
+Rules for every lane
+- The spec is mcp-studio-spec.html in macanderson/oxagen-roadmap. The Shared contract section of steering-repo-spec.html is fixed: use its names exactly. If the contract is wrong, stop and say so in the PR body. Do not work around it.
+- Work in macanderson/oxagen. Create the worktree with:
+  git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
+- Change only the paths under "You own". Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
+- Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+- Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
+- A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
+- Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
+- New code and copy say "steering record" and "steering PR" (#4325).
+
+## Local execution
+
+Mac set this on 2026-09-26 for every repository on this machine. Local builds, test runs, dev servers, and git hooks ran the laptop out of memory and killed agent runs partway through, and every killed run costs money. CI is the only place code is built, checked, or tested.
+
+- Do not run the gate, a build, a typecheck, a lint, or any test, not even one test file. Push the branch and read the CI result. Read a failed job with `gh run view --job &lt;id&gt; --log-failed`.
+- Do not start a dev server: no `next dev`, `next start`, `pnpm dev`, a server under `cargo run`, or anything else that listens on a port.
+- Do not start Docker or Colima, and do not run anything that needs them.
+- Do not run Biome in any form.
+- Git hooks are off on this machine. `LEFTHOOK=0` and `HUSKY=0` are set for every shell (`~/.zshenv`) and every Claude Code session (`~/.claude/settings.json`). oxagen's installed hooks are renamed `*.disabled`, and stella's `core.hooksPath` is unset. Do not reinstall a hook, turn one back on, or run a hook's commands by hand.
+- Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
+- Put this rule, word for word, in the prompt of every subagent you start.
+
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
+
+  <figure class="code prompt"><figcaption><span class="path">M8 Credentials and operator OAuth</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M8. Credentials and operator OAuth
 
 Goal
 A CredentialSource that resolves oxagen:credential/&lt;name&gt; for every mode in the
@@ -1269,7 +1543,7 @@ You own
 - packages/handlers/src/mcp-studio/credentials/ (new)
 - apps/api/src/routes/v1/mcp-studio.oauth.ts (new, the OAuth callback)
 - A new operator token table in its own schema file, with its own migration
-- The handlers you found above, for reads by name only. M10 adds the name
+- The handlers you found above, for reads by name only. M13 adds the name
   column to mcp.credentials. Until it merges, resolve by the existing key.
 
 Do
@@ -1312,11 +1586,12 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M6 Studio screens</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M6. Studio screens
+  <figure class="code prompt"><figcaption><span class="path">M9 Studio screens</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M9. Studio screens
 
 Goal
-Add server with four sources, and per server the Tools, Connection, Try it, and
-Changes tabs from the spec's Studio screens section, in the MCP servers area.
+Add server with four choices, and per server the Tools, Connection, Try it,
+and Changes tabs from the spec's Studio screens section, in the MCP servers
+area.
 
 Read first
 - mcp-studio-spec.html: Studio screens (the sketch), Tools file, Risk
@@ -1331,20 +1606,22 @@ You own
 
 Do
 1. Add server: Connect by URL, From the registry (browse mcp.catalog_servers),
-   Local command, and From OpenAPI, each ending in discovery progress.
+   Local command, and From a definition (OpenAPI, GraphQL, or gRPC, by file,
+   repository path, URL, introspection, or reflection), each ending in
+   discovery progress.
 2. Tools: every available tool with imported or available state, name, risk,
    side effect, and definition tokens, filterable, with the running total
    against definition_budget. Suggested values show as suggestions until a
    person confirms them.
-3. Tool panel: classification (risk, side effect, egress, tags, measures, data
-   classes), description with Draft, hidden and fixed inputs, returns
-   (select), what the server says, and agent feedback.
+3. Tool panel: classification, description with Draft (the in-app agent,
+   billed as in-app agent spend), hidden and fixed inputs, returns (select),
+   the GraphQL selection set, what the server says, and agent feedback.
 4. Connection: source, environments, network route, auth mode, credential.
    Credentials are entered here and never reach a pull request.
 5. Try it: pick an environment, fill the arguments, show what went upstream,
    the raw result, and the shaped result. Save as test.
 6. Changes: the tool surface diff and the findings, then Open steering PR.
-   Call M8's handler. Until M8 merges, use a typed stub.
+   Call M11's handler. Until M11 merges, use a typed stub.
 7. The off switch on a server and on each tool, with who and when.
 8. Plain-noun headings, clear-prose copy, both themes, and phone width.
 
@@ -1377,7 +1654,7 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M7 Discovery and sync</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M7. Discovery and sync
+  <figure class="code prompt"><figcaption><span class="path">M10 Discovery and sync</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M10. Discovery and sync
 
 Goal
 Every server's available tools are current in mcp.tool_snapshots, and a change
@@ -1393,17 +1670,18 @@ You own
 - packages/inngest-functions/src/functions/mcp-server.discover.ts and
   mcp-server.sync.ts (new)
 - One new function in the GitHub and GitLab webhook handlers that routes a
-  push touching an OpenAPI source path. Keep it apart from S2's settings
-  routing. On conflict keep both.
+  push touching a definition path. Keep it apart from S2's settings routing.
+  On conflict keep both.
 
 Do
 1. Discover by source: tools/list for remote and registry servers (service
    credential, or the importing person's token), the local gateway's report
-   for local servers, and M1's import for OpenAPI documents. Write every tool
-   to mcp.tool_snapshots.
+   for local servers, M1, M2, or M3 for a definition, including GraphQL
+   introspection and gRPC reflection through the network route. Write every
+   tool to mcp.tool_snapshots.
 2. Triggers: the server's schedule, notifications/tools/list_changed, a push
-   to a document path, and a newer registry version.
-3. Compare each imported tool's upstream with the lock (M2's diff). When one
+   to a definition path, and a newer registry version.
+3. Compare each imported tool's upstream with the lock (M4's diff). When one
    differs, open one sync PR per server through S3's open path with the new
    lock, the new source.version for a registry server, and the diff in the
    body. Mark a changed input schema as breaking and withhold that tool until
@@ -1438,7 +1716,7 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M8 Import PRs</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M8. Studio's edits become a server folder in a steering PR
+  <figure class="code prompt"><figcaption><span class="path">M11 Import PRs</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M11. Studio's edits become a server folder in a steering PR
 
 Goal
 Adding a server, importing tools, classifying them, and shaping them in Studio
@@ -1455,11 +1733,12 @@ You own
 
 Do
 1. Keep Studio's unsaved edits as a draft in Oxagen until Review.
-2. Review writes server.toml, tools.toml, tools.lock.json (M2's lock), the
-   vendored document for an OpenAPI source, and tests/ to a branch named
-   servers/&lt;name&gt;, and opens a steering PR through the open path.
+2. Review writes server.toml, tools.toml, tools.lock.json (M4's lock), the
+   vendored definition (openapi.yaml, schema.graphql, or proto/), and tests/
+   to a branch named servers/&lt;name&gt;, and opens a steering PR through the open
+   path.
 3. The PR body lists every imported, removed, and reclassified tool, the
-   definition token total against the budget, and M3's findings.
+   definition token total against the budget, and M5's findings.
 4. Refuse to open a PR while any imported tool lacks risk, side_effect, or
    egress.
 
@@ -1492,37 +1771,45 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M9 Relay</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M9. The relay for servers and APIs in a private network
+  <figure class="code prompt"><figcaption><span class="path">M12 Relay</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M12. The relay for servers and APIs in a private network
 
 Goal
-A customer runs one small container inside its network. It dials out to
-Oxagen, receives signed call envelopes, sends each request to an MCP server or
-an HTTP API, and returns the response. No inbound port opens.
+A customer runs the relay inside its network. It dials out to Oxagen, sends
+only requests the cloud gateway signed, and returns the responses. When the
+gateway stops signing, nothing can make it act.
 
 Read first
-- mcp-studio-spec.html: Network paths.
+- mcp-studio-spec.html: Network paths (relay rules, placement, packaging,
+  customer-held credentials).
 - packages/mcp-studio/src/contract/ (the relay envelope, from M0) and the
   Transport interface in src/execute/.
 
 You own
 - apps/relay/ (new: the container)
-- packages/relay-broker/ (new: the Oxagen side, and a Transport for M4)
+- packages/relay-broker/ (new: the Oxagen side, and a Transport for M6 and M7)
+- The Helm chart for the relay, beside apps/relay/
 
 Do
 1. The relay authenticates with a relay token, holds one outbound TLS
    connection with heartbeats, and reconnects with backoff.
-2. It verifies each envelope's signature and expiry before it sends anything,
-   sends only to hosts its local allowlist names, and returns the response,
-   capped in size. It carries MCP streamable HTTP and plain HTTP.
-3. It can add a customer-held credential from its own environment when an
-   envelope asks for one by name.
-4. The broker routes envelopes to the named relay, times out calls, and
-   reports a relay as down after missed heartbeats.
-5. A Dockerfile and a README with the run command. No other deploy tooling.
+2. It refuses an envelope that is unsigned, expired, replayed (nonce seen),
+   or aimed at a host its local allowlist does not name, and sends exactly
+   the method, host, and path, or gRPC service and method, the envelope names.
+3. It fails closed: while disconnected it sends nothing.
+4. It carries HTTP/1.1, HTTP/2 including gRPC, and MCP streamable HTTP, with
+   responses capped in size.
+5. It can add a customer-held credential from its own environment when an
+   envelope names one. This is for the Enterprise plan. Take the plan check
+   from how the API gates other plan features.
+6. The broker signs envelopes with a short expiry, routes them to the named
+   relay, times out calls, and reports a relay as down after missed
+   heartbeats.
+7. Ship a container image (Dockerfile) and a Helm chart, with a README that
+   covers the run command, the chart values, and where to run the relay.
 
 Done when
-- Tests cover signature and expiry refusal, the allowlist, reconnects, and
-  timeouts with an in-process broker. CI is green.
+- Tests cover each refusal, fail-closed behavior, reconnects, timeouts, and
+  a gRPC call through an in-process broker. CI is green.
 
 Rules for every lane
 - The spec is mcp-studio-spec.html in macanderson/oxagen-roadmap. The Shared contract section of steering-repo-spec.html is fixed: use its names exactly. If the contract is wrong, stop and say so in the PR body. Do not work around it.
@@ -1549,7 +1836,7 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M10 Registry projection and migration</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M10. Rebuild the tool registry from the steering repo, and move today's servers
+  <figure class="code prompt"><figcaption><span class="path">M13 Registry projection and migration</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M13. Rebuild the tool registry from the steering repo, and move today's servers
 
 Goal
 Publish writes mcp.mcp_servers, agent.tools, and agent.tool_versions from the
@@ -1574,9 +1861,9 @@ You own
 - packages/handlers/src/mcp-studio/project.ts and migrate.ts (new)
 
 Do
-1. Schema: mcp.mcp_servers.transport_type also accepts openapi, a new origin
-   column (steering or legacy), and a name column on mcp.credentials, unique
-   per workspace. Backfill names from the existing rows.
+1. Schema: mcp.mcp_servers.transport_type also accepts openapi, graphql, and
+   grpc. Add an origin column (steering or legacy), and a name column on
+   mcp.credentials, unique per workspace. Backfill names from existing rows.
 2. project(publishedVersion): for each server folder, upsert its server row
    with origin steering, upsert one agent.tools row per imported tool (slug
    &lt;server&gt;__&lt;tool&gt;), write a new tool_versions row through publishTool when
@@ -1589,7 +1876,7 @@ Do
    server a wrapped agent may use, from today's rows and pinned snapshots. An
    unclassified tool gets high and write, flagged in the PR body.
 5. After a workspace's migration PR merges, agent.mcp.register, the plugin
-   flow's workspace install, and import_tools open steering PRs through M8's
+   flow's workspace install, and import_tools open steering PRs through M11's
    handler instead of writing rows.
 
 Done when
@@ -1623,22 +1910,23 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
   <h3>Wave 2</h3>
-  <figure class="code prompt"><figcaption><span class="path">M11 Serving and search mode</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M11. Serve every server's tools to wrapped agents
+  <figure class="code prompt"><figcaption><span class="path">M14 Serving and search mode</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M14. Serve every server's tools to wrapped agents, and the search index
 
 Goal
 An agent's MCP connection lists its toolbelt's tools from the published bundle,
 for every source, and calls them through the executor with policy decided on
-the real tool in both exposure modes.
+the real tool in both exposure modes. Search mode ranks with embeddings.
 
 Read first
 - mcp-studio-spec.html: Call path, Large servers, Risk classification, Tool
-  lifecycle.
+  lifecycle, Spend.
 - steering-repo-spec.html: Token efficiency, Shared contract (bundle/v1).
 - apps/mcp, packages/tacho/src/collector/mcp-gateway.ts (the local gateway
   forwards here), packages/rules (decision rules today).
 
 You own
 - apps/mcp/src/servers/ (new) and its registration in apps/mcp
+- packages/mcp-studio/src/search/ (new)
 
 Do
 1. tools/list: the agent's toolbelt intersected with the published manifests,
@@ -1648,15 +1936,21 @@ Do
 2. tools/call: find the tool at its locked version, decide with the toolbelt
    grant, the classification, and the decision rules in packages/rules (Cedar
    when its evaluator lands). Park for approval through the existing approval
-   path. Then call M4's execute with M5's CredentialSource and the Transport
-   the environment names: cloud, M9's relay, or the local gateway.
+   path. Then call M6's execute with M8's CredentialSource and the Transport
+   the environment names: cloud, M12's relay, or the local gateway.
 3. Search mode: search returns only tools in the toolbelt, describe returns
    one input schema, and call is decided as the underlying tool.
-4. Record and meter each call as a governed action.
+4. The search index: on publish, embed each changed one-line entry, keyed by
+   content hash, through a queue that batches calls. Use Oxagen's Voyage AI
+   key, which is stored in AWS: find how the API reads its other AWS-held
+   secrets and read it the same way. Never log it. Pick the Voyage model and
+   record why in the PR body.
+5. Meter every call, search, and describe as a governed action.
 
 Done when
 - Tests cover listing, a call from each source in each mode, the off switch,
-  a withheld tool, a denial, and an approval. CI is green.
+  a withheld tool, a denial, an approval, and search ranking against a fake
+  embedder. CI is green.
 
 Rules for every lane
 - The spec is mcp-studio-spec.html in macanderson/oxagen-roadmap. The Shared contract section of steering-repo-spec.html is fixed: use its names exactly. If the contract is wrong, stop and say so in the PR body. Do not work around it.
@@ -1683,7 +1977,7 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M12 Replay and selection tests</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M12. Replay recorded calls in the PR, and selection tests on request
+  <figure class="code prompt"><figcaption><span class="path">M15 Replay and selection tests</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M15. Replay recorded calls in the PR, and selection tests on request
 
 Goal
 The compile check replays each server's tests/calls.jsonl with no network, and
@@ -1698,11 +1992,11 @@ You own
 - The servers part of the compile check in packages/steering-check
 
 Do
-1. The compile check compiles every changed server folder with M2, verifies
-   the lock, and runs M3's lint.
+1. The compile check compiles every changed server folder with M4, verifies
+   the lock, and runs M5's lint.
 2. Replay: shape each recorded response and compare it with the recorded
-   result. For an OpenAPI server, also build the request with M4 and compare
-   it with the recording. Report the first difference.
+   result. For a server built from a definition, also build the request with
+   M6 and compare it with the recording. Report the first difference.
 3. Selection: for each task, ask a model on the workspace's route to pick from
    the server's tools, and report hits and misses. Run only when a person asks.
 
@@ -1735,11 +2029,12 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 
-  <figure class="code prompt"><figcaption><span class="path">M13 Live test</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M13. Live test with a sample MCP server and a sample API
+  <figure class="code prompt"><figcaption><span class="path">M16 Live test</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Lane M16. Live test with sample servers
 
 Goal
-One CI job connects a sample MCP server and imports a sample API, publishes
-both through steering PRs, and calls their tools as an agent would.
+One CI job connects a sample MCP server and imports a sample OpenAPI, GraphQL,
+and gRPC service, publishes them through steering PRs, and calls their tools as
+an agent would, one of them through a relay.
 
 This lane needs a rig. It needs the GitHub test organization from the steering
 repo's S11. If it is missing, open an issue that says exactly what to create and
@@ -1749,16 +2044,18 @@ You own
 - A new live test suite and its CI workflow, beside S11's
 
 Do
-1. Start a sample MCP server and a sample API in CI from M0's fixtures.
-2. Connect the server and import the API. Import two tools from each, classify
-   them, open the steering PRs, merge them through Oxagen, and wait for the
-   new published version.
+1. Start the sample servers in CI from M0's fixtures, and a relay in front of
+   the gRPC one.
+2. Connect or import each, import two tools from each, classify them, open the
+   steering PRs, merge them through Oxagen, and wait for the new published
+   version.
 3. Call each tool as an enrolled test agent. Expect a shaped result, an
    approval park for an irreversible tool, and a denial for a tool outside the
    toolbelt.
 4. Change a description on the sample MCP server. Expect a sync PR and the
    locked description still served.
-5. Delete the test repository at the end of every run.
+5. Stop the broker's signing for the relay. Expect the next call to fail.
+6. Delete the test repository at the end of every run.
 
 Done when
 - The job passes twice in a row in CI.
@@ -1789,7 +2086,7 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></figure>
 </section>
 
-<footer>MCP Studio v1. Draft for review, 2026-09-26. Decided items come from Mac's instructions of 2026-09-25 and 2026-09-26. Items marked Today describe <code>macanderson/oxagen</code> at <code>main</code> on 2026-09-26.</footer>
+<footer>MCP Studio v1. Draft for review, 2026-09-26. Decided items come from Mac's instructions of 2026-09-25 and 2026-09-26, including the comments on this page. Items marked Today describe <code>macanderson/oxagen</code> at <code>main</code> on 2026-09-26.</footer>
 </div>
 
 
