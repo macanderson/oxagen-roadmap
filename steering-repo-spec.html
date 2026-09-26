@@ -338,6 +338,10 @@ body{padding-inline:0}
         <li>The folders <code>servers/</code>, with one folder per MCP server whatever its source, <code>policy/</code>, and <code>steering/memory/</code>. <code>proposals/</code> goes. (Mac, 2026-09-26)</li>
         <li>The record fields <code>repos</code>, <code>tools</code>, and <code>description</code> on every kind. (Mac, 2026-09-26)</li>
         <li>An optional always-on token budget. A workspace that sets none inherits Oxagen's default, and a workspace can turn the check off. (Mac, 2026-09-26)</li>
+        <li>The repository name <code>oxagen-&lt;workspace&gt;</code>. (Mac, 2026-09-26)</li>
+        <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>. (Mac, 2026-09-26)</li>
+        <li>Reflections and memory candidates stay in Oxagen, and promoted memories arrive by a batched memory PR. (Mac, 2026-09-26)</li>
+        <li>The four file formats: Markdown with YAML frontmatter, TOML, JSON Lines, and each standard's own format. (Mac, 2026-09-26)</li>
       </ul>
     </div>
     <div class="card">
@@ -353,10 +357,8 @@ body{padding-inline:0}
     <div class="card">
       <h4><span class="st p">Proposed</span></h4>
       <ul>
-        <li>The repository name <code>oxagen-&lt;workspace&gt;</code>.</li>
-        <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>.</li>
         <li>Oxagen's default budget only warns. A budget the workspace sets fails a steering PR that goes over it.</li>
-        <li>Reflections and memory candidates kept in Oxagen, and promoted memories written by a batched memory PR.</li>
+        <li>The details below that no Decided item names: the settings table beyond the required check, the drift sweep, the scale targets, and the build lanes.</li>
       </ul>
     </div>
   </div>
@@ -438,7 +440,7 @@ body{padding-inline:0}
 <section id="formats">
   <span class="eyebrow">Formats</span>
   <h2>File formats</h2>
-  <p>Four formats, each with one job. A file a standard defines keeps that standard's format. <span class="st p">Proposed</span></p>
+  <p>Four formats, each with one job. A file a standard defines keeps that standard's format. <span class="st d">Decided</span></p>
   <div class="tscroll"><table>
     <thead><tr><th>Format</th><th>Extension</th><th>Used for</th><th>Rules</th></tr></thead>
     <tbody>
@@ -708,7 +710,7 @@ per_month_micros = 12000000000                # $12,000.00
 <section id="settings">
   <span class="eyebrow">Settings</span>
   <h2>Prescribed settings</h2>
-  <p>These settings let Oxagen merge from the web app every time and make sure nothing reaches <code>main</code> any other way. <span class="st p">Proposed</span></p>
+  <p>These settings let Oxagen merge from the web app every time and make sure nothing reaches <code>main</code> any other way. The one required check and Oxagen as the only merger are <span class="st d">Decided</span>. The rest of the table is <span class="st p">Proposed</span>.</p>
   <h3>GitHub</h3>
   <div class="tscroll"><table>
     <thead><tr><th>Setting</th><th>Value</th><th>Why</th></tr></thead>
@@ -809,7 +811,7 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
 <section id="memory">
   <span class="eyebrow">Memory</span>
   <h2>Memory and reflection</h2>
-  <p>Agents learn things in runs that the next run should know. Oxagen captures those lessons in Oxagen's database, where writing is cheap and fast, and reaches the repository only through a steering PR, where a person reviews what every agent will be told. The rule: <strong>the repository holds what steers, and Oxagen holds what happened.</strong> <span class="st p">Proposed</span></p>
+  <p>Agents learn things in runs that the next run should know. Oxagen captures those lessons in Oxagen's database, where writing is cheap and fast, and reaches the repository only through a steering PR, where a person reviews what every agent will be told. The rule: <strong>the repository holds what steers, and Oxagen holds what happened.</strong> <span class="st d">Decided</span></p>
   <p>Today memories are Neo4j <code>:AgentMemory</code> nodes behind the knowledge-graph flag, recalled only by the in-app agent, and the reflector is not built (ADR-061 §3, ADR-097). <span class="st c">Today</span></p>
 
   <h3>Lifecycle</h3>
