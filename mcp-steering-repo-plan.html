@@ -754,11 +754,16 @@ You own
 - docs/specs/github-app/github-app-setup.md
 
 Do
-1. GitHub: create the repository in the installation&#x27;s organization, write the
-   first commit from S0&#x27;s templates, apply both rulesets (the check pinned to
-   the Oxagen app, restrict updates with the app as the only bypass), squash
-   only, delete head branches, Actions off, and the steering environment.
-   Read everything back and compare with settings-baseline.ts.
+1. GitHub: every call on a steering repo uses the Oxagen Steering app, which
+   has Oxagen&#x27;s permissions plus Administration and Deployments. Create the
+   repository in the organization, write the first commit from S0&#x27;s
+   templates, apply both rulesets (the check pinned to Oxagen Steering,
+   restrict updates with it as the only bypass), squash only, delete head
+   branches, Actions off, and the steering environment. Read everything back
+   and compare with settings-baseline.ts. How the app reaches a repository it
+   just created is an open question in the spec&#x27;s Provisioning section: build
+   what the spec says when you start, and if it is still open, ask before
+   building that step.
 2. GitLab: the same with a group access token: create the project, protect
    main (push: no one, merge: the Oxagen bot), squash required, pipelines must
    succeed, CI/CD off.
@@ -768,8 +773,9 @@ Do
 4. Bind the new repository with role steering (S0&#x27;s migration allows it).
 5. Creating an organization runs the same steps for &lt;org&gt;/oxagen, the
    repository for organization records, with no workspace.toml.
-6. Update the GitHub App setup doc: Administration write and Deployments write,
-   and why. Keep the second-app fallback in the doc as an option.
+6. Update the GitHub App setup doc: the Oxagen app keeps today&#x27;s permissions,
+   and a new Oxagen Steering app has the same ones plus Administration write
+   and Deployments write, used only on steering repos.
 
 Done when
 - Unit tests cover each step with a mocked GitHub and GitLab client, and a

@@ -350,6 +350,9 @@ body{padding-inline:0}
         <li>An optional always-on token budget. A workspace that sets none inherits Oxagen's default, and a workspace can turn the check off. (Mac, 2026-09-26)</li>
         <li>The budget check never blocks a steering PR, because a steering PR is how a budget changes. It warns and shows the cost. (Mac, 2026-09-26)</li>
         <li>While a steering repo's settings have drifted, runs keep the last published version. (Mac, 2026-09-26)</li>
+        <li>Two GitHub apps. Oxagen keeps its write, pull request, and issue permissions on code repositories. Oxagen Steering has the same permissions plus full admin, and acts on the steering repos Oxagen creates. (Mac, 2026-09-26)</li>
+        <li>An unreviewed memory candidate steers only the agent that wrote it. (Mac, 2026-09-26)</li>
+        <li>GitHub Actions and GitLab CI are off in every steering repo. (Mac, 2026-09-26)</li>
         <li>The repository name <code>oxagen-&lt;workspace&gt;</code>. (Mac, 2026-09-26)</li>
         <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>. (Mac, 2026-09-26)</li>
         <li>Reflections and memory candidates stay in Oxagen, and promoted memories arrive by a batched memory PR. (Mac, 2026-09-26)</li>
@@ -708,25 +711,28 @@ per_month_micros = 12000000000                # $12,000.00
     <li><div><strong>Open the workspace.</strong><p>The target is 15 seconds from Create to an open workspace. When a step fails, the workspace shows which step and a Retry button. Every step is safe to repeat.</p></div></li>
   </ol>
   <p>Creating an organization runs the same steps for <code>&lt;org&gt;/oxagen</code>, the repository for organization records, with the same settings and no <code>workspace.toml</code>. <span class="st d">Decided</span> for the repository, <span class="st p">Proposed</span> for the steps.</p>
+  <h3>GitHub apps</h3>
+  <p>Two apps split the permissions. <strong>Oxagen</strong> keeps the permissions it has today and works on code repositories. <strong>Oxagen Steering</strong> has the same permissions plus full admin, and it is the only app that acts on steering repos, so an organization grants admin on the repositories Oxagen creates and on nothing else. <span class="st d">Decided</span> for the split, <span class="st p">Proposed</span> for the name Oxagen Steering.</p>
   <div class="tscroll"><table>
-    <thead><tr><th>GitHub App permission</th><th>Access</th><th>Why</th><th>Today</th></tr></thead>
+    <thead><tr><th>Permission</th><th>Access</th><th>Why</th><th>Oxagen</th><th>Oxagen Steering</th></tr></thead>
     <tbody>
-      <tr><td>Administration</td><td>write</td><td class="wrap">Create the repository, write and read rulesets, merge options, and the environment</td><td><span class="bad">missing</span></td></tr>
-      <tr><td>Deployments</td><td>write</td><td class="wrap">Record each publish as a deployment</td><td><span class="bad">missing</span></td></tr>
-      <tr><td>Contents</td><td>write</td><td class="wrap">Commits and branches</td><td class="good">granted</td></tr>
-      <tr><td>Pull requests</td><td>write</td><td class="wrap">Open, comment on, and merge steering PRs</td><td class="good">granted</td></tr>
-      <tr><td>Checks</td><td>write</td><td class="wrap">Post <code>Oxagen steering</code></td><td class="good">granted</td></tr>
-      <tr><td>Members</td><td>read</td><td class="wrap">Match reviewers to Oxagen members</td><td class="good">granted, optional</td></tr>
+      <tr><td>Contents</td><td>write</td><td class="wrap">Commits and branches</td><td class="good">yes, today</td><td class="good">yes</td></tr>
+      <tr><td>Pull requests</td><td>write</td><td class="wrap">Open, comment on, and merge pull requests</td><td class="good">yes, today</td><td class="good">yes</td></tr>
+      <tr><td>Issues</td><td>as today</td><td class="wrap">Read and link work items</td><td class="good">yes, today</td><td class="good">yes</td></tr>
+      <tr><td>Checks</td><td>write</td><td class="wrap">Post <code>Oxagen steering</code></td><td class="good">yes, today</td><td class="good">yes</td></tr>
+      <tr><td>Members</td><td>read</td><td class="wrap">Match reviewers to Oxagen members</td><td class="good">yes, today, optional</td><td class="good">yes</td></tr>
+      <tr><td>Administration</td><td>write</td><td class="wrap">Create the steering repo, and write and read its rulesets, merge options, and environment</td><td>no</td><td class="good">yes</td></tr>
+      <tr><td>Deployments</td><td>write</td><td class="wrap">Record each publish as a deployment, part of admin on the steering repo</td><td>no</td><td class="good">yes</td></tr>
     </tbody>
   </table></div>
-  <div class="note"><p><strong>Decision needed.</strong> Administration write lets the app create repositories and change settings across every repository the installation covers. Some enterprises will refuse it. The fallback is a second GitHub App, "Oxagen provisioning", that holds only Administration and Deployments and is installed on the steering repos alone. The first app keeps its current permissions.</p></div>
+  <div class="note"><p><strong>Open question.</strong> GitHub does not add a repository an app creates to an installation limited to selected repositories. Adding it takes a person's user access token (<code>PUT /user/installations/{id}/repositories/{repo}</code>). So either an organization owner authorizes Oxagen Steering once, and Oxagen uses that token to create each steering repo and add it to the installation (recommended), or Oxagen Steering is installed on all repositories, which gives it admin everywhere and undoes the split.</p></div>
   <p>On GitLab, provisioning needs a group access token with the <code>api</code> scope and the Maintainer role. Today Oxagen holds project access tokens only (#3762). Group access tokens need GitLab Premium on GitLab.com. Build verifies the tier rules for self-managed GitLab.</p>
 </section>
 
 <section id="settings">
   <span class="eyebrow">Settings</span>
   <h2>Prescribed settings</h2>
-  <p>These settings let Oxagen merge from the web app every time and make sure nothing reaches <code>main</code> any other way. The one required check and Oxagen as the only merger are <span class="st d">Decided</span>. The rest of the table is <span class="st p">Proposed</span>.</p>
+  <p>These settings let Oxagen merge from the web app every time and make sure nothing reaches <code>main</code> any other way. The one required check, Oxagen as the only merger, and Actions and CI off are <span class="st d">Decided</span>. The rest of the table is <span class="st p">Proposed</span>.</p>
   <h3>GitHub</h3>
   <div class="tscroll"><table>
     <thead><tr><th>Setting</th><th>Value</th><th>Why</th></tr></thead>
@@ -885,7 +891,7 @@ mode = "team"                        # solo, team, or regulated
 always_on_tokens = 4000              # a number or "off". Unset inherits Oxagen's default, which only warns.
 
 [memory]
-recall_candidates = "same-agent"     # off, same-agent, or workspace
+recall_candidates = "same-agent"     # same-agent, or off
 min_runs = 2                         # distinct runs before a candidate is proposed
 batch_size = 20                      # memories per memory PR
 retire_after_days = 180
@@ -894,7 +900,7 @@ auto_merge = false                   # allowed in solo mode only
 [[reviewers]]
 paths = ["steering/billing/**", "servers/billing/**"]
 group = "billing-leads"</code></pre></figure>
-  <p><code>recall_candidates</code> decides whether a candidate steers anything before a person reviews it. The default lets an agent recall its own candidates at force <code>info</code> and nothing else. <code>regulated</code> mode forces <code>off</code>. The in-app agent never receives workspace memories (Mac, 2026-09-25).</p>
+  <p><code>recall_candidates</code> decides whether a candidate steers anything before a person reviews it. An unreviewed candidate steers only the agent that wrote it, at force <code>info</code> (Mac, 2026-09-26). <code>off</code> stops even that. <code>regulated</code> mode forces <code>off</code>. The in-app agent never receives workspace memories (Mac, 2026-09-25).</p>
 </section>
 
 <section id="scale">
@@ -1062,10 +1068,8 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
   <span class="eyebrow">Open questions</span>
   <h2>Open questions</h2>
   <ol>
-    <li>Administration write on the GitHub App, or a second app that holds only the provisioning permissions.</li>
-    <li>Whether an unreviewed memory candidate steers anything: the same agent only (proposed here), the whole workspace, or nothing until a memory PR merges.</li>
+    <li>How Oxagen Steering reaches a steering repo it creates: an organization owner's user token that adds each new repository to the installation (recommended), or an installation on all repositories. See Provisioning.</li>
     <li>How Cursor receives steering now that code repositories hold no committed Oxagen files. Cursor reads rules from files in the repository and from its own dashboard, and its model calls do not pass the cloud gateway.</li>
-    <li>Actions and CI disabled in the steering repo.</li>
     <li>What <code>agents/</code> holds if the agent entity goes.</li>
     <li>A run on a code repository that is not linked to its agent's workspace: refuse it, or allow it and charge its cost to the workspace.</li>
     <li>The first workspace is provisional for 14 days without a main repository (ADR-065). With the repository created at once, it needs a provider connection before it can exist.</li>
