@@ -427,7 +427,7 @@ ACTS.steertab = function (el) { S.steerTab = el.getAttribute("data-tab"); render
 function repoCard() {
   var open = allPrs().filter(function (p) { return p.state !== "merged"; }).length, org = steeringItems().filter(function (i) { return i.scope === "organization"; }).length;
   return '<div class="panel repocard"><div class="rc-main">' + ipLogo("github", 20) + '<div class="grow"><span class="k">Steering repo</span>' + repoLink(REPO.name, REPO.url) +
-      '<span class="sub">Published version ' + REPO.version + ' from <a href="' + href("steering", "pr-" + REPO.publishedPr) + '" data-go="steering|pr-' + REPO.publishedPr + '">steering PR #' + REPO.publishedPr + "</a>, " + when(REPO.published) + "</span></div>" + healthBadge() + "</div>" +
+      '<span class="sub">' + pts(["Published version " + REPO.version, '<a href="' + href("steering", "pr-" + REPO.publishedPr) + '" data-go="steering|pr-' + REPO.publishedPr + '">Steering PR #' + REPO.publishedPr + "</a>", when(REPO.published)]) + "</span></div>" + healthBadge() + "</div>" +
     '<dl class="rc-facts"><div><dt>Required check</dt><dd><code>Oxagen steering</code></dd></div><div><dt>Review</dt><dd>' + h(REPO.governance.mode === "team" ? "Team mode" : REPO.governance.mode) + "</dd></div>" +
       '<div><dt>Open steering PRs</dt><dd><button class="linkbtn" data-act="steertab" data-tab="prs">' + num(open) + "</button></dd></div>" +
       '<div><dt>Linked repositories</dt><dd><button class="linkbtn" data-act="steertab" data-tab="repo">' + num(REPO.linked.length) + "</button></dd></div>" +
@@ -498,7 +498,7 @@ function steeringRepoTab() {
     return '<button class="li linkish" data-act="steeritem" data-id="' + i.id + '">' + kindBadge(i.kind) + '<span class="bd2"><span class="t1">' + h(recLabel(i)) + '</span><span class="t2 mono">' + h(i.lineage) + '</span></span><span class="muted num">' + num(i.tok) + " tok</span></button>";
   }).join("");
   var versions = REPO.versions.map(function (v) {
-    var inner = '<span class="mono muted">v' + v.v + '</span><span class="bd2"><span class="t1">' + h(v.what) + '</span><span class="t2">Steering PR #' + v.pr + ", " + when(v.at) + "</span></span>";
+    var inner = '<span class="mono muted">v' + v.v + '</span><span class="bd2"><span class="t1">' + h(v.what) + '</span><span class="t2">' + pts(["Steering PR #" + v.pr, when(v.at)]) + "</span></span>";
     return prBy(v.pr) ? '<a class="li" href="' + href("steering", "pr-" + v.pr) + '" data-go="steering|pr-' + v.pr + '">' + inner + "</a>" : '<div class="li">' + inner + "</div>";
   }).join("");
   return '<div class="grid g2">' +
@@ -532,7 +532,7 @@ function steeringPrView(id) {
   }
   var head = '<div class="shead"><div class="t"><p class="eyebrow">Steering PR #' + pr.n + "</p><h1>" + h(pr.title) + "</h1>" + meta + '</div><div class="acts">' + acts + "</div></div>";
   var main = (pr.summary ? '<p class="pr-sum">' + mdi(pr.summary) + "</p>" : "");
-  if (pr.state === "merged") main += '<div class="banner"><div class="grow"><b>Merged ' + when(pr.merged) + ", published as version " + pr.version + '</b>oxagen squash-merged it at the checked commit. Revert opens a steering PR that undoes it, with the same checks and review.</div></div><pre class="trailers">' + h((pr.trailers || []).join("\n")) + "</pre>";
+  if (pr.state === "merged") main += '<div class="banner"><div class="grow"><b>Published as version ' + pr.version + "</b>oxagen squash-merged it at the checked commit " + when(pr.merged) + ". Revert opens a steering PR that undoes it, with the same checks and review.</div></div><pre class="trailers">' + h((pr.trailers || []).join("\n")) + "</pre>";
   if (pr.kind === "memory") main += memoryCards(pr);
   if (pr.kind === "server") main += surfaceDiff(pr, true);
   if (pr.record) main += '<div class="panel"><div class="panel-h"><h3>Record</h3><span class="sp">' + kindBadge(pr.record.kind) + ' <span class="muted mono">' + h(pr.record.force) + '</span> <span class="muted">' + num(pr.record.tok) + ' tokens</span></span></div><div class="panel-b"><div class="readout"><div class="rh"><span class="mono">' + h(pr.record.path) + '</span></div><pre>' + h(pr.record.body) + "</pre></div></div></div>";
@@ -673,7 +673,7 @@ ACTS["rec-pr"] = function (el) {
 };
 ACTS.newsteer = function () { openDialog("newsteer"); };
 DIALOGS.newsteer = function () {
-  return { title: "New steering record", sub: "A record steers nothing until its steering PR merges. Every agent it applies to gets it at the start of its next session after that.",
+  return { title: "New steering record", sub: "Every agent it applies to gets it at its next session after the steering PR merges.",
     body: '<div class="fields"><div class="field"><label for="ns-kind">Kind</label><select id="ns-kind">' + Object.keys(KINDS).filter(function (k) { return k !== "skill"; }).map(function (k) { return "<option>" + h(KINDS[k]) + "</option>"; }).join("") + '</select></div>' +
       '<div class="field"><label for="ns-force">Force</label><select id="ns-force"><option>must</option><option>should</option><option>may</option><option>info</option></select><div class="hint">must and should reach every request. may and info load when they fit.</div></div></div>' +
       '<div class="field"><label for="ns-text">Body</label><textarea id="ns-text" rows="3" autofocus placeholder="Run pnpm release:lint before you commit release notes."></textarea></div>' +
@@ -713,7 +713,7 @@ ACTS["steerimport-go"] = function () { S.imported.steering = true; closeDialog()
 ACTS.linkrepo = function () { openDialog("linkrepo"); };
 DIALOGS.linkrepo = function (arg, d) {
   d.pick = d.pick || REPO.linkable[0].url;
-  return { title: "Link a repository", sub: "Linking opens a steering PR that adds the repository to <code>workspace.toml</code>. The link follows the merge.",
+  return { title: "Link a repository", sub: "Linking opens a steering PR that adds the repository to <code>workspace.toml</code>.",
     body: '<div class="field"><label>Repositories the oxagen app can read</label>' + REPO.linkable.map(function (r) {
       return '<label class="check"><input type="radio" name="lr" value="' + h(r.url) + '" data-change="lr-pick"' + (d.pick === r.url ? " checked" : "") + '><span class="grow"><span class="n">' + h(r.url) + '</span><span class="d">' + (r.also.length ? "Also linked to " + h(r.also.join(", ")) + ". A repository can belong to many workspaces." : "In no workspace yet") + "</span></span></label>";
     }).join("") + "</div>",
@@ -752,7 +752,7 @@ DIALOGS.newworkspace = function (arg, d) {
     if (d.q.prov === "done") { d.ws = d.ws || "Payments ops"; d.phase = "run"; d.at = steps.length; d.retried = true; }
   }
   if (!d.phase) {
-    return { title: "New workspace", sub: "Type a name. oxagen creates the workspace and its steering repo.",
+    return { title: "New workspace", sub: "oxagen creates the workspace and its steering repo from the name.",
       body: '<div class="field"><label for="nws-name">Name</label><input id="nws-name" autofocus data-input="nws-name" value="' + h(d.ws || "") + '" placeholder="Payments ops"><div class="hint">Its steering repo is <code>' + h(steeringRepoFor(d.ws || "Payments ops")) + "</code>, a private repository in " + h(ORG.slug) + ".</div></div>",
       foot: '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="nws-go">Create workspace</button>' };
   }
@@ -793,8 +793,8 @@ function deliveryStrip(targets, note) {
 }
 function embedLabel() {
   var e = F.SERVERS.embeddings;
-  if (e.provider === "custom") return "Your endpoint, " + e.custom.model;
-  if (e.provider === "keyword") return "Keyword matching. Nothing is sent to an embedding provider.";
+  if (e.provider === "custom") return e.custom.model + " at your endpoint";
+  if (e.provider === "keyword") return "Keyword matching";
   return e.vendor + " " + e.model + " on oxagen's key";
 }
 function srvState(sv) {
@@ -822,7 +822,7 @@ VIEWS.servers = function () {
   var syncB = syncs.length ? '<div class="banner"><div class="grow"><b>' + plural(syncs.length, "sync PR") + " waiting on review</b>" + syncs.map(function (sv) { return '<a href="' + href("steering", "pr-" + sv.syncPr) + '" data-go="steering|pr-' + sv.syncPr + '">#' + sv.syncPr + " " + h(sv.name) + "</a>"; }).join(", ") + ". The gateway serves the locked definitions until they merge.</div></div>" : "";
   return { crumb: [["MCP servers"]], html: head + deliveryStrip(F.SERVERS.targets, "Every harness points at " + F.SERVERS.gateway + ", which holds the keys and applies your policies.") + syncB +
     '<div class="panel"><div class="tw"><table><thead><tr><th>Server</th><th class="mh">Source</th><th class="num">Tools imported</th><th class="mh">Agents</th><th class="num mh">Calls this month</th><th class="num mh">Cost</th><th>State</th></tr></thead><tbody>' + rows + "</tbody></table></div></div>" +
-    '<div class="panel pad rank"><div class="grow"><span class="k">Search ranking</span><b>' + h(embedLabel()) + '</b><span class="muted small">Ranks the tools of a server in search mode. It is a workspace setting in <code>workspace.toml</code>.</span></div><button class="btn sm" data-act="embeddings">Change</button></div>' +
+    '<div class="panel pad rank"><div class="grow"><span class="k">Search ranking</span><b>' + h(embedLabel()) + '</b><span class="muted small">Ranks the tools of a server in search mode, from <code>workspace.toml</code>.</span></div><button class="btn sm" data-act="embeddings">Change</button></div>' +
     '<p class="muted small foot">A server\'s cost is what its tool definitions and results added to each model request.</p>' };
 };
 
@@ -838,7 +838,7 @@ function serverPage(id) {
     (off ? '<button class="btn" data-act="srv-on" data-id="' + id + '">Turn on</button>' : '<button class="btn danger" data-act="srv-off" data-id="' + id + '">' + g("stop", 13) + " Turn off</button>");
   var head = '<div class="shead"><div class="t"><p class="eyebrow">MCP server</p><h1>' + h(sv.name) + "</h1>" + meta + '</div><div class="acts">' + acts + "</div></div>";
   var banners = "";
-  if (off) banners += '<div class="banner offb"><div class="grow"><b>Off since ' + when(off.at) + ", turned off by " + h(personName(off.by)) + "</b>" + (off.why ? h(off.why) + " " : "") + "Every call to its tools is refused. Turning it back on is instant too, and neither needs a steering PR.</div></div>";
+  if (off) banners += '<div class="banner offb"><div class="grow"><b>Turned off by ' + h(personName(off.by)) + " " + when(off.at) + "</b>" + (off.why ? h(off.why) + " " : "") + "Every call to its tools is refused. Turning it back on is instant too, and neither needs a steering PR.</div></div>";
   relaysOf(sv).filter(function (r) { return r.r.state === "down"; }).forEach(function (r) {
     var envs = (sv.environments || []).filter(function (e) { return e.network === "relay:" + r.name; }).map(function (e) { return e.name; });
     banners += '<div class="banner failb"><div class="grow"><b>Relay <code>' + h(r.name) + "</code> is down since " + when(r.r.since) + "</b>Calls to " + h(sv.name) + " in " + h(envs.join(" and ")) + " fail closed until it reconnects. The relay sends nothing while its connection to oxagen is down.</div></div>";
@@ -898,7 +898,7 @@ function toolsTab(sv) {
       (stagedOp(id, "import", t.n) ? " " + badge("b-approval", "Importing") : "") + (stagedOp(id, "remove", t.n) ? " " + badge("b-denied", "Removing") : "");
     return '<tr class="click' + (on ? "" : " avail") + '" data-act="tool" data-k="' + h(k) + '">' +
       (builtin ? "" : '<td class="ckc"><input type="checkbox" data-change="tool-import" data-k="' + h(k) + '"' + (on ? " checked" : "") + ' aria-label="Import ' + h(t.n) + '"></td>') +
-      '<td><span class="mono tn">' + h(t.n) + "</span>" + flags + '<span class="sub">' + h(off ? "Off since " + when(off.at) + ", " + personName(off.by) : t.d) + "</span></td>" +
+      '<td><span class="mono tn">' + h(t.n) + "</span>" + flags + '<span class="sub">' + h(off ? "Turned off by " + personName(off.by) + " " + when(off.at) : t.d) + "</span></td>" +
       "<td>" + cval(c.risk, c.confirmed) + '</td><td class="mh">' + cval(c.side_effect, c.confirmed) + '</td><td class="mh">' + cval(c.egress, c.confirmed) + "</td>" +
       '<td class="mh">' + (c.impacts.length ? c.impacts.map(function (x) { return c.confirmed ? '<span class="chip mono">' + h(x) + "</span>" : '<span class="chip mono sugg">' + h(x) + "</span>"; }).join(" ") : '<span class="muted">None</span>') + "</td>" +
       '<td class="mh">' + (rules.length ? '<span class="apv">' + h(approvalLabel(rules)) + '</span><span class="sub mono">' + h(rules.map(function (r) { return r.id; }).join(", ")) + "</span>" : '<span class="muted">None</span>') + "</td>" +
@@ -948,8 +948,8 @@ DRAWERS.tool = function (k) {
   if (!t) return { title: "Tool", head: '<div class="grow"><h2>Not found</h2></div>', body: '<p class="muted">No tool with that name on this server.</p>' };
   var id = sv.id, c = classOf(id, t), off = toolOffBy(id, t), on = importedNow(id, t), rules = approvalFor(id, t), draft = S.drafts[k];
   var name = toolName(id, t.n), desc = draft || descOf(id, t);
-  var stateLine = t.state === "available" ? (on ? "Importing in your changes" : "Available. Nobody imported it, so no agent sees it.") : "Version " + t.version + (withheld(t) ? ", withheld until sync PR #" + sv.syncPr + " merges" : "");
-  var sw = t.state === "available" ? "" : '<div class="offrow"><div class="grow"><b>' + (off ? "Off" : "On") + "</b>" + (off ? '<span class="muted small">Since ' + when(off.at) + ", turned off by " + h(personName(off.by)) + (off.why ? ". " + h(off.why) : "") + "</span>" : '<span class="muted small">Turning it off acts on the next call, with no steering PR.</span>') + "</div>" +
+  var stateLine = t.state === "available" ? (on ? "Importing in your changes" : "Nobody imported it, so no agent sees it.") : "Version " + t.version + (withheld(t) ? " withheld until sync PR #" + sv.syncPr + " merges" : "");
+  var sw = t.state === "available" ? "" : '<div class="offrow"><div class="grow"><b>' + (off ? "Off" : "On") + "</b>" + (off ? '<span class="muted small">Turned off by ' + h(personName(off.by)) + " " + when(off.at) + (off.why ? ". " + h(off.why) : "") + "</span>" : '<span class="muted small">Turning it off acts on the next call, with no steering PR.</span>') + "</div>" +
     (off ? '<button class="btn sm" data-act="tool-on" data-k="' + h(k) + '">Turn on</button>' : '<button class="btn sm danger" data-act="tool-off" data-k="' + h(k) + '">Turn off</button>') + "</div>";
   var inputs = t.inputs ? '<table class="narrow mini"><thead><tr><th>Input</th><th>Type</th><th>Shaping</th></tr></thead><tbody>' + t.inputs.map(function (x) {
     return '<tr><td class="mono">' + h(x.name) + "</td><td>" + h(x.type) + (x.enum ? '<span class="sub mono">' + h(x.enum.join(", ")) + "</span>" : "") + "</td><td>" + (x.hidden ? badge("b-q", "Hidden") + " " : "") + (x.fixed ? "Fixed to <code>" + h(x.fixed) + "</code>" : x.required ? "Required" : x.note ? h(x.note) : '<span class="muted">As sent</span>') + "</td></tr>";
@@ -1186,7 +1186,7 @@ ACTS.embeddings = function () { openDialog("embeddings"); };
 DIALOGS.embeddings = function (arg, d) {
   var e = F.SERVERS.embeddings; d.pick = d.pick || e.provider;
   var opts = [["oxagen", "oxagen", "The default. " + e.vendor + " " + e.model + " on oxagen's key. oxagen absorbs the cost."], ["custom", "Your endpoint", "Your own URL, model, and key. You pay for your embeddings."], ["keyword", "Keyword", "Keyword matching. Nothing is sent to any embedding provider."]];
-  return { title: "Search ranking", sub: "How a server in search mode ranks its tools. It lives in <code>workspace.toml</code>, so a change is a steering PR.",
+  return { title: "Search ranking", sub: "How a server in search mode ranks its tools, set in <code>workspace.toml</code> by steering PR.",
     body: opts.map(function (o) { return '<label class="check"><input type="radio" name="emb" value="' + o[0] + '" data-change="emb-pick"' + (d.pick === o[0] ? " checked" : "") + '><span class="grow"><span class="n">' + h(o[1]) + (o[0] === e.provider ? ' <span class="b b-q">Current</span>' : "") + '</span><span class="d">' + h(o[2]) + "</span></span></label>"; }).join("") +
       (d.pick === "custom" ? '<div class="fields"><div class="field"><label for="emb-url">URL</label><input id="emb-url" value="' + h(e.custom.url) + '"></div><div class="field"><label for="emb-model">Model</label><input id="emb-model" value="' + h(e.custom.model) + '"></div></div><div class="field"><label for="emb-key">Key</label><input id="emb-key" type="password" placeholder="Paste the key"><div class="hint">It goes to oxagen\'s vault as <code>' + h(e.custom.credential) + "</code>, never into the repository.</div></div>" : "") +
       '<p class="muted small">Changing the model or the endpoint re-embeds every search entry in the workspace.</p>',
@@ -1238,7 +1238,7 @@ DIALOGS.addserver = function (arg, d) {
   if (d.q && !d.init) { d.init = true; d.src = d.q.src || null; d.fmt = d.q.fmt || "openapi"; d.phase = d.q.phase || null; d.pick = d.q.pick || null; }
   d.fmt = d.fmt || "openapi";
   if (!d.src) {
-    return { title: "Add server", wide: true, sub: "Pick where the tools come from. From here on, every source takes the same path: discover, import, review, publish.",
+    return { title: "Add server", wide: true, sub: "Every source then takes the same path: discover, import, review, and publish.",
       body: '<div class="srcpick">' + SOURCES.map(function (s) { return '<button class="srcp" data-act="as-src" data-src="' + s[0] + '"><b>' + h(s[1]) + '</b><span class="muted small">' + h(s[2]) + "</span></button>"; }).join("") + "</div>",
       foot: '<button class="btn" data-act="close">Cancel</button>' };
   }
@@ -1285,7 +1285,7 @@ function discoveryResult(d, back) {
   }
   var word = d.src === "definition" ? { openapi: "operation", graphql: "root field", grpc: "method" }[d.fmt] : "tool";
   head = d.src === "definition" ? "Compiled <code>" + h(sv.source.path) + "</code> at <code>" + h(sv.source.commit) + "</code>" : d.src === "local" ? "<code>mbell-mbp-16</code> in <code>dev-laptops</code> ran the command and reported <code>tools/list</code>" : "The gateway called <code>tools/list</code>";
-  var nots = sv && sv.notTools ? '<h3 class="sec">Listed, never tools</h3><div class="lst">' + sv.notTools.map(function (x) { return '<div class="li"><span class="bd2"><span class="t1 mono">' + h(x.n) + '</span><span class="t2">' + h(x.why) + "</span></span></div>"; }).join("") + "</div>" : "";
+  var nots = sv && sv.notTools ? '<h3 class="sec">Unsupported capabilities</h3><div class="lst">' + sv.notTools.map(function (x) { return '<div class="li"><span class="bd2"><span class="t1 mono">' + h(x.n) + '</span><span class="t2">' + h(x.why) + "</span></span></div>"; }).join("") + "</div>" : "";
   var big = sv && sv.generate ? '<div class="note">The imported definitions would pass the ' + num(sv.exposure.definition_budget) + "-token budget, so Studio suggests search mode.</div>" : "";
   return { title: "Discovery result", wide: true, sub: head + ".",
     body: '<p><b>' + plural(total, word) + "</b> offered. Studio suggests a classification for each from the server's annotations or the method. Grey values are suggestions.</p>" +

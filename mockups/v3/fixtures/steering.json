@@ -1038,14 +1038,14 @@
    {
     "k": "settings",
     "t": "Apply the settings",
-    "d": "The rulesets, merge options, and the steering environment, read back and compared",
+    "d": "oxagen writes the rulesets, merge options, and steering environment, then reads them back",
     "error": "GitHub refused the ruleset `Oxagen merges`. The oxagen GitHub App lacks the Administration permission on a-intel.",
     "fix": "An organization admin grants Administration write to the app in GitHub, then you retry. Every step is safe to repeat."
    },
    {
     "k": "publish",
     "t": "Publish version 1",
-    "d": "Built from the first commit, recorded as a deployment to `steering`"
+    "d": "A deployment to `steering` built from the first commit"
    },
    {
     "k": "open",

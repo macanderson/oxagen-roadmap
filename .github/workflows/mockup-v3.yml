@@ -214,7 +214,7 @@ jobs:
           await flow("off switch", async () => {
             await open(page, "servers/stripe?tool=list_charges", "&theme=dark");
             await page.click('[data-act="tool-off"]');
-            ok(/Since .*Marcus Bell/.test(await page.innerText(".offrow")), "off: the tool does not say who turned it off and when");
+            ok(/Turned off by Marcus Bell/.test(await page.innerText(".offrow")), "off: the tool does not say who turned it off and when");
             await open(page, "servers/notion", "&theme=dark");
             ok(/Priya Natarajan/.test(await page.innerText(".offb")), "off: the server does not say who turned it off");
             await page.click('[data-act="srv-on"]');
