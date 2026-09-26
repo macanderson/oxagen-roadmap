@@ -387,7 +387,7 @@
     {
      "paths": [
       "steering/billing/**",
-      "servers/billing/**"
+      "tools/servers/billing/**"
      ],
      "group": "billing-leads",
      "members": [
@@ -553,7 +553,7 @@
    "server": "stripe",
    "state": "open",
    "title": "Sync stripe: create_refund description changed",
-   "branch": "servers/stripe-sync-2026-09-25",
+   "branch": "tools/stripe-sync-2026-09-25",
    "by": "oxagen",
    "via": "sync",
    "opened": "2026-09-25T03:00:00",
@@ -564,7 +564,7 @@
    "summary": "`tools/list` changed at 03:00. The gateway keeps serving the locked definition until this merges.",
    "diff": [
     {
-     "head": "servers/stripe  tools/list changed at 2026-09-25 03:00 UTC",
+     "head": "tools/servers/stripe  tools/list changed at 2026-09-25 03:00 UTC",
      "lines": [
       {
        "op": "~",
@@ -583,7 +583,7 @@
     460
    ],
    "files": [
-    "servers/stripe/tools.lock.json"
+    "tools/servers/stripe/tools.lock.json"
    ],
    "checks": [
     {
@@ -598,7 +598,7 @@
     {
      "id": "compile",
      "r": "pass",
-     "note": "servers/stripe compiles to 2 tools. The lock matches the new upstream."
+     "note": "tools/servers/stripe compiles to 2 tools. The lock matches the new upstream."
     },
     {
      "id": "references",
@@ -622,7 +622,7 @@
    "server": "billing",
    "state": "open",
    "title": "Sync billing: openapi.yaml changed at 4be91d2",
-   "branch": "servers/billing-sync-4be91d2",
+   "branch": "tools/billing-sync-4be91d2",
    "by": "oxagen",
    "via": "sync",
    "opened": "2026-09-25T10:14:00",
@@ -631,7 +631,7 @@
    "summary": "`openapi/billing.yaml` changed at `a-intel/billing-service@4be91d2`. Two changes are breaking, so both tools are withheld until this merges.",
    "diff": [
     {
-     "head": "servers/billing  openapi.yaml changed at a-intel/billing-service@4be91d2",
+     "head": "tools/servers/billing  openapi.yaml changed at a-intel/billing-service@4be91d2",
      "lines": [
       {
        "op": "+",
@@ -672,9 +672,9 @@
     1284
    ],
    "files": [
-    "servers/billing/openapi.yaml",
-    "servers/billing/tools.lock.json",
-    "servers/billing/tools.toml"
+    "tools/servers/billing/openapi.yaml",
+    "tools/servers/billing/tools.lock.json",
+    "tools/servers/billing/tools.toml"
    ],
    "checks": [
     {
@@ -689,7 +689,7 @@
     {
      "id": "compile",
      "r": "pass",
-     "note": "servers/billing compiles to 5 tools. 3 recorded calls replay with no network, and the built requests match."
+     "note": "tools/servers/billing compiles to 5 tools. 3 recorded calls replay with no network, and the built requests match."
     },
     {
      "id": "references",

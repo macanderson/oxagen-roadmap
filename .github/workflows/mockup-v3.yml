@@ -263,7 +263,7 @@ jobs:
             await page.click('[data-act="serverimport-go"]');
             await waitPr();
             const sp = await openedPr();
-            ok(sp.kind === "import" && sp.files.some((f) => f.path === "servers/github/server.toml") && !(await page.evaluate(() => S.imported.servers)), "import: Import MCP servers applied the servers before its steering PR merged");
+            ok(sp.kind === "import" && sp.files.some((f) => f.path === "tools/servers/github/server.toml") && !(await page.evaluate(() => S.imported.servers)), "import: Import MCP servers applied the servers before its steering PR merged");
             ok(sp.files.every((f) => !/ghp_|sk_live|password=/.test(f.diff)), "import: a key reached a server file");
             await copyCheck(page, "import servers PR");
           });

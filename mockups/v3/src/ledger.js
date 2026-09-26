@@ -63,7 +63,7 @@ var Ledger = (function () {
   }
 
   /* What an agent's context holds before its first prompt: the harness's prompt and tools, the
-     definitions of every tool its MCP servers import (servers/<name>/tools.toml), and the steering
+     definitions of every tool its MCP servers import (tools/servers/<name>/tools.toml), and the steering
      delivered every session (records and memories; a skill loads only when the session uses it).
      A tool a server offers and nobody imported is visible to no agent and costs nothing. The off
      switch is left out: every recorded session predates the switches in the fixtures. */

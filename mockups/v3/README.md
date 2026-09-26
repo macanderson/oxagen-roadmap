@@ -64,7 +64,7 @@ Sending a work item to an agent opens its new session, which starts replaying at
 
 ## MCP Studio
 
-`mcp-studio-spec.html` is the source. Every server is one folder, `servers/<name>/`, whatever its source.
+`mcp-studio-spec.html` is the source. Every server is one folder, `tools/servers/<name>/`, whatever its source. The app routes stay `.../servers/<name>`.
 
 - **Add server** offers Connect by URL, From the registry, Local command, and From a definition (OpenAPI, GraphQL, or gRPC). Each ends in a discovery result that lists what the source offers, with a suggested classification in grey.
 - **Tools** lists available and imported tools with risk, side effect, egress, impacts, approval, and definition tokens, and a running total against the definition budget. A suggestion stays grey until a person confirms it. The tool panel shows the classification, the description with Draft, inputs, what the result returns, what the server says, and agent feedback.

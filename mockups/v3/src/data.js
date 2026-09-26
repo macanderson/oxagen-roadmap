@@ -290,7 +290,7 @@ SERVERS.forEach(function (sv) {
 /* ---- servers and tools ---- */
 var SOURCE_LABEL = { remote: "Connected by URL", registry: "From the registry", local: "Local command", openapi: "OpenAPI definition", graphql: "GraphQL schema", grpc: "gRPC protos", builtin: "Built in" };
 function sourceLabel(sv) { return SOURCE_LABEL[sv.source.type] || sv.source.type; }
-function folderOf(sv) { return sv.source.type === "builtin" ? null : "servers/" + sv.id + "/"; }
+function folderOf(sv) { return sv.source.type === "builtin" ? null : "tools/servers/" + sv.id + "/"; }
 function toolName(sid, n) { return sid + "__" + n; }
 function toolBy(sid, n) { var sv = serverBy(sid); if (!sv) return null; for (var i = 0; i < sv.tools.length; i++) if (sv.tools[i].n === n) return sv.tools[i]; return null; }
 function isSearch(sv) { return !!(sv.exposure && sv.exposure.mode === "search"); }
@@ -302,7 +302,7 @@ function toolOffBy(sid, t) { var k = sid + "." + t.n; return S.toolOff[k] !== un
 /* A tool a sync PR marks breaking is withheld: the gateway refuses it until the PR merges. */
 function withheld(t) { return !!(t.sync && t.sync.breaking); }
 
-/* Staged changes: what Review turns into one steering PR on servers/<name>/. A server can arrive
+/* Staged changes: what Review turns into one steering PR on tools/servers/<name>/. A server can arrive
    with changes already staged (fixtures pending). */
 function staged(sid) {
   if (!S.staged[sid]) {
@@ -391,7 +391,7 @@ function prApprovals(pr) { return (pr.approvals || []).concat(S.approved[pr.n] ?
 /* Review by governance mode: team mode needs one approval from a member other than the author. A
    reviewer group named for a path in governance.toml reviews what touches it. */
 function prReviewers(pr) {
-  var paths = pr.kind === "server" ? ["servers/" + pr.server + "/"] : pr.record ? [pr.record.path] : (pr.files || []).map(function (f) { return f.path || f; });
+  var paths = pr.kind === "server" ? ["tools/servers/" + pr.server + "/"] : pr.record ? [pr.record.path] : (pr.files || []).map(function (f) { return f.path || f; });
   var groups = REPO.governance.reviewers.filter(function (g) {
     return g.paths.some(function (glob) { var pre = glob.replace(/\*\*$/, ""); return paths.some(function (p) { return p.indexOf(pre) === 0; }); });
   });

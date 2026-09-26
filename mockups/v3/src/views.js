@@ -882,7 +882,7 @@ ACTS["nws-open"] = function () { var name = S.dialog.ws; closeDialog(); toast(na
 /* ============================== MCP servers ==============================
    MCP Studio (mcp-studio-spec.html). The list, Add server with four sources, and one page per server
    with one row of tabs: Tools, Connection, Try it, and Changes. Every server is one folder,
-   servers/<name>/, in the steering repo. */
+   tools/servers/<name>/, in the steering repo. The app's own routes stay #/.../servers/<name>. */
 function deliveryStrip(targets, note) {
   return '<div class="deliv"><span class="deliv-n">' + h(note) + '</span><div class="deliv-t">' + targets.map(function (t) {
     return '<span class="dt">' + hxIcon(t.harness, 14) + '<span>' + h(hxLabel(t.harness)) + '</span><code>' + h(t.file) + "</code></span>";
@@ -1233,10 +1233,10 @@ ACTS["changes-discard"] = function (el) { var id = el.getAttribute("data-id"); S
 ACTS["changes-pr"] = function (el) {
   var id = el.getAttribute("data-id"), sv = serverBy(id), dfx = stagedDiff(sv), n = nextPrNumber();
   var imports = staged(id).filter(function (o) { return o.op === "import"; }).length;
-  S.newPrs.push({ n: n, kind: "server", server: id, state: "open", title: imports ? "Import " + plural(imports, "tool") + " into " + id : "Change " + id + " in MCP Studio", branch: "servers/" + id + "-studio-" + n, by: ME, via: "studio", opened: F.ORG.now, approvals: [],
+  S.newPrs.push({ n: n, kind: "server", server: id, state: "open", title: imports ? "Import " + plural(imports, "tool") + " into " + id : "Change " + id + " in MCP Studio", branch: "tools/" + id + "-studio-" + n, by: ME, via: "studio", opened: F.ORG.now, approvals: [],
     summary: "Opened from MCP Studio. The tools and their classification reach agents when it merges.",
-    diff: [{ head: "servers/" + id, lines: dfx.lines }], defs: [defsOf(sv, false), defsOf(sv, true)], files: dfx.files,
-    checks: [{ id: "schema", r: "pass" }, { id: "compile", r: "pass", note: "servers/" + id + " compiles. The lock matches the reviewed definitions." }, { id: "owned", r: "pass" }, { id: "references", r: "pass" }, { id: "settings", r: "pass" }],
+    diff: [{ head: "tools/servers/" + id, lines: dfx.lines }], defs: [defsOf(sv, false), defsOf(sv, true)], files: dfx.files,
+    checks: [{ id: "schema", r: "pass" }, { id: "compile", r: "pass", note: "tools/servers/" + id + " compiles. The lock matches the reviewed definitions." }, { id: "owned", r: "pass" }, { id: "references", r: "pass" }, { id: "settings", r: "pass" }],
     findings: dfx.findings });
   S.staged[id] = [];
   go("steering", "pr-" + n);
@@ -1266,7 +1266,7 @@ DRAWERS.server = function (id) {
 ACTS["tools-off"] = function (el) {
   var id = el.getAttribute("data-id"), st = serverStats(id);
   st.unused.forEach(function (t) { stage(id, { op: "remove", tool: t.n }); });
-  toast(plural(st.unused.length, "tool") + " staged to leave servers/" + id + "/tools.toml. Review opens the steering PR.");
+  toast(plural(st.unused.length, "tool") + " staged to leave tools/servers/" + id + "/tools.toml. Review opens the steering PR.");
   renderLayer(); render();
 };
 ACTS["srv-agent"] = function (el) {
@@ -1335,11 +1335,11 @@ function importedServerToml(id) {
   else if (sv) { l.push('type = "remote"', 'url = "' + sv.source.url + '"', 'transport = "' + sv.source.transport + '"'); if (sv.source.network) l.push('network = "' + sv.source.network + '"'); }
   else if (c) l.push('type = "registry"', 'server = "' + c.reg + '"');
   l.push("", "[auth]", 'mode = "service"', 'credential = "' + (sv && sv.authcfg.credential || "oxagen:credential/" + id) + '"');
-  return { path: "servers/" + id + "/server.toml", diff: l.map(function (x) { return "+" + x; }).join("\n") };
+  return { path: "tools/servers/" + id + "/server.toml", diff: l.map(function (x) { return "+" + x; }).join("\n") };
 }
 ACTS["serverimport-go"] = function () {
   var x = serverImport(), n = nextPrNumber();
-  S.newPrs.push({ n: n, kind: "import", target: "servers", state: "open", title: "Import " + plural(x.servers.length, "MCP server"), branch: "servers/import", by: ME, via: "web", opened: F.ORG.now, approvals: [],
+  S.newPrs.push({ n: n, kind: "import", target: "servers", state: "open", title: "Import " + plural(x.servers.length, "MCP server"), branch: "tools/import", by: ME, via: "web", opened: F.ORG.now, approvals: [],
     summary: "Adds a folder for each server the harness configs on " + plural(x.im.machines, "machine") + " name. No agent reaches them through the gateway until this merges.",
     note: "When this merges, oxagen moves the " + plural(x.keys, "key") + " into its vault and points each config at `" + F.SERVERS.gateway + "`.",
     files: x.servers.map(importedServerToml),
@@ -1376,7 +1376,7 @@ DIALOGS.addserver = function (arg, d) {
   if (d.phase === "result") return discoveryResult(d, back);
   var body = "", goLabel = "Discover tools";
   if (d.src === "url") {
-    body = '<div class="fields"><div class="field"><label for="as-name">Name</label><input id="as-name" value="stripe"><div class="hint">The folder <code>servers/stripe/</code> and the prefix of every tool name.</div></div><div class="field"><label for="as-url">URL</label><input id="as-url" value="https://mcp.stripe.com"></div></div>' +
+    body = '<div class="fields"><div class="field"><label for="as-name">Name</label><input id="as-name" value="stripe"><div class="hint">The folder <code>tools/servers/stripe/</code> and the prefix of every tool name.</div></div><div class="field"><label for="as-url">URL</label><input id="as-url" value="https://mcp.stripe.com"></div></div>' +
       '<div class="fields"><div class="field"><label for="as-tr">Transport</label><select id="as-tr"><option>Streamable HTTP</option><option>SSE</option></select></div><div class="field"><label for="as-auth">Authentication</label><select id="as-auth"><option>Service: one credential for every session</option><option>Operator OAuth</option><option>None</option></select></div></div>' +
       '<div class="fields"><div class="field"><label for="as-key">Credential</label><input id="as-key" type="password" placeholder="Paste the key"><div class="hint">It goes to oxagen\'s vault as <code>oxagen:credential/stripe-live</code>. It never reaches a steering PR.</div></div><div class="field"><label for="as-net">Network</label><select id="as-net"><option>cloud</option>' + Object.keys(F.SERVERS.relays).map(function (r) { return "<option>relay:" + h(r) + "</option>"; }).join("") + '</select><div class="hint">A server inside a private network goes through a relay.</div></div></div>';
   } else if (d.src === "registry") {
