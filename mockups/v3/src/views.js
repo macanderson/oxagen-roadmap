@@ -541,7 +541,7 @@ function steeringPrView(id) {
   var main = (pr.summary ? '<p class="pr-sum">' + mdi(pr.summary) + "</p>" : "");
   if (pr.state === "merged") main += '<div class="banner"><div class="grow"><b>Published as version ' + pr.version + "</b>oxagen squash-merged it at the checked commit " + when(pr.merged) + ". Revert opens a steering PR that undoes it, with the same checks and review.</div></div><pre class="trailers">' + h((pr.trailers || []).join("\n")) + "</pre>";
   if (pr.kind === "memory") main += memoryCards(pr);
-  if (pr.kind === "server") main += surfaceDiff(pr, true);
+  if (pr.server && pr.diff) main += surfaceDiff(pr, true);
   if (pr.record) main += '<div class="panel"><div class="panel-h"><h3>Record</h3><span class="sp">' + kindBadge(pr.record.kind) + ' <span class="muted mono">' + h(pr.record.force) + '</span> <span class="muted">' + num(pr.record.tok) + ' tokens</span></span></div><div class="panel-b"><div class="readout"><div class="rh"><span class="mono">' + h(pr.record.path) + '</span></div><pre>' + h(pr.record.body) + "</pre></div></div></div>";
   (pr.files || []).forEach(function (f) { if (f.diff) main += '<div class="readout"><div class="rh"><span class="mono">' + h(f.path) + '</span></div><pre class="diff">' + diffHtml(f.diff) + "</pre></div>"; });
   if (pr.note) main += '<p class="note">' + mdi(pr.note) + "</p>";
@@ -634,12 +634,52 @@ function mergeFirstRun(pr) {
   toast("Merged and published as version " + pr.version + "." + (pr.kind === "import" ? " Every agent gets the import at its next session." : ""));
   render();
 }
+/* Revert builds the inverse of what the PR merged. A diff inverts line by line: + and - swap, and
+   context stays. A record the PR added is archived in place, because record files are never
+   deleted. A file the PR lists without a diff goes back to its version before the merge. */
+function invertDiff(diff) {
+  var out = [], run = [];
+  function flush() { out = out.concat(run.filter(function (l) { return l[0] === "-"; }), run.filter(function (l) { return l[0] === "+"; })); run = []; }
+  String(diff).split("\n").forEach(function (l) {
+    if (l[0] === "+" || l[0] === "-") run.push((l[0] === "+" ? "-" : "+") + l.slice(1));
+    else { flush(); out.push(l); }
+  });
+  flush();
+  return out.join("\n");
+}
+function frontmatter(body) { var l = String(body).split("\n"), end = l.indexOf("---", 1); return end > 0 ? l.slice(0, end + 1) : l; }
+function archiveDiff(lines) { return lines.map(function (l) { return l === "status: active" ? "-status: active\n+status: archived" : " " + l; }).join("\n"); }
+function revertFiles(src) {
+  if (src.kind === "memory") return src.memories.filter(function (m) { return !S.dropped[src.n + "." + m.id]; }).map(function (m) {
+    return { path: "steering/memory/" + m.lineage.split(".")[1] + "/" + m.lineage + ".md", diff: archiveDiff(["lineage: " + m.lineage, "status: active"]), archived: true };
+  });
+  if (src.record && !(src.files || []).length) return [{ path: src.record.path, diff: archiveDiff(frontmatter(src.record.body || "")), archived: true }];
+  return (src.files || []).map(function (f) {
+    var path = f.path || f;
+    if (!f.diff) return { path: path };
+    var lines = f.diff.split("\n");
+    if (/^steering\/.*\.md$/.test(path) && lines.every(function (l) { return l[0] === "+"; })) return { path: path, diff: archiveDiff(frontmatter(lines.map(function (l) { return l.slice(1); }).join("\n"))), archived: true };
+    return { path: path, diff: invertDiff(f.diff) };
+  });
+}
+function invertSurface(diff) {
+  return diff.map(function (b) {
+    return { head: b.head, lines: b.lines.map(function (l) {
+      return { op: l.op === "+" ? "-" : l.op === "-" ? "+" : l.op, tool: l.tool, what: l.what, detail: l.detail ? l.detail.map(function (x) { return x[0] === "+" ? "-" + x.slice(1) : x[0] === "-" ? "+" + x.slice(1) : x; }) : null };
+    }) };
+  });
+}
 ACTS["pr-revert"] = function (el) {
-  var src = prBy(+el.getAttribute("data-n")), n = nextPrNumber();
-  S.newPrs.push({ n: n, kind: "revert", state: "open", title: "Revert #" + src.n + ": " + src.title, branch: "steering/revert-" + src.n, by: ME, via: "web", opened: F.ORG.now, approvals: [],
-    summary: "Undoes steering PR #" + src.n + ". It takes the same checks and review as any steering PR.",
-    files: src.record ? [{ path: src.record.path, diff: src.record.body.split("\n").filter(function (l) { return /^[+-]/.test(l); }).map(function (l) { return (l[0] === "+" ? "-" : "+") + l.slice(1); }).join("\n") }] : [],
-    checks: src.checks });
+  var src = prBy(+el.getAttribute("data-n")), n = nextPrNumber(), files = revertFiles(src);
+  var top = files.length ? files[0].path.split("/")[0].replace(/\.toml$/, "") : "steering";
+  var archived = files.filter(function (f) { return f.archived; }).length, restored = files.filter(function (f) { return !f.diff; }).length;
+  S.newPrs.push({ n: n, kind: "revert", state: "open", title: "Revert #" + src.n + ": " + src.title, branch: top + "/revert-" + src.n, by: ME, via: "web", opened: F.ORG.now, approvals: [],
+    summary: "Undoes steering PR #" + src.n + ". It takes the same checks and review as any steering PR." +
+      (archived ? " " + (archived === 1 ? "The record it added is archived in place, because record files are never deleted." : "The " + plural(archived, "record") + " it added are archived in place, because record files are never deleted.") : "") +
+      (restored ? " " + plural(restored, "file") + (restored === 1 ? " goes back to its version" : " go back to their versions") + " before #" + src.n + "." : ""),
+    server: src.server, diff: src.diff ? invertSurface(src.diff) : undefined, defs: src.defs ? [src.defs[1], src.defs[0]] : undefined,
+    files: files,
+    checks: (src.checks || []).map(function (c) { return c.r === "skip" ? c : { id: c.id, r: "pass" }; }) });
   go("steering", "pr-" + n);
   toast("Opened steering PR #" + n + ".");
 };

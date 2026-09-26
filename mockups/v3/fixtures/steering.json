@@ -951,8 +951,14 @@
     "tok": 34,
     "agents": "all",
     "path": "steering/platform/a-intel.platform.release-notes-format.md",
-    "body": "---\nschema: steering-record/v1\nlineage: a-intel.platform.release-notes-format\nlabel: Release notes format\nkind: preference\nforce: should\nscope: workspace\nstatus: active\norigin: user\n---\n\n-Release notes group changes by author.\n+Release notes group changes by surface, not by author.\n Every entry links the pull request."
+    "body": "---\nschema: steering-record/v1\nlineage: a-intel.platform.release-notes-format\nlabel: Release notes format\nkind: preference\nforce: should\nscope: workspace\nstatus: active\norigin: user\n---\n\nRelease notes group changes by surface, not by author.\nEvery entry links the pull request."
    },
+   "files": [
+    {
+     "path": "steering/platform/a-intel.platform.release-notes-format.md",
+     "diff": " ---\n schema: steering-record/v1\n lineage: a-intel.platform.release-notes-format\n label: Release notes format\n kind: preference\n force: should\n scope: workspace\n status: active\n origin: user\n ---\n \n-Release notes group changes by author.\n+Release notes group changes by surface, not by author.\n Every entry links the pull request."
+    }
+   ],
    "trailers": [
     "Oxagen-Approved-By: marcus",
     "Oxagen-Checks: 11 passed",
