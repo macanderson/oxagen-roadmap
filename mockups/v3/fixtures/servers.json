@@ -1,0 +1,783 @@
+{
+ "gateway": "mcp.oxagen.sh/a-intel",
+ "targets": [
+  {
+   "harness": "claude-code",
+   "file": "~/.claude.json"
+  },
+  {
+   "harness": "codex-cli",
+   "file": "~/.codex/config.toml"
+  },
+  {
+   "harness": "cursor",
+   "file": "~/.cursor/mcp.json"
+  },
+  {
+   "harness": "stella",
+   "file": "stella.toml"
+  }
+ ],
+ "servers": [
+  {
+   "id": "github",
+   "name": "GitHub",
+   "logo": "github",
+   "upstream": "api.githubcopilot.com/mcp",
+   "auth": "GitHub App installation on a-intel",
+   "authKind": "oauth",
+   "keyNote": "A token is minted for each call and expires in 5 minutes.",
+   "status": "ok",
+   "added": "2026-08-14",
+   "by": "marcus",
+   "tools": [
+    {
+     "n": "get_file_contents",
+     "d": "Read a file or directory from a repository",
+     "mode": "allow",
+     "tok": 280,
+     "write": false
+    },
+    {
+     "n": "list_branches",
+     "d": "List branches",
+     "mode": "allow",
+     "tok": 210,
+     "write": false
+    },
+    {
+     "n": "list_commits",
+     "d": "List commits on a branch",
+     "mode": "allow",
+     "tok": 250,
+     "write": false
+    },
+    {
+     "n": "get_commit",
+     "d": "Get one commit with its diff",
+     "mode": "allow",
+     "tok": 230,
+     "write": false
+    },
+    {
+     "n": "compare_commits",
+     "d": "Compare two refs",
+     "mode": "allow",
+     "tok": 240,
+     "write": false
+    },
+    {
+     "n": "search_code",
+     "d": "Search code across repositories",
+     "mode": "allow",
+     "tok": 310,
+     "write": false
+    },
+    {
+     "n": "list_issues",
+     "d": "List issues with filters",
+     "mode": "allow",
+     "tok": 330,
+     "write": false
+    },
+    {
+     "n": "get_issue",
+     "d": "Get one issue",
+     "mode": "allow",
+     "tok": 200,
+     "write": false
+    },
+    {
+     "n": "list_pull_requests",
+     "d": "List pull requests with filters",
+     "mode": "allow",
+     "tok": 320,
+     "write": false
+    },
+    {
+     "n": "get_pull_request",
+     "d": "Get one pull request",
+     "mode": "allow",
+     "tok": 210,
+     "write": false
+    },
+    {
+     "n": "get_pull_request_diff",
+     "d": "Get a pull request's diff",
+     "mode": "allow",
+     "tok": 220,
+     "write": false
+    },
+    {
+     "n": "get_pull_request_files",
+     "d": "List the files a pull request changes",
+     "mode": "allow",
+     "tok": 230,
+     "write": false
+    },
+    {
+     "n": "list_releases",
+     "d": "List releases",
+     "mode": "allow",
+     "tok": 200,
+     "write": false
+    },
+    {
+     "n": "list_workflow_runs",
+     "d": "List workflow runs",
+     "mode": "allow",
+     "tok": 300,
+     "write": false
+    },
+    {
+     "n": "get_workflow_run",
+     "d": "Get one workflow run",
+     "mode": "allow",
+     "tok": 210,
+     "write": false
+    },
+    {
+     "n": "get_job_logs",
+     "d": "Read a job's logs",
+     "mode": "allow",
+     "tok": 260,
+     "write": false
+    },
+    {
+     "n": "add_issue_comment",
+     "d": "Comment on an issue or pull request",
+     "mode": "allow",
+     "tok": 250,
+     "write": true
+    },
+    {
+     "n": "create_pull_request",
+     "d": "Open a pull request",
+     "mode": "allow",
+     "tok": 330,
+     "write": true
+    },
+    {
+     "n": "update_issue",
+     "d": "Change an issue's title, labels or state",
+     "mode": "allow",
+     "tok": 320,
+     "write": true
+    },
+    {
+     "n": "create_pull_request_review",
+     "d": "Leave a review on a pull request",
+     "mode": "allow",
+     "tok": 360,
+     "write": true
+    },
+    {
+     "n": "create_release",
+     "d": "Create a release",
+     "mode": "ask",
+     "tok": 340,
+     "write": true
+    },
+    {
+     "n": "merge_pull_request",
+     "d": "Merge a pull request",
+     "mode": "ask",
+     "tok": 300,
+     "write": true
+    },
+    {
+     "n": "rerun_failed_jobs",
+     "d": "Re-run the failed jobs of a workflow run",
+     "mode": "ask",
+     "tok": 220,
+     "write": true
+    },
+    {
+     "n": "create_or_update_file",
+     "d": "Write a file through the API",
+     "mode": "off",
+     "tok": 380,
+     "write": true
+    },
+    {
+     "n": "delete_file",
+     "d": "Delete a file through the API",
+     "mode": "off",
+     "tok": 260,
+     "write": true
+    },
+    {
+     "n": "push_files",
+     "d": "Push several files in one commit",
+     "mode": "off",
+     "tok": 360,
+     "write": true
+    },
+    {
+     "n": "create_branch",
+     "d": "Create a branch through the API",
+     "mode": "off",
+     "tok": 220,
+     "write": true
+    },
+    {
+     "n": "create_issue",
+     "d": "Open an issue",
+     "mode": "off",
+     "tok": 330,
+     "write": true
+    },
+    {
+     "n": "update_pull_request",
+     "d": "Change a pull request",
+     "mode": "off",
+     "tok": 340,
+     "write": true
+    },
+    {
+     "n": "request_copilot_review",
+     "d": "Ask Copilot to review",
+     "mode": "off",
+     "tok": 180,
+     "write": true
+    },
+    {
+     "n": "get_latest_release",
+     "d": "Get the latest release",
+     "mode": "off",
+     "tok": 170,
+     "write": false
+    },
+    {
+     "n": "list_tags",
+     "d": "List tags",
+     "mode": "off",
+     "tok": 190,
+     "write": false
+    },
+    {
+     "n": "list_notifications",
+     "d": "List notifications",
+     "mode": "off",
+     "tok": 240,
+     "write": false
+    },
+    {
+     "n": "search_users",
+     "d": "Search users",
+     "mode": "off",
+     "tok": 220,
+     "write": false
+    },
+    {
+     "n": "search_repositories",
+     "d": "Search repositories",
+     "mode": "off",
+     "tok": 250,
+     "write": false
+    },
+    {
+     "n": "get_me",
+     "d": "Get the signed-in account",
+     "mode": "off",
+     "tok": 120,
+     "write": false
+    },
+    {
+     "n": "list_code_scanning_alerts",
+     "d": "List code scanning alerts",
+     "mode": "off",
+     "tok": 290,
+     "write": false
+    },
+    {
+     "n": "list_secret_scanning_alerts",
+     "d": "List secret scanning alerts",
+     "mode": "off",
+     "tok": 280,
+     "write": false
+    },
+    {
+     "n": "fork_repository",
+     "d": "Fork a repository",
+     "mode": "off",
+     "tok": 200,
+     "write": true
+    },
+    {
+     "n": "create_repository",
+     "d": "Create a repository",
+     "mode": "off",
+     "tok": 260,
+     "write": true
+    },
+    {
+     "n": "delete_branch",
+     "d": "Delete a branch",
+     "mode": "off",
+     "tok": 180,
+     "write": true
+    }
+   ]
+  },
+  {
+   "id": "linear",
+   "name": "Linear",
+   "logo": "linear",
+   "upstream": "mcp.linear.app/sse",
+   "auth": "Signed in as marcus@a-intel.example",
+   "authKind": "oauth",
+   "keyNote": "oxagen refreshes the token. No laptop holds it.",
+   "status": "ok",
+   "added": "2026-08-20",
+   "by": "marcus",
+   "tools": [
+    {
+     "n": "get_issue",
+     "d": "Get one issue",
+     "mode": "allow",
+     "tok": 330,
+     "write": false
+    },
+    {
+     "n": "list_issues",
+     "d": "List issues with filters",
+     "mode": "allow",
+     "tok": 420,
+     "write": false
+    },
+    {
+     "n": "search_issues",
+     "d": "Search issues",
+     "mode": "allow",
+     "tok": 360,
+     "write": false
+    },
+    {
+     "n": "list_labels",
+     "d": "List labels",
+     "mode": "allow",
+     "tok": 240,
+     "write": false
+    },
+    {
+     "n": "list_issue_statuses",
+     "d": "List a team's statuses",
+     "mode": "allow",
+     "tok": 250,
+     "write": false
+    },
+    {
+     "n": "list_cycles",
+     "d": "List cycles",
+     "mode": "allow",
+     "tok": 260,
+     "write": false
+    },
+    {
+     "n": "get_project",
+     "d": "Get one project",
+     "mode": "allow",
+     "tok": 300,
+     "write": false
+    },
+    {
+     "n": "create_comment",
+     "d": "Comment on an issue",
+     "mode": "allow",
+     "tok": 310,
+     "write": true
+    },
+    {
+     "n": "update_issue",
+     "d": "Change an issue",
+     "mode": "allow",
+     "tok": 530,
+     "write": true
+    },
+    {
+     "n": "create_issue",
+     "d": "Open an issue",
+     "mode": "off",
+     "tok": 560,
+     "write": true
+    },
+    {
+     "n": "list_comments",
+     "d": "List comments",
+     "mode": "off",
+     "tok": 260,
+     "write": false
+    },
+    {
+     "n": "list_projects",
+     "d": "List projects",
+     "mode": "off",
+     "tok": 280,
+     "write": false
+    },
+    {
+     "n": "list_teams",
+     "d": "List teams",
+     "mode": "off",
+     "tok": 200,
+     "write": false
+    },
+    {
+     "n": "get_team",
+     "d": "Get one team",
+     "mode": "off",
+     "tok": 190,
+     "write": false
+    },
+    {
+     "n": "list_users",
+     "d": "List users",
+     "mode": "off",
+     "tok": 210,
+     "write": false
+    },
+    {
+     "n": "get_user",
+     "d": "Get one user",
+     "mode": "off",
+     "tok": 180,
+     "write": false
+    },
+    {
+     "n": "get_issue_status",
+     "d": "Get one status",
+     "mode": "off",
+     "tok": 190,
+     "write": false
+    },
+    {
+     "n": "create_project",
+     "d": "Create a project",
+     "mode": "off",
+     "tok": 420,
+     "write": true
+    },
+    {
+     "n": "update_project",
+     "d": "Change a project",
+     "mode": "off",
+     "tok": 430,
+     "write": true
+    },
+    {
+     "n": "list_documents",
+     "d": "List documents",
+     "mode": "off",
+     "tok": 240,
+     "write": false
+    },
+    {
+     "n": "get_document",
+     "d": "Get one document",
+     "mode": "off",
+     "tok": 210,
+     "write": false
+    },
+    {
+     "n": "create_document",
+     "d": "Create a document",
+     "mode": "off",
+     "tok": 380,
+     "write": true
+    }
+   ]
+  },
+  {
+   "id": "sentry",
+   "name": "Sentry",
+   "logo": null,
+   "letter": "S",
+   "upstream": "mcp.sentry.dev/mcp",
+   "auth": "API key held by oxagen",
+   "authKind": "key",
+   "keyNote": "sntrys_…9fQ2, added by Marcus Bell on 2026-09-03.",
+   "status": "ok",
+   "added": "2026-09-03",
+   "by": "marcus",
+   "tools": [
+    {
+     "n": "search_issues",
+     "d": "Search issues",
+     "mode": "allow",
+     "tok": 390,
+     "write": false
+    },
+    {
+     "n": "get_issue_details",
+     "d": "Get one issue with its latest event",
+     "mode": "allow",
+     "tok": 340,
+     "write": false
+    },
+    {
+     "n": "get_event",
+     "d": "Get one event",
+     "mode": "allow",
+     "tok": 300,
+     "write": false
+    },
+    {
+     "n": "search_events",
+     "d": "Search events",
+     "mode": "allow",
+     "tok": 420,
+     "write": false
+    },
+    {
+     "n": "get_trace",
+     "d": "Get one trace",
+     "mode": "allow",
+     "tok": 330,
+     "write": false
+    },
+    {
+     "n": "list_releases",
+     "d": "List releases",
+     "mode": "allow",
+     "tok": 320,
+     "write": false
+    },
+    {
+     "n": "update_issue",
+     "d": "Resolve, ignore or assign an issue",
+     "mode": "off",
+     "tok": 360,
+     "write": true
+    },
+    {
+     "n": "create_comment",
+     "d": "Comment on an issue",
+     "mode": "off",
+     "tok": 280,
+     "write": true
+    },
+    {
+     "n": "list_projects",
+     "d": "List projects",
+     "mode": "off",
+     "tok": 210,
+     "write": false
+    },
+    {
+     "n": "list_organizations",
+     "d": "List organizations",
+     "mode": "off",
+     "tok": 170,
+     "write": false
+    },
+    {
+     "n": "get_release",
+     "d": "Get one release",
+     "mode": "off",
+     "tok": 220,
+     "write": false
+    },
+    {
+     "n": "analyze_issue_with_seer",
+     "d": "Ask Seer for a root cause",
+     "mode": "off",
+     "tok": 330,
+     "write": false
+    }
+   ]
+  },
+  {
+   "id": "postgres",
+   "name": "Postgres replica",
+   "logo": null,
+   "letter": "P",
+   "upstream": "pg-replica.a-intel.internal:5432",
+   "auth": "Read-only role agent_ro, held by oxagen",
+   "authKind": "key",
+   "keyNote": "The connection string never leaves oxagen.",
+   "status": "ok",
+   "added": "2026-09-10",
+   "by": "amara",
+   "tools": [
+    {
+     "n": "query",
+     "d": "Run a read-only SQL query on the replica",
+     "mode": "allow",
+     "tok": 340,
+     "write": false
+    },
+    {
+     "n": "list_tables",
+     "d": "List tables",
+     "mode": "allow",
+     "tok": 200,
+     "write": false
+    },
+    {
+     "n": "describe_table",
+     "d": "Describe a table's columns",
+     "mode": "allow",
+     "tok": 240,
+     "write": false
+    }
+   ]
+  },
+  {
+   "id": "oxagen",
+   "name": "oxagen",
+   "logo": "oxagen",
+   "upstream": "built in",
+   "auth": "Built in",
+   "authKind": "builtin",
+   "keyNote": "Every agent gets it. It reports status and asks a person.",
+   "status": "ok",
+   "added": "2026-08-14",
+   "by": "marcus",
+   "tools": [
+    {
+     "n": "report_status",
+     "d": "Report progress, doubts and readiness",
+     "mode": "allow",
+     "tok": 260,
+     "write": true
+    },
+    {
+     "n": "ask_person",
+     "d": "Ask a person a question and wait",
+     "mode": "allow",
+     "tok": 240,
+     "write": true
+    },
+    {
+     "n": "remember",
+     "d": "Suggest a memory for steering",
+     "mode": "allow",
+     "tok": 210,
+     "write": true
+    },
+    {
+     "n": "get_work_item",
+     "d": "Read the work item this session is for",
+     "mode": "allow",
+     "tok": 190,
+     "write": false
+    }
+   ]
+  }
+ ],
+ "catalog": [
+  {
+   "id": "stripe",
+   "name": "Stripe",
+   "letter": "S",
+   "auth": "key",
+   "d": "Payments, refunds and invoices."
+  },
+  {
+   "id": "slack",
+   "name": "Slack",
+   "letter": "S",
+   "auth": "oauth",
+   "d": "Read channels and post messages."
+  },
+  {
+   "id": "notion",
+   "name": "Notion",
+   "letter": "N",
+   "auth": "oauth",
+   "d": "Search and edit pages."
+  },
+  {
+   "id": "figma",
+   "name": "Figma",
+   "letter": "F",
+   "auth": "key",
+   "d": "Read design files and frames."
+  },
+  {
+   "id": "jira",
+   "name": "Jira",
+   "logo": "jira",
+   "auth": "oauth",
+   "d": "Issues from Jira Cloud."
+  },
+  {
+   "id": "datadog",
+   "name": "Datadog",
+   "letter": "D",
+   "auth": "key",
+   "d": "Metrics, logs and monitors."
+  }
+ ],
+ "import": {
+  "machines": 3,
+  "found": [
+   {
+    "machine": "mbell-mbp-16",
+    "person": "marcus",
+    "file": "~/.claude.json",
+    "entries": [
+     {
+      "name": "github",
+      "server": "github",
+      "key": "plaintext",
+      "note": "GITHUB_PERSONAL_ACCESS_TOKEN written in the file"
+     },
+     {
+      "name": "linear",
+      "server": "linear",
+      "key": "oauth",
+      "note": "OAuth, signed in on this laptop"
+     },
+     {
+      "name": "sentry",
+      "server": "sentry",
+      "key": "plaintext",
+      "note": "SENTRY_AUTH_TOKEN written in the file"
+     }
+    ]
+   },
+   {
+    "machine": "mbp-01",
+    "person": "marcus",
+    "file": "~/.codex/config.toml",
+    "entries": [
+     {
+      "name": "gh",
+      "server": "github",
+      "key": "env",
+      "note": "Same server as github on mbell-mbp-16",
+      "dupe": true
+     },
+     {
+      "name": "pg-replica",
+      "server": "postgres",
+      "key": "plaintext",
+      "note": "Password inside the connection string"
+     }
+    ]
+   },
+   {
+    "machine": "priya-mbp-14",
+    "person": "priya",
+    "file": "~/.cursor/mcp.json",
+    "entries": [
+     {
+      "name": "linear",
+      "server": "linear",
+      "key": "oauth",
+      "note": "Same server as linear on mbell-mbp-16",
+      "dupe": true
+     },
+     {
+      "name": "figma",
+      "server": "figma",
+      "key": "plaintext",
+      "note": "FIGMA_API_KEY written in the file"
+     }
+    ]
+   }
+  ]
+ }
+}

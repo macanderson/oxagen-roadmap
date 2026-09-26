@@ -1,0 +1,48 @@
+{
+ "targets": [
+  { "harness": "claude-code", "file": "CLAUDE.md", "skills": ".claude/skills/" },
+  { "harness": "codex-cli", "file": "AGENTS.md", "skills": ".agents/skills/" },
+  { "harness": "cursor", "file": ".cursor/rules/oxagen.mdc", "skills": ".cursor/rules/" },
+  { "harness": "stella", "file": "AGENTS.md", "skills": ".claude/skills/" }
+ ],
+ "items": [
+  { "id": "instructions", "kind": "instructions", "title": "Workspace instructions", "tok": 1180, "agents": "all", "by": "marcus", "edited": "2026-09-23", "version": 7,
+    "body": "# Core platform\n\na-intel/platform is a TypeScript monorepo: the API in apps/api, the web app in apps/web, and shared code in packages/.\n\n## Commands\n- Use pnpm for every script. Node 22.\n- Run one test file for what you changed: pnpm vitest run <file>.\n- Lint only the files you touched: pnpm eslint <files>.\n\n## Changes\n- Never push to main. Open a pull request.\n- A pull request names the issue it closes and the test that proves it.\n- Keep a pull request to one change.\n\n## Style\n- Errors say what happened, then what to do.\n- No new dependency without a line in the pull request saying why.",
+    "history": [ { "v": 7, "by": "marcus", "at": "2026-09-23", "what": "Added the lint command" }, { "v": 6, "by": "priya", "at": "2026-09-12", "what": "One change per pull request" }, { "v": 5, "by": "marcus", "at": "2026-09-02", "what": "Imported from CLAUDE.md and AGENTS.md" } ] },
+  { "id": "notes-format", "kind": "rule", "text": "Release notes group changes by surface, not by author. Every entry links the pull request.", "tok": 34, "agents": "all", "by": "marcus", "edited": "2026-09-04", "version": 2 },
+  { "id": "never-merge-release", "kind": "rule", "text": "Never merge a release pull request. A person merges it.", "tok": 32, "agents": ["release-manager"], "by": "marcus", "edited": "2026-09-04", "version": 1 },
+  { "id": "retry-helper", "kind": "rule", "text": "Use the workspace's retry helper, not an ad hoc loop.", "tok": 26, "agents": "all", "by": "amara", "edited": "2026-09-09", "version": 1 },
+  { "id": "no-secrets", "kind": "rule", "text": "Never print a secret, a token or a connection string, even in part.", "tok": 28, "agents": "all", "by": "priya", "edited": "2026-09-02", "version": 1 },
+  { "id": "migrations", "kind": "rule", "text": "A schema change ships with its migration in the same pull request.", "tok": 30, "agents": "all", "by": "amara", "edited": "2026-09-15", "version": 1 },
+  { "id": "safari-flake", "kind": "rule", "text": "The checkout e2e suite flaked on Safari through August. A retry there is not evidence of a regression.", "tok": 48, "agents": ["stella-ci", "reviewer"], "by": "marcus", "edited": "2026-09-01", "version": 1 },
+  { "id": "review-tone", "kind": "rule", "text": "A review comment names the line, the problem and the fix. No praise and no summaries.", "tok": 36, "agents": ["reviewer"], "by": "priya", "edited": "2026-09-08", "version": 3 },
+  { "id": "mem-vitest", "kind": "memory", "text": "a-intel/platform uses Vitest, not Jest.", "tok": 18, "agents": "all", "by": "marcus", "edited": "2026-09-11", "version": 1, "from": "Suggested by Triage in a session on 2026-09-11" },
+  { "id": "mem-refill", "kind": "memory", "text": "The rate limiter's refill time is in milliseconds.", "tok": 16, "agents": "all", "by": "marcus", "edited": "2026-09-24", "version": 1, "from": "Suggested by Triage in a session on 2026-09-24" },
+  { "id": "mem-prose", "kind": "memory", "text": "Docs changes run pnpm check:prose before the pull request.", "tok": 22, "agents": "all", "by": "priya", "edited": "2026-09-19", "version": 1, "from": "Suggested by Docs writer in a session on 2026-09-19" },
+  { "id": "mem-utc", "kind": "memory", "text": "The API stores timestamps in UTC. The web app converts them to the browser's time zone.", "tok": 26, "agents": "all", "by": "amara", "edited": "2026-09-16", "version": 1, "from": "Suggested by Amara's Claude Code on 2026-09-16" },
+  { "id": "release-notes-from-prs", "kind": "skill", "title": "release-notes-from-prs", "text": "Draft release notes from the pull requests merged since a tag.", "tok": 1840, "agents": ["release-manager"], "by": "marcus", "edited": "2026-09-04", "version": 4,
+    "files": ["SKILL.md", "references/format.md", "references/labels.md"] },
+  { "id": "rollback-a-bad-release", "kind": "skill", "title": "rollback-a-bad-release", "text": "Roll a release back to the last good tag and write the incident note.", "tok": 1420, "agents": ["release-manager"], "by": "marcus", "edited": "2026-08-30", "version": 2,
+    "files": ["SKILL.md", "references/incident-note.md"] },
+  { "id": "e2e-flake-triage", "kind": "skill", "title": "e2e-flake-triage", "text": "Find why an end-to-end test flakes, then fix it or quarantine it with a reason.", "tok": 980, "agents": ["stella-ci", "triage"], "by": "marcus", "edited": "2026-09-10", "version": 1,
+    "files": ["SKILL.md"] }
+ ],
+ "suggestions": [
+  { "id": "sug-platform-only", "kind": "rule", "text": "Release notes cover a-intel/platform only, unless the work item names another repository.", "tok": 24,
+    "from": { "session": "ses_01K5RS7M2E8FJ3QW", "said": "Skip the mobile repo this cycle; 4.11.0 is platform only.", "by": "marcus" } },
+  { "id": "sug-lint-first", "kind": "rule", "text": "Run pnpm release:lint before you commit release notes.", "tok": 14,
+    "from": { "session": "ses_01K5RS7M2E8FJ3QW", "sessions": 3, "fixup": [6, 7], "by": "release-manager" } }
+ ],
+ "import": {
+  "found": [
+   { "where": "a-intel/platform", "file": "CLAUDE.md", "lines": 14, "dupes": 0 },
+   { "where": "a-intel/platform", "file": "AGENTS.md", "lines": 11, "dupes": 8 },
+   { "where": "a-intel/billing", "file": ".cursor/rules/billing.mdc", "lines": 5, "dupes": 1 },
+   { "where": "mbell-mbp-16", "file": "~/.claude/CLAUDE.md", "lines": 4, "dupes": 0, "personal": true }
+  ],
+  "conflicts": [
+   { "a": { "text": "Use pnpm for every script.", "file": "CLAUDE.md" }, "b": { "text": "Run npm test before you commit.", "file": "AGENTS.md" } },
+   { "a": { "text": "Squash-merge pull requests.", "file": "CLAUDE.md" }, "b": { "text": "Rebase and merge. Never squash.", "file": ".cursor/rules/billing.mdc" } }
+  ]
+ }
+}

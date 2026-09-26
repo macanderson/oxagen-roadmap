@@ -1,0 +1,13 @@
+{
+ "org": { "slug": "a-intel", "name": "Anderson Intelligence Corp.", "initial": "A", "currency": "USD", "plan": "Team" },
+ "ws": { "slug": "core-platform", "name": "Core platform", "repo": "a-intel/platform" },
+ "me": "marcus",
+ "now": "2026-09-25T13:05:00",
+ "month": { "label": "September 2026", "from": "2026-09-01", "to": "2026-09-25" },
+ "people": {
+  "marcus": { "name": "Marcus Bell", "initials": "MB", "role": "Workspace owner", "email": "marcus@a-intel.example", "budget": 900 },
+  "priya": { "name": "Priya Natarajan", "initials": "PN", "role": "Organization owner", "email": "priya@a-intel.example", "budget": 400 },
+  "amara": { "name": "Amara Lindqvist", "initials": "AL", "role": "Member", "email": "amara@a-intel.example", "budget": 700 },
+  "dana": { "name": "Dana Okafor", "initials": "DO", "role": "Billing", "email": "dana@a-intel.example", "budget": null }
+ }
+}

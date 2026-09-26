@@ -1,0 +1,6 @@
+{
+ "claude-code": { "label": "Claude Code", "system": 2900, "tools": 11400 },
+ "codex-cli": { "label": "Codex CLI", "system": 6100, "tools": 1500 },
+ "cursor": { "label": "Cursor", "system": 4800, "tools": 5200 },
+ "stella": { "label": "stella", "system": 3400, "tools": 2600 }
+}

@@ -1,0 +1,6 @@
+{
+ "claude-opus-5": { "label": "Opus 5", "vendor": "Anthropic", "in": 5, "out": 25, "cw": 6.25, "cr": 0.5 },
+ "claude-sonnet-5": { "label": "Sonnet 5", "vendor": "Anthropic", "in": 2, "out": 10, "cw": 2.5, "cr": 0.2 },
+ "gpt-5-codex": { "label": "GPT-5 Codex", "vendor": "OpenAI", "in": 1.25, "out": 10, "cw": 1.25, "cr": 0.125 },
+ "kimi-k3": { "label": "kimi-k3", "vendor": "Moonshot", "in": 0.6, "out": 2.5, "cw": 0.6, "cr": 0.15 }
+}

@@ -12,3 +12,4 @@ design/*
 !design/fonts
 pnpm-lock.yaml
 pnpm-workspace.yaml
+mockups/v3/fixtures
