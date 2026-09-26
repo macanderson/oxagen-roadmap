@@ -525,7 +525,8 @@ MCP Studio
    confirms them, and a running total counts against the definition budget.
    The tool panel shows the classification, the description with Draft,
    hidden and fixed inputs, what the result returns, what the server says, and
-   agent feedback.
+   agent feedback. A Toolbelts view lists the named toolbelts, each a set of
+   tools across servers, and the workspace&#x27;s default.
 9. Changes shows the steering PR a review opens: the tool surface diff, the
    checks, and Open steering PR. Include a sync PR where an upstream
    description changed while the locked one is still served, and a breaking
@@ -621,7 +622,7 @@ Do
    code checkout.
 2. Zod schemas and TypeScript types for workspace/v1 (with the optional
    [embeddings] table MCP Studio specifies), governance/v1,
-   reflection/v1, promotion/v1, bundle/v1, repo health, and the three new
+   toolbelt/v1, reflection/v1, promotion/v1, bundle/v1, repo health, and the three new
    steering-record/v1 fields (repos, tools, description on every kind).
 3. A generator that writes each schema as JSON Schema to
    packages/oxagen/schemas/&lt;id&gt;.json with $id https://oxagen.sh/schemas/&lt;id&gt;.json.
@@ -922,7 +923,7 @@ Do
 1. Post one check named Oxagen steering. Put each check&#x27;s result inside it.
    Call S4&#x27;s runChecks() for the results; until S4 merges, call today&#x27;s six.
 2. Branch names start with the top-level folder they change. Allow many files
-   in one pull request for memory/ and servers/ branches.
+   in one pull request for memory/ and tools/ branches.
 3. The merge queue: one merge at a time per repository. When main moves, bring
    the next branch up to date and check it again before merging.
 4. At the head of the queue, push one stamp commit that writes id and hash
@@ -1059,7 +1060,8 @@ You own
 Do
 1. publish(repo, sha): build the bundle incrementally by blob SHA: the record
    index with token counts, the always-on block per code repository, the Cedar policy
-   set when policy/ exists, and the tool manifest from servers/ (MCP Studio&#x27;s
+   set when policy/ exists, the toolbelts from tools/toolbelts/, and the tool
+   manifest from tools/servers/ (MCP Studio&#x27;s
    compile(), lane M4. Until it merges, skip servers with a warning.). Then call
    MCP Studio&#x27;s project() (lane M13) so the tool registry follows the merge.
    Store it, then switch the workspace&#x27;s published version in one write.
@@ -1913,11 +1915,11 @@ This overrides any repository file that still allows a local test file, a local 
 
 Goal
 Adding a server, importing tools, classifying them, and shaping them in Studio
-produces servers/&lt;name&gt;/ files in one steering PR.
+produces tools/servers/&lt;name&gt;/ files in one steering PR.
 
 Read first
 - mcp-studio-spec.html: Storage model, Server file, Tools file, Lock file.
-- steering-repo-spec.html: Steering PR flow (branch prefix servers/), Shared
+- steering-repo-spec.html: Steering PR flow (branch prefix tools/), Shared
   contract.
 - packages/handlers/src/context.pr.open.ts (the open path S3 is changing).
 
@@ -1928,7 +1930,7 @@ Do
 1. Keep Studio&#x27;s unsaved edits as a draft in Oxagen until Review.
 2. Review writes server.toml, tools.toml, tools.lock.json (M4&#x27;s lock), the
    vendored definition (openapi.yaml, schema.graphql, or proto/), and tests/
-   to a branch named servers/&lt;name&gt;, and opens a steering PR through the open
+   to a branch named tools/&lt;name&gt;, and opens a steering PR through the open
    path.
 3. The PR body lists every imported, removed, and reclassified tool, the
    definition token total against the budget, and M5&#x27;s findings.
@@ -2283,8 +2285,7 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article><article class="pcard" data-wave="w2" id="prompt-m15"><div class="pcard-head"><span class="lane-id">M15</span><span class="pcard-title">Serving and search mode</span><button type="button" class="cp" aria-label="Copy the M15 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M15. Serve every server&#x27;s tools to wrapped agents, and the search index
 
 Goal
-A run&#x27;s MCP connection lists its toolbelt, the imported tools policy allows it,
-from the published bundle,
+A run&#x27;s MCP connection lists the tools in its toolbelt from the published bundle,
 for every source, and calls them through the executor with policy decided on
 the real tool in both exposure modes. Search mode ranks with embeddings.
 
@@ -2300,8 +2301,8 @@ You own
 - packages/mcp-studio/src/search/ (new)
 
 Do
-1. tools/list: the published manifests&#x27; imported tools, narrowed by policy and
-   by Send To for the run,
+1. tools/list: the tools in the run&#x27;s toolbelt (tools/toolbelts/), from the
+   published manifests,
    minus tools that are off or withheld, in a stable order, so the list is
    identical across requests of one published version. Annotations come from
    the classification.
