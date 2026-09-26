@@ -405,8 +405,8 @@ function healthBanner() {
   if (S.health === "disconnected") act = isOrgAdmin(me) ? '<button class="btn sm primary" data-act="reconnect">Reconnect</button>' : '<span class="muted small">' + h(personName(st.admin)) + ", an organization admin, reconnects it.</span>";
   if (S.health === "diverged") act = '<button class="btn sm primary" data-go="steering|pr-' + st.revertPr + '">Open revert PR #' + st.revertPr + "</button>";
   return '<div class="banner health-b hb-' + S.health + '" role="alert"><span class="d"></span><div class="grow"><b>' + h(title) + "</b>" +
-    '<ul class="hb-list">' + st.diffs.map(function (x) { return "<li>" + md(x) + "</li>"; }).join("") + "</ul>" +
-    '<p class="small">' + md(st.effect) + " " + md(st.fix) + "</p></div>" + act + "</div>";
+    '<ul class="hb-list">' + st.diffs.map(function (x) { return "<li>" + mdi(x) + "</li>"; }).join("") + "</ul>" +
+    '<p class="small">' + mdi(st.effect) + " " + mdi(st.fix) + "</p></div>" + act + "</div>";
 }
 ACTS.repair = function () { S.health = "healthy"; toast("Settings repaired. oxagen read them back, and they match."); render(); };
 ACTS.reconnect = function () { S.health = "healthy"; toast("Reconnected. oxagen can read, merge, and publish again."); render(); };
@@ -488,7 +488,7 @@ function steeringRepoTab() {
   var dr = S.health === "drifted" ? REPO.health.drifted.settings : [], gov = REPO.governance, me = viewer();
   var settings = REPO.settings.map(function (x, i) {
     var bad = dr.indexOf(i) >= 0 || (S.health === "disconnected");
-    return "<tr><td>" + md(x.name) + '</td><td class="mh">' + md(x.want) + "</td><td>" + (bad ? badge("b-denied", S.health === "disconnected" ? "Unreadable" : "Differs", true) : badge("b-allowed", "Matches", true)) + "</td></tr>";
+    return "<tr><td>" + mdi(x.name) + '</td><td class="mh">' + mdi(x.want) + "</td><td>" + (bad ? badge("b-denied", S.health === "disconnected" ? "Unreadable" : "Differs", true) : badge("b-allowed", "Matches", true)) + "</td></tr>";
   }).join("");
   var repair = S.health === "drifted" && isWsAdmin(me) ? '<button class="btn sm primary" data-act="repair">Repair settings</button>' : "";
   var linked = REPO.linked.map(function (r) {
@@ -530,13 +530,13 @@ function steeringPrView(id) {
     if (st !== "queued") acts += '<button class="btn primary" data-act="pr-merge" data-n="' + pr.n + '"' + (apv.length ? "" : " disabled") + ">" + (pr.kind === "memory" ? "Merge " + plural(pr.memories.filter(function (m) { return !S.dropped[pr.n + "." + m.id]; }).length, "memory", "memories") : "Merge") + "</button>";
   }
   var head = '<div class="shead"><div class="t"><p class="eyebrow">Steering PR #' + pr.n + "</p><h1>" + h(pr.title) + "</h1>" + meta + '</div><div class="acts">' + acts + "</div></div>";
-  var main = (pr.summary ? '<p class="pr-sum">' + md(pr.summary) + "</p>" : "");
+  var main = (pr.summary ? '<p class="pr-sum">' + mdi(pr.summary) + "</p>" : "");
   if (pr.state === "merged") main += '<div class="banner"><div class="grow"><b>Merged ' + when(pr.merged) + ", published as version " + pr.version + '</b>oxagen squash-merged it at the checked commit. Revert opens a steering PR that undoes it, with the same checks and review.</div></div><pre class="trailers">' + h((pr.trailers || []).join("\n")) + "</pre>";
   if (pr.kind === "memory") main += memoryCards(pr);
   if (pr.kind === "server") main += surfaceDiff(pr, true);
   if (pr.record) main += '<div class="panel"><div class="panel-h"><h3>Record</h3><span class="sp">' + kindBadge(pr.record.kind) + ' <span class="muted mono">' + h(pr.record.force) + '</span> <span class="muted">' + num(pr.record.tok) + ' tokens</span></span></div><div class="panel-b"><div class="readout"><div class="rh"><span class="mono">' + h(pr.record.path) + '</span></div><pre>' + h(pr.record.body) + "</pre></div></div></div>";
   (pr.files || []).forEach(function (f) { if (f.diff) main += '<div class="readout"><div class="rh"><span class="mono">' + h(f.path) + '</span></div><pre class="diff">' + diffHtml(f.diff) + "</pre></div>"; });
-  if (pr.note) main += '<p class="note">' + md(pr.note) + "</p>";
+  if (pr.note) main += '<p class="note">' + mdi(pr.note) + "</p>";
   main += checksPanel(pr);
   var side = reviewPanel(pr) + queuePanel(pr) + filesPanel(pr);
   return { crumb: [["Steering", "steering"], ["Steering PR #" + pr.n]], html: head + '<div class="split prgrid"><div class="prmain">' + main + '</div><aside class="prside">' + side + "</aside></div>" };
@@ -549,11 +549,11 @@ function checksPanel(pr) {
   var rows = (pr.checks || []).map(function (c) {
     var b = CHECK_BADGE[c.r], extra = "";
     if (c.id === "budget" && pr.record && pr.state !== "merged") extra = budgetDetail(pr.record);
-    return '<div class="ck"><span class="ck-n mono">' + h(c.id) + "</span>" + badge(b[0], b[1]) + '<div class="grow"><span class="muted small">' + md(c.note || STEERING.checkNames[c.id] || "") + "</span>" + extra + "</div></div>";
+    return '<div class="ck"><span class="ck-n mono">' + h(c.id) + "</span>" + badge(b[0], b[1]) + '<div class="grow"><span class="muted small">' + mdi(c.note || STEERING.checkNames[c.id] || "") + "</span>" + extra + "</div></div>";
   }).join("");
   if (S.health !== "healthy" && pr.state !== "merged") rows = '<div class="ck"><span class="ck-n mono">settings</span>' + badge("b-failed", "Failed") + '<div class="grow"><span class="muted small">The repository settings differ from the prescribed ones. oxagen will not merge or publish until they match.</span></div></div>' + rows;
   var findings = (pr.findings || []).map(function (f) {
-    return '<div class="ck"><span class="ck-n">' + badge(f.level === "error" ? "b-failed" : f.level === "warning" ? "b-approval" : "b-q", f.level === "error" ? "Error" : f.level === "warning" ? "Warning" : "Info") + '</span><div class="grow small">' + md(f.text) + "</div></div>";
+    return '<div class="ck"><span class="ck-n">' + badge(f.level === "error" ? "b-failed" : f.level === "warning" ? "b-approval" : "b-q", f.level === "error" ? "Error" : f.level === "warning" ? "Warning" : "Info") + '</span><div class="grow small">' + mdi(f.text) + "</div></div>";
   }).join("");
   return '<div class="panel"><div class="panel-h"><h3>Checks</h3><span class="sp"><code>Oxagen steering</code> ' + badge(rb[0], roll === "warn" ? "Passed with warnings" : rb[1], true) + "</span></div>" + rows +
     (findings ? '<div class="panel-h sub-h"><h3>Tool checks</h3></div>' + findings : "") + "</div>";
@@ -629,7 +629,7 @@ function surfaceDiff(pr, withDefs) {
   var sv = serverBy(pr.server);
   var blocks = pr.diff.map(function (b) {
     return '<div class="tsd-h mono">' + h(b.head) + "</div>" + b.lines.map(function (l) {
-      return '<div class="tsd-l op-' + (l.op === "+" ? "add" : l.op === "-" ? "del" : "chg") + (l.breaking ? " breaking" : "") + '"><span class="tsd-op mono">' + h(l.op) + '</span><span class="tsd-t mono">' + h(l.tool) + '</span><span class="tsd-w">' + md(l.what) + "</span>" +
+      return '<div class="tsd-l op-' + (l.op === "+" ? "add" : l.op === "-" ? "del" : "chg") + (l.breaking ? " breaking" : "") + '"><span class="tsd-op mono">' + h(l.op) + '</span><span class="tsd-t mono">' + h(l.tool) + '</span><span class="tsd-w">' + mdi(l.what) + "</span>" +
         (l.detail ? '<div class="tsd-d mono">' + l.detail.map(function (x) { return '<span class="' + (x[0] === "+" ? "add" : x[0] === "-" ? "del" : "") + '">' + h(x) + "</span>"; }).join("") + "</div>" : "") + "</div>";
     }).join("");
   }).join("");
@@ -759,8 +759,8 @@ DIALOGS.newworkspace = function (arg, d) {
   var list = steps.map(function (s, i) {
     var st = i < d.at ? "done" : i === d.at ? (d.failed ? "failed" : "running") : "wait";
     var ic = st === "done" ? g("check", 13) : st === "failed" ? g("x", 13) : st === "running" ? '<span class="spin"></span>' : String(i + 1);
-    return '<div class="prov-step st-' + st + '"><span class="prov-i">' + ic + '</span><div class="grow"><b>' + h(s.t) + '</b><span class="sub">' + (s.k === "create" ? "<code>" + h(repo) + "</code>, private" : md(s.d)) + "</span>" +
-      (st === "failed" ? '<div class="warn small">' + md(s.error) + " " + h(s.fix) + "</div>" : "") + "</div></div>";
+    return '<div class="prov-step st-' + st + '"><span class="prov-i">' + ic + '</span><div class="grow"><b>' + h(s.t) + '</b><span class="sub">' + (s.k === "create" ? "<code>" + h(repo) + "</code>, private" : mdi(s.d)) + "</span>" +
+      (st === "failed" ? '<div class="warn small">' + mdi(s.error) + " " + h(s.fix) + "</div>" : "") + "</div></div>";
   }).join("");
   return { title: done ? d.ws + " is ready" : d.failed ? "Setting up " + d.ws + " stopped" : "Setting up " + d.ws, sub: done ? "Its steering repo is published at version 1." : "The target is 15 seconds from Create to an open workspace.",
     body: '<div class="prov">' + list + "</div>",
@@ -969,7 +969,7 @@ DRAWERS.tool = function (k) {
       '<h3 class="sec">Classification</h3>' + (c.confirmed ? "" : '<p class="small"><span class="sugg">Suggested</span> from ' + h(suggestBasis(sv, t)) + " A person confirms or changes it before the steering PR opens.</p>") +
       '<div class="fields f3"><div class="field"><label for="tc-risk">Risk</label>' + selectOf("tc-risk", k, "risk", RISKS, c.risk) + '</div><div class="field"><label for="tc-se">Side effect</label>' + selectOf("tc-se", k, "side_effect", EFFECTS, c.side_effect) + '</div><div class="field"><label for="tc-eg">Egress</label>' + selectOf("tc-eg", k, "egress", EGRESS, c.egress) + "</div></div>" +
       '<div class="row">' + (c.impacts.length ? c.impacts.map(function (x) { return '<span class="chip mono">' + h(x) + "</span>"; }).join(" ") : '<span class="muted small">No impacts</span>') + (c.confirmed ? "" : '<span class="sp"></span><button class="btn sm primary" data-act="cls-confirm" data-k="' + h(k) + '">Confirm</button>') + "</div>" +
-      '<h3 class="sec">Approval</h3>' + (rules.length ? '<div class="lst">' + rules.map(function (r) { return '<div class="li"><span class="bd2"><span class="t1">' + (r.cond ? "Asks a person " + h(r.cond) : "Asks a person on every call") + '</span><span class="t2"><code>' + h(r.id) + "</code> in <code>" + h(r.file) + "</code> reads it because " + md(r.when) + ".</span></span></div>"; }).join("") + "</div>" : '<p class="small muted">No policy in <code>policy/</code> asks a person for this classification. The agent\'s toolbelt decides who may call it.</p>') +
+      '<h3 class="sec">Approval</h3>' + (rules.length ? '<div class="lst">' + rules.map(function (r) { return '<div class="li"><span class="bd2"><span class="t1">' + (r.cond ? "Asks a person " + h(r.cond) : "Asks a person on every call") + '</span><span class="t2"><code>' + h(r.id) + "</code> in <code>" + h(r.file) + "</code> reads it because " + mdi(r.when) + ".</span></span></div>"; }).join("") + "</div>" : '<p class="small muted">No policy in <code>policy/</code> asks a person for this classification. The agent\'s toolbelt decides who may call it.</p>') +
       '<h3 class="sec">Description</h3><div class="field"><textarea id="td-desc" rows="3" data-input="desc-edit" data-k="' + h(k) + '">' + h(desc) + '</textarea><div class="hint">' + num(desc.length) + " of 1,024 characters. It replaces the server's description in <code>tools.toml</code>.</div></div>" +
       (draft ? '<p class="small muted">Drafted by the in-app agent. It bills as in-app agent spend on the Billing page.</p>' : "") +
       '<div class="row"><button class="btn sm" data-act="desc-draft" data-k="' + h(k) + '">' + g("spark", 13) + ' Draft</button><button class="btn sm" data-act="desc-save" data-k="' + h(k) + '">Add to changes</button></div>' +
@@ -1117,15 +1117,15 @@ function changesTab(sv) {
     mine = surfaceDiff(pr, true) +
       '<div class="panel"><div class="panel-h"><h3>Checks</h3><span class="sp"><code>Oxagen steering</code> ' + (errs ? badge("b-failed", "Would fail", true) : badge("b-allowed", "Would pass", true)) + "</span></div>" +
       [["schema", errs ? "fail" : "pass", errs ? "A classification is still a suggestion." : ""], ["compile", "pass", folderOf(sv) + " compiles. The lock is written by oxagen when the steering PR opens."], ["owned", "pass", "`tools.lock.json` is written by oxagen, never by hand."], ["references", "pass", ""]].map(function (c) {
-        var b = CHECK_BADGE[c[1]]; return '<div class="ck"><span class="ck-n mono">' + c[0] + "</span>" + badge(b[0], b[1]) + '<div class="grow"><span class="muted small">' + md(c[2] || STEERING.checkNames[c[0]]) + "</span></div></div>";
+        var b = CHECK_BADGE[c[1]]; return '<div class="ck"><span class="ck-n mono">' + c[0] + "</span>" + badge(b[0], b[1]) + '<div class="grow"><span class="muted small">' + mdi(c[2] || STEERING.checkNames[c[0]]) + "</span></div></div>";
       }).join("") +
-      (dfx.findings.length ? '<div class="panel-h sub-h"><h3>Tool checks</h3></div>' + dfx.findings.map(function (f) { return '<div class="ck"><span class="ck-n">' + badge(f.level === "error" ? "b-failed" : f.level === "warning" ? "b-approval" : "b-q", f.level === "error" ? "Error" : f.level === "warning" ? "Warning" : "Info") + '</span><div class="grow small">' + md(f.text) + "</div></div>"; }).join("") : "") + "</div>" +
+      (dfx.findings.length ? '<div class="panel-h sub-h"><h3>Tool checks</h3></div>' + dfx.findings.map(function (f) { return '<div class="ck"><span class="ck-n">' + badge(f.level === "error" ? "b-failed" : f.level === "warning" ? "b-approval" : "b-q", f.level === "error" ? "Error" : f.level === "warning" ? "Warning" : "Info") + '</span><div class="grow small">' + mdi(f.text) + "</div></div>"; }).join("") : "") + "</div>" +
       '<div class="panel pad"><div class="rl-h"><h3>Files</h3><span class="muted">' + plural(dfx.files.length, "file") + '</span></div><div class="flist">' + dfx.files.map(function (f) { return '<span class="mono">' + h(f) + "</span>"; }).join("") + "</div></div>" +
       '<div class="row"><button class="btn primary" data-act="changes-pr" data-id="' + id + '"' + (errs ? " disabled" : "") + '>Open steering PR</button><button class="btn ghost" data-act="changes-discard" data-id="' + id + '">Discard</button><span class="muted small">Definitions ' + num(before) + " → " + num(after) + " tokens per request, budget " + num(budget) + ".</span></div>";
   }
   var open = allPrs().filter(function (p) { return p.server === id && p.state !== "merged"; });
   var theirs = open.map(function (p) {
-    return '<div class="panel pad"><div class="rl-h"><h3>Steering PR #' + p.n + "</h3>" + prStateBadge(p) + '</div><p class="small">' + h(p.title) + ". " + md(p.summary || "") + '</p><button class="btn sm" data-go="steering|pr-' + p.n + '">View steering PR #' + p.n + "</button></div>" + (p.diff ? surfaceDiff(p, true) : "");
+    return '<div class="panel pad"><div class="rl-h"><h3>Steering PR #' + p.n + "</h3>" + prStateBadge(p) + '</div><p class="small">' + h(p.title) + ". " + mdi(p.summary || "") + '</p><button class="btn sm" data-go="steering|pr-' + p.n + '">View steering PR #' + p.n + "</button></div>" + (p.diff ? surfaceDiff(p, true) : "");
   }).join("");
   return '<h3 class="sec">Your changes</h3>' + mine + (theirs ? '<h3 class="sec">Open steering PRs</h3>' + theirs : "");
 }

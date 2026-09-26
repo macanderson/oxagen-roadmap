@@ -78,8 +78,9 @@ function ago(d) {
 /* ---- markup ---- */
 function h(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
 /* Fixture text marks names, paths and ids with backticks. They render as code, which is also how a
-   contract name that carries the capital brand (the check Oxagen steering) reaches the page. */
-function md(s) { return h(s).replace(/`([^`]+)`/g, "<code>$1</code>"); }
+   contract name that carries the capital brand (the check Oxagen steering) reaches the page. Inline
+   only: replay.js has its own md() for a harness's markdown, which makes blocks. */
+function mdi(s) { return h(s).replace(/`([^`]+)`/g, "<code>$1</code>"); }
 function svg(paths, size, sw) {
   return '<svg width="' + (size || 15) + '" height="' + (size || 15) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 1.7) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + "</svg>";
 }

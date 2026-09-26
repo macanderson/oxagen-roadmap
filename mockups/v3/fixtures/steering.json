@@ -700,8 +700,8 @@
    ],
    "findings": [
     {
-     "level": "error",
-     "text": "`billing__void_invoice`: an imported tool the source no longer offers. This PR removes it from `tools.toml`."
+     "level": "info",
+     "text": "`billing__void_invoice`: an imported tool the source no longer offers. The check passes because this PR removes it from `tools.toml`."
     },
     {
      "level": "warning",
