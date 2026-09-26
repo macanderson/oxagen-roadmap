@@ -864,8 +864,9 @@ Do
 6. diverged: open a pull request that reverts main to the last published
    commit, and refuse every other merge until it merges.
 7. Code repository checks: on every pull request in a linked code repository,
-   post the Oxagen check the spec&#x27;s Code repository checks section describes,
-   warning only. Flag instruction files that contradict or repeat steering,
+   post the Oxagen check the spec&#x27;s Code repository checks section describes.
+   It warns, and a finding fails it only when workspace.toml sets
+   [code_checks] block_merge = true. Flag instruction files that contradict or repeat steering,
    and hand memory-like writes to S6 as memories. The spec leaves open
    whether this runs from the app or from a committed workflow: build what it
    says when you start, and if it is still open, ask first.

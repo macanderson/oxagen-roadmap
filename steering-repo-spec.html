@@ -387,6 +387,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
         <li>Approve and Merge buttons in the web app. In <code>solo</code> mode a steering PR has no approval step and a merge counts as approved. In every other mode it needs an approval and a merge. The workspace owner, in any mode, may merge as in <code>solo</code> mode. (Mac, 2026-09-26)</li>
         <li>Every published version gets the next number for its workspace, so an auditor can tell which version steered a run. (Mac, 2026-09-26)</li>
         <li>Oxagen marks the pull requests it played a part in with a badge from the brand kit. (Mac, 2026-09-26)</li>
+        <li>The code repository check warns by default. <code>[code_checks] block_merge</code> in <code>workspace.toml</code>, off by default, makes a finding fail the check. (Mac, 2026-09-26)</li>
         <li>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first and creates the workspace with its repository in one automated flow. The 14-day grace period of ADR-065 goes. (Mac, 2026-09-26)</li>
         <li>The repository name <code>oxagen-&lt;workspace&gt;</code>. (Mac, 2026-09-26)</li>
         <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>. (Mac, 2026-09-26)</li>
@@ -459,7 +460,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
 ├── CLAUDE.md                                  one line: @AGENTS.md
 ├── README.md                                  what this repo is, for people
 ├── .gitattributes                             LF line endings
-├── workspace.toml                             linked code repositories, budget
+├── workspace.toml                             linked code repositories, budget, code checks
 ├── agents/                                    one file per agent: operator, runtime, harness
 │   ├── a-intel.core.release-bot.toml
 │   └── a-intel.core.ci-reviewer.toml
@@ -512,7 +513,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
     <tbody>
       <tr><td><code>AGENTS.md</code> <code>CLAUDE.md</code></td><td class="wrap">How to write a record in this repo, for an agent that opens it. Oxagen's text sits in a managed block.</td><td>Markdown</td><td>Oxagen</td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>README.md</code></td><td class="wrap">What the repo is, who reviews it, and the settings Oxagen holds. Oxagen's text sits in a managed block.</td><td>Markdown</td><td>Oxagen</td><td><span class="st d">Decided</span></td></tr>
-      <tr><td><code>workspace.toml</code></td><td>Linked code repositories, the workspace budget, and an optional embedding endpoint</td><td>TOML</td><td>People, by steering PR</td><td><span class="st c">Today</span> written by the init PR and displayed, reconciled by nothing</td></tr>
+      <tr><td><code>workspace.toml</code></td><td>Linked code repositories, the workspace budget, code check settings, and optional tool and embedding settings</td><td>TOML</td><td>People, by steering PR</td><td><span class="st c">Today</span> written by the init PR and displayed, reconciled by nothing</td></tr>
       <tr><td><code>steering/</code></td><td>Steering records and skills</td><td>Markdown with YAML frontmatter</td><td>People, agents, the curator</td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>steering/governance.toml</code></td><td>Governance mode, reviewer groups, memory settings</td><td>TOML</td><td>People</td><td><span class="st c">Today</span> at <code>.oxagen/rules/governance.toml</code></td></tr>
       <tr><td><code>steering/promotions/</code></td><td class="wrap">The hash-chained ledger of merged records, in a new file each period or at a line cap, whichever comes first</td><td>JSON Lines</td><td>Oxagen</td><td><span class="st p">Proposed</span></td></tr>
@@ -1064,6 +1065,12 @@ url = "github.com/a-intel/billing-service"
 [budget]
 per_month_micros = 12000000000                # $12,000.00
 
+[code_checks]
+block_merge = false                           # true: a finding fails the Oxagen check
+
+# [tools]                                     # optional
+# definition_budget = 20000                   # warn past this many tokens of direct-mode definitions
+
 # [embeddings]                                # optional, see MCP Studio
 # url = "https://embeddings.a-intel.com/v1/embeddings"
 # model = "bge-large-en-v1.5"
@@ -1082,7 +1089,8 @@ per_month_micros = 12000000000                # $12,000.00
     </tbody>
   </table></div>
   <p>Some harnesses keep memories on the machine, such as Claude Code's memory directory, where no repository sees them. The local gateway on an enrolled machine reads each harness's known memory locations and sends new entries to Oxagen as memories. <span class="st p">Proposed</span></p>
-  <p>The check warns and never blocks a merge by default, because a code repository's branch rules belong to the customer. <span class="st p">Proposed</span></p>
+  <p>The check warns by default. A workspace that wants findings to block sets <code>block_merge = true</code> under <code>[code_checks]</code> in <code>workspace.toml</code>, through a steering PR like any setting. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
+  <p>With it on, a finding fails the <code>Oxagen</code> check. The check blocks a merge once the customer makes it a required check in the code repository's branch rules, which stay the customer's. The web app shows that step next to the setting. <span class="st p">Proposed</span></p>
 </section>
 
 <section id="badges">
@@ -1534,7 +1542,6 @@ billing__call {"tool": "create_refund", "arguments": {"charge": "ch_3Q", "amount
   <ol>
     <li>How Oxagen Steering reaches a steering repo it creates: an organization owner's user token that adds each new repository to the installation (recommended), or an installation on all repositories. See Provisioning.</li>
     <li>Checks on linked code repositories: posted by the Oxagen app with no committed files (recommended), or a CI workflow committed to each repository, which reverses the decision that code repositories hold no committed Oxagen files.</li>
-    <li>Whether a customer can opt in to the code repository check blocking a merge. By default it only warns.</li>
     <li>Where function tools run, such as <code>calculate_refund_amount</code>: in a sandbox in Oxagen's cloud, or on the customer's own infrastructure through the relay. And which language comes first. See Function tools.</li>
     <li>What a policy on a subagent's skill does on a harness that does not say which skill made a tool call. Recommended: the call gets the parent agent's decision, and the Skills screen shows that the skill's policy does not apply on that harness, since Oxagen assumes operators act in good faith. The other choice is to not deliver such a skill to that harness. See Subagents.</li>
     <li>Whether an organization admin acting in a workspace gets the owner's right to merge a steering PR without an approval, or only the named workspace owner does (recommended).</li>
