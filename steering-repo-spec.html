@@ -360,7 +360,8 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
         <li>From v1: the name steering record, Markdown with YAML frontmatter and <code>.md</code>, the kinds, no agent persona, and the Steering section. (Mac, 2026-09-25)</li>
         <li>The name steering repo. (Mac, 2026-09-26)</li>
         <li>The folders <code>tools/servers/</code>, with one folder per MCP server whatever its source, <code>policy/</code>, and <code>steering/memory/</code>. <code>proposals/</code> goes. (Mac, 2026-09-26)</li>
-        <li>The record fields <code>repos</code>, <code>tools</code>, and <code>description</code> on every kind. (Mac, 2026-09-26)</li>
+        <li>The record fields <code>repos</code>, <code>tools</code>, <code>skills</code>, and <code>description</code> on every kind. (Mac, 2026-09-26)</li>
+        <li>A record can target a skill with <code>skills</code>. It cannot target a named agent. (Mac, 2026-09-26)</li>
         <li>An optional always-on token budget. A workspace that sets none inherits Oxagen's default, and a workspace can turn the check off. (Mac, 2026-09-26)</li>
         <li>The budget check never blocks a steering PR, because a steering PR is how a budget changes. It warns and shows the cost. (Mac, 2026-09-26)</li>
         <li>While a steering repo's settings have drifted, runs keep the last published version. (Mac, 2026-09-26)</li>
@@ -557,12 +558,13 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
 <section id="records">
   <span class="eyebrow">Records</span>
   <h2>Record changes</h2>
-  <p>Three fields join the v1 frontmatter before v1 ships, so the schema stays <code>steering-record/v1</code>. Targets combine: a record reaches a model request only when every target it names matches. <span class="st d">Decided</span></p>
+  <p>Four fields join the v1 frontmatter before v1 ships, so the schema stays <code>steering-record/v1</code>. Targets combine: a record reaches a model request only when every target it names matches. <span class="st d">Decided</span></p>
   <div class="tscroll"><table>
     <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Rule</th></tr></thead>
     <tbody>
       <tr><td><code>repos</code></td><td>list</td><td>when <code>scope</code> is <code>repository</code></td><td class="wrap">Code repositories as <code>&lt;host&gt;/&lt;owner&gt;/&lt;name&gt;</code>, such as <code>github.com/a-intel/platform</code>. The record reaches a run only when its working repository is on the list. This replaces v1's rule that repository records live in the code repository.</td></tr>
       <tr><td><code>tools</code></td><td>list</td><td>no</td><td class="wrap">Tool names such as <code>billing__create_refund</code>, or a server prefix such as <code>billing__*</code>. The record reaches a request only when the run's toolbelt holds a match.</td></tr>
+      <tr><td><code>skills</code></td><td>list</td><td>no</td><td class="wrap">Skill lineages, such as <code>a-intel.platform.code-reviewer</code>. The record reaches a request only when the request's <code>context.skill</code> is on the list, so a request that names no skill gets none of these records. A record cannot target a named agent. See <a href="#subagents">Subagents</a>. <span class="st d">Decided</span> (Mac, 2026-09-26)</td></tr>
       <tr><td><code>toolbelt</code></td><td>string</td><td>no</td><td class="wrap">Skills only, and later, with named toolbelts. Day one, a Cedar policy on the skill limits a subagent. See <a href="#subagents">Subagents</a>.</td></tr>
       <tr><td><code>description</code></td><td>string</td><td>skills</td><td class="wrap">Allowed on every kind. One sentence, at most 200 characters, or 1,024 for a skill. It becomes the record's line in the index an agent reads before it asks for a body.</td></tr>
     </tbody>
@@ -1002,7 +1004,7 @@ unless { principal == Agent::"a-intel.core.release-bot" };</code></pre></figure>
   <h3 id="subagents">Subagents</h3>
   <p>A subagent often needs fewer tools than the run that starts it, such as a reviewer that may read code and write nothing. Day one, a Cedar policy on the skill it runs sets that limit. <span class="st p">Proposed</span></p>
   <ul>
-    <li><strong>The skill in context.</strong> When the harness says which skill a subagent runs, the hook or the gateway adds it to the request as <code>context.skill</code>.</li>
+    <li><strong>The skill in context.</strong> When the harness says which skill a subagent runs, the hook or the gateway adds it to the request as <code>context.skill</code>. A record whose <code>skills</code> list holds that skill reaches the request.</li>
     <li><strong>Read only by class.</strong> A policy forbids any call whose side effect is not <code>read</code> for that skill, so a new write tool never slips in. Built-in tools carry a classification too, so the same rule covers <code>builtin__write_file</code> and <code>builtin__shell</code>.</li>
     <li><strong>What the model sees.</strong> When a harness has its own tool list for a subagent, such as the <code>tools</code> field of a Claude Code subagent, Oxagen can fill it when it delivers the skill. The list trims what the model sees, and Cedar decides the call.</li>
     <li><strong>Knowing the caller.</strong> A skill's limit holds only on a harness that says which skill made each tool call. On a harness that does not say, the call is checked against the main agent's rules, and the Skills screen warns, harness by harness, where the limit does not hold. <span class="st d">Decided</span> (Mac, 2026-09-26)</li>
