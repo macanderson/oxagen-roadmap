@@ -1,0 +1,39 @@
+# The v3 mockup checks (mockups/v3/README.md, Commands). Local test runs are not allowed on the
+# maintainer's machine, so this job is the only place the headless walk runs.
+#
+#   npm run check:v3   the sessions fixture, the built page, and the headless walk in Chromium
+name: mockup-v3
+on:
+  pull_request:
+    paths:
+      - "mockups/v3/**"
+      - "mockups/catalog.mjs"
+      - "tools/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/mockup-v3.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mockup-v3-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  check-v3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # tools/lib/playwright.mjs reads the browsers from here. Its default is the macOS cache.
+      PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.ms-playwright
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Install Chromium for the headless walk
+        run: npx playwright install --with-deps chromium --only-shell
+      - name: Check v3
+        run: npm run check:v3
