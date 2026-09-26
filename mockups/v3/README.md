@@ -148,7 +148,7 @@ A route's own query pins a screen or a state, so each has a Storybook story:
 | `tool=` | The tool panel on a server page |
 | `run=1` | A Try it result |
 
-CI runs all three in `.github/workflows/mockup-v3.yml`, then a second walk over every steering repo and MCP Studio screen and state and its flows. That walk sits in the workflow until it moves into `tools/check-mockup-v3.mjs`.
+CI runs all three in `.github/workflows/mockup-v3.yml`, then a second walk over every steering repo and MCP Studio screen and state and its flows. That walk sits in the workflow until it moves into `tools/check-mockup-v3.mjs`. With `SHOTS=<dir>` set, it saves a screenshot of each screen, and the job uploads them as the `v3-screens` artifact.
 
 The headless walk opens every view in both themes, desktop and phone, and fails on a script error, sideways scroll, a transcript below the first viewport, a replay that does not reach its end, a question that cannot be answered, a Send that opens no session, a drawer or dialog that does not open, money that does not reconcile, or copy that breaks the house rules.
 

@@ -75,7 +75,7 @@ jobs:
             ["steering/pr-58", ".budget"], ["steering/pr-57", ".trailers"], ["steering/pr-59", ".mem"], ["steering/pr-61", ".tsd"], ["steering/pr-62", ".tsd"],
             ["steering/pr-60?health=diverged", ".health-b"], ["steering?tab=repo&dialog=linkrepo", ".dlg"],
             ["steering?health=drifted", ".health-b"], ["work?health=drifted&as=amara", ".health-b"], ["sessions?health=disconnected", ".health-b"],
-            ["work?dialog=newworkspace", ".dlg"], ["work?dialog=newworkspace&prov=failed", '[data-act="nws-retry"]'], ["work?dialog=newworkspace&prov=done", '[data-act="nws-open"]'],
+            ["work?dialog=workspaces", '.dlg [data-act="newws"]'], ["work?dialog=newworkspace", ".dlg"], ["work?dialog=newworkspace&prov=failed", '[data-act="nws-retry"]'], ["work?dialog=newworkspace&prov=done", '[data-act="nws-open"]'],
             ["servers", ".rank"], ["servers?dialog=addserver", ".srcpick"], ["servers?dialog=addserver&src=url", ".dlg"], ["servers?dialog=addserver&src=registry", ".catalog"],
             ["servers?dialog=addserver&src=local", ".dlg"], ["servers?dialog=addserver&src=definition", ".dlg"],
             ["servers?dialog=addserver&src=registry&pick=slack&phase=result", ".dlg table"], ["servers?dialog=addserver&src=definition&fmt=openapi&phase=result", ".dlg table"],
