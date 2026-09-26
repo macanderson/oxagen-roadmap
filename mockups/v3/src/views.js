@@ -155,7 +155,7 @@ DIALOGS.send = function (key, d) {
     return '<button class="pick-i' + (x.key === d.agent ? " on" : "") + '" data-act="send-agent" data-agent="' + x.key + '" aria-pressed="' + (x.key === d.agent) + '">' + agentAv(x, 30) +
       '<span class="pick-t"><b>' + h(x.name) + '</b>' + pts([hxIcon(x.harness, 12) + " " + h(hxLabel(x.harness)), h(modelLabel(x.model))]) + pts([h(x.where), money(sp) + " this month"]) + "</span></button>";
   }).join("") + "</div></div>";
-  var st = Ledger.steeringFor(a, LEDGER_F), stTok = st.reduce(function (t, i) { return t + i.tok; }, 0);
+  var st = steeringNext(a), stTok = st.reduce(function (t, i) { return t + i.tok; }, 0);
   var gets = '<div class="gets"><div><span class="k">Steering</span><b>' + plural(st.length, "item") + "</b> <span class=\"muted\">" + num(stTok) + ' tokens</span> <a href="' + href("steering") + '" data-go="steering">Change</a></div>' +
     '<div><span class="k">MCP servers</span><b>' + a.servers.map(function (id) { return serverBy(id).name; }).join(", ") + '</b> <a href="' + href("servers") + '" data-go="servers">Change</a></div>' +
     '<div><span class="k">Runs on</span><b>' + h(a.where) + '</b> <span class="muted mono">' + h(a.host) + "</span></div></div>";
@@ -163,11 +163,14 @@ DIALOGS.send = function (key, d) {
     title: "Send to an agent", wide: true,
     sub: "The agent gets the work item as its first prompt, with the steering and MCP servers you set in one place.",
     body: picker + '<div class="wi-prev">' + wiCell(w) + '<p class="muted">' + h(w.body) + "</p></div>" + agents +
-      '<div class="field"><label for="send-note">Note for the agent</label><textarea id="send-note" rows="2" placeholder="Anything to add to the brief"></textarea></div>' +
-      '<div class="fields"><div class="field"><label for="send-cap">Stop the session at</label><input id="send-cap" value="' + money(a.cap) + '"><div class="hint">The session stops when its cost reaches this.</div></div><div class="field"><label>What it gets</label>' + gets + "</div></div>",
+      '<div class="field"><label for="send-note">Note for the agent</label><textarea id="send-note" rows="2" data-input="send-keep" placeholder="Anything to add to the brief">' + h(d.note || "") + "</textarea></div>" +
+      '<div class="fields"><div class="field"><label for="send-cap">Stop the session at</label><input id="send-cap" data-input="send-keep" value="' + h(d.cap != null ? d.cap : money(a.cap)) + '"><div class="hint">The session stops when its cost reaches this.</div></div><div class="field"><label>What it gets</label>' + gets + "</div></div>",
     foot: '<span class="grow">' + h(a.name) + " starts on " + h(a.host) + ".</span><button class=\"btn\" data-act=\"close\">Cancel</button><button class=\"btn primary\" data-act=\"send-go\" data-key=\"" + h(w.key) + '">' + g("send", 14) + " Send</button>",
   };
 };
+/* What a person typed survives picking another agent or work item. A cap they did not touch
+   follows the agent. */
+ACTS["send-keep"] = function (el) { if (el.id === "send-note") S.dialog.note = el.value; else S.dialog.cap = el.value; };
 ACTS["send-agent"] = function (el) { S.dialog.agent = el.getAttribute("data-agent"); renderLayer(); };
 ACTS["send-item"] = function (el) { S.dialog.arg = el.value; S.dialog.agent = null; renderLayer(); };
 ACTS["send-go"] = function (el) {
@@ -269,7 +272,7 @@ function sessionView(id) {
     '<button class="iconbtn" data-act="rp-prev" aria-label="Previous step">' + g("prev", 14) + "</button>" +
     '<button class="iconbtn play" id="rp-play" data-act="rp-play" aria-label="Play">' + g("play", 16) + "</button>" +
     '<button class="iconbtn" data-act="rp-next" aria-label="Next step">' + g("next", 14) + "</button>" +
-    '<div class="rp-track"><div class="rp-rail"><div class="rp-fill" id="rp-fill"></div>' + markers + '</div><input type="range" id="rp-scrub" min="0" max="' + RP.total.toFixed(2) + '" step="0.05" value="' + RP.vt + '" data-input="rp-scrub" aria-label="Replay position"></div>' +
+    '<div class="rp-track"><div class="rp-rail"><div class="rp-fill" id="rp-fill"></div>' + markers + '</div><input type="range" id="rp-scrub" min="0" max="' + RP.total.toFixed(2) + '" step="any" value="' + RP.vt + '" data-input="rp-scrub" aria-label="Replay position"></div>' +
     '<span class="rp-time"><b id="rp-time" class="num"></b><span class="muted" id="rp-el"></span></span>' +
     '<select class="sel sm" data-change="rp-speed" aria-label="Replay speed">' + [1, 2, 4, 8, 16].map(function (x) { return '<option value="' + x + '"' + (RP.speed === x ? " selected" : "") + ">" + x + "×</option>"; }).join("") + "</select>" +
     (T.harness === "claude-code" || T.harness === "cursor" ? '<button class="btn sm" id="rp-thinking" data-act="rp-think" aria-pressed="' + RP.thinking + '">Thinking</button>' : "") + "</div>";
@@ -301,11 +304,13 @@ function sessionRail(s, T) {
 }
 /* What the session changed, as of replay time vt (null for the whole session). */
 function changesFor(T, vt) {
-  var ev = transcriptEvents(T), files = {}, order = [], out = [], res = {};
-  var seen = function (e) { return vt == null || RP.sid !== T.id || RP.vts[RP.ev.indexOf(e)] <= vt + 1e-6; };
-  ev.forEach(function (e) { if (e.k === "res" && seen(e)) res[e.id] = e; });
-  ev.forEach(function (e) {
-    if (e.k !== "call" || !seen(e)) return;
+  // The replay's own event list when it is on screen, so each event has its clock time by index.
+  // transcriptEvents() builds fresh copies of an answer's events on every call.
+  var live = RP.sid === T.id && RP.ev.length, ev = live ? RP.ev : transcriptEvents(T), files = {}, order = [], out = [], res = {};
+  var seen = function (i) { return vt == null || !live || RP.vts[i] <= vt + 1e-6; };
+  ev.forEach(function (e, i) { if (e.k === "res" && seen(i)) res[e.id] = e; });
+  ev.forEach(function (e, i) {
+    if (e.k !== "call" || !seen(i)) return;
     var t = e.tool;
     if (t.kind === "write" || t.kind === "edit") {
       if (!files[t.path]) { files[t.path] = { add: 0, del: 0, isNew: t.kind === "write" }; order.push(t.path); }
@@ -334,7 +339,7 @@ VIEWS.agents = function () {
   var all = sessions();
   var cards = AGENTS.map(function (a) {
     var ss = all.filter(function (s) { return s.agent === a.key; }), spent = ss.reduce(function (t, s) { return t + s.cost.total; }, 0), last = ss[0];
-    var st = Ledger.steeringFor(a, LEDGER_F);
+    var st = steeringNext(a);
     var live = ss.filter(isLive)[0];
     return '<button class="panel acard" data-act="agent" data-key="' + a.key + '"><div class="acard-h">' + agentAv(a, 36) + '<div class="grow"><b>' + h(a.name) + '</b><span class="sub">' + pts([hxIcon(a.harness, 12) + " " + h(hxLabel(a.harness)), h(modelLabel(a.model))]) + "</span></div>" + (live ? statusBadge(live) : "") + "</div>" +
       '<p class="muted">' + h(a.desc) + "</p>" +
@@ -345,7 +350,7 @@ VIEWS.agents = function () {
 };
 ACTS.agent = function (el) { openDrawer("agent", el.getAttribute("data-key")); };
 DRAWERS.agent = function (key) {
-  var a = agentBy(key), ss = sessions().filter(function (s) { return s.agent === key; }), st = Ledger.steeringFor(a, LEDGER_F);
+  var a = agentBy(key), ss = sessions().filter(function (s) { return s.agent === key; }), st = steeringNext(a);
   var spent = ss.reduce(function (t, s) { return t + s.cost.total; }, 0);
   return { title: a.name,
     head: '<div class="grow row">' + agentAv(a, 34) + '<div><h2>' + h(a.name) + '</h2><span class="muted">' + pts([hxIcon(a.harness, 12) + " " + h(hxLabel(a.harness)) + " " + h(a.harnessV), h(modelLabel(a.model))]) + "</span></div></div>",

@@ -146,13 +146,13 @@ function parseHash() {
 function applyHash() {
   var r = parseHash();
   S.area = r.area; S.id = r.id;
-  if (r.q.by) S.spendBy = r.q.by;
-  if (r.q.tab) S.workTab = r.q.tab;
+  if (r.q.by && ["work", "agent", "person", "model", "server"].indexOf(r.q.by) >= 0) S.spendBy = r.q.by;
+  if (r.q.tab && ["inbox", "running", "review", "done"].indexOf(r.q.tab) >= 0) S.workTab = r.q.tab;
 }
 function href(area, id, query) { return BASE + "/" + area + (id ? "/" + encodeURIComponent(id) : "") + (query ? "?" + query : ""); }
 function go(area, id, query) {
   var target = href(area, id, query);
-  S.area = area; S.id = id || null; S.dialog = null;
+  S.area = area; S.id = id || null; S.dialog = null; S.drawer = null;
   try { if (location.hash !== target) history.pushState(null, "", target); } catch (e) { /* a sandbox that refuses history: keep the state in S */ }
   render();
   try { window.scrollTo(0, 0); } catch (e) { /* no window scroll in some hosts */ }
@@ -221,8 +221,11 @@ function render() {
 
 /* ---- events: one delegated listener for every [data-act] and [data-go] ---- */
 document.addEventListener("click", function (ev) {
-  var goEl = ev.target.closest("[data-go]");
-  if (goEl && !ev.target.closest("[data-act]") && !ev.metaKey && !ev.ctrlKey) {
+  // A link wins unless the click landed on a control inside it (a Send button in a clickable row).
+  // A control around it, such as a drawer's backdrop, does not stop it.
+  var goEl = ev.target.closest("[data-go]"), actEl = ev.target.closest("[data-act]");
+  var inner = actEl && goEl && actEl !== goEl && goEl.contains(actEl);
+  if (goEl && !inner && !ev.metaKey && !ev.ctrlKey) {
     ev.preventDefault();
     var p = goEl.getAttribute("data-go").split("|");
     go(p[0], p[1] || null, p[2] || null);
@@ -247,8 +250,9 @@ document.addEventListener("keydown", function (ev) {
   if (ev.key === "Escape" && (S.dialog || S.drawer)) { closeDialog(); return; }
   if (typeof replayKey === "function") replayKey(ev);
 });
-window.addEventListener("hashchange", function () { applyHash(); render(); });
-window.addEventListener("popstate", function () { applyHash(); render(); });
+function onNavigate() { S.dialog = null; S.drawer = null; applyHash(); render(); }
+window.addEventListener("hashchange", onNavigate);
+window.addEventListener("popstate", onNavigate);
 
 /* Copy buttons: the clipboard can refuse, so the fallback selects the text. */
 ACTS.copy = function (el) {

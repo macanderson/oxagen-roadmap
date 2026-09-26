@@ -40,7 +40,7 @@ function rpBlocks(vt) {
     else if (e.k === "think") b = { type: "think", e: e };
     else if (e.k === "say") b = { type: "say", e: e };
     else if (e.k === "call") { b = { type: "call", e: e, res: null }; calls[e.id] = b; }
-    else if (e.k === "res") { if (calls[e.id]) { calls[e.id].res = e; calls[e.id].resI = i; } continue; }
+    else if (e.k === "res") { if (calls[e.id]) { calls[e.id].res = e; calls[e.id].resI = i; if (RP.gaps[i]) calls[e.id].took = RP.gaps[i]; } continue; }
     else if (e.k === "ask") { if (calls[e.id]) calls[e.id].asking = e; b = { type: "ask", e: e, call: calls[e.id] }; }
     else if (e.k === "answer") { if (calls[e.id]) { calls[e.id].asking = null; calls[e.id].answer = e; } out = out.filter(function (x) { return !(x.type === "ask" && x.e.id === e.id); }); b = { type: "answered", e: e, call: calls[e.id] }; }
     else if (e.k === "end") b = { type: "end", e: e };
@@ -50,8 +50,9 @@ function rpBlocks(vt) {
     if (RP.gaps[i]) b.gap = RP.gaps[i];
     out.push(b);
   }
-  // A say block is typed out as it arrives.
-  out.forEach(function (b) { if (b.type === "say") b.shown = vt >= RP.total - 1e-6 ? b.e.text.length : Math.min(b.e.text.length, Math.floor((vt - b.vt) * 160)); });
+  // A reply types out while the replay plays. Stopped, or at the end, it shows in full, so a step
+  // or a seek never lands on a blank reply.
+  out.forEach(function (b) { if (b.type === "say") b.shown = !RP.playing || vt >= RP.total - 1e-6 ? b.e.text.length : Math.min(b.e.text.length, Math.floor((vt - b.vt) * 160)); });
   // The final answer of a finished session: Codex prints its "Worked for" rule above it.
   for (i = out.length - 1; i >= 0; i--) { if (out[i].type === "end") { for (var j = i - 1; j >= 0; j--) if (out[j].type === "say") { out[j].final = true; out[j].worked = out[i].e.worked; break; } break; } }
   return out;
@@ -350,6 +351,7 @@ var SKINS = { "claude-code": CC, "codex-cli": CX, cursor: CU, stella: ST };
 function marginFor(b) {
   var bits = [];
   if (b.gap) bits.push('<span class="mg-gap">Waited ' + dur(b.gap) + "</span>");
+  if (b.took) bits.push('<span class="mg-gap">Took ' + dur(b.took) + "</span>");
   if (b.req) {
     var q = RP.led.reqs.filter(function (x) { return x.n === b.req.n; })[0];
     if (q) {
@@ -368,7 +370,11 @@ function marginFor(b) {
     if (b.answer) bits.push('<span class="mg-note ' + (b.answer.verdict === "approve" ? "ok" : "bad") + '">' + (b.answer.verdict === "approve" ? "Approved" : "Denied") + " by " + h(personName(b.answer.by)) + " in oxagen</span>");
   }
   if (b.type === "call" && b.e.tool.kind === "skill") bits.push('<span class="mg-note">Skill from steering</span>');
-  if (b.type === "ask") {
+  if (b.type === "ask" && S.answered[RP.T.id]) {
+    // Replayed after the answer: the question was on screen then, and the margin says how it went.
+    var ans = S.answered[RP.T.id];
+    bits.push('<span class="mg-note ' + (ans.verdict === "approve" ? "ok" : "bad") + '">' + (ans.verdict === "approve" ? "Approved" : "Denied") + " by " + h(personName(ME)) + " in oxagen, " + dur(ans.t - b.e.t) + " later</span>");
+  } else if (b.type === "ask") {
     var who = PEOPLE[ME].name;
     bits.push('<div class="mg-ask"><b>Waiting on you</b><span>oxagen asks a person before ' + h(b.call.e.tool.server) + " " + h(b.call.e.tool.name) + ". Your answer goes to the terminal.</span>" +
       '<div class="row"><button class="btn sm primary" data-act="rp-approve">' + g("check", 13) + ' Approve</button><button class="btn sm" data-act="rp-deny">Deny</button></div><span class="mg-who">Answering as ' + h(who) + "</span></div>");
@@ -473,7 +479,7 @@ ACTS["rp-restart"] = function () { RP.vt = 0; rpPlay(); };
 ACTS["rp-prev"] = function () { rpStep(-1); };
 ACTS["rp-next"] = function () { rpStep(1); };
 ACTS["rp-speed"] = function (el) { RP.speed = +el.value; };
-ACTS["rp-scrub"] = function (el) { rpStop(); rpSeek(+el.value); };
+ACTS["rp-scrub"] = function (el) { var v = +el.value; rpStop(); rpSeek(v >= +el.max - 0.05 ? RP.total : v); };
 ACTS["rp-think"] = function () { RP.thinking = !RP.thinking; var t = document.getElementById("rp-thinking"); if (t) t.setAttribute("aria-pressed", RP.thinking); rpDraw(true); };
 ACTS["rp-open"] = function (el) { var i = +el.getAttribute("data-i"); RP.open[i] = !RP.open[i]; rpDraw(true); };
 ACTS["rp-seek-req"] = function (el) { var n = +el.getAttribute("data-n"); rpStop(); rpSeek(RP.reqVt[n] + 0.8); };
@@ -482,6 +488,7 @@ ACTS["rp-approve"] = function () { rpAnswer("approve"); };
 ACTS["rp-deny"] = function () { rpAnswer("deny"); };
 function rpAnswer(verdict) {
   var T = RP.T, ask = T.events.filter(function (e) { return e.k === "ask"; })[0];
+  if (!ask || S.answered[T.id]) return;
   S.answered[T.id] = { verdict: verdict, t: Math.max(ask.t + 1, (NOW - dt(T.started)) / 1000) };
   _sessions = null;
   var at = RP.total;
@@ -492,7 +499,7 @@ function rpAnswer(verdict) {
   toast(verdict === "approve" ? "Approved. Claude Code is creating the draft release." : "Denied. Claude Code got your answer and stopped.", verdict === "approve" ? null : "warn");
 }
 function replayKey(ev) {
-  if (S.area !== "sessions" || !S.id || S.dialog || S.drawer || !RP.T) return;
+  if (S.area !== "sessions" || !S.id || S.dialog || S.drawer || !RP.T || RP.sid !== S.id) return;
   var tag = (ev.target && ev.target.tagName) || "";
   if (/INPUT|TEXTAREA|SELECT|BUTTON/.test(tag) && ev.key === " ") return;
   if (/INPUT|TEXTAREA/.test(tag)) return;

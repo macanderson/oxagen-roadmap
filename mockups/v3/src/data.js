@@ -183,11 +183,13 @@ function serverStats(id) {
   unused = unused.filter(function (t) { return !perTool[t.n]; });
   var unusedTok = unused.reduce(function (a, t) { return a + t.tok; }, 0);
   // Turning an unused tool off takes its definition out of every request of every session that
-  // carries this server, which it re-reads at the cache-read price.
+  // carries this server. The ledger writes it once, on the first request, at the cache-write price,
+  // and every later request re-reads it at the cache-read price.
   all.forEach(function (s) {
     if (!s.flows["mcp:" + id]) return;
+    var p = priceOf(s.model);
     reqs += s.req;
-    save += unusedTok * s.req * priceOf(s.model).cr / 1e6;
+    save += unusedTok * (p.cw + (s.req - 1) * p.cr) / 1e6;
   });
   var defTok = sv.tools.reduce(function (a, t) { return a + (toolMode(id, t) === "off" ? 0 : t.tok); }, 0);
   return { cost: cost, calls: calls, perTool: perTool, unused: unused, unusedTok: unusedTok, save: save, defTok: defTok, reqs: reqs };
@@ -201,6 +203,8 @@ function steeringItems() {
 }
 function steeringStats(item) {
   var all = sessions(), cost = 0, n = 0;
+  // An item added on this page reaches the next session. No recorded session carried it.
+  if (item.fresh) return { cost: 0, sessions: 0 };
   all.forEach(function (s) {
     var a = agentBy(s.agent);
     if (item.kind === "skill") {
@@ -214,6 +218,11 @@ function steeringStats(item) {
     n++;
   });
   return { cost: cost, sessions: n };
+}
+/* The steering an agent's next session starts with: what its recorded sessions got, plus any item
+   added on this page. Pricing uses Ledger.steeringFor alone, because no recorded session had the rest. */
+function steeringNext(agent) {
+  return Ledger.steeringFor(agent, LEDGER_F).concat(steeringItems().filter(function (i) { return i.fresh && (i.agents === "all" || i.agents.indexOf(agent.key) >= 0); }));
 }
 function suggestionFixup(sug) {
   // What the lint fix-up cost in the session that prompted the suggestion: the requests it names.
