@@ -389,6 +389,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
         <li>Oxagen marks the pull requests it played a part in with a badge from the brand kit. (Mac, 2026-09-26)</li>
         <li>A subagent's skill limit holds only on a harness that says which skill made each tool call. Elsewhere the call gets the main agent's rules, and the Skills screen warns per harness. (Mac, 2026-09-26)</li>
         <li>Function tools run in a sandbox in Oxagen's cloud, and TypeScript is the first language they support. Code on a customer's own infrastructure is a REST endpoint connected as a server, through the relay when it is private. (Mac, 2026-09-26)</li>
+        <li>The Oxagen app posts the code repository check, and no workflow file is committed to the code repository. (Mac, 2026-09-26)</li>
         <li>The code repository check warns by default. <code>[code_checks] block_merge</code> in <code>workspace.toml</code>, off by default, makes a finding fail the check. (Mac, 2026-09-26)</li>
         <li>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first and creates the workspace with its repository in one automated flow. The 14-day grace period of ADR-065 goes. (Mac, 2026-09-26)</li>
         <li>The repository name <code>oxagen-&lt;workspace&gt;</code>. (Mac, 2026-09-26)</li>
@@ -1083,7 +1084,7 @@ block_merge = false                           # true: a finding fails the Oxagen
 <section id="repo-checks">
   <span class="eyebrow">Code repositories</span>
   <h2>Code repository checks</h2>
-  <p>Linked code repositories hold no committed Oxagen files, so Oxagen checks them from outside. The Oxagen app already has pull request and check permissions there. It posts a check named <code>Oxagen</code> on every pull request, through the Checks API on GitHub and a commit status on GitLab. <span class="st p">Proposed</span></p>
+  <p>Linked code repositories hold no committed Oxagen files, so Oxagen checks them from outside. The Oxagen app already has pull request and check permissions there. It posts a check named <code>Oxagen</code> on every pull request, through the Checks API on GitHub and a commit status on GitLab. No workflow file is committed to the code repository. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
   <div class="tscroll"><table>
     <thead><tr><th>Check</th><th>What it does</th></tr></thead>
     <tbody>
@@ -1544,7 +1545,6 @@ billing__call {"tool": "create_refund", "arguments": {"charge": "ch_3Q", "amount
   <h2>Open questions</h2>
   <ol>
     <li>How Oxagen Steering reaches a steering repo it creates: an organization owner's user token that adds each new repository to the installation (recommended), or an installation on all repositories. See Provisioning.</li>
-    <li>Checks on linked code repositories: posted by the Oxagen app with no committed files (recommended), or a CI workflow committed to each repository, which reverses the decision that code repositories hold no committed Oxagen files.</li>
   </ol>
 </section>
 
