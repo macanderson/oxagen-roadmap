@@ -60,6 +60,7 @@ Sending a work item to an agent opens its new session, which starts replaying at
 - **Steering PRs.** Each page shows the checks inside `Oxagen steering`, review by governance mode, the merge queue, and Revert on a merged one. #58 carries the budget check with per-record token counts, over oxagen's default of 4,000 tokens, which only warns.
 - **The memory PR.** #59 lists each memory with the sessions it came from. Drop takes one out.
 - **Linking a repository** opens a steering PR on `workspace.toml`.
+- **Import.** Import steering and Import MCP servers each open one steering PR and apply nothing until it merges. In the first run the new workspace is in solo mode, as its first commit writes it, so Merge merges the import PR with no approval step.
 
 ## MCP Studio
 
