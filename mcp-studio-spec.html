@@ -247,7 +247,8 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
         <li>Oxagen bills governed actions only. (Mac, 2026-09-25)</li>
         <li>Every use of Oxagen to steer, govern, or provide a tool is a governed action. That includes each tool call, each search and describe call in search mode, and each Try it call. (Mac, 2026-09-26)</li>
         <li>OpenAPI, GraphQL, and gRPC definitions are all sources on day 1. (Mac, 2026-09-26)</li>
-        <li>Search mode ranks tools with embeddings made on Oxagen's own Voyage AI key, held in AWS. Oxagen absorbs the cost. (Mac, 2026-09-26)</li>
+        <li>Search mode ranks tools with embeddings. By default Oxagen embeds with Voyage AI's <code>voyage-3-large</code> on its own shared key, held in AWS, and absorbs the cost. A workspace can set its own embedding URL, model, and key. (Mac, 2026-09-26)</li>
+        <li>The off switch acts at once with no pull request. (Mac, 2026-09-26)</li>
         <li>Private networks are reached through the relay on day 1. The relay acts only on envelopes the cloud gateway signed, and it ships as a container image and a Helm chart. (Mac, 2026-09-26)</li>
         <li>A customer that keeps its own credential in the relay needs the Enterprise plan, and the website advertises it that way. (Mac, 2026-09-26)</li>
         <li>Drafting a description with the in-app agent bills as in-app agent spend on the Billing page. (Mac, 2026-09-26)</li>
@@ -590,7 +591,7 @@ unless { context.approval.granted };</code></pre></figure>
       <tr><td>Removed</td><td class="wrap">Gone from <code>tools.toml</code>, rows kept for replay</td><td>No</td><td class="wrap">A steering PR</td></tr>
     </tbody>
   </table></div>
-  <p>The off switch is the one change that skips review. A kill switch cannot wait for a reviewer, and Oxagen holds the keys, so turning a server or a tool off takes effect on the next call. The app shows who turned it off and when, and turning it back on is also instant. <span class="st p">Proposed</span></p>
+  <p>The off switch is the one change that skips review. A kill switch cannot wait for a reviewer, and Oxagen holds the keys, so turning a server or a tool off takes effect on the next call. The app shows who turned it off and when, and turning it back on is also instant. <span class="st d">Decided</span></p>
 </section>
 
 <section id="sources">
@@ -723,8 +724,21 @@ unless { context.approval.granted };</code></pre></figure>
     <li><strong>Policy sees the real tool.</strong> The gateway decides <code>billing__call</code> with <code>tool: "create_refund"</code> as <code>billing__create_refund</code>. Cedar rules, toolbelt grants, classification, approvals, and spend attribution work the same in both modes.</li>
     <li><strong>Search shows only what the agent may call.</strong> Visibility is permission, so a search never returns a tool outside the agent's toolbelt.</li>
     <li><strong>The tool list never changes mid-session.</strong> A fixed list keeps the provider's prompt cache warm. Tool lists that grow during a session break the cache and depend on each harness handling list changes.</li>
-    <li><strong>Ranking.</strong> <code>search</code> ranks with embeddings of each tool's one-line entry, made on Oxagen's Voyage AI key (Mac, 2026-09-26). Publish embeds only entries whose content hash changed, through a queue that batches them, so one large import cannot use up the key's shared rate limit.</li>
+    <li><strong>Ranking.</strong> <code>search</code> ranks with embeddings of each tool's one-line entry. By default Oxagen embeds with Voyage AI's <code>voyage-3-large</code> on its own shared key and absorbs the cost. A workspace can set its own embedding endpoint, model, and key. <span class="st d">Decided</span></li>
+    <li><strong>Only changes are embedded.</strong> Publish embeds entries whose content hash changed, through a queue that batches them, so one large import cannot use up a shared rate limit. When the endpoint fails, search falls back to keyword matching.</li>
     <li><strong>Studio recommends a mode.</strong> When the imported definitions pass <code>definition_budget</code>, Studio suggests <code>search</code>. The names <code>search</code>, <code>describe</code>, and <code>call</code> are reserved in a server that uses it.</li>
+  </ul>
+  <h3>Embedding endpoint</h3>
+  <p>A workspace that sets nothing uses Oxagen's default. One that sets <code>[embeddings]</code> in <code>workspace.toml</code> uses its own endpoint, model, and key, by steering PR like any configuration.</p>
+  <figure class="code"><figcaption><span class="path">workspace.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">[embeddings]
+url = "https://embeddings.a-intel.com/v1/embeddings"
+model = "bge-large-en-v1.5"
+credential = "oxagen:credential/embeddings"</code></pre></figure>
+  <ul>
+    <li><strong>Request shape.</strong> The endpoint takes the request Voyage's API takes, <code>model</code> and <code>input</code>, and answers with <code>data[].embedding</code>. OpenAI-compatible servers take the same shape. <span class="st p">Proposed</span></li>
+    <li><strong>The key.</strong> It lives in Oxagen's vault like any credential, and never in the repository.</li>
+    <li><strong>A change re-embeds.</strong> Changing the model or the endpoint re-embeds every search entry in the workspace, because vectors from different models cannot be compared.</li>
+    <li><strong>Cost.</strong> A workspace with its own endpoint pays for its own embeddings.</li>
   </ul>
 </section>
 
@@ -871,8 +885,8 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
   <span class="eyebrow">Spend</span>
   <h2>Spend</h2>
   <p>The spend ledger charges each server for what it adds to a request: its tool definitions on every request that carries them, and its results on the requests that follow a call. Studio shows the definition cost before the steering PR opens and each tool's average result size from real calls after. A server whose tools are imported and never called shows that cost plainly. <span class="st p">Proposed</span></p>
-  <p>Every use of Oxagen to steer, govern, or provide a tool is a governed action. Each tool call, each search and describe call in search mode, and each Try it call is metered as one. <span class="st d">Decided</span></p>
-  <p>Embedding search entries costs Oxagen the Voyage AI price of the changed entries on each publish. A full embed of a 1,500-tool server is under 500,000 tokens, which is cents at Voyage's list prices, and a search query is about 20 tokens. Oxagen absorbs it. The cost falls on publish and the revenue on calls, so a server that is published and rarely called costs a little and earns little.</p>
+  <p>Every use of Oxagen to steer, govern, or provide a tool is a governed action. Each tool call, each search and describe call in search mode, and each Try it call is metered as one. <span class="st d">Decided</span> The rule covers every call Oxagen gates, so a call that policy denies or parks for approval counts too.</p>
+  <p>With the default endpoint, embedding search entries costs Oxagen the Voyage AI price of the changed entries on each publish. A full embed of a 1,500-tool server is under 500,000 tokens, which is cents at Voyage's list prices, and a search query is about 20 tokens. Oxagen absorbs it. The cost falls on publish and the revenue on calls, so a server that is published and rarely called costs a little and earns little.</p>
 </section>
 
 <section id="screens">
@@ -947,15 +961,18 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
   <span class="eyebrow">Open questions</span>
   <h2>Open questions</h2>
   <ol>
-    <li>The off switch acting at once with no pull request (proposed here), or through an expedited steering PR.</li>
     <li><strong>Default environment.</strong> A server can list more than one environment. The billing example has <code>sandbox</code> and <code>production</code>, and the gateway has to pick one for each call. Two parts need an answer:
       <ul>
         <li>The default when nobody chooses. <code>sandbox</code> is safe but does nothing real until someone switches it. <code>production</code> is useful at once, but a new agent can move real money on its first run.</li>
         <li>Where the choice is set: on the agent, so all its calls to a server use one environment, or on each tool, so one agent could read production and still refund in sandbox.</li>
       </ul>
       Proposed: an agent uses the first environment listed, and Studio lists the sandbox or test environment first. The choice is set per agent in <code>agents/&lt;slug&gt;.toml</code>, so production is an explicit choice reviewed in a steering PR.</li>
-    <li>gRPC streaming on day 1: unary methods only, or server streaming too, collected up to <code>max_items</code> (proposed here). Client and bidirectional streams stay out either way.</li>
-    <li>A keyword search fallback for workspaces that do not accept Voyage AI as a subprocessor, since the embeddings send tool descriptions to Voyage.</li>
+    <li><strong>gRPC scope on day 1.</strong> Two scopes, and client and bidirectional streams stay out of both:
+      <ul>
+        <li>Unary methods only. M3 imports them, M7 is a dynamic client for unary calls, and M12 carries HTTP/2.</li>
+        <li>Unary and server-streaming methods (proposed here). M7 also collects a stream up to <code>max_items</code> and then cancels it, and M12 carries streamed responses. Both lanes grow.</li>
+      </ul></li>
+    <li><strong>Default embedding model.</strong> <code>voyage-3-large</code>, as written here, or <code>voyage-4-large</code>, which Voyage released in January 2026. Either change re-embeds every workspace on the default.</li>
     <li><code>consequence_tags</code> in the agent policy spec's <code>Tool</code> type, and whether its <code>financial_class</code> becomes a field or stays the <code>moves_money</code> tag.</li>
     <li>Local servers: which machines may run one, and whether the local gateway waits for the cloud gateway's decision on every call.</li>
   </ol>
@@ -1941,11 +1958,14 @@ Do
 3. Search mode: search returns only tools in the toolbelt, describe returns
    one input schema, and call is decided as the underlying tool.
 4. The search index: on publish, embed each changed one-line entry, keyed by
-   content hash, through a queue that batches calls. Use Oxagen's Voyage AI
-   key, which is stored in AWS: find how the API reads its other AWS-held
-   secrets and read it the same way. Never log it. Pick the Voyage model and
-   record why in the PR body.
-5. Meter every call, search, and describe as a governed action.
+   content hash and model, through a queue that batches calls. Use the
+   workspace's [embeddings] url, model, and credential when workspace.toml
+   sets them. Otherwise use Voyage AI's voyage-3-large on Oxagen's key, which
+   is stored in AWS: find how the API reads its other AWS-held secrets and
+   read it the same way. Never log a key. Re-embed a workspace when its model
+   or endpoint changes. Fall back to keyword ranking when the endpoint fails.
+5. Meter as a governed action every call, search, describe, and Try it call,
+   including calls that policy denies or parks.
 
 Done when
 - Tests cover listing, a call from each source in each mode, the off switch,

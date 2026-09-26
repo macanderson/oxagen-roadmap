@@ -333,7 +333,7 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
     <tbody>
       <tr><td><code>AGENTS.md</code> <code>CLAUDE.md</code></td><td>How to write a record in this repo, for an agent that opens it</td><td>Markdown</td><td>Oxagen</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>README.md</code></td><td>What the repo is, who reviews it, and the settings Oxagen holds</td><td>Markdown</td><td>Oxagen</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>workspace.toml</code></td><td>Linked code repositories and the workspace budget</td><td>TOML</td><td>People, by steering PR</td><td><span class="st c">Today</span> written by the init PR and displayed, reconciled by nothing</td></tr>
+      <tr><td><code>workspace.toml</code></td><td>Linked code repositories, the workspace budget, and an optional embedding endpoint</td><td>TOML</td><td>People, by steering PR</td><td><span class="st c">Today</span> written by the init PR and displayed, reconciled by nothing</td></tr>
       <tr><td><code>steering/</code></td><td>Steering records and skills</td><td>Markdown with YAML frontmatter</td><td>People, agents, the curator</td><td><span class="st p">Proposed</span> in v1</td></tr>
       <tr><td><code>steering/governance.toml</code></td><td>Governance mode, reviewer groups, memory settings</td><td>TOML</td><td>People</td><td><span class="st c">Today</span> at <code>.oxagen/rules/governance.toml</code></td></tr>
       <tr><td><code>steering/promotions/</code></td><td>The hash-chained ledger of merged records</td><td>JSON Lines</td><td>Oxagen</td><td><span class="st p">Proposed</span> one file a month</td></tr>
@@ -578,7 +578,12 @@ url = "github.com/a-intel/platform"
 url = "github.com/a-intel/billing-service"
 
 [budget]
-per_month_micros = 12000000000                # $12,000.00</code></pre></figure>
+per_month_micros = 12000000000                # $12,000.00
+
+# [embeddings]                                # optional, see MCP Studio
+# url = "https://embeddings.a-intel.com/v1/embeddings"
+# model = "bge-large-en-v1.5"
+# credential = "oxagen:credential/embeddings"</code></pre></figure>
 </section>
 
 <section id="provisioning">
@@ -1071,7 +1076,8 @@ Do
    an import from it. Leave steering-freshness/src/settings.ts:35 and
    mcp-config/src/resolve.ts:46 alone: they name the machine-local folder in a
    code checkout.
-2. Zod schemas and TypeScript types for workspace/v1, governance/v1,
+2. Zod schemas and TypeScript types for workspace/v1 (with the optional
+   [embeddings] table MCP Studio specifies), governance/v1,
    agent-definition/v1 (v0.1's fields plus skills),
    reflection/v1, promotion/v1, bundle/v1, repo health, and the three new
    steering-record/v1 fields (repos, tools, description on every kind).
