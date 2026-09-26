@@ -591,7 +591,7 @@ You own
   context.steering.policy.ts:7, oxagen/src/contracts/context.governance_mode.set.ts:68,
   handlers/src/repository.tree.get.ts:39-40, repository.init_pr.open.ts:55-61,
   context.steering.published.get.ts:45, skill-config.service.ts:8,
-  oxagen/src/contracts/agent.definition.commit.ts:29, contracts/skill.propose.ts:26,28,
+  contracts/skill.propose.ts:26,28,
   oxagen/src/skills.ts:26, apps/cli/src/commands/pull.ts:113-114,
   apps/app/src/data/live/mappers/steering.ts:250
 - One new migration under packages/database/atlas/migrations/
@@ -604,7 +604,6 @@ Do
    code checkout.
 2. Zod schemas and TypeScript types for workspace/v1 (with the optional
    [embeddings] table MCP Studio specifies), governance/v1,
-   agent-definition/v1 (v0.1&#x27;s fields plus skills and environments),
    reflection/v1, promotion/v1, bundle/v1, repo health, and the three new
    steering-record/v1 fields (repos, tools, description on every kind).
 3. A generator that writes each schema as JSON Schema to
@@ -963,7 +962,7 @@ You own
 Do
 1. Move today&#x27;s six checks into packages/steering-check unchanged in effect.
 2. Add settings (reads S2&#x27;s health), references, budget, compile, and owned.
-3. budget: count tokens for each changed record, then for each agent and
+3. budget: count tokens for each changed record, then for each code
    repository the change reaches, compare the always-on total before and
    after with the budget. The budget is steering.always_on_tokens in the
    PR&#x27;s own governance.toml, so a PR that changes the budget is measured
@@ -1029,7 +1028,7 @@ You own
 
 Do
 1. publish(repo, sha): build the bundle incrementally by blob SHA: the record
-   index with token counts, the always-on block per agent, the Cedar policy
+   index with token counts, the always-on block per code repository, the Cedar policy
    set when policy/ exists, and the tool manifest from servers/ (MCP Studio&#x27;s
    compile(), lane M4. Until it merges, skip servers with a warning.). Then call
    MCP Studio&#x27;s project() (lane M13) so the tool registry follows the merge.
@@ -2205,8 +2204,13 @@ Do
    .oxagen/ content in the new layout, converting v0.1 TOML records to v1
    Markdown. Then open one pull request on the old repository that removes the
    committed .oxagen/ files, and relink it as linked.
-2. Stella reads steering/ from the steering repo root.
-3. Rewrite the docs for the steering repo, and say main repository nowhere.
+2. Agent definitions leave the repository. Move each field of
+   .oxagen/agents/&lt;slug&gt;.toml where the steering spec&#x27;s Agents table says,
+   and stop commit_agent_definition (agent.definition.commit.ts) writing a
+   file. An agent is an operator, a runtime, and a harness registered in
+   Oxagen, and subagent-style agents become skills.
+3. Stella reads steering/ from the steering repo root.
+4. Rewrite the docs for the steering repo, and say main repository nowhere.
 
 Done when
 - The importer&#x27;s tests convert S0&#x27;s v0.1 fixtures and match the v1 fixtures.
@@ -2240,7 +2244,8 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article><article class="pcard" data-wave="w2" id="prompt-m15"><div class="pcard-head"><span class="lane-id">M15</span><span class="pcard-title">Serving and search mode</span><button type="button" class="cp" aria-label="Copy the M15 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane M15. Serve every server&#x27;s tools to wrapped agents, and the search index
 
 Goal
-An agent&#x27;s MCP connection lists its toolbelt&#x27;s tools from the published bundle,
+A run&#x27;s MCP connection lists its toolbelt, the imported tools policy allows it,
+from the published bundle,
 for every source, and calls them through the executor with policy decided on
 the real tool in both exposure modes. Search mode ranks with embeddings.
 
@@ -2256,7 +2261,8 @@ You own
 - packages/mcp-studio/src/search/ (new)
 
 Do
-1. tools/list: the agent&#x27;s toolbelt intersected with the published manifests,
+1. tools/list: the published manifests&#x27; imported tools, narrowed by policy and
+   by Send To for the run,
    minus tools that are off or withheld, in a stable order, so the list is
    identical across requests of one published version. Annotations come from
    the classification.

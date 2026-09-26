@@ -320,7 +320,7 @@ body{padding-inline:0}
   <p>Steering records v1 stands: one Markdown file per record, YAML frontmatter, the kinds, the forces, the two-pass hash, and the six checks. What changes is the repository around the records.</p>
   <ul>
     <li><span class="st d">Decided</span> <strong>Oxagen creates the repository.</strong> Every new workspace gets a private repository in the organization's GitHub organization or GitLab group. Customers no longer choose which repository holds steering.</li>
-    <li><span class="st d">Decided</span> <strong>The root is the old <code>.oxagen/</code>.</strong> <code>steering/</code>, <code>agents/</code>, and <code>workspace.toml</code> sit at the top of the repository.</li>
+    <li><span class="st d">Decided</span> <strong>The root is the old <code>.oxagen/</code>.</strong> <code>steering/</code>, <code>servers/</code>, and <code>workspace.toml</code> sit at the top of the repository.</li>
     <li><span class="st d">Decided</span> <strong>Runs follow the agent's workspace.</strong> The workspace an agent is bound to supplies the steering, rules, and tools for its runs.</li>
     <li><span class="st d">Decided</span> <strong>A code repository can belong to many workspaces.</strong></li>
     <li><span class="st d">Decided</span> <strong>Oxagen holds the settings.</strong> Oxagen sets the branch and merge rules so it can always merge from the web app. When someone changes them, every pull request fails at once and Oxagen warns the workspace.</li>
@@ -356,6 +356,7 @@ body{padding-inline:0}
         <li>Oxagen supports each first-class harness (Claude Code, Cursor, Codex, and stella) as fully as that harness allows. (Mac, 2026-09-26)</li>
         <li>Cursor gets steering through Oxagen's MCP server, plus one rule in Cursor's dashboard that tells it to read steering there. (Mac, 2026-09-26)</li>
         <li>A run on a code repository not linked to its agent's workspace is allowed, charged to that workspace, and flagged in the run record. (Mac, 2026-09-26)</li>
+        <li>There is no <code>agents/</code> folder. An agent is an operator, a runtime, and a harness, registered in Oxagen. What Claude Code calls an agent is a skill. (Mac, 2026-09-26)</li>
         <li>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first and creates the workspace with its repository in one automated flow. The 14-day grace period of ADR-065 goes. (Mac, 2026-09-26)</li>
         <li>The repository name <code>oxagen-&lt;workspace&gt;</code>. (Mac, 2026-09-26)</li>
         <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>. (Mac, 2026-09-26)</li>
@@ -422,8 +423,6 @@ body{padding-inline:0}
 │   └── memory/                                promoted memories, from the curator
 │       └── platform/
 │           └── a-intel.platform.ci-cache-key.md
-├── agents/
-│   └── release-manager.toml
 ├── servers/                                   one folder per MCP server
 │   ├── stripe/                                connected by URL
 │   │   ├── server.toml
@@ -450,8 +449,7 @@ body{padding-inline:0}
       <tr><td><code>steering/governance.toml</code></td><td>Governance mode, reviewer groups, memory settings</td><td>TOML</td><td>People</td><td><span class="st c">Today</span> at <code>.oxagen/rules/governance.toml</code></td></tr>
       <tr><td><code>steering/promotions/</code></td><td>The hash-chained ledger of merged records</td><td>JSON Lines</td><td>Oxagen</td><td><span class="st p">Proposed</span> one file a month</td></tr>
       <tr><td><code>steering/memory/</code></td><td>Memories a memory PR promoted</td><td>Markdown with YAML frontmatter</td><td>The curator</td><td><span class="st d">Decided</span></td></tr>
-      <tr><td><code>agents/</code></td><td>Agent definitions</td><td>TOML</td><td>People, by steering PR</td><td><span class="st c">Today</span> <code>agent-definition/v0.1</code></td></tr>
-      <tr><td><code>servers/</code></td><td class="wrap">Every MCP server agents reach, connected or built from a definition, with its imported tools and their risk classification</td><td>TOML, a JSON lock, the vendored definition</td><td>MCP Studio and people, by steering PR</td><td><span class="st d">Decided</span></td></tr>
+            <tr><td><code>servers/</code></td><td class="wrap">Every MCP server agents reach, connected or built from a definition, with its imported tools and their risk classification</td><td>TOML, a JSON lock, the vendored definition</td><td>MCP Studio and people, by steering PR</td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>policy/</code></td><td>Cedar policies and their tests</td><td>Cedar, JSON Lines</td><td>People</td><td><span class="st d">Decided</span></td></tr>
     </tbody>
   </table></div>
@@ -489,7 +487,7 @@ body{padding-inline:0}
     <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Rule</th></tr></thead>
     <tbody>
       <tr><td><code>repos</code></td><td>list</td><td>when <code>scope</code> is <code>repository</code></td><td class="wrap">Code repositories as <code>&lt;host&gt;/&lt;owner&gt;/&lt;name&gt;</code>, such as <code>github.com/a-intel/platform</code>. The record reaches a run only when its working repository is on the list. This replaces v1's rule that repository records live in the code repository.</td></tr>
-      <tr><td><code>tools</code></td><td>list</td><td>no</td><td class="wrap">Tool names such as <code>billing__create_refund</code>, or a server prefix such as <code>billing__*</code>. The record reaches a request only when the agent's toolbelt holds a match.</td></tr>
+      <tr><td><code>tools</code></td><td>list</td><td>no</td><td class="wrap">Tool names such as <code>billing__create_refund</code>, or a server prefix such as <code>billing__*</code>. The record reaches a request only when the run's toolbelt holds a match.</td></tr>
       <tr><td><code>description</code></td><td>string</td><td>skills</td><td class="wrap">Allowed on every kind. One sentence, at most 200 characters, or 1,024 for a skill. It becomes the record's line in the index an agent reads before it asks for a body.</td></tr>
     </tbody>
   </table></div>
@@ -543,8 +541,9 @@ into smaller refunds to stay under the limit.</code></pre></figure>
       <tr><td>MCP servers</td><td><code>servers/&lt;name&gt;/</code></td><td><code>mcp-server/v1</code>, <code>mcp-tools/v1</code>, and a lock</td><td>Imported tool definitions through the cloud gateway</td></tr>
       <tr><td>Tool risk categories</td><td><code>servers/&lt;name&gt;/tools.toml</code></td><td>Today's classification: risk, side effect, egress, impacts</td><td>Cedar policies read it, and the agent sees annotations derived from it</td></tr>
       <tr><td>APIs as MCP servers</td><td><code>servers/&lt;name&gt;/</code> with an OpenAPI, GraphQL, or gRPC source</td><td>The same files plus the definition</td><td>Imported tool definitions through the cloud gateway</td></tr>
-      <tr><td>Toolbelts</td><td><code>agents/&lt;slug&gt;.toml</code></td><td>The <code>tools</code> list</td><td>Only listed tools are visible to the agent</td></tr>
-      <tr><td>Agent identities</td><td><code>agents/&lt;slug&gt;.toml</code>, with keys and enrollment in Oxagen</td><td>TOML</td><td>Not delivered</td></tr>
+      <tr><td>Toolbelts</td><td><code>servers/&lt;name&gt;/tools.toml</code>, narrowed by <code>policy/</code></td><td>Imported tools</td><td>A run sees the imported tools that policy allows it</td></tr>
+      <tr><td>Agents</td><td>Oxagen: an operator, a runtime, and a harness, registered at enrollment</td><td>Nothing in the repository</td><td>Not delivered</td></tr>
+      <tr><td>Subagent instructions</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td><code>skill</code></td><td>The index line on every request, the body on demand</td></tr>
     </tbody>
   </table></div>
 
@@ -637,35 +636,26 @@ impacts = ["moves_money"]</code></pre></figure>
 <section id="agents">
   <span class="eyebrow">Agents</span>
   <h2>Agents</h2>
-  <p>Today an agent definition is <code>.oxagen/agents/&lt;slug&gt;.toml</code> (<code>agent-definition/v0.1</code>), parsed by <code>packages/oxagen/src/agent-definition-source.ts</code> and cached on <code>agent.agent_versions</code> (ADR-057). It moves to <code>agents/&lt;slug&gt;.toml</code> with its fields unchanged. <span class="st c">Today</span></p>
-  <p>A definition in a workspace's steering repo binds that agent to the workspace, which is the binding that decides a run's steering. Enrollment attaches a runtime and its operator to the agent in Oxagen. Keys, runtimes, and operators never enter the repository. Every merged edit is a new, immutable agent version, and a session binds to one. <span class="st p">Proposed</span></p>
-  <p><code>[environments]</code> names the environment the agent uses on a server. On a server it does not list, the agent uses the server's sandbox. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
-  <figure class="code"><figcaption><span class="path">agents/release-manager.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/agent-definition/v1.json
-schema = "agent-definition/v1"
-slug = "release-manager"
-label = "Release manager"
-tools = [
-  "github__create_release",
-  "github__get_file_contents",
-  "billing__list_invoices",
-]
-skills = ["a-intel.platform.release-steps"]   # proposed: skills injected at session start
-
-[environments]                                # per server, the sandbox otherwise
-billing = "production"
-
-[budget]
-per_day_micros = 40000000                     # $40.00
-
-[containment]
-required = true</code></pre></figure>
-  <div class="note"><p><strong>Open tension.</strong> On 2026-09-25 Mac dropped agent profiles and raised dropping the agent entity for a per-run record (harness, runtime, model route, toolbelt, operator) plus skill injection. This section keeps the file that exists today and adds only <code>skills</code>. If the agent entity goes, <code>agents/</code> becomes named toolbelts and skill sets, and the run record carries the rest.</p></div>
+  <p>There is no <code>agents/</code> folder. An agent is an operator, a runtime, and a harness, registered in Oxagen when a runtime is enrolled. What Claude Code calls an agent, a named set of instructions a harness hands work to, is a skill: a steering record with its own files, delivered by its targets. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
+  <p>Today agent definitions are <code>.oxagen/agents/&lt;slug&gt;.toml</code> (<code>agent-definition/v0.1</code>), parsed by <code>packages/oxagen/src/agent-definition-source.ts</code> and cached on <code>agent.agent_versions</code> (ADR-057). <span class="st c">Today</span> Their fields move out of the repository:</p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Field today</th><th>Where it goes</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>tools</code>, the toolbelt</td><td class="wrap">The workspace's imported tools. Policy narrows them by operator, runtime, or harness, and Send To can narrow them for one run.</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>skills</code></td><td class="wrap">Steering records, delivered by force and targets</td><td><span class="st d">Decided</span></td></tr>
+      <tr><td><code>[environments]</code></td><td class="wrap">Per agent, with a server's sandbox unless the agent's settings name another environment</td><td><span class="st d">Decided</span> for per agent and sandbox by default. The place is an open question.</td></tr>
+      <tr><td><code>[budget]</code></td><td class="wrap">Workspace limits in <code>workspace.toml</code>, and a per-agent limit where the open question lands</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>[containment]</code></td><td class="wrap">The runtime's registration in Oxagen</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>slug</code>, <code>label</code></td><td class="wrap">The registration's name</td><td><span class="st p">Proposed</span></td></tr>
+    </tbody>
+  </table></div>
+  <div class="note"><p><strong>Open question.</strong> Where per-agent settings live, such as the environment an agent uses in production. On the agent's registration in Oxagen, they change at once and are recorded but get no review. In <code>workspace.toml</code>, keyed by the agent's registration, they go through a steering PR like any configuration. Recommended: <code>workspace.toml</code>, since pull requests are how configuration changes.</p></div>
 </section>
 
 <section id="policy">
   <span class="eyebrow">Policy</span>
   <h2>Policies</h2>
-  <p>Cedar policies live in <code>policy/</code>, one file per group of related rules, each with a tests file beside it. Oxagen writes <code>policy/schema.cedarschema</code> from the workspace's tools and agents and compiles the toolbelt grant from each agent's <code>tools</code>, so no one writes a grant as a rule. The format, the schema, and the tests follow the agent policy spec (<code>oxagen-agent-policy-spec.html</code>, PR 127). <span class="st p">Proposed</span></p>
+  <p>Cedar policies live in <code>policy/</code>, one file per group of related rules, each with a tests file beside it. Oxagen writes <code>policy/schema.cedarschema</code> from the workspace's tools and registered agents, and compiles the toolbelt grant from the imported tools, so no one writes a grant as a rule. The format, the schema, and the tests follow the agent policy spec (<code>oxagen-agent-policy-spec.html</code>, PR 127). <span class="st p">Proposed</span></p>
   <p>Today no Cedar evaluator exists. Decision rules are a zod engine in <code>packages/rules</code> that reads <code>workspaces.settings.decisionRules</code> in Postgres. <span class="st c">Today</span></p>
   <figure class="code"><figcaption><span class="path">policy/money.tests.jsonl</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="json">{"name":"refund under limit","principal":"a-intel.finops.invoice-bot","tool":"billing__create_refund@3","context":{"args":{"amount":12000}},"expect":"allow"}
 {"name":"refund over limit","principal":"a-intel.finops.invoice-bot","tool":"billing__create_refund@3","context":{"args":{"amount":64000}},"expect":"require_approval"}</code></pre></figure>
@@ -812,7 +802,7 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
   <h2>Steering PR flow</h2>
   <p>v1's flow stands: open, check, review, merge, publish, retire. These steps change it so Oxagen is the only merger and every merge is checked against the <code>main</code> it lands on.</p>
   <ol class="steps">
-    <li><div><strong>Open.</strong><p>From the web app, an agent's MCP tool, MCP Studio, the curator, or a clone. The branch starts with the top-level folder it changes: <code>steering/</code>, <code>memory/</code>, <code>agents/</code>, <code>servers/</code>, <code>policy/</code>, or <code>workspace/</code>. A person's steering PR holds one record, as in v1. A memory PR and a server PR hold many files. <span class="st p">Proposed</span></p></div></li>
+    <li><div><strong>Open.</strong><p>From the web app, an agent's MCP tool, MCP Studio, the curator, or a clone. The branch starts with the top-level folder it changes: <code>steering/</code>, <code>memory/</code>, <code>servers/</code>, <code>policy/</code>, or <code>workspace/</code>. A person's steering PR holds one record, as in v1. A memory PR and a server PR hold many files. <span class="st p">Proposed</span></p></div></li>
     <li><div><strong>Check.</strong><p>Oxagen runs the checks below and posts one required check, <code>Oxagen steering</code>, with each result inside it. <span class="st p">Proposed</span></p></div></li>
     <li><div><strong>Review.</strong><p>By governance mode, as in v1. A reviewer approves in Oxagen or with a GitHub or GitLab review from an account linked to an Oxagen member. <code>governance.toml</code> can route folders to reviewer groups. <span class="st p">Proposed</span></p></div></li>
     <li><div><strong>Queue.</strong><p>Merge, or auto-merge once approved, puts the pull request in the repository's queue. Oxagen merges one at a time. When <code>main</code> moves, the next pull request is brought up to date and checked again, so the budget and conflict checks judge the <code>main</code> it will land on. <span class="st p">Proposed</span></p></div></li>
@@ -922,7 +912,7 @@ group = "billing-leads"</code></pre></figure>
       <tr><td>Active records</td><td class="num">20,000</td><td class="wrap">One file per record, indexed by Oxagen at publish</td></tr>
       <tr><td>Files in one folder</td><td class="num">1,000</td><td class="wrap">The GitHub and GitLab web views truncate a folder at 1,000 entries. The curator shards <code>steering/memory/</code> by repository and area, and the <code>schema</code> check warns at 800.</td></tr>
       <tr><td>Tool servers</td><td class="num">300</td><td class="wrap">One folder per server</td></tr>
-      <tr><td>Tools exposed</td><td class="num">5,000</td><td class="wrap">Toolbelts, imports, and MCP Studio's search mode keep each agent's list short</td></tr>
+      <tr><td>Tools exposed</td><td class="num">5,000</td><td class="wrap">Imports, policy, and MCP Studio's search mode keep each run's tool list short</td></tr>
       <tr><td>Merges a day</td><td class="num">200</td><td class="wrap">The merge queue, and batched memory PRs</td></tr>
       <tr><td>Checks, p95</td><td class="num">60 s</td><td class="wrap">For 50 changed files. Only changed files are parsed, and cross-file checks run against Oxagen's index of the published version.</td></tr>
       <tr><td>Merge to live, p95</td><td class="num">30 s</td><td class="wrap">Publishing recompiles only files whose blob SHA changed</td></tr>
@@ -944,13 +934,13 @@ group = "billing-leads"</code></pre></figure>
     <thead><tr><th>Mechanism</th><th>What it does</th></tr></thead>
     <tbody>
       <tr><td>Frontmatter stays home</td><td class="wrap">Delivery sends a heading with the label and the body. The frontmatter, often 150 tokens with its hash, is for Oxagen and never reaches the model.</td></tr>
-      <tr><td>Always-on budget</td><td class="wrap">A limit on the records that reach every request (<code>must</code> and <code>should</code> with <code>load: always</code>), per agent and repository. It is optional: a workspace that sets nothing inherits Oxagen's default of 4,000 tokens, a workspace can set its own in <code>governance.toml</code>, and <code>"off"</code> turns the check off. The <code>budget</code> check warns and never blocks a steering PR, because a steering PR is how a budget changes. A PR that changes the budget is measured against its own new value.</td></tr>
+      <tr><td>Always-on budget</td><td class="wrap">A limit on the records that reach every request (<code>must</code> and <code>should</code> with <code>load: always</code>), per code repository. It is optional: a workspace that sets nothing inherits Oxagen's default of 4,000 tokens, a workspace can set its own in <code>governance.toml</code>, and <code>"off"</code> turns the check off. The <code>budget</code> check warns and never blocks a steering PR, because a steering PR is how a budget changes. A PR that changes the budget is measured against its own new value.</td></tr>
       <tr><td>Index lines</td><td class="wrap"><code>may</code> and <code>info</code> records and skills reach a request as one line each: label, description, and reference, about 25 tokens. The agent reads a body with <code>steering_read</code> or by an @-mention.</td></tr>
       <tr><td>Stable order</td><td class="wrap">The always-on block is sorted by lineage, placed before anything that changes per request, and changes only on publish. Provider prompt caching then bills it at the cache-read price after the first request.</td></tr>
       <tr><td>Targets</td><td class="wrap"><code>repos</code>, <code>applies_to</code>, and <code>tools</code> keep a record out of runs it does not concern.</td></tr>
       <tr><td>Short statements</td><td class="wrap">The <code>schema</code> check warns when an always-on body passes 120 words, or a <code>SKILL.md</code> passes 500 lines. A skill's detail belongs in the files it links.</td></tr>
       <tr><td>Near duplicates</td><td class="wrap">The <code>conflicts</code> check flags a new record that says what an active one already says.</td></tr>
-      <tr><td>Visible cost</td><td class="wrap">Every check run lists each changed record's token count and each agent's always-on total before and after. The Steering page prices each record from real requests.</td></tr>
+      <tr><td>Visible cost</td><td class="wrap">Every check run lists each changed record's token count and each repository's always-on total before and after. The Steering page prices each record from real requests.</td></tr>
       <tr><td>Tools</td><td class="wrap">Only listed tools are visible, descriptions can be replaced with shorter ones, and large servers use search mode (MCP Studio).</td></tr>
     </tbody>
   </table></div>
@@ -972,7 +962,7 @@ Read any of these with steering_read when it fits the task.
 - Refund: What a refund is at a-intel, its states, and the tools that change it. (a-intel.domain.refund)</code></pre></figure>
   <figure class="code"><figcaption><span class="path">Oxagen steering check, budget</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Oxagen steering  ✓ passed, 1 warning
   warning  budget
-  always-on steering for release-manager on github.com/a-intel/platform
+  always-on steering on github.com/a-intel/platform
   before 3,410 tokens   after 4,260 tokens   budget 4,000 (steering/governance.toml)
 
   largest always-on records
@@ -1042,8 +1032,8 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
     <thead><tr><th>Name</th><th>Value</th></tr></thead>
     <tbody>
       <tr><td>Steering repo</td><td class="wrap"><code>&lt;org&gt;/oxagen-&lt;workspace-slug&gt;</code>, then <code>-2</code> on a clash. Organization repo <code>&lt;org&gt;/oxagen</code>.</td></tr>
-      <tr><td>Top-level paths</td><td class="wrap"><code>AGENTS.md</code> <code>CLAUDE.md</code> <code>README.md</code> <code>.gitattributes</code> <code>workspace.toml</code> <code>steering/</code> <code>steering/governance.toml</code> <code>steering/promotions/&lt;yyyy-mm&gt;.jsonl</code> <code>steering/skills/</code> <code>steering/memory/</code> <code>agents/</code> <code>servers/&lt;name&gt;/</code> <code>policy/</code></td></tr>
-      <tr><td>Schema ids</td><td class="wrap"><code>steering-record/v1</code> <code>workspace/v1</code> <code>governance/v1</code> <code>agent-definition/v1</code> <code>mcp-server/v1</code> <code>mcp-tools/v1</code> <code>mcp-tools-lock/v1</code> <code>tool-manifest/v1</code> <code>reflection/v1</code> <code>promotion/v1</code> <code>bundle/v1</code>, each at <code>https://oxagen.sh/schemas/&lt;id&gt;.json</code></td></tr>
+      <tr><td>Top-level paths</td><td class="wrap"><code>AGENTS.md</code> <code>CLAUDE.md</code> <code>README.md</code> <code>.gitattributes</code> <code>workspace.toml</code> <code>steering/</code> <code>steering/governance.toml</code> <code>steering/promotions/&lt;yyyy-mm&gt;.jsonl</code> <code>steering/skills/</code> <code>steering/memory/</code> <code>servers/&lt;name&gt;/</code> <code>policy/</code></td></tr>
+      <tr><td>Schema ids</td><td class="wrap"><code>steering-record/v1</code> <code>workspace/v1</code> <code>governance/v1</code> <code>mcp-server/v1</code> <code>mcp-tools/v1</code> <code>mcp-tools-lock/v1</code> <code>tool-manifest/v1</code> <code>reflection/v1</code> <code>promotion/v1</code> <code>bundle/v1</code>, each at <code>https://oxagen.sh/schemas/&lt;id&gt;.json</code></td></tr>
       <tr><td>Tool name</td><td class="wrap"><code>&lt;server&gt;__&lt;tool&gt;</code>. Server <code>^[a-z][a-z0-9_]{0,23}$</code>, tool <code>^[a-z][a-z0-9_]*$</code>, 64 characters at most in all. A pinned reference adds <code>@&lt;version&gt;</code>.</td></tr>
       <tr><td>Credential reference</td><td class="wrap"><code>oxagen:credential/&lt;name&gt;</code>, name <code>^[a-z0-9][a-z0-9-]{0,62}$</code></td></tr>
       <tr><td>Repository reference</td><td class="wrap"><code>&lt;host&gt;/&lt;owner&gt;/&lt;name&gt;</code>, lowercase</td></tr>
@@ -1051,10 +1041,10 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
       <tr><td>Server folder</td><td class="wrap"><code>servers/&lt;name&gt;/</code> with <code>server.toml</code>, <code>tools.toml</code>, and <code>tools.lock.json</code> for every source, plus the vendored definition (<code>openapi.yaml</code>, <code>schema.graphql</code>, or <code>proto/</code>) and <code>tests/</code> where they apply</td></tr>
       <tr><td>Tool classification</td><td class="wrap"><code>risk</code> <code>side_effect</code> <code>egress</code> required, <code>impacts</code> <code>measures</code> <code>data_classes</code> optional, in the values of <code>packages/oxagen/src/contracts/tool.classification.ts</code></td></tr>
       <tr><td>Required check</td><td class="wrap"><code>Oxagen steering</code>, posted by the Oxagen app only</td></tr>
-      <tr><td>Branch prefix</td><td class="wrap">The top-level folder the change touches: <code>steering/</code> <code>memory/</code> <code>agents/</code> <code>servers/</code> <code>policy/</code> <code>workspace/</code></td></tr>
+      <tr><td>Branch prefix</td><td class="wrap">The top-level folder the change touches: <code>steering/</code> <code>memory/</code> <code>servers/</code> <code>policy/</code> <code>workspace/</code></td></tr>
       <tr><td>Environment</td><td class="wrap"><code>steering</code></td></tr>
       <tr><td>Published version</td><td class="wrap">An integer per workspace that rises by one on each publish</td></tr>
-      <tr><td>Bundle</td><td class="wrap"><code>bundle/v1</code>: what the cloud gateway and session start read for a published version. It holds the record index with token counts, the rendered always-on blocks per agent, the Cedar policy set, and the tool manifest.</td></tr>
+      <tr><td>Bundle</td><td class="wrap"><code>bundle/v1</code>: what the cloud gateway and session start read for a published version. It holds the record index with token counts, the rendered always-on blocks per code repository, the Cedar policy set, and the tool manifest.</td></tr>
       <tr><td>Repo health</td><td class="wrap"><code>healthy</code> <code>drifted</code> <code>disconnected</code> <code>diverged</code></td></tr>
     </tbody>
   </table></div>
@@ -1078,7 +1068,7 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
   <h2>Open questions</h2>
   <ol>
     <li>How Oxagen Steering reaches a steering repo it creates: an organization owner's user token that adds each new repository to the installation (recommended), or an installation on all repositories. See Provisioning.</li>
-    <li>What <code>agents/</code> holds if the agent entity goes.</li>
+    <li>Where per-agent settings live, such as the environment an agent uses: on the agent's registration in Oxagen, or in <code>workspace.toml</code> through a steering PR (recommended). See Agents.</li>
   </ol>
 </section>
 
