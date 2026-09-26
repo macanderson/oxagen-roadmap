@@ -24,7 +24,11 @@ A provider is named by the system it is: GitHub, Stripe, the harness on a host. 
 
 - **List controls** (`ltTable()`): "Search this list", the filters "Any health", "Any transport" and "Any authorization", **Rows** (10 by default) and the pager (`1–10 of 19`).
 - **Table**, columns in order: Provider · Transport · Tools · Toolbelts · Agents · Health · Connection · Authorization · Last import, then an unlabelled actions column.
-  - *Provider*: the system in bold over what it is ("GitHub" over "Source control and pull requests.").
+  - *Provider*: the logomark (24 px) beside the system in bold over what it is ("GitHub" over "Source control and pull requests."), then the links the registry entry holds: the website's host ("github.com"), **Docs** and **Source**.
+    - The logomark is the registry entry's icon, loaded with no referrer on a white plate. A provider with no icon, or one whose icon does not load, shows the first letter of its system on a soft tile ("A" for AWS Billing). While #3917 leaves the build without a system name, the letter is the registry name's. No favicon service fills the gap.
+    - Every link is https and opens in a new tab. Clicking a link, or pressing Enter on it, follows the link and does not open the row.
+    - Docs is left out when it is the same URL as the website or the source. The registry has no docs field, so for most entries Oxagen's docs link is one of the other two (see Registry fields below).
+    - A provider with no registry entry (AWS Billing, Oxagen agent tools, Harness-native tools) shows no links.
   - *Transport*: the transport badge (`mcp`, `http`, `native`, `local`) over the wire and the endpoint in mono ("streamable-http · https://mcp.github.com/a-intel", "in-process · contract registry", "hook · claude-code 2.1.4, codex-cli 1.4.0, stella 0.9.2").
   - *Tools*: the distinct tools over "N versions" ("48" over "81 versions").
   - *Toolbelts*: one badge per toolbelt that reaches the provider, or a dash.
@@ -34,8 +38,9 @@ A provider is named by the system it is: GitHub, Stripe, the harness on a host. 
   - *Authorization*: a badge over the token's expiry: connected, token expired, key held, role assumed, or not connected. A provider reached in-process or over a harness hook reads "none needed".
   - *Last import*: a timestamp, or "ships with the release" (Oxagen agent tools) or "per harness version" (Harness-native tools).
   - *Actions*: **Open** (opens `server`), then, on a provider that takes a credential, **Manage connection** (opens `conn`) when it has a connection, **Connect** when it has none, or **Reconnect** when the token expired (both open `oauth`), then **Remove** (danger, opens `serverdel`). The design draws Connect and Reconnect in gold, two gold buttons on the first page beside Add provider. That breaks the one-gold rule below, and a build draws them plain.
-  - A row opens `server`. It is keyboard reachable, with `role="button"` and the label "Open <name>".
+  - A row opens `server`. It is keyboard reachable, with `role="button"` and the label "Open <name>". Enter or Space opens the row only when the row itself has focus. A button or link inside the row keeps its own keys.
 - The demo roster holds 19 providers. The first eight (GitHub, Linear, Stripe, AWS Billing, Slack, Snowflake, Oxagen agent tools, Harness-native tools) carry every field. The eleven that `volume()` adds (jira, datadog, pagerduty, salesforce, gdrive, orders-db, kubernetes, sentry, hubspot, notion, zendesk) carry a system, a description and a wire too, so the design names each one ("Jira" over "Issues and service desk tickets in Atlassian Cloud."). A build names every provider's system and transport.
+- Eight demo providers carry a logomark, a website and docs, with the values from Oxagen's verified list: GitHub, Linear, Stripe, Slack, Jira, Sentry, HubSpot and Notion. Snowflake has a source repository and no icon, so it shows the letter tile and one link. The other ten have no registry entry and show the letter tile alone.
 - No transport note under the table. That MCP is one transport among several is in the component help.
 - **Warning**, counted from the connections: "3 connections need attention. Slack · a-intel.slack.com has an expired token. Calls through it are blocked until it is reconnected. PagerDuty · a-intel workspace was due for review 2026-08-30. HubSpot · a-intel workspace was due for review 2026-09-11."
 
@@ -53,9 +58,9 @@ A provider is named by the system it is: GitHub, Stripe, the harness on a host. 
 **Dialogs this tab opens.**
 
 - `import` (Add provider): the three-step importer in `tools.md`.
-- `server` (wide), one provider. Title: the system. Subtitle: transport, wire and endpoint ("mcp · streamable-http · https://mcp.github.com/a-intel").
+- `server` (wide), one provider. Title: the system, with its logomark (32 px) before it. Subtitle: transport, wire and endpoint ("mcp · streamable-http · https://mcp.github.com/a-intel").
   - Warnings where they apply. Degraded: "This provider is degraded. Calls to it are retried once and then blocked." Expired token: "The token expired 2026-09-12 00:00 UTC. Reconnect to bring the 30 tools below back into reach." Waiting schemas: "6 schemas are awaiting approval. Until an admin approves, outputs are validated only for size and type."
-  - System (the description), Transport ("mcp · streamable-http"), Registry name, Schemas, Tool versions ("81 across 48 tools"), Toolbelts (badges, or "Not on any toolbelt in this workspace"), Agents reached (badges, or "none"), Last import.
+  - System (the description), then Website, Docs and Source, each the URL without its scheme as a link that opens in a new tab ("github.com", "github.com/github/github-mcp-server"). A row appears only when the entry holds that link, and Docs follows the rule on the table. A provider with no link reads Links "None recorded". Then Transport ("mcp · streamable-http"), Registry name, Schemas, Tool versions ("81 across 48 tools"), Toolbelts (badges, or "Not on any toolbelt in this workspace"), Agents reached (badges, or "none"), Last import.
   - "Authorization". With a connection: Connection (a link to `conn`, with its id and kind), Authorization (the badge and the expiry), Scopes, Owner ("Marcus Bell · reviewed 2026-08-14, next 2026-11-14"), Issued per call ("a token limited to the repositories the call names"), Grants 30d. Then the buttons the connection's state allows. **Reconfigure OAuth**, or **Reconnect** when the token expired, appears for OAuth and GitHub App connections. **Refresh the token** and **Disconnect** appear for a connected OAuth connection. **Edit the connection** (opens `connedit`) and **Revoke** (danger, opens `connrevoke`) always appear. With no connection on a provider that needs one: "This provider needs a connection, and none exists yet. Every call to it is blocked until someone connects it." with **Connect with OAuth** and **Add a key or a role instead** (opens `connection`). With no credential to hold: "This provider holds no credential, so there is nothing to authorize."
   - "Tools imported from <system>": Tool version · Hazard · Gate · Agents · Calls 30d. A row opens `tool`. Under it, "81 of the 81 versions this provider has shipped are in the registry. Re-import to pull the rest." With nothing imported: "Nothing from this provider is in the registry yet. Re-import to pull its tool list."
   - Footer: **Remove** (danger, opens `serverdel`), **Re-import tools** ("Re-imported GitHub. New versions appear as new rows."), **Edit** (gold, opens `serveredit`). The design also draws Reconfigure OAuth, Reconnect and Connect with OAuth in gold, which puts two gold actions in one dialog. A build keeps Edit as the dialog's one gold action.
@@ -70,11 +75,13 @@ A provider is named by the system it is: GitHub, Stripe, the harness on a host. 
 
 ## Data sources
 
-Legend: ✅ shipped · 🟡 partial · ❌ future-only. Backing checked against `macanderson/oxagen` `main` at `bf14d158a` (2026-09-24). A fixture is not evidence that anything ships.
+Legend: ✅ shipped · 🟡 partial · ❌ future-only. Backing checked against `macanderson/oxagen` `main` at `bf14d158a` (2026-09-24). The Logomark and Website rows, the description's storage in the Provider row, and Registry fields below were checked at `ba7a00f47` (2026-09-25). A fixture is not evidence that anything ships.
 
 | Element | Mockup collection | Target store or contract | Backing today in macanderson/oxagen | Status |
 |---|---|---|---|---|
-| Provider: registry name, system, description | `PROVIDERS` (`FIXTURES.SERVERS`, grown by `volume()`) | `tools.tool_servers` (spec Appendix A.5) | `list_mcp_servers` returns `publicId`, `name`, `transportType`, `endpointUrl`, `healthStatus`, `lastHealthcheckAt` and `toolCount` (`packages/oxagen/src/contracts/agent.mcp.list.ts:21-57`) from `mcp.mcp_servers` (`packages/database/src/schema/mcp.ts:131-199`). No system name or description apart from the registry name is stored, #3917 (`apps/app/src/features/tools/gaps.ts:10-11`) | 🟡 the registry name only |
+| Provider: registry name, system, description | `PROVIDERS` (`FIXTURES.SERVERS`, grown by `volume()`) | `tools.tool_servers` (spec Appendix A.5) | `list_mcp_servers` returns `publicId`, `name`, `transportType`, `endpointUrl`, `healthStatus`, `lastHealthcheckAt` and `toolCount` (`packages/oxagen/src/contracts/agent.mcp.list.ts:21-57`) from `mcp.mcp_servers` (`packages/database/src/schema/mcp.ts:131-199`). No system name or description apart from the registry name is stored, #3917 (`apps/app/src/features/tools/gaps.ts:10-11`). The OAuth add path writes the registry entry's description to `plugin.installed_plugins.description` (`packages/agent/src/runtime/mcp-oauth-flow.ts:297`), and `list_mcp_servers` does not return it, #4327 | 🟡 the registry name only |
+| Logomark | `PROVIDERS[].icon`, `providerMark()` | the registry entry's icon | `list_mcp_servers` returns `iconUrl`, https or null (`agent.mcp.list.ts:78`), read from `plugin.installed_plugins.icon_url` (`packages/agent/src/handlers/agent.mcp.list.ts:112`). Only the OAuth add path stores it (`mcp-oauth-flow.ts:297-302`). A provider added with a bearer token, a header or no auth goes through `register_mcp_server`, which takes no icon (`agent.mcp.register.ts:19-25`), so its row shows the letter tile, #4327. The app draws the mark and the fallback in `apps/app/src/ui/provider-icon.tsx:13-56` | 🟡 OAuth providers only |
+| Website, Docs and Source | `PROVIDERS[].website`, `.docs`, `.source`, `providerLinks()` | the registry entry's `websiteUrl` and `repository.url`, and Oxagen's `docsUrl` | `search_mcp_registry` returns `websiteUrl`, `docsUrl` and `repositoryUrl` (`packages/oxagen/src/contracts/agent.mcp.registry.search.ts:40-43`), and the Add a provider wizard shows them (`apps/app/src/features/tools/registry-browser.tsx:61-63`). No store keeps them once the provider is added, and `list_mcp_servers` does not return them, #4327 | ❌ |
 | Transport and wire | `PROVIDERS[].transport`, `.wire`, `.url` | a transport of eight values and a wire of five | Every row on the roster is an MCP server, and `transport_type` holds a wire: `streamable-http`, `sse` or `stdio` (`mcp.ts:191-194`). A provider reached over `http`, `native` or a harness hook has nowhere to live, #3917 (`apps/app/src/features/tools/providers.tsx:7-9`) | 🟡 |
 | Tools and versions | `PROVIDERS[].tools`, `.versions` | counts per provider | `toolCount` on each server. Versions are counted from `list_tool_versions` by `serverId`, one cursor page at a time | 🟡 |
 | Toolbelts and Agents | `providerBelts()`, `providerAgents()` | derived from toolbelts | None, #3852 (`gaps.ts:8-9`) | ❌ |
@@ -92,6 +99,23 @@ Legend: ✅ shipped · 🟡 partial · ❌ future-only. Backing checked against 
 | OAuth: authorize, refresh, disconnect | `oauthAuthorize()`, `oauthRefresh()`, `oauthDisconnect()` | `connection.authorize` | Plugin OAuth exists for installed plugins (`packages/plugins/src/oauth/`). Nothing on Tools reaches it, #3918 | 🟡 |
 | Connection open, edit, review, revoke, add | `DLG_EXT.conn`, `connedit`, `connrevoke`, `connection` | `tools.connections` | Credential rows exist (`mcp.ts:82-129`). No owner, review date or downscope is stored on them, #3918 | 🟡 |
 
+### Registry fields
+
+Oxagen searches one registry, the official MCP Registry at `https://registry.modelcontextprotocol.io` (API v0.1, `GET /v0.1/servers?version=latest`), and lists 18 vendor servers it checked by hand above the results (`packages/agent/src/runtime/verified-mcp-servers.ts`). `toRegistryServer()` maps each entry (`packages/agent/src/runtime/mcp-registry.ts:143-212`):
+
+| Registry field | Oxagen field | On this page |
+|---|---|---|
+| `server.title`, else the last segment of `server.name` | `name` | the system |
+| `server.name`, such as `app.linear/linear` | `publisher` and `publisherVerified`. A reversed domain is verified, and `io.github.<user>` is not | not shown |
+| `server.description` | `description` | the description under the system |
+| `server.icons[]` with `src`, `mimeType`, `sizes` and `theme` | `iconUrl`, the first https `src`. `theme` is ignored, #4327 | the logomark |
+| `server.websiteUrl` | `websiteUrl` | Website |
+| `server.repository` with `url`, `source`, `id` and `subfolder` | `repositoryUrl`, from `url` | Source |
+| none | `docsUrl`. A verified entry has its own docs URL. A registry entry uses `websiteUrl`, else `repository.url` | Docs, when it differs from both |
+| `server.version` | `version` | not shown |
+| `server.remotes[]` and `server.packages[]` | `endpointUrl`, `transports`, `auth` and `connectable` | Transport and wire |
+| `_meta["io.modelcontextprotocol.registry/official"].status` | a `deleted` or `deprecated` entry is dropped | not shown |
+
 ## Future-only fields
 
 The renderer puts no `data-future` mark on this tab, and the catalog gives it no future-only story. These fields have no contract today all the same. A build renders each as not recorded, with its gap as `data-gap`, and never as a zero, a blank or a green word:
@@ -100,6 +124,7 @@ The renderer puts no `data-future` mark on this tab, and the catalog gives it no
 - Toolbelts and Agents, on the table and in the dialog (#3852).
 - The Authorization badge, the token expiry, the attention warning, and every OAuth and review control (#3918). The app renders the warning as a statement that it cannot count them.
 - Last import, until `list_mcp_servers` returns `last_import_at` (#3917).
+- Website, Docs and Source, on the table and in the dialog, until `list_mcp_servers` returns them (#4327). A provider added without OAuth has no stored icon until then, and its row shows the letter tile. The tile is the drawn fallback, so it carries no `data-gap`.
 - In the grants log, the tool version and the agent (#3923), the "Not issued" row and the 30-day totals.
 
 ## Functionality
@@ -141,6 +166,7 @@ The design names these permissions. The capability that binds each today is in p
 - #3918: the OAuth token lifecycle on a connection: client registration, code exchange, refresh, expiry, owner and review dates.
 - #3923: the tool version and the agent behind each credential grant, and a grant count per connection.
 - #3852: toolbelts, for the Toolbelts and Agents columns.
+- #4327: the registry entry's icon, description, website, docs and source, stored on every add path and returned by `list_mcp_servers`.
 
 ## Rules every build of this page must keep
 
@@ -149,6 +175,7 @@ The design names these permissions. The capability that binds each today is in p
 - Every enforcement claim states the tier. A refused call is refused for calls routed through Oxagen.
 - A provider row names the toolbelts and the agents it reaches, and both are derived. Headers are rollups of the rows beneath them: the caption, the warning and the grants caption count the rows they describe.
 - A secret is never returned to a screen, and no screen implies an agent holds a credential.
+- A logomark is decorative (`alt=""`), and the system beside it names the provider. It loads from the registry entry's https URL with no referrer, so the request to the vendor carries no Oxagen URL. Every registry link is https and opens in a new tab with `rel="noopener noreferrer"`.
 - No person is scored or ranked.
 - Plain nouns: a heading names the thing, a caption states one fact, and no label carries a comma, a mid-dot, or a not/never contrast. Subtext under a heading is one sentence or nothing.
 - Exactly one gold action per screen: Add provider. A row's Connect is not gold.

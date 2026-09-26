@@ -99,7 +99,7 @@ export default {
     ["--fg, --muted, --dim", "Figure, legend text, and sub line"],
   ],
   helpers: [
-    ["stgMeter(label, used, max, unit, sub)", "engine.js:6699", "Single-value meter with `role=\"img\"` and an aria-label stating the percent. Holds at 90%."],
+    ["stgMeter(label, used, max, unit, sub)", "engine.js:6730", "Single-value meter with `role=\"img\"` and an aria-label stating the percent. Holds at 90%."],
     ["tokBars(t, opts)", "engine.js:196", "One composition meter per prompt part, plus output and reasoning, each in its own hue."],
     ["stack3(parts, total)", "engine.js:2664", "One `.stk` segment per part, sized by flex, each with a tooltip."],
     ["stackLeg(parts)", "engine.js:2667", "The `.leg` row naming each part `stack3()` drew."],

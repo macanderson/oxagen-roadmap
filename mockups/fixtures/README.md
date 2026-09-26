@@ -28,7 +28,7 @@ record must be derived the same way in the fixture, or two pages disagree.
 | `findings.json` | `FINDINGS` | the findings on Work › Findings, each a costed problem with the frames that prove it |
 | `evidence.json` | `EVIDENCE` | Evidence behind each finding — keyed by finding id so the FINDINGS seed stays untouched. Every saving is measured minus counterfactual over the cited runs; nothing here is a model's opinion. |
 | `fix.json` | `FIX` | What Fix opens, by finding kind. A pull request when the fix is a Steering record the agent will read; a help article when the fix is in the customer's own agent code or configuration. |
-| `servers.json` | `SERVERS` | the tool servers in the registry: kind, transport, tools, versions, health, connection |
+| `servers.json` | `SERVERS` | the providers in the registry: kind, transport, tools, versions, health, connection, and the MCP registry entry's icon, website, docs and source (null where the entry has none) |
 | `tools.json` | `TOOLS` | The registry, as W9 drew it: one row per tool version. `proposal` marks an observed output schema awaiting approval; S.approved[n] flips it to observed_approved at runtime. |
 | `connections.json` | `CONNECTIONS` | the customer's credentials in the vault, with owner, downscope and review dates |
 | `mandates.json` | `MANDATES` | the mandates: limits by measure, counterparties, tools, approval rule, validity, ledger position |

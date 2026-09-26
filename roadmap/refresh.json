@@ -177,7 +177,10 @@
     "docs/adr/ADR-179-a-re-enrolled-host-carries-on-its-predecessors-sessions.md",
     "docs/adr/ADR-180-the-control-plane-seals-a-silent-ledger-attempt-abandoned.md",
     "docs/adr/ADR-181-clickhouse-keeps-two-system-logs.md",
-    "docs/adr/ADR-182-the-server-is-the-only-place-a-run-transcript-is-folded.md"
+    "docs/adr/ADR-182-the-server-is-the-only-place-a-run-transcript-is-folded.md",
+    "docs/adr/ADR-183-claude-code-email-addresses-in-clickhouse-and-postgres.md",
+    "docs/adr/ADR-184-the-registry-follows-the-production-branch.md",
+    "docs/adr/ADR-185-a-failed-wal-body-write-rolls-back-the-seal.md"
   ],
   "adrs": {
     "ADR-001": {
@@ -1603,6 +1606,30 @@
       "path": "docs/adr/ADR-182-the-server-is-the-only-place-a-run-transcript-is-folded.md",
       "status": null,
       "title": "The server is the only place a run's transcript is folded"
+    },
+    "ADR-183": {
+      "date": null,
+      "decision": "### 1. The two tacho columns",
+      "id": "ADR-183",
+      "path": "docs/adr/ADR-183-claude-code-email-addresses-in-clickhouse-and-postgres.md",
+      "status": null,
+      "title": "Claude Code email addresses in ClickHouse and Postgres"
+    },
+    "ADR-184": {
+      "date": null,
+      "decision": "1. **The production branch is the truth, and the registry follows it.** A repository sync reads every file under `.oxagen/rules/` at the branch's head and makes the registry match: new records are published, changed ones get a new version, moved or relabeled ones are updated in place, and records whose file is gone or marked retracted are retired with a `retire` link on the ledger. 2. **A record is matched by the `lineage_id` inside its file, never by the file's name.** A file can have any name and sit in any subdirectory of `.oxagen/rules/`. The registry records where it was last seen in `pat",
+      "id": "ADR-184",
+      "path": "docs/adr/ADR-184-the-registry-follows-the-production-branch.md",
+      "status": null,
+      "title": "The context registry follows the production branch"
+    },
+    "ADR-185": {
+      "date": "2026-09-25",
+      "decision": "1. **A failed body write throws.** `Wal.writeBodies` reports the failure through the diagnostic sink with its session, operation, and error code, then rethrows the error. A sink that throws does not replace the original error. `Wal.append` writes bodies before events, so the throw leaves every event in the call unwritten. For a call whose bodies belong to one session, the WAL then holds neither the event nor its body. A call with bodies for several sessions can leave an earlier session's body lines behind (see Limits). 2. **The caller rolls back the seal.** These writers take a chain mark befo",
+      "id": "ADR-185",
+      "path": "docs/adr/ADR-185-a-failed-wal-body-write-rolls-back-the-seal.md",
+      "status": "accepted",
+      "title": "A failed WAL body write rolls back the seal"
     }
   },
   "baseline": "2026-09-18T20:52:30Z",
@@ -2579,6 +2606,45 @@
       "status": "decided",
       "title": "The server is the only place a run's transcript is folded"
     },
+    "ADR-183": {
+      "blocks": [],
+      "decided": "ADR-183: Claude Code email addresses in ClickHouse and Postgres. ### 1. The two tacho columns",
+      "decided_on": "2026-09-25",
+      "id": "ADR-183",
+      "origin": "adr",
+      "pr": 4306,
+      "question": "Decided in the repository: Claude Code email addresses in ClickHouse and Postgres.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-183-claude-code-email-addresses-in-clickhouse-and-postgres.md",
+      "status": "decided",
+      "title": "Claude Code email addresses in ClickHouse and Postgres"
+    },
+    "ADR-184": {
+      "blocks": [],
+      "decided": "ADR-184: The context registry follows the production branch. 1. **The production branch is the truth, and the registry follows it.** A repository sync reads every file under `.oxagen/rules/` at the branch's head and makes the registry match: new records are published, changed ones get a new version, moved or relabeled ones are updated in place, and records whose file is gone or marked retracted are retired with a `retire` link on the ledger. 2. **A record is matched by the `lineage_id` inside its file, never by the file's name.** A file can have any name and sit in any subdirectory of `.oxagen/rules/`. The registry records where it was last seen in `pat",
+      "decided_on": "2026-09-25",
+      "id": "ADR-184",
+      "origin": "adr",
+      "pr": 4291,
+      "question": "Decided in the repository: The context registry follows the production branch.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-184-the-registry-follows-the-production-branch.md",
+      "status": "decided",
+      "title": "The context registry follows the production branch"
+    },
+    "ADR-185": {
+      "blocks": [],
+      "decided": "ADR-185: A failed WAL body write rolls back the seal. 1. **A failed body write throws.** `Wal.writeBodies` reports the failure through the diagnostic sink with its session, operation, and error code, then rethrows the error. A sink that throws does not replace the original error. `Wal.append` writes bodies before events, so the throw leaves every event in the call unwritten. For a call whose bodies belong to one session, the WAL then holds neither the event nor its body. A call with bodies for several sessions can leave an earlier session's body lines behind (see Limits). 2. **The caller rolls back the seal.** These writers take a chain mark befo",
+      "decided_on": "2026-09-25",
+      "id": "ADR-185",
+      "origin": "adr",
+      "pr": 4300,
+      "question": "Decided in the repository: A failed WAL body write rolls back the seal.",
+      "recommendation": null,
+      "source": "docs/adr/ADR-185-a-failed-wal-body-write-rolls-back-the-seal.md",
+      "status": "decided",
+      "title": "A failed WAL body write rolls back the seal"
+    },
     "I-oxagen#2980": {
       "blocks": [],
       "decided": null,
@@ -2775,9 +2841,9 @@
       "title": "P2 Gap M (App shell): Page tabs are navigation links, while the design audits expect ARIA tabs"
     }
   },
-  "generated_at": "2026-09-25T20:28:46.835Z",
+  "generated_at": "2026-09-25T23:26:50.123Z",
   "heads": {
-    "oxagen": "7dfcd0b951114959fcecbd3c75a0aa18b44340f1"
+    "oxagen": "f6cedbd0d95a1e1fcf5e5b001f44e775a1dfee09"
   },
   "issues": {
     "oxagen#1": {
@@ -5488,7 +5554,7 @@
     },
     "oxagen#3214": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T21:12:13Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -5514,9 +5580,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P2 Bug XS (Desktop): The macOS desktop app turns off a code-signing check it does not need",
-      "updated_at": "2026-09-25T17:34:50Z"
+      "updated_at": "2026-09-25T21:12:13Z"
     },
     "oxagen#3218": {
       "author": "macanderson",
@@ -7096,7 +7162,7 @@
       ],
       "state": "open",
       "title": "P0 Feature XL (Gateway): Meter, cap, and interrupt local agents by routing model calls through Tacho",
-      "updated_at": "2026-09-25T20:13:39Z"
+      "updated_at": "2026-09-25T20:55:04Z"
     },
     "oxagen#3300": {
       "author": "macanderson",
@@ -7138,7 +7204,7 @@
     },
     "oxagen#3301": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T22:15:08Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -7166,9 +7232,9 @@
         "ADR-094",
         "ADR-095"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "P0 Bug L (Desktop): Uninstalling the desktop app can leave each agent tool's settings changed",
-      "updated_at": "2026-09-25T17:36:10Z"
+      "updated_at": "2026-09-25T22:15:08Z"
     },
     "oxagen#3302": {
       "author": "macanderson",
@@ -7359,7 +7425,7 @@
     },
     "oxagen#3313": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T21:39:56Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -7385,9 +7451,9 @@
       "spec_refs": [
         "ADR-092"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "P2 Bug S (Stella): Renaming a workspace hides its assistant threads and any reply in flight",
-      "updated_at": "2026-09-25T17:36:24Z"
+      "updated_at": "2026-09-25T21:39:56Z"
     },
     "oxagen#3314": {
       "author": "macanderson",
@@ -7862,7 +7928,7 @@
     },
     "oxagen#3330": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T22:15:09Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -7888,9 +7954,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P2 Bug S (Tacho): Uninstall leaves empty settings files and the release script exposes its token",
-      "updated_at": "2026-09-25T17:36:45Z"
+      "updated_at": "2026-09-25T22:15:09Z"
     },
     "oxagen#3332": {
       "author": "macanderson",
@@ -8294,7 +8360,7 @@
     },
     "oxagen#3348": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T21:12:12Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -8318,9 +8384,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P2 Bug S (Desktop): The desktop app uses a fallback font and the website shows the old gold texture",
-      "updated_at": "2026-09-25T20:23:38Z"
+      "updated_at": "2026-09-25T21:12:12Z"
     },
     "oxagen#3349": {
       "author": "macanderson",
@@ -8586,7 +8652,7 @@
     },
     "oxagen#3365": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T22:41:48Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -8614,9 +8680,9 @@
         "ADR-094",
         "ADR-095"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "P1 Bug L (Tacho): Tacho has two competing ways to keep full run content on the host",
-      "updated_at": "2026-09-25T20:27:44Z"
+      "updated_at": "2026-09-25T22:41:48Z"
     },
     "oxagen#3366": {
       "author": "macanderson",
@@ -8680,7 +8746,7 @@
       ],
       "state": "open",
       "title": "P2 Bug L (Tacho): Steers never reach a live Cursor session and the setup docs never enroll Cursor",
-      "updated_at": "2026-09-25T17:37:13Z"
+      "updated_at": "2026-09-25T23:14:05Z"
     },
     "oxagen#3368": {
       "author": "macanderson",
@@ -8809,7 +8875,7 @@
       ],
       "state": "open",
       "title": "P3 Bug M (Tacho): A run can be rated fully viewable when prompts or replies were never captured",
-      "updated_at": "2026-09-25T17:37:24Z"
+      "updated_at": "2026-09-25T21:05:31Z"
     },
     "oxagen#3373": {
       "author": "macanderson",
@@ -9014,7 +9080,7 @@
       ],
       "state": "open",
       "title": "P2 Bug L (Tacho): Tacho records a failed Git read as a clean worktree and splits one file into two",
-      "updated_at": "2026-09-25T17:37:31Z"
+      "updated_at": "2026-09-25T20:44:44Z"
     },
     "oxagen#3385": {
       "author": "macanderson",
@@ -11599,7 +11665,7 @@
     },
     "oxagen#3505": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T20:29:54Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -11624,9 +11690,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P1 Bug S (Desktop): A retried release can publish with installers missing from the download page",
-      "updated_at": "2026-09-25T17:39:09Z"
+      "updated_at": "2026-09-25T22:42:45Z"
     },
     "oxagen#3506": {
       "author": "macanderson",
@@ -15332,11 +15398,12 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [
+        "ADR-140",
         "docs/specs/tacho/"
       ],
       "state": "open",
       "title": "P2 Bug S (Tacho): Each tool call appears three times in a Tacho run, twice without its content",
-      "updated_at": "2026-09-25T17:40:27Z"
+      "updated_at": "2026-09-25T20:29:32Z"
     },
     "oxagen#3662": {
       "author": "macanderson",
@@ -15368,7 +15435,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 Bug S (Database): Tacho uploads fail when another query uses up ClickHouse memory",
-      "updated_at": "2026-09-25T17:40:31Z"
+      "updated_at": "2026-09-25T20:29:48Z"
     },
     "oxagen#3663": {
       "author": "macanderson",
@@ -15760,7 +15827,7 @@
       ],
       "state": "open",
       "title": "P1 Bug M (Tacho): A failed disk write as a session ends can drop other sessions' recorded events",
-      "updated_at": "2026-09-25T18:19:08Z"
+      "updated_at": "2026-09-25T20:44:37Z"
     },
     "oxagen#3676": {
       "author": "macanderson",
@@ -16224,7 +16291,7 @@
     },
     "oxagen#3694": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T20:30:42Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -16251,9 +16318,9 @@
       "spec_refs": [
         "docs/specs/tacho/"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "P1 Bug L (Tacho): A long recorded session stops Tacho from shipping runs for hours",
-      "updated_at": "2026-09-25T17:41:24Z"
+      "updated_at": "2026-09-25T22:42:48Z"
     },
     "oxagen#3695": {
       "author": "macanderson",
@@ -16334,7 +16401,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 Bug M (Desktop): The desktop app keeps showing the old version after a deploy until it restarts",
-      "updated_at": "2026-09-25T17:41:28Z"
+      "updated_at": "2026-09-25T21:12:51Z"
     },
     "oxagen#3698": {
       "author": "macanderson",
@@ -16852,7 +16919,7 @@
     },
     "oxagen#3719": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T20:29:39Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -16876,9 +16943,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P2 Bug M (Tacho): A disk write failure can drop the closing events of every idle Tacho session",
-      "updated_at": "2026-09-25T17:41:39Z"
+      "updated_at": "2026-09-25T22:42:44Z"
     },
     "oxagen#3720": {
       "author": "macanderson",
@@ -18575,7 +18642,7 @@
     },
     "oxagen#3782": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T20:30:04Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -18601,9 +18668,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P3 Bug S (Tacho): A Tacho test fails at random when a finished run's events arrive out of order",
-      "updated_at": "2026-09-25T17:42:44Z"
+      "updated_at": "2026-09-25T22:42:46Z"
     },
     "oxagen#3783": {
       "author": "macanderson",
@@ -19747,24 +19814,26 @@
         "P2",
         "kind:defect",
         "job:meter",
+        "needs:decision",
         "pillar:reliability",
         "size/M",
         "area:spend"
       ],
       "merged_at": null,
       "milestone": null,
-      "needs_decision": false,
+      "needs_decision": true,
       "number": 3825,
       "pillar": "reliability",
       "priority": "P2",
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [
-        "ADR-060"
+        "ADR-060",
+        "ADR-042"
       ],
       "state": "open",
       "title": "P2 Bug M (Spend): Budgets undercount for good when a spend write from Tacho fails three times",
-      "updated_at": "2026-09-25T17:43:47Z"
+      "updated_at": "2026-09-25T21:01:31Z"
     },
     "oxagen#3826": {
       "author": "macanderson",
@@ -20503,7 +20572,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P3 Gap M (App shell): Show the organization's agent count and data plane in the sidebar footer",
-      "updated_at": "2026-09-25T17:44:51Z"
+      "updated_at": "2026-09-25T23:09:01Z"
     },
     "oxagen#3852": {
       "author": "macanderson",
@@ -23267,7 +23336,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P0 Bug XL (Tacho): Tacho counts subagent calls twice and failed installs leave tools unable to connect",
-      "updated_at": "2026-09-25T17:49:13Z"
+      "updated_at": "2026-09-25T21:53:56Z"
     },
     "oxagen#3945": {
       "author": "macanderson",
@@ -23474,7 +23543,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "main has commits nothing verified",
-      "updated_at": "2026-09-25T17:54:50Z"
+      "updated_at": "2026-09-25T21:13:55Z"
     },
     "oxagen#3953": {
       "author": "github-actions[bot]",
@@ -24394,7 +24463,7 @@
       ],
       "state": "open",
       "title": "P2 Bug M (Tacho): The host recorder leaves some ended sessions open for up to 12 hours",
-      "updated_at": "2026-09-25T17:49:43Z"
+      "updated_at": "2026-09-25T23:14:11Z"
     },
     "oxagen#3990": {
       "author": "macanderson",
@@ -24510,7 +24579,7 @@
     },
     "oxagen#3996": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T23:13:25Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -24536,9 +24605,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P2 Bug XS (Tacho): Hosts stop sending recordings when Oxagen is slow to accept them, and nothing says so",
-      "updated_at": "2026-09-25T17:49:50Z"
+      "updated_at": "2026-09-25T23:13:25Z"
     },
     "oxagen#3998": {
       "author": "macanderson",
@@ -27487,7 +27556,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 Bug M (Tacho): A run's changed files include pulled commits and edits made before it started",
-      "updated_at": "2026-09-25T17:51:25Z"
+      "updated_at": "2026-09-25T20:44:36Z"
     },
     "oxagen#4105": {
       "author": "macanderson",
@@ -27653,7 +27722,7 @@
     },
     "oxagen#4111": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T20:29:26Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -27677,9 +27746,9 @@
       "refs": [],
       "repo": "oxagen",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "P2 Bug S (Tacho): After a restart, Tacho can mark a session crashed before replaying its prompts",
-      "updated_at": "2026-09-25T17:51:28Z"
+      "updated_at": "2026-09-25T22:42:43Z"
     },
     "oxagen#4112": {
       "author": "macanderson",
@@ -28509,7 +28578,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P1 Bug S (Repositories): A Context PR merged directly on GitHub gets stuck on checks that can never pass",
-      "updated_at": "2026-09-25T17:51:45Z"
+      "updated_at": "2026-09-25T21:50:59Z"
     },
     "oxagen#4142": {
       "author": "macanderson",
@@ -29461,7 +29530,7 @@
       ],
       "state": "open",
       "title": "P2 Gap L (Stella): Check a rule stella drafts against the person's goal and record the verdict",
-      "updated_at": "2026-09-25T20:02:12Z"
+      "updated_at": "2026-09-25T23:18:07Z"
     },
     "oxagen#4176": {
       "author": "macanderson",
@@ -32507,7 +32576,7 @@
     },
     "oxagen#4283": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T21:50:02Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": true,
@@ -32528,9 +32597,9 @@
       "spec_refs": [
         "ADR-178"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "Queued · knowledge/Steering+Repositories · Changes merged or edited on GitHub never reach the steering registry",
-      "updated_at": "2026-09-25T18:50:39Z"
+      "updated_at": "2026-09-25T21:50:03Z"
     },
     "oxagen#4284": {
       "author": "macanderson",
@@ -32714,15 +32783,16 @@
         "ADR-177",
         "ADR-183",
         "ADR-053",
-        "ADR-182"
+        "ADR-182",
+        "ADR-184"
       ],
       "state": "open",
       "title": "feat(agent): author_graph_rule sends the rule-authoring goal on a stella turn",
-      "updated_at": "2026-09-25T20:01:55Z"
+      "updated_at": "2026-09-25T23:18:00Z"
     },
     "oxagen#4291": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T21:50:01Z",
       "closes": [
         4283
       ],
@@ -32734,7 +32804,7 @@
       "labels": [
         "migration-required"
       ],
-      "merged_at": null,
+      "merged_at": "2026-09-25T21:50:01Z",
       "milestone": null,
       "needs_decision": false,
       "number": 4291,
@@ -32748,9 +32818,9 @@
         "ADR-184",
         "ADR-042"
       ],
-      "state": "open",
+      "state": "closed",
       "title": "feat(steering): sync the context registry from the production branch",
-      "updated_at": "2026-09-25T19:58:44Z"
+      "updated_at": "2026-09-25T21:50:04Z"
     },
     "oxagen#4292": {
       "author": "github-actions[bot]",
@@ -32859,7 +32929,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "P2 Gap S (Docs): The harness matrix does not say whether MCP tool calls reach the gateway",
-      "updated_at": "2026-09-25T20:14:09Z"
+      "updated_at": "2026-09-25T20:42:26Z"
     },
     "oxagen#4296": {
       "author": "macanderson",
@@ -32889,8 +32959,8 @@
         "ADR-067"
       ],
       "state": "open",
-      "title": "docs(web): say which MCP tool calls reach the gateway",
-      "updated_at": "2026-09-25T20:14:28Z"
+      "title": "docs: state MCP gateway coverage in the harness matrix",
+      "updated_at": "2026-09-25T23:15:29Z"
     },
     "oxagen#4297": {
       "author": "macanderson",
@@ -32945,7 +33015,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "Queued Bug (Desktop): Removing the desktop app leaves hooks that fail every tool call and block Cursor",
-      "updated_at": "2026-09-25T20:26:40Z"
+      "updated_at": "2026-09-25T21:53:58Z"
     },
     "oxagen#4299": {
       "author": "macanderson",
@@ -32971,8 +33041,8 @@
         "ADR-139"
       ],
       "state": "open",
-      "title": "Queued Bug (Tacho): Tacho can freeze for several seconds when a long recorded session ends",
-      "updated_at": "2026-09-25T20:27:39Z"
+      "title": "Queued Bug (Tacho): Tacho can freeze for seconds while it reindexes a long session's recorded content",
+      "updated_at": "2026-09-25T22:42:41Z"
     },
     "oxagen#430": {
       "author": "macanderson",
@@ -32999,7 +33069,7 @@
     },
     "oxagen#4300": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T22:41:47Z",
       "closes": [
         3365
       ],
@@ -33009,7 +33079,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-25T22:41:47Z",
       "milestone": null,
       "needs_decision": false,
       "number": 4300,
@@ -33020,20 +33090,937 @@
         3719,
         3505,
         3782,
-        3694
+        3694,
+        4311,
+        4299
       ],
       "repo": "oxagen",
       "spec_refs": [
         "ADR-185",
         "ADR-126",
         "ADR-127",
+        "ADR-139",
+        "ADR-074",
+        "ADR-086",
         "ADR-183",
-        "ADR-184",
+        "ADR-184"
+      ],
+      "state": "closed",
+      "title": "docs(adr): record that a failed WAL body write rolls back the seal",
+      "updated_at": "2026-09-25T22:41:50Z"
+    },
+    "oxagen#4301": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3372,
+        3661
+      ],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4301",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4301,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-140",
+        "ADR-185",
+        "ADR-127",
+        "ADR-043",
+        "docs/specs/tacho/spec.md"
+      ],
+      "state": "open",
+      "title": "fix(tacho): grade a recording by what a reader can see, and stop a lost WAL write from shadowing a body",
+      "updated_at": "2026-09-25T23:25:33Z"
+    },
+    "oxagen#4302": {
+      "author": "macanderson",
+      "closed_at": "2026-09-25T23:13:23Z",
+      "closes": [
+        3996
+      ],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4302",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-25T23:13:23Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4302,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3989,
+        3367
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-159",
+        "ADR-141",
+        "docs/specs/tacho/spec.md",
+        "docs/specs/oxagen-desktop/spec.md"
+      ],
+      "state": "closed",
+      "title": "fix(tacho): close ended Codex and Claude Code sessions on the host, and fix Cursor setup steps",
+      "updated_at": "2026-09-25T23:13:25Z"
+    },
+    "oxagen#4303": {
+      "author": "macanderson",
+      "closed_at": "2026-09-25T21:12:11Z",
+      "closes": [
+        3348,
+        3214
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4303",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-25T21:12:11Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4303,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3697,
+        4313
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(desktop): house fonts, library validation on, and an automatic update check",
+      "updated_at": "2026-09-25T21:12:14Z"
+    },
+    "oxagen#4304": {
+      "author": "macanderson",
+      "closed_at": "2026-09-25T22:15:07Z",
+      "closes": [
+        3301,
+        3330
+      ],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4304",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-25T22:15:07Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4304,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        4317,
+        4318
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-095",
+        "ADR-101",
+        "ADR-078"
+      ],
+      "state": "closed",
+      "title": "fix(tacho, desktop): give harness files back byte for byte, prove Windows uninstall, and keep the release token off argv",
+      "updated_at": "2026-09-25T22:15:09Z"
+    },
+    "oxagen#4305": {
+      "author": "macanderson",
+      "closed_at": "2026-09-25T21:53:38Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4305",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-25T21:53:38Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4305,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3944,
+        4298,
+        4312
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-162",
+        "ADR-179"
+      ],
+      "state": "closed",
+      "title": "fix(tacho): cap proxy decompression, tell a revoked host, one PR attr scheme, budget run enrichment",
+      "updated_at": "2026-09-25T21:53:40Z"
+    },
+    "oxagen#4306": {
+      "author": "macanderson",
+      "closed_at": "2026-09-25T23:19:48Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4306",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "migration-required"
+      ],
+      "merged_at": "2026-09-25T23:19:48Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4306,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3825,
+        3072,
+        3662,
+        3944
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-183",
+        "ADR-042",
+        "ADR-134",
+        "ADR-058",
+        "ADR-181",
+        "docs/specs/tacho/data-model.md",
+        "docs/specs/tacho/spec.md"
+      ],
+      "state": "closed",
+      "title": "fix(tacho): drop stored email columns, write spend in the ingest transaction, bound insert memory, widen counters",
+      "updated_at": "2026-09-25T23:19:49Z"
+    },
+    "oxagen#4307": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4307",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4307,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3375,
+        3942
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-182"
+      ],
+      "state": "open",
+      "title": "refactor(app/run): the Run page presents the server's transcript fold (ADR-182, stage 4)",
+      "updated_at": "2026-09-25T23:16:30Z"
+    },
+    "oxagen#4308": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4308",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4308,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3375
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-182"
+      ],
+      "state": "open",
+      "title": "Queued · evidence/ClickHouse · A wrapped run's turn step counts come from SQL, a second step rule beside the transcript fold",
+      "updated_at": "2026-09-25T20:43:53Z"
+    },
+    "oxagen#4309": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        4104,
+        3675
+      ],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4309",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4309,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3384
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-186",
+        "docs/specs/gateway/spec.md",
+        "docs/specs/tacho/spec.md"
+      ],
+      "state": "open",
+      "title": "fix(tacho): report the files a session changed, not a pull's or earlier edits",
+      "updated_at": "2026-09-25T22:47:10Z"
+    },
+    "oxagen#4310": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4310",
+      "is_pr": false,
+      "kind": "defect",
+      "labels": [
+        "P1",
+        "kind:defect",
+        "pillar:reliability",
+        "size/M",
+        "area:tools",
+        "area:stella"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4310,
+      "pillar": "reliability",
+      "priority": "P1",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-053"
+      ],
+      "state": "open",
+      "title": "P1 Defect M (Stella): The in-app agent loads the workspace's MCP servers and obeys its rules",
+      "updated_at": "2026-09-25T20:52:22Z"
+    },
+    "oxagen#4311": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4311",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4311,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-185",
+        "ADR-127",
         "ADR-139"
       ],
       "state": "open",
-      "title": "docs(adr): record that a failed WAL body write rolls back the seal",
-      "updated_at": "2026-09-25T20:28:43Z"
+      "title": "Queued Bug (Tacho): A failed disk write can leave a hole in a session's recorded history (residue #4300)",
+      "updated_at": "2026-09-25T22:42:40Z"
+    },
+    "oxagen#4312": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4312",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4312,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued Gap (Runs): A live run's enrichment budget resets with each 30-minute job, so one run's total spend has no cap (residue #4305)",
+      "updated_at": "2026-09-25T21:53:57Z"
+    },
+    "oxagen#4313": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4313",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4313,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued Debt (Desktop): The macOS release check's path for a bundle without the hardened runtime has never run (residue #4303)",
+      "updated_at": "2026-09-25T20:55:14Z"
+    },
+    "oxagen#4314": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4314",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4314,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued Bug (Tacho): An operator cancel can signal an unrelated process that reused a session's pid (residue #4302)",
+      "updated_at": "2026-09-25T20:59:54Z"
+    },
+    "oxagen#4315": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4315",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4315,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-042",
+        "ADR-134"
+      ],
+      "state": "open",
+      "title": "Queued Bug (Spend): Model usage from an organization on its own database is never delivered",
+      "updated_at": "2026-09-25T21:00:56Z"
+    },
+    "oxagen#4316": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4316",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4316,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued Bug (Tacho): Run frames that expire will read as a broken chain (residue #4306)",
+      "updated_at": "2026-09-25T21:01:13Z"
+    },
+    "oxagen#4317": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4317",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4317,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3301
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued Gap (Desktop): Prove that uninstall restores every agent's settings on a real Mac, Linux, and Windows machine",
+      "updated_at": "2026-09-25T22:16:43Z"
+    },
+    "oxagen#4318": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        3301
+      ],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4318",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4318,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        4304
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-078"
+      ],
+      "state": "open",
+      "title": "Queued Bug (Desktop): Setup and removal keep eight small defects the last review left open (residue #4304)",
+      "updated_at": "2026-09-25T22:16:44Z"
+    },
+    "oxagen#4319": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4319",
+      "is_pr": false,
+      "kind": "gap",
+      "labels": [
+        "P1",
+        "pillar:maintainability",
+        "kind:gap",
+        "size/S",
+        "area:gateway",
+        "area:docs"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4319,
+      "pillar": "maintainability",
+      "priority": "P1",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-094",
+        "ADR-143",
+        "ADR-122",
+        "ADR-187"
+      ],
+      "state": "open",
+      "title": "P1 Gap S (Gateway): Record the gateway direction in an ADR",
+      "updated_at": "2026-09-25T21:23:05Z"
+    },
+    "oxagen#4320": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4320",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4320,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-186"
+      ],
+      "state": "open",
+      "title": "Queued Bug (Tacho): A run's file list misses commits under another email and disagrees with its diff (residue #4309)",
+      "updated_at": "2026-09-25T21:23:08Z"
+    },
+    "oxagen#4321": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        4319
+      ],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4321",
+      "is_pr": true,
+      "kind": null,
+      "labels": [
+        "area:gateway",
+        "area:docs"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4321,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3299
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-187",
+        "ADR-094",
+        "ADR-143",
+        "ADR-122",
+        "ADR-078",
+        "ADR-184"
+      ],
+      "state": "open",
+      "title": "docs(adr): ADR-187, two gateways carry every customer agent's traffic, and Oxagen holds the keys",
+      "updated_at": "2026-09-25T23:21:19Z"
+    },
+    "oxagen#4322": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4322",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4322,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3989
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-159",
+        "ADR-141",
+        "docs/specs/tacho/spec.md"
+      ],
+      "state": "open",
+      "title": "Queued Bug (Tacho): A Cursor session that closes without its end event stays open for six hours",
+      "updated_at": "2026-09-25T21:44:18Z"
+    },
+    "oxagen#4323": {
+      "author": "macanderson",
+      "closed_at": "2026-09-25T22:10:37Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4323",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4323,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Queued · ops/CI · A deploy's desktop build runs a newer desktop.yml against the deployed commit and fails",
+      "updated_at": "2026-09-25T22:10:37Z"
+    },
+    "oxagen#4324": {
+      "author": "macanderson",
+      "closed_at": "2026-09-25T21:49:49Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4324",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-25T21:49:49Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4324,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        4323
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(ci): skip a deploy's desktop build when desktop.yml is newer than its commit",
+      "updated_at": "2026-09-25T21:49:52Z"
+    },
+    "oxagen#4325": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4325",
+      "is_pr": false,
+      "kind": "debt",
+      "labels": [
+        "P2",
+        "kind:debt",
+        "job:ground",
+        "pillar:maintainability",
+        "size/XL",
+        "area:steering"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4325,
+      "pillar": "maintainability",
+      "priority": "P2",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-112"
+      ],
+      "state": "open",
+      "title": "P2 Debt XL (Steering): Rename context records to steering records in the code, schema, and capabilities",
+      "updated_at": "2026-09-25T21:51:33Z"
+    },
+    "oxagen#4326": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4326",
+      "is_pr": false,
+      "kind": "feature",
+      "labels": [
+        "P2",
+        "kind:feature",
+        "job:ground",
+        "pillar:maintainability",
+        "pillar:innovation",
+        "size/L",
+        "area:steering"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4326,
+      "pillar": "maintainability",
+      "priority": "P2",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-101"
+      ],
+      "state": "open",
+      "title": "P2 Feature L (Steering): Ingest a harness's subagent files as agent personas",
+      "updated_at": "2026-09-25T21:51:32Z"
+    },
+    "oxagen#4327": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4327",
+      "is_pr": false,
+      "kind": "gap",
+      "labels": [
+        "P2",
+        "job:govern",
+        "pillar:innovation",
+        "kind:gap",
+        "pillar:reliability",
+        "size/M",
+        "area:tools"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4327,
+      "pillar": "innovation",
+      "priority": "P2",
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "P2 Gap M (Tools): The Providers roster keeps each provider's registry icon, description, website, docs and source",
+      "updated_at": "2026-09-25T22:42:34Z"
+    },
+    "oxagen#4328": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4328",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4328,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Queued Bug (App shell): The organization and workspace switchers end in a question mark that reads as broken",
+      "updated_at": "2026-09-25T23:08:58Z"
+    },
+    "oxagen#4329": {
+      "author": "macanderson",
+      "closed_at": "2026-09-25T23:21:09Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4329",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-25T23:21:09Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4329,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3851
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "fix(shell): drop the caption under Ask Stella in the sidebar foot",
+      "updated_at": "2026-09-25T23:21:10Z"
+    },
+    "oxagen#4330": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [
+        4328
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4330",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4330,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3861
+      ],
+      "repo": "oxagen",
+      "spec_refs": [],
+      "state": "open",
+      "title": "fix(app-shell): drop the question mark from the switcher tiles",
+      "updated_at": "2026-09-25T23:09:06Z"
+    },
+    "oxagen#4331": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": true,
+      "html_url": "https://github.com/macanderson/oxagen/issues/4331",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "triage"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 4331,
+      "pillar": null,
+      "priority": null,
+      "refs": [
+        3375
+      ],
+      "repo": "oxagen",
+      "spec_refs": [
+        "ADR-182"
+      ],
+      "state": "open",
+      "title": "Queued · evidence/ClickHouse+API · A transcript read opens every uncached prompt and reply body to decide which rows are blank or echoes",
+      "updated_at": "2026-09-25T23:16:40Z"
     },
     "oxagen#5": {
       "author": "macanderson",
@@ -33956,7 +34943,7 @@
     },
     "oxagen-roadmap#114": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T21:38:57Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -33975,13 +34962,13 @@
       "refs": [],
       "repo": "oxagen-roadmap",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Copy prompt buttons in the mockups show no success state",
-      "updated_at": "2026-09-25T19:36:18Z"
+      "updated_at": "2026-09-25T21:38:57Z"
     },
     "oxagen-roadmap#115": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T21:38:56Z",
       "closes": [
         114
       ],
@@ -33991,7 +34978,7 @@
       "is_pr": true,
       "kind": null,
       "labels": [],
-      "merged_at": null,
+      "merged_at": "2026-09-25T21:38:56Z",
       "milestone": null,
       "needs_decision": false,
       "number": 115,
@@ -34000,9 +34987,9 @@
       "refs": [],
       "repo": "oxagen-roadmap",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "mockups: copy buttons show a check and Copied when the copy lands",
-      "updated_at": "2026-09-25T20:12:58Z"
+      "updated_at": "2026-09-25T21:38:56Z"
     },
     "oxagen-roadmap#116": {
       "author": "macanderson",
@@ -34027,7 +35014,7 @@
       "spec_refs": [],
       "state": "open",
       "title": "Specify the enforcement tier ladder and plan MCP routing",
-      "updated_at": "2026-09-25T20:12:55Z"
+      "updated_at": "2026-09-25T20:55:35Z"
     },
     "oxagen-roadmap#117": {
       "author": "macanderson",
@@ -34052,15 +35039,16 @@
       "refs": [],
       "repo": "oxagen-roadmap",
       "spec_refs": [
+        "ADR-187",
         "ADR-096"
       ],
       "state": "open",
-      "title": "docs: specify the enforcement tier ladder and plan MCP routing",
-      "updated_at": "2026-09-25T20:20:42Z"
+      "title": "docs: specify the enforcement tier ladder and plan the Oxagen gateways",
+      "updated_at": "2026-09-25T22:28:09Z"
     },
     "oxagen-roadmap#118": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T22:27:13Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -34079,9 +35067,209 @@
       "refs": [],
       "repo": "oxagen-roadmap",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "mockups: move explainer text into a review toolbar with per-component help",
-      "updated_at": "2026-09-25T20:25:48Z"
+      "updated_at": "2026-09-25T22:27:13Z"
+    },
+    "oxagen-roadmap#119": {
+      "author": "macanderson",
+      "closed_at": "2026-09-25T21:49:22Z",
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/issues/119",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "enhancement"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 119,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "Work: an In progress tab, multi-select Labels and Owner filters, and stat cards with a My work scope",
+      "updated_at": "2026-09-25T21:49:22Z"
+    },
+    "oxagen-roadmap#120": {
+      "author": "macanderson",
+      "closed_at": "2026-09-25T21:49:21Z",
+      "closes": [
+        119
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/120",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-25T21:49:21Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 120,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "mockups: Work gets an In progress tab, multi-select Labels and Owner filters, and stat cards",
+      "updated_at": "2026-09-25T21:49:21Z"
+    },
+    "oxagen-roadmap#121": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/issues/121",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "bug"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 121,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [],
+      "state": "open",
+      "title": "mockups: the complex model route reads $0 because its Spend line changed case",
+      "updated_at": "2026-09-25T22:05:43Z"
+    },
+    "oxagen-roadmap#122": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/issues/122",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "bug"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 122,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [],
+      "state": "open",
+      "title": "The demo namespace a-intel breaks the spec's 2 to 6 character limit",
+      "updated_at": "2026-09-25T22:06:05Z"
+    },
+    "oxagen-roadmap#123": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/issues/123",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "bug"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 123,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [],
+      "state": "open",
+      "title": "mockups: defects the component help records and nothing fixes yet",
+      "updated_at": "2026-09-25T22:06:25Z"
+    },
+    "oxagen-roadmap#124": {
+      "author": "macanderson",
+      "closed_at": "2026-09-25T22:27:12Z",
+      "closes": [
+        118
+      ],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/pull/124",
+      "is_pr": true,
+      "kind": null,
+      "labels": [],
+      "merged_at": "2026-09-25T22:27:12Z",
+      "milestone": null,
+      "needs_decision": false,
+      "number": 124,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [],
+      "state": "closed",
+      "title": "mockups: a floating review island, and every explanation moves into per-component help",
+      "updated_at": "2026-09-25T22:27:14Z"
+    },
+    "oxagen-roadmap#125": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/issues/125",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "documentation"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 125,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Tools › Providers: the logomark, website and docs from the MCP registry are in the spec and the audit",
+      "updated_at": "2026-09-25T22:43:53Z"
+    },
+    "oxagen-roadmap#126": {
+      "author": "macanderson",
+      "closed_at": null,
+      "closes": [],
+      "decision_question": null,
+      "has_spec_backing": false,
+      "html_url": "https://github.com/macanderson/oxagen-roadmap/issues/126",
+      "is_pr": false,
+      "kind": null,
+      "labels": [
+        "enhancement"
+      ],
+      "merged_at": null,
+      "milestone": null,
+      "needs_decision": false,
+      "number": 126,
+      "pillar": null,
+      "priority": null,
+      "refs": [],
+      "repo": "oxagen-roadmap",
+      "spec_refs": [],
+      "state": "open",
+      "title": "Policy has no editor for a version's rules",
+      "updated_at": "2026-09-25T22:46:54Z"
     },
     "oxagen-roadmap#70": {
       "author": "macanderson",
@@ -49988,7 +51176,7 @@
     },
     "stella#6564": {
       "author": "macanderson",
-      "closed_at": null,
+      "closed_at": "2026-09-25T21:34:48Z",
       "closes": [],
       "decision_question": null,
       "has_spec_backing": false,
@@ -50009,9 +51197,9 @@
       "refs": [],
       "repo": "stella",
       "spec_refs": [],
-      "state": "open",
+      "state": "closed",
       "title": "Load MCP servers from user and managed scope, with a managed allowlist",
-      "updated_at": "2026-09-25T20:20:20Z"
+      "updated_at": "2026-09-25T21:34:48Z"
     },
     "stella#834": {
       "author": "macanderson",
@@ -50135,9 +51323,49 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-25T19:53:58Z",
+      "last_merge": "2026-09-25T23:13:23Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T23:13:23Z",
+          "number": 4302,
+          "repo": "oxagen",
+          "title": "fix(tacho): close ended Codex and Claude Code sessions on the host, and fix Cursor setup steps",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T22:41:47Z",
+          "number": 4300,
+          "repo": "oxagen",
+          "title": "docs(adr): record that a failed WAL body write rolls back the seal",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T22:15:07Z",
+          "number": 4304,
+          "repo": "oxagen",
+          "title": "fix(tacho, desktop): give harness files back byte for byte, prove Windows uninstall, and keep the release token off argv",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T21:53:38Z",
+          "number": 4305,
+          "repo": "oxagen",
+          "title": "fix(tacho): cap proxy decompression, tell a revoked host, one PR attr scheme, budget run enrichment",
+          "touched": [
+            "packages/tacho"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-25T19:53:58Z",
@@ -50297,59 +51525,29 @@
           "touched": [
             "packages/tacho"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-24T17:58:38Z",
-          "number": 4076,
-          "repo": "oxagen",
-          "title": "feat(app): say a run is parked or paused in its header, and edit a money limit on a mandate",
-          "touched": [
-            "packages/tacho"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-24T17:09:48Z",
-          "number": 4075,
-          "repo": "oxagen",
-          "title": "fix(tacho): count a subagent's model and tool calls once per session family",
-          "touched": [
-            "packages/tacho"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-24T17:09:29Z",
-          "number": 4066,
-          "repo": "oxagen",
-          "title": "feat(cli, app): copy org and workspace public ids, and accept them in .oxagen/workspace.json",
-          "touched": [
-            "apps/cli/src"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-24T16:34:57Z",
-          "number": 4062,
-          "repo": "oxagen",
-          "title": "fix(billing): price unknown models at Sonnet 5 on the CLI card",
-          "touched": [
-            "apps/cli/src"
-          ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-25T20:28:46.835Z",
+      "refreshed_at": "2026-09-25T23:26:50.123Z",
       "shared_page": false
     },
     "D3": {
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "dod",
-      "last_merge": "2026-09-25T11:24:02Z",
+      "last_merge": "2026-09-25T23:19:48Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T23:19:48Z",
+          "number": 4306,
+          "repo": "oxagen",
+          "title": "fix(tacho): drop stored email columns, write spend in the ingest transaction, bound insert memory, widen counters",
+          "touched": [
+            "packages/billing/src"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-25T11:24:02Z",
@@ -50539,20 +51737,10 @@
           "touched": [
             "packages/billing/src"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-21T07:43:19Z",
-          "number": 3629,
-          "repo": "oxagen",
-          "title": "Show and cancel scheduled prices without losing observed usage",
-          "touched": [
-            "packages/billing/src"
-          ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-25T12:12:55.926Z",
+      "refreshed_at": "2026-09-25T23:26:50.123Z",
       "shared_page": false
     },
     "D4": {
@@ -50983,9 +52171,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "witness",
-      "last_merge": "2026-09-25T12:59:06Z",
+      "last_merge": "2026-09-25T23:19:48Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T23:19:48Z",
+          "number": 4306,
+          "repo": "oxagen",
+          "title": "fix(tacho): drop stored email columns, write spend in the ingest transaction, bound insert memory, widen counters",
+          "touched": [
+            "packages/handlers/src/tacho.events.ingest.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-25T12:59:06Z",
@@ -51175,20 +52373,10 @@
           "touched": [
             "packages/handlers/src/tacho.events.ingest.ts"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-19T06:53:38Z",
-          "number": 3332,
-          "repo": "oxagen",
-          "title": "desktop: sign-in stops holding the setup wizard for five minutes, and a spec for the remaining gateway gaps",
-          "touched": [
-            "packages/handlers/src/tacho.events.ingest.ts"
-          ]
         }
       ],
       "open_issues": 0,
-      "refreshed_at": "2026-09-25T17:11:12.521Z",
+      "refreshed_at": "2026-09-25T23:26:50.123Z",
       "shared_page": false
     },
     "W3": {
@@ -53074,7 +54262,7 @@
       "shared_page": false
     },
     "installer": {
-      "closed_issues": 1,
+      "closed_issues": 3,
       "gap_refs": [
         {
           "number": 3320,
@@ -53082,12 +54270,12 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-25T12:59:06Z",
+      "last_merge": "2026-09-25T23:13:23Z",
       "links": [
         {
           "number": 3301,
           "repo": "oxagen",
-          "state": "open",
+          "state": "closed",
           "title": "P0 Bug L (Desktop): Uninstalling the desktop app can leave each agent tool's settings changed"
         },
         {
@@ -53099,11 +54287,45 @@
         {
           "number": 3330,
           "repo": "oxagen",
-          "state": "open",
+          "state": "closed",
           "title": "P2 Bug S (Tacho): Uninstall leaves empty settings files and the release script exposes its token"
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T23:13:23Z",
+          "number": 4302,
+          "repo": "oxagen",
+          "title": "fix(tacho): close ended Codex and Claude Code sessions on the host, and fix Cursor setup steps",
+          "touched": [
+            "docs/specs/oxagen-desktop"
+          ]
+        },
+        {
+          "closes": [
+            3301,
+            3330
+          ],
+          "merged_at": "2026-09-25T22:15:07Z",
+          "number": 4304,
+          "repo": "oxagen",
+          "title": "fix(tacho, desktop): give harness files back byte for byte, prove Windows uninstall, and keep the release token off argv",
+          "touched": [
+            "packages/tacho/src/cli/install-rig.test.ts",
+            "packages/tacho/src/cli/enroll.ts"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T21:12:11Z",
+          "number": 4303,
+          "repo": "oxagen",
+          "title": "fix(desktop): house fonts, library validation on, and an automatic update check",
+          "touched": [
+            "apps/desktop/README.md"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-25T12:59:06Z",
@@ -53286,42 +54508,11 @@
             "packages/tacho/src/cli/install-rig.test.ts",
             "packages/tacho/src/cli/unenroll.ts"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T03:31:58Z",
-          "number": 3538,
-          "repo": "oxagen",
-          "title": "Preserve desktop uninstall recovery state on failure",
-          "touched": [
-            "packages/tacho/src/cli/install-rig.test.ts",
-            "packages/tacho/src/cli/unenroll.ts"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T01:21:02Z",
-          "number": 3512,
-          "repo": "oxagen",
-          "title": "release: one version across every manifest, pnpm dist:local, and pnpm release:<bump>:publish from the laptop",
-          "touched": [
-            "apps/desktop/README.md"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-20T00:03:46Z",
-          "number": 3496,
-          "repo": "oxagen",
-          "title": "release: one-button releases, model-written notes on docs.oxagen.sh, and a house-brand downloads page published by CI",
-          "touched": [
-            "apps/desktop/README.md"
-          ]
         }
       ],
-      "open_issues": 2,
+      "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-25T20:28:46.835Z",
+      "refreshed_at": "2026-09-25T23:26:50.123Z",
       "shared_page": true
     },
     "login": {
@@ -54268,7 +55459,7 @@
       "closed_issues": 1,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T09:32:53Z",
+      "last_merge": "2026-09-25T21:50:01Z",
       "links": [
         {
           "number": 3395,
@@ -54278,6 +55469,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T21:50:01Z",
+          "number": 4291,
+          "repo": "oxagen",
+          "title": "feat(steering): sync the context registry from the production branch",
+          "touched": [
+            "apps/app/src/data/contracts/steering.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T09:32:53Z",
@@ -54356,11 +55557,11 @@
       "open_issues": 0,
       "page": null,
       "reason": "#3622 closed a linked issue",
-      "refreshed_at": "2026-09-25T06:39:46.351Z",
+      "refreshed_at": "2026-09-25T23:26:50.123Z",
       "shared_page": false
     },
     "register-name": {
-      "closed_issues": 1,
+      "closed_issues": 2,
       "gap_refs": [
         {
           "number": 3260,
@@ -54379,7 +55580,7 @@
         {
           "number": 3313,
           "repo": "oxagen",
-          "state": "open",
+          "state": "closed",
           "title": "P2 Bug S (Stella): Renaming a workspace hides its assistant threads and any reply in flight"
         }
       ],
@@ -54590,9 +55791,9 @@
           ]
         }
       ],
-      "open_issues": 1,
+      "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-25T20:28:46.835Z",
+      "refreshed_at": "2026-09-25T23:26:50.123Z",
       "shared_page": true
     },
     "register-run": {
@@ -54642,9 +55843,19 @@
       "closed_issues": 0,
       "gap_refs": [],
       "kind": "surface",
-      "last_merge": "2026-09-24T20:02:18Z",
+      "last_merge": "2026-09-25T22:15:07Z",
       "links": [],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T22:15:07Z",
+          "number": 4304,
+          "repo": "oxagen",
+          "title": "fix(tacho, desktop): give harness files back byte for byte, prove Windows uninstall, and keep the release token off argv",
+          "touched": [
+            "packages/tacho/src/host/model-base-url.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-24T20:02:18Z",
@@ -54748,7 +55959,7 @@
       ],
       "open_issues": 0,
       "page": "apps/app/src/app/[org]/[ws]/register/[step]/page.tsx",
-      "refreshed_at": "2026-09-24T20:41:15.996Z",
+      "refreshed_at": "2026-09-25T23:26:50.123Z",
       "shared_page": true
     },
     "repositories": {
@@ -54760,7 +55971,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-25T04:16:53Z",
+      "last_merge": "2026-09-25T21:50:01Z",
       "links": [
         {
           "number": 3241,
@@ -54788,6 +55999,16 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T21:50:01Z",
+          "number": 4291,
+          "repo": "oxagen",
+          "title": "feat(steering): sync the context registry from the production branch",
+          "touched": [
+            "packages/handlers/src/context.steering.github.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-25T04:16:53Z",
@@ -54907,7 +56128,7 @@
       ],
       "open_issues": 1,
       "page": null,
-      "refreshed_at": "2026-09-25T20:28:46.835Z",
+      "refreshed_at": "2026-09-25T23:26:50.123Z",
       "shared_page": false
     },
     "reset-password": {
@@ -56066,7 +57287,7 @@
         }
       ],
       "kind": "surface",
-      "last_merge": "2026-09-25T05:44:30Z",
+      "last_merge": "2026-09-25T23:13:23Z",
       "links": [
         {
           "number": 2592,
@@ -56118,6 +57339,26 @@
         }
       ],
       "merged_prs": [
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T23:13:23Z",
+          "number": 4302,
+          "repo": "oxagen",
+          "title": "fix(tacho): close ended Codex and Claude Code sessions on the host, and fix Cursor setup steps",
+          "touched": [
+            "packages/tacho/src/claude-code/hook-client.ts"
+          ]
+        },
+        {
+          "closes": [],
+          "merged_at": "2026-09-25T21:53:38Z",
+          "number": 4305,
+          "repo": "oxagen",
+          "title": "fix(tacho): cap proxy decompression, tell a revoked host, one PR attr scheme, budget run enrichment",
+          "touched": [
+            "packages/handlers/src/lib/tacho-host.ts"
+          ]
+        },
         {
           "closes": [],
           "merged_at": "2026-09-25T05:44:30Z",
@@ -56308,32 +57549,11 @@
           "touched": [
             "packages/handlers/src/lib/tacho-host.ts"
           ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T16:43:21Z",
-          "number": 3759,
-          "repo": "oxagen",
-          "title": "fix(tacho): enforce the published definition budget",
-          "touched": [
-            "packages/handlers/src/lib/tacho-host.ts"
-          ]
-        },
-        {
-          "closes": [],
-          "merged_at": "2026-09-23T16:42:54Z",
-          "number": 3748,
-          "repo": "oxagen",
-          "title": "feat(steering): assemble budgeted context and show delivery counts",
-          "touched": [
-            "packages/handlers/src/lib/tacho-steering.ts",
-            "packages/handlers/src/lib/tacho-host.ts"
-          ]
         }
       ],
       "open_issues": 4,
       "page": "apps/app/src/app/[org]/[ws]/steering/page.tsx",
-      "refreshed_at": "2026-09-25T20:28:46.835Z",
+      "refreshed_at": "2026-09-25T23:26:50.123Z",
       "shared_page": false
     },
     "tools": {
@@ -57184,20 +58404,20 @@
     }
   },
   "last_run": {
-    "at": "2026-09-25T20:28:46.835Z",
-    "calls": 24,
+    "at": "2026-09-25T23:26:50.123Z",
+    "calls": 17,
     "quiet": false
   },
   "milestones": {
     "M0": {
       "built": 4,
       "last_merge": {
-        "merged_at": "2026-09-25T18:07:27Z",
-        "number": 4280,
+        "merged_at": "2026-09-25T21:50:01Z",
+        "number": 4291,
         "repo": "oxagen",
-        "title": "feat(app): one avatar editor for people, agents, workspaces, and organizations, with gold tones"
+        "title": "feat(steering): sync the context registry from the production branch"
       },
-      "merged_prs": 72,
+      "merged_prs": 73,
       "not_started": 0,
       "open_issues": 3,
       "partial": 1,
@@ -57206,14 +58426,14 @@
     "M1": {
       "built": 10,
       "last_merge": {
-        "merged_at": "2026-09-25T19:53:58Z",
-        "number": 4289,
+        "merged_at": "2026-09-25T23:13:23Z",
+        "number": 4302,
         "repo": "oxagen",
-        "title": "refactor(run): fold a run's transcript on the server only (ADR-182)"
+        "title": "fix(tacho): close ended Codex and Claude Code sessions on the host, and fix Cursor setup steps"
       },
-      "merged_prs": 143,
+      "merged_prs": 146,
       "not_started": 1,
-      "open_issues": 7,
+      "open_issues": 4,
       "partial": 5,
       "total": 16
     },
@@ -57262,12 +58482,12 @@
     "M5": {
       "built": 0,
       "last_merge": {
-        "merged_at": "2026-09-25T10:29:33Z",
-        "number": 4149,
+        "merged_at": "2026-09-25T23:13:23Z",
+        "number": 4302,
         "repo": "oxagen",
-        "title": "feat(steering): name each context record by a 36-character label, and restore Clone"
+        "title": "fix(tacho): close ended Codex and Claude Code sessions on the host, and fix Cursor setup steps"
       },
-      "merged_prs": 51,
+      "merged_prs": 54,
       "not_started": 6,
       "open_issues": 5,
       "partial": 4,
@@ -57276,12 +58496,12 @@
     "M6": {
       "built": 0,
       "last_merge": {
-        "merged_at": "2026-09-25T05:44:30Z",
-        "number": 4217,
+        "merged_at": "2026-09-25T23:13:23Z",
+        "number": 4302,
         "repo": "oxagen",
-        "title": "chore: correct six comments and notes that no longer match the code"
+        "title": "fix(tacho): close ended Codex and Claude Code sessions on the host, and fix Cursor setup steps"
       },
-      "merged_prs": 34,
+      "merged_prs": 36,
       "not_started": 0,
       "open_issues": 4,
       "partial": 1,
@@ -80456,6 +81676,111 @@
       "repo": "oxagen",
       "title": "refactor(run): fold a run's transcript on the server only (ADR-182)"
     },
+    "oxagen#4291": {
+      "added": [
+        "apps/app/src/ui/live-refresh.test.tsx",
+        "apps/app/src/ui/live-refresh.tsx",
+        "docs/adr/ADR-184-the-registry-follows-the-production-branch.md",
+        "packages/database/atlas/migrations/20260925180000_context_sync_state.sql",
+        "packages/handlers/src/context.steering.publication.ts",
+        "packages/handlers/src/context.steering.sync.plan.test.ts",
+        "packages/handlers/src/context.steering.sync.plan.ts",
+        "packages/handlers/src/context.steering.sync.request.test.ts",
+        "packages/handlers/src/context.steering.sync.request.ts",
+        "packages/handlers/src/context.steering.sync.store.ts",
+        "packages/handlers/src/context.steering.sync.test.ts",
+        "packages/handlers/src/context.steering.sync.ts",
+        "packages/inngest-functions/src/functions/steering.sync.test.ts",
+        "packages/inngest-functions/src/functions/steering.sync.ts",
+        "packages/inngest-functions/src/lib/steering-sync-runner.ts"
+      ],
+      "author": "macanderson",
+      "closes": [
+        4283
+      ],
+      "files": [
+        "apps/api/src/__tests__/github-webhook.test.ts",
+        "apps/api/src/routes/v1/github-webhook.ts",
+        "apps/app/messages/steering.json",
+        "apps/app/src/data/contracts/steering.ts",
+        "apps/app/src/data/live/mappers/steering.ts",
+        "apps/app/src/features/repositories/repositories.test.tsx",
+        "apps/app/src/features/repositories/repositories.tsx",
+        "apps/app/src/features/steering/freshness.test.tsx",
+        "apps/app/src/features/steering/freshness.tsx",
+        "apps/app/src/features/steering/tabs/proposals.tsx",
+        "apps/app/src/features/steering/write-controls.test.tsx",
+        "apps/app/src/i18n/messages.d.ts",
+        "apps/app/src/test/steering-views.ts",
+        "apps/app/src/ui/live-refresh.test.tsx",
+        "apps/app/src/ui/live-refresh.tsx",
+        "docs/adr/ADR-061-steering-governance-mode-thresholds-and-the-reflector.md",
+        "docs/adr/ADR-178-context-record-labels.md",
+        "docs/adr/ADR-184-the-registry-follows-the-production-branch.md",
+        "docs/adr/README.md",
+        "docs/capabilities/context.record.promote.md",
+        "docs/capabilities/schemas/get_steering_freshness.json",
+        "docs/specs/steering/README.md",
+        "packages/database/atlas/migrations/20260925180000_context_sync_state.sql",
+        "packages/database/atlas/migrations/atlas.sum",
+        "packages/database/src/schema/agent.ts",
+        "packages/database/src/tenant-policy.manifest.test.ts",
+        "packages/database/src/tenant-policy.manifest.ts",
+        "packages/database/storage-manifest.json",
+        "packages/github/src/__tests__/fetch-client.test.ts",
+        "packages/github/src/fetch-client.ts",
+        "packages/github/src/types.ts",
+        "packages/gitlab/src/client.ts",
+        "packages/gitlab/src/types.ts",
+        "packages/handlers/src/context.pr.merge.ts",
+        "packages/handlers/src/context.pr.open.ts",
+        "packages/handlers/src/context.record.promote.test.ts",
+        "packages/handlers/src/context.record.promote.ts",
+        "packages/handlers/src/context.record.source.ts",
+        "packages/handlers/src/context.steering.checks.test.ts",
+        "packages/handlers/src/context.steering.checks.ts",
+        "packages/handlers/src/context.steering.deps.ts",
+        "packages/handlers/src/context.steering.file.ts",
+        "packages/handlers/src/context.steering.freshness.test.ts",
+        "packages/handlers/src/context.steering.freshness.ts",
+        "packages/handlers/src/context.steering.github.test.ts",
+        "packages/handlers/src/context.steering.github.ts",
+        "packages/handlers/src/context.steering.gitlab.ts",
+        "packages/handlers/src/context.steering.host.ts",
+        "packages/handlers/src/context.steering.publication.ts",
+        "packages/handlers/src/context.steering.store.ts",
+        "packages/handlers/src/context.steering.sync.plan.test.ts",
+        "packages/handlers/src/context.steering.sync.plan.ts",
+        "packages/handlers/src/context.steering.sync.request.test.ts",
+        "packages/handlers/src/context.steering.sync.request.ts",
+        "packages/handlers/src/context.steering.sync.store.ts",
+        "packages/handlers/src/context.steering.sync.test.ts",
+        "packages/handlers/src/context.steering.sync.ts",
+        "packages/handlers/src/context.steering.test-support.ts",
+        "packages/handlers/src/gitlab.webhook.deps.test.ts",
+        "packages/handlers/src/gitlab.webhook.test.ts",
+        "packages/handlers/src/gitlab.webhook.ts",
+        "packages/handlers/src/register.ts",
+        "packages/handlers/src/repository.gitlab.attach.ts",
+        "packages/handlers/src/workspace.create.ts",
+        "packages/inngest-functions/package.json",
+        "packages/inngest-functions/src/functions.ts",
+        "packages/inngest-functions/src/functions/steering.sync.test.ts",
+        "packages/inngest-functions/src/functions/steering.sync.ts",
+        "packages/inngest-functions/src/inngest.ts",
+        "packages/inngest-functions/src/lib/steering-sync-runner.ts",
+        "packages/oxagen/src/contracts/context.steering.freshness.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4291",
+      "merged_at": "2026-09-25T21:50:01Z",
+      "number": 4291,
+      "refs": [
+        4141
+      ],
+      "repo": "oxagen",
+      "title": "feat(steering): sync the context registry from the production branch"
+    },
     "oxagen#4294": {
       "added": [
         ".agent/memory/test-engineer/reflections/2026-09-25-4290-author-graph-rule-coverage.md"
@@ -80473,6 +81798,364 @@
       "refs": [],
       "repo": "oxagen",
       "title": "chore(memory): record the test-engineer lessons from the #4290 coverage audit"
+    },
+    "oxagen#4300": {
+      "added": [
+        "docs/adr/ADR-185-a-failed-wal-body-write-rolls-back-the-seal.md"
+      ],
+      "author": "macanderson",
+      "closes": [
+        3365
+      ],
+      "files": [
+        "docs/adr/ADR-126-wal-frame-content-and-redaction-evidence.md",
+        "docs/adr/ADR-127-wal-body-write-failure.md",
+        "docs/adr/ADR-185-a-failed-wal-body-write-rolls-back-the-seal.md",
+        "docs/adr/README.md",
+        "packages/tacho/src/host/wal.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4300",
+      "merged_at": "2026-09-25T22:41:47Z",
+      "number": 4300,
+      "refs": [
+        4111,
+        3719,
+        3505,
+        3782,
+        3694,
+        4311,
+        4299
+      ],
+      "repo": "oxagen",
+      "title": "docs(adr): record that a failed WAL body write rolls back the seal"
+    },
+    "oxagen#4302": {
+      "added": [
+        "packages/tacho/src/claude-code/harness-process.test.ts",
+        "packages/tacho/src/claude-code/harness-process.ts",
+        "packages/tacho/src/claude-code/hook-client-harness-pid.test.ts",
+        "packages/tacho/src/cli/status-cursor.test.ts",
+        "packages/tacho/src/cli/status-hooks.test.ts",
+        "packages/tacho/src/collector/daemon-harness-end.test.ts",
+        "packages/tacho/src/collector/hook-handler-cursor-steer.test.ts"
+      ],
+      "author": "macanderson",
+      "closes": [
+        3996
+      ],
+      "files": [
+        "apps/app/ARCHITECTURE.md",
+        "apps/app/src/features/runtimes/parts.tsx",
+        "apps/docs/content/docs/cli/wrap-an-agent.mdx",
+        "docs/adr/ADR-141-what-counts-as-an-installed-cursor-and-where-a-cursor-steer-lands.md",
+        "docs/reference/harness-matrix.md",
+        "docs/specs/oxagen-desktop/spec.html",
+        "docs/specs/oxagen-desktop/spec.md",
+        "docs/specs/tacho/spec.md",
+        "packages/handlers/src/system.install.instructions.test.ts",
+        "packages/handlers/src/system.install.instructions.ts",
+        "packages/tacho/README.md",
+        "packages/tacho/src/claude-code/harness-process.test.ts",
+        "packages/tacho/src/claude-code/harness-process.ts",
+        "packages/tacho/src/claude-code/hook-client-harness-pid.test.ts",
+        "packages/tacho/src/claude-code/hook-client.ts",
+        "packages/tacho/src/claude-code/hook-main.ts",
+        "packages/tacho/src/claude-code/hook-process.ts",
+        "packages/tacho/src/claude-code/stella-adapter.ts",
+        "packages/tacho/src/cli/deps.ts",
+        "packages/tacho/src/cli/detect.ts",
+        "packages/tacho/src/cli/status-cursor.test.ts",
+        "packages/tacho/src/cli/status-hooks.test.ts",
+        "packages/tacho/src/cli/status-shipping.test.ts",
+        "packages/tacho/src/cli/status.ts",
+        "packages/tacho/src/collector/daemon-harness-end.test.ts",
+        "packages/tacho/src/collector/detector.ts",
+        "packages/tacho/src/collector/hook-handler-cursor-steer.test.ts",
+        "packages/tacho/src/collector/hook-handler.ts",
+        "packages/tacho/src/host/settings-writer.test.ts",
+        "packages/tacho/src/host/settings-writer.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4302",
+      "merged_at": "2026-09-25T23:13:23Z",
+      "number": 4302,
+      "refs": [
+        3989,
+        3367
+      ],
+      "repo": "oxagen",
+      "title": "fix(tacho): close ended Codex and Claude Code sessions on the host, and fix Cursor setup steps"
+    },
+    "oxagen#4303": {
+      "added": [
+        "apps/desktop/scripts/smoke-macos-bundle.sh",
+        "apps/desktop/src/styles.test.ts",
+        "apps/desktop/src/update-watch.test.ts",
+        "apps/desktop/src/update-watch.ts",
+        "apps/web/scripts/oxagen-css-palette.test.mjs",
+        "verifications/3214-library-validation/README.md",
+        "verifications/3214-library-validation/aarch64-apple-darwin.log",
+        "verifications/3214-library-validation/x86_64-apple-darwin.log",
+        "verifications/3348-desktop-fonts-web-hex/README.md",
+        "verifications/3348-desktop-fonts-web-hex/check-brand.txt",
+        "verifications/3348-desktop-fonts-web-hex/desktop-fonts.json",
+        "verifications/3348-desktop-fonts-web-hex/desktop-masthead.png",
+        "verifications/3348-desktop-fonts-web-hex/web-hero-dark.png",
+        "verifications/3697-update-prompt/README.md",
+        "verifications/3697-update-prompt/update-prompt.png"
+      ],
+      "author": "macanderson",
+      "closes": [
+        3348,
+        3214
+      ],
+      "files": [
+        ".github/workflows/desktop.yml",
+        "apps/desktop/README.md",
+        "apps/desktop/scripts/smoke-macos-bundle.sh",
+        "apps/desktop/src-tauri/entitlements.md",
+        "apps/desktop/src-tauri/entitlements.plist",
+        "apps/desktop/src/app.tsx",
+        "apps/desktop/src/styles.css",
+        "apps/desktop/src/styles.test.ts",
+        "apps/desktop/src/update-watch.test.ts",
+        "apps/desktop/src/update-watch.ts",
+        "apps/web/assets/oxagen.css",
+        "apps/web/scripts/oxagen-css-palette.test.mjs",
+        "packages/ui/README.md",
+        "packages/ui/package.json",
+        "packages/ui/src/styles/fonts/README.md",
+        "verifications/3214-library-validation/README.md",
+        "verifications/3214-library-validation/aarch64-apple-darwin.log",
+        "verifications/3214-library-validation/x86_64-apple-darwin.log",
+        "verifications/3348-desktop-fonts-web-hex/README.md",
+        "verifications/3348-desktop-fonts-web-hex/check-brand.txt",
+        "verifications/3348-desktop-fonts-web-hex/desktop-fonts.json",
+        "verifications/3348-desktop-fonts-web-hex/desktop-masthead.png",
+        "verifications/3348-desktop-fonts-web-hex/web-hero-dark.png",
+        "verifications/3697-update-prompt/README.md",
+        "verifications/3697-update-prompt/update-prompt.png"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4303",
+      "merged_at": "2026-09-25T21:12:11Z",
+      "number": 4303,
+      "refs": [
+        3697,
+        4313
+      ],
+      "repo": "oxagen",
+      "title": "fix(desktop): house fonts, library validation on, and an automatic update check"
+    },
+    "oxagen#4304": {
+      "added": [
+        "apps/desktop/src/publish-downloads.test.ts",
+        "packages/mcp-config/src/credentials.test.ts",
+        "packages/tacho/src/host/atomic-write.test.ts"
+      ],
+      "author": "macanderson",
+      "closes": [
+        3301,
+        3330
+      ],
+      "files": [
+        "apps/desktop/scripts/e2e-smoke.mjs",
+        "apps/desktop/scripts/icons.mjs",
+        "apps/desktop/scripts/publish-downloads.mjs",
+        "apps/desktop/scripts/sidecars.mjs",
+        "apps/desktop/src-tauri/src/lib.rs",
+        "apps/desktop/src-tauri/src/machine.rs",
+        "apps/desktop/src/agents.test.ts",
+        "apps/desktop/src/agents.ts",
+        "apps/desktop/src/app.tsx",
+        "apps/desktop/src/commands.test.ts",
+        "apps/desktop/src/commands.ts",
+        "apps/desktop/src/downloads.ts",
+        "apps/desktop/src/publish-downloads.test.ts",
+        "apps/desktop/src/tacho-status.ts",
+        "packages/mcp-config/src/credentials.test.ts",
+        "packages/mcp-config/src/credentials.ts",
+        "packages/tacho/src/cli/deps.ts",
+        "packages/tacho/src/cli/enroll.ts",
+        "packages/tacho/src/cli/install-rig.test.ts",
+        "packages/tacho/src/cli/install-rig.ts",
+        "packages/tacho/src/host/atomic-write.test.ts",
+        "packages/tacho/src/host/fs.ts",
+        "packages/tacho/src/host/harness-file.ts",
+        "packages/tacho/src/host/install-hardening.test.ts",
+        "packages/tacho/src/host/model-base-url.ts",
+        "packages/tacho/src/host/model-credential.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4304",
+      "merged_at": "2026-09-25T22:15:07Z",
+      "number": 4304,
+      "refs": [
+        4317,
+        4318
+      ],
+      "repo": "oxagen",
+      "title": "fix(tacho, desktop): give harness files back byte for byte, prove Windows uninstall, and keep the release token off argv"
+    },
+    "oxagen#4305": {
+      "added": [
+        "packages/handlers/integration/tacho-host-revoked-key.test.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/api/src/middleware/auth.test.ts",
+        "apps/api/src/middleware/auth.ts",
+        "docs/adr/ADR-162-a-run-resolves-an-issue-when-dispatch-pr-link-and-merge-agree.md",
+        "docs/capabilities/run.outputs.get.md",
+        "docs/capabilities/run.summarize.md",
+        "docs/capabilities/run.work.get.md",
+        "docs/capabilities/tacho.enrollment.revoke.md",
+        "docs/specs/tacho/data-model.md",
+        "docs/specs/tacho/spec.md",
+        "packages/auth/README.md",
+        "packages/auth/src/resolvers/api-key.ts",
+        "packages/auth/src/resolvers/resolvers.test.ts",
+        "packages/handlers/integration/scim-deprovision.test.ts",
+        "packages/handlers/integration/tacho-host-revoked-key.test.ts",
+        "packages/handlers/src/lib/run-list-work.test.ts",
+        "packages/handlers/src/lib/run-list-work.ts",
+        "packages/handlers/src/lib/run-work.clickhouse.test.ts",
+        "packages/handlers/src/lib/run-work.test.ts",
+        "packages/handlers/src/lib/run-work.ts",
+        "packages/handlers/src/lib/tacho-host.ts",
+        "packages/inngest-functions/src/functions/run.enrich.test.ts",
+        "packages/inngest-functions/src/functions/run.enrich.ts",
+        "packages/inngest-functions/src/lib/run-enrichment.test.ts",
+        "packages/inngest-functions/src/lib/run-enrichment.ts",
+        "packages/tacho/src/claude-code/transcript.test.ts",
+        "packages/tacho/src/claude-code/transcript.ts",
+        "packages/tacho/src/cli/status-shipping.test.ts",
+        "packages/tacho/src/cli/status.ts",
+        "packages/tacho/src/collector/collector-units.test.ts",
+        "packages/tacho/src/collector/daemon-wiring-audit-fix.test.ts",
+        "packages/tacho/src/collector/daemon.ts",
+        "packages/tacho/src/collector/model-proxy-audit-fix.test.ts",
+        "packages/tacho/src/collector/model-proxy.ts",
+        "packages/tacho/src/collector/spool.ts",
+        "packages/tacho/src/envelope.ts",
+        "tools/scripts/system-db-justifications.baseline.json"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4305",
+      "merged_at": "2026-09-25T21:53:38Z",
+      "number": 4305,
+      "refs": [
+        3944,
+        4298,
+        4312
+      ],
+      "repo": "oxagen",
+      "title": "fix(tacho): cap proxy decompression, tell a revoked host, one PR attr scheme, budget run enrichment"
+    },
+    "oxagen#4306": {
+      "added": [
+        "docs/adr/ADR-183-claude-code-email-addresses-in-clickhouse-and-postgres.md",
+        "packages/billing/integration/spend-counter.test.ts",
+        "packages/billing/src/spend-counter.test.ts",
+        "packages/database/atlas/migrations/20260925230100_drop_tacho_sessions_anthropic_user_email.sql",
+        "packages/database/atlas/migrations/20260925230200_tacho_sessions_bigint_counters.sql",
+        "packages/telemetry/src/claude-telemetry.integration.test.ts",
+        "packages/telemetry/src/claude-telemetry.test.ts",
+        "packages/telemetry/src/claude-telemetry.ts",
+        "packages/telemetry/src/migrations/0031_drop_tacho_events_anthropic_user_email.sql",
+        "packages/telemetry/src/migrations/0032_tacho_events_ttl.sql",
+        "packages/telemetry/src/tacho-events-insert.integration.test.ts"
+      ],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "docs/adr/ADR-183-claude-code-email-addresses-in-clickhouse-and-postgres.md",
+        "docs/adr/README.md",
+        "docs/audits/2026-09-15-schema-audit.md",
+        "docs/compliance/data-retention.md",
+        "docs/specs/tacho/data-model.md",
+        "docs/specs/tacho/spec.md",
+        "infra/README.md",
+        "packages/billing/integration/spend-counter.test.ts",
+        "packages/billing/src/spend-counter.test.ts",
+        "packages/billing/src/spend-counter.ts",
+        "packages/database/atlas/migrations/20260925230100_drop_tacho_sessions_anthropic_user_email.sql",
+        "packages/database/atlas/migrations/20260925230200_tacho_sessions_bigint_counters.sql",
+        "packages/database/atlas/migrations/atlas.sum",
+        "packages/database/src/schema/tacho.test.ts",
+        "packages/database/src/schema/tacho.ts",
+        "packages/database/storage-manifest.json",
+        "packages/handlers/src/tacho.events.ingest.test.ts",
+        "packages/handlers/src/tacho.events.ingest.ts",
+        "packages/inngest-functions/src/functions/privacy.erasure.execute.test.ts",
+        "packages/inngest-functions/src/functions/privacy.erasure.execute.ts",
+        "packages/telemetry/src/claude-telemetry.integration.test.ts",
+        "packages/telemetry/src/claude-telemetry.test.ts",
+        "packages/telemetry/src/claude-telemetry.ts",
+        "packages/telemetry/src/index.ts",
+        "packages/telemetry/src/migrations/0031_drop_tacho_events_anthropic_user_email.sql",
+        "packages/telemetry/src/migrations/0032_tacho_events_ttl.sql",
+        "packages/telemetry/src/tacho-events-ddl.test.ts",
+        "packages/telemetry/src/tacho-events-ddl.ts",
+        "packages/telemetry/src/tacho-events-insert.integration.test.ts",
+        "packages/telemetry/src/tacho-events.test.ts",
+        "packages/telemetry/src/tacho-events.ts",
+        "packages/telemetry/src/tenant.test.ts",
+        "packages/telemetry/src/tenant.ts",
+        "tools/scripts/backfill-claude-telemetry.ts",
+        "tools/scripts/system-db-justifications.baseline.json"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4306",
+      "merged_at": "2026-09-25T23:19:48Z",
+      "number": 4306,
+      "refs": [
+        3825,
+        3072,
+        3662,
+        3944
+      ],
+      "repo": "oxagen",
+      "title": "fix(tacho): drop stored email columns, write spend in the ingest transaction, bound insert memory, widen counters"
+    },
+    "oxagen#4324": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        ".github/workflows/desktop.yml"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4324",
+      "merged_at": "2026-09-25T21:49:49Z",
+      "number": 4324,
+      "refs": [
+        4323
+      ],
+      "repo": "oxagen",
+      "title": "fix(ci): skip a deploy's desktop build when desktop.yml is newer than its commit"
+    },
+    "oxagen#4329": {
+      "added": [],
+      "author": "macanderson",
+      "closes": [],
+      "files": [
+        "apps/app/messages/shell.json",
+        "apps/app/src/features/shell/notifications-dialog.test.tsx",
+        "apps/app/src/features/shell/sidebar.tsx",
+        "apps/app/src/i18n/messages.d.ts"
+      ],
+      "files_truncated": false,
+      "html_url": "https://github.com/macanderson/oxagen/pull/4329",
+      "merged_at": "2026-09-25T23:21:09Z",
+      "number": 4329,
+      "refs": [
+        3851
+      ],
+      "repo": "oxagen",
+      "title": "fix(shell): drop the caption under Ask Stella in the sidebar foot"
     },
     "stella#6527": {
       "added": [],
@@ -81197,8 +82880,8 @@
     }
   },
   "since": {
-    "oxagen": "2026-09-25T20:28:43Z",
-    "oxagen-roadmap": "2026-09-25T20:25:48Z",
-    "stella": "2026-09-25T20:20:20Z"
+    "oxagen": "2026-09-25T23:25:33Z",
+    "oxagen-roadmap": "2026-09-25T22:46:54Z",
+    "stella": "2026-09-25T21:34:48Z"
   }
 }

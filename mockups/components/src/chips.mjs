@@ -161,12 +161,12 @@ export default {
     ["--st-denied", "Mention chip's not-found state"],
   ],
   helpers: [
-    ["agentRoleChips(a)", "engine.js:10421", "Every role an agent holds, as removable chips joined by `SEP`, with an Assign role button."],
+    ["agentRoleChips(a)", "engine.js:10454", "Every role an agent holds, as removable chips joined by `SEP`, with an Assign role button."],
     ["edgeChip(it)", "engine.js:3193", "One provenance edge, plus a `button.edge` per frame it cites."],
-    ["lblChip(k)", "engine.js:15057", "One work-item label, colored from the tracker's own value."],
-    ["lblChips(ks)", "engine.js:15061", "A `.lbls` row of `lblChip()`."],
-    ["tagChip(t)", "engine.js:15089", "One DoD tag."],
-    ["tkPerson(id, opts)", "engine.js:15079", "A provider account as a mapped teammate or a raw handle."],
+    ["lblChip(k)", "engine.js:15090", "One work-item label, colored from the tracker's own value."],
+    ["lblChips(ks)", "engine.js:15094", "A `.lbls` row of `lblChip()`."],
+    ["tagChip(t)", "engine.js:15122", "One DoD tag."],
+    ["tkPerson(id, opts)", "engine.js:15112", "A provider account as a mapped teammate or a raw handle."],
   ],
   sourceNotes: [
     "`.chips` is defined twice (engine.css 770 and 924). The later definition, the input-styled field with a focus ring, wins. `.chip` is only ever used inside the work order dialog's `wo-work items` container, which is neither of those two, so it never gets either definition's border, background, or minimum height.",
