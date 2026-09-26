@@ -252,15 +252,15 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 898 to 942</td><td>The rules that draw it</td></tr>
-      <tr><td><code>listify()</code> at <code>engine.js:13621</code></td><td>After every render, runs <code>ltTable()</code> on each table in the page and the dialog layer, and <code>ltCards()</code> on each card list.</td></tr>
-      <tr><td><code>ltTable(table, prefix)</code> at <code>engine.js:13516</code></td><td>Reads the table, picks filters, makes headers sortable, and inserts the bar and pager.</td></tr>
-      <tr><td><code>ltBar(st, opts, apply)</code> at <code>engine.js:13442</code></td><td>Writes the control bar: search, filters, an optional Sort, and Rows.</td></tr>
-      <tr><td><code>ltMultiFacets(cols, rows, vals)</code> at <code>engine.js:13486</code></td><td>Reads each <code>data-facet=&quot;multi&quot;</code> column's <code>data-fv</code> values into options with their row counts.</td></tr>
-      <tr><td><code>ltMulti(st, f)</code> at <code>engine.js:13403</code></td><td>Writes a multi-select filter: the button and its popover list.</td></tr>
-      <tr><td><code>ltMultiWire(m, st, f, apply)</code> at <code>engine.js:13413</code></td><td>Places the list under its button, closes it on scroll, and applies each pick.</td></tr>
-      <tr><td><code>ltPager(st, total, onPage)</code> at <code>engine.js:13370</code></td><td>Writes the range and the page buttons, with ellipses past seven pages.</td></tr>
-      <tr><td><code>ltCards(cfg)</code> at <code>engine.js:13590</code></td><td>The same bar and pager for card lists, configured in <code>LT_CARDS</code>.</td></tr>
-      <tr><td><code>cardTables()</code> at <code>engine.js:13682</code></td><td>Turns tables into labelled cards in the phone shell.</td></tr>
+      <tr><td><code>listify()</code> at <code>engine.js:13617</code></td><td>After every render, runs <code>ltTable()</code> on each table in the page and the dialog layer, and <code>ltCards()</code> on each card list.</td></tr>
+      <tr><td><code>ltTable(table, prefix)</code> at <code>engine.js:13512</code></td><td>Reads the table, picks filters, makes headers sortable, and inserts the bar and pager.</td></tr>
+      <tr><td><code>ltBar(st, opts, apply)</code> at <code>engine.js:13438</code></td><td>Writes the control bar: search, filters, an optional Sort, and Rows.</td></tr>
+      <tr><td><code>ltMultiFacets(cols, rows, vals)</code> at <code>engine.js:13482</code></td><td>Reads each <code>data-facet=&quot;multi&quot;</code> column's <code>data-fv</code> values into options with their row counts.</td></tr>
+      <tr><td><code>ltMulti(st, f)</code> at <code>engine.js:13399</code></td><td>Writes a multi-select filter: the button and its popover list.</td></tr>
+      <tr><td><code>ltMultiWire(m, st, f, apply)</code> at <code>engine.js:13409</code></td><td>Places the list under its button, closes it on scroll, and applies each pick.</td></tr>
+      <tr><td><code>ltPager(st, total, onPage)</code> at <code>engine.js:13366</code></td><td>Writes the range and the page buttons, with ellipses past seven pages.</td></tr>
+      <tr><td><code>ltCards(cfg)</code> at <code>engine.js:13586</code></td><td>The same bar and pager for card lists, configured in <code>LT_CARDS</code>.</td></tr>
+      <tr><td><code>cardTables()</code> at <code>engine.js:13678</code></td><td>Turns tables into labelled cards in the phone shell.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -290,7 +290,7 @@
 ## Inputs
 
 1. mockups/components/list-table.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 898 to 942. The mockup renders it with listify() (engine.js:13621), ltTable(table, prefix) (engine.js:13516), ltBar(st, opts, apply) (engine.js:13442), ltMultiFacets(cols, rows, vals) (engine.js:13486), ltMulti(st, f) (engine.js:13403), ltMultiWire(m, st, f, apply) (engine.js:13413), ltPager(st, total, onPage) (engine.js:13370), ltCards(cfg) (engine.js:13590), cardTables() (engine.js:13682).
+2. The design source: mockups/src/engine.css lines 898 to 942. The mockup renders it with listify() (engine.js:13617), ltTable(table, prefix) (engine.js:13512), ltBar(st, opts, apply) (engine.js:13438), ltMultiFacets(cols, rows, vals) (engine.js:13482), ltMulti(st, f) (engine.js:13399), ltMultiWire(m, st, f, apply) (engine.js:13409), ltPager(st, total, onPage) (engine.js:13366), ltCards(cfg) (engine.js:13586), cardTables() (engine.js:13678).
 3. The build's implementation: find it by its root selector (.lt, .lp) or its name, and list every route that renders it.
 4. Where to see it in the design: Agents, Work orders, Backlog, Tools, Spend budgets, Repositories, Runtimes, Audit, Organization. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

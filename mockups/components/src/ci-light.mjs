@@ -97,10 +97,10 @@ export default {
     ["--mono", "The done/total count"],
   ],
   helpers: [
-    ["ciLight(c, label)", "engine.js:7007", "Picks the state from a counts object and writes the dot, title, and count. An optional label appends a `.dim` caption."],
-    ["ciCounts(list)", "engine.js:6997", "Tallies an array of per-check states into `{pass, fail, running, queued, total, done}`."],
-    ["ciFromSt(def, st)", "engine.js:7002", "Builds a plausible per-check state list from a change's overall status, for fixture data with no real per-check log."],
-    ["oxprCiLight(p)", "engine.js:7013", "The Repositories Changes table's own wrapper: counts a proposal's checks and calls `ciLight()`."],
+    ["ciLight(c, label)", "engine.js:7005", "Picks the state from a counts object and writes the dot, title, and count. An optional label appends a `.dim` caption."],
+    ["ciCounts(list)", "engine.js:6995", "Tallies an array of per-check states into `{pass, fail, running, queued, total, done}`."],
+    ["ciFromSt(def, st)", "engine.js:7000", "Builds a plausible per-check state list from a change's overall status, for fixture data with no real per-check log."],
+    ["oxprCiLight(p)", "engine.js:7011", "The Repositories Changes table's own wrapper: counts a proposal's checks and calls `ciLight()`."],
   ],
   sourceNotes: [
     "The design rule, from the CSS comment at engine.css 2133 to 2134: blink blue while anything runs, a red ✕ the moment one job fails, pulsing while others still run, static green once every job has passed, static grey while everything queues.",

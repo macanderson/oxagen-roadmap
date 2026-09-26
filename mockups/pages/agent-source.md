@@ -30,7 +30,7 @@ With component help off, the page carries no explainer text. Each part's specifi
 **Editor.** One panel, carrying the help key `data-help="editor"`.
 
 - A bar: the path, a dot and a word for the draft's state (“unchanged” or “modified”, the dot filled when modified), and a find field (placeholder “Find  ⌘F”, `aria-label` “Find in file”) with its match count (the match in view and the total once one is selected).
-- A gutter of line numbers beside a textarea labelled with the path. The text is highlighted as TOML: keys, strings, numbers, booleans, table headers and comments. The demo file is 21 lines:
+- A gutter of line numbers beside a textarea labelled with the path. The text is highlighted as TOML: keys, strings, numbers, booleans, table headers and comments. The demo file is 18 lines:
 
 ```toml
 # .oxagen/agents/release-manager.toml
@@ -50,24 +50,21 @@ You prepare releases for this repository. Read the changelog
 conventions in .oxagen/rules before writing notes. Open a pull
 request; a person merges it.
 """
-
-[harness.claude-code]
-color = "blue"
 ```
 
-- A status line: the cursor position (“Ln 21, Col 1”, with “(N selected)” when text is selected), “TOML”, “Spaces: 2”, “LF”, “UTF-8”, and the key hints “⌘S save · Tab indent · ⇧Tab outdent · ⌘/ comment · ⌘F find · ⌘Z undo”.
+- A status line: the cursor position (“Ln 18, Col 1”, with “(N selected)” when text is selected), “TOML”, “Spaces: 2”, “LF”, “UTF-8”, and the key hints “⌘S save · Tab indent · ⇧Tab outdent · ⌘/ comment · ⌘F find · ⌘Z undo”.
 
 Keys: ⌘S saves (opens the commit dialog), Tab indents by two spaces, ⇧Tab outdents, ⌘/ comments or uncomments the selected lines, ⌘F moves to the find field, Enter in find goes to the next match (⇧Enter the previous), Escape clears find, Enter keeps the line's indent (and adds two after an opening bracket), and brackets and quotes close themselves.
 
 **Commit dialog** (from Save), titled “Commit this change”, with an eyebrow line “.oxagen/agents/release-manager.toml · +1 −1 · from the source editor”: the path, the diff stat of the draft against the base, and where the change came from.
 
 - Repository and Base: `a-intel/platform` (“primary”) at `main @ a4c91e2`, with no hint. Why the repository is fixed is in the component help (`mockups/help/agent-source.md`, Commit this change).
-- **Branch**: a select that opens on “+ New branch” and lists the repository's branches, each with its pull request where it has one. **New branch name** (“agent/release-manager/update-color”), with “Cut from main @ a4c91e2.”
-- **Summary**: a drafted one-line summary (“Update release-manager color”), badges for the change's kind and area (“cosmetic”, “harness”), the line naming the model that drafted it, and **Redraft**.
+- **Branch**: a select that opens on “+ New branch” and lists the repository's branches, each with its pull request where it has one. **New branch name** (“agent/release-manager/update-description”), with “Cut from main @ a4c91e2.”
+- **Summary**: a drafted one-line summary (“Update release-manager description”), badges for the change's kind and area (“cosmetic”, “metadata”), the line naming the model that drafted it, and **Redraft**.
 - **Description**: the drafted body, with “Becomes the commit message and the pull request body.”
 - **Open a pull request**: a switch (`role=switch`), on by default, with “Against main, titled from the summary.” Off, it reads “Push the commit to the branch only.” With the commit already on the branch it reads “Opens the pull request for <branch>” over “The commit is already on the branch.”, and with a pull request already open it reads “<pr> already covers this branch” over “The commit lands on the branch and the pull request updates itself.” Who reviews, and what changes for the running agent when, is in the component help. When the draft touches a sensitive field, a callout names the risk and says it merges only when someone other than the author approves, and only under an active mandate when the change adds `irreversible`.
 - **Diff against main**, with the count of lines changed. No note follows it. When the principal, roles and toolbelt update is in the component help (`mockups/help/agent-source.md`, Commit this change).
-- The footer names what will be written (“New branch agent/release-manager/update-color on a-intel/platform”), then **Cancel** and the primary button: **Commit and open the pull request**, **Commit to the branch** (switch off, or a branch whose pull request is already open), or **Open the pull request** (the commit is already on the branch). It is disabled until the branch and the summary are filled.
+- The footer names what will be written (“New branch agent/release-manager/update-description on a-intel/platform”), then **Cancel** and the primary button: **Commit and open the pull request**, **Commit to the branch** (switch off, or a branch whose pull request is already open), or **Open the pull request** (the commit is already on the branch). It is disabled until the branch and the summary are filled.
 
 Committing records the pending branch; the header's branch chip then shows it until it merges.
 

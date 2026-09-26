@@ -3729,9 +3729,7 @@ function agentTomlSeed(a){
    'side_effects = ["read", "write"]\n'+
    'budget = { per_run_micros = '+Math.round(parseFloat(a.budget)*1e6)+' }\n\n'+
    '[instructions]\n'+
-   'body = """\n'+instr+'\n"""\n\n'+
-   '[harness.'+a.harness+']\n'+
-   'color = "blue"\n';
+   'body = """\n'+instr+'\n"""\n';
 }
 function defBase(slug){if(S.defBase[slug]==null)S.defBase[slug]=agentTomlSeed(agentBySlug(slug));return S.defBase[slug];}
 function defSrc(slug){if(S.defSrc[slug]==null)S.defSrc[slug]=defBase(slug);return S.defSrc[slug];}
@@ -15456,9 +15454,7 @@ function wzAgentToml(){
    '[instructions]\n'+
    'body = """\n'+(d||"What this agent is for.")+'\n\n'+
    'Work inside the toolbelt you were given. When a step needs authority you do\n'+
-   'not hold, stop and say which one. Do not route around it.\n"""\n\n'+
-   '[harness.'+z.harness+']\n'+
-   'color = "gold"\n';
+   'not hold, stop and say which one. Do not route around it.\n"""\n';
 }
 var WZ_BELT_POOL=["github__get_file_contents@2","github__create_pull_request@3","github__create_release@2",
  "linear__get_issue@2","linear__update_issue@3","slack__post_message@2","snowflake__run_query@2",

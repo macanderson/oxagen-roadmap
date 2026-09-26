@@ -131,7 +131,7 @@ export default {
     ["--dim", "Meta line facts (see Findings)"],
   ],
   helpers: [
-    ["recordCard(r, x)", "engine.js:1561", "The one function that draws a steering record. `x.right` replaces the status badge and `x.meta` prepends a fact to the meta line. 4 calls."],
+    ["recordCard(r, x)", "engine.js:1559", "The one function that draws a steering record. `x.right` replaces the status badge and `x.meta` prepends a fact to the meta line. 4 calls."],
   ],
   sourceNotes: [
     "The four call sites are Steering's proposals list (wedge.js:919 and engine.js:5816), the compiler wizard's live preview (engine.js:13201), and a record's own page's related-records panel (engine.js:13511). All four supply their own `x.right`.",

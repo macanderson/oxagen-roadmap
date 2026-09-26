@@ -201,8 +201,8 @@ export default {
     ["--st-critical, --st-denied", "Risk rule on critical and high rows"],
   ],
   helpers: [
-    ["rowClick(on, label)", "engine.js:6861", "Makes a row a keyboard button. 17 calls."],
-    ["cardTables()", "engine.js:13682", "Turns every single-header table into labelled cards on a phone."],
+    ["rowClick(on, label)", "engine.js:6859", "Makes a row a keyboard button. 17 calls."],
+    ["cardTables()", "engine.js:13678", "Turns every single-header table into labelled cards on a phone."],
     ["keyLabel(k)", "engine.js:696", "Shows a stored key as its label with the key in a tooltip."],
   ],
   sourceNotes: [
