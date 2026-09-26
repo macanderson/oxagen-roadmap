@@ -124,11 +124,17 @@ ACTS.send = function (el, ev) {
 };
 ACTS.newwork = function () { openDialog("newwork"); };
 
+/* An import step waits on its steering PR: the step links it until it merges. */
+function importStep(what, btn) { var n = S.importPr[what]; return n ? '<button class="btn" data-go="steering|pr-' + n + '">Steering PR #' + n + "</button>" : btn; }
+function importPending(what) {
+  var n = S.importPr[what];
+  return empty(what, "Import in review", "Steering PR #" + n + (what === "steering" ? " imports your records. No agent gets them" : " adds your servers. No agent reaches them") + " until it merges.", '<button class="btn primary" data-go="steering|pr-' + n + '">View steering PR #' + n + "</button>");
+}
 function onboarding() {
   var steps = [
     ["Connect an agent", "Run one command where the agent runs. Claude Code, Codex, Cursor and stella all connect the same way.", '<button class="btn primary" data-act="connect">Connect an agent</button>', S.connected],
-    ["Import your steering", "oxagen reads CLAUDE.md, AGENTS.md and Cursor rules from your repositories and merges them into one list.", '<button class="btn" data-act="steerimport">Import steering</button>', S.imported.steering],
-    ["Import your MCP servers", "oxagen finds the servers in each harness's config, takes their keys, and points every harness at one gateway.", '<button class="btn" data-act="serverimport">Import MCP servers</button>', S.imported.servers],
+    ["Import your steering", "oxagen reads CLAUDE.md, AGENTS.md and Cursor rules from your repositories and merges them into one list.", importStep("steering", '<button class="btn" data-act="steerimport">Import steering</button>'), S.imported.steering],
+    ["Import your MCP servers", "oxagen finds the servers in each harness's config, takes their keys, and points every harness at one gateway.", importStep("servers", '<button class="btn" data-act="serverimport">Import MCP servers</button>'), S.imported.servers],
     ["Connect a tracker", "Issues from GitHub, Linear or Jira arrive in the inbox.", '<button class="btn" data-act="stub" data-what="Connecting a tracker">Connect GitHub</button>', false],
   ];
   return '<div class="panel onb"><div class="panel-h"><h3>Set up Core platform</h3><span class="sp muted">' + steps.filter(function (s) { return s[3]; }).length + " of 4 done</span></div>" +
@@ -415,6 +421,7 @@ VIEWS.steering = function () {
   if (S.id) return steeringPrView(S.id);
   var head = phead("Steering", "What every agent is told, from the workspace's steering repo.",
     '<button class="btn" data-act="steerimport">' + g("import", 14) + ' Import</button><button class="btn primary" data-act="newsteer">' + g("plus", 14) + " New record</button>");
+  if (S.empty && !S.imported.steering && S.importPr.steering) return { crumb: [["Steering"]], html: head + importPending("steering") };
   if (S.empty && !S.imported.steering) return { crumb: [["Steering"]], html: head + empty("steering", "Nothing here yet", "Import CLAUDE.md, AGENTS.md and Cursor rules from your repositories. oxagen merges them into one list, drops the duplicates and asks you about the conflicts.", '<button class="btn primary" data-act="steerimport">Import steering</button>') };
   var open = allPrs().filter(function (p) { return p.state !== "merged"; }).length;
   var tabs = tabRow("steertab", S.steerTab, [["records", "Records", steeringItems().length], ["prs", "Steering PRs", open], ["repo", "Repository"]]);
@@ -427,7 +434,7 @@ ACTS.steertab = function (el) { S.steerTab = el.getAttribute("data-tab"); render
 function repoCard() {
   var open = allPrs().filter(function (p) { return p.state !== "merged"; }).length, org = steeringItems().filter(function (i) { return i.scope === "organization"; }).length;
   return '<div class="panel repocard"><div class="rc-main">' + ipLogo("github", 20) + '<div class="grow"><span class="k">Steering repo</span>' + repoLink(REPO.name, REPO.url) +
-      '<span class="sub">Published version ' + REPO.version + ' from <a href="' + href("steering", "pr-" + REPO.publishedPr) + '" data-go="steering|pr-' + REPO.publishedPr + '">steering PR #' + REPO.publishedPr + "</a>, " + when(REPO.published) + "</span></div>" + healthBadge() + "</div>" +
+      '<span class="sub">' + pts(["Published version " + REPO.version, '<a href="' + href("steering", "pr-" + REPO.publishedPr) + '" data-go="steering|pr-' + REPO.publishedPr + '">Steering PR #' + REPO.publishedPr + "</a>", when(REPO.published)]) + "</span></div>" + healthBadge() + "</div>" +
     '<dl class="rc-facts"><div><dt>Required check</dt><dd><code>Oxagen steering</code></dd></div><div><dt>Review</dt><dd>' + h(REPO.governance.mode === "team" ? "Team mode" : REPO.governance.mode) + "</dd></div>" +
       '<div><dt>Open steering PRs</dt><dd><button class="linkbtn" data-act="steertab" data-tab="prs">' + num(open) + "</button></dd></div>" +
       '<div><dt>Linked repositories</dt><dd><button class="linkbtn" data-act="steertab" data-tab="repo">' + num(REPO.linked.length) + "</button></dd></div>" +
@@ -498,7 +505,7 @@ function steeringRepoTab() {
     return '<button class="li linkish" data-act="steeritem" data-id="' + i.id + '">' + kindBadge(i.kind) + '<span class="bd2"><span class="t1">' + h(recLabel(i)) + '</span><span class="t2 mono">' + h(i.lineage) + '</span></span><span class="muted num">' + num(i.tok) + " tok</span></button>";
   }).join("");
   var versions = REPO.versions.map(function (v) {
-    var inner = '<span class="mono muted">v' + v.v + '</span><span class="bd2"><span class="t1">' + h(v.what) + '</span><span class="t2">Steering PR #' + v.pr + ", " + when(v.at) + "</span></span>";
+    var inner = '<span class="mono muted">v' + v.v + '</span><span class="bd2"><span class="t1">' + h(v.what) + '</span><span class="t2">' + pts(["Steering PR #" + v.pr, when(v.at)]) + "</span></span>";
     return prBy(v.pr) ? '<a class="li" href="' + href("steering", "pr-" + v.pr) + '" data-go="steering|pr-' + v.pr + '">' + inner + "</a>" : '<div class="li">' + inner + "</div>";
   }).join("");
   return '<div class="grid g2">' +
@@ -520,21 +527,21 @@ function steeringRepoTab() {
 /* ---- one steering PR ---- */
 function steeringPrView(id) {
   var n = parseInt(String(id).replace(/^pr-/, ""), 10), pr = prBy(n);
-  if (S.empty && !S.imported.steering) return { crumb: [["Steering", "steering"], ["Steering PR"]], html: empty("steering", "No steering PRs yet", "Import steering first. Every change after that arrives as a steering PR.", '<button class="btn" data-go="steering">Steering</button>') };
+  if (!prVisible(n)) return { crumb: [["Steering", "steering"], ["Steering PR"]], html: empty("steering", "No steering PRs yet", "Import steering first. Every change after that arrives as a steering PR.", '<button class="btn" data-go="steering">Steering</button>') };
   if (!pr) return { crumb: [["Steering", "steering"], ["Not found"]], html: empty("steering", "No steering PR with that number", "It may be in another workspace's steering repo.", '<button class="btn" data-go="steering">Steering</button>') };
   var st = prState(pr), me = viewer(), apv = prApprovals(pr);
   var meta = '<div class="smeta"><span class="mono">' + h(pr.branch) + "</span><span>" + h(authorLabel(pr)) + "</span><span>Opened " + when(pr.opened) + "</span>" + (pr.session ? '<a href="' + href("sessions", pr.session) + '" data-go="sessions|' + pr.session + '">From a session</a>' : "") + "</div>";
   var acts = prStateBadge(pr);
   if (st === "merged") acts += '<button class="btn" data-act="pr-revert" data-n="' + pr.n + '">Revert</button>';
   else {
-    if (canApprove(pr) && apv.indexOf(me) < 0) acts += '<button class="btn" data-act="pr-approve" data-n="' + pr.n + '">Approve</button>';
-    if (st !== "queued") acts += '<button class="btn primary" data-act="pr-merge" data-n="' + pr.n + '"' + (apv.length ? "" : " disabled") + ">" + (pr.kind === "memory" ? "Merge " + plural(pr.memories.filter(function (m) { return !S.dropped[pr.n + "." + m.id]; }).length, "memory", "memories") : "Merge") + "</button>";
+    if (govMode() !== "solo" && canApprove(pr) && apv.indexOf(me) < 0) acts += '<button class="btn" data-act="pr-approve" data-n="' + pr.n + '">Approve</button>';
+    if (st !== "queued") acts += '<button class="btn primary" data-act="pr-merge" data-n="' + pr.n + '"' + (apv.length || govMode() === "solo" || canMergeWithoutReview(me) ? "" : " disabled") + ">" + (pr.kind === "memory" ? "Merge " + plural(pr.memories.filter(function (m) { return !S.dropped[pr.n + "." + m.id]; }).length, "memory", "memories") : "Merge") + "</button>";
   }
   var head = '<div class="shead"><div class="t"><p class="eyebrow">Steering PR #' + pr.n + "</p><h1>" + h(pr.title) + "</h1>" + meta + '</div><div class="acts">' + acts + "</div></div>";
   var main = (pr.summary ? '<p class="pr-sum">' + mdi(pr.summary) + "</p>" : "");
-  if (pr.state === "merged") main += '<div class="banner"><div class="grow"><b>Merged ' + when(pr.merged) + ", published as version " + pr.version + '</b>oxagen squash-merged it at the checked commit. Revert opens a steering PR that undoes it, with the same checks and review.</div></div><pre class="trailers">' + h((pr.trailers || []).join("\n")) + "</pre>";
+  if (pr.state === "merged") main += '<div class="banner"><div class="grow"><b>Published as version ' + pr.version + "</b>oxagen squash-merged it at the checked commit " + when(pr.merged) + '. Revert opens a steering PR that undoes it, with the same checks and review.</div></div><pre class="trailers">' + h((pr.trailers || []).join("\n")) + "</pre>";
   if (pr.kind === "memory") main += memoryCards(pr);
-  if (pr.kind === "server") main += surfaceDiff(pr, true);
+  if (pr.server && pr.diff) main += surfaceDiff(pr, true);
   if (pr.record) main += '<div class="panel"><div class="panel-h"><h3>Record</h3><span class="sp">' + kindBadge(pr.record.kind) + ' <span class="muted mono">' + h(pr.record.force) + '</span> <span class="muted">' + num(pr.record.tok) + ' tokens</span></span></div><div class="panel-b"><div class="readout"><div class="rh"><span class="mono">' + h(pr.record.path) + '</span></div><pre>' + h(pr.record.body) + "</pre></div></div></div>";
   (pr.files || []).forEach(function (f) { if (f.diff) main += '<div class="readout"><div class="rh"><span class="mono">' + h(f.path) + '</span></div><pre class="diff">' + diffHtml(f.diff) + "</pre></div>"; });
   if (pr.note) main += '<p class="note">' + mdi(pr.note) + "</p>";
@@ -559,30 +566,33 @@ function checksPanel(pr) {
   return '<div class="panel"><div class="panel-h"><h3>Checks</h3><span class="sp"><code>Oxagen steering</code> ' + badge(rb[0], roll === "warn" ? "Passed with warnings" : rb[1], true) + "</span></div>" + rows +
     (findings ? '<div class="panel-h sub-h"><h3>Tool checks</h3></div>' + findings : "") + "</div>";
 }
-/* The budget check: per agent, the always-on steering before and after, the budget and where it
-   comes from, and the largest always-on records with their token counts. */
+/* The budget check: per code repository, the always-on steering before and after, the budget and
+   where it comes from, and the largest always-on records with their token counts. It only warns. */
 function budgetDetail(rec) {
   return budgetRows(rec).map(function (r) {
-    var line = r.over ? (r.set ? "Over the workspace budget. The check fails." : "Over oxagen's default of " + num(r.budget) + " tokens. The default only warns, so the check passes.") : "Under the budget.";
-    return '<div class="budget"><div class="bd-h"><b>' + h(r.agent.name) + '</b> <span class="mono muted">' + h(r.repo) + '</span></div><div class="bd-n"><span>Before <b class="num">' + num(r.before) + '</b></span><span>After <b class="num">' + num(r.after) + '</b></span><span>Budget <b class="num">' + num(r.budget) + "</b> " + (r.set ? "<code>steering/governance.toml</code>" : "oxagen's default") + "</span></div>" +
+    var line = !r.adds ? "The record names a target or loads when it fits, so it adds nothing to the always-on total." : r.over ? (r.set ? "Over the workspace budget. The check warns and passes." : "Over oxagen's default of " + num(r.budget) + " tokens. The default only warns, so the check passes.") : "Under the budget.";
+    return '<div class="budget"><div class="bd-h"><b>Always-on steering</b> <span class="mono muted">' + h(r.repo) + '</span></div><div class="bd-n"><span>Before <b class="num">' + num(r.before) + '</b></span><span>After <b class="num">' + num(r.after) + '</b></span><span>Budget <b class="num">' + num(r.budget) + "</b> " + (r.set ? "<code>steering/governance.toml</code>" : "oxagen's default") + "</span></div>" +
       '<div class="capbar' + (r.over ? " over" : "") + '"><i style="width:' + Math.min(100, r.after / r.budget * 100).toFixed(1) + '%"></i></div><p class="small">' + h(line) + "</p>" +
       '<table class="narrow mini"><thead><tr><th class="num">Tokens</th><th>Largest always-on records</th><th class="mh">Kind</th></tr></thead><tbody>' + r.largest.map(function (x) {
         return '<tr><td class="num">' + num(x.tok) + '</td><td class="mono">' + h(x.lineage) + (x.fresh ? ' <span class="b b-approval">This PR</span>' : "") + '</td><td class="mh">' + h(kindLabel(x.kind)) + ", " + h(x.force) + "</td></tr>";
       }).join("") + "</tbody></table>" +
-      (r.over ? '<p class="small muted">Fix: shorten the record, set <code>force: may</code> so it loads when it fits, or narrow it with <code>repos</code>, <code>applies_to</code>, or <code>tools</code>. Set <code>always_on_tokens</code> in <code>steering/governance.toml</code> to make the check fail.</p>' : "") + "</div>";
+      (r.over ? '<p class="small muted">To keep this cost, merge as is, or raise <code>always_on_tokens</code> in this PR. To cut it, shorten a record, set <code>force: may</code> so it loads when it fits, or narrow it with <code>repos</code>, <code>applies_to</code>, or <code>tools</code>.</p>' : "") + "</div>";
   }).join("");
 }
 function reviewPanel(pr) {
   var gov = REPO.governance, groups = prReviewers(pr), apv = prApprovals(pr);
+  if (govMode() === "solo" || pr.solo) return '<div class="panel pad"><div class="rl-h"><h3>Review</h3><span class="muted">Solo mode</span></div><p class="small">' + (pr.state === "merged" ? "Merged without an approval step, as solo mode allows." : "No approval step. A merged steering PR counts as approved.") + "</p></div>";
   var need = groups.length ? "One approval from " + groups.map(function (gr) { return "<code>" + h(gr.group) + "</code> (" + h(gr.members.map(personName).join(" or ")) + ")"; }).join(" and ") + "." : "One approval from a workspace member other than the author.";
   return '<div class="panel pad"><div class="rl-h"><h3>Review</h3><span class="muted">' + h(gov.mode === "team" ? "Team mode" : gov.mode) + '</span></div><p class="small">' + need + "</p>" +
     (apv.length ? '<div class="lst">' + apv.map(function (p) { return '<div class="li">' + personAv(p, 22) + '<span class="bd2"><span class="t1">' + h(personName(p)) + '</span><span class="t2">Approved in oxagen</span></span></div>'; }).join("") + "</div>" : '<p class="muted small">No approval yet.</p>') +
-    (pr.state !== "merged" && !canApprove(pr) && pr.by !== viewer() ? '<p class="muted small">You are not in the group that reviews this path.</p>' : "") + "</div>";
+    (pr.state !== "merged" && !canApprove(pr) && pr.by !== viewer() ? '<p class="muted small">You are not in the group that reviews this path.</p>' : "") +
+    (S.noReview[pr.n] ? '<p class="small">' + h(personName(S.noReview[pr.n])) + " merges it without review. The merge commit records it.</p>" :
+      pr.state !== "merged" && !apv.length && canMergeWithoutReview(viewer()) ? '<p class="small muted">As the workspace owner, you can merge without review. The required check still has to pass, and the merge commit records you.</p>' : "") + "</div>";
 }
 function queuePanel(pr) {
   if (pr.state === "merged") return "";
-  var pos = S.queue.indexOf(pr.n);
-  var list = S.queue.map(function (k, i) { var p = prBy(k); return '<div class="li"><span class="mono muted">' + (i + 1) + '</span><span class="bd2"><span class="t1">#' + k + " " + h(p ? p.title : "") + "</span></span></div>"; }).join("");
+  var pos = S.queue.filter(prVisible).indexOf(pr.n);
+  var list = S.queue.filter(prVisible).map(function (k, i) { var p = prBy(k); return '<div class="li"><span class="mono muted">' + (i + 1) + '</span><span class="bd2"><span class="t1">#' + k + " " + h(p ? p.title : "") + "</span></span></div>"; }).join("");
   return '<div class="panel pad"><div class="rl-h"><h3>Merge queue</h3><span class="muted">' + (pos >= 0 ? "Position " + (pos + 1) : "Not queued") + '</span></div><p class="small muted">oxagen merges one steering PR at a time. When <code>main</code> moves, it brings the next one up to date and checks it again, so the budget and conflicts checks judge the <code>main</code> it lands on.</p>' +
     (list ? '<div class="lst">' + list + "</div>" : "") + "</div>";
 }
@@ -610,16 +620,70 @@ ACTS["mem-keep"] = function (el) { delete S.dropped[el.getAttribute("data-k")]; 
 ACTS["pr-approve"] = function (el) { S.approved[+el.getAttribute("data-n")] = viewer(); toast("Approved."); render(); };
 ACTS["pr-merge"] = function (el) {
   var n = +el.getAttribute("data-n");
+  if (govMode() === "solo") { mergeFirstRun(prBy(n)); return; }
+  var bare = !prApprovals(prBy(n)).length;
+  if (bare) S.noReview[n] = viewer();
   if (S.queue.indexOf(n) < 0) S.queue.push(n);
-  toast("In the merge queue at position " + (S.queue.indexOf(n) + 1) + ". oxagen merges it when it reaches the front and its checks pass on the new main.");
+  toast("In the merge queue at position " + (S.queue.indexOf(n) + 1) + ". oxagen merges it when it reaches the front and its checks pass on the new main." + (bare ? " It merges without review, and the merge commit records you." : ""));
   render();
 };
+/* The first run: a new workspace in solo mode with an empty queue. The steering PR merges at once,
+   oxagen publishes the next version, and an import applies only now. */
+function mergeFirstRun(pr) {
+  if (!pr) return;
+  S.firstRunVersion++;
+  pr.state = "merged"; pr.merged = F.ORG.now; pr.version = S.firstRunVersion; pr.solo = true;
+  pr.trailers = ["Oxagen-Merged-By: " + viewer(), "Oxagen-Checks: " + num((pr.checks || []).length) + " passed", "Oxagen-Version: " + pr.version];
+  if (pr.kind === "import") { S.imported[pr.target] = true; S.importPr[pr.target] = null; }
+  toast("Merged and published as version " + pr.version + "." + (pr.kind === "import" ? " Every agent gets the import at its next session." : ""));
+  render();
+}
+/* Revert builds the inverse of what the PR merged. A diff inverts line by line: + and - swap, and
+   context stays. A record the PR added is archived in place, because record files are never
+   deleted. A file the PR lists without a diff goes back to its version before the merge. */
+function invertDiff(diff) {
+  var out = [], run = [];
+  function flush() { out = out.concat(run.filter(function (l) { return l[0] === "-"; }), run.filter(function (l) { return l[0] === "+"; })); run = []; }
+  String(diff).split("\n").forEach(function (l) {
+    if (l[0] === "+" || l[0] === "-") run.push((l[0] === "+" ? "-" : "+") + l.slice(1));
+    else { flush(); out.push(l); }
+  });
+  flush();
+  return out.join("\n");
+}
+function frontmatter(body) { var l = String(body).split("\n"), end = l.indexOf("---", 1); return end > 0 ? l.slice(0, end + 1) : l; }
+function archiveDiff(lines) { return lines.map(function (l) { return l === "status: active" ? "-status: active\n+status: archived" : " " + l; }).join("\n"); }
+function revertFiles(src) {
+  if (src.kind === "memory") return src.memories.filter(function (m) { return !S.dropped[src.n + "." + m.id]; }).map(function (m) {
+    return { path: "steering/memory/" + m.lineage.split(".")[1] + "/" + m.lineage + ".md", diff: archiveDiff(["lineage: " + m.lineage, "status: active"]), archived: true };
+  });
+  if (src.record && !(src.files || []).length) return [{ path: src.record.path, diff: archiveDiff(frontmatter(src.record.body || "")), archived: true }];
+  return (src.files || []).map(function (f) {
+    var path = f.path || f;
+    if (!f.diff) return { path: path };
+    var lines = f.diff.split("\n");
+    if (/^steering\/.*\.md$/.test(path) && lines.every(function (l) { return l[0] === "+"; })) return { path: path, diff: archiveDiff(frontmatter(lines.map(function (l) { return l.slice(1); }).join("\n"))), archived: true };
+    return { path: path, diff: invertDiff(f.diff) };
+  });
+}
+function invertSurface(diff) {
+  return diff.map(function (b) {
+    return { head: b.head, lines: b.lines.map(function (l) {
+      return { op: l.op === "+" ? "-" : l.op === "-" ? "+" : l.op, tool: l.tool, what: l.what, detail: l.detail ? l.detail.map(function (x) { return x[0] === "+" ? "-" + x.slice(1) : x[0] === "-" ? "+" + x.slice(1) : x; }) : null };
+    }) };
+  });
+}
 ACTS["pr-revert"] = function (el) {
-  var src = prBy(+el.getAttribute("data-n")), n = nextPrNumber();
-  S.newPrs.push({ n: n, kind: "revert", state: "open", title: "Revert #" + src.n + ": " + src.title, branch: "steering/revert-" + src.n, by: ME, via: "web", opened: F.ORG.now, approvals: [],
-    summary: "Undoes steering PR #" + src.n + ". It takes the same checks and review as any steering PR.",
-    files: src.record ? [{ path: src.record.path, diff: src.record.body.split("\n").filter(function (l) { return /^[+-]/.test(l); }).map(function (l) { return (l[0] === "+" ? "-" : "+") + l.slice(1); }).join("\n") }] : [],
-    checks: src.checks });
+  var src = prBy(+el.getAttribute("data-n")), n = nextPrNumber(), files = revertFiles(src);
+  var top = files.length ? files[0].path.split("/")[0].replace(/\.toml$/, "") : "steering";
+  var archived = files.filter(function (f) { return f.archived; }).length, restored = files.filter(function (f) { return !f.diff; }).length;
+  S.newPrs.push({ n: n, kind: "revert", state: "open", title: "Revert #" + src.n + ": " + src.title, branch: top + "/revert-" + src.n, by: ME, via: "web", opened: F.ORG.now, approvals: [],
+    summary: "Undoes steering PR #" + src.n + ". It takes the same checks and review as any steering PR." +
+      (archived ? " " + (archived === 1 ? "The record it added is archived in place, because record files are never deleted." : "The " + plural(archived, "record") + " it added are archived in place, because record files are never deleted.") : "") +
+      (restored ? " " + plural(restored, "file") + (restored === 1 ? " goes back to its version" : " go back to their versions") + " before #" + src.n + "." : ""),
+    server: src.server, diff: src.diff ? invertSurface(src.diff) : undefined, defs: src.defs ? [src.defs[1], src.defs[0]] : undefined,
+    files: files,
+    checks: (src.checks || []).map(function (c) { return c.r === "skip" ? c : { id: c.id, r: "pass" }; }) });
   go("steering", "pr-" + n);
   toast("Opened steering PR #" + n + ".");
 };
@@ -647,7 +711,7 @@ DRAWERS.steeritem = function (id) {
     it.kind === "memory" ? "## Memories\n\n- " + it.text + "\n\n(recalled when relevant: at most 5 memories and 800 tokens a request)" :
     "## Workspace rules\n\n### " + recLabel(it) + "\n" + text;
   var fm = "---\nschema: steering-record/v1\nlineage: " + it.lineage + "\nlabel: " + recLabel(it) + "\nkind: " + it.kind + "\nforce: " + it.force + (it.effect ? "\neffect: " + it.effect : "") + "\nscope: " + it.scope +
-    (it.repos ? "\nrepos:\n" + it.repos.map(function (r) { return "  - " + r; }).join("\n") : "") + "\nstatus: active\n---";
+    [].concat(yamlList("repos", it.repos), yamlList("tools", it.tools), yamlList("applies_to", it.applies_to)).map(function (l) { return "\n" + l; }).join("") + "\nstatus: active\n---";
   var org = it.scope === "organization";
   return { title: recLabel(it),
     head: '<div class="grow">' + kindBadge(it.kind) + " <span class=\"muted mono small\">" + h(it.force) + "</span><h2>" + h(recLabel(it)) + "</h2></div>",
@@ -673,47 +737,95 @@ ACTS["rec-pr"] = function (el) {
 };
 ACTS.newsteer = function () { openDialog("newsteer"); };
 DIALOGS.newsteer = function () {
-  return { title: "New steering record", sub: "A record steers nothing until its steering PR merges. Every agent it applies to gets it at the start of its next session after that.",
+  return { title: "New steering record", sub: "It reaches the runs it targets once its steering PR merges.",
     body: '<div class="fields"><div class="field"><label for="ns-kind">Kind</label><select id="ns-kind">' + Object.keys(KINDS).filter(function (k) { return k !== "skill"; }).map(function (k) { return "<option>" + h(KINDS[k]) + "</option>"; }).join("") + '</select></div>' +
       '<div class="field"><label for="ns-force">Force</label><select id="ns-force"><option>must</option><option>should</option><option>may</option><option>info</option></select><div class="hint">must and should reach every request. may and info load when they fit.</div></div></div>' +
       '<div class="field"><label for="ns-text">Body</label><textarea id="ns-text" rows="3" autofocus placeholder="Run pnpm release:lint before you commit release notes."></textarea></div>' +
-      '<div class="field"><label for="ns-to">Applies to</label><select id="ns-to"><option>Every agent</option>' + AGENTS.map(function (a) { return "<option>" + h(a.name) + "</option>"; }).join("") + "</select></div>",
+      '<h3 class="sec">Applies to</h3><p class="muted small">It reaches every run unless a target below narrows it.</p>' +
+      '<div class="field"><label>Repositories</label><div class="agpick">' + REPO.linked.map(function (r) { return '<label class="check"><input type="checkbox" name="ns-repo" value="' + h(r.url) + '"><span class="grow"><span class="n mono">' + h(r.url) + "</span></span></label>"; }).join("") + '</div><div class="hint">None ticked reaches every linked repository.</div></div>' +
+      '<div class="fields"><div class="field"><label for="ns-tools">Tools</label><input id="ns-tools" class="mono" placeholder="billing__create_refund, stripe__*"><div class="hint">It reaches a request only when the run holds a match.</div></div>' +
+      '<div class="field"><label for="ns-paths">Paths</label><input id="ns-paths" class="mono" placeholder="packages/api/**"><div class="hint">It reaches a turn that touches a match.</div></div></div>',
     foot: '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="newsteer-go">Open steering PR</button>' };
 };
+/* A label is 1 to 36 characters: the body's first words. */
+function labelFrom(text) {
+  var out = "";
+  String(text).replace(/\.$/, "").split(/\s+/).some(function (w) { if ((out ? out.length + 1 : 0) + w.length > 36) return true; out += (out ? " " : "") + w; return false; });
+  return out || String(text).slice(0, 36);
+}
+/* A record's targets are the steering-record/v1 fields repos, tools, and applies_to (path globs).
+   A glob or a wildcard is quoted, as the spec's examples write it. */
+function yamlList(name, arr) {
+  if (!arr || !arr.length) return [];
+  return [name + ":"].concat(arr.map(function (x) { return "  - " + (/[*?{}\[\]]/.test(x) || name === "applies_to" ? '"' + x + '"' : x); }));
+}
+function orList(a) { return a.length < 3 ? a.join(" or ") : a.slice(0, -1).join(", ") + ", or " + a[a.length - 1]; }
+function listField(id) { return ((document.getElementById(id) || {}).value || "").split(",").map(function (x) { return x.trim(); }).filter(Boolean); }
 ACTS["newsteer-go"] = function () {
   var n = nextPrNumber(), text = (document.getElementById("ns-text") || {}).value || "Run pnpm release:lint before you commit release notes.";
   var kindName = (document.getElementById("ns-kind") || {}).value || "Business rule", force = (document.getElementById("ns-force") || {}).value || "must";
+  var repos = Array.prototype.slice.call(document.querySelectorAll('input[name="ns-repo"]:checked')).map(function (el) { return el.value; });
+  var tools = listField("ns-tools"), paths = listField("ns-paths"), scope = repos.length ? "repository" : "workspace";
+  var code = function (x) { return "`" + x + "`"; };
+  var reach = [repos.length ? "its repository is " + orList(repos.map(code)) : "", tools.length ? "it holds " + orList(tools.map(code)) : "", paths.length ? "it touches " + orList(paths.map(code)) : ""].filter(Boolean);
   var kind = Object.keys(KINDS).filter(function (k) { return KINDS[k] === kindName; })[0] || "business-rule";
-  var lineage = "a-intel.platform." + slugify(text).split("-").slice(0, 4).join("-");
+  var lineage = "a-intel.platform." + slugify(text).split("-").slice(0, 4).join("-"), label = labelFrom(text);
+  var body = ["---", "schema: steering-record/v1", "lineage: " + lineage, "label: " + label, "kind: " + kind, "force: " + force, "scope: " + scope].concat(yamlList("repos", repos), yamlList("tools", tools), yamlList("applies_to", paths), ["status: active", "origin: user", "---", "", text]).join("\n");
+  var rec = { lineage: lineage, label: label, kind: kind, force: force, scope: scope, repos: repos.length ? repos : null, tools: tools, applies_to: paths, tok: Math.round((label.length + text.length) / 4) + 8, path: "steering/platform/" + lineage + ".md", body: body };
+  var over = budgetRows(rec).some(function (r) { return r.over; });
   S.newPrs.push({ n: n, kind: "record", state: "open", title: text.length > 60 ? text.slice(0, 57) + "..." : text, branch: "steering/" + lineage.split(".").slice(2).join("-"), by: ME, via: "web", opened: F.ORG.now, approvals: [],
-    summary: "Adds one record. oxagen writes its id and hash when it merges.",
-    files: [{ path: "steering/platform/" + lineage + ".md", diff: ["---", "schema: steering-record/v1", "lineage: " + lineage, "kind: " + kind, "force: " + force, "scope: workspace", "status: active", "origin: user", "---", "", text].map(function (l) { return "+" + l; }).join("\n") }],
-    checks: [{ id: "schema", r: "pass" }, { id: "lineage", r: "pass" }, { id: "secrets", r: "pass" }, { id: "conflicts", r: "pass" }, { id: "authority", r: "pass" }, { id: "budget", r: "pass" }, { id: "owned", r: "pass" }] });
+    summary: "Adds one record. It reaches " + (reach.length ? "a run only when " + reach.join(" and ") : "every run in the workspace") + ". oxagen writes its id and hash when it merges.",
+    record: rec,
+    checks: [{ id: "schema", r: "pass" }, { id: "lineage", r: "pass" }, { id: "secrets", r: "pass" }, { id: "conflicts", r: "pass" }, { id: "authority", r: "pass" }, { id: "budget", r: over ? "warn" : "pass" }, { id: "owned", r: "pass" }] });
   closeDialog(); go("steering", "pr-" + n); toast("Opened steering PR #" + n + ".");
 };
 ACTS.steerimport = function () { openDialog("steerimport"); };
-DIALOGS.steerimport = function (arg, d) {
-  var im = STEERING.import, lines = im.found.reduce(function (t, f) { return t + f.lines; }, 0), dupes = im.found.reduce(function (t, f) { return t + f.dupes; }, 0);
+function andList(a) { return a.length < 3 ? a.join(" and ") : a.slice(0, -1).join(", ") + ", and " + a[a.length - 1]; }
+function importCounts(im) {
+  var lines = im.found.reduce(function (t, f) { return t + f.lines; }, 0), dupes = im.found.reduce(function (t, f) { return t + f.dupes; }, 0);
   var personal = im.found.filter(function (f) { return f.personal; }).reduce(function (t, f) { return t + f.lines; }, 0);
-  var result = lines - dupes - personal - im.conflicts.length;
+  return { lines: lines, dupes: dupes, personal: personal, result: lines - dupes - personal - im.conflicts.length };
+}
+DIALOGS.steerimport = function (arg, d) {
+  var im = STEERING.import, c = importCounts(im), open = S.importPr.steering;
   d.pick = d.pick || {};
-  return { title: "Import steering", wide: true, sub: "oxagen read these files from your repositories and machines. The import arrives as one steering PR in " + h(REPO.name) + ".",
+  return { title: "Import steering", wide: true, sub: "Import opens one steering PR in " + h(REPO.name) + ", and nothing changes until it merges.",
     body: '<div class="tw"><table class="narrow"><thead><tr><th>File</th><th>Where</th><th class="num">Lines</th><th class="num">Duplicates</th></tr></thead><tbody>' + im.found.map(function (f) {
-      return '<tr><td class="mono">' + h(f.file) + "</td><td>" + h(f.where) + (f.personal ? ' <span class="b b-q">Personal, stays on the laptop</span>' : "") + '</td><td class="num">' + f.lines + '</td><td class="num">' + (f.dupes || "") + "</td></tr>";
+      return '<tr><td class="mono">' + h(f.file) + "</td><td>" + h(f.where) + (f.personal ? ' <span class="b b-q">Stays on the laptop</span>' : "") + '</td><td class="num">' + f.lines + '</td><td class="num">' + (f.dupes || "") + "</td></tr>";
     }).join("") + "</tbody></table></div>" +
-      '<h3 class="sec">' + plural(im.conflicts.length, "conflict") + " to settle</h3>" + im.conflicts.map(function (c, i) {
-        return '<div class="conf"><label class="check"><input type="radio" name="cf' + i + '" ' + (d.pick[i] !== "b" ? "checked" : "") + ' data-change="cf" data-i="' + i + '" value="a"><span class="grow"><span class="n">' + h(c.a.text) + '</span><span class="d">' + h(c.a.file) + '</span></span></label><label class="check"><input type="radio" name="cf' + i + '" ' + (d.pick[i] === "b" ? "checked" : "") + ' data-change="cf" data-i="' + i + '" value="b"><span class="grow"><span class="n">' + h(c.b.text) + '</span><span class="d">' + h(c.b.file) + "</span></span></label></div>";
+      '<h3 class="sec">' + plural(im.conflicts.length, "conflict") + " to settle</h3>" + im.conflicts.map(function (cf, i) {
+        return '<div class="conf"><label class="check"><input type="radio" name="cf' + i + '" ' + (d.pick[i] !== "b" ? "checked" : "") + ' data-change="cf" data-i="' + i + '" value="a"><span class="grow"><span class="n">' + h(cf.a.text) + '</span><span class="d">' + h(cf.a.file) + '</span></span></label><label class="check"><input type="radio" name="cf' + i + '" ' + (d.pick[i] === "b" ? "checked" : "") + ' data-change="cf" data-i="' + i + '" value="b"><span class="grow"><span class="n">' + h(cf.b.text) + '</span><span class="d">' + h(cf.b.file) + "</span></span></label></div>";
       }).join(""),
-    foot: '<span class="grow">' + num(lines) + " lines, " + num(dupes) + " duplicates merged, " + num(personal) + " personal left out. " + plural(result, "record") + ' to import.</span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="steerimport-go">Import ' + plural(result, "record") + "</button>" };
+    foot: '<span class="grow">' + num(c.lines) + " lines, " + num(c.dupes) + " duplicates merged, " + num(c.personal) + " personal left out. " + plural(c.result, "record") + " to import.</span>" +
+      (open ? '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-go="steering|pr-' + open + '">View steering PR #' + open + "</button>" : '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="steerimport-go">Open steering PR</button>') };
 };
 ACTS.cf = function (el) { S.dialog.pick[el.getAttribute("data-i")] = el.value; };
-ACTS["steerimport-go"] = function () { S.imported.steering = true; closeDialog(); toast("Imported. Every agent gets these at its next session."); render(); };
+/* One file per record. The PR shows the records the conflicts settled, and the summary counts the
+   rest, which take the same shape. */
+function importedRecord(im, choice, kind) {
+  var src = im.found.filter(function (f) { return f.file === choice.file; })[0] || im.found[0];
+  var area = src.where.split("/").pop(), lineage = "a-intel." + area + "." + slugify(choice.text).split("-").slice(0, 4).join("-");
+  var body = ["---", "schema: steering-record/v1", "lineage: " + lineage, "label: " + labelFrom(choice.text), "kind: " + kind, "force: should", "scope: repository", "repos:", "  - github.com/" + src.where, "status: active", "origin: user", "provenance:", "  source: import", "  uri: oxagen:import/" + slugify(src.file) + "/" + area, "---", "", choice.text];
+  return { path: "steering/" + area + "/" + lineage + ".md", diff: body.map(function (l) { return "+" + l; }).join("\n") };
+}
+ACTS["steerimport-go"] = function () {
+  var im = STEERING.import, c = importCounts(im), pick = (S.dialog && S.dialog.pick) || {}, n = nextPrNumber();
+  var from = im.found.filter(function (f) { return !f.personal; });
+  var files = im.conflicts.map(function (cf, i) { return importedRecord(im, pick[i] === "b" ? cf.b : cf.a, cf.kind || "procedure"); });
+  S.newPrs.push({ n: n, kind: "import", target: "steering", state: "open", title: "Import " + plural(c.result, "record") + " from " + plural(from.length, "file"), branch: "steering/import", by: ME, via: "web", opened: F.ORG.now, approvals: [],
+    summary: "Imports " + plural(c.result, "record") + " from " + plural(from.length, "file") + " in " + andList(from.map(function (f) { return f.where; }).filter(function (w, i, all) { return all.indexOf(w) === i; }).map(function (w) { return "`" + w + "`"; })) + ". No agent gets them until this merges.",
+    note: "The PR shows the " + plural(files.length, "record") + " your conflict choices settled. The other " + plural(c.result - files.length, "record") + " take the same shape, one file each.",
+    files: files,
+    checks: [{ id: "schema", r: "pass" }, { id: "lineage", r: "pass" }, { id: "secrets", r: "pass", note: num(c.personal) + " personal lines stayed on the laptop." }, { id: "conflicts", r: "pass", note: "You settled " + plural(im.conflicts.length, "conflict") + " in the import." }, { id: "authority", r: "pass" }, { id: "budget", r: "pass" }, { id: "owned", r: "pass" }] });
+  S.importPr.steering = n;
+  closeDialog(); go("steering", "pr-" + n); toast("Opened steering PR #" + n + ". Nothing changes until it merges.");
+};
 
 /* ---- linking a code repository: a steering PR on workspace.toml ---- */
 ACTS.linkrepo = function () { openDialog("linkrepo"); };
 DIALOGS.linkrepo = function (arg, d) {
   d.pick = d.pick || REPO.linkable[0].url;
-  return { title: "Link a repository", sub: "Linking opens a steering PR that adds the repository to <code>workspace.toml</code>. The link follows the merge.",
+  return { title: "Link a repository", sub: "Linking opens a steering PR that adds the repository to <code>workspace.toml</code>.",
     body: '<div class="field"><label>Repositories the oxagen app can read</label>' + REPO.linkable.map(function (r) {
       return '<label class="check"><input type="radio" name="lr" value="' + h(r.url) + '" data-change="lr-pick"' + (d.pick === r.url ? " checked" : "") + '><span class="grow"><span class="n">' + h(r.url) + '</span><span class="d">' + (r.also.length ? "Also linked to " + h(r.also.join(", ")) + ". A repository can belong to many workspaces." : "In no workspace yet") + "</span></span></label>";
     }).join("") + "</div>",
@@ -752,7 +864,7 @@ DIALOGS.newworkspace = function (arg, d) {
     if (d.q.prov === "done") { d.ws = d.ws || "Payments ops"; d.phase = "run"; d.at = steps.length; d.retried = true; }
   }
   if (!d.phase) {
-    return { title: "New workspace", sub: "Type a name. oxagen creates the workspace and its steering repo.",
+    return { title: "New workspace", sub: "oxagen creates the workspace and its steering repo from the name.",
       body: '<div class="field"><label for="nws-name">Name</label><input id="nws-name" autofocus data-input="nws-name" value="' + h(d.ws || "") + '" placeholder="Payments ops"><div class="hint">Its steering repo is <code>' + h(steeringRepoFor(d.ws || "Payments ops")) + "</code>, a private repository in " + h(ORG.slug) + ".</div></div>",
       foot: '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="nws-go">Create workspace</button>' };
   }
@@ -785,7 +897,7 @@ ACTS["nws-open"] = function () { var name = S.dialog.ws; closeDialog(); toast(na
 /* ============================== MCP servers ==============================
    MCP Studio (mcp-studio-spec.html). The list, Add server with four sources, and one page per server
    with one row of tabs: Tools, Connection, Try it, and Changes. Every server is one folder,
-   servers/<name>/, in the steering repo. */
+   tools/servers/<name>/, in the steering repo. The app's own routes stay #/.../servers/<name>. */
 function deliveryStrip(targets, note) {
   return '<div class="deliv"><span class="deliv-n">' + h(note) + '</span><div class="deliv-t">' + targets.map(function (t) {
     return '<span class="dt">' + hxIcon(t.harness, 14) + '<span>' + h(hxLabel(t.harness)) + '</span><code>' + h(t.file) + "</code></span>";
@@ -793,8 +905,8 @@ function deliveryStrip(targets, note) {
 }
 function embedLabel() {
   var e = F.SERVERS.embeddings;
-  if (e.provider === "custom") return "Your endpoint, " + e.custom.model;
-  if (e.provider === "keyword") return "Keyword matching. Nothing is sent to an embedding provider.";
+  if (e.provider === "custom") return e.custom.model + " at your endpoint";
+  if (e.provider === "keyword") return "Keyword matching";
   return e.vendor + " " + e.model + " on oxagen's key";
 }
 function srvState(sv) {
@@ -810,6 +922,7 @@ VIEWS.servers = function () {
   if (S.id) return serverPage(S.id);
   var head = phead("MCP servers", "One list of servers for every agent. oxagen holds the keys, and the gateway serves each imported tool.",
     '<button class="btn" data-act="serverimport">' + g("import", 14) + ' Import</button><button class="btn primary" data-act="addserver">' + g("plus", 14) + " Add server</button>");
+  if (S.empty && !S.imported.servers && S.importPr.servers) return { crumb: [["MCP servers"]], html: head + importPending("servers") };
   if (S.empty && !S.imported.servers) return { crumb: [["MCP servers"]], html: head + empty("servers", "No servers yet", "Import the servers already set up in Claude Code, Codex and Cursor on your machines. oxagen takes their keys and points every harness at one gateway.", '<button class="btn primary" data-act="serverimport">Import MCP servers</button>') };
   var rows = SERVERS.map(function (sv) {
     var st = serverStats(sv.id), imp = sv.tools.filter(function (t) { return t.state !== "available"; }).length, ag = serverAgents(sv.id);
@@ -822,7 +935,7 @@ VIEWS.servers = function () {
   var syncB = syncs.length ? '<div class="banner"><div class="grow"><b>' + plural(syncs.length, "sync PR") + " waiting on review</b>" + syncs.map(function (sv) { return '<a href="' + href("steering", "pr-" + sv.syncPr) + '" data-go="steering|pr-' + sv.syncPr + '">#' + sv.syncPr + " " + h(sv.name) + "</a>"; }).join(", ") + ". The gateway serves the locked definitions until they merge.</div></div>" : "";
   return { crumb: [["MCP servers"]], html: head + deliveryStrip(F.SERVERS.targets, "Every harness points at " + F.SERVERS.gateway + ", which holds the keys and applies your policies.") + syncB +
     '<div class="panel"><div class="tw"><table><thead><tr><th>Server</th><th class="mh">Source</th><th class="num">Tools imported</th><th class="mh">Agents</th><th class="num mh">Calls this month</th><th class="num mh">Cost</th><th>State</th></tr></thead><tbody>' + rows + "</tbody></table></div></div>" +
-    '<div class="panel pad rank"><div class="grow"><span class="k">Search ranking</span><b>' + h(embedLabel()) + '</b><span class="muted small">Ranks the tools of a server in search mode. It is a workspace setting in <code>workspace.toml</code>.</span></div><button class="btn sm" data-act="embeddings">Change</button></div>' +
+    '<div class="panel pad rank"><div class="grow"><span class="k">Search ranking</span><b>' + h(embedLabel()) + '</b><span class="muted small">Ranks the tools of a server in search mode, from <code>workspace.toml</code>.</span></div><button class="btn sm" data-act="embeddings">Change</button></div>' +
     '<p class="muted small foot">A server\'s cost is what its tool definitions and results added to each model request.</p>' };
 };
 
@@ -830,6 +943,7 @@ VIEWS.servers = function () {
 function changeCount(sid) { var seen = {}; staged(sid).forEach(function (o) { seen[o.op === "test" ? "test" + o.at : o.tool] = 1; }); return Object.keys(seen).length; }
 function serverPage(id) {
   var sv = serverBy(id);
+  if (S.empty && !S.imported.servers && S.importPr.servers) return { crumb: [["MCP servers", "servers"], ["Server"]], html: importPending("servers") };
   if (S.empty && !S.imported.servers) return { crumb: [["MCP servers", "servers"], ["Server"]], html: empty("servers", "No servers yet", "Import your MCP servers or add one first.", '<button class="btn" data-go="servers">MCP servers</button>') };
   if (!sv) return { crumb: [["MCP servers", "servers"], ["Not found"]], html: empty("servers", "No server with that name", "It may be in another workspace.", '<button class="btn" data-go="servers">MCP servers</button>') };
   var off = serverOffBy(sv), n = sv.source.type === "builtin" ? 0 : changeCount(id);
@@ -838,7 +952,7 @@ function serverPage(id) {
     (off ? '<button class="btn" data-act="srv-on" data-id="' + id + '">Turn on</button>' : '<button class="btn danger" data-act="srv-off" data-id="' + id + '">' + g("stop", 13) + " Turn off</button>");
   var head = '<div class="shead"><div class="t"><p class="eyebrow">MCP server</p><h1>' + h(sv.name) + "</h1>" + meta + '</div><div class="acts">' + acts + "</div></div>";
   var banners = "";
-  if (off) banners += '<div class="banner offb"><div class="grow"><b>Off since ' + when(off.at) + ", turned off by " + h(personName(off.by)) + "</b>" + (off.why ? h(off.why) + " " : "") + "Every call to its tools is refused. Turning it back on is instant too, and neither needs a steering PR.</div></div>";
+  if (off) banners += '<div class="banner offb"><div class="grow"><b>Turned off by ' + h(personName(off.by)) + " " + when(off.at) + "</b>" + (off.why ? h(off.why) + " " : "") + "Every call to its tools is refused. Turning it back on is instant too, and neither needs a steering PR.</div></div>";
   relaysOf(sv).filter(function (r) { return r.r.state === "down"; }).forEach(function (r) {
     var envs = (sv.environments || []).filter(function (e) { return e.network === "relay:" + r.name; }).map(function (e) { return e.name; });
     banners += '<div class="banner failb"><div class="grow"><b>Relay <code>' + h(r.name) + "</code> is down since " + when(r.r.since) + "</b>Calls to " + h(sv.name) + " in " + h(envs.join(" and ")) + " fail closed until it reconnects. The relay sends nothing while its connection to oxagen is down.</div></div>";
@@ -898,7 +1012,7 @@ function toolsTab(sv) {
       (stagedOp(id, "import", t.n) ? " " + badge("b-approval", "Importing") : "") + (stagedOp(id, "remove", t.n) ? " " + badge("b-denied", "Removing") : "");
     return '<tr class="click' + (on ? "" : " avail") + '" data-act="tool" data-k="' + h(k) + '">' +
       (builtin ? "" : '<td class="ckc"><input type="checkbox" data-change="tool-import" data-k="' + h(k) + '"' + (on ? " checked" : "") + ' aria-label="Import ' + h(t.n) + '"></td>') +
-      '<td><span class="mono tn">' + h(t.n) + "</span>" + flags + '<span class="sub">' + h(off ? "Off since " + when(off.at) + ", " + personName(off.by) : t.d) + "</span></td>" +
+      '<td><span class="mono tn">' + h(t.n) + "</span>" + flags + '<span class="sub">' + h(off ? "Turned off by " + personName(off.by) + " " + when(off.at) : t.d) + "</span></td>" +
       "<td>" + cval(c.risk, c.confirmed) + '</td><td class="mh">' + cval(c.side_effect, c.confirmed) + '</td><td class="mh">' + cval(c.egress, c.confirmed) + "</td>" +
       '<td class="mh">' + (c.impacts.length ? c.impacts.map(function (x) { return c.confirmed ? '<span class="chip mono">' + h(x) + "</span>" : '<span class="chip mono sugg">' + h(x) + "</span>"; }).join(" ") : '<span class="muted">None</span>') + "</td>" +
       '<td class="mh">' + (rules.length ? '<span class="apv">' + h(approvalLabel(rules)) + '</span><span class="sub mono">' + h(rules.map(function (r) { return r.id; }).join(", ")) + "</span>" : '<span class="muted">None</span>') + "</td>" +
@@ -948,8 +1062,8 @@ DRAWERS.tool = function (k) {
   if (!t) return { title: "Tool", head: '<div class="grow"><h2>Not found</h2></div>', body: '<p class="muted">No tool with that name on this server.</p>' };
   var id = sv.id, c = classOf(id, t), off = toolOffBy(id, t), on = importedNow(id, t), rules = approvalFor(id, t), draft = S.drafts[k];
   var name = toolName(id, t.n), desc = draft || descOf(id, t);
-  var stateLine = t.state === "available" ? (on ? "Importing in your changes" : "Available. Nobody imported it, so no agent sees it.") : "Version " + t.version + (withheld(t) ? ", withheld until sync PR #" + sv.syncPr + " merges" : "");
-  var sw = t.state === "available" ? "" : '<div class="offrow"><div class="grow"><b>' + (off ? "Off" : "On") + "</b>" + (off ? '<span class="muted small">Since ' + when(off.at) + ", turned off by " + h(personName(off.by)) + (off.why ? ". " + h(off.why) : "") + "</span>" : '<span class="muted small">Turning it off acts on the next call, with no steering PR.</span>') + "</div>" +
+  var stateLine = t.state === "available" ? (on ? "Importing in your changes" : "Nobody imported it, so no agent sees it.") : "Version " + t.version + (withheld(t) ? " withheld until sync PR #" + sv.syncPr + " merges" : "");
+  var sw = t.state === "available" ? "" : '<div class="offrow"><div class="grow"><b>' + (off ? "Off" : "On") + "</b>" + (off ? '<span class="muted small">Turned off by ' + h(personName(off.by)) + " " + when(off.at) + (off.why ? ". " + h(off.why) : "") + "</span>" : '<span class="muted small">Turning it off acts on the next call, with no steering PR.</span>') + "</div>" +
     (off ? '<button class="btn sm" data-act="tool-on" data-k="' + h(k) + '">Turn on</button>' : '<button class="btn sm danger" data-act="tool-off" data-k="' + h(k) + '">Turn off</button>') + "</div>";
   var inputs = t.inputs ? '<table class="narrow mini"><thead><tr><th>Input</th><th>Type</th><th>Shaping</th></tr></thead><tbody>' + t.inputs.map(function (x) {
     return '<tr><td class="mono">' + h(x.name) + "</td><td>" + h(x.type) + (x.enum ? '<span class="sub mono">' + h(x.enum.join(", ")) + "</span>" : "") + "</td><td>" + (x.hidden ? badge("b-q", "Hidden") + " " : "") + (x.fixed ? "Fixed to <code>" + h(x.fixed) + "</code>" : x.required ? "Required" : x.note ? h(x.note) : '<span class="muted">As sent</span>') + "</td></tr>";
@@ -1134,10 +1248,10 @@ ACTS["changes-discard"] = function (el) { var id = el.getAttribute("data-id"); S
 ACTS["changes-pr"] = function (el) {
   var id = el.getAttribute("data-id"), sv = serverBy(id), dfx = stagedDiff(sv), n = nextPrNumber();
   var imports = staged(id).filter(function (o) { return o.op === "import"; }).length;
-  S.newPrs.push({ n: n, kind: "server", server: id, state: "open", title: imports ? "Import " + plural(imports, "tool") + " into " + id : "Change " + id + " in MCP Studio", branch: "servers/" + id + "-studio-" + n, by: ME, via: "studio", opened: F.ORG.now, approvals: [],
+  S.newPrs.push({ n: n, kind: "server", server: id, state: "open", title: imports ? "Import " + plural(imports, "tool") + " into " + id : "Change " + id + " in MCP Studio", branch: "tools/" + id + "-studio-" + n, by: ME, via: "studio", opened: F.ORG.now, approvals: [],
     summary: "Opened from MCP Studio. The tools and their classification reach agents when it merges.",
-    diff: [{ head: "servers/" + id, lines: dfx.lines }], defs: [defsOf(sv, false), defsOf(sv, true)], files: dfx.files,
-    checks: [{ id: "schema", r: "pass" }, { id: "compile", r: "pass", note: "servers/" + id + " compiles. The lock matches the reviewed definitions." }, { id: "owned", r: "pass" }, { id: "references", r: "pass" }, { id: "settings", r: "pass" }],
+    diff: [{ head: "tools/servers/" + id, lines: dfx.lines }], defs: [defsOf(sv, false), defsOf(sv, true)], files: dfx.files,
+    checks: [{ id: "schema", r: "pass" }, { id: "compile", r: "pass", note: "tools/servers/" + id + " compiles. The lock matches the reviewed definitions." }, { id: "owned", r: "pass" }, { id: "references", r: "pass" }, { id: "settings", r: "pass" }],
     findings: dfx.findings });
   S.staged[id] = [];
   go("steering", "pr-" + n);
@@ -1167,7 +1281,7 @@ DRAWERS.server = function (id) {
 ACTS["tools-off"] = function (el) {
   var id = el.getAttribute("data-id"), st = serverStats(id);
   st.unused.forEach(function (t) { stage(id, { op: "remove", tool: t.n }); });
-  toast(plural(st.unused.length, "tool") + " staged to leave servers/" + id + "/tools.toml. Review opens the steering PR.");
+  toast(plural(st.unused.length, "tool") + " staged to leave tools/servers/" + id + "/tools.toml. Review opens the steering PR.");
   renderLayer(); render();
 };
 ACTS["srv-agent"] = function (el) {
@@ -1186,17 +1300,23 @@ ACTS.embeddings = function () { openDialog("embeddings"); };
 DIALOGS.embeddings = function (arg, d) {
   var e = F.SERVERS.embeddings; d.pick = d.pick || e.provider;
   var opts = [["oxagen", "oxagen", "The default. " + e.vendor + " " + e.model + " on oxagen's key. oxagen absorbs the cost."], ["custom", "Your endpoint", "Your own URL, model, and key. You pay for your embeddings."], ["keyword", "Keyword", "Keyword matching. Nothing is sent to any embedding provider."]];
-  return { title: "Search ranking", sub: "How a server in search mode ranks its tools. It lives in <code>workspace.toml</code>, so a change is a steering PR.",
+  return { title: "Search ranking", sub: "How a server in search mode ranks its tools, set in <code>workspace.toml</code> by steering PR.",
     body: opts.map(function (o) { return '<label class="check"><input type="radio" name="emb" value="' + o[0] + '" data-change="emb-pick"' + (d.pick === o[0] ? " checked" : "") + '><span class="grow"><span class="n">' + h(o[1]) + (o[0] === e.provider ? ' <span class="b b-q">Current</span>' : "") + '</span><span class="d">' + h(o[2]) + "</span></span></label>"; }).join("") +
-      (d.pick === "custom" ? '<div class="fields"><div class="field"><label for="emb-url">URL</label><input id="emb-url" value="' + h(e.custom.url) + '"></div><div class="field"><label for="emb-model">Model</label><input id="emb-model" value="' + h(e.custom.model) + '"></div></div><div class="field"><label for="emb-key">Key</label><input id="emb-key" type="password" placeholder="Paste the key"><div class="hint">It goes to oxagen\'s vault as <code>' + h(e.custom.credential) + "</code>, never into the repository.</div></div>" : "") +
+      (d.pick === "custom" ? '<div class="fields"><div class="field"><label for="emb-url">URL</label><input id="emb-url" data-input="emb-url" value="' + h(d.url != null ? d.url : e.custom.url) + '"></div><div class="field"><label for="emb-model">Model</label><input id="emb-model" data-input="emb-model" value="' + h(d.model != null ? d.model : e.custom.model) + '"></div></div><div class="field"><label for="emb-key">Key</label><input id="emb-key" type="password" placeholder="Paste the key"><div class="hint">It goes to oxagen\'s vault as <code>' + h(e.custom.credential) + "</code>, never into the repository.</div></div>" : "") +
       '<p class="muted small">Changing the model or the endpoint re-embeds every search entry in the workspace.</p>',
     foot: '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="emb-go"' + (d.pick === e.provider ? " disabled" : "") + ">Open steering PR</button>" };
 };
 ACTS["emb-pick"] = function (el) { S.dialog.pick = el.value; renderLayer(); };
+/* What the person types survives a redraw of the dialog, and the steering PR carries it. */
+ACTS["emb-url"] = function (el) { S.dialog.url = el.value; };
+ACTS["emb-model"] = function (el) { S.dialog.model = el.value; };
 ACTS["emb-go"] = function () {
-  var pick = S.dialog.pick, e = F.SERVERS.embeddings, n = nextPrNumber();
-  var diff = pick === "custom" ? "+[embeddings]\n+provider = \"custom\"\n+url = \"" + e.custom.url + "\"\n+model = \"" + e.custom.model + "\"\n+credential = \"" + e.custom.credential + "\"" : "+[embeddings]\n+provider = \"" + pick + "\"";
-  S.newPrs.push({ n: n, kind: "workspace", state: "open", title: "Rank search mode with " + (pick === "custom" ? "our endpoint" : pick), branch: "workspace/embeddings-" + pick, by: ME, via: "web", opened: F.ORG.now, approvals: [],
+  var d = S.dialog, pick = d.pick, e = F.SERVERS.embeddings, n = nextPrNumber();
+  var field = function (id, typed, dflt) { var el = document.getElementById(id); return String(el ? el.value : typed != null ? typed : dflt).trim(); };
+  var url = pick === "custom" ? field("emb-url", d.url, e.custom.url) : "", model = pick === "custom" ? field("emb-model", d.model, e.custom.model) : "";
+  if (pick === "custom" && (!url || !model)) { toast("Enter the URL and the model of your endpoint."); return; }
+  var diff = pick === "custom" ? "+[embeddings]\n+provider = \"custom\"\n+url = \"" + url + "\"\n+model = \"" + model + "\"\n+credential = \"" + e.custom.credential + "\"" : "+[embeddings]\n+provider = \"" + pick + "\"";
+  S.newPrs.push({ n: n, kind: "workspace", state: "open", title: "Rank search mode with " + (pick === "custom" ? model : pick), branch: "workspace/embeddings-" + pick, by: ME, via: "web", opened: F.ORG.now, approvals: [],
     summary: "Changes how search mode ranks tools. oxagen re-embeds every search entry when it merges.",
     files: [{ path: "workspace.toml", diff: diff }],
     checks: [{ id: "schema", r: "pass" }, { id: "references", r: "pass" }, { id: "owned", r: "pass" }] });
@@ -1205,18 +1325,43 @@ ACTS["emb-go"] = function () {
 
 /* ---- Import from each harness's config ---- */
 ACTS.serverimport = function () { openDialog("serverimport"); };
+function serverImport() {
+  var im = F.SERVERS.import, entries = [], keys = 0, srv = [];
+  im.found.forEach(function (m) { m.entries.forEach(function (e) { entries.push(e); if (e.key === "plaintext") keys++; if (srv.indexOf(e.server) < 0) srv.push(e.server); }); });
+  return { im: im, entries: entries, keys: keys, servers: srv };
+}
 DIALOGS.serverimport = function () {
-  var im = F.SERVERS.import, entries = [], keys = 0, srv = {};
-  im.found.forEach(function (m) { m.entries.forEach(function (e) { entries.push(e); if (e.key === "plaintext") keys++; srv[e.server] = 1; }); });
-  return { title: "Import MCP servers", wide: true, sub: "oxagen read the MCP config of each harness on " + plural(im.machines, "machine") + ". The import arrives as one steering PR with a folder per server.",
+  var x = serverImport(), im = x.im, open = S.importPr.servers;
+  return { title: "Import MCP servers", wide: true, sub: "Import opens one steering PR with a folder per server, and nothing changes until it merges.",
     body: im.found.map(function (m) {
       return '<div class="imp"><div class="imp-h">' + g("dir", 14) + ' <b class="mono">' + h(m.machine) + '</b><span class="mono muted">' + h(m.file) + "</span><span class=\"muted\">" + h(personName(m.person)) + "</span></div>" + m.entries.map(function (e) {
         return '<div class="imp-e"><span class="mono">' + h(e.name) + "</span><span class=\"muted\">" + h(e.note) + "</span>" + (e.key === "plaintext" ? badge("b-denied", "Key in plaintext", true) : "") + (e.dupe ? badge("b-q", "Duplicate") : "") + "</div>";
       }).join("") + "</div>";
-    }).join("") + '<div class="note">Import moves the ' + plural(keys, "key") + " into oxagen's vault and rewrites each config to point at " + h(F.SERVERS.gateway) + ". No key stays on a laptop.</div>",
-    foot: '<span class="grow">' + plural(entries.length, "entry", "entries") + ", " + plural(Object.keys(srv).length, "server") + ", " + plural(keys, "key") + ' in plaintext.</span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="serverimport-go">Import ' + plural(Object.keys(srv).length, "server") + "</button>" };
+    }).join("") + '<div class="note">When the steering PR merges, oxagen moves the ' + plural(x.keys, "key") + " into its vault and rewrites each config to point at " + h(F.SERVERS.gateway) + ". No key stays on a laptop.</div>",
+    foot: '<span class="grow">' + plural(x.entries.length, "entry", "entries") + ", " + plural(x.servers.length, "server") + ", " + plural(x.keys, "key") + " in plaintext.</span>" +
+      (open ? '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-go="steering|pr-' + open + '">View steering PR #' + open + "</button>" : '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="serverimport-go">Open steering PR</button>') };
 };
-ACTS["serverimport-go"] = function () { S.imported.servers = true; closeDialog(); toast("Imported. The keys are in oxagen, and each config points at the gateway."); render(); };
+/* server.toml for an imported server: its source as the harness config named it, and a credential
+   reference. The key itself goes to the vault, never into the file. */
+function importedServerToml(id) {
+  var sv = serverBy(id), c = F.SERVERS.catalog.filter(function (x) { return x.id === id; })[0];
+  var l = ["#:schema https://oxagen.sh/schemas/mcp-server/v1.json", 'schema = "mcp-server/v1"', 'name = "' + id + '"', "", "[source]"];
+  if (sv && sv.source.type === "registry") l.push('type = "registry"', 'server = "' + sv.source.server + '"', 'version = "' + sv.source.version + '"');
+  else if (sv) { l.push('type = "remote"', 'url = "' + sv.source.url + '"', 'transport = "' + sv.source.transport + '"'); if (sv.source.network) l.push('network = "' + sv.source.network + '"'); }
+  else if (c) l.push('type = "registry"', 'server = "' + c.reg + '"');
+  l.push("", "[auth]", 'mode = "service"', 'credential = "' + (sv && sv.authcfg.credential || "oxagen:credential/" + id) + '"');
+  return { path: "tools/servers/" + id + "/server.toml", diff: l.map(function (x) { return "+" + x; }).join("\n") };
+}
+ACTS["serverimport-go"] = function () {
+  var x = serverImport(), n = nextPrNumber();
+  S.newPrs.push({ n: n, kind: "import", target: "servers", state: "open", title: "Import " + plural(x.servers.length, "MCP server"), branch: "tools/import", by: ME, via: "web", opened: F.ORG.now, approvals: [],
+    summary: "Adds a folder for each server the harness configs on " + plural(x.im.machines, "machine") + " name. No agent reaches them through the gateway until this merges.",
+    note: "When this merges, oxagen moves the " + plural(x.keys, "key") + " into its vault and points each config at `" + F.SERVERS.gateway + "`.",
+    files: x.servers.map(importedServerToml),
+    checks: [{ id: "schema", r: "pass" }, { id: "compile", r: "pass" }, { id: "references", r: "pass" }, { id: "secrets", r: "pass", note: "No key is in a file. Each server names a credential reference." }, { id: "owned", r: "pass" }] });
+  S.importPr.servers = n;
+  closeDialog(); go("steering", "pr-" + n); toast("Opened steering PR #" + n + ". Nothing changes until it merges.");
+};
 
 /* ---- Add server: four sources, each ending in what discovery found ---- */
 var SOURCES = [
@@ -1238,7 +1383,7 @@ DIALOGS.addserver = function (arg, d) {
   if (d.q && !d.init) { d.init = true; d.src = d.q.src || null; d.fmt = d.q.fmt || "openapi"; d.phase = d.q.phase || null; d.pick = d.q.pick || null; }
   d.fmt = d.fmt || "openapi";
   if (!d.src) {
-    return { title: "Add server", wide: true, sub: "Pick where the tools come from. From here on, every source takes the same path: discover, import, review, publish.",
+    return { title: "Add server", wide: true, sub: "Every source then takes the same path: discover, import, review, and publish.",
       body: '<div class="srcpick">' + SOURCES.map(function (s) { return '<button class="srcp" data-act="as-src" data-src="' + s[0] + '"><b>' + h(s[1]) + '</b><span class="muted small">' + h(s[2]) + "</span></button>"; }).join("") + "</div>",
       foot: '<button class="btn" data-act="close">Cancel</button>' };
   }
@@ -1246,7 +1391,7 @@ DIALOGS.addserver = function (arg, d) {
   if (d.phase === "result") return discoveryResult(d, back);
   var body = "", goLabel = "Discover tools";
   if (d.src === "url") {
-    body = '<div class="fields"><div class="field"><label for="as-name">Name</label><input id="as-name" value="stripe"><div class="hint">The folder <code>servers/stripe/</code> and the prefix of every tool name.</div></div><div class="field"><label for="as-url">URL</label><input id="as-url" value="https://mcp.stripe.com"></div></div>' +
+    body = '<div class="fields"><div class="field"><label for="as-name">Name</label><input id="as-name" value="stripe"><div class="hint">The folder <code>tools/servers/stripe/</code> and the prefix of every tool name.</div></div><div class="field"><label for="as-url">URL</label><input id="as-url" value="https://mcp.stripe.com"></div></div>' +
       '<div class="fields"><div class="field"><label for="as-tr">Transport</label><select id="as-tr"><option>Streamable HTTP</option><option>SSE</option></select></div><div class="field"><label for="as-auth">Authentication</label><select id="as-auth"><option>Service: one credential for every session</option><option>Operator OAuth</option><option>None</option></select></div></div>' +
       '<div class="fields"><div class="field"><label for="as-key">Credential</label><input id="as-key" type="password" placeholder="Paste the key"><div class="hint">It goes to oxagen\'s vault as <code>oxagen:credential/stripe-live</code>. It never reaches a steering PR.</div></div><div class="field"><label for="as-net">Network</label><select id="as-net"><option>cloud</option>' + Object.keys(F.SERVERS.relays).map(function (r) { return "<option>relay:" + h(r) + "</option>"; }).join("") + '</select><div class="hint">A server inside a private network goes through a relay.</div></div></div>';
   } else if (d.src === "registry") {
@@ -1285,7 +1430,7 @@ function discoveryResult(d, back) {
   }
   var word = d.src === "definition" ? { openapi: "operation", graphql: "root field", grpc: "method" }[d.fmt] : "tool";
   head = d.src === "definition" ? "Compiled <code>" + h(sv.source.path) + "</code> at <code>" + h(sv.source.commit) + "</code>" : d.src === "local" ? "<code>mbell-mbp-16</code> in <code>dev-laptops</code> ran the command and reported <code>tools/list</code>" : "The gateway called <code>tools/list</code>";
-  var nots = sv && sv.notTools ? '<h3 class="sec">Listed, never tools</h3><div class="lst">' + sv.notTools.map(function (x) { return '<div class="li"><span class="bd2"><span class="t1 mono">' + h(x.n) + '</span><span class="t2">' + h(x.why) + "</span></span></div>"; }).join("") + "</div>" : "";
+  var nots = sv && sv.notTools ? '<h3 class="sec">Unsupported capabilities</h3><div class="lst">' + sv.notTools.map(function (x) { return '<div class="li"><span class="bd2"><span class="t1 mono">' + h(x.n) + '</span><span class="t2">' + h(x.why) + "</span></span></div>"; }).join("") + "</div>" : "";
   var big = sv && sv.generate ? '<div class="note">The imported definitions would pass the ' + num(sv.exposure.definition_budget) + "-token budget, so Studio suggests search mode.</div>" : "";
   return { title: "Discovery result", wide: true, sub: head + ".",
     body: '<p><b>' + plural(total, word) + "</b> offered. Studio suggests a classification for each from the server's annotations or the method. Grey values are suggestions.</p>" +
@@ -1365,7 +1510,7 @@ function renderPill() {
     '<button data-act="pill-hide" aria-label="Hide the mockup controls">' + g("x", 13) + "</button></div>";
 }
 ACTS["pill-theme"] = function () { setTheme(effectiveTheme() === "dark" ? "light" : "dark"); render(); };
-ACTS["pill-empty"] = function () { S.empty = !S.empty; S.imported = { steering: false, servers: false }; S.connected = false; _sessions = null; render(); };
+ACTS["pill-empty"] = function () { S.empty = !S.empty; S.imported = { steering: false, servers: false }; S.importPr = { steering: null, servers: null }; S.connected = false; _sessions = null; render(); };
 ACTS["pill-phone"] = function () { S.preview = !S.preview; S.phone = S.preview || (function () { try { return matchMedia("(max-width: 760px)").matches; } catch (e) { return false; } })(); render(); };
 ACTS["pill-hide"] = function () { S.island = false; renderPill(); };
 ACTS["pill-health"] = function (el) { S.health = el.value; render(); };

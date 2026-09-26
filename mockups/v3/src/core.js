@@ -20,11 +20,13 @@ var S = {
   dialog: null, drawer: null,
   sent: {}, answered: {}, accepted: {}, dismissed: {}, serverAgents: {},
   imported: { steering: false, servers: false }, connected: false,
+  // An import opens a steering PR and applies nothing until it merges. importPr holds its number.
+  importPr: { steering: null, servers: null }, firstRunVersion: 1,
   // The steering repo and MCP Studio. health and viewer are mockup states: the review pill and the
   // URL (?health=drifted, ?as=amara) switch them.
   health: "healthy", viewer: null, steerTab: "records", srvTab: "tools",
   staged: {}, toolOff: {}, srvOff: {}, cls: {}, descs: {}, drafts: {}, dropped: {}, approved: {}, queue: [62],
-  newPrs: [], pendingAgents: {}, toolFilter: "all", toolQ: "", toolShow: 40, tryRun: {}, tryTool: {}, tryEnv: {},
+  newPrs: [], noReview: {}, pendingAgents: {}, toolFilter: "all", toolQ: "", toolShow: 40, tryRun: {}, tryTool: {}, tryEnv: {},
 };
 var HEALTH = ["healthy", "drifted", "disconnected", "diverged"];
 
