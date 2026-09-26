@@ -4,7 +4,8 @@
 const FILE = "./v3/index.html";
 const BASE = "/a-intel/core-platform/";
 
-export const argTypes = {
+// Not exported: every named export of a stories file is indexed as a story.
+const argTypes = {
   shell: { control: "inline-radio", options: ["desktop", "mobile"], description: "mobile draws a 390×844 phone, which gets the phone layout" },
   theme: { control: "inline-radio", options: ["system", "dark", "light"] },
   first: { control: "boolean", description: "?state=empty: the first run, before anything is connected" },

@@ -2258,7 +2258,13 @@ VIEWS.work = function () {
 };
 ACTS.worktab = function (el) { S.workTab = el.getAttribute("data-tab"); render(); };
 ACTS.wi = function (el, ev) { if (ev.target.closest("button")) return; openDrawer("workitem", el.getAttribute("data-key")); };
-ACTS.send = function (el, ev) { if (ev) ev.stopPropagation(); openDialog("send", el.getAttribute("data-key") || workItems().filter(function (w) { return w.state === "inbox"; })[0].key); };
+ACTS.send = function (el, ev) {
+  if (ev) ev.stopPropagation();
+  var first = workItems().filter(function (w) { return w.state === "inbox"; })[0];
+  var key = el.getAttribute("data-key") || (first && first.key);
+  if (!key) { toast("The inbox is empty. New work arrives from your trackers."); return; }
+  openDialog("send", key);
+};
 ACTS.newwork = function () { openDialog("newwork"); };
 
 function onboarding() {
