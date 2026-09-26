@@ -527,6 +527,7 @@ consequence_tags = ["moves_money"]</code></pre></figure>
   <h2>Agents</h2>
   <p>Today an agent definition is <code>.oxagen/agents/&lt;slug&gt;.toml</code> (<code>agent-definition/v0.1</code>), parsed by <code>packages/oxagen/src/agent-definition-source.ts</code> and cached on <code>agent.agent_versions</code> (ADR-057). It moves to <code>agents/&lt;slug&gt;.toml</code> with its fields unchanged. <span class="st c">Today</span></p>
   <p>A definition in a workspace's steering repo binds that agent to the workspace, which is the binding that decides a run's steering. Enrollment attaches a runtime and its operator to the agent in Oxagen. Keys, runtimes, and operators never enter the repository. Every merged edit is a new, immutable agent version, and a session binds to one. <span class="st p">Proposed</span></p>
+  <p><code>[environments]</code> names the environment the agent uses on a server. On a server it does not list, the agent uses the server's sandbox. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
   <figure class="code"><figcaption><span class="path">agents/release-manager.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/agent-definition/v1.json
 schema = "agent-definition/v1"
 slug = "release-manager"
@@ -537,6 +538,9 @@ tools = [
   "billing__list_invoices",
 ]
 skills = ["a-intel.platform.release-steps"]   # proposed: skills injected at session start
+
+[environments]                                # per server, the sandbox otherwise
+billing = "production"
 
 [budget]
 per_day_micros = 40000000                     # $40.00
@@ -1078,7 +1082,7 @@ Do
    code checkout.
 2. Zod schemas and TypeScript types for workspace/v1 (with the optional
    [embeddings] table MCP Studio specifies), governance/v1,
-   agent-definition/v1 (v0.1's fields plus skills),
+   agent-definition/v1 (v0.1's fields plus skills and environments),
    reflection/v1, promotion/v1, bundle/v1, repo health, and the three new
    steering-record/v1 fields (repos, tools, description on every kind).
 3. A generator that writes each schema as JSON Schema to

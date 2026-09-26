@@ -249,6 +249,9 @@ footer{margin-top:56px; padding-top:18px; border-top:1px solid var(--border); co
         <li>OpenAPI, GraphQL, and gRPC definitions are all sources on day 1. (Mac, 2026-09-26)</li>
         <li>Search mode ranks tools with embeddings. By default Oxagen embeds with Voyage AI's <code>voyage-3-large</code> on its own shared key, held in AWS, and absorbs the cost. A workspace can set its own embedding URL, model, and key. (Mac, 2026-09-26)</li>
         <li>The off switch acts at once with no pull request. (Mac, 2026-09-26)</li>
+        <li>An agent's calls go to a server's sandbox environment unless the agent's definition names another. The choice is set per agent. (Mac, 2026-09-26)</li>
+        <li>gRPC server-streaming methods are tools on day 1, each returning one bounded result. Client and bidirectional streams are never tools. (Picked for durability at Mac's request, 2026-09-26)</li>
+        <li>One classification vocabulary everywhere, the code's. <code>consequence_tags</code> joins the agent policy spec's <code>Tool</code> type and <code>financial_class</code> leaves it. (Picked for durability at Mac's request, 2026-09-26)</li>
         <li>Private networks are reached through the relay on day 1. The relay acts only on envelopes the cloud gateway signed, and it ships as a container image and a Helm chart. (Mac, 2026-09-26)</li>
         <li>A customer that keeps its own credential in the relay needs the Enterprise plan, and the website advertises it that way. (Mac, 2026-09-26)</li>
         <li>Drafting a description with the in-app agent bills as in-app agent spend on the Billing page. (Mac, 2026-09-26)</li>
@@ -366,6 +369,7 @@ mode = "service"                           # none, service, or operator-oauth
 scheme = "oauth"                           # oauth, bearer, basic, or header
 
 [environments.test]
+sandbox = true
 credential = "oxagen:credential/stripe-test"
 
 [environments.live]
@@ -396,6 +400,7 @@ scheme = "oauth"                           # a key of components.securitySchemes
 credential = "oxagen:credential/billing-oauth-client"
 
 [environments.sandbox]
+sandbox = true
 url = "https://billing-sandbox.a-intel.com/v2"
 
 [environments.production]
@@ -422,7 +427,7 @@ schedule = "on-change"</code></pre></figure>
       <tr><td><code>auth.mode</code></td><td>all but local</td><td class="wrap"><code>none</code>, <code>service</code> (one credential for every run), or <code>operator-oauth</code> (the token of the person who operates the run)</td></tr>
       <tr><td><code>auth.scheme</code></td><td>all but local</td><td class="wrap">For OpenAPI: a key of <code>components.securitySchemes</code>. For every other source: <code>oauth</code>, <code>bearer</code>, <code>basic</code>, or <code>header</code> with <code>auth.header</code>. gRPC sends it as call metadata.</td></tr>
       <tr><td><code>auth.credential</code></td><td>all but local</td><td class="wrap"><code>oxagen:credential/&lt;name&gt;</code>. Required unless the mode is <code>none</code> or every environment names one.</td></tr>
-      <tr><td><code>environments.&lt;name&gt;</code></td><td>all but local</td><td class="wrap">Overrides <code>url</code>, <code>network</code>, and <code>credential</code>. A server built from a definition needs one, since its <code>url</code> is the endpoint. A server with none has one environment, <code>default</code>. Which one an agent uses is an open question.</td></tr>
+      <tr><td><code>environments.&lt;name&gt;</code></td><td>all but local</td><td class="wrap">Overrides <code>url</code>, <code>network</code>, and <code>credential</code>. A server built from a definition needs one, since its <code>url</code> is the endpoint. A server with none has one environment, <code>default</code>. <code>sandbox = true</code> marks the sandbox. An agent uses the sandbox unless its definition names another environment for the server. A server with one environment uses it, and a server with several and no sandbox needs every agent to name one. <span class="st d">Decided</span> for sandbox by default and the choice per agent.</td></tr>
       <tr><td><code>exposure.mode</code>, <code>exposure.definition_budget</code></td><td>all</td><td class="wrap">See <a href="#large">Large servers</a>. The budget defaults to 8,000 tokens.</td></tr>
       <tr><td><code>sync.schedule</code></td><td>all</td><td class="wrap"><code>on-change</code> (a definition in a linked repository), <code>daily</code>, or <code>manual</code></td></tr>
     </tbody>
@@ -532,7 +537,7 @@ idempotency_header = "Idempotency-Key"</code></pre></figure>
 forbid (principal, action, resource)
 when { context.tool.consequence_tags.contains("destroys_data") }
 unless { context.approval.granted };</code></pre></figure>
-  <p class="muted">This rule assumes <code>consequence_tags</code> joins the policy spec's <code>Tool</code> type, which lists <code>risk</code>, <code>side_effect</code>, <code>egress</code>, and <code>financial_class</code> today. See Open questions.</p>
+  <p class="muted"><code>consequence_tags</code> joins the agent policy spec's <code>Tool</code> type and replaces its <code>financial_class</code>, so Cedar, the repository, and the code share one vocabulary. The policy spec's egress values move to the code's as well. Issue #141 tracks that page.</p>
 </section>
 
 <section id="lock">
@@ -692,8 +697,8 @@ unless { context.approval.granted };</code></pre></figure>
     <thead><tr><th>gRPC</th><th>Tool definition</th></tr></thead>
     <tbody>
       <tr><td>A unary method</td><td class="wrap">One tool. <code>PostEntry</code> suggests the name <code>post_entry</code>.</td></tr>
-      <tr><td>A server-streaming method</td><td class="wrap">One tool whose result collects up to <code>max_items</code> messages. See Open questions.</td></tr>
-      <tr><td>A client-streaming or bidirectional method</td><td class="wrap">Listed, never a tool</td></tr>
+      <tr><td>A server-streaming method</td><td class="wrap">One tool. The result is <code>{ items, truncated }</code>: the stream is read until it ends, reaches <code>max_items</code>, or passes <code>deadline_ms</code>, and <code>truncated</code> says whether it was cut short.</td></tr>
+      <tr><td>A client-streaming or bidirectional method</td><td class="wrap">Listed, never a tool. One request and one result cannot carry it, so this is permanent.</td></tr>
       <tr><td>The request message</td><td class="wrap"><code>inputSchema</code> by the proto3 JSON mapping: 64-bit integers as strings, <code>oneof</code> as <code>oneOf</code>, enums by name, and well-known types such as <code>Timestamp</code> in their JSON forms</td></tr>
       <tr><td>The response message</td><td class="wrap"><code>outputSchema</code> by the same mapping</td></tr>
       <tr><td>The method's leading comment</td><td class="wrap"><code>description</code></td></tr>
@@ -766,6 +771,7 @@ credential = "oxagen:credential/embeddings"</code></pre></figure>
       <tr><td>A selection set deeper than 3 levels</td><td>graphql</td><td>warning</td><td class="wrap">Large results and slow queries</td></tr>
       <tr><td>A list field with no paging arguments</td><td>graphql</td><td>warning</td><td class="wrap">One result can fill the context</td></tr>
       <tr><td>A <code>google.protobuf.Any</code> field</td><td>grpc</td><td>warning</td><td class="wrap">Its type is known only at run time</td></tr>
+      <tr><td>A server-streaming method imported without <code>max_items</code></td><td>grpc</td><td>warning</td><td class="wrap">A stream that never ends would run to its deadline on every call</td></tr>
       <tr><td>A method with no <code>idempotency_level</code></td><td>grpc</td><td>info</td><td class="wrap">The suggestion falls back to <code>write</code> and <code>high</code></td></tr>
     </tbody>
   </table></div>
@@ -961,20 +967,8 @@ Definitions: 6,120 → 6,410 tokens per request (budget 8,000)</code></pre></fig
   <span class="eyebrow">Open questions</span>
   <h2>Open questions</h2>
   <ol>
-    <li><strong>Default environment.</strong> A server can list more than one environment. The billing example has <code>sandbox</code> and <code>production</code>, and the gateway has to pick one for each call. Two parts need an answer:
-      <ul>
-        <li>The default when nobody chooses. <code>sandbox</code> is safe but does nothing real until someone switches it. <code>production</code> is useful at once, but a new agent can move real money on its first run.</li>
-        <li>Where the choice is set: on the agent, so all its calls to a server use one environment, or on each tool, so one agent could read production and still refund in sandbox.</li>
-      </ul>
-      Proposed: an agent uses the first environment listed, and Studio lists the sandbox or test environment first. The choice is set per agent in <code>agents/&lt;slug&gt;.toml</code>, so production is an explicit choice reviewed in a steering PR.</li>
-    <li><strong>gRPC scope on day 1.</strong> Two scopes, and client and bidirectional streams stay out of both:
-      <ul>
-        <li>Unary methods only. M3 imports them, M7 is a dynamic client for unary calls, and M12 carries HTTP/2.</li>
-        <li>Unary and server-streaming methods (proposed here). M7 also collects a stream up to <code>max_items</code> and then cancels it, and M12 carries streamed responses. Both lanes grow.</li>
-      </ul></li>
     <li><strong>Default embedding model.</strong> <code>voyage-3-large</code>, as written here, or <code>voyage-4-large</code>, which Voyage released in January 2026. Either change re-embeds every workspace on the default.</li>
-    <li><code>consequence_tags</code> in the agent policy spec's <code>Tool</code> type, and whether its <code>financial_class</code> becomes a field or stays the <code>moves_money</code> tag.</li>
-    <li>Local servers: which machines may run one, and whether the local gateway waits for the cloud gateway's decision on every call.</li>
+    <li><strong>Local servers.</strong> Which machines may run one, and whether the local gateway waits for the cloud gateway's decision on every call.</li>
   </ol>
 </section>
 
@@ -1508,7 +1502,8 @@ Do
    method's descriptors. Pick a maintained library and record why.
 2. HTTP/2 with TLS by default. Send the credential as call metadata. Apply
    deadline_ms, 30,000 by default.
-3. Collect a server stream up to max_items, then cancel the stream.
+3. Read a server stream until it ends, reaches max_items, or passes
+   deadline_ms, then cancel it. Return { items, truncated }.
 4. Map a non-OK status to isError with the code and the message. Retry
    UNAVAILABLE up to 3 times only for methods marked NO_SIDE_EFFECTS or
    IDEMPOTENT.
@@ -1954,7 +1949,9 @@ Do
    grant, the classification, and the decision rules in packages/rules (Cedar
    when its evaluator lands). Park for approval through the existing approval
    path. Then call M6's execute with M8's CredentialSource and the Transport
-   the environment names: cloud, M12's relay, or the local gateway.
+   the environment names: cloud, M12's relay, or the local gateway. The
+   environment is the one the agent's definition names for the server, or
+   else the server's sandbox.
 3. Search mode: search returns only tools in the toolbelt, describe returns
    one input schema, and call is decided as the underlying tool.
 4. The search index: on publish, embed each changed one-line entry, keyed by
