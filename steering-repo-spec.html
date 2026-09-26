@@ -307,7 +307,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
 </style>
 </head>
 <body>
-<div class="app"><aside class="side" aria-label="Page navigation"><a class="brand" href="#spec">oxagen <b>/</b> steering repo</a><span class="sub">Draft of 2026-09-26</span><div class="grp">Views</div><nav class="views" aria-label="Views"><a href="#spec" data-view="spec">Spec</a></nav><details class="secwrap" open><summary>Sections</summary><nav class="secs" aria-label="Sections"><a href="#changes">Changes</a><a href="#decisions">Decisions</a><a href="#day-one">Day one</a><a href="#layout">Layout</a><a href="#formats">Formats</a><a href="#records">Records</a><a href="#placement">Placement</a><a href="#servers">Tools</a><a href="#agents">Agents</a><a href="#policy">Policy</a><a href="#scope">Scope</a><a href="#repo-checks">Repo checks</a><a href="#provisioning">Provisioning</a><a href="#settings">Settings</a><a href="#drift">Drift</a><a href="#steering-pr">Steering PR</a><a href="#memory">Memory</a><a href="#scale">Scale</a><a href="#tokens">Tokens</a><a href="#agent-use">Agent use</a><a href="#contract">Contract</a><a href="#migration">Migration</a><a href="#open">Open questions</a><a href="#build">Build plan</a></nav></details><div class="grp">Related</div><nav aria-label="Related pages"><a class="ext" href="https://claude.ai/artifact/Csf3bmfQykQJ32tNFT13eR" target="_blank" rel="noopener">Build plan and progress</a><a class="ext" href="https://claude.ai/artifact/6p3eUwf6Snaf6UonhUBsoa" target="_blank" rel="noopener">MCP Studio</a><a class="ext" href="https://claude.ai/artifact/K12EGALijFzN66AfFPKefS" target="_blank" rel="noopener">Steering records v1</a></nav></aside><main class="main"><div data-view-root="spec" id="spec"><div class="wrap">
+<div class="app"><aside class="side" aria-label="Page navigation"><a class="brand" href="#spec">oxagen <b>/</b> steering repo</a><span class="sub">Draft of 2026-09-26</span><div class="grp">Views</div><nav class="views" aria-label="Views"><a href="#spec" data-view="spec">Spec</a></nav><details class="secwrap" open><summary>Sections</summary><nav class="secs" aria-label="Sections"><a href="#changes">Changes</a><a href="#decisions">Decisions</a><a href="#day-one">Day one</a><a href="#layout">Layout</a><a href="#formats">Formats</a><a href="#records">Records</a><a href="#placement">Placement</a><a href="#servers">Tools</a><a href="#agents">Agents</a><a href="#policy">Policy</a><a href="#scope">Scope</a><a href="#repo-checks">Repo checks</a><a href="#badges">Badges</a><a href="#provisioning">Provisioning</a><a href="#settings">Settings</a><a href="#drift">Drift</a><a href="#steering-pr">Steering PR</a><a href="#memory">Memory</a><a href="#scale">Scale</a><a href="#tokens">Tokens</a><a href="#agent-use">Agent use</a><a href="#contract">Contract</a><a href="#migration">Migration</a><a href="#open">Open questions</a><a href="#build">Build plan</a></nav></details><div class="grp">Related</div><nav aria-label="Related pages"><a class="ext" href="https://claude.ai/artifact/Csf3bmfQykQJ32tNFT13eR" target="_blank" rel="noopener">Build plan and progress</a><a class="ext" href="https://claude.ai/artifact/6p3eUwf6Snaf6UonhUBsoa" target="_blank" rel="noopener">MCP Studio</a><a class="ext" href="https://claude.ai/artifact/K12EGALijFzN66AfFPKefS" target="_blank" rel="noopener">Steering records v1</a></nav></aside><main class="main"><div data-view-root="spec" id="spec"><div class="wrap">
 <div class="hero">
   <span class="eyebrow">Specification</span>
   <h1>Steering repo</h1>
@@ -375,10 +375,17 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
         <li><code>README.md</code>, <code>AGENTS.md</code>, and <code>CLAUDE.md</code> at the root, written by Oxagen. Oxagen's text sits between markers, a check verifies it, and the web app shows Drift detected in the file, with a way to restore it. (Mac, 2026-09-26)</li>
         <li>Tools live under <code>tools/</code>: <code>tools/servers/</code> holds one folder per MCP server, and <code>tools/toolbelts/</code> is where named toolbelts that span servers will go. (Mac, 2026-09-26)</li>
         <li>Day one, every agent in a workspace gets the workspace's imported tools. Named toolbelts and a budget per agent wait until customers ask. (Mac, 2026-09-26)</li>
-        <li>Cedar policies with the agent as principal give least privilege, and they cover a harness's built-in tools, such as Claude Code's <code>Bash</code>. (Mac, 2026-09-26)</li>
+        <li>Cedar policies with the agent as principal give least privilege, and they cover a harness's built-in tools, such as Claude Code's <code>Bash</code>, in one vocabulary for every harness. (Mac, 2026-09-26)</li>
         <li>Teams that must not share tools use separate workspaces. (Mac, 2026-09-26)</li>
         <li>Oxagen assumes operators follow the conduct rules of their job, and adds no controls aimed at an operator who breaks them. (Mac, 2026-09-26)</li>
         <li>Rules can @mention a skill or a tool. (Mac, 2026-09-26)</li>
+        <li>Built-in tools share one Cedar vocabulary across every harness. (Mac, 2026-09-26)</li>
+        <li>Names use hyphens for slugs and record names, and snake_case for API, field, and key names. Nothing Oxagen names uses camelCase. (Mac, 2026-09-26)</li>
+        <li>The provisioning steps, the name Oxagen Steering, and the drift design: signals, states, and effects. (Mac, 2026-09-26)</li>
+        <li>The steering PR steps Open, Check, Stamp, and Publish. (Mac, 2026-09-26)</li>
+        <li>Approve and Merge buttons in the web app. In <code>solo</code> mode a steering PR has no approval step and a merge counts as approved. In every other mode it needs an approval and a merge. The workspace owner, in any mode, may merge as in <code>solo</code> mode. (Mac, 2026-09-26)</li>
+        <li>Every published version gets the next number for its workspace, so an auditor can tell which version steered a run. (Mac, 2026-09-26)</li>
+        <li>Oxagen marks the pull requests it played a part in with a badge from the brand kit. (Mac, 2026-09-26)</li>
         <li>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first and creates the workspace with its repository in one automated flow. The 14-day grace period of ADR-065 goes. (Mac, 2026-09-26)</li>
         <li>The repository name <code>oxagen-&lt;workspace&gt;</code>. (Mac, 2026-09-26)</li>
         <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>. (Mac, 2026-09-26)</li>
@@ -403,7 +410,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
     <div class="card">
       <h4><span class="st p">Proposed</span></h4>
       <ul>
-        <li>The details below that no Decided item names: the settings table beyond the required check, the drift sweep, the scale targets, the build lanes, the Cedar policy on a subagent's skill, the @mention syntax, and function tools.</li>
+        <li>The details below that no Decided item names: the settings table beyond the required check, the scale targets, the build lanes, the Cedar policy on a subagent's skill, the @mention syntax, and function tools.</li>
       </ul>
     </div>
   </div>
@@ -418,7 +425,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
     <li><strong>Agents.</strong> An agent is an operator, a harness, and a runtime. Each has a file in <code>agents/</code> that names the three, and Cedar sees it as the principal <code>Agent</code>. <span class="st d">Decided</span></li>
     <li><strong>Tools.</strong> Every agent in a workspace gets the workspace's imported tools and its harness's built-in tools. <span class="st d">Decided</span></li>
     <li><strong>Least privilege.</strong> Cedar policies in <code>policy/</code> narrow what an agent may call, by the agent, its operator, harness, or runtime, and the tool's classification. <span class="st d">Decided</span></li>
-    <li><strong>Built-in tools.</strong> Cedar decides a harness's own tools too, such as Claude Code's <code>Bash</code>, <code>Edit</code>, and <code>WebFetch</code>. The pre-tool hook asks for the decision. <span class="st d">Decided</span></li>
+    <li><strong>Built-in tools.</strong> Cedar decides a harness's own tools too, in one vocabulary for every harness: <code>builtin__shell</code> is Claude Code's <code>Bash</code> and Codex's <code>shell</code>. The pre-tool hook asks for the decision. <span class="st d">Decided</span> for one vocabulary, <span class="st p">Proposed</span> for the names. See <a href="#builtins">Built-in tools</a>.</li>
     <li><strong>Separation.</strong> Teams that must not share tools use separate workspaces. <span class="st d">Decided</span></li>
     <li><strong>Subagents.</strong> A Cedar policy on the skill a subagent runs limits it, such as a reviewer that may only read. See <a href="#subagents">Subagents</a>. <span class="st p">Proposed</span></li>
     <li><strong>Context size.</strong> A server over the definition budget runs in search mode, so an agent sees three tools for it instead of every definition. <span class="st p">Proposed</span></li>
@@ -971,7 +978,7 @@ harness = "claude-code"             # a harness, or a framework adapter</code></
     <li><strong>Later.</strong> <code>toolbelt</code>, <code>budget</code>, and <code>environment</code> fields, when customers ask. <span class="st d">Decided</span> that they wait (Mac, 2026-09-26)</li>
   </ul>
   <figure class="code"><figcaption><span class="path">policy/shell.cedar</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">// Only the release bot may run shell commands.
-forbid (principal, action == Action::"claude_code__Bash", resource)
+forbid (principal, action == Action::"builtin__shell", resource)
 unless { principal == Agent::"a-intel.core.release-bot" };</code></pre></figure>
   <p>Today agent definitions are <code>.oxagen/agents/&lt;slug&gt;.toml</code> (<code>agent-definition/v0.1</code>), parsed by <code>packages/oxagen/src/agent-definition-source.ts</code> and cached on <code>agent.agent_versions</code> (ADR-057). <span class="st c">Today</span> Their fields move:</p>
   <div class="tscroll"><table>
@@ -989,7 +996,7 @@ unless { principal == Agent::"a-intel.core.release-bot" };</code></pre></figure>
   <p>A subagent often needs fewer tools than the run that starts it, such as a reviewer that may read code and write nothing. Day one, a Cedar policy on the skill it runs sets that limit. <span class="st p">Proposed</span></p>
   <ul>
     <li><strong>The skill in context.</strong> When the harness says which skill a subagent runs, the hook or the gateway adds it to the request as <code>context.skill</code>.</li>
-    <li><strong>Read only by class.</strong> A policy forbids any call whose side effect is not <code>read</code> for that skill, so a new write tool never slips in. Built-in tools carry a classification too, so the same rule covers <code>Edit</code> and <code>Bash</code>.</li>
+    <li><strong>Read only by class.</strong> A policy forbids any call whose side effect is not <code>read</code> for that skill, so a new write tool never slips in. Built-in tools carry a classification too, so the same rule covers <code>builtin__write_file</code> and <code>builtin__shell</code>.</li>
     <li><strong>What the model sees.</strong> When a harness has its own tool list for a subagent, such as the <code>tools</code> field of a Claude Code subagent, Oxagen can fill it when it delivers the skill. The list trims what the model sees, and Cedar decides the call.</li>
     <li><strong>Knowing the caller.</strong> A harness that does not say which skill made a call gets the parent agent's decision. See Open questions.</li>
     <li><strong>Later.</strong> A skill's own <code>toolbelt</code> field, with named toolbelts.</li>
@@ -1007,9 +1014,24 @@ when {
   <span class="eyebrow">Policy</span>
   <h2>Policies</h2>
   <p>Cedar policies live in <code>policy/</code>, one file per group of related rules, each with a tests file beside it. Oxagen writes <code>policy/schema.cedarschema</code> from the workspace's tools and the files in <code>agents/</code>, and compiles the grant from the workspace's imported tools and each harness's built-in tools, so no one writes a grant as a rule and every policy narrows. The format, the schema, and the tests follow the agent policy spec (<code>oxagen-agent-policy-spec.html</code>, PR 127). <span class="st p">Proposed</span></p>
-  <p>Today no Cedar evaluator exists. Decision rules are a zod engine in <code>packages/rules</code> that reads <code>workspaces.settings.decisionRules</code> in Postgres. <span class="st c">Today</span> Lane S12 builds the evaluator for the gateway and for the pre-tool hook. <span class="st p">Proposed</span></p>
+  <p>Today no Cedar evaluator exists. Decision rules are a zod engine in <code>packages/rules</code> that reads the <code>decisionRules</code> key of <code>workspaces.settings</code> in Postgres, a camelCase name the naming rule retires. <span class="st c">Today</span> Lane S12 builds the evaluator for the gateway and for the pre-tool hook. <span class="st p">Proposed</span></p>
   <figure class="code"><figcaption><span class="path">policy/money.tests.jsonl</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="json">{"name":"refund under limit","principal":"a-intel.finops.invoice-bot","tool":"billing__create_refund@3","context":{"args":{"amount":12000}},"expect":"allow"}
 {"name":"refund over limit","principal":"a-intel.finops.invoice-bot","tool":"billing__create_refund@3","context":{"args":{"amount":64000}},"expect":"require_approval"}</code></pre></figure>
+  <h3 id="builtins">Built-in tools</h3>
+  <p>Every harness's own tools map to one Cedar vocabulary, so one policy covers Claude Code, Codex, Cursor, stella, and any framework. The action is <code>builtin__&lt;name&gt;</code>, and <code>builtin</code> is a reserved server name. A rule that needs one harness tests <code>principal.harness</code>, and <code>context.harness_tool</code> carries the harness's own name for the tool. <span class="st d">Decided</span> for one vocabulary (Mac, 2026-09-26), <span class="st p">Proposed</span> for the names and classifications.</p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Action</th><th>Claude Code</th><th>Codex</th><th>Risk</th><th>Side effect</th><th>Egress</th></tr></thead>
+    <tbody>
+      <tr><td><code>builtin__shell</code></td><td><code>Bash</code></td><td><code>shell</code></td><td>high</td><td>irreversible</td><td>third_party</td></tr>
+      <tr><td><code>builtin__read_file</code></td><td><code>Read</code></td><td>the shell's reads</td><td>low</td><td>read</td><td>local</td></tr>
+      <tr><td><code>builtin__search_files</code></td><td><code>Grep</code>, <code>Glob</code></td><td>the shell's searches</td><td>low</td><td>read</td><td>local</td></tr>
+      <tr><td><code>builtin__write_file</code></td><td><code>Edit</code>, <code>Write</code>, <code>MultiEdit</code></td><td><code>apply_patch</code></td><td>medium</td><td>write</td><td>local</td></tr>
+      <tr><td><code>builtin__web_fetch</code></td><td><code>WebFetch</code></td><td>none</td><td>medium</td><td>read</td><td>third_party</td></tr>
+      <tr><td><code>builtin__web_search</code></td><td><code>WebSearch</code></td><td><code>web_search</code></td><td>low</td><td>read</td><td>third_party</td></tr>
+      <tr><td><code>builtin__start_subagent</code></td><td><code>Task</code></td><td>none</td><td>low</td><td>read</td><td>local</td></tr>
+    </tbody>
+  </table></div>
+  <p class="muted">Lane S12 writes the map for Cursor, stella, and each framework adapter. A harness tool with no entry is decided as <code>builtin__shell</code>, the strictest one. The agent policy spec still names built-ins by harness, such as <code>claude_code__Bash</code>. Issue #141 tracks its vocabulary.</p>
 </section>
 
 <section id="scope">
@@ -1062,10 +1084,28 @@ per_month_micros = 12000000000                # $12,000.00
   <p>The check warns and never blocks a merge by default, because a code repository's branch rules belong to the customer. <span class="st p">Proposed</span></p>
 </section>
 
+<section id="badges">
+  <span class="eyebrow">Badges</span>
+  <h2>Pull request badges</h2>
+  <p>Oxagen marks the pull requests it played a part in with a badge from the house brand kit, so a customer can pick them out at a glance. <span class="st d">Decided</span> for the badges (Mac, 2026-09-26), <span class="st p">Proposed</span> for the mechanism.</p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Pull request</th><th>Where the badge goes</th><th>How Oxagen knows</th></tr></thead>
+    <tbody>
+      <tr><td>Steering PR</td><td class="wrap">The summary of the <code>Oxagen steering</code> check, and a managed block at the top of the description</td><td class="wrap">Oxagen opens or checks every one</td></tr>
+      <tr><td>A pull request a wrapped agent opens on a code repository</td><td class="wrap">A managed block at the top of the description with a link to the run, and an <code>oxagen</code> label</td><td class="wrap">The run record holds it: a gateway call such as <code>github__create_pull_request</code>, or a shell command the post-tool hook saw, matched to the pull request by its head commit</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><strong>The badges.</strong> The shields in <code>oxagen-brand/github-badges/</code>, 20 pixels high and readable on either theme, such as <code>shield-oxagen-verified.svg</code>. A new shield for pull requests a wrapped agent opened is a design task for that repository's <code>build.py</code>.</li>
+    <li><strong>Hosting.</strong> GitHub shows a pull request's images through its image proxy, so each badge needs a public URL. <code>oxagen-brand</code> is public, so a raw file URL works, or <code>oxagen.sh</code> can serve the files.</li>
+    <li><strong>Permissions.</strong> The Oxagen app already has pull request permission on code repositories, so it can edit the description and add the label. It edits only its managed block.</li>
+  </ul>
+</section>
+
 <section id="provisioning">
   <span class="eyebrow">Provisioning</span>
   <h2>Provisioning</h2>
-  <p>Creating a workspace creates its steering repo. The person creating it types a name and nothing else. <span class="st d">Decided</span> for the outcome, <span class="st p">Proposed</span> for the steps.</p>
+  <p>Creating a workspace creates its steering repo. The person creating it types a name and nothing else. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
   <p>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first, installing both Oxagen apps, then creates the first workspace and its repository in the same flow, with nothing for the person to set up by hand. There is no provisional workspace, and the 14-day grace period of ADR-065 goes. <span class="st d">Decided</span></p>
   <ol class="steps">
     <li><div><strong>Pick the provider connection.</strong><p>The organization's GitHub App installation or GitLab group. Oxagen asks only when the organization has more than one.</p></div></li>
@@ -1075,9 +1115,9 @@ per_month_micros = 12000000000                # $12,000.00
     <li><div><strong>Publish version 1.</strong><p>Oxagen builds the published version from the first commit and records a deployment to the <code>steering</code> environment.</p></div></li>
     <li><div><strong>Open the workspace.</strong><p>The target is 15 seconds from Create to an open workspace. When a step fails, the workspace shows which step and a Retry button. Every step is safe to repeat.</p></div></li>
   </ol>
-  <p>Creating an organization runs the same steps for <code>&lt;org&gt;/oxagen</code>, the repository for organization records, with the same settings and no <code>workspace.toml</code>. <span class="st d">Decided</span> for the repository, <span class="st p">Proposed</span> for the steps.</p>
+  <p>Creating an organization runs the same steps for <code>&lt;org&gt;/oxagen</code>, the repository for organization records, with the same settings and no <code>workspace.toml</code>. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
   <h3>GitHub apps</h3>
-  <p>Two apps split the permissions. <strong>Oxagen</strong> keeps the permissions it has today and works on code repositories. <strong>Oxagen Steering</strong> has the same permissions plus full admin, and it is the only app that acts on steering repos, so an organization grants admin on the repositories Oxagen creates and on nothing else. <span class="st d">Decided</span> for the split, <span class="st p">Proposed</span> for the name Oxagen Steering.</p>
+  <p>Two apps split the permissions. <strong>Oxagen</strong> keeps the permissions it has today and works on code repositories. <strong>Oxagen Steering</strong> has the same permissions plus full admin, and it is the only app that acts on steering repos, so an organization grants admin on the repositories Oxagen creates and on nothing else. <span class="st d">Decided</span> for the split and the name Oxagen Steering (Mac, 2026-09-26).</p>
   <div class="tscroll"><table>
     <thead><tr><th>Permission</th><th>Access</th><th>Why</th><th>Oxagen</th><th>Oxagen Steering</th></tr></thead>
     <tbody>
@@ -1128,7 +1168,7 @@ per_month_micros = 12000000000                # $12,000.00
 <section id="drift">
   <span class="eyebrow">Drift</span>
   <h2>Settings drift</h2>
-  <p>When someone changes a prescribed setting, Oxagen notices within seconds, fails every pull request, and stops publishing until the setting is back. <span class="st d">Decided</span> for the outcome, <span class="st p">Proposed</span> for the mechanism.</p>
+  <p>When someone changes a prescribed setting, Oxagen notices within seconds, fails every pull request, and stops publishing until the setting is back. <span class="st d">Decided</span> for the outcome and the mechanism below (Mac, 2026-09-26).</p>
   <h3>Signals</h3>
   <ul>
     <li><strong>Webhooks.</strong> GitHub: <code>repository_ruleset</code>, <code>branch_protection_configuration</code>, <code>repository</code> (edited, renamed, transferred, archived, made public), <code>installation_repositories</code> (removed), <code>installation</code> (suspended, deleted), and <code>push</code> to <code>main</code>. GitLab: project, push, and member hooks.</li>
@@ -1168,13 +1208,13 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
   <h2>Steering PR flow</h2>
   <p>v1's flow stands: open, check, review, merge, publish, retire. These steps change it so Oxagen is the only merger and every merge is checked against the <code>main</code> it lands on.</p>
   <ol class="steps">
-    <li><div><strong>Open.</strong><p>From the web app, an agent's MCP tool, MCP Studio, the curator, or a clone. The branch starts with the top-level folder it changes: <code>steering/</code>, <code>memory/</code>, <code>tools/</code>, <code>agents/</code>, <code>policy/</code>, or <code>workspace/</code>. A person's steering PR holds one record, as in v1. A memory PR and a server PR hold many files. <span class="st p">Proposed</span></p></div></li>
-    <li><div><strong>Check.</strong><p>Oxagen runs the checks below and posts one required check, <code>Oxagen steering</code>, with each result inside it. <span class="st p">Proposed</span></p></div></li>
-    <li><div><strong>Review.</strong><p>By governance mode, as in v1. A reviewer approves in Oxagen or with a GitHub or GitLab review from an account linked to an Oxagen member. <code>governance.toml</code> can route folders to reviewer groups. <span class="st p">Proposed</span></p></div></li>
+    <li><div><strong>Open.</strong><p>From the web app, an agent's MCP tool, MCP Studio, the curator, or a clone. The branch starts with the top-level folder it changes: <code>steering/</code>, <code>memory/</code>, <code>tools/</code>, <code>agents/</code>, <code>policy/</code>, or <code>workspace/</code>. A person's steering PR holds one record, as in v1. A memory PR and a server PR hold many files. <span class="st d">Decided</span> (Mac, 2026-09-26)</p></div></li>
+    <li><div><strong>Check.</strong><p>Oxagen runs the checks below and posts one required check, <code>Oxagen steering</code>, with each result inside it. <span class="st d">Decided</span> (Mac, 2026-09-26)</p></div></li>
+    <li><div><strong>Review.</strong><p>The web app has Approve and Merge buttons on every steering PR, and both act through Oxagen Steering. In <code>solo</code> mode there is no approval step: Merge is the only action, and a merged steering PR counts as approved. In every other mode a steering PR needs an approval, then a merge. The workspace owner, in any mode, may merge as in <code>solo</code> mode. <span class="st d">Decided</span> (Mac, 2026-09-26)</p><p>The required check still has to pass for the owner, and the ledger line and the merge commit record that the owner merged without an approval. A reviewer approves in Oxagen or with a GitHub or GitLab review from an account linked to an Oxagen member, and <code>governance.toml</code> can route folders to reviewer groups. The host's branch rules require no reviewer, so Oxagen enforces the approval. <span class="st p">Proposed</span></p></div></li>
     <li><div><strong>Queue.</strong><p>Merge, or auto-merge once approved, puts the pull request in the repository's queue. Oxagen merges one at a time. When <code>main</code> moves, the next pull request is brought up to date and checked again, so the budget and conflict checks judge the <code>main</code> it will land on. <span class="st p">Proposed</span></p></div></li>
-    <li><div><strong>Stamp.</strong><p>At the head of the queue, Oxagen pushes one commit to the branch that writes <code>id</code> and <code>hash</code> into changed records and adds the ledger line. Only the head of the queue is stamped, so no two branches append to the ledger. <span class="st p">Proposed</span></p></div></li>
+    <li><div><strong>Stamp.</strong><p>At the head of the queue, Oxagen pushes one commit to the branch that writes <code>id</code> and <code>hash</code> into changed records and adds the ledger line. Only the head of the queue is stamped, so no two branches append to the ledger. <span class="st d">Decided</span> (Mac, 2026-09-26)</p></div></li>
     <li><div><strong>Merge.</strong><p>Oxagen squash-merges at the stamped SHA. The commit message carries trailers: <code>Oxagen-Approved-By</code>, <code>Oxagen-Checks</code>, and <code>Oxagen-Version</code>. <span class="st c">Today</span> for the squash merge</p></div></li>
-    <li><div><strong>Publish.</strong><p>Oxagen builds the next published version from the merged tree, switches new model requests and tool calls to it at once, and records a deployment to <code>steering</code>. Each request's manifest names the version it used. <span class="st p">Proposed</span></p></div></li>
+    <li><div><strong>Publish.</strong><p>Oxagen builds the next published version from the merged tree, switches new model requests and tool calls to it at once, and records a deployment to <code>steering</code>. <span class="st d">Decided</span> (Mac, 2026-09-26)</p><p>Each published version gets the next number for its workspace, starting at 1 when the repository is created. A number is never reused, so a revert is a new number. <span class="st d">Decided</span> (Mac, 2026-09-26)</p><p>The number is a label. The proof is the merge SHA and the version's line in the hash-chained ledger, which the publish records beside the number. Each request's manifest and each run record name the workspace's number and the organization repo's number. Oxagen tags the merge commit <code>steering/&lt;number&gt;</code> for an auditor to check out, and the ledger stays authoritative, since a tag can move. <span class="st p">Proposed</span></p></div></li>
     <li><div><strong>Revert.</strong><p>Revert opens a steering PR that undoes a merged one, with the same checks and review. <span class="st p">Proposed</span></p></div></li>
   </ol>
   <div class="tscroll"><table>
@@ -1410,7 +1450,8 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
       <tr><td>Steering repo</td><td class="wrap"><code>&lt;org&gt;/oxagen-&lt;workspace-slug&gt;</code>, then <code>-2</code> on a clash. Organization repo <code>&lt;org&gt;/oxagen</code>.</td></tr>
       <tr><td>Top-level paths</td><td class="wrap"><code>AGENTS.md</code> <code>CLAUDE.md</code> <code>README.md</code> <code>.gitattributes</code> <code>workspace.toml</code> <code>agents/</code> <code>steering/</code> <code>steering/governance.toml</code> <code>steering/promotions/&lt;period&gt;.jsonl</code>, then <code>&lt;period&gt;.002.jsonl</code> past the line cap <code>steering/skills/</code> <code>steering/memory/</code> <code>tools/servers/&lt;name&gt;/</code> <code>tools/toolbelts/</code> <code>policy/</code></td></tr>
       <tr><td>Schema ids</td><td class="wrap"><code>steering-record/v1</code> <code>workspace/v1</code> <code>agent/v1</code> <code>governance/v1</code> <code>toolbelt/v1</code> <code>mcp-server/v1</code> <code>mcp-tools/v1</code> <code>mcp-tools-lock/v1</code> <code>tool-manifest/v1</code> <code>reflection/v1</code> <code>promotion/v1</code> <code>bundle/v1</code>, each at <code>https://oxagen.sh/schemas/&lt;id&gt;.json</code></td></tr>
-      <tr><td>Tool name</td><td class="wrap"><code>&lt;server&gt;__&lt;tool&gt;</code>. Server <code>^[a-z][a-z0-9_]{0,23}$</code>, tool <code>^[a-z][a-z0-9_]*$</code>, 64 characters at most in all. A pinned reference adds <code>@&lt;version&gt;</code>.</td></tr>
+      <tr><td>Naming</td><td class="wrap">Hyphens for slugs and record names, such as <code>refunds-over-100</code>. snake_case for API, field, and key names, such as <code>always_on_tokens</code>. Nothing Oxagen names uses camelCase. A name a standard fixes, such as MCP's <code>inputSchema</code>, keeps the standard's spelling. <span class="st d">Decided</span> (Mac, 2026-09-26)</td></tr>
+      <tr><td>Tool name</td><td class="wrap"><code>&lt;server&gt;__&lt;tool&gt;</code>. Built-in tools are <code>builtin__&lt;name&gt;</code>, and <code>builtin</code> is reserved. Server <code>^[a-z][a-z0-9_]{0,23}$</code>, tool <code>^[a-z][a-z0-9_]*$</code>, 64 characters at most in all. A pinned reference adds <code>@&lt;version&gt;</code>.</td></tr>
       <tr><td>Credential reference</td><td class="wrap"><code>oxagen:credential/&lt;name&gt;</code>, name <code>^[a-z0-9][a-z0-9-]{0,62}$</code></td></tr>
       <tr><td>Repository reference</td><td class="wrap"><code>&lt;host&gt;/&lt;owner&gt;/&lt;name&gt;</code>, lowercase</td></tr>
       <tr><td>Record reference</td><td class="wrap"><code>@record:&lt;lineage&gt;</code> in a body, the lineage alone in a field. A body can also mention <code>@skill:&lt;lineage&gt;</code> and <code>@tool:&lt;server&gt;__&lt;tool&gt;</code></td></tr>
@@ -1448,6 +1489,7 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
     <li>Whether a customer can opt in to the code repository check blocking a merge. By default it only warns.</li>
     <li>Where function tools run, such as <code>calculate_refund_amount</code>: in a sandbox in Oxagen's cloud, or on the customer's own infrastructure through the relay. And which language comes first. See Function tools.</li>
     <li>What a policy on a subagent's skill does on a harness that does not say which skill made a tool call. Recommended: the call gets the parent agent's decision, and the Skills screen shows that the skill's policy does not apply on that harness, since Oxagen assumes operators act in good faith. The other choice is to not deliver such a skill to that harness. See Subagents.</li>
+    <li>Whether an organization admin acting in a workspace gets the owner's right to merge a steering PR without an approval, or only the named workspace owner does (recommended).</li>
   </ol>
 </section>
 
