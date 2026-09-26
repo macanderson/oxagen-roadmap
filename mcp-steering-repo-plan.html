@@ -912,8 +912,11 @@ Do
 3. The merge queue: one merge at a time per repository. When main moves, bring
    the next branch up to date and check it again before merging.
 4. At the head of the queue, push one stamp commit that writes id and hash
-   into changed records and adds the ledger line to
-   steering/promotions/&lt;yyyy-mm&gt;.jsonl. Carry the chain across months.
+   into changed records and adds the ledger line to the current file in
+   steering/promotions/. Start a new file at the period or the line cap in
+   governance.toml&#x27;s [ledger] table, whichever comes first: 2026-09.jsonl,
+   then 2026-09.002.jsonl. Carry the chain across files: the first line of a
+   new file carries the last hash of the file before.
 5. Squash-merge at the stamped SHA with the Oxagen-Approved-By, Oxagen-Checks,
    and Oxagen-Version trailers, then call S5&#x27;s publish(). Refuse to merge when
    S2&#x27;s health is not healthy.

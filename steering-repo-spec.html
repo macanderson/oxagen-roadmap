@@ -402,7 +402,7 @@ body{padding-inline:0}
 ├── steering/
 │   ├── governance.toml                        mode, reviewers, memory settings
 │   ├── promotions/
-│   │   └── 2026-09.jsonl                      the ledger, one file a month
+│   │   └── 2026-09.jsonl                      the ledger, rotated as governance.toml sets
 │   ├── billing/                               folders are yours to arrange
 │   │   └── a-intel.billing.refunds-over-100.md
 │   ├── platform/
@@ -449,7 +449,7 @@ body{padding-inline:0}
       <tr><td><code>workspace.toml</code></td><td>Linked code repositories, the workspace budget, and an optional embedding endpoint</td><td>TOML</td><td>People, by steering PR</td><td><span class="st c">Today</span> written by the init PR and displayed, reconciled by nothing</td></tr>
       <tr><td><code>steering/</code></td><td>Steering records and skills</td><td>Markdown with YAML frontmatter</td><td>People, agents, the curator</td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>steering/governance.toml</code></td><td>Governance mode, reviewer groups, memory settings</td><td>TOML</td><td>People</td><td><span class="st c">Today</span> at <code>.oxagen/rules/governance.toml</code></td></tr>
-      <tr><td><code>steering/promotions/</code></td><td>The hash-chained ledger of merged records</td><td>JSON Lines</td><td>Oxagen</td><td><span class="st p">Proposed</span> one file a month</td></tr>
+      <tr><td><code>steering/promotions/</code></td><td class="wrap">The hash-chained ledger of merged records, in a new file each period or at a line cap, whichever comes first</td><td>JSON Lines</td><td>Oxagen</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>steering/memory/</code></td><td>Memories a memory PR promoted</td><td>Markdown with YAML frontmatter</td><td>The curator</td><td><span class="st d">Decided</span></td></tr>
             <tr><td><code>servers/</code></td><td class="wrap">Every MCP server agents reach, connected or built from a definition, with its imported tools and their risk classification</td><td>TOML, a JSON lock, the vendored definition</td><td>MCP Studio and people, by steering PR</td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>policy/</code></td><td>Cedar policies and their tests</td><td>Cedar, JSON Lines</td><td>People</td><td><span class="st d">Decided</span></td></tr>
@@ -532,7 +532,7 @@ into smaller refunds to stay under the limit.</code></pre></figure>
       <tr><td>Invariants</td><td><code>steering/**</code></td><td><code>constraint</code>, <code>force: must</code></td><td>Every request. A Cedar policy enforces the ones about tool calls</td></tr>
       <tr><td>Governance policies</td><td><code>policy/*.cedar</code></td><td>Cedar</td><td>Never sent to the model. The cloud gateway decides each tool call with them</td></tr>
       <tr><td>Facts</td><td><code>steering/**</code></td><td><code>fact</code></td><td>When relevant</td></tr>
-      <tr><td>Ontology</td><td><code>steering/domain/**</code> by convention</td><td><code>fact</code>, one entity or term per record</td><td>When relevant, or when the toolbelt holds a tool in <code>tools</code></td></tr>
+      <tr><td>Ontology</td><td><code>steering/domain/**</code> by convention</td><td><code>fact</code>, one entity or term per record. Definitions only: a rule about an entity is a <code>business-rule</code> or a <code>constraint</code>.</td><td>When relevant, or when the toolbelt holds a tool in <code>tools</code></td></tr>
       <tr><td>Style preferences</td><td><code>steering/**</code></td><td><code>preference</code></td><td>Every request for <code>must</code> and <code>should</code></td></tr>
       <tr><td>Brand identity</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td>A <code>skill</code> with its files, plus one short <code>preference</code></td><td>The preference on every request, the skill on demand</td></tr>
       <tr><td>Design system</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td>A <code>skill</code> with <code>tokens.json</code> and one file per component</td><td>On demand</td></tr>
@@ -570,7 +570,7 @@ provenance:
 ---
 
 A refund returns money against one captured charge. Amounts are integers in
-cents. A charge's refunds never total more than the captured amount.
+cents.
 
 States: `pending`, `succeeded`, `failed`, `canceled`. Only `pending` can be
 canceled, with `billing__cancel_refund`.
@@ -906,6 +906,10 @@ mode = "team"                        # solo, team, or regulated
 [steering]
 always_on_tokens = 4000              # a number or "off". Unset inherits Oxagen's default, which only warns.
 
+[ledger]
+rotate = "month"                     # day, week, month, or year
+max_lines = 10000                    # a new file starts here even mid-period
+
 [memory]
 recall_candidates = "same-agent"     # same-agent, or off
 min_runs = 2                         # distinct runs before a candidate is proposed
@@ -933,7 +937,7 @@ group = "billing-leads"</code></pre></figure>
       <tr><td>Merges a day</td><td class="num">200</td><td class="wrap">The merge queue, and batched memory PRs</td></tr>
       <tr><td>Checks, p95</td><td class="num">60 s</td><td class="wrap">For 50 changed files. Only changed files are parsed, and cross-file checks run against Oxagen's index of the published version.</td></tr>
       <tr><td>Merge to live, p95</td><td class="num">30 s</td><td class="wrap">Publishing recompiles only files whose blob SHA changed</td></tr>
-      <tr><td>Ledger file size</td><td class="num">5 MB</td><td class="wrap">One file a month. The first line of each file carries the last hash of the month before, so the chain stays whole.</td></tr>
+      <tr><td>Ledger file size</td><td class="num">5 MB</td><td class="wrap">A new file each period (a month by default) or at <code>max_lines</code>, whichever comes first, so a busy workspace and a quiet one both get readable files. The first line of each file carries the last hash of the file before, so the chain stays whole across files.</td></tr>
     </tbody>
   </table></div>
   <ul>
@@ -1055,7 +1059,7 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
     <thead><tr><th>Name</th><th>Value</th></tr></thead>
     <tbody>
       <tr><td>Steering repo</td><td class="wrap"><code>&lt;org&gt;/oxagen-&lt;workspace-slug&gt;</code>, then <code>-2</code> on a clash. Organization repo <code>&lt;org&gt;/oxagen</code>.</td></tr>
-      <tr><td>Top-level paths</td><td class="wrap"><code>AGENTS.md</code> <code>CLAUDE.md</code> <code>README.md</code> <code>.gitattributes</code> <code>workspace.toml</code> <code>steering/</code> <code>steering/governance.toml</code> <code>steering/promotions/&lt;yyyy-mm&gt;.jsonl</code> <code>steering/skills/</code> <code>steering/memory/</code> <code>servers/&lt;name&gt;/</code> <code>policy/</code></td></tr>
+      <tr><td>Top-level paths</td><td class="wrap"><code>AGENTS.md</code> <code>CLAUDE.md</code> <code>README.md</code> <code>.gitattributes</code> <code>workspace.toml</code> <code>steering/</code> <code>steering/governance.toml</code> <code>steering/promotions/&lt;period&gt;.jsonl</code>, then <code>&lt;period&gt;.002.jsonl</code> past the line cap <code>steering/skills/</code> <code>steering/memory/</code> <code>servers/&lt;name&gt;/</code> <code>policy/</code></td></tr>
       <tr><td>Schema ids</td><td class="wrap"><code>steering-record/v1</code> <code>workspace/v1</code> <code>governance/v1</code> <code>mcp-server/v1</code> <code>mcp-tools/v1</code> <code>mcp-tools-lock/v1</code> <code>tool-manifest/v1</code> <code>reflection/v1</code> <code>promotion/v1</code> <code>bundle/v1</code>, each at <code>https://oxagen.sh/schemas/&lt;id&gt;.json</code></td></tr>
       <tr><td>Tool name</td><td class="wrap"><code>&lt;server&gt;__&lt;tool&gt;</code>. Server <code>^[a-z][a-z0-9_]{0,23}$</code>, tool <code>^[a-z][a-z0-9_]*$</code>, 64 characters at most in all. A pinned reference adds <code>@&lt;version&gt;</code>.</td></tr>
       <tr><td>Credential reference</td><td class="wrap"><code>oxagen:credential/&lt;name&gt;</code>, name <code>^[a-z0-9][a-z0-9-]{0,62}$</code></td></tr>
