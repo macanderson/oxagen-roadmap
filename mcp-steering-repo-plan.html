@@ -307,16 +307,16 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
 </style>
 </head>
 <body>
-<div class="app"><aside class="side" aria-label="Page navigation"><a class="brand" href="#plan">oxagen <b>/</b> build plan</a><span class="sub">Steering repo and MCP Studio</span><div class="grp">Views</div><nav class="views" aria-label="Views"><a href="#plan" data-view="plan">Plan</a><a href="#prompts" data-view="prompts">Prompts <span class="cnt">32</span></a><a href="#progress" data-view="progress">Progress <span class="cnt" id="nav-progress-count">0/31</span></a></nav><details class="secwrap" open><summary>Sections</summary><nav class="secs" aria-label="Sections"><a href="#order">Build order</a><a href="#sequence">Sequence</a><a href="#critical">Critical path</a><a href="#lanes">Lanes</a><a href="#rules">Rules</a></nav></details><div class="grp">Related</div><nav aria-label="Related pages"><a class="ext" href="https://claude.ai/artifact/P12CrkUBPm4o4viMv2mSJc" target="_blank" rel="noopener">Steering repo spec</a><a class="ext" href="https://claude.ai/artifact/6p3eUwf6Snaf6UonhUBsoa" target="_blank" rel="noopener">MCP Studio spec</a><a class="ext" href="https://claude.ai/artifact/K12EGALijFzN66AfFPKefS" target="_blank" rel="noopener">Steering records v1</a></nav></aside><main class="main"><div data-view-root="plan" id="plan"><div class="wrap">
+<div class="app"><aside class="side" aria-label="Page navigation"><a class="brand" href="#plan">oxagen <b>/</b> build plan</a><span class="sub">Steering repo and MCP Studio</span><div class="grp">Views</div><nav class="views" aria-label="Views"><a href="#plan" data-view="plan">Plan</a><a href="#prompts" data-view="prompts">Prompts <span class="cnt">33</span></a><a href="#progress" data-view="progress">Progress <span class="cnt" id="nav-progress-count">0/32</span></a></nav><details class="secwrap" open><summary>Sections</summary><nav class="secs" aria-label="Sections"><a href="#order">Build order</a><a href="#sequence">Sequence</a><a href="#critical">Critical path</a><a href="#lanes">Lanes</a><a href="#rules">Rules</a></nav></details><div class="grp">Related</div><nav aria-label="Related pages"><a class="ext" href="https://claude.ai/artifact/P12CrkUBPm4o4viMv2mSJc" target="_blank" rel="noopener">Steering repo spec</a><a class="ext" href="https://claude.ai/artifact/6p3eUwf6Snaf6UonhUBsoa" target="_blank" rel="noopener">MCP Studio spec</a><a class="ext" href="https://claude.ai/artifact/K12EGALijFzN66AfFPKefS" target="_blank" rel="noopener">Steering records v1</a></nav></aside><main class="main"><div data-view-root="plan" id="plan"><div class="wrap">
 <div class="hero">
   <span class="eyebrow">Build plan</span>
   <h1>Steering repo and MCP Studio</h1>
   <p class="lead">One plan for both builds: the order, one master list of build prompts, and a progress tracker you can refresh. The target UI is <code>mockups/v3</code>, and one design lane puts both features there before any build lane starts.</p>
   <dl class="facts">
     <div class="fact"><dt>Date</dt><dd>2026-09-26</dd></div>
-    <div class="fact"><dt>Lanes</dt><dd>31, in six phases</dd></div>
+    <div class="fact"><dt>Lanes</dt><dd>32, in six phases</dd></div>
     <div class="fact"><dt>Target UI</dt><dd><code>mockups/v3</code> (Mac, 2026-09-26)</dd></div>
-    <div class="fact"><dt>Progress</dt><dd><a href="#progress" id="hero-build">0 of 31 lanes merged</a></dd></div>
+    <div class="fact"><dt>Progress</dt><dd><a href="#progress" id="hero-build">0 of 32 lanes merged</a></dd></div>
     <div class="fact"><dt>Specs</dt><dd><a href="https://claude.ai/artifact/P12CrkUBPm4o4viMv2mSJc" target="_blank" rel="noopener">Steering repo</a> and <a href="https://claude.ai/artifact/6p3eUwf6Snaf6UonhUBsoa" target="_blank" rel="noopener">MCP Studio</a></dd></div>
   </dl>
 </div>
@@ -326,13 +326,13 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
   <h2>Build order</h2>
   <div class="answer"><p>Build both at once after a short serial start. Do not finish the steering repo first.</p></div>
   <ol class="steps">
-    <li><div><strong>MCP Studio needs four things from the steering repo.</strong><p>The contract (S0) before it starts, the pull request path (S3) and the checks (S4) before its PR and check lanes finish, and publishing (S5) before serving (M15). Its importers, compiler, executor, relay, credentials, and local servers are code that needs none of the steering repo.</p></div></li>
-    <li><div><strong>Steering first would idle MCP Studio.</strong><p>Fourteen MCP Studio lanes would wait a whole wave for no reason, and <code>servers/</code> is where most of a workspace's reviewed configuration will live, so the steering repo's first real content is MCP servers anyway.</p></div></li>
+    <li><div><strong>MCP Studio needs five things from the steering lanes.</strong><p>The contract (S0) before it starts, the pull request path (S3) and the checks (S4) before its PR and check lanes finish, and publishing (S5) and the Cedar evaluator (S12) before serving (M15). Its importers, compiler, executor, relay, credentials, and local servers are code that needs none of the steering repo.</p></div></li>
+    <li><div><strong>Steering first would idle MCP Studio.</strong><p>Fourteen MCP Studio lanes would wait a whole wave for no reason, and <code>tools/servers/</code> is where most of a workspace's reviewed configuration will live, so the steering repo's first real content is MCP servers anyway.</p></div></li>
     <li><div><strong>The contract is the risk, so it goes alone.</strong><p>A wrong name in S0 or M0 costs every lane after it. Those two run one after the other, before any wave starts, and every lane stops and reports a wrong contract instead of working around it.</p></div></li>
     <li><div><strong>One design lane covers both.</strong><p>U1 puts the steering repo and MCP Studio into <code>mockups/v3</code>, so Mac reviews the whole experience once. S7 and M9 then build the screens from the merged mockup.</p></div></li>
-    <li><div><strong>The critical path starts first.</strong><p>In wave 1, start S1, S3, S4, S5, M4, M6, M7, M13, and M14 before the rest. They gate wave 2 and the live tests.</p></div></li>
+    <li><div><strong>The critical path starts first.</strong><p>In wave 1, start S1, S3, S4, S5, S12, M4, M6, M7, M13, and M14 before the rest. They gate wave 2 and the live tests.</p></div></li>
   </ol>
-  <div class="note"><p><strong>Proposed.</strong> At most 8 lane agents at once, a number Mac can change. Wave 1 alone has 22 lanes.</p></div>
+  <div class="note"><p><strong>Proposed.</strong> At most 8 lane agents at once, a number Mac can change. Wave 1 alone has 23 lanes.</p></div>
 </section>
 
 <section id="sequence">
@@ -341,14 +341,14 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
   <p>Each phase starts when the one before it has merged, except in wave 2 and the live tests, where each lane starts as soon as the lanes it needs have merged. Gold lanes are on the critical path.</p>
   <div class="tscroll seq"><table>
     <thead><tr><th>Track</th><th>Design</th><th>Contract</th><th>Wave 1</th><th>Wave 2</th><th>Live tests</th></tr></thead>
-    <tbody><tr><td>Design</td><td><span class="chips"><span class="lane-id">U1</span></span></td><td></td><td></td><td></td><td></td></tr><tr><td>Steering repo</td><td></td><td><span class="chips"><span class="lane-id">S0</span></span></td><td><span class="chips"><span class="lane-id crit">S1</span><span class="lane-id">S2</span><span class="lane-id crit">S3</span><span class="lane-id crit">S4</span><span class="lane-id crit">S5</span><span class="lane-id">S6</span><span class="lane-id">S7</span><span class="lane-id">S8</span></span></td><td><span class="chips"><span class="lane-id">S9</span><span class="lane-id">S10</span></span></td><td><span class="chips"><span class="lane-id">S11</span></span></td></tr><tr><td>MCP Studio</td><td></td><td><span class="chips"><span class="lane-id">M0</span></span></td><td><span class="chips"><span class="lane-id">M1</span><span class="lane-id">M2</span><span class="lane-id">M3</span><span class="lane-id crit">M4</span><span class="lane-id">M5</span><span class="lane-id crit">M6</span><span class="lane-id crit">M7</span><span class="lane-id">M8</span><span class="lane-id">M9</span><span class="lane-id">M10</span><span class="lane-id">M11</span><span class="lane-id">M12</span><span class="lane-id crit">M13</span><span class="lane-id crit">M14</span></span></td><td><span class="chips"><span class="lane-id">M15</span><span class="lane-id">M16</span></span></td><td><span class="chips"><span class="lane-id">M17</span></span></td></tr></tbody>
+    <tbody><tr><td>Design</td><td><span class="chips"><span class="lane-id">U1</span></span></td><td></td><td></td><td></td><td></td></tr><tr><td>Steering repo</td><td></td><td><span class="chips"><span class="lane-id">S0</span></span></td><td><span class="chips"><span class="lane-id crit">S1</span><span class="lane-id">S2</span><span class="lane-id crit">S3</span><span class="lane-id crit">S4</span><span class="lane-id crit">S5</span><span class="lane-id">S6</span><span class="lane-id">S7</span><span class="lane-id">S8</span><span class="lane-id crit">S12</span></span></td><td><span class="chips"><span class="lane-id">S9</span><span class="lane-id">S10</span></span></td><td><span class="chips"><span class="lane-id">S11</span></span></td></tr><tr><td>MCP Studio</td><td></td><td><span class="chips"><span class="lane-id">M0</span></span></td><td><span class="chips"><span class="lane-id">M1</span><span class="lane-id">M2</span><span class="lane-id">M3</span><span class="lane-id crit">M4</span><span class="lane-id">M5</span><span class="lane-id crit">M6</span><span class="lane-id crit">M7</span><span class="lane-id">M8</span><span class="lane-id">M9</span><span class="lane-id">M10</span><span class="lane-id">M11</span><span class="lane-id">M12</span><span class="lane-id crit">M13</span><span class="lane-id crit">M14</span></span></td><td><span class="chips"><span class="lane-id">M15</span><span class="lane-id">M16</span></span></td><td><span class="chips"><span class="lane-id">M17</span></span></td></tr></tbody>
   </table></div>
   <ol class="steps">
     <li><div><strong>Design.</strong><p>U1 adds both features to <code>mockups/v3</code>. Mac reviews and merges it. A design change lands in the spec it touches before the contract starts.</p></div></li>
     <li><div><strong>Contract.</strong><p>S0, then M0. After M0 merges, every shared name and signature is fixed.</p></div></li>
-    <li><div><strong>Wave 1.</strong><p>S1 to S8 and M1 to M14, each in paths no other lane touches. Critical-path lanes first.</p></div></li>
-    <li><div><strong>Wave 2.</strong><p>S9 after S4. S10 after S1, S3, and S5. M15 after S5, M4, M6, M7, M13, and M14. M16 after S4, M4, and M6.</p></div></li>
-    <li><div><strong>Live tests.</strong><p>S11 after S1 to S8, on a GitHub test organization. M17 after M1 to M15 and S11, on the same organization.</p></div></li>
+    <li><div><strong>Wave 1.</strong><p>S1 to S8, S12, and M1 to M14, each in paths no other lane touches. Critical-path lanes first.</p></div></li>
+    <li><div><strong>Wave 2.</strong><p>S9 after S4. S10 after S1, S3, and S5. M15 after S5, S12, M4, M6, M7, M13, and M14. M16 after S4, M4, and M6.</p></div></li>
+    <li><div><strong>Live tests.</strong><p>S11 after S1 to S8 and S12, on a GitHub test organization. M17 after M1 to M15 and S11, on the same organization.</p></div></li>
   </ol>
 </section>
 
@@ -356,8 +356,8 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
   <span class="eyebrow">Critical path</span>
   <h2>Critical path</h2>
   <p>The longest chain of lanes that each wait on the one before. A delay on any of them delays the end of the build.</p>
-  <p class="chips"><span class="lane-id">U1</span><span class="arrow">review</span><span class="arrow">→</span><span class="lane-id">S0</span><span class="arrow">→</span><span class="lane-id">M0</span><span class="arrow">→</span><span class="chips"><span class="lane-id crit">S3</span><span class="lane-id crit">S5</span><span class="lane-id crit">M4</span><span class="lane-id crit">M6</span><span class="lane-id crit">M7</span><span class="lane-id crit">M13</span><span class="lane-id crit">M14</span></span><span class="arrow">→</span><span class="lane-id crit">M15</span><span class="arrow">→</span><span class="lane-id">M17</span></p>
-  <p>S1 to S8 feed S11, which M17 reuses, so the steering lanes also finish before the last MCP Studio lane.</p>
+  <p class="chips"><span class="lane-id">U1</span><span class="arrow">review</span><span class="arrow">→</span><span class="lane-id">S0</span><span class="arrow">→</span><span class="lane-id">M0</span><span class="arrow">→</span><span class="chips"><span class="lane-id crit">S3</span><span class="lane-id crit">S5</span><span class="lane-id crit">S12</span><span class="lane-id crit">M4</span><span class="lane-id crit">M6</span><span class="lane-id crit">M7</span><span class="lane-id crit">M13</span><span class="lane-id crit">M14</span></span><span class="arrow">→</span><span class="lane-id crit">M15</span><span class="arrow">→</span><span class="lane-id">M17</span></p>
+  <p>S1 to S8 and S12 feed S11, which M17 reuses, so the steering lanes also finish before the last MCP Studio lane.</p>
 </section>
 
 <section id="lanes">
@@ -366,7 +366,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
   <p>Lane ids match the specs, so a spec that names a lane, such as M13, means the lane here.</p>
   <div class="tscroll"><table>
     <thead><tr><th>Lane</th><th>Name</th><th>Track</th><th>Phase</th><th>Needs merged</th><th>Repository</th></tr></thead>
-    <tbody><tr><td><span class="lane-id">U1</span></td><td class="wrap">The steering repo and MCP Studio in the v3 mockup</td><td>Design</td><td>Design</td><td class="wrap">Nothing</td><td><code>oxagen-roadmap</code></td></tr><tr><td><span class="lane-id">S0</span></td><td class="wrap">Contract, paths, fixtures</td><td>Steering repo</td><td>Contract</td><td class="wrap">U1</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M0</span></td><td class="wrap">Contract, operation model, fixtures</td><td>MCP Studio</td><td>Contract</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">S1</span></td><td class="wrap">Provisioning</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S2</span></td><td class="wrap">Drift</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">S3</span></td><td class="wrap">Steering PR pipeline</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">S4</span></td><td class="wrap">Checks</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">S5</span></td><td class="wrap">Publish and delivery</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S6</span></td><td class="wrap">Memory and reflection</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S7</span></td><td class="wrap">App screens</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0, U1</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S8</span></td><td class="wrap">Binding and linking</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M1</span></td><td class="wrap">OpenAPI import</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M2</span></td><td class="wrap">GraphQL import</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M3</span></td><td class="wrap">gRPC import</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">M4</span></td><td class="wrap">Compile and lock</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M5</span></td><td class="wrap">Tool checks</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">M6</span></td><td class="wrap">Executor</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">M7</span></td><td class="wrap">gRPC client</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M8</span></td><td class="wrap">Credentials and operator OAuth</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M9</span></td><td class="wrap">Studio screens</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0, U1</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M10</span></td><td class="wrap">Discovery and sync</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M11</span></td><td class="wrap">Import PRs</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M12</span></td><td class="wrap">Relay</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">M13</span></td><td class="wrap">Registry projection and migration</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">M14</span></td><td class="wrap">Local servers</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S9</span></td><td class="wrap">oxagen check CLI</td><td>Steering repo</td><td>Wave 2</td><td class="wrap">S4</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S10</span></td><td class="wrap">Migration and docs</td><td>Steering repo</td><td>Wave 2</td><td class="wrap">S1, S3, S5</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M15</span></td><td class="wrap">Serving and search mode</td><td>MCP Studio</td><td>Wave 2</td><td class="wrap">S5, M4, M6, M7, M13, M14</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M16</span></td><td class="wrap">Replay and selection tests</td><td>MCP Studio</td><td>Wave 2</td><td class="wrap">S4, M4, M6</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S11</span></td><td class="wrap">Live test</td><td>Steering repo</td><td>Live tests</td><td class="wrap">S1 to S8</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M17</span></td><td class="wrap">Live test</td><td>MCP Studio</td><td>Live tests</td><td class="wrap">M1 to M15, S11</td><td><code>oxagen</code></td></tr></tbody>
+    <tbody><tr><td><span class="lane-id">U1</span></td><td class="wrap">The steering repo and MCP Studio in the v3 mockup</td><td>Design</td><td>Design</td><td class="wrap">Nothing</td><td><code>oxagen-roadmap</code></td></tr><tr><td><span class="lane-id">S0</span></td><td class="wrap">Contract, paths, fixtures</td><td>Steering repo</td><td>Contract</td><td class="wrap">U1</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M0</span></td><td class="wrap">Contract, operation model, fixtures</td><td>MCP Studio</td><td>Contract</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">S1</span></td><td class="wrap">Provisioning</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S2</span></td><td class="wrap">Drift</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">S3</span></td><td class="wrap">Steering PR pipeline</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">S4</span></td><td class="wrap">Checks</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">S5</span></td><td class="wrap">Publish and delivery</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S6</span></td><td class="wrap">Memory and reflection</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S7</span></td><td class="wrap">App screens</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0, U1</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S8</span></td><td class="wrap">Binding and linking</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">S12</span></td><td class="wrap">Cedar evaluator</td><td>Steering repo</td><td>Wave 1 steering repo</td><td class="wrap">S0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M1</span></td><td class="wrap">OpenAPI import</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M2</span></td><td class="wrap">GraphQL import</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M3</span></td><td class="wrap">gRPC import</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">M4</span></td><td class="wrap">Compile and lock</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M5</span></td><td class="wrap">Tool checks</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">M6</span></td><td class="wrap">Executor</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">M7</span></td><td class="wrap">gRPC client</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M8</span></td><td class="wrap">Credentials and operator OAuth</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M9</span></td><td class="wrap">Studio screens</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0, U1</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M10</span></td><td class="wrap">Discovery and sync</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M11</span></td><td class="wrap">Import PRs</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M12</span></td><td class="wrap">Relay</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">M13</span></td><td class="wrap">Registry projection and migration</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id crit">M14</span></td><td class="wrap">Local servers</td><td>MCP Studio</td><td>Wave 1 MCP Studio</td><td class="wrap">M0</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S9</span></td><td class="wrap">oxagen check CLI</td><td>Steering repo</td><td>Wave 2</td><td class="wrap">S4</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S10</span></td><td class="wrap">Migration and docs</td><td>Steering repo</td><td>Wave 2</td><td class="wrap">S1, S3, S5</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M15</span></td><td class="wrap">Serving and search mode</td><td>MCP Studio</td><td>Wave 2</td><td class="wrap">S5, S12, M4, M6, M7, M13, M14</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M16</span></td><td class="wrap">Replay and selection tests</td><td>MCP Studio</td><td>Wave 2</td><td class="wrap">S4, M4, M6</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">S11</span></td><td class="wrap">Live test</td><td>Steering repo</td><td>Live tests</td><td class="wrap">S1 to S8, S12</td><td><code>oxagen</code></td></tr><tr><td><span class="lane-id">M17</span></td><td class="wrap">Live test</td><td>MCP Studio</td><td>Live tests</td><td class="wrap">M1 to M15, S11</td><td><code>oxagen</code></td></tr></tbody>
   </table></div>
 </section>
 
@@ -414,20 +414,20 @@ This overrides any repository file that still allows a local test file, a local 
   <article class="pcard" data-wave="coord" id="prompt-all"><div class="pcard-head"><span class="lane-id">All</span><span class="pcard-title">Coordinator</span><button type="button" class="cp" aria-label="Copy the All prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">You coordinate the build of the steering repo and MCP Studio in
 macanderson/oxagen. The plan is mcp-steering-repo-plan.html in
 macanderson/oxagen-roadmap. Its Prompts view holds one prompt per lane: U1, S0
-to S11, and M0 to M17. Give each lane agent its prompt and nothing else.
+to S12, and M0 to M17. Give each lane agent its prompt and nothing else.
 
 1. Design. Start one agent with the U1 prompt. When its PR is ready, ask Mac
    to review the mockup, and wait until it merges. If the review changed the
    design, update the spec it touches in one PR before going on.
 2. Contract. Start S0. When it merges, start M0. When M0 merges, the contract
    is fixed.
-3. Wave 1. Start the critical-path lanes first: S1, S3, S4, S5, M4, M6, M7,
-   M13, and M14. Then start the rest of S1 to S8 and M1 to M14 as slots free
-   up. Run at most 8 lane agents at once unless Mac sets another number.
+3. Wave 1. Start the critical-path lanes first: S1, S3, S4, S5, S12, M4,
+   M6, M7, M13, and M14. Then start the rest of S1 to S8 and M1 to M14 as
+   slots free up. Run at most 8 lane agents at once unless Mac sets another number.
 4. Wave 2. Start each lane when the lanes it needs have merged: S9 after S4.
-   S10 after S1, S3, and S5. M15 after S5, M4, M6, M7, M13, and M14. M16
+   S10 after S1, S3, and S5. M15 after S5, S12, M4, M6, M7, M13, and M14. M16
    after S4, M4, and M6.
-5. Live tests. Start S11 when S1 to S8 have merged. Start M17 when M1 to M15
+5. Live tests. Start S11 when S1 to S8 and S12 have merged. Start M17 when M1 to M15
    and S11 have merged, since it reuses S11&#x27;s test organization.
 6. When a lane reports that a contract is wrong, stop the lanes it affects,
    fix the contract in one PR, and restart them after it merges.
@@ -525,8 +525,8 @@ MCP Studio
    confirms them, and a running total counts against the definition budget.
    The tool panel shows the classification, the description with Draft,
    hidden and fixed inputs, what the result returns, what the server says, and
-   agent feedback. A Toolbelts view lists the named toolbelts, each a set of
-   tools across servers, and the workspace&#x27;s default.
+   agent feedback. An Agents view lists each agent&#x27;s file: its operator,
+   runtime, and harness, and the policies that name it.
 9. Changes shows the steering PR a review opens: the tool surface diff, the
    checks, and Open steering PR. Include a sync PR where an upstream
    description changed while the locked one is still served, and a breaking
@@ -622,7 +622,7 @@ Do
    code checkout.
 2. Zod schemas and TypeScript types for workspace/v1 (with the optional
    [embeddings] table MCP Studio specifies), governance/v1,
-   toolbelt/v1, reflection/v1, promotion/v1, bundle/v1, repo health, and the three new
+   agent/v1, toolbelt/v1, reflection/v1, promotion/v1, bundle/v1, repo health, and the three new
    steering-record/v1 fields (repos, tools, description on every kind).
 3. A generator that writes each schema as JSON Schema to
    packages/oxagen/schemas/&lt;id&gt;.json with $id https://oxagen.sh/schemas/&lt;id&gt;.json.
@@ -748,7 +748,7 @@ Mac set this on 2026-09-26 for every repository on this machine. Local builds, t
 - Put this rule, word for word, in the prompt of every subagent you start.
 
 This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article><h3>Wave 1 steering repo</h3>
-  <div class="wave-copy"><button type="button" class="cpw" data-wave="w1s">Copy all 8 wave 1 steering repo prompts</button><span>Each prompt goes to its own agent.</span></div><article class="pcard" data-wave="w1s" id="prompt-s1"><div class="pcard-head"><span class="lane-id">S1</span><span class="pcard-title">Provisioning</span><button type="button" class="cp" aria-label="Copy the S1 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S1. Provision a steering repo when a workspace is created
+  <div class="wave-copy"><button type="button" class="cpw" data-wave="w1s">Copy all 9 wave 1 steering repo prompts</button><span>Each prompt goes to its own agent.</span></div><article class="pcard" data-wave="w1s" id="prompt-s1"><div class="pcard-head"><span class="lane-id">S1</span><span class="pcard-title">Provisioning</span><button type="button" class="cp" aria-label="Copy the S1 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S1. Provision a steering repo when a workspace is created
 
 Goal
 Creating a workspace creates its private steering repo, seeds it, applies the
@@ -989,6 +989,8 @@ You own
 Do
 1. Move today&#x27;s six checks into packages/steering-check unchanged in effect.
 2. Add settings (reads S2&#x27;s health), references, budget, compile, and owned.
+   references also resolves @skill: and @tool: mentions in record bodies,
+   and the runtime each agents/ file names.
 3. budget: count tokens for each changed record, then for each code
    repository the change reaches, compare the always-on total before and
    after with the budget. The budget is steering.always_on_tokens in the
@@ -1060,7 +1062,7 @@ You own
 Do
 1. publish(repo, sha): build the bundle incrementally by blob SHA: the record
    index with token counts, the always-on block per code repository, the Cedar policy
-   set when policy/ exists, the toolbelts from tools/toolbelts/, and the tool
+   set when policy/ exists, the agents from agents/, and the tool
    manifest from tools/servers/ (MCP Studio&#x27;s
    compile(), lane M4. Until it merges, skip servers with a warning.). Then call
    MCP Studio&#x27;s project() (lane M13) so the tool registry follows the merge.
@@ -1297,6 +1299,80 @@ Do
 Done when
 - Tests cover the migration, linking one repository to two workspaces, and
   link by PR.
+- CI is green.
+
+Rules for every lane
+- The plan is mcp-steering-repo-plan.html in macanderson/oxagen-roadmap, and your prompt&#x27;s Read first names the spec sections you need. The Shared contract section of steering-repo-spec.html is fixed: use its names exactly. If the contract is wrong, stop and say so in the PR body. Do not work around it.
+- Work in macanderson/oxagen. Create the worktree with:
+  git worktree add ~/Projects/.worktrees/oxagen/&lt;lane-slug&gt; -b &lt;branch&gt; origin/main
+- Change only the paths under &quot;You own&quot;. Read anything. When you need a change in a path another lane owns, write it in the PR body and leave the path alone.
+- Open an issue for the lane before the PR and cite it in the PR body (Refs #N).
+  Start the issue title and the PR title with the lane id in brackets, such as
+  [M4] or [S3], so the build tracker can find them.
+- Watch the PR until it merges or closes. Every 60 seconds read its state, its mergeability, and the checks on the head commit. When a job fails, read it with gh run view --job &lt;id&gt; --log-failed, fix it, and push. When the PR conflicts, merge main in, resolve, and push. Treat cancelled or skipped required jobs as not passed.
+- A schema change needs only the schema label. Migrations apply on merge. Write no apply steps.
+- Load the clear-prose skill before you write a comment, a UI string, an error message, a doc, a commit message, or the PR body.
+- New code and copy say &quot;steering record&quot; and &quot;steering PR&quot; (#4325).
+
+## Local execution
+
+Mac set this on 2026-09-26 for every repository on this machine. Local builds, test runs, dev servers, and git hooks ran the laptop out of memory and killed agent runs partway through, and every killed run costs money. CI is the only place code is built, checked, or tested.
+
+- Do not run the gate, a build, a typecheck, a lint, or any test, not even one test file. Push the branch and read the CI result. Read a failed job with `gh run view --job &lt;id&gt; --log-failed`.
+- Do not start a dev server: no `next dev`, `next start`, `pnpm dev`, a server under `cargo run`, or anything else that listens on a port.
+- Do not start Docker or Colima, and do not run anything that needs them.
+- Do not run Biome in any form.
+- Git hooks are off on this machine. `LEFTHOOK=0` and `HUSKY=0` are set for every shell (`~/.zshenv`) and every Claude Code session (`~/.claude/settings.json`). oxagen&#x27;s installed hooks are renamed `*.disabled`, and stella&#x27;s `core.hooksPath` is unset. Do not reinstall a hook, turn one back on, or run a hook&#x27;s commands by hand.
+- Code generators and small integrity scripts that only read and write files are allowed, such as regenerating a checksum, a schema index, or a message catalogue.
+- Put this rule, word for word, in the prompt of every subagent you start.
+
+This overrides any repository file that still allows a local test file, a local gate, a dev server, or hooks.</code></pre></details></article><article class="pcard" data-wave="w1s" id="prompt-s12"><div class="pcard-head"><span class="lane-id">S12</span><span class="pcard-title">Cedar evaluator</span><button type="button" class="cp" aria-label="Copy the S12 prompt">Copy prompt</button></div><details class="pcard-body"><summary>Show prompt</summary><pre><code data-lang="plaintext">Lane S12. The Cedar evaluator for tool calls
+
+Goal
+Every tool call routed through Oxagen, and every built-in tool call a hook
+sees, is decided by the Cedar policies in the steering repo&#x27;s policy/, with
+the agent as the principal.
+
+Read first
+- steering-repo-spec.html: Day one, Agents, Policies, Tools.
+- oxagen-agent-policy-spec.html in macanderson/oxagen-roadmap: the schema,
+  How a call is decided, and the examples and their tests.
+- packages/rules/ (today&#x27;s decision rules), packages/tacho/src/bundle.ts and
+  hook-handler.ts, and the gateway&#x27;s tools/call path.
+
+You own
+- packages/policy/ (new): the evaluator, the request builder, the entity loader
+- The Cedar parts of the signed host bundle in packages/tacho/src
+- The writer for policy/schema.cedarschema
+
+Do
+1. Evaluate with @cedar-policy/cedar-wasm at a pinned version. On publish,
+   validate every policy against the schema in strict mode, and refuse a
+   version that fails.
+2. The request: the principal is Agent from agents/&lt;name&gt;.toml, with its
+   operator, runtime, and harness, in its Workspace. The action is the tool
+   name: &lt;server&gt;__&lt;tool&gt;, or &lt;harness&gt;__&lt;Tool&gt; for a built-in tool such as
+   claude_code__Bash. The context is the agent policy spec&#x27;s Call type, plus
+   context.skill when the harness names the skill a subagent runs.
+3. The grant: every agent is granted the workspace&#x27;s imported tools and its
+   harness&#x27;s built-in tools. Compile that grant into a permit, so every
+   policy a person writes narrows it.
+4. Read a denial as the agent policy spec says: when every deciding rule
+   carries @decision(&quot;require_approval&quot;), park the call. Otherwise deny.
+5. The gateway decides tools/call with the evaluator. Keep packages/rules as
+   the fallback until each rule it holds has a Cedar policy.
+6. The hook: sign the compiled policies into the host bundle, and evaluate
+   them in PreToolUse from the cached bundle, built-in tools included.
+7. Write policy/schema.cedarschema on each publish, from the workspace&#x27;s
+   imported tools, the built-in tools of each harness in agents/, and the
+   agents&#x27; attributes.
+
+Done when
+- The agent policy spec&#x27;s examples and tests pass through the new evaluator.
+- A test denies claude_code__Bash in PreToolUse for an agent a policy
+  forbids, and allows it for another agent.
+- A test parks a call whose deciding rules all carry
+  @decision(&quot;require_approval&quot;).
 - CI is green.
 
 Rules for every lane
@@ -2245,11 +2321,11 @@ Do
    .oxagen/ content in the new layout, converting v0.1 TOML records to v1
    Markdown. Then open one pull request on the old repository that removes the
    committed .oxagen/ files, and relink it as linked.
-2. Agent definitions leave the repository. Move each field of
-   .oxagen/agents/&lt;slug&gt;.toml where the steering spec&#x27;s Agents table says,
-   and stop commit_agent_definition (agent.definition.commit.ts) writing a
-   file. An agent is an operator, a runtime, and a harness registered in
-   Oxagen, and subagent-style agents become skills.
+2. Agent definitions become agents/&lt;name&gt;.toml (agent/v1): operator,
+   runtime, and harness. Move each other field of .oxagen/agents/&lt;slug&gt;.toml
+   where the steering spec&#x27;s Agents table says, and point
+   commit_agent_definition (agent.definition.commit.ts) at the new file.
+   Subagent-style agents become skills.
 3. Stella reads steering/ from the steering repo root.
 4. Rewrite the docs for the steering repo, and say main repository nowhere.
 
@@ -2301,18 +2377,17 @@ You own
 - packages/mcp-studio/src/search/ (new)
 
 Do
-1. tools/list: the tools in the run&#x27;s toolbelt (tools/toolbelts/), from the
-   published manifests,
+1. tools/list: the workspace&#x27;s imported tools, which are every agent&#x27;s
+   toolbelt on day one, from the published manifests,
    minus tools that are off or withheld, in a stable order, so the list is
    identical across requests of one published version. Annotations come from
    the classification.
-2. tools/call: find the tool at its locked version, decide with the toolbelt
-   grant, the classification, and the decision rules in packages/rules (Cedar
-   when its evaluator lands). Park for approval through the existing approval
+2. tools/call: find the tool at its locked version, and decide with S12&#x27;s
+   Cedar evaluator (the grant, the classification, and the workspace&#x27;s
+   policies). Until S12 merges, decide with packages/rules. Park for approval through the existing approval
    path. Then call M6&#x27;s execute with M8&#x27;s CredentialSource and the Transport
-   the environment names: cloud, M12&#x27;s relay, or M14&#x27;s local transport. The
-   environment is the one the agent&#x27;s definition names for the server, or
-   else the server&#x27;s sandbox.
+   the environment names: cloud, M12&#x27;s relay, or M14&#x27;s local transport. On day
+   one the environment is the server&#x27;s sandbox.
 3. Search mode: search returns only tools in the toolbelt, describe returns
    one input schema, and call is decided as the underlying tool.
 4. The search index: on publish, embed each changed one-line entry, keyed by
@@ -2482,8 +2557,8 @@ Do
    steering PRs, merge them through Oxagen, and wait for the new published
    version.
 3. Call each tool as an enrolled test agent. Expect a shaped result, an
-   approval park for an irreversible tool, and a denial for a tool outside the
-   toolbelt.
+   approval park for an irreversible tool, and a denial for a tool a Cedar policy
+   forbids the test agent.
 4. Change a description on the sample MCP server. Expect a sync PR and the
    locked description still served.
 5. Stop the broker&#x27;s signing for the relay. Expect the next call to fail.
@@ -2527,7 +2602,7 @@ This overrides any repository file that still allows a local test file, a local 
 </div>
 <section id="tracker-section" style="border-top:0;margin-top:0;padding-top:8px">
   <div id="tracker" aria-live="polite"></div>
-  <script type="application/json" id="tracker-plan">{"groups": [{"name": "Design", "lanes": [{"id": "U1", "name": "The steering repo and MCP Studio in the v3 mockup", "repo": "macanderson/oxagen-roadmap", "criteria": ["Every screen and state in steps 2 to 10 opens in the mockup, in both themes and at phone width, with no sideways scroll.", "The v3 checks pass in CI.", "The PR body lists each place the mockup and a spec disagree, and the PR is ready for Mac's review."]}]}, {"name": "Contract", "lanes": [{"id": "S0", "name": "Contract, paths, fixtures", "repo": "macanderson/oxagen", "criteria": ["CI is green, and every path constant listed above imports from paths.ts.", "Every schema id in the contract has a zod schema, a type, and a JSON Schema."]}, {"id": "M0", "name": "Contract, operation model, fixtures", "repo": "macanderson/oxagen", "criteria": ["Every module has its signature and every contract schema has a type and a JSON Schema.", "CI is green."]}]}, {"name": "Steering repo wave 1", "lanes": [{"id": "S1", "name": "Provisioning", "repo": "macanderson/oxagen", "criteria": ["Unit tests cover each step with a mocked GitHub and GitLab client, and a rerun after a failure at every step ends in the same state.", "CI is green. A live run against a real organization belongs to S11."]}, {"id": "S2", "name": "Drift", "repo": "macanderson/oxagen", "criteria": ["Unit tests cover every state change from recorded webhook payloads.", "CI is green."]}, {"id": "S3", "name": "Steering PR pipeline", "repo": "macanderson/oxagen", "criteria": ["Unit tests cover queue order, re-checks after main moves, stamping, and refusal on bad health.", "CI is green."]}, {"id": "S4", "name": "Checks", "repo": "macanderson/oxagen", "criteria": ["Every rule has a failing fixture from S0 and a test that expects its message.", "CI is green."]}, {"id": "S5", "name": "Publish and delivery", "repo": "macanderson/oxagen", "criteria": ["Golden tests on S0's fixture repo pin the rendered block byte for byte.", "A test proves the block is identical across two requests of one version.", "CI is green."]}, {"id": "S6", "name": "Memory and reflection", "repo": "macanderson/oxagen", "criteria": ["Tests cover capture, curation, the PR contents, rejection, recall limits, and retirement.", "CI is green."]}, {"id": "S7", "name": "App screens", "repo": "macanderson/oxagen", "criteria": ["Component tests cover every state: provisioning, each health state, and a memory PR with a dropped item.", "CI is green."]}, {"id": "S8", "name": "Binding and linking", "repo": "macanderson/oxagen", "criteria": ["Tests cover the migration, linking one repository to two workspaces, and link by PR.", "CI is green."]}]}, {"name": "MCP Studio wave 1", "lanes": [{"id": "M1", "name": "OpenAPI import", "repo": "macanderson/oxagen", "criteria": ["Every OpenAPI fixture imports, and golden tests pin each result.", "CI is green."]}, {"id": "M2", "name": "GraphQL import", "repo": "macanderson/oxagen", "criteria": ["The GraphQL fixture imports, and golden tests pin the tools and their selection sets.", "CI is green."]}, {"id": "M3", "name": "gRPC import", "repo": "macanderson/oxagen", "criteria": ["The proto fixture imports, and golden tests pin every schema.", "CI is green."]}, {"id": "M4", "name": "Compile and lock", "repo": "macanderson/oxagen", "criteria": ["The stripe and billing fixtures compile and lock to M0's expected files byte for byte. Golden tests cover every diff class and every suggestion row.", "CI is green."]}, {"id": "M5", "name": "Tool checks", "repo": "macanderson/oxagen", "criteria": ["Every rule has a fixture that triggers it and a test that expects its message.", "CI is green."]}, {"id": "M6", "name": "Executor", "repo": "macanderson/oxagen", "criteria": ["Tests against a fake Transport cover each kind, every retry rule, and every refusal.", "CI is green."]}, {"id": "M7", "name": "gRPC client", "repo": "macanderson/oxagen", "criteria": ["Tests against an in-process gRPC server from M0's proto fixture cover a unary call, a collected stream, each retry rule, and a deadline.", "CI is green."]}, {"id": "M8", "name": "Credentials and operator OAuth", "repo": "macanderson/oxagen", "criteria": ["Tests cover every mode, refresh, expiry, revocation, and the missing token.", "CI is green."]}, {"id": "M9", "name": "Studio screens", "repo": "macanderson/oxagen", "criteria": ["Component tests cover each screen with the stripe and billing fixtures, an empty server, and a 600-tool server.", "CI is green."]}, {"id": "M10", "name": "Discovery and sync", "repo": "macanderson/oxagen", "criteria": ["Tests cover each source, each trigger, an unchanged discovery (no PR), a description change, and a breaking change.", "CI is green."]}, {"id": "M11", "name": "Import PRs", "repo": "macanderson/oxagen", "criteria": ["Tests cover a first import from each source, a reclassification, a removal, and the refusal.", "CI is green."]}, {"id": "M12", "name": "Relay", "repo": "macanderson/oxagen", "criteria": ["Tests cover each refusal, fail-closed behavior, reconnects, timeouts, and a gRPC call through an in-process broker.", "CI is green."]}, {"id": "M13", "name": "Registry projection and migration", "repo": "macanderson/oxagen", "criteria": ["Tests cover projection of each change (add, reclassify, new version, remove), the reader filter, and migration of a workspace with classified and unclassified tools.", "CI is green."]}, {"id": "M14", "name": "Local servers", "repo": "macanderson/oxagen", "criteria": ["Tests cover a machine outside the group, a digest mismatch, an expired and a replayed envelope, an unreachable cloud gateway, and a successful call.", "CI is green."]}]}, {"name": "Wave 2", "lanes": [{"id": "S9", "name": "oxagen check CLI", "repo": "macanderson/oxagen", "criteria": ["Tests run the command on S0's fixture repo and match its output.", "CI is green."]}, {"id": "S10", "name": "Migration and docs", "repo": "macanderson/oxagen", "criteria": ["The importer's tests convert S0's v0.1 fixtures and match the v1 fixtures.", "CI is green in both repositories."]}, {"id": "M15", "name": "Serving and search mode", "repo": "macanderson/oxagen", "criteria": ["Tests cover listing, a call from each source in each mode, the off switch, a withheld tool, a denial, an approval, and search ranking against a fake embedder.", "CI is green."]}, {"id": "M16", "name": "Replay and selection tests", "repo": "macanderson/oxagen", "criteria": ["Tests cover a matching replay, a changed shape, a changed request, a stale lock, and a selection run against a fake model.", "CI is green."]}]}, {"name": "Live tests", "lanes": [{"id": "S11", "name": "Live test", "repo": "macanderson/oxagen", "criteria": ["The job passes twice in a row in CI."]}, {"id": "M17", "name": "Live test", "repo": "macanderson/oxagen", "criteria": ["The job passes twice in a row in CI."]}]}]}</script>
+  <script type="application/json" id="tracker-plan">{"groups": [{"name": "Design", "lanes": [{"id": "U1", "name": "The steering repo and MCP Studio in the v3 mockup", "repo": "macanderson/oxagen-roadmap", "criteria": ["Every screen and state in steps 2 to 10 opens in the mockup, in both themes and at phone width, with no sideways scroll.", "The v3 checks pass in CI.", "The PR body lists each place the mockup and a spec disagree, and the PR is ready for Mac's review."]}]}, {"name": "Contract", "lanes": [{"id": "S0", "name": "Contract, paths, fixtures", "repo": "macanderson/oxagen", "criteria": ["CI is green, and every path constant listed above imports from paths.ts.", "Every schema id in the contract has a zod schema, a type, and a JSON Schema."]}, {"id": "M0", "name": "Contract, operation model, fixtures", "repo": "macanderson/oxagen", "criteria": ["Every module has its signature and every contract schema has a type and a JSON Schema.", "CI is green."]}]}, {"name": "Steering repo wave 1", "lanes": [{"id": "S1", "name": "Provisioning", "repo": "macanderson/oxagen", "criteria": ["Unit tests cover each step with a mocked GitHub and GitLab client, and a rerun after a failure at every step ends in the same state.", "CI is green. A live run against a real organization belongs to S11."]}, {"id": "S2", "name": "Drift", "repo": "macanderson/oxagen", "criteria": ["Unit tests cover every state change from recorded webhook payloads.", "CI is green."]}, {"id": "S3", "name": "Steering PR pipeline", "repo": "macanderson/oxagen", "criteria": ["Unit tests cover queue order, re-checks after main moves, stamping, and refusal on bad health.", "CI is green."]}, {"id": "S4", "name": "Checks", "repo": "macanderson/oxagen", "criteria": ["Every rule has a failing fixture from S0 and a test that expects its message.", "CI is green."]}, {"id": "S5", "name": "Publish and delivery", "repo": "macanderson/oxagen", "criteria": ["Golden tests on S0's fixture repo pin the rendered block byte for byte.", "A test proves the block is identical across two requests of one version.", "CI is green."]}, {"id": "S6", "name": "Memory and reflection", "repo": "macanderson/oxagen", "criteria": ["Tests cover capture, curation, the PR contents, rejection, recall limits, and retirement.", "CI is green."]}, {"id": "S7", "name": "App screens", "repo": "macanderson/oxagen", "criteria": ["Component tests cover every state: provisioning, each health state, and a memory PR with a dropped item.", "CI is green."]}, {"id": "S8", "name": "Binding and linking", "repo": "macanderson/oxagen", "criteria": ["Tests cover the migration, linking one repository to two workspaces, and link by PR.", "CI is green."]}, {"id": "S12", "name": "Cedar evaluator", "repo": "macanderson/oxagen", "criteria": ["The agent policy spec's examples and tests pass through the new evaluator.", "A test denies claude_code__Bash in PreToolUse for an agent a policy forbids, and allows it for another agent.", "A test parks a call whose deciding rules all carry @decision(\"require_approval\").", "CI is green."]}]}, {"name": "MCP Studio wave 1", "lanes": [{"id": "M1", "name": "OpenAPI import", "repo": "macanderson/oxagen", "criteria": ["Every OpenAPI fixture imports, and golden tests pin each result.", "CI is green."]}, {"id": "M2", "name": "GraphQL import", "repo": "macanderson/oxagen", "criteria": ["The GraphQL fixture imports, and golden tests pin the tools and their selection sets.", "CI is green."]}, {"id": "M3", "name": "gRPC import", "repo": "macanderson/oxagen", "criteria": ["The proto fixture imports, and golden tests pin every schema.", "CI is green."]}, {"id": "M4", "name": "Compile and lock", "repo": "macanderson/oxagen", "criteria": ["The stripe and billing fixtures compile and lock to M0's expected files byte for byte. Golden tests cover every diff class and every suggestion row.", "CI is green."]}, {"id": "M5", "name": "Tool checks", "repo": "macanderson/oxagen", "criteria": ["Every rule has a fixture that triggers it and a test that expects its message.", "CI is green."]}, {"id": "M6", "name": "Executor", "repo": "macanderson/oxagen", "criteria": ["Tests against a fake Transport cover each kind, every retry rule, and every refusal.", "CI is green."]}, {"id": "M7", "name": "gRPC client", "repo": "macanderson/oxagen", "criteria": ["Tests against an in-process gRPC server from M0's proto fixture cover a unary call, a collected stream, each retry rule, and a deadline.", "CI is green."]}, {"id": "M8", "name": "Credentials and operator OAuth", "repo": "macanderson/oxagen", "criteria": ["Tests cover every mode, refresh, expiry, revocation, and the missing token.", "CI is green."]}, {"id": "M9", "name": "Studio screens", "repo": "macanderson/oxagen", "criteria": ["Component tests cover each screen with the stripe and billing fixtures, an empty server, and a 600-tool server.", "CI is green."]}, {"id": "M10", "name": "Discovery and sync", "repo": "macanderson/oxagen", "criteria": ["Tests cover each source, each trigger, an unchanged discovery (no PR), a description change, and a breaking change.", "CI is green."]}, {"id": "M11", "name": "Import PRs", "repo": "macanderson/oxagen", "criteria": ["Tests cover a first import from each source, a reclassification, a removal, and the refusal.", "CI is green."]}, {"id": "M12", "name": "Relay", "repo": "macanderson/oxagen", "criteria": ["Tests cover each refusal, fail-closed behavior, reconnects, timeouts, and a gRPC call through an in-process broker.", "CI is green."]}, {"id": "M13", "name": "Registry projection and migration", "repo": "macanderson/oxagen", "criteria": ["Tests cover projection of each change (add, reclassify, new version, remove), the reader filter, and migration of a workspace with classified and unclassified tools.", "CI is green."]}, {"id": "M14", "name": "Local servers", "repo": "macanderson/oxagen", "criteria": ["Tests cover a machine outside the group, a digest mismatch, an expired and a replayed envelope, an unreachable cloud gateway, and a successful call.", "CI is green."]}]}, {"name": "Wave 2", "lanes": [{"id": "S9", "name": "oxagen check CLI", "repo": "macanderson/oxagen", "criteria": ["Tests run the command on S0's fixture repo and match its output.", "CI is green."]}, {"id": "S10", "name": "Migration and docs", "repo": "macanderson/oxagen", "criteria": ["The importer's tests convert S0's v0.1 fixtures and match the v1 fixtures.", "CI is green in both repositories."]}, {"id": "M15", "name": "Serving and search mode", "repo": "macanderson/oxagen", "criteria": ["Tests cover listing, a call from each source in each mode, the off switch, a withheld tool, a denial, an approval, and search ranking against a fake embedder.", "CI is green."]}, {"id": "M16", "name": "Replay and selection tests", "repo": "macanderson/oxagen", "criteria": ["Tests cover a matching replay, a changed shape, a changed request, a stale lock, and a selection run against a fake model.", "CI is green."]}]}, {"name": "Live tests", "lanes": [{"id": "S11", "name": "Live test", "repo": "macanderson/oxagen", "criteria": ["The job passes twice in a row in CI."]}, {"id": "M17", "name": "Live test", "repo": "macanderson/oxagen", "criteria": ["The job passes twice in a row in CI."]}]}]}</script>
 </section>
 <section id="refresh">
   <span class="eyebrow">Refresh</span>
@@ -2580,7 +2655,7 @@ Do not run builds or tests locally. Read CI instead.
     </tbody>
   </table></div>
 </section>
-<footer>31 lanes. The criteria come from the Done when section of each prompt, so a changed prompt changes its criteria here.</footer>
+<footer>32 lanes. The criteria come from the Done when section of each prompt, so a changed prompt changes its criteria here.</footer>
 </div></div></main></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>

@@ -307,7 +307,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
 </style>
 </head>
 <body>
-<div class="app"><aside class="side" aria-label="Page navigation"><a class="brand" href="#spec">oxagen <b>/</b> steering repo</a><span class="sub">Draft of 2026-09-26</span><div class="grp">Views</div><nav class="views" aria-label="Views"><a href="#spec" data-view="spec">Spec</a></nav><details class="secwrap" open><summary>Sections</summary><nav class="secs" aria-label="Sections"><a href="#changes">Changes</a><a href="#decisions">Decisions</a><a href="#layout">Layout</a><a href="#formats">Formats</a><a href="#records">Records</a><a href="#placement">Placement</a><a href="#servers">Tools</a><a href="#agents">Agents</a><a href="#policy">Policy</a><a href="#scope">Scope</a><a href="#repo-checks">Repo checks</a><a href="#provisioning">Provisioning</a><a href="#settings">Settings</a><a href="#drift">Drift</a><a href="#steering-pr">Steering PR</a><a href="#memory">Memory</a><a href="#scale">Scale</a><a href="#tokens">Tokens</a><a href="#agent-use">Agent use</a><a href="#contract">Contract</a><a href="#migration">Migration</a><a href="#open">Open questions</a><a href="#build">Build plan</a></nav></details><div class="grp">Related</div><nav aria-label="Related pages"><a class="ext" href="https://claude.ai/artifact/Csf3bmfQykQJ32tNFT13eR" target="_blank" rel="noopener">Build plan and progress</a><a class="ext" href="https://claude.ai/artifact/6p3eUwf6Snaf6UonhUBsoa" target="_blank" rel="noopener">MCP Studio</a><a class="ext" href="https://claude.ai/artifact/K12EGALijFzN66AfFPKefS" target="_blank" rel="noopener">Steering records v1</a></nav></aside><main class="main"><div data-view-root="spec" id="spec"><div class="wrap">
+<div class="app"><aside class="side" aria-label="Page navigation"><a class="brand" href="#spec">oxagen <b>/</b> steering repo</a><span class="sub">Draft of 2026-09-26</span><div class="grp">Views</div><nav class="views" aria-label="Views"><a href="#spec" data-view="spec">Spec</a></nav><details class="secwrap" open><summary>Sections</summary><nav class="secs" aria-label="Sections"><a href="#changes">Changes</a><a href="#decisions">Decisions</a><a href="#day-one">Day one</a><a href="#layout">Layout</a><a href="#formats">Formats</a><a href="#records">Records</a><a href="#placement">Placement</a><a href="#servers">Tools</a><a href="#agents">Agents</a><a href="#policy">Policy</a><a href="#scope">Scope</a><a href="#repo-checks">Repo checks</a><a href="#provisioning">Provisioning</a><a href="#settings">Settings</a><a href="#drift">Drift</a><a href="#steering-pr">Steering PR</a><a href="#memory">Memory</a><a href="#scale">Scale</a><a href="#tokens">Tokens</a><a href="#agent-use">Agent use</a><a href="#contract">Contract</a><a href="#migration">Migration</a><a href="#open">Open questions</a><a href="#build">Build plan</a></nav></details><div class="grp">Related</div><nav aria-label="Related pages"><a class="ext" href="https://claude.ai/artifact/Csf3bmfQykQJ32tNFT13eR" target="_blank" rel="noopener">Build plan and progress</a><a class="ext" href="https://claude.ai/artifact/6p3eUwf6Snaf6UonhUBsoa" target="_blank" rel="noopener">MCP Studio</a><a class="ext" href="https://claude.ai/artifact/K12EGALijFzN66AfFPKefS" target="_blank" rel="noopener">Steering records v1</a></nav></aside><main class="main"><div data-view-root="spec" id="spec"><div class="wrap">
 <div class="hero">
   <span class="eyebrow">Specification</span>
   <h1>Steering repo</h1>
@@ -370,10 +370,15 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
         <li>Oxagen supports each first-class harness (Claude Code, Cursor, Codex, and stella) as fully as that harness allows. (Mac, 2026-09-26)</li>
         <li>Cursor gets steering through Oxagen's MCP server, plus one rule in Cursor's dashboard that tells it to read steering there. (Mac, 2026-09-26)</li>
         <li>A run on a code repository not linked to its agent's workspace is allowed, charged to that workspace, and flagged in the run record. (Mac, 2026-09-26)</li>
-        <li>There is no <code>agents/</code> folder. An agent is an operator, a runtime, and a harness, registered in Oxagen. What Claude Code calls an agent is a skill. (Mac, 2026-09-26)</li>
+        <li>An agent is an operator, a runtime, and a harness. Each agent has a file in <code>agents/</code> that records the three, and Cedar sees it as the principal. What Claude Code calls an agent is a skill. (Mac, 2026-09-26. An earlier decision that day dropped <code>agents/</code>, and Mac brought it back.)</li>
         <li><code>steering/</code> at the root holds steering records and skills, written by people, agents, and the curator. (Mac, 2026-09-26)</li>
         <li><code>README.md</code>, <code>AGENTS.md</code>, and <code>CLAUDE.md</code> at the root, written by Oxagen. Oxagen's text sits between markers, a check verifies it, and the web app shows Drift detected in the file, with a way to restore it. (Mac, 2026-09-26)</li>
-        <li>Tools live under <code>tools/</code>: <code>tools/servers/</code> holds one folder per MCP server, and <code>tools/toolbelts/</code> holds named toolbelts that span servers. A toolbelt is the list of tools a run may call, and policy only adds conditions. (Mac, 2026-09-26 and 2026-09-25)</li>
+        <li>Tools live under <code>tools/</code>: <code>tools/servers/</code> holds one folder per MCP server, and <code>tools/toolbelts/</code> is where named toolbelts that span servers will go. (Mac, 2026-09-26)</li>
+        <li>Day one, every agent in a workspace gets the workspace's imported tools. Named toolbelts and a budget per agent wait until customers ask. (Mac, 2026-09-26)</li>
+        <li>Cedar policies with the agent as principal give least privilege, and they cover a harness's built-in tools, such as Claude Code's <code>Bash</code>. (Mac, 2026-09-26)</li>
+        <li>Teams that must not share tools use separate workspaces. (Mac, 2026-09-26)</li>
+        <li>Oxagen assumes operators follow the conduct rules of their job, and adds no controls aimed at an operator who breaks them. (Mac, 2026-09-26)</li>
+        <li>Rules can @mention a skill or a tool. (Mac, 2026-09-26)</li>
         <li>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first and creates the workspace with its repository in one automated flow. The 14-day grace period of ADR-065 goes. (Mac, 2026-09-26)</li>
         <li>The repository name <code>oxagen-&lt;workspace&gt;</code>. (Mac, 2026-09-26)</li>
         <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>. (Mac, 2026-09-26)</li>
@@ -398,10 +403,43 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
     <div class="card">
       <h4><span class="st p">Proposed</span></h4>
       <ul>
-        <li>The details below that no Decided item names: the settings table beyond the required check, the drift sweep, the scale targets, the build lanes, and a skill's toolbelt for subagents.</li>
+        <li>The details below that no Decided item names: the settings table beyond the required check, the drift sweep, the scale targets, the build lanes, the Cedar policy on a subagent's skill, the @mention syntax, and function tools.</li>
       </ul>
     </div>
   </div>
+</section>
+
+<section id="day-one">
+  <span class="eyebrow">Scope</span>
+  <h2>Day one</h2>
+  <p>The smallest version of agents, subagents, and tools that ships, with the rest waiting until customers ask. Mac set it on 2026-09-26.</p>
+  <h3>Ships</h3>
+  <ul>
+    <li><strong>Agents.</strong> An agent is an operator, a harness, and a runtime. Each has a file in <code>agents/</code> that names the three, and Cedar sees it as the principal <code>Agent</code>. <span class="st d">Decided</span></li>
+    <li><strong>Tools.</strong> Every agent in a workspace gets the workspace's imported tools and its harness's built-in tools. <span class="st d">Decided</span></li>
+    <li><strong>Least privilege.</strong> Cedar policies in <code>policy/</code> narrow what an agent may call, by the agent, its operator, harness, or runtime, and the tool's classification. <span class="st d">Decided</span></li>
+    <li><strong>Built-in tools.</strong> Cedar decides a harness's own tools too, such as Claude Code's <code>Bash</code>, <code>Edit</code>, and <code>WebFetch</code>. The pre-tool hook asks for the decision. <span class="st d">Decided</span></li>
+    <li><strong>Separation.</strong> Teams that must not share tools use separate workspaces. <span class="st d">Decided</span></li>
+    <li><strong>Subagents.</strong> A Cedar policy on the skill a subagent runs limits it, such as a reviewer that may only read. See <a href="#subagents">Subagents</a>. <span class="st p">Proposed</span></li>
+    <li><strong>Context size.</strong> A server over the definition budget runs in search mode, so an agent sees three tools for it instead of every definition. <span class="st p">Proposed</span></li>
+  </ul>
+  <h3>Waits</h3>
+  <ul>
+    <li>Named toolbelts in <code>tools/toolbelts/</code>, and a toolbelt per agent or per skill.</li>
+    <li>A budget per agent. The workspace's limits in <code>workspace.toml</code> apply to every run.</li>
+    <li>An environment per agent. A server's calls use its sandbox.</li>
+  </ul>
+  <h3>Holes</h3>
+  <ol>
+    <li><strong>No Cedar evaluator exists.</strong> Decision rules run in the zod engine in <code>packages/rules</code>, and no lane built an evaluator until this change. Lane S12 builds it for the gateway and the pre-tool hook, and every item above depends on it.</li>
+    <li><strong>The hook decides on the machine.</strong> Built-in tools never reach the gateway, so the compiled policies ride in the signed host bundle, and the hook evaluates them there. Offline, it decides from the cached bundle, as the hook does today.</li>
+    <li><strong>A forbidden tool stays in the list.</strong> An agent sees every workspace tool, including one a policy forbids it, and the call is refused with the rule's reason. Hiding such a tool needs the gateway to test each tool for the agent when a run starts. <span class="st p">Proposed</span> for later.</li>
+    <li><strong>Subagent calls.</strong> A harness that does not say which skill made a call gets the parent agent's decision. See Open questions.</li>
+    <li><strong>New agents.</strong> A policy names an agent by its file, so an agent enrolled before its file merges runs under the workspace's policies alone.</li>
+    <li><strong>Many workspaces.</strong> A person on two teams switches workspace, and each workspace's runs and spend are its own. Records both teams need go in the organization repo, <code>&lt;org&gt;/oxagen</code>.</li>
+  </ol>
+  <h3>Operators</h3>
+  <p>Oxagen assumes every operator follows the conduct rules of their job, and adds no controls aimed at an operator who breaks them. The tier words still say only what a run's record can show. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
 </section>
 
 <section id="layout">
@@ -414,6 +452,9 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
 ├── README.md                                  what this repo is, for people
 ├── .gitattributes                             LF line endings
 ├── workspace.toml                             linked code repositories, budget
+├── agents/                                    one file per agent: operator, runtime, harness
+│   ├── a-intel.core.release-bot.toml
+│   └── a-intel.core.ci-reviewer.toml
 ├── steering/
 │   ├── governance.toml                        mode, reviewers, memory settings
 │   ├── promotions/
@@ -441,7 +482,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
 │       └── platform/
 │           └── a-intel.platform.ci-cache-key.md
 ├── tools/
-│   ├── tools/servers/                               one folder per MCP server
+│   ├── servers/                               one folder per MCP server
 │   │   ├── stripe/                            connected by URL
 │   │   │   ├── server.toml
 │   │   │   ├── tools.toml                     imported tools and their risk
@@ -452,9 +493,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
 │   │       ├── tools.toml
 │   │       ├── tools.lock.json
 │   │       └── tests/calls.jsonl
-│   └── toolbelts/                             named sets of tools across servers
-│       ├── release.toml
-│       └── support.toml
+│   └── toolbelts/                             named toolbelts, later
 └── policy/
     ├── schema.cedarschema                     written by Oxagen
     ├── money.cedar
@@ -471,7 +510,8 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
       <tr><td><code>steering/promotions/</code></td><td class="wrap">The hash-chained ledger of merged records, in a new file each period or at a line cap, whichever comes first</td><td>JSON Lines</td><td>Oxagen</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>steering/memory/</code></td><td>Memories a memory PR promoted</td><td>Markdown with YAML frontmatter</td><td>The curator</td><td><span class="st d">Decided</span></td></tr>
             <tr><td><code>tools/servers/</code></td><td class="wrap">Every MCP server agents reach, connected or built from a definition, with its imported tools and their risk classification</td><td>TOML, a JSON lock, the vendored definition</td><td>MCP Studio and people, by steering PR</td><td><span class="st d">Decided</span></td></tr>
-      <tr><td><code>tools/toolbelts/</code></td><td class="wrap">Named toolbelts, each a list of tools across servers</td><td>TOML</td><td>People, by steering PR</td><td><span class="st d">Decided</span></td></tr>
+      <tr><td><code>agents/</code></td><td class="wrap">One file per agent: its operator, runtime, and harness</td><td>TOML</td><td>Oxagen at enrollment, then people, by steering PR</td><td><span class="st d">Decided</span></td></tr>
+      <tr><td><code>tools/toolbelts/</code></td><td class="wrap">Named toolbelts, each a list of tools across servers. Empty on day one</td><td>TOML</td><td>People, by steering PR</td><td><span class="st d">Decided</span> for the folder</td></tr>
       <tr><td><code>policy/</code></td><td>Cedar policies and their tests</td><td>Cedar, JSON Lines</td><td>People</td><td><span class="st d">Decided</span></td></tr>
     </tbody>
   </table></div>
@@ -510,7 +550,7 @@ dialog.exdlg::backdrop{background:rgba(0,0,0,.55)}
     <tbody>
       <tr><td><code>repos</code></td><td>list</td><td>when <code>scope</code> is <code>repository</code></td><td class="wrap">Code repositories as <code>&lt;host&gt;/&lt;owner&gt;/&lt;name&gt;</code>, such as <code>github.com/a-intel/platform</code>. The record reaches a run only when its working repository is on the list. This replaces v1's rule that repository records live in the code repository.</td></tr>
       <tr><td><code>tools</code></td><td>list</td><td>no</td><td class="wrap">Tool names such as <code>billing__create_refund</code>, or a server prefix such as <code>billing__*</code>. The record reaches a request only when the run's toolbelt holds a match.</td></tr>
-      <tr><td><code>toolbelt</code></td><td>string</td><td>no</td><td class="wrap">Skills only. <span class="st p">Proposed</span> A toolbelt in <code>tools/toolbelts/</code>. When a harness runs the skill as a subagent, the subagent may call only tools in both its parent run's toolbelt and this one. <code>tools</code> decides when a record is delivered, and <code>toolbelt</code> decides what a subagent may call. See <a href="#subagents">Subagents</a>.</td></tr>
+      <tr><td><code>toolbelt</code></td><td>string</td><td>no</td><td class="wrap">Skills only, and later, with named toolbelts. Day one, a Cedar policy on the skill limits a subagent. See <a href="#subagents">Subagents</a>.</td></tr>
       <tr><td><code>description</code></td><td>string</td><td>skills</td><td class="wrap">Allowed on every kind. One sentence, at most 200 characters, or 1,024 for a skill. It becomes the record's line in the index an agent reads before it asks for a body.</td></tr>
     </tbody>
   </table></div>
@@ -539,6 +579,13 @@ Refunds over $100 need a person's approval before you call
 `billing__create_refund`. Ask in the run and wait. Do not split one refund
 into smaller refunds to stay under the limit.</code></pre></figure>
   <p>Everything else in v1 holds: a file is named for its lineage, skills are a folder with <code>SKILL.md</code>, Oxagen writes <code>id</code> and <code>hash</code> when the steering PR merges, and a record never grants authority.</p>
+  <p><strong>Mentions.</strong> A record's body can @mention a skill or a tool, so a rule sends the agent to a fixed procedure or a deterministic function: "Prorate with <code>@skill:a-intel.billing.prorate</code>" or "Compute the amount with <code>@tool:billing__calculate_refund_amount</code>". <span class="st d">Decided</span> that rules support them (Mac, 2026-09-26). <span class="st p">Proposed</span> for the syntax and the rules below.</p>
+  <ul>
+    <li>A mention resolves by lineage or by tool name, so moving a folder never breaks it.</li>
+    <li>When the record reaches a request, a mentioned skill's index line comes with it, and the agent reads the body on demand.</li>
+    <li>The <code>references</code> check fails a mention that resolves to nothing.</li>
+    <li>A mention points the model at something and grants nothing. The <code>tools</code> field decides when the record loads, and Cedar decides the call.</li>
+  </ul>
 </section>
 
 <section id="placement">
@@ -564,9 +611,9 @@ into smaller refunds to stay under the limit.</code></pre></figure>
       <tr><td>MCP servers</td><td><code>tools/servers/&lt;name&gt;/</code></td><td><code>mcp-server/v1</code>, <code>mcp-tools/v1</code>, and a lock</td><td>Imported tool definitions through the cloud gateway</td></tr>
       <tr><td>Tool risk categories</td><td><code>tools/servers/&lt;name&gt;/tools.toml</code></td><td>Today's classification: risk, side effect, egress, impacts</td><td>Cedar policies read it, and the agent sees annotations derived from it</td></tr>
       <tr><td>APIs as MCP servers</td><td><code>tools/servers/&lt;name&gt;/</code> with an OpenAPI, GraphQL, or gRPC source</td><td>The same files plus the definition</td><td>Imported tool definitions through the cloud gateway</td></tr>
-      <tr><td>Toolbelts</td><td><code>tools/toolbelts/&lt;name&gt;.toml</code></td><td><code>toolbelt/v1</code></td><td>A run sees and may call only its toolbelt's tools. Policy adds conditions.</td></tr>
-      <tr><td>Agents</td><td>Oxagen: an operator, a runtime, and a harness, registered at enrollment</td><td>Nothing in the repository</td><td>Not delivered</td></tr>
-      <tr><td>Subagent instructions</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td><code>skill</code>, with an optional <code>toolbelt</code></td><td>The index line on every request, the body on demand. The subagent may call only tools in both its parent's toolbelt and the skill's. See <a href="#subagents">Subagents</a></td></tr>
+      <tr><td>Toolbelts</td><td><code>tools/toolbelts/&lt;name&gt;.toml</code>, later</td><td><code>toolbelt/v1</code></td><td>Day one, every agent gets the workspace's imported tools, and Cedar narrows them</td></tr>
+      <tr><td>Agents</td><td><code>agents/&lt;name&gt;.toml</code></td><td><code>agent/v1</code>: operator, runtime, harness</td><td>Not delivered. Cedar reads it as the principal</td></tr>
+      <tr><td>Subagent instructions</td><td><code>steering/skills/&lt;lineage&gt;/</code></td><td><code>skill</code></td><td>The index line on every request, the body on demand. A Cedar policy on the skill limits what the subagent may call. See <a href="#subagents">Subagents</a></td></tr>
     </tbody>
   </table></div>
 
@@ -880,8 +927,16 @@ side_effect = "irreversible"
 egress = "third_party"
 impacts = ["moves_money"]</code></pre></figure>
   <p>Available tools that nobody imported stay in Oxagen (<code>mcp.tool_snapshots</code>), so the repository grows with what agents may call, never with the size of a server. Turning a server or a tool off is instant and needs no pull request, because a kill switch cannot wait for review.</p>
+  <h3>Function tools</h3>
+  <p>A rule can point an agent at a deterministic function, such as <code>calculate_refund_amount</code>, instead of leaving arithmetic to the model. A function tool would be a server folder with a <code>functions</code> source beside the URL and OpenAPI sources, so it gets the same classification, lock, and Cedar decisions as any other tool. Where its code runs is an open question. <span class="st p">Proposed</span></p>
   <h3>Toolbelts</h3>
-  <p>A toolbelt is a named list of tools that can span servers. A run is handed one toolbelt, and it sees and may call only the tools in it. Policy adds conditions to those calls, such as an approval, and never widens the list. <span class="st d">Decided</span> (Mac, 2026-09-25 and 2026-09-26)</p>
+  <p>Day one, every agent in a workspace gets the workspace's imported tools and its harness's built-in tools. Cedar policies narrow what an agent may call. Named toolbelts wait until customers ask. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
+  <ul>
+    <li><strong>Separation.</strong> Teams that must not share tools work in separate workspaces, each with its own steering repo and imported tools. One code repository can be linked to many workspaces, so both teams still work on the same code. <span class="st d">Decided</span> (Mac, 2026-09-26)</li>
+    <li><strong>Cost.</strong> A run pays for its tool definitions on every request. A server over the definition budget runs in search mode, so the agent sees three tools for it (<code>search</code>, <code>describe</code>, and <code>call</code>) and finds the rest on demand (MCP Studio).</li>
+    <li><strong>Later.</strong> <code>tools/toolbelts/</code> holds named toolbelts: tool names across servers, server prefixes such as <code>billing__*</code>, and an optional <code>side_effects</code> filter, picked per agent in its file or per run by Send To. <span class="st p">Proposed</span></li>
+  </ul>
+  <details><summary>Named toolbelt format, for later</summary>
   <figure class="code"><figcaption><span class="path">tools/toolbelts/release.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/toolbelt/v1.json
 schema = "toolbelt/v1"
 name = "release"
@@ -893,57 +948,66 @@ tools = [
   "stripe__list_charges",
   "billing__*",                 # every imported tool of the billing server
 ]</code></pre></figure>
-  <ul>
-    <li><strong>Entries.</strong> A tool's full name, or a server prefix such as <code>billing__*</code> for every imported tool of that server. The <code>references</code> check fails an entry that names no imported tool.</li>
-    <li><strong>Which toolbelt a run gets.</strong> The workspace default in <code>workspace.toml</code>, another one picked by Send To for one run, or an agent's own choice once the per-agent settings question lands. <span class="st p">Proposed</span></li>
-    <li><strong>Selection by side effect.</strong> An optional <code>side_effects</code> list, such as <code>["read"]</code>, keeps only the listed tools whose side effect in <code>tools.toml</code> is on it. A read-only toolbelt then needs no hand-kept list, and a new write tool on a listed server never enters it. <span class="st p">Proposed</span></li>
-    <li><strong>Cost.</strong> A run pays for its toolbelt's tool definitions on every request, so a narrow toolbelt is a cheap one. A server in search mode counts as its three tools.</li>
-  </ul>
+  </details>
 </section>
 
 <section id="agents">
   <span class="eyebrow">Agents</span>
   <h2>Agents</h2>
-  <p>There is no <code>agents/</code> folder. An agent is an operator, a runtime, and a harness, registered in Oxagen when a runtime is enrolled. What Claude Code calls an agent, a named set of instructions a harness hands work to, is a skill: a steering record with its own files, delivered by its targets. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
-  <p>Today agent definitions are <code>.oxagen/agents/&lt;slug&gt;.toml</code> (<code>agent-definition/v0.1</code>), parsed by <code>packages/oxagen/src/agent-definition-source.ts</code> and cached on <code>agent.agent_versions</code> (ADR-057). <span class="st c">Today</span> Their fields move out of the repository:</p>
+  <p>An agent is an operator, a runtime, and a harness. Each agent has one file in <code>agents/</code>, named for the agent, that records the three, and Cedar sees it as the principal <code>Agent</code>. What Claude Code calls an agent, a named set of instructions a harness hands work to, is a skill. <span class="st d">Decided</span> (Mac, 2026-09-26)</p>
+  <p class="muted">Earlier on 2026-09-26 this spec dropped the <code>agents/</code> folder. Mac brought it back later that day.</p>
+  <figure class="code"><figcaption><span class="path">agents/a-intel.core.release-bot.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/agent/v1.json
+schema = "agent/v1"
+name = "a-intel.core.release-bot"
+label = "Release bot"
+operator = "priya"                  # an Oxagen member or team
+runtime = "ci-linux-01"             # a runtime enrolled in Oxagen
+harness = "claude-code"             # a harness, or a framework adapter</code></pre></figure>
+  <ul>
+    <li><strong>Identity stays in Oxagen.</strong> Enrollment and credentials stay in Oxagen. The file names the runtime and carries no secret. <span class="st p">Proposed</span></li>
+    <li><strong>Enrollment opens a steering PR</strong> that adds the file. Until it merges, the agent runs under the workspace's policies alone. <span class="st p">Proposed</span></li>
+    <li><strong>The steering check</strong> fails a file whose runtime is not enrolled or whose harness Oxagen does not support. <span class="st p">Proposed</span></li>
+    <li><strong>One workspace.</strong> The agent's workspace governs its runs, so its file lives in that workspace's steering repo.</li>
+    <li><strong>Later.</strong> <code>toolbelt</code>, <code>budget</code>, and <code>environment</code> fields, when customers ask. <span class="st d">Decided</span> that they wait (Mac, 2026-09-26)</li>
+  </ul>
+  <figure class="code"><figcaption><span class="path">policy/shell.cedar</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">// Only the release bot may run shell commands.
+forbid (principal, action == Action::"claude_code__Bash", resource)
+unless { principal == Agent::"a-intel.core.release-bot" };</code></pre></figure>
+  <p>Today agent definitions are <code>.oxagen/agents/&lt;slug&gt;.toml</code> (<code>agent-definition/v0.1</code>), parsed by <code>packages/oxagen/src/agent-definition-source.ts</code> and cached on <code>agent.agent_versions</code> (ADR-057). <span class="st c">Today</span> Their fields move:</p>
   <div class="tscroll"><table>
     <thead><tr><th>Field today</th><th>Where it goes</th><th>Status</th></tr></thead>
     <tbody>
-      <tr><td><code>tools</code>, the toolbelt</td><td class="wrap">A named toolbelt in <code>tools/toolbelts/</code>. The workspace default is set in <code>workspace.toml</code>, Send To can pick another for one run, and a per-agent choice lands where the open question does.</td><td><span class="st d">Decided</span> for the folder, <span class="st p">Proposed</span> for the default and the choice</td></tr>
+      <tr><td><code>tools</code>, the toolbelt</td><td class="wrap">Day one, the workspace's imported tools, narrowed by Cedar. Later, a <code>toolbelt</code> field in the agent's file</td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>skills</code></td><td class="wrap">Steering records, delivered by force and targets</td><td><span class="st d">Decided</span></td></tr>
-      <tr><td><code>[environments]</code></td><td class="wrap">Per agent, with a server's sandbox unless the agent's settings name another environment</td><td><span class="st d">Decided</span> for per agent and sandbox by default. The place is an open question.</td></tr>
-      <tr><td><code>[budget]</code></td><td class="wrap">Workspace limits in <code>workspace.toml</code>, and a per-agent limit where the open question lands</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>[environments]</code></td><td class="wrap">Day one, a server's sandbox. Later, an <code>environment</code> field in the agent's file</td><td><span class="st d">Decided</span></td></tr>
+      <tr><td><code>[budget]</code></td><td class="wrap">Workspace limits in <code>workspace.toml</code>. Later, a <code>budget</code> field in the agent's file</td><td><span class="st d">Decided</span> for later, <span class="st p">Proposed</span> for workspace limits</td></tr>
       <tr><td><code>[containment]</code></td><td class="wrap">The runtime's registration in Oxagen</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>slug</code>, <code>label</code></td><td class="wrap">The registration's name</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>slug</code>, <code>label</code></td><td class="wrap"><code>name</code> and <code>label</code> in the agent's file</td><td><span class="st d">Decided</span></td></tr>
     </tbody>
   </table></div>
-  <div class="note"><p><strong>Open question.</strong> Where per-agent settings live, such as the environment an agent uses in production. On the agent's registration in Oxagen, they change at once and are recorded but get no review. In <code>workspace.toml</code>, keyed by the agent's registration, they go through a steering PR like any configuration. Recommended: <code>workspace.toml</code>, since pull requests are how configuration changes.</p></div>
   <h3 id="subagents">Subagents</h3>
-  <p>A subagent often needs fewer tools than the run that starts it, such as a reviewer that may read code and write nothing. A skill carries that limit. <span class="st p">Proposed</span></p>
+  <p>A subagent often needs fewer tools than the run that starts it, such as a reviewer that may read code and write nothing. Day one, a Cedar policy on the skill it runs sets that limit. <span class="st p">Proposed</span></p>
   <ul>
-    <li><strong>The skill names a toolbelt.</strong> Its <code>toolbelt</code> field points at a file in <code>tools/toolbelts/</code>.</li>
-    <li><strong>Narrowing only.</strong> A subagent's tool call passes only when the tool is in both its parent run's toolbelt and the skill's. A subagent never reaches a tool its parent cannot.</li>
-    <li><strong>Read only by class.</strong> A toolbelt with <code>side_effects = ["read"]</code> keeps the tools that <code>tools.toml</code> classifies as read. A Cedar policy that forbids write and irreversible calls from a subagent can back it up once a Cedar evaluator exists. Today decision rules run in <code>packages/rules</code>.</li>
-    <li><strong>What the model sees.</strong> When a harness has its own tool list for a subagent, such as the <code>tools</code> field of a Claude Code subagent, Oxagen fills it from the toolbelt when it delivers the skill. That list trims what the model sees. The hook or the gateway decides the call.</li>
-    <li><strong>Knowing the caller.</strong> The hook or the gateway has to know that a subagent made the call and which skill it runs. Harnesses differ here. See Open questions.</li>
+    <li><strong>The skill in context.</strong> When the harness says which skill a subagent runs, the hook or the gateway adds it to the request as <code>context.skill</code>.</li>
+    <li><strong>Read only by class.</strong> A policy forbids any call whose side effect is not <code>read</code> for that skill, so a new write tool never slips in. Built-in tools carry a classification too, so the same rule covers <code>Edit</code> and <code>Bash</code>.</li>
+    <li><strong>What the model sees.</strong> When a harness has its own tool list for a subagent, such as the <code>tools</code> field of a Claude Code subagent, Oxagen can fill it when it delivers the skill. The list trims what the model sees, and Cedar decides the call.</li>
+    <li><strong>Knowing the caller.</strong> A harness that does not say which skill made a call gets the parent agent's decision. See Open questions.</li>
+    <li><strong>Later.</strong> A skill's own <code>toolbelt</code> field, with named toolbelts.</li>
   </ul>
-  <figure class="code"><figcaption><span class="path">tools/toolbelts/review-readonly.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/toolbelt/v1.json
-schema = "toolbelt/v1"
-name = "review-readonly"
-label = "Read-only review"
-description = "Read code, pull requests, and issues. Write nothing."
-tools = [
-  "github__*",
-  "linear__*",
-]
-side_effects = ["read"]         # keeps only tools classified read in tools.toml</code></pre></figure>
+  <figure class="code"><figcaption><span class="path">policy/review.cedar</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">// The code reviewer skill reads and writes nothing.
+forbid (principal, action, resource)
+when {
+  context has skill &&
+  context.skill == "a-intel.platform.code-reviewer" &&
+  context.tool.side_effect != "read"
+};</code></pre></figure>
 </section>
 
 <section id="policy">
   <span class="eyebrow">Policy</span>
   <h2>Policies</h2>
-  <p>Cedar policies live in <code>policy/</code>, one file per group of related rules, each with a tests file beside it. Oxagen writes <code>policy/schema.cedarschema</code> from the workspace's tools and registered agents, and compiles the toolbelt grant from each toolbelt in <code>tools/toolbelts/</code>, so no one writes a grant as a rule. The format, the schema, and the tests follow the agent policy spec (<code>oxagen-agent-policy-spec.html</code>, PR 127). <span class="st p">Proposed</span></p>
-  <p>Today no Cedar evaluator exists. Decision rules are a zod engine in <code>packages/rules</code> that reads <code>workspaces.settings.decisionRules</code> in Postgres. <span class="st c">Today</span></p>
+  <p>Cedar policies live in <code>policy/</code>, one file per group of related rules, each with a tests file beside it. Oxagen writes <code>policy/schema.cedarschema</code> from the workspace's tools and the files in <code>agents/</code>, and compiles the grant from the workspace's imported tools and each harness's built-in tools, so no one writes a grant as a rule and every policy narrows. The format, the schema, and the tests follow the agent policy spec (<code>oxagen-agent-policy-spec.html</code>, PR 127). <span class="st p">Proposed</span></p>
+  <p>Today no Cedar evaluator exists. Decision rules are a zod engine in <code>packages/rules</code> that reads <code>workspaces.settings.decisionRules</code> in Postgres. <span class="st c">Today</span> Lane S12 builds the evaluator for the gateway and for the pre-tool hook. <span class="st p">Proposed</span></p>
   <figure class="code"><figcaption><span class="path">policy/money.tests.jsonl</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="json">{"name":"refund under limit","principal":"a-intel.finops.invoice-bot","tool":"billing__create_refund@3","context":{"args":{"amount":12000}},"expect":"allow"}
 {"name":"refund over limit","principal":"a-intel.finops.invoice-bot","tool":"billing__create_refund@3","context":{"args":{"amount":64000}},"expect":"require_approval"}</code></pre></figure>
 </section>
@@ -967,7 +1031,6 @@ side_effects = ["read"]         # keeps only tools classified read in tools.toml
 schema = "workspace/v1"
 organization = "a-intel"
 workspace = "core-platform"
-default_toolbelt = "core"                    # a file in tools/toolbelts/
 
 [[repositories]]
 url = "github.com/a-intel/platform"
@@ -1105,7 +1168,7 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
   <h2>Steering PR flow</h2>
   <p>v1's flow stands: open, check, review, merge, publish, retire. These steps change it so Oxagen is the only merger and every merge is checked against the <code>main</code> it lands on.</p>
   <ol class="steps">
-    <li><div><strong>Open.</strong><p>From the web app, an agent's MCP tool, MCP Studio, the curator, or a clone. The branch starts with the top-level folder it changes: <code>steering/</code>, <code>memory/</code>, <code>tools/</code>, <code>policy/</code>, or <code>workspace/</code>. A person's steering PR holds one record, as in v1. A memory PR and a server PR hold many files. <span class="st p">Proposed</span></p></div></li>
+    <li><div><strong>Open.</strong><p>From the web app, an agent's MCP tool, MCP Studio, the curator, or a clone. The branch starts with the top-level folder it changes: <code>steering/</code>, <code>memory/</code>, <code>tools/</code>, <code>agents/</code>, <code>policy/</code>, or <code>workspace/</code>. A person's steering PR holds one record, as in v1. A memory PR and a server PR hold many files. <span class="st p">Proposed</span></p></div></li>
     <li><div><strong>Check.</strong><p>Oxagen runs the checks below and posts one required check, <code>Oxagen steering</code>, with each result inside it. <span class="st p">Proposed</span></p></div></li>
     <li><div><strong>Review.</strong><p>By governance mode, as in v1. A reviewer approves in Oxagen or with a GitHub or GitLab review from an account linked to an Oxagen member. <code>governance.toml</code> can route folders to reviewer groups. <span class="st p">Proposed</span></p></div></li>
     <li><div><strong>Queue.</strong><p>Merge, or auto-merge once approved, puts the pull request in the repository's queue. Oxagen merges one at a time. When <code>main</code> moves, the next pull request is brought up to date and checked again, so the budget and conflict checks judge the <code>main</code> it will land on. <span class="st p">Proposed</span></p></div></li>
@@ -1124,7 +1187,7 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
       <tr><td><code>conflicts</code></td><td class="wrap">An active record requires what this one forbids</td><td><span class="st c">Today</span></td></tr>
       <tr><td><code>authority</code></td><td class="wrap">A record tries to grant authority</td><td><span class="st c">Today</span></td></tr>
       <tr><td><code>settings</code></td><td class="wrap">The repository settings differ from the prescribed ones</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>references</code></td><td class="wrap">A named tool, record, repository, credential, or skill file does not exist</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>references</code></td><td class="wrap">A named tool, record, repository, credential, skill file, runtime, or @mention does not exist</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>budget</code></td><td class="wrap">Warns, and never fails, when the change pushes an agent's always-on steering over its budget. See <a href="#tokens">Tokens</a></td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>compile</code></td><td class="wrap">A server folder does not compile to tools, its lock does not match, a Cedar policy does not validate, or a policy test fails</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>owned</code></td><td class="wrap">The change edits a file only Oxagen writes (<code>policy/schema.cedarschema</code>, a <code>tools.lock.json</code>, or the ledger), or changes the managed block in <code>AGENTS.md</code>, <code>CLAUDE.md</code>, or <code>README.md</code>. The web app shows Drift detected in the file, with Restore block.</td><td><span class="st d">Decided</span> for the managed block, <span class="st p">Proposed</span> for the rest</td></tr>
@@ -1345,16 +1408,16 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
     <thead><tr><th>Name</th><th>Value</th></tr></thead>
     <tbody>
       <tr><td>Steering repo</td><td class="wrap"><code>&lt;org&gt;/oxagen-&lt;workspace-slug&gt;</code>, then <code>-2</code> on a clash. Organization repo <code>&lt;org&gt;/oxagen</code>.</td></tr>
-      <tr><td>Top-level paths</td><td class="wrap"><code>AGENTS.md</code> <code>CLAUDE.md</code> <code>README.md</code> <code>.gitattributes</code> <code>workspace.toml</code> <code>steering/</code> <code>steering/governance.toml</code> <code>steering/promotions/&lt;period&gt;.jsonl</code>, then <code>&lt;period&gt;.002.jsonl</code> past the line cap <code>steering/skills/</code> <code>steering/memory/</code> <code>tools/servers/&lt;name&gt;/</code> <code>tools/toolbelts/</code> <code>policy/</code></td></tr>
-      <tr><td>Schema ids</td><td class="wrap"><code>steering-record/v1</code> <code>workspace/v1</code> <code>governance/v1</code> <code>toolbelt/v1</code> <code>mcp-server/v1</code> <code>mcp-tools/v1</code> <code>mcp-tools-lock/v1</code> <code>tool-manifest/v1</code> <code>reflection/v1</code> <code>promotion/v1</code> <code>bundle/v1</code>, each at <code>https://oxagen.sh/schemas/&lt;id&gt;.json</code></td></tr>
+      <tr><td>Top-level paths</td><td class="wrap"><code>AGENTS.md</code> <code>CLAUDE.md</code> <code>README.md</code> <code>.gitattributes</code> <code>workspace.toml</code> <code>agents/</code> <code>steering/</code> <code>steering/governance.toml</code> <code>steering/promotions/&lt;period&gt;.jsonl</code>, then <code>&lt;period&gt;.002.jsonl</code> past the line cap <code>steering/skills/</code> <code>steering/memory/</code> <code>tools/servers/&lt;name&gt;/</code> <code>tools/toolbelts/</code> <code>policy/</code></td></tr>
+      <tr><td>Schema ids</td><td class="wrap"><code>steering-record/v1</code> <code>workspace/v1</code> <code>agent/v1</code> <code>governance/v1</code> <code>toolbelt/v1</code> <code>mcp-server/v1</code> <code>mcp-tools/v1</code> <code>mcp-tools-lock/v1</code> <code>tool-manifest/v1</code> <code>reflection/v1</code> <code>promotion/v1</code> <code>bundle/v1</code>, each at <code>https://oxagen.sh/schemas/&lt;id&gt;.json</code></td></tr>
       <tr><td>Tool name</td><td class="wrap"><code>&lt;server&gt;__&lt;tool&gt;</code>. Server <code>^[a-z][a-z0-9_]{0,23}$</code>, tool <code>^[a-z][a-z0-9_]*$</code>, 64 characters at most in all. A pinned reference adds <code>@&lt;version&gt;</code>.</td></tr>
       <tr><td>Credential reference</td><td class="wrap"><code>oxagen:credential/&lt;name&gt;</code>, name <code>^[a-z0-9][a-z0-9-]{0,62}$</code></td></tr>
       <tr><td>Repository reference</td><td class="wrap"><code>&lt;host&gt;/&lt;owner&gt;/&lt;name&gt;</code>, lowercase</td></tr>
-      <tr><td>Record reference</td><td class="wrap"><code>@record:&lt;lineage&gt;</code> in a body, the lineage alone in a field</td></tr>
+      <tr><td>Record reference</td><td class="wrap"><code>@record:&lt;lineage&gt;</code> in a body, the lineage alone in a field. A body can also mention <code>@skill:&lt;lineage&gt;</code> and <code>@tool:&lt;server&gt;__&lt;tool&gt;</code></td></tr>
       <tr><td>Server folder</td><td class="wrap"><code>tools/servers/&lt;name&gt;/</code> with <code>server.toml</code>, <code>tools.toml</code>, and <code>tools.lock.json</code> for every source, plus the vendored definition (<code>openapi.yaml</code>, <code>schema.graphql</code>, or <code>proto/</code>) and <code>tests/</code> where they apply</td></tr>
       <tr><td>Tool classification</td><td class="wrap"><code>risk</code> <code>side_effect</code> <code>egress</code> required, <code>impacts</code> <code>measures</code> <code>data_classes</code> optional, in the values of <code>packages/oxagen/src/contracts/tool.classification.ts</code></td></tr>
       <tr><td>Required check</td><td class="wrap"><code>Oxagen steering</code>, posted by the Oxagen app only</td></tr>
-      <tr><td>Branch prefix</td><td class="wrap">The top-level folder the change touches: <code>steering/</code> <code>memory/</code> <code>tools/</code> <code>policy/</code> <code>workspace/</code></td></tr>
+      <tr><td>Branch prefix</td><td class="wrap">The top-level folder the change touches: <code>steering/</code> <code>memory/</code> <code>tools/</code> <code>agents/</code> <code>policy/</code> <code>workspace/</code></td></tr>
       <tr><td>Environment</td><td class="wrap"><code>steering</code></td></tr>
       <tr><td>Published version</td><td class="wrap">An integer per workspace that rises by one on each publish</td></tr>
       <tr><td>Bundle</td><td class="wrap"><code>bundle/v1</code>: what the cloud gateway and session start read for a published version. It holds the record index with token counts, the rendered always-on blocks per code repository, the Cedar policy set, and the tool manifest.</td></tr>
@@ -1383,8 +1446,8 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
     <li>How Oxagen Steering reaches a steering repo it creates: an organization owner's user token that adds each new repository to the installation (recommended), or an installation on all repositories. See Provisioning.</li>
     <li>Checks on linked code repositories: posted by the Oxagen app with no committed files (recommended), or a CI workflow committed to each repository, which reverses the decision that code repositories hold no committed Oxagen files.</li>
     <li>Whether a customer can opt in to the code repository check blocking a merge. By default it only warns.</li>
-    <li>Where per-agent settings live, such as an agent's toolbelt and the environment it uses: on the agent's registration in Oxagen, or in <code>workspace.toml</code> through a steering PR (recommended). See Agents.</li>
-    <li>What a subagent's toolbelt does on a harness that does not say which subagent made a tool call: the call gets the parent's toolbelt and the Skills screen marks the skill's toolbelt as not enforced on that harness (recommended), or Oxagen does not deliver a skill with a toolbelt to that harness. See Subagents.</li>
+    <li>Where function tools run, such as <code>calculate_refund_amount</code>: in a sandbox in Oxagen's cloud, or on the customer's own infrastructure through the relay. And which language comes first. See Function tools.</li>
+    <li>What a policy on a subagent's skill does on a harness that does not say which skill made a tool call. Recommended: the call gets the parent agent's decision, and the Skills screen shows that the skill's policy does not apply on that harness, since Oxagen assumes operators act in good faith. The other choice is to not deliver such a skill to that harness. See Subagents.</li>
   </ol>
 </section>
 
