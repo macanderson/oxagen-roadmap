@@ -149,12 +149,12 @@ export default {
     ["--gold", "Find marks and the find input's focus"],
   ],
   helpers: [
-    ["pAgentSource(r)", "engine.js:1260", "The agent Source page: the header, tabs, and the TOML editor."],
-    ["edMount()", "engine.js:1286", "Wires the textarea's events and restores the selection after a render."],
-    ["edPaint()", "engine.js:1305", "Repaints the highlighted layer, the gutter, the find marks, and the current line."],
-    ["edKey(e)", "engine.js:1336", "Tab and Shift Tab indent, ⌘/ comments, ⌘F finds, ⌘S saves."],
-    ["hlToml(src)", "engine.js:1230", "The TOML highlighter: one regex pass that writes token classes."],
-    ["cedHtml(key, path, lang, opts)", "engine.js:11728", "The same editor for other languages, sized for a dialog with `small` or wrapped for prose."],
+    ["pAgentSource(r)", "engine.js:1258", "The agent Source page: the header, tabs, and the TOML editor."],
+    ["edMount()", "engine.js:1284", "Wires the textarea's events and restores the selection after a render."],
+    ["edPaint()", "engine.js:1303", "Repaints the highlighted layer, the gutter, the find marks, and the current line."],
+    ["edKey(e)", "engine.js:1334", "Tab and Shift Tab indent, ⌘/ comments, ⌘F finds, ⌘S saves."],
+    ["hlToml(src)", "engine.js:1228", "The TOML highlighter: one regex pass that writes token classes."],
+    ["cedHtml(key, path, lang, opts)", "engine.js:11726", "The same editor for other languages, sized for a dialog with `small` or wrapped for prose."],
   ],
   sourceNotes: [
     "`CED_LANG` (engine.js 11405) lists the languages the shared editor highlights: TOML, Markdown, JSON, TypeScript, Python, and Go.",
