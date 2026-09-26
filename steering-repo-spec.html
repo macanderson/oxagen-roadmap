@@ -348,6 +348,8 @@ body{padding-inline:0}
         <li>The folders <code>servers/</code>, with one folder per MCP server whatever its source, <code>policy/</code>, and <code>steering/memory/</code>. <code>proposals/</code> goes. (Mac, 2026-09-26)</li>
         <li>The record fields <code>repos</code>, <code>tools</code>, and <code>description</code> on every kind. (Mac, 2026-09-26)</li>
         <li>An optional always-on token budget. A workspace that sets none inherits Oxagen's default, and a workspace can turn the check off. (Mac, 2026-09-26)</li>
+        <li>The budget check never blocks a steering PR, because a steering PR is how a budget changes. It warns and shows the cost. (Mac, 2026-09-26)</li>
+        <li>While a steering repo's settings have drifted, runs keep the last published version. (Mac, 2026-09-26)</li>
         <li>The repository name <code>oxagen-&lt;workspace&gt;</code>. (Mac, 2026-09-26)</li>
         <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>. (Mac, 2026-09-26)</li>
         <li>Reflections and memory candidates stay in Oxagen, and promoted memories arrive by a batched memory PR. (Mac, 2026-09-26)</li>
@@ -371,7 +373,6 @@ body{padding-inline:0}
     <div class="card">
       <h4><span class="st p">Proposed</span></h4>
       <ul>
-        <li>Oxagen's default budget only warns. A budget the workspace sets fails a steering PR that goes over it.</li>
         <li>The details below that no Decided item names: the settings table beyond the required check, the drift sweep, the scale targets, and the build lanes.</li>
       </ul>
     </div>
@@ -776,7 +777,7 @@ per_month_micros = 12000000000                # $12,000.00
   <h3>Effects</h3>
   <ul>
     <li>Oxagen posts <code>Oxagen steering</code> as failed on every open pull request within seconds, and on every new one as it opens, with the list of differences. It leaves one comment per pull request and edits it in place.</li>
-    <li>Oxagen merges nothing and publishes nothing. Runs keep the last published version, so no agent stops mid-run.</li>
+    <li>Oxagen merges nothing and publishes nothing. Runs keep the last published version, so no agent stops mid-run. <span class="st d">Decided</span></li>
     <li>The workspace shows a banner on every page, and Oxagen sends email and Slack to the workspace admins.</li>
     <li>For <code>diverged</code>, Oxagen opens a pull request that reverts <code>main</code> to the last published commit. The person who pushed can propose the same change again through a steering PR.</li>
   </ul>
@@ -816,7 +817,7 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
       <tr><td><code>authority</code></td><td class="wrap">A record tries to grant authority</td><td><span class="st c">Today</span></td></tr>
       <tr><td><code>settings</code></td><td class="wrap">The repository settings differ from the prescribed ones</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>references</code></td><td class="wrap">A named tool, record, repository, credential, or skill file does not exist</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>budget</code></td><td class="wrap">The change pushes an agent's always-on steering over a budget the workspace set. Over Oxagen's default, it warns and passes. See <a href="#tokens">Tokens</a></td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>budget</code></td><td class="wrap">Warns, and never fails, when the change pushes an agent's always-on steering over its budget. See <a href="#tokens">Tokens</a></td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>compile</code></td><td class="wrap">A server folder does not compile to tools, its lock does not match, a Cedar policy does not validate, or a policy test fails</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>owned</code></td><td class="wrap">The change edits a file Oxagen writes: <code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>README.md</code>, <code>policy/schema.cedarschema</code>, a <code>tools.lock.json</code>, or the ledger</td><td><span class="st p">Proposed</span></td></tr>
     </tbody>
@@ -928,7 +929,7 @@ group = "billing-leads"</code></pre></figure>
     <thead><tr><th>Mechanism</th><th>What it does</th></tr></thead>
     <tbody>
       <tr><td>Frontmatter stays home</td><td class="wrap">Delivery sends a heading with the label and the body. The frontmatter, often 150 tokens with its hash, is for Oxagen and never reaches the model.</td></tr>
-      <tr><td>Always-on budget</td><td class="wrap">A limit on the records that reach every request (<code>must</code> and <code>should</code> with <code>load: always</code>), per agent and repository. It is optional: a workspace that sets nothing inherits Oxagen's default of 4,000 tokens, and the check only warns against it. A budget the workspace sets in <code>governance.toml</code> fails a steering PR that goes over it, and <code>"off"</code> turns the check off.</td></tr>
+      <tr><td>Always-on budget</td><td class="wrap">A limit on the records that reach every request (<code>must</code> and <code>should</code> with <code>load: always</code>), per agent and repository. It is optional: a workspace that sets nothing inherits Oxagen's default of 4,000 tokens, a workspace can set its own in <code>governance.toml</code>, and <code>"off"</code> turns the check off. The <code>budget</code> check warns and never blocks a steering PR, because a steering PR is how a budget changes. A PR that changes the budget is measured against its own new value.</td></tr>
       <tr><td>Index lines</td><td class="wrap"><code>may</code> and <code>info</code> records and skills reach a request as one line each: label, description, and reference, about 25 tokens. The agent reads a body with <code>steering_read</code> or by an @-mention.</td></tr>
       <tr><td>Stable order</td><td class="wrap">The always-on block is sorted by lineage, placed before anything that changes per request, and changes only on publish. Provider prompt caching then bills it at the cache-read price after the first request.</td></tr>
       <tr><td>Targets</td><td class="wrap"><code>repos</code>, <code>applies_to</code>, and <code>tools</code> keep a record out of runs it does not concern.</td></tr>
@@ -954,7 +955,8 @@ Every query that reads or writes a tenant table goes through
 Read any of these with steering_read when it fits the task.
 - Write a database migration: Write and check an Atlas migration for a schema change. (a-intel.platform.write-migration)
 - Refund: What a refund is at a-intel, its states, and the tools that change it. (a-intel.domain.refund)</code></pre></figure>
-  <figure class="code"><figcaption><span class="path">Oxagen steering check, budget</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Oxagen steering  ✗ budget
+  <figure class="code"><figcaption><span class="path">Oxagen steering check, budget</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">Oxagen steering  ✓ passed, 1 warning
+  warning  budget
   always-on steering for release-manager on github.com/a-intel/platform
   before 3,410 tokens   after 4,260 tokens   budget 4,000 (steering/governance.toml)
 
@@ -962,7 +964,8 @@ Read any of these with steering_read when it fits the task.
     1,020  a-intel.platform.release-steps     procedure, must
       610  a-intel.platform.tenant-queries    code-rule, must
 
-  Fix: shorten a record, set force: may so it loads when it fits,
+  To keep this cost, merge as is, or raise always_on_tokens in this PR.
+  To cut it, shorten a record, set force: may so it loads when it fits,
   or narrow it with repos, applies_to, or tools.</code></pre></figure>
   <p class="muted">Example. 40 always-on records sent with their frontmatter cost about 40 × 240 = 9,600 tokens on each request, or 1.92 million over a 200-request run. Sent as heading and body, the same records cost about 40 × 90 = 3,600 tokens, or 720,000 over the run, and cache reads bill most of those at a tenth of the input price.</p>
 </section>
@@ -1060,7 +1063,6 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
   <h2>Open questions</h2>
   <ol>
     <li>Administration write on the GitHub App, or a second app that holds only the provisioning permissions.</li>
-    <li>While a repository is drifted, runs keep the last published version (proposed here), or runs stop until it is repaired.</li>
     <li>Whether an unreviewed memory candidate steers anything: the same agent only (proposed here), the whole workspace, or nothing until a memory PR merges.</li>
     <li>How Cursor receives steering now that code repositories hold no committed Oxagen files. Cursor reads rules from files in the repository and from its own dashboard, and its model calls do not pass the cloud gateway.</li>
     <li>Actions and CI disabled in the steering repo.</li>

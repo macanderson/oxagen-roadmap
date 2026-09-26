@@ -957,10 +957,12 @@ Do
 2. Add settings (reads S2&#x27;s health), references, budget, compile, and owned.
 3. budget: count tokens for each changed record, then for each agent and
    repository the change reaches, compare the always-on total before and
-   after with the budget. The budget is steering.always_on_tokens in
-   governance.toml. Over a budget the workspace set, fail. Unset, compare
-   with Oxagen&#x27;s default and only warn. &quot;off&quot; skips the check. Report the
-   largest records and the fix.
+   after with the budget. The budget is steering.always_on_tokens in the
+   PR&#x27;s own governance.toml, so a PR that changes the budget is measured
+   against its new value. Unset, use Oxagen&#x27;s default. &quot;off&quot; skips the
+   check. The budget check only warns and never fails a steering PR,
+   because a steering PR is how a budget changes. Report the largest
+   records and both ways out: raise the budget in the PR, or cut records.
 4. The schema check warns above 800 files in one folder, above 120 words in
    an always-on body, and above 500 lines in a SKILL.md.
 5. Every failure carries file, line, field, expected, and fix. Provide a
