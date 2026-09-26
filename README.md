@@ -11,7 +11,7 @@ index.html                    the roadmap app, ONE file: built from roadmap/app.
 stella-in-app-agent-roadmap.html  the in-app stella build spec: parity with stella in the terminal, contained sessions, 38 specs with workflow prompts
 stella-backlog-batches.html   the stella backlog on 2026-09-25: 486 open issues by type and area, and workflow prompts that fix them in parallel batches
 steering-repo-spec.html       the steering repo Oxagen creates for each workspace: layout, formats, settings, drift, memory, build prompts
-mcp-studio-spec.html          MCP Studio, which turns an OpenAPI document into a governed MCP server, with build prompts
+mcp-studio-spec.html          MCP Studio: storage for every MCP server agents use, build prompts, a build tracker (Progress), and an Oxagen and Kong comparison
 roadmap/app.html              the app: the pages, the Claude drawer, the GitHub wiring, the shared store
 roadmap/data.json             the roadmap content: surfaces, witness, dod, decisions, milestones, the catalog, the issue triage snapshot
 mockups/missioncontrol.html   the master: every page, dialog, auth screen and guided scenario, self-contained, open from disk
