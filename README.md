@@ -9,6 +9,7 @@ One place to see what Oxagen is building next, exactly how it will look, and wha
 ```
 index.html                    the roadmap app, ONE file: built from roadmap/app.html + roadmap/data.json (edit those, never this)
 stella-in-app-agent-roadmap.html  the in-app stella build spec: parity with stella in the terminal, contained sessions, 38 specs with workflow prompts
+stella-backlog-batches.html   the stella backlog on 2026-09-25: 486 open issues by type and area, and workflow prompts that fix them in parallel batches
 steering-repo-spec.html       the steering repo Oxagen creates for each workspace: layout, formats, settings, drift, memory, build prompts
 mcp-studio-spec.html          MCP Studio, which turns an OpenAPI document into a governed MCP server, with build prompts
 roadmap/app.html              the app: the pages, the Claude drawer, the GitHub wiring, the shared store
