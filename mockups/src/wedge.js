@@ -827,6 +827,9 @@ function gateHome(x,wslug){
   if(x.edit==="mandate"){ var m=MANDATES.filter(function(y){return y.id===x.source;})[0], a=m&&agent(m.agent);
     return ["Agent › Permissions",a?"#/"+ORG.slug+"/"+a.ws+"/agents/"+defSlug(a)+"/permissions?delegation="+encodeURIComponent(m.id):b+"/agents"]; }
   if(x.edit==="agents") return ["Agents",b+"/agents"];
+  /* a decision rule names its version and its rule ("pol_v41 · rg_0093"), so the link opens that rule */
+  var pr=String(x.source||"").split(" · ");
+  if(/^pol_v\d+$/.test(pr[0])) return ["Tools › Policy",b+"/tools/policy/"+pr[0]+(pr[1]?"?rule="+encodeURIComponent(pr[1]):"")];
   return ["Tools › Policy",b+"/tools/policy"];
 }
 function emitsCell(o){

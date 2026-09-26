@@ -214,8 +214,8 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 196 to 207 (kind), 264 to 265 (tool category), 266 to 270 (hazard), 271 to 276 (gate), wedge.js 234 to 236 and 2269 to 2276 (frame type)</td><td>The rules that draw it</td></tr>
-      <tr><td><code>kindBadge(k)</code> at <code>engine.js:1556</code></td><td>Kind badge with icon and word. 4 calls.</td></tr>
-      <tr><td><code>kindGlyph(k)</code> at <code>engine.js:1557</code></td><td>Icon-only kind glyph. 2 calls.</td></tr>
+      <tr><td><code>kindBadge(k)</code> at <code>engine.js:1565</code></td><td>Kind badge with icon and word. 4 calls.</td></tr>
+      <tr><td><code>kindGlyph(k)</code> at <code>engine.js:1566</code></td><td>Icon-only kind glyph. 2 calls.</td></tr>
       <tr><td><code>ftBadge(t)</code> at <code>wedge.js:278</code></td><td>Frame-type badge, word and CSS mark, no icon. 10 calls.</td></tr>
       <tr><td><code>typeStrip(list, ctx)</code> at <code>wedge.js:488</code></td><td>Counts by frame type as a strip. A <code>ctx</code> turns each entry into a filter button.</td></tr>
       <tr><td><code>catBadge(c)</code> at <code>engine.js:827</code></td><td>Tool category badge with icon and word. 5 calls.</td></tr>
@@ -251,7 +251,7 @@
 ## Inputs
 
 1. mockups/components/typed-badges.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 196 to 207 (kind), 264 to 265 (tool category), 266 to 270 (hazard), 271 to 276 (gate), wedge.js 234 to 236 and 2269 to 2276 (frame type). The mockup renders it with kindBadge(k) (engine.js:1556), kindGlyph(k) (engine.js:1557), ftBadge(t) (wedge.js:278), typeStrip(list, ctx) (wedge.js:488), catBadge(c) (engine.js:827), hazard(risk, effect) (engine.js:851), gate(g, note) (engine.js:866), toolGate(t) (engine.js:878).
+2. The design source: mockups/src/engine.css lines 196 to 207 (kind), 264 to 265 (tool category), 266 to 270 (hazard), 271 to 276 (gate), wedge.js 234 to 236 and 2269 to 2276 (frame type). The mockup renders it with kindBadge(k) (engine.js:1565), kindGlyph(k) (engine.js:1566), ftBadge(t) (wedge.js:278), typeStrip(list, ctx) (wedge.js:488), catBadge(c) (engine.js:827), hazard(risk, effect) (engine.js:851), gate(g, note) (engine.js:866), toolGate(t) (engine.js:878).
 3. The build's implementation: find it by its root selector (.kb, .ft, .tcb, .hz, .gt) or its name, and list every route that renders it.
 4. Where to see it in the design: Steering, Run (Decision trace, Transcript), Tools, Agents (mandates). Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

@@ -195,6 +195,7 @@ Every unique view has a page spec in `mockups/pages/` and a loaded story in Stor
 | `tools-toolbelts` | Tools, Toolbelts | `#/a-intel/core-platform/tools/toolbelts` | `tools-toolbelts.md` |
 | `tools-providers` | Tools, Providers | `#/a-intel/core-platform/tools/providers` | `tools-providers.md` |
 | `tools-policy` | Tools, Policy | `#/a-intel/core-platform/tools/policy` | `tools-policy.md` |
+| `tools-policy-version` | Tools, Policy version | `#/a-intel/core-platform/tools/policy/pol_v42` | `tools-policy-version.md` |
 | `tools-switches` | Tools, Kill switches | `#/a-intel/core-platform/tools/switches` | `tools-switches.md` |
 | `steering` | Steering, Sources | `#/a-intel/core-platform/steering` | `steering.md` |
 | `steering-source` | Steering source | `#/a-intel/core-platform/steering/sources/record/ctx.release.notes-format` | `steering-source.md` |

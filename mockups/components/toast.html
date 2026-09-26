@@ -173,8 +173,8 @@
     <thead><tr><th>Where</th><th>What</th></tr></thead>
     <tbody>
       <tr><td><code>mockups/src/engine.css</code> lines 888 to 892, phone 643</td><td>The rules that draw it</td></tr>
-      <tr><td><code>toast(msg, tone)</code> at <code>engine.js:2032</code></td><td>Appends one row to <code>#toast</code> and removes it after 4.2 seconds. 17 calls.</td></tr>
-      <tr><td><code>act(msg, tone)</code> at <code>engine.js:2031</code></td><td>Records the message on state and calls <code>toast()</code>. Over 200 calls. The usual way a change reports itself.</td></tr>
+      <tr><td><code>toast(msg, tone)</code> at <code>engine.js:2042</code></td><td>Appends one row to <code>#toast</code> and removes it after 4.2 seconds. 17 calls.</td></tr>
+      <tr><td><code>act(msg, tone)</code> at <code>engine.js:2041</code></td><td>Records the message on state and calls <code>toast()</code>. Over 200 calls. The usual way a change reports itself.</td></tr>
     </tbody>
   </table></div></div>
   <ul>
@@ -200,7 +200,7 @@
 ## Inputs
 
 1. mockups/components/toast.html in the roadmap repo. Read it in full: anatomy, examples, usage, content, accessibility, and phone rules. Open it in a browser and switch themes to see every example in both.
-2. The design source: mockups/src/engine.css lines 888 to 892, phone 643. The mockup renders it with toast(msg, tone) (engine.js:2032), act(msg, tone) (engine.js:2031).
+2. The design source: mockups/src/engine.css lines 888 to 892, phone 643. The mockup renders it with toast(msg, tone) (engine.js:2042), act(msg, tone) (engine.js:2041).
 3. The build's implementation: find it by its root selector (#toast) or its name, and list every route that renders it.
 4. Where to see it in the design: every page. Open mockups/missioncontrol.html?product=1 at those routes, or the matching Storybook stories.
 

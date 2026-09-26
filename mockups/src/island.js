@@ -34,6 +34,7 @@ function islPageId(r,under){
   if(p==="agent"){ var at=S.tab.agent||"overview"; return at==="overview"?"agent":at==="definition"?"agent-source":"agent-"+at; }
   if(p==="agentsource") return "agent-source";
   if(p==="tools"){ var tt=S.tab.tools||"tools"; return tt==="tools"?"tools":"tools-"+tt; }
+  if(p==="policyversion") return "tools-policy-version";
   if(p==="source") return r.kind==="skill"?"steering-source-skill":"steering-source";
   if(p==="steering") return r.tab&&r.tab!=="sources"?"steering-"+r.tab:"steering";
   if(p==="runtimes") return r.id?"runtime":"runtimes";

@@ -25,10 +25,10 @@ gate steps have loading and denied, and the first-run step an error.
 | `<page>.audit-prompt.md` | A prompt to paste into an agent session that audits the built page against `<page>.md`, check by check, and reports PASS/FAIL with evidence. |
 | `audit-prompt.md` | The whole-app prompt: shell, the approvals drawer, mobile shell, auth sequences, cross-cutting rules; it runs every per-page prompt. |
 
-Pages (64): work-backlog · work-intake · work-item · work-orders · work-order · work-workflows ·
+Pages (65): work-backlog · work-intake · work-item · work-orders · work-order · work-workflows ·
 work-findings · run · run-transcript · run-cost · run-memories · run-evidence · run-interjection · agents · agent ·
 agent-identity · agent-steering · agent-toolbelt · agent-runtime · agent-permissions · agent-activity ·
-agent-source · tools · tools-toolbelts · tools-providers · tools-policy · tools-switches · steering ·
+agent-source · tools · tools-toolbelts · tools-providers · tools-policy · tools-policy-version · tools-switches · steering ·
 steering-source · steering-source-skill · steering-assignments · steering-compiler · steering-proposals ·
 steering-prs · runtimes · runtime · spend · spend-budgets · spend-optimization · repositories ·
 repositories-copies · repositories-changes · repositories-config · approvals-drawer · stella-drawer ·

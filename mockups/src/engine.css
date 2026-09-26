@@ -1938,6 +1938,24 @@ button.wz-opt:hover{border-color:var(--rule)}
 .ced.wrap .ed-hl .ln,.ced.wrap .ed-mk .ln{display:block;min-height:var(--ed-lh)}
 .ced.wrap .ed-gut{white-space:normal}
 .ced.wrap .ed-gut>div{min-height:var(--ed-lh);line-height:var(--ed-lh)}
+/* Policy version: the rule list beside the editor, the problems under it, and the activation checks */
+.pv-grid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;align-items:start}
+.pv-list{max-height:calc(100vh - 260px);overflow:auto;scrollbar-width:thin}
+.pv-rule{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--border);padding:9px 14px;color:var(--body);cursor:pointer;font:inherit}
+.pv-rule:first-child{border-top:0}
+.pv-rule:hover,.pv-rule:focus-visible{background:var(--hl)}
+.pv-rule-h{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px}
+.pv-rule-s{display:block;margin-top:4px;font-size:12px;color:var(--muted);line-height:1.4}
+.pv-main{min-width:0}
+.pv-probs{margin-top:12px}
+.pv-prob{display:flex;gap:10px;align-items:center;font-size:12.5px;padding:3px 0}
+.pv-note{margin:0 0 14px;max-width:720px}
+.pv-checks{display:grid;gap:6px;margin:0 0 12px}
+.pv-check{display:flex;gap:8px;align-items:center;font-size:12.5px}
+@media(max-width:900px){.pv-grid{grid-template-columns:minmax(0,1fr)}.pv-list{max-height:260px}}
+#viewport.phone .pv-grid{grid-template-columns:minmax(0,1fr)}
+#viewport.phone .pv-list{max-height:260px}
+#viewport.phone .pv-rule{min-height:44px}
 
 /* ---------- one steering record ---------- */
 .crec-h .crec-hl{display:flex;gap:12px;align-items:flex-start}

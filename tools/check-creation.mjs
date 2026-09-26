@@ -594,7 +594,7 @@ for (const theme of ["light", "dark"]) {
   await page.close();
 }
 
-// A policy version is created, edited and discarded from the Policy tab rather than a wizard, and
+// A policy version is created from the Policy tab, edited on its own page, and discarded, and
 // the constraint is the point: a draft is the only version that edits or deletes, because an active
 // or superseded one is cited by every decision it made.
 {
@@ -613,18 +613,21 @@ for (const theme of ["light", "dark"]) {
   ok(await page.evaluate(() => !!document.getElementById("pn-note")), "policy: a draft with no sentence is refused");
   await page.evaluate(() => { document.getElementById("pn-note").value = "Raises any egress call to approval"; policyDraft(); });
   await page.waitForTimeout(200);
+  ok(await page.evaluate(() => location.hash) === "#/a-intel/core-platform/tools/policy/pol_v43", "policy: the new draft opens on its page");
+  await page.evaluate(() => go("#/a-intel/core-platform/tools/policy"));
+  await page.waitForTimeout(200);
   ok(/pol_v43/.test(await rows()), "policy: the new draft is listed");
   ok(/Raises any egress call to approval/.test(await rows()), "policy: its sentence is listed");
   ok(/not run yet/.test(await rows()), "policy: a fresh draft has no test run behind it");
 
-  await page.evaluate(() => openDialog("policyedit", "pol_v43"));
-  await page.waitForTimeout(120);
-  ok(/Edit pol_v43/.test(await dtxt()), "policy: a draft edits");
-  await page.evaluate(() => { document.getElementById("pe-note").value = "Raises any egress call, and any tainted write"; policySaveDraft("pol_v43"); });
+  await page.evaluate(() => go("#/a-intel/core-platform/tools/policy/pol_v43"));
+  await page.waitForTimeout(200);
+  ok(await page.evaluate(() => !!document.getElementById("pv-note") && !document.getElementById("cedT").readOnly), "policy: a draft edits");
+  await page.evaluate(() => { document.getElementById("pv-note").value = "Raises any egress call, and any tainted write"; polSave("pol_v43"); go("#/a-intel/core-platform/tools/policy"); });
   await page.waitForTimeout(200);
   ok(/any tainted write/.test(await rows()), "policy: the edit is saved");
 
-  await page.evaluate(() => openDialog("policyedit", "pol_v41"));
+  await page.evaluate(() => openDialog("policyrule", "pol_v41"));
   await page.waitForTimeout(120);
   ok(/cannot be edited/.test(await dtxt()), "policy: the active version refuses an edit");
   await page.evaluate(() => openDialog("policydiscard", "pol_v41"));
@@ -1000,13 +1003,107 @@ for (const theme of ["light", "dark"]) {
     return !!prev && /denies a payment unless/.test(prev.textContent);
   }), "policy: the rule sample carries a plain sentence above it");
 
-  // Opening a version says where it is kept.
-  await page.evaluate(() => openDialog("policyver", POLICIES.filter((p) => p.state === "active")[0].v));
-  await page.waitForTimeout(200);
-  const dtext = await page.evaluate(() => { const d = document.querySelector("#layer .dlg"); return d ? d.innerText : ""; });
-  ok(/Stored in/.test(dtext), "policy: the version dialog says where it is stored, got " + dtext.slice(0, 200));
-  ok(!/Cedar/i.test(dtext), "policy: the version dialog names no policy language");
+  // The rule sample is the active version's rule, in valid Cedar: no invented statement or method.
+  const sample = await page.evaluate(() => [...document.querySelectorAll("pre")].find((x) => /forbid/.test(x.textContent))?.textContent || "");
+  ok(/@id\("rg_0044"\)/.test(sample) && /context\.run\.prior_calls\.contains\("stripe__list_prices"\)/.test(sample), "policy: the rule sample is rg_0044 as stored, got " + sample);
+  ok(!/has_prior_call|\badvice\b/.test(sample), "policy: the rule sample uses no invented Cedar");
+
+  // Every count on the list comes from the version's own source, and Open lands on the version page.
+  const rows = await page.evaluate(() => POLICIES.map((p) => ({ v: p.v, shown: [...document.querySelectorAll("#pg table tbody tr")].find((r) => r.cells[0].textContent === p.v)?.cells[4].textContent, n: polParse(polSaved(p.v)).rules.length })));
+  ok(rows.every((r) => r.shown == null || +r.shown === r.n), "policy: each Rules cell counts its saved source, got " + JSON.stringify(rows.slice(0, 3)));
+  const clean = await page.evaluate(() => POLICIES.map((p) => [p.v, polParse(polSaved(p.v)).problems.length]).filter((x) => x[1]));
+  ok(clean.length === 0, "policy: every stored version parses with no problem, got " + JSON.stringify(clean));
+  const counts = await page.evaluate(() => ["pol_v42", "pol_v41", "pol_v40", "pol_v34"].map((v) => [v, polRuleN(v), polTests(polBy(v)).length, polTestsLabel(v, polSaved(v)).t]));
+  ok(JSON.stringify(counts) === JSON.stringify([["pol_v42", 39, 44, "44 / 44 pass"], ["pol_v41", 38, 42, "42 / 42 pass"], ["pol_v40", 36, 39, "39 / 39 pass"], ["pol_v34", 31, 33, "33 / 33 pass"]]),
+    "policy: rule and test counts match the fixture's versions, got " + JSON.stringify(counts));
+  const openBtn = await page.evaluate(() => [...document.querySelectorAll("#pg table tbody tr")][0].querySelector(".rowacts button").getAttribute("onclick"));
+  ok(/go\('#\/a-intel\/core-platform\/tools\/policy\/pol_v42'\)/.test(openBtn), "policy: Open lands on the version page, got " + openBtn);
   ok(errs.length === 0, "policy: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+
+// A version opens on its own page: the rule list beside the editor, the problems under it, the tests
+// that ship with it, and the changes against the version it came from. Only a draft changes.
+{
+  const { page, errs } = await open("#/a-intel/core-platform/tools/policy/pol_v42");
+  const tabs = await page.evaluate(() => [...document.querySelectorAll("#pg .tabs .tab")].map((t) => t.textContent.replace(/\s+/g, " ").trim()));
+  ok(JSON.stringify(tabs) === JSON.stringify(["Rules 39", "Tests 44", "Changes 1"]), "policy version: tabs and counts, got " + tabs.join(" | "));
+  ok(await page.evaluate(() => document.querySelectorAll(".pv-rule").length) === 39, "policy version: one row per rule");
+  ok(/Cedar/.test(await page.evaluate(() => document.querySelector(".ed-status")?.textContent || "")), "policy version: the editor names its grammar");
+  ok(await page.evaluate(() => !document.getElementById("cedT").readOnly), "policy version: a draft is writable");
+  ok(/No problems/.test(await page.evaluate(() => el("polProblems").textContent)), "policy version: the draft has no problems");
+  const gold = await page.evaluate(() => [...document.querySelectorAll("#pg .btn.primary")].map((b) => b.textContent));
+  ok(JSON.stringify(gold) === JSON.stringify(["Activate"]), "policy version: one gold action on a draft, got " + gold.join(" | "));
+
+  // Typing follows through: a bad effect and a bad path are problems, the counts follow, and the tests go stale.
+  await page.evaluate(() => { const t = el("cedT"); t.value = t.value.replace('permit (principal, action, resource)\nwhen { context.tool.side_effect == "read"', 'advice (principal, action, resource)\nwhen { context.tool.side_efect == "read"'); t.dispatchEvent(new Event("input")); });
+  const probs = await page.evaluate(() => [...document.querySelectorAll("#polProblems .pv-prob")].map((x) => x.textContent));
+  ok(probs.some((p) => /starts with permit or forbid\. This one starts with advice/.test(p)) && probs.some((p) => /context\.tool\.side_efect is not in the schema/.test(p)),
+    "policy version: the editor reports the bad effect and the bad path, got " + probs.join(" | "));
+  ok(await page.evaluate(() => !document.querySelector("[data-ced-dirty]").disabled), "policy version: Save the draft enables on a change");
+  ok(await page.evaluate(() => polTestsLabel("pol_v42", cedText("pol:pol_v42")).t) === "not run yet", "policy version: an edit turns the tests stale");
+  await page.evaluate(() => openDialog("policyactivate", "pol_v42"));
+  await page.waitForTimeout(150);
+  let d = await dlg(page);
+  ok(/is not ready/.test(d.title) && /not saved/.test(d.body) && !d.foot.some((b) => b.t === "Activate it"), "policy version: activation refuses an unsaved draft, got " + d.title + " " + d.body);
+  await page.evaluate(() => { closeDialog(); cedRevert("pol:pol_v42"); polLive(); });
+
+  // Flip the rule a test depends on, save, run: that test fails and names what it got.
+  await page.evaluate(() => { const t = el("cedT"); t.value = t.value.replace('@id("rg_0093")\n@decision("require_approval")\nforbid', '@id("rg_0093")\npermit'); t.dispatchEvent(new Event("input")); polSave("pol_v42"); polRunTests("pol_v42"); });
+  await page.waitForTimeout(150);
+  const run = await page.evaluate(() => { const r = polRunOf("pol_v42", polSaved("pol_v42")); return r && r.res.filter((x) => !x.pass).map((x) => x.id + ":" + x.got + ":" + x.by); });
+  ok(JSON.stringify(run) === JSON.stringify(["pt_010:allow:rg_0093", "pt_011:allow:rg_0093"]), "policy version: flipping rg_0093 fails its two tests, got " + JSON.stringify(run));
+  await page.evaluate(() => openDialog("policyactivate", "pol_v42"));
+  await page.waitForTimeout(150);
+  d = await dlg(page);
+  ok(/is not ready/.test(d.title) && /2 tests fail/.test(d.body), "policy version: activation refuses failing tests, got " + d.body);
+  await page.evaluate(() => closeDialog());
+
+  // Put it back, add a rule through the builder, save, run, and activate with a reason.
+  await page.evaluate(() => { cedReseed("pol:pol_v42", polBy("pol_v42").src.replace('@id("rg_0093")\npermit', '@id("rg_0093")\n@decision("require_approval")\nforbid')); polBy("pol_v42").src = S.cedBase["pol:pol_v42"]; render(); });
+  await page.evaluate(() => openDialog("policyrule", "pol_v42"));
+  await page.waitForTimeout(150);
+  await page.fill("#pr-say", "Parks a pod delete for approval");
+  await page.selectOption("#pr-tool", "kubernetes__delete_pod");
+  const prev = await page.evaluate(() => el("pr-prev").textContent);
+  ok(/@id\("rg_0132"\)\n@decision\("require_approval"\)\nforbid \(principal, action == Action::"kubernetes__delete_pod", resource\)\nunless \{ context\.approval\.granted \};/.test(prev), "policy version: the builder writes valid Cedar, got " + prev);
+  await page.evaluate(() => polAddRule("pol_v42"));
+  await page.waitForTimeout(250);
+  ok(await page.evaluate(() => document.querySelectorAll(".pv-rule").length) === 40, "policy version: the new rule joins the list");
+  const caret = await page.evaluate(() => el("cedPos").textContent);
+  const want = await page.evaluate(() => polParse(cedText("pol:pol_v42")).rules.find((r) => r.id === "rg_0132").line);
+  ok(caret === "Ln " + want + ", Col 1", "policy version: the caret lands on the new rule, got " + caret);
+  await page.evaluate(() => { polSave("pol_v42"); polRunTests("pol_v42"); openDialog("policyactivate", "pol_v42"); });
+  await page.waitForTimeout(150);
+  d = await dlg(page);
+  ok(d.title === "Activate pol_v42?" && d.foot.some((b) => b.t === "Activate it"), "policy version: a ready draft offers activation, got " + d.title);
+  await page.evaluate(() => policyActivate("pol_v42"));
+  ok(await page.evaluate(() => S.toast) === "Say why you are activating it.", "policy version: activation needs a reason");
+  await page.fill("#pa-why", "Release calls went out unreviewed twice this week");
+  await page.evaluate(() => policyActivate("pol_v42"));
+  await page.waitForTimeout(200);
+  ok(await page.evaluate(() => polBy("pol_v42").state === "active" && polBy("pol_v41").state === "superseded" && polBy("pol_v42").reason.length > 0), "policy version: activation supersedes and records the reason");
+  ok(await page.evaluate(() => el("cedT").readOnly), "policy version: an active version is read-only");
+  ok(errs.length === 0, "policy version: no JavaScript error: " + errs.join(" | "));
+  await page.close();
+}
+{
+  // A gate notice's address lands the caret on its rule, and a new draft opens on its page with its tests not run.
+  const { page, errs } = await open("#/a-intel/core-platform/tools/policy/pol_v41?rule=rg_0093");
+  const line = await page.evaluate(() => polParse(polSaved("pol_v41")).rules.find((r) => r.id === "rg_0093").line);
+  ok(await page.evaluate(() => el("cedPos").textContent) === "Ln " + line + ", Col 1", "policy version: ?rule= lands on the rule");
+  ok(await page.evaluate(() => location.hash) === "#/a-intel/core-platform/tools/policy/pol_v41", "policy version: the rule query is dropped in place");
+  ok(await page.evaluate(() => gateHome({ edit: "tools/policy", source: "pol_v41 · rg_0093" }, "core-platform")[1]) === "#/a-intel/core-platform/tools/policy/pol_v41?rule=rg_0093", "policy version: a gate notice links to its rule");
+  await page.evaluate(() => { openDialog("policynew", "pol_v41"); });
+  await page.waitForTimeout(150);
+  ok(await page.evaluate(() => [...el("pn-base").options].every((o) => !/,/.test(o.textContent))), "policy: the Based on options carry no comma");
+  await page.fill("#pn-note", "Raises any egress call to approval");
+  await page.evaluate(() => policyDraft());
+  await page.waitForTimeout(250);
+  ok(await page.evaluate(() => location.hash) === "#/a-intel/core-platform/tools/policy/pol_v43", "policy version: a new draft opens on its page");
+  ok(await page.evaluate(() => polRuleN("pol_v43") === 38 && polTests(polBy("pol_v43")).length === 42 && polTestsLabel("pol_v43", polSaved("pol_v43")).t === "not run yet"),
+    "policy version: a new draft copies its base's rules and tests, not run");
+  ok(errs.length === 0, "policy version: no JavaScript error: " + errs.join(" | "));
   await page.close();
 }
 
@@ -1160,7 +1257,7 @@ for (const theme of ["light", "dark"]) {
   ok(homes.length > 0, "gates: each gate notice links to where its gate is edited");
   ok(!homes.some((l) => /·/.test(l.split("|")[0])), "gates: no link carries a mid-dot, got " + homes.join(" ~ "));
   ok(!homes.some((l) => /Mandates/.test(l)), "gates: no link points at the cut Mandates ledger, got " + homes.join(" ~ "));
-  for (const [label, href] of [["Tools › Policy", /tools\/policy$/], ["Tools › Kill switches", /tools\/switches$/], ["Steering record", /sources\/record\//]]) {
+  for (const [label, href] of [["Tools › Policy", /tools\/policy\/pol_v41\?rule=rg_0093$/], ["Tools › Kill switches", /tools\/switches$/], ["Steering record", /sources\/record\//]]) {
     ok(homes.some((l) => l.startsWith(label + "|") && href.test(l.split("|")[1])), "gates: " + label + " is linked, got " + homes.join(" ~ "));
   }
   ok(errs.length === 0, "gates: no JavaScript error: " + errs.join(" | "));

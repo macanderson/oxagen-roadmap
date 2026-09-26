@@ -139,8 +139,8 @@ export default {
     ["--ink", "The critical risk mark's exclamation stroke, for contrast against its own fill"],
   ],
   helpers: [
-    ["kindBadge(k)", "engine.js:1556", "Kind badge with icon and word. 4 calls."],
-    ["kindGlyph(k)", "engine.js:1557", "Icon-only kind glyph. 2 calls."],
+    ["kindBadge(k)", "engine.js:1565", "Kind badge with icon and word. 4 calls."],
+    ["kindGlyph(k)", "engine.js:1566", "Icon-only kind glyph. 2 calls."],
     ["ftBadge(t)", "wedge.js:278", "Frame-type badge, word and CSS mark, no icon. 10 calls."],
     ["typeStrip(list, ctx)", "wedge.js:488", "Counts by frame type as a strip. A `ctx` turns each entry into a filter button."],
     ["catBadge(c)", "engine.js:827", "Tool category badge with icon and word. 5 calls."],
