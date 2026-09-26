@@ -99,6 +99,8 @@ jobs:
             catch (e) { for (const x of errors) console.error("FAIL " + x); throw new Error(`${route}: no heading after 15 seconds`); }
             await page.waitForTimeout(120);
           }
+          // One flow that throws fails alone, and the next one still runs.
+          async function flow(name, fn) { try { await fn(); } catch (e) { ok(false, `${name}: ${e.message.split("\n")[0]}`); } }
           function watch(page, label) {
             page.on("pageerror", (e) => errors.push(`${label}: ${e.message}`));
             page.on("console", (m) => { if (m.type() === "error") errors.push(`${label}: console ${m.text()}`); });
@@ -139,72 +141,88 @@ jobs:
           const page = await browser.newPage({ viewport: SHELLS.desktop });
           watch(page, "flows");
           // Provisioning: a name only, the failed step with Retry, then an open workspace.
-          await open(page, "work?dialog=newworkspace", "&theme=dark");
-          ok((await page.$$(".dlg input")).length === 1, "provision: the first step asks for more than a name");
-          await page.fill("#nws-name", "Payments ops");
-          await page.click('[data-act="nws-go"]');
-          await page.waitForSelector('[data-act="nws-retry"]', { timeout: 15000 });
-          ok(/Apply the settings/.test(await page.innerText(".pv-step.st-failed")), "provision: the failed step is not Apply the settings");
-          await page.click('[data-act="nws-retry"]');
-          await page.waitForSelector('[data-act="nws-open"]', { timeout: 15000 });
-          ok(/a-intel\/oxagen-payments-ops/.test(await page.innerText(".dlg")), "provision: the steering repo is not a-intel/oxagen-payments-ops");
+          await flow("provision", async () => {
+            await open(page, "work?dialog=newworkspace", "&theme=dark");
+            ok((await page.$$(".dlg input")).length === 1, "provision: the first step asks for more than a name");
+            await page.fill("#nws-name", "Payments ops");
+            await page.click('[data-act="nws-go"]');
+            await page.waitForSelector('[data-act="nws-retry"]', { timeout: 15000 });
+            ok(/Apply the settings/.test(await page.innerText(".pv-step.st-failed")), "provision: the failed step is not Apply the settings");
+            await page.click('[data-act="nws-retry"]');
+            await page.waitForSelector('[data-act="nws-open"]', { timeout: 15000 });
+            ok(/a-intel\/oxagen-payments-ops/.test(await page.innerText(".dlg")), "provision: the steering repo is not a-intel/oxagen-payments-ops");
+          });
           // Health: the banner on every page, Repair settings for an admin, and none for a member.
-          for (const area of ["work", "sessions", "agents", "steering", "servers", "spend"]) {
-            await open(page, `${area}?health=drifted`, "&theme=dark");
-            ok(await page.$(".health-b"), `health: no banner on ${area}`);
-          }
-          ok(await page.$('.health-b [data-act="repair"]'), "health: an admin sees no Repair settings");
-          await page.click('.health-b [data-act="repair"]');
-          ok(!(await page.$(".health-b")), "health: Repair settings left the banner up");
-          await open(page, "work?health=drifted&as=amara", "&theme=dark");
-          ok(!(await page.$('.health-b [data-act="repair"]')), "health: a member sees Repair settings");
-          await open(page, "steering/pr-58?health=drifted", "&theme=dark");
-          ok(/Failed/.test(await page.innerText(".panel .ck")), "health: a drifted repo does not fail the open steering PR");
+          await flow("health", async () => {
+            for (const area of ["work", "sessions", "agents", "steering", "servers", "spend"]) {
+              await open(page, `${area}?health=drifted`, "&theme=dark");
+              ok(await page.$(".health-b"), `health: no banner on ${area}`);
+            }
+            ok(await page.$('.health-b [data-act="repair"]'), "health: an admin sees no Repair settings");
+            await page.click('.health-b [data-act="repair"]');
+            ok(!(await page.$(".health-b")), "health: Repair settings left the banner up");
+            await open(page, "work?health=drifted&as=amara", "&theme=dark");
+            ok(!(await page.$('.health-b [data-act="repair"]')), "health: a member sees Repair settings");
+            await open(page, "steering/pr-58?health=drifted", "&theme=dark");
+            ok(/Failed/.test(await page.innerText(".panel .ck")), "health: a drifted repo does not fail the open steering PR");
+          });
           // The budget check warns and passes against oxagen's default.
-          await open(page, "steering/pr-58", "&theme=dark");
-          ok(/only warns, so the check passes/.test(await page.innerText(".budget")), "budget: the warn-only default is not stated");
-          ok((await page.$$(".budget table.mini tbody tr")).length >= 2, "budget: no per-record token counts");
-          await page.click('[data-act="pr-approve"]');
-          await page.click('[data-act="pr-merge"]');
-          ok(/Position 2/.test(await page.innerText(".prside")), "queue: #58 is not second behind #62");
+          await flow("budget", async () => {
+            await open(page, "steering/pr-58", "&theme=dark");
+            ok(/only warns, so the check passes/.test(await page.innerText(".budget")), "budget: the warn-only default is not stated");
+            ok((await page.$$(".budget table.mini tbody tr")).length >= 2, "budget: no per-record token counts");
+            await page.click('[data-act="pr-approve"]');
+            await page.click('[data-act="pr-merge"]');
+            ok(/Position 2/.test(await page.innerText(".prside")), "queue: #58 is not second behind #62");
+          });
           // Memory PR: Drop one memory.
-          await open(page, "steering/pr-59", "&theme=dark");
-          ok((await page.$$(".mem .lst a.li")).length >= 8, "memory: the evidence sessions are missing");
-          await page.click('[data-act="mem-drop"]');
-          ok((await page.$$(".mem.dropped")).length === 1 && /Merge 3 memories/.test(await page.innerText(".shead")), "memory: Drop did not drop one memory");
+          await flow("memory", async () => {
+            await open(page, "steering/pr-59", "&theme=dark");
+            ok((await page.$$(".mem .lst a.li")).length >= 8, "memory: the evidence sessions are missing");
+            await page.click('[data-act="mem-drop"]');
+            ok((await page.$$(".mem.dropped")).length === 1 && /Merge 3 memories/.test(await page.innerText(".shead")), "memory: Drop did not drop one memory");
+          });
           // Linking a repository opens a steering PR on workspace.toml.
-          await open(page, "steering?tab=repo", "&theme=dark");
-          await page.click('[data-act="linkrepo"]');
-          await page.click('[data-act="linkrepo-go"]');
-          ok(/workspace\.toml/.test(await page.innerText("#app")) && /Link github\.com\/a-intel\/mobile/.test(await page.innerText("#app h1")), "link: no steering PR on workspace.toml");
+          await flow("link", async () => {
+            await open(page, "steering?tab=repo", "&theme=dark");
+            await page.click('[data-act="linkrepo"]');
+            await page.click('[data-act="linkrepo-go"]');
+            ok(/workspace\.toml/.test(await page.innerText("#app")) && /Link github\.com\/a-intel\/mobile/.test(await page.innerText("#app h1")), "link: no steering PR on workspace.toml");
+          });
           // Studio: import a tool, confirm its suggestion, and open the steering PR.
-          await open(page, "servers/stripe", "&theme=dark");
-          ok(/Review 2 changes/.test(await page.innerText(".shead")), "studio: stripe does not show its 2 staged changes");
-          await page.click('input[data-k="stripe.create_customer"]');
-          ok(await page.evaluate(() => !!stagedOp("stripe", "import", "create_customer")), "studio: ticking create_customer staged no import");
-          await page.evaluate(() => { S.srvTab = "changes"; render(); });
-          ok(await page.$('[data-act="changes-pr"][disabled]'), "studio: an unconfirmed suggestion does not block the steering PR");
-          await page.evaluate(() => openDrawer("tool", "stripe.create_customer"));
-          await page.click('[data-act="cls-confirm"]');
-          await page.evaluate(() => closeDialog());
-          await page.click('[data-act="changes-pr"]');
-          await page.waitForFunction(() => S.area === "steering" && /^pr-/.test(S.id), null, { timeout: 5000 });
-          ok(/stripe__create_customer/.test(await page.innerText(".tsd")), "studio: the steering PR does not list the imported tool");
+          await flow("studio", async () => {
+            await open(page, "servers/stripe", "&theme=dark");
+            ok(/Review 2 changes/.test(await page.innerText(".shead")), "studio: stripe does not show its 2 staged changes");
+            await page.click('input[data-k="stripe.create_customer"]');
+            ok(await page.evaluate(() => !!stagedOp("stripe", "import", "create_customer")), "studio: ticking create_customer staged no import");
+            await page.evaluate(() => { S.srvTab = "changes"; render(); });
+            ok(await page.$('[data-act="changes-pr"][disabled]'), "studio: an unconfirmed suggestion does not block the steering PR");
+            await page.evaluate(() => openDrawer("tool", "stripe.create_customer"));
+            await page.click('[data-act="cls-confirm"]');
+            await page.evaluate(() => closeDialog());
+            await page.click('[data-act="changes-pr"]');
+            await page.waitForFunction(() => S.area === "steering" && /^pr-/.test(S.id), null, { timeout: 5000 });
+            ok(/stripe__create_customer/.test(await page.innerText(".tsd")), "studio: the steering PR does not list the imported tool");
+          });
           // The off switch on a tool and on a server, with who and when.
-          await open(page, "servers/stripe?tool=list_charges", "&theme=dark");
-          await page.click('[data-act="tool-off"]');
-          ok(/Since .*Marcus Bell/.test(await page.innerText(".offrow")), "off: the tool does not say who turned it off and when");
-          await open(page, "servers/notion", "&theme=dark");
-          ok(/Priya Natarajan/.test(await page.innerText(".offb")), "off: the server does not say who turned it off");
-          await page.click('[data-act="srv-on"]');
-          ok(!(await page.$(".offb")), "off: Turn on left the server off");
+          await flow("off switch", async () => {
+            await open(page, "servers/stripe?tool=list_charges", "&theme=dark");
+            await page.click('[data-act="tool-off"]');
+            ok(/Since .*Marcus Bell/.test(await page.innerText(".offrow")), "off: the tool does not say who turned it off and when");
+            await open(page, "servers/notion", "&theme=dark");
+            ok(/Priya Natarajan/.test(await page.innerText(".offb")), "off: the server does not say who turned it off");
+            await page.click('[data-act="srv-on"]');
+            ok(!(await page.$(".offb")), "off: Turn on left the server off");
+          });
           // Add server: every source ends in a discovery result.
-          for (const src of ["url", "registry", "local", "definition"]) {
-            await open(page, "servers?dialog=addserver", "&theme=dark");
-            await page.click(`[data-act="as-src"][data-src="${src}"]`);
-            await page.click('[data-act="as-discover"]');
-            ok(/Discovery result/.test(await page.innerText(".dlg-h")) && (await page.$$(".dlg tbody tr")).length > 3, `add server: ${src} does not end in a discovery result`);
-          }
+          await flow("add server", async () => {
+            for (const src of ["url", "registry", "local", "definition"]) {
+              await open(page, "servers?dialog=addserver", "&theme=dark");
+              await page.click(`[data-act="as-src"][data-src="${src}"]`);
+              await page.click('[data-act="as-discover"]');
+              ok(/Discovery result/.test(await page.innerText(".dlg-h")) && (await page.$$(".dlg tbody tr")).length > 3, `add server: ${src} does not end in a discovery result`);
+            }
+          });
           await browser.close();
           for (const e of errors) { failures++; console.error("FAIL " + e); }
           console.log(`${failures ? "FAIL" : "ok  "} steering repo and MCP Studio walk: ${passes} checks passed, ${failures} failed`);

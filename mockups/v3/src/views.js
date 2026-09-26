@@ -746,28 +746,28 @@ DIALOGS.newworkspace = function (arg, d) {
   var steps = STEERING.provision.steps;
   if (d.q && !d.init) {
     d.init = true;
-    if (d.q.name) d.name = decodeURIComponent(d.q.name);
-    if (d.q.prov === "failed") { d.name = d.name || "Payments ops"; d.phase = "run"; d.at = 3; d.failed = true; }
-    if (d.q.prov === "done") { d.name = d.name || "Payments ops"; d.phase = "run"; d.at = steps.length; d.retried = true; }
+    if (d.q.name) d.ws = decodeURIComponent(d.q.name);
+    if (d.q.prov === "failed") { d.ws = d.ws || "Payments ops"; d.phase = "run"; d.at = 3; d.failed = true; }
+    if (d.q.prov === "done") { d.ws = d.ws || "Payments ops"; d.phase = "run"; d.at = steps.length; d.retried = true; }
   }
   if (!d.phase) {
     return { title: "New workspace", sub: "Type a name. oxagen creates the workspace and its steering repo.",
-      body: '<div class="field"><label for="nws-name">Name</label><input id="nws-name" autofocus data-input="nws-name" value="' + h(d.name || "") + '" placeholder="Payments ops"><div class="hint">Its steering repo is <code>' + h(steeringRepoFor(d.name || "Payments ops")) + "</code>, a private repository in " + h(ORG.slug) + ".</div></div>",
+      body: '<div class="field"><label for="nws-name">Name</label><input id="nws-name" autofocus data-input="nws-name" value="' + h(d.ws || "") + '" placeholder="Payments ops"><div class="hint">Its steering repo is <code>' + h(steeringRepoFor(d.ws || "Payments ops")) + "</code>, a private repository in " + h(ORG.slug) + ".</div></div>",
       foot: '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="nws-go">Create workspace</button>' };
   }
-  var repo = steeringRepoFor(d.name), done = d.at >= steps.length;
+  var repo = steeringRepoFor(d.ws), done = d.at >= steps.length;
   var list = steps.map(function (s, i) {
     var st = i < d.at ? "done" : i === d.at ? (d.failed ? "failed" : "running") : "wait";
     var ic = st === "done" ? g("check", 13) : st === "failed" ? g("x", 13) : st === "running" ? '<span class="spin"></span>' : String(i + 1);
     return '<div class="pv-step st-' + st + '"><span class="pv-i">' + ic + '</span><div class="grow"><b>' + h(s.t) + '</b><span class="sub">' + (s.k === "create" ? "<code>" + h(repo) + "</code>, private" : md(s.d)) + "</span>" +
       (st === "failed" ? '<div class="warn small">' + md(s.error) + " " + h(s.fix) + "</div>" : "") + "</div></div>";
   }).join("");
-  return { title: done ? d.name + " is ready" : d.failed ? "Setting up " + d.name + " stopped" : "Setting up " + d.name, sub: done ? "Its steering repo is published at version 1." : "The target is 15 seconds from Create to an open workspace.",
+  return { title: done ? d.ws + " is ready" : d.failed ? "Setting up " + d.ws + " stopped" : "Setting up " + d.ws, sub: done ? "Its steering repo is published at version 1." : "The target is 15 seconds from Create to an open workspace.",
     body: '<div class="pv">' + list + "</div>",
     foot: d.failed ? '<button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="nws-retry">Retry</button>' :
       done ? '<button class="btn primary" data-act="nws-open">Open the workspace</button>' : '<span class="grow">Step ' + (d.at + 1) + " of " + steps.length + '</span><button class="btn" data-act="close">Run in the background</button>' };
 };
-ACTS["nws-name"] = function (el) { S.dialog.name = el.value; var hint = el.parentNode.querySelector(".hint code"); if (hint) hint.textContent = steeringRepoFor(el.value || "Payments ops"); };
+ACTS["nws-name"] = function (el) { S.dialog.ws = el.value; var hint = el.parentNode.querySelector(".hint code"); if (hint) hint.textContent = steeringRepoFor(el.value || "Payments ops"); };
 function provTick(d) {
   setTimeout(function () {
     if (S.dialog !== d || d.failed) return;
@@ -777,9 +777,9 @@ function provTick(d) {
     if (!d.failed && d.at < STEERING.provision.steps.length) provTick(d);
   }, 650);
 }
-ACTS["nws-go"] = function () { var d = S.dialog; d.name = (d.name || "").trim() || "Payments ops"; d.phase = "run"; d.at = 0; renderLayer(); provTick(d); };
+ACTS["nws-go"] = function () { var d = S.dialog; d.ws = (d.ws || "").trim() || "Payments ops"; d.phase = "run"; d.at = 0; renderLayer(); provTick(d); };
 ACTS["nws-retry"] = function () { var d = S.dialog; d.failed = false; d.retried = true; renderLayer(); provTick(d); };
-ACTS["nws-open"] = function () { var name = S.dialog.name; closeDialog(); toast(name + " is ready. Workspaces other than Core platform are not in this mockup."); };
+ACTS["nws-open"] = function () { var name = S.dialog.ws; closeDialog(); toast(name + " is ready. Workspaces other than Core platform are not in this mockup."); };
 
 /* ============================== MCP servers ==============================
    MCP Studio (mcp-studio-spec.html). The list, Add server with four sources, and one page per server
