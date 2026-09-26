@@ -30,293 +30,521 @@
    "status": "ok",
    "added": "2026-08-14",
    "by": "marcus",
+   "source": {
+    "type": "registry",
+    "registry": "registry.modelcontextprotocol.io",
+    "server": "io.github.github/github-mcp-server",
+    "version": "0.14.0",
+    "url": "https://api.githubcopilot.com/mcp",
+    "transport": "http"
+   },
+   "authcfg": {
+    "mode": "service",
+    "scheme": "oauth",
+    "credential": "oxagen:credential/github-app"
+   },
+   "exposure": {
+    "mode": "direct",
+    "definition_budget": 8000
+   },
+   "sync": {
+    "schedule": "daily",
+    "last": "2026-09-25T03:00:00"
+   },
    "tools": [
     {
      "n": "get_file_contents",
      "d": "Read a file or directory from a repository",
-     "mode": "allow",
+     "state": "imported",
      "tok": 280,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 3
     },
     {
      "n": "list_branches",
      "d": "List branches",
-     "mode": "allow",
+     "state": "imported",
      "tok": 210,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "list_commits",
      "d": "List commits on a branch",
-     "mode": "allow",
+     "state": "imported",
      "tok": 250,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "get_commit",
      "d": "Get one commit with its diff",
-     "mode": "allow",
+     "state": "imported",
      "tok": 230,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "compare_commits",
      "d": "Compare two refs",
-     "mode": "allow",
+     "state": "imported",
      "tok": 240,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "search_code",
      "d": "Search code across repositories",
-     "mode": "allow",
+     "state": "imported",
      "tok": 310,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "list_issues",
      "d": "List issues with filters",
-     "mode": "allow",
+     "state": "imported",
      "tok": 330,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "get_issue",
      "d": "Get one issue",
-     "mode": "allow",
+     "state": "imported",
      "tok": 200,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 2
     },
     {
      "n": "list_pull_requests",
      "d": "List pull requests with filters",
-     "mode": "allow",
+     "state": "imported",
      "tok": 320,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "get_pull_request",
      "d": "Get one pull request",
-     "mode": "allow",
+     "state": "imported",
      "tok": 210,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "get_pull_request_diff",
      "d": "Get a pull request's diff",
-     "mode": "allow",
+     "state": "imported",
      "tok": 220,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "get_pull_request_files",
      "d": "List the files a pull request changes",
-     "mode": "allow",
+     "state": "imported",
      "tok": 230,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "list_releases",
      "d": "List releases",
-     "mode": "allow",
+     "state": "imported",
      "tok": 200,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "list_workflow_runs",
      "d": "List workflow runs",
-     "mode": "allow",
+     "state": "imported",
      "tok": 300,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "get_workflow_run",
      "d": "Get one workflow run",
-     "mode": "allow",
+     "state": "imported",
      "tok": 210,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "get_job_logs",
      "d": "Read a job's logs",
-     "mode": "allow",
+     "state": "imported",
      "tok": 260,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "add_issue_comment",
      "d": "Comment on an issue or pull request",
-     "mode": "allow",
+     "state": "imported",
      "tok": 250,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "create_pull_request",
      "d": "Open a pull request",
-     "mode": "allow",
+     "state": "imported",
      "tok": 330,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 2
     },
     {
      "n": "update_issue",
      "d": "Change an issue's title, labels or state",
-     "mode": "allow",
+     "state": "imported",
      "tok": 320,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "create_pull_request_review",
      "d": "Leave a review on a pull request",
-     "mode": "allow",
+     "state": "imported",
      "tok": 360,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "create_release",
      "d": "Create a release",
-     "mode": "ask",
+     "state": "imported",
      "tok": 340,
-     "write": true
+     "write": true,
+     "risk": "high",
+     "side_effect": "write",
+     "impacts": [
+      "alters_production"
+     ],
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 2
     },
     {
      "n": "merge_pull_request",
      "d": "Merge a pull request",
-     "mode": "ask",
+     "state": "imported",
      "tok": 300,
-     "write": true
+     "write": true,
+     "risk": "high",
+     "side_effect": "write",
+     "impacts": [
+      "alters_production"
+     ],
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1,
+     "off": {
+      "by": "marcus",
+      "at": "2026-09-25T09:12:00",
+      "why": "A merge landed on a-intel/cli without a review."
+     }
     },
     {
      "n": "rerun_failed_jobs",
      "d": "Re-run the failed jobs of a workflow run",
-     "mode": "ask",
+     "state": "imported",
      "tok": 220,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "create_or_update_file",
      "d": "Write a file through the API",
-     "mode": "off",
+     "state": "available",
      "tok": 380,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "delete_file",
      "d": "Delete a file through the API",
-     "mode": "off",
+     "state": "available",
      "tok": 260,
-     "write": true
+     "write": true,
+     "risk": "high",
+     "side_effect": "irreversible",
+     "impacts": [
+      "destroys_data"
+     ],
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "push_files",
      "d": "Push several files in one commit",
-     "mode": "off",
+     "state": "available",
      "tok": 360,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "create_branch",
      "d": "Create a branch through the API",
-     "mode": "off",
+     "state": "available",
      "tok": 220,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "create_issue",
      "d": "Open an issue",
-     "mode": "off",
+     "state": "available",
      "tok": 330,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "update_pull_request",
      "d": "Change a pull request",
-     "mode": "off",
+     "state": "available",
      "tok": 340,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "request_copilot_review",
      "d": "Ask Copilot to review",
-     "mode": "off",
+     "state": "available",
      "tok": 180,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "get_latest_release",
      "d": "Get the latest release",
-     "mode": "off",
+     "state": "available",
      "tok": 170,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "list_tags",
      "d": "List tags",
-     "mode": "off",
+     "state": "available",
      "tok": 190,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "list_notifications",
      "d": "List notifications",
-     "mode": "off",
+     "state": "available",
      "tok": 240,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "search_users",
      "d": "Search users",
-     "mode": "off",
+     "state": "available",
      "tok": 220,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "search_repositories",
      "d": "Search repositories",
-     "mode": "off",
+     "state": "available",
      "tok": 250,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "get_me",
      "d": "Get the signed-in account",
-     "mode": "off",
+     "state": "available",
      "tok": 120,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "list_code_scanning_alerts",
      "d": "List code scanning alerts",
-     "mode": "off",
+     "state": "available",
      "tok": 290,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "list_secret_scanning_alerts",
      "d": "List secret scanning alerts",
-     "mode": "off",
+     "state": "available",
      "tok": 280,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "fork_repository",
      "d": "Fork a repository",
-     "mode": "off",
+     "state": "available",
      "tok": 200,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "create_repository",
      "d": "Create a repository",
-     "mode": "off",
+     "state": "available",
      "tok": 260,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "impacts": [
+      "changes_access"
+     ],
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "delete_branch",
      "d": "Delete a branch",
-     "mode": "off",
+     "state": "available",
      "tok": 180,
-     "write": true
+     "write": true,
+     "risk": "high",
+     "side_effect": "irreversible",
+     "impacts": [
+      "destroys_data"
+     ],
+     "egress": "third_party",
+     "confirmed": false
     }
    ]
   },
@@ -331,160 +559,275 @@
    "status": "ok",
    "added": "2026-08-20",
    "by": "marcus",
+   "source": {
+    "type": "remote",
+    "url": "https://mcp.linear.app/sse",
+    "transport": "sse"
+   },
+   "authcfg": {
+    "mode": "service",
+    "scheme": "oauth",
+    "credential": "oxagen:credential/linear"
+   },
+   "exposure": {
+    "mode": "direct",
+    "definition_budget": 8000
+   },
+   "sync": {
+    "schedule": "daily",
+    "last": "2026-09-25T03:00:00"
+   },
    "tools": [
     {
      "n": "get_issue",
      "d": "Get one issue",
-     "mode": "allow",
+     "state": "imported",
      "tok": 330,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 2
     },
     {
      "n": "list_issues",
      "d": "List issues with filters",
-     "mode": "allow",
+     "state": "imported",
      "tok": 420,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "search_issues",
      "d": "Search issues",
-     "mode": "allow",
+     "state": "imported",
      "tok": 360,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "list_labels",
      "d": "List labels",
-     "mode": "allow",
+     "state": "imported",
      "tok": 240,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "list_issue_statuses",
      "d": "List a team's statuses",
-     "mode": "allow",
+     "state": "imported",
      "tok": 250,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "list_cycles",
      "d": "List cycles",
-     "mode": "allow",
+     "state": "imported",
      "tok": 260,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "get_project",
      "d": "Get one project",
-     "mode": "allow",
+     "state": "imported",
      "tok": 300,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "create_comment",
      "d": "Comment on an issue",
-     "mode": "allow",
+     "state": "imported",
      "tok": 310,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "update_issue",
      "d": "Change an issue",
-     "mode": "allow",
+     "state": "imported",
      "tok": 530,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "create_issue",
      "d": "Open an issue",
-     "mode": "off",
+     "state": "available",
      "tok": 560,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "list_comments",
      "d": "List comments",
-     "mode": "off",
+     "state": "available",
      "tok": 260,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "list_projects",
      "d": "List projects",
-     "mode": "off",
+     "state": "available",
      "tok": 280,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "list_teams",
      "d": "List teams",
-     "mode": "off",
+     "state": "available",
      "tok": 200,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "get_team",
      "d": "Get one team",
-     "mode": "off",
+     "state": "available",
      "tok": 190,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "list_users",
      "d": "List users",
-     "mode": "off",
+     "state": "available",
      "tok": 210,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "get_user",
      "d": "Get one user",
-     "mode": "off",
+     "state": "available",
      "tok": 180,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "get_issue_status",
      "d": "Get one status",
-     "mode": "off",
+     "state": "available",
      "tok": 190,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "create_project",
      "d": "Create a project",
-     "mode": "off",
+     "state": "available",
      "tok": 420,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "update_project",
      "d": "Change a project",
-     "mode": "off",
+     "state": "available",
      "tok": 430,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "list_documents",
      "d": "List documents",
-     "mode": "off",
+     "state": "available",
      "tok": 240,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "get_document",
      "d": "Get one document",
-     "mode": "off",
+     "state": "available",
      "tok": 210,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "create_document",
      "d": "Create a document",
-     "mode": "off",
+     "state": "available",
      "tok": 380,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     }
    ]
   },
@@ -500,90 +843,162 @@
    "status": "ok",
    "added": "2026-09-03",
    "by": "marcus",
+   "source": {
+    "type": "remote",
+    "url": "https://mcp.sentry.dev/mcp",
+    "transport": "http"
+   },
+   "authcfg": {
+    "mode": "service",
+    "scheme": "bearer",
+    "credential": "oxagen:credential/sentry"
+   },
+   "exposure": {
+    "mode": "direct",
+    "definition_budget": 8000
+   },
+   "sync": {
+    "schedule": "daily",
+    "last": "2026-09-25T03:00:00"
+   },
    "tools": [
     {
      "n": "search_issues",
      "d": "Search issues",
-     "mode": "allow",
+     "state": "imported",
      "tok": 390,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "get_issue_details",
      "d": "Get one issue with its latest event",
-     "mode": "allow",
+     "state": "imported",
      "tok": 340,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "get_event",
      "d": "Get one event",
-     "mode": "allow",
+     "state": "imported",
      "tok": 300,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "search_events",
      "d": "Search events",
-     "mode": "allow",
+     "state": "imported",
      "tok": 420,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "get_trace",
      "d": "Get one trace",
-     "mode": "allow",
+     "state": "imported",
      "tok": 330,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "list_releases",
      "d": "List releases",
-     "mode": "allow",
+     "state": "imported",
      "tok": 320,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "update_issue",
      "d": "Resolve, ignore or assign an issue",
-     "mode": "off",
+     "state": "available",
      "tok": 360,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "create_comment",
      "d": "Comment on an issue",
-     "mode": "off",
+     "state": "available",
      "tok": 280,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "list_projects",
      "d": "List projects",
-     "mode": "off",
+     "state": "available",
      "tok": 210,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "list_organizations",
      "d": "List organizations",
-     "mode": "off",
+     "state": "available",
      "tok": 170,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "get_release",
      "d": "Get one release",
-     "mode": "off",
+     "state": "available",
      "tok": 220,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     },
     {
      "n": "analyze_issue_with_seer",
      "d": "Ask Seer for a root cause",
-     "mode": "off",
+     "state": "available",
      "tok": 330,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false
     }
    ]
   },
@@ -599,27 +1014,61 @@
    "status": "ok",
    "added": "2026-09-10",
    "by": "amara",
+   "source": {
+    "type": "remote",
+    "url": "http://pg-mcp.a-intel.internal:8080/mcp",
+    "transport": "http",
+    "network": "relay:a-intel-east"
+   },
+   "authcfg": {
+    "mode": "service",
+    "scheme": "bearer",
+    "credential": "oxagen:credential/pg-replica-agent-ro"
+   },
+   "exposure": {
+    "mode": "direct",
+    "definition_budget": 8000
+   },
+   "sync": {
+    "schedule": "daily",
+    "last": "2026-09-25T03:00:00"
+   },
    "tools": [
     {
      "n": "query",
      "d": "Run a read-only SQL query on the replica",
-     "mode": "allow",
+     "state": "imported",
      "tok": 340,
-     "write": false
+     "write": false,
+     "risk": "medium",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 2
     },
     {
      "n": "list_tables",
      "d": "List tables",
-     "mode": "allow",
+     "state": "imported",
      "tok": 200,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "describe_table",
      "d": "Describe a table's columns",
-     "mode": "allow",
+     "state": "imported",
      "tok": 240,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 1
     }
    ]
   },
@@ -634,80 +1083,1741 @@
    "status": "ok",
    "added": "2026-08-14",
    "by": "marcus",
+   "source": {
+    "type": "builtin"
+   },
+   "authcfg": {
+    "mode": "none"
+   },
    "tools": [
     {
      "n": "report_status",
      "d": "Report progress, doubts and readiness",
-     "mode": "allow",
+     "state": "imported",
      "tok": 260,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "ask_person",
      "d": "Ask a person a question and wait",
-     "mode": "allow",
+     "state": "imported",
      "tok": 240,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "remember",
      "d": "Suggest a memory for steering",
-     "mode": "allow",
+     "state": "imported",
      "tok": 210,
-     "write": true
+     "write": true,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 1
     },
     {
      "n": "get_work_item",
      "d": "Read the work item this session is for",
-     "mode": "allow",
+     "state": "imported",
      "tok": 190,
-     "write": false
+     "write": false,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 1
+    }
+   ]
+  },
+  {
+   "id": "stripe",
+   "name": "Stripe",
+   "logo": null,
+   "letter": "S",
+   "upstream": "mcp.stripe.com",
+   "auth": "Service credential held by oxagen",
+   "authKind": "key",
+   "keyNote": "stripe-live, added by Marcus Bell on 2026-09-19.",
+   "status": "ok",
+   "added": "2026-09-19",
+   "by": "marcus",
+   "description": "Payments, refunds, and invoices in the a-intel Stripe account.",
+   "source": {
+    "type": "remote",
+    "url": "https://mcp.stripe.com",
+    "transport": "http",
+    "version": "2026.09.1"
+   },
+   "authcfg": {
+    "mode": "service",
+    "scheme": "oauth"
+   },
+   "environments": [
+    {
+     "name": "test",
+     "sandbox": true,
+     "credential": "oxagen:credential/stripe-test"
+    },
+    {
+     "name": "live",
+     "credential": "oxagen:credential/stripe-live"
+    }
+   ],
+   "exposure": {
+    "mode": "direct",
+    "definition_budget": 8000
+   },
+   "sync": {
+    "schedule": "daily",
+    "last": "2026-09-26T03:00:00"
+   },
+   "syncPr": 62,
+   "pending": [
+    {
+     "op": "import",
+     "tool": "list_disputes"
+    },
+    {
+     "op": "classify",
+     "tool": "list_disputes",
+     "confirmed": true
+    },
+    {
+     "op": "describe",
+     "tool": "list_charges",
+     "text": "List one customer's charges, newest first. Amounts are in cents."
+    }
+   ],
+   "tryit": {
+    "tool": "list_charges",
+    "env": "test",
+    "args": "{\n  \"customer\": \"cus_81\",\n  \"limit\": 2\n}",
+    "upstream": "POST https://mcp.stripe.com\n{\"jsonrpc\":\"2.0\",\"id\":7,\"method\":\"tools/call\",\n \"params\":{\"name\":\"list_charges\",\"arguments\":{\"customer\":\"cus_81\",\"limit\":2}}}",
+    "raw": "{\n  \"object\": \"list\",\n  \"data\": [\n    {\"id\": \"ch_3P9\", \"amount\": 4000, \"currency\": \"usd\", \"status\": \"succeeded\", \"customer\": \"cus_81\",\n     \"receipt_url\": \"https://pay.stripe.com/receipts/…\", \"billing_details\": {…}, \"outcome\": {…}},\n    {\"id\": \"ch_3P2\", \"amount\": 12900, \"currency\": \"usd\", \"status\": \"succeeded\", \"customer\": \"cus_81\",\n     \"receipt_url\": \"https://pay.stripe.com/receipts/…\", \"billing_details\": {…}, \"outcome\": {…}}\n  ],\n  \"has_more\": true\n}",
+    "shaped": "{\n  \"data\": [\n    {\"id\": \"ch_3P9\", \"amount\": 4000, \"status\": \"succeeded\"},\n    {\"id\": \"ch_3P2\", \"amount\": 12900, \"status\": \"succeeded\"}\n  ],\n  \"has_more\": true\n}",
+    "bytes": [
+     2184,
+     196
+    ],
+    "decision": "Allowed. No policy asks a person for a read."
+   },
+   "tools": [
+    {
+     "n": "list_charges",
+     "d": "List charges, newest first.",
+     "state": "imported",
+     "tok": 212,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 2,
+     "hint": {
+      "readOnlyHint": true
+     },
+     "select": [
+      "data[].id",
+      "data[].amount",
+      "data[].status",
+      "has_more"
+     ],
+     "inputs": [
+      {
+       "name": "customer",
+       "type": "string"
+      },
+      {
+       "name": "limit",
+       "type": "integer"
+      },
+      {
+       "name": "starting_after",
+       "type": "string"
+      }
+     ]
+    },
+    {
+     "n": "create_refund",
+     "d": "Create a refund for a charge.",
+     "state": "imported",
+     "tok": 248,
+     "risk": "high",
+     "side_effect": "irreversible",
+     "egress": "third_party",
+     "impacts": [
+      "moves_money"
+     ],
+     "confirmed": true,
+     "version": 3,
+     "desc": "Refund part or all of a captured charge. The amount is in cents.",
+     "hint": {
+      "destructiveHint": true
+     },
+     "inputs": [
+      {
+       "name": "charge",
+       "type": "string",
+       "required": true
+      },
+      {
+       "name": "amount",
+       "type": "integer"
+      },
+      {
+       "name": "reason",
+       "type": "string",
+       "enum": [
+        "duplicate",
+        "fraudulent",
+        "requested_by_customer"
+       ]
+      }
+     ],
+     "returns": [
+      "id",
+      "amount",
+      "status"
+     ],
+     "upstreamNew": "Create a refund for a charge. Always refund the full amount.",
+     "feedback": {
+      "reflections": [
+       {
+        "text": "2 sessions sent dollars, not cents, before this description.",
+        "sessions": 2,
+        "at": "2026-09-19"
+       }
+      ],
+      "rejections": 3,
+      "errors": 1,
+      "retries": 2
+     }
+    },
+    {
+     "n": "create_customer",
+     "d": "Create a customer.",
+     "state": "available",
+     "tok": 301,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": false
+     }
+    },
+    {
+     "n": "list_disputes",
+     "d": "List disputes, newest first.",
+     "state": "available",
+     "tok": 188,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "delete_customer",
+     "d": "Delete a customer and cancel its subscriptions.",
+     "state": "available",
+     "tok": 131,
+     "risk": "high",
+     "side_effect": "irreversible",
+     "egress": "third_party",
+     "impacts": [
+      "destroys_data"
+     ],
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": true
+     }
+    },
+    {
+     "n": "retrieve_balance",
+     "d": "Retrieve the account balance.",
+     "state": "available",
+     "tok": 142,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "list_customers",
+     "d": "List customers.",
+     "state": "available",
+     "tok": 196,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "retrieve_customer",
+     "d": "Retrieve one customer.",
+     "state": "available",
+     "tok": 150,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "update_customer",
+     "d": "Update a customer's details.",
+     "state": "available",
+     "tok": 288,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": false
+     }
+    },
+    {
+     "n": "list_invoices",
+     "d": "List invoices.",
+     "state": "available",
+     "tok": 204,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "create_invoice",
+     "d": "Create a draft invoice.",
+     "state": "available",
+     "tok": 276,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": false
+     }
+    },
+    {
+     "n": "finalize_invoice",
+     "d": "Finalize a draft invoice so it can be paid.",
+     "state": "available",
+     "tok": 164,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": false
+     }
+    },
+    {
+     "n": "void_invoice",
+     "d": "Void a finalized invoice.",
+     "state": "available",
+     "tok": 139,
+     "risk": "high",
+     "side_effect": "irreversible",
+     "egress": "third_party",
+     "impacts": [
+      "moves_money"
+     ],
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": true
+     }
+    },
+    {
+     "n": "list_payment_intents",
+     "d": "List payment intents.",
+     "state": "available",
+     "tok": 210,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "create_payment_intent",
+     "d": "Create a payment intent.",
+     "state": "available",
+     "tok": 318,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "impacts": [
+      "moves_money"
+     ],
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": false
+     }
+    },
+    {
+     "n": "cancel_payment_intent",
+     "d": "Cancel a payment intent.",
+     "state": "available",
+     "tok": 152,
+     "risk": "high",
+     "side_effect": "irreversible",
+     "egress": "third_party",
+     "impacts": [
+      "moves_money"
+     ],
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": true
+     }
+    },
+    {
+     "n": "list_subscriptions",
+     "d": "List subscriptions.",
+     "state": "available",
+     "tok": 214,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "cancel_subscription",
+     "d": "Cancel a subscription at once or at period end.",
+     "state": "available",
+     "tok": 187,
+     "risk": "high",
+     "side_effect": "irreversible",
+     "egress": "third_party",
+     "impacts": [
+      "changes_entitlement"
+     ],
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": true
+     }
+    },
+    {
+     "n": "list_products",
+     "d": "List products.",
+     "state": "available",
+     "tok": 176,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "create_product",
+     "d": "Create a product.",
+     "state": "available",
+     "tok": 233,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": false
+     }
+    },
+    {
+     "n": "list_prices",
+     "d": "List prices.",
+     "state": "available",
+     "tok": 181,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "create_payment_link",
+     "d": "Create a payment link for a price.",
+     "state": "available",
+     "tok": 244,
+     "risk": "high",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false
+    },
+    {
+     "n": "search_documentation",
+     "d": "Search the Stripe documentation.",
+     "state": "available",
+     "tok": 162,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "readOnlyHint": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "billing",
+   "name": "Billing API",
+   "logo": null,
+   "letter": "B",
+   "upstream": "openapi/billing.yaml",
+   "auth": "Operator OAuth through billing-oauth-client",
+   "authKind": "oauth",
+   "keyNote": "Each operator connects once. A call uses the operator's token.",
+   "status": "ok",
+   "added": "2026-09-12",
+   "by": "dana",
+   "description": "Charges, refunds, and invoices in the a-intel billing service.",
+   "source": {
+    "type": "openapi",
+    "from": "repository",
+    "repo": "github.com/a-intel/billing-service",
+    "path": "openapi/billing.yaml",
+    "ref": "main",
+    "commit": "4be91d2",
+    "version": "2.4.0"
+   },
+   "authcfg": {
+    "mode": "operator-oauth",
+    "scheme": "oauth",
+    "credential": "oxagen:credential/billing-oauth-client"
+   },
+   "environments": [
+    {
+     "name": "sandbox",
+     "sandbox": true,
+     "url": "https://billing-sandbox.a-intel.com/v2"
+    },
+    {
+     "name": "production",
+     "url": "https://billing.internal.a-intel.com/v2",
+     "network": "relay:a-intel-east"
+    }
+   ],
+   "exposure": {
+    "mode": "direct",
+    "definition_budget": 8000
+   },
+   "sync": {
+    "schedule": "on-change",
+    "last": "2026-09-25T10:14:00"
+   },
+   "syncPr": 61,
+   "notTools": [
+    {
+     "n": "refund.updated",
+     "why": "An OpenAPI webhook. Webhooks are listed and never become tools."
+    },
+    {
+     "n": "invoice.paid",
+     "why": "An OpenAPI webhook. Webhooks are listed and never become tools."
+    }
+   ],
+   "tests": {
+    "calls": 3,
+    "selection": 2,
+    "lastSelection": {
+     "right": 2,
+     "of": 2,
+     "at": "2026-09-20"
+    }
+   },
+   "operators": {
+    "marcus": null,
+    "priya": "2026-09-19",
+    "amara": "2026-09-22",
+    "dana": "2026-09-12"
+   },
+   "tryit": {
+    "tool": "list_charges",
+    "env": "sandbox",
+    "args": "{\n  \"customer\": \"cus_81\",\n  \"limit\": 2\n}",
+    "upstream": "GET https://billing-sandbox.a-intel.com/v2/charges?customer=cus_81&limit=2\nAuthorization: Bearer (your billing token)\nX-Request-Source: oxagen",
+    "raw": "{\n  \"data\": [\n    {\"id\": \"ch_3P9\", \"amount\": 4000, \"currency\": \"usd\", \"status\": \"succeeded\", \"fee\": 146,\n     \"created\": 1758792000, \"customer\": \"cus_81\", \"metadata\": {\"order\": \"o_5521\"}},\n    {\"id\": \"ch_3P2\", \"amount\": 12900, \"currency\": \"usd\", \"status\": \"succeeded\", \"fee\": 404,\n     \"created\": 1758446400, \"customer\": \"cus_81\", \"metadata\": {\"order\": \"o_5488\"}}\n  ],\n  \"has_more\": true,\n  \"next_cursor\": \"ch_3P2\"\n}",
+    "shaped": "{\n  \"data\": [\n    {\"id\": \"ch_3P9\", \"amount\": 4000, \"status\": \"succeeded\", \"created\": 1758792000},\n    {\"id\": \"ch_3P2\", \"amount\": 12900, \"status\": \"succeeded\", \"created\": 1758446400}\n  ],\n  \"has_more\": true\n}",
+    "bytes": [
+     512,
+     214
+    ],
+    "decision": "Allowed. No policy asks a person for a read."
+   },
+   "tools": [
+    {
+     "n": "list_charges",
+     "d": "List charges for a customer.",
+     "state": "imported",
+     "tok": 236,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 2,
+     "operation": "listCharges",
+     "desc": "List one customer's charges, newest first. Amounts are in cents.",
+     "paginate": "cursor",
+     "method": "GET /charges",
+     "select": [
+      "data[].id",
+      "data[].amount",
+      "data[].status",
+      "data[].created",
+      "has_more"
+     ],
+     "sync": {
+      "to": 3,
+      "breaking": false,
+      "note": "Response field data[].fee added. It is not in select, so the model does not receive it."
+     }
+    },
+    {
+     "n": "get_charge",
+     "d": "Get one charge.",
+     "state": "imported",
+     "tok": 172,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 1,
+     "operation": "getCharge",
+     "method": "GET /charges/{id}"
+    },
+    {
+     "n": "create_refund",
+     "d": "Create a refund.",
+     "state": "imported",
+     "tok": 264,
+     "risk": "high",
+     "side_effect": "irreversible",
+     "egress": "org_tenant",
+     "impacts": [
+      "moves_money"
+     ],
+     "confirmed": true,
+     "version": 3,
+     "operation": "createRefund",
+     "method": "POST /refunds",
+     "desc": "Refund part or all of a captured charge. amount is in cents and defaults to the whole charge.",
+     "hide": [
+      "X-Request-Source"
+     ],
+     "fixed": {
+      "X-Request-Source": "oxagen"
+     },
+     "idempotency_header": "Idempotency-Key",
+     "inputs": [
+      {
+       "name": "charge_id",
+       "type": "string",
+       "required": true,
+       "note": "The charge to refund."
+      },
+      {
+       "name": "amount",
+       "type": "integer",
+       "note": "minimum 1"
+      },
+      {
+       "name": "reason",
+       "type": "string",
+       "enum": [
+        "duplicate",
+        "fraudulent",
+        "requested_by_customer"
+       ]
+      },
+      {
+       "name": "X-Request-Source",
+       "type": "header",
+       "hidden": true,
+       "fixed": "oxagen"
+      }
+     ],
+     "returns": [
+      "id",
+      "amount",
+      "status"
+     ],
+     "sync": {
+      "to": 4,
+      "breaking": true,
+      "note": "New required input: currency (string, ISO 4217). Withheld until the sync PR merges."
+     },
+     "feedback": {
+      "reflections": [
+       {
+        "text": "The description does not say the amount is in cents. The first call sent 120.00.",
+        "sessions": 1,
+        "at": "2026-09-22"
+       }
+      ],
+      "rejections": 4,
+      "errors": 1,
+      "retries": 2
+     }
+    },
+    {
+     "n": "cancel_refund",
+     "d": "Cancel a pending refund.",
+     "state": "imported",
+     "tok": 158,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 1,
+     "operation": "POST /refunds/{id}/cancel",
+     "method": "POST /refunds/{id}/cancel"
+    },
+    {
+     "n": "list_invoices",
+     "d": "List invoices for a customer.",
+     "state": "imported",
+     "tok": 218,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 1,
+     "operation": "listInvoices",
+     "method": "GET /invoices"
+    },
+    {
+     "n": "void_invoice",
+     "d": "Void an open invoice.",
+     "state": "imported",
+     "tok": 150,
+     "risk": "high",
+     "side_effect": "irreversible",
+     "egress": "org_tenant",
+     "impacts": [
+      "moves_money"
+     ],
+     "confirmed": true,
+     "version": 2,
+     "operation": "voidInvoice",
+     "method": "POST /invoices/{id}/void",
+     "sync": {
+      "removed": true,
+      "breaking": true,
+      "note": "Operation removed from the document. The tool is withheld until the sync PR removes it."
+     }
+    },
+    {
+     "n": "list_disputes",
+     "d": "List disputes.",
+     "state": "available",
+     "tok": 190,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": false,
+     "operation": "listDisputes",
+     "method": "GET /disputes",
+     "fresh": true
+    },
+    {
+     "n": "get_customer",
+     "d": "Get one customer.",
+     "state": "available",
+     "tok": 166,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": false,
+     "operation": "getCustomer",
+     "method": "GET /customers/{id}"
+    },
+    {
+     "n": "list_customers",
+     "d": "List customers.",
+     "state": "available",
+     "tok": 204,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": false,
+     "operation": "listCustomers",
+     "method": "GET /customers"
+    },
+    {
+     "n": "update_customer",
+     "d": "Update a customer.",
+     "state": "available",
+     "tok": 262,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "org_tenant",
+     "confirmed": false,
+     "operation": "updateCustomer",
+     "method": "PATCH /customers/{id}"
+    },
+    {
+     "n": "create_invoice",
+     "d": "Create a draft invoice.",
+     "state": "available",
+     "tok": 284,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "org_tenant",
+     "confirmed": false,
+     "operation": "createInvoice",
+     "method": "POST /invoices"
+    },
+    {
+     "n": "finalize_invoice",
+     "d": "Finalize a draft invoice.",
+     "state": "available",
+     "tok": 148,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "org_tenant",
+     "confirmed": false,
+     "operation": "finalizeInvoice",
+     "method": "POST /invoices/{id}/finalize"
+    },
+    {
+     "n": "delete_draft_invoice",
+     "d": "Delete a draft invoice.",
+     "state": "available",
+     "tok": 131,
+     "risk": "high",
+     "side_effect": "irreversible",
+     "egress": "org_tenant",
+     "impacts": [
+      "destroys_data"
+     ],
+     "confirmed": false,
+     "operation": "deleteDraftInvoice",
+     "method": "DELETE /invoices/{id}"
+    },
+    {
+     "n": "create_credit_note",
+     "d": "Issue a credit note against an invoice.",
+     "state": "available",
+     "tok": 296,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "org_tenant",
+     "impacts": [
+      "moves_money"
+     ],
+     "confirmed": false,
+     "operation": "createCreditNote",
+     "method": "POST /credit_notes"
+    },
+    {
+     "n": "list_payouts",
+     "d": "List payouts.",
+     "state": "available",
+     "tok": 188,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": false,
+     "operation": "listPayouts",
+     "method": "GET /payouts"
+    },
+    {
+     "n": "get_balance",
+     "d": "Get the balance by currency.",
+     "state": "available",
+     "tok": 120,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": false,
+     "operation": "getBalance",
+     "method": "GET /balance"
+    },
+    {
+     "n": "list_plans",
+     "d": "List plans.",
+     "state": "available",
+     "tok": 170,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": false,
+     "operation": "listPlans",
+     "method": "GET /plans"
+    },
+    {
+     "n": "change_plan",
+     "d": "Move a customer to another plan.",
+     "state": "available",
+     "tok": 244,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "org_tenant",
+     "impacts": [
+      "changes_entitlement"
+     ],
+     "confirmed": false,
+     "operation": "changePlan",
+     "method": "PUT /customers/{id}/plan"
+    },
+    {
+     "n": "export_ledger",
+     "d": "Export the ledger for a date range as CSV.",
+     "state": "available",
+     "tok": 226,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": false,
+     "operation": "exportLedger",
+     "method": "GET /exports/ledger",
+     "deprecated": true
+    },
+    {
+     "n": "delete_customer",
+     "d": "Delete a customer.",
+     "state": "available",
+     "tok": 128,
+     "risk": "high",
+     "side_effect": "irreversible",
+     "egress": "org_tenant",
+     "impacts": [
+      "destroys_data"
+     ],
+     "confirmed": false,
+     "operation": "deleteCustomer",
+     "method": "DELETE /customers/{id}"
+    }
+   ]
+  },
+  {
+   "id": "warehouse",
+   "name": "Warehouse",
+   "logo": null,
+   "letter": "W",
+   "upstream": "uvx warehouse-mcp==1.4.2",
+   "auth": "None. It reads WAREHOUSE_DSN on the machine",
+   "authKind": "builtin",
+   "keyNote": "A local server gets no credential from oxagen.",
+   "status": "ok",
+   "added": "2026-09-17",
+   "by": "amara",
+   "description": "Read-only queries against the analytics warehouse from a developer laptop.",
+   "source": {
+    "type": "local",
+    "command": "uvx",
+    "args": [
+     "warehouse-mcp==1.4.2",
+     "--read-only"
+    ],
+    "env": [
+     "WAREHOUSE_DSN"
+    ],
+    "machines": [
+     "dev-laptops"
+    ],
+    "package": {
+     "name": "warehouse-mcp",
+     "version": "1.4.2",
+     "digest": "sha256:3b7e0c91d5a24f86e1c0b9d7a3f25e48c6019d2b7f43a8e5c1d9f0b26a7e4c13"
+    }
+   },
+   "authcfg": {
+    "mode": "none"
+   },
+   "exposure": {
+    "mode": "direct",
+    "definition_budget": 8000
+   },
+   "sync": {
+    "schedule": "manual",
+    "last": "2026-09-24T15:40:00",
+    "reporter": "mbell-mbp-16"
+   },
+   "errors": [
+    {
+     "machine": "ci-runner-07",
+     "at": "2026-09-25T12:31:00",
+     "text": "This machine is not in group dev-laptops.",
+     "fix": "Ask a workspace admin to add it."
+    },
+    {
+     "machine": "amara-mbp-16",
+     "at": "2026-09-25T10:02:00",
+     "text": "The package digest does not match the lock.",
+     "fix": "Reinstall the locked version, or run the sync if the package changed on purpose."
+    },
+    {
+     "machine": "mbell-mbp-16",
+     "at": "2026-09-25T09:14:00",
+     "text": "oxagen's cloud gateway cannot be reached.",
+     "fix": "Local tools stay off until it is back. Check the network, then retry."
+    }
+   ],
+   "tryit": {
+    "tool": "run_query",
+    "env": "default",
+    "args": "{\n  \"sql\": \"select plan, count(*) from accounts group by 1\"\n}",
+    "upstream": "Signed envelope to mbell-mbp-16 (dev-laptops)\ntool warehouse__run_query@2, expires 13:05:08\nlocal gateway runs: uvx warehouse-mcp==1.4.2 --read-only",
+    "raw": "{\n  \"columns\": [\"plan\", \"count\"],\n  \"rows\": [[\"team\", 1482], [\"business\", 391], [\"enterprise\", 58]],\n  \"elapsed_ms\": 412\n}",
+    "shaped": "{\n  \"columns\": [\"plan\", \"count\"],\n  \"rows\": [[\"team\", 1482], [\"business\", 391], [\"enterprise\", 58]]\n}",
+    "bytes": [
+     118,
+     96
+    ],
+    "decision": "Allowed. A read with local egress needs no person."
+   },
+   "tools": [
+    {
+     "n": "run_query",
+     "d": "Run a read-only SQL query.",
+     "state": "imported",
+     "tok": 288,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "local",
+     "confirmed": true,
+     "version": 2,
+     "select": [
+      "columns",
+      "rows"
+     ],
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "list_tables",
+     "d": "List tables in a schema.",
+     "state": "imported",
+     "tok": 164,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "local",
+     "confirmed": true,
+     "version": 1,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "describe_table",
+     "d": "Describe a table's columns.",
+     "state": "imported",
+     "tok": 172,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "local",
+     "confirmed": true,
+     "version": 1,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "explain_query",
+     "d": "Show a query plan.",
+     "state": "imported",
+     "tok": 190,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "local",
+     "confirmed": true,
+     "version": 1,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "sample_rows",
+     "d": "Return a sample of rows from a table.",
+     "state": "available",
+     "tok": 176,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "local",
+     "confirmed": false,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "export_csv",
+     "d": "Write a query result to a CSV file on this machine.",
+     "state": "available",
+     "tok": 214,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "local",
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": false
+     }
+    },
+    {
+     "n": "cancel_query",
+     "d": "Cancel a running query.",
+     "state": "available",
+     "tok": 138,
+     "risk": "high",
+     "side_effect": "write",
+     "egress": "local",
+     "confirmed": false
+    }
+   ]
+  },
+  {
+   "id": "crm",
+   "name": "CRM",
+   "logo": null,
+   "letter": "C",
+   "upstream": "schema/crm.graphql",
+   "auth": "Service credential held by oxagen",
+   "authKind": "key",
+   "keyNote": "crm-service, added by Priya Natarajan on 2026-09-08.",
+   "status": "ok",
+   "added": "2026-09-08",
+   "by": "priya",
+   "description": "Accounts, contacts, deals, and cases in the a-intel CRM.",
+   "source": {
+    "type": "graphql",
+    "from": "repository",
+    "repo": "github.com/a-intel/crm-api",
+    "path": "schema/crm.graphql",
+    "ref": "main",
+    "commit": "91c0e4a"
+   },
+   "authcfg": {
+    "mode": "service",
+    "scheme": "bearer",
+    "credential": "oxagen:credential/crm-service"
+   },
+   "environments": [
+    {
+     "name": "sandbox",
+     "sandbox": true,
+     "url": "https://crm-sandbox.a-intel.com/graphql"
+    },
+    {
+     "name": "production",
+     "url": "https://crm.a-intel.com/graphql"
+    }
+   ],
+   "exposure": {
+    "mode": "search",
+    "definition_budget": 8000
+   },
+   "sync": {
+    "schedule": "on-change",
+    "last": "2026-09-23T16:02:00"
+   },
+   "generate": {
+    "entities": [
+     "account",
+     "contact",
+     "lead",
+     "deal",
+     "case",
+     "campaign",
+     "quote",
+     "order",
+     "contract",
+     "invoice",
+     "product",
+     "price_book",
+     "task",
+     "meeting",
+     "note",
+     "territory",
+     "forecast",
+     "pipeline",
+     "stage",
+     "team",
+     "user",
+     "role",
+     "partner",
+     "renewal",
+     "subscription",
+     "entitlement",
+     "asset",
+     "survey",
+     "segment",
+     "list",
+     "email_template",
+     "call",
+     "activity",
+     "document"
+    ],
+    "ops": [
+     "list",
+     "get",
+     "search",
+     "count",
+     "history",
+     "create",
+     "update",
+     "archive",
+     "restore",
+     "merge",
+     "delete",
+     "assign",
+     "tag",
+     "untag",
+     "follow",
+     "unfollow",
+     "export",
+     "import"
+    ],
+    "imported": [
+     "list",
+     "get",
+     "search",
+     "count",
+     "history"
+    ],
+    "importedWrite": [
+     "deal",
+     "case",
+     "task",
+     "note",
+     "meeting",
+     "contact",
+     "lead"
+    ],
+    "importedWriteOps": [
+     "create",
+     "update"
+    ]
+   },
+   "notTools": [
+    {
+     "n": "Subscription.dealUpdated",
+     "why": "A GraphQL subscription. Subscriptions are listed and never become tools."
+    },
+    {
+     "n": "Subscription.caseAssigned",
+     "why": "A GraphQL subscription. Subscriptions are listed and never become tools."
+    }
+   ],
+   "featured": {
+    "tool": "search_deals",
+    "field": "Query.searchDeals",
+    "selection": "searchDeals(query: $query, first: $first) {\n  edges {\n    node { id name stage amount closeDate owner { id name } }\n  }\n  pageInfo { hasNextPage endCursor }\n}"
+   },
+   "tryit": {
+    "tool": "search_deals",
+    "env": "sandbox",
+    "args": "{\n  \"query\": \"renewal Q4\",\n  \"first\": 2\n}",
+    "upstream": "POST https://crm-sandbox.a-intel.com/graphql\nquery ($query: String!, $first: Int) { searchDeals(query: $query, first: $first) { edges { node { id name stage amount } } } }\nvariables: {\"query\": \"renewal Q4\", \"first\": 2}",
+    "raw": "{\n  \"data\": {\"searchDeals\": {\"edges\": [\n    {\"node\": {\"id\": \"dl_77\", \"name\": \"Northwind renewal\", \"stage\": \"negotiation\", \"amount\": 4800000, \"closeDate\": \"2026-11-30\", \"owner\": {\"id\": \"u_4\", \"name\": \"Dana Okafor\"}}},\n    {\"node\": {\"id\": \"dl_81\", \"name\": \"Contoso renewal\", \"stage\": \"proposal\", \"amount\": 2150000, \"closeDate\": \"2026-12-12\", \"owner\": {\"id\": \"u_9\", \"name\": \"Jin Park\"}}}\n  ], \"pageInfo\": {\"hasNextPage\": true, \"endCursor\": \"Y3Vyc29yOjI=\"}}}\n}",
+    "shaped": "{\n  \"items\": [\n    {\"id\": \"dl_77\", \"name\": \"Northwind renewal\", \"stage\": \"negotiation\", \"amount\": 4800000},\n    {\"id\": \"dl_81\", \"name\": \"Contoso renewal\", \"stage\": \"proposal\", \"amount\": 2150000}\n  ],\n  \"has_more\": true\n}",
+    "bytes": [
+     498,
+     231
+    ],
+    "decision": "Allowed. No policy asks a person for a read."
+   },
+   "tools": []
+  },
+  {
+   "id": "ledger",
+   "name": "Ledger",
+   "logo": null,
+   "letter": "L",
+   "upstream": "proto/ledger/v1/ledger.proto",
+   "auth": "Mutual TLS in the relay",
+   "authKind": "key",
+   "keyNote": "The client certificate stays inside the a-intel network.",
+   "status": "ok",
+   "added": "2026-09-15",
+   "by": "amara",
+   "description": "Double-entry ledger postings and balances.",
+   "source": {
+    "type": "grpc",
+    "from": "repository",
+    "repo": "github.com/a-intel/ledger",
+    "path": "proto/ledger/v1/ledger.proto",
+    "ref": "main",
+    "commit": "e31a7f2",
+    "service": "a_intel.ledger.v1.Ledger"
+   },
+   "authcfg": {
+    "mode": "service",
+    "scheme": "header",
+    "credential": "oxagen:credential/ledger-service"
+   },
+   "environments": [
+    {
+     "name": "sandbox",
+     "sandbox": true,
+     "url": "https://ledger-sandbox.a-intel.com:443"
+    },
+    {
+     "name": "production",
+     "url": "https://ledger.internal.a-intel.com:443",
+     "network": "relay:a-intel-west"
+    }
+   ],
+   "exposure": {
+    "mode": "direct",
+    "definition_budget": 8000
+   },
+   "sync": {
+    "schedule": "daily",
+    "last": "2026-09-25T03:00:00"
+   },
+   "notTools": [
+    {
+     "n": "ImportEntries",
+     "why": "A client-streaming method. One request and one result cannot carry it, so it is never a tool."
+    },
+    {
+     "n": "WatchBalances",
+     "why": "A bidirectional stream. It is listed and never becomes a tool."
+    }
+   ],
+   "tryit": {
+    "tool": "get_balance",
+    "env": "production",
+    "relayDown": true,
+    "args": "{\n  \"account_id\": \"acct_ops_usd\"\n}"
+   },
+   "tools": [
+    {
+     "n": "get_balance",
+     "d": "Get an account's balance.",
+     "state": "imported",
+     "tok": 168,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 1,
+     "method": "a_intel.ledger.v1.Ledger/GetBalance",
+     "idempotency": "NO_SIDE_EFFECTS"
+    },
+    {
+     "n": "list_entries",
+     "d": "Stream an account's entries for a date range.",
+     "state": "imported",
+     "tok": 214,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 1,
+     "method": "a_intel.ledger.v1.Ledger/ListEntries",
+     "streaming": true,
+     "max_items": 500,
+     "deadline_ms": 30000,
+     "idempotency": "NO_SIDE_EFFECTS"
+    },
+    {
+     "n": "post_entry",
+     "d": "Post a balanced journal entry.",
+     "state": "imported",
+     "tok": 302,
+     "risk": "high",
+     "side_effect": "write",
+     "egress": "org_tenant",
+     "impacts": [
+      "moves_money"
+     ],
+     "confirmed": true,
+     "version": 2,
+     "method": "a_intel.ledger.v1.Ledger/PostEntry"
+    },
+    {
+     "n": "get_entry",
+     "d": "Get one journal entry.",
+     "state": "imported",
+     "tok": 150,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "org_tenant",
+     "confirmed": true,
+     "version": 1,
+     "method": "a_intel.ledger.v1.Ledger/GetEntry",
+     "idempotency": "NO_SIDE_EFFECTS"
+    },
+    {
+     "n": "reverse_entry",
+     "d": "Reverse a posted entry with a new entry.",
+     "state": "available",
+     "tok": 226,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "org_tenant",
+     "impacts": [
+      "moves_money"
+     ],
+     "confirmed": false,
+     "method": "a_intel.ledger.v1.Ledger/ReverseEntry",
+     "idempotency": "IDEMPOTENT"
+    },
+    {
+     "n": "close_day",
+     "d": "Close the books for a day.",
+     "state": "available",
+     "tok": 184,
+     "risk": "high",
+     "side_effect": "write",
+     "egress": "org_tenant",
+     "confirmed": false,
+     "method": "a_intel.ledger.v1.Ledger/CloseDay"
+    }
+   ]
+  },
+  {
+   "id": "notion",
+   "name": "Notion",
+   "logo": null,
+   "letter": "N",
+   "upstream": "mcp.notion.com/mcp",
+   "auth": "Operator OAuth",
+   "authKind": "oauth",
+   "keyNote": "Each operator connects once.",
+   "status": "ok",
+   "added": "2026-09-10",
+   "by": "priya",
+   "description": "Search and read the a-intel docs space.",
+   "source": {
+    "type": "registry",
+    "registry": "registry.modelcontextprotocol.io",
+    "server": "com.notion/mcp",
+    "version": "1.3.0",
+    "url": "https://mcp.notion.com/mcp",
+    "transport": "http"
+   },
+   "authcfg": {
+    "mode": "operator-oauth",
+    "scheme": "oauth",
+    "credential": "oxagen:credential/notion-oauth-client"
+   },
+   "exposure": {
+    "mode": "direct",
+    "definition_budget": 8000
+   },
+   "sync": {
+    "schedule": "daily",
+    "last": "2026-09-24T03:00:00"
+   },
+   "off": {
+    "by": "priya",
+    "at": "2026-09-24T16:20:00",
+    "why": "An agent read pages outside the docs space."
+   },
+   "operators": {
+    "marcus": "2026-09-10",
+    "priya": "2026-09-10",
+    "amara": null,
+    "dana": null
+   },
+   "tools": [
+    {
+     "n": "search",
+     "d": "Search pages and databases.",
+     "state": "imported",
+     "tok": 240,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "fetch",
+     "d": "Fetch a page or database.",
+     "state": "imported",
+     "tok": 196,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "get_comments",
+     "d": "List comments on a page.",
+     "state": "imported",
+     "tok": 158,
+     "risk": "low",
+     "side_effect": "read",
+     "egress": "third_party",
+     "confirmed": true,
+     "version": 1,
+     "hint": {
+      "readOnlyHint": true
+     }
+    },
+    {
+     "n": "create_pages",
+     "d": "Create pages.",
+     "state": "available",
+     "tok": 312,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": false
+     }
+    },
+    {
+     "n": "update_page",
+     "d": "Update a page's properties or content.",
+     "state": "available",
+     "tok": 290,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": false
+     }
+    },
+    {
+     "n": "move_pages",
+     "d": "Move pages to a new parent.",
+     "state": "available",
+     "tok": 176,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": false
+     }
+    },
+    {
+     "n": "create_comment",
+     "d": "Comment on a page.",
+     "state": "available",
+     "tok": 170,
+     "risk": "medium",
+     "side_effect": "write",
+     "egress": "third_party",
+     "impacts": [
+      "communicates_externally"
+     ],
+     "confirmed": false,
+     "hint": {
+      "destructiveHint": false
+     }
     }
    ]
   }
  ],
  "catalog": [
   {
-   "id": "stripe",
-   "name": "Stripe",
-   "letter": "S",
-   "auth": "key",
-   "d": "Payments, refunds and invoices."
-  },
-  {
-   "id": "slack",
-   "name": "Slack",
-   "letter": "S",
+   "id": "github",
+   "name": "GitHub",
+   "logo": "github",
+   "reg": "io.github.github/github-mcp-server",
+   "version": "0.14.0",
+   "kind": "remote",
    "auth": "oauth",
-   "d": "Read channels and post messages."
+   "d": "Repositories, issues, pull requests, and Actions.",
+   "server": "github",
+   "offers": 41
   },
   {
    "id": "notion",
    "name": "Notion",
    "letter": "N",
+   "reg": "com.notion/mcp",
+   "version": "1.3.0",
+   "kind": "remote",
    "auth": "oauth",
-   "d": "Search and edit pages."
+   "d": "Search and edit pages.",
+   "server": "notion",
+   "offers": 7
+  },
+  {
+   "id": "slack",
+   "name": "Slack",
+   "letter": "S",
+   "reg": "com.slack/mcp",
+   "version": "1.1.0",
+   "kind": "remote",
+   "auth": "oauth",
+   "d": "Read channels and post messages.",
+   "offers": 12,
+   "sample": [
+    [
+     "list_channels",
+     "read"
+    ],
+    [
+     "read_channel",
+     "read"
+    ],
+    [
+     "search_messages",
+     "read"
+    ],
+    [
+     "post_message",
+     "write"
+    ],
+    [
+     "add_reaction",
+     "write"
+    ],
+    [
+     "delete_message",
+     "irreversible"
+    ]
+   ]
   },
   {
    "id": "figma",
    "name": "Figma",
    "letter": "F",
+   "reg": "com.figma/dev-mode-mcp",
+   "version": "0.8.2",
+   "kind": "package",
    "auth": "key",
-   "d": "Read design files and frames."
+   "d": "Read design files and frames.",
+   "offers": 6,
+   "sample": [
+    [
+     "get_file",
+     "read"
+    ],
+    [
+     "get_frame",
+     "read"
+    ],
+    [
+     "get_variables",
+     "read"
+    ],
+    [
+     "get_code_connect",
+     "read"
+    ],
+    [
+     "export_image",
+     "write"
+    ],
+    [
+     "create_comment",
+     "write"
+    ]
+   ]
   },
   {
    "id": "jira",
    "name": "Jira",
    "logo": "jira",
+   "reg": "com.atlassian/jira-mcp",
+   "version": "2.0.1",
+   "kind": "remote",
    "auth": "oauth",
-   "d": "Issues from Jira Cloud."
+   "d": "Issues from Jira Cloud.",
+   "offers": 18,
+   "sample": [
+    [
+     "search_issues",
+     "read"
+    ],
+    [
+     "get_issue",
+     "read"
+    ],
+    [
+     "create_issue",
+     "write"
+    ],
+    [
+     "transition_issue",
+     "write"
+    ],
+    [
+     "add_comment",
+     "write"
+    ],
+    [
+     "delete_issue",
+     "irreversible"
+    ]
+   ]
   },
   {
    "id": "datadog",
    "name": "Datadog",
    "letter": "D",
+   "reg": "com.datadoghq/mcp",
+   "version": "0.4.0",
+   "kind": "remote",
    "auth": "key",
-   "d": "Metrics, logs and monitors."
+   "d": "Metrics, logs, and monitors.",
+   "offers": 21,
+   "sample": [
+    [
+     "query_metrics",
+     "read"
+    ],
+    [
+     "search_logs",
+     "read"
+    ],
+    [
+     "list_monitors",
+     "read"
+    ],
+    [
+     "get_incident",
+     "read"
+    ],
+    [
+     "mute_monitor",
+     "write"
+    ],
+    [
+     "delete_monitor",
+     "irreversible"
+    ]
+   ]
   }
  ],
  "import": {
@@ -779,5 +2889,47 @@
     ]
    }
   ]
+ },
+ "relays": {
+  "a-intel-east": {
+   "state": "connected",
+   "seen": "2026-09-25T13:04:40",
+   "version": "0.9.2",
+   "where": "eks-prod-east, namespace oxagen-relay",
+   "hosts": [
+    "billing.internal.a-intel.com",
+    "pg-mcp.a-intel.internal"
+   ]
+  },
+  "a-intel-west": {
+   "state": "down",
+   "since": "2026-09-25T11:42:00",
+   "version": "0.9.1",
+   "where": "gke-prod-west, namespace oxagen-relay",
+   "hosts": [
+    "ledger.internal.a-intel.com"
+   ]
+  }
+ },
+ "machineGroups": {
+  "dev-laptops": [
+   "mbell-mbp-16",
+   "amara-mbp-16",
+   "priya-mbp-14"
+  ],
+  "ci-runners": [
+   "ci-runner-04",
+   "ci-runner-07"
+  ]
+ },
+ "embeddings": {
+  "provider": "oxagen",
+  "model": "voyage-4-large",
+  "vendor": "Voyage AI",
+  "custom": {
+   "url": "https://embeddings.a-intel.com/v1/embeddings",
+   "model": "bge-large-en-v1.5",
+   "credential": "oxagen:credential/embeddings"
+  }
  }
 }

@@ -10,8 +10,8 @@ Open `mockups/v3/index.html` from disk. Issue #133 tracks it.
 
 Five jobs, in the brief's words:
 
-1. **Steering in one place.** One list of instructions, rules, skills and memories. oxagen writes each item into the file every harness reads.
-2. **MCP servers in one place.** One list of servers. oxagen holds the keys, and every harness points at one gateway.
+1. **Steering in one place.** One list of steering records, rules, skills and memories, kept in the workspace's steering repo and changed only by steering PR. The cloud gateway delivers them to every harness.
+2. **MCP servers in one place.** One list of servers, each a folder in the steering repo. oxagen holds the keys, every harness points at one gateway, and MCP Studio imports and classifies each tool.
 3. **Work comes in, and you give it to an agent.** Items arrive from trackers. Send one to an agent in two clicks.
 4. **Full spend attribution.** Every dollar traces to a model request, and every request to a session, a work item, an agent, a person, a model and the MCP server whose tokens it carried.
 5. **Transcript replay.** A session replays the way its harness showed it. A Claude Code session looks like Claude Code.
@@ -25,9 +25,11 @@ Six navigation items, and no area has more than one row of tabs.
 | Work | What is waiting, what is running, what is ready to review | `#/a-intel/core-platform/work` |
 | Sessions | What each agent did, replayed, and what it cost | `#/a-intel/core-platform/sessions`, `.../sessions/<id>` |
 | Agents | Who runs where, on which harness and model, and against which budget | `#/a-intel/core-platform/agents` |
-| Steering | What every agent is told, where it lands, and what it costs | `#/a-intel/core-platform/steering` |
-| MCP servers | Which servers every agent gets, who holds the keys, and which tools need a person | `#/a-intel/core-platform/servers` |
+| Steering | What every agent is told, what it costs, the steering PRs that change it, and the steering repo | `#/a-intel/core-platform/steering`, `.../steering/pr-<n>` |
+| MCP servers | Which servers every agent gets, which tools each imports, how each tool is classified, and where an approval comes from | `#/a-intel/core-platform/servers`, `.../servers/<name>` |
 | Spend | The month, grouped by work item, agent, person, model or MCP server | `#/a-intel/core-platform/spend` |
+
+Steering has one row of tabs (Records, Steering PRs, Repository). A steering PR opens as its own page with no tabs. A server page has one row of tabs (Tools, Connection, Try it, Changes), and the servers list has none.
 
 A bare word also works as the hash (`#work`, `#sessions`, `#replay`, `#agents`, `#steering`, `#servers`, `#spend`), for a host that passes only a plain anchor.
 
@@ -47,6 +49,28 @@ The replay bar plays, pauses, steps and scrubs at 1× to 16×. Space plays and p
 The Claude Code session is waiting on a question: oxagen's policy asks a person before `github create_release`. The terminal shows Claude Code's own permission prompt, and the margin carries Approve and Deny. Either answer reaches the transcript and finishes the session. Approve moves the work item to Review with its draft release, and Deny moves it to Review with the release held.
 
 Sending a work item to an agent opens its new session, which starts replaying at once. The four sessions with a full transcript carry a Replay badge in the Sessions list. Every other session shows its record and cost and says the transcript is not in this mockup.
+
+## The steering repo
+
+`steering-repo-spec.html` is the source. Every workspace has one steering repo, `a-intel/oxagen-core-platform` here, and nothing steers until a steering PR merges.
+
+- **Creating a workspace.** The workspace switcher in the sidebar lists the workspaces and opens New workspace. It asks for a name only, then shows provisioning by step. The first attempt fails at Apply the settings, the way it does while the GitHub App lacks Administration write, so the failed step and Retry show.
+- **The steering repo card.** The top of Records shows the repository, the published version, and health. The Repository tab adds the settings oxagen holds, the linked code repositories, the organization records from `a-intel/oxagen`, governance, and the published versions.
+- **Health.** healthy, drifted, disconnected, or diverged. While it is not healthy, a banner on every page lists the differences. Repair settings shows for a workspace or organization admin, and Reconnect for an organization admin only. Every open steering PR fails its check.
+- **Steering PRs.** Each page shows the checks inside `Oxagen steering`, review by governance mode, the merge queue, and Revert on a merged one. #58 carries the budget check with per-record token counts, over oxagen's default of 4,000 tokens, which only warns.
+- **The memory PR.** #59 lists each memory with the sessions it came from. Drop takes one out.
+- **Linking a repository** opens a steering PR on `workspace.toml`.
+
+## MCP Studio
+
+`mcp-studio-spec.html` is the source. Every server is one folder, `servers/<name>/`, whatever its source.
+
+- **Add server** offers Connect by URL, From the registry, Local command, and From a definition (OpenAPI, GraphQL, or gRPC). Each ends in a discovery result that lists what the source offers, with a suggested classification in grey.
+- **Tools** lists available and imported tools with risk, side effect, egress, impacts, approval, and definition tokens, and a running total against the definition budget. A suggestion stays grey until a person confirms it. The tool panel shows the classification, the description with Draft, inputs, what the result returns, what the server says, and agent feedback.
+- **Approvals** come from policy. Each rule in `policy/*.cedar` reads the tool's classification, and the Approval column names the rule. The off switch acts at once, with no steering PR, and shows who turned it off and when. It replaces v3's Allow, Ask, and Off.
+- **Connection** shows the source, environments, network route, authentication, and operator accounts. **Try it** shows what went upstream, the raw result, and what the model receives. **Changes** shows the tool surface diff and the checks, and opens the steering PR.
+- **States.** `crm` runs in search mode. `warehouse` is a local command with its machine groups and three machine errors. `billing` sits behind relay `a-intel-east`, and `ledger` behind `a-intel-west`, which is down. `notion` is off, and so is `github__merge_pull_request`. Marcus has not connected his Billing API account. Search ranking uses oxagen's embedding provider.
+- **Sync PRs.** #62 serves Stripe's locked description while the upstream one changed. #61 withholds two billing tools after a breaking change.
 
 ## Spend attribution
 
@@ -73,6 +97,7 @@ v3 uses the brief's words where rev1's glossary (`docs/fleet-operations-ia.md`, 
 |---|---|---|
 | session | run | Claude Code, Codex, Cursor and stella all call it a session, and so does the brief |
 | MCP server | provider | The brief asks for "your mcp servers in one place", and every harness config calls them MCP servers |
+| steering record, steering PR | steering item, proposal | The steering repo spec and #4325. The replay's margin still says "steering item", which the headless walk asserts |
 
 Everything else follows rev1: oxagen and stella in lowercase, work item, no "task" in product copy, and no person scored or ranked.
 
@@ -85,8 +110,8 @@ Nothing below is deleted. Every rev1 view is still in the master, specified in `
 | Work orders, workflows, stages, the Intake dialog, definitions of done | Work is one inbox. Send to an agent carries the brief, the note and the cost cap |
 | Findings | Left out. Spend shows where the money went, and a steering suggestion carries the cost of the fix-up it would save |
 | A run's five tabs: Decision trace, Transcript, Cost, Memories, Evidence | One session page: the replay, the cost in its margin, and the rail |
-| Steering Sources and SteeringFrames, the envelope, injection points, the Compiler, Assignments, Proposals, Steering pull requests | One list, with who each item applies to, where it lands in each harness, and suggestions drawn from sessions |
-| Tools, toolbelts, providers, policy versions, kill switches | MCP servers, with Allow, Ask or Off on each tool |
+| Steering Sources and SteeringFrames, the envelope, injection points, the Compiler, Assignments, Proposals | One list of records, suggestions drawn from sessions, and steering PRs in the steering repo |
+| Tools, toolbelts, providers, policy versions, kill switches | MCP servers and MCP Studio: imported tools with their classification, approvals from policy, and the off switch |
 | The approvals drawer | The question in the transcript, answered from the margin, and a count in the top bar |
 | An agent's tabs: identity, toolbelt, runtime, permissions, activity, source | One agent card and drawer |
 | Runtimes | The agent's host |
@@ -110,13 +135,26 @@ npm run check:v3                        # all three checks
 
 `npm run build` and `npm run check` run them with the rest of the repo's guards, and Storybook shows every view under Oxagen v3.
 
-The URL takes `?theme=dark|light`, `?state=empty` (the first run, before anything is connected) and `?phone=1` (the 400 px phone preview). A floating pill in the corner switches the same three, and `?island=0` hides it. The pill is mockup chrome, not product UI.
+The URL takes `?theme=dark|light`, `?state=empty` (the first run, before anything is connected) and `?phone=1` (the 400 px phone preview). A floating pill in the corner switches the same three, the steering repo's health, and who is viewing, and `?island=0` hides it. The pill is mockup chrome, not product UI.
+
+A route's own query pins a screen or a state, so each has a Storybook story:
+
+| Query | What it does |
+|---|---|
+| `tab=` | A tab: `records`, `prs` or `repo` in Steering, and `tools`, `connection`, `try` or `changes` on a server |
+| `health=` | The steering repo's health: `healthy`, `drifted`, `disconnected` or `diverged` |
+| `as=` | Who is viewing, such as `amara`, a member who cannot repair settings |
+| `dialog=` | A dialog: `newworkspace` (with `prov=failed` or `prov=done`), `linkrepo`, `addserver` (with `src=`, `fmt=`, `pick=` and `phase=result`), `embeddings` |
+| `tool=` | The tool panel on a server page |
+| `run=1` | A Try it result |
+
+CI runs all three in `.github/workflows/mockup-v3.yml`, then a second walk over every steering repo and MCP Studio screen and state and its flows. That walk sits in the workflow until it moves into `tools/check-mockup-v3.mjs`. With `SHOTS=<dir>` set, it saves a screenshot of each screen, and the job uploads them as the `v3-screens` artifact.
 
 The headless walk opens every view in both themes, desktop and phone, and fails on a script error, sideways scroll, a transcript below the first viewport, a replay that does not reach its end, a question that cannot be answered, a Send that opens no session, a drawer or dialog that does not open, money that does not reconcile, or copy that breaks the house rules.
 
 ## Data boundary
 
-Interactive fixtures, not telemetry. The prices in `fixtures/prices.json` are illustrative list prices, and nothing here was measured. `fixtures/sessions.json` holds the 232 September sessions other than the four with a transcript, written by `gen-sessions.mjs` from a seeded generator through the same ledger the page uses. No action sends anything to a real agent, tracker or server.
+Interactive fixtures, not telemetry. The steering repo, its steering PRs, the memory PR, the servers other than the first five, the relays, and the policies are illustrative too. The prices in `fixtures/prices.json` are illustrative list prices, and nothing here was measured. `fixtures/sessions.json` holds the 232 September sessions other than the four with a transcript, written by `gen-sessions.mjs` from a seeded generator through the same ledger the page uses. No action sends anything to a real agent, tracker or server.
 
 ## Sources
 
@@ -125,8 +163,8 @@ Interactive fixtures, not telemetry. The prices in `fixtures/prices.json` are il
 | `src/v3.css` | Part 1 is copied from `mockups/src/engine.css`. Part 2 is the replay, the four skins and the six areas |
 | `src/marks.js` | The wordmark, harness marks, tracker logos and glyphs, copied from `mockups/src/engine.js` |
 | `src/ledger.js` | The accounting rule, shared by the page and the generator |
-| `src/core.js`, `src/data.js` | State, routes, formatting, and every derived figure |
+| `src/core.js`, `src/data.js` | State, routes, formatting, every derived figure, and the steering repo and MCP Studio model: staged changes, classification, approvals from policy, the off switch, and the budget check |
 | `src/replay.js` | The event model, the four skins, the margin and the replay clock |
 | `src/views.js`, `src/boot.js` | The six areas, the dialogs and drawers, and the first render |
-| `fixtures/*.json` | The demo record: org, agents, harnesses, prices, work, steering, servers, transcripts and sessions |
+| `fixtures/*.json` | The demo record: org, agents, harnesses, prices, work, steering (with the steering repo, steering PRs and the memory PR), servers (every source type, relays, machine groups and search ranking), transcripts and sessions |
 | `stories/v3.stories.js` | The Storybook entries |

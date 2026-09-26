@@ -13,8 +13,6 @@ function serverBy(id) { for (var i = 0; i < SERVERS.length; i++) if (SERVERS[i].
 function priceOf(model) { return PRICES[model]; }
 function modelLabel(model) { return (PRICES[model] || { label: model }).label; }
 
-/* A tool's mode after any change made on the page. */
-function toolMode(serverId, t) { var k = serverId + "." + t.n; return S.toolMode[k] || t.mode; }
 
 /* ---- transcripts: events → ledger steps → requests ---- */
 function transcriptSteps(T, events) {
@@ -175,7 +173,8 @@ function serverAgents(id) {
 }
 function serverStats(id) {
   var sv = serverBy(id), all = sessions(), cost = 0, calls = 0, perTool = {}, reqs = 0, save = 0;
-  var unused = sv.tools.filter(function (t) { return toolMode(id, t) !== "off"; });
+  // Unused: imported, on, not already leaving in a staged change, and never called this month.
+  var unused = sv.tools.filter(function (t) { return t.state !== "available" && !toolOffBy(id, t) && !stagedOp(id, "remove", t.n); });
   all.forEach(function (s) {
     if (s.cost.by["mcp:" + id]) cost += s.cost.by["mcp:" + id];
     Object.keys(s.calls || {}).forEach(function (k) {
@@ -193,14 +192,16 @@ function serverStats(id) {
     reqs += s.req;
     save += unusedTok * (p.cw + (s.req - 1) * p.cr) / 1e6;
   });
-  var defTok = sv.tools.reduce(function (a, t) { return a + (toolMode(id, t) === "off" ? 0 : t.tok); }, 0);
+  var defTok = sv.tools.reduce(function (a, t) { return a + (t.state !== "available" && !toolOffBy(id, t) ? t.tok : 0); }, 0);
   return { cost: cost, calls: calls, perTool: perTool, unused: unused, unusedTok: unusedTok, save: save, defTok: defTok, reqs: reqs };
 }
 
 /* ---- Steering ---- */
 function steeringItems() {
   var items = STEERING.items.slice();
-  STEERING.suggestions.forEach(function (s) { if (S.accepted[s.id]) items.push({ id: s.id, kind: s.kind, text: s.text, tok: s.tok, agents: "all", by: ME, edited: F.ORG.now.slice(0, 10), version: 1, fresh: true }); });
+  STEERING.suggestions.forEach(function (s) {
+    if (S.accepted[s.id]) items.push({ id: s.id, lineage: s.lineage, kind: s.kind, force: "should", scope: "workspace", path: "steering/platform/" + s.lineage + ".md", text: s.text, tok: s.tok, agents: "all", by: ME, edited: F.ORG.now.slice(0, 10), version: 1, fresh: true });
+  });
   return items;
 }
 function steeringStats(item) {
@@ -257,3 +258,186 @@ function workCost(key) { return sessions().filter(function (s) { return s.wi && 
 
 /* What a person needs to act on: a session waiting on a question. */
 function needsYou() { return sessions().filter(function (s) { return s.status === "needs-you"; }); }
+
+/* ============================== the steering repo and MCP Studio ==============================
+   steering-repo-spec.html and mcp-studio-spec.html. The steering repo decides which records steer,
+   which servers exist, which of their tools are imported, and how each tool is classified. A change
+   reaches it only through a steering PR. The off switch is the one change that skips review. */
+var REPO = STEERING.repo, POLICY = REPO.policy;
+
+/* A server large enough for search mode carries a recipe instead of 612 rows: every root field of
+   its schema is an entity and an operation. The recipe is fixed, so the list is the same each load. */
+function seeded(str) { var x = 2166136261; for (var i = 0; i < str.length; i++) { x ^= str.charCodeAt(i); x = Math.imul(x, 16777619); } return (x >>> 0) / 4294967296; }
+SERVERS.forEach(function (sv) {
+  if (!sv.generate) return;
+  var G = sv.generate, out = [];
+  G.entities.forEach(function (e) {
+    G.ops.forEach(function (op) {
+      var n = op + "_" + e + (op === "list" || op === "search" || op === "count" || op === "export" ? "s" : "");
+      var read = ["list", "get", "search", "count", "history", "export"].indexOf(op) >= 0;
+      var del = op === "delete";
+      var imported = G.imported.indexOf(op) >= 0 || (G.importedWrite.indexOf(e) >= 0 && G.importedWriteOps.indexOf(op) >= 0);
+      var t = { n: n, d: (read ? "Query." : "Mutation.") + n.replace(/_([a-z])/g, function (m, b) { return b.toUpperCase(); }), state: imported ? "imported" : "available",
+        tok: 180 + Math.round(seeded(n) * 140), risk: del ? "high" : read ? "low" : "medium", side_effect: del ? "irreversible" : read ? "read" : "write", egress: "org_tenant", confirmed: imported };
+      if (del) t.impacts = ["destroys_data"];
+      if (imported) t.version = 1;
+      out.push(t);
+    });
+  });
+  sv.tools = out;
+});
+
+/* ---- servers and tools ---- */
+var SOURCE_LABEL = { remote: "Connected by URL", registry: "From the registry", local: "Local command", openapi: "OpenAPI definition", graphql: "GraphQL schema", grpc: "gRPC protos", builtin: "Built in" };
+function sourceLabel(sv) { return SOURCE_LABEL[sv.source.type] || sv.source.type; }
+function folderOf(sv) { return sv.source.type === "builtin" ? null : "servers/" + sv.id + "/"; }
+function toolName(sid, n) { return sid + "__" + n; }
+function toolBy(sid, n) { var sv = serverBy(sid); if (!sv) return null; for (var i = 0; i < sv.tools.length; i++) if (sv.tools[i].n === n) return sv.tools[i]; return null; }
+function isSearch(sv) { return !!(sv.exposure && sv.exposure.mode === "search"); }
+var SEARCH_TOK = 900;
+/* The off switch: a record of who turned it off and when, or null. A change made on this page wins
+   over the fixture. */
+function serverOffBy(sv) { return S.srvOff[sv.id] !== undefined ? S.srvOff[sv.id] : sv.off || null; }
+function toolOffBy(sid, t) { var k = sid + "." + t.n; return S.toolOff[k] !== undefined ? S.toolOff[k] : t.off || null; }
+/* A tool a sync PR marks breaking is withheld: the gateway refuses it until the PR merges. */
+function withheld(t) { return !!(t.sync && t.sync.breaking); }
+
+/* Staged changes: what Review turns into one steering PR on servers/<name>/. A server can arrive
+   with changes already staged (fixtures pending). */
+function staged(sid) {
+  if (!S.staged[sid]) {
+    var sv = serverBy(sid);
+    S.staged[sid] = ((sv && sv.pending) || []).map(function (o) { var c = {}; for (var k in o) c[k] = o[k]; return c; });
+    // A staged classify carries what the person confirmed.
+    S.staged[sid].forEach(function (o) { if (o.op === "classify" && !S.cls[sid + "." + o.tool]) S.cls[sid + "." + o.tool] = { confirmed: !!o.confirmed }; });
+  }
+  return S.staged[sid];
+}
+function stagedOp(sid, op, n) { var l = staged(sid); for (var i = 0; i < l.length; i++) if (l[i].op === op && l[i].tool === n) return l[i]; return null; }
+function stage(sid, o) {
+  var l = staged(sid);
+  for (var i = l.length - 1; i >= 0; i--) if (l[i].tool === o.tool && l[i].op === o.op) l.splice(i, 1);
+  l.push(o);
+}
+function unstage(sid, op, n) { S.staged[sid] = staged(sid).filter(function (o) { return !(o.op === op && o.tool === n); }); }
+/* A tool counts as imported with the staged changes applied. */
+function importedNow(sid, t) {
+  if (stagedOp(sid, "remove", t.n)) return false;
+  return t.state !== "available" || !!stagedOp(sid, "import", t.n);
+}
+/* The classification a person sees: the fixture's, then any change made here. confirmed is false
+   while every value is still Studio's suggestion. */
+function classOf(sid, t) {
+  var c = { risk: t.risk, side_effect: t.side_effect, egress: t.egress, impacts: (t.impacts || []).slice(), confirmed: !!t.confirmed }, o = S.cls[sid + "." + t.n];
+  if (o) for (var k in o) c[k] = o[k];
+  return c;
+}
+function descOf(sid, t) { var d = stagedOp(sid, "describe", t.n); return d ? d.text : t.desc || t.d; }
+
+/* Where an approval comes from: policy reading the classification, never a setting on the tool.
+   Each rule in policy/*.cedar names the impact it reads. A rule with a condition asks only when the
+   call meets it. */
+function approvalFor(sid, t) {
+  var c = classOf(sid, t);
+  return POLICY.filter(function (p) { return c.impacts.indexOf(p.impact) >= 0; });
+}
+function approvalLabel(rules) {
+  if (!rules.length) return "None";
+  var always = rules.filter(function (r) { return !r.cond; });
+  return always.length ? "Asks a person" : "Asks a person " + rules[0].cond;
+}
+
+/* Definition tokens per request: the imported tools that are on, or the three search tools. */
+function defsOf(sv, withStaged) {
+  if (isSearch(sv)) return SEARCH_TOK;
+  return sv.tools.reduce(function (a, t) {
+    var on = withStaged ? importedNow(sv.id, t) : t.state !== "available";
+    return a + (on && !toolOffBy(sv.id, t) && !withheld(t) ? t.tok : 0);
+  }, 0);
+}
+function importedDefs(sv) { return sv.tools.reduce(function (a, t) { return a + (importedNow(sv.id, t) ? t.tok : 0); }, 0); }
+function relayOf(name) { return name && /^relay:/.test(name) ? { name: name.slice(6), r: F.SERVERS.relays[name.slice(6)] } : null; }
+function relaysOf(sv) {
+  var out = [], seen = {};
+  (sv.environments || []).concat([{ network: sv.source.network }]).forEach(function (e) {
+    var r = relayOf(e.network);
+    if (r && !seen[r.name]) { seen[r.name] = 1; out.push(r); }
+  });
+  return out;
+}
+function viewer() { return S.viewer || ME; }
+function operatorLinked(sv, who) { return !sv.operators || sv.operators[who] !== null; }
+
+/* ---- steering PRs ---- */
+function allPrs() {
+  var out = STEERING.prs.concat(S.newPrs);
+  if (S.health === "diverged" && !out.some(function (p) { return p.n === REPO.health.diverged.revertPr; })) {
+    out = out.concat([{ n: REPO.health.diverged.revertPr, kind: "revert", state: "open", title: "Revert main to published version " + REPO.version, branch: "steering/revert-" + REPO.health.diverged.commit,
+      by: "oxagen", via: "drift", opened: REPO.health.diverged.since, approvals: [],
+      summary: "`main` holds commit `" + REPO.health.diverged.commit + "`, which oxagen did not merge. This PR puts `main` back at the last published commit.",
+      files: [{ path: "steering/billing/a-intel.billing.refunds-over-100.md", diff: "-Refunds over $250 need a person's approval before you call\n+Refunds over $100 need a person's approval before you call\n `billing__create_refund`. Ask in the run and wait." }],
+      checks: [{ id: "schema", r: "pass" }, { id: "hash", r: "pass" }, { id: "settings", r: "pass" }] }]);
+  }
+  return out.sort(function (a, b) { return b.n - a.n; });
+}
+function prBy(n) { var l = allPrs(); for (var i = 0; i < l.length; i++) if (l[i].n === n) return l[i]; return null; }
+function nextPrNumber() { return allPrs().reduce(function (m, p) { return Math.max(m, p.n); }, 60) + 1; }
+function prState(pr) {
+  if (pr.state === "merged") return "merged";
+  if (S.queue.indexOf(pr.n) >= 0) return "queued";
+  return "open";
+}
+function prApprovals(pr) { return (pr.approvals || []).concat(S.approved[pr.n] ? [S.approved[pr.n]] : []); }
+/* Review by governance mode: team mode needs one approval from a member other than the author. A
+   reviewer group named for a path in governance.toml reviews what touches it. */
+function prReviewers(pr) {
+  var paths = pr.kind === "server" ? ["servers/" + pr.server + "/"] : pr.record ? [pr.record.path] : (pr.files || []).map(function (f) { return f.path || f; });
+  var groups = REPO.governance.reviewers.filter(function (g) {
+    return g.paths.some(function (glob) { var pre = glob.replace(/\*\*$/, ""); return paths.some(function (p) { return p.indexOf(pre) === 0; }); });
+  });
+  return groups;
+}
+function canApprove(pr) {
+  var me = viewer(), groups = prReviewers(pr);
+  if (pr.by === me) return false;
+  if (groups.length) return groups.some(function (g) { return g.members.indexOf(me) >= 0; });
+  return true;
+}
+function authorLabel(pr) {
+  if (pr.by === "oxagen") return pr.via === "sync" ? "oxagen sync" : "oxagen";
+  if (pr.by === "curator") return "The curator";
+  var a = agentBy(pr.by);
+  if (a) return a.name + " with steering_propose";
+  return personName(pr.by);
+}
+var PR_KIND = { record: "Record", memory: "Memory", server: "Server", workspace: "Workspace", agent: "Agent", revert: "Revert" };
+
+/* The budget check: each agent's always-on steering (must and should records that load every
+   request) before and after the change, against the workspace's budget or oxagen's default. */
+function alwaysOn(agent) {
+  return Ledger.steeringFor(agent, LEDGER_F).filter(function (i) { return i.force === "must" || i.force === "should"; });
+}
+function budgetRows(rec) {
+  var set = REPO.governance.always_on_tokens, budget = set || REPO.governance.defaultBudget;
+  var agents = rec.agents === "all" ? AGENTS.map(function (a) { return a.key; }) : rec.agents;
+  return agents.map(function (k) {
+    var a = agentBy(k), list = alwaysOn(a), before = list.reduce(function (t, i) { return t + i.tok; }, 0);
+    var after = before + (rec.force === "must" || rec.force === "should" ? rec.tok : 0) - (list.some(function (i) { return i.lineage === rec.lineage; }) ? rec.tok : 0);
+    return { agent: a, repo: "github.com/a-intel/platform", before: before, after: after, budget: budget, set: !!set, over: after > budget,
+      largest: list.filter(function (i) { return i.lineage !== rec.lineage; }).map(function (i) { return { lineage: i.lineage, label: i.label || i.title, kind: i.kind, force: i.force, tok: i.tok }; })
+        .concat([{ lineage: rec.lineage, label: rec.label, kind: rec.kind, force: rec.force, tok: rec.tok, fresh: true }])
+        .sort(function (x, y) { return y.tok - x.tok; }).slice(0, 4) };
+  });
+}
+
+/* ---- the steering repo ---- */
+function isWsAdmin(who) { var r = (PEOPLE[who] || {}).role; return r === "Workspace owner" || r === "Organization owner"; }
+function isOrgAdmin(who) { return (PEOPLE[who] || {}).role === "Organization owner"; }
+function orgAdmin() { for (var k in PEOPLE) if (isOrgAdmin(k)) return k; return null; }
+function slugify(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "workspace"; }
+/* A new workspace's steering repo: oxagen-<slug>, then -2, -3 on a clash. */
+function steeringRepoFor(name) {
+  var slug = slugify(name), taken = STEERING.provision.workspaces.map(function (w) { return w.slug; }), n = 1, s = slug;
+  while (taken.indexOf(s) >= 0) { n++; s = slug + "-" + n; }
+  return ORG.slug + "/oxagen-" + s;
+}

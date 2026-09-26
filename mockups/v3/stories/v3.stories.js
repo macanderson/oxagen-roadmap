@@ -1,4 +1,5 @@
-// The v3 mockup (mockups/v3/README.md), one story per view, each a framed URL of mockups/v3/index.html.
+// The v3 mockup (mockups/v3/README.md), one story per view and state, each a framed URL of
+// mockups/v3/index.html. A route's query pins a tab, a dialog, a drawer or a mockup state.
 // Storybook's dev server builds that page fresh from mockups/v3/src and mockups/v3/fixtures on every
 // request (.storybook/mockup-plugin.mjs); `npm run build-storybook` writes it into the static build.
 const FILE = "./v3/index.html";
@@ -40,4 +41,43 @@ export const Steering = { args: { route: "steering" } };
 export const McpServers = { name: "MCP servers", args: { route: "servers" } };
 export const Spend = { args: { route: "spend" } };
 export const FirstRun = { name: "First run", args: { route: "work", first: true } };
+
+// The steering repo (steering-repo-spec.html).
+export const SteeringPrs = { name: "Steering PRs", args: { route: "steering?tab=prs" } };
+export const SteeringRepository = { name: "Steering repo", args: { route: "steering?tab=repo" } };
+export const SteeringPrBudget = { name: "Steering PR, budget warning", args: { route: "steering/pr-58" } };
+export const SteeringPrMerged = { name: "Steering PR, merged", args: { route: "steering/pr-57" } };
+export const MemoryPr = { name: "Memory PR", args: { route: "steering/pr-59" } };
+export const LinkRepository = { name: "Link a repository", args: { route: "steering?tab=repo&dialog=linkrepo" } };
+export const RepoDrifted = { name: "Repo drifted", args: { route: "steering?health=drifted" } };
+export const RepoDriftedMember = { name: "Repo drifted, member view", args: { route: "work?health=drifted&as=amara" } };
+export const RepoDisconnected = { name: "Repo disconnected", args: { route: "work?health=disconnected" } };
+export const RepoDiverged = { name: "Repo diverged", args: { route: "steering/pr-60?health=diverged" } };
+export const NewWorkspace = { name: "New workspace", args: { route: "work?dialog=newworkspace" } };
+export const ProvisioningFailed = { name: "Provisioning, failed step", args: { route: "work?dialog=newworkspace&prov=failed" } };
+export const ProvisioningDone = { name: "Provisioning, done", args: { route: "work?dialog=newworkspace&prov=done" } };
+
+// MCP Studio (mcp-studio-spec.html).
+export const AddServer = { name: "Add server", args: { route: "servers?dialog=addserver" } };
+export const AddServerUrl = { name: "Add server, by URL", args: { route: "servers?dialog=addserver&src=url" } };
+export const AddServerRegistry = { name: "Add server, registry result", args: { route: "servers?dialog=addserver&src=registry&pick=slack&phase=result" } };
+export const AddServerLocal = { name: "Add server, local command", args: { route: "servers?dialog=addserver&src=local" } };
+export const AddServerOpenApi = { name: "Add server, OpenAPI result", args: { route: "servers?dialog=addserver&src=definition&fmt=openapi&phase=result" } };
+export const AddServerGraphQl = { name: "Add server, GraphQL result", args: { route: "servers?dialog=addserver&src=definition&fmt=graphql&phase=result" } };
+export const AddServerGrpc = { name: "Add server, gRPC result", args: { route: "servers?dialog=addserver&src=definition&fmt=grpc&phase=result" } };
+export const ServerTools = { name: "Server, Tools", args: { route: "servers/stripe" } };
+export const ToolPanel = { name: "Tool panel", args: { route: "servers/stripe?tool=create_refund" } };
+export const ToolPanelSuggested = { name: "Tool panel, suggested", args: { route: "servers/stripe?tool=delete_customer" } };
+export const ServerConnection = { name: "Server, Connection", args: { route: "servers/billing?tab=connection" } };
+export const ServerTryIt = { name: "Server, Try it", args: { route: "servers/stripe?tab=try&run=1" } };
+export const ServerChanges = { name: "Server, Changes", args: { route: "servers/stripe?tab=changes" } };
+export const SyncPrDescription = { name: "Sync PR, description changed", args: { route: "steering/pr-62" } };
+export const SyncPrBreaking = { name: "Sync PR, breaking change", args: { route: "steering/pr-61" } };
+export const SearchMode = { name: "Search mode", args: { route: "servers/crm" } };
+export const LocalServer = { name: "Local server", args: { route: "servers/warehouse?tab=connection" } };
+export const RelayDown = { name: "Relay down", args: { route: "servers/ledger?tab=connection" } };
+export const ServerOff = { name: "Server off", args: { route: "servers/notion" } };
+export const ToolOff = { name: "Tool off", args: { route: "servers/github?tool=merge_pull_request" } };
+export const OperatorNotConnected = { name: "Operator not connected", args: { route: "servers/billing" } };
+export const SearchRanking = { name: "Search ranking", args: { route: "servers?dialog=embeddings" } };
 export const Mobile = { args: { route: "sessions/ses_01K5RS7M2E8FJ3QW", shell: "mobile" } };
