@@ -942,9 +942,10 @@ Do
 7. Revert: open a steering PR that undoes a merged one.
 8. Approve and merge endpoints for the web app. In solo mode there is no
    approval: merge alone, and the merge counts as approved. In every other
-   mode, merge only after an approval. The workspace owner may merge without
-   an approval in any mode. The check still has to pass, and the ledger line
-   and the merge trailers record that the owner merged without one.
+   mode, merge only after an approval. The workspace owner, and a member whose
+   custom role holds merge_without_review, may merge without an approval in
+   any mode. The check still has to pass, and the ledger line and the merge
+   trailers record who merged without one.
 
 Done when
 - Unit tests cover queue order, re-checks after main moves, stamping, and
@@ -1243,8 +1244,9 @@ Do
    that contradicts steering shows the same warning with Promote to
    steering.
 6. Approve and Merge buttons on every steering PR, calling S3&#x27;s endpoints.
-   Solo mode shows Merge only. The workspace owner sees Merge without an
-   approval in any mode.
+   Solo mode shows Merge only. The workspace owner, and a member whose
+   custom role holds merge_without_review, sees Merge without an approval in
+   any mode. Add the Merge without review checkbox to the custom role editor.
 7. Copy follows clear-prose. Headings are plain nouns.
 
 Done when
