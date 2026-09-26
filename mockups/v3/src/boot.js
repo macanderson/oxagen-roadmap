@@ -12,6 +12,9 @@
   S.preview = BOOT.phone && !(mq && mq.matches);
   S.phone = BOOT.phone || !!(mq && mq.matches);
   if (mq && mq.addEventListener) mq.addEventListener("change", function () { if (!S.preview) { S.phone = mq.matches; render(); } });
+  // The mockup states the review pill switches can also come in the query: ?health=drifted, ?as=amara.
+  if (HEALTH.indexOf(BOOT.q.health) >= 0) S.health = BOOT.q.health;
+  if (BOOT.q.as && PEOPLE[BOOT.q.as]) S.viewer = BOOT.q.as;
   applyHash();
   render();
 })();

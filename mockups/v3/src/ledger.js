@@ -63,13 +63,15 @@ var Ledger = (function () {
   }
 
   /* What an agent's context holds before its first prompt: the harness's prompt and tools, the
-     definitions of every tool its MCP servers leave on, and the steering delivered every session
-     (instructions, rules and memories; a skill loads only when the session uses it). */
+     definitions of every tool its MCP servers import (servers/<name>/tools.toml), and the steering
+     delivered every session (records and memories; a skill loads only when the session uses it).
+     A tool a server offers and nobody imported is visible to no agent and costs nothing. The off
+     switch is left out: every recorded session predates the switches in the fixtures. */
   function context0(agent, F) {
     var h = F.HARNESSES[agent.harness], out = [["system", h.system], ["tools", h.tools]];
     agent.servers.forEach(function (id) {
       var s = F.SERVERS.servers.filter(function (x) { return x.id === id; })[0];
-      var tok = s.tools.reduce(function (a, t) { return a + (t.mode === "off" ? 0 : t.tok); }, 0);
+      var tok = s.tools.reduce(function (a, t) { return a + (t.state === "imported" ? t.tok : 0); }, 0);
       out.push(["mcp:" + id, tok]);
     });
     out.push(["steering", steeringFor(agent, F).reduce(function (a, i) { return a + i.tok; }, 0)]);

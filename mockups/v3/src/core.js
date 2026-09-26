@@ -10,7 +10,7 @@ var BASE = "#/" + ORG.slug + "/" + WS.slug;
 var BOOT = (function () {
   var q = {};
   try { new URLSearchParams(location.search).forEach(function (v, k) { q[k] = v; }); } catch (e) { /* a host that strips the query */ }
-  return { theme: q.theme || null, empty: q.state === "empty", phone: q.phone === "1" || q.mobile === "1", island: q.island !== "0" };
+  return { theme: q.theme || null, empty: q.state === "empty", phone: q.phone === "1" || q.mobile === "1", island: q.island !== "0", q: q };
 })();
 
 var S = {
@@ -18,9 +18,15 @@ var S = {
   empty: BOOT.empty, phone: BOOT.phone, theme: null, island: BOOT.island,
   workTab: "inbox", sessFilter: "all", spendBy: "work", spendOpen: null,
   dialog: null, drawer: null,
-  sent: {}, answered: {}, accepted: {}, dismissed: {}, toolMode: {}, serverAgents: {},
+  sent: {}, answered: {}, accepted: {}, dismissed: {}, serverAgents: {},
   imported: { steering: false, servers: false }, connected: false,
+  // The steering repo and MCP Studio. health and viewer are mockup states: the review pill and the
+  // URL (?health=drifted, ?as=amara) switch them.
+  health: "healthy", viewer: null, steerTab: "records", srvTab: "tools",
+  staged: {}, toolOff: {}, srvOff: {}, cls: {}, descs: {}, drafts: {}, dropped: {}, approved: {}, queue: [62],
+  newPrs: [], pendingAgents: {}, toolFilter: "all", toolQ: "", toolShow: 40, tryRun: {}, tryTool: {}, tryEnv: {},
 };
+var HEALTH = ["healthy", "drifted", "disconnected", "diverged"];
 
 /* ---- formatting ---- */
 var USD = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
@@ -71,6 +77,9 @@ function ago(d) {
 
 /* ---- markup ---- */
 function h(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+/* Fixture text marks names, paths and ids with backticks. They render as code, which is also how a
+   contract name that carries the capital brand (the check Oxagen steering) reaches the page. */
+function md(s) { return h(s).replace(/`([^`]+)`/g, "<code>$1</code>"); }
 function svg(paths, size, sw) {
   return '<svg width="' + (size || 15) + '" height="' + (size || 15) + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="' + (sw || 1.7) + '" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + paths + "</svg>";
 }
@@ -146,13 +155,30 @@ function parseHash() {
 function applyHash() {
   var r = parseHash();
   S.area = r.area; S.id = r.id;
-  if (r.q.by && ["work", "agent", "person", "model", "server"].indexOf(r.q.by) >= 0) S.spendBy = r.q.by;
-  if (r.q.tab && ["inbox", "running", "review", "done"].indexOf(r.q.tab) >= 0) S.workTab = r.q.tab;
+  applyQuery(r.q);
 }
+/* What a route's query pins: a tab, a mockup state, or a dialog or drawer to open. Storybook frames
+   one URL per story, so every screen and state in the steering repo and MCP Studio has one. */
+function applyQuery(q) {
+  if (q.by && ["work", "agent", "person", "model", "server"].indexOf(q.by) >= 0) S.spendBy = q.by;
+  if (S.area === "work" && q.tab && ["inbox", "running", "review", "done"].indexOf(q.tab) >= 0) S.workTab = q.tab;
+  if (S.area === "steering") S.steerTab = ["records", "prs", "repo"].indexOf(q.tab) >= 0 ? q.tab : "records";
+  if (S.area === "servers") {
+    S.srvTab = ["tools", "connection", "try", "changes"].indexOf(q.tab) >= 0 ? q.tab : "tools";
+    S.toolFilter = "all"; S.toolQ = ""; S.toolShow = 40;
+    if (S.id && q.run) S.tryRun[S.id] = true;
+  }
+  if (HEALTH.indexOf(q.health) >= 0) S.health = q.health;
+  if (q.as && PEOPLE[q.as]) S.viewer = q.as;
+  if (q.dialog && DIALOGS[q.dialog]) { S.dialog = { name: q.dialog, arg: q.arg || null, step: 0, q: q }; S.drawer = null; }
+  if (q.tool && S.area === "servers" && S.id) { S.drawer = { name: "tool", arg: S.id + "." + q.tool }; S.dialog = null; }
+}
+function queryOf(str) { var q = {}; (str || "").split("&").forEach(function (kv) { var p = kv.split("="); if (p[0]) q[p[0]] = p[1]; }); return q; }
 function href(area, id, query) { return BASE + "/" + area + (id ? "/" + encodeURIComponent(id) : "") + (query ? "?" + query : ""); }
 function go(area, id, query) {
   var target = href(area, id, query);
   S.area = area; S.id = id || null; S.dialog = null; S.drawer = null;
+  applyQuery(queryOf(query));
   try { if (location.hash !== target) history.pushState(null, "", target); } catch (e) { /* a sandbox that refuses history: keep the state in S */ }
   render();
   try { window.scrollTo(0, 0); } catch (e) { /* no window scroll in some hosts */ }
