@@ -345,6 +345,12 @@ body{padding-inline:0}
         <li>OpenAPI, GraphQL, and gRPC definitions are all sources on day 1. (Mac, 2026-09-26)</li>
         <li>Search mode ranks tools with embeddings. By default Oxagen embeds with Voyage AI's <code>voyage-4-large</code> on its own shared key, held in AWS, and absorbs the cost. A workspace can set its own embedding URL, model, and key, and a workspace that declines Voyage and sets no provider of its own gets keyword ranking. (Mac, 2026-09-26)</li>
         <li>The off switch acts at once with no pull request. (Mac, 2026-09-26)</li>
+        <li>One folder per server, <code>servers/&lt;name&gt;/</code>, with <code>server.toml</code>, <code>tools.toml</code>, and <code>tools.lock.json</code>, whatever the source. (Mac, 2026-09-26)</li>
+        <li>The repository decides what agents see. Oxagen's tables are rebuilt from it on publish and hold only what a repository cannot: secrets, discovery, health, the compiled form, and the off switch. (Mac, 2026-09-26)</li>
+        <li>A lock file pins each imported tool's upstream definition, so a server cannot change what the model reads without a steering PR. (Mac, 2026-09-26)</li>
+        <li>The agent sees annotations derived from the classification, not the ones the server sent. (Mac, 2026-09-26)</li>
+        <li>Two exposure modes, <code>direct</code> and <code>search</code>, for any server. (Mac, 2026-09-26)</li>
+        <li>A format-neutral operation model, so compile, checks, policy, sync, and serving treat every definition format the same. (Mac, 2026-09-26)</li>
         <li>An agent's calls go to a server's sandbox environment unless the agent's definition names another. The choice is set per agent. (Mac, 2026-09-26)</li>
         <li>gRPC server-streaming methods are tools on day 1, each returning one bounded result. Client and bidirectional streams are never tools. (Picked for durability at Mac's request, 2026-09-26)</li>
         <li>A local server runs only on machine groups a steering PR names, only from the package the lock pins, and only on a call the cloud gateway decided and signed. The local gateway fails closed, and there is no offline mode. (Picked for durability at Mac's request, 2026-09-26)</li>
@@ -367,12 +373,7 @@ body{padding-inline:0}
     <div class="card">
       <h4><span class="st p">Proposed</span></h4>
       <ul>
-        <li>One folder per server, <code>servers/&lt;name&gt;/</code>, with <code>server.toml</code>, <code>tools.toml</code>, and <code>tools.lock.json</code>, whatever the source.</li>
-        <li>The repository decides what agents see. Oxagen's tables are rebuilt from it on publish and hold only what a repository cannot: secrets, discovery, health, the compiled form, and the off switch.</li>
-        <li>A lock file pins each imported tool's upstream definition, so a server cannot change what the model reads without a steering PR.</li>
-        <li>The agent sees annotations derived from the classification, not the ones the server sent.</li>
-        <li>Two exposure modes, <code>direct</code> and <code>search</code>, for any server.</li>
-        <li>A format-neutral operation model, so compile, checks, policy, sync, and serving treat every definition format the same.</li>
+        <li>The details a section still marks Proposed: the mapping rules, tool names, tool checks, the call path, sync, tests, screens, and migration.</li>
       </ul>
     </div>
   </div>
@@ -381,7 +382,7 @@ body{padding-inline:0}
 <section id="storage">
   <span class="eyebrow">Storage</span>
   <h2>Storage model</h2>
-  <p>The repository decides which servers exist, which of their tools agents can see, and how each tool is classified and shaped. Oxagen's tables hold what a repository cannot: secrets, what each server offers, health, the compiled form, and the off switch. Publish rewrites the registry rows from the merged files, so a row never disagrees with the repository. <span class="st p">Proposed</span></p>
+  <p>The repository decides which servers exist, which of their tools agents can see, and how each tool is classified and shaped. Oxagen's tables hold what a repository cannot: secrets, what each server offers, health, the compiled form, and the off switch. Publish rewrites the registry rows from the merged files, so a row never disagrees with the repository. <span class="st d">Decided</span></p>
 
   <h3>Server folder</h3>
   <p>Every server has the same three files. A server built from a definition adds it: <code>openapi.yaml</code>, <code>schema.graphql</code>, or <code>proto/</code>. Any server can add tests.</p>
@@ -450,7 +451,7 @@ body{padding-inline:0}
 <section id="server">
   <span class="eyebrow">Server file</span>
   <h2>Server file</h2>
-  <p><code>server.toml</code> says where the server's tools come from, how to reach it in each environment, which credential the gateway uses, and how its tools are exposed. <span class="st p">Proposed</span></p>
+  <p><code>server.toml</code> says where the server's tools come from, how to reach it in each environment, which credential the gateway uses, and how its tools are exposed. <span class="st d">Decided</span> for the file, <span class="st p">Proposed</span> for its keys</p>
   <figure class="code"><figcaption><span class="path">servers/stripe/server.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/mcp-server/v1.json
 schema = "mcp-server/v1"
 name = "stripe"
@@ -536,7 +537,7 @@ schedule = "on-change"</code></pre></figure>
 <section id="tools">
   <span class="eyebrow">Tools file</span>
   <h2>Tools file</h2>
-  <p><code>tools.toml</code> lists the imported tools. A tool the server offers and this file does not list is visible to no agent. Each table's key is the tool's name after the server prefix: the name agents, toolbelts, and policies use. <span class="st p">Proposed</span></p>
+  <p><code>tools.toml</code> lists the imported tools. A tool the server offers and this file does not list is visible to no agent. Each table's key is the tool's name after the server prefix: the name agents, toolbelts, and policies use. <span class="st d">Decided</span> for the file, <span class="st p">Proposed</span> for its keys</p>
   <figure class="code"><figcaption><span class="path">servers/stripe/tools.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/mcp-tools/v1.json
 schema = "mcp-tools/v1"
 
@@ -599,7 +600,7 @@ idempotency_header = "Idempotency-Key"</code></pre></figure>
 <section id="risk">
   <span class="eyebrow">Risk</span>
   <h2>Risk classification</h2>
-  <p>Every imported tool carries the classification Oxagen already uses (<code>packages/oxagen/src/contracts/tool.classification.ts</code>, <code>agent.tool_versions</code>). The keys in <code>tools.toml</code> are the same fields in snake case. <span class="st c">Today</span> for the vocabulary, <span class="st p">Proposed</span> for storing it in the repository.</p>
+  <p>Every imported tool carries the classification Oxagen already uses (<code>packages/oxagen/src/contracts/tool.classification.ts</code>, <code>agent.tool_versions</code>). The keys in <code>tools.toml</code> are the same fields in snake case. <span class="st c">Today</span> for the vocabulary, <span class="st d">Decided</span> for storing it in the repository and for the annotations the agent sees.</p>
   <div class="tscroll"><table>
     <thead><tr><th>Key</th><th>Values</th><th>Required</th></tr></thead>
     <tbody>
@@ -642,7 +643,7 @@ unless { context.approval.granted };</code></pre></figure>
 <section id="lock">
   <span class="eyebrow">Lock file</span>
   <h2>Lock file</h2>
-  <p>A server can change a tool's description or schema at any time, and a changed description is an instruction the model will read. <code>tools.lock.json</code> pins the upstream definition of every imported tool as it was when a person reviewed it. The gateway serves only locked definitions, so what the model reads changes only through a steering PR. <span class="st p">Proposed</span></p>
+  <p>A server can change a tool's description or schema at any time, and a changed description is an instruction the model will read. <code>tools.lock.json</code> pins the upstream definition of every imported tool as it was when a person reviewed it. The gateway serves only locked definitions, so what the model reads changes only through a steering PR. <span class="st d">Decided</span></p>
   <figure class="code"><figcaption><span class="path">servers/stripe/tools.lock.json</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="json">{
   "schema": "mcp-tools-lock/v1",
   "server": "stripe",
@@ -835,7 +836,7 @@ unless { context.approval.granted };</code></pre></figure>
 <section id="large">
   <span class="eyebrow">Large servers</span>
   <h2>Large servers</h2>
-  <p>An enterprise API can hold 1,500 operations, and some MCP servers offer over 100 tools. At about 250 tokens a definition, 1,500 tools would cost 375,000 tokens on every model request. Every server has one of two exposure modes. <span class="st p">Proposed</span></p>
+  <p>An enterprise API can hold 1,500 operations, and some MCP servers offer over 100 tools. At about 250 tokens a definition, 1,500 tools would cost 375,000 tokens on every model request. Every server has one of two exposure modes. <span class="st d">Decided</span></p>
   <div class="tscroll"><table>
     <thead><tr><th>Mode</th><th>The agent sees</th><th>Fits</th><th>Definition cost per request</th></tr></thead>
     <tbody>

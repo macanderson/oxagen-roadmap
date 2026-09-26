@@ -483,8 +483,10 @@ Do
 1. Keep the six areas and one row of tabs per area. Add no navigation item.
 
 Steering repo
-2. Creating a workspace asks for a name only, then shows provisioning by step,
-   with the failed step and Retry.
+2. Onboarding connects GitHub or GitLab first, then creates the first
+   workspace and its steering repo in one flow. No workspace exists without a
+   steering repo. Creating a workspace asks for a name only, then shows
+   provisioning by step, with the failed step and Retry.
 3. In Steering, a steering repo card: the repository link, the published
    version, and health (healthy, drifted, disconnected, or diverged). While
    health is not healthy, a banner on every page lists the differences, with
@@ -1042,6 +1044,9 @@ Do
    the code repository, and remove them when the session ends. Code
    repositories get no committed Oxagen files. Record the location you chose
    for each harness in the PR body.
+6. Cursor: write nothing to the repository. Cursor reads steering through
+   steering_search and steering_read. Document the one rule a workspace admin
+   adds in Cursor&#x27;s dashboard to tell Cursor to read steering there.
 
 Done when
 - Golden tests on S0&#x27;s fixture repo pin the rendered block byte for byte.
@@ -1166,8 +1171,10 @@ You own
 - apps/app/messages/*.json
 
 Do
-1. Create workspace: name only. Show provisioning progress by step, and the
-   failed step with Retry.
+1. Onboarding connects GitHub or GitLab first, installing both Oxagen apps,
+   then creates the first workspace and its steering repo in one flow. No
+   workspace exists without a steering repo. Create workspace asks for a name
+   only. Show provisioning progress by step, and the failed step with Retry.
 2. Replace main-repository.tsx and the init wizard with a steering repo card:
    the repository link, the published version, and the health state.
 3. A banner on every workspace page while health is not healthy, with the
@@ -1234,12 +1241,17 @@ Do
 1. Migrate rows from main to steering, then remove main from the role check.
    Keep the exclusivity rule for steering. linked stays unlimited.
 2. Remove repository.main.bind.ts. Rename repository.main.get.ts to return the
-   steering repo.
+   steering repo. Remove the provisional first workspace (ADR-065) from
+   lib/onboarding.ts: a workspace is created only with its steering repo,
+   after a provider connection exists.
 3. repository.link opens a steering PR that adds the repository to
    workspace.toml. The binding row follows the merge.
 4. Confirm a session&#x27;s workspace comes from enrollment and nothing reads the
    checkout for scope. Remove any code that still does.
-5. Write the ADR: the steering repo, the roles, the agent&#x27;s workspace governs
+5. A run on a code repository not linked to its agent&#x27;s workspace is allowed:
+   charge its cost to that workspace and flag the repository as unlinked on
+   the run record.
+6. Write the ADR: the steering repo, the roles, the agent&#x27;s workspace governs
    the run, and what it supersedes.
 
 Done when

@@ -353,6 +353,10 @@ body{padding-inline:0}
         <li>Two GitHub apps. Oxagen keeps its write, pull request, and issue permissions on code repositories. Oxagen Steering has the same permissions plus full admin, and acts on the steering repos Oxagen creates. (Mac, 2026-09-26)</li>
         <li>An unreviewed memory candidate steers only the agent that wrote it. (Mac, 2026-09-26)</li>
         <li>GitHub Actions and GitLab CI are off in every steering repo. (Mac, 2026-09-26)</li>
+        <li>Oxagen supports each first-class harness (Claude Code, Cursor, Codex, and stella) as fully as that harness allows. (Mac, 2026-09-26)</li>
+        <li>Cursor gets steering through Oxagen's MCP server, plus one rule in Cursor's dashboard that tells it to read steering there. (Mac, 2026-09-26)</li>
+        <li>A run on a code repository not linked to its agent's workspace is allowed, charged to that workspace, and flagged in the run record. (Mac, 2026-09-26)</li>
+        <li>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first and creates the workspace with its repository in one automated flow. The 14-day grace period of ADR-065 goes. (Mac, 2026-09-26)</li>
         <li>The repository name <code>oxagen-&lt;workspace&gt;</code>. (Mac, 2026-09-26)</li>
         <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>. (Mac, 2026-09-26)</li>
         <li>Reflections and memory candidates stay in Oxagen, and promoted memories arrive by a batched memory PR. (Mac, 2026-09-26)</li>
@@ -677,7 +681,11 @@ required = true</code></pre></figure>
     <li><span class="st d">Decided</span> <strong>Linking is a steering PR.</strong> The Link button opens a steering PR that adds the repository to <code>workspace.toml</code>. The binding follows the merge.</li>
     <li><span class="st d">Decided</span> <strong>Code repositories hold no committed Oxagen files.</strong> A repository in two workspaces cannot hold two sets of skills, so v1's delivery route that writes <code>.claude/skills/</code> and <code>.cursor/rules/</code> into the code repository goes. Skills reach the harness at session start, in a location outside the repository, and records reach it through the cloud gateway.</li>
     <li><span class="st d">Decided</span> <strong>Organization records.</strong> Oxagen creates <code>&lt;org&gt;/oxagen</code> with the organization for <code>scope: organization</code> records. Every workspace inherits them, so a rule shared by 40 workspaces is written once.</li>
+    <li><span class="st d">Decided</span> <strong>Unlinked repositories.</strong> A run on a code repository not linked to its agent's workspace is allowed. Its cost goes to that workspace, and the run record flags the repository as unlinked, so an agent that touches several repositories keeps working.</li>
   </ul>
+  <h3>Cursor</h3>
+  <p>Cursor reads rules from files in the repository and from its team dashboard, and its model calls go to Cursor's servers, not the cloud gateway. With no committed Oxagen files in code repositories, Cursor gets steering through Oxagen's MCP server (<code>steering_search</code> and <code>steering_read</code>), plus one rule in Cursor's dashboard that tells it to read steering there. <span class="st d">Decided</span></p>
+  <p>Cursor gets less than the other harnesses. No always-on block reaches every model request, because Oxagen never sees those requests, and Cursor reads steering only when it follows the rule. Oxagen still records Cursor's runs and refuses tool calls through its hooks, at the <code>harness</code> tier.</p>
   <figure class="code"><figcaption><span class="path">workspace.toml</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="toml">#:schema https://oxagen.sh/schemas/workspace/v1.json
 schema = "workspace/v1"
 organization = "a-intel"
@@ -702,6 +710,7 @@ per_month_micros = 12000000000                # $12,000.00
   <span class="eyebrow">Provisioning</span>
   <h2>Provisioning</h2>
   <p>Creating a workspace creates its steering repo. The person creating it types a name and nothing else. <span class="st d">Decided</span> for the outcome, <span class="st p">Proposed</span> for the steps.</p>
+  <p>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first, installing both Oxagen apps, then creates the first workspace and its repository in the same flow, with nothing for the person to set up by hand. There is no provisional workspace, and the 14-day grace period of ADR-065 goes. <span class="st d">Decided</span></p>
   <ol class="steps">
     <li><div><strong>Pick the provider connection.</strong><p>The organization's GitHub App installation or GitLab group. Oxagen asks only when the organization has more than one.</p></div></li>
     <li><div><strong>Create the repository.</strong><p>A private repository named <code>oxagen-&lt;workspace-slug&gt;</code>. When the name is taken, Oxagen adds <code>-2</code>, <code>-3</code>, and so on. The workspace page links the repository, so its name matters to no one.</p></div></li>
@@ -1069,10 +1078,7 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
   <h2>Open questions</h2>
   <ol>
     <li>How Oxagen Steering reaches a steering repo it creates: an organization owner's user token that adds each new repository to the installation (recommended), or an installation on all repositories. See Provisioning.</li>
-    <li>How Cursor receives steering now that code repositories hold no committed Oxagen files. Cursor reads rules from files in the repository and from its own dashboard, and its model calls do not pass the cloud gateway.</li>
     <li>What <code>agents/</code> holds if the agent entity goes.</li>
-    <li>A run on a code repository that is not linked to its agent's workspace: refuse it, or allow it and charge its cost to the workspace.</li>
-    <li>The first workspace is provisional for 14 days without a main repository (ADR-065). With the repository created at once, it needs a provider connection before it can exist.</li>
   </ol>
 </section>
 
