@@ -496,7 +496,10 @@ Steering repo
    governance mode, the merge queue position, and Revert.
 5. A memory PR review: each memory with its evidence runs, and Drop.
 6. Linking a code repository opens a steering PR. Records from &lt;org&gt;/oxagen
-   show that every workspace inherits them.
+   show that every workspace inherits them. A steering PR that changes the
+   managed block in AGENTS.md shows Drift detected in AGENTS.md with Restore
+   block, and a code repository&#x27;s instruction file that contradicts steering
+   offers Promote to steering.
 
 MCP Studio
 7. In MCP servers, Add server offers Connect by URL, From the registry, Local
@@ -845,6 +848,12 @@ Do
 5. repair() reapplies the baseline when Oxagen can still write settings.
 6. diverged: open a pull request that reverts main to the last published
    commit, and refuse every other merge until it merges.
+7. Code repository checks: on every pull request in a linked code repository,
+   post the Oxagen check the spec&#x27;s Code repository checks section describes,
+   warning only. Flag instruction files that contradict or repeat steering,
+   and hand memory-like writes to S6 as candidates. The spec leaves open
+   whether this runs from the app or from a committed workflow: build what it
+   says when you start, and if it is still open, ask first.
 
 Done when
 - Unit tests cover every state change from recorded webhook payloads.
@@ -974,7 +983,11 @@ Do
    an always-on body, and above 500 lines in a SKILL.md.
 5. Every failure carries file, line, field, expected, and fix. Provide a
    human format and a JSON format.
-6. context.steering.checks.ts becomes a thin caller that loads files and the
+6. owned: fail a change to a file only Oxagen writes, or to the managed block
+   in AGENTS.md, CLAUDE.md, or README.md. The block sits between the
+   oxagen:begin managed and oxagen:end managed markers, and the first marker
+   carries the hash of the text between them. Recompute it.
+7. context.steering.checks.ts becomes a thin caller that loads files and the
    index and calls runChecks().
 
 Done when
@@ -1096,6 +1109,7 @@ You own
 - packages/inngest-functions/src/functions/run.reflect.ts, memory.curate.ts (new)
 - New tables for candidates, reflections, and rejections, with a migration
 - The tacho Stop hook handling (find it under packages/tacho/src)
+- packages/tacho/src/collector/memory-capture/ (new)
 
 Do
 1. Decide the store for candidates and reflections (Postgres beside today&#x27;s
@@ -1116,6 +1130,10 @@ Do
    relevance. Honor recall_candidates. Never for the in-app agent.
 7. Retirement: propose archiving a memory that a reflection contradicts or no
    run recalled in retire_after_days.
+8. Memories written outside a run: accept candidates from S2&#x27;s code
+   repository check, and add a reader to the local gateway that watches each
+   harness&#x27;s known memory locations on the machine, such as Claude Code&#x27;s
+   memory directory, and sends new entries as candidates with their source.
 
 Done when
 - Tests cover capture, curation, the PR contents, rejection, recall limits,
@@ -1180,7 +1198,11 @@ Do
    differences and Repair settings for admins.
 4. Memory PR review: each memory as a card with its evidence runs and a Drop
    button. Drop pushes a commit through the API and records the rejection.
-5. Copy follows clear-prose. Headings are plain nouns.
+5. Drift warnings: Drift detected in AGENTS.md on a steering PR that changes
+   a managed block, with Restore block. A code repository&#x27;s instruction file
+   that contradicts steering shows the same warning with Promote to
+   steering.
+6. Copy follows clear-prose. Headings are plain nouns.
 
 Done when
 - Component tests cover every state: provisioning, each health state, and a

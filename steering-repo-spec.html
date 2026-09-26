@@ -293,7 +293,7 @@ body{padding-inline:0}
 </style>
 </head>
 <body>
-<div class="app"><aside class="side" aria-label="Page navigation"><a class="brand" href="#spec">oxagen <b>/</b> steering repo</a><span class="sub">Draft of 2026-09-26</span><div class="grp">Views</div><nav class="views" aria-label="Views"><a href="#spec" data-view="spec">Spec</a></nav><details class="secwrap" open><summary>Sections</summary><nav class="secs" aria-label="Sections"><a href="#changes">Changes</a><a href="#decisions">Decisions</a><a href="#layout">Layout</a><a href="#formats">Formats</a><a href="#records">Records</a><a href="#placement">Placement</a><a href="#servers">Servers</a><a href="#agents">Agents</a><a href="#policy">Policy</a><a href="#scope">Scope</a><a href="#provisioning">Provisioning</a><a href="#settings">Settings</a><a href="#drift">Drift</a><a href="#steering-pr">Steering PR</a><a href="#memory">Memory</a><a href="#scale">Scale</a><a href="#tokens">Tokens</a><a href="#agent-use">Agent use</a><a href="#contract">Contract</a><a href="#migration">Migration</a><a href="#open">Open questions</a><a href="#build">Build plan</a></nav></details><div class="grp">Related</div><nav aria-label="Related pages"><a class="ext" href="https://claude.ai/artifact/Csf3bmfQykQJ32tNFT13eR" target="_blank" rel="noopener">Build plan and progress</a><a class="ext" href="https://claude.ai/artifact/6p3eUwf6Snaf6UonhUBsoa" target="_blank" rel="noopener">MCP Studio</a><a class="ext" href="https://claude.ai/artifact/K12EGALijFzN66AfFPKefS" target="_blank" rel="noopener">Steering records v1</a></nav></aside><main class="main"><div data-view-root="spec" id="spec"><div class="wrap">
+<div class="app"><aside class="side" aria-label="Page navigation"><a class="brand" href="#spec">oxagen <b>/</b> steering repo</a><span class="sub">Draft of 2026-09-26</span><div class="grp">Views</div><nav class="views" aria-label="Views"><a href="#spec" data-view="spec">Spec</a></nav><details class="secwrap" open><summary>Sections</summary><nav class="secs" aria-label="Sections"><a href="#changes">Changes</a><a href="#decisions">Decisions</a><a href="#layout">Layout</a><a href="#formats">Formats</a><a href="#records">Records</a><a href="#placement">Placement</a><a href="#servers">Servers</a><a href="#agents">Agents</a><a href="#policy">Policy</a><a href="#scope">Scope</a><a href="#repo-checks">Repo checks</a><a href="#provisioning">Provisioning</a><a href="#settings">Settings</a><a href="#drift">Drift</a><a href="#steering-pr">Steering PR</a><a href="#memory">Memory</a><a href="#scale">Scale</a><a href="#tokens">Tokens</a><a href="#agent-use">Agent use</a><a href="#contract">Contract</a><a href="#migration">Migration</a><a href="#open">Open questions</a><a href="#build">Build plan</a></nav></details><div class="grp">Related</div><nav aria-label="Related pages"><a class="ext" href="https://claude.ai/artifact/Csf3bmfQykQJ32tNFT13eR" target="_blank" rel="noopener">Build plan and progress</a><a class="ext" href="https://claude.ai/artifact/6p3eUwf6Snaf6UonhUBsoa" target="_blank" rel="noopener">MCP Studio</a><a class="ext" href="https://claude.ai/artifact/K12EGALijFzN66AfFPKefS" target="_blank" rel="noopener">Steering records v1</a></nav></aside><main class="main"><div data-view-root="spec" id="spec"><div class="wrap">
 <div class="hero">
   <span class="eyebrow">Specification</span>
   <h1>Steering repo</h1>
@@ -357,6 +357,8 @@ body{padding-inline:0}
         <li>Cursor gets steering through Oxagen's MCP server, plus one rule in Cursor's dashboard that tells it to read steering there. (Mac, 2026-09-26)</li>
         <li>A run on a code repository not linked to its agent's workspace is allowed, charged to that workspace, and flagged in the run record. (Mac, 2026-09-26)</li>
         <li>There is no <code>agents/</code> folder. An agent is an operator, a runtime, and a harness, registered in Oxagen. What Claude Code calls an agent is a skill. (Mac, 2026-09-26)</li>
+        <li><code>steering/</code> at the root holds steering records and skills, written by people, agents, and the curator. (Mac, 2026-09-26)</li>
+        <li><code>README.md</code>, <code>AGENTS.md</code>, and <code>CLAUDE.md</code> at the root, written by Oxagen. Oxagen's text sits between markers, a check verifies it, and the web app shows Drift detected in the file, with a way to restore it. (Mac, 2026-09-26)</li>
         <li>No workspace exists without a steering repo. Onboarding connects GitHub or GitLab first and creates the workspace with its repository in one automated flow. The 14-day grace period of ADR-065 goes. (Mac, 2026-09-26)</li>
         <li>The repository name <code>oxagen-&lt;workspace&gt;</code>. (Mac, 2026-09-26)</li>
         <li>One required check, <code>Oxagen steering</code>, and only Oxagen may update <code>main</code>. (Mac, 2026-09-26)</li>
@@ -442,10 +444,10 @@ body{padding-inline:0}
   <div class="tscroll"><table>
     <thead><tr><th>Path</th><th>Holds</th><th>Format</th><th>Written by</th><th>Status</th></tr></thead>
     <tbody>
-      <tr><td><code>AGENTS.md</code> <code>CLAUDE.md</code></td><td>How to write a record in this repo, for an agent that opens it</td><td>Markdown</td><td>Oxagen</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>README.md</code></td><td>What the repo is, who reviews it, and the settings Oxagen holds</td><td>Markdown</td><td>Oxagen</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>AGENTS.md</code> <code>CLAUDE.md</code></td><td class="wrap">How to write a record in this repo, for an agent that opens it. Oxagen's text sits in a managed block.</td><td>Markdown</td><td>Oxagen</td><td><span class="st d">Decided</span></td></tr>
+      <tr><td><code>README.md</code></td><td class="wrap">What the repo is, who reviews it, and the settings Oxagen holds. Oxagen's text sits in a managed block.</td><td>Markdown</td><td>Oxagen</td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>workspace.toml</code></td><td>Linked code repositories, the workspace budget, and an optional embedding endpoint</td><td>TOML</td><td>People, by steering PR</td><td><span class="st c">Today</span> written by the init PR and displayed, reconciled by nothing</td></tr>
-      <tr><td><code>steering/</code></td><td>Steering records and skills</td><td>Markdown with YAML frontmatter</td><td>People, agents, the curator</td><td><span class="st p">Proposed</span> in v1</td></tr>
+      <tr><td><code>steering/</code></td><td>Steering records and skills</td><td>Markdown with YAML frontmatter</td><td>People, agents, the curator</td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>steering/governance.toml</code></td><td>Governance mode, reviewer groups, memory settings</td><td>TOML</td><td>People</td><td><span class="st c">Today</span> at <code>.oxagen/rules/governance.toml</code></td></tr>
       <tr><td><code>steering/promotions/</code></td><td>The hash-chained ledger of merged records</td><td>JSON Lines</td><td>Oxagen</td><td><span class="st p">Proposed</span> one file a month</td></tr>
       <tr><td><code>steering/memory/</code></td><td>Memories a memory PR promoted</td><td>Markdown with YAML frontmatter</td><td>The curator</td><td><span class="st d">Decided</span></td></tr>
@@ -696,6 +698,21 @@ per_month_micros = 12000000000                # $12,000.00
 # credential = "oxagen:credential/embeddings"</code></pre></figure>
 </section>
 
+<section id="repo-checks">
+  <span class="eyebrow">Code repositories</span>
+  <h2>Code repository checks</h2>
+  <p>Linked code repositories hold no committed Oxagen files, so Oxagen checks them from outside. The Oxagen app already has pull request and check permissions there. It posts a check named <code>Oxagen</code> on every pull request, through the Checks API on GitHub and a commit status on GitLab. <span class="st p">Proposed</span></p>
+  <div class="tscroll"><table>
+    <thead><tr><th>Check</th><th>What it does</th></tr></thead>
+    <tbody>
+      <tr><td>Instruction files</td><td class="wrap">Reads the harness instruction files a pull request changes: <code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>GEMINI.md</code>, <code>.cursor/rules/</code>, <code>.github/copilot-instructions.md</code>, and the like. It flags text that contradicts or repeats a steering record, shows Drift detected in <code>CLAUDE.md</code> in <code>a-intel/platform</code> in the web app, and offers Promote to steering, which opens a steering PR with that text as records.</td></tr>
+      <tr><td>Memory capture</td><td class="wrap">Finds what agents wrote down in the diff, such as notes added to <code>CLAUDE.md</code> or a new rule file, and turns each into a memory candidate with the pull request as evidence. Candidates then follow the memory lifecycle.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Some harnesses keep memories on the machine, such as Claude Code's memory directory, where no repository sees them. The local gateway on an enrolled machine reads each harness's known memory locations and sends new entries to Oxagen as memory candidates. <span class="st p">Proposed</span></p>
+  <p>The check warns and never blocks a merge by default, because a code repository's branch rules belong to the customer. <span class="st p">Proposed</span></p>
+</section>
+
 <section id="provisioning">
   <span class="eyebrow">Provisioning</span>
   <h2>Provisioning</h2>
@@ -824,7 +841,7 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
       <tr><td><code>references</code></td><td class="wrap">A named tool, record, repository, credential, or skill file does not exist</td><td><span class="st p">Proposed</span></td></tr>
       <tr><td><code>budget</code></td><td class="wrap">Warns, and never fails, when the change pushes an agent's always-on steering over its budget. See <a href="#tokens">Tokens</a></td><td><span class="st d">Decided</span></td></tr>
       <tr><td><code>compile</code></td><td class="wrap">A server folder does not compile to tools, its lock does not match, a Cedar policy does not validate, or a policy test fails</td><td><span class="st p">Proposed</span></td></tr>
-      <tr><td><code>owned</code></td><td class="wrap">The change edits a file Oxagen writes: <code>AGENTS.md</code>, <code>CLAUDE.md</code>, <code>README.md</code>, <code>policy/schema.cedarschema</code>, a <code>tools.lock.json</code>, or the ledger</td><td><span class="st p">Proposed</span></td></tr>
+      <tr><td><code>owned</code></td><td class="wrap">The change edits a file only Oxagen writes (<code>policy/schema.cedarschema</code>, a <code>tools.lock.json</code>, or the ledger), or changes the managed block in <code>AGENTS.md</code>, <code>CLAUDE.md</code>, or <code>README.md</code>. The web app shows Drift detected in the file, with Restore block.</td><td><span class="st d">Decided</span> for the managed block, <span class="st p">Proposed</span> for the rest</td></tr>
     </tbody>
   </table></div>
 </section>
@@ -838,7 +855,7 @@ and selects Repair settings. Or restore both rulesets by hand.</code></pre></fig
   <h3>Lifecycle</h3>
   <ol class="steps">
     <li><div><strong>Observe.</strong><p>A frame in the run shows something worth keeping: a failed tool call, a person's correction, a retry loop, or a policy denial.</p></div></li>
-    <li><div><strong>Capture.</strong><p>The agent calls <code>remember</code> during the run, or its reflection lists a lesson at the end. Either writes a <strong>candidate</strong> to Oxagen with the frame as evidence.</p></div></li>
+    <li><div><strong>Capture.</strong><p>The agent calls <code>remember</code> during the run, or its reflection lists a lesson at the end. Either writes a <strong>candidate</strong> to Oxagen with the frame as evidence. Memories agents write elsewhere arrive too: the code repository check finds them in pull requests, and the local gateway reads each harness's memory locations on the machine.</p></div></li>
     <li><div><strong>Curate.</strong><p>Once a day, or when 20 candidates wait, the curator merges duplicates, counts the distinct runs behind each, drops what an active record already says, and flags what contradicts one.</p></div></li>
     <li><div><strong>Propose.</strong><p>The curator writes the strongest candidates as memory records on a <code>memory/&lt;date&gt;</code> branch and opens one memory PR.</p></div></li>
     <li><div><strong>Review.</strong><p>A reviewer merges the PR or drops single memories from it. Oxagen pushes a commit that removes a dropped file and records the rejection, so the same lesson returns only with new evidence.</p></div></li>
@@ -985,7 +1002,10 @@ Read any of these with steering_read when it fits the task.
     <li><strong>Errors an agent can act on.</strong> Every failure names the file, the line, the field, what was expected, and the fix. <code>--json</code> prints one object per failure.</li>
     <li><strong>No clone needed.</strong> Oxagen's MCP tools read and propose without git.</li>
   </ul>
-  <figure class="code"><figcaption><span class="path">AGENTS.md, first lines</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="markdown"># a-intel/oxagen-core-platform
+  <h3>Managed blocks</h3>
+  <p>Oxagen's text in <code>AGENTS.md</code>, <code>CLAUDE.md</code>, and <code>README.md</code> sits between two markers, and the first marker carries a hash of the text between them. People may write anything outside the block. The <code>owned</code> check recomputes the hash on every steering PR and fails a PR that edits or removes the block, and the web app shows Drift detected in <code>AGENTS.md</code> on that PR, with Restore block, which pushes a commit that puts the block back. Only Oxagen merges into <code>main</code>, so drift lives in an open pull request and never reaches the published version. <span class="st d">Decided</span> for the block and the warning, <span class="st p">Proposed</span> for the marker format.</p>
+  <figure class="code"><figcaption><span class="path">AGENTS.md, first lines</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="markdown">&lt;!-- oxagen:begin managed sha256:4c1f09a7e2b3d58c --&gt;
+# a-intel/oxagen-core-platform
 
 This repository steers every agent in the Core platform workspace. Oxagen
 publishes it when a steering PR merges. Nothing here takes effect before that.
@@ -1001,8 +1021,11 @@ publishes it when a steering PR merges. Nothing here takes effect before that.
 
 ## Do not edit
 
-AGENTS.md, CLAUDE.md, README.md, policy/schema.cedarschema, steering/promotions/,
-servers/*/tools.lock.json.</code></pre></figure>
+This block, policy/schema.cedarschema, steering/promotions/, and
+servers/*/tools.lock.json.
+&lt;!-- oxagen:end managed --&gt;
+
+Notes your team adds go below the block.</code></pre></figure>
   <figure class="code"><figcaption><span class="path">oxagen check</span><button type="button" class="copy">Copy</button></figcaption><pre><code data-lang="plaintext">$ oxagen check steering/billing
 steering/billing/a-intel.billing.refunds-over-100.md:6
   force: "must!" is not one of must, should, may, info.
@@ -1068,6 +1091,8 @@ steering/billing/a-intel.billing.refunds-over-100.md:12
   <h2>Open questions</h2>
   <ol>
     <li>How Oxagen Steering reaches a steering repo it creates: an organization owner's user token that adds each new repository to the installation (recommended), or an installation on all repositories. See Provisioning.</li>
+    <li>Checks on linked code repositories: posted by the Oxagen app with no committed files (recommended), or a CI workflow committed to each repository, which reverses the decision that code repositories hold no committed Oxagen files.</li>
+    <li>Whether a customer can opt in to the code repository check blocking a merge. By default it only warns.</li>
     <li>Where per-agent settings live, such as the environment an agent uses: on the agent's registration in Oxagen, or in <code>workspace.toml</code> through a steering PR (recommended). See Agents.</li>
   </ol>
 </section>
